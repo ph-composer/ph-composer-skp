@@ -4,7 +4,7 @@ DATE: 2026-10-03
 STATUS: Scoped. Part 1 is findings read from source on `main` at `08c4807`, re-verified against `420c783a` in Part 1b on 2026-10-21. Part 2 was answered by Ed
 on 2026-10-03, every row as recommended except D3b-20; see "Ed's answers". D3b-22 and D3b-23, added by the re-baseline, were answered as recommended on 2026-10-21. The interview is complete.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: [#301](https://github.com/bldgtyp/ph-composer/issues/301)
+ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 
 The [PRD](PRD.md) was drafted on 2026-09-18 from a one-line brief, before the foundation, Phase 1
 and Phase 2 existed, and it has not been interviewed. This file is the review of that PRD against

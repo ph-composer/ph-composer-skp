@@ -3,7 +3,7 @@
 DATE: 2026-09-30
 STATUS: Scoped. Authorized 2026-10-01; preceding stage gates remain required.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: https://github.com/bldgtyp/ph-composer/issues/14
+ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/14
 
 ## Entry and scope
 
@@ -18,7 +18,7 @@ one-page protocol. Nothing specific to any vendor enters the code and no address
 Behavior owner: [libraries PRD](../../../archive/libraries/PRD.md), "The connection protocol" and "Security
 rules", Q6, Q7, Q16, Q18. Host rules: `context/TECH_STACK.md`, "The library provider seam".
 
-Predecessor paths are relative to `../ph-navigator-sketchup/src/ph_navigator_sketchup/` at
+Predecessor paths are relative to `../../ph-navigator-sketchup/src/ph_navigator_sketchup/` at
 `f358ebf`.
 
 ## Steps

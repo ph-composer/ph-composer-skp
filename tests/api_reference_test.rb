@@ -82,7 +82,8 @@ class ApiReferenceTest < PhComposerTestCase
   def test_refusal_metadata_has_uniform_keys_and_discovery_points_to_the_foundation_authority
     found = API.discover
     pointer = found.fetch("refusal_documentation")
-    assert_equal "https://github.com/bldgtyp/ph-composer/blob/main/context/CONTRACTS.md#outcomes-and-codes", pointer
+    assert_equal "https://github.com/ph-composer/ph-composer-skp/blob/main/context/CONTRACTS.md#outcomes-and-codes",
+                 pointer
     assert_includes File.read(File.expand_path("../context/CONTRACTS.md", __dir__)), "## Outcomes and codes"
     seen_owners = []
     %w[queries actions view_commands setup_commands file_exports].each do |group|

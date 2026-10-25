@@ -366,7 +366,7 @@ to the panel, which runs it the next time the panel opens. To run it in a host w
 
 ```sh
 uv run tools/hostkit/host_bridge.py eval \
-  'load "/absolute/path/to/ph-composer/tools/examples/foundation/load.rb"; ExampleWalkthrough.run'
+  'load "/absolute/path/to/ph-composer/ph-composer-skp/tools/examples/foundation/load.rb"; ExampleWalkthrough.run'
 ```
 
 ## Not yet available

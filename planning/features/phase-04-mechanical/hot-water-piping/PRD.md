@@ -38,7 +38,7 @@ bridges), and moving the run builder to `core/`. Under Q1's recommendation, by c
 assignment carries no parent reference and needs no registry; it still carries an id, as every
 reference-target record does (3b D3b-22, open).
 
-The predecessor's M1 brief (`../ph-navigator-sketchup/planning/phases/M1_piping.md`) still
+The predecessor's M1 brief (`../../ph-navigator-sketchup/planning/phases/M1_piping.md`) still
 applies: its open questions are answered or carried below, and its boundary, no new
 general-purpose drawing tool, is kept.
 
@@ -225,7 +225,7 @@ rows are metr-export's.
 
 ## Prior art and evidence
 
-- Predecessor `planning/phases/M1_piping.md` (`../ph-navigator-sketchup/`).
+- Predecessor `planning/phases/M1_piping.md` (`../../ph-navigator-sketchup/`).
 - honeybee-ph `honeybee_phhvac/hot_water_piping.py`, `hot_water_system.py`, re-read at 1.33.65.
 - PHX `model/hvac/piping.py`, `model/enums/hvac.py`, `to_METr_JSON/metr_schemas.py`, read
   2026-09-18, not in the pinned runtime.

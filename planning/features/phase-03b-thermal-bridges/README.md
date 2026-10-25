@@ -3,7 +3,7 @@
 DATE: 2026-10-03
 STATUS: Scoped. Interviewed 2026-10-03; planned in detail as stages P3b-01 to P3b-09; re-baselined on `main` at `420c783a` on 2026-10-21 and D3b-22, D3b-23 answered the same day; no stage authorized.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: [#301](https://github.com/bldgtyp/ph-composer/issues/301)
+ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 
 Roadmap item 3.2 from [ROADMAP.md](../../ROADMAP.md). Build Thermal Bridge Types, select edges,
 assign a type. The exporter measures the edges and writes one honeybee-ph thermal bridge per

@@ -65,7 +65,7 @@ through [PR #1](https://github.com/bldgtyp/ph-composer/pull/1). The packet is ar
 | 0.4 | Overlay fill spike | spike | Complete 2026-09-18, [pass](archive/phase-00-foundation/evidence/spike-overlay.md) | Gates Colour-by, which face-assignment needs in phase 1 |
 | 0.5 | Window component host spike | spike | Complete 2026-09-18, [flat component holds, five plan consequences](archive/phase-00-foundation/evidence/spike-window.md) | Gates window-types. Cheap to run with 0.4 |
 | 0.6 | Edge identity spike | spike | Complete 2026-09-18, [dictionaries survive, and multiply](archive/phase-00-foundation/evidence/spike-edge.md) | Gates thermal bridges, piping, ducting. Cheap to run with 0.4 |
-| 0.7 | Development repository home and MVP license boundary | decisions | Confirmed | D5 keeps the UI kit AGPL and external integrations at file/HTTPS seams. D8 keeps development at `bldgtyp/ph-composer`; the public name and any future organization move remain open |
+| 0.7 | Development repository home and MVP license boundary | decisions | Confirmed | D5 keeps the UI kit AGPL and external integrations at file/HTTPS seams. D8 places SketchUp development at `ph-composer/ph-composer-skp`, authorized 2026-10-25; product and runtime identities remain PH-Composer |
 
 The host investigations are complete. Their evidence records the PH-Composer development bridge
 and current proving host; feature-specific lifecycle and geometry gates remain with their owners.

@@ -7,7 +7,7 @@ predecessor, PH-Navigator for SketchUp, learned at cost between 2026-09-06 and 2
 every designPH rule removed, and adds the rules for the two seams this project introduces. The
 SketchUp facts behind these rules, with what pins each one, are in
 [`SKETCHUP_HOST_BEHAVIOR.md`](SKETCHUP_HOST_BEHAVIOR.md). Where a rule cites evidence, the evidence
-is in the predecessor's archive at `../../ph-navigator-sketchup/planning/archive/`.
+is in the predecessor's archive at `../../../ph-navigator-sketchup/planning/archive/`.
 
 The Phase 0 foundation merged through PR #1: sessions, revisions, record transactions and the
 public operation contract, panel/UI kit and shared Units, the runtime shell and export contracts.
@@ -571,7 +571,7 @@ eslint. The 2023 host's CEF version is confirmed when a 2023 host is available.
   adds an Undo step or touches `UnitsOptions`.
 - Every panel number is parsed and formatted through `html/units.js`. Do not add a second parser or
   unit table. The length grammar, regional number formats and per-quantity factors are the
-  predecessor's U1 contracts C1 to C5 (`../../ph-navigator-sketchup/planning/archive/units/PLAN.md`).
+  predecessor's U1 contracts C1 to C5 (`../../../ph-navigator-sketchup/planning/archive/units/PLAN.md`).
 - The first keystroke or paste fixes a draft's starting profile, so a switch never reinterprets
   text already typed.
 - The preference lives in `Sketchup.write_default` (`shell/preferences.rb`), never in page storage.

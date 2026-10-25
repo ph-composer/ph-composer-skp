@@ -1,4 +1,4 @@
-# PH-Composer
+# PH-Composer for SketchUp
 
 A free, open-source Passive House authoring environment that runs inside SketchUp, for Phius
 passive building projects.
@@ -8,9 +8,9 @@ windows, thermal bridges and spaces all live in the SKP file. The extension expo
 later exporter will convert that HBJSON to the model METr reads.
 
 **Status: Phase 1 merged to main; no release yet.**
-[PR #1](https://github.com/bldgtyp/ph-composer/pull/1) landed the foundation.
-[PR #3](https://github.com/bldgtyp/ph-composer/pull/3) and
-[PR #6](https://github.com/bldgtyp/ph-composer/pull/6) landed Phase 1: Zone and Face authoring,
+[PR #1](https://github.com/ph-composer/ph-composer-skp/pull/1) landed the foundation.
+[PR #3](https://github.com/ph-composer/ph-composer-skp/pull/3) and
+[PR #6](https://github.com/ph-composer/ph-composer-skp/pull/6) landed Phase 1: Zone and Face authoring,
 the Classify tool, Colour-by, adjacency, identity repairs, a public scripting interface and the
 HBJSON/report export with pinned translation wheels, verified on SketchUp 26.1 for macOS.
 [Acceptance evidence](planning/archive/phase-01-faces-and-zones/evidence/p1-e-export-workflow.md) records the

@@ -5,6 +5,10 @@
 remain unimplemented. The transplant tables below record the original predecessor inventory.
 **OWNER:** Ed May, BLDGTYP
 
+Current repository home: `ph-composer/ph-composer-skp`, authorized 2026-10-25.
+The original decisions below retain their historical context. See the
+[migration plan](features/unscheduled/github-organization-migration.md).
+
 ## The idea
 
 PH-Composer is a free, open-source SketchUp extension for authoring Phius passive building

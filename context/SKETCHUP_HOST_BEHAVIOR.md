@@ -15,7 +15,7 @@ in the Pinned by column; tests named for Volumes, Spaces and `GeometryReference`
 predecessor's and move here with the Spaces feature. When a fact changes on a newer
 host, update the stub and this file in the same change. The full record, including the designPH
 and Dynamic Components facts this file drops, is
-[`../../ph-navigator-sketchup/context/SKETCHUP_HOST_BEHAVIOR.md`](../../ph-navigator-sketchup/context/SKETCHUP_HOST_BEHAVIOR.md).
+[`../../../ph-navigator-sketchup/context/SKETCHUP_HOST_BEHAVIOR.md`](../../../ph-navigator-sketchup/context/SKETCHUP_HOST_BEHAVIOR.md).
 
 ## Observers and edit contexts
 

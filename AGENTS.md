@@ -13,7 +13,7 @@ HBJSON; the METr model is produced from it by the first exporter.
 
 Read [`planning/FOUNDING_BRIEF.md`](planning/FOUNDING_BRIEF.md) for why this repository exists and what it inherits,
 then [`docs/PRD.md`](docs/PRD.md) and [`docs/.index.md`](docs/.index.md) for product scope. The
-predecessor, PH-Navigator for SketchUp at `../ph-navigator-sketchup`, is prior art and evidence,
+predecessor, PH-Navigator for SketchUp at `../../ph-navigator-sketchup`, is prior art and evidence,
 not a dependency. Its designPH integration is retired and is never reintroduced here.
 
 ## Start with the owning authority
@@ -55,7 +55,7 @@ the owning packet.
 - Face types and boundary conditions are honeybee's. Do not coin a third vocabulary.
 - Link measured host claims to the predecessor's evidence or to current host evidence instead of
   restating them. Restated technical facts drift. Predecessor evidence lives under
-  `../ph-navigator-sketchup/planning/archive/`.
+  `../../ph-navigator-sketchup/planning/archive/`.
 - Preserve the public-repository boundary. Licensed PHPP workbooks, designPH files, METr exports
   of real projects, and PHI or Phius source material do not enter this repository. Use synthetic
   fixtures; real files live in a gitignored `_private/` corpus with a `MANIFEST.md`, and tests

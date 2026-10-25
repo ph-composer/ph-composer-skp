@@ -2,7 +2,7 @@
 
 These paths identify accepted patterns. Reinspect them before reuse and extract shared components when the behavior truly matches.
 
-Paths under **Local** are in this repository at `src/ph_composer/html/`. The UI kit registers modules with `PhComposerUI.define` and uses the `phc-` class prefix. Paths under **Predecessor only** are in `../ph-navigator-sketchup/src/ph_navigator_sketchup/html/` and have not transplanted; they are reference points for screens this repository will build, not current files. The predecessor's Window Schedule, assigned-window propagation and designPH review screens do not transplant; their designPH-specific patterns are omitted here.
+Paths under **Local** are in this repository at `src/ph_composer/html/`. The UI kit registers modules with `PhComposerUI.define` and uses the `phc-` class prefix. Paths under **Predecessor only** are in `../../ph-navigator-sketchup/src/ph_navigator_sketchup/html/` and have not transplanted; they are reference points for screens this repository will build, not current files. The predecessor's Window Schedule, assigned-window propagation and designPH review screens do not transplant; their designPH-specific patterns are omitted here.
 
 ## Shared primitives (local)
 

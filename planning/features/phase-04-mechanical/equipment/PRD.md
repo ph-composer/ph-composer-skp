@@ -33,7 +33,7 @@ Read on 2026-10-21 at `420c783a`. Paths are relative to `src/ph_composer/`. This
 | Agent access | Exists | Every registered query and action is an agent-facing surface (Phase 3a1): a query declares `response:` and `while_busy:`, an action `preconditions:`, and a new feature bumps `API::MINOR` in `shell/api.rb` with one `API::CHANGES` row. A list read that can grow with the Model is paged, as `ph_composer.spaces.list` is |
 | METr | Deferred | PHX is not in the pinned wheels. [metr-export](../../unscheduled/metr-export/README.md) owns conversion and import; every METr row below is checked there |
 
-The predecessor's Q1 and B4 briefs (`../ph-navigator-sketchup/planning/phases/`) still apply as
+The predecessor's Q1 and B4 briefs (`../../ph-navigator-sketchup/planning/phases/`) still apply as
 read on 2026-09-18: roster kept, one family per interview, no data sheet hosting, no spec status.
 B4's single-Room problem is gone: PH-Composer exports one honeybee Room per Zone
 (`model_sections.py`, `ZoneSection`).
@@ -290,7 +290,7 @@ half, that PHX keeps them distinct, is a metr-export row.
 ## Prior art and evidence
 
 - Predecessor `planning/phases/Q1_equipment.md`, `B4_ventilation-units.md`
-  (`../ph-navigator-sketchup/`).
+  (`../../ph-navigator-sketchup/`).
 - honeybee-ph `honeybee_phhvac/`: `ventilation.py`, `heat_pumps.py`, `heating.py`,
   `hot_water_devices.py`, `hot_water_system.py`, `supportive_device.py`,
   `properties/room.py`. Re-read at 1.33.65 on 2026-10-21.

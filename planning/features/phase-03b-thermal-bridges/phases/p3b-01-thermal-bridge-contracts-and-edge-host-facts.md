@@ -3,7 +3,7 @@
 DATE: 2026-10-03
 STATUS: Merged to main 2026-10-22 (PR #302); T01 pass. Corrected to `main` at `420c783a` on 2026-10-21 (DECISIONS Part 1b)
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: [#301](https://github.com/bldgtyp/ph-composer/issues/301)
+ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 
 ## Entry and scope
 

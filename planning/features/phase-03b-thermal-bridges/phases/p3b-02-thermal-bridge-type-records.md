@@ -3,7 +3,7 @@
 DATE: 2026-10-03
 STATUS: Scoped. Corrected to `main` at `420c783a` on 2026-10-21 (DECISIONS Part 1b)
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: [#301](https://github.com/bldgtyp/ph-composer/issues/301)
+ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 
 ## Entry and scope
 

@@ -3,7 +3,7 @@
 DATE: 2026-10-03
 STATUS: Scoped. Stages P3b-01 to P3b-09 planned; interview complete 2026-10-03; re-baselined on `main` at `420c783a` on 2026-10-21, D3b-22 and D3b-23 answered the same day; none authorized.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: [#301](https://github.com/bldgtyp/ph-composer/issues/301)
+ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 
 ## Outcome and scope
 
@@ -100,7 +100,7 @@ shared files, which must not be changed by two open branches at once:
 | `python/ph_composer_translation/composition.py`, `assembly.py` | P3b-08 | none |
 | `tools/runtime/vendor.py` footprint keys | P3b-09 | none |
 
-Each stage is one pull request against `main`, with `Refs [#301](https://github.com/bldgtyp/ph-composer/issues/301)`. A
+Each stage is one pull request against `main`, with `Refs [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)`. A
 stage that grows past one coherent review splits along the slices its document names; it does not
 merge half a gate.
 

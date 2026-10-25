@@ -25,7 +25,7 @@ select then Assign is the primary route and the edge tool the secondary one. Thi
 | Duct dimension and insulation displays | Partly | `length` exists; duct diameter, width, height and insulation thickness in inches are the units packet's [ducting row](../../cross-phase/units/STATUS.md) |
 | METr | Deferred | PHX is not in the pinned wheels; `lassVU` and the duct list are [metr-export](../../unscheduled/metr-export/README.md) rows |
 
-The predecessor's M2 brief (`../ph-navigator-sketchup/planning/phases/M2_ducting.md`) still
+The predecessor's M2 brief (`../../ph-navigator-sketchup/planning/phases/M2_ducting.md`) still
 applies: no duct design, no pressure drop, no routing.
 
 ## Vocabulary
@@ -146,7 +146,7 @@ section's `conformance` check. One Undo per assign. Save and reopen. METr's duct
 
 ## Prior art and evidence
 
-- Predecessor `planning/phases/M2_ducting.md` (`../ph-navigator-sketchup/`).
+- Predecessor `planning/phases/M2_ducting.md` (`../../ph-navigator-sketchup/`).
 - honeybee-ph `honeybee_phhvac/ducting.py`, `ventilation.py`, re-read at 1.33.65.
 - PHX `model/hvac/ducting.py`, `to_METr_JSON/metr_schemas.py`, `_PhxDuctElement`, read
   2026-09-18, not in the pinned runtime.
