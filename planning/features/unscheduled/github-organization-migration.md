@@ -1,7 +1,7 @@
 # GitHub organization and SketchUp repository migration
 
 DATE: 2026-10-25
-STATUS: Implementation authorized 2026-10-25; preflight and cutover in progress.
+STATUS: Transfers, local moves and native acceptance complete; delivery checks in progress.
 ISSUE: [#305](https://github.com/ph-composer/ph-composer-skp/issues/305)
 
 ## Recommendation and scope
@@ -166,8 +166,65 @@ ready and no external publishing integrations are found. Organization setup or a
 can add elapsed time. The required local moves increase machine-specific work; changing runtime
 identities would be a separate, much larger compatibility project and is not recommended here.
 
-Before execution resolve organization-handle availability and organization owners/plan.
-The requested GitHub names and the local layout above are the planning baseline.
-GitHub-side settings and external consumers remain uninspected, so this is not an exhaustive
-integration clearance. No GitHub organization, repository, issue, invitation or shipping code
-was changed during planning.
+The organization handle, Free plan and Ed's owner access are verified. Ed confirmed the local
+layout and authorized restoring John's previous read access; both invitations were sent.
+The sidebar project-folder update is user-operated because Codex blocks automation of its own
+interface and exposes no project-path update tool. The trusted-project configuration is repaired.
+
+## Execution receipt, 2026-10-25
+
+- Both transfers completed. Repository IDs remain `1376194878` (SketchUp) and `1399931972`
+  (provider example), with the same pre-transfer `main` commits and four open SketchUp issues.
+  Neither repository had tags, releases, forks, Pages, webhooks, deploy keys, environments or
+  repository secrets. Existing source PR lists were empty. Old Git URLs resolve to the same HEAD.
+- Main's two required checks and branch protection survived unchanged. The example remains
+  unprotected as before. Actions permissions are unchanged. Secret scanning became disabled
+  during transfer and was explicitly restored on both repositories. Other captured security
+  flags remain unchanged. The target reports no installed GitHub Apps; the connected GitHub
+  tool successfully reads the new repository. No claim is made about unenumerated external consumers.
+- Both complete local directories moved into the confirmed organization container. Origins,
+  Python environment entrypoints, Codex's trusted-project entry and the global native-acceptance
+  skill symlink now use the new roots. There were no linked worktrees. Internal skill symlinks
+  and installed SketchUp extension filenames remain intact. Active predecessor references
+  and example load paths were repaired. No retained native evidence was rewritten.
+- Canonical URL changes cover shipped Help, Help/issue reporting, API discovery, generated API
+  reference, contributor/security navigation and active planning links. Historical archive URLs
+  and runtime/cache/provider identifiers deliberately remain stable. The API reference was
+  regenerated and committed separately because `fixtures-check` requires generated outputs
+  committed before its final clean-state check; the generated delta was exactly the intended URL.
+- `make ci` passed on Ruby 3.2.2: 2,117 Ruby tests / 23,700 assertions, 737 JavaScript tests,
+  246 Python tests, lint/type/runtime/hostkit/fixture/help checks and RBZ verification.
+  The RBZ has 490 files and fits the existing installed-size gate. No runtime-manifest update
+  was required: shipped edits are Ruby and Help, outside the pinned `html/` and `python/` assets.
+- One bounded independent review found a stale roadmap D8 statement and missed active
+  predecessor paths. Both were corrected. Its follow-up review of the provider API repair
+  found no remaining correctness issues. Runtime and persistence identities are unchanged.
+- The actual standalone provider walkthrough initially reproduced `request.unknown_operation`
+  for library loading through the old view entrypoint, then `params.invalid` for retired
+  `choice: inspect`. This pre-existing incompatibility blocked the planned acceptance check.
+  The minimal repair uses the setup grant/entrypoint and the `in_file` resolution query.
+  Offline execution against the actual sibling repository passed copy and unchanged reuse.
+  Provider changes merged through [PR #1](https://github.com/ph-composer/ph-composer-library-provider-example/pull/1)
+  (canonical link) and [PR #2](https://github.com/ph-composer/ph-composer-library-provider-example/pull/2)
+  (walkthrough compatibility).
+- Native acceptance used SketchUp 26.1.188 / Ruby 3.2.2, build `efcc99f1b3f3`, source
+  `766aabc85220`, with one registered/loaded `ph_composer` extension. The unchanged synthetic
+  source Model SHA-256 is `84b505124b4506384e65a7ef2a32c190605b0d0d8159e7b2bdc72bd043cbc007`;
+  the installed RBZ SHA-256 is `0449b0c6b84712b1688a1a28beecad2d9e7b9dfd524529521f9dd320e375cfe0`.
+- In a fresh process, the panel-closed external provider copied a Material, reused the same ID
+  without writing, and native Undo/Redo removed/restored that ID in separate observed calls.
+  HBJSON export completed through the normal runtime and reloaded in Honeybee as two Rooms.
+  The pre-existing synthetic fixture's defaulted thermal-mass/unavailable-definition findings
+  remained nonblocking; this is export-path acceptance, not a clean-model or certification claim.
+- Save and fresh-process reopen preserved exact selected authored IDs, values and references
+  for 2 Zones, 12 Faces, 7 Materials, 5 Assemblies and 4 Spaces. The normal reopened process
+  has no example provider injected. Native pixels confirmed the populated Zones panel and
+  Help & Diagnostics; Help exists and its commit-specific URL and issue URL use the new address.
+  The session's diagnostic warning/error read contained no records.
+- Private settings snapshots, driver snippets, identity and observation JSON, export artifacts,
+  diagnostic/wait results and full local gate logs are retained in `_private/github-migration/`.
+  They remain untracked. Current-host acceptance does not close SketchUp 2023, Windows or release gates.
+
+Delivery is tracked in [PR #306](https://github.com/ph-composer/ph-composer-skp/pull/306).
+The only human follow-ups are accepting John's access invitations and updating the Codex sidebar
+project folder; neither changes the verified runtime or repository contents.
