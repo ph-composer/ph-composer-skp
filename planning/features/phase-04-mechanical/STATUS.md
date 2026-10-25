@@ -33,7 +33,7 @@ Ed creates the phase issue and says go on P4-01, which waits for Phase 3b's P3b-
 | --- | --- |
 | The equipment shared shape, Ventilators and hot water interviewed | Done 2026-10-21 |
 | Ed answers D4-01 to D4-12 | Done 2026-10-21, all as recommended |
-| A Phase 4 issue exists on `bldgtyp/ph-composer`, and every header's `ISSUE` line points at it | Open. Create on Ed's say |
+| A Phase 4 issue exists on `ph-composer/ph-composer-skp`, and every header's `ISSUE` line points at it | Open. Create on Ed's say |
 | Ed authorizes implementation, stage by stage or for a run of stages | Open |
 | P3b-01 merged before P4-01 (both edit the `PLANNING_IDS` line) | Open; Phase 3b P3b-01 in progress since 2026-10-21 |
 | The other shared files (`extension.rb`, `index.html`, `composition.py`, `assembly.py`, `api.rb`, the agent guide) are never open on a Phase 3b branch and a Phase 4 branch at once; whichever lands second rebases (PLAN, "Order and parallel work") | Coordination, not an ordering gate |

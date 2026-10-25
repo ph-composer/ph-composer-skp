@@ -13,7 +13,7 @@ Run it in a fresh scratch Model through the development bridge:
 
 ```sh
 uv run tools/hostkit/host_bridge.py eval \
-  'load "/absolute/path/to/ph-composer/tools/examples/authoring/walkthrough.rb"; AuthoringWalkthrough.setup'
+  'load "/absolute/path/to/ph-composer/ph-composer-skp/tools/examples/authoring/walkthrough.rb"; AuthoringWalkthrough.setup'
 uv run tools/hostkit/host_bridge.py eval 'AuthoringWalkthrough.run'
 uv run tools/hostkit/host_bridge.py eval 'AuthoringWalkthrough.undo'
 uv run tools/hostkit/host_bridge.py eval 'AuthoringWalkthrough.verify'
@@ -33,7 +33,7 @@ licensed or project data and is never included in the RBZ.
 
 ```sh
 uv run tools/hostkit/host_bridge.py eval \
-  'load "/absolute/path/to/ph-composer/tools/examples/authoring/repair_walkthrough.rb"; RepairWalkthrough.setup'
+  'load "/absolute/path/to/ph-composer/ph-composer-skp/tools/examples/authoring/repair_walkthrough.rb"; RepairWalkthrough.setup'
 uv run tools/hostkit/host_bridge.py eval 'RepairWalkthrough.copy_shared'
 uv run tools/hostkit/host_bridge.py eval 'RepairWalkthrough.repair_copy'
 ```
@@ -79,7 +79,7 @@ have. Run it in a fresh scratch Model:
 
 ```sh
 uv run tools/hostkit/host_bridge.py eval \
-  'load "/absolute/path/to/ph-composer/tools/examples/authoring/colour_by_walkthrough.rb"; ColourByWalkthrough.setup'
+  'load "/absolute/path/to/ph-composer/ph-composer-skp/tools/examples/authoring/colour_by_walkthrough.rb"; ColourByWalkthrough.setup'
 uv run tools/hostkit/host_bridge.py eval 'ColourByWalkthrough.meshes'
 uv run tools/hostkit/host_bridge.py eval 'ColourByWalkthrough.on'
 ```
@@ -136,7 +136,7 @@ defensible on the host, and what occurrence resolution costs.
 
 ```sh
 uv run tools/hostkit/host_bridge.py eval \
-  'load "/absolute/path/to/ph-composer/tools/examples/authoring/gesture_cost_walkthrough.rb"; GestureCostWalkthrough.build(334)'
+  'load "/absolute/path/to/ph-composer/ph-composer-skp/tools/examples/authoring/gesture_cost_walkthrough.rb"; GestureCostWalkthrough.build(334)'
 uv run tools/hostkit/host_bridge.py eval 'GestureCostWalkthrough.gesture_curve([1, 10, 50])'
 uv run tools/hostkit/host_bridge.py eval 'GestureCostWalkthrough.ceiling'
 uv run tools/hostkit/host_bridge.py eval 'GestureCostWalkthrough.model_curve'
@@ -162,7 +162,7 @@ modifier mask or the edit context, which are what this gate exists to answer.
 
 ```sh
 uv run tools/hostkit/host_bridge.py eval \
-  'load "/absolute/path/to/ph-composer/tools/examples/authoring/classify_tool_walkthrough.rb"; ClassifyToolWalkthrough.setup(40)'
+  'load "/absolute/path/to/ph-composer/ph-composer-skp/tools/examples/authoring/classify_tool_walkthrough.rb"; ClassifyToolWalkthrough.setup(40)'
 uv run tools/hostkit/host_bridge.py eval 'ClassifyToolWalkthrough.arm("Wall", "Outdoors")'
 ```
 
@@ -211,7 +211,7 @@ back what the panel's own commands did to it. You do the clicking.
 
 ```sh
 uv run tools/hostkit/host_bridge.py eval \
-  'load "/absolute/path/to/ph-composer/tools/examples/authoring/overview_walkthrough.rb"; OverviewWalkthrough.setup'
+  'load "/absolute/path/to/ph-composer/ph-composer-skp/tools/examples/authoring/overview_walkthrough.rb"; OverviewWalkthrough.setup'
 uv run tools/hostkit/host_bridge.py eval 'OverviewWalkthrough.read_cost'
 uv run tools/hostkit/host_bridge.py eval 'OverviewWalkthrough.report'
 ```
@@ -262,7 +262,7 @@ its own is not part of the script: the copy watcher makes it independent after t
 
 ```sh
 uv run tools/hostkit/host_bridge.py eval \
-  'load "/absolute/path/to/ph-composer/tools/examples/authoring/spaces_walkthrough.rb"; SpacesWalkthrough.run'
+  'load "/absolute/path/to/ph-composer/ph-composer-skp/tools/examples/authoring/spaces_walkthrough.rb"; SpacesWalkthrough.run'
 ```
 
 ## Spaces: the Mark floor tool and Create Space
@@ -274,7 +274,7 @@ tool; you click, drag and right-click.
 
 ```sh
 uv run tools/hostkit/host_bridge.py eval \
-  'load "/absolute/path/to/ph-composer/tools/examples/authoring/mark_tool_walkthrough.rb"; MarkToolWalkthrough.setup'
+  'load "/absolute/path/to/ph-composer/ph-composer-skp/tools/examples/authoring/mark_tool_walkthrough.rb"; MarkToolWalkthrough.setup'
 uv run tools/hostkit/host_bridge.py eval 'MarkToolWalkthrough.instrument'
 uv run tools/hostkit/host_bridge.py eval 'MarkToolWalkthrough.arm(1.0)'
 ```
@@ -298,5 +298,5 @@ model.
 
 ```sh
 uv run tools/hostkit/host_bridge.py eval \
-  'load "/absolute/path/to/ph-composer/tools/examples/authoring/spaces_colour_by_walkthrough.rb"; SpacesColourByWalkthrough.run'
+  'load "/absolute/path/to/ph-composer/ph-composer-skp/tools/examples/authoring/spaces_colour_by_walkthrough.rb"; SpacesColourByWalkthrough.run'
 ```

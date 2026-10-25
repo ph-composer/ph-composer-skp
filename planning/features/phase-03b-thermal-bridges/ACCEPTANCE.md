@@ -3,7 +3,7 @@
 DATE: 2026-10-03
 STATUS: Scoped. T01 passes on the branch (2026-10-21); T02 to T09 open. Re-read against `main` at `420c783a` on 2026-10-21.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: [#301](https://github.com/bldgtyp/ph-composer/issues/301)
+ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 
 The [PRD](PRD.md), "Acceptance shape", supplies the detailed cases. This register supplies the
 closure gates for Phase 3b; Phase 3a's [Spaces register](../../archive/phase-03a-spaces/ACCEPTANCE.md)

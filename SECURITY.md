@@ -3,7 +3,7 @@
 ## Reporting a vulnerability
 
 Report a security problem privately through GitHub's private vulnerability reporting:
-https://github.com/bldgtyp/ph-composer/security/advisories/new
+https://github.com/ph-composer/ph-composer-skp/security/advisories/new
 
 Do not open a public issue for a security problem. A public issue is visible to everyone before a
 fix exists.

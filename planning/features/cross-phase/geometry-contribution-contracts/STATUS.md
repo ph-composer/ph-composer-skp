@@ -2,7 +2,7 @@
 
 DATE: 2026-10-13
 STATUS: G-02 merged to main (PR 119). G-01 answered by thermal bridges P3b-01 on 2026-10-21; G-03 superseded; G-04 deferred to the phase 3b thermal-bridge ledger, which owns when it runs.
-ISSUE: [#118](https://github.com/bldgtyp/ph-composer/issues/118)
+ISSUE: [#118](https://github.com/ph-composer/ph-composer-skp/issues/118)
 
 The phased plan is the `## Stages` section of [PLAN.md](PLAN.md); there is no `phases/` folder.
 Acceptance rows are in [ACCEPTANCE.md](ACCEPTANCE.md).

@@ -3,7 +3,7 @@
 DATE: 2026-10-03
 STATUS: Scoped. Corrected to `main` at `420c783a` on 2026-10-21 (DECISIONS Part 1b)
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: [#301](https://github.com/bldgtyp/ph-composer/issues/301)
+ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 
 ## Entry and scope
 
@@ -41,7 +41,7 @@ Register: [thermal-bridges ACCEPTANCE](../ACCEPTANCE.md).
    `context/` rules and at the edge tool, and record B4's registry question (D3b-01) as theirs.
    Add the PHX quantity check to metr-export if P3b-08 did not. Close G-01 and G-04 in the
    geometry-contribution-contracts packet with their receipts, which lets that packet and
-   [#118](https://github.com/bldgtyp/ph-composer/issues/118) close.
+   [#118](https://github.com/ph-composer/ph-composer-skp/issues/118) close.
 7. **Tracking.** Update [STATUS](../STATUS.md), `planning/STATUS.md` and the roadmap's 3.2
    row.
 

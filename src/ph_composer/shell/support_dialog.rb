@@ -20,8 +20,8 @@ module PhComposer
     FALLBACK_SECONDS = 5
     HELP_PAGE = File.join(ROOT, "help", "index.html")
     # The online copy of the shipped help page, both from docs/HELP.md, at the commit this build came from.
-    HELP_URL = "https://github.com/bldgtyp/ph-composer/blob/%<ref>s/docs/HELP.md"
-    ISSUE_URL = "https://github.com/bldgtyp/ph-composer/issues/new?template=bug_report.yml"
+    HELP_URL = "https://github.com/ph-composer/ph-composer-skp/blob/%<ref>s/docs/HELP.md"
+    ISSUE_URL = "https://github.com/ph-composer/ph-composer-skp/issues/new?template=bug_report.yml"
     INBOUND = {
       "support.ready" => [], "support.capture" => %w[purpose], "support.save" => %w[capture_id],
       "support.open_log_folder" => [], "support.open_help" => [], "support.open_online_help" => [],

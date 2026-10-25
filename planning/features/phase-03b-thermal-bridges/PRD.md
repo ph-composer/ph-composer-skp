@@ -3,7 +3,7 @@
 DATE: 2026-09-18
 STATUS: Scoped. Interviewed 2026-10-03; answers recorded in [DECISIONS.md](DECISIONS.md) and folded in below. Corrected to the code on `main` at `420c783a` on 2026-10-21 (the assignment id and the HUD label shape).
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: [#301](https://github.com/bldgtyp/ph-composer/issues/301)
+ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 
 ## Problem
 

@@ -79,7 +79,7 @@ module PhComposer
         "capabilities" => CallerRegistry::CAPABILITIES,
         "common_refusals" => Refusals::COMMON,
         "refusal_documentation" =>
-          "https://github.com/bldgtyp/ph-composer/blob/main/context/CONTRACTS.md#outcomes-and-codes",
+          "https://github.com/ph-composer/ph-composer-skp/blob/main/context/CONTRACTS.md#outcomes-and-codes",
         "tasks" => { "export" => { "preflight" => "export_preflight", "start" => "start_export",
                                    "status" => "export_status", "cancel" => "cancel_export",
                                    "latest" => "latest_export", "retention_limit" => Export::Tasks::LIMIT,

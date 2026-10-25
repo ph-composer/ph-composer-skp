@@ -2136,7 +2136,7 @@ Occurrence reference:
 
 ## Common refusals
 
-Every operation answers the codes of its kind's set besides its own, and an operation that needs the user to choose a location also answers the `approval` set. Each operation below lists only its own codes. `PhComposer::API.discover` returns these sets as `common_refusals`, and `describe` returns an operation's own codes as `refuses` and the sets it answers as `common_refusal_sets`. Every refusal has `code`, `owner` and `description`; the foundation's description is null. Discovery's `refusal_documentation` points to [Outcomes and codes](https://github.com/bldgtyp/ph-composer/blob/main/context/CONTRACTS.md#outcomes-and-codes).
+Every operation answers the codes of its kind's set besides its own, and an operation that needs the user to choose a location also answers the `approval` set. Each operation below lists only its own codes. `PhComposer::API.discover` returns these sets as `common_refusals`, and `describe` returns an operation's own codes as `refuses` and the sets it answers as `common_refusal_sets`. Every refusal has `code`, `owner` and `description`; the foundation's description is null. Discovery's `refusal_documentation` points to [Outcomes and codes](https://github.com/ph-composer/ph-composer-skp/blob/main/context/CONTRACTS.md#outcomes-and-codes).
 
 | Set | Codes |
 | --- | --- |

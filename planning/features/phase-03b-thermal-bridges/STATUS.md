@@ -3,7 +3,7 @@
 DATE: 2026-10-03
 STATUS: In progress. P3b-01 merged to `main` 2026-10-22 (PR #302); P3b-02 to P3b-09 scoped, none authorized.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: [#301](https://github.com/bldgtyp/ph-composer/issues/301)
+ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 
 This is the one place Phase 3b completeness is read from. Update it in the same change as any
 stage's state. States use the canon vocabulary: `Requested`, `Scoped`, `In progress`, `Blocked`,
@@ -30,7 +30,7 @@ recommended the same day; no stage authorized.
 
 ## Next step
 
-P3b-01 is in progress on `feature/thermal-bridges-p3b-01` (Ed's go, 2026-10-21): merged to `main` as `91366643` ([PR #302](https://github.com/bldgtyp/ph-composer/pull/302)); T01 passes. P3b-02 is the next `Scoped` stage and waits for Ed's go.
+P3b-01 is in progress on `feature/thermal-bridges-p3b-01` (Ed's go, 2026-10-21): merged to `main` as `91366643` ([PR #302](https://github.com/ph-composer/ph-composer-skp/pull/302)); T01 passes. P3b-02 is the next `Scoped` stage and waits for Ed's go.
 
 ## Entry gates
 
@@ -38,7 +38,7 @@ P3b-01 is in progress on `feature/thermal-bridges-p3b-01` (Ed's go, 2026-10-21):
 | --- | --- |
 | Ed answers PRD Q1 to Q11 (the interview) and D3b-01 to D3b-21 | Done 2026-10-03 |
 | Ed answers D3b-22 (before P3b-03) and D3b-23 (before P3b-04) | Done 2026-10-21 |
-| A Phase 3 issue exists on `bldgtyp/ph-composer`, and every header's `ISSUE` line points at it | Done 2026-10-21: [#301](https://github.com/bldgtyp/ph-composer/issues/301) |
+| A Phase 3 issue exists on `ph-composer/ph-composer-skp`, and every header's `ISSUE` line points at it | Done 2026-10-21: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301) |
 | Ed authorizes implementation, stage by stage or for a run of stages | Open |
 | P3a-01 merged before P3b-03 and P3b-08 start; P3a-05 merged before P3b-06 starts | Closed: P3a-01 merged through PR #135, P3a-05 through PRs #147 and #148; Phase 3a closed 2026-10-17 |
 
@@ -50,7 +50,7 @@ only when all three are done and its evidence file exists.
 
 | Stage | Title | State | Blocked by | Branch / PR | Offline | Host | Review | Evidence | Register |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| [P3b-01](phases/p3b-01-thermal-bridge-contracts-and-edge-host-facts.md) | Thermal-bridge contracts and edge host facts | Merged to main | | [PR #302](https://github.com/bldgtyp/ph-composer/pull/302), squash `91366643` | `make ci` green at `b013f330` and on the evidence head (Ruby 3.2.2); the new test also on 2.7.2 | T01 run 2026-10-21 on 26.1.188 at `bec31a4c`: the five B4 cases with native Undo, Redo, save and fresh-process reopen, eight assertions pass | architecture review done: Codex gpt-6-astra with the architecture and Ruby rubrics, two cycles (2 P2 + 1 P3, then 3 P2), all six fixed in `31ddfb03` and `b013f330` | | [evidence](evidence/p3b-01-edge-host-facts.md) | T01 |
+| [P3b-01](phases/p3b-01-thermal-bridge-contracts-and-edge-host-facts.md) | Thermal-bridge contracts and edge host facts | Merged to main | | [PR #302](https://github.com/ph-composer/ph-composer-skp/pull/302), squash `91366643` | `make ci` green at `b013f330` and on the evidence head (Ruby 3.2.2); the new test also on 2.7.2 | T01 run 2026-10-21 on 26.1.188 at `bec31a4c`: the five B4 cases with native Undo, Redo, save and fresh-process reopen, eight assertions pass | architecture review done: Codex gpt-6-astra with the architecture and Ruby rubrics, two cycles (2 P2 + 1 P3, then 3 P2), all six fixed in `31ddfb03` and `b013f330` | | [evidence](evidence/p3b-01-edge-host-facts.md) | T01 |
 | [P3b-02](phases/p3b-02-thermal-bridge-type-records.md) | Thermal Bridge Type records and operations | Scoped | P3b-01 | | | | ordinary | | T02 |
 | [P3b-03](phases/p3b-03-edge-assignment.md) | Edge assignment, Zone containment and edge picking | Scoped | P3b-02 | | | | strong | | T03 |
 | [P3b-04](phases/p3b-04-runs-and-schedule.md) | Runs, the schedule read and findings | Scoped | P3b-03 | | | | ordinary | | T04 |
@@ -64,7 +64,7 @@ only when all three are done and its evidence file exists.
 
 Three stages of the refactoring program's
 [geometry contribution contracts](../cross-phase/geometry-contribution-contracts/PLAN.md)
-packet ([#118](https://github.com/bldgtyp/ph-composer/issues/118)) need this track as their adopter.
+packet ([#118](https://github.com/ph-composer/ph-composer-skp/issues/118)) need this track as their adopter.
 They are deferred here until the P3b stage named in "Picked up by" starts. Their plan text stays in
 that packet; this ledger owns when they run.
 
@@ -74,7 +74,7 @@ that packet; this ledger owns when they run.
 | G-03 | `ColourBy::LineEntry`, the service branch, the overlay line pass | Superseded 2026-10-15 | P3b-06, after G-01 | Not built: P3a-05's design note settled one line primitive, `derived` segments on an ordinary entry (`context/EXTENSIBILITY.md`, "Colour-by derived geometry"). An Edge entry carries the Edge as `entity` and its segment in `derived`; P3b-06 adds only a mode-level stroke weight |
 | G-04 | Thermal-bridge adoption: native drawing proof, export of runs, the 50,000 Edge measurement | Deferred | P3b-06 and P3b-08 | Closes F06 once G-02 and G-03 both have this adopter in use |
 
-G-02 is already on `main` ([PR #119](https://github.com/bldgtyp/ph-composer/pull/119)): the export
+G-02 is already on `main` ([PR #119](https://github.com/ph-composer/ph-composer-skp/pull/119)): the export
 `GeometrySnapshot` has an `edge` entry for every Edge occurrence (world SI endpoints, vertex ids,
 Face ids, dictionaries), with Edges inside cutting components dropped as Faces are. H15 is done;
 P3b-08 adds only its contributor, which filters edge entries by its own dictionary, and measures
@@ -167,7 +167,7 @@ reproduced; P3b-01 reproduces what the stages depend on.
 | 2026-10-16 | Handoff from Phase 3a (P3a-12 step 9). Built and observed on the host (P3a-12), ready to reuse: the viewport-tool shape in `features/spaces/mark_tool.rb` (no operation of its own; each completed gesture is one public `invoke` and one Undo step; picks through `Pick.face_path`, drags through `core/` `DragSet`; a move without `MK_LBUTTON` cancels the gesture, and macOS sets that flag on every held move, `context/SKETCHUP_HOST_BEHAVIOR.md`). Also: Colour-by `derived` polygons and segments as P3a-05 shipped them (`ColourBy::Derived.new(polygons:, segments:)`, segments drawn at the overlay's outline weight, so H14's per-mode stroke weight is still P3b-06's), and the container rule (a stamped Group's Faces leave Zone inventories, CONTRACTS section 8). The `derived` shape is the one this packet's CONTRACTS assume for `by_type`. |
 | 2026-10-21 | Re-baselined against `main` at `420c783a` (DECISIONS Part 1b, F27 to F36): F6 settled (records need an id), F7, F10, F14, F15, F24 changed, F8, F9, F25 superseded by P3a-05 and G-02. CONTRACTS section 8 answers five of section 7's questions from code; H15 done; H17 and H18 narrowed; the assignment reference takes the Face shape. D3b-22 and D3b-23 added, open. The D3b-12 HUD label takes the service's "label (count) figure" shape. PLAN, ACCEPTANCE, the PRD and every stage document corrected; the Phase 3a gates recorded as met. No decision answered, no stage authorized. |
 | 2026-10-21 | Ed answered D3b-22 and D3b-23 as recommended; P3b-03 and P3b-04 lose their decision blockers. Waiting on the phase issue and the go on P3b-01. |
-| 2026-10-21 | Phase issue [#301](https://github.com/bldgtyp/ph-composer/issues/301) created; every header in the packet points at it. Waiting on the go on P3b-01. |
+| 2026-10-21 | Phase issue [#301](https://github.com/ph-composer/ph-composer-skp/issues/301) created; every header in the packet points at it. Waiting on the go on P3b-01. |
 | 2026-10-21 | Ed authorized P3b-01 as its own pull request through the loop. Branch `feature/thermal-bridges-p3b-01`: `tests/edge_record_contract_test.rb` answers CONTRACTS section 7 questions 2 and 3; `PLANNING_IDS` fails `S01`, `T01` and `F26`; T01 added to the native-acceptance cases; the edge spike gained the five open cases; G-01 answered in both packets. Host gate pending. |
 | 2026-10-21 | PR #302 opened; Codex gpt-6-astra reviewed twice with the architecture rubric. Fixed: the retag case shared no operation with its registry write; the scan dropped dictionaries; the PRD's Runs rule still said tolerance; run identifiers collided for coincident placements, so they now digest the container path (D3b-07 under D3b-23); the "export attribute guard" claim was false and is corrected in F5, CONTRACTS section 8 and `core/dictionaries.rb`; the spike setup refuses a reused Model. `make ci` green at `b013f330`. State `In review`; the host gate is the one open item of T01. |
 | 2026-10-21 | T01 host gate run on the PR head: the five B4 cases with native Undo, Redo, save and fresh-process reopen, eight assertions pass; results folded into `context/SKETCHUP_HOST_BEHAVIOR.md` and the heal consequence into D3b-22's row. P3b-01 `Implemented on branch`. |

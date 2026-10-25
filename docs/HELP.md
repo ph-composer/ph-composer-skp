@@ -17,7 +17,7 @@ Extension, and pick the file. To update, install the newer file the same way; it
 one. Restart SketchUp after installing.
 
 Current release: none yet. PH-Composer is in development and every build so far is a development
-build. Releases will be listed at https://github.com/bldgtyp/ph-composer/releases.
+build. Releases will be listed at https://github.com/ph-composer/ph-composer-skp/releases.
 
 PH-Composer does not check for updates. Help & Diagnostics shows the version and build you have
 installed; compare it with the releases page to see whether a newer one exists.
