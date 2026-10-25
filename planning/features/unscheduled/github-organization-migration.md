@@ -1,7 +1,7 @@
 # GitHub organization and SketchUp repository migration
 
 DATE: 2026-10-25
-STATUS: Transfers, local moves and native acceptance complete; delivery checks in progress.
+STATUS: Implemented and native-verified; merge delivery tracked in PR #306.
 ISSUE: [#305](https://github.com/ph-composer/ph-composer-skp/issues/305)
 
 ## Recommendation and scope
