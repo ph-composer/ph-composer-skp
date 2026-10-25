@@ -168,14 +168,14 @@ identities would be a separate, much larger compatibility project and is not rec
 
 The organization handle, Free plan and Ed's owner access are verified. Ed confirmed the local
 layout and authorized restoring John's previous read access; both invitations were sent.
-The sidebar project-folder update is user-operated because Codex blocks automation of its own
-interface and exposes no project-path update tool. The trusted-project configuration is repaired.
+Ed updated the sidebar project folder; the project listing confirms the new checkout path.
+The trusted-project configuration is repaired.
 
 ## Execution receipt, 2026-10-25
 
 - Both transfers completed. Repository IDs remain `1376194878` (SketchUp) and `1399931972`
   (provider example), with the same pre-transfer `main` commits and four open SketchUp issues.
-  Neither repository had tags, releases, forks, Pages, webhooks, deploy keys, environments or
+  Neither repository had associated GitHub Packages, tags, releases, forks, Pages, webhooks, deploy keys, environments or
   repository secrets. Existing source PR lists were empty. Old Git URLs resolve to the same HEAD.
 - Main's two required checks and branch protection survived unchanged. The example remains
   unprotected as before. Actions permissions are unchanged. Secret scanning became disabled
@@ -226,5 +226,5 @@ interface and exposes no project-path update tool. The trusted-project configura
   They remain untracked. Current-host acceptance does not close SketchUp 2023, Windows or release gates.
 
 Delivery is tracked in [PR #306](https://github.com/ph-composer/ph-composer-skp/pull/306).
-The only human follow-ups are accepting John's access invitations and updating the Codex sidebar
-project folder; neither changes the verified runtime or repository contents.
+The remaining human follow-up is John accepting the read-access invitations. The Codex sidebar
+project path is verified correct. Neither changes the verified runtime or repository contents.
