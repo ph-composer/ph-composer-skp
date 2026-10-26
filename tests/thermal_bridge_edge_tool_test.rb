@@ -313,6 +313,12 @@ class ThermalBridgeEdgeToolTest < PhComposerTestCase
     stop.handler.call(@session)
     refute tool.active?
 
+    piped = create_type("Wall | Roof")
+    UI.inputbox_result = ["Wall / Roof", "1"]
+    arm.handler.call(@session)
+    assert_equal piped, tool.thermal_bridge_type_id, "a name holding the choice separator stays selectable"
+    stop.handler.call(@session)
+
     ["none", "0x1A", "1e999"].each do |typed|
       UI.inputbox_result = ["Slab edge", typed]
       arm.handler.call(@session)

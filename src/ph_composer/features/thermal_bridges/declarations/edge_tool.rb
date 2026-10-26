@@ -99,21 +99,31 @@ module PhComposer
         read = API.query(:context => context(session), :name => "#{TypeRegistration::PREFIX}.all")
         return show_refusal(session, read) unless read.fetch("status") == "completed"
 
-        rows = read.fetch("value").fetch("records").sort_by { |row| row.dig("values", "name").downcase }
+        rows = read.fetch("value").fetch("records").sort_by { |row| [row.dig("values", "name").downcase, row["id"]] }
         return if rows.empty?
 
         tool = ThermalBridges.edge_tool(session)
-        chosen = rows.find { |row| row.fetch("id") == tool.thermal_bridge_type_id } || rows.first
-        names = rows.map { |row| row.dig("values", "name") }
-        answer = UI.inputbox(["Thermal Bridge Type", "Quantity"], [chosen.dig("values", "name"), tool.quantity.to_s],
-                             [names.join("|"), ""], "Assign by clicking")
+        choices = choice_labels(rows)
+        chosen = choices.key(rows.find { |row| row.fetch("id") == tool.thermal_bridge_type_id }) || choices.keys.first
+        answer = UI.inputbox(["Thermal Bridge Type", "Quantity"], [chosen, tool.quantity.to_s],
+                             [choices.keys.join("|"), ""], "Assign by clicking")
         return unless answer
 
-        selected = rows.find { |row| row.dig("values", "name") == answer.first }
+        selected = choices[answer.first]
         return unless selected
 
         params = { "thermal_bridge_type_id" => selected.fetch("id"), "quantity" => quantity(answer.last) }
         show_refusal(session, API.view(:context => context(session), :name => "#{PREFIX}.choose", :params => params))
+      end
+
+      # Each type's name as a dropdown label, mapped to its row. UI.inputbox splits its choices on "|", so a name
+      # holding one shows it as "/", and a label two names share takes a number.
+      def choice_labels(rows)
+        rows.each_with_object({}) do |row, labels|
+          label = row.dig("values", "name").tr("|", "/")
+          label = "#{label} (#{labels.length + 1})" if labels.key?(label)
+          labels[label] = row
+        end
       end
 
       DECIMAL = /\A[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?\z/
