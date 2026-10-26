@@ -20,12 +20,15 @@ module PhComposer
       NUMBER = { "type" => "number" }.freeze
       NULLABLE_NUMBER = { "type" => %w[number null] }.freeze
       COUNT = { "type" => "integer", "minimum" => 0 }.freeze
+      # One locate takes a whole run, however long, since a second call would replace the first selection.
+      # The bound only stops a runaway request; a run this long is not a real thermal bridge.
+      LOCATE_EDGE_LIMIT = 10_000
       EDGE_PATHS = Shapes.list(PATH).merge("description" => "Root-to-Edge persistent-id paths.")
       LOCATE_PARAMS = Shapes.object({ "edge_paths" => EDGE_PATHS.merge(
-        "minItems" => 1, "maxItems" => Pages::MAXIMUM_LIMIT,
+        "minItems" => 1, "maxItems" => LOCATE_EDGE_LIMIT,
         "description" => "The Edges of one run, or of one finding, as the schedule reads them."
       ) })
-      # A finding names every Edge it is about, however many; runs.locate takes them a page at a time.
+      # A finding names every Edge it is about, as runs.locate takes them.
       FINDING = Shapes.object({
         "code" => Shapes::TEXT, "message" => Shapes::TEXT,
         "blocks_export" => { "type" => "boolean" },

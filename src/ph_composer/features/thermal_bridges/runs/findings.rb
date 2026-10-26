@@ -45,14 +45,13 @@ module PhComposer
           found
         end
 
-        # An Edge with no classified Face is likely a stray line; one whose classified Faces all face
-        # another Zone (Surface or To neighbour) is an interior junction. An unclassified Face
-        # beside a classified one changes neither.
+        # An Edge with no classified Face is likely a stray line; one whose Zone Faces all face another
+        # Zone (Surface or To neighbour) is an interior junction. An unclassified Face beside an interior one
+        # shows nothing about its side, so that Edge is neither.
         def face_findings(run)
           stray = run.facts.select { |fact| classified(fact).empty? }
           interior = run.facts.select do |fact|
-            faces = classified(fact)
-            !faces.empty? && faces.all? { |values| INTERIOR.include?(values["boundary_condition"]) }
+            !classified(fact).empty? && fact.faces.all? { |values| INTERIOR.include?(values["boundary_condition"]) }
           end
           found = []
           unless stray.empty?

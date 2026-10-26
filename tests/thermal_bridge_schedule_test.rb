@@ -139,6 +139,9 @@ class ThermalBridgeScheduleTest < PhComposerTestCase
     assert_in_delta 6.0, rows.first.fetch("length_m"), 0.001
     page = query("schedule.list")
     assert_equal [1, nil], [page.fetch("runs").length, page.fetch("next_cursor")]
+    located = command("runs.locate", "edge_paths" => rows.first.fetch("edge_paths"))
+    assert_equal ["completed", 600], [located["status"], located.dig("value", "selected")], located.inspect
+    assert_equal long.sort_by(&:persistent_id), @model.selection.to_a.sort_by(&:persistent_id)
   end
 
   def test_the_scan_opens_no_operation_and_writes_nothing

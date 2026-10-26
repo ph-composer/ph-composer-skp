@@ -172,7 +172,7 @@ class ThermalBridgeRunsTest < Minitest::Test
       "thermal_bridge.psi_missing" => [fact(ZONE_A, "tbt_DRAFT0000001", [0, 0, 9], [1, 0, 9])],
       "thermal_bridge.no_envelope_face" => [fact(ZONE_A, PARAPET, [0, 0, 9], [1, 0, 9], :faces => [{}])],
       "thermal_bridge.interior_junction" => [fact(ZONE_A, PARAPET, [0, 0, 9], [1, 0, 9],
-                                                  :faces => [{ "boundary_condition" => "Adiabatic" }, {}])],
+                                                  :faces => [{ "boundary_condition" => "Adiabatic" }, SURFACE])],
       "thermal_bridge.shared_definition" => [fact(ZONE_A, PARAPET, [0, 0, 9], [1, 0, 9], :shared => true)],
       "thermal_bridge.counted_twice" => [fact(ZONE_A, PARAPET, [0, 0, 9], [1, 0, 9]),
                                          fact(ZONE_B, PARAPET, [1, 0, 9 + 0.00002], [0, 0, 9])]
@@ -185,6 +185,11 @@ class ThermalBridgeRunsTest < Minitest::Test
       blocking = schedule(facts).fetch("runs").flat_map { |row| row.fetch("findings") }.map { |f| f["blocks_export"] }
       assert_equal [%w[thermal_bridge.type_missing thermal_bridge.psi_missing].include?(code)], blocking.uniq, code
     end
+
+    # An unclassified Face beside an interior one shows nothing about its side: no finding.
+    setup
+    beside = fact(ZONE_A, PARAPET, [0, 0, 9], [1, 0, 9], :faces => [{ "boundary_condition" => "Adiabatic" }, {}])
+    assert(schedule([beside]).fetch("runs").all? { |row| row.fetch("findings").empty? })
 
     setup
     apart = [fact(ZONE_A, PARAPET, [0, 0, 9], [1, 0, 9]), fact(ZONE_B, PARAPET, [0, 0, 9.0001], [1, 0, 9.0001])]
