@@ -1,7 +1,7 @@
 # P3b-08: thermal-bridge export
 
 DATE: 2026-10-03
-STATUS: Implemented on branch `feature/thermal-bridges-p3b-08` (PR #314), T08 passed 2026-10-26. Corrected to `main` at `420c783a` on 2026-10-21 (DECISIONS Part 1b)
+STATUS: Merged to `main` 2026-10-26 as `b73e5c0b` (PR #314), T08 passed 2026-10-26. Corrected to `main` at `420c783a` on 2026-10-21 (DECISIONS Part 1b)
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 

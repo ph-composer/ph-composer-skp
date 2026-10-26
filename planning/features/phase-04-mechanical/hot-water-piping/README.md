@@ -6,16 +6,17 @@ recirculation loop. New work: the predecessor held this as a 55-line discovery b
 
 ## Read order
 
-1. [thermal-bridges PRD, "Edge tagging rules"](../../phase-03b-thermal-bridges/PRD.md#edge-tagging-rules).
-   This packet follows them. They are proposals until P3b-01 measures them.
+1. [`context/TECH_STACK.md`, "Edge-owned assignments"](../../../../context/TECH_STACK.md#edge-owned-assignments):
+   the edge tagging rules, measured and built by Phase 3b. This packet follows them.
 2. [PRD.md](PRD.md): what `main` and Phase 3b supply, then the behavior and the decisions.
 3. [STATUS.md](STATUS.md).
 
 ## What this packet needs from elsewhere
 
-- Phase 3b stages P3b-03 (edge records and assignment), P3b-04 (the chain rule), P3b-06 (the
-  stroke weight), P3b-07 (the edge tool) and P3b-08 (an edge contributor and section). Phase 3b is
-  scoped and interviewed; none of it is authorized. Only the snapshot's Edge entries exist today.
+- Phase 3b's edge records and assignment, the chain rule, the stroke weight, the edge tool and an edge
+  export contributor with an optional Python section, all on `main` (P3b-03 to P3b-08). The edge tool
+  (`features/thermal_bridges/edge_tool.rb`) is the pattern for a pointer route whose
+  explicit-reference equivalent is the feature's own assign action.
 - The Hot Water System record from [equipment](../equipment/README.md), family 2.
 - [metr-export](../../unscheduled/metr-export/README.md) for the diameter enum, the tree rows and
   the recirculation coefficient; acceptance here is HBJSON reloaded in the pinned stack.

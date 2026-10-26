@@ -29,19 +29,19 @@ Planning in detail waits for Phase 3b's P3b-04 at least, so the chain rule it re
 
 ## Blockers
 
-- Phase 3b: P3b-03, P3b-04, P3b-06, P3b-07 and P3b-08 are scoped and unauthorized. Nothing of
-  the edge store, chain rule, edge tool or edge contributor exists on `main`.
+- None from Phase 3b: the edge store, chain rule, edge tool and edge contributor are on `main`
+  (P3b-03 to P3b-08); the rules are in `context/TECH_STACK.md`, "Edge-owned assignments".
 - The Hot Water System record, which the equipment packet owns; its family was interviewed on
   2026-10-21 (H1 to H7): operating values sit on the system record, and the simplified methods
   wait on a honeybee-ph field (H5, [honeybee_ph#135](https://github.com/PH-Tools/honeybee_ph/issues/135)).
 - None from the edge identity spike: it passed on 2026-09-18 ([B4](../../../archive/phase-00-foundation/evidence/spike-edge.md));
-  its open cases close in P3b-01.
+  its open cases closed in P3b-01 (T01).
 
 ## Owed from Phase 3b
 
 | Item | Source | Disposition here |
 | --- | --- | --- |
-| A Model-level edge registry for identity-bearing assignments | D3b-01 | Not needed under Q1's by-connection recommendation; needed only if Ed chooses explicit parents |
+| A Model-level edge registry for identity-bearing assignments (B4's registry question) | D3b-01, handed over by Phase 3b P3b-09 | This packet's to decide. Not needed under Q1's by-connection recommendation; needed only if Ed chooses explicit parents |
 | Moving the run builder to `core/` | 3b STATUS, "Deferred out of this plan" | The first piping stage that computes runs moves it, with 3b's tests |
 
 ## Verification
@@ -55,3 +55,4 @@ None. Nothing is implemented.
 | 2026-09-18 | PRD drafted. |
 | 2026-10-21 | Phase 4 planned in detail; this packet's stage is a gate stub in the phase ledger. |
 | 2026-10-21 | Re-baselined against `main` at `420c783a`: foundation and remote blockers removed, Phase 3b dependencies named stage by stage, records and export mapping corrected, Q13 added. No interview, no implementation. |
+| 2026-10-26 | Phase 3b P3b-09 handoff: the edge tagging rules point at `context/TECH_STACK.md`, the edge stages are on `main`, and the edge registry question (D3b-01) is this packet's. |

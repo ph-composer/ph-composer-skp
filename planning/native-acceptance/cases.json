@@ -4308,6 +4308,22 @@
         "tools/examples/authoring/thermal_bridge_schedule_walkthrough.rb"
       ],
       "native_control_required": false
+    },
+    {
+      "id": "T09",
+      "label": "Phase 3b integrated run on the reference model in a fresh process with the normal installed RBZ: the five Thermal Bridge Types authored in the panel; runs assigned from the assign bar, the Thermal bridge menu and the edge tool, including a Zone under a turned wrapper; native Undo and Redo; a second Model opened and closed; an assigned Edge split and healed; save, fresh-process reopen, export and the exact HBJSON reloaded against ACCEPTANCE's tables; normal composition restored",
+      "mode": "mixed",
+      "authority": "planning/features/phase-03b-thermal-bridges/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/thermal_bridges/*",
+        "src/ph_composer/html/features/thermal_bridges/*",
+        "src/ph_composer/python/ph_composer_translation/thermal_bridge_sections.py",
+        "src/ph_composer/features/zones/export.rb",
+        "src/ph_composer/features/windows/units/outlines.rb",
+        "src/ph_composer/colour_by/*",
+        "tools/examples/authoring/thermal_bridge_reference_model.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }

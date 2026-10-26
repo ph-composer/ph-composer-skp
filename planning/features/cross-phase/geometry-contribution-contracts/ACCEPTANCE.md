@@ -1,6 +1,6 @@
 # Geometry contribution acceptance
 
-STATUS: G01 to G06 pass offline on both Rubies (PR 119, `tests/geometry_snapshot_test.rb`). G07 to G15 wait for G-03 and the thermal-bridge adopter.
+STATUS: Complete 2026-10-26. G01 to G06 pass offline on both Rubies (PR 119, `tests/geometry_snapshot_test.rb`). G07 to G13 were G-03's and went with it: Phase 3a P3a-05's `derived` segments replaced the line primitive, and thermal bridges' T06 drew Edges through them natively. G14 passes through thermal bridges T08 (runs from captured Edge topology, attached through the Python section's declared contract). G15 passes through Spaces' derived geometry (P3a-05).
 
 | Case | Scenario | Required result |
 | --- | --- | --- |

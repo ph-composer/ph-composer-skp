@@ -14,7 +14,7 @@ assignment, local libraries, Window Type records, the Builder and Unit operation
 and accepted on the Phase 2 feature branch for SketchUp 26.1.188 on macOS. Normal export
 includes authored opaque constructions and Apertures. File libraries, Place, Schedule and
 Window Type Colour-by pass their named current-host requirements. Connection libraries are Phase 5. Spaces is
-implemented and accepted on SketchUp 26.1.188 on macOS. Thermal bridges remain proposed.
+implemented and accepted on SketchUp 26.1.188 on macOS, and so are thermal bridges.
 
 ## The working environment
 
@@ -133,8 +133,19 @@ classification requires the user to make the parent unique first. PH-Composer ne
 automatically. Unclassified faces are visible in validation and never silently exported.
 
 Thermal bridges are identified on the model as edges, assigned a type carrying a psi-value, and
-exported with their measured length. Point bridges and chi-values are outside the MVP. They can
-return as later scope only after the canonical honeybee-ph artifact has a real carrier for them.
+exported with their measured length. A Thermal Bridge Type holds one psi-value, its group (Ambient,
+Perimeter or Basement floor) and links to its calculation report; a second value is a second type.
+Edges inside a Zone take a type from the Thermal Bridges tab's assign bar, from the right-click
+"Thermal bridge" menu, or by clicking them with Assign by clicking; each gesture is one Undo step, and
+the assignment lives on the edge, so a copy or a split carries it. Connected edges of one type,
+quantity and Zone form one run, named by its type and a counter. The Schedule lists each run's
+length, psi-value, quantity and heat loss with totals by type and by group, and Colour by shows
+assigned edges in their type's colour. Export writes each run as one thermal bridge on its Zone's
+Building-Segment. A missing type or psi-value blocks export; an edge outside every Zone, a stray
+line, an interior junction, an edge counted in two Zones and an edge on a placed window's outline
+are warnings in the preflight and the report, and the rest export. Point bridges and chi-values
+are outside the MVP. They can return as later scope only after the canonical honeybee-ph artifact
+has a real carrier for them.
 
 ## Window Types and placement
 
