@@ -1,7 +1,7 @@
 # P3b-08: thermal-bridge export
 
 DATE: 2026-10-03
-STATUS: Scoped. Corrected to `main` at `420c783a` on 2026-10-21 (DECISIONS Part 1b)
+STATUS: Implemented on branch `feature/thermal-bridges-p3b-08` (PR #314), T08 passed 2026-10-26. Corrected to `main` at `420c783a` on 2026-10-21 (DECISIONS Part 1b)
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 
@@ -33,11 +33,13 @@ Paths are relative to `src/ph_composer/`.
    It names no thermal-bridge concept. Thermal bridges adds `ph_composer.windows` to `requires:`.
 3. **Contributor.** `features/thermal_bridges/export.rb`: `export_contributor` for
    `ph_composer.thermal_bridges.export.thermal_bridges`, `section_version` 1,
-   `requires: ["ph_composer.zones.export.zones"]`, `user_data_keys:
+   `requires: ["ph_composer.zones.export.zones"]` (built: the Zones, Faces and Apertures sections, the
+   first two for Zone occurrences and Face values, the third for Window outlines; CONTRACTS section 4),
+   `user_data_keys:
    ["ph_composer.thermal_bridge_type_id"]`, `preflight:` the registered `export_preflight` query,
    in the shape of the Spaces contributor. Its projection reads the snapshot's `edge` entries that
    carry `ph_composer.thermal_bridge` (and nothing else of the many Edges there) and the Zones
-   section's Zone paths, Building-Segments and omissions, runs the same `runs/chains.rb` the
+   section's Zone paths, Building-Segments and omissions (none exists, F38), runs the same `runs/chains.rb` the
    schedule uses, and writes one record per run with identifier, name, Zone id, type id, psi,
    group, quantity and points in metres. Edges outside every Zone or in an omitted Zone are left
    out with their findings. The `export_preflight` query returns every finding of CONTRACTS

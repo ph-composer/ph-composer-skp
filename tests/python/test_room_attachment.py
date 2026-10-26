@@ -8,14 +8,14 @@ import json
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, ClassVar, cast
 
 from ph_composer_translation import stack
 from ph_composer_translation.composition import SECTIONS
 from ph_composer_translation.contract import as_text
 from ph_composer_translation.coordinator import translate
 from ph_composer_translation.model_sections import TranslatedZone, ZoneSection
-from ph_composer_translation.sections import ROOM, Attachment, Inputs, Requirement, Section
+from ph_composer_translation.sections import ROOM, Attachment, AttachmentRefused, Inputs, Requirement, Section
 
 FIXTURE = Path(__file__).resolve().parents[1] / "fixtures" / "phase_one" / "two_zones_extraction.json"
 ID = "test.room_spaces"
@@ -117,3 +117,47 @@ def test_room_attachment_hands_each_room_its_spaces_and_the_hbjson_reloads_them(
     )
     assert volume.avg_ceiling_height == 2.4 and len(volume.geometry) == 1
     assert segment.weighting_factor == 0.6 and segment.geometry.area == 4.0
+
+
+class RefusingSpaces(RoomSpaces):
+    """Attaches every Space but `spc_refused`, which it refuses, leaving the Room without it."""
+
+    def attach(self, host: Any, objects: Sequence[RoomSpace]) -> None:
+        refused = [item for item in objects if item.space.identifier == "spc_refused"]
+        super().attach(host, [item for item in objects if item not in refused])
+        if refused:
+            raise AttachmentRefused("refused for the test", refused)
+
+
+class OptionalRefusingSpaces(RefusingSpaces):
+    required_for_export: ClassVar[bool] = False
+
+
+def refusal_run(section: RefusingSpaces) -> dict[str, Any]:
+    airflows: dict[str, float | None] = {}
+    document = extraction(
+        {"id": "spc_kept", "zone_id": ZONE_A, "airflows": airflows},
+        {"id": "spc_refused", "zone_id": ZONE_A, "airflows": airflows},
+    )
+    return cast(dict[str, Any], translate(document, (*SECTIONS, section)).to_document())
+
+
+def test_an_optional_sections_refused_object_is_omitted_and_the_canonical_model_is_still_written() -> None:
+    result = refusal_run(OptionalRefusingSpaces())
+
+    unavailable = [finding for finding in result["findings"] if finding["code"] == "object.unavailable"]
+    assert [(finding["object_id"], finding["blocks_export"]) for finding in unavailable] == [("spc_refused", False)]
+    assert result["summary"]["publishable"] is True
+    model = stack.load("honeybee.model").Model.from_dict(json.loads(result["canonical_model"]["hbjson"]))
+    room = next(room for room in model.rooms if room.identifier == ZONE_A)
+    assert [space.identifier for space in room.properties.ph.spaces] == ["spc_kept"]
+
+
+def test_a_required_sections_refused_object_still_withholds_the_canonical_model() -> None:
+    result = refusal_run(RefusingSpaces())
+
+    assert [finding["blocks_export"] for finding in result["findings"] if finding["object_id"] == "spc_refused"] == [
+        True
+    ]
+    assert result["summary"]["publishable"] is False
+    assert "canonical_model" not in result

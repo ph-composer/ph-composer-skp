@@ -116,6 +116,13 @@ in no run and reports in `edge_findings`. Nothing points at a run, so to show on
 `edge_paths`, or a finding's `locate`, to `ph_composer.thermal_bridges.runs.locate`, which opens the
 context holding the Edges, selects them and frames them.
 
+Before exporting, `ph_composer.thermal_bridges.export_preflight` lists the same findings, each with a
+`locate` to pass on, and one more warning the schedule does not give: `thermal_bridge.on_window_perimeter`,
+an assigned Edge lying on a placed Window's outline, whose install psi-value belongs to the Window Type.
+Each run exports as one thermal bridge on its Zone's Building-Segment, and the export's findings repeat
+the warnings. An Edge no Zone holds is left out; a run that fails to translate is left out with a finding
+and the rest still export.
+
 ### Windows
 
 Place Units with `ph_composer.windows.units.place` at explicit Faces and positions you have read;
@@ -123,6 +130,8 @@ read `ph_composer.windows.units.list` back. `ph_composer.windows.units.host_exte
 outline and its bounding width and height in the frame `offsets` use, with the holes and Window
 outlines on its plane as rectangles in that frame. Keep an opening inside the outline, not only the
 bounding box, and clear of those rectangles.
+`ph_composer.windows.units.outlines` gives every placed Unit's outline in world metres, with the Face
+it is glued to, a bounded page at a time.
 
 ### Library records
 

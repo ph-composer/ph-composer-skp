@@ -18,7 +18,7 @@ module PhComposer
                    :result => {
                      "construction_usage" => [Export::Privacy.fields(%w[assembly_id face_count gross_area_m2])]
                    },
-                   :requires => [CONSTRUCTIONS], :report => method(:report)
+                   :requires => [CONSTRUCTIONS], :report => method(:report), :projection => method(:occurrences)
         ) { |reader| records(reader) }
         feature.query("#{FEATURE_ID}.export_preflight", :description => "All-Zone export checks and adjacency repair.",
                                                         :refuses => Options::Registration::REFUSALS,
@@ -122,6 +122,35 @@ module PhComposer
         end
       end
 
+      # The section's registered projection, for a contributor that places its own snapshot entries in a Zone
+      # (`reader.section(SECTION)`): one row per Zone occurrence with its id, path, name and Building-Segment
+      # name, as zones.containment names them live, and the paths of the containers it holds, whose contents
+      # are not the Zone's (context/CONTRACTS.md, "Zones geometry rules"). It writes no finding; the section
+      # contract validates the same records and refuses a choice it cannot export.
+      def occurrences(reader)
+        reader.snapshot.records(ZONE_DICTIONARY, :kind => "group").map do |entry, record|
+          record = Names.project(record, entry.native_name)
+          segment = if record.fetch("schema_version") == 2
+                      option_choices(reader).fetch(Options::SEGMENTS.id)[record["building_segment_id"]]&.fetch("name")
+                    else
+                      record["building_segment"]
+                    end
+          { "zone_id" => record.fetch("id"), "zone_path" => entry.path, "name" => record.fetch("name"),
+            "building_segment" => segment,
+            "container_paths" => containers(reader.snapshot, entry).map(&:path) }
+        end
+      end
+
+      # The Model's Building-Segment and Level options by kind id, read once per export.
+      def option_choices(reader)
+        reader.projection(:zone_option_definitions) do
+          [Options::SEGMENTS, Options::LEVELS].to_h do |kind|
+            dictionary = reader.snapshot.model_dictionaries.fetch(kind.store.dictionary, {})
+            [kind.id, dictionary.to_h { |id, text| [id, JSON.parse(text)] }]
+          end
+        end
+      end
+
       def export_choice(reader, choices, kind, id)
         record = choices.fetch(kind.id)[id]
         unless record && kind.problems(record).empty?
@@ -148,12 +177,7 @@ module PhComposer
                                                   :target_kind => REFERENCE_KIND, :path => entry.path,
                                                   :user_data => true)
           if record.fetch("schema_version") == 2
-            choices = reader.projection(:zone_option_definitions) do
-              [Options::SEGMENTS, Options::LEVELS].to_h do |kind|
-                dictionary = reader.snapshot.model_dictionaries.fetch(kind.store.dictionary, {})
-                [kind.id, dictionary.to_h { |id, text| [id, JSON.parse(text)] }]
-              end
-            end
+            choices = option_choices(reader)
             segment = export_choice(reader, choices, Options::SEGMENTS, record.fetch("building_segment_id"))
             level = record["level_id"] && export_choice(reader, choices, Options::LEVELS, record.fetch("level_id"))
             exported.merge!("building_segment_id" => segment.fetch("id"),

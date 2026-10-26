@@ -576,14 +576,14 @@
       "sha256": "884e2725e72e1d8e08c345067699790718ca70c6a0a3c83ae241abb9dce64dbd"
     },
     "python/ph_composer_translation/assembly.py": {
-      "bytes": 4242,
+      "bytes": 4522,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "32996193772548de1ab6a03ad5d99c6d5f7eac98174d402f29aee36c166b987b"
+      "sha256": "67985dfd66315fab3e7a75cbd5f4dfe323cfcbf8efb123ab13f46c6598776d06"
     },
     "python/ph_composer_translation/composition.py": {
-      "bytes": 902,
+      "bytes": 988,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "afffd6cc8bcc61bfeb4769ed81425f7030eb830a23d27ab94282d4cc64d08ce7"
+      "sha256": "7656cb6af9c931b901e888b7b69c1c972e65aa55380e5e875ac2ceef147da784"
     },
     "python/ph_composer_translation/conformance.py": {
       "bytes": 2658,
@@ -609,6 +609,11 @@
       "bytes": 5762,
       "mime": "text/plain; charset=utf-8",
       "sha256": "9536a474a64d3fe8445c23a5ae9690bf90cf476c5aa162820b0e65cdf9b91690"
+    },
+    "python/ph_composer_translation/contract/thermal_bridge_records.py": {
+      "bytes": 2908,
+      "mime": "text/plain; charset=utf-8",
+      "sha256": "013dc8a1be2173b323ccf07dcd2785dd629330492f9989559116b756a6170446"
     },
     "python/ph_composer_translation/contract/window_records.py": {
       "bytes": 6103,
@@ -646,9 +651,9 @@
       "sha256": "c5ce3e684288159b36def0d454e0ebc6cff3839382f63f42ea58ee6be7afd1f7"
     },
     "python/ph_composer_translation/sections.py": {
-      "bytes": 6912,
+      "bytes": 7039,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "60b88a69d756abf37bf74c2968f6dde0d348cd25da1d03baed6ae4afd0e0444c"
+      "sha256": "8e5908a28c57dcda7e4781e073f504aacd6b80d0c300a5f7ff4f58b96cd01e4e"
     },
     "python/ph_composer_translation/space_sections.py": {
       "bytes": 9949,
@@ -659,6 +664,11 @@
       "bytes": 1361,
       "mime": "text/plain; charset=utf-8",
       "sha256": "1b73dab83dd4ee7d5b381d71d70e2a30a753b691f248b035903596f59ca6a740"
+    },
+    "python/ph_composer_translation/thermal_bridge_sections.py": {
+      "bytes": 7682,
+      "mime": "text/plain; charset=utf-8",
+      "sha256": "e0238baa07c7c66f6f02936b31ae9605236b4dba0494931ebcb0cb0ddef9bd38"
     },
     "python/ph_composer_translation/window_sections.py": {
       "bytes": 11626,
@@ -871,6 +881,7 @@
     "python/ph_composer_translation/contract/__init__.py",
     "python/ph_composer_translation/contract/assembly_records.py",
     "python/ph_composer_translation/contract/space_records.py",
+    "python/ph_composer_translation/contract/thermal_bridge_records.py",
     "python/ph_composer_translation/contract/window_records.py",
     "python/ph_composer_translation/coordinator.py",
     "python/ph_composer_translation/entry.py",
@@ -881,6 +892,7 @@
     "python/ph_composer_translation/sections.py",
     "python/ph_composer_translation/space_sections.py",
     "python/ph_composer_translation/stack.py",
+    "python/ph_composer_translation/thermal_bridge_sections.py",
     "python/ph_composer_translation/window_sections.py"
   ],
   "wheel_order": [

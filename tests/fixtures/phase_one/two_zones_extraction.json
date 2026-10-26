@@ -58,6 +58,10 @@
       "records": [],
       "version": 1
     },
+    "ph_composer.thermal_bridges.export.thermal_bridges": {
+      "records": [],
+      "version": 1
+    },
     "ph_composer.zones.export.zones": {
       "records": [
         {

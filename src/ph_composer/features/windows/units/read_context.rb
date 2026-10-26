@@ -83,6 +83,12 @@ module PhComposer
           Placement::Hosts.writable(@request, reference)
         end
 
+        # The occurrence reference of the Zone Face a Unit is glued to, or nil.
+        def glued_reference(item)
+          path = glued_path(item)
+          path && rows[path]&.fetch("reference")
+        end
+
         private
 
         def rows

@@ -77,6 +77,28 @@ class WindowUnitActionsTest < PhComposerTestCase
     assert_in_delta 25.4, rest.fetch("width_m"), 1e-9, "the Face's extent comes on every page"
   end
 
+  def test_outlines_give_each_placed_unit_in_world_metres_with_its_host_and_page
+    [2.0, 5.0].each { |x| place(x) }
+    first = assignment_query("#{PREFIX}.units.outlines", "limit" => 1)
+    assert_equal [1, 2], [first.fetch("units").length, first.fetch("total")]
+    rest = assignment_query("#{PREFIX}.units.outlines", "cursor" => first.fetch("next_cursor"))
+    rows = first.fetch("units") + rest.fetch("units")
+    assert_nil rest.fetch("next_cursor")
+    assert_equal units.map { |row| row.fetch("reference") }.sort_by { |ref| ref.fetch("entity_path") },
+                 rows.map { |row| row.fetch("reference") }
+    assert(rows.all? { |row| row.fetch("host") == @face_reference })
+    extent = assignment_query("#{PREFIX}.units.host_extent", "host" => @face_reference).fetch("units")
+    rows.zip(extent.sort_by { |row| row.dig("reference", "entity_path") }).each do |row, box|
+      outline = row.fetch("outline_m")
+      assert(outline.all? { |point| point.length == 3 && point[2].abs < 1e-9 }, "on the Face's plane, in world")
+      xs = outline.map(&:first)
+      assert_in_delta box.fetch("width_m"), xs.max - xs.min, 1e-4
+      assert_in_delta box.fetch("x_m"), xs.min, 1e-4
+    end
+    refused = API.query(:context => @context, :name => "#{PREFIX}.units.outlines", :params => { "ids" => ["wun_x"] })
+    assert_equal %w[refused params.invalid], refused.values_at("status", "code"), "it filters nothing, so takes no ids"
+  end
+
   def test_preview_changes_nothing_and_place_is_one_native_undo_with_public_readback
     before = U::MutationScope.new.capture(@model)
     preview = API.preview(:context => @context, :name => "#{PREFIX}.units.place", :params => params)

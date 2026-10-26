@@ -39,7 +39,7 @@ on 2026-10-01. See [PLAN.md](PLAN.md) for the original allocation; later scope r
 ### Owed from the Phase 2 review
 
 Added 2026-10-02 from [R05](../../../archive/phase-02-envelope-review/R05-export-layering.md)'s follow-ups.
-Items 1 and 2 are delivered. Item 3 is allocated to
+Items 1, 2 and 4 are delivered. Item 3 is allocated to
 [P3a-10](../../../archive/phase-03a-spaces/phases/p3a-10-spaces-export.md), with the Spaces contributor,
 section and report schedule, and item 4 to Phase 3b's P3b-08.
 
@@ -66,7 +66,11 @@ section and report schedule, and item 4 to Phase 3b's P3b-08.
    the rule before the first one does. Allocated 2026-10-03 to Phase 3
    [P3b-08](../../phase-03b-thermal-bridges/phases/p3b-08-thermal-bridge-export.md): Ed made the
    thermal-bridge section optional, so a refused run is omitted and disclosed and the canonical model
-   is still written.
+   is still written. Delivered by P3b-08 on 2026-10-26 (`feature/thermal-bridges-p3b-08`): `assemble`
+   withholds the canonical model only for a refusal from a section required for export; an optional
+   section's refused object is left out with a non-blocking `object.unavailable` finding.
+   `tests/python/test_room_attachment.py` holds both cases; the rule is in `context/CONTRACTS.md`,
+   "Translation sections and artifacts".
 
 ## Verification
 
@@ -90,3 +94,4 @@ loss, two Models, nested edit paths, Undo/Redo and reopen. See the evidence for 
 | 2026-09-30 | P1-E implementation and P1-F current-host integrated acceptance complete on branch; independent review and final gates pass. Normal composition requires authored Assemblies. |
 | 2026-10-02 | Phase 2 review: R05's four export-run follow-ups recorded as owed, one a live defect (an empty Room fails to reload). None authorized. |
 | 2026-10-03 | Phase 3 planning: R05 items 1 and 2 allocated to P3a-01 and item 3 to P3a-10, with the Spaces export section. Item 4 stays owed pending D3a-9. None authorized. |
+| 2026-10-26 | Phase 3b P3b-08 on branch: R05 item 4 delivered (optional attaching sections) with the first optional section, thermal bridges (`ph_composer.thermal_bridges.export.thermal_bridges`, attaching at `ROOM`). |

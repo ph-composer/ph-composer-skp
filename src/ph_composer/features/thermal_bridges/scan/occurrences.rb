@@ -66,7 +66,7 @@ module PhComposer
         faces = faces(request, tagged.zip(rows))
         facts = tagged.zip(rows).map do |edge, row|
           Runs::Fact.new(:path => edge.path, :zone => zone(row), :reason => row.fetch("reason"),
-                         :type_id => edge.record.fetch("thermal_bridge_type_id"),
+                         :record_id => edge.record.fetch("id"), :type_id => edge.record.fetch("thermal_bridge_type_id"),
                          :quantity => edge.record.fetch("quantity"), :points_m => edge.points_m,
                          :vertex_ids => edge.vertex_ids, :shared => edge.shared,
                          :faces => edge.face_ids.filter_map { |id| faces[edge.path[0...-1] + [id]] })

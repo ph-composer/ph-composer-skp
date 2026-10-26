@@ -70,6 +70,9 @@ class WindowExportTest < PhComposerTestCase
     assert_in_delta W::Thermal.calculate(@type, @products, @settings["default_psi_install_id"])
                               .fetch("elements").first.fetch("uw_w_m2k"), construction["uw_w_m2k"], 1e-12
     refute row["is_operable"]
+    # The outline the Apertures projection gives other sections: the whole Unit, here its single pane.
+    assert_equal [[row["unit_id"], row["polygon_m"]]],
+                 result.outlines.map { |outline| outline.values_at("unit_id", "outline_m") }
     assert_empty @model.operation_starts
   end
 

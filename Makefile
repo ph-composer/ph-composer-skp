@@ -108,7 +108,7 @@ lint-python:
 
 # The owning tests, one per golden: exactly one test may write each file (docs/DEVELOPMENT.md
 # "Fixtures and coverage"). A new golden adds its owner here and its path below.
-FIXTURE_OWNERS := phase_one_export api_reference
+FIXTURE_OWNERS := phase_one_export thermal_bridge_export api_reference
 FIXTURE_PATHS := tests/fixtures tests/python/fixtures docs/API_REFERENCE.md
 
 fixtures:

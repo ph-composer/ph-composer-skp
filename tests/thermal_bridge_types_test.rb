@@ -153,7 +153,7 @@ class ThermalBridgeTypesTest < PhComposerTestCase
     owned = (registry.queries.values + registry.actions.values + registry.view_commands.values).select do |row|
       row.owner == TB::FEATURE_ID
     end
-    assert_equal 16, owned.length
+    assert_equal 17, owned.length
     owned.each do |declaration|
       declaration.examples.each do |example|
         assert_empty PhComposer::JsonSchema.validate(example, declaration.params), declaration.name

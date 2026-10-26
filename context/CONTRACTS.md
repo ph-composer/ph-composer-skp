@@ -943,7 +943,11 @@ shows in `translate`, so `attach` judges only what needs the host. A missing hos
 `RecordError` from `attach`, is an `object.unavailable` finding on each of those objects;
 `AttachmentRefused` names only the objects it refused. The canonical model, `{hbjson, rooms, faces,
 surface_pairs}` counted from the assembled Model, is a shell field of the result document; it is
-written when the Model holds a Room and no attachment was refused. Each section's
+written when the Model holds a Room and no attachment of a section required for export was refused. A
+section that sets `required_for_export = False` is optional: an object of it that fails to translate or
+attach is left out of the Model with a non-blocking `object.unavailable` finding, and the Model holds the
+rest. An optional section's `attach` checks every object before it adds any, so a refused one is never
+left half-added. Each section's
 `result_fields` are collected after assembly and sit under its id, `result[section_id][field]`; a
 section with none has no key. After the export reloads the canonical HBJSON, each section's
 `conformance(model, fields)` checks it against that section's own fields.
@@ -958,6 +962,15 @@ all three, 0 for an unset rate, converted from m3/h to m3/s there and nowhere el
 total floor area, weighted area and net volume per Zone and per Building-Segment, and its
 conformance checks the reloaded Rooms' Spaces against the per-Zone totals.
 
+Thermal bridges are the first optional section: `ph_composer.thermal_bridges.export.thermal_bridges` (Ruby
+`features/thermal_bridges/export.rb`, Python `thermal_bridge_sections.py`) writes one record per run, built
+by the same run functions as the schedule from the snapshot's assigned Edge entries, and attaches at `ROOM`,
+adding each honeybee-ph `PhThermalBridge` to the Room's shared `ph_bldg_segment`. Its only `user_data` is
+the declared `ph_composer.thermal_bridge_type_id`: a run joins many Edges, so no Edge's own user_data
+leaves. A missing type or psi-value refuses the section; every other finding is a note, and an Edge no Zone
+holds is left out with one. Its result fields list each attached run's length, psi-value, quantity and
+heat loss, and its conformance finds each run on its Zone's Building-Segment in the reloaded model.
+
 Export reads one revision-bound `GeometrySnapshot`: one traversal recording each occurrence path
 and accumulated transform, with no live SketchUp objects. Its entries are Faces, Edges (world SI
 endpoints, vertex and Face ids within their container), Groups and ComponentInstances; Faces and
@@ -968,7 +981,12 @@ in `requires:`; registration refuses a section that is not registered, or whose 
 the contributor's feature nor one that feature requires, with `registration.missing_dependency`.
 It reads that section's registered `projection` with `reader.section(id)` while collecting, and its
 result fields with `result.section(id)` in its report, which receives an `Export::ResultView`; an
-undeclared read is an internal error. Export contributors extend a composed privacy allowlist, one
+undeclared read is an internal error. The Zones section projects each Zone occurrence's id, path, name and
+Building-Segment, and the paths of the containers it holds; the Faces section each Zone Face's path, record and Zone; the Apertures section each
+placed Window's world outline. A contributor discloses what it leaves out of its records, or warns about
+them, with `reader.note(code, object_id, message)`: a non-blocking finding that joins the result's findings
+and so the report. Such a finding carries no `locate`; the preflight row for the same condition does.
+Export contributors extend a composed privacy allowlist, one
 optional entry per section; the report embeds their results unchanged. Exporters consume only the HBJSON artifact plus explicit
 options. The HBJSON and report pair is replaced together: an injected failure leaves the previous
 pair intact. A run that cannot publish writes neither file, but its figures are the ones a user needs

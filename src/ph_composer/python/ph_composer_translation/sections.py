@@ -71,8 +71,8 @@ class Attachment:
 
 
 class AttachmentRefused(RecordError):
-    """`attach` refuses some of a host's objects and has attached the rest. Only `refused` emit findings;
-    any refusal still keeps the canonical model from being written."""
+    """`attach` refuses some of a host's objects and has attached the rest. Only `refused` emit findings; a
+    refusal from a section required for export still keeps the canonical model from being written."""
 
     def __init__(self, message: str, refused: Sequence[object]) -> None:
         super().__init__(message)
@@ -120,8 +120,9 @@ class Section(ABC, Generic[RecordT, ObjectT]):
     versions: ClassVar[frozenset[int]]
     object_type: ClassVar[type]
     requires: ClassVar[tuple[Requirement[Any], ...]] = ()
-    #: Whether an object that fails to translate blocks the canonical artifact. Translation continues
-    #: either way, for diagnostics; continuing never grants permission to publish.
+    #: Whether an object that fails to translate or attach blocks the canonical artifact. An optional
+    #: section's failed object is left out with a non-blocking finding. Translation continues either way,
+    #: for diagnostics; continuing never grants permission to publish.
     required_for_export: ClassVar[bool] = True
     #: Where this section's objects go in the assembled model, or None when they go nowhere.
     attaches: ClassVar[Attachment | None] = None
