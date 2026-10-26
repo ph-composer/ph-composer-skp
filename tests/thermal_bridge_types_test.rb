@@ -107,6 +107,26 @@ class ThermalBridgeTypesTest < PhComposerTestCase
     assert_equal id, record(id)["id"]
   end
 
+  def test_a_list_page_is_cut_by_size_and_its_cursor_reads_every_type_once
+    ids = Array.new(100) do |index|
+      id = PhComposer::Records::Identity.mint("tbt")
+      KIND.store.write(@model, TB::Type.defaults("name" => "Type #{index}", "notes" => "n" * 400)
+                                 .merge("id" => id, "schema_version" => 1))
+      id
+    end
+    first = list
+    assert_operator first["records"].length, :<, 100
+    assert_operator JSON.generate(first["records"]).bytesize, :<=, PhComposer::Pages::MAX_PAGE_BYTES
+    read = first["records"].map { |row| row["id"] }
+    cursor = first["next_cursor"]
+    while cursor
+      page = list("cursor" => cursor)
+      read.concat(page["records"].map { |row| row["id"] })
+      cursor = page["next_cursor"]
+    end
+    assert_equal ids.sort, read
+  end
+
   def test_a_type_without_a_psi_value_is_not_export_ready
     rows = query_all.fetch("records").to_h { |row| [row.dig("values", "name"), row] }
     assert_empty rows
