@@ -101,6 +101,16 @@ removes the assignment. Each is one Undo step. An Edge split or copied in Sketch
 assignment, and the pieces share one id, which reads mark `copied`; nothing needs repairing. The edge
 tool, when it arrives, is the pointer equivalent of `edges.assign`.
 
+Read the schedule with `ph_composer.thermal_bridges.schedule.list`, a bounded page of runs with
+`totals` over every run; follow `next_cursor` for the rest. A run is connected assigned Edges with one
+Zone, type and quantity: it has a `display_name`, a derived `identifier` that changes with the
+geometry, its `length_m`, `psi_w_mk`, `quantity` and `heat_loss_w_k` (psi times length times
+quantity, in W/K), and its `findings`. Only `thermal_bridge.type_missing` and
+`thermal_bridge.psi_missing` block export; the others are warnings. An assigned Edge no Zone holds is
+in no run and reports in `edge_findings`. Nothing points at a run, so to show one pass its
+`edge_paths`, or a finding's `locate`, to `ph_composer.thermal_bridges.runs.locate`, which opens the
+context holding the Edges, selects them and frames them.
+
 ### Windows
 
 Place Units with `ph_composer.windows.units.place` at explicit Faces and positions you have read;

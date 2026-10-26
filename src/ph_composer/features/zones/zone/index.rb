@@ -62,5 +62,24 @@ module PhComposer
         faces_by_id.fetch(id, [])
       end
     end
+
+    # The children of each Entities collection by persistent id, for one read over many explicit paths.
+    #
+    # Resolving a path finds each step by scanning its collection, so a read of N paths into one Zone
+    # scanned that Zone's entities about 2N times. Measured on SketchUp 26.1.188, 5,000 Edge paths in Zones
+    # of 5,000 Edges cost 10 s in `containment` and 12 s in `faces.host_context`. A lookup scans
+    # each collection a read steps into once, the first time, and answers every later step from that.
+    #
+    # It is valid for one read only, as an Index is: it holds what each collection held when first asked.
+    # SketchUp keeps one Ruby object per collection, so collections are told apart by identity.
+    class ChildLookup
+      def initialize
+        @by_collection = {}.compare_by_identity
+      end
+
+      def matching(entities, persistent_id)
+        (@by_collection[entities] ||= entities.to_a.group_by(&:persistent_id)).fetch(persistent_id, [])
+      end
+    end
   end
 end

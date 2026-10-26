@@ -38,7 +38,7 @@ Proposed layout, following `features/windows/install.rb` and `features/zones/ins
 
 ```
 features/thermal_bridges/
-  install.rb  codes.rb  snapshot.rb  export.rb  colour_modes.rb  edge_tool.rb
+  install.rb  codes.rb  run_locate.rb  snapshot.rb  export.rb  colour_modes.rb  edge_tool.rb
   type/        schema.rb  operations.rb  reads.rb
   assignment/  schema.rb (record and store)  operations.rb  steps.rb  reference_target.rb  selection.rb
   runs/        chains.rb  schedule.rb  findings.rb      (pure Ruby, no SketchUp)
@@ -114,7 +114,7 @@ test covers it. Id params carry the prefix pattern, for example `^tbt_[A-Za-z0-9
 | Name | Verb | Stage | Purpose |
 | --- | --- | --- | --- |
 | `types.list` | query | P3b-02 | One bounded page of the same rows; the bounded read `types.all` names as `prefer` |
-| `types.all` | query | P3b-02 | Every type with its values, `display.color`, `export_ready` and `export_blockers`, and used length once P3b-04 lands |
+| `types.all` | query | P3b-02 | Every type with its values, `display.color`, `export_ready` and `export_blockers`. Used length is the schedule's `totals.by_type`, not a field here: snapshot sections are separate reads, so carrying it would walk the Model twice (P3b-04) |
 | `types` | snapshot section | P3b-02 | The same projection for the panel |
 | `types.create`, `types.update`, `types.duplicate` | action | P3b-02 | Values with `expected_values`; `user_data` |
 | `types.delete` | action | P3b-02; replacement from P3b-03 | Guarded delete; with `replacement_id` every assigned Edge is rewritten to it, and with an explicit null every assigned Edge's dictionary is removed, in the same proposal and Undo step |
@@ -123,8 +123,9 @@ test covers it. Id params carry the prefix pattern, for example `^tbt_[A-Za-z0-9
 | `edges.selection` | query | P3b-03 | The current native selection as Edge references, each with its Zone containment, current assignment and write refusal; one bounded page, its cursor bound to the selection and the revision (P3b-03, Codex review) |
 | `edges.selection_all` | query | P3b-03 | The same, unbounded, naming `edges.selection` as `prefer`; the panel section and the menu route read it |
 | `edges.selected` | snapshot section | P3b-03 | `edges.selection_all`, for the panel's assign bar |
-| `schedule` | query, snapshot section | P3b-04 | Runs with identifier (`tb_` and a digest of Zone, type, container path and canonical endpoints, D3b-07 and D3b-23), Zone, Building-Segment, type, length in metres, psi, quantity and psi times length times quantity in W/K; totals by type and by group; findings per run. Bounded |
-| `runs.locate` | view command | P3b-04 | Select a run's Edges and zoom to them. Refuses hidden targets. A run inside a nested Zone opens its context through the foundation's `ph_composer.context.open` (D3a1-04), never a Zones or thermal-bridge navigation of its own |
+| `schedule.list` | query | P3b-04 | One bounded page of runs, each with identifier (`tb_` and a digest of Zone, type, container path and canonical points, D3b-07 and D3b-23), Zone and its Building-Segment, type, length in metres, psi, quantity, `heat_loss_w_k` (psi times length times quantity), points, Edge paths (what `runs.locate` takes) and findings; `totals` by type (run and Edge counts, used length, heat loss) and by group over every run; the first 50 `edge_findings` (assigned Edges no Zone holds) and unreadable assignments, with their counts. The runs share the page's byte budget with what travels beside them; one run larger than the budget is sent alone, so a run of a few hundred Edges can exceed a caller's reply budget until a `fields` projection exists (the catalog follow-up in STATUS) |
+| `schedule.all` | query | P3b-04 | The same, unbounded, naming `schedule.list` as `prefer`. No snapshot section: D3b-13 measured it over the refresh budget (DECISIONS F37), so the panel reads it on opening the Schedule and on Refresh |
+| `runs.locate` | view command | P3b-04 | Takes `edge_paths`, as a run's or finding's `locate` carries them (a run has no stored identity). Opens the Edges' container through the foundation's `ph_composer.context.open` code path (`ContextCommands.move`, D3a1-04), selects the Edges and frames their world points. Refuses Edges in different containers (`params.invalid`) and a hidden Edge or ancestor (`thermal_bridge.hidden`) |
 | `assign_menu` | `menu_entries` | P3b-05 | "Thermal bridge" submenu on a selection of Edges: one item per type, then Clear |
 | `by_type` | colour mode | P3b-06 | Assigned Edges in their type's colour at the mode's stroke weight; label carries total length (D3b-12) |
 | `edge_tool.choose`, `edge_tool.stop` | view command | P3b-07 | Start the tool armed with a type, or stop it |
@@ -171,7 +172,7 @@ the stage listed with its own tests.
 
 | # | Addition | Where | Stage |
 | --- | --- | --- | --- |
-| H11 | `ph_composer.zones.containment` (exists from P3b-03): for native root-to-entity paths, the Zone occurrence that holds each (`zone_id`, `zone_path`, `building_segment`, `level`) with the `entity_path` inside it, or none with a reason (`not_found` for a step missing or repeated, added by P3b-03; `outside_zone`, `cutting_instance`, `nested_container` under D3a-1, `not_a_drawing_element`), and the `write_refusal` a write through that path meets. Its Ruby half for a `locate:`, which has no request, is `Zones::Occurrences.resolve_element(model, reference, noun:, mutable:, index:)`. Built on what exists: `Zones::Occurrences.occurrence_at` and `occurrence_for_path` already resolve a path along its own collections to the innermost Zone and answer nil for those reasons without naming them, and accept a Face leaf only (DECISIONS F7). H11 generalises the leaf to any drawing element, returns the reason, and `host_context` keeps its Face-only shape over the same code | `features/zones/zone/occurrences.rb`, `features/zones/declarations/` | P3b-03 |
+| H11 | `ph_composer.zones.containment` (exists from P3b-03): for native root-to-entity paths, the Zone occurrence that holds each (`zone_id`, `zone_path`, `name` from P3b-04, `building_segment`, `level`) with the `entity_path` inside it, or none with a reason (`not_found` for a step missing or repeated, added by P3b-03; `outside_zone`, `cutting_instance`, `nested_container` under D3a-1, `not_a_drawing_element`), and the `write_refusal` a write through that path meets. Its Ruby half for a `locate:`, which has no request, is `Zones::Occurrences.resolve_element(model, reference, noun:, mutable:, index:)`. Built on what exists: `Zones::Occurrences.occurrence_at` and `occurrence_for_path` already resolve a path along its own collections to the innermost Zone and answer nil for those reasons without naming them, and accept a Face leaf only (DECISIONS F7). H11 generalises the leaf to any drawing element, returns the reason, and `host_context` keeps its Face-only shape over the same code | `features/zones/zone/occurrences.rb`, `features/zones/declarations/` | P3b-03 |
 | H12 | `Pick.edge_path(view, x, y)` (new): the first pick path ending in a `Sketchup::Edge`, with the same rules as `face_path` | `core/pick.rb` | P3b-03 |
 | H13 | Not needed. An Edge is drawn through P3a-05's `derived` segments (D3b-11); `colour_by/tessellation.rb` is unchanged. The number is kept so later references stay stable | none | none |
 | H14 | A stroke weight for `derived` segments, declared per mode (`colour_mode(..., stroke:)`) (new), drawn on the per-colour line batch P3a-05 built (`colour_by/drawing.rb`, `@lines`; `overlay.rb`, `LINE_WIDTH`). One mode is active at a time, so one width per mode costs no extra pass (section 8, question 7) | `shell/registry.rb`, `shell/declarations.rb`, `colour_by/overlay.rb` | P3b-06 |
@@ -188,7 +189,10 @@ list with `make panel-manifest`.
 ## 6. Findings and export
 
 Findings are `{code, section, object_id, message, blocks_export, locate}` from the preflight
-query and the Python section. The same codes appear per run in `schedule`.
+query and the Python section. The same codes appear per run in `schedule` as `{code, message,
+blocks_export, locate}`, `locate` naming the Edges the finding is about; P3b-08's preflight adds
+`section` and `object_id`. `counted_twice` compares whole Edges: an Edge one Zone splits where the
+other does not is not found (P3b-04).
 
 | Code | PRD row or decision | Blocks export | Repair |
 | --- | --- | --- | --- |
@@ -200,7 +204,8 @@ query and the Python section. The same codes appear per run in `schedule`.
 | `thermal_bridge.counted_twice` | D3b-16: coincident with an assigned Edge in another Zone | no | Clear one |
 | `thermal_bridge.shared_definition` | D3b-10: tag inside a shared definition, counted per occurrence | no | Informational |
 | `thermal_bridge.on_window_perimeter` | Q11, D3b-15 | no | Clear; window install psi belongs to the Window Type |
-| `thermal_bridge.zone_omitted` | The holding Zone is omitted from export | no; not exported | The Zone's own finding |
+| `thermal_bridge.zone_omitted` | The holding Zone is omitted from export. Not registered: no Zone omission state exists (DECISIONS F38); P3b-08 adds it only if the Zones section gains one | no; not exported | The Zone's own finding |
+| `thermal_bridge.hidden` | P3b-04: `runs.locate` refuses an Edge, or a Group holding it, that is hidden or on a hidden tag | not a finding; a refusal | Show it and locate again |
 | `object.unavailable` (foundation code, from the translation) | D3b-20: a run failed to translate or attach | no, because the section is optional; that run is not exported | The message carries the cause; the report lists the run |
 
 The PRD's "type has no group" row is removed under D3b-04. "Two types on one edge" cannot occur:

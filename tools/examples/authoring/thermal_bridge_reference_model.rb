@@ -7,13 +7,16 @@ require_relative "windows_walkthrough"
 # selection are development setup outside the product API; Zones, types and the Window Unit are made
 # through public actions. Run each line in its own bridge call:
 #   ThermalBridgeReferenceModel.build        two adjacent Zones, a Zone in a turned wrapper, the five types,
-#                                            a Window Unit on Zone A's south wall and a line at the Model root;
-#                                            answers the named Edge paths
+#                                            a Window Unit on Zone A's south wall, the Balcony line across
+#                                            Zone B's south wall and a line at the Model root, every Face
+#                                            classified as Zones suggests; answers the named Edge paths
 #   ThermalBridgeReferenceModel.paths        the same names, read again from the live Model
 #   ThermalBridgeReferenceModel.select("zone_a_roof")
 #                                            opens the Zone and selects those Edges, as a user would
 # Zone A is 5 x 4 x 3 m from the origin and Zone B 4 x 4 x 3 m beside it at x = 5 m; Zone W is
-# 2 x 2 x 2 m inside a Group turned 30 degrees about z at x = 20 m.
+# 2 x 2 x 2 m inside a Group turned 30 degrees about z at x = 20 m. Paths and selection are read with the
+# edit path closed, since positions read inside an open context are world coordinates
+# (context/SKETCHUP_HOST_BEHAVIOR.md); both close it first.
 module ThermalBridgeReferenceModel
   API = PhComposer::API
   TYPES = [["Parapet", 0.05, "15-Ambient"], ["Slab edge", 0.12, "16-Perimeter"], ["Footing", -0.02, "17-FS/BC"],
@@ -36,6 +39,8 @@ module ThermalBridgeReferenceModel
     wrapper.transformation = Geom::Transformation.translation([20_000.mm, 0, 0]) *
                              Geom::Transformation.rotation(ORIGIN, Z_AXIS, 30.degrees)
     zone_w = AuthoringExample.box(wrapper.entities, "Zone W", [0, 0, 0], 2000.mm, 2000.mm, 2000.mm)
+    # Drawn before classification, so the two halves of the wall it splits are each classified.
+    zone_b.entities.add_line([0, 0, 1500.mm], [4000.mm, 0, 1500.mm])
     model.entities.add_line([0, -2000.mm, 0], [3000.mm, -2000.mm, 0])
     # Make Zone acts in the open edit context, so Zone W is made with the wrapper open.
     [[nil, zone_a], [nil, zone_b], [wrapper, zone_w]].each do |parent, group|
@@ -48,21 +53,41 @@ module ThermalBridgeReferenceModel
       checked(client, "ph_composer.thermal_bridges.types.create",
               "values" => { "name" => name, "psi_w_mk" => psi, "group" => group })
     end
+    classify(client)
     place_window(client, zone_a)
     paths
+  end
+
+  # Every Face of every Zone, classified with the face type and boundary condition Zones suggests. Make Zone
+  # may have classified some already.
+  def classify(client)
+    query(client, "ph_composer.zones.faces.all").fetch("faces").each do |face|
+      next if face.fetch("values").slice("face_type", "boundary_condition") == face.fetch("suggested")
+
+      intent = %w[face_type boundary_condition].to_h do |field|
+        [field, { "mode" => "set", "value" => face.dig("suggested", field) }]
+      end
+      checked(client, "ph_composer.zones.faces.classify", "faces" => [face.fetch("reference")], "intent" => intent,
+                                                          "expected_values" => face.fetch("values"))
+    end
   end
 
   # Named root-to-Edge paths in the live Model.
   def paths
     model = Sketchup.active_model
+    model.active_path = nil if model.active_path
     zones = %w[Zone\ A Zone\ B].to_h { |name| [name, model.entities.grep(Sketchup::Group).find { |g| g.name == name }] }
     wrapper = model.entities.grep(Sketchup::Group).find { |group| group.name == "Turned wrapper" }
     zone_w = wrapper.entities.grep(Sketchup::Group).first
     unit = zones.fetch("Zone A").entities.grep(Sketchup::ComponentInstance).first
     {
       "zone_a_roof" => sides(zones.fetch("Zone A"), 3000.mm, %w[south west north]),
+      "zone_a_roof_east" => sides(zones.fetch("Zone A"), 3000.mm, %w[east]),
+      "zone_a_ground" => sides(zones.fetch("Zone A"), 0, %w[south west north]),
       "zone_b_roof" => sides(zones.fetch("Zone B"), 3000.mm, %w[south east north]),
+      "zone_b_roof_west" => sides(zones.fetch("Zone B"), 3000.mm, %w[west]),
       "zone_b_ground" => sides(zones.fetch("Zone B"), 0, %w[south east north]),
+      "zone_b_balcony" => sides(zones.fetch("Zone B"), 1500.mm, %w[south]),
       "zone_w_roof" => sides(zone_w, 2000.mm, %w[south east north west]).map { |path| [wrapper.persistent_id] + path },
       "window_edge" => unit && [[zones.fetch("Zone A").persistent_id, unit.persistent_id,
                                  unit.definition.entities.grep(Sketchup::Edge).first.persistent_id]],

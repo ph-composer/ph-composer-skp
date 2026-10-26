@@ -9505,6 +9505,7 @@ Result:
             "required": [
               "zone_id",
               "zone_path",
+              "name",
               "building_segment",
               "level"
             ],
@@ -9517,6 +9518,9 @@ Result:
                 "items": {
                   "type": "integer"
                 }
+              },
+              "name": {
+                "type": "string"
               },
               "building_segment": {
                 "type": [
@@ -9734,6 +9738,7 @@ Result:
             "required": [
               "zone_id",
               "zone_path",
+              "name",
               "building_segment",
               "level"
             ],
@@ -9746,6 +9751,9 @@ Result:
                 "items": {
                   "type": "integer"
                 }
+              },
+              "name": {
+                "type": "string"
               },
               "building_segment": {
                 "type": [
@@ -9840,6 +9848,872 @@ Example params:
 
 ```json
 {}
+```
+
+### `ph_composer.thermal_bridges.schedule.all`
+
+The whole schedule in one read, for the panel's Schedule on open and Refresh. Owner: `ph_composer.thermal_bridges`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.thermal_bridges.schedule.list` instead.
+
+Refuses: `record.unreadable`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "runs",
+    "edge_findings",
+    "edge_finding_total",
+    "unreadable",
+    "unreadable_total",
+    "totals",
+    "units"
+  ],
+  "properties": {
+    "runs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "identifier",
+          "display_name",
+          "zone",
+          "type_id",
+          "type_name",
+          "group",
+          "psi_w_mk",
+          "quantity",
+          "length_m",
+          "heat_loss_w_k",
+          "closed",
+          "points_m",
+          "edge_paths",
+          "shared",
+          "findings"
+        ],
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "tb_ and a digest of the Zone, type, container path and points; derived, and it changes with the geometry."
+          },
+          "display_name": {
+            "type": "string",
+            "description": "The type name and a counter, numbered per type."
+          },
+          "zone": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path",
+              "name",
+              "building_segment"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "name": {
+                "type": "string"
+              },
+              "building_segment": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          },
+          "type_id": {
+            "type": "string"
+          },
+          "type_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Null when the type no longer exists."
+          },
+          "group": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "15-Ambient",
+              "16-Perimeter",
+              "17-FS/BC",
+              null
+            ]
+          },
+          "psi_w_mk": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "length_m": {
+            "type": "number"
+          },
+          "heat_loss_w_k": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "psi times length times quantity; null without a psi-value."
+          },
+          "closed": {
+            "type": "boolean"
+          },
+          "points_m": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            "description": "World points in metres, in order; a closed run repeats its first point."
+          },
+          "edge_paths": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "description": "Edge i joins points i and i + 1; runs.locate takes them as its edge_paths."
+          },
+          "shared": {
+            "type": "boolean",
+            "description": "Whether any Edge is in shared component storage."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "message",
+                "blocks_export",
+                "locate"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                },
+                "locate": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "edge_paths"
+                  ],
+                  "properties": {
+                    "edge_paths": {
+                      "type": "array",
+                      "items": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer"
+                        }
+                      },
+                      "description": "Root-to-Edge persistent-id paths."
+                    }
+                  },
+                  "description": "The Edges named, as runs.locate takes them."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "edge_findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "message",
+          "blocks_export",
+          "locate",
+          "path"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "blocks_export": {
+            "type": "boolean"
+          },
+          "locate": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "edge_paths"
+            ],
+            "properties": {
+              "edge_paths": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  }
+                },
+                "description": "Root-to-Edge persistent-id paths."
+              }
+            },
+            "description": "The Edges named, as runs.locate takes them."
+          },
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "description": "Assigned Edges in no run because no Zone holds them; not exported."
+    },
+    "edge_finding_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Assignments that are not valid; not counted."
+    },
+    "unreadable_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "by_type",
+        "by_group",
+        "run_count",
+        "heat_loss_w_k"
+      ],
+      "properties": {
+        "by_type": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type_id",
+              "type_name",
+              "group",
+              "run_count",
+              "edge_count",
+              "length_m",
+              "heat_loss_w_k"
+            ],
+            "properties": {
+              "type_id": {
+                "type": "string"
+              },
+              "type_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "group": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "run_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "edge_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "length_m": {
+                "type": "number"
+              },
+              "heat_loss_w_k": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            }
+          },
+          "description": "Each type with a run; used length and heat loss over every run of it."
+        },
+        "by_group": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "group",
+              "heat_loss_w_k"
+            ],
+            "properties": {
+              "group": {
+                "type": "string"
+              },
+              "heat_loss_w_k": {
+                "type": "number"
+              }
+            }
+          },
+          "description": "Every group, zero with no run; a run without a psi-value adds nothing."
+        },
+        "run_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "heat_loss_w_k": {
+          "type": "number"
+        }
+      }
+    },
+    "units": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "length_m",
+        "psi_w_mk",
+        "heat_loss_w_k"
+      ],
+      "properties": {
+        "length_m": {
+          "type": "string"
+        },
+        "psi_w_mk": {
+          "type": "string"
+        },
+        "heat_loss_w_k": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.thermal_bridges.schedule.list`
+
+One bounded page of thermal-bridge runs, each with its Zone, type, length, psi-value, quantity, heat loss and findings, with totals over every run. Owner: `ph_composer.thermal_bridges`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "runs",
+    "edge_findings",
+    "edge_finding_total",
+    "unreadable",
+    "unreadable_total",
+    "totals",
+    "units",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "runs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "identifier",
+          "display_name",
+          "zone",
+          "type_id",
+          "type_name",
+          "group",
+          "psi_w_mk",
+          "quantity",
+          "length_m",
+          "heat_loss_w_k",
+          "closed",
+          "points_m",
+          "edge_paths",
+          "shared",
+          "findings"
+        ],
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "tb_ and a digest of the Zone, type, container path and points; derived, and it changes with the geometry."
+          },
+          "display_name": {
+            "type": "string",
+            "description": "The type name and a counter, numbered per type."
+          },
+          "zone": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path",
+              "name",
+              "building_segment"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "name": {
+                "type": "string"
+              },
+              "building_segment": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          },
+          "type_id": {
+            "type": "string"
+          },
+          "type_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Null when the type no longer exists."
+          },
+          "group": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "15-Ambient",
+              "16-Perimeter",
+              "17-FS/BC",
+              null
+            ]
+          },
+          "psi_w_mk": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "length_m": {
+            "type": "number"
+          },
+          "heat_loss_w_k": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "psi times length times quantity; null without a psi-value."
+          },
+          "closed": {
+            "type": "boolean"
+          },
+          "points_m": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            "description": "World points in metres, in order; a closed run repeats its first point."
+          },
+          "edge_paths": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "description": "Edge i joins points i and i + 1; runs.locate takes them as its edge_paths."
+          },
+          "shared": {
+            "type": "boolean",
+            "description": "Whether any Edge is in shared component storage."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "message",
+                "blocks_export",
+                "locate"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "blocks_export": {
+                  "type": "boolean"
+                },
+                "locate": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "edge_paths"
+                  ],
+                  "properties": {
+                    "edge_paths": {
+                      "type": "array",
+                      "items": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer"
+                        }
+                      },
+                      "description": "Root-to-Edge persistent-id paths."
+                    }
+                  },
+                  "description": "The Edges named, as runs.locate takes them."
+                }
+              }
+            }
+          }
+        }
+      },
+      "description": "One page of runs in schedule order."
+    },
+    "edge_findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "message",
+          "blocks_export",
+          "locate",
+          "path"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "blocks_export": {
+            "type": "boolean"
+          },
+          "locate": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "edge_paths"
+            ],
+            "properties": {
+              "edge_paths": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  }
+                },
+                "description": "Root-to-Edge persistent-id paths."
+              }
+            },
+            "description": "The Edges named, as runs.locate takes them."
+          },
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "description": "The first 50."
+    },
+    "edge_finding_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "The first 50."
+    },
+    "unreadable_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "by_type",
+        "by_group",
+        "run_count",
+        "heat_loss_w_k"
+      ],
+      "properties": {
+        "by_type": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type_id",
+              "type_name",
+              "group",
+              "run_count",
+              "edge_count",
+              "length_m",
+              "heat_loss_w_k"
+            ],
+            "properties": {
+              "type_id": {
+                "type": "string"
+              },
+              "type_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "group": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "run_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "edge_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "length_m": {
+                "type": "number"
+              },
+              "heat_loss_w_k": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            }
+          },
+          "description": "Each type with a run; used length and heat loss over every run of it."
+        },
+        "by_group": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "group",
+              "heat_loss_w_k"
+            ],
+            "properties": {
+              "group": {
+                "type": "string"
+              },
+              "heat_loss_w_k": {
+                "type": "number"
+              }
+            }
+          },
+          "description": "Every group, zero with no run; a run without a psi-value adds nothing."
+        },
+        "run_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "heat_loss_w_k": {
+          "type": "number"
+        }
+      }
+    },
+    "units": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "length_m",
+        "psi_w_mk",
+        "heat_loss_w_k"
+      ],
+      "properties": {
+        "length_m": {
+          "type": "string"
+        },
+        "psi_w_mk": {
+          "type": "string"
+        },
+        "heat_loss_w_k": {
+          "type": "string"
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 20
+}
 ```
 
 ### `ph_composer.thermal_bridges.types.all`
@@ -16028,6 +16902,7 @@ Result:
             "required": [
               "zone_id",
               "zone_path",
+              "name",
               "building_segment",
               "level"
             ],
@@ -16040,6 +16915,9 @@ Result:
                 "items": {
                   "type": "integer"
                 }
+              },
+              "name": {
+                "type": "string"
               },
               "building_segment": {
                 "type": [
@@ -48384,6 +49262,85 @@ Example params:
 {}
 ```
 
+### `ph_composer.thermal_bridges.runs.locate`
+
+Select the Edges of one run and bring them into view, opening the context that holds them. Owner: `ph_composer.thermal_bridges`.
+
+Side effects: Selects and frames the Edges. Moves the edit path, which advances the Model revision. Leaving a Volume that was open and unprotected protects it again (Spaces locks it). No authored value changes; SketchUp itself records leaving a Group as an Undo entry, and undoing it reopens the Group.
+
+Before calling: Every Edge sits in one container and none is hidden.
+
+Refuses: `session.inactive`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_kind`, `thermal_bridge.hidden`, and the `view_command` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "edge_paths"
+  ],
+  "properties": {
+    "edge_paths": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        }
+      },
+      "description": "The Edges of one run, or of one finding, as the schedule reads them.",
+      "minItems": 1,
+      "maxItems": 10000
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "path",
+    "selected"
+  ],
+  "properties": {
+    "path": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "description": "The edit path afterwards."
+    },
+    "selected": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "edge_paths": [
+    [
+      1201,
+      1205
+    ],
+    [
+      1201,
+      1206
+    ]
+  ]
+}
+```
+
 ### `ph_composer.view.capture`
 
 Write a PNG of the current view at the current camera and answer its path, hash and what it shows. Geometry only. Owner: `ph_composer.view`.
@@ -52089,7 +53046,14 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 
 | Code | Meaning |
 | --- | --- |
+| `thermal_bridge.counted_twice` | An assigned Edge coincides with an assigned Edge in another Zone, so the bridge is counted twice. |
+| `thermal_bridge.hidden` | An Edge to locate, or a Group holding it, is hidden or on a hidden tag. |
+| `thermal_bridge.interior_junction` | An assigned Edge lies only between interior Faces (Surface or To neighbour). |
+| `thermal_bridge.no_envelope_face` | An assigned Edge bounds no classified envelope Face; it is likely a stray line. |
+| `thermal_bridge.outside_zone` | An assigned Edge is in no Zone, so it is not exported. |
 | `thermal_bridge.psi_missing` | A Thermal Bridge Type has no psi-value, so an Edge using it cannot export. |
+| `thermal_bridge.shared_definition` | An assigned Edge is in shared component storage and counts once per placement. |
+| `thermal_bridge.type_missing` | Assigned Edges name a Thermal Bridge Type that no longer exists, so they cannot export. |
 
 ### `ph_composer.view`
 
@@ -52209,3 +53173,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.9 | 2026-10-21 | ph_composer.view.capture no longer answers window_state: every window state measured gives the current view. |
 | 1.10 | 2026-10-25 | ph_composer.thermal_bridges is new: the Thermal Bridge Type kind, types.list, types.all and its snapshot section, and types.create, types.update, types.duplicate and types.delete. |
 | 1.11 | 2026-10-25 | ph_composer.zones.containment is new. ph_composer.thermal_bridges.edges.assign, edges.clear, edges.selection (bounded), edges.selection_all and the edges.selected snapshot section are new, over the ph_composer.thermal_bridges.edge reference target; types.delete takes replacement_id. |
+| 1.12 | 2026-10-25 | ph_composer.thermal_bridges.schedule.list (bounded) and schedule.all are new: thermal-bridge runs with lengths, heat loss, findings and totals. ph_composer.thermal_bridges.runs.locate is a new view command. ph_composer.zones.containment, and so ph_composer.thermal_bridges.edges.selection, answers each Zone's name. |

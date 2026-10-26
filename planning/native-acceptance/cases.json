@@ -4214,6 +4214,28 @@
         "tools/examples/authoring/client.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "T04",
+      "label": "The thermal-bridge schedule with the panel closed on the classified reference model: the five reference runs assigned through edges.assign and schedule.all compared with the hand calculation; the same read inside an open context; the counted-twice case and its Undo; an assignment copied to the Model root read as outside a Zone; runs.locate into a Zone under a turned wrapper; the 50,000 Edge measurement",
+      "mode": "mixed",
+      "authority": "planning/features/phase-03b-thermal-bridges/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/thermal_bridges/runs/*",
+        "src/ph_composer/features/thermal_bridges/scan/*",
+        "src/ph_composer/features/thermal_bridges/run_locate.rb",
+        "src/ph_composer/features/thermal_bridges/declarations/schedule.rb",
+        "src/ph_composer/features/zones/zone/occurrences.rb",
+        "src/ph_composer/features/zones/zone/index.rb",
+        "src/ph_composer/features/zones/zone/operations.rb",
+        "src/ph_composer/features/zones/faces/operations.rb",
+        "src/ph_composer/shell/context_commands.rb",
+        "tools/examples/authoring/thermal_bridge_schedule_walkthrough.rb",
+        "tools/examples/authoring/thermal_bridge_measurement.rb",
+        "tools/examples/authoring/thermal_bridge_reference_model.rb",
+        "tools/examples/authoring/client.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }

@@ -464,9 +464,11 @@ so `write_refusal` cannot show it and the write still resolves strictly. Zone st
 Zone occurrence and stays in `ph_composer.zones.all`.
 
 **Containment.** `ph_composer.zones.containment` answers, for each root-to-entity path, the Zone
-occurrence holding the drawing element at its end (`zone_id`, `zone_path`, `building_segment`,
+occurrence holding the drawing element at its end (`zone_id`, `zone_path`, `name`, `building_segment`,
 `level`), the `entity_path` from inside that Zone, and its `write_refusal`, read along the path
-alone. The Zone is the innermost one above the element, by the rule Face picking applies; with no
+alone. One read over many paths, here and in `faces.host_context`, scans each collection it steps
+into once (`Zones::ChildLookup`), so its cost grows with the paths asked, not with paths times
+siblings. The Zone is the innermost one above the element, by the rule Face picking applies; with no
 Zone, `reason` says why: `not_found` (a step missing or repeated), `not_a_drawing_element`,
 `cutting_instance`, `outside_zone` or `nested_container`. `faces.host_context` stays Face-only over
 the same code. A feature whose reference target stores records on other elements inside Zones
