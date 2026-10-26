@@ -27,11 +27,14 @@ module PhComposer
           Declarations::MenuEntry.new(:label => row.dig("values", "name"),
                                       :handler => ->(session) { Assignment::Selection.client(session).assign(id) })
         end
-        return items unless assignable(read).any? { |row| assigned?(row) }
-
-        items.last.separator_after = true unless items.empty?
-        items << Declarations::MenuEntry.new(:label => CLEAR,
-                                             :handler => ->(session) { Assignment::Selection.client(session).clear })
+        if assignable(read).any? { |row| assigned?(row) }
+          items.last.separator_after = true unless items.empty?
+          items << Declarations::MenuEntry.new(:label => CLEAR,
+                                               :handler => ->(session) { Assignment::Selection.client(session).clear })
+        end
+        # The edge tool's "Assign by clicking…" follows in the same submenu whenever there is a type.
+        items.last.separator_after = true unless types.empty?
+        items
       end
 
       # An invalid assignment reads with empty values and its problem; Clear is how it goes.

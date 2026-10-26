@@ -854,10 +854,12 @@ the answer in its own result slot. A setup command takes the same optional `appr
 
 ### Viewport tools
 
-Classify, Window Place and Spaces' Mark floor (`features/spaces/mark_tool.rb`, started by the
-`ph_composer.spaces.mark_tool.start` view command with a weighting factor) use this contract. A feature
-that authors by pointing writes a `Sketchup::Tool` and starts it from a menu item or a registered view
-command. The thermal-bridge edge tool will share this shape. The rules below come from Classify's host gate
+Classify, Window Place, Spaces' Mark floor (`features/spaces/mark_tool.rb`, started by the
+`ph_composer.spaces.mark_tool.start` view command with a weighting factor) and the thermal-bridge edge tool
+(`features/thermal_bridges/edge_tool.rb`, armed by `ph_composer.thermal_bridges.edge_tool.choose` with a type
+and quantity; it picks with `Pick.edge_path` and asks `zones.containment` per hovered path) use this
+contract. A feature that authors by pointing writes a `Sketchup::Tool` and starts it from a menu item or a
+registered view command. The rules below come from Classify's host gate
 ([evidence](../planning/archive/phase-01-faces-and-zones/evidence/p1-d-classify-tool.md)).
 
 - **Pick, never walk.** `Pick.face_path(view, x, y)` answers what is under the pointer as a

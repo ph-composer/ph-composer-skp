@@ -137,6 +137,85 @@ test("Assign sends the assignable Edges with their values; Clear only those hold
     { thermal_bridge_type_id: "tbt_b", quantity: 2 });
 });
 
+test("Assign by clicking arms the edge tool with the bar's type and quantity, with nothing selected", function () {
+  var o = setup(), bar = o.view.types.bar, tool = bar.tool;
+  assert.strictEqual(bar.type.disabled, false, "the type stays open for the tool with nothing selected");
+  assert.strictEqual(tool.arm.disabled, true, "no type chosen yet");
+  assert.strictEqual(tool.stop.hidden, true, "Stop shows only while the tool runs");
+  bar.type.value = "tbt_a"; bar.type.listeners.change({});
+  bar.quantity.value = "2"; bar.quantity.listeners.input({});
+  assert.strictEqual(named(o, PREFIX + "edge_tool.choose").length, 0, "choosing a type alone arms nothing");
+  tool.arm.listeners.click({});
+  var choose = named(o, PREFIX + "edge_tool.choose");
+  assert.strictEqual(choose.length, 1);
+  assert.strictEqual(choose[0].type, "view.invoke");
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(choose[0].payload.params)),
+    { thermal_bridge_type_id: "tbt_a", quantity: 2 });
+  assert.strictEqual(named(o, PREFIX + "edges.assign").length, 0, "arming writes nothing");
+  o.state.ui.viewResults[choose[0].payload.request_id] = { request_id: choose[0].payload.request_id,
+    session: "session", outcome: { status: "refused", code: "target.not_found", message: "There is no type." } };
+  o.paint();
+  assert.deepStrictEqual(o.notices, ["There is no type."], "a refused choice says why");
+});
+
+test("a type chosen with nothing selected survives selecting unassigned Edges", function () {
+  var o = setup(), bar = o.view.types.bar;
+  bar.type.value = "tbt_a"; bar.type.listeners.change({});
+  o.state.sections[PREFIX + "edges.selected"].value.edges = [fixtures.edge(101)];
+  o.paint();
+  assert.strictEqual(bar.type.value, "tbt_a");
+  o.state.sections[PREFIX + "edges.selected"].value.edges = [fixtures.edge(102, { thermal_bridge_type_id: "tbt_b",
+    quantity: 2 })];
+  o.paint();
+  assert.strictEqual(bar.type.value, "tbt_b", "Edges sharing a type still start from it");
+  assert.strictEqual(bar.quantity.value, "2");
+});
+
+test("Enter in Quantity re-arms a running tool and writes nothing to the selection", function () {
+  var o = setup([fixtures.edge(101)]), bar = o.view.types.bar;
+  o.state.sections[PREFIX + "edge_tool"].value = { active: true, thermal_bridge_type_id: "tbt_a", quantity: 1,
+    gesture_limit: 250 };
+  o.paint();
+  bar.quantity.listeners.focus({});
+  bar.quantity.value = "3"; bar.quantity.listeners.input({});
+  key(bar.quantity, "Enter");
+  assert.strictEqual(named(o, PREFIX + "edges.assign").length, 0);
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(named(o, PREFIX + "edge_tool.choose")[0].payload.params)),
+    { thermal_bridge_type_id: "tbt_a", quantity: 3 });
+});
+
+test("while the tool runs the bar shows what it assigns, re-arms on a change and Stop ends it", function () {
+  var o = setup(), bar = o.view.types.bar, tool = bar.tool;
+  o.state.sections[PREFIX + "edge_tool"].value = { active: true, thermal_bridge_type_id: "tbt_b", quantity: 3,
+    gesture_limit: 250 };
+  o.paint();
+  assert.strictEqual(tool.arm.getAttribute("aria-pressed"), "true");
+  assert.strictEqual(tool.stop.hidden, false);
+  assert.strictEqual(bar.type.value, "tbt_b", "a tool armed in SketchUp shows its type");
+  assert.strictEqual(bar.quantity.value, "3");
+  bar.type.value = "tbt_a"; bar.type.listeners.change({});
+  var choose = named(o, PREFIX + "edge_tool.choose");
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(choose[0].payload.params)),
+    { thermal_bridge_type_id: "tbt_a", quantity: 3 }, "a new type re-arms the running tool");
+  o.paint();
+  assert.strictEqual(bar.type.value, "tbt_a", "the change shows while it is on its way");
+  o.state.ui.viewResults[choose[0].payload.request_id] = { request_id: choose[0].payload.request_id,
+    session: "session", outcome: { status: "completed", value: {} } };
+  o.state.sections[PREFIX + "edge_tool"].value.thermal_bridge_type_id = "tbt_a";
+  o.paint();
+  tool.arm.listeners.click({});
+  assert.strictEqual(named(o, PREFIX + "edge_tool.stop").length, 1, "a second click on the pressed button stops");
+  tool.stop.listeners.click({});
+  assert.strictEqual(named(o, PREFIX + "edge_tool.stop").length, 1, "one stop in flight at a time");
+  o.state.ui.viewResults[named(o, PREFIX + "edge_tool.stop")[0].payload.request_id] = {
+    request_id: named(o, PREFIX + "edge_tool.stop")[0].payload.request_id, session: "session",
+    outcome: { status: "completed", value: {} } };
+  o.state.sections[PREFIX + "edge_tool"].value.active = false;
+  o.paint();
+  assert.strictEqual(tool.arm.getAttribute("aria-pressed"), "false");
+  assert.strictEqual(tool.stop.hidden, true);
+});
+
 test("Clear takes an invalid assignment that reads with no values", function () {
   var broken = fixtures.edge(103);
   broken.reference.entity_id = "tbe_BADBADBADBAD";

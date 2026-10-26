@@ -98,8 +98,13 @@ be assigned. For a native path you hold yourself,
 `ph_composer.zones.containment` answers which Zone holds it. One command reaches at most 250 Edges
 and refuses as a whole if any target changed or cannot be written. `ph_composer.thermal_bridges.edges.clear`
 removes the assignment. Each is one Undo step. An Edge split or copied in SketchUp keeps its
-assignment, and the pieces share one id, which reads mark `copied`; nothing needs repairing. The edge
-tool, when it arrives, is the pointer equivalent of `edges.assign`.
+assignment, and the pieces share one id, which reads mark `copied`; nothing needs repairing.
+
+`ph_composer.thermal_bridges.edge_tool.choose` arms the edge tool with a type and quantity for a person
+at the mouse: each click or drag across Edges is one `edges.assign` and one Undo step, at most 250
+Edges a gesture. It is the pointer route; its explicit-reference equivalent is `edges.assign`, which is
+what an agent calls. `ph_composer.thermal_bridges.edge_tool.state` says whether the tool is running,
+and `edge_tool.stop` ends it.
 
 Read the schedule with `ph_composer.thermal_bridges.schedule.list`, a bounded page of runs with
 `totals` over every run; follow `next_cursor` for the rest. A run is connected assigned Edges with one

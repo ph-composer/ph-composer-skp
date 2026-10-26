@@ -54,11 +54,16 @@ module PhComposer
           [Operations.contained(request, paths).zip(records).map { |row, record| row(row, record, copied) }, others]
         end
 
-        def row(containment, record, copied)
+        # The Edge reference a `zones.containment` row and the Edge's stored record make, or nil when no Zone
+        # holds it. The edge tool builds its targets with this too.
+        def reference(containment, record)
           zone = containment.fetch("zone")
-          reference = zone && { "zone_id" => zone.fetch("zone_id"), "zone_path" => zone.fetch("zone_path"),
-                                "entity_path" => containment.fetch("entity_path"),
-                                "entity_id" => Assignment.identity(record) }
+          zone && { "zone_id" => zone.fetch("zone_id"), "zone_path" => zone.fetch("zone_path"),
+                    "entity_path" => containment.fetch("entity_path"), "entity_id" => Assignment.identity(record) }
+        end
+
+        def row(containment, record, copied)
+          reference = reference(containment, record)
           { "path" => containment.fetch("path"), "reference" => reference,
             "zone" => containment.fetch("zone"), "reason" => containment.fetch("reason"),
             "values" => Assignment.values(record), "copied" => !record.nil? && copied.include?(record["id"]),

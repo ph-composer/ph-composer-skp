@@ -9,6 +9,7 @@
 #   scan/           the live read: one walk for assigned Edges, Zones' answers for their paths, the schedule
 #   run_locate.rb   runs.locate, which selects a run's Edges through the foundation's context.open
 #   colour_modes.rb the Thermal bridges Colour-by mode, assigned Edges in their type's colour
+#   edge_tool.rb    the edge tool, the pointer route to edges.assign; declarations/edge_tool.rb its commands
 #   codes.rb        the codes under the thermal_bridge noun
 #   declarations/   what thermal bridges register, the right-click menu among it
 require_relative "type/schema"
@@ -25,11 +26,13 @@ require_relative "runs/schedule"
 require_relative "scan/occurrences"
 require_relative "run_locate"
 require_relative "colour_modes"
+require_relative "edge_tool"
 require_relative "declarations/shapes"
 require_relative "declarations/types"
 require_relative "declarations/assignment"
 require_relative "declarations/schedule"
 require_relative "declarations/menu"
+require_relative "declarations/edge_tool"
 require_relative "codes"
 
 module PhComposer
@@ -42,6 +45,7 @@ module PhComposer
       AssignmentRegistration.install(feature)
       ScheduleRegistration.install(feature)
       MenuRegistration.install(feature)
+      EdgeToolRegistration.install(feature)
       ColourModes.install(feature)
       Codes.install(feature)
     end

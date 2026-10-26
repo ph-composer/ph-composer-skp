@@ -4268,6 +4268,24 @@
         "tools/examples/authoring/thermal_bridge_reference_model.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "T07",
+      "label": "The edge tool on the reference model with Ed at the mouse: armed with Parapet from the assign bar, hover highlight in the type's colour and a refused Edge in red with its reason; three clicks and a drag across Zone B's roof perimeter, each one native Undo step; Escape mid-drag and a type change mid-drag leave the gesture unwritten or unchanged; a Model switch and a raised callback write nothing; an Edge in a Window Unit and one at the Model root refuse on the status bar and in the notice; a drag past 250 Edges refuses whole; Stop gives back the Colour-by mode; the assign cost at the limit and the hover cost per newly hovered Edge",
+      "mode": "mixed",
+      "authority": "planning/features/phase-03b-thermal-bridges/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/thermal_bridges/edge_tool.rb",
+        "src/ph_composer/features/thermal_bridges/declarations/edge_tool.rb",
+        "src/ph_composer/features/thermal_bridges/declarations/menu.rb",
+        "src/ph_composer/features/thermal_bridges/assignment/*",
+        "src/ph_composer/html/features/thermal_bridges/*",
+        "src/ph_composer/colour_by/lease.rb",
+        "src/ph_composer/core/pick.rb",
+        "src/ph_composer/core/drag_set.rb",
+        "tools/examples/authoring/thermal_bridge_reference_model.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }
