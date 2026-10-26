@@ -30,7 +30,7 @@ recommended the same day; no stage authorized.
 
 ## Next step
 
-P3b-01 merged to `main` as `91366643` ([PR #302](https://github.com/ph-composer/ph-composer-skp/pull/302)); T01 passes. On 2026-10-25 Ed authorized the rest of the packet through the PR loop, one branch and pull request per stage, with the merge delegated on green CI. P3b-02 is in progress on `feature/thermal-bridges-p3b-02`.
+P3b-01 merged to `main` as `91366643` ([PR #302](https://github.com/ph-composer/ph-composer-skp/pull/302)); T01 passes. On 2026-10-25 Ed authorized the rest of the packet through the PR loop, one branch and pull request per stage, with the merge delegated on green CI. P3b-02 is `Implemented on branch` in [PR #308](https://github.com/ph-composer/ph-composer-skp/pull/308); T02 passes. P3b-03 is next.
 
 ## Entry gates
 
@@ -51,7 +51,7 @@ only when all three are done and its evidence file exists.
 | Stage | Title | State | Blocked by | Branch / PR | Offline | Host | Review | Evidence | Register |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | [P3b-01](phases/p3b-01-thermal-bridge-contracts-and-edge-host-facts.md) | Thermal-bridge contracts and edge host facts | Merged to main | | [PR #302](https://github.com/ph-composer/ph-composer-skp/pull/302), squash `91366643` | `make ci` green at `b013f330` and on the evidence head (Ruby 3.2.2); the new test also on 2.7.2 | T01 run 2026-10-21 on 26.1.188 at `bec31a4c`: the five B4 cases with native Undo, Redo, save and fresh-process reopen, eight assertions pass | architecture review done: Codex gpt-6-astra with the architecture and Ruby rubrics, two cycles (2 P2 + 1 P3, then 3 P2), all six fixed in `31ddfb03` and `b013f330` | | [evidence](evidence/p3b-01-edge-host-facts.md) | T01 |
-| [P3b-02](phases/p3b-02-thermal-bridge-type-records.md) | Thermal Bridge Type records and operations | In progress | | `feature/thermal-bridges-p3b-02` | | | ordinary | | T02 |
+| [P3b-02](phases/p3b-02-thermal-bridge-type-records.md) | Thermal Bridge Type records and operations | Implemented on branch | | [PR #308](https://github.com/ph-composer/ph-composer-skp/pull/308), `feature/thermal-bridges-p3b-02` | `make ci` green at `6a805df1` (Ruby 3.2.2: 2,129 runs); the new tests also on 2.7.2 | T02 run 2026-10-25 on 26.1.188 at `6a805df1`: walkthrough, six native Undo and Redo steps, save and fresh-process reopen, three assertions pass | ordinary: Sonnet pre-gate read (5 fixed), Codex gpt-6.1-sol two cycles (1 P2 fixed in `6c87c98d`, 1 P2 declined as a cross-catalog follow-up) | [evidence](evidence/p3b-02-type-records.md) | T02 |
 | [P3b-03](phases/p3b-03-edge-assignment.md) | Edge assignment, Zone containment and edge picking | Scoped | P3b-02 | | | | strong | | T03 |
 | [P3b-04](phases/p3b-04-runs-and-schedule.md) | Runs, the schedule read and findings | Scoped | P3b-03 | | | | ordinary | | T04 |
 | [P3b-05](phases/p3b-05-thermal-bridges-tab.md) | The Thermal Bridges tab | Scoped | P3b-04 | | | | ordinary, UI | | T05 |
@@ -137,6 +137,7 @@ answers". D3b-22 and D3b-23 were added by the re-baseline of 2026-10-21 and answ
 | A Model-level edge registry for identity-bearing assignments (D3b-01) | [hot-water-piping](../phase-04-mechanical/hot-water-piping/README.md), [erv-ducting](../phase-04-mechanical/erv-ducting/README.md) |
 | Moving the run builder to `core/` | When piping or ducting needs the same chain rule |
 | A toolbar button for the edge tool | [zones-entry-points](../unscheduled/zones-entry-points/README.md) E1 |
+| A compact default `fields` projection for every catalog `.list` (Assemblies, Materials, Window products and Types, Thermal Bridge Types), so one record over the agent reply budget cannot stop a page walk (Codex review of PR #308) | Unscheduled; needs its own issue |
 
 ## Verification
 
@@ -173,3 +174,4 @@ reproduced; P3b-01 reproduces what the stages depend on.
 | 2026-10-21 | T01 host gate run on the PR head: the five B4 cases with native Undo, Redo, save and fresh-process reopen, eight assertions pass; results folded into `context/SKETCHUP_HOST_BEHAVIOR.md` and the heal consequence into D3b-22's row. P3b-01 `Implemented on branch`. |
 | 2026-10-22 | PR #302 merged to `main` as `91366643` (squash, auto-merge on green CI); branch deleted locally and on the remote. P3b-01 `Merged to main`. |
 | 2026-10-25 | Ed authorized P3b-02 to P3b-09 through the PR loop, one pull request per stage, merge delegated on green CI. P3b-02 started on `feature/thermal-bridges-p3b-02`: the feature, the Thermal Bridge Type kind, `types.list`, `types.all` and its section, the four actions, API minor 10, the walkthrough and the agent-guide recipe. CONTRACTS corrected: `color` is stored once authored and read as `display.color`, as Assemblies do, because the engine mints the id inside `propose_create`; `types.list` added as the bounded read `types.all` prefers. |
+| 2026-10-25 | PR #308 opened. Pre-gate Sonnet read: `types.delete` lacked `copy.rule_missing`, a hostkit test expected four features, three assertions were weak; all fixed. Codex gpt-6.1-sol cycle 1: `types.list` exceeded the reply budget at its default limit; fixed in `6c87c98d` with `Pages.bounded` and a regression test. Cycle 2: a single oversized row cannot be paged past without a `fields` projection; declined as a cross-catalog follow-up. The walkthrough now checks `user_data` and an authored colour (`6a805df1`). T02 host gate passed on `6a805df1`. P3b-02 `Implemented on branch`. |
