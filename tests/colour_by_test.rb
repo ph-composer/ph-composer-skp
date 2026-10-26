@@ -825,6 +825,24 @@ class ColourByTest < PhComposerTestCase
     assert_equal 1, @session.revision, "a tag is not a Model change"
   end
 
+  # A tag shows only while every tag folder holding it shows. Hiding a folder leaves the tag's own flag
+  # alone, so the folder event is what rebuilds.
+  def test_a_face_under_a_hidden_tag_folder_is_not_painted_and_a_folder_change_rebuilds
+    group = zone_group(1410, %w[Wall Wall])
+    outer = Sketchup::LayerFolder.new("Envelope", true)
+    inner = Sketchup::LayerFolder.new("Walls", true, outer)
+    group.entities.to_a.first.layer = Sketchup::Tag.new("North wall", true, inner)
+    service = activate("ph_composer.zones.faces.by_face_type")
+    assert_equal 6, service.fills.values.first.length
+
+    outer.visible = false
+    PhComposer::HostObservers::LayersObserver.new.onLayerFolderChanged(@model.layers, outer)
+
+    assert_equal 3, service.fills.values.first.length
+    assert_equal 2, service.rows.first.count, "the legend still counts the hidden Face"
+    assert_equal 2, service.rebuilds
+  end
+
   # ------------------------------------------------------------------ reads
 
   def test_a_projection_that_raises_turns_its_own_mode_off_rather_than_the_extension

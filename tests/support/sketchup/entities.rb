@@ -310,7 +310,15 @@ module Sketchup
     end
   end
 
-  Tag = Struct.new(:name, :visible) do
+  # `folder` is the LayerFolder holding the tag, nil at the top level, as on the host since SketchUp 2021.
+  Tag = Struct.new(:name, :visible, :folder) do
+    def visible?
+      visible != false
+    end
+  end
+
+  # A tag folder: hidden, it hides every tag inside it and inside the folders it holds.
+  LayerFolder = Struct.new(:name, :visible, :folder) do
     def visible?
       visible != false
     end

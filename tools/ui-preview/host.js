@@ -204,7 +204,8 @@
           group: "ventilation" },
         { name: "ph_composer.spaces.by_weighting_factor", label: "Weighting factor", entity_kind: "volume",
           group: null },
-        { name: "ph_composer.spaces.by_height", label: "Height", entity_kind: "volume", group: null }],
+        { name: "ph_composer.spaces.by_height", label: "Height", entity_kind: "volume", group: null },
+        { name: "ph_composer.thermal_bridges.by_type", label: "Thermal bridges", entity_kind: "edge", group: null }],
       readouts: [["ph_composer.spaces.labels", "Space labels", false],
         ["ph_composer.spaces.selection_totals", "Spaces selection totals", true]].map(function (readout) {
         return { name: readout[0], label: readout[1], selection: readout[2],

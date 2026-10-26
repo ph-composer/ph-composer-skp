@@ -113,13 +113,19 @@ module PhComposer
         end
       end
 
-      # Hidden geometry and geometry on a hidden tag are not painted. Tag visibility does not advance
-      # the session revision, so the service also invalidates on `tags_changed`.
+      # Hidden geometry and geometry on a hidden tag are not painted; a tag shows only while it and every
+      # tag folder holding it are visible. Tag visibility does not advance the session revision, so the
+      # service also invalidates on `tags_changed`.
       def skipped?(entity)
         return true if entity.respond_to?(:hidden?) && entity.hidden?
 
-        layer = entity.respond_to?(:layer) ? entity.layer : nil
-        layer.respond_to?(:visible?) && !layer.visible?
+        tag = entity.respond_to?(:layer) ? entity.layer : nil
+        while tag
+          return true if tag.respond_to?(:visible?) && !tag.visible?
+
+          tag = tag.respond_to?(:folder) ? tag.folder : nil
+        end
+        false
       end
 
       def add_face(face, transform, triangles, segments)
