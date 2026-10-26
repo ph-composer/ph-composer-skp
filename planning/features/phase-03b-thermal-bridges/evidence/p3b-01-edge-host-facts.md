@@ -3,7 +3,7 @@
 DATE: 2026-10-21
 STATUS: Host gate run on branch `feature/thermal-bridges-p3b-01` at `bec31a4c` (PR #302), SketchUp 26.1.188, Ruby 3.2.2, macOS. Reopen results below.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: [#301](https://github.com/bldgtyp/ph-composer/issues/301)
+ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 
 Register row [T01](../ACCEPTANCE.md). Offline half: `tests/edge_record_contract_test.rb` (2 runs, 17
 assertions on Ruby 3.2.2 and 2.7.2), `make lint-citations` with planted `T01` and `F26` refused,
