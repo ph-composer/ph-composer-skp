@@ -84,7 +84,7 @@ test("the group chip shows METr's word and sends honeybee-ph's string", function
   var o = setup(), group = cell(o, "tbt_b:group");
   assert.strictEqual(group.input.value, "17-FS/BC");
   assert.deepStrictEqual(group.input.children.map(function (option) { return option.textContent; }),
-    ["Ambient", "Perimeter", "Floor slab / basement ceiling"]);
+    ["Ambient", "Perimeter", "Basement floor"]);
   group.input.value = "16-Perimeter"; group.input.listeners.change({});
   var update = named(o, PREFIX + "types.update")[0];
   assert.strictEqual(update.payload.params.values.group, "16-Perimeter");
@@ -152,7 +152,7 @@ test("Clear takes an invalid assignment that reads with no values", function () 
 test("the Group column filters by METr's words and sorts from its menu", function () {
   var o = setup(), inventory = o.view.types.inventory;
   assert.deepStrictEqual(JSON.parse(JSON.stringify(inventory.filterValues("group").map(function (entry) {
-    return entry.label; }))), ["Ambient", "Perimeter", "Floor slab / basement ceiling"]);
+    return entry.label; }))), ["Ambient", "Perimeter", "Basement floor"]);
   assert.strictEqual(inventory.controls.orderBy.parentNode.hidden, true, "column menus replace Order by");
   inventory.controls.filterColumn("group", ["17-FS/BC"]);
   function rows() {

@@ -27,7 +27,7 @@ check({ name: "thermal_bridges", output }, async ({ newPage, step }) => {
   assert.equal((await sent(TB + "schedule.all")).length, 1);
   assert.equal(await types.locator("[data-row-key='tbt_Dd44Ee55Ff66'] select").inputValue(), "17-FS/BC");
   assert.equal(await types.locator("[data-row-key='tbt_Dd44Ee55Ff66'] select option:checked").textContent(),
-    "Floor slab / basement ceiling");
+    "Basement floor");
   await page.screenshot({ path: path.join(output, "types.png") });
 
   step("edit a psi-value in place");

@@ -161,9 +161,9 @@
       "sha256": "4184fa86571b9a4efd0f3403e1ab67eaa3a8e4a6ee2c52676d7364bb4b3d5d5f"
     },
     "html/features/thermal_bridges/shared.js": {
-      "bytes": 3207,
+      "bytes": 3192,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "fdd53dd5905cb9d3576c512c6811dbe58bddbbd16d3bcf72ad3ac160a817d6a7"
+      "sha256": "e301a567441116407faf3ab58b3af96de39cf7642182bd191bf2f19b75886d76"
     },
     "html/features/thermal_bridges/thermal_bridges.css": {
       "bytes": 2660,

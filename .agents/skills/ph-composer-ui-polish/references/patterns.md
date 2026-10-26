@@ -125,6 +125,7 @@ Paths under **Local** are in this repository at `src/ph_composer/html/`. The UI 
   Keep Enter/blur writes and navigation blocked. A clean membrane has no numeric editor; cancellation
   returns focus to its membrane label. Restoring the original category must not silently accept the draft.
 - Library tabs: `library/section.js` and `features/windows/inventory.js`. One page heading for every tab, holding the active tab's "+ New" beside Export library; each tab body opens with the shared action bar (view controls, then tab settings) and keeps it to one line at 1280 px. Tab settings sit at the end of the action bar through the kit `Inventory`'s `settings` option, as compact controls that open a choice list (the current choice `aria-pressed`) or a single-value bubble; the Psi-Install Types Model defaults are the example. Record forms use `formDialog`; a record's uses open in a bubble anchored to its row action.
+- Thermal Bridges: `features/thermal_bridges/`, accepted by Ed on 2026-10-26 after five changes from his host review. One page header over Types and Schedule subtabs. Types is the kit `Inventory` with column menus (`columnMenus`), under an always-present assign bar: the native selection's Edge count, a type, a quantity, Assign and Clear, the reason on a disabled Assign through `ui.reasonButton`, and a success notice naming the type and the number of Edges on each write (the right-click menu confirms the same way). Used length comes from the one schedule read and shows a dash once the Model has changed. Schedule reads on request (opening, choosing a subtab, Refresh) with Refresh before a short "Changed since read"; a row click or its icon Locates, and a Locate it sent keeps the read current; findings sit behind an alert glyph in a bubble mounted outside the table (`detachedTrigger`), so its scroller and sticky cells never clip it; totals by type take the full row with totals by group beneath; Edges in no run collect under "Not in the schedule".
 - Window Types: `features/windows/editor.js`, `features/windows/canvas.js`, `features/windows/windows.css`. Use for the page-header action hierarchy, title and metrics, floating notices, contextual drawing tools, selection treatment, edge inserts, single-value dimension bubbles and the adapted collapsible sidebar. Its drawing toolbar groups by job, each group one outline: View (viewing side, zoom, fit), Window Type (flip, eyedropper, Undo help), Assign (the library's product kind and, for frames, the side), and the selected elements' edits at the right while something is selected. Choices between named states in a toolbar are `select.phc-choice-pill`.
 
 ## Accepted screen patterns (predecessor only)
@@ -135,7 +136,7 @@ Paths under **Local** are in this repository at `src/ph_composer/html/`. The UI 
 ## Patterns still to be established
 
 - Window placement: functionally accepted in Phase 2 E13 (`features/windows/placement.js`, `src/ph_composer/features/windows/place_tool.rb`), not yet reviewed as the pattern for other viewport tools; decide when thermal-bridge picking is designed.
-- Thermal bridges: edge and point picking in the viewport plus a schedule. No accepted pattern yet.
+- Thermal bridges: edge picking in the viewport (the P3b-07 edge tool). The tab itself is accepted; see above.
 
 Record each here once the owner accepts a screen.
 

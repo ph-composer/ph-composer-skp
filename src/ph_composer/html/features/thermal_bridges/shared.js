@@ -6,7 +6,7 @@ PhComposerUI.define("features/thermal_bridges/shared", ["request", "snapshot"], 
   /* honeybee-ph's stored group strings, shown in METr's words (context/UBIQUITOUS_LANGUAGE.md, "Thermal bridge
      group"). */
   var GROUPS = [{ value: "15-Ambient", label: "Ambient" }, { value: "16-Perimeter", label: "Perimeter" },
-    { value: "17-FS/BC", label: "Floor slab / basement ceiling" }];
+    { value: "17-FS/BC", label: "Basement floor" }];
   function groupLabel(value) {
     var group = GROUPS.filter(function (entry) { return entry.value === value; })[0];
     return group ? group.label : value || "No group";

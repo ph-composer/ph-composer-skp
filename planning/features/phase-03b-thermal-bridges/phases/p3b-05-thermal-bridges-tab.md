@@ -1,7 +1,7 @@
 # P3b-05: the Thermal Bridges tab
 
 DATE: 2026-10-03
-STATUS: In progress on `feature/thermal-bridges-p3b-05`. Corrected to `main` at `420c783a` on 2026-10-21 (DECISIONS Part 1b)
+STATUS: Implemented on branch `feature/thermal-bridges-p3b-05` (PR #311), T05 passed 2026-10-26 with Ed; METr's third group word is "Basement floor". Corrected to `main` at `420c783a` on 2026-10-21 (DECISIONS Part 1b)
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 

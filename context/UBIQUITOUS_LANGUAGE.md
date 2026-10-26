@@ -97,7 +97,7 @@ not coin a third vocabulary between SketchUp and honeybee. Faces belong to a Zon
 | Thermal bridge | One run of assigned edges with a measured length and its type's psi-value. The exported object, honeybee-ph's `PhThermalBridge`, held by the Building-Segment of the Zone that contains the edges. Point bridges and chi-values are outside the MVP because honeybee-ph has no canonical carrier |
 | Thermal bridge assignment | The record on one SketchUp edge naming its Thermal Bridge Type and a quantity. The edge is the record: a split or a copy carries it, and deleting the edge removes it. The MVP has no point assignment |
 | Run | Connected assigned edges with the same Zone, type and quantity, ending at a free end or at a junction of three or more. A closed loop is one run. Derived each time the Model is read, never stored |
-| Thermal bridge group | Ambient, Perimeter, or floor slab and basement ceiling. Stored as honeybee-ph's `15-Ambient`, `16-Perimeter` and `17-FS/BC`; shown in METr's words |
+| Thermal bridge group | Ambient, Perimeter or Basement floor, METr's words for its three groups. Stored as honeybee-ph's `15-Ambient`, `16-Perimeter` and `17-FS/BC`; shown in METr's words |
 
 ## Windows
 
