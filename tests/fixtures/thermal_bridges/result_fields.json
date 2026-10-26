@@ -1,0 +1,12 @@
+[
+  "identifier",
+  "display_name",
+  "zone_id",
+  "type_id",
+  "type_name",
+  "group",
+  "psi_w_mk",
+  "quantity",
+  "length_m",
+  "heat_loss_w_k"
+]

@@ -204,6 +204,21 @@ class ThermalBridgeRunsTest < Minitest::Test
                  result.fetch("edge_findings").map { |finding| finding.values_at("code", "path", "blocks_export") }
   end
 
+  # A fixed window on Zone A's south wall (y = 0), 1 to 2 m along x, sill at 0.9 m and head at 2.1 m. A line
+  # drawn along part of its sill lies on the outline; the parapet above the window does not, and neither does a
+  # line just off the sill by more than the merge tolerance.
+  def test_the_window_perimeter_warning_fires_on_a_sill_line_and_not_on_a_parapet
+    outline = [[1, 0, 0.9], [2, 0, 0.9], [2, 0, 2.1], [1, 0, 2.1]]
+    sill = fact(ZONE_A, "tbt_SLABEDGE0001", [1.2, 0, 0.9], [1.8, 0, 0.9])
+    off = fact(ZONE_A, "tbt_SLABEDGE0001", [1.2, 0.0001, 0.9], [1.8, 0.0001, 0.9], :container => [100, 400])
+    rows = RUNS::Schedule.call(reference + [sill, off], :types => TYPES, :outlines => [outline]).fetch("runs")
+    flagged = rows.select { |row| row.fetch("findings").any? { |f| f["code"] == "thermal_bridge.on_window_perimeter" } }
+    assert_equal [[sill.path]], flagged.map { |row| row.fetch("edge_paths") }
+    finding = flagged.first.fetch("findings").find { |f| f["code"] == "thermal_bridge.on_window_perimeter" }
+    assert_equal [false, [sill.path]], [finding.fetch("blocks_export"), finding.dig("locate", "edge_paths")]
+    assert_equal 1, flagged.first.fetch("findings").length, "the sill run carries the warning alone"
+  end
+
   def test_runs_tied_on_every_key_but_their_points_and_a_loop_hung_from_a_junction_read_the_same_in_any_order
     t = [fact(ZONE_A, PARAPET, [0, 0, 0], [1, 0, 0]), fact(ZONE_A, PARAPET, [0, 0, 0], [0, 1, 0]),
          fact(ZONE_A, PARAPET, [0, 0, 0], [0, 0, 1])]

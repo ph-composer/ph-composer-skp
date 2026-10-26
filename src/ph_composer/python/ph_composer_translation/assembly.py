@@ -7,10 +7,12 @@ level in turn, outermost first, so a Face exists before anything is attached to 
 objects are attached in one call, in id order, so the attaching section can check them together.
 The assembly names no section and knows no feature: it only follows the declarations.
 
-The canonical model is serialized when it holds a Room and no attachment was refused, even when other
-findings keep it from being published, so a run that fails still shows what did translate. Any refused
-attachment withholds it, blocking or not, because the Model would then not hold what the sections said. Its
-accounting counts what the Model holds, not what any section reports.
+The canonical model is serialized when it holds a Room and no required section's attachment was refused, even
+when other findings keep it from being published, so a run that fails still shows what did translate. A
+required section's refusal withholds it, because the Model would then not hold what the sections said. A
+section with `required_for_export = False` may be refused: its refused objects are left out of the Model with
+a non-blocking finding each, and the Model holds the rest. Its accounting counts what the Model holds, not what
+any section reports.
 """
 
 from __future__ import annotations
@@ -29,7 +31,7 @@ MODEL_ID = "ph_composer_model"
 
 def assemble(translation: Translation, sections: Sequence[Section[Any, Any]]) -> None:
     """Attaches every declared object, records a finding for each one that cannot be attached, and sets
-    `translation.canonical` when nothing failed to attach."""
+    `translation.canonical` when nothing a required section declared failed to attach."""
     attaching = [section for section in sections if section.attaches is not None]
     if not any(section.attaches.host == MODEL for section in attaching if section.attaches):
         return
@@ -42,7 +44,8 @@ def assemble(translation: Translation, sections: Sequence[Section[Any, Any]]) ->
         hosts = _hosts(model, level)
         for section in attaching:
             if section.attaches and section.attaches.host == level:
-                complete = _attach(translation, section, hosts, level) and complete
+                attached = _attach(translation, section, hosts, level)
+                complete = complete and (attached or not section.required_for_export)
     if complete and model.rooms:
         translation.canonical = _canonical(model)
 

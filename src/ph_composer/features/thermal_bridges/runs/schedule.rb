@@ -10,12 +10,13 @@ module PhComposer
         module_function
 
         # `facts` are every assigned Edge occurrence, Zone-held or not; `types` maps a type id to its
-        # record. Runs come from the Zone-held facts; the others report as outside a Zone.
-        def call(facts, types:)
+        # record; `outlines` are placed Windows' world outlines, read by export only. Runs come from the
+        # Zone-held facts; the others report as outside a Zone.
+        def call(facts, types:, outlines: [])
           held, outside = facts.partition(&:zone)
           runs = Chains.build(held, :type_names => types.transform_values { |type| type.fetch("name") })
           coincident = Findings.coincident(held)
-          rows = runs.map { |run| row(run, types, Findings.for_run(run, types, coincident)) }
+          rows = runs.map { |run| row(run, types, Findings.for_run(run, types, coincident, outlines)) }
           { "runs" => rows, "edge_findings" => outside.map { |fact| Findings.outside(fact) },
             "totals" => totals(rows, types) }
         end

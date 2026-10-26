@@ -108,6 +108,12 @@ module PhComposer
         DeepCopy.call(rows)
       end
 
+      # A non-blocking finding the reading section discloses about `id`: something it left out of its records,
+      # or a warning about what it wrote. It joins the result's findings, and so the report.
+      def note(code, id, message)
+        @findings << Finding.new(:code => code, :section => @section, :record_id => id, :message => message)
+      end
+
       # A claimed row its claimant never read, including one captured after its read, would leave
       # declared data out of the export silently.
       def reconcile!
@@ -199,10 +205,6 @@ module PhComposer
 
       def omit_metadata(id)
         note("export.metadata_omitted", id, "User data is local to this Model and was not exported.")
-      end
-
-      def note(code, id, message)
-        @findings << Finding.new(:code => code, :section => @section, :record_id => id, :message => message)
       end
 
       def block(code, message)

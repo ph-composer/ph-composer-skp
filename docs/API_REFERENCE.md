@@ -9911,6 +9911,128 @@ Example params:
 {}
 ```
 
+### `ph_composer.thermal_bridges.export_preflight`
+
+Thermal-bridge export checks: each run's and assigned Edge's findings, with the Edges each one locates. Owner: `ph_composer.thermal_bridges`.
+
+Refuses: `record.unreadable`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "findings",
+    "repairs"
+  ],
+  "properties": {
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "section",
+          "object_id",
+          "message",
+          "blocks_export"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "section": {
+            "type": "string"
+          },
+          "object_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The record the finding is about."
+          },
+          "message": {
+            "type": "string"
+          },
+          "blocks_export": {
+            "type": "boolean"
+          },
+          "locate": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "params"
+            ],
+            "description": "A view command that shows what the finding is about.",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "params": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "repairs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "checked",
+          "action",
+          "params"
+        ],
+        "description": "An action the export workflow offers to run before exporting.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "checked": {
+            "type": "boolean"
+          },
+          "action": {
+            "type": "string"
+          },
+          "params": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
 ### `ph_composer.thermal_bridges.schedule.all`
 
 The whole schedule in one read, for the panel's Schedule on open and Refresh. Owner: `ph_composer.thermal_bridges`.
@@ -16477,6 +16599,167 @@ Example params:
 
 ```json
 {}
+```
+
+### `ph_composer.windows.units.outlines`
+
+Each placed Window's world outline in metres, with the Zone Face it is glued to. Owner: `ph_composer.windows`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 500,
+      "description": "Only these record ids; every record when absent."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "units",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "units": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reference",
+          "host",
+          "outline_m"
+        ],
+        "properties": {
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "unit_id",
+              "entity_path"
+            ],
+            "properties": {
+              "unit_id": {
+                "type": "string"
+              },
+              "entity_path": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "host": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path",
+              "entity_path",
+              "entity_id"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "entity_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "entity_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "description": "The Zone Face the Unit is glued to, or null."
+          },
+          "outline_m": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "x-unit": "m"
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "description": "The Unit's outer outline in world metres, one point per corner."
+          }
+        }
+      },
+      "description": "One page of placed Windows, in path order."
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 20
+}
 ```
 
 ### `ph_composer.zones.all`
@@ -53263,6 +53546,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `thermal_bridge.hidden` | An Edge to locate, or a Group holding it, is hidden or on a hidden tag. |
 | `thermal_bridge.interior_junction` | An assigned Edge lies only between interior Faces (Surface or To neighbour). |
 | `thermal_bridge.no_envelope_face` | An assigned Edge bounds no classified envelope Face; it is likely a stray line. |
+| `thermal_bridge.on_window_perimeter` | An assigned Edge lies on a placed Window's outline; its install psi-value belongs to the Window Type. |
 | `thermal_bridge.outside_zone` | An assigned Edge is in no Zone, so it is not exported. |
 | `thermal_bridge.psi_missing` | A Thermal Bridge Type has no psi-value, so an Edge using it cannot export. |
 | `thermal_bridge.shared_definition` | An assigned Edge is in shared component storage and counts once per placement. |
@@ -53388,3 +53672,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.11 | 2026-10-25 | ph_composer.zones.containment is new. ph_composer.thermal_bridges.edges.assign, edges.clear, edges.selection (bounded), edges.selection_all and the edges.selected snapshot section are new, over the ph_composer.thermal_bridges.edge reference target; types.delete takes replacement_id. |
 | 1.12 | 2026-10-25 | ph_composer.thermal_bridges.schedule.list (bounded) and schedule.all are new: thermal-bridge runs with lengths, heat loss, findings and totals. ph_composer.thermal_bridges.runs.locate is a new view command. ph_composer.zones.containment, and so ph_composer.thermal_bridges.edges.selection, answers each Zone's name. |
 | 1.13 | 2026-10-26 | ph_composer.thermal_bridges.edge_tool.choose and edge_tool.stop are new view commands, with edge_tool.state and the edge_tool snapshot section: the pointer route to edges.assign. |
+| 1.14 | 2026-10-26 | ph_composer.windows.units.outlines (bounded) is new: each placed Window's world outline. ph_composer.thermal_bridges.export_preflight is new, with the ph_composer.thermal_bridges.export.thermal_bridges export section and the thermal_bridge.on_window_perimeter code. |

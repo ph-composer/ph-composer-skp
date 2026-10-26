@@ -14,6 +14,7 @@ from .material_sources import MaterialSourcesSection
 from .model_sections import FaceSection, ZoneSection
 from .sections import Section
 from .space_sections import SpaceSection
+from .thermal_bridge_sections import ThermalBridgeSection
 from .window_sections import ApertureSection, WindowConstructionSection
 
 SECTIONS: tuple[Section[Any, Any], ...] = (
@@ -24,5 +25,6 @@ SECTIONS: tuple[Section[Any, Any], ...] = (
     ApertureSection(),
     ZoneSection(),
     SpaceSection(),
+    ThermalBridgeSection(),
 )
 EXPORTERS: tuple[Exporter, ...] = ()

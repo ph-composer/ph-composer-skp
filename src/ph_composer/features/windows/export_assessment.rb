@@ -10,9 +10,10 @@ module PhComposer
     # and unhosted Units. Blocking rows never become partial apertures or zero thermal placeholders.
     # `ExportAssessment.call` is the entry point; an instance is the working state of one call.
     class ExportAssessment
-      # Aperture and construction rows for the translation, the preflight findings, and the batch
-      # repairs the preflight offers.
-      Result = Struct.new(:apertures, :constructions, :findings, :repairs, keyword_init: true)
+      # Aperture and construction rows for the translation, the preflight findings, the batch repairs the
+      # preflight offers, and each Unit's world outline that could be placed, as `{unit_id, entity_path,
+      # outline_m}` rows.
+      Result = Struct.new(:apertures, :constructions, :findings, :repairs, :outlines, keyword_init: true)
       # The pinned Honeybee simple glazing material accepts a Uw above zero and up to this value.
       UW_LIMIT_W_M2K = 12
       # The one thermal condition that is reported without blocking export.
@@ -42,10 +43,17 @@ module PhComposer
         constructions = @constructions.uniq { |row| row.fetch("id") }
         Result.new(:apertures => @apertures.sort_by { |row| row.fetch("id") },
                    :constructions => constructions.sort_by { |row| row.fetch("id") },
-                   :findings => @findings, :repairs => @repairs).freeze
+                   :findings => @findings, :repairs => @repairs, :outlines => outline_rows).freeze
       end
 
       private
+
+      def outline_rows
+        @units.filter_map do |entry, record|
+          mapped = @outlines[entry.path]
+          mapped && { "unit_id" => record["id"], "entity_path" => entry.path, "outline_m" => mapped.outer_polygon_m }
+        end
+      end
 
       def unit_records
         @snapshot.entries.filter_map do |entry|

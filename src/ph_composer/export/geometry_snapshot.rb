@@ -281,6 +281,10 @@ module PhComposer
         @records.findings
       end
 
+      def note(code, object_id, message)
+        @records.note(code, object_id, message)
+      end
+
       def reconcile!
         @records.reconcile!
       end

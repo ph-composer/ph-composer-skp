@@ -1,13 +1,15 @@
 # frozen_string_literal: true
 
 # One feature owns thermal bridges: the Thermal Bridge Type catalog and, on Edges inside a Zone, the
-# assignments that name a type. It requires Zones, and no Zones file names it.
+# assignments that name a type. It requires Zones, and Windows for the outlines its export checks against;
+# no Zones or Windows file names it.
 #
 #   type/           the Thermal Bridge Type kind, its operations and reads; names no Edge, Zone or run
 #   assignment/     the record on an Edge, its reference target, assign, clear and the selection read
 #   runs/           pure Ruby: chains of assigned Edges, the schedule and its findings, over detached facts
 #   scan/           the live read: one walk for assigned Edges, Zones' answers for their paths, the schedule
 #   run_locate.rb   runs.locate, which selects a run's Edges through the foundation's context.open
+#   export.rb       the export section and its preflight, over the same runs as the schedule
 #   colour_modes.rb the Thermal bridges Colour-by mode, assigned Edges in their type's colour
 #   edge_tool.rb    the edge tool, the pointer route to edges.assign; declarations/edge_tool.rb its commands
 #   codes.rb        the codes under the thermal_bridge noun
@@ -25,6 +27,7 @@ require_relative "runs/findings"
 require_relative "runs/schedule"
 require_relative "scan/occurrences"
 require_relative "run_locate"
+require_relative "export"
 require_relative "colour_modes"
 require_relative "edge_tool"
 require_relative "declarations/shapes"
@@ -40,12 +43,14 @@ module PhComposer
     module_function
 
     def install(registry)
-      feature = registry.feature(FEATURE_ID, :contract_version => 1, :requires => ["ph_composer.zones"])
+      feature = registry.feature(FEATURE_ID, :contract_version => 1,
+                                             :requires => ["ph_composer.zones", "ph_composer.windows"])
       TypeRegistration.install(feature)
       AssignmentRegistration.install(feature)
       ScheduleRegistration.install(feature)
       MenuRegistration.install(feature)
       EdgeToolRegistration.install(feature)
+      ExportProjection.install(feature)
       ColourModes.install(feature)
       Codes.install(feature)
     end

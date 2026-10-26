@@ -2,6 +2,7 @@
 
 require_relative "../units/actions"
 require_relative "../units/host_extent"
+require_relative "../units/outlines"
 require_relative "../units/repairs"
 require_relative "../units/update_step"
 
@@ -45,6 +46,7 @@ module PhComposer
         restore_repair(feature, face)
         place(feature, face)
         host_extent(feature, face, reference)
+        outlines(feature, face, reference)
       end
 
       def reads(feature, face, reference)
@@ -247,6 +249,24 @@ module PhComposer
                       :examples => [{ "host" => { "zone_id" => "zon_Ab12Cd34Ef56", "zone_path" => [1201],
                                                   "entity_path" => [1202], "entity_id" => nil } }]) do |request|
           Units::HostExtent.read(request, request.params.fetch("host"))
+        end
+      end
+
+      def outlines(feature, face, reference)
+        point = { "type" => "array", "items" => { "type" => "number", "x-unit" => "m" }, "minItems" => 3,
+                  "maxItems" => 3 }
+        host = face.merge("type" => %w[object null], "description" => "The Zone Face the Unit is glued to, or null.")
+        outline = Shapes.list(point, :description => "The Unit's outer outline in world metres, one point per corner.")
+        row = Shapes.object({ "reference" => reference, "host" => host, "outline_m" => outline })
+        result = Shapes.object({ "units" => Shapes.list(row, :description => "One page of placed Windows, in path " \
+                                                                             "order."),
+                                 "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL })
+        feature.query(Units::Outlines::QUERY,
+                      :description => "Each placed Window's world outline in metres, with the Zone Face it is " \
+                                      "glued to.",
+                      :refuses => Refuses::UNIT_READ + Refuses::PAGE, :params => Shapes.list_params,
+                      :result => result, :examples => [{}, { "limit" => 20 }]) do |request|
+          Units::Outlines.read(request)
         end
       end
 

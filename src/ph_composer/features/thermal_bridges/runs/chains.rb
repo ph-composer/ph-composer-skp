@@ -12,9 +12,9 @@ module PhComposer
       # ids, which belong to the Edge's container, as the export snapshot's `edge` entry carries them.
       # `faces` are the recorded values of its Zone Faces, as ph_composer.zones.faces.host_context reads
       # them, empty for an unclassified one; `shared` is true when the Edge is reached through component or
-      # shared Group storage.
-      Fact = Struct.new(:path, :zone, :reason, :type_id, :quantity, :points_m, :vertex_ids, :faces, :shared,
-                        keyword_init: true) do
+      # shared Group storage. `record_id` is its assignment's `tbe_` id, which only names it in a finding.
+      Fact = Struct.new(:path, :zone, :reason, :record_id, :type_id, :quantity, :points_m, :vertex_ids, :faces,
+                        :shared, keyword_init: true) do
         def container_path
           path[0...-1]
         end

@@ -4286,6 +4286,28 @@
         "tools/examples/authoring/thermal_bridge_reference_model.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "T08",
+      "label": "The thermal-bridge export on the reference model with the five runs, normal packaged RBZ: export through an approved location; the exact HBJSON reloaded in the pinned stack with one Building-Segment carrying the five runs (identifier, display_name, geometry type, length, psi, group, quantity) and conformance passing; save, fresh-process reopen and re-export give the same HBJSON; an assigned Edge at the Model root, a sill line on the Window Unit's outline and a roof Edge counted twice appear in preflight and the report, the pair written; a cleared psi-value blocks in preflight and export and keeps the prior pair; the snapshot and contributor measured on the 50,000 Edge Model",
+      "mode": "mixed",
+      "authority": "planning/features/phase-03b-thermal-bridges/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/thermal_bridges/export.rb",
+        "src/ph_composer/features/thermal_bridges/runs/*",
+        "src/ph_composer/features/thermal_bridges/scan/*",
+        "src/ph_composer/features/thermal_bridges/install.rb",
+        "src/ph_composer/features/windows/units/outlines.rb",
+        "src/ph_composer/features/windows/export.rb",
+        "src/ph_composer/features/windows/export_assessment.rb",
+        "src/ph_composer/features/zones/export.rb",
+        "src/ph_composer/export/*",
+        "src/ph_composer/python/ph_composer_translation/thermal_bridge_sections.py",
+        "src/ph_composer/python/ph_composer_translation/contract/thermal_bridge_records.py",
+        "src/ph_composer/python/ph_composer_translation/assembly.py",
+        "tools/examples/authoring/thermal_bridge_schedule_walkthrough.rb"
+      ],
+      "native_control_required": false
     }
   ]
 }

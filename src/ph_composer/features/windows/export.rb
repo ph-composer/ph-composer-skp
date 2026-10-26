@@ -36,7 +36,8 @@ module PhComposer
                                      "window_face_areas" => [Export::Privacy.fields(%w[face_id zone_id gross_area_m2
                                                                                        glazed_area_m2
                                                                                        net_area_m2])]
-                                   }, :report => method(:report)) { |reader| apertures(reader) }
+                                   }, :report => method(:report),
+                                   :projection => method(:outlines)) { |reader| apertures(reader) }
       end
 
       def assess(**values)
@@ -47,6 +48,14 @@ module PhComposer
       # user_data counted among them) is reported under Apertures.
       def projection(reader)
         reader.projection(APERTURES) { reader.within(APERTURES) { assessment(reader) } }
+      end
+
+      # The Apertures section's registered projection: each Unit's world outline in metres as
+      # `{unit_id, entity_path, outline_m}`, from the assessment's own placement of it, for a contributor that
+      # needs to know where Windows sit (`reader.section(APERTURES)`). A Unit whose Type cannot be placed has
+      # no outline.
+      def outlines(reader)
+        DeepCopy.call(projection(reader).outlines)
       end
 
       def assessment(reader)

@@ -17,6 +17,8 @@ module PhComposer
                                           "bridge is counted twice.",
         "thermal_bridge.shared_definition" => "An assigned Edge is in shared component storage and counts once per " \
                                               "placement.",
+        "thermal_bridge.on_window_perimeter" => "An assigned Edge lies on a placed Window's outline; its install " \
+                                                "psi-value belongs to the Window Type.",
         "thermal_bridge.hidden" => "An Edge to locate, or a Group holding it, is hidden or on a hidden tag."
       }.freeze
 

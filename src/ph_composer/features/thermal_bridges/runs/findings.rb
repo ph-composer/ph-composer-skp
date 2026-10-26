@@ -3,9 +3,10 @@
 module PhComposer
   module ThermalBridges
     module Runs
-      # The schedule's findings (CONTRACTS section 6) that need no Windows read. A run's findings sit on its
-      # row; an assigned Edge no Zone holds is in no run and reports on its own. Each locates the Edges it is
-      # about with runs.locate's params. Only a missing type and a missing psi-value block export.
+      # The findings of CONTRACTS section 6. A run's findings sit on its row; an assigned Edge no Zone holds is
+      # in no run and reports on its own. Each locates the Edges it is about with runs.locate's params. Only a
+      # missing type and a missing psi-value block export. The window-perimeter finding needs Windows' outlines,
+      # which the export preflight and contributor read and the schedule does not.
       module Findings
         # SketchUp's merge tolerance (context/SKETCHUP_HOST_BEHAVIOR.md), used here only across Zones, where
         # no vertex can be shared.
@@ -18,8 +19,9 @@ module PhComposer
 
         module_function
 
-        # `types` maps a type id to its record, or has no key for a type that no longer exists.
-        def for_run(run, types, coincident)
+        # `types` maps a type id to its record, or has no key for a type that no longer exists. `outlines` are
+        # placed Windows' world outlines in metres, each a list of corner points; none when not read.
+        def for_run(run, types, coincident, outlines = [])
           type = types[run.type_id]
           found = []
           if type.nil?
@@ -42,7 +44,43 @@ module PhComposer
                                                                  "storage, counted once per placement.",
                              shared.map(&:path), false)
           end
-          found
+          found.concat(perimeter(run, outlines))
+        end
+
+        # An Edge lying on a placed Window's outline, both its ends within the merge tolerance of one side of it.
+        # A placed Window adds no Edge to its wall, so this is a line drawn around the opening, and a psi-value
+        # there belongs to the Window Type's install.
+        def perimeter(run, outlines)
+          # Most Edges are nowhere near a given Window: its box rules them out before any side is measured.
+          boxed = outlines.map { |outline| [outline, outline.transpose.map(&:minmax)] }
+          on = run.facts.select do |fact|
+            boxed.any? do |outline, box|
+              next false unless fact.points_m.all? { |point| within?(point, box) }
+
+              outline.zip(outline.rotate).any? do |a, b|
+                fact.points_m.all? { |point| segment_distance(point, a, b) <= COINCIDENT_M }
+              end
+            end
+          end
+          return [] if on.empty?
+
+          [finding("thermal_bridge.on_window_perimeter", "#{count(on)} on a placed Window's outline; its install " \
+                                                         "psi-value belongs to the Window Type. Clear them.",
+                   on.map(&:path), false)]
+        end
+
+        # Whether `point` lies in `box`, each axis's [min, max], grown by the merge tolerance.
+        def within?(point, box)
+          point.zip(box).all? { |value, (low, high)| value.between?(low - COINCIDENT_M, high + COINCIDENT_M) }
+        end
+
+        # The distance from `point` to the segment from `a` to `b`.
+        def segment_distance(point, a, b)
+          along = b.zip(a).map { |end_value, start| end_value - start }
+          offset = point.zip(a).map { |value, start| value - start }
+          squared = along.sum { |value| value * value }
+          t = squared.zero? ? 0.0 : (offset.zip(along).sum { |x, y| x * y } / squared).clamp(0.0, 1.0)
+          Chains.distance(point, a.zip(along).map { |start, delta| start + (t * delta) })
         end
 
         # An Edge with no classified Face is likely a stray line; one whose Zone Faces all face another
