@@ -7,52 +7,26 @@ module PhComposer
     module Snapshot
       module_function
 
-      def read_records(engine, kind, ids)
-        records = []
-        unreadable = []
-        ids.each do |id|
-          records << engine.find(kind, id)
-        rescue CodedError => error
-          raise unless error.code == "record.unreadable"
-
-          unreadable << { "id" => id, "code" => error.code, "message" => error.message }
-        end
-        [records, unreadable]
-      end
-
-      # The page of `kind`'s ids a list or all query reads, its cursor and the total.
-      def page(request, kind, query, paged)
-        ids = request.engine.ids(kind).sort
-        ids &= request.params["ids"] if request.params.key?("ids")
-        page, cursor = paged ? Pages.slice(request, query, ids, :key => ->(id) { id }) : [ids, nil]
-        [page, cursor, ids.length]
-      end
-
-      def result(rows, unreadable, cursor, total, paged, extra = {})
-        result = { "records" => rows, "unreadable" => unreadable }.merge(extra)
-        result.merge!("next_cursor" => cursor, "total" => total) if paged
-        result
-      end
-
       def materials(request, paged: true)
-        ids, cursor, total = page(request, MATERIAL_KIND, "#{FEATURE_ID}.materials.list", paged)
-        records, unreadable = read_records(request.engine, MATERIAL_KIND, ids)
-        assemblies = read_records(request.engine, ASSEMBLY_KIND, request.engine.ids(ASSEMBLY_KIND)).first
-        rows = records.map { |record| material(request.engine.view(MATERIAL_KIND, record), record, assemblies) }
-        result(rows, unreadable, cursor, total, paged, "categories" => categories)
+        assemblies = DefinitionLists.read(request.engine, ASSEMBLY_KIND, request.engine.ids(ASSEMBLY_KIND)).first
+        rows(request, "#{FEATURE_ID}.materials.list", MATERIAL_KIND, paged) do |record|
+          material(request.engine.view(MATERIAL_KIND, record), record, assemblies)
+        end.merge("categories" => categories)
       end
 
       def assemblies(request, paged: true)
-        ids, cursor, total = page(request, ASSEMBLY_KIND, "#{FEATURE_ID}.assemblies.list", paged)
-        records, unreadable = read_records(request.engine, ASSEMBLY_KIND, ids)
-        materials = read_records(request.engine, MATERIAL_KIND, request.engine.ids(MATERIAL_KIND)).first
+        materials = DefinitionLists.read(request.engine, MATERIAL_KIND, request.engine.ids(MATERIAL_KIND)).first
         materials_by_id = materials.to_h { |record| [record.fetch("id"), record] }
         material_findings = materials.to_h { |record| [record.fetch("id"), Validation.material(record)] }
-        rows = records.map do |record|
+        rows(request, "#{FEATURE_ID}.assemblies.list", ASSEMBLY_KIND, paged) do |record|
           assembly(request.engine.view(ASSEMBLY_KIND, record), record, materials_by_id,
                    :material_findings => material_findings)
         end
-        result(rows, unreadable, cursor, total, paged)
+      end
+
+      # The list query's page or the all query's whole inventory, each row as the block builds it.
+      def rows(request, query, kind, paged, &row)
+        paged ? DefinitionLists.list(request, query, kind, &row) : DefinitionLists.all(request.engine, kind, &row)
       end
 
       def categories

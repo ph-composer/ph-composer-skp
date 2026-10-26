@@ -11,35 +11,11 @@ module PhComposer
         module_function
 
         def all(request)
-          split(entries(request.engine, request.engine.ids(TYPE_KIND).sort))
+          DefinitionLists.all(request.engine, TYPE_KIND) { |record| row(request.engine, record) }
         end
 
-        # A page is cut by row count and by the size of the rows it carries, so the bounded read stays
-        # within a caller's reply budget at its default limit (Pages.bounded).
         def list(request)
-          ids = request.engine.ids(TYPE_KIND).sort
-          ids &= request.params["ids"] if request.params.key?("ids")
-          page, cursor = Pages.bounded(request, LIST, entries(request.engine, ids),
-                                       :key => ->(entry) { entry.first },
-                                       :size => ->(entry) { JSON.generate(entry.last).bytesize + 1 })
-          split(page).merge("next_cursor" => cursor, "total" => ids.length)
-        end
-
-        # Each id with its row, or with the reason the engine cannot read it: an unreadable record is
-        # reported beside the rows, never repaired or dropped silently.
-        def entries(engine, ids)
-          ids.map do |id|
-            [id, row(engine, engine.find(TYPE_KIND, id))]
-          rescue CodedError => error
-            raise unless error.code == "record.unreadable"
-
-            [id, { "id" => id, "code" => error.code, "message" => error.message }]
-          end
-        end
-
-        def split(entries)
-          rows, unreadable = entries.map(&:last).partition { |entry| entry.key?("values") }
-          { "records" => rows, "unreadable" => unreadable }
+          DefinitionLists.list(request, LIST, TYPE_KIND) { |record| row(request.engine, record) }
         end
 
         def row(engine, record)

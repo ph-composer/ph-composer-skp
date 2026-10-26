@@ -24,8 +24,8 @@ module PhComposer
       # One Model walk and one read of the types per rebuild. Zones is not asked anything: an Edge outside a
       # Zone still draws, which is how a stray one is found.
       def entries(read)
-        types = Type::Reads.entries(read.engine, read.engine.ids(TYPE_KIND)).to_h
-                           .select { |_id, row| row.key?("values") }
+        types = DefinitionLists.read(read.engine, TYPE_KIND, read.engine.ids(TYPE_KIND)).first
+                               .to_h { |record| [record.fetch("id"), Type::Reads.row(read.engine, record)] }
         tagged, _unreadable = Scan.walk(read.model)
         tagged.map do |edge|
           id = edge.record.fetch("thermal_bridge_type_id")

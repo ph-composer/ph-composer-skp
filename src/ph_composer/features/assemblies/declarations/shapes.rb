@@ -25,7 +25,6 @@ module PhComposer
         "missing_fields" => { "type" => "array", "items" => TEXT }
       }, :optional => %w[assembly_id material_id layer_id segment_id missing_fields]).freeze
       FINDINGS = { "type" => "array", "items" => FINDING }.freeze
-      UNREADABLE = list(object({ "id" => TEXT, "code" => TEXT, "message" => TEXT })).freeze
 
       module_function
 
@@ -62,12 +61,6 @@ module PhComposer
                  "values" => described(editable_patch(kind, fields, :labelled => labelled),
                                        "The values to change; any not given stay."),
                  "expected_values" => expected(kind), "user_data" => USER_DATA }, :optional => ["user_data"])
-      end
-
-      def list_params
-        object({ "ids" => list(TEXT).merge("maxItems" => Pages::MAXIMUM_LIMIT,
-                                           "description" => "Only these record ids; every record when absent."),
-                 "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR }, :optional => %w[ids limit cursor])
       end
     end
   end

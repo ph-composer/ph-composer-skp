@@ -59,13 +59,6 @@ module PhComposer
 
       module_function
 
-      def result(kind, row, paged:)
-        properties = { "records" => Shapes.list(Shapes.with(Shapes.view(kind), row)),
-                       "unreadable" => Shapes::UNREADABLE }
-        properties.merge!("next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL) if paged
-        Shapes.object(properties)
-      end
-
       def install(feature)
         Products::KINDS.each do |collection, kind|
           declare(feature, collection, kind, PRODUCT_ROW) do |request, paged|
@@ -76,20 +69,22 @@ module PhComposer
       end
 
       # The list and all queries for one collection; `read` takes the request and whether to page.
-      def declare(feature, collection, kind, row, &read)
+      def declare(feature, collection, kind, additions, &read)
         prefix = "#{FEATURE_ID}.#{collection}"
+        row = Shapes.with(Shapes.view(kind), additions)
         feature.query("#{prefix}.list", :description => "A bounded page of #{collection} with display findings.",
                                         :refuses => Refuses::PAGE + %w[record.unreadable],
-                                        :params => Shapes.list_params, :result => result(kind, row, :paged => true),
-                                        :examples => [{}, { "limit" => 20 }]) do |request|
+                                        :params => DefinitionLists.params(row),
+                                        :result => DefinitionLists.result(row, :paged => true),
+                                        :examples => [{}, { "limit" => 20 }, { "fields" => %w[values] }]) do |request|
           read.call(request, true)
         end
         feature.query("#{prefix}.all",
                       :response => { "bounded" => false, "prefer" => "#{prefix}.list" },
                       :description => "The complete #{collection} inventory for the panel snapshot.",
                       :refuses => %w[record.unreadable],
-                      :params => Shapes::NONE, :result => result(kind, row,
-                                                                 :paged => false), :examples => [{}]) do |request|
+                      :params => Shapes::NONE, :result => DefinitionLists.result(row, :paged => false),
+                      :examples => [{}]) do |request|
           read.call(request, false)
         end
         feature.snapshot_section(prefix, :query => "#{prefix}.all")

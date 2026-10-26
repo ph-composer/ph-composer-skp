@@ -19,6 +19,7 @@ module PhComposer
                   target.locked target.not_found target.shared_definition target.wrong_hierarchy target.wrong_kind
                   target.wrong_zone validation.failed].freeze
       CREATE_EXAMPLE = { "values" => { "name" => "Parapet", "psi_w_mk" => 0.12 } }.freeze
+      LIST_EXAMPLES = [{}, { "limit" => 20 }, { "fields" => %w[values export_ready] }].freeze
 
       DISPLAY = Shapes.object({ "color" => Shapes.described(SchemaShapes::HEX_COLOUR,
                                                             "The stored color, or the default one for the id.") })
@@ -40,21 +41,16 @@ module PhComposer
         install_delete(feature)
       end
 
-      def result(paged:)
-        properties = { "records" => Shapes.list(ROW), "unreadable" => Shapes::UNREADABLE }
-        properties.merge!("next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL) if paged
-        Shapes.object(properties)
-      end
-
       def install_reads(feature)
         feature.query("#{PREFIX}.list", :description => "One bounded page of Thermal Bridge Types, with export " \
                                                         "readiness.",
-                                        :refuses => PAGE, :params => Shapes.list_params,
-                                        :result => result(:paged => true),
-                                        :examples => [{}, { "limit" => 20 }]) { |request| Type::Reads.list(request) }
+                                        :refuses => PAGE, :params => DefinitionLists.params(ROW),
+                                        :result => DefinitionLists.result(ROW, :paged => true),
+                                        :examples => LIST_EXAMPLES) { |request| Type::Reads.list(request) }
         feature.query("#{PREFIX}.all", :description => "Every Thermal Bridge Type, for the panel snapshot.",
                                        :response => { "bounded" => false, "prefer" => "#{PREFIX}.list" },
-                                       :refuses => [], :params => Shapes::NONE, :result => result(:paged => false),
+                                       :refuses => [], :params => Shapes::NONE,
+                                       :result => DefinitionLists.result(ROW, :paged => false),
                                        :examples => [{}]) { |request| Type::Reads.all(request) }
         feature.snapshot_section(PREFIX, :query => "#{PREFIX}.all")
       end

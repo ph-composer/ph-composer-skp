@@ -17,8 +17,9 @@ lists them all. The connection itself is set up in [AGENT_ACCESS.md](AGENT_ACCES
 3. **Read where it stands.** Call `context` for the session: its revision, whether it is busy and
    why, the tool the user has active, the edit path, the camera and the selection.
 4. **Read what you need, in pages.** Use the bounded reads (`ph_composer.spaces.list`,
-   `ph_composer.zones.faces.list` and the like) with `fields` and `limit`, and pass `next_cursor`
-   back for the next page. A result larger than one reply is refused, not cut: ask for less.
+   `ph_composer.zones.faces.list`, `ph_composer.assemblies.assemblies.list` and the like) with
+   `fields` and `limit`, and pass `next_cursor` back for the next page. A result larger than one
+   reply is refused, not cut: ask for less.
 5. **Describe before you call.** `describe` gives an operation's params and result schemas, its
    examples, its refusals and, for a view command, what else it can trigger (`side_effects`).
 6. **Preview a compound change.** `preview` shows what an action would change without changing

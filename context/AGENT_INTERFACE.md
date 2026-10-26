@@ -116,6 +116,13 @@ record yet: a Face directly in a Volume is a Floor candidate for `spaces.floors.
 at a Space's root a candidate for `spaces.volumes.create` (which also needs the Space open). Each row
 gives its path, plan area and normal (loops when `fields` asks), the operation, and the refusal that
 operation would give now, from one rule the read and both actions share (`Spaces::Eligibility`).
+The definition lists (`ph_composer.assemblies.materials.list` and `assemblies.list`, the Window
+product and Type lists, `ph_composer.thermal_bridges.types.list`) page through
+`shell/definition_lists.rb`: `Pages.bounded` by record id, an `ids` filter, and a `fields`
+projection over the row's own properties that always keeps `kind`, `id` and `schema_version`.
+Without `fields`, a row is the one the matching `.all` read gives. A row larger than the budget
+comes alone, and asking for fewer `fields` reads past it. An unreadable record is reported in
+`unreadable` beside the page and counted in `total`.
 `spaces.update` and `spaces.batch_update` type `values` and `expected_values` field by field from the
 record definitions, with units; null clears an optional value, and a field the referenced kind does
 not take is refused.
