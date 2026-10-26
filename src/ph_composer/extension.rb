@@ -64,7 +64,8 @@ module PhComposer
     require_relative "features/zones/install"
     require_relative "features/windows/install"
     require_relative "features/spaces/install"
-    FEATURES = [Assemblies, Zones, Windows, Spaces].freeze unless const_defined?(:FEATURES)
+    require_relative "features/thermal_bridges/install"
+    FEATURES = [Assemblies, Zones, Windows, Spaces, ThermalBridges].freeze unless const_defined?(:FEATURES)
 
     # Capabilities the foundation itself provides, registered through the same interface as a feature.
     unless const_defined?(:FOUNDATION_FEATURES)

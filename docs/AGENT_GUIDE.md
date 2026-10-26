@@ -77,6 +77,16 @@ Read `ph_composer.assemblies.assemblies.list`, check `ph_composer.zones.faces.as
 for the Faces you mean, then `ph_composer.zones.faces.assign_assembly` with explicit Face
 references. Never assign to "whatever is selected" without reading the selection first.
 
+### Thermal Bridge Types
+
+Read `ph_composer.thermal_bridges.types.list` first; names are unique. Create a type with
+`ph_composer.thermal_bridges.types.create`, giving `psi_w_mk` in W/mK and `group` as one of
+`15-Ambient`, `16-Perimeter` or `17-FS/BC` (METr shows these as Ambient, Perimeter and FS/BC). A
+negative psi-value is valid. A type left without one reads `export_ready: false` with
+`thermal_bridge.psi_missing`. Edit with `ph_composer.thermal_bridges.types.update`, copying
+`expected_values` from the values you read. `ph_composer.thermal_bridges.types.delete` refuses a type
+an Edge still uses.
+
 ### Windows
 
 Place Units with `ph_composer.windows.units.place` at explicit Faces and positions you have read;

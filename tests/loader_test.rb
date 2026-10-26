@@ -31,7 +31,8 @@ class LoaderTest < PhComposerTestCase
   end
 
   def test_the_shipping_composition_root_lists_the_authoring_features
-    assert_equal [PhComposer::Assemblies, PhComposer::Zones, PhComposer::Windows, PhComposer::Spaces],
+    assert_equal [PhComposer::Assemblies, PhComposer::Zones, PhComposer::Windows, PhComposer::Spaces,
+                  PhComposer::ThermalBridges],
                  PhComposer::FEATURES
     assert PhComposer::Registry.installed?("ph_composer.assemblies")
     assert PhComposer::Registry.installed?("ph_composer.zones")

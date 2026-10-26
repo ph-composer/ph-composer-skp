@@ -778,6 +778,143 @@ Occurrence reference:
 }
 ```
 
+### `ph_composer.thermal_bridges.type`
+
+Thermal Bridge Type, a catalog kind owned by `ph_composer.thermal_bridges`, schema version 1.
+
+Values:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "group"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notes": {
+      "type": "string"
+    },
+    "datasheet_links": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "provider_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "library_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fingerprint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "copied_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "derived",
+            "library"
+          ]
+        },
+        "fingerprint_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        },
+        "snapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "notes": {
+              "type": "string"
+            },
+            "datasheet_links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "psi_w_mk": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "W/mK"
+            },
+            "group": {
+              "type": "string",
+              "enum": [
+                "15-Ambient",
+                "16-Perimeter",
+                "17-FS/BC"
+              ]
+            },
+            "color": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            }
+          }
+        }
+      }
+    },
+    "psi_w_mk": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-unit": "W/mK"
+    },
+    "group": {
+      "type": "string",
+      "enum": [
+        "15-Ambient",
+        "16-Perimeter",
+        "17-FS/BC"
+      ]
+    },
+    "color": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{6}$"
+    }
+  }
+}
+```
+
 ### `ph_composer.windows.frame`
 
 Frame, a catalog kind owned by `ph_composer.windows`, schema version 1.
@@ -9186,6 +9323,557 @@ Example params:
       1202
     ]
   }
+}
+```
+
+### `ph_composer.thermal_bridges.types.all`
+
+Every Thermal Bridge Type, for the panel snapshot. Owner: `ph_composer.thermal_bridges`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.thermal_bridges.types.list` instead.
+
+Refuses: only the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "schema_version",
+          "values",
+          "user_data",
+          "extension_data",
+          "kind",
+          "extension_status",
+          "display",
+          "export_ready",
+          "export_blockers"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "group"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "psi_w_mk": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "x-unit": "W/mK"
+                      },
+                      "group": {
+                        "type": "string",
+                        "enum": [
+                          "15-Ambient",
+                          "16-Perimeter",
+                          "17-FS/BC"
+                        ]
+                      },
+                      "color": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$"
+                      }
+                    }
+                  }
+                }
+              },
+              "psi_w_mk": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "W/mK"
+              },
+              "group": {
+                "type": "string",
+                "enum": [
+                  "15-Ambient",
+                  "16-Perimeter",
+                  "17-FS/BC"
+                ]
+              },
+              "color": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$"
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "display": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "color"
+            ],
+            "properties": {
+              "color": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$",
+                "description": "The stored color, or the default one for the id."
+              }
+            }
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether an Edge using this type can export."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export once an Edge uses it; empty when export_ready."
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.thermal_bridges.types.list`
+
+One bounded page of Thermal Bridge Types, with export readiness. Owner: `ph_composer.thermal_bridges`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 500,
+      "description": "Only these record ids; every record when absent."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "schema_version",
+          "values",
+          "user_data",
+          "extension_data",
+          "kind",
+          "extension_status",
+          "display",
+          "export_ready",
+          "export_blockers"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "group"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "psi_w_mk": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "x-unit": "W/mK"
+                      },
+                      "group": {
+                        "type": "string",
+                        "enum": [
+                          "15-Ambient",
+                          "16-Perimeter",
+                          "17-FS/BC"
+                        ]
+                      },
+                      "color": {
+                        "type": "string",
+                        "pattern": "^#[0-9A-Fa-f]{6}$"
+                      }
+                    }
+                  }
+                }
+              },
+              "psi_w_mk": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "W/mK"
+              },
+              "group": {
+                "type": "string",
+                "enum": [
+                  "15-Ambient",
+                  "16-Perimeter",
+                  "17-FS/BC"
+                ]
+              },
+              "color": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$"
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "display": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "color"
+            ],
+            "properties": {
+              "color": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$",
+                "description": "The stored color, or the default one for the id."
+              }
+            }
+          },
+          "export_ready": {
+            "type": "boolean",
+            "description": "Whether an Edge using this type can export."
+          },
+          "export_blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The codes keeping it out of an export once an Edge uses it; empty when export_ready."
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 20
 }
 ```
 
@@ -27687,6 +28375,708 @@ Example params:
       1300,
       1310
     ]
+  }
+}
+```
+
+### `ph_composer.thermal_bridges.types.create`
+
+Create one Thermal Bridge Type. The group starts at 15-Ambient and the psi-value empty unless values give them. Owner: `ph_composer.thermal_bridges`.
+
+Undo step: Create Thermal Bridge Type. Creates one Model-owned definition.
+
+Refuses: `record.unreadable`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "values"
+  ],
+  "properties": {
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        },
+        "datasheet_links": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "psi_w_mk": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/mK"
+                },
+                "group": {
+                  "type": "string",
+                  "enum": [
+                    "15-Ambient",
+                    "16-Perimeter",
+                    "17-FS/BC"
+                  ]
+                },
+                "color": {
+                  "type": "string",
+                  "pattern": "^#[0-9A-Fa-f]{6}$"
+                }
+              }
+            }
+          }
+        },
+        "psi_w_mk": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "W/mK"
+        },
+        "group": {
+          "type": "string",
+          "enum": [
+            "15-Ambient",
+            "16-Perimeter",
+            "17-FS/BC"
+          ]
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        }
+      },
+      "description": "The new Thermal Bridge Type's values; name is required and every other value takes its default."
+    },
+    "user_data": {
+      "type": "object",
+      "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "values": {
+    "name": "Parapet",
+    "psi_w_mk": 0.12
+  }
+}
+```
+
+### `ph_composer.thermal_bridges.types.delete`
+
+Delete one Thermal Bridge Type; a type still in use refuses. Owner: `ph_composer.thermal_bridges`.
+
+Undo step: Delete Thermal Bridge Type. Deletes one definition.
+
+Refuses: `copy.rule_missing`, `record.unreadable`, `reference.in_use`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^tbt_[A-Za-z0-9]{12}$",
+      "description": "The Thermal Bridge Type to delete."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "psi_w_mk": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/mK"
+                },
+                "group": {
+                  "type": "string",
+                  "enum": [
+                    "15-Ambient",
+                    "16-Perimeter",
+                    "17-FS/BC"
+                  ]
+                },
+                "color": {
+                  "type": "string",
+                  "pattern": "^#[0-9A-Fa-f]{6}$"
+                }
+              }
+            }
+          }
+        },
+        "psi_w_mk": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "W/mK"
+        },
+        "group": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "15-Ambient",
+            "16-Perimeter",
+            "17-FS/BC",
+            null
+          ]
+        },
+        "color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "tbt_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.thermal_bridges.types.duplicate`
+
+Duplicate one Thermal Bridge Type with a new id and source derived. Owner: `ph_composer.thermal_bridges`.
+
+Undo step: Duplicate Thermal Bridge Type. Creates one definition; user_data is copied.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.invalid`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^tbt_[A-Za-z0-9]{12}$",
+      "description": "The Thermal Bridge Type to copy."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The copy's name; \"<name> (copy)\" when absent. Names are unique."
+    },
+    "copy_datasheets": {
+      "type": "boolean",
+      "description": "Keep the datasheet links on the copy; false when absent."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "tbt_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.thermal_bridges.types.update`
+
+Edit guarded values of one Thermal Bridge Type; a changed expected value refuses. Owner: `ph_composer.thermal_bridges`.
+
+Undo step: Edit Thermal Bridge Type. Updates one definition and preserves its metadata.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "values",
+    "expected_values"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^tbt_[A-Za-z0-9]{12}$",
+      "description": "The Thermal Bridge Type to edit."
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "psi_w_mk": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "W/mK"
+        },
+        "group": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "15-Ambient",
+            "16-Perimeter",
+            "17-FS/BC",
+            null
+          ]
+        },
+        "color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        }
+      },
+      "description": "The values to change; any not given stay. A null color returns the type to its default colour."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "psi_w_mk": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/mK"
+                },
+                "group": {
+                  "type": "string",
+                  "enum": [
+                    "15-Ambient",
+                    "16-Perimeter",
+                    "17-FS/BC"
+                  ]
+                },
+                "color": {
+                  "type": "string",
+                  "pattern": "^#[0-9A-Fa-f]{6}$"
+                }
+              }
+            }
+          }
+        },
+        "psi_w_mk": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "W/mK"
+        },
+        "group": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "15-Ambient",
+            "16-Perimeter",
+            "17-FS/BC",
+            null
+          ]
+        },
+        "color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        }
+      },
+      "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    },
+    "user_data": {
+      "type": "object",
+      "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "tbt_Ab12Cd34Ef56",
+  "values": {
+    "psi_w_mk": -0.02
+  },
+  "expected_values": {
+    "psi_w_mk": null
   }
 }
 ```
@@ -49749,6 +51139,12 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `space.volume_protected` | The Volume is protected; unprotect it before opening it. |
 | `space.volume_unprotected` | A closed Volume is unlocked, so its Faces can be edited from the Space. |
 
+### `ph_composer.thermal_bridges`
+
+| Code | Meaning |
+| --- | --- |
+| `thermal_bridge.psi_missing` | A Thermal Bridge Type has no psi-value, so an Edge using it cannot export. |
+
 ### `ph_composer.view`
 
 | Code | Meaning |
@@ -49865,3 +51261,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.7 | 2026-10-18 | export_status and latest_export give the caller that started a task its written pair's paths, SHA-256 and sizes as outcome.value.artifacts. |
 | 1.8 | 2026-10-18 | The capture capability and ph_composer.view.capture are new; describe names the grant a view command declares when it is not view. |
 | 1.9 | 2026-10-21 | ph_composer.view.capture no longer answers window_state: every window state measured gives the current view. |
+| 1.10 | 2026-10-25 | ph_composer.thermal_bridges is new: the Thermal Bridge Type kind, types.list, types.all and its snapshot section, and types.create, types.update, types.duplicate and types.delete. |

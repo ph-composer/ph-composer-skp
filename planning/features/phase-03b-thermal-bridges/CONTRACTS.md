@@ -25,7 +25,7 @@ answered as recommended on 2026-10-21 and are bound below.
 
 | Feature id | Folder | Requires | Registered in |
 | --- | --- | --- | --- |
-| `ph_composer.thermal_bridges` (new) | `features/thermal_bridges/` | `ph_composer.zones`, `ph_composer.windows` (D3b-15) | `FEATURES`, last: `[Assemblies, Zones, Windows, Spaces, ThermalBridges]` |
+| `ph_composer.thermal_bridges` (exists from P3b-02) | `features/thermal_bridges/` | `ph_composer.zones`; `ph_composer.windows` added by P3b-08 (D3b-15) | `FEATURES`, last: `[Assemblies, Zones, Windows, Spaces, ThermalBridges]` |
 
 Layer 3 of `context/EXTENSIBILITY.md`'s layering, like window Units and Spaces, with one
 difference: the Thermal Bridge Type is a layer 1 definition that lives inside the feature, as
@@ -39,7 +39,7 @@ Proposed layout, following `features/windows/install.rb` and `features/zones/ins
 ```
 features/thermal_bridges/
   install.rb  codes.rb  snapshot.rb  export.rb  colour_modes.rb  edge_tool.rb
-  type/        schema.rb  operations.rb
+  type/        schema.rb  operations.rb  reads.rb
   assignment/  schema.rb  store.rb  operations.rb  steps.rb  reference_target.rb  selection.rb
   runs/        chains.rb  schedule.rb  findings.rb      (pure Ruby, no SketchUp)
   scan/        occurrences.rb
@@ -62,14 +62,14 @@ needs the same chain rule.
 
 | Kind id | Label | Prefix | Store |
 | --- | --- | --- | --- |
-| `ph_composer.thermal_bridges.type` (new) | Thermal Bridge Type | `tbt` | `DictionaryStore`, Model dictionary `ph_composer.records.ph_composer.thermal_bridges.type` |
+| `ph_composer.thermal_bridges.type` (exists from P3b-02) | Thermal Bridge Type | `tbt` | `DictionaryStore`, Model dictionary `ph_composer.records.ph_composer.thermal_bridges.type` |
 
 | Field | Shape | Required | Note |
 | --- | --- | --- | --- |
 | `name`, `notes`, `datasheet_links`, `source` | `Fields.common` (exists, `core/records/authoring_fields.rb`) | `name` | `datasheet_links` carries the psi-value calculation report (Q9). `source` defaults to `{"kind": "manual"}` |
 | `psi_w_mk` | number or null, signed, `x-unit` `W/mK` | no | Null is incomplete and blocks export. Negative is legal |
 | `group` | enum `15-Ambient`, `16-Perimeter`, `17-FS/BC` | yes, default `15-Ambient` | D3b-03, D3b-04. honeybee-ph's strings, stored; the panel shows METr's words |
-| `color` | hex `#rrggbb` | yes, default from a ramp by id | As Assemblies (`features/assemblies/assembly/schema.rb`) |
+| `color` | hex `#rrggbb` | no; stored once authored | As Assemblies (`features/assemblies/assembly/schema.rb`): reads show `display.color`, the stored colour or the ramp's by id, because the engine mints the id inside `propose_create` (P3b-02) |
 
 `schema_version` 1 with this final field set, because the engine has no migrations. No
 `created_at` or `updated_at` (D3b-05). `user_data` and `extension_data` are the engine's reserved
@@ -113,7 +113,8 @@ test covers it. Id params carry the prefix pattern, for example `^tbt_[A-Za-z0-9
 
 | Name | Verb | Stage | Purpose |
 | --- | --- | --- | --- |
-| `types.all` | query | P3b-02 | Every type with its values, `export_ready` and `export_blockers`, and used length once P3b-04 lands |
+| `types.list` | query | P3b-02 | One bounded page of the same rows; the bounded read `types.all` names as `prefer` |
+| `types.all` | query | P3b-02 | Every type with its values, `display.color`, `export_ready` and `export_blockers`, and used length once P3b-04 lands |
 | `types` | snapshot section | P3b-02 | The same projection for the panel |
 | `types.create`, `types.update`, `types.duplicate` | action | P3b-02 | Values with `expected_values`; `user_data` |
 | `types.delete` | action | P3b-02; replacement from P3b-03 | Guarded delete; with `replacement_id` every assigned Edge is rewritten to it, and with an explicit null every assigned Edge's dictionary is removed, in the same proposal and Undo step |

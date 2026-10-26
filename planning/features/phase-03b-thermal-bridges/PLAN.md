@@ -1,7 +1,7 @@
 # Phase 3b delivery plan: thermal bridges
 
 DATE: 2026-10-03
-STATUS: Scoped. Stages P3b-01 to P3b-09 planned; interview complete 2026-10-03; re-baselined on `main` at `420c783a` on 2026-10-21, D3b-22 and D3b-23 answered the same day; none authorized.
+STATUS: In progress. Stages P3b-01 to P3b-09 planned; interview complete 2026-10-03; re-baselined on `main` at `420c783a` on 2026-10-21, D3b-22 and D3b-23 answered the same day; P3b-01 merged 2026-10-22; P3b-02 to P3b-09 authorized 2026-10-25.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 

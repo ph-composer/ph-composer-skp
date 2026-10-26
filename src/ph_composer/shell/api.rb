@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 9
+    MINOR = 10
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -50,7 +50,10 @@ module PhComposer
                     "command declares when it is not view." },
       { "minor" => 9, "date" => "2026-10-21",
         "change" => "ph_composer.view.capture no longer answers window_state: every window state measured gives the " \
-                    "current view." }
+                    "current view." },
+      { "minor" => 10, "date" => "2026-10-25",
+        "change" => "ph_composer.thermal_bridges is new: the Thermal Bridge Type kind, types.list, types.all and its " \
+                    "snapshot section, and types.create, types.update, types.duplicate and types.delete." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {
