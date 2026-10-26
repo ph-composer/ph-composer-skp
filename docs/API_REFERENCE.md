@@ -3014,6 +3014,23 @@ Params:
       "maxItems": 500,
       "description": "Only these record ids; every record when absent."
     },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "values",
+          "user_data",
+          "extension_data",
+          "extension_status",
+          "findings",
+          "display",
+          "export_ready",
+          "export_blockers"
+        ]
+      },
+      "description": "What each row carries beside kind, id and schema_version; the whole row when absent. Ask for fewer when a row is larger than your reply."
+    },
     "limit": {
       "type": "number",
       "description": "Page size, 1 to 500; 100 when absent."
@@ -3045,17 +3062,9 @@ Result:
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "id",
-          "schema_version",
-          "values",
-          "user_data",
-          "extension_data",
           "kind",
-          "extension_status",
-          "findings",
-          "display",
-          "export_ready",
-          "export_blockers"
+          "id",
+          "schema_version"
         ],
         "properties": {
           "id": {
@@ -3662,6 +3671,16 @@ Example params:
 }
 ```
 
+Example params:
+
+```json
+{
+  "fields": [
+    "values"
+  ]
+}
+```
+
 ### `ph_composer.assemblies.export_preflight`
 
 Material and Assembly export conditions. Owner: `ph_composer.assemblies`.
@@ -4183,6 +4202,22 @@ Params:
       "maxItems": 500,
       "description": "Only these record ids; every record when absent."
     },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "values",
+          "user_data",
+          "extension_data",
+          "extension_status",
+          "findings",
+          "uses",
+          "use_count"
+        ]
+      },
+      "description": "What each row carries beside kind, id and schema_version; the whole row when absent. Ask for fewer when a row is larger than your reply."
+    },
     "limit": {
       "type": "number",
       "description": "Page size, 1 to 500; 100 when absent."
@@ -4215,16 +4250,9 @@ Result:
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "id",
-          "schema_version",
-          "values",
-          "user_data",
-          "extension_data",
           "kind",
-          "extension_status",
-          "findings",
-          "uses",
-          "use_count"
+          "id",
+          "schema_version"
         ],
         "properties": {
           "id": {
@@ -4573,6 +4601,16 @@ Example params:
 ```json
 {
   "limit": 20
+}
+```
+
+Example params:
+
+```json
+{
+  "fields": [
+    "values"
+  ]
 }
 ```
 
@@ -11178,6 +11216,22 @@ Params:
       "maxItems": 500,
       "description": "Only these record ids; every record when absent."
     },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "values",
+          "user_data",
+          "extension_data",
+          "extension_status",
+          "display",
+          "export_ready",
+          "export_blockers"
+        ]
+      },
+      "description": "What each row carries beside kind, id and schema_version; the whole row when absent. Ask for fewer when a row is larger than your reply."
+    },
     "limit": {
       "type": "number",
       "description": "Page size, 1 to 500; 100 when absent."
@@ -11209,16 +11263,9 @@ Result:
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "id",
-          "schema_version",
-          "values",
-          "user_data",
-          "extension_data",
           "kind",
-          "extension_status",
-          "display",
-          "export_ready",
-          "export_blockers"
+          "id",
+          "schema_version"
         ],
         "properties": {
           "id": {
@@ -11447,6 +11494,17 @@ Example params:
 ```json
 {
   "limit": 20
+}
+```
+
+Example params:
+
+```json
+{
+  "fields": [
+    "values",
+    "export_ready"
+  ]
 }
 ```
 
@@ -11928,6 +11986,23 @@ Params:
       "maxItems": 500,
       "description": "Only these record ids; every record when absent."
     },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "values",
+          "user_data",
+          "extension_data",
+          "extension_status",
+          "findings",
+          "uses",
+          "use_count",
+          "element_use_count"
+        ]
+      },
+      "description": "What each row carries beside kind, id and schema_version; the whole row when absent. Ask for fewer when a row is larger than your reply."
+    },
     "limit": {
       "type": "number",
       "description": "Page size, 1 to 500; 100 when absent."
@@ -11959,17 +12034,9 @@ Result:
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "id",
-          "schema_version",
-          "values",
-          "user_data",
-          "extension_data",
           "kind",
-          "extension_status",
-          "findings",
-          "uses",
-          "use_count",
-          "element_use_count"
+          "id",
+          "schema_version"
         ],
         "properties": {
           "id": {
@@ -12274,6 +12341,16 @@ Example params:
 ```json
 {
   "limit": 20
+}
+```
+
+Example params:
+
+```json
+{
+  "fields": [
+    "values"
+  ]
 }
 ```
 
@@ -12615,6 +12692,23 @@ Params:
       "maxItems": 500,
       "description": "Only these record ids; every record when absent."
     },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "values",
+          "user_data",
+          "extension_data",
+          "extension_status",
+          "findings",
+          "uses",
+          "use_count",
+          "element_use_count"
+        ]
+      },
+      "description": "What each row carries beside kind, id and schema_version; the whole row when absent. Ask for fewer when a row is larger than your reply."
+    },
     "limit": {
       "type": "number",
       "description": "Page size, 1 to 500; 100 when absent."
@@ -12646,17 +12740,9 @@ Result:
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "id",
-          "schema_version",
-          "values",
-          "user_data",
-          "extension_data",
           "kind",
-          "extension_status",
-          "findings",
-          "uses",
-          "use_count",
-          "element_use_count"
+          "id",
+          "schema_version"
         ],
         "properties": {
           "id": {
@@ -12943,6 +13029,16 @@ Example params:
 ```json
 {
   "limit": 20
+}
+```
+
+Example params:
+
+```json
+{
+  "fields": [
+    "values"
+  ]
 }
 ```
 
@@ -13339,6 +13435,23 @@ Params:
       "maxItems": 500,
       "description": "Only these record ids; every record when absent."
     },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "values",
+          "user_data",
+          "extension_data",
+          "extension_status",
+          "findings",
+          "uses",
+          "use_count",
+          "element_use_count"
+        ]
+      },
+      "description": "What each row carries beside kind, id and schema_version; the whole row when absent. Ask for fewer when a row is larger than your reply."
+    },
     "limit": {
       "type": "number",
       "description": "Page size, 1 to 500; 100 when absent."
@@ -13370,17 +13483,9 @@ Result:
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "id",
-          "schema_version",
-          "values",
-          "user_data",
-          "extension_data",
           "kind",
-          "extension_status",
-          "findings",
-          "uses",
-          "use_count",
-          "element_use_count"
+          "id",
+          "schema_version"
         ],
         "properties": {
           "id": {
@@ -13623,6 +13728,16 @@ Example params:
 ```json
 {
   "limit": 20
+}
+```
+
+Example params:
+
+```json
+{
+  "fields": [
+    "values"
+  ]
 }
 ```
 
@@ -14750,6 +14865,21 @@ Params:
       "maxItems": 500,
       "description": "Only these record ids; every record when absent."
     },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "values",
+          "user_data",
+          "extension_data",
+          "extension_status",
+          "findings",
+          "display"
+        ]
+      },
+      "description": "What each row carries beside kind, id and schema_version; the whole row when absent. Ask for fewer when a row is larger than your reply."
+    },
     "limit": {
       "type": "number",
       "description": "Page size, 1 to 500; 100 when absent."
@@ -14781,15 +14911,9 @@ Result:
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "id",
-          "schema_version",
-          "values",
-          "user_data",
-          "extension_data",
           "kind",
-          "extension_status",
-          "findings",
-          "display"
+          "id",
+          "schema_version"
         ],
         "properties": {
           "id": {
@@ -15815,6 +15939,16 @@ Example params:
 ```json
 {
   "limit": 20
+}
+```
+
+Example params:
+
+```json
+{
+  "fields": [
+    "values"
+  ]
 }
 ```
 
@@ -53665,3 +53799,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.12 | 2026-10-25 | ph_composer.thermal_bridges.schedule.list (bounded) and schedule.all are new: thermal-bridge runs with lengths, heat loss, findings and totals. ph_composer.thermal_bridges.runs.locate is a new view command. ph_composer.zones.containment, and so ph_composer.thermal_bridges.edges.selection, answers each Zone's name. |
 | 1.13 | 2026-10-26 | ph_composer.thermal_bridges.edge_tool.choose and edge_tool.stop are new view commands, with edge_tool.state and the edge_tool snapshot section: the pointer route to edges.assign. |
 | 1.14 | 2026-10-26 | ph_composer.windows.units.outlines (bounded) is new: each placed Window's world outline. ph_composer.thermal_bridges.export_preflight is new, with the ph_composer.thermal_bridges.export.thermal_bridges export section and the thermal_bridge.on_window_perimeter code. |
+| 1.15 | 2026-10-26 | The definition lists (ph_composer.assemblies.materials.list and assemblies.list, the Window product and Type lists, ph_composer.thermal_bridges.types.list) take fields, keeping kind, id and schema_version on every row, and cut each page by size as well as by limit. |
