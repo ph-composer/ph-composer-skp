@@ -120,14 +120,15 @@ fixtures:
 # Regenerate, then fail if that changed any golden on disk. The comparison is by content, not against
 # the last commit, so a golden regenerated and not yet committed passes and `make ci && git commit -s`
 # works in one chain; CI's clean checkout compares against the commit itself.
-FIXTURE_SUMS = find $(wildcard $(FIXTURE_PATHS)) -type f | xargs cksum | LC_ALL=C sort
+# Paths are resolved when each snapshot runs, so a golden the regeneration creates or deletes counts.
+FIXTURE_SUMS = for p in $(FIXTURE_PATHS); do [ ! -e "$$p" ] || find "$$p" -type f; done | xargs cksum | LC_ALL=C sort
 fixtures-check:
-	@before=$$(mktemp); $(FIXTURE_SUMS) > "$$before"; \
-	 $(MAKE) --no-print-directory fixtures >/dev/null || { rm -f "$$before"; exit 1; }; \
-	 changed=$$($(FIXTURE_SUMS) | LC_ALL=C comm -13 "$$before" - | awk '{ print $$3 }'); rm -f "$$before"; \
-	 if [ -n "$$changed" ]; then \
-	   echo "fixtures are stale; 'make fixtures' rewrote these, so commit the result:"; \
-	   echo "$$changed"; \
+	@before=$$($(FIXTURE_SUMS)); \
+	 $(MAKE) --no-print-directory fixtures >/dev/null || exit 1; \
+	 after=$$($(FIXTURE_SUMS)); \
+	 if [ "$$before" != "$$after" ]; then \
+	   echo "fixtures are stale; 'make fixtures' created, rewrote or removed these, so commit the result:"; \
+	   printf '%s\n%s\n' "$$before" "$$after" | LC_ALL=C sort | uniq -u | awk '{ print $$3 }' | LC_ALL=C sort -u; \
 	   exit 1; \
 	 fi
 	@echo "Fixtures up to date"
