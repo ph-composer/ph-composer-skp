@@ -23,7 +23,10 @@ module ThermalBridgeReferenceModel
 
   def build
     model = Sketchup.active_model
-    raise "Build the reference model in an empty Model." unless model.entities.length.zero?
+    # The blank template's scale figure may stay; any geometry would confuse the named paths.
+    unless model.entities.grep(Sketchup::Group).empty? && model.entities.grep(Sketchup::Edge).empty?
+      raise "Build the reference model in an empty Model."
+    end
 
     client = AuthoringExample::Client.new
     zone_a = AuthoringExample.box(model.entities, "Zone A", [0, 0, 0], 5000.mm, 4000.mm, 3000.mm)
@@ -34,10 +37,13 @@ module ThermalBridgeReferenceModel
                              Geom::Transformation.rotation(ORIGIN, Z_AXIS, 30.degrees)
     zone_w = AuthoringExample.box(wrapper.entities, "Zone W", [0, 0, 0], 2000.mm, 2000.mm, 2000.mm)
     model.entities.add_line([0, -2000.mm, 0], [3000.mm, -2000.mm, 0])
-    [[[], zone_a], [[], zone_b], [[wrapper.persistent_id], zone_w]].each do |parent_path, group|
-      checked(client, "ph_composer.zones.make", "parent_path" => parent_path, "entity_ids" => [group.persistent_id],
-                                                "name" => group.name)
+    # Make Zone acts in the open edit context, so Zone W is made with the wrapper open.
+    [[nil, zone_a], [nil, zone_b], [wrapper, zone_w]].each do |parent, group|
+      model.active_path = parent && [parent]
+      checked(client, "ph_composer.zones.make", "parent_path" => parent ? [parent.persistent_id] : [],
+                                                "entity_ids" => [group.persistent_id], "name" => group.name)
     end
+    model.active_path = nil
     TYPES.each do |name, psi, group|
       checked(client, "ph_composer.thermal_bridges.types.create",
               "values" => { "name" => name, "psi_w_mk" => psi, "group" => group })

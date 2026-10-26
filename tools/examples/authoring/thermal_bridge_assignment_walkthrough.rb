@@ -17,14 +17,13 @@ module ThermalBridgeAssignmentWalkthrough
 
   # The selected Edges, each as `{ path, type, quantity, copied, reason, refusal }` with the type's name.
   def selection
-    value = read("#{PREFIX}.edges.selection")
     names = type_names
-    { "edges" => value.fetch("edges").map do |row|
+    { "edges" => selected_rows.map do |row|
       values = row.fetch("values")
       { "path" => row.fetch("path"), "type" => names[values["thermal_bridge_type_id"]],
         "quantity" => values["quantity"], "copied" => row.fetch("copied"), "reason" => row.fetch("reason"),
         "refusal" => row.dig("write_refusal", "code") }
-    end, "ignored" => value.fetch("ignored").length }
+    end }
   end
 
   def assign(type_name, quantity: 1)
@@ -43,9 +42,28 @@ module ThermalBridgeAssignmentWalkthrough
 
   def write(name, params = {})
     client = AuthoringExample::Client.new
-    rows = read("#{PREFIX}.edges.selection").fetch("edges")
+    rows = selected_rows
+    # An Edge no Zone holds has no reference to send; its reason is the refusal.
+    if (unreachable = rows.find { |row| row["reference"].nil? })
+      return { "status" => "refused", "code" => unreachable.fetch("reason"), "effect" => "none" }
+    end
+
     targets = rows.map { |row| { "reference" => row.fetch("reference"), "expected_values" => row.fetch("values") } }
     client.invoke("#{PREFIX}.#{name}", params.merge("targets" => targets))
+  end
+
+  # Every selected Edge, read a bounded page at a time as an agent would.
+  def selected_rows
+    rows = []
+    params = {}
+    loop do
+      page = read("#{PREFIX}.edges.selection", params)
+      rows.concat(page.fetch("edges"))
+      break unless page.fetch("next_cursor")
+
+      params = { "cursor" => page.fetch("next_cursor") }
+    end
+    rows
   end
 
   def type_id(name)
@@ -56,8 +74,8 @@ module ThermalBridgeAssignmentWalkthrough
     read("#{PREFIX}.types.all").fetch("records").to_h { |row| [row.fetch("id"), row.dig("values", "name")] }
   end
 
-  def read(name)
-    result = AuthoringExample::Client.new.query(name)
+  def read(name, params = {})
+    result = AuthoringExample::Client.new.query(name, params)
     raise "#{name} failed: #{result['code']} #{result['message']}" unless result["status"] == "completed"
 
     result.fetch("value")

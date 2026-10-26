@@ -92,8 +92,9 @@ Assign a type to Edges with `ph_composer.thermal_bridges.edges.assign`, the expl
 route: each target is an Edge reference inside its Zone (`zone_id`, `zone_path`, `entity_path`,
 `entity_id`) with the assignment values you read as `expected_values`, plus one type id and a
 quantity (1 when absent). `ph_composer.thermal_bridges.edges.selection` returns the selected Edges in
-that shape, each with the Zone holding it and the refusal a write would meet; an Edge outside every
-Zone has no reference and cannot be assigned. For a native path you hold yourself,
+that shape a bounded page at a time, each with the Zone holding it and the refusal a write would
+meet; follow `next_cursor` to read them all. An Edge outside every Zone has no reference and cannot
+be assigned. For a native path you hold yourself,
 `ph_composer.zones.containment` answers which Zone holds it. One command reaches at most 250 Edges
 and refuses as a whole if any target changed or cannot be written. `ph_composer.thermal_bridges.edges.clear`
 removes the assignment. Each is one Undo step. An Edge split or copied in SketchUp keeps its

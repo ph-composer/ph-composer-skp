@@ -42,6 +42,7 @@ module PhComposer
         # no assignment is left alone.
         def clear(request, proposal, targets:)
           updates = resolve(request, targets).filter_map { |located, before| before && update(located, before, nil) }
+          check_removals!(request, proposal, updates)
           propose(proposal, updates)
           { "cleared" => updates.length }
         end
@@ -76,6 +77,7 @@ module PhComposer
             end
           end
           refuse_stranded(from, stranded) unless stranded.empty?
+          check_removals!(request, proposal, updates)
           propose(proposal, updates)
           plan(updates)
         end
@@ -130,6 +132,25 @@ module PhComposer
           [request.locate(EDGE_KIND, reference(row, record), :index => index), nil]
         rescue CodedError => error
           [nil, error.code]
+        end
+
+        # Refuses `reference.in_use` when a record, a readable unavailable extension's included, still names an
+        # assignment id these updates remove (context/EXTENSIBILITY.md, "Entity-owned reference targets"). An
+        # id a copied Edge outside the updates keeps survives, so only ids no other Edge holds are checked. An
+        # invalid record is no resolvable target, so it cannot be referenced and is not checked.
+        def check_removals!(request, proposal, updates)
+          removed = updates.reject { |row| row.fetch("after") }
+                           .select { |row| RECORD_KIND.problems(row.fetch("before")).empty? }
+          return if removed.empty?
+
+          gone = removed.map { |row| key(row.fetch("reference")) }
+          kept = Target.entries(request.model).reject { |entry| gone.include?(entry.key) }
+                       .map { |entry| entry.record["id"] }
+          checked = plan(removed)
+          (removed.map { |row| row.fetch("before").fetch("id") }.uniq - kept).each do |id|
+            request.engine.check_identity_removal!(EDGE_KIND, id, :change_set => proposal.record_changes,
+                                                                  :reference_plan => checked)
+          end
         end
 
         def check_expected!(before, expected)

@@ -56,8 +56,9 @@ module PhComposer
                     "snapshot section, and types.create, types.update, types.duplicate and types.delete." },
       { "minor" => 11, "date" => "2026-10-25",
         "change" => "ph_composer.zones.containment is new. ph_composer.thermal_bridges.edges.assign, edges.clear, " \
-                    "edges.selection and the edges.selected snapshot section are new, over the " \
-                    "ph_composer.thermal_bridges.edge reference target; types.delete takes replacement_id." }
+                    "edges.selection (bounded), edges.selection_all and the edges.selected snapshot section are " \
+                    "new, over the ph_composer.thermal_bridges.edge reference target; types.delete takes " \
+                    "replacement_id." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

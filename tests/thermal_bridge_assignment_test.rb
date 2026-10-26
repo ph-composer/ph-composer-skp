@@ -115,6 +115,50 @@ class ThermalBridgeAssignmentTest < PhComposerTestCase
     assert_nil STORE.read(live(100, 101))
   end
 
+  def test_clearing_an_assignment_another_record_names_refuses_unless_a_copy_keeps_its_id
+    assign([target(@edges.first)], @parapet)
+    assign([target(@edges[1])], @slab)
+    named = STORE.read(@edges.first).fetch("id")
+    envelope = { "schema_version" => 1, "payload" => { "edge" => named }, "export_relevance" => "local_only",
+                 "references" => [{ "path" => "$.edge", "target_kind" => TB::EDGE_KIND, "cardinality" => "one" }] }
+    STORE.write(@edges[1], STORE.read(@edges[1]).merge("extension_data" => { "other.tool" => envelope }))
+    [["edges.clear", { "targets" => [target(@edges.first)] }],
+     ["types.delete", { "id" => @parapet, "replacement_id" => nil }]].each do |name, params|
+      result = invoke(name, params)
+      assert_equal %w[refused reference.in_use none], result.values_at("status", "code", "effect"), name
+    end
+    STORE.write(@edges[2], STORE.read(@edges.first))
+    assert_equal "committed", invoke("edges.clear", "targets" => [target(@edges.first)])["effect"]
+  end
+
+  def test_a_stored_value_of_the_wrong_type_still_reads_and_clears
+    STORE.write(@edges.first, "id" => "tbe_BADBADBADBAD", "schema_version" => 1,
+                              "thermal_bridge_type_id" => @parapet, "quantity" => "two", "invented" => true)
+    @model.active_path = [@zone_a]
+    @model.selection.add([@edges.first])
+    row = selection.fetch("edges").first
+    assert_equal "two", row.dig("values", "quantity")
+    refute_nil row.fetch("record_problem")
+    cleared = invoke("edges.clear", "targets" => [{ "reference" => row.fetch("reference"),
+                                                    "expected_values" => row.fetch("values") }])
+    assert_equal "committed", cleared["effect"], cleared.inspect
+  end
+
+  def test_the_selection_pages_within_its_bound_and_a_changed_selection_expires_the_cursor
+    @model.active_path = [@zone_a]
+    @model.selection.add(@edges)
+    first = selection("limit" => 2)
+    assert_equal [3, [[100, 101], [100, 102]]], [first.fetch("total"), first.fetch("edges").map { |row| row["path"] }]
+    second = selection("limit" => 2, "cursor" => first.fetch("next_cursor"))
+    assert_equal [[[100, 103]], nil], [second.fetch("edges").map { |row| row["path"] }, second.fetch("next_cursor")]
+    @model.selection.remove(@edges.last)
+    expired = API.query(:context => @context, :name => "#{TB::FEATURE_ID}.edges.selection",
+                        :params => { "limit" => 2, "cursor" => first.fetch("next_cursor") })
+    assert_equal %w[refused query.cursor_expired], expired.values_at("status", "code")
+    all = API.query(:context => @context, :name => "#{TB::FEATURE_ID}.edges.selection_all")
+    assert_equal 2, all.dig("value", "edges").length
+  end
+
   def test_the_selection_client_assigns_and_clears_what_is_selected
     @model.active_path = [@zone_a]
     @model.selection.add(@edges)
@@ -254,8 +298,8 @@ class ThermalBridgeAssignmentTest < PhComposerTestCase
     invoke("edges.assign", "targets" => targets, "thermal_bridge_type_id" => type_id, "quantity" => quantity)
   end
 
-  def selection
-    result = API.query(:context => @context, :name => "#{TB::FEATURE_ID}.edges.selection")
+  def selection(params = {})
+    result = API.query(:context => @context, :name => "#{TB::FEATURE_ID}.edges.selection", :params => params)
     assert_equal "completed", result["status"], result.inspect
     result.fetch("value")
   end

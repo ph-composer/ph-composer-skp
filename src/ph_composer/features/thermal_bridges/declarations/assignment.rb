@@ -11,11 +11,14 @@ module PhComposer
                         target.shared_definition target.wrong_hierarchy target.wrong_kind target.wrong_zone
                         validation.failed].freeze
       ASSIGN = (TARGET_CODES + %w[gesture.too_large]).freeze
+      CLEAR = (ASSIGN + %w[copy.rule_missing reference.in_use]).freeze
       SELECTION = %w[gesture.too_large record.unreadable validation.failed].freeze
+      SELECTION_PAGE = (SELECTION + %w[query.cursor_expired query.limit_invalid]).freeze
 
       REFERENCE = Assignment::Target::REFERENCE
-      VALUES = Shapes.object({ "thermal_bridge_type_id" => Shapes::TEXT,
-                               "quantity" => { "type" => "number" } }, :optional => %w[thermal_bridge_type_id quantity])
+      # An assignment's values as stored: thermal_bridge_type_id and quantity, or whatever an invalid record
+      # holds, so a read never refuses the record it is there to help clear.
+      VALUES = { "type" => "object" }.freeze
       EXPECTED = VALUES.merge("description" => "The Edge's assignment values as last read; {} or absent for an Edge " \
                                                "with none. A changed value refuses as target.changed.")
       TARGETS = Shapes.list(Shapes.object({ "reference" => REFERENCE, "expected_values" => EXPECTED },
@@ -45,7 +48,8 @@ module PhComposer
                                        "description" => "The Edge's reference, or null when no Zone holds it."),
         "zone" => ZONE,
         "reason" => { "type" => %w[string null], "description" => "Why no Zone holds it; null with a Zone." },
-        "values" => VALUES.merge("description" => "The Edge's assignment values; empty when it has none."),
+        "values" => VALUES.merge("description" => "The Edge's assignment values as stored (thermal_bridge_type_id " \
+                                                  "and quantity); empty when it has none."),
         "copied" => { "type" => "boolean",
                       "description" => "Whether another Edge carries the same assignment id, as a split or a copy " \
                                        "leaves it. Routine; nothing repairs it." },
@@ -54,7 +58,7 @@ module PhComposer
                                                "still be cleared or reassigned." },
         "write_refusal" => REFUSAL
       })
-      SELECTION_RESULT = Shapes.object({
+      SELECTION_ALL = Shapes.object({
         "edges" => Shapes.list(SELECTED_ROW),
         "ignored" => Shapes.list(Shapes.object({ "persistent_id" => { "type" => "integer" }, "type" => Shapes::TEXT }))
                            .merge("description" => "Selected entities that are not Edges, the first " \
@@ -62,6 +66,10 @@ module PhComposer
         "ignored_total" => { "type" => "integer", "minimum" => 0,
                              "description" => "How many selected entities are not Edges." }
       })
+      PAGE_PROPERTIES = { "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL }.freeze
+      SELECTION_PAGE_RESULT = Shapes.object(SELECTION_ALL.fetch("properties").merge(PAGE_PROPERTIES))
+      SELECTION_PARAMS = Shapes.object({ "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR },
+                                       :optional => %w[limit cursor])
       CLEAR_RESULT = Shapes.object({ "cleared" => { "type" => "integer", "minimum" => 0,
                                                     "description" => "Edges whose assignment was removed." } })
       PRECONDITIONS = ["Each Edge is inside a Zone, reached through no shared, locked or other Zone storage.",
@@ -73,12 +81,17 @@ module PhComposer
         feature.reference_target(Assignment::TARGET)
         install_writes(feature)
         feature.query("#{PREFIX}.selection",
-                      :description => "The selected Edges under the active path, each with the Zone holding it, its " \
-                                      "assignment and the refusal a write meets; other entities are reported as " \
-                                      "ignored.",
-                      :refuses => SELECTION, :params => Shapes::NONE, :result => SELECTION_RESULT,
-                      :examples => [{}]) { |request| Assignment::Selection.read(request) }
-        feature.snapshot_section("#{PREFIX}.selected", :query => "#{PREFIX}.selection")
+                      :description => "One bounded page of the selected Edges under the active path, each with the " \
+                                      "Zone holding it, its assignment and the refusal a write meets; other " \
+                                      "entities are reported as ignored.",
+                      :refuses => SELECTION_PAGE, :params => SELECTION_PARAMS, :result => SELECTION_PAGE_RESULT,
+                      :examples => [{}, { "limit" => 50 }]) { |request| Assignment::Selection.page(request) }
+        feature.query("#{PREFIX}.selection_all",
+                      :description => "Every selected Edge in one read, for the panel and the menu route.",
+                      :response => { "bounded" => false, "prefer" => "#{PREFIX}.selection" },
+                      :refuses => SELECTION, :params => Shapes::NONE, :result => SELECTION_ALL,
+                      :examples => [{}]) { |request| Assignment::Selection.all(request) }
+        feature.snapshot_section("#{PREFIX}.selected", :query => "#{PREFIX}.selection_all")
       end
 
       def install_writes(feature)
@@ -102,7 +115,7 @@ module PhComposer
         end
         feature.action("#{PREFIX}.clear",
                        :description => "Remove the thermal bridge assignment from explicit Edges.",
-                       :refuses => ASSIGN, :params => Shapes.object({ "targets" => TARGETS }),
+                       :refuses => CLEAR, :params => Shapes.object({ "targets" => TARGETS }),
                        :result => CLEAR_RESULT,
                        :undo_name => "Clear Thermal Bridge", :preconditions => PRECONDITIONS,
                        :side_effects => "Removes the assignment record from each Edge.",

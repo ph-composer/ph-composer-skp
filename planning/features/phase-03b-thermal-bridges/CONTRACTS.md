@@ -120,8 +120,9 @@ test covers it. Id params carry the prefix pattern, for example `^tbt_[A-Za-z0-9
 | `types.delete` | action | P3b-02; replacement from P3b-03 | Guarded delete; with `replacement_id` every assigned Edge is rewritten to it, and with an explicit null every assigned Edge's dictionary is removed, in the same proposal and Undo step |
 | `edges.assign` | action | P3b-03 | Explicit Edge references, a type id, a quantity, and each target's `expected_values`. Assign and reassign. One Undo step. Each target resolves through the Edge target's `locate:`, which already answers every containment refusal, so the action does not also call `zones.containment` (P3b-03) |
 | `edges.clear` | action | P3b-03 | Explicit Edge references. Removes the assignment dictionary |
-| `edges.selection` | query | P3b-03 | The current native selection as Edge references, each with its Zone containment, current assignment and write refusal |
-| `edges.selected` | snapshot section | P3b-03 | The same for the panel's assign bar |
+| `edges.selection` | query | P3b-03 | The current native selection as Edge references, each with its Zone containment, current assignment and write refusal; one bounded page, its cursor bound to the selection and the revision (P3b-03, Codex review) |
+| `edges.selection_all` | query | P3b-03 | The same, unbounded, naming `edges.selection` as `prefer`; the panel section and the menu route read it |
+| `edges.selected` | snapshot section | P3b-03 | `edges.selection_all`, for the panel's assign bar |
 | `schedule` | query, snapshot section | P3b-04 | Runs with identifier (`tb_` and a digest of Zone, type, container path and canonical endpoints, D3b-07 and D3b-23), Zone, Building-Segment, type, length in metres, psi, quantity and psi times length times quantity in W/K; totals by type and by group; findings per run. Bounded |
 | `runs.locate` | view command | P3b-04 | Select a run's Edges and zoom to them. Refuses hidden targets. A run inside a nested Zone opens its context through the foundation's `ph_composer.context.open` (D3a1-04), never a Zones or thermal-bridge navigation of its own |
 | `assign_menu` | `menu_entries` | P3b-05 | "Thermal bridge" submenu on a selection of Edges: one item per type, then Clear |

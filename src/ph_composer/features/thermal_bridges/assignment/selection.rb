@@ -11,11 +11,34 @@ module PhComposer
 
         module_function
 
+        PAGED = "#{FEATURE_ID}.edges.selection".freeze
+
         # Each selected Edge under the active path with the Zone holding it, its assignment as stored and the
         # refusal a write to it meets; anything else selected is reported as ignored and never assigned. An
         # Edge no Zone holds has no reference, and its reason says why. An invalid assignment is read, with
         # its first problem, so it can still be cleared.
-        def read(request)
+        def all(request)
+          rows, others = rows(request)
+          { "edges" => rows }.merge(ignored(others))
+        end
+
+        # The same rows a bounded page at a time, in path order. A cursor is bound to the selection as well
+        # as the revision, since selecting changes no revision.
+        def page(request)
+          rows, others = rows(request)
+          binding = "#{request.revision}/#{CanonicalJson.digest(rows.map { |row| row.fetch('path') })}"
+          page, cursor = Pages.bounded(request, PAGED, rows, :key => ->(row) { row.fetch("path") },
+                                                             :revision => binding)
+          { "edges" => page, "next_cursor" => cursor, "total" => rows.length }.merge(ignored(others))
+        end
+
+        def ignored(others)
+          { "ignored" => others.first(IGNORED_ROWS).map do |entity|
+            { "persistent_id" => entity.persistent_id, "type" => entity.typename }
+          end, "ignored_total" => others.length }
+        end
+
+        def rows(request)
           model = request.model
           edges, others = model.selection.to_a.partition { |entity| entity.is_a?(Sketchup::Edge) }
           if edges.length > Assignment.gesture_edge_limit
@@ -24,15 +47,11 @@ module PhComposer
           end
 
           parent = Array(model.active_path)
+          edges = edges.sort_by { |edge| (parent + [edge]).map(&:persistent_id) }
           paths = edges.map { |edge| (parent + [edge]).map(&:persistent_id) }
-          rows = Operations.contained(request, paths)
           records = edges.map { |edge| STORE.read(edge) }
           copied = copied_ids(model, records)
-          ignored = others.first(IGNORED_ROWS).map do |entity|
-            { "persistent_id" => entity.persistent_id, "type" => entity.typename }
-          end
-          { "edges" => rows.zip(records).map { |row, record| row(row, record, copied) }, "ignored" => ignored,
-            "ignored_total" => others.length }
+          [Operations.contained(request, paths).zip(records).map { |row, record| row(row, record, copied) }, others]
         end
 
         def row(containment, record, copied)
@@ -55,7 +74,7 @@ module PhComposer
           counts = Target.entries(model).map { |entry| entry.record["id"] }.tally
           ids.select { |id| counts.fetch(id, 0) > 1 }
         end
-        private_class_method :row, :copied_ids
+        private_class_method :rows, :row, :copied_ids, :ignored
 
         def client(session)
           session.feature_state(:thermal_bridges_selection_menu) { Client.new(session) }
@@ -85,7 +104,7 @@ module PhComposer
           private
 
           def invoke(name)
-            read = API.query(:context => @context, :name => "#{PREFIX}.selection")
+            read = API.query(:context => @context, :name => "#{PREFIX}.selection_all")
             return show(read) unless read["status"] == "completed"
 
             rows = read.fetch("value").fetch("edges")
