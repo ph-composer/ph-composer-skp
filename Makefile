@@ -39,7 +39,9 @@ syntax:
 # JavaScript tests run under tools/js_test_guard.js, which kills the test process tree once its resident
 # memory passes JS_TEST_MAX_RSS_MB, and each test has a time limit. A failing assertion that printed a stub
 # DOM node once grew three processes past 100 GB each and stalled the machine; a Node heap flag does not
-# stop that, because the memory is not the JS heap.
+# stop that, because the memory is not the JS heap. `--test-force-exit` ends each file once its tests
+# finish: a panel test leaves a request pending, and its 20 s recovery timer (request.js) otherwise holds
+# the process open, about 20 s idle per file.
 JS_TEST_MAX_RSS_MB ?= 4096
 NODE_TEST_TIMEOUT_MS ?= 60000
 export JS_TEST_MAX_RSS_MB
@@ -51,7 +53,7 @@ export JS_TEST_MAX_RSS_MB
 test: hooks-auto
 	@$(RUBY) -Itests tests/parallel_tests.rb; ruby_status=$$?; \
 	 if [ -n "$(JS_TESTS)" ]; then \
-	   node tools/js_test_guard.js node --test --test-timeout=$(NODE_TEST_TIMEOUT_MS) $(JS_TESTS); js_status=$$?; \
+	   node tools/js_test_guard.js node --test --test-force-exit --test-timeout=$(NODE_TEST_TIMEOUT_MS) $(JS_TESTS); js_status=$$?; \
 	 else echo "JavaScript suite: no tests found"; js_status=1; fi; \
 	 uv run pytest; py_status=$$?; \
 	 exit $$((ruby_status | js_status | py_status))
