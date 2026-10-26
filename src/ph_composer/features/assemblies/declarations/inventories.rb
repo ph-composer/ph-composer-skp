@@ -32,10 +32,8 @@ module PhComposer
       module_function
 
       def result(row, paged:, categories: false)
-        properties = { "records" => Shapes.list(row), "unreadable" => Shapes::UNREADABLE }
-        properties["categories"] = Shapes.list(CATEGORY) if categories
-        properties.merge!("next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL) if paged
-        Shapes.object(properties)
+        extra = categories ? { "categories" => Shapes.list(CATEGORY) } : {}
+        DefinitionLists.result(row, :paged => paged, :extra => extra)
       end
 
       def install(feature)
@@ -50,9 +48,9 @@ module PhComposer
         prefix = "#{FEATURE_ID}.#{collection}"
         feature.query("#{prefix}.list", :description => "One bounded page of #{collection}, with display findings.",
                                         :refuses => Refuses::PAGE,
-                                        :params => Shapes.list_params,
+                                        :params => DefinitionLists.params(row),
                                         :result => result(row, :paged => true, :categories => categories),
-                                        :examples => [{}, { "limit" => 20 }]) do |request|
+                                        :examples => [{}, { "limit" => 20 }, { "fields" => %w[values] }]) do |request|
           read.call(request, true)
         end
         feature.query("#{prefix}.all",

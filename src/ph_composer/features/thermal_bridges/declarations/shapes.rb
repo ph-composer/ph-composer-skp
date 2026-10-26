@@ -10,7 +10,6 @@ module PhComposer
       OBJECT = { "type" => "object" }.freeze
       NONE = object({}).freeze
       RESULT = object({ "id" => TEXT }).freeze
-      UNREADABLE = list(object(%w[id code message].to_h { |key| [key, TEXT] })).freeze
       EXPECTED = "Any of the record's values as last read; if one changed since, the edit is refused as " \
                  "target.changed. {} skips the check."
       USER_DATA = { "type" => "object",
@@ -46,12 +45,6 @@ module PhComposer
 
       def view(kind)
         with(kind.descriptor.view_schema, "kind" => TEXT, "extension_status" => OBJECT)
-      end
-
-      def list_params
-        object({ "ids" => list(TEXT).merge("maxItems" => Pages::MAXIMUM_LIMIT,
-                                           "description" => "Only these record ids; every record when absent."),
-                 "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR }, :optional => %w[ids limit cursor])
       end
     end
   end

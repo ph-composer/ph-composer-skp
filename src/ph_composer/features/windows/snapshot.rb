@@ -6,65 +6,41 @@ module PhComposer
     module Snapshot
       module_function
 
-      def read(engine, kind, ids)
-        rows = []
-        unreadable = []
-        ids.each do |id|
-          rows << engine.find(kind.id, id)
-        rescue CodedError => error
-          raise unless error.code == "record.unreadable"
-
-          unreadable << { "id" => id, "code" => error.code, "message" => error.message }
-        end
-        [rows, unreadable]
-      end
-
       # Every readable record of `kind`, in id order; an unreadable one is skipped, so a context menu
       # or Colour-by mode built from them keeps working around it.
       def readable(engine, kind)
-        read(engine, kind, engine.ids(kind.id).sort).first
+        DefinitionLists.read(engine, kind.id, engine.ids(kind.id).sort).first
       end
 
-      # The page of `kind`'s ids a list or all query reads, its cursor and the total.
-      def page(request, kind, query, paged)
-        ids = request.engine.ids(kind.id).sort
-        ids &= request.params["ids"] if request.params.key?("ids")
-        page, cursor = paged ? Pages.slice(request, query, ids, :key => ->(id) { id }) : [ids, nil]
-        [page, cursor, ids.length]
-      end
-
-      def result(views, unreadable, cursor, total, paged)
-        result = { "records" => views, "unreadable" => unreadable }
-        result.merge!("next_cursor" => cursor, "total" => total) if paged
-        result
+      # The list query's page or the all query's whole inventory, each row as the block builds it.
+      def rows(request, query, kind, paged, &row)
+        paged ? DefinitionLists.list(request, query, kind.id, &row) : DefinitionLists.all(request.engine, kind.id, &row)
       end
 
       # Every product by collection, then id: what a Type's thermal values and findings read.
       def products_by_collection(request)
         Products::KINDS.to_h do |collection, kind|
-          rows = read(request.engine, kind, request.engine.ids(kind.id)).first
+          rows = DefinitionLists.read(request.engine, kind.id, request.engine.ids(kind.id)).first
           [collection, rows.to_h { |row| [row.fetch("id"), row] }]
         end
       end
 
       def types(request, paged: true)
-        ids, cursor, total = page(request, Types::KIND, "#{FEATURE_ID}.types.list", paged)
-        records, unreadable = read(request.engine, Types::KIND, ids)
         settings = Settings.read(request.model)
         products = products_by_collection(request)
-        views = records.map { |record| type(request.engine.view(TYPE_KIND, record), record, products, settings) }
-        result(views, unreadable, cursor, total, paged)
+        rows(request, "#{FEATURE_ID}.types.list", Types::KIND, paged) do |record|
+          type(request.engine.view(TYPE_KIND, record), record, products, settings)
+        end
       end
 
       def products(request, collection, paged: true)
         kind = Products::KINDS.fetch(collection)
-        ids, cursor, total = page(request, kind, "#{FEATURE_ID}.#{collection}.list", paged)
-        records, unreadable = read(request.engine, kind, ids)
         settings = Settings.read(request.model)
-        types = read(request.engine, Types::KIND, request.engine.ids(TYPE_KIND)).first
+        types = DefinitionLists.read(request.engine, TYPE_KIND, request.engine.ids(TYPE_KIND)).first
         uses = Graph.uses(types, settings.fetch("default_psi_install_id"))
-        views = records.map { |record| product(request.engine.view(kind.id, record), record, kind, uses, settings) }
-        result(views, unreadable, cursor, total, paged)
+        rows(request, "#{FEATURE_ID}.#{collection}.list", kind, paged) do |record|
+          product(request.engine.view(kind.id, record), record, kind, uses, settings)
+        end
       end
 
       def type(view, record, products, settings)

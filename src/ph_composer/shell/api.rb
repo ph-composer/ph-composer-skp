@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 14
+    MINOR = 15
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -71,7 +71,11 @@ module PhComposer
         "change" => "ph_composer.windows.units.outlines (bounded) is new: each placed Window's world outline. " \
                     "ph_composer.thermal_bridges.export_preflight is new, with the " \
                     "ph_composer.thermal_bridges.export.thermal_bridges export section and the " \
-                    "thermal_bridge.on_window_perimeter code." }
+                    "thermal_bridge.on_window_perimeter code." },
+      { "minor" => 15, "date" => "2026-10-26",
+        "change" => "The definition lists (ph_composer.assemblies.materials.list and assemblies.list, the Window " \
+                    "product and Type lists, ph_composer.thermal_bridges.types.list) take fields, keeping kind, id " \
+                    "and schema_version on every row, and cut each page by size as well as by limit." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

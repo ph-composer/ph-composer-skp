@@ -41,10 +41,10 @@ module PhComposer
       end
 
       def preflight(request)
-        materials, bad_materials = Snapshot.read_records(request.engine, MATERIAL_KIND,
-                                                         request.engine.ids(MATERIAL_KIND))
-        assemblies, bad_assemblies = Snapshot.read_records(request.engine, ASSEMBLY_KIND,
-                                                           request.engine.ids(ASSEMBLY_KIND))
+        materials, bad_materials = DefinitionLists.read(request.engine, MATERIAL_KIND,
+                                                        request.engine.ids(MATERIAL_KIND))
+        assemblies, bad_assemblies = DefinitionLists.read(request.engine, ASSEMBLY_KIND,
+                                                          request.engine.ids(ASSEMBLY_KIND))
         by_id = materials.to_h { |row| [row.fetch("id"), row] }
         material_findings = materials.to_h { |row| [row.fetch("id"), Validation.material(row)] }
         findings = material_findings.values.flatten

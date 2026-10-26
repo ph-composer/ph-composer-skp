@@ -11,7 +11,6 @@ module PhComposer
       NONE = object({}).freeze
       RESULT = object({ "id" => TEXT }).freeze
       TYPE_RESULT = object({ "id" => TEXT, "unit_count" => { "type" => "integer", "minimum" => 0 } }).freeze
-      UNREADABLE = list(object(%w[id code message].to_h { |key| [key, TEXT] })).freeze
       FINDING = object({ "code" => TEXT, "message" => TEXT, "element_id" => TEXT, "side" => TEXT,
                          "product_id" => TEXT }, :optional => %w[element_id side product_id]).freeze
       EXPECTED = "Any of the record's values as last read; if one changed since, the edit is refused as " \
