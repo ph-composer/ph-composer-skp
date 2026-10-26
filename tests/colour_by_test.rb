@@ -843,6 +843,25 @@ class ColourByTest < PhComposerTestCase
     assert_equal 2, service.rebuilds
   end
 
+  # Moving a shown tag into or out of a hidden folder changes what is painted through the move's own event.
+  def test_moving_a_tag_into_and_out_of_a_hidden_folder_rebuilds_the_drawing
+    group = zone_group(1420, %w[Wall Wall])
+    tag = Sketchup::Tag.new("North wall", true)
+    group.entities.to_a.first.layer = tag
+    hidden = Sketchup::LayerFolder.new("Hidden", false)
+    service = activate("ph_composer.zones.faces.by_face_type")
+    observer = PhComposer::HostObservers::LayersObserver.new
+
+    tag.folder = hidden
+    observer.onParentFolderChanged(@model.layers, tag)
+    assert_equal 3, service.fills.values.first.length, "moved in: not painted"
+
+    tag.folder = nil
+    observer.onParentFolderChanged(@model.layers, tag)
+    assert_equal 6, service.fills.values.first.length, "moved out: painted again"
+    assert_equal [2, 3], [service.rows.first.count, service.rebuilds]
+  end
+
   # ------------------------------------------------------------------ reads
 
   def test_a_projection_that_raises_turns_its_own_mode_off_rather_than_the_extension

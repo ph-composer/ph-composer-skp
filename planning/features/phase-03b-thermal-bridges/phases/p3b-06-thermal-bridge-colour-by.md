@@ -76,7 +76,8 @@ id (`context/SKETCHUP_HOST_BEHAVIOR.md`, "Overlays"). Repeat the Colour-by cases
 
 - `ColourBy::Tessellation.skipped?` treats a tag inside a hidden tag folder as hidden, as `runs.locate`
   already did (the defect Codex found in P3b-04's review), and the session's tag observer publishes
-  `tags_changed` for tag folder events, so a folder hidden in the Tags panel rebuilds the drawing. This
+  `tags_changed` for tag folder events and for a tag or folder moved to another folder, so a folder
+  hidden in the Tags panel rebuilds the drawing. This
   touches every mode, not only this one: Faces, Zones, Windows and Spaces stop painting geometry under a
   hidden folder. Whether SketchUp fires the folder event for a visibility toggle is a host fact T06
   checks.
