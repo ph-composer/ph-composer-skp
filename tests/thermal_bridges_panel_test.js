@@ -128,6 +128,38 @@ test("Assign sends the assignable Edges with their values; Clear only those hold
     { thermal_bridge_type_id: "tbt_b", quantity: 2 });
 });
 
+test("Clear takes an invalid assignment that reads with no values", function () {
+  var broken = fixtures.edge(103);
+  broken.reference.entity_id = "tbe_BADBADBADBAD";
+  broken.record_problem = "thermal_bridge_type_id is required";
+  var o = setup([broken]), bar = o.view.types.bar;
+  assert.strictEqual(bar.clear.disabled, false);
+  bar.clear.listeners.click({});
+  var clear = named(o, PREFIX + "edges.clear")[0].payload.params;
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(clear.targets)), [{ reference: broken.reference,
+    expected_values: {} }]);
+});
+
+test("the Group column filters by METr's words and sorts from its menu", function () {
+  var o = setup(), inventory = o.view.types.inventory;
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(inventory.filterValues("group").map(function (entry) {
+    return entry.label; }))), ["Ambient", "Perimeter", "Floor slab / basement ceiling"]);
+  assert.strictEqual(inventory.controls.orderBy.parentNode.hidden, true, "column menus replace Order by");
+  inventory.controls.filterColumn("group", ["17-FS/BC"]);
+  function rows() {
+    return o.root.querySelector(".tb-types").querySelectorAll("[data-row-key]").filter(function (row) {
+      return !row.hidden && /^tbt_/.test(row.getAttribute("data-row-key"));
+    }).map(function (row) { return row.getAttribute("data-row-key"); });
+  }
+  var shown = rows();
+  assert.deepStrictEqual(shown, ["tbt_b"]);
+  assert.ok(inventory.menus.group.filtered(), "the filtered column's menu says so");
+  assert.strictEqual(inventory.menus.color, undefined, "Color offers no menu");
+  inventory.controls.filterColumn("group", null);
+  inventory.controls.sortBy("psi_w_mk", "asc");
+  assert.deepStrictEqual(rows(), ["tbt_b", "tbt_a"]);
+});
+
 test("a schedule row's Locate sends runs.locate with that run's Edges", function () {
   var o = setup();
   readSchedule(o);

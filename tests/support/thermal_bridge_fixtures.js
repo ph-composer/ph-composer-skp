@@ -26,8 +26,8 @@ function schedule() {
     heat_loss_w_k: 2.16, closed: true, points_m: [[0, 0, 3], [5, 0, 3], [5, 4, 3], [0, 4, 3], [0, 0, 3]],
     edge_paths: [[100, 101], [100, 102], [100, 103], [100, 104]], shared: false,
     findings: [{ code: "thermal_bridge.counted_twice", blocks_export: false,
-      message: "Zone B tags the same line. Clear it in one Zone.",
-      locate: { edge_paths: [[100, 101], [200, 201]] } }] };
+      message: "1 Edge also assigned in another Zone, so the bridge is counted twice; clear one.",
+      locate: { edge_paths: [[100, 101]] } }] };
   return { runs: [run], edge_findings: [], edge_finding_total: 0, unreadable: [], unreadable_total: 0,
     totals: { by_type: [{ type_id: "tbt_a", type_name: "Parapet", group: "15-Ambient", run_count: 1, edge_count: 4,
       length_m: 18, heat_loss_w_k: 2.16 }],

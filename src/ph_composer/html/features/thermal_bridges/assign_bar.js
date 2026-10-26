@@ -11,7 +11,9 @@ PhComposerUI.define("features/thermal_bridges/assign_bar", ["request", "snapshot
   function clone(value) { return JSON.parse(JSON.stringify(value)); }
   /* The same rule the right-click menu applies (Assignment::Selection.assignable?). */
   function assignable(row) { return Boolean(row.reference) && !row.write_refusal; }
-  function assigned(row) { return Object.keys(row.values || {}).length > 0; }
+  /* An Edge holding an assignment, an invalid one included: it reads with empty values and its problem, and
+     Clear is how it goes. */
+  function assigned(row) { return Object.keys(row.values || {}).length > 0 || Boolean(row.record_problem); }
   function plural(count, word) { return count + " " + word + (count === 1 ? "" : "s"); }
   function why(row) {
     if (row.write_refusal) return row.write_refusal.message;

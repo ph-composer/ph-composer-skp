@@ -1,8 +1,11 @@
 /* A record inventory: the shared table, view controls, cell edits and range edits over one snapshot
- * section. The feature supplies every record value, label and action through `config`. */
+ * section. The feature supplies every record value, label and action through `config`.
+ * `config.columnMenus` ({ sort: [field], filter: [field] }), when given, sorts and filters from each named
+ * column's menu (column_menu.js) in place of Order by; a filter offers the column's values as shown, its
+ * declared choices included. */
 PhComposerUI.define("inventory", ["request", "snapshot", "workspace", "table", "view_controls", "record_edits",
-  "inventory_grid", "units", "unit_preferences"],
-function (request, snapshot, ui, tables, viewControls, RecordEdits, Grid, units, preferences) {
+  "inventory_grid", "units", "unit_preferences", "column_menu"],
+function (request, snapshot, ui, tables, viewControls, RecordEdits, Grid, units, preferences, columnMenus) {
   "use strict";
   function RangeEdits(session, send, action, notice, changed) {
     this.requests = request.channel(session, send, "range-edits");
@@ -55,8 +58,9 @@ function (request, snapshot, ui, tables, viewControls, RecordEdits, Grid, units,
           !self.ranges.busy() && !self.externalBusy; },
       label: function (row, field) { return row.record.values.name + " " + self.columnLabel(field); },
       recordLabel: config.label });
+    this.menus = Object.create(null);
     this.controls = new viewControls.ViewControls({ label: config.label, placeholder: "Name or notes",
-      fields: config.columns, groups: config.groups, count: config.count,
+      fields: config.columns, groups: config.groups, count: config.count, columnSort: Boolean(config.columnMenus),
       guard: function () { return self.guard(); }, refused: notice },
       function () {
         if (self.dirty()) self.controls.collapsed = Object.create(null);
@@ -80,6 +84,45 @@ function (request, snapshot, ui, tables, viewControls, RecordEdits, Grid, units,
   }
   Inventory.prototype.columnLabel = function (field) {
     return this.config.columns.filter(function (entry) { return entry[0] === field; })[0][1];
+  };
+  /* A value as a filter compares it: a blank is "". */
+  function filterKey(value) { return value === null || value === undefined ? "" : String(value); }
+  /* The values a column offers to filter by: its declared choices in their order, then any other value a record
+     holds, the blank last. */
+  Inventory.prototype.filterValues = function (field) {
+    var config = this.config, choices = (config.selectFields || {})[field] || [], seen = Object.create(null);
+    var values = [], labels = Object.create(null);
+    function add(value, label) {
+      if (seen[value]) return;
+      seen[value] = true; values.push(value); labels[value] = label;
+    }
+    choices.forEach(function (choice) {
+      if (typeof choice === "string") add(choice, choice); else add(choice.value, choice.label);
+    });
+    this.records.forEach(function (record) {
+      var value = filterKey(config.value(record, field));
+      add(value, value || "None");
+    });
+    return values.sort(function (a, b) { return Number(!a) - Number(!b); }).map(function (value) {
+      return { value: value, label: labels[value] || "None" };
+    });
+  };
+  Inventory.prototype.columnMenu = function (field, label) {
+    var self = this, spec = this.config.columnMenus, menu = this.menus[field], controls = this.controls;
+    if (!menu) {
+      menu = this.menus[field] = new columnMenus.ColumnMenu({ label: label,
+        sort: spec.sort && spec.sort.indexOf(field) >= 0 ? { current: function () {
+          return controls.columnDirection(field);
+        }, choose: function (direction) { controls.sortBy(field, direction); } } : null,
+        filter: spec.filter && spec.filter.indexOf(field) >= 0 ? {
+          values: function () { return self.filterValues(field); },
+          shown: function () { return controls.columnFilter(field); },
+          set: function (values) { return controls.filterColumn(field, values); } } : null });
+    }
+    // The label carries a unit, which a unit switch changes.
+    menu.options.label = label;
+    menu.paint();
+    return menu;
   };
   Inventory.prototype.dirty = function (id) {
     return Object.keys(this.edits.cells).some(function (key) {
@@ -121,7 +164,11 @@ function (request, snapshot, ui, tables, viewControls, RecordEdits, Grid, units,
     if (this.dirty()) this.controls.collapsed = Object.create(null);
     var projected = this.controls.project(this.records, { value: config.value,
       search: function (record) { return record.values.name + " " + (record.values.notes || ""); },
-      group: config.group, tie: function (a, b) {
+      group: config.group, columnMatch: function (record, filters) {
+        return Object.keys(filters).every(function (field) {
+          return filters[field].indexOf(filterKey(config.value(record, field))) >= 0;
+        });
+      }, tie: function (a, b) {
         return ui.compareText(a.values.name, b.values.name) || ui.compareText(a.id, b.id);
       }, retain: function (record) { return self.dirty(record.id); } });
     var rows = projected.records.map(function (record) {
@@ -149,6 +196,15 @@ function (request, snapshot, ui, tables, viewControls, RecordEdits, Grid, units,
       }, empty: payload ? (this.records.length ? "No " + config.label + " records match this view." :
         "No " + config.label + " records yet. Choose + New " + config.label + ".") :
         snapshot.message(snapshot.section(state, config.section) || {}, config.label + " records are unavailable.") };
+    if (config.columnMenus) {
+      var labels = Object.create(null), spec = config.columnMenus;
+      columns.forEach(function (column) { labels[column[0]] = column[1]; });
+      this.tableOptions.headerActions = function (field) {
+        if ((spec.sort || []).indexOf(field) < 0 && (spec.filter || []).indexOf(field) < 0) return [];
+        var menu = self.columnMenu(field, labels[field]);
+        return [{ node: menu.root, persistent: menu.filtered() }];
+      };
+    }
     if (config.tableId) this.tableOptions = ui.composeTable(config.tableId, this.tableOptions, state,
       this.requests.transport);
     var composedAction = this.tableOptions.action;

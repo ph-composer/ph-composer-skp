@@ -86,7 +86,8 @@ Recorded 2026-10-26 while building the stage; the screen is proposed until Ed ac
   is that read's `totals.by_type`, shown muted with a tooltip once the Model has changed since.
 - **Assign bar.** An always-present row above the Types table (`assign_bar.js`), so selecting never moves
   the table. It counts `edges.selected`, assigns only the Edges a write can reach (`reference` and no
-  `write_refusal`, the rule `Assignment::Selection.assignable?` names for the menu), and puts the reason
+  `write_refusal`, the rule `Assignment::Selection.assignable?` names for the menu); Clear also takes an
+  invalid assignment that reads with no values, and puts the reason
   beside a disabled Assign with `ui.reasonButton`. The menu's selection client takes the same subset. One
   native selection lives in one context, so a mixed selection is rare; the bar still says which Edges it
   would leave.
@@ -100,9 +101,10 @@ Recorded 2026-10-26 while building the stage; the screen is proposed until Ed ac
   with Clear existing uses; it asks for a replacement unless a current read shows the type unused.
 - **Datasheet.** Shown as the first link's text with every link in the tooltip, not editable or opened:
   following a link would navigate the panel, and no panel screen edits `datasheet_links` yet.
-- **Ordering and filters.** The Types table orders and groups through the action bar's Order by and Group
-  by, as every other inventory does. `column_menu.js` column sort is wired only into Zones / Faces; adding
-  `columnSort` to the kit `Inventory` is a kit change for all inventories and is left as a follow-up.
+- **Ordering and filters.** The kit `Inventory` takes an opt-in `columnMenus` ({ sort, filter }) that
+  wires `column_menu.js` as Zones / Faces does: Sort A to Z and Z to A on Name, psi-value, Group, Used
+  length and Notes, and a Show checklist on Group in METr's words. Order by and its direction give way to
+  the column menus there; other inventories are unchanged. Group by stays.
 - **Locate.** A run's Locate is its row icon, as in the Window schedule, in place of a click on the row
   (the PRD's "click a row"); a row click would compete with selecting text and with the findings glyph.
   A hidden Schedule does not repaint; it paints its last read when shown. Findings sit behind an alert glyph

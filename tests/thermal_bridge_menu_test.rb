@@ -58,6 +58,16 @@ class ThermalBridgeMenuTest < PhComposerTestCase
     assert_nil STORE.read(@edge)
   end
 
+  def test_an_invalid_assignment_with_no_values_offers_clear
+    STORE.write(@edge, "id" => "tbe_BADBADBADBAD", "schema_version" => 1)
+    @model.selection.add([@edge])
+    entries = @declaration.entries.call(read)
+    assert_equal "Clear thermal bridge", entries.last.label
+
+    entries.last.handler.call(@session)
+    assert_nil STORE.read(@edge)
+  end
+
   def test_an_edge_outside_any_zone_offers_no_menu
     @model.active_path = []
     @model.entities << (loose = Sketchup::Edge.new(5, Geom::Point3d.new(0, 0, 0), Geom::Point3d.new(0, 100, 0)))

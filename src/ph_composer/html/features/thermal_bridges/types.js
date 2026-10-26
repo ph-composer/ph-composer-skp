@@ -100,6 +100,7 @@ function (panel, snapshot, ui, fields, units, preferences, unitFields, RecordFor
       tableId: shared.TYPES, section: shared.TYPES, action: shared.TYPES + ".update", label: LABEL,
       columns: columns, editable: ["name", "psi_w_mk", "group", "notes"], quantities: quantities,
       selectFields: { group: shared.GROUPS }, groups: [["group", "Group"]], notice: panel.notify,
+      columnMenus: { sort: ["name", "psi_w_mk", "group", "length_m", "notes"], filter: ["group"] },
       value: function (record, field) {
         if (field === "length_m") { var totals = self.read.totals(record.id); return totals && totals.length_m; }
         if (field === "datasheet") return (record.values.datasheet_links || [])[0] || "";

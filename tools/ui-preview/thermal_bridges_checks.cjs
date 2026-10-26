@@ -82,6 +82,18 @@ check({ name: "thermal_bridges", output }, async ({ newPage, step }) => {
   await page.getByRole("button", { name: "Set display units to SI", exact: true }).click();
   assert.equal(await host("window.previewHost.thermalBridges.types[0].values.psi_w_mk"), 0.14);
 
+  step("the Group column filters from its menu");
+  await types.locator("th.col-group").hover();
+  await types.locator("th.col-group").getByRole("button", { name: /Group column menu/ }).click();
+  const menu = page.locator(".phc-column-menu:visible");
+  await menu.locator(".phc-column-filter-value").filter({ hasText: /^Ambient$/ }).locator("input").uncheck();
+  await types.locator("[data-row-key='tbt_Aa11Bb22Cc33']").waitFor({ state: "hidden" });
+  await types.locator("[data-row-key='tbt_Dd44Ee55Ff66']").waitFor();
+  await page.screenshot({ path: path.join(output, "types-group-filter.png") });
+  await menu.getByRole("button", { name: "Clear filter", exact: true }).click();
+  await page.keyboard.press("Escape");
+  await types.locator("[data-row-key='tbt_Aa11Bb22Cc33']").waitFor();
+
   step("the Schedule reads the changed Model, locates a run and a finding, and totals");
   await pane.getByRole("tab", { name: "Schedule", exact: true }).click();
   const schedule = pane.locator(".tb-schedule");
@@ -93,10 +105,10 @@ check({ name: "thermal_bridges", output }, async ({ newPage, step }) => {
   await page.waitForFunction(() => (window.previewHost.locatedEdges || []).length === 4);
   await schedule.getByRole("button", { name: "1 finding for Parapet 2", exact: true }).click();
   const finding = page.getByRole("dialog", { name: "Findings" });
-  await finding.getByText(/counts twice/).waitFor();
+  await finding.getByText(/counted twice/).waitFor();
   await page.screenshot({ path: path.join(output, "schedule-finding.png") });
   await finding.getByRole("button", { name: "Locate", exact: true }).click();
-  await page.waitForFunction(() => JSON.stringify(window.previewHost.locatedEdges) === "[[100,301],[200,401]]");
+  await page.waitForFunction(() => JSON.stringify(window.previewHost.locatedEdges) === "[[200,401]]");
   await schedule.getByRole("heading", { name: "Totals", exact: true }).waitFor();
   await schedule.getByRole("heading", { name: "Not in the schedule (1)", exact: true }).waitFor();
   await page.screenshot({ path: path.join(output, "schedule.png"), fullPage: true });
