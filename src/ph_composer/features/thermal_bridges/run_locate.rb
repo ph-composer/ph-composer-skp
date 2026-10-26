@@ -18,7 +18,8 @@ module PhComposer
           raise CodedError.new("params.invalid", "Locate one run at a time: these Edges sit in different containers.")
         end
 
-        chains = edge_paths.map { |path| along(model, path) }
+        children = Zones::ChildLookup.new
+        chains = edge_paths.map { |path| along(model, path, children) }
         if chains.any? { |chain| chain.any? { |entity| hidden?(entity) } }
           raise CodedError.new("thermal_bridge.hidden", "An Edge of the run, or a Group holding it, is hidden or on " \
                                                         "a hidden tag; show it and locate again. Nothing moved.")
@@ -32,11 +33,12 @@ module PhComposer
         { "path" => EditContext.current_ids(model), "selected" => edges.length }
       end
 
-      # The entities a root-to-Edge path names, each the unique child of the one before.
-      def along(model, path)
+      # The entities a root-to-Edge path names, each the unique child of the one before. One lookup serves
+      # every path of the call, so a run of many Edges scans their container once.
+      def along(model, path, children)
         entities = model.entities
         chain = path.each_with_index.map do |id, index|
-          matches = entities.to_a.select { |entity| entity.persistent_id == id }
+          matches = children.matching(entities, id)
           raise CodedError.new("target.not_found", "No single entity #{id} is at that step.") unless matches.length == 1
 
           entity = matches.first

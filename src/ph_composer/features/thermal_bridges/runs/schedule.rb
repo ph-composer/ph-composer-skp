@@ -29,8 +29,7 @@ module PhComposer
             "group" => type && type.fetch("group"), "psi_w_mk" => psi, "quantity" => run.quantity,
             "length_m" => length, "heat_loss_w_k" => psi && psi * length * run.quantity,
             "closed" => run.closed, "points_m" => run.points_m, "edge_paths" => run.edge_paths,
-            "shared" => run.facts.any?(&:shared), "findings" => findings,
-            "locate" => { "edge_paths" => run.edge_paths } }
+            "shared" => run.facts.any?(&:shared), "findings" => findings }
         end
 
         # By type for every type that has a run, a missing one included; by group for every group, so a

@@ -199,6 +199,43 @@ class ThermalBridgeRunsTest < Minitest::Test
                  result.fetch("edge_findings").map { |finding| finding.values_at("code", "path", "blocks_export") }
   end
 
+  def test_runs_tied_on_every_key_but_their_points_and_a_loop_hung_from_a_junction_read_the_same_in_any_order
+    t = [fact(ZONE_A, PARAPET, [0, 0, 0], [1, 0, 0]), fact(ZONE_A, PARAPET, [0, 0, 0], [0, 1, 0]),
+         fact(ZONE_A, PARAPET, [0, 0, 0], [0, 0, 1])]
+    hung = chain(ZONE_A, PARAPET, [[5, 5, 5], [6, 5, 5], [6, 6, 5], [5, 5, 5]]) +
+           [fact(ZONE_A, PARAPET, [5, 5, 5], [4, 5, 5])]
+    facts = t + hung
+    reads = [facts, facts.reverse, facts.rotate(2), facts.rotate(4)].map do |order|
+      build(order).map { |run| [run.display_name, run.identifier, run.points_m] }
+    end
+    assert_equal [reads.first] * 4, reads
+  end
+
+  def test_a_quantity_of_one_and_one_point_zero_is_one_run
+    facts = [fact(ZONE_A, PARAPET, [0, 0, 0], [1, 0, 0], :quantity => 1),
+             fact(ZONE_A, PARAPET, [1, 0, 0], [2, 0, 0], :quantity => 1.0)]
+    assert_equal 1, build(facts).length
+  end
+
+  def test_coincidence_is_found_across_a_lookup_cell_boundary_and_not_past_the_tolerance
+    edge = ->(zone, offset) { fact(zone, PARAPET, [0.002 - offset, 0, 9], [1, 0, 9]) }
+    across = schedule([edge.call(ZONE_A, 0.0), edge.call(ZONE_B, 0.00002)]).fetch("runs")
+    assert(across.all? { |row| row.fetch("findings").map { |f| f.fetch("code") } == %w[thermal_bridge.counted_twice] })
+    setup
+    apart = schedule([edge.call(ZONE_A, 0.0), edge.call(ZONE_B, 0.00003)]).fetch("runs")
+    assert(apart.all? { |row| row.fetch("findings").empty? })
+  end
+
+  def test_totals_leave_out_a_run_without_a_psi_value_and_its_type_reads_no_heat_loss
+    totals = schedule(reference + [fact(ZONE_A, "tbt_DRAFT0000001", [0, 0, 9], [1, 0, 9])]).fetch("totals")
+    draft = totals.fetch("by_type").find { |row| row.fetch("type_name") == "Draft" }
+    assert_equal [1, nil], draft.values_at("run_count", "heat_loss_w_k")
+    assert_in_delta 1.0, draft.fetch("length_m"), 0.001
+    assert_in_delta 3.3, totals.fetch("by_group").find { |row| row.fetch("group") == "15-Ambient" }
+                               .fetch("heat_loss_w_k"), 0.001
+    assert_in_delta 4.74, totals.fetch("heat_loss_w_k"), 0.001
+  end
+
   def test_a_tag_in_a_component_placed_twice_gives_two_shared_runs
     placed = [140, 141].map do |placement|
       fact(ZONE_B, "tbt_BALCONY00001", [5, 0, 1.5], [9, 0, 1.5], :container => [200, placement], :quantity => 2,

@@ -91,7 +91,7 @@ module ThermalBridgeScheduleWalkthrough
     written = client.invoke("#{PREFIX}.edges.assign", "targets" => targets("zone_w_roof"),
                                                       "thermal_bridge_type_id" => type_id("Parapet"))
     run = schedule.fetch("runs").find { |row| row.dig("zone", "name") == "Zone W" }
-    located = client.view("#{PREFIX}.runs.locate", run.fetch("locate"))
+    located = client.view("#{PREFIX}.runs.locate", "edge_paths" => run.fetch("edge_paths"))
     model = Sketchup.active_model
     { "write" => written.values_at("status", "effect"), "run" => run.values_at("display_name", "closed", "length_m"),
       "locate" => located.values_at("status", "value"),

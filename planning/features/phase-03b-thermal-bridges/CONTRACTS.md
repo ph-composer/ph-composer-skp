@@ -123,7 +123,7 @@ test covers it. Id params carry the prefix pattern, for example `^tbt_[A-Za-z0-9
 | `edges.selection` | query | P3b-03 | The current native selection as Edge references, each with its Zone containment, current assignment and write refusal; one bounded page, its cursor bound to the selection and the revision (P3b-03, Codex review) |
 | `edges.selection_all` | query | P3b-03 | The same, unbounded, naming `edges.selection` as `prefer`; the panel section and the menu route read it |
 | `edges.selected` | snapshot section | P3b-03 | `edges.selection_all`, for the panel's assign bar |
-| `schedule.list` | query | P3b-04 | One bounded page of runs, each with identifier (`tb_` and a digest of Zone, type, container path and canonical points, D3b-07 and D3b-23), Zone and its Building-Segment, type, length in metres, psi, quantity, `heat_loss_w_k` (psi times length times quantity), points, Edge paths and findings; `totals` by type (run and Edge counts, used length, heat loss) and by group over every run; the first 50 `edge_findings` (assigned Edges no Zone holds) and unreadable assignments, with their counts |
+| `schedule.list` | query | P3b-04 | One bounded page of runs, each with identifier (`tb_` and a digest of Zone, type, container path and canonical points, D3b-07 and D3b-23), Zone and its Building-Segment, type, length in metres, psi, quantity, `heat_loss_w_k` (psi times length times quantity), points, Edge paths (what `runs.locate` takes) and findings; `totals` by type (run and Edge counts, used length, heat loss) and by group over every run; the first 50 `edge_findings` (assigned Edges no Zone holds) and unreadable assignments, with their counts. The runs share the page's byte budget with what travels beside them; one run larger than the budget is sent alone, so a run of a few hundred Edges can exceed a caller's reply budget until a `fields` projection exists (the catalog follow-up in STATUS) |
 | `schedule.all` | query | P3b-04 | The same, unbounded, naming `schedule.list` as `prefer`. No snapshot section: D3b-13 measured it over the refresh budget (DECISIONS F37), so the panel reads it on opening the Schedule and on Refresh |
 | `runs.locate` | view command | P3b-04 | Takes `edge_paths`, as a run's or finding's `locate` carries them (a run has no stored identity). Opens the Edges' container through the foundation's `ph_composer.context.open` code path (`ContextCommands.move`, D3a1-04), selects the Edges and frames their world points. Refuses Edges in different containers (`params.invalid`) and a hidden Edge or ancestor (`thermal_bridge.hidden`) |
 | `assign_menu` | `menu_entries` | P3b-05 | "Thermal bridge" submenu on a selection of Edges: one item per type, then Clear |
@@ -189,7 +189,10 @@ list with `make panel-manifest`.
 ## 6. Findings and export
 
 Findings are `{code, section, object_id, message, blocks_export, locate}` from the preflight
-query and the Python section. The same codes appear per run in `schedule`.
+query and the Python section. The same codes appear per run in `schedule` as `{code, message,
+blocks_export, locate}`, `locate` naming the Edges the finding is about; P3b-08's preflight adds
+`section` and `object_id`. `counted_twice` compares whole Edges: an Edge one Zone splits where the
+other does not is not found (P3b-04).
 
 | Code | PRD row or decision | Blocks export | Repair |
 | --- | --- | --- | --- |

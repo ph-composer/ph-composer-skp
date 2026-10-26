@@ -30,7 +30,7 @@ module PhComposer
                              run.edge_paths, true)
           end
           found.concat(face_findings(run))
-          twice = run.facts.select { |fact| coincident.include?(fact.path) }
+          twice = run.facts.select { |fact| coincident.key?(fact.path) }
           unless twice.empty?
             found << finding("thermal_bridge.counted_twice", "#{count(twice)} also assigned in another Zone, so the " \
                                                              "bridge is counted twice; clear one.",
@@ -79,8 +79,9 @@ module PhComposer
                   [fact.path], false).merge("path" => fact.path)
         end
 
-        # The paths of Zone-held facts coincident, within the tolerance and either way round, with a fact in
-        # another Zone occurrence.
+        # The paths, as Hash keys, of Zone-held facts coincident, within the tolerance and either way round,
+        # with a fact in another Zone occurrence, of any type. Only whole Edges compare: an Edge one Zone
+        # splits where the other does not is not found.
         def coincident(facts)
           cells = Hash.new { |hash, cell| hash[cell] = [] }
           facts.each { |fact| fact.points_m.each { |point| cells[cell(point)] << fact } }
@@ -90,7 +91,7 @@ module PhComposer
               candidate.zone.fetch("zone_path") != fact.zone.fetch("zone_path") && same_segment?(fact, candidate)
             end
             found << fact.path if other
-          end
+          end.to_h { |path| [path, true] }
         end
 
         def same_segment?(one, other)

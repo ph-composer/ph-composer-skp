@@ -14,8 +14,8 @@ module PhComposer
       # Bridge Type refuses the read as it refuses Zones' and the catalog's own.
       READ = %w[record.unreadable validation.failed].freeze
       PAGE = (READ + %w[query.cursor_expired query.limit_invalid]).freeze
-      LOCATE_REFUSES = %w[target.not_found target.locked target.wrong_kind target.shared_definition
-                          thermal_bridge.hidden].freeze
+      LOCATE_REFUSES = %w[session.inactive target.not_found target.locked target.wrong_kind
+                          target.shared_definition thermal_bridge.hidden].freeze
 
       NUMBER = { "type" => "number" }.freeze
       NULLABLE_NUMBER = { "type" => %w[number null] }.freeze
@@ -25,10 +25,12 @@ module PhComposer
         "minItems" => 1, "maxItems" => Pages::MAXIMUM_LIMIT,
         "description" => "The Edges of one run, or of one finding, as the schedule reads them."
       ) })
+      # A finding names every Edge it is about, however many; runs.locate takes them a page at a time.
       FINDING = Shapes.object({
         "code" => Shapes::TEXT, "message" => Shapes::TEXT,
         "blocks_export" => { "type" => "boolean" },
-        "locate" => LOCATE_PARAMS.merge("description" => "The params runs.locate takes to show the Edges named.")
+        "locate" => Shapes.object({ "edge_paths" => EDGE_PATHS })
+                          .merge("description" => "The Edges named, as runs.locate takes them.")
       })
       ZONE = Shapes.object({ "zone_id" => Shapes::TEXT, "zone_path" => PATH, "name" => Shapes::TEXT,
                              "building_segment" => { "type" => %w[string null] } })
@@ -45,9 +47,10 @@ module PhComposer
         "closed" => { "type" => "boolean" },
         "points_m" => Shapes.described(Shapes.list({ "type" => "array", "items" => NUMBER }),
                                        "World points in metres, in order; a closed run repeats its first point."),
-        "edge_paths" => EDGE_PATHS.merge("description" => "Edge i joins points i and i + 1."),
+        "edge_paths" => EDGE_PATHS.merge("description" => "Edge i joins points i and i + 1; runs.locate takes " \
+                                                          "them as its edge_paths."),
         "shared" => Shapes.described({ "type" => "boolean" }, "Whether any Edge is in shared component storage."),
-        "findings" => Shapes.list(FINDING), "locate" => LOCATE_PARAMS
+        "findings" => Shapes.list(FINDING)
       })
       TOTALS = Shapes.object({
         "by_type" => Shapes.list(Shapes.object({

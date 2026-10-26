@@ -50,7 +50,8 @@ module PhComposer
         # Runs from facts that each have a Zone, in a deterministic order, named and identified.
         # `type_names` maps a type id to its name; a type id with no name keeps the id.
         def build(facts, type_names:)
-          groups = facts.group_by { |fact| [fact.zone.fetch("zone_path"), fact.type_id, fact.quantity] }
+          # A quantity of 1 and one of 1.0 are one quantity, whichever a caller wrote.
+          groups = facts.group_by { |fact| [fact.zone.fetch("zone_path"), fact.type_id, fact.quantity.to_f] }
           runs = groups.keys.sort_by(&:to_s).flat_map { |key| chains(groups.fetch(key)) }
           name(runs, type_names)
         end
@@ -59,12 +60,17 @@ module PhComposer
           Math.sqrt(start.zip(finish).sum { |a, b| (a - b)**2 })
         end
 
+        # Adding 0.0 turns a -0.0 from rounding into 0.0, which would otherwise digest differently.
         def key(point)
-          point.map { |value| value.round(DIGITS) }
+          point.map { |value| value.round(DIGITS) + 0.0 }
         end
 
         def before?(point, other)
           (key(point) <=> key(other)).negative?
+        end
+
+        def keys(points)
+          points.map { |point| key(point) }
         end
 
         # The chains in one group, open ones from every vertex that is not a pass-through, then the loops
@@ -112,7 +118,8 @@ module PhComposer
           canonical(order.first, order, points, closed)
         end
 
-        # Open runs start at their lexicographically smaller end. A loop starts at its smallest point and
+        # Open runs start at their lexicographically smaller end, and where the ends meet (a loop hung from a
+        # junction) run the way whose points sort first. A closed run starts at its smallest point and
         # turns toward the smaller of that point's neighbours. So two scans of one geometry agree.
         def canonical(sample, order, points, closed)
           paths = order.map(&:path)
@@ -129,7 +136,7 @@ module PhComposer
               order = order.reverse
             end
             points += [points.first]
-          elsif before?(points.last, points.first)
+          elsif (keys(points.reverse) <=> keys(points)).negative?
             points = points.reverse
             paths = paths.reverse
             order = order.reverse
@@ -146,16 +153,17 @@ module PhComposer
         def name(runs, type_names)
           ordered = runs.sort_by do |run|
             [run.type_id, run.zone["building_segment"].to_s, run.zone["name"].to_s, run.zone.fetch("zone_path"),
-             run.points_m.map { |point| key(point) }.min, run.container_path]
+             keys(run.points_m).min, run.container_path, keys(run.points_m)]
           end
           counters = Hash.new(0)
           ordered.each do |run|
             counters[run.type_id] += 1
             run.display_name = "#{type_names.fetch(run.type_id, run.type_id)} #{counters[run.type_id]}"
             digest = CanonicalJson.digest([run.zone.fetch("zone_id"), run.type_id, run.container_path,
-                                           run.points_m.map { |point| key(point) }])
+                                           keys(run.points_m)])
             run.identifier = "tb_#{digest[0, 16]}"
           end
+          ordered
         end
       end
     end

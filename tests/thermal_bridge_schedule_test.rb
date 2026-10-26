@@ -107,6 +107,40 @@ class ThermalBridgeScheduleTest < PhComposerTestCase
     assert_equal [[[6], "record.unreadable"]], result.fetch("unreadable").map { |row| row.values_at("path", "code") }
   end
 
+  def test_a_turned_wrapper_and_a_shared_group_read_in_world_metres_and_an_invalid_record_is_unreadable
+    reference
+    # A quarter turn about z, then 5 m along x: the Balcony line runs along y in the world.
+    @wrapper.transformation = Geom::Transformation.new([0.0, 1.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+                                                        5 * INCHES, 0.0, 0.0, 1.0])
+    # Two Groups placing one definition, as a native copy of a Group leaves them until one is opened.
+    storage = Sketchup::Entities.new([tag(Sketchup::Edge.new(301, Geom::Point3d.new(0, 0, 0),
+                                                             Geom::Point3d.new(10, 0, 0)), @parapet)])
+    @zone_a.entities << Sketchup::Group.new(310, storage)
+    @zone_a.entities << Sketchup::Group.new(320, storage)
+    STORE.write(@roof.first, STORE.read(@roof.first).merge("quantity" => -1))
+
+    result = schedule
+    balcony = result.fetch("runs").find { |row| row.fetch("display_name") == "Balcony 1" }
+    assert_equal [[5.0, 0.0, 1.5], [5.0, 4.0, 1.5]],
+                 balcony.fetch("points_m").map { |point| point.map { |value| value.round(6) + 0.0 } }.sort
+    assert_equal [[[100, @roof.first.persistent_id], "validation.failed"]],
+                 result.fetch("unreadable").map { |row| row.values_at("path", "code") }
+    placed = result.fetch("runs").select { |row| row.fetch("edge_paths").first[1].between?(310, 320) }
+    assert_equal [true, true], placed.map { |row| row.fetch("shared") }
+  end
+
+  # More Edges than one Zones read takes (500), in one run: the scan pages its reads and the schedule still
+  # reads, with the run's paths whole.
+  def test_a_run_longer_than_one_page_of_paths_reads_whole
+    long = chain((0..600).map { |step| [step * 0.01, 0, 3] }, @parapet)
+    @model.entities << zone("zon_AAAAAAAAAAAA", 100, long.flat_map { |edge| [edge] + edge.faces })
+    rows = schedule.fetch("runs")
+    assert_equal [[600, false]], rows.map { |row| [row.fetch("edge_paths").length, row.fetch("closed")] }
+    assert_in_delta 6.0, rows.first.fetch("length_m"), 0.001
+    page = query("schedule.list")
+    assert_equal [1, nil], [page.fetch("runs").length, page.fetch("next_cursor")]
+  end
+
   def test_the_scan_opens_no_operation_and_writes_nothing
     reference
     revision = @session.revision
@@ -132,16 +166,23 @@ class ThermalBridgeScheduleTest < PhComposerTestCase
   def test_locate_opens_the_runs_container_selects_its_edges_and_refuses_hidden_or_mixed_paths
     reference
     balcony = schedule.fetch("runs").find { |row| row.fetch("display_name") == "Balcony 1" }
-    result = command("runs.locate", balcony.fetch("locate"))
+    result = command("runs.locate", "edge_paths" => balcony.fetch("edge_paths"))
     assert_equal "completed", result["status"], result.inspect
     assert_equal [20, 200], result.dig("value", "path")
     assert_equal [@line], @model.selection.to_a
 
+    # A hidden ancestor or a hidden tag on the Edge refuses before anything moves.
     @model.active_path = nil
+    @model.selection.clear
     @wrapper.hidden = true
-    hidden = command("runs.locate", balcony.fetch("locate"))
+    hidden = command("runs.locate", "edge_paths" => balcony.fetch("edge_paths"))
     assert_equal %w[refused thermal_bridge.hidden], hidden.values_at("status", "code")
+    assert_equal [[], []], [Array(@model.active_path), @model.selection.to_a]
     @wrapper.hidden = false
+    @line.layer = Sketchup::Tag.new("Hidden", false)
+    tagged = command("runs.locate", "edge_paths" => balcony.fetch("edge_paths"))
+    assert_equal %w[refused thermal_bridge.hidden], tagged.values_at("status", "code")
+    assert_equal [[], []], [Array(@model.active_path), @model.selection.to_a]
 
     mixed = command("runs.locate", "edge_paths" => [[100, @roof.first.persistent_id], [20, 200, @line.persistent_id]])
     assert_equal %w[refused params.invalid], mixed.values_at("status", "code")

@@ -27,16 +27,26 @@ module PhComposer
       end
 
       # One bounded page of runs in schedule order, with the totals over every run and the first
-      # DETAIL_ROWS Edge findings and unreadable assignments.
+      # DETAIL_ROWS Edge findings and unreadable assignments. The runs share the page's byte budget with
+      # what is beside them. A bad limit or cursor refuses before the Model is walked.
       def page(request)
+        Pages.limit(request.params)
+        Pages.position(request, LIST)
         whole = schedule(request)
         runs = whole.fetch("runs")
+        beside = whole.merge("runs" => [], "edge_findings" => whole.fetch("edge_findings").first(DETAIL_ROWS),
+                             "unreadable" => whole.fetch("unreadable").first(DETAIL_ROWS))
         # A cursor holds a String or an Array, so a run's place in the schedule is carried as a one-item Array.
         order = runs.each_with_index.to_h { |row, index| [row.fetch("identifier"), [index]] }
-        page, cursor = Pages.bounded(request, LIST, runs, :key => ->(row) { order.fetch(row.fetch("identifier")) })
-        whole.merge("runs" => page, "next_cursor" => cursor, "total" => runs.length,
-                    "edge_findings" => whole.fetch("edge_findings").first(DETAIL_ROWS),
-                    "unreadable" => whole.fetch("unreadable").first(DETAIL_ROWS))
+        page, cursor = Pages.bounded(request, LIST, runs, :key => ->(row) { order.fetch(row.fetch("identifier")) },
+                                                          :max_bytes => budget(beside))
+        beside.merge("runs" => page, "next_cursor" => cursor, "total" => runs.length)
+      end
+
+      # What the page's runs may take: the page budget less what travels beside them, never below one row,
+      # which Pages.bounded always sends.
+      def budget(beside)
+        [Pages::MAX_PAGE_BYTES - JSON.generate(beside).bytesize, 0].max
       end
 
       # Every Thermal Bridge Type's record by id. A type that cannot be read refuses the read, as it would
@@ -64,7 +74,7 @@ module PhComposer
 
       # Every Edge carrying an assignment, inside every Group and ComponentInstance, one per occurrence,
       # with its world endpoints. Transforms compose from the root, which gives world positions whether or
-      # not a context is open (context/SKETCHUP_HOST_BEHAVIOR.md, "Edit context").
+      # not a context is open (context/SKETCHUP_HOST_BEHAVIOR.md, "Observers and edit contexts").
       def walk(model)
         tagged = []
         unreadable = []

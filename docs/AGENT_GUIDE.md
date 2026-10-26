@@ -107,9 +107,9 @@ Zone, type and quantity: it has a `display_name`, a derived `identifier` that ch
 geometry, its `length_m`, `psi_w_mk`, `quantity` and `heat_loss_w_k` (psi times length times
 quantity, in W/K), and its `findings`. Only `thermal_bridge.type_missing` and
 `thermal_bridge.psi_missing` block export; the others are warnings. An assigned Edge no Zone holds is
-in no run and reports in `edge_findings`. Nothing points at a run, so to show one pass its `locate`
-params to `ph_composer.thermal_bridges.runs.locate`, which opens the context holding the Edges,
-selects them and frames them.
+in no run and reports in `edge_findings`. Nothing points at a run, so to show one pass its
+`edge_paths`, or a finding's `locate`, to `ph_composer.thermal_bridges.runs.locate`, which opens the
+context holding the Edges, selects them and frames them.
 
 ### Windows
 
