@@ -48,7 +48,7 @@ module PhComposer
         barrier = copy["air_barrier"]
         barrier["layer_id"] = layer_ids.fetch(barrier.fetch("layer_id")) if barrier
         copy["photo_collections"] = {}
-        copy["name"] = duplicate_name(copy.fetch("name"), records)
+        copy["name"] = Records::Names.copy_name(copy.fetch("name"), records)
         copy["source"] = { "kind" => "derived" }
         copy
       end

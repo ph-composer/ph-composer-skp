@@ -11,7 +11,7 @@ module PhComposer
 
         def create(request, proposal, collection, values:, user_data: nil)
           kind = KINDS.fetch(collection)
-          Definitions.unique_name!(values.fetch("name"), Definitions.records(request, kind))
+          Records::Names.unique!(values.fetch("name"), Definitions.records(request, kind))
           id = request.engine.propose_create(kind.id, proposal, :values => Products.defaults(collection, values),
                                                                 :user_data => user_data)
           { "id" => id }
@@ -23,7 +23,7 @@ module PhComposer
           values = DeepCopy.call(values)
           if values["name"]
             values["name"] = values["name"].strip
-            Definitions.unique_name!(values["name"], Definitions.records(request, kind), :except => id)
+            Records::Names.unique!(values["name"], Definitions.records(request, kind), :except => id)
           end
           request.engine.propose_update(kind.id, id, proposal,
                                         :values => values,
@@ -35,8 +35,8 @@ module PhComposer
           kind = KINDS.fetch(collection)
           rows = Definitions.records(request, kind)
           mapping = request.engine.propose_duplicate(kind.id, [id], proposal) do |values|
-            values["name"] = (name || Definitions.duplicate_name(values.fetch("name"), rows)).strip
-            Definitions.unique_name!(values["name"], rows)
+            values["name"] = (name || Records::Names.copy_name(values.fetch("name"), rows)).strip
+            Records::Names.unique!(values["name"], rows)
             values["source"] = { "kind" => "derived" }
             values["datasheet_links"] = [] unless copy_datasheets
             values

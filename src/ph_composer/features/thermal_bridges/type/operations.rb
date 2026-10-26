@@ -14,7 +14,7 @@ module PhComposer
         end
 
         def create(request, proposal, values:, user_data: nil)
-          unique_name!(values.fetch("name"), records(request))
+          Records::Names.unique!(values.fetch("name"), records(request))
           id = request.engine.propose_create(TYPE_KIND, proposal, :values => Type.defaults(values),
                                                                   :user_data => user_data)
           { "id" => id }
@@ -25,7 +25,7 @@ module PhComposer
           values = DeepCopy.call(values)
           if values["name"]
             values["name"] = values["name"].strip
-            unique_name!(values["name"], records(request), :except => id)
+            Records::Names.unique!(values["name"], records(request), :except => id)
           end
           request.engine.propose_update(TYPE_KIND, id, proposal, :values => values,
                                                                  :expected_values => expected_values,
@@ -38,8 +38,8 @@ module PhComposer
         def duplicate(request, proposal, id:, name: nil, copy_datasheets: false)
           rows = records(request)
           mapping = request.engine.propose_duplicate(TYPE_KIND, [id], proposal) do |values|
-            values["name"] = (name || duplicate_name(values.fetch("name"), rows)).strip
-            unique_name!(values["name"], rows)
+            values["name"] = (name || Records::Names.copy_name(values.fetch("name"), rows)).strip
+            Records::Names.unique!(values["name"], rows)
             values["source"] = { "kind" => "derived" }
             values["datasheet_links"] = [] unless copy_datasheets
             values
@@ -54,21 +54,6 @@ module PhComposer
           request.engine.propose_delete(TYPE_KIND, id, proposal, :expected_values => expected_values,
                                                                  :reference_plan => reference_plan)
           { "id" => id }
-        end
-
-        def unique_name!(name, rows, except: nil)
-          if name.strip.empty? || rows.any? { |row| row["id"] != except && row["name"].strip.casecmp(name.strip).zero? }
-            raise CodedError.new("validation.failed", "Give the Thermal Bridge Type a unique, nonempty name.")
-          end
-        end
-
-        def duplicate_name(name, rows)
-          stem = name.strip
-          existing = rows.map { |row| row.fetch("name").strip.downcase }
-          (1..).each do |index|
-            candidate = index == 1 ? "#{stem} (copy)" : "#{stem} (copy #{index})"
-            return candidate unless existing.include?(candidate.downcase)
-          end
         end
       end
     end

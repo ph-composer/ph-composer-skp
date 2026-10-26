@@ -10,7 +10,7 @@ module PhComposer
         module_function
 
         def create(request, proposal, values:, user_data: nil)
-          Commands.unique_name!(values.fetch("name"), Definitions.records(request, MATERIAL_KIND))
+          Records::Names.unique!(values.fetch("name"), Definitions.records(request, MATERIAL_KIND))
           id = request.engine.propose_create(MATERIAL_KIND, proposal, :values => Schema.defaults(values),
                                                                       :user_data => user_data)
           { "id" => id }
@@ -21,7 +21,7 @@ module PhComposer
         def update(request, proposal, id:, values:, expected_values:, user_data: nil, source: nil)
           record = request.engine.find(MATERIAL_KIND, id)
           if values["name"]
-            Commands.unique_name!(values["name"], Definitions.records(request, MATERIAL_KIND), :except => id)
+            Records::Names.unique!(values["name"], Definitions.records(request, MATERIAL_KIND), :except => id)
           end
           result = Commands.update_material(record, :values => values)
           changes = Definitions.changed_values(Schema::KIND, record, result.record)

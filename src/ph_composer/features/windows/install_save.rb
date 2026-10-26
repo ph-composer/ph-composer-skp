@@ -39,7 +39,7 @@ module PhComposer
           end
 
           values = Products.defaults("psi_install_types", row.fetch("values"))
-          Definitions.unique_name!(values.fetch("name"), known)
+          Records::Names.unique!(values.fetch("name"), known)
           id = request.engine.propose_create(PSI_INSTALL_KIND, proposal, :values => values,
                                                                          :user_data => row["user_data"])
           known << values.merge("id" => id)
@@ -55,7 +55,7 @@ module PhComposer
           values = DeepCopy.call(row.fetch("values"))
           if values["name"]
             values["name"] = values["name"].strip
-            Definitions.unique_name!(values["name"], known, :except => row.fetch("id"))
+            Records::Names.unique!(values["name"], known, :except => row.fetch("id"))
             known.find { |record| record.fetch("id") == row.fetch("id") }&.merge!("name" => values["name"])
           end
           request.engine.propose_update(PSI_INSTALL_KIND, row.fetch("id"), proposal,
