@@ -53,7 +53,7 @@ saved layout and repaint measurement remain with their owners. SketchUp 2023 hos
 Windows and public release gates remain open. The cross-phase units packet stays active.
 
 Whitespace checks and local Markdown file-link validation passed for the final changed documents.
-Delivery: pushed on `codex/units` as [PR #84](https://github.com/bldgtyp/ph-composer/pull/84),
+Delivery: pushed on `codex/units` as [PR #84](https://github.com/ph-composer/ph-composer-skp/pull/84),
 merged to `main` at `2195f54` on 2026-10-07. No installation or deployment was performed. Source and test blob identities
 above are unchanged by the delivery documentation update.
 

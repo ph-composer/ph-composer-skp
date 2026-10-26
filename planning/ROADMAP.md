@@ -55,7 +55,7 @@ The [Phase 0 planning packet](archive/phase-00-foundation/README.md) supplies se
 designs, frozen source disposition and acceptance checks. Product decisions are resolved.
 Ed authorized implementation on 2026-09-18; progress is tracked in the packet's STATUS. All seven
 stages and the four spikes ran on 2026-09-18, every acceptance row is met, and Phase 0 was merged
-through [PR #1](https://github.com/bldgtyp/ph-composer/pull/1). The packet is archived.
+through [PR #1](https://github.com/ph-composer/ph-composer-skp/pull/1). The packet is archived.
 
 | # | Item | Kind | State | Why here |
 | --- | --- | --- | --- | --- |
@@ -230,14 +230,14 @@ prerequisites and carried B1/B2 conditions into the next phase.
 | 2026-10-15 | Spaces re-baselined against `main` at `87bdc62`: findings re-read, two decisions added (D3a-14, D3a-15), foundation stages corrected, screen stages held for a UI and UX discussion. No implementation authorized. |
 | 2026-10-15 | Spaces UI and UX settled with Ed: the Zones / Faces tab becomes Zones, with Faces and Spaces as views and loads and equipment views to follow; Spaces stages P3a-06 to P3a-08 restructured. No implementation authorized. |
 | 2026-10-15 | Spaces decisions D3a-1 to D3a-18 all answered and the interview record confirmed; the packet waits for its phase issue and Ed's go on P3a-01. |
-| 2026-10-15 | Spaces phase issue [#133](https://github.com/bldgtyp/ph-composer/issues/133) created; the packet waits for Ed's go on P3a-01. |
+| 2026-10-15 | Spaces phase issue [#133](https://github.com/ph-composer/ph-composer-skp/issues/133) created; the packet waits for Ed's go on P3a-01. |
 | 2026-10-15 | Ed authorized the Spaces packet, one stage per pull request; P3a-01 merged through PR #135. |
 | 2026-10-16 | Spaces P3a-01 to P3a-11 merged through PR #167; P3a-12's integrated host run ran on 26.1.188. Ed answered the four closure calls the same day; D3a-19 and D3a-20 merged (#173, #172) and the acceptance rerun passed S01 to S11 (#186); closure waits on #179. |
 | 2026-10-16 | #179 fixed through #187 and rechecked on the host: A09 passes; UXR-PAINT's narrow clause fails on #188 (the selection bar crowds the table: Solve under the footer at 420 px, header covered at 360 x 520). Phase 3a closure is Ed's call on #188. |
 | 2026-10-17 | #188 fixed through #190 and rechecked on the host: A09, UXR-SOLVE and UXR-PAINT pass. No acceptance case blocks Phase 3a closure; closing is Ed's call (ZO-O7 fails on #181 as a follow-up). |
 | 2026-10-17 | Ed closed Phase 3a (Spaces); its packet is archived as `phase-03a-spaces`. Phase 3 stays open for 3b, thermal bridges. |
 | 2026-10-22 | Thermal bridges P3b-01 merged to main through PR #302 after its T01 host gate; P3b-02 waits for Ed's go. |
-| 2026-10-21 | Thermal bridges phase issue [#301](https://github.com/bldgtyp/ph-composer/issues/301) created after the re-baseline and the D3b-22, D3b-23 answers; waits on Ed's go for P3b-01. |
+| 2026-10-21 | Thermal bridges phase issue [#301](https://github.com/ph-composer/ph-composer-skp/issues/301) created after the re-baseline and the D3b-22, D3b-23 answers; waits on Ed's go for P3b-01. |
 | 2026-10-21 | Thermal bridges re-baselined against `main` at `420c783a`: findings re-read (F27 to F36 added), CONTRACTS answered from code where it could be, stages corrected, D3b-22 and D3b-23 added for Ed. No implementation authorized. |
 | 2026-10-21 | Phase 4 packets re-baselined against `main` at `420c783a`: stale foundation and remote blockers removed, each PRD opens with what `main` supplies, piping and ducting dependencies named per Phase 3b stage, METr acceptance moved to metr-export. No implementation authorized. |
 | 2026-10-21 | Equipment shared shape interviewed: Q1 to Q12 answered as recommended; fans and appliances traced through PHX. Families not interviewed; no implementation authorized. |

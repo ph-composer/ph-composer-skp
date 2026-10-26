@@ -4,7 +4,7 @@ DATE: 2026-10-21
 STATUS: Diagnosed. Ed authorized F1 and F2 on 2026-10-21 with a target of under 200 ms with every row open;
 both merged to main through PR #289 (see "Implementation" below). F3 and F4 are not
 authorized.
-ISSUE: [#154](https://github.com/bldgtyp/ph-composer/issues/154)
+ISSUE: [#154](https://github.com/ph-composer/ph-composer-skp/issues/154)
 
 ## Outcome
 
