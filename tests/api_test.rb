@@ -28,7 +28,7 @@ class ApiTest < PhComposerTestCase
   def test_discovery_lists_the_session_and_every_registration_by_name
     found = API.discover
 
-    assert_equal({ "major" => 1, "minor" => 9 }, found.fetch("api"))
+    assert_equal({ "major" => 1, "minor" => 10 }, found.fetch("api"))
     assert_equal [@session.id], found.fetch("sessions").map { |session| session.fetch("id") }
     assert_includes found.fetch("actions").map { |action| action.fetch("name") }, "test.fixture.update_parts"
     assert_includes found.fetch("queries").map { |query| query.fetch("name") }, "ph_composer.records.list"

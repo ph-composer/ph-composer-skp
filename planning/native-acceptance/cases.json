@@ -4179,6 +4179,23 @@
         "tests/edge_record_contract_test.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "T02",
+      "label": "Thermal Bridge Type catalog with the panel closed: the walkthrough creates three types, edits, duplicates and deletes one through registered actions; native Undo and Redo of each step; save, fresh-process reopen and the same catalog read back through types.all",
+      "mode": "mixed",
+      "authority": "planning/features/phase-03b-thermal-bridges/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/thermal_bridges/type/*",
+        "src/ph_composer/features/thermal_bridges/declarations/types.rb",
+        "src/ph_composer/features/thermal_bridges/declarations/shapes.rb",
+        "src/ph_composer/core/records/engine.rb",
+        "src/ph_composer/core/records/dictionary_store.rb",
+        "src/ph_composer/core/records/authoring_fields.rb",
+        "tools/examples/authoring/thermal_bridge_types_walkthrough.rb",
+        "tools/examples/authoring/client.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }

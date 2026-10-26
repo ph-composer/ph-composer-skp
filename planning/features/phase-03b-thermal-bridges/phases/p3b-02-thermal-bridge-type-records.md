@@ -1,7 +1,7 @@
 # P3b-02: Thermal Bridge Type records and operations
 
 DATE: 2026-10-03
-STATUS: Scoped. Corrected to `main` at `420c783a` on 2026-10-21 (DECISIONS Part 1b)
+STATUS: In progress on `feature/thermal-bridges-p3b-02` (authorized 2026-10-25). Corrected to `main` at `420c783a` on 2026-10-21 (DECISIONS Part 1b)
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 

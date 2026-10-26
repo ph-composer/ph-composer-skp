@@ -300,3 +300,20 @@ model.
 uv run tools/hostkit/host_bridge.py eval \
   'load "/absolute/path/to/ph-composer/ph-composer-skp/tools/examples/authoring/spaces_colour_by_walkthrough.rb"; SpacesColourByWalkthrough.run'
 ```
+
+## Thermal Bridge Types with the panel closed
+
+`thermal_bridge_types_walkthrough.rb` creates three Thermal Bridge Types, edits one psi-value,
+duplicates one and deletes one, each a registered action and one native Undo step, and reads the
+catalog back through `ph_composer.thermal_bridges.types.all`. `verify` compares that read with the
+expected catalog, so it serves after Undo and Redo and after a save and reopen.
+`tests/thermal_bridge_types_walkthrough_test.rb` runs it offline.
+
+```sh
+uv run tools/hostkit/host_bridge.py eval \
+  'load "/absolute/path/to/ph-composer/ph-composer-skp/tools/examples/authoring/thermal_bridge_types_walkthrough.rb"; ThermalBridgeTypesWalkthrough.run'
+uv run tools/hostkit/host_bridge.py eval 'AuthoringExample.undo'     # six times, reading state between
+uv run tools/hostkit/host_bridge.py eval 'ThermalBridgeTypesWalkthrough.state'
+uv run tools/hostkit/host_bridge.py eval 'AuthoringExample.redo'     # six times
+uv run tools/hostkit/host_bridge.py eval 'ThermalBridgeTypesWalkthrough.verify'
+```

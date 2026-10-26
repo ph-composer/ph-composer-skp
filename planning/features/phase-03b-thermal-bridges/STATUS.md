@@ -1,7 +1,7 @@
 # Phase 3b: thermal bridges, tracking ledger
 
 DATE: 2026-10-03
-STATUS: In progress. P3b-01 merged to `main` 2026-10-22 (PR #302); P3b-02 to P3b-09 scoped, none authorized.
+STATUS: In progress. P3b-01 merged to `main` 2026-10-22 (PR #302); P3b-02 in progress; P3b-02 to P3b-09 authorized 2026-10-25 as one pull request each.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 
@@ -30,7 +30,7 @@ recommended the same day; no stage authorized.
 
 ## Next step
 
-P3b-01 is in progress on `feature/thermal-bridges-p3b-01` (Ed's go, 2026-10-21): merged to `main` as `91366643` ([PR #302](https://github.com/ph-composer/ph-composer-skp/pull/302)); T01 passes. P3b-02 is the next `Scoped` stage and waits for Ed's go.
+P3b-01 merged to `main` as `91366643` ([PR #302](https://github.com/ph-composer/ph-composer-skp/pull/302)); T01 passes. On 2026-10-25 Ed authorized the rest of the packet through the PR loop, one branch and pull request per stage, with the merge delegated on green CI. P3b-02 is in progress on `feature/thermal-bridges-p3b-02`.
 
 ## Entry gates
 
@@ -39,7 +39,7 @@ P3b-01 is in progress on `feature/thermal-bridges-p3b-01` (Ed's go, 2026-10-21):
 | Ed answers PRD Q1 to Q11 (the interview) and D3b-01 to D3b-21 | Done 2026-10-03 |
 | Ed answers D3b-22 (before P3b-03) and D3b-23 (before P3b-04) | Done 2026-10-21 |
 | A Phase 3 issue exists on `ph-composer/ph-composer-skp`, and every header's `ISSUE` line points at it | Done 2026-10-21: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301) |
-| Ed authorizes implementation, stage by stage or for a run of stages | Open |
+| Ed authorizes implementation, stage by stage or for a run of stages | Done: P3b-01 on 2026-10-21; P3b-02 to P3b-09 on 2026-10-25, through the PR loop with the merge delegated |
 | P3a-01 merged before P3b-03 and P3b-08 start; P3a-05 merged before P3b-06 starts | Closed: P3a-01 merged through PR #135, P3a-05 through PRs #147 and #148; Phase 3a closed 2026-10-17 |
 
 ## Stage ledger
@@ -51,7 +51,7 @@ only when all three are done and its evidence file exists.
 | Stage | Title | State | Blocked by | Branch / PR | Offline | Host | Review | Evidence | Register |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | [P3b-01](phases/p3b-01-thermal-bridge-contracts-and-edge-host-facts.md) | Thermal-bridge contracts and edge host facts | Merged to main | | [PR #302](https://github.com/ph-composer/ph-composer-skp/pull/302), squash `91366643` | `make ci` green at `b013f330` and on the evidence head (Ruby 3.2.2); the new test also on 2.7.2 | T01 run 2026-10-21 on 26.1.188 at `bec31a4c`: the five B4 cases with native Undo, Redo, save and fresh-process reopen, eight assertions pass | architecture review done: Codex gpt-6-astra with the architecture and Ruby rubrics, two cycles (2 P2 + 1 P3, then 3 P2), all six fixed in `31ddfb03` and `b013f330` | | [evidence](evidence/p3b-01-edge-host-facts.md) | T01 |
-| [P3b-02](phases/p3b-02-thermal-bridge-type-records.md) | Thermal Bridge Type records and operations | Scoped | P3b-01 | | | | ordinary | | T02 |
+| [P3b-02](phases/p3b-02-thermal-bridge-type-records.md) | Thermal Bridge Type records and operations | In progress | | `feature/thermal-bridges-p3b-02` | | | ordinary | | T02 |
 | [P3b-03](phases/p3b-03-edge-assignment.md) | Edge assignment, Zone containment and edge picking | Scoped | P3b-02 | | | | strong | | T03 |
 | [P3b-04](phases/p3b-04-runs-and-schedule.md) | Runs, the schedule read and findings | Scoped | P3b-03 | | | | ordinary | | T04 |
 | [P3b-05](phases/p3b-05-thermal-bridges-tab.md) | The Thermal Bridges tab | Scoped | P3b-04 | | | | ordinary, UI | | T05 |
@@ -172,3 +172,4 @@ reproduced; P3b-01 reproduces what the stages depend on.
 | 2026-10-21 | PR #302 opened; Codex gpt-6-astra reviewed twice with the architecture rubric. Fixed: the retag case shared no operation with its registry write; the scan dropped dictionaries; the PRD's Runs rule still said tolerance; run identifiers collided for coincident placements, so they now digest the container path (D3b-07 under D3b-23); the "export attribute guard" claim was false and is corrected in F5, CONTRACTS section 8 and `core/dictionaries.rb`; the spike setup refuses a reused Model. `make ci` green at `b013f330`. State `In review`; the host gate is the one open item of T01. |
 | 2026-10-21 | T01 host gate run on the PR head: the five B4 cases with native Undo, Redo, save and fresh-process reopen, eight assertions pass; results folded into `context/SKETCHUP_HOST_BEHAVIOR.md` and the heal consequence into D3b-22's row. P3b-01 `Implemented on branch`. |
 | 2026-10-22 | PR #302 merged to `main` as `91366643` (squash, auto-merge on green CI); branch deleted locally and on the remote. P3b-01 `Merged to main`. |
+| 2026-10-25 | Ed authorized P3b-02 to P3b-09 through the PR loop, one pull request per stage, merge delegated on green CI. P3b-02 started on `feature/thermal-bridges-p3b-02`: the feature, the Thermal Bridge Type kind, `types.list`, `types.all` and its section, the four actions, API minor 10, the walkthrough and the agent-guide recipe. CONTRACTS corrected: `color` is stored once authored and read as `display.color`, as Assemblies do, because the engine mints the id inside `propose_create`; `types.list` added as the bounded read `types.all` prefers. |
