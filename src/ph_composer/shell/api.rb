@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 11
+    MINOR = 12
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -58,7 +58,12 @@ module PhComposer
         "change" => "ph_composer.zones.containment is new. ph_composer.thermal_bridges.edges.assign, edges.clear, " \
                     "edges.selection (bounded), edges.selection_all and the edges.selected snapshot section are " \
                     "new, over the ph_composer.thermal_bridges.edge reference target; types.delete takes " \
-                    "replacement_id." }
+                    "replacement_id." },
+      { "minor" => 12, "date" => "2026-10-25",
+        "change" => "ph_composer.thermal_bridges.schedule.list (bounded) and schedule.all are new: thermal-bridge " \
+                    "runs with lengths, heat loss, findings and totals. " \
+                    "ph_composer.thermal_bridges.runs.locate is a new view command. ph_composer.zones.containment, " \
+                    "and so ph_composer.thermal_bridges.edges.selection, answers each Zone's name." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

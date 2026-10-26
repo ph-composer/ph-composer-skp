@@ -77,7 +77,7 @@ stays clean.
 
 | Case | Expected |
 | --- | --- |
-| Assign Parapet to the roof edge at x = 5 m in both Zones | `thermal_bridge.counted_twice` on both, `thermal_bridge.interior_junction` on both. Parapet 1 becomes a closed run of 18.000 m and Parapet 2 one of 16.000 m |
+| Assign Parapet to the roof edge at x = 5 m in both Zones | `thermal_bridge.counted_twice` on both. Parapet 1 becomes a closed run of 18.000 m and Parapet 2 one of 16.000 m. No `thermal_bridge.interior_junction`: each Edge also bounds its Zone's Outdoors roof, and D3b-16 needs every Zone Face on the Edge interior (corrected by P3b-04) |
 | Copy the Balcony line to the Model root | `thermal_bridge.outside_zone`; not exported |
 | A loose line on Zone A's south wall along the sill of its fixed window unit, assigned Slab edge | `thermal_bridge.no_envelope_face`; `thermal_bridge.on_window_perimeter` |
 | Delete the Footing type with Slab edge as replacement | Footing 1's Edges name Slab edge; one Undo step restores both |

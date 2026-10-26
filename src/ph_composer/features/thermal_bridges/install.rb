@@ -5,6 +5,9 @@
 #
 #   type/           the Thermal Bridge Type kind, its operations and reads; names no Edge, Zone or run
 #   assignment/     the record on an Edge, its reference target, assign, clear and the selection read
+#   runs/           pure Ruby: chains of assigned Edges, the schedule and its findings, over detached facts
+#   scan/           the live read: one walk for assigned Edges, Zones' answers for their paths, the schedule
+#   run_locate.rb   runs.locate, which selects a run's Edges through the foundation's context.open
 #   codes.rb        the codes under the thermal_bridge noun
 #   declarations/   what thermal bridges register
 require_relative "type/schema"
@@ -15,9 +18,15 @@ require_relative "assignment/reference_target"
 require_relative "assignment/steps"
 require_relative "assignment/operations"
 require_relative "assignment/selection"
+require_relative "runs/chains"
+require_relative "runs/findings"
+require_relative "runs/schedule"
+require_relative "scan/occurrences"
+require_relative "run_locate"
 require_relative "declarations/shapes"
 require_relative "declarations/types"
 require_relative "declarations/assignment"
+require_relative "declarations/schedule"
 require_relative "codes"
 
 module PhComposer
@@ -28,6 +37,7 @@ module PhComposer
       feature = registry.feature(FEATURE_ID, :contract_version => 1, :requires => ["ph_composer.zones"])
       TypeRegistration.install(feature)
       AssignmentRegistration.install(feature)
+      ScheduleRegistration.install(feature)
       Codes.install(feature)
     end
   end

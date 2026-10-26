@@ -115,8 +115,9 @@ schedule shows the same grouping so the list matches what METr will show.
 
 The Schedule subtab: one row per run with Zone, Building-Segment, type, length, psi-value,
 quantity, and psi times length times quantity in W/K. Totals by type and by group. Click a row to
-select its edges in the model. The schedule is live, recomputed on each panel refresh, unless the
-measurement in P3b-04 says otherwise (D3b-13).
+select its edges in the model. The schedule is computed when the Schedule opens and on Refresh, not
+on every panel refresh: P3b-04 measured it at about two seconds with 5,000 assigned edges in a model
+of 50,000, over the refresh budget (D3b-13).
 
 ### Colour-by mode
 
@@ -171,8 +172,8 @@ spike measures them.
 2. SketchUp splits an edge when another edge crosses it or a face is cut. B4 measured that every
    piece keeps the full dictionary, so a split is harmless and needs no repair. P3b-01 measures the
    cases B4 did not run, including the heal when the crossing edge is erased.
-3. No observer watches edges. Reads scan the Model; the schedule is live unless measurement says
-   otherwise (D3b-13).
+3. No observer watches edges. Reads scan the Model; the schedule is scanned on request, as the
+   measurement in P3b-04 required (D3b-13).
 4. An edge carries at most one assignment of each kind. A thermal bridge edge is envelope
    geometry. A pipe or duct edge is a loose line in its own group. The two never share an edge.
 

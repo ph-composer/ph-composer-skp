@@ -249,7 +249,15 @@ and ERV ducting reuse these rules.
 - Writes refuse through shared storage, a locked Group and another Zone, as Face writes do. Every
   assign or clear is one command over explicit references, bounded by a limit the feature's schema
   owns (250 Edges for thermal bridges), refusing as a whole.
-- No observer watches Edges. Reads scan the Model when asked.
+- No observer watches Edges. Reads scan the Model when asked. The thermal-bridge schedule is one such
+  read and registers no snapshot section: at 5,000 assigned Edges in a Model of 50,000 it costs about
+  two seconds, so the panel asks for it on opening the Schedule and on Refresh, never on every refresh
+  (D3b-13, measured in P3b-04).
+- Runs are derived, never stored. The pure builder (`features/thermal_bridges/runs/`) joins Edges of
+  one Zone occurrence, type and quantity where they share a vertex, keyed on the Edge's container path
+  plus the vertex id, so two placements of one component never join; a run ends at a free end or a
+  vertex where the count of joining Edges is not two. The same function serves the live read and the
+  export, which feeds it the snapshot's `edge` entries.
 - An Edge carries at most one assignment of each kind; a thermal bridge Edge is envelope geometry
   and a pipe or duct is a loose line in its own Group, so the two never share an Edge.
 

@@ -35,7 +35,7 @@ module PhComposer
                         "description" => "How many times each Edge counts; 1 when absent." }
       }, :optional => ["quantity"]).freeze
       ZONE = Shapes.object({ "zone_id" => Shapes::TEXT, "zone_path" => Assignment::Target::PATH,
-                             "building_segment" => { "type" => %w[string null] },
+                             "name" => Shapes::TEXT, "building_segment" => { "type" => %w[string null] },
                              "level" => { "type" => %w[string null] } })
                    .merge("type" => %w[object null], "description" => "The Zone holding the Edge, as " \
                                                                       "ph_composer.zones.containment reads it.")

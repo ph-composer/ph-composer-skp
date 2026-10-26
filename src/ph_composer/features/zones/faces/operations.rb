@@ -85,15 +85,16 @@ module PhComposer
       # feature reads this instead of `all`, which computes suggestions, adjacency and Assembly state
       # for every Face. Zone state needs every Zone occurrence, so it stays with the Zone reads.
       def host_context(request, paths:)
+        children = Zones::ChildLookup.new
         rows = paths.filter_map do |path|
-          occurrence = Zones::Occurrences.occurrence_at(request.model, path)
+          occurrence = Zones::Occurrences.occurrence_at(request.model, path, :children => children)
           next unless occurrence
 
           record = FACE_STORE.read(occurrence.entity)
           Schema.validate!(record) if record
           { "path" => path, "reference" => occurrence.reference(record&.fetch("id", nil)),
             "values" => record ? Schema.values(record) : {},
-            "write_refusal" => Zones::Occurrences.write_refusal(occurrence) }
+            "write_refusal" => Zones::Occurrences.write_refusal(occurrence, :children => children) }
         end
         { "faces" => rows }
       end

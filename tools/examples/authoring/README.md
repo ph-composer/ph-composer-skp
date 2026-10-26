@@ -326,8 +326,9 @@ name, quantity, `copied` flag and refusal; `assign` and `clear` send the referen
 read returned, one native Undo step each; `replace` deletes a type with `replacement_id`, moving its
 Edges to another type in the same step. `tests/thermal_bridge_assignment_walkthrough_test.rb` runs it
 offline. `thermal_bridge_reference_model.rb` builds the host gate's model in an empty one: two adjacent
-Zones, a Zone in a turned wrapper, the five reference types, a Window Unit on Zone A's south wall and a
-line at the Model root, with `select(name)` standing in for a native selection of the named Edges.
+Zones, a Zone in a turned wrapper, the five reference types, a Window Unit on Zone A's south wall, the
+Balcony line across Zone B's south wall and a line at the Model root, every Face classified as Zones
+suggests, with `select(name)` standing in for a native selection of the named Edges.
 
 ```sh
 uv run tools/hostkit/host_bridge.py eval \
@@ -335,4 +336,34 @@ uv run tools/hostkit/host_bridge.py eval \
 uv run tools/hostkit/host_bridge.py eval 'ThermalBridgeAssignmentWalkthrough.assign("Parapet")'
 uv run tools/hostkit/host_bridge.py eval 'AuthoringExample.undo'
 uv run tools/hostkit/host_bridge.py eval 'ThermalBridgeAssignmentWalkthrough.replace("Footing", "Slab edge")'
+```
+
+## The thermal-bridge schedule with the panel closed
+
+`thermal_bridge_schedule_walkthrough.rb` works on the model `ThermalBridgeReferenceModel.build` makes,
+with every Edge named by path. `assign_reference` assigns ACCEPTANCE's five runs through
+`ph_composer.thermal_bridges.edges.assign`; `verify` reads `ph_composer.thermal_bridges.schedule.all`
+and checks every run, type total, group total and the Model total against the hand calculation to
+0.001. `counted_twice`, `outside_zone` and `locate_nested` add the T04 cases one at a time, the last
+sending a run's `locate` params to `ph_composer.thermal_bridges.runs.locate` and reading the edit
+path and selection back.
+
+```sh
+uv run tools/hostkit/host_bridge.py eval \
+  'load "/absolute/path/to/ph-composer/ph-composer-skp/tools/examples/authoring/thermal_bridge_schedule_walkthrough.rb"; ThermalBridgeReferenceModel.build'
+uv run tools/hostkit/host_bridge.py eval 'ThermalBridgeScheduleWalkthrough.assign_reference'
+uv run tools/hostkit/host_bridge.py eval 'ThermalBridgeScheduleWalkthrough.verify'
+uv run tools/hostkit/host_bridge.py eval 'ThermalBridgeScheduleWalkthrough.locate_nested'
+```
+
+`thermal_bridge_measurement.rb` builds the D3b-13 measurement model in an empty Model, ten Zones of
+417 one-metre boxes (50,040 Edges), assigns 5,000 of them in calls of 250, and times the schedule read
+phase by phase and a whole panel snapshot. Save the model under `_private/host/t04/` for the later
+draw-cost and export-snapshot measurements.
+
+```sh
+uv run tools/hostkit/host_bridge.py eval \
+  'load "/absolute/path/to/ph-composer/ph-composer-skp/tools/examples/authoring/thermal_bridge_measurement.rb"; ThermalBridgeMeasurement.build'
+uv run tools/hostkit/host_bridge.py eval 'ThermalBridgeMeasurement.assign'
+uv run tools/hostkit/host_bridge.py eval 'ThermalBridgeMeasurement.measure'
 ```

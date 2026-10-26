@@ -187,8 +187,9 @@ module PhComposer
           "path" => PATH,
           "zone" => {
             "type" => %w[object null], "additionalProperties" => false,
-            "required" => %w[zone_id zone_path building_segment level],
+            "required" => %w[zone_id zone_path name building_segment level],
             "properties" => { "zone_id" => { "type" => "string" }, "zone_path" => PATH,
+                              "name" => { "type" => "string" },
                               "building_segment" => { "type" => %w[string null] },
                               "level" => { "type" => %w[string null] } },
             "description" => "The Zone occurrence holding the entity, or null with a reason."

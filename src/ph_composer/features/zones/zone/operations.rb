@@ -16,18 +16,20 @@ module PhComposer
     # Which Zone occurrence holds each root-to-entity path, or why none does, and the refusal a write through
     # the path meets (Occurrences.containment). It walks only along each path, so a pointer move may ask.
     def containment(request, paths:)
+      children = ChildLookup.new
       { "paths" => paths.map do |path|
-        found = Occurrences.containment(request.model, path)
+        found = Occurrences.containment(request.model, path, :children => children)
         { "path" => path, "zone" => found.zone && containment_zone(request.engine, found.zone),
           "entity_path" => found.entity_path, "reason" => found.reason, "write_refusal" => found.write_refusal }
       end }
     end
 
-    # A Zone's reference with its Building-Segment and Level names, read as zones.all shows them.
+    # A Zone's reference with its name and its Building-Segment and Level names, read as zones.all shows them.
     def containment_zone(engine, zone)
       record = zone.record
       names = record.fetch("schema_version") == 1 ? record : Options.display(engine, record)
-      zone.reference.merge("building_segment" => names["building_segment"], "level" => names["level"])
+      zone.reference.merge("name" => record.fetch("name"), "building_segment" => names["building_segment"],
+                           "level" => names["level"])
     end
 
     def repair_split_face(request, proposal, zone:, face_id:, zones:, retaining_entity_path: nil)

@@ -47,15 +47,33 @@ class ZonesContainmentTest < PhComposerTestCase
 
     rows = containment([100, 102], [10, 200, 202], [20, 300, 302])
 
-    assert_equal [{ "zone_id" => "zon_AAAAAAAAAAAA", "zone_path" => [100], "building_segment" => "Building",
-                    "level" => "L1" },
-                  { "zone_id" => "zon_BBBBBBBBBBBB", "zone_path" => [10, 200], "building_segment" => "Building",
-                    "level" => "L1" },
-                  { "zone_id" => "zon_CCCCCCCCCCCC", "zone_path" => [20, 300], "building_segment" => "Annex",
-                    "level" => "L1" }], rows.map { |row| row.fetch("zone") }
+    assert_equal [{ "zone_id" => "zon_AAAAAAAAAAAA", "zone_path" => [100], "name" => "Zone 100",
+                    "building_segment" => "Building", "level" => "L1" },
+                  { "zone_id" => "zon_BBBBBBBBBBBB", "zone_path" => [10, 200], "name" => "Zone 200",
+                    "building_segment" => "Building", "level" => "L1" },
+                  { "zone_id" => "zon_CCCCCCCCCCCC", "zone_path" => [20, 300], "name" => "Zone 300",
+                    "building_segment" => "Annex", "level" => "L1" }], rows.map { |row| row.fetch("zone") }
     assert_equal [[102], [202], [302]], rows.map { |row| row.fetch("entity_path") }
     assert_equal [nil, nil, nil], rows.map { |row| [row.fetch("reason"), row.fetch("write_refusal")].compact.first }
     assert_equal [[100, 102], [10, 200, 202], [20, 300, 302]], rows.map { |row| row.fetch("path") }
+  end
+
+  # A read over many paths scans each collection once (Zones::ChildLookup), not once per path and step:
+  # measured at 5,000 paths, the per-path scan cost seconds (context/CONTRACTS.md, "Containment").
+  def test_one_read_scans_each_collection_once_however_many_paths_it_answers
+    held = zone("zon_AAAAAAAAAAAA", 100, (101..140).map { |id| edge(id) })
+    @model.entities << held
+    scans = 0
+    held.entities.define_singleton_method(:to_a) do
+      scans += 1
+      super()
+    end
+
+    rows = containment(*(101..140).map { |id| [100, id] })
+
+    assert_equal [[100]] * 40, rows.map { |row| row.dig("zone", "zone_path") }
+    assert_equal [nil] * 40, rows.map { |row| row.fetch("write_refusal") }
+    assert_equal 1, scans
   end
 
   def test_paths_no_zone_holds_answer_their_reason

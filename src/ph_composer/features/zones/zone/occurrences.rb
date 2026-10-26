@@ -135,15 +135,16 @@ module PhComposer
       # nil. It runs the strict resolver's writable checks over the path without walking the Model, so
       # it cannot see a duplicated Zone or Face id: a pointer move may ask it, and the write itself
       # still resolves strictly.
-      def write_refusal(occurrence)
-        element_write_refusal(occurrence.zone, occurrence.path)
+      def write_refusal(occurrence, children: nil)
+        element_write_refusal(occurrence.zone, occurrence.path, :children => children)
       end
 
       # The same refusal for any drawing element inside a Zone occurrence, by its path inside the Zone.
-      # `noun` is the caller's word for the element, used in the messages.
-      def element_write_refusal(zone, entity_path, noun: "Face")
+      # `noun` is the caller's word for the element, used in the messages. A read over many paths passes
+      # one `children` lookup (ChildLookup) to every call.
+      def element_write_refusal(zone, entity_path, noun: "Face", children: nil)
         writable_zone!(zone)
-        entity, = resolve_face_path(zone, integer_path(entity_path), true, :noun => noun)
+        entity, = resolve_face_path(zone, integer_path(entity_path), true, :noun => noun, :children => children)
         stamped_for!(zone, entity)
         unlocked_zone!(zone)
         nil
@@ -218,8 +219,8 @@ module PhComposer
 
       # The Face occurrence a root-to-Face persistent-id path names, or nil when the path no longer
       # resolves uniquely or names no Zone Face. A read, under the same rule as `occurrence_for_path`.
-      def occurrence_at(model, path)
-        found = entities_along(model, path)
+      def occurrence_at(model, path, children: nil)
+        found = entities_along(model, path, :children => children)
         found && occurrence_for_path(found)
       end
 
@@ -230,8 +231,8 @@ module PhComposer
       # `cutting_instance` (a cutting component above it), `outside_zone`, or `nested_container` (a stamped
       # container between the Zone and it). Like `occurrence_for_path` it proves no identity; a write
       # still resolves strictly.
-      def containment(model, path)
-        entities = entities_along(model, path)
+      def containment(model, path, children: nil)
+        entities = entities_along(model, path, :children => children)
         return Containment.new(:reason => "not_found") unless entities
 
         zone, inside, reason = holding(entities)
@@ -239,15 +240,16 @@ module PhComposer
 
         entity_path = inside.map(&:persistent_id)
         Containment.new(:zone => zone, :entity_path => entity_path,
-                        :write_refusal => element_write_refusal(zone, entity_path, :noun => entities.last.typename))
+                        :write_refusal => element_write_refusal(zone, entity_path, :noun => entities.last.typename,
+                                                                                   :children => children))
       end
 
       # The entities a root-to-entity path names, each the unique child of the one before, or nil when
       # a step is missing or repeated.
-      def entities_along(model, path)
+      def entities_along(model, path, children: nil)
         entities = model.entities
         integer_path(path).map do |persistent_id|
-          matches = entities.to_a.select { |entity| entity.persistent_id == persistent_id }
+          matches = with_id(entities, persistent_id, children)
           return nil unless matches.length == 1
 
           entity = matches.first
@@ -332,12 +334,12 @@ module PhComposer
       # definition another Group shares is storage both placements write through, so a mutable path
       # refuses it and asks for it to be opened, which gives that placement its own definition. The
       # rule holds for any element at the end of the path; `noun` names it in the messages.
-      def resolve_face_path(zone, path, mutable, noun: "Face")
+      def resolve_face_path(zone, path, mutable, noun: "Face", children: nil)
         current = zone.entity.entities
         transform = zone.transform
         entity = nil
         path.each_with_index do |persistent_id, index|
-          entity = unique_entity(current, persistent_id)
+          entity = unique_entity(current, persistent_id, :children => children)
           break if index == path.length - 1
 
           if ZONE_STORE.read(entity)
@@ -412,8 +414,15 @@ module PhComposer
         raise_target("params.invalid", "Occurrence paths contain only persistent-id integers.")
       end
 
-      def unique_entity(entities, persistent_id)
-        matches = entities.to_a.select { |candidate| candidate.persistent_id == persistent_id }
+      # The children of `entities` with one persistent id, from the read's ChildLookup when it passes one.
+      def with_id(entities, persistent_id, children)
+        return children.matching(entities, persistent_id) if children
+
+        entities.to_a.select { |entity| entity.persistent_id == persistent_id }
+      end
+
+      def unique_entity(entities, persistent_id, children: nil)
+        matches = with_id(entities, persistent_id, children)
         raise_target("target.not_found", "Entity #{persistent_id} no longer exists.") if matches.empty?
         raise_target("target.ambiguous", "Entity #{persistent_id} resolves more than once.") if matches.length > 1
 
@@ -505,8 +514,8 @@ module PhComposer
         raise CodedError.new(code, message)
       end
       private_class_method :resolve_face_path, :walk_zones, :holding, :entities_along, :walk_faces, :raise_target,
-                           :zone_for_path, :cutting_component?, :container?, :contents, :collection_at, :writable_zone!,
-                           :unlocked_zone!, :stamped_for!
+                           :with_id, :zone_for_path, :cutting_component?, :container?, :contents, :collection_at,
+                           :writable_zone!, :unlocked_zone!, :stamped_for!
     end
   end
 end

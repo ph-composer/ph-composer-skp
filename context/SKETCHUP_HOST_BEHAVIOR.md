@@ -77,6 +77,7 @@ and Dynamic Components facts this file drops, is
 | Fact | Consequence | Pinned by |
 | --- | --- | --- |
 | `Sketchup.send_action("editPaste:")` parks the pasted content on the cursor and waits for a viewport click; `editPasteInPlace:` did not complete either. Measured in PH-Composer on 26.1.188, 2026-09-20. On 2026-10-12 `send_action("copy:")` then `send_action("pasteInPlace:")` made a native copy while SketchUp was frontmost, and did nothing, returning `true`, while it was in the background. | A script can make a native Paste in Place only with SketchUp frontmost; check that a Group was added before trusting it. Other copy gestures still need real input. | `tools/examples/authoring/repair_walkthrough.rb` |
+| SketchUp keeps one Ruby object per entity and per Entities collection: `model.entities`, `group.entities` and an entity read twice are `equal?`, and `group.entities.parent` is `group.definition`. Measured in PH-Composer on 26.1.188, 2026-10-25 (P3b-04). | A read may key a per-read cache on a collection by object identity (`Zones::ChildLookup`). | `tests/zones_containment_test.rb`, `test_one_read_scans_each_collection_once_however_many_paths_it_answers` |
 | The stock blank template already contains component instances of its own, including the scale figure. Measured in PH-Composer on 26.1.188, 2026-09-20. | A fixture that reaches for "the component" with `grep(ComponentInstance).first` picks up the template's. Select by definition name. | `tools/examples/authoring/repair_walkthrough.rb` |
 
 ## Saving, dialogs and the panel
