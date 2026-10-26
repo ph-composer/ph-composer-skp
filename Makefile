@@ -117,14 +117,19 @@ fixtures:
 	@if [ -z "$(strip $(FIXTURE_OWNERS))" ]; then echo "fixtures: no generated goldens yet"; else \
 	  PHC_WRITE_FIXTURES=1 $(RUBY) -Itests $(addprefix -r,$(addsuffix _test,$(FIXTURE_OWNERS))) -e ""; fi
 
-# Regenerate, then fail if that changed anything the branch has not committed.
+# Regenerate, then fail if that changed any golden on disk. The comparison is by content, not against
+# the last commit, so a golden regenerated and not yet committed passes and `make ci && git commit -s`
+# works in one chain; CI's clean checkout compares against the commit itself.
+FIXTURE_SUMS = find $(wildcard $(FIXTURE_PATHS)) -type f | xargs cksum | LC_ALL=C sort
 fixtures-check:
-	@$(MAKE) --no-print-directory fixtures >/dev/null
-	@if [ -n "$$(git status --porcelain -- $(FIXTURE_PATHS))" ]; then \
-	  echo "fixtures are stale; run 'make fixtures' and commit the result:"; \
-	  git status --short -- $(FIXTURE_PATHS); \
-	  exit 1; \
-	fi
+	@before=$$(mktemp); $(FIXTURE_SUMS) > "$$before"; \
+	 $(MAKE) --no-print-directory fixtures >/dev/null || { rm -f "$$before"; exit 1; }; \
+	 changed=$$($(FIXTURE_SUMS) | LC_ALL=C comm -13 "$$before" - | awk '{ print $$3 }'); rm -f "$$before"; \
+	 if [ -n "$$changed" ]; then \
+	   echo "fixtures are stale; 'make fixtures' rewrote these, so commit the result:"; \
+	   echo "$$changed"; \
+	   exit 1; \
+	 fi
 	@echo "Fixtures up to date"
 
 # Separate from ci: run it before a phase gate. Thresholds ratchet upward only. Python coverage

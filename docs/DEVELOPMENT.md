@@ -124,6 +124,15 @@ make ci                                        # 3.2.2, from .ruby-version
 make ci RUBY=$(rbenv prefix 2.7.2)/bin/ruby    # the floor
 ```
 
+A non-interactive shell (an agent's tool shell, a git client) can resolve `ruby` and `bundle` to
+macOS's system Ruby 2.6, which the suite refuses. The `make` targets find the rbenv Ruby
+themselves. Run a single test file or RuboCop yourself like this:
+
+```sh
+$(rbenv which ruby) -Itests tests/definition_lists_test.rb
+PATH="$(dirname "$(rbenv which ruby)"):$PATH" bundle exec rubocop src/ph_composer/shell
+```
+
 GitHub Actions runs `make ci` on both, one matrix job per version, on every pull request and
 every push to `main`. A newer push to the same pull request cancels the run in progress.
 
@@ -136,6 +145,11 @@ the Makefile, and `FIXTURE_PATHS` names what `make fixtures-check` compares. The
 `tests/phase_one_export_test.rb`; and [`API_REFERENCE.md`](API_REFERENCE.md), the generated API
 reference, owned by `tests/api_reference_test.rb`. Hand-authored inputs live apart from goldens and
 nothing regenerates them.
+
+`make fixtures-check` compares the goldens' content before and after regenerating them, not against
+the last commit. A golden you regenerated and have not committed yet passes, so `make ci && git
+commit -s` works in one chain. Stage the regenerated golden with the rest, or the CI run on the
+pushed commit fails.
 
 `make coverage` measures Ruby line coverage of the extension folder against a 93% minimum,
 JavaScript line coverage of `html/` (the runtime page included) against 94%, and Python coverage of
