@@ -46,6 +46,15 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared)
     this.controls.root.appendChild(this.refresh);
     root.appendChild(this.controls.root);
     this.mount = ui.element("div", "tb-schedule-table");
+    // A click on a run's row selects its Edges; its controls (Locate, the findings glyph) keep their own clicks,
+    // and the Locate icon is the keyboard route.
+    this.mount.addEventListener("click", function (event) {
+      var target = event.target;
+      if (!target || !target.closest || target.closest("button, input, select, a, .col-actions")) return;
+      var row = target.closest("[data-row-key]"), key = row && row.getAttribute("data-row-key");
+      var run = self.runs.filter(function (entry) { return entry.identifier === key; })[0];
+      if (run) self.sendLocate(run.edge_paths);
+    });
     root.appendChild(this.mount);
     this.totals = ui.element("div", "tb-schedule-totals");
     this.byType = ui.element("div", "tb-totals-table");

@@ -160,7 +160,7 @@ test("the Group column filters by METr's words and sorts from its menu", functio
   assert.deepStrictEqual(rows(), ["tbt_b", "tbt_a"]);
 });
 
-test("a schedule row's Locate sends runs.locate with that run's Edges", function () {
+test("a schedule row's Locate icon, and a click on the row, send runs.locate with that run's Edges", function () {
   var o = setup();
   readSchedule(o);
   o.view.tabs.select("schedule");
@@ -171,6 +171,16 @@ test("a schedule row's Locate sends runs.locate with that run's Edges", function
   assert.strictEqual(sent.type, "view.invoke");
   assert.deepStrictEqual(JSON.parse(JSON.stringify(sent.payload.params)),
     { edge_paths: [[100, 101], [100, 102], [100, 103], [100, 104]] });
+  var zone = o.root.querySelector("[data-row-key=tb_aaaa]").querySelector(".col-zone");
+  o.view.schedule.mount.listeners.click({ target: zone });
+  assert.strictEqual(named(o, PREFIX + "runs.locate").length, 1, "a pending Locate takes no second click");
+  o.state.ui.viewResults[sent.payload.request_id] = { request_id: sent.payload.request_id, session: "session",
+    outcome: { status: "completed", value: {} } };
+  o.paint();
+  o.view.schedule.mount.listeners.click({ target: zone });
+  assert.strictEqual(named(o, PREFIX + "runs.locate").length, 2, "clicking a row's cell locates the run");
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(named(o, PREFIX + "runs.locate")[1].payload.params.edge_paths)),
+    [[100, 101], [100, 102], [100, 103], [100, 104]]);
   var heat = o.root.querySelectorAll(".col-heat_loss_w_k").map(function (td) { return td.textContent; });
   assert.ok(heat.indexOf("2.16") >= 0, heat.join());
 });

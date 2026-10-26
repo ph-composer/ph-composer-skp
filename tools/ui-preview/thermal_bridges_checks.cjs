@@ -103,6 +103,8 @@ check({ name: "thermal_bridges", output }, async ({ newPage, step }) => {
   assert.equal(await schedule.locator(".phc-view-count").textContent(), "3 runs");
   await schedule.getByRole("button", { name: "Locate Parapet 1", exact: true }).click();
   await page.waitForFunction(() => (window.previewHost.locatedEdges || []).length === 4);
+  await schedule.locator("[data-row-key='tb_Gg77Hh88Ii99'] .col-zone").click();
+  await page.waitForFunction(() => JSON.stringify(window.previewHost.locatedEdges) === "[[100,311],[100,312]]");
   await schedule.getByRole("button", { name: "1 finding for Parapet 2", exact: true }).click();
   const finding = page.getByRole("dialog", { name: "Findings" });
   await finding.getByText(/counted twice/).waitFor();

@@ -105,9 +105,9 @@ Recorded 2026-10-26 while building the stage; the screen is proposed until Ed ac
   wires `column_menu.js` as Zones / Faces does: Sort A to Z and Z to A on Name, psi-value, Group, Used
   length and Notes, and a Show checklist on Group in METr's words. Order by and its direction give way to
   the column menus there; other inventories are unchanged. Group by stays.
-- **Locate.** A run's Locate is its row icon, as in the Window schedule, in place of a click on the row
-  (the PRD's "click a row"); a row click would compete with selecting text and with the findings glyph.
-  A hidden Schedule does not repaint; it paints its last read when shown. Findings sit behind an alert glyph
+- **Locate.** A click on a run's row locates it, as the PRD asks; the row's Locate icon is the keyboard
+  route, and the findings glyph keeps its own click. A hidden Schedule does not repaint; it paints its
+  last read when shown. Findings sit behind an alert glyph
   that opens a bubble with each message and its own Locate; Edges in no run and unreadable assignments
   collect under "Not in the schedule".
 - **Kit fix.** `library/library.css` made every inventory's Name header static, so it scrolled away under

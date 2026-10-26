@@ -12,6 +12,7 @@
 /* Each table scrolls inside itself, so a narrow panel never scrolls the tab sideways. */
 .tb-schedule-table, .tb-totals-table { min-width: 0; overflow: auto; }
 .tb-schedule-table { margin-top: 8px; }
+.tb-schedule-table tbody tr { cursor: pointer; }
 /* Words read from the left; numbers keep the table's right alignment. */
 .tb-types .phc-table :is(.col-group, .col-datasheet),
 .tb-schedule .phc-table :is(.col-display_name, .col-zone, .col-building_segment, .col-type_name, .col-group) {
