@@ -182,15 +182,27 @@ class ThermalBridgeScheduleTest < PhComposerTestCase
     assert_equal %w[refused thermal_bridge.hidden], hidden.values_at("status", "code")
     assert_equal [[], []], [Array(@model.active_path), @model.selection.to_a]
     @wrapper.hidden = false
-    @line.layer = Sketchup::Tag.new("Hidden", false)
-    tagged = command("runs.locate", "edge_paths" => balcony.fetch("edge_paths"))
-    assert_equal %w[refused thermal_bridge.hidden], tagged.values_at("status", "code")
-    assert_equal [[], []], [Array(@model.active_path), @model.selection.to_a]
+    hidden_folder = Sketchup::Tag.new("Hidden folder", false)
+    shown_folder = Sketchup::Tag.new("Shown folder", true)
+    shown_folder.define_singleton_method(:folder) { hidden_folder }
+    [Sketchup::Tag.new("Hidden", false), in_folder(hidden_folder), in_folder(shown_folder)].each do |tag|
+      @line.layer = tag
+      tagged = command("runs.locate", "edge_paths" => balcony.fetch("edge_paths"))
+      assert_equal %w[refused thermal_bridge.hidden], tagged.values_at("status", "code"), tag.name
+      assert_equal [[], []], [Array(@model.active_path), @model.selection.to_a], tag.name
+    end
 
     mixed = command("runs.locate", "edge_paths" => [[100, @roof.first.persistent_id], [20, 200, @line.persistent_id]])
     assert_equal %w[refused params.invalid], mixed.values_at("status", "code")
     gone = command("runs.locate", "edge_paths" => [[100, 999_999]])
     assert_equal %w[refused target.not_found], gone.values_at("status", "code")
+  end
+
+  # A shown tag inside `folder`, as SketchUp's tag folders hold tags.
+  def in_folder(folder)
+    tag = Sketchup::Tag.new("Shown in #{folder.name}", true)
+    tag.define_singleton_method(:folder) { folder }
+    tag
   end
 
   def schedule

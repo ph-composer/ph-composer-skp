@@ -60,8 +60,17 @@ module PhComposer
       def hidden?(entity)
         return true if entity.respond_to?(:hidden?) && entity.hidden?
 
-        layer = entity.respond_to?(:layer) ? entity.layer : nil
-        layer.respond_to?(:visible?) && !layer.visible?
+        hidden_tag?(entity.respond_to?(:layer) ? entity.layer : nil)
+      end
+
+      # A tag shows only when it and every tag folder holding it are visible.
+      def hidden_tag?(tag)
+        while tag
+          return true if tag.respond_to?(:visible?) && !tag.visible?
+
+          tag = tag.respond_to?(:folder) ? tag.folder : nil
+        end
+        false
       end
 
       # Frames by world endpoints, composed from the root, so a context open or not gives the same view.
@@ -75,7 +84,7 @@ module PhComposer
         end
         ViewFraming.call(view, points, chains.map(&:last))
       end
-      private_class_method :along, :contents, :hidden?, :frame
+      private_class_method :along, :contents, :hidden?, :hidden_tag?, :frame
     end
   end
 end
