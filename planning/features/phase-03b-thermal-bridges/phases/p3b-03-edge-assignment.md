@@ -1,7 +1,7 @@
 # P3b-03: edge assignment, Zone containment and edge picking
 
 DATE: 2026-10-03
-STATUS: Scoped. Corrected to `main` at `420c783a` on 2026-10-21 (DECISIONS Part 1b)
+STATUS: In progress on `feature/thermal-bridges-p3b-03` (2026-10-25). Corrected to `main` at `420c783a` on 2026-10-21 (DECISIONS Part 1b)
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 
@@ -77,6 +77,12 @@ Paths are relative to `src/ph_composer/`.
    `edges.assign` is the explicit-reference route and the tool (P3b-07) its pointer equivalent.
    Any navigation into a nested Zone's context goes through the foundation's
    `ph_composer.context.open` (D3a1-04 names this stage); add none of its own.
+
+As built (2026-10-25): the store sits in `assignment/schema.rb` beside the record kind, not in a
+`store.rb` of its own; `edges.assign` resolves each target through the Edge target's `locate:`
+(`Zones::Occurrences.resolve_element`), which answers every refusal step 4 lists, so it does not also
+call `zones.containment`; the selection read and the type delete's rewrite call it. The resolver
+and the selection read an assignment as stored, so an invalid one can still be cleared.
 
 ## Source
 

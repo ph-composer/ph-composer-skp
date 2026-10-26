@@ -40,7 +40,7 @@ Proposed layout, following `features/windows/install.rb` and `features/zones/ins
 features/thermal_bridges/
   install.rb  codes.rb  snapshot.rb  export.rb  colour_modes.rb  edge_tool.rb
   type/        schema.rb  operations.rb  reads.rb
-  assignment/  schema.rb  store.rb  operations.rb  steps.rb  reference_target.rb  selection.rb
+  assignment/  schema.rb (record and store)  operations.rb  steps.rb  reference_target.rb  selection.rb
   runs/        chains.rb  schedule.rb  findings.rb      (pure Ruby, no SketchUp)
   scan/        occurrences.rb
   declarations/ shapes.rb  types.rb  assignment.rb  schedule.rb  viewport.rb
@@ -92,7 +92,7 @@ fields.
 
 | Target id | Occurrence reference | Records provider | `locate:` |
 | --- | --- | --- | --- |
-| `ph_composer.thermal_bridges.edge` (new) | `{ "zone_id", "zone_path", "entity_path", "entity_id" }`, the Face reference shape (`context/CONTRACTS.md`, "Geometry records and occurrence references"): `zone_path` root to the holding Zone, `entity_path` from inside the Zone to the Edge, `entity_id` the `tbe_` id or null for an unassigned Edge | A whole-Model walk for tagged Edges, every Group and ComponentInstance including shared definitions and cutting instances, so an orphaned or shared tag still blocks deleting its type; entries are `Records::ReferenceEntry(kind, key: path, record)` as `Zones::Faces::ReferenceTargets.entries` builds them | The owner's resolver over Zones' path resolution (H11): refuses a stale or ambiguous path with `target.*` codes, a path whose Edge gained or changed its record as `target.changed`, and never searches by geometry. `locate_index:` builds the read-phase index |
+| `ph_composer.thermal_bridges.edge` (new) | `{ "zone_id", "zone_path", "entity_path", "entity_id" }`, the Face reference shape (`context/CONTRACTS.md`, "Geometry records and occurrence references"): `zone_path` root to the holding Zone, `entity_path` from inside the Zone to the Edge, `entity_id` the `tbe_` id or null for an unassigned Edge | A whole-Model walk for tagged Edges, every Group and ComponentInstance including shared definitions and cutting instances, so an orphaned or shared tag still blocks deleting its type; entries are `Records::ReferenceEntry(kind, key: path, record)` as `Zones::Faces::ReferenceTargets.entries` builds them | The owner's resolver over Zones' path resolution (H11): `Zones::Occurrences.resolve_element` resolves the Zone and every step and refuses with `target.*` codes; the owner checks the leaf is an Edge, refuses a path whose Edge gained or changed its record as `target.changed`, refuses no duplicated `tbe_` id (D3b-22), and never searches by geometry. `locate_index:` builds a `Zones::Index` (P3b-03) |
 
 The target declares `references: [thermal_bridge_type_id]` so the engine's incoming-reference
 scan refuses deleting a Thermal Bridge Type while an Edge names it, exactly as a Face naming an
@@ -118,7 +118,7 @@ test covers it. Id params carry the prefix pattern, for example `^tbt_[A-Za-z0-9
 | `types` | snapshot section | P3b-02 | The same projection for the panel |
 | `types.create`, `types.update`, `types.duplicate` | action | P3b-02 | Values with `expected_values`; `user_data` |
 | `types.delete` | action | P3b-02; replacement from P3b-03 | Guarded delete; with `replacement_id` every assigned Edge is rewritten to it, and with an explicit null every assigned Edge's dictionary is removed, in the same proposal and Undo step |
-| `edges.assign` | action | P3b-03 | Explicit Edge references, a type id, a quantity, and each target's `expected_values`. Assign and reassign. One Undo step |
+| `edges.assign` | action | P3b-03 | Explicit Edge references, a type id, a quantity, and each target's `expected_values`. Assign and reassign. One Undo step. Each target resolves through the Edge target's `locate:`, which already answers every containment refusal, so the action does not also call `zones.containment` (P3b-03) |
 | `edges.clear` | action | P3b-03 | Explicit Edge references. Removes the assignment dictionary |
 | `edges.selection` | query | P3b-03 | The current native selection as Edge references, each with its Zone containment, current assignment and write refusal |
 | `edges.selected` | snapshot section | P3b-03 | The same for the panel's assign bar |
@@ -170,7 +170,7 @@ the stage listed with its own tests.
 
 | # | Addition | Where | Stage |
 | --- | --- | --- | --- |
-| H11 | `ph_composer.zones.containment` (new): for native root-to-entity paths, the Zone occurrence that holds each (`zone_id`, `zone_path`, `building_segment`, `level`), or none with a reason (`outside_zone`, `cutting_instance`, `nested_container` under D3a-1, `not_a_drawing_element`), and the `write_refusal` a write through that path meets. Built on what exists: `Zones::Occurrences.occurrence_at` and `occurrence_for_path` already resolve a path along its own collections to the innermost Zone and answer nil for those reasons without naming them, and accept a Face leaf only (DECISIONS F7). H11 generalises the leaf to any drawing element, returns the reason, and `host_context` keeps its Face-only shape over the same code | `features/zones/zone/occurrences.rb`, `features/zones/declarations/` | P3b-03 |
+| H11 | `ph_composer.zones.containment` (exists from P3b-03): for native root-to-entity paths, the Zone occurrence that holds each (`zone_id`, `zone_path`, `building_segment`, `level`) with the `entity_path` inside it, or none with a reason (`not_found` for a step missing or repeated, added by P3b-03; `outside_zone`, `cutting_instance`, `nested_container` under D3a-1, `not_a_drawing_element`), and the `write_refusal` a write through that path meets. Its Ruby half for a `locate:`, which has no request, is `Zones::Occurrences.resolve_element(model, reference, noun:, mutable:, index:)`. Built on what exists: `Zones::Occurrences.occurrence_at` and `occurrence_for_path` already resolve a path along its own collections to the innermost Zone and answer nil for those reasons without naming them, and accept a Face leaf only (DECISIONS F7). H11 generalises the leaf to any drawing element, returns the reason, and `host_context` keeps its Face-only shape over the same code | `features/zones/zone/occurrences.rb`, `features/zones/declarations/` | P3b-03 |
 | H12 | `Pick.edge_path(view, x, y)` (new): the first pick path ending in a `Sketchup::Edge`, with the same rules as `face_path` | `core/pick.rb` | P3b-03 |
 | H13 | Not needed. An Edge is drawn through P3a-05's `derived` segments (D3b-11); `colour_by/tessellation.rb` is unchanged. The number is kept so later references stay stable | none | none |
 | H14 | A stroke weight for `derived` segments, declared per mode (`colour_mode(..., stroke:)`) (new), drawn on the per-colour line batch P3a-05 built (`colour_by/drawing.rb`, `@lines`; `overlay.rb`, `LINE_WIDTH`). One mode is active at a time, so one width per mode costs no extra pass (section 8, question 7) | `shell/registry.rb`, `shell/declarations.rb`, `colour_by/overlay.rb` | P3b-06 |

@@ -20,6 +20,20 @@ module PhComposer
       end
     end
 
+    # Any drawing element inside a Zone occurrence, resolved by `Occurrences.resolve_element`: the shape
+    # of a FaceOccurrence for an element of a kind Zones does not name.
+    ElementOccurrence = Struct.new(:entity, :zone, :path, :transform, :entities, keyword_init: true) do
+      def reference(entity_id = nil)
+        { "zone_id" => zone.record.fetch("id"), "zone_path" => zone.path.dup, "entity_path" => path.dup,
+          "entity_id" => entity_id }
+      end
+    end
+
+    # What `Occurrences.containment` answers for one path: the holding Zone occurrence, the path from
+    # inside it to the entity and the refusal a write through that path meets, or only the reason no Zone
+    # holds it.
+    Containment = Struct.new(:zone, :entity_path, :write_refusal, :reason, keyword_init: true)
+
     # Bounded occurrence reads for Zone and Face public operations. Resolution follows every supplied
     # parent-child path and durable id. It never searches by name or geometry to repair a stale target.
     module Occurrences
@@ -122,13 +136,36 @@ module PhComposer
       # it cannot see a duplicated Zone or Face id: a pointer move may ask it, and the write itself
       # still resolves strictly.
       def write_refusal(occurrence)
-        writable_zone!(occurrence.zone)
-        face_at(occurrence.zone, occurrence.path, :mutable => true)
-        stamped_for!(occurrence.zone, occurrence.entity)
-        unlocked_zone!(occurrence.zone)
+        element_write_refusal(occurrence.zone, occurrence.path)
+      end
+
+      # The same refusal for any drawing element inside a Zone occurrence, by its path inside the Zone.
+      # `noun` is the caller's word for the element, used in the messages.
+      def element_write_refusal(zone, entity_path, noun: "Face")
+        writable_zone!(zone)
+        entity, = resolve_face_path(zone, integer_path(entity_path), true, :noun => noun)
+        stamped_for!(zone, entity)
+        unlocked_zone!(zone)
         nil
       rescue CodedError => error
         { "code" => error.code, "message" => error.message }
+      end
+
+      # A Face-shaped reference (`zone_id`, `zone_path`, `entity_path`) resolved strictly to the drawing
+      # element it names, of any kind: the Zone by id and path, every step inside it, and, when `mutable`,
+      # what a write through that path refuses. It reads no record on the element and checks no kind; an
+      # owner storing records on other elements checks both itself. Returns an ElementOccurrence. Its
+      # `index:` is a Zones::Index, as for the Zone and Face targets.
+      def resolve_element(model, reference, noun:, mutable: false, index: nil)
+        zone = resolve_zone(model, reference, :mutable => mutable, :index => index)
+        path = integer_path(reference.fetch("entity_path"))
+        raise_target("target.not_found", "The #{noun} path is empty.") if path.empty?
+
+        entity, transform, entities = resolve_face_path(zone, path, mutable, :noun => noun)
+        stamped_for!(zone, entity)
+        unlocked_zone!(zone) if mutable
+        ElementOccurrence.new(:entity => entity, :zone => zone, :path => path, :transform => transform,
+                              :entities => entities)
       end
 
       # The Zone reference target's `locate:` (Records::ReferenceTarget): the strict resolver, so a
@@ -182,8 +219,34 @@ module PhComposer
       # The Face occurrence a root-to-Face persistent-id path names, or nil when the path no longer
       # resolves uniquely or names no Zone Face. A read, under the same rule as `occurrence_for_path`.
       def occurrence_at(model, path)
+        found = entities_along(model, path)
+        found && occurrence_for_path(found)
+      end
+
+      # Which Zone occurrence holds the entity a root-to-entity persistent-id path names, read along that
+      # path alone, as a Containment. The Zone is the innermost one above the entity, by the rule
+      # `occurrence_for_path` applies to Faces; any drawing element may be the leaf. Without a Zone it
+      # carries the reason: `not_found` (a step missing or repeated), `not_a_drawing_element`,
+      # `cutting_instance` (a cutting component above it), `outside_zone`, or `nested_container` (a stamped
+      # container between the Zone and it). Like `occurrence_for_path` it proves no identity; a write
+      # still resolves strictly.
+      def containment(model, path)
+        entities = entities_along(model, path)
+        return Containment.new(:reason => "not_found") unless entities
+
+        zone, inside, reason = holding(entities)
+        return Containment.new(:reason => reason) unless zone
+
+        entity_path = inside.map(&:persistent_id)
+        Containment.new(:zone => zone, :entity_path => entity_path,
+                        :write_refusal => element_write_refusal(zone, entity_path, :noun => entities.last.typename))
+      end
+
+      # The entities a root-to-entity path names, each the unique child of the one before, or nil when
+      # a step is missing or repeated.
+      def entities_along(model, path)
         entities = model.entities
-        found = integer_path(path).map do |persistent_id|
+        integer_path(path).map do |persistent_id|
           matches = entities.to_a.select { |entity| entity.persistent_id == persistent_id }
           return nil unless matches.length == 1
 
@@ -195,7 +258,6 @@ module PhComposer
                      end
           entity
         end
-        occurrence_for_path(found)
       end
 
       # The occurrence one picked instance path names, or nil when the path reaches no Face or the
@@ -210,24 +272,35 @@ module PhComposer
         entities = Array(path)
         face = entities.last
         return nil unless face.is_a?(Sketchup::Face)
-        return nil if entities.any? { |entity| cutting_component?(entity) }
 
-        # The innermost Zone on the path, because that is the one whose Faces this Face is among:
-        # `walk_faces` stops descending at a nested Zone, so an outer Zone does not own it. Taking
-        # the outer one instead would build a reference the resolver accepts, since it descends a
-        # Group without checking for a Zone record, and the gesture would stamp the Face with the
-        # wrong Zone.
-        zone_index = entities.rindex { |entity| entity.is_a?(Sketchup::Group) && ZONE_STORE.read(entity) }
-        return nil unless zone_index
-
-        zone = zone_for_path(entities[0..zone_index],
-                             entities[0...zone_index].any? { |entity| ZONE_STORE.read(entity) })
-        inside = entities[(zone_index + 1)..-1]
-        return nil if inside[0...-1].any? { |entity| container?(entity) }
+        zone, inside, = holding(entities)
+        return nil unless zone
 
         transform = inside[0...-1].reduce(zone.transform) { |carried, entity| carried * entity.transformation }
         FaceOccurrence.new(:entity => face, :zone => zone, :path => inside.map(&:persistent_id),
                            :transform => transform, :entities => contents(entities[-2]))
+      end
+
+      # The Zone occurrence holding the last of a root-to-entity list and the entities from inside it to
+      # the leaf, as `[zone, inside, nil]`, or `[nil, nil, reason]` (see `containment`).
+      def holding(entities)
+        return [nil, nil, "not_a_drawing_element"] unless entities.last.is_a?(Sketchup::Drawingelement)
+        return [nil, nil, "cutting_instance"] if entities[0...-1].any? { |entity| cutting_component?(entity) }
+
+        # The innermost Zone above the leaf, because that is the one whose Faces this Face is among:
+        # `walk_faces` stops descending at a nested Zone, so an outer Zone does not own it. Taking
+        # the outer one instead would build a reference the resolver accepts, since it descends a
+        # Group without checking for a Zone record, and the gesture would stamp the Face with the
+        # wrong Zone.
+        zone_index = entities[0...-1].rindex { |entity| entity.is_a?(Sketchup::Group) && ZONE_STORE.read(entity) }
+        return [nil, nil, "outside_zone"] unless zone_index
+
+        inside = entities[(zone_index + 1)..-1]
+        return [nil, nil, "nested_container"] if inside[0...-1].any? { |entity| container?(entity) }
+
+        zone = zone_for_path(entities[0..zone_index],
+                             entities[0...zone_index].any? { |entity| ZONE_STORE.read(entity) })
+        [zone, inside, nil]
       end
 
       # The Zone occurrence for a root-to-Zone entity path, composed exactly as `walk_zones` does.
@@ -257,8 +330,9 @@ module PhComposer
       # carrying a Zone record, or a Group carrying a Zone stamp, owns what is inside it, so a path
       # through one names a Face this Zone does not own, for reads and writes alike. A Group whose
       # definition another Group shares is storage both placements write through, so a mutable path
-      # refuses it and asks for it to be opened, which gives that placement its own definition.
-      def resolve_face_path(zone, path, mutable)
+      # refuses it and asks for it to be opened, which gives that placement its own definition. The
+      # rule holds for any element at the end of the path; `noun` names it in the messages.
+      def resolve_face_path(zone, path, mutable, noun: "Face")
         current = zone.entity.entities
         transform = zone.transform
         entity = nil
@@ -267,20 +341,20 @@ module PhComposer
           break if index == path.length - 1
 
           if ZONE_STORE.read(entity)
-            raise_target("target.wrong_hierarchy", "The Face path crosses another Zone.")
+            raise_target("target.wrong_hierarchy", "The #{noun} path crosses another Zone.")
           elsif container?(entity)
-            raise_target("target.wrong_hierarchy", "The Face is inside a nested container, not among the Zone's Faces.")
+            raise_target("target.wrong_hierarchy", "The #{noun} is inside a nested container, not in the Zone itself.")
           elsif entity.is_a?(Sketchup::ComponentInstance)
             if cutting_component?(entity)
-              raise_target("target.wrong_kind", "Cutting component geometry is not a Zone Face.")
+              raise_target("target.wrong_kind", "Cutting component geometry is not part of the Zone.")
             end
-            raise_target("target.shared_definition", "That Face is inside shared component storage.") if mutable
+            raise_target("target.shared_definition", "That #{noun} is inside shared component storage.") if mutable
             current = entity.definition.entities
           elsif entity.is_a?(Sketchup::Group)
-            raise_target("target.locked", "The Face is inside a locked Group.") if mutable && entity.locked?
+            raise_target("target.locked", "The #{noun} is inside a locked Group.") if mutable && entity.locked?
             if mutable && shared_storage?(entity)
               raise_target("target.shared_definition",
-                           "That Face is inside a Group shared with a copy. Open that Group with Edit Group, or " \
+                           "That #{noun} is inside a Group shared with a copy. Open that Group with Edit Group, or " \
                            "double-click it, then close it, and try again.")
             end
             current = entity.entities
@@ -426,7 +500,7 @@ module PhComposer
       def raise_target(code, message)
         raise CodedError.new(code, message)
       end
-      private_class_method :resolve_face_path, :walk_zones, :walk_faces, :raise_target,
+      private_class_method :resolve_face_path, :walk_zones, :holding, :entities_along, :walk_faces, :raise_target,
                            :zone_for_path, :cutting_component?, :container?, :contents, :collection_at, :writable_zone!,
                            :unlocked_zone!, :stamped_for!
     end

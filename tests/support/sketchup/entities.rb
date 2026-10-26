@@ -467,7 +467,11 @@ module Sketchup
     end
   end
 
-  class Face < Entity
+  # The host's base for everything an entities collection holds: Faces, Edges, Groups, instances. An
+  # Entity that is not one, as a test plants to stand for a non-geometric child, is not.
+  class Drawingelement < Entity; end
+
+  class Face < Drawingelement
     attr_reader :loops, :outer_loop, :normal, :edges
     attr_accessor :material, :back_material
 
@@ -588,7 +592,7 @@ module Sketchup
     end
   end
 
-  class Edge < Entity
+  class Edge < Drawingelement
     attr_reader :start, :end, :faces
 
     def initialize(persistent_id, start_point, end_point, dictionaries = {})
@@ -861,7 +865,7 @@ module Sketchup
     end
   end
 
-  class ComponentInstance < Entity
+  class ComponentInstance < Drawingelement
     include SolidVolume
 
     attr_accessor :definition
@@ -909,7 +913,7 @@ module Sketchup
     end
   end
 
-  class Group < Entity
+  class Group < Drawingelement
     include SolidVolume
 
     attr_reader :entities

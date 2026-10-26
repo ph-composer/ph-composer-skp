@@ -226,6 +226,33 @@ constraints:
   `gesture.too_large`. The ceiling bounds the blast radius, not elapsed time. Suggest
   classification for one Zone is a named batch and carries no ceiling.
 
+### Edge-owned assignments
+
+Thermal bridges were the first feature to store a record on a `Sketchup::Edge`; hot-water piping
+and ERV ducting reuse these rules.
+
+- The record is an attribute dictionary on the Edge, written through `Records::EntityStore`. No
+  Model-level registry lists tagged Edges, so a copied Edge carries its record and an erased one
+  takes it away. A feature whose records other records point at decides for itself whether it needs
+  a registry.
+- The record carries an id because the engine's reference scan requires one. Every split, copy and
+  paste puts the whole dictionary on each piece (`SKETCHUP_HOST_BEHAVIOR.md`), so one id held by
+  several Edges is routine: reads mark it copied, nothing re-issues it, and the resolver proves an
+  occurrence by its path and the record id on that path, never by refusing the duplicate. A heal of
+  two differently tagged halves keeps one record and drops the other silently; a rescan is the only
+  reader of that loss.
+- Zones decides which Zone holds an Edge. A feature reads `ph_composer.zones.containment` for native
+  paths it holds (a selection, a pick), and its reference target's `locate:` calls
+  `Zones::Occurrences.resolve_element`, the same resolution with Zones' `target.*` refusals, because a
+  `locate:` runs at apply with no request. The feature never restates the nested-Zone, wrapper,
+  stamped-container or cutting-instance rules.
+- Writes refuse through shared storage, a locked Group and another Zone, as Face writes do. Every
+  assign or clear is one command over explicit references, bounded by a limit the feature's schema
+  owns (250 Edges for thermal bridges), refusing as a whole.
+- No observer watches Edges. Reads scan the Model when asked.
+- An Edge carries at most one assignment of each kind; a thermal bridge Edge is envelope geometry
+  and a pipe or duct is a loose line in its own Group, so the two never share an Edge.
+
 ## Pyodide and Export boundary
 
 The embedded runtime is served from a token-qualified loopback HTTP origin. `file://` and an

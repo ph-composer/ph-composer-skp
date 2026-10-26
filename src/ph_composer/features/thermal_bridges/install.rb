@@ -4,13 +4,20 @@
 # assignments that name a type. It requires Zones, and no Zones file names it.
 #
 #   type/           the Thermal Bridge Type kind, its operations and reads; names no Edge, Zone or run
+#   assignment/     the record on an Edge, its reference target, assign, clear and the selection read
 #   codes.rb        the codes under the thermal_bridge noun
 #   declarations/   what thermal bridges register
 require_relative "type/schema"
 require_relative "type/operations"
 require_relative "type/reads"
+require_relative "assignment/schema"
+require_relative "assignment/reference_target"
+require_relative "assignment/steps"
+require_relative "assignment/operations"
+require_relative "assignment/selection"
 require_relative "declarations/shapes"
 require_relative "declarations/types"
+require_relative "declarations/assignment"
 require_relative "codes"
 
 module PhComposer
@@ -20,6 +27,7 @@ module PhComposer
     def install(registry)
       feature = registry.feature(FEATURE_ID, :contract_version => 1, :requires => ["ph_composer.zones"])
       TypeRegistration.install(feature)
+      AssignmentRegistration.install(feature)
       Codes.install(feature)
     end
   end

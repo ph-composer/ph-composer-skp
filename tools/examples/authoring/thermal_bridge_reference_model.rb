@@ -1,0 +1,131 @@
+# frozen_string_literal: true
+
+require_relative "client"
+require_relative "windows_walkthrough"
+
+# The thermal-bridge reference model, built in an empty Model for a host gate. Geometry and the native
+# selection are development setup outside the product API; Zones, types and the Window Unit are made
+# through public actions. Run each line in its own bridge call:
+#   ThermalBridgeReferenceModel.build        two adjacent Zones, a Zone in a turned wrapper, the five types,
+#                                            a Window Unit on Zone A's south wall and a line at the Model root;
+#                                            answers the named Edge paths
+#   ThermalBridgeReferenceModel.paths        the same names, read again from the live Model
+#   ThermalBridgeReferenceModel.select("zone_a_roof")
+#                                            opens the Zone and selects those Edges, as a user would
+# Zone A is 5 x 4 x 3 m from the origin and Zone B 4 x 4 x 3 m beside it at x = 5 m; Zone W is
+# 2 x 2 x 2 m inside a Group turned 30 degrees about z at x = 20 m.
+module ThermalBridgeReferenceModel
+  API = PhComposer::API
+  TYPES = [["Parapet", 0.05, "15-Ambient"], ["Slab edge", 0.12, "16-Perimeter"], ["Footing", -0.02, "17-FS/BC"],
+           ["Balcony", 0.25, "15-Ambient"], ["Draft", nil, "15-Ambient"]].freeze
+
+  module_function
+
+  def build
+    model = Sketchup.active_model
+    raise "Build the reference model in an empty Model." unless model.entities.length.zero?
+
+    client = AuthoringExample::Client.new
+    zone_a = AuthoringExample.box(model.entities, "Zone A", [0, 0, 0], 5000.mm, 4000.mm, 3000.mm)
+    zone_b = AuthoringExample.box(model.entities, "Zone B", [5000.mm, 0, 0], 4000.mm, 4000.mm, 3000.mm)
+    wrapper = model.entities.add_group
+    wrapper.name = "Turned wrapper"
+    wrapper.transformation = Geom::Transformation.translation([20_000.mm, 0, 0]) *
+                             Geom::Transformation.rotation(ORIGIN, Z_AXIS, 30.degrees)
+    zone_w = AuthoringExample.box(wrapper.entities, "Zone W", [0, 0, 0], 2000.mm, 2000.mm, 2000.mm)
+    model.entities.add_line([0, -2000.mm, 0], [3000.mm, -2000.mm, 0])
+    [[[], zone_a], [[], zone_b], [[wrapper.persistent_id], zone_w]].each do |parent_path, group|
+      checked(client, "ph_composer.zones.make", "parent_path" => parent_path, "entity_ids" => [group.persistent_id],
+                                                "name" => group.name)
+    end
+    TYPES.each do |name, psi, group|
+      checked(client, "ph_composer.thermal_bridges.types.create",
+              "values" => { "name" => name, "psi_w_mk" => psi, "group" => group })
+    end
+    place_window(client, zone_a)
+    paths
+  end
+
+  # Named root-to-Edge paths in the live Model.
+  def paths
+    model = Sketchup.active_model
+    zones = %w[Zone\ A Zone\ B].to_h { |name| [name, model.entities.grep(Sketchup::Group).find { |g| g.name == name }] }
+    wrapper = model.entities.grep(Sketchup::Group).find { |group| group.name == "Turned wrapper" }
+    zone_w = wrapper.entities.grep(Sketchup::Group).first
+    unit = zones.fetch("Zone A").entities.grep(Sketchup::ComponentInstance).first
+    {
+      "zone_a_roof" => sides(zones.fetch("Zone A"), 3000.mm, %w[south west north]),
+      "zone_b_roof" => sides(zones.fetch("Zone B"), 3000.mm, %w[south east north]),
+      "zone_b_ground" => sides(zones.fetch("Zone B"), 0, %w[south east north]),
+      "zone_w_roof" => sides(zone_w, 2000.mm, %w[south east north west]).map { |path| [wrapper.persistent_id] + path },
+      "window_edge" => unit && [[zones.fetch("Zone A").persistent_id, unit.persistent_id,
+                                 unit.definition.entities.grep(Sketchup::Edge).first.persistent_id]],
+      "root_edge" => [[model.entities.grep(Sketchup::Edge).first.persistent_id]]
+    }
+  end
+
+  # Opens the Zone holding the named Edges and selects them there, as a user would before assigning.
+  def select(name)
+    model = Sketchup.active_model
+    targets = paths.fetch(name)
+    containers = resolve(model, targets.first[0...-1])
+    model.active_path = containers.empty? ? nil : containers
+    model.selection.clear
+    model.selection.add(targets.map { |path| resolve(model, path).last })
+    targets.length
+  end
+
+  def resolve(model, path)
+    entities = model.entities
+    path.map do |id|
+      entity = entities.find { |item| item.persistent_id == id }
+      entities = entity.entities if entity.is_a?(Sketchup::Group)
+      entities = entity.definition.entities if entity.is_a?(Sketchup::ComponentInstance)
+      entity
+    end
+  end
+
+  # The roof or ground perimeter Edges of a box Group on the named sides, as root-to-Edge paths from the
+  # Group, in the Group's own coordinates.
+  def sides(group, height, names)
+    depth = group.entities.grep(Sketchup::Edge).map { |edge| edge.end.position.y }.max
+    width = group.entities.grep(Sketchup::Edge).map { |edge| edge.end.position.x }.max
+    tests = { "south" => ->(a, b) { a.y.zero? && b.y.zero? }, "north" => ->(a, b) { a.y == depth && b.y == depth },
+              "west" => ->(a, b) { a.x.zero? && b.x.zero? }, "east" => ->(a, b) { a.x == width && b.x == width } }
+    names.map do |side|
+      edge = group.entities.grep(Sketchup::Edge).find do |item|
+        a = item.start.position
+        b = item.end.position
+        a.z == height && b.z == height && tests.fetch(side).call(a, b)
+      end
+      [group.persistent_id, edge.persistent_id]
+    end
+  end
+
+  # A Window Unit centred on Zone A's south wall, through the Windows walkthrough's synthetic type.
+  def place_window(client, zone_a)
+    authored = WindowAuthoringWalkthrough.run
+    wall = zone_a.entities.grep(Sketchup::Face).find do |face|
+      face.vertices.all? { |vertex| vertex.position.y.zero? }
+    end
+    faces = query(client, "ph_composer.zones.faces.list", "zone_paths" => [[zone_a.persistent_id]]).fetch("faces")
+    host = faces.find { |row| row.dig("reference", "entity_path") == [wall.persistent_id] }.fetch("reference")
+    checked(client, "ph_composer.windows.units.place", "host" => host, "type_id" => authored.fetch("type_id"),
+                                                       "anchor" => "sill_center",
+                                                       "offsets" => { "x_m" => 2.5, "y_m" => 0.9 })
+  end
+
+  def query(client, name, params = {})
+    result = client.query(name, params)
+    raise "#{name}: #{result['code']} #{result['message']}" unless result["status"] == "completed"
+
+    result.fetch("value")
+  end
+
+  def checked(client, name, params)
+    result = client.invoke(name, params)
+    raise "#{name}: #{result['code']} #{result['message']}" unless result["effect"] == "committed"
+
+    result
+  end
+end
