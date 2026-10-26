@@ -327,6 +327,17 @@ class ThermalBridgeEdgeToolTest < PhComposerTestCase
     end
   end
 
+  def test_menu_labels_never_stand_for_two_types
+    rows = ["A / B", "A / B (2)", "A | B", "A | B"].each_with_index.map do |name, index|
+      { "id" => "tbt_#{index}", "values" => { "name" => name } }
+    end
+    labels = TB::EdgeToolRegistration.choice_labels(rows)
+    assert_equal 4, labels.length
+    assert_equal %w[tbt_0 tbt_1], labels.values_at("A / B", "A / B (2)").map { |row| row["id"] },
+                 "a name keeps its own label"
+    assert_equal %w[tbt_0 tbt_1 tbt_2 tbt_3], labels.values.map { |row| row["id"] }.sort
+  end
+
   def test_detach_with_the_tool_active_leaves_no_tool
     tool.choose(@parapet)
     @session.detach

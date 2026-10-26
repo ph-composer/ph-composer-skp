@@ -117,11 +117,14 @@ module PhComposer
       end
 
       # Each type's name as a dropdown label, mapped to its row. UI.inputbox splits its choices on "|", so a name
-      # holding one shows it as "/", and a label two names share takes a number.
+      # holding one shows it as "/". A name keeps its own label when it can; one that would repeat a label
+      # takes the first free number, so no label ever stands for two types.
       def choice_labels(rows)
-        rows.each_with_object({}) do |row, labels|
-          label = row.dig("values", "name").tr("|", "/")
-          label = "#{label} (#{labels.length + 1})" if labels.key?(label)
+        plain, piped = rows.partition { |row| !row.dig("values", "name").include?("|") }
+        (plain + piped).each_with_object({}) do |row, labels|
+          base = row.dig("values", "name").tr("|", "/")
+          label = base
+          label = "#{base} (#{(2..).find { |n| !labels.key?("#{base} (#{n})") }})" if labels.key?(label)
           labels[label] = row
         end
       end
