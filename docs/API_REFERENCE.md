@@ -9905,8 +9905,7 @@ Result:
           "points_m",
           "edge_paths",
           "shared",
-          "findings",
-          "locate"
+          "findings"
         ],
         "properties": {
           "identifier": {
@@ -10009,7 +10008,7 @@ Result:
                 "type": "integer"
               }
             },
-            "description": "Edge i joins points i and i + 1."
+            "description": "Edge i joins points i and i + 1; runs.locate takes them as its edge_paths."
           },
           "shared": {
             "type": "boolean",
@@ -10051,34 +10050,11 @@ Result:
                           "type": "integer"
                         }
                       },
-                      "description": "The Edges of one run, or of one finding, as the schedule reads them.",
-                      "minItems": 1,
-                      "maxItems": 500
+                      "description": "Root-to-Edge persistent-id paths."
                     }
                   },
-                  "description": "The params runs.locate takes to show the Edges named."
+                  "description": "The Edges named, as runs.locate takes them."
                 }
-              }
-            }
-          },
-          "locate": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "edge_paths"
-            ],
-            "properties": {
-              "edge_paths": {
-                "type": "array",
-                "items": {
-                  "type": "array",
-                  "items": {
-                    "type": "integer"
-                  }
-                },
-                "description": "The Edges of one run, or of one finding, as the schedule reads them.",
-                "minItems": 1,
-                "maxItems": 500
               }
             }
           }
@@ -10122,12 +10098,10 @@ Result:
                     "type": "integer"
                   }
                 },
-                "description": "The Edges of one run, or of one finding, as the schedule reads them.",
-                "minItems": 1,
-                "maxItems": 500
+                "description": "Root-to-Edge persistent-id paths."
               }
             },
-            "description": "The params runs.locate takes to show the Edges named."
+            "description": "The Edges named, as runs.locate takes them."
           },
           "path": {
             "type": "array",
@@ -10358,8 +10332,7 @@ Result:
           "points_m",
           "edge_paths",
           "shared",
-          "findings",
-          "locate"
+          "findings"
         ],
         "properties": {
           "identifier": {
@@ -10462,7 +10435,7 @@ Result:
                 "type": "integer"
               }
             },
-            "description": "Edge i joins points i and i + 1."
+            "description": "Edge i joins points i and i + 1; runs.locate takes them as its edge_paths."
           },
           "shared": {
             "type": "boolean",
@@ -10504,34 +10477,11 @@ Result:
                           "type": "integer"
                         }
                       },
-                      "description": "The Edges of one run, or of one finding, as the schedule reads them.",
-                      "minItems": 1,
-                      "maxItems": 500
+                      "description": "Root-to-Edge persistent-id paths."
                     }
                   },
-                  "description": "The params runs.locate takes to show the Edges named."
+                  "description": "The Edges named, as runs.locate takes them."
                 }
-              }
-            }
-          },
-          "locate": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "edge_paths"
-            ],
-            "properties": {
-              "edge_paths": {
-                "type": "array",
-                "items": {
-                  "type": "array",
-                  "items": {
-                    "type": "integer"
-                  }
-                },
-                "description": "The Edges of one run, or of one finding, as the schedule reads them.",
-                "minItems": 1,
-                "maxItems": 500
               }
             }
           }
@@ -10576,12 +10526,10 @@ Result:
                     "type": "integer"
                   }
                 },
-                "description": "The Edges of one run, or of one finding, as the schedule reads them.",
-                "minItems": 1,
-                "maxItems": 500
+                "description": "Root-to-Edge persistent-id paths."
               }
             },
-            "description": "The params runs.locate takes to show the Edges named."
+            "description": "The Edges named, as runs.locate takes them."
           },
           "path": {
             "type": "array",
@@ -49322,7 +49270,7 @@ Side effects: Selects and frames the Edges. Moves the edit path, which advances 
 
 Before calling: Every Edge sits in one container and none is hidden.
 
-Refuses: `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_kind`, `thermal_bridge.hidden`, and the `view_command` common set.
+Refuses: `session.inactive`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_kind`, `thermal_bridge.hidden`, and the `view_command` common set.
 
 Params:
 
