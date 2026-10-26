@@ -10,7 +10,7 @@ module PhComposer
         module_function
 
         def create(request, proposal, values:, user_data: nil)
-          Commands.unique_name!(values.fetch("name"), Definitions.records(request, ASSEMBLY_KIND))
+          Records::Names.unique!(values.fetch("name"), Definitions.records(request, ASSEMBLY_KIND))
           defaults = Schema.defaults(values, :identity => Records::Identity.allocator(request, "values" => values))
           id = request.engine.propose_create(ASSEMBLY_KIND, proposal, :values => defaults, :user_data => user_data)
           { "id" => id }
@@ -19,7 +19,7 @@ module PhComposer
         def update(request, proposal, id:, values:, expected_values:, user_data: nil)
           record = request.engine.find(ASSEMBLY_KIND, id)
           if values["name"]
-            Commands.unique_name!(values["name"], Definitions.records(request, ASSEMBLY_KIND), :except => id)
+            Records::Names.unique!(values["name"], Definitions.records(request, ASSEMBLY_KIND), :except => id)
           end
           result = Commands.update_assembly(record, :values => values, :materials => Definitions.materials(request))
           request.engine.propose_update(ASSEMBLY_KIND, id, proposal,

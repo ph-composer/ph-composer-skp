@@ -84,8 +84,8 @@ module PhComposer
         def flipped_type(request, proposal, source, name:, seed:)
           identity = Records::Identity.allocator(request, seed)
           rows = Definitions.records(request, Types::KIND)
-          name ||= Definitions.duplicate_name("#{source.fetch('name')} (flipped)", rows)
-          Definitions.unique_name!(name, rows)
+          name ||= Records::Names.copy_name("#{source.fetch('name')} (flipped)", rows)
+          Records::Names.unique!(name, rows)
           mapping = request.engine.propose_duplicate(TYPE_KIND, [source.fetch("id")], proposal) do |values|
             values["name"] = name.strip
             values["source"] = { "kind" => "derived" }

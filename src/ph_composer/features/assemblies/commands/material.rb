@@ -26,8 +26,8 @@ module PhComposer
 
       def duplicate_material_values(values, records, name: nil, copy_datasheets: false)
         copy = DeepCopy.call(values)
-        copy["name"] = (name || duplicate_name(copy.fetch("name"), records)).strip
-        unique_name!(copy.fetch("name"), records)
+        copy["name"] = (name || Records::Names.copy_name(copy.fetch("name"), records)).strip
+        Records::Names.unique!(copy.fetch("name"), records)
         copy["datasheet_links"] = [] unless copy_datasheets
         copy["source"] = { "kind" => "derived" }
         copy

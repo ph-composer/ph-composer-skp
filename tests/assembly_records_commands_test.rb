@@ -133,9 +133,4 @@ class AssemblyRecordsCommandsTest < PhComposerTestCase
       Assemblies::Commands.add_segment(result.record, :materials => fixture_materials, :layer_id => thick["id"])
     end
   end
-
-  def test_duplicate_name_canonicalizes_existing_names_and_the_base
-    records = [{ "name" => " TRIMMED (copy) " }, { "name" => " Trimmed (copy 2) " }]
-    assert_equal "Trimmed (copy 3)", Assemblies::Commands.duplicate_name(" Trimmed ", records)
-  end
 end

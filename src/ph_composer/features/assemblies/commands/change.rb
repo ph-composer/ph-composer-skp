@@ -26,24 +26,6 @@ module PhComposer
         candidate
       end
 
-      def unique_name!(name, records, except: nil)
-        if records.any? { |row| row.fetch("id") != except && row.fetch("name").strip.casecmp(name.to_s.strip).zero? }
-          raise CodedError.new("validation.failed", "Another record already has that name.")
-        end
-      end
-
-      def duplicate_name(name, records)
-        base = name.strip
-        used = records.map { |row| row.fetch("name").strip.downcase }
-        index = 1
-        loop do
-          next_name = index == 1 ? "#{base} (copy)" : "#{base} (copy #{index})"
-          return next_name unless used.include?(next_name.downcase)
-
-          index += 1
-        end
-      end
-
       def layer!(record, layer_id)
         layer = record.fetch("layers").find { |entry| entry.fetch("id") == layer_id }
         raise CodedError.new("target.not_found", "Layer #{layer_id} was not found.") unless layer

@@ -10,7 +10,7 @@ module PhComposer
         module_function
 
         def create(request, proposal, values:, user_data: nil)
-          Definitions.unique_name!(values.fetch("name"), Definitions.records(request, KIND))
+          Records::Names.unique!(values.fetch("name"), Definitions.records(request, KIND))
           values = Types.defaults(values, :identity => Records::Identity.allocator(request, "values" => values))
           id = request.engine.propose_create(TYPE_KIND, proposal, :values => values, :user_data => user_data)
           { "id" => id }
@@ -21,7 +21,7 @@ module PhComposer
           values = DeepCopy.call(values)
           if values["name"]
             values["name"] = values["name"].strip
-            Definitions.unique_name!(values["name"], Definitions.records(request, KIND), :except => id)
+            Records::Names.unique!(values["name"], Definitions.records(request, KIND), :except => id)
           end
           request.engine.propose_update(TYPE_KIND, id, proposal,
                                         :values => values,
@@ -33,8 +33,8 @@ module PhComposer
           rows = Definitions.records(request, KIND)
           identity = Records::Identity.allocator(request, "id" => id)
           mapping = request.engine.propose_duplicate(TYPE_KIND, [id], proposal) do |values|
-            values["name"] = (name || Definitions.duplicate_name(values.fetch("name"), rows)).strip
-            Definitions.unique_name!(values["name"], rows)
+            values["name"] = (name || Records::Names.copy_name(values.fetch("name"), rows)).strip
+            Records::Names.unique!(values["name"], rows)
             values["source"] = { "kind" => "derived" }
             values["datasheet_links"] = [] unless copy_datasheets
             values["product_photos"] = []
