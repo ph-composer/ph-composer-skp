@@ -317,3 +317,22 @@ uv run tools/hostkit/host_bridge.py eval 'ThermalBridgeTypesWalkthrough.state'
 uv run tools/hostkit/host_bridge.py eval 'AuthoringExample.redo'     # six times
 uv run tools/hostkit/host_bridge.py eval 'ThermalBridgeTypesWalkthrough.verify'
 ```
+
+## Edge assignment with the panel closed
+
+`thermal_bridge_assignment_walkthrough.rb` works on the Edges selected natively inside a Zone:
+`selection` reads them through `ph_composer.thermal_bridges.edges.selection` with each Edge's type
+name, quantity, `copied` flag and refusal; `assign` and `clear` send the references and values that
+read returned, one native Undo step each; `replace` deletes a type with `replacement_id`, moving its
+Edges to another type in the same step. `tests/thermal_bridge_assignment_walkthrough_test.rb` runs it
+offline. `thermal_bridge_reference_model.rb` builds the host gate's model in an empty one: two adjacent
+Zones, a Zone in a turned wrapper, the five reference types, a Window Unit on Zone A's south wall and a
+line at the Model root, with `select(name)` standing in for a native selection of the named Edges.
+
+```sh
+uv run tools/hostkit/host_bridge.py eval \
+  'load "/absolute/path/to/ph-composer/ph-composer-skp/tools/examples/authoring/thermal_bridge_assignment_walkthrough.rb"; ThermalBridgeAssignmentWalkthrough.selection'
+uv run tools/hostkit/host_bridge.py eval 'ThermalBridgeAssignmentWalkthrough.assign("Parapet")'
+uv run tools/hostkit/host_bridge.py eval 'AuthoringExample.undo'
+uv run tools/hostkit/host_bridge.py eval 'ThermalBridgeAssignmentWalkthrough.replace("Footing", "Slab edge")'
+```

@@ -4196,6 +4196,24 @@
         "tools/examples/authoring/client.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "T03",
+      "label": "Edge assignment with the panel closed on the two-Zone reference model: native selection of roof perimeter Edges inside a Zone, edges.selection, assign, native Undo and Redo, the same inside a Zone under a rotated wrapper; the refusals for an Edge inside a placed Window unit and at the Model root; types.delete with a replacement and Undo; a native split of an assigned Edge read on both pieces; save and fresh-process reopen",
+      "mode": "mixed",
+      "authority": "planning/features/phase-03b-thermal-bridges/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/thermal_bridges/assignment/*",
+        "src/ph_composer/features/thermal_bridges/declarations/assignment.rb",
+        "src/ph_composer/features/thermal_bridges/declarations/types.rb",
+        "src/ph_composer/features/zones/zone/occurrences.rb",
+        "src/ph_composer/features/zones/zone/operations.rb",
+        "src/ph_composer/core/records/entity_store.rb",
+        "tools/examples/authoring/thermal_bridge_assignment_walkthrough.rb",
+        "tools/examples/authoring/thermal_bridge_reference_model.rb",
+        "tools/examples/authoring/client.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }

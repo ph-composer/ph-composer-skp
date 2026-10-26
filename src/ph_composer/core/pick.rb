@@ -10,7 +10,8 @@ module PhComposer
   # exists: a whole-Model walk costs tens to hundreds of milliseconds on a Model of a few thousand
   # Faces (the measurement is in features/zones/zone/index.rb), far too much per move.
   #
-  # It names no feature; the Classify tool and Spaces' Mark floor both pick with it.
+  # It names no feature; the Classify tool and Spaces' Mark floor pick Faces with it, and an edge tool picks
+  # Edges.
   module Pick
     module_function
 
@@ -29,16 +30,14 @@ module PhComposer
     # A host with no pick helper, which is every offline view that does not supply one, picks
     # nothing.
     def face_path(view, x, y)
-      helper = view.respond_to?(:pick_helper) ? view.pick_helper : nil
-      return nil unless helper
+      first_path(view, x, y, Sketchup::Face)
+    end
 
-      count = helper.do_pick(x, y).to_i
-      context = view.respond_to?(:model) ? Array(view.model.active_path) : []
-      (0...count).each do |index|
-        path = Array(helper.path_at(index))
-        return context + path if path.last.is_a?(Sketchup::Face)
-      end
-      nil
+    # The same for an Edge: the first picked path ending in an Edge, with the active path prepended, or
+    # nil when the pointer is over no Edge. A Face under the pointer is skipped, as `face_path` skips an
+    # Edge, so the two never answer for each other.
+    def edge_path(view, x, y)
+      first_path(view, x, y, Sketchup::Edge)
     end
 
     # The same single native pick, plus the camera ray's intersection with that Face's world
@@ -71,6 +70,19 @@ module PhComposer
     def coordinates(vector)
       [vector.x.to_f, vector.y.to_f, vector.z.to_f]
     end
-    private_class_method :coordinates
+
+    def first_path(view, x, y, kind)
+      helper = view.respond_to?(:pick_helper) ? view.pick_helper : nil
+      return nil unless helper
+
+      count = helper.do_pick(x, y).to_i
+      context = view.respond_to?(:model) ? Array(view.model.active_path) : []
+      (0...count).each do |index|
+        path = Array(helper.path_at(index))
+        return context + path if path.last.is_a?(kind)
+      end
+      nil
+    end
+    private_class_method :coordinates, :first_path
   end
 end

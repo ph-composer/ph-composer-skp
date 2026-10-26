@@ -37,6 +37,19 @@ class PickPointTest < PhComposerTestCase
     assert_equal [4.0, 5.0, 12.0], coordinates(picked.fetch(:point))
   end
 
+  def test_an_edge_pick_skips_faces_and_a_face_pick_skips_edges
+    edge = Sketchup::Edge.new(9_503, Geom::Point3d.new(0, 0, 0), Geom::Point3d.new(20, 0, 0))
+    parent = Sketchup::Group.new(9_504, Sketchup::Entities.new([@face, edge]))
+    Sketchup.active_model.entities << parent
+    Sketchup.active_model.active_path = [parent]
+    @view.picks[[6, 7]] = [[@face], [edge]]
+    @view.picks[[8, 9]] = [[edge], [@face]]
+
+    assert_equal [parent, edge], PhComposer::Pick.edge_path(@view, 6, 7)
+    assert_equal [parent, @face], PhComposer::Pick.face_path(@view, 8, 9)
+    assert_nil PhComposer::Pick.edge_path(@view, 4, 5)
+  end
+
   def test_no_face_parallel_ray_and_plane_behind_camera_return_no_point
     assert_nil PhComposer::Pick.face_point(@view, 8, 9)
     def @view.pickray(_x, _y)

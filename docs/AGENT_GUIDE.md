@@ -85,7 +85,21 @@ Read `ph_composer.thermal_bridges.types.list` first; names are unique. Create a 
 negative psi-value is valid. A type left without one reads `export_ready: false` with
 `thermal_bridge.psi_missing`. Edit with `ph_composer.thermal_bridges.types.update`, copying
 `expected_values` from the values you read. `ph_composer.thermal_bridges.types.delete` refuses a type
-an Edge still uses.
+an Edge still uses; give `replacement_id` to move those Edges to another type in the same step, or
+null to clear them.
+
+Assign a type to Edges with `ph_composer.thermal_bridges.edges.assign`, the explicit-reference
+route: each target is an Edge reference inside its Zone (`zone_id`, `zone_path`, `entity_path`,
+`entity_id`) with the assignment values you read as `expected_values`, plus one type id and a
+quantity (1 when absent). `ph_composer.thermal_bridges.edges.selection` returns the selected Edges in
+that shape a bounded page at a time, each with the Zone holding it and the refusal a write would
+meet; follow `next_cursor` to read them all. An Edge outside every Zone has no reference and cannot
+be assigned. For a native path you hold yourself,
+`ph_composer.zones.containment` answers which Zone holds it. One command reaches at most 250 Edges
+and refuses as a whole if any target changed or cannot be written. `ph_composer.thermal_bridges.edges.clear`
+removes the assignment. Each is one Undo step. An Edge split or copied in SketchUp keeps its
+assignment, and the pieces share one id, which reads mark `copied`; nothing needs repairing. The edge
+tool, when it arrives, is the pointer equivalent of `edges.assign`.
 
 ### Windows
 

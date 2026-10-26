@@ -116,6 +116,34 @@ module PhComposer
 
       module_function
 
+      def install_reads(feature)
+        feature.query("#{FEATURE_ID}.list",
+                      :description => "One page of Zone occurrences, filtered and projected, and the Make Zone target.",
+                      :refuses => READ + Refuses::PAGE, :params => LIST_PARAMS, :result => LIST_RESULT,
+                      :examples => [{}, { "fields" => ["name"], "limit" => 20 }]) { |request| Zones.list(request) }
+        feature.query("#{FEATURE_ID}.all",
+                      :response => { "bounded" => false, "prefer" => "#{FEATURE_ID}.list" },
+                      :description => "Every Zone occurrence in one complete projection, for the panel. Scripts " \
+                                      "page #{FEATURE_ID}.list instead.",
+                      :refuses => READ,
+                      :params => Shapes::NONE, :result => ALL_RESULT, :examples => [{}]) do |request|
+          Zones.all(request)
+        end
+        install_containment(feature)
+      end
+
+      def install_containment(feature)
+        feature.query("#{FEATURE_ID}.containment",
+                      :description => "The Zone occurrence holding the entity at each explicit native path, for a " \
+                                      "feature storing records on geometry inside Zones. Scans only each path, " \
+                                      "never the whole Model.",
+                      :refuses => %w[record.unreadable validation.failed], :params => CONTAINMENT_PARAMS,
+                      :result => CONTAINMENT_RESULT,
+                      :examples => [{ "paths" => [[1201, 1202]] }]) do |request|
+          Zones.containment(request, :paths => request.params.fetch("paths"))
+        end
+      end
+
       # The two edits of an existing Zone occurrence: its values, and its metadata.
       def declare_edits(feature)
         feature.action("#{FEATURE_ID}.update", :description => "Update one explicit Zone occurrence.",
@@ -147,21 +175,45 @@ module PhComposer
         end
       end
 
+      REFUSAL = { "type" => %w[object null], "additionalProperties" => false, "required" => %w[code message],
+                  "properties" => { "code" => { "type" => "string" }, "message" => { "type" => "string" } } }.freeze
+      CONTAINMENT_PARAMS = Shapes.object({
+        "paths" => { "type" => "array", "items" => PATH.merge("minItems" => 1), "minItems" => 1,
+                     "maxItems" => Pages::MAXIMUM_LIMIT,
+                     "description" => "Root-to-entity persistent-id paths, as a pick or a selection holds them." }
+      }).freeze
+      CONTAINMENT_RESULT = Shapes.object({
+        "paths" => Shapes.list(Shapes.object({
+          "path" => PATH,
+          "zone" => {
+            "type" => %w[object null], "additionalProperties" => false,
+            "required" => %w[zone_id zone_path building_segment level],
+            "properties" => { "zone_id" => { "type" => "string" }, "zone_path" => PATH,
+                              "building_segment" => { "type" => %w[string null] },
+                              "level" => { "type" => %w[string null] } },
+            "description" => "The Zone occurrence holding the entity, or null with a reason."
+          },
+          "entity_path" => PATH.merge("type" => %w[array null],
+                                      "description" => "The path from inside the Zone to the entity; null " \
+                                                       "with no Zone."),
+          "reason" => { "type" => %w[string null],
+                        "enum" => [nil, "not_found", "not_a_drawing_element", "cutting_instance", "outside_zone",
+                                   "nested_container"],
+                        "description" => "Why no Zone holds it: a step missing or repeated, not a drawing " \
+                                         "element, under a cutting component, outside every Zone, or inside a " \
+                                         "nested container. Null with a Zone." },
+          "write_refusal" => REFUSAL.merge("description" => "The refusal a write through this path meets from " \
+                                                            "the path alone (a shared, nested or locked Zone, " \
+                                                            "locked or shared storage), or null. A duplicated " \
+                                                            "Zone id needs a walk; the write still resolves " \
+                                                            "strictly.")
+        }))
+      }).freeze
+
       def install(feature)
         feature.reference_target(TARGET)
         ColourModes.install(feature)
-        feature.query("#{FEATURE_ID}.list",
-                      :description => "One page of Zone occurrences, filtered and projected, and the Make Zone target.",
-                      :refuses => READ + Refuses::PAGE, :params => LIST_PARAMS, :result => LIST_RESULT,
-                      :examples => [{}, { "fields" => ["name"], "limit" => 20 }]) { |request| Zones.list(request) }
-        feature.query("#{FEATURE_ID}.all",
-                      :response => { "bounded" => false, "prefer" => "#{FEATURE_ID}.list" },
-                      :description => "Every Zone occurrence in one complete projection, for the panel. Scripts " \
-                                      "page #{FEATURE_ID}.list instead.",
-                      :refuses => READ,
-                      :params => Shapes::NONE, :result => ALL_RESULT, :examples => [{}]) do |request|
-          Zones.all(request)
-        end
+        install_reads(feature)
         feature.action("#{FEATURE_ID}.make",
                        :description => "Make one Zone from explicit entities in one edit context.",
                        :refuses => (Options::Registration::REFUSALS + %w[target.edit_path_changed]).uniq,

@@ -420,6 +420,7 @@ access and never fall back to selection, display name, proximity or the active M
 | Zone membership stamp | `ph_composer.zone_stamp` | Classified Face, and a nested container Group such as a Space | Zone id plus Building-Segment and Level, as recovery data. Only Zones writes it; a feature that creates a container in a Zone has Zones stamp it through the participant below |
 | Face assignment | `ph_composer.face_assignment` | Face | `fac_` id |
 | Attached zone | `ph_composer.records.ph_composer.face_assignment.attached_zone` (a legacy name, kept so saved Models still read) | Model | `atz_` id through the record engine |
+| Thermal bridge assignment | `ph_composer.thermal_bridge` | The `Sketchup::Edge`, inside a Zone | `tbe_` id; values `thermal_bridge_type_id` (a required core reference to `ph_composer.thermal_bridges.type`) and `quantity` (above 0, default 1). A split or copy carries the id, which reads mark `copied` and nothing re-issues |
 | Window unit | `ph_composer.window_unit` | The Unit's ComponentInstance | `wun_` id; values `window_type_id` (a core reference to `ph_composer.windows.window_type`) and `anchor` |
 | Window definition mark | `ph_composer.window_definition` | The generated ComponentDefinition | `window_type_id`, plus optional derived `generated_size_m` (`width_m`, `height_m`) used only to repair a Unit whose Type is gone |
 | Pane stamp | `ph_composer.window_pane` | Each pane Face inside the definition | None; `window_type_id` and `element_id` as recovery data for Restore |
@@ -461,6 +462,21 @@ storage on the path), or null. It scans only the collections along each path, ne
 Model, so a viewport tool may call it on a pointer move. A duplicated Zone or Face id needs a walk,
 so `write_refusal` cannot show it and the write still resolves strictly. Zone state needs every
 Zone occurrence and stays in `ph_composer.zones.all`.
+
+**Containment.** `ph_composer.zones.containment` answers, for each root-to-entity path, the Zone
+occurrence holding the drawing element at its end (`zone_id`, `zone_path`, `building_segment`,
+`level`), the `entity_path` from inside that Zone, and its `write_refusal`, read along the path
+alone. The Zone is the innermost one above the element, by the rule Face picking applies; with no
+Zone, `reason` says why: `not_found` (a step missing or repeated), `not_a_drawing_element`,
+`cutting_instance`, `outside_zone` or `nested_container`. `faces.host_context` stays Face-only over
+the same code. A feature whose reference target stores records on other elements inside Zones
+resolves its Face-shaped reference with `Zones::Occurrences.resolve_element(model, reference, noun:,
+mutable:, index:)` from its `locate:`, which has no request: Zones resolves the Zone and every step and
+refuses what a write meets, and the owner checks the element's kind and its own record. The
+thermal-bridge Edge target (`ph_composer.thermal_bridges.edge`) does this, and refuses no duplicated
+`tbe_` id. A type delete with `replacement_id` rewrites, or with null removes, every Edge naming the
+type in the same step, passing them as the `reference_plan`; an Edge it cannot reach (outside every
+Zone, in shared storage, locked) refuses the whole delete as `reference.in_use`.
 
 A Window unit target is reached from the Model root, not from a Zone, because a Unit may sit
 outside every Zone and still blocks deletion of its Type:

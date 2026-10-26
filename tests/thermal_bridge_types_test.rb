@@ -151,7 +151,7 @@ class ThermalBridgeTypesTest < PhComposerTestCase
   def test_every_declaration_has_a_valid_example
     registry = PhComposer::Registry.current
     owned = (registry.queries.values + registry.actions.values).select { |row| row.owner == TB::FEATURE_ID }
-    assert_equal 6, owned.length
+    assert_equal 10, owned.length
     owned.each do |declaration|
       declaration.examples.each do |example|
         assert_empty PhComposer::JsonSchema.validate(example, declaration.params), declaration.name

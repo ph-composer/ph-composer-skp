@@ -13,8 +13,11 @@ module PhComposer
       DUPLICATE = %w[copy.rule_missing extension.invalid record.unreadable reference.invalid target.not_found
                      validation.failed].freeze
       # A delete scans every record for references to it, so an unreadable envelope anywhere refuses it.
-      DELETE = %w[copy.rule_missing record.unreadable reference.in_use target.changed target.not_found
-                  validation.failed].freeze
+      # With a replacement it also rewrites every Edge naming the type, which an Edge changed since planning
+      # refuses at apply with Zones' target codes.
+      DELETE = %w[copy.rule_missing record.unreadable reference.in_use target.ambiguous target.changed
+                  target.locked target.not_found target.shared_definition target.wrong_hierarchy target.wrong_kind
+                  target.wrong_zone validation.failed].freeze
       CREATE_EXAMPLE = { "values" => { "name" => "Parapet", "psi_w_mk" => 0.12 } }.freeze
 
       DISPLAY = Shapes.object({ "color" => Shapes.described(SchemaShapes::HEX_COLOUR,
@@ -33,7 +36,8 @@ module PhComposer
         feature.record_kind(Type::KIND)
         install_reads(feature)
         install_create_and_update(feature)
-        install_duplicate_and_delete(feature)
+        install_duplicate(feature)
+        install_delete(feature)
       end
 
       def result(paged:)
@@ -81,7 +85,7 @@ module PhComposer
         end
       end
 
-      def install_duplicate_and_delete(feature)
+      def install_duplicate(feature)
         kind = Type::KIND
         duplicate = Shapes.object(
           { "id" => Shapes.id(kind.id_prefix, "The #{kind.label} to copy."),
@@ -101,15 +105,36 @@ module PhComposer
           Type::Operations.duplicate(request, proposal, :id => params.fetch("id"), :name => params["name"],
                                                         :copy_datasheets => params.fetch("copy_datasheets", false))
         end
+      end
+
+      def install_delete(feature)
+        kind = Type::KIND
         delete = Shapes.object({ "id" => Shapes.id(kind.id_prefix, "The #{kind.label} to delete."),
-                                 "expected_values" => Shapes.expected(kind) }, :optional => ["expected_values"])
+                                 "expected_values" => Shapes.expected(kind),
+                                 "replacement_id" => Shapes.id(kind.id_prefix,
+                                                               "Move every Edge using it to this type first; null " \
+                                                               "clears them. Absent, a type in use refuses.",
+                                                               :nullable => true) },
+                               :optional => %w[expected_values replacement_id])
         feature.action("#{PREFIX}.delete",
-                       :description => "Delete one #{kind.label}; a type still in use refuses.",
+                       :description => "Delete one #{kind.label}; a type still in use refuses unless a replacement, " \
+                                       "or null to clear, is given.",
                        :refuses => DELETE, :params => delete, :result => Shapes::RESULT,
-                       :undo_name => "Delete #{kind.label}", :side_effects => "Deletes one definition.",
-                       :examples => [{ "id" => Shapes.example_id(kind) }]) do |request, proposal|
-          Type::Operations.delete(request, proposal, :id => request.params.fetch("id"),
-                                                     :expected_values => request.params.fetch("expected_values", {}))
+                       :undo_name => "Delete #{kind.label}",
+                       :side_effects => "Deletes one definition; with replacement_id, rewrites or clears every Edge " \
+                                        "using it in the same step.",
+                       :examples => [{ "id" => Shapes.example_id(kind) },
+                                     { "id" => Shapes.example_id(kind),
+                                       "replacement_id" => nil }]) do |request, proposal|
+          params = request.params
+          id = params.fetch("id")
+          expected = params.fetch("expected_values", {})
+          if params.key?("replacement_id")
+            Assignment::Operations.delete_type(request, proposal, :id => id, :expected_values => expected,
+                                                                  :replacement_id => params.fetch("replacement_id"))
+          else
+            Type::Operations.delete(request, proposal, :id => id, :expected_values => expected)
+          end
         end
       end
     end
