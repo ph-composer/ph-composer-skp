@@ -77,12 +77,18 @@ module PhComposer
         end
         private_class_method :rows, :row, :copied_ids, :ignored
 
+        # Whether a write can reach the Edge a selection row names: a Zone holds it, through no shared,
+        # locked or other Zone storage. The menu and the panel's assign bar both offer only such Edges.
+        def assignable?(row)
+          !row["reference"].nil? && row["write_refusal"].nil?
+        end
+
         def client(session)
           session.feature_state(:thermal_bridges_selection_menu) { Client.new(session) }
         end
 
-        # The selection route a menu or the panel's assign bar drives: read the selection, then one public
-        # invoke with the references and values it read, so a stale selection refuses rather than writing.
+        # The selection route the right-click menu drives: read the selection, then one public invoke with
+        # the references and values it read, so a stale selection refuses rather than writing.
         class Client
           PREFIX = "#{FEATURE_ID}.edges".freeze
 
@@ -109,11 +115,13 @@ module PhComposer
             return show(read) unless read["status"] == "completed"
 
             rows = read.fetch("value").fetch("edges")
-            unreachable = rows.find { |row| row["reference"].nil? }
             return show("status" => "refused", "message" => "Select Edges inside a Zone.") if rows.empty?
-            return show("status" => "refused", "message" => unreachable_message(unreachable)) if unreachable
 
-            targets = rows.map do |row|
+            # The Edges a write can reach, as the assign bar takes them; with none, why the first cannot be.
+            writable = rows.select { |row| Selection.assignable?(row) }
+            return show("status" => "refused", "message" => unreachable_message(rows.first)) if writable.empty?
+
+            targets = writable.map do |row|
               { "reference" => row.fetch("reference"), "expected_values" => row.fetch("values") }
             end
             @sequence += 1
@@ -122,6 +130,8 @@ module PhComposer
           end
 
           def unreachable_message(row)
+            return "#{row.fetch('write_refusal').fetch('message')} Nothing was written." if row["reference"]
+
             "A selected Edge is not inside a Zone (#{row.fetch('reason').tr('_', ' ')}). Nothing was written."
           end
 

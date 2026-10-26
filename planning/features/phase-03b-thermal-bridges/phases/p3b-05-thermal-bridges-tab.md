@@ -1,7 +1,7 @@
 # P3b-05: the Thermal Bridges tab
 
 DATE: 2026-10-03
-STATUS: Scoped. Corrected to `main` at `420c783a` on 2026-10-21 (DECISIONS Part 1b)
+STATUS: In progress on `feature/thermal-bridges-p3b-05`. Corrected to `main` at `420c783a` on 2026-10-21 (DECISIONS Part 1b)
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 
@@ -75,6 +75,42 @@ replacement in Types; select the roof perimeter natively and assign from the bar
 right-click menu; switch display units with a draft open; Locate from the Schedule into a nested
 Zone; the UI polish review with native window captures (by window id, never a full-screen
 capture). Observe the host with the development tooling: `host_bridge.py wait-for` for deferred work, `host_bridge.py diagnostics` for what happened, `acceptance_case.py begin` and `finish` for the ledger row (`tools/hostkit/.index.md`).
+
+## Implementation notes
+
+Recorded 2026-10-26 while building the stage; the screen is proposed until Ed accepts it at the host gate.
+
+- **One schedule read, two subtabs.** `html/features/thermal_bridges/shared.js` `ScheduleRead` issues
+  `schedule.all` through `query.invoke` when the tab is opened or Schedule is chosen and the last read is
+  missing or older than the Model, and on Refresh; never on a panel refresh (D3b-13). Types' Used length
+  is that read's `totals.by_type`, shown muted with a tooltip once the Model has changed since.
+- **Assign bar.** An always-present row above the Types table (`assign_bar.js`), so selecting never moves
+  the table. It counts `edges.selected`, assigns only the Edges a write can reach (`reference` and no
+  `write_refusal`, the rule `Assignment::Selection.assignable?` names for the menu), and puts the reason
+  beside a disabled Assign with `ui.reasonButton`. The menu's selection client takes the same subset. One
+  native selection lives in one context, so a mixed selection is rare; the bar still says which Edges it
+  would leave.
+- **Right-click menu.** `declarations/menu.rb`: "Thermal bridge" with one item per type by name and,
+  when a selected Edge holds an assignment, Clear thermal bridge; offered only with an assignable Edge.
+  Each item runs the existing selection client, quantity 1. The availability test and the entries each read
+  the selection, so a right-click reads it twice (accepted: at most 250 Edges). Menu entries are not API
+  surface, so the API minor stays 12.
+- **Forms.** A type is only numbers, so New and Duplicate use the shared form dialog. Duplicate is the
+  Materials form moved into the kit as `inventory_forms.js` `DuplicateForm`. Delete is `ReplacementForm`
+  with Clear existing uses; it asks for a replacement unless a current read shows the type unused.
+- **Datasheet.** Shown as the first link's text with every link in the tooltip, not editable or opened:
+  following a link would navigate the panel, and no panel screen edits `datasheet_links` yet.
+- **Ordering and filters.** The Types table orders and groups through the action bar's Order by and Group
+  by, as every other inventory does. `column_menu.js` column sort is wired only into Zones / Faces; adding
+  `columnSort` to the kit `Inventory` is a kit change for all inventories and is left as a follow-up.
+- **Locate.** A run's Locate is its row icon, as in the Window schedule, in place of a click on the row
+  (the PRD's "click a row"); a row click would compete with selecting text and with the findings glyph.
+  A hidden Schedule does not repaint; it paints its last read when shown. Findings sit behind an alert glyph
+  that opens a bubble with each message and its own Locate; Edges in no run and unreadable assignments
+  collect under "Not in the schedule".
+- **Kit fix.** `library/library.css` made every inventory's Name header static, so it scrolled away under
+  the sticky header row and its resize handle overhung the pane by 4 px (Assemblies too). The header now
+  stays sticky to the top only.
 
 ## Out of scope
 

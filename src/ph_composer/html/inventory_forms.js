@@ -1,4 +1,4 @@
-/* Record forms shared by every inventory: the color picker and Delete with a replacement. Each takes
+/* Record forms shared by every inventory: the color picker, Duplicate and Delete with a replacement. Each takes
  * its action or section from the caller and names no feature. `labelled` and `refreshForm` are the
  * helpers a feature's own record forms use to match them. */
 PhComposerUI.define("inventory_forms", ["record_form", "request", "snapshot", "workspace"],
@@ -90,6 +90,57 @@ function (RecordForm, request, snapshot, ui) {
     this.updateButton();
   };
   ReplacementForm.prototype.dispose = function () { this.enabled = false;
+  this.withdraw(); };
+
+  /* Duplicate for a record that draws nothing, so the copy's name is asked for first: a free "(copy)" name,
+     selected, and whether to keep the datasheet links. `options`: { section, label }. */
+  function DuplicateForm(session, send, changed, options) {
+    var self = this;
+    this.section = options.section;
+    RecordForm.call(this, session, send, { title: "Duplicate " + options.label, action: options.section +
+      ".duplicate", label: "duplicate-record", submitLabel: "Duplicate " + options.label,
+      pendingText: "Duplicating " + options.label + "...", failureText: "The " + options.label +
+      " was not duplicated.", changed: changed });
+    this.name = labelled(this.form, options.label + " copy name", ui.element("input"));
+    this.copyDatasheets = labelled(this.form, "Copy datasheet links", ui.element("input"));
+    this.copyDatasheets.type = "checkbox";
+    this.name.addEventListener("input", function () {
+      self.submitButton.disabled = self.busy() || !self.name.value.trim();
+      self.error.textContent = "";
+    });
+    this.name.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") { event.preventDefault();
+      self.submit(); }
+    });
+    this.finish();
+  }
+  RecordForm.extend(DuplicateForm);
+  DuplicateForm.prototype.open = function (record) {
+    if (!this.enabled) return;
+    this.record = record;
+    var names = this.records.map(function (entry) { return entry.values.name.trim().toLowerCase(); });
+    var baseName = record.values.name.trim();
+    var number = 1, candidate = baseName + " (copy)";
+    while (names.indexOf(candidate.toLowerCase()) >= 0) candidate = baseName + " (copy " + (++number) + ")";
+    this.name.value = candidate;
+    this.copyDatasheets.checked = false;
+    this.submitButton.disabled = false;
+    this.show();
+    this.name.focus();
+    this.name.select();
+  };
+  DuplicateForm.prototype.submit = function () {
+    if (!this.enabled || !this.record || !this.name.value.trim() || this.busy()) return;
+    this.run({ id: this.record.id, name: this.name.value.trim(), copy_datasheets: this.copyDatasheets.checked });
+  };
+  DuplicateForm.prototype.refresh = function (state) {
+    this.records = (snapshot.value(state, this.section) || {}).records || [];
+    var outcome = refreshForm(this, state, this.section);
+    if (outcome && outcome.status === "completed") this.hide(outcome.value);
+    this.name.disabled = this.copyDatasheets.disabled = this.busy();
+    this.submitButton.disabled = !this.enabled || this.busy() || !this.name.value.trim();
+  };
+  DuplicateForm.prototype.dispose = function () { this.enabled = false;
   this.withdraw(); };
 
   function colorHSV(hex, previousHue) {
@@ -346,7 +397,7 @@ function (RecordForm, request, snapshot, ui) {
     td._color.setAttribute("aria-label", "Color for " + record.values.name + ": " + color);
     td._color.disabled = !form.enabled || form.requests.busy();
   }
-  return { ReplacementForm: ReplacementForm, ColorForm: ColorForm, colorCell: colorCell, labelled: labelled,
-    required: RecordForm.required,
+  return { ReplacementForm: ReplacementForm, DuplicateForm: DuplicateForm, ColorForm: ColorForm, colorCell: colorCell,
+    labelled: labelled, required: RecordForm.required,
     refreshForm: refreshForm };
 });

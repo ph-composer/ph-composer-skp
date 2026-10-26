@@ -1,8 +1,8 @@
 /* The Materials surface of the Library pane: the model's Materials as an editable inventory beside
  * the Material Library sidebar, with New, Duplicate, color and Delete with a replacement. */
-PhComposerUI.define("features/assemblies/materials", ["panel", "snapshot", "workspace", "fields", "record_form",
-  "inventory", "inventory_forms", "library/sidebar", "library/section", "features/assemblies/material_form"],
-function (panel, snapshot, ui, fields, RecordForm, inventories, forms, Sidebar, library, MaterialForm) {
+PhComposerUI.define("features/assemblies/materials", ["panel", "snapshot", "workspace", "fields", "inventory",
+  "inventory_forms", "library/sidebar", "library/section", "features/assemblies/material_form"],
+function (panel, snapshot, ui, fields, inventories, forms, Sidebar, library, MaterialForm) {
   "use strict";
   // A Material, local or a library row, is labelled by its name.
   function materialName(row) { return row.display_label || row.values.name; }
@@ -12,53 +12,6 @@ function (panel, snapshot, ui, fields, RecordForm, inventories, forms, Sidebar, 
   var columns = [["name", "Name"], ["color", "Color"], ["category", "Category"],
     ["conductivity_w_mk", "λ"], ["density_kg_m3", "ρ"], ["specific_heat_j_kgk", "c"],
     ["emissivity", "Emissivity"], ["notes", "Notes"]];
-  function DuplicateForm(session, send, changed) {
-    var self = this;
-    RecordForm.call(this, session, send, { title: "Duplicate Material", action: MATERIALS + ".duplicate",
-      label: "duplicate-material", submitLabel: "Duplicate Material", pendingText: "Duplicating Material...",
-      failureText: "The Material was not duplicated.", changed: changed });
-    this.name = forms.labelled(this.form, "Material copy name", ui.element("input"));
-    this.copyDatasheets = forms.labelled(this.form, "Copy datasheet links", ui.element("input"));
-    this.copyDatasheets.type = "checkbox";
-    this.name.addEventListener("input", function () {
-      self.submitButton.disabled = self.busy() || !self.name.value.trim();
-      self.error.textContent = "";
-    });
-    this.name.addEventListener("keydown", function (event) {
-      if (event.key === "Enter") { event.preventDefault();
-      self.submit(); }
-    });
-    this.finish();
-  }
-  RecordForm.extend(DuplicateForm);
-  DuplicateForm.prototype.open = function (record) {
-    if (!this.enabled) return;
-    this.record = record;
-    var names = this.records.map(function (entry) { return entry.values.name.trim().toLowerCase(); });
-    var baseName = record.values.name.trim();
-    var number = 1, candidate = baseName + " (copy)";
-    while (names.indexOf(candidate.toLowerCase()) >= 0) candidate = baseName + " (copy " + (++number) + ")";
-    this.name.value = candidate;
-    this.copyDatasheets.checked = false;
-    this.submitButton.disabled = false;
-    this.show();
-    this.name.focus();
-    this.name.select();
-  };
-  DuplicateForm.prototype.submit = function () {
-    if (!this.enabled || !this.record || !this.name.value.trim() || this.busy()) return;
-    this.run({ id: this.record.id, name: this.name.value.trim(), copy_datasheets: this.copyDatasheets.checked });
-  };
-  DuplicateForm.prototype.refresh = function (state) {
-    this.records = (snapshot.value(state, MATERIALS) || {}).records || [];
-    var outcome = forms.refreshForm(this, state, MATERIALS);
-    if (outcome && outcome.status === "completed") this.hide(outcome.value);
-    this.name.disabled = this.copyDatasheets.disabled = this.busy();
-    this.submitButton.disabled = !this.enabled || this.busy() || !this.name.value.trim();
-  };
-  DuplicateForm.prototype.dispose = function () { this.enabled = false;
-  this.withdraw(); };
-
   function Surface(root, state, send) {
     var self = this;
     function changed() { panel.repaint(); }
@@ -68,7 +21,7 @@ function (panel, snapshot, ui, fields, RecordForm, inventories, forms, Sidebar, 
     this.records = [];
     this.categories = [];
     this.newMaterial = new MaterialForm(state.session, send, changed);
-    this.duplicate = new DuplicateForm(state.session, send, changed);
+    this.duplicate = new forms.DuplicateForm(state.session, send, changed, { section: MATERIALS, label: "Material" });
     this.replacement = new forms.ReplacementForm(state.session, send, changed,
       { section: MATERIALS, label: "Material", replacement: true });
     this.color = new forms.ColorForm(state.session, send, MATERIALS + ".update", changed);
@@ -178,5 +131,5 @@ function (panel, snapshot, ui, fields, RecordForm, inventories, forms, Sidebar, 
   library.registerSurface({ id: "materials", label: "Materials", order: 10,
     recordKind: "ph_composer.assemblies.material", createLabel: "+ New Material",
     build: function (root, state, send) { return new Surface(root, state, send); } });
-  return { Surface: Surface, DuplicateForm: DuplicateForm };
+  return { Surface: Surface };
 });

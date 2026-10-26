@@ -176,6 +176,42 @@
         values: { name: "Garage", kind: "garage", temperature_reduction_factor: 0.95 } }] }
   };
 
+  /* The Thermal Bridges tab: three types (one still without a psi-value), the two authoring Zones, three runs
+     and an assigned Edge no Zone holds, and three Edges selected in the Living Zone, one already assigned. */
+  function tbType(id, name, psi, group, color) {
+    return { id: id, kind: "ph_composer.thermal_bridges.type", schema_version: 1, user_data: {}, extension_data: {},
+      findings: [], values: { name: name, notes: "", datasheet_links: [], psi_w_mk: psi, group: group },
+      display: { color: color }, export_ready: psi !== null, export_blockers: psi === null ?
+        ["thermal_bridge.psi_missing"] : [] };
+  }
+  function tbRun(id, name, zone, typeId, length, paths, findings) {
+    return { identifier: id, display_name: name, zone: zone, type_id: typeId, quantity: 1, length_m: length,
+      closed: false, points_m: [], shared: false, findings: findings || [], edge_paths: paths };
+  }
+  var LIVING = { zone_id: "zon_Aa11Bb22Cc33", zone_path: [100], name: "Living Zone", building_segment: "House" };
+  var ATTIC = { zone_id: "zon_Dd44Ee55Ff66", zone_path: [200], name: "Attic Zone", building_segment: "House" };
+  function selectedEdge(id, values) {
+    return { path: [100, id], reference: { zone_id: LIVING.zone_id, zone_path: [100], entity_path: [id],
+      entity_id: values ? "tbe_Aa11Bb22Cc3" + (id % 10) : null }, zone: Object.assign({ level: "Ground" }, LIVING),
+      reason: null, values: values || {}, copied: false, record_problem: null, write_refusal: null };
+  }
+  FIXTURES.thermalbridges = { parts: [], zones: AUTHORING.zones, faces: AUTHORING.faces, thermalBridges: {
+    types: [tbType("tbt_Aa11Bb22Cc33", "Parapet", 0.12, "15-Ambient", "#c8553d"),
+      tbType("tbt_Dd44Ee55Ff66", "Slab edge", -0.02, "17-FS/BC", "#6a8eae"),
+      tbType("tbt_Gg77Hh88Ii99", "Balcony", null, "15-Ambient", "#d9a23b")],
+    selected: [selectedEdge(301, { thermal_bridge_type_id: "tbt_Aa11Bb22Cc33", quantity: 1 }), selectedEdge(302),
+      selectedEdge(303)],
+    runs: [tbRun("tb_Aa11Bb22Cc33", "Parapet 1", LIVING, "tbt_Aa11Bb22Cc33", 18,
+      [[100, 301], [100, 302], [100, 303], [100, 304]]),
+    tbRun("tb_Dd44Ee55Ff66", "Parapet 2", ATTIC, "tbt_Aa11Bb22Cc33", 16, [[200, 401], [200, 402]],
+      [{ code: "thermal_bridge.counted_twice", blocks_export: false,
+        message: "Living Zone tags the same line, so it counts twice. Clear it in one Zone.",
+        locate: { edge_paths: [[100, 301], [200, 401]] } }]),
+    tbRun("tb_Gg77Hh88Ii99", "Slab edge 1", LIVING, "tbt_Dd44Ee55Ff66", 18, [[100, 311], [100, 312]])],
+    edgeFindings: [{ path: [5], code: "thermal_bridge.outside_zone", blocks_export: false,
+      message: "An assigned Edge is not inside a Zone, so it is not exported. Move it into a Zone or clear it.",
+      locate: { edge_paths: [[5]] } }] } };
+
   // Public synthetic Builder reference. Thermal fields are fixed canonical host responses.
   FIXTURES.builder = JSON.parse(JSON.stringify(FIXTURES.inventories));
   [FIXTURES.inventories, FIXTURES.builder].forEach(function (fixture) {
