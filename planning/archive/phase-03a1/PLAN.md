@@ -106,8 +106,8 @@ with 07's server hooks no-ops until 08. Later stages may share prerequisites but
 not overlap on dispatch, registry, session observers, approved locations, the export task, the
 composition root or generated docs.
 
-Coordinate with [thermal bridges](../../features/phase-03b-thermal-bridges/PLAN.md) and
-[geometry contribution contracts](../../features/cross-phase/geometry-contribution-contracts/PLAN.md) before
+Coordinate with [thermal bridges](../phase-03b-thermal-bridges/PLAN.md) and
+[geometry contribution contracts](../geometry-contribution-contracts/PLAN.md) before
 touching Zones traversal, generic occurrence reads, declarations or export snapshots. This phase
 does not absorb their edge tagging or export work or change their existing requirements.
 

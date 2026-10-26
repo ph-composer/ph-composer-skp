@@ -1,7 +1,7 @@
 # Phase 3, thermal bridges: findings from source, and the decisions that follow
 
 DATE: 2026-10-03
-STATUS: Scoped. Part 1 is findings read from source on `main` at `08c4807`, re-verified against `420c783a` in Part 1b on 2026-10-21. Part 2 was answered by Ed
+STATUS: Complete 2026-10-26, archived with the packet; built as recorded in [STATUS.md](STATUS.md). Was: Scoped. Part 1 is findings read from source on `main` at `08c4807`, re-verified against `420c783a` in Part 1b on 2026-10-21. Part 2 was answered by Ed
 on 2026-10-03, every row as recommended except D3b-20; see "Ed's answers". D3b-22 and D3b-23, added by the re-baseline, were answered as recommended on 2026-10-21. The interview is complete.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
@@ -14,7 +14,7 @@ recommendation. The bindings that follow from the recommendations are in
 [CONTRACTS.md](CONTRACTS.md); they change when an answer differs.
 
 These are Phase 3b's decisions, D3b-01 to D3b-23, with findings F1 to F36. Phase 3a (Spaces) has
-its own [DECISIONS.md](../../archive/phase-03a-spaces/DECISIONS.md), D3a-1 to D3a-12 with its own F1 to F22;
+its own [DECISIONS.md](../phase-03a-spaces/DECISIONS.md), D3a-1 to D3a-12 with its own F1 to F22;
 a reference to one of those always says Phase 3a. Stages are P3b-01 to P3b-09, tracked in
 [STATUS.md](STATUS.md). The ids were renumbered on 2026-10-03 when Phase 3 split into 3a and 3b
 (D3-13 to D3-33 became D3b-01 to D3b-21, TF1 to TF26 became F1 to F26, P3-13 to P3-21 became
@@ -32,9 +32,9 @@ not that the consequence was reproduced on a host or in a test.
 
 | # | Finding | Consequence |
 | --- | --- | --- |
-| F1 | [B4](../../archive/phase-00-foundation/evidence/spike-edge.md) measured that split, explode and native cut, copy and paste put an edge's whole dictionary on every new edge; weld, move and push-pull keep persistent ids; Undo, Redo and reopen restore everything. Its disposition 2 recommends a Model-level registry of expected edges so a scan can tell a split from a paste | The PRD's edge tagging rule 1 and Q1 say the opposite: the edge is the record and there is no separate index. See D3b-01 |
+| F1 | [B4](../phase-00-foundation/evidence/spike-edge.md) measured that split, explode and native cut, copy and paste put an edge's whole dictionary on every new edge; weld, move and push-pull keep persistent ids; Undo, Redo and reopen restore everything. Its disposition 2 recommends a Model-level registry of expected edges so a scan can tell a split from a paste | The PRD's edge tagging rule 1 and Q1 say the opposite: the edge is the record and there is no separate index. See D3b-01 |
 | F2 | B4 did not run: a push-pull that deletes a tagged edge, `Entities#intersect_with`, native Divide, the native Weld menu command. Nobody has run the reverse of a split: erase the crossing edge so SketchUp heals two collinear tagged halves into one edge | Which dictionary the healed edge keeps decides whether a split-then-heal changes a schedule. P3b-01 closes these on the host before any storage code |
-| F3 | B4 disposition 4: an explode that lays a window sill over a tagged base edge leaves contiguous collinear tagged pieces that read as a legitimate split. [B3](../../archive/phase-00-foundation/evidence/spike-window.md) measured that a glued cutting unit leaves the host Face's loops unchanged | A window outline has no edges in the host wall unless the user draws them. The double-count case in PRD Q11 needs a rule that knows window geometry. See D3b-15 |
+| F3 | B4 disposition 4: an explode that lays a window sill over a tagged base edge leaves contiguous collinear tagged pieces that read as a legitimate split. [B3](../phase-00-foundation/evidence/spike-window.md) measured that a glued cutting unit leaves the host Face's loops unchanged | A window outline has no edges in the host wall unless the user draws them. The double-count case in PRD Q11 needs a rule that knows window geometry. See D3b-15 |
 
 ### Code on `main`
 
@@ -62,7 +62,7 @@ honeybee-ph files cited are byte-identical between the wheel and the repository.
 | --- | --- | --- |
 | F16 | `PhThermalBridge(_identifier, _geometry)`: `display_name`, `quantity` 1.0, `group_type` 15, `psi_value` 0.1, `fRsi_value` 0.75, `is_interior_pipe` False; geometry is a `LineSegment3D` or `Polyline3D` and `length` comes from it. The group enum's strings are `15-Ambient`, `16-Perimeter`, `17-FS/BC`. Nothing is range-checked (`honeybee_energy_ph/construction/thermal_bridge.py:31-143`) | The PRD's mapping holds. `fRsi_value` and `is_interior_pipe` keep their defaults |
 | F17 | `BldgSegment.thermal_bridges` is a dict keyed by identifier, filled by `add_new_thermal_bridge` (`honeybee_ph/bldg_segment.py:353`, `:379-391`). The Model writes `bldg_segments` deduplicated by segment identifier, last Room wins, with no union of thermal bridges (`honeybee_ph/properties/model.py:85-88` in the wheel); Rooms carry only `ph_bldg_segment_id` | Every Room of a Building-Segment must hold the same segment object, or thermal bridges are silently dropped. F10 shows the Zone section already does this. A conformance check after reload proves it per export |
-| F18 | PHX writes one METr row per thermal bridge: `n`, `typeTbZ` as the negated group, `lengthTbZ`, `psiTbZ`; no quantity and no fRsi (`PHX/to_METr_JSON/metr_schemas.py:1062-1071`). Quantity is folded into length only when `merge_thermal_bridges` reduces two or more bridges sharing group, psi and name (`PHX/model/components.py:895-929`, `PHX/model/building.py:161-176`) | Read from source, not reproduced: a lone thermal bridge with quantity 2 would reach METr at quantity 1. HBJSON is canonical and keeps quantity. The consumer check goes to [metr-export](../unscheduled/metr-export/README.md). See D3b-08 |
+| F18 | PHX writes one METr row per thermal bridge: `n`, `typeTbZ` as the negated group, `lengthTbZ`, `psiTbZ`; no quantity and no fRsi (`PHX/to_METr_JSON/metr_schemas.py:1062-1071`). Quantity is folded into length only when `merge_thermal_bridges` reduces two or more bridges sharing group, psi and name (`PHX/model/components.py:895-929`, `PHX/model/building.py:161-176`) | Read from source, not reproduced: a lone thermal bridge with quantity 2 would reach METr at quantity 1. HBJSON is canonical and keeps quantity. The consumer check goes to [metr-export](../../features/unscheduled/metr-export/README.md). See D3b-08 |
 | F19 | PHX merges a Building-Segment's Rooms by duplicating the first Room's ph properties (`PHX/from_HBJSON/cleanup.py:525,567`) | Consistent with F17: a shared segment is what PHX expects |
 | F20 | PHX names group 17 `UNDERGROUND`, "in contact with ground" (`PHX/model/enums/building.py:143-154`); honeybee-ph's docstring says "floor slab / boundary condition". No writer emits a text label | The PRD's provisional key `FloorSlabBasementCeiling` is a third vocabulary. See D3b-03 |
 | F21 | There is no point thermal bridge class in honeybee-ph or PHX. The only chi-value is on `PhWindowFrameElement` | D3 stands unchanged |
@@ -73,7 +73,7 @@ honeybee-ph files cited are byte-identical between the wheel and the repository.
 | --- | --- | --- |
 | F22 | METr export is deferred (D12) and no PHX wheel is vendored | The PRD's METr acceptance rows move to metr-export, as Phase 2 moved every "Through PHX" step. This feature closes on HBJSON reloaded in the pinned honeybee stack |
 | F23 | The geometry-first rule (`context/TECH_STACK.md`, "Rules for later features"): select, then act; a modal tool is secondary unless the plan records why | Assign by selection is primary. The edge tool is the secondary route, kept because Phase 4 piping and ducting reuse its shape (roadmap 3.2) |
-| F24 | The validation-and-export packet owes four export-run items from R05 ([STATUS](../cross-phase/validation-and-export/STATUS.md), "Owed from the Phase 2 review"). The Spaces plan allocates items 1 (the empty Room) and 2 (section-read cycles) to P3a-01 and item 3 to P3a-10, and D3a-9 leaves item 4, an optional attaching section that refuses, owed until an optional section exists | P3a-01 is the entry gate of P3b-08. Ed made the thermal-bridge section optional (D3b-20), so P3b-08 settles item 4 |
+| F24 | The validation-and-export packet owes four export-run items from R05 ([STATUS](../../features/cross-phase/validation-and-export/STATUS.md), "Owed from the Phase 2 review"). The Spaces plan allocates items 1 (the empty Room) and 2 (section-read cycles) to P3a-01 and item 3 to P3a-10, and D3a-9 leaves item 4, an optional attaching section that refuses, owed until an optional section exists | P3a-01 is the entry gate of P3b-08. Ed made the thermal-bridge section optional (D3b-20), so P3b-08 settles item 4 |
 | F25 | The Spaces plan builds the Colour-by extension in P3a-05: an `Entry` may carry `derived` world-space polygons and segments that the service fills and outlines in the entry's colour (D3a-5). That is the first draw path for coloured segments | Thermal bridges need coloured, heavy segments over live Edges. They are a third user of P3a-05's `derived` segments, not a reason for a second draw path. See D3b-11 |
 | F26 | Assemblies' preflight reports an incomplete Assembly as a non-blocking row (`features/assemblies/export.rb:53-58`, `blocks_export` false); the blocking row comes from the Face that uses it. The PRD's "type has no psi-value" row says only "blocks export" | An unused incomplete Thermal Bridge Type would block export under a literal reading. See D3b-21 |
 
@@ -106,7 +106,7 @@ Line numbers are those of `420c783a`.
 | F16 to F21 | Hold | honeybee-ph is still pinned at 1.33.65; no PHX wheel | `vendor/wheels/`; `vendor/manifest.json` |
 | F22 | Holds | | |
 | F23 | Holds | | `context/TECH_STACK.md:592-640` |
-| F24 | Changed | R05 items 1 (P3a-01), 2 (PR #122) and 3 (P3a-10 slice B) are delivered. Item 4 alone remains, with P3b-08 | [validation-and-export STATUS](../cross-phase/validation-and-export/STATUS.md), "Owed from the Phase 2 review" |
+| F24 | Changed | R05 items 1 (P3a-01), 2 (PR #122) and 3 (P3a-10 slice B) are delivered. Item 4 alone remains, with P3b-08 | [validation-and-export STATUS](../../features/cross-phase/validation-and-export/STATUS.md), "Owed from the Phase 2 review" |
 | F25 | Settled | P3a-05 shipped `derived`, and D3a-5 settled one line primitive: an Edge entry carries the Edge as `entity` and its world segment in `derived`; a mode that needs a heavier stroke declares it on the mode (thermal bridges) | `context/EXTENSIBILITY.md`, "Colour-by derived geometry", "One line primitive" |
 | F26 | Holds | | `features/assemblies/export.rb` |
 

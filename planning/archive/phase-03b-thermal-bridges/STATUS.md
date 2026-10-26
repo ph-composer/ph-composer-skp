@@ -1,7 +1,7 @@
 # Phase 3b: thermal bridges, tracking ledger
 
 DATE: 2026-10-03
-STATUS: In progress. P3b-01 merged to `main` 2026-10-22 (PR #302); P3b-02 merged 2026-10-25 (PR #308); P3b-03 merged 2026-10-25 (PR #309); P3b-04 merged 2026-10-26 (PR #310); P3b-05 merged 2026-10-26 (PR #311); P3b-06 merged 2026-10-26 (PR #312); P3b-07 merged 2026-10-26 (PR #313); P3b-08 merged 2026-10-26 (PR #314); P3b-09 implemented on branch, T09 passes; P3b-02 to P3b-09 authorized 2026-10-25 as one pull request each.
+STATUS: Complete 2026-10-26, archived. P3b-01 to P3b-09 merged to `main` through PRs #302 and #308 to #315; T01 to T09 pass with ledger results.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 
@@ -30,7 +30,7 @@ recommended the same day; no stage authorized.
 
 ## Next step
 
-P3b-01 merged to `main` as `91366643` ([PR #302](https://github.com/ph-composer/ph-composer-skp/pull/302)); T01 passes. On 2026-10-25 Ed authorized the rest of the packet through the PR loop, one branch and pull request per stage, with the merge delegated on green CI. P3b-02 merged to `main` as `b4b6d08c` ([PR #308](https://github.com/ph-composer/ph-composer-skp/pull/308)); T02 passes. P3b-03 merged to `main` as `96d09161` ([PR #309](https://github.com/ph-composer/ph-composer-skp/pull/309)); T03 passes. P3b-04 merged to `main` as `85d81a46` ([PR #310](https://github.com/ph-composer/ph-composer-skp/pull/310)); T04 passes; the schedule is read on request (D3b-13, DECISIONS F37). P3b-05 merged to `main` as `de76ddba` ([PR #311](https://github.com/ph-composer/ph-composer-skp/pull/311)); T05 passes. P3b-06 merged to `main` as `da53f66e` ([PR #312](https://github.com/ph-composer/ph-composer-skp/pull/312)); T06 passes. P3b-07 merged to `main` as `15c9c535` ([PR #313](https://github.com/ph-composer/ph-composer-skp/pull/313)); T07 passes. P3b-08 merged to `main` as `b73e5c0b` ([PR #314](https://github.com/ph-composer/ph-composer-skp/pull/314)); T08 passes. P3b-09 is `Implemented on branch` on `feature/thermal-bridges-p3b-09`; T09 passes. When it merges, Phase 3b is complete and this packet is archived.
+None. Phase 3b is complete: P3b-01 to P3b-09 merged to `main` (PRs [#302](https://github.com/ph-composer/ph-composer-skp/pull/302), [#308](https://github.com/ph-composer/ph-composer-skp/pull/308) to [#315](https://github.com/ph-composer/ph-composer-skp/pull/315)), T01 to T09 pass, and this packet is archived. With 3a it closes Phase 3. The follow-ups below stay recorded; none is scheduled.
 
 ## Entry gates
 
@@ -58,12 +58,12 @@ only when all three are done and its evidence file exists.
 | [P3b-06](phases/p3b-06-thermal-bridge-colour-by.md) | The thermal-bridge Colour-by mode | Merged to main | | [PR #312](https://github.com/ph-composer/ph-composer-skp/pull/312), squash `da53f66e` | `make ci` green at `3d7045a7` (Ruby 3.2.2: 2,191 runs; 750 JS tests); the new and touched suites also on 2.7.2 | T06 run 2026-10-26 on 26.1.188 at `3d7045a7`: the native menu, thick coloured depth-tested Edges in a turned nested Zone, a hidden tag, tag folder and ancestor, the HUD in SI and IP, select and Show only this, 7.7 ms a frame and 225 ms a rebuild at 5,000 assigned Edges; six assertions pass | strong: Sonnet pre-gate read (11 items, the real ones fixed), Codex gpt-6-astra two cycles with the architecture and Ruby rubrics (1 P2 fixed in `3d7045a7`, then none) | [evidence](evidence/p3b-06-colour-by.md) | T06 | | T06 |
 | [P3b-07](phases/p3b-07-edge-tool.md) | The edge tool | Merged to main | P3b-05, P3b-06 | [PR #313](https://github.com/ph-composer/ph-composer-skp/pull/313), squash `15c9c535` | `make ci` green at `a0a765a6` (Ruby 3.2.2: 2,212 runs; 754 JS tests); `make ui-checks` for the thermal-bridges check at the three panel sizes | T07 run 2026-10-26 on 26.1.188 at `a0a765a6`, Ed at the mouse: hover, clicks and a drag with one Undo each, a type change and Escape mid-drag, a Model switch, a raised callback, the root and Window Unit refusals, 251 Edges refused whole, Stop; eleven assertions pass; 185 ms to assign 250 Edges, 1.3 ms median per newly hovered Edge at 50,040 Edges | ordinary, UI: Sonnet pre-gate read (9 items, fixed); Codex gpt-6.1-sol two cycles (1 P2, then 1 P2; both fixed) | [evidence](evidence/p3b-07-edge-tool.md) | T07 |
 | [P3b-08](phases/p3b-08-thermal-bridge-export.md) | Thermal-bridge export | Merged to main | P3b-04 | [PR #314](https://github.com/ph-composer/ph-composer-skp/pull/314), squash `b73e5c0b` | `make ci` green at `26188c6e` (Ruby 3.2.2: 2,224 runs; 754 JS tests; 258 Python tests) | T08 run 2026-10-26 on 26.1.188 at `26188c6e`, bridge only: the reference export reloaded with five runs on one Building-Segment and conformance passing, save and reopen giving the same thermal bridges, every warning in preflight and report with the pair written, a cleared psi-value blocking with the prior pair kept, the refusal rows through the offline seam; snapshot 1,708 ms median at 76,959 entries | strong: Sonnet pre-gate read (no high; 3 medium fixed); Codex gpt-6-astra two cycles (1 P2 and 1 P3, fixed; then none) | [evidence](evidence/p3b-08-thermal-bridge-export.md) | T08 |
-| [P3b-09](phases/p3b-09-thermal-bridge-acceptance-and-handoff.md) | Thermal-bridge acceptance and handoff | Implemented on branch | P3b-01 to P3b-08 | `feature/thermal-bridges-p3b-09` | `make ci` on Ruby 3.2.2 and 2.7.2 (2,224 runs; 754 JS; 258 Python); coverage Ruby 97.2%, JS 96.8%, Python 95.2%; `make ui-checks`; `make runtime-browser-check` (Chromium 88); footprint 24,541,739 bytes | T09 run 2026-10-26 on 26.1.188 from `main` at `b73e5c0b`, native control for panel, menus and viewport: all ten assertions pass | none; consolidation | [evidence](evidence/p3b-09-acceptance.md) | T09 |
+| [P3b-09](phases/p3b-09-thermal-bridge-acceptance-and-handoff.md) | Thermal-bridge acceptance and handoff | Merged to main | P3b-01 to P3b-08 | [PR #315](https://github.com/ph-composer/ph-composer-skp/pull/315), squash `5886a1ad` | `make ci` on Ruby 3.2.2 and 2.7.2 (2,224 runs; 754 JS; 258 Python); coverage Ruby 97.2%, JS 96.8%, Python 95.2%; `make ui-checks`; `make runtime-browser-check` (Chromium 88); footprint 24,541,739 bytes | T09 run 2026-10-26 on 26.1.188 from `main` at `b73e5c0b`, native control for panel, menus and viewport: all ten assertions pass | none; consolidation | [evidence](evidence/p3b-09-acceptance.md) | T09 |
 
 ## Deferred foundation stages
 
 Three stages of the refactoring program's
-[geometry contribution contracts](../cross-phase/geometry-contribution-contracts/PLAN.md)
+[geometry contribution contracts](../geometry-contribution-contracts/PLAN.md)
 packet ([#118](https://github.com/ph-composer/ph-composer-skp/issues/118)) need this track as their adopter.
 They are deferred here until the P3b stage named in "Picked up by" starts. Their plan text stays in
 that packet; this ledger owns when they run.
@@ -133,11 +133,11 @@ answers". D3b-22 and D3b-23 were added by the re-baseline of 2026-10-21 and answ
 
 | Item | Where it waits |
 | --- | --- |
-| METr thermal-bridge rows and PHX's treatment of `quantity` (F18, unreproduced) | [metr-export](../unscheduled/metr-export/README.md) |
+| METr thermal-bridge rows and PHX's treatment of `quantity` (F18, unreproduced) | [metr-export](../../features/unscheduled/metr-export/README.md) |
 | Thermal Bridge Types as a library kind (Q8) | Roadmap 5.4 |
-| A Model-level edge registry for identity-bearing assignments (D3b-01) | [hot-water-piping](../phase-04-mechanical/hot-water-piping/README.md), [erv-ducting](../phase-04-mechanical/erv-ducting/README.md) |
+| A Model-level edge registry for identity-bearing assignments (D3b-01) | [hot-water-piping](../../features/phase-04-mechanical/hot-water-piping/README.md), [erv-ducting](../../features/phase-04-mechanical/erv-ducting/README.md) |
 | Moving the run builder to `core/` | When piping or ducting needs the same chain rule |
-| A toolbar button for the edge tool | [zones-entry-points](../unscheduled/zones-entry-points/README.md) E1 |
+| A toolbar button for the edge tool | [zones-entry-points](../../features/unscheduled/zones-entry-points/README.md) E1 |
 | A compact default `fields` projection for every catalog `.list` (Assemblies, Materials, Window products and Types, Thermal Bridge Types), so one record over the agent reply budget cannot stop a page walk (Codex review of PR #308) | Unscheduled; needs its own issue |
 
 ## Verification
@@ -207,3 +207,4 @@ reproduced; P3b-01 reproduces what the stages depend on.
 | 2026-10-26 | Codex gpt-6-astra cycle 2 on `26188c6e`: no findings. T08 host gate on `26188c6e`, bridge only, three fresh processes ([evidence](evidence/p3b-08-thermal-bridge-export.md)): all nine assertions pass. Save, reopen and re-export give byte-identical thermal bridges; the whole HBJSON matches after normalizing honeybee-ph's generated default UUIDs and unordered Energy collections, the P1-E and P2-14 rule. A full collection on the 50,000 Edge Model does not finish because the Zones Faces section finds each Face's Zone by scanning the snapshot; that is Zones' cost, recorded as a follow-up. P3b-08 `Implemented on branch`. |
 | 2026-10-26 | PR #314 merged to `main` as `b73e5c0b` (squash, on green CI); branch deleted locally and on the remote. P3b-08 `Merged to main`. P3b-09 started on `feature/thermal-bridges-p3b-09`. |
 | 2026-10-26 | P3b-09: offline gates green on both Rubies with coverage, browser, Chromium 88 runtime and footprint; the footprint baseline reset at the close (D3b-24). T09 integrated run on `main` at `b73e5c0b` under native control ([evidence](evidence/p3b-09-acceptance.md)): all ten assertions pass. Register consolidated (T01 to T09 pass with evidence). PRODUCT and AGENT_INTERFACE describe thermal bridges as built; hot-water-piping and erv-ducting point at the `context/` edge rules and the edge tool, and own D3b-01; G-01 and G-04 closed. P3b-09 `Implemented on branch`. |
+| 2026-10-26 | PR #315 merged to `main` as `5886a1ad`, closing #301 and #118. P3b-09 `Merged to main`; Phase 3b complete. Packet archived to `planning/archive/phase-03b-thermal-bridges/` with every inbound and outbound link rewritten; the ledger's evidence paths mapped through `evidence-locations.json`. |

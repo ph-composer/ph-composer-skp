@@ -146,7 +146,7 @@ Measured in PH-Composer on 26.1.188, 2026-09-18 ([B3](../planning/archive/phase-
 | `no_scale_mask` hides the Scale tool's handles; `Transformation` scaling from Ruby applies anyway. | Detect scaling from `xscale`/`yscale`; a mirror from a negative determinant. |
 | `Edge#split`, an explode that splits edges, and native cut, copy and paste all put the source edge's full attribute dictionary on the new edges. `Entities#weld`, moves and push-pull keep edge persistent ids. Undo, Redo and save and reopen restore dictionaries and ids exactly. | Edge tags multiply rather than vanish; a Model-level registry and a scan tell a split from a copy or a replacement. |
 
-Measured in PH-Composer on 26.1.188, 2026-10-21 ([T01](../planning/features/phase-03b-thermal-bridges/evidence/p3b-01-edge-host-facts.md)),
+Measured in PH-Composer on 26.1.188, 2026-10-21 ([T01](../planning/archive/phase-03b-thermal-bridges/evidence/p3b-01-edge-host-facts.md)),
 the cases B4 left open, each with native Undo, Redo, save and a fresh-process reopen:
 
 | Fact | Consequence |
@@ -198,7 +198,7 @@ Groups. `Spaces::HeightFromSolid.solid_volume_m3` depends on these facts.
 | A filled, translucent overlay (`GL_TRIANGLES`, alpha 110) is depth-tested against Model geometry, leaves native picking unaffected and adds no measurable median frame cost at 1,000 triangles; at 10,000 it adds about 4 to 5 ms a frame, mostly Ruby marshalling in `draw`. Measured in PH-Composer on 26.1.188, M1 Max, 2026-09-18 ([B2](../planning/archive/phase-00-foundation/evidence/spike-overlay.md)). | Filled Colour-by modes and the volume preview are available; cache per instance and budget past about 10,000 triangles. |
 | A `Sketchup::Overlay` drawing through the accumulated world transform lands on the right geometry under rotated parents; 44 items drew in 0.17 ms median with a one-off 1.4 s walk. `View#write_image` does not render overlays; `view.invalidate` inside an eval does not repaint before the eval returns. | Cache per instance and invalidate from the observers; capture overlay evidence with a window capture. |
 | SketchUp 2023 to 2025 require a child drawing element appended to a component or group leaf path for `Model#drawing_element_visible?`; SketchUp 2026 accepts the occurrence path directly. | Branch on the host version in the visibility reader. |
-| `LayersObserver` callbacks fire for tag folder changes: hiding a `LayerFolder` and moving a tag into one each reached `tags_changed` and rebuilt Colour by, with no revision. Measured in PH-Composer on 26.1.188, 2026-10-26, through the API (a drag in the Tags panel was not driven) ([T06](../planning/features/phase-03b-thermal-bridges/evidence/p3b-06-colour-by.md)). | A drawing that depends on tag visibility checks every folder holding the tag and listens for folder and parent-folder events as well as tag events. |
+| `LayersObserver` callbacks fire for tag folder changes: hiding a `LayerFolder` and moving a tag into one each reached `tags_changed` and rebuilt Colour by, with no revision. Measured in PH-Composer on 26.1.188, 2026-10-26, through the API (a drag in the Tags panel was not driven) ([T06](../planning/archive/phase-03b-thermal-bridges/evidence/p3b-06-colour-by.md)). | A drawing that depends on tag visibility checks every folder holding the tag and listens for folder and parent-folder events as well as tag events. |
 | `Sketchup::Overlay` is a 2023.0 API. | It is why SketchUp 2023 is the compatibility floor. |
 
 ## Window-edit measurements on the current host

@@ -1,7 +1,7 @@
 # Phase 3b: thermal bridges
 
 DATE: 2026-10-03
-STATUS: In progress. Interviewed 2026-10-03; planned in detail as stages P3b-01 to P3b-09; re-baselined on `main` at `420c783a` on 2026-10-21 and D3b-22, D3b-23 answered the same day. P3b-01 merged 2026-10-22; P3b-02 to P3b-09 authorized 2026-10-25.
+STATUS: Complete 2026-10-26, archived. P3b-01 to P3b-09 merged to `main` through PRs #302 and #308 to #315; T01 to T09 pass with ledger results.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 
@@ -10,11 +10,11 @@ assign a type. The exporter measures the edges and writes one honeybee-ph therma
 assigned run. New work: the predecessor never built it.
 
 This packet also owns the rules for tagging a SketchUp edge, which
-[hot-water-piping](../phase-04-mechanical/hot-water-piping/README.md) and
-[erv-ducting](../phase-04-mechanical/erv-ducting/README.md) reuse.
+[hot-water-piping](../../features/phase-04-mechanical/hot-water-piping/README.md) and
+[erv-ducting](../../features/phase-04-mechanical/erv-ducting/README.md) reuse.
 
 Phase 3 is split into two independent sub-phases, each one flat packet:
-[3a Spaces](../../archive/phase-03a-spaces/README.md) and 3b thermal bridges (this folder). Phase 3 ends when
+[3a Spaces](../phase-03a-spaces/README.md) and 3b thermal bridges (this folder). Phase 3 ends when
 both close. That is the first internal envelope-model release candidate (D1).
 
 ## Read order
@@ -54,9 +54,9 @@ both close. That is the first internal envelope-model release candidate (D1).
 
 Phase 3a closed on 2026-10-17 and its three gates are met: the nested-container rule that
 `zones.containment` honors and R05 items 1 and 2 came with
-[P3a-01](../../archive/phase-03a-spaces/phases/p3a-01-contracts-and-groundwork.md); the `derived`
+[P3a-01](../phase-03a-spaces/phases/p3a-01-contracts-and-groundwork.md); the `derived`
 geometry, the legend `figure` sums and the one-line-primitive decision came with
-[P3a-05](../../archive/phase-03a-spaces/phases/p3a-05-colour-by-derived-geometry-and-readouts.md).
+[P3a-05](../phase-03a-spaces/phases/p3a-05-colour-by-derived-geometry-and-readouts.md).
 Since the plan was drafted, G-02 put Edge entries in the export snapshot, the agent-access phase
 made every registration an agent surface and gave the foundation `context.open`, and the host kit
 grew bounded waits, a diagnostic reader and fault controls. [DECISIONS](DECISIONS.md) Part 1b
@@ -71,7 +71,7 @@ Colour-by mode, export to HBJSON for honeybee-ph.
 Out: psi-value calculation, Flixo or THERM import, fRsi and condensation checks, automatic
 detection of junctions, window install psi-values (those belong to Window Types), point thermal
 bridges and chi-values (D3), METr conversion (deferred by D12 to
-[metr-export](../unscheduled/metr-export/README.md)), a library kind (roadmap 5.4).
+[metr-export](../../features/unscheduled/metr-export/README.md)), a library kind (roadmap 5.4).
 
 ## Rules for every stage
 

@@ -1,6 +1,6 @@
 # Native-control capabilities
 
-DATE: 2026-10-01
+DATE: 2026-10-01, updated 2026-10-26
 STATUS: Development guidance grounded in SketchUp 26.1.188 on the current macOS system.
 
 Choose the control by the claim being tested. Recheck current tool capabilities when they change;
@@ -20,7 +20,10 @@ these are observed limitations of this run, not permanent limits of SketchUp or 
 | Missing/blank window | Refresh current surface and check active Space/document | A missing capture is not proof of a failed panel. Bridge state may remain available. |
 | Window-bounded capture and menu labels | Current native computer-use controller: bind SketchUp, capture its window, read fresh accessibility state and invoke the observed menu item | Window screenshots and native menu targeting worked on 2026-10-01 for SketchUp and PH-Composer. The 2026-09-30 capture limitation is historical. `getScreenshot` returned pixels; an AX-plus-screenshot call did not consistently include pixels. Use the explicit screenshot call when needed. Never capture the full screen. |
 | Escape inside the panel | The background controller's `app_key escape` on the panel window, with the bridge reading the Model before and after | On 2026-10-04 (ZT-07) background Escape reached the web view and drove its Escape layers. On 2026-10-03 a synthesized Escape did not, while Backspace, Enter and letters did; if it fails again, ask for one physical keypress. |
-| Panel clicks and Edit > Undo | SketchUp frontmost under full-screen control, with the model window clicked before the Edit menu | Under background control, clicks stopped reaching the panel after a few interactions and Undo stayed disabled (2026-10-03). Undo reads "Undo <operation>" only while the model window is key. `Sketchup.send_action("editUndo:")` did nothing while SketchUp was in the background. |
+| Panel clicks and Edit > Undo | Background control (`app_click`, `app_type`, `app_menu`) on the panel and model windows, with the bridge reading the Model before and after | On 2026-10-26 (thermal bridges T09) background clicks and typing reached the panel throughout a long session, and Edit read "Undo <operation>" and undid and redid once a click on the model window's title bar made it key. The 2026-10-03 run, where clicks stopped reaching the panel and Undo stayed disabled, is historical. File > Save and File > Close stay disabled under background control: save with `host_bridge.py save` and close a window with its close button |
+| Panel form fields | Click the field, then type; for a `<select>`, focus it (click a neighbouring field, then Tab or Shift+Tab) and press the option's first letter | Opening a select's popup and choosing in it did not stick, and a background `mode: replace` did not select a field's text: place the caret, End, Backspace, then type (T09, 2026-10-26). Read the value back before relying on it |
+| Viewport clicks for a tool | Background `app_click` on the model window at the target's screen point: `view.screen_coords` read through the bridge, scaled to the window's screenshot frame (on T09's display, x times 0.738, and y times 0.738 plus the 49-point toolbar band) | The edge tool took single clicks this way (T09). A press may carry the Command key; check the selection afterwards |
+| A context-menu item | SketchUp's Edit > "<n> <entities>" selection submenu through `app_menu`: it carries extension context-menu items, the same handlers a right-click shows | A full-screen right-click can be refused when another app's window overlays the viewport (T09); the menu bar route needs no full-screen control. A right-click itself is then not observed |
 | Controls shown only on hover (header and row icons) | Inject a dev-only style through `dialog.execute_script` that sets them visible, target them by coordinate, then remove the style before any at-rest check | Background control cannot hover. Never leave the style in place while judging what shows at rest (2026-10-04, ZT-07). |
 | Reading panel DOM state into Ruby | A development callback registered before the panel's `show`, or window pixels | On SketchUp 26.1.188 (2026-10-15, E18) `add_action_callback` on an already shown HtmlDialog never reached `window.sketchup`, even after `set_file` reloaded the page. Read pixels instead, or wrap the dialog's construction in a development helper. |
 | Pointer drags inside the panel | Full-screen native control: `left_mouse_down`, stepped moves, a capture while held, `left_mouse_up` | Hover-revealed handles appear for the real pointer, so no visibility style is needed when the pointer passes over the row first (E18). Bridge-driven focus changes (`Sketchup.focus`) work while the button is held, to test blur. |
@@ -45,6 +48,7 @@ repeatable fault with `host_bridge.py fault arm` rather than a one-off prepend: 
 target back against the arm baseline and must report `restored: true` before the fresh process.
 
 Sources: [Phase 2 groundwork observations](../planning/archive/phase-02-envelope/evidence/p2-01-groundwork.md),
+[thermal bridges T09](../planning/archive/phase-03b-thermal-bridges/evidence/p3b-09-acceptance.md),
 [Colour-by toggle continuation](../planning/archive/phase-01-faces-and-zones/evidence/p1-d-colour-by-continuation.md),
 [held gesture/context continuation](../planning/archive/phase-01-faces-and-zones/evidence/p1-d-keyboard-context.md),
 [export lifecycle and restoration](../planning/archive/phase-01-faces-and-zones/evidence/p1-e-export-workflow.md),

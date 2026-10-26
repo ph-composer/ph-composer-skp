@@ -1,7 +1,7 @@
 # Phase 3b delivery plan: thermal bridges
 
 DATE: 2026-10-03
-STATUS: In progress. Stages P3b-01 to P3b-09 planned; interview complete 2026-10-03; re-baselined on `main` at `420c783a` on 2026-10-21, D3b-22 and D3b-23 answered the same day; P3b-01 merged 2026-10-22; P3b-02 to P3b-09 authorized 2026-10-25.
+STATUS: Complete 2026-10-26, archived. P3b-01 to P3b-09 merged to `main` through PRs #302 and #308 to #315; T01 to T09 pass with ledger results.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 
@@ -20,10 +20,10 @@ added, D3b-22 and D3b-23, and answered as recommended the same day; nothing else
 In this plan: thermal bridges, roadmap 3.2, as the [PRD](PRD.md) scopes it after the interview
 of 2026-10-03. The findings, decisions, bindings and register are this folder's
 [DECISIONS](DECISIONS.md), [CONTRACTS](CONTRACTS.md) and [ACCEPTANCE](ACCEPTANCE.md). Spaces,
-roadmap 3.1, is [Phase 3a](../../archive/phase-03a-spaces/PLAN.md).
+roadmap 3.1, is [Phase 3a](../phase-03a-spaces/PLAN.md).
 
 Out of this plan: METr conversion and import (D12; the METr rows and PHX's handling of `quantity`
-wait with [metr-export](../unscheduled/metr-export/README.md)), point thermal bridges and
+wait with [metr-export](../../features/unscheduled/metr-export/README.md)), point thermal bridges and
 chi-values (D3), psi-value calculation, fRsi, automatic junction detection, a library kind for
 Thermal Bridge Types (roadmap 5.4), a toolbar, SketchUp 2023 and Windows host proof, public
 distribution.
@@ -146,5 +146,5 @@ changed and repeat the earlier cases that screen reports.
 Every row of [ACCEPTANCE.md](ACCEPTANCE.md) passes on the proving host, this packet records what
 was delivered and what remains, the edge tagging rules are in `context/` for piping and ducting,
 the Phase 4 packets point at them, and `docs/PRODUCT.md` and the generated API reference describe
-what exists. Phase 3 closes when this plan and [Phase 3a](../../archive/phase-03a-spaces/PLAN.md) have both
+what exists. Phase 3 closes when this plan and [Phase 3a](../phase-03a-spaces/PLAN.md) have both
 exited. Nothing here is a release, a SketchUp 2023 or Windows claim, or a certification claim.

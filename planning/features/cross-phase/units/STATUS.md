@@ -61,7 +61,7 @@ checks, review and limits. P3a-01 reuses it; no Spaces stage gate is closed by t
 | Climate | Confirm radiation quantities and add their conversions/vectors; reuse temperature and length primitives for matching fields | [Climate data](../../phase-05-post-mvp/climate-data/STATUS.md); requested, post-MVP |
 
 Thermal-bridge run length and psi already have generic quantities (`length`, `linear_psi`);
-[Phase 3b](../../phase-03b-thermal-bridges/STATUS.md) still owns its field wiring and acceptance.
+[Phase 3b](../../../archive/phase-03b-thermal-bridges/STATUS.md) still owns its field wiring and acceptance.
 No piping, ducting, equipment, climate or Spaces feature source is implemented at the audited
 head. The PRD's new-quantity table is a proposal, not a list of all-new registry rows: several
 fields reuse existing quantities. Add only missing conversions, and Ruby report rows as needed.

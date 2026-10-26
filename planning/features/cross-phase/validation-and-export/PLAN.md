@@ -44,7 +44,7 @@ Assembly authoring and the deferred METr consumer milestone are outside this Pha
 | P1-E | Run coordinator, Export UI, progress/cancellation, snapshot guard and conformance | Clean/warning/blocking/cancelled/changed-Model outcomes; destination-first behavior and report consistency |
 | P1-E | Pinned HBJSON translation wheels | Native/Pyodide parity and manifest/footprint |
 | P1-E/F | Fresh-process canonical export gate | Exact HBJSON/report reconciled against authoring |
-| P3b-08 | Thermal-bridge section, the first optional section, and the optional-attachment rule (R05 item 4) | [Phase 3b T08](../../phase-03b-thermal-bridges/ACCEPTANCE.md): runs read back on their Building-Segment; a refused run is omitted and the pair is written |
+| P3b-08 | Thermal-bridge section, the first optional section, and the optional-attachment rule (R05 item 4) | [Phase 3b T08](../../../archive/phase-03b-thermal-bridges/ACCEPTANCE.md): runs read back on their Building-Segment; a refused run is omitted and the pair is written |
 | Deferred, unscheduled | METr exporter and actual import | Re-scope against available features when Ed resumes this work |
 
 ## Implemented Phase 1 contracts

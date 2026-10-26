@@ -16,7 +16,7 @@ Paths are relative to `src/ph_composer/` unless stated. Predecessor paths are re
 not that the consequence was reproduced in a test or on a host. Nothing in Part 1 was reproduced.
 P3a-01 reproduces each finding it depends on before acting on it.
 
-Thermal bridges has no rows here; it is [Phase 3b](../../features/phase-03b-thermal-bridges/DECISIONS.md). The
+Thermal bridges has no rows here; it is [Phase 3b](../phase-03b-thermal-bridges/DECISIONS.md). The
 ids here were renumbered on 2026-10-03 when Phase 3 split: D3-1 to D3-12 became D3a-1 to D3a-12
 and stages P3-01 to P3-12 became P3a-01 to P3a-12. F ids are unchanged.
 

@@ -23,11 +23,11 @@ P3b-01 to P3b-09, none authorized; the rows marked "3b" exist only once that sta
 | --- | --- | --- |
 | Catalog record kinds with the common authored fields, references, referrer handlers | Exists | `core/records/`; `context/CONTRACTS.md`, "Records and extension data". No timestamps |
 | Edge entries in the export snapshot: world SI endpoints, vertex ids, Face ids, dictionaries | Exists | `export/geometry_snapshot.rb` (G-02, PR #119). A contributor filters edge entries by its own dictionary; no snapshot change |
-| Entity-owned records on an Edge, the edge reference target, assign and clear by native selection | 3b, P3b-03 | [p3b-03](../../phase-03b-thermal-bridges/phases/p3b-03-edge-assignment.md); the edge tagging rules below |
-| The chain rule: connected same-type edges into runs with lengths, pure Ruby | 3b, P3b-04 | `features/thermal_bridges/runs/` in the 3b [contracts](../../phase-03b-thermal-bridges/CONTRACTS.md); it moves to `core/` when piping arrives as its second user (3b STATUS, "Deferred out of this plan") |
+| Entity-owned records on an Edge, the edge reference target, assign and clear by native selection | 3b, P3b-03 | [p3b-03](../../../archive/phase-03b-thermal-bridges/phases/p3b-03-edge-assignment.md); the edge tagging rules below |
+| The chain rule: connected same-type edges into runs with lengths, pure Ruby | 3b, P3b-04 | `features/thermal_bridges/runs/` in the 3b [contracts](../../../archive/phase-03b-thermal-bridges/CONTRACTS.md); it moves to `core/` when piping arrives as its second user (3b STATUS, "Deferred out of this plan") |
 | Coloured edges in the viewport | Partly | `derived` segments on an ordinary Colour-by entry exist (P3a-05; `context/EXTENSIBILITY.md`, "Colour-by derived geometry"). The stroke weight for thick lines is P3b-06 (H14). `ColourBy::LineEntry` was superseded; there is one line primitive |
-| The edge tool, the secondary route | 3b, P3b-07 | [p3b-07](../../phase-03b-thermal-bridges/phases/p3b-07-edge-tool.md). Select then Assign is the primary route (`context/TECH_STACK.md`, "Geometry first, then action"; D3b-18). The first draft's "arm the Classify tool" named Faces' paint tool, which does not pick edges |
-| An export contributor over edges with a Python section | 3b, P3b-08 | [p3b-08](../../phase-03b-thermal-bridges/phases/p3b-08-thermal-bridge-export.md), the pattern this packet's section follows |
+| The edge tool, the secondary route | 3b, P3b-07 | [p3b-07](../../../archive/phase-03b-thermal-bridges/phases/p3b-07-edge-tool.md). Select then Assign is the primary route (`context/TECH_STACK.md`, "Geometry first, then action"; D3b-18). The first draft's "arm the Classify tool" named Faces' paint tool, which does not pick edges |
+| An export contributor over edges with a Python section | 3b, P3b-08 | [p3b-08](../../../archive/phase-03b-thermal-bridges/phases/p3b-08-thermal-bridge-export.md), the pattern this packet's section follows |
 | Inventory table, in-place drafts, subtabs nav, length and linear quantities | Exists | `html/inventory.js`, `record_edits.js`, `subtabs.js`; units `length` exists in Ruby and the panel, nominal pipe size is [units Q2](../../cross-phase/units/PRD.md) |
 | The Hot Water System record | [equipment](../equipment/README.md), family 2 | Not started |
 | METr | Deferred | PHX is not in the pinned wheels. [metr-export](../../unscheduled/metr-export/README.md) owns conversion and import; every METr claim below is checked there |
@@ -230,5 +230,5 @@ rows are metr-export's.
 - PHX `model/hvac/piping.py`, `model/enums/hvac.py`, `to_METr_JSON/metr_schemas.py`, read
   2026-09-18, not in the pinned runtime.
 - honeybee-grasshopper-ph "HBPH - Create SHW Pipe" family: curves in, trunks and branches out.
-- Phase 3b's [PRD](../../phase-03b-thermal-bridges/PRD.md), "Edge tagging rules", and
-  [CONTRACTS](../../phase-03b-thermal-bridges/CONTRACTS.md), the edge store, target and `runs/`.
+- Phase 3b's [PRD](../../../archive/phase-03b-thermal-bridges/PRD.md), "Edge tagging rules", and
+  [CONTRACTS](../../../archive/phase-03b-thermal-bridges/CONTRACTS.md), the edge store, target and `runs/`.

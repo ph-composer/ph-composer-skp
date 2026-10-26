@@ -57,7 +57,7 @@ non-container branch yields nil. Edges inside a component definition may be capt
 definition facts, but ordinary occurrence Edges have no entries, identities, dictionaries or
 adjacency in the shared export snapshot.
 
-This is directly relevant to [the thermal-bridge PRD](../../../features/phase-03b-thermal-bridges/PRD.md),
+This is directly relevant to [the thermal-bridge PRD](../../phase-03b-thermal-bridges/PRD.md),
 whose assignments live on Edges and whose exported runs derive from connected edges, and to its
 planned line display. A contributor cannot supply those through the current capture/render
 contracts alone. The existing feature plan already anticipates some shared extension; do not call
