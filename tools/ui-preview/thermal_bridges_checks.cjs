@@ -51,6 +51,9 @@ check({ name: "thermal_bridges", output }, async ({ newPage, step }) => {
   step("arm the edge tool from the bar, see it pressed with Stop beside it, and stop it");
   await bar.getByRole("button", { name: "Assign by clicking", exact: true }).click();
   await bar.getByRole("button", { name: "Assign by clicking", pressed: true }).waitFor();
+  await page.locator("body").click({ position: { x: 5, y: 5 } }); // focus leaves the button, as it does for SketchUp
+  assert.notEqual(await bar.getByRole("button", { name: "Assign by clicking" }).evaluate(node =>
+    getComputedStyle(node).backgroundColor), "rgb(255, 255, 255)", "the running tool stays marked at rest");
   assert.deepEqual((await sent(TB + "edge_tool.choose"))[0].payload.params,
     { thermal_bridge_type_id: "tbt_Dd44Ee55Ff66", quantity: 1 });
   await page.screenshot({ path: path.join(output, "edge-tool-armed.png") });

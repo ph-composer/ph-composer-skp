@@ -9,6 +9,13 @@
 .phc-workspace .tb-assign-quantity { width: 5em; }
 .tb-assign-quantity[aria-invalid="true"] { border-color: var(--red); }
 .tb-assign-reason[hidden] { display: none; }
+/* The kit marks a pressed text button only on hover and focus; the running edge tool stays marked at rest, as a
+   pressed icon button does, so the cue survives the panel losing focus to SketchUp. */
+.phc-workspace .tb-assign-bar .tb-edge-tool-arm[aria-pressed="true"] {
+  color: #fff;
+  background: var(--interaction-highlight);
+  border-color: var(--interaction-highlight);
+}
 /* Each table scrolls inside itself, so a narrow panel never scrolls the tab sideways. */
 .tb-schedule-table, .tb-totals-table { min-width: 0; overflow: auto; }
 .tb-schedule-table { margin-top: 8px; }

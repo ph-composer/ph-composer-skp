@@ -151,9 +151,9 @@
       "sha256": "9bf2f658e333936bac77a05917d3949566c3d5f55cc27eba8a0dabbf045da4eb"
     },
     "html/features/thermal_bridges/edge_tool.js": {
-      "bytes": 3217,
+      "bytes": 3262,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "734844a50f84d4cb24db367e781a3ca4b9c5b194fbb5dcb3ff3a1667559c1c84"
+      "sha256": "f920be374090ff2e3b23f250393474ea2db8d62fba5f0b0eca702653427b2975"
     },
     "html/features/thermal_bridges/schedule.js": {
       "bytes": 14740,
@@ -171,9 +171,9 @@
       "sha256": "e301a567441116407faf3ab58b3af96de39cf7642182bd191bf2f19b75886d76"
     },
     "html/features/thermal_bridges/thermal_bridges.css": {
-      "bytes": 2660,
+      "bytes": 3039,
       "mime": "text/css; charset=utf-8",
-      "sha256": "b4e7954307385b48fb1795c4eda0241b1c727d1ff2a7d65075fd04df0a890dfe"
+      "sha256": "b8ed3aaead2a1a0ddecb684751721042a970ad341e1e3a6b77bfa6776f1a7146"
     },
     "html/features/thermal_bridges/types.js": {
       "bytes": 11277,

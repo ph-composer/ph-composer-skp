@@ -14,6 +14,7 @@ PhComposerUI.define("features/thermal_bridges/edge_tool", ["request", "snapshot"
     this.refused = refused;
     this.channel = request.channel(session, send, "thermal-bridge-edge-tool", "view.invoke");
     this.arm = ui.button("Assign by clicking");
+    this.arm.className = "tb-edge-tool-arm";
     this.stop = ui.button("Stop", function () { self.stopTool(); });
     this.stop.setAttribute("aria-label", "Stop assigning by clicking");
     this.state = { active: false };
