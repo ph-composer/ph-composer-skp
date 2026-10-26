@@ -264,7 +264,9 @@ module PhComposer
         feature.query(Units::Outlines::QUERY,
                       :description => "Each placed Window's world outline in metres, with the Zone Face it is " \
                                       "glued to.",
-                      :refuses => Refuses::UNIT_READ + Refuses::PAGE, :params => Shapes.list_params,
+                      :refuses => Refuses::UNIT_READ + Refuses::PAGE,
+                      :params => Shapes.object({ "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR },
+                                               :optional => %w[limit cursor]),
                       :result => result, :examples => [{}, { "limit" => 20 }]) do |request|
           Units::Outlines.read(request)
         end

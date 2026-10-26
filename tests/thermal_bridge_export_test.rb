@@ -186,6 +186,27 @@ class ThermalBridgeExportTest < PhComposerTestCase
     assert_equal TB::ScheduleRegistration::LOCATE, row.dig("locate", "name")
   end
 
+  # A Group a Zone holds and stamps is a container: its contents are not the Zone's, so an assigned Edge in it is
+  # in no Zone, live and in the export.
+  def test_an_edge_in_a_container_the_zone_holds_is_left_out_as_nested
+    reference
+    inner = line("A", [1, 1, 1], [2, 1, 1], 9200)
+    container = Sketchup::Group.new(9201, Sketchup::Entities.new([inner]))
+    PhComposer::Zones::STAMP_STORE.write(container,
+                                         PhComposer::Zones::Schema.stamp(PhComposer::Zones::ZONE_STORE.read(@zone_a)))
+    @zone_a.entities << container
+    assign("A", BALCONY, [[1, 1, 1], [2, 1, 1]])
+    extraction = extract
+
+    assert_equal 5, runs(extraction).length
+    assert_equal [["thermal_bridge.outside_zone", true]],
+                 extraction.findings.map { |row|
+                   [row.fetch("code"), row.fetch("message").include?("nested container")]
+                 }
+    live = query("#{TB::FEATURE_ID}.schedule.all").fetch("edge_findings")
+    assert_equal [[1000, 9201, 9200]], live.map { |row| row.fetch("path") }
+  end
+
   def test_a_missing_psi_value_or_type_blocks_the_section_and_its_preflight
     reference
     TB::Type::KIND.store.write(@model, "id" => PARAPET, "schema_version" => 1, "name" => "Parapet", "notes" => "",

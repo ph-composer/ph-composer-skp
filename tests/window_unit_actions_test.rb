@@ -95,6 +95,8 @@ class WindowUnitActionsTest < PhComposerTestCase
       assert_in_delta box.fetch("width_m"), xs.max - xs.min, 1e-4
       assert_in_delta box.fetch("x_m"), xs.min, 1e-4
     end
+    refused = API.query(:context => @context, :name => "#{PREFIX}.units.outlines", :params => { "ids" => ["wun_x"] })
+    assert_equal %w[refused params.invalid], refused.values_at("status", "code"), "it filters nothing, so takes no ids"
   end
 
   def test_preview_changes_nothing_and_place_is_one_native_undo_with_public_readback

@@ -92,36 +92,6 @@ module PhComposer
         !owner.nil? && in_container?(snapshot, owner.first, entry)
       end
 
-      # Zone ownership for many snapshot paths at once: each Zone occurrence's path and the stamped containers
-      # inside it, read once, so placing thousands of entries does not rescan the snapshot for each. The rules
-      # are `zone_owner`'s and `contained?`'s.
-      class Owners
-        def initialize(snapshot)
-          @zones = snapshot.records(ZONE_DICTIONARY, :kind => "group").map do |entry, _record|
-            [entry.path, ExportProjection.containers(snapshot, entry).map(&:path)]
-          end
-        end
-
-        # The path of the one Zone occurrence that owns the entry at `path`, or nil and why: `outside_zone`, or
-        # `nested_container` for an entry inside a container the Zone holds. A Zone inside a Zone refuses.
-        def owner(path)
-          holding = @zones.select { |zone_path, _containers| inside?(zone_path, path) }
-          if holding.length > 1
-            raise Export::Blocked.new("face.wrong_zone", "A Face is contained by more than one Zone.")
-          end
-          return [nil, "outside_zone"] if holding.empty?
-
-          zone_path, containers = holding.first
-          containers.any? { |container| inside?(container, path) } ? [nil, "nested_container"] : [zone_path, nil]
-        end
-
-        private
-
-        def inside?(parent, path)
-          path.length > parent.length && path[0, parent.length] == parent
-        end
-      end
-
       def enclosing_zone(snapshot, entry)
         matches = snapshot.records(ZONE_DICTIONARY, :kind => "group").select do |zone_entry, _record|
           snapshot.contains?(zone_entry, entry)
@@ -154,8 +124,9 @@ module PhComposer
 
       # The section's registered projection, for a contributor that places its own snapshot entries in a Zone
       # (`reader.section(SECTION)`): one row per Zone occurrence with its id, path, name and Building-Segment
-      # name, as zones.containment names them live. It writes no finding; the section contract validates the
-      # same records and refuses a choice it cannot export.
+      # name, as zones.containment names them live, and the paths of the containers it holds, whose contents
+      # are not the Zone's (context/CONTRACTS.md, "Zones geometry rules"). It writes no finding; the section
+      # contract validates the same records and refuses a choice it cannot export.
       def occurrences(reader)
         reader.snapshot.records(ZONE_DICTIONARY, :kind => "group").map do |entry, record|
           record = Names.project(record, entry.native_name)
@@ -165,7 +136,8 @@ module PhComposer
                       record["building_segment"]
                     end
           { "zone_id" => record.fetch("id"), "zone_path" => entry.path, "name" => record.fetch("name"),
-            "building_segment" => segment }
+            "building_segment" => segment,
+            "container_paths" => containers(reader.snapshot, entry).map(&:path) }
         end
       end
 

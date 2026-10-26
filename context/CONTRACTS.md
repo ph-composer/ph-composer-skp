@@ -982,7 +982,7 @@ the contributor's feature nor one that feature requires, with `registration.miss
 It reads that section's registered `projection` with `reader.section(id)` while collecting, and its
 result fields with `result.section(id)` in its report, which receives an `Export::ResultView`; an
 undeclared read is an internal error. The Zones section projects each Zone occurrence's id, path, name and
-Building-Segment; the Faces section each Zone Face's path, record and Zone; the Apertures section each
+Building-Segment, and the paths of the containers it holds; the Faces section each Zone Face's path, record and Zone; the Apertures section each
 placed Window's world outline. A contributor discloses what it leaves out of its records, or warns about
 them, with `reader.note(code, object_id, message)`: a non-blocking finding that joins the result's findings
 and so the report. Such a finding carries no `locate`; the preflight row for the same condition does.

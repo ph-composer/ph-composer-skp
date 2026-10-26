@@ -16615,14 +16615,6 @@ Params:
   "additionalProperties": false,
   "required": [],
   "properties": {
-    "ids": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "maxItems": 500,
-      "description": "Only these record ids; every record when absent."
-    },
     "limit": {
       "type": "number",
       "description": "Page size, 1 to 500; 100 when absent."

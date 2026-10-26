@@ -124,9 +124,8 @@ module PhComposer
       # for it.
       def facts(reader)
         snapshot = reader.snapshot
-        zones = reader.section(ZONES).to_h { |row| [row.fetch("zone_path"), row] }
+        zones = reader.section(ZONES)
         faces = reader.section(FACES).to_h { |row| [row.fetch("path"), row] }
-        owners = Zones::ExportProjection::Owners.new(snapshot)
         storage = snapshot.entries.select { |entry| entry.kind == "component_instance" }
                           .to_h { |entry| [entry.path, true] }
         snapshot.records(Assignment::STORE.dictionary, :kind => "edge").map do |entry, record|
@@ -137,15 +136,35 @@ module PhComposer
           end
           reader.entity_record(record, :fields => %w[thermal_bridge_type_id quantity], :target_kind => EDGE_KIND,
                                        :path => entry.path)
-          zone_path, reason = owners.owner(entry.path)
+          zone, reason = owner(zones, entry.path)
           geometry = entry.geometry
-          Runs::Fact.new(:path => entry.path, :zone => zone_path && zones.fetch(zone_path), :reason => reason,
+          Runs::Fact.new(:path => entry.path, :zone => zone, :reason => reason,
                          :record_id => record.fetch("id"), :type_id => record.fetch("thermal_bridge_type_id"),
                          :quantity => record.fetch("quantity"), :points_m => geometry.points_m,
                          :vertex_ids => geometry.vertex_ids,
                          :faces => face_values(faces, entry.path[0...-1], geometry.face_ids),
                          :shared => (1...entry.path.length).any? { |length| storage.key?(entry.path[0, length]) })
         end
+      end
+
+      # The Zone occurrence that owns an Edge at `path`, as `{zone_id, zone_path, name, building_segment}`, or nil
+      # and why: `outside_zone`, or `nested_container` inside a container the Zone holds. Zones' own rule, read
+      # from its projection; a Zone inside a Zone refuses, as the Zones section does.
+      def owner(zones, path)
+        holding = zones.select { |zone| inside?(zone.fetch("zone_path"), path) }
+        if holding.length > 1
+          raise Export::Blocked.new("face.wrong_zone", "An assigned Edge is contained by more than one Zone.")
+        end
+        return [nil, "outside_zone"] if holding.empty?
+
+        zone = holding.first
+        return [nil, "nested_container"] if zone.fetch("container_paths").any? { |container| inside?(container, path) }
+
+        [zone.slice("zone_id", "zone_path", "name", "building_segment"), nil]
+      end
+
+      def inside?(parent, path)
+        path.length > parent.length && path[0, parent.length] == parent
       end
 
       # As ph_composer.zones.faces.host_context reads them live: a Zone Face's recorded values, empty when it is
