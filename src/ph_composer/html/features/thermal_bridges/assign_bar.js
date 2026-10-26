@@ -1,9 +1,12 @@
 /* The assign bar above the Types table: what SketchUp has selected, how many of those Edges a write can reach,
    and a type, a quantity, Assign and Clear for them. It always shows, so selecting never moves the table; with
    nothing to assign, Assign is disabled and its reason sits beside it. Each press is one public action and one
-   Undo step over the Edges as the selection read them, so an Edge changed since refuses rather than writing. */
+   Undo step over the Edges as the selection read them, so an Edge changed since refuses rather than writing.
+   The same type and quantity arm the edge tool, the secondary route, with "Assign by clicking"; while the tool
+   runs they show what it assigns, and changing them re-arms it. */
 PhComposerUI.define("features/thermal_bridges/assign_bar", ["request", "snapshot", "workspace",
-  "features/thermal_bridges/shared"], function (request, snapshot, ui, shared) {
+  "features/thermal_bridges/shared", "features/thermal_bridges/edge_tool"], function (request, snapshot, ui, shared,
+  edgeTool) {
   "use strict";
   var REASONS = { outside_zone: "it is not inside a Zone", not_found: "it could not be found in the Model",
     not_a_drawing_element: "it is not a drawing element", cutting_instance: "a cutting component holds it",
@@ -41,15 +44,29 @@ PhComposerUI.define("features/thermal_bridges/assign_bar", ["request", "snapshot
     this.clear = ui.button("Clear", function () { self.submit("clear"); });
     this.clear.setAttribute("aria-label", "Clear thermal bridge from selected Edges");
     this.reason = ui.element("span", "tb-assign-reason");
+    this.tool = new edgeTool.EdgeToolControls(session, send, refused);
+    // A second click on the pressed button ends the tool, as Stop does.
+    this.tool.arm.addEventListener("click", function () {
+      if (self.tool.active()) self.tool.stopTool(); else self.armTool();
+    });
     var quantity = ui.element("label", "tb-assign-field", "Quantity");
     quantity.appendChild(this.quantity);
-    [this.count, this.type, quantity, this.assign, this.clear, this.reason].forEach(function (node) {
-      self.root.appendChild(node);
+    [this.count, this.type, quantity, this.assign, this.clear, this.tool.arm, this.tool.stop, this.reason]
+      .forEach(function (node) { self.root.appendChild(node); });
+    this.type.addEventListener("change", function () {
+      self.chosen = self.type.value;
+      if (self.tool.active()) self.armTool();
+      self.paint();
     });
-    this.type.addEventListener("change", function () { self.chosen = self.type.value; self.paint(); });
     this.quantity.addEventListener("input", function () { self.paint(); });
+    this.quantity.addEventListener("change", function () { if (self.tool.active()) self.armTool(); });
+    this.quantity.addEventListener("focus", function () { self.editingQuantity = true; });
+    this.quantity.addEventListener("blur", function () { self.editingQuantity = false; });
+    // While the edge tool runs, Enter re-arms it with the new quantity rather than writing to the selection.
     this.quantity.addEventListener("keydown", function (event) {
-      if (event.key === "Enter") { event.preventDefault(); self.submit("assign"); }
+      if (event.key !== "Enter") return;
+      event.preventDefault();
+      if (self.tool.active()) self.armTool(); else self.submit("assign");
     });
     this.rows = []; this.types = []; this.chosen = "";
   }
@@ -67,6 +84,21 @@ PhComposerUI.define("features/thermal_bridges/assign_bar", ["request", "snapshot
     if (!this.type.value) return "Choose a Thermal Bridge Type.";
     if (this.quantityValue() === null) return "Enter a quantity greater than zero.";
     return null;
+  };
+  /* Why the type and quantity cannot arm the edge tool, or null. */
+  AssignBar.prototype.armBlocked = function () {
+    if (!this.types.length) return "Create a Thermal Bridge Type first.";
+    if (!this.type.value) return "Choose a Thermal Bridge Type.";
+    if (this.quantityValue() === null) return "Enter a quantity greater than zero.";
+    return null;
+  };
+  AssignBar.prototype.armTool = function () {
+    if (this.disposed) return;
+    var reason = this.guard && this.guard();
+    if (reason) { this.refused(reason); return; }
+    if (this.armBlocked()) return;
+    this.tool.choose(this.type.value, this.quantityValue());
+    this.paint();
   };
   AssignBar.prototype.submit = function (action) {
     var self = this;
@@ -98,6 +130,7 @@ PhComposerUI.define("features/thermal_bridges/assign_bar", ["request", "snapshot
     if (this.disposed) return;
     var section = snapshot.section(state, shared.SELECTED), value = snapshot.value(state, shared.SELECTED);
     this.requests.consume(state);
+    this.tool.render(state);
     this.unavailable = value ? null : snapshot.message(section || {}, "The selected Edges cannot be read.");
     this.rows = value ? value.edges : [];
     this.writable = this.rows.filter(assignable);
@@ -110,11 +143,18 @@ PhComposerUI.define("features/thermal_bridges/assign_bar", ["request", "snapshot
       return held.length && held[0] !== undefined && held.every(function (item) { return item === held[0]; }) ?
         held[0] : fallback;
     }
-    // A new selection starts from what its Edges hold; the user's choice stands until the selection changes.
+    // A new selection whose Edges share a type or quantity starts from it; otherwise the user's choice stands,
+    // so a type chosen with nothing selected survives selecting unassigned Edges.
     var key = JSON.stringify(this.writable.map(function (row) { return [row.path, row.values]; }));
     if (key !== this.key) {
-      this.key = key; this.chosen = common("thermal_bridge_type_id", "");
-      this.quantity.value = String(common("quantity", 1));
+      this.key = key; this.chosen = common("thermal_bridge_type_id", this.chosen);
+      this.quantity.value = String(common("quantity", this.quantityValue() || 1));
+    }
+    // A running tool shows what it assigns, unless a change to it is on its way or being typed.
+    var tool = this.tool.state;
+    if (this.tool.active() && !this.tool.busy()) {
+      this.chosen = tool.thermal_bridge_type_id || "";
+      if (!this.editingQuantity) this.quantity.value = String(tool.quantity);
     }
     // Rebuilt only when the catalog changes, so a repaint never closes an open list.
     var catalog = JSON.stringify(this.types.map(function (type) { return [type.id, type.values.name]; }));
@@ -142,12 +182,15 @@ PhComposerUI.define("features/thermal_bridges/assign_bar", ["request", "snapshot
       this.reason._reason = reason;
       this.reason.replaceChildren(ui.reasonButton(blocked ? "Assign" : "Assign to every selected Edge", reason));
     }
-    this.type.disabled = busy || !writable || !this.types.length;
-    this.quantity.disabled = busy || !writable;
-    this.quantity.setAttribute("aria-invalid", String(Boolean(writable) && this.quantityValue() === null));
+    // The type and quantity serve the edge tool too, so they stay open with nothing selected.
+    this.type.disabled = busy || this.tool.busy() || !this.types.length;
+    this.quantity.disabled = busy || this.tool.busy() || !this.types.length;
+    this.quantity.setAttribute("aria-invalid", String(this.types.length > 0 && this.quantityValue() === null));
     this.assign.disabled = busy || Boolean(blocked);
     this.clear.disabled = busy || !this.writable.some(assigned);
+    var self = this, type = this.types.filter(function (entry) { return entry.id === self.type.value; })[0];
+    this.tool.paint(this.armBlocked(), type && type.values.name);
   };
-  AssignBar.prototype.dispose = function () { this.disposed = true; this.requests.reset(); };
+  AssignBar.prototype.dispose = function () { this.disposed = true; this.requests.reset(); this.tool.dispose(); };
   return { AssignBar: AssignBar, assignable: assignable };
 });

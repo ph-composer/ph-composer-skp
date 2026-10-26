@@ -130,6 +130,7 @@ test covers it. Id params carry the prefix pattern, for example `^tbt_[A-Za-z0-9
 | `by_type` | colour mode | P3b-06 | Assigned Edges in their type's colour at the mode's stroke weight; label carries total length (D3b-12) |
 | `edge_tool.choose`, `edge_tool.stop` | view command | P3b-07 | Start the tool armed with a type, or stop it |
 | `edge_tool` | snapshot section | P3b-07 | The armed type and whether the tool has the viewport |
+| `edge_tool.state` | query | P3b-07 | What the snapshot section reads: `active`, `thermal_bridge_type_id`, `quantity` and `gesture_limit` |
 | `preflight` | query | P3b-08 | The export preflight rows, passed to `export_contributor(preflight:)` |
 
 Codes are declared once with `feature.code` in `features/thermal_bridges/codes.rb` under the noun

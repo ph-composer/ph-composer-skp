@@ -9395,6 +9395,67 @@ Example params:
 }
 ```
 
+### `ph_composer.thermal_bridges.edge_tool.state`
+
+The edge tool: whether it has the viewport, and the type and quantity it assigns. Owner: `ph_composer.thermal_bridges`.
+
+Refuses: only the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "active",
+    "thermal_bridge_type_id",
+    "quantity",
+    "gesture_limit"
+  ],
+  "properties": {
+    "active": {
+      "type": "boolean",
+      "description": "Whether the edge tool has the viewport."
+    },
+    "thermal_bridge_type_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The type the tool assigns, or null before one is chosen."
+    },
+    "quantity": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "How many times each Edge it assigns counts."
+    },
+    "gesture_limit": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The most Edges one gesture may assign."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
 ### `ph_composer.thermal_bridges.edges.selection`
 
 One bounded page of the selected Edges under the active path, each with the Zone holding it, its assignment and the refusal a write meets; other entities are reported as ignored. Owner: `ph_composer.thermal_bridges`.
@@ -49262,6 +49323,158 @@ Example params:
 {}
 ```
 
+### `ph_composer.thermal_bridges.edge_tool.choose`
+
+Arm the edge tool with a Thermal Bridge Type and quantity and give it the viewport: each click or drag across Edges is one edges.assign. Owner: `ph_composer.thermal_bridges`.
+
+Side effects: Gives the viewport to the edge tool and turns on Colour by Thermal bridges until it stops; a choice while it runs re-arms it for the next gesture.
+
+Before calling: The Thermal Bridge Type exists and is readable.
+
+Refuses: `record.unreadable`, `target.not_found`, `validation.failed`, and the `view_command` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "thermal_bridge_type_id"
+  ],
+  "properties": {
+    "thermal_bridge_type_id": {
+      "type": "string",
+      "pattern": "^tbt_[A-Za-z0-9]{12}$",
+      "description": "The Thermal Bridge Type to assign by clicking."
+    },
+    "quantity": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "How many times each Edge counts; 1 when absent."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "active",
+    "thermal_bridge_type_id",
+    "quantity",
+    "gesture_limit"
+  ],
+  "properties": {
+    "active": {
+      "type": "boolean",
+      "description": "Whether the edge tool has the viewport."
+    },
+    "thermal_bridge_type_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The type the tool assigns, or null before one is chosen."
+    },
+    "quantity": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "How many times each Edge it assigns counts."
+    },
+    "gesture_limit": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The most Edges one gesture may assign."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "thermal_bridge_type_id": "tbt_Ab12Cd34Ef56"
+}
+```
+
+Example params:
+
+```json
+{
+  "thermal_bridge_type_id": "tbt_Ab12Cd34Ef56",
+  "quantity": 2
+}
+```
+
+### `ph_composer.thermal_bridges.edge_tool.stop`
+
+Give the viewport back to whatever tool the user had. Owner: `ph_composer.thermal_bridges`.
+
+Side effects: Abandons a pending gesture and puts back the Colour-by mode from before the tool, unless another was chosen meanwhile.
+
+Refuses: only the `view_command` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "active",
+    "thermal_bridge_type_id",
+    "quantity",
+    "gesture_limit"
+  ],
+  "properties": {
+    "active": {
+      "type": "boolean",
+      "description": "Whether the edge tool has the viewport."
+    },
+    "thermal_bridge_type_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The type the tool assigns, or null before one is chosen."
+    },
+    "quantity": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "How many times each Edge it assigns counts."
+    },
+    "gesture_limit": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The most Edges one gesture may assign."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
 ### `ph_composer.thermal_bridges.runs.locate`
 
 Select the Edges of one run and bring them into view, opening the context that holds them. Owner: `ph_composer.thermal_bridges`.
@@ -53174,3 +53387,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.10 | 2026-10-25 | ph_composer.thermal_bridges is new: the Thermal Bridge Type kind, types.list, types.all and its snapshot section, and types.create, types.update, types.duplicate and types.delete. |
 | 1.11 | 2026-10-25 | ph_composer.zones.containment is new. ph_composer.thermal_bridges.edges.assign, edges.clear, edges.selection (bounded), edges.selection_all and the edges.selected snapshot section are new, over the ph_composer.thermal_bridges.edge reference target; types.delete takes replacement_id. |
 | 1.12 | 2026-10-25 | ph_composer.thermal_bridges.schedule.list (bounded) and schedule.all are new: thermal-bridge runs with lengths, heat loss, findings and totals. ph_composer.thermal_bridges.runs.locate is a new view command. ph_composer.zones.containment, and so ph_composer.thermal_bridges.edges.selection, answers each Zone's name. |
+| 1.13 | 2026-10-26 | ph_composer.thermal_bridges.edge_tool.choose and edge_tool.stop are new view commands, with edge_tool.state and the edge_tool snapshot section: the pointer route to edges.assign. |

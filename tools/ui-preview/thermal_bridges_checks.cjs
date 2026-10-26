@@ -1,5 +1,6 @@
 /* The Thermal Bridges tab in the preview: Types edits and forms, the assign bar, the Schedule read on opening,
-   Locate and the totals, at the panel's sizes. Browser evidence for P3b-05; not host acceptance. */
+   Locate and the totals, at the panel's sizes, and arming the edge tool. Browser evidence for P3b-05 and P3b-07;
+   not host acceptance. */
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
@@ -46,6 +47,23 @@ check({ name: "thermal_bridges", output }, async ({ newPage, step }) => {
   await page.waitForFunction(() => window.previewHost.thermalBridges.selected.every(edge =>
     edge.values.thermal_bridge_type_id === "tbt_Dd44Ee55Ff66"));
   assert.equal((await sent(TB + "edges.assign"))[0].payload.params.targets.length, 3);
+
+  step("arm the edge tool from the bar, see it pressed with Stop beside it, and stop it");
+  await bar.getByRole("button", { name: "Assign by clicking", exact: true }).click();
+  await bar.getByRole("button", { name: "Assign by clicking", pressed: true }).waitFor();
+  assert.deepEqual((await sent(TB + "edge_tool.choose"))[0].payload.params,
+    { thermal_bridge_type_id: "tbt_Dd44Ee55Ff66", quantity: 1 });
+  await page.screenshot({ path: path.join(output, "edge-tool-armed.png") });
+  for (const [width, height] of PANEL_SIZES) {
+    await setPanelSize(page, width, height);
+    assert.equal((await paneFacts(page, { floating: [], header: null })).sideways, false,
+      `the armed bar does not scroll sideways at ${width} x ${height}`);
+    await page.screenshot({ path: path.join(output, `edge-tool-armed-${width}x${height}.png`) });
+  }
+  await setPanelSize(page, 1280, 800);
+  await bar.getByRole("button", { name: "Stop assigning by clicking", exact: true }).click();
+  await bar.getByRole("button", { name: "Assign by clicking", pressed: false }).waitFor();
+  await bar.getByRole("button", { name: "Stop assigning by clicking" }).waitFor({ state: "hidden" });
 
   step("create, duplicate and delete in the form dialog");
   await pane.getByRole("button", { name: "+ New Thermal Bridge Type", exact: true }).click();

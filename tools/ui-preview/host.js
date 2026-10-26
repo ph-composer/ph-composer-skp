@@ -61,6 +61,7 @@
     this.attachedZones = JSON.parse(JSON.stringify(settings.attachedZones || []));
     this.thermalBridges = JSON.parse(JSON.stringify(settings.thermalBridges ||
       { types: [], selected: [], runs: [], edgeFindings: [] }));
+    this.edgeTool = { active: false, thermal_bridge_type_id: null, quantity: 1, gesture_limit: 250 };
     this.preferences = { unit_system: settings.unitSystem || "SI", dimension_formats: {},
       number_format: { decimal: settings.decimal || ".", locale: settings.locale || "en-US" } };
   }
@@ -153,6 +154,7 @@
           this.thermalBridges.types)), unreadable: [] } },
         [TB + "edges.selected"]: { status: "completed", value: { edges: JSON.parse(JSON.stringify(
           this.thermalBridges.selected)), ignored: [], ignored_total: 0 } },
+        [TB + "edge_tool"]: { status: "completed", value: JSON.parse(JSON.stringify(this.edgeTool)) },
         [ATTACHED]: { status: "completed", code: "ok", revision: this.revision,
           value: { records: JSON.parse(JSON.stringify(this.attachedZones)), next_cursor: null,
             total: this.attachedZones.length } }
@@ -293,6 +295,13 @@
       if (payload.name === "ph_composer.windows.place_tool.stop") this.windows.place_tool.active = false;
       if (payload.name === "ph_composer.windows.units.locate") this.selectedUnits = payload.params.units;
       if (payload.name === TB + "runs.locate") this.locatedEdges = payload.params.edge_paths;
+      // The edge tool arms, re-arms and stops; gestures happen only in SketchUp.
+      if (payload.name === TB + "edge_tool.choose") {
+        this.edgeTool = { active: true, thermal_bridge_type_id: payload.params.thermal_bridge_type_id,
+          quantity: payload.params.quantity || 1, gesture_limit: 250 };
+        this.colourBy = { mode: TB + "by_type", isolated: null };
+      }
+      if (payload.name === TB + "edge_tool.stop") this.edgeTool.active = false;
       if (payload.name === "ph_composer.spaces.mark_tool.start") {
         this.markTool = { active: true, weighting_factor: payload.params.weighting_factor, gesture_limit: 250 };
         this.colourBy = { mode: "ph_composer.spaces.by_weighting_factor", isolated: null };

@@ -42,6 +42,8 @@ function state(edges) {
   sections[PREFIX + "types"] = { status: "completed", value: { records: types, unreadable: [] } };
   sections[PREFIX + "edges.selected"] = { status: "completed",
     value: { edges: edges || [], ignored: [], ignored_total: 0 } };
+  sections[PREFIX + "edge_tool"] = { status: "completed",
+    value: { active: false, thermal_bridge_type_id: null, quantity: 1, gesture_limit: 250 } };
   return { session: "session", revision: 1, sections: sections,
     ui: { activeTab: "thermal_bridges", actionResult: null, viewResults: {}, queryResults: {} } };
 }
