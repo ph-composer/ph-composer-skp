@@ -367,3 +367,18 @@ uv run tools/hostkit/host_bridge.py eval \
 uv run tools/hostkit/host_bridge.py eval 'ThermalBridgeMeasurement.assign'
 uv run tools/hostkit/host_bridge.py eval 'ThermalBridgeMeasurement.measure'
 ```
+
+`thermal_bridge_colour_by_walkthrough.rb` reads the Thermal bridges Colour-by mode on the reference model
+after `assign` (the five runs and Parapet on Zone W's roof): `report` gives the legend as
+`ph_composer.colour_by.state` answers it, the HUD lines the overlay draws and the line batches; `hide_tag`,
+`hide_ancestor` and `show_all` change visibility as the Tags panel and Entity Info would; `locate` and
+`only` send the legend's select and isolate commands. Turn the mode on from the native Colour by menu.
+`cost` times a rebuild, the overlay's Ruby draw and a forced redraw with the mode on and off, on the
+measurement model's 5,000 assigned Edges.
+
+```sh
+uv run tools/hostkit/host_bridge.py eval \
+  'load "/absolute/path/to/ph-composer/ph-composer-skp/tools/examples/authoring/thermal_bridge_colour_by_walkthrough.rb"; ThermalBridgeColourByWalkthrough.assign'
+uv run tools/hostkit/host_bridge.py eval 'ThermalBridgeColourByWalkthrough.report'
+uv run tools/hostkit/host_bridge.py eval 'ThermalBridgeColourByWalkthrough.cost'
+```

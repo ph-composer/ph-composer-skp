@@ -306,11 +306,18 @@ module PhComposer
         end
       end
 
+      # A mode's stroke, in pixels: one is a hairline, and past ten a line hides the geometry it marks.
+      COLOUR_STROKES = (1..10).freeze
+
       # A Colour-by mode needs a legend label, the entity kind it paints, a colour function and a
       # projection. Entity kinds are open, so the kind is checked for shape alone and never against a
       # list the shared service would have to keep.
       def check_colour_modes
         @staging.declared_colour_modes.each do |mode|
+          unless mode.stroke.nil? || (mode.stroke.is_a?(Integer) && COLOUR_STROKES.cover?(mode.stroke))
+            add("registration.schema_invalid", mode.owner, mode.name,
+                "#{mode.name}'s stroke, when given, is a whole number of pixels from 1 to 10.")
+          end
           next if text?(mode.label) && text?(mode.entity_kind) && mode.colours.respond_to?(:call) &&
                   mode.projection.respond_to?(:call) && (mode.group.nil? || text?(mode.group))
 

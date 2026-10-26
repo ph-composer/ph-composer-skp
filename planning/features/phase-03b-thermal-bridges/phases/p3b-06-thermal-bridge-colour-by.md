@@ -1,7 +1,7 @@
 # P3b-06: the thermal-bridge Colour-by mode
 
 DATE: 2026-10-03
-STATUS: Scoped. Corrected to `main` at `420c783a` on 2026-10-21 (DECISIONS Part 1b)
+STATUS: Implemented on branch `feature/thermal-bridges-p3b-06` (PR #312), T06 passed 2026-10-26. Corrected to `main` at `420c783a` on 2026-10-21 (DECISIONS Part 1b)
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 
@@ -71,6 +71,16 @@ types draw thick in their colours, depth-tested, inside a nested Zone; hide a ta
 Show only this and Locate from the legend; the HUD reads type, count and length; capture by window
 id (`context/SKETCHUP_HOST_BEHAVIOR.md`, "Overlays"). Repeat the Colour-by cases the ledger screens
 (`acceptance_ledger.py status --changed`), S05 among them. Observe the host with the development tooling: `host_bridge.py wait-for` for deferred work, `host_bridge.py diagnostics` for what happened, `acceptance_case.py begin` and `finish` for the ledger row (`tools/hostkit/.index.md`).
+
+## Added in implementation
+
+- `ColourBy::Tessellation.skipped?` treats a tag inside a hidden tag folder as hidden, as `runs.locate`
+  already did (the defect Codex found in P3b-04's review), and the session's tag observer publishes
+  `tags_changed` for tag folder events and for a tag or folder moved to another folder, so a folder
+  hidden in the Tags panel rebuilds the drawing. This
+  touches every mode, not only this one: Faces, Zones, Windows and Spaces stop painting geometry under a
+  hidden folder. Whether SketchUp fires the folder event for a visibility toggle is a host fact T06
+  checks.
 
 ## Out of scope
 

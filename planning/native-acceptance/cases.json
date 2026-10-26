@@ -4252,6 +4252,22 @@
         "tools/examples/authoring/thermal_bridge_reference_model.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "T06",
+      "label": "The Thermal bridges Colour-by mode on the reference model with the five runs and Zone W's roof assigned: turned on from the native Colour by menu; assigned Edges thick in their type's colour, depth-tested, inside the Zone under the turned wrapper, nothing for unassigned Edges; a hidden tag, a hidden tag folder and a hidden ancestor hide the drawing and keep the legend; the HUD and the panel legend read label, count and length in the display units, before and after a unit switch; the legend's select and Show only this; window captures; draw cost at 5,000 assigned Edges",
+      "mode": "mixed",
+      "authority": "planning/features/phase-03b-thermal-bridges/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/colour_by/*",
+        "src/ph_composer/features/thermal_bridges/colour_modes.rb",
+        "src/ph_composer/features/thermal_bridges/scan/*",
+        "src/ph_composer/session/host_observers.rb",
+        "src/ph_composer/shell/commands.rb",
+        "tools/examples/authoring/thermal_bridge_colour_by_walkthrough.rb",
+        "tools/examples/authoring/thermal_bridge_reference_model.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }

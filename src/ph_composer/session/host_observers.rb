@@ -65,6 +65,24 @@ module PhComposer
         tags_changed(layers)
       end
 
+      # A tag in a hidden tag folder is hidden however its own flag reads, so a folder change, or a tag or
+      # folder moved to another folder, is a tag change.
+      def onParentFolderChanged(layers, _tag_or_folder)
+        tags_changed(layers)
+      end
+
+      def onLayerFolderAdded(layers, _folder)
+        tags_changed(layers)
+      end
+
+      def onLayerFolderChanged(layers, _folder)
+        tags_changed(layers)
+      end
+
+      def onLayerFolderRemoved(layers, _folder)
+        tags_changed(layers)
+      end
+
       private
 
       def tags_changed(layers)

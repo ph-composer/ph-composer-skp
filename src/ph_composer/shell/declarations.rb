@@ -192,8 +192,9 @@ module PhComposer
     # whatever entity an entry carries.
     # `sort` is an optional `->(row) { key }` over legend rows. `group` is an optional name several modes share
     # so a screen can offer them from one place (a column that shows what they colour by) without naming a
-    # mode another feature owns.
-    ColourMode = Struct.new(:name, :owner, :label, :entity_kind, :colours, :sort, :group, :projection,
+    # mode another feature owns. `stroke` is an optional width in pixels for the mode's derived lines, 1 to 10;
+    # without it they draw at the overlay's outline weight.
+    ColourMode = Struct.new(:name, :owner, :label, :entity_kind, :colours, :sort, :group, :stroke, :projection,
                             keyword_init: true)
 
     # One Colour-by readout: viewport text a feature projects, shown with any mode and with none

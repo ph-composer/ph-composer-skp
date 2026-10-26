@@ -48,11 +48,11 @@ module PhComposer
         view.draw(GL_TRIANGLES, Tessellation.lift(@service.wash_triangles, view))
       end
 
-      # Derived outlines and segments, in each entry's colour at the outline weight.
+      # Derived outlines and segments, in each entry's colour at the mode's stroke, else the outline weight.
       def draw_lines(view)
         return if @service.lines.empty?
 
-        view.line_width = LINE_WIDTH
+        view.line_width = @service.mode&.stroke || LINE_WIDTH
         view.line_stipple = "" if view.respond_to?(:line_stipple=)
         @service.lines.each do |colour, points|
           next if points.empty?

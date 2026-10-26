@@ -8,8 +8,10 @@ module PhComposer
     module Scan
       CONTAINMENT = "ph_composer.zones.containment"
       HOST_CONTEXT = "ph_composer.zones.faces.host_context"
-      # One assigned Edge as the walk finds it, before Zones has answered for its path.
-      Tagged = Struct.new(:path, :record, :points_m, :vertex_ids, :face_ids, :shared, keyword_init: true)
+      # One assigned Edge as the walk finds it, before Zones has answered for its path. `edge` and `transform`,
+      # which maps its container's contents to world, stay live for a reader that draws or selects it.
+      Tagged = Struct.new(:path, :record, :points_m, :vertex_ids, :face_ids, :shared, :edge, :transform,
+                          keyword_init: true)
 
       # Edge findings and unreadable assignments a bounded page lists, beside a count of every one.
       DETAIL_ROWS = 50
@@ -105,7 +107,8 @@ module PhComposer
           points = [edge.start, edge.end].map { |vertex| FaceCapture.point_m(vertex.position.transform(transform)) }
           tagged << Tagged.new(:path => path, :record => record, :points_m => points,
                                :vertex_ids => [edge.start, edge.end].map(&:persistent_id),
-                               :face_ids => edge.faces.map(&:persistent_id), :shared => shared)
+                               :face_ids => edge.faces.map(&:persistent_id), :shared => shared,
+                               :edge => edge, :transform => transform)
         end
       rescue CodedError => error
         raise unless error.code == "record.unreadable"

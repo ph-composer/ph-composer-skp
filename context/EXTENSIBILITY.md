@@ -508,7 +508,8 @@ The Assembly mode uses it for Faces with no assigned Assembly so native selectio
 
 An entry may supply `path`, the full root-to-entity array of persistent IDs. Supply it when
 the entity belongs to an occurrence inside Groups or Components: the shared renderer then
-checks hidden and tag visibility along that occurrence's entire path. Supplied paths with missing
+checks hidden and tag visibility along that occurrence's entire path. A tag is hidden while it, or
+any tag folder holding it, is hidden; a tag or tag folder change rebuilds the drawing. Supplied paths with missing
 entities or mismatched endpoints draw nothing. Omitting `path` preserves the original entity-only
 visibility contract.
 Visibility affects the drawing; the legend continues to count the mode's complete projection.
@@ -530,6 +531,9 @@ registered mode for a screen's options menu. `colour(state, binding, value)` sup
 mode's swatch for a matching column's Show choices. `filter(state, paths)` coalesces a screen's
 occurrence mask through the public view command. The panel has no legend strip; row selection
 and isolation remain public view commands for scripts.
+
+A mode may declare `stroke:`, the width in pixels of the lines its derived shapes draw ("Colour-by
+derived geometry"). Thermal bridges' mode, which draws Edges, declares 5.
 
 The shared service owns registration, the one `Sketchup::Overlay` a Model gets, the viewport HUD
 legend and cache invalidation. It reads no record and knows no mode, and turning a mode on writes
@@ -560,8 +564,27 @@ ColourBy::Entry.new(path: volume.path, value: "2.50", label: "2.50 m",
   the service converts nothing.
 - **Appearance.** Polygons fill and outline in the entry's colour: translucent, lifted toward the eye
   and depth-tested like Face fills; an unclassified entry's polygons take the hatch and an incomplete
-  one's the amber. Segments and outlines draw at the overlay's outline weight. An entry with both an
-  entity and shapes draws both.
+  one's the amber. Segments and outlines draw at the overlay's outline weight, or at the mode's
+  `stroke:` when it declares one: a whole number of pixels from 1 to 10, checked at
+  registration, set once before the mode's line batches are drawn. It widens every derived line the
+  mode draws, polygon outlines included, and nothing else: unclassified outlines and the hatch keep
+  their own weights. An entry with both an entity and shapes draws both.
+- **Edges.** An Edge contributes no Face geometry, so an entry whose `entity` is an Edge draws only its
+  shapes. Thermal bridges' mode gives each assigned Edge occurrence one world segment, so the Edge
+  still serves visibility along its path, select and Locate, and Show only this:
+
+  ```ruby
+  feature.colour_mode("ph_composer.thermal_bridges.by_type", label: "Thermal bridges",
+                      entity_kind: "edge", stroke: 5, colours: ->(_value) { nil }) do |read|
+    Scan.walk(read.model).first.map do |edge|
+      ends = [edge.edge.start, edge.edge.end].map { |vertex| vertex.position.transform(edge.transform) }
+      ColourBy::Entry.new(entity: edge.edge, transform: edge.transform, path: edge.path,
+                          value: type_id, label: type_name, colour: type_rgb,
+                          derived: ColourBy::Derived.new(polygons: [], segments: [ends]),
+                          figure: ["length", metres])
+    end
+  end
+  ```
 - **Visibility.** With `path`, shapes are drawn only while every entity along the path is visible
   (not hidden, tag visible), the same walk the service makes for an entity; with no entity the path
   still names the occurrence the shapes belong to, so the identity check against `entity` is
@@ -579,10 +602,9 @@ ColourBy::Entry.new(path: volume.path, value: "2.50", label: "2.50 m",
   Readouts are cached beside it, keyed on the revision and, for a `selection: true` readout, on a
   selection generation the service advances on `selection_changed`, which the revision does not.
 - **One line primitive.** Coloured lines are derived segments. The deferred geometry stage's
-  `ColourBy::LineEntry` is not built: an Edge is drawn as an entry with the Edge as `entity` (so
-  Locate, Show only this and path visibility work) and its one world segment in `derived`. A mode that
-  needs a heavier stroke than the outline weight declares it on the mode when it needs it (thermal
-  bridges, Phase 3b); nothing per entry.
+  `ColourBy::LineEntry` is not built: an Edge is drawn as an entry with the Edge as `entity` and its
+  one world segment in `derived`, as above. A heavier line is the mode's `stroke:`; there is no
+  per-entry weight.
 - `group:` and the column-header toggles are unaffected: a shape belongs to its entry, an entry to its
   mode.
 - **Worked example.** Spaces' four modes (`features/spaces/colour_modes.rb`: By Space, By ventilation,

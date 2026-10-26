@@ -194,7 +194,7 @@ module PhComposer
       Declarations::SnapshotSection => %i[name owner query params],
       Declarations::ExportContributor => %i[name owner section_version result preflight user_data_keys requires
                                             entity_projections],
-      Declarations::ColourMode => %i[name owner label entity_kind group],
+      Declarations::ColourMode => %i[name owner label entity_kind group stroke],
       Declarations::ColourReadout => %i[name owner label selection],
       Declarations::MenuItem => %i[name owner label menu separator_after],
       Declarations::ReferenceRetargeter => %i[name owner target_kind],
@@ -440,11 +440,12 @@ module PhComposer
       end
 
       # One Colour-by mode. The projection receives a read request: it reads this feature's entities,
-      # and another feature's values only through `read.query` of a declared dependency.
-      def colour_mode(name, label:, entity_kind:, colours:, sort: nil, group: nil, &projection)
+      # and another feature's values only through `read.query` of a declared dependency. `stroke` widens
+      # the mode's derived lines.
+      def colour_mode(name, label:, entity_kind:, colours:, sort: nil, group: nil, stroke: nil, &projection)
         declaration = Declarations::ColourMode.new(
           :name => name, :owner => id, :label => label, :entity_kind => entity_kind, :colours => colours,
-          :sort => sort, :group => group, :projection => projection
+          :sort => sort, :group => group, :stroke => stroke, :projection => projection
         )
         @staging.add(:declared_colour_modes, id, name, declaration)
       end

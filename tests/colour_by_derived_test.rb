@@ -32,11 +32,11 @@ class ColourByDerivedTest < PhComposerTestCase
   end
 
   # One mode whose projection answers `entries.call(read)`.
-  def install_mode(&entries)
+  def install_mode(stroke: nil, &entries)
     probe = Module.new do
       define_singleton_method(:install) do |registry|
         registry.feature("outside.derived", :contract_version => 1)
-                .colour_mode("outside.derived.by_shape", :label => "Shape", :entity_kind => "shape",
+                .colour_mode("outside.derived.by_shape", :label => "Shape", :entity_kind => "shape", :stroke => stroke,
                                                          :colours => ColourBy::Palette.fixed("a" => COLOUR)) do |read|
           entries.call(read)
         end
@@ -169,6 +169,77 @@ class ColourByDerivedTest < PhComposerTestCase
     assert_empty service.fills
     assert_empty service.lines
     assert_equal 6, service.wash_triangles.length
+  end
+
+  # An Edge contributes no Face geometry, so an entry carrying one draws only its derived
+  # segment, as its projection placed it in the world, and its row still selects the Edge.
+  def test_an_edge_entry_draws_only_its_world_segment_and_its_row_selects_the_edge
+    edge = Sketchup::Edge.new(9101, point(0, 0), point(10, 0))
+    # A quarter turn about z, then 100 inches along x.
+    turn = Geom::Transformation.new([0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1, 0, 100, 0, 0, 1])
+    @model.entities << Sketchup::Group.new(9100, Sketchup::Entities.new([edge]), :transformation => turn)
+    world = [edge.start.position, edge.end.position].map { |position| position.transform(turn) }
+    service = install_mode do
+      [entry(:entity => edge, :transform => turn, :path => [9100, 9101],
+             :derived => ColourBy::Derived.new(:polygons => [], :segments => [world]))]
+    end
+    assert_empty service.fills
+    assert_empty service.unclassified_outlines
+    drawn = service.lines.fetch(COLOUR).map { |each| [each.x, each.y, each.z] }
+    assert_equal [[100.0, 0.0, 0.0], [100.0, 10.0, 0.0]], drawn
+    assert_equal 1, service.select_row("a", "classified")
+    assert_equal [edge], @model.selection.to_a
+  end
+
+  # A mode's stroke is the width of its derived lines; the unclassified outline keeps the overlay's own.
+  def test_a_modes_stroke_sets_the_width_of_its_derived_lines_only
+    segment = [point(0, 0), point(10, 0)]
+    install_mode(:stroke => 6) do
+      [entry(:derived => ColourBy::Derived.new(:polygons => [], :segments => [segment])),
+       ColourBy::Entry.new(:value => nil, :derived => ColourBy::Derived.new(:polygons => [], :segments => [segment]))]
+    end
+    view = @model.active_view
+    @model.overlays.to_a.first.draw(view)
+    lines = view.draws.select { |mode, *| mode == GL_LINES }
+    widths = lines.map { |_mode, _points, colour, width| [colour.red, width] }
+    assert_includes widths, [COLOUR.first, 6], "the mode's coloured segment"
+    assert_includes widths, [ColourBy::Palette::UNCLASSIFIED.first, ColourBy::Overlay::LINE_WIDTH]
+  end
+
+  def test_a_mode_without_a_stroke_draws_its_lines_at_the_outline_weight
+    segment = [point(0, 0), point(1, 0)]
+    install_mode { [entry(:derived => ColourBy::Derived.new(:polygons => [], :segments => [segment]))] }
+    view = @model.active_view
+    @model.overlays.to_a.first.draw(view)
+    assert_equal [ColourBy::Overlay::LINE_WIDTH], view.draws.select { |mode, *| mode == GL_LINES }.map(&:last).uniq
+  end
+
+  def test_a_stroke_outside_one_to_ten_pixels_refuses_registration
+    [0, 11, 2.5, "4"].each do |stroke|
+      probe = Module.new do
+        define_singleton_method(:name) { "Probe" }
+        define_singleton_method(:install) do |registry|
+          registry.feature("outside.derived", :contract_version => 1)
+                  .colour_mode("outside.derived.thick", :label => "Thick", :entity_kind => "shape", :stroke => stroke,
+                                                        :colours => ColourBy::Palette.ramp) { |_read| [] }
+        end
+      end
+      error = assert_raises(PhComposer::RegistrationError, stroke.inspect) { Registry.install([probe]) }
+      assert_includes error.diagnostics.map(&:code), "registration.schema_invalid"
+    end
+  end
+
+  # A tag shows only while every tag folder holding it shows, so shapes under a hidden folder are not drawn.
+  def test_shapes_under_a_tag_in_a_hidden_tag_folder_are_not_drawn_and_still_count
+    tag = Sketchup::Tag.new("Shown", true, Sketchup::LayerFolder.new("Hidden folder", false))
+    group = Sketchup::Group.new(300, Sketchup::Entities.new([]))
+    group.layer = tag
+    @model.entities << group
+    service = install_mode do
+      [entry(:path => [300], :derived => ColourBy::Derived.new(:polygons => [square], :segments => []))]
+    end
+    assert_empty service.fills
+    assert_equal 1, service.rows.first.count
   end
 
   # A row of shapes alone is framed, and nothing is selected, rather than refused.
