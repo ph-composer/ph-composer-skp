@@ -57,7 +57,8 @@ module PhComposer
         def row(containment, record, copied)
           zone = containment.fetch("zone")
           reference = zone && { "zone_id" => zone.fetch("zone_id"), "zone_path" => zone.fetch("zone_path"),
-                                "entity_path" => containment.fetch("entity_path"), "entity_id" => record&.[]("id") }
+                                "entity_path" => containment.fetch("entity_path"),
+                                "entity_id" => Assignment.identity(record) }
           { "path" => containment.fetch("path"), "reference" => reference,
             "zone" => containment.fetch("zone"), "reason" => containment.fetch("reason"),
             "values" => Assignment.values(record), "copied" => !record.nil? && copied.include?(record["id"]),

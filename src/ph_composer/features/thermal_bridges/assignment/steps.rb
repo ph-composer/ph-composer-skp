@@ -12,7 +12,7 @@ module PhComposer
           @updates = updates.map { |update| DeepCopy.call(update).freeze }.freeze
           @affected = @updates.map do |update|
             record = update["after"] || update.fetch("before")
-            { "kind" => "edge", "id" => record.fetch("id"), "change" => update.fetch("change"),
+            { "kind" => "edge", "id" => record["id"], "change" => update.fetch("change"),
               "reference" => update.fetch("reference").merge("entity_id" => update["after"]&.fetch("id")) }
           end
         end

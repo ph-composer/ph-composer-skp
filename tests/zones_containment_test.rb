@@ -84,12 +84,12 @@ class ZonesContainmentTest < PhComposerTestCase
                                                       Sketchup::ComponentInstance.new(140, definition), inner])
     @model.entities << zone("zon_CCCCCCCCCCCC", 300, [edge(302)], :locked => true)
 
-    rows = containment([100, 110], [100, 130, 131], [100, 140, 141], [100, 150, 151], [300, 302])
+    rows = containment([100, 110], [100, 130, 131], [100, 140, 141], [100, 150, 151], [300, 302], [100, 130])
 
-    assert_equal [[100], [100], [100], [100, 150], [300]], rows.map { |row| row.dig("zone", "zone_path") }
-    assert_equal [[110], [130, 131], [140, 141], [151], [302]], rows.map { |row| row.fetch("entity_path") }
-    assert_equal [nil, "target.locked", "target.shared_definition", "target.wrong_hierarchy", "target.locked"],
-                 rows.map { |row| row["write_refusal"]&.fetch("code") }
+    assert_equal [[100], [100], [100], [100, 150], [300], [100]], rows.map { |row| row.dig("zone", "zone_path") }
+    assert_equal [[110], [130, 131], [140, 141], [151], [302], [130]], rows.map { |row| row.fetch("entity_path") }
+    assert_equal [nil, "target.locked", "target.shared_definition", "target.wrong_hierarchy", "target.locked",
+                  "target.locked"], rows.map { |row| row["write_refusal"]&.fetch("code") }
     assert_match(/Edge is inside a locked Group/, rows[1].dig("write_refusal", "message"))
   end
 

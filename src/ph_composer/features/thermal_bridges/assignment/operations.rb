@@ -29,6 +29,7 @@ module PhComposer
           allocate = Records::Identity.allocator(request, request.params)
           updates = resolve(request, targets).filter_map do |located, before|
             after = before ? DeepCopy.call(before) : new_record(allocate)
+            after["id"] = allocate.call("tbe") unless Assignment.identity(after)
             after.merge!("thermal_bridge_type_id" => thermal_bridge_type_id, "quantity" => quantity)
             next if after == before
 
@@ -115,7 +116,7 @@ module PhComposer
                    elsif before then "updated"
                    else "created"
                    end
-          { "reference" => located.reference.merge("entity_id" => before&.fetch("id")), "before" => before,
+          { "reference" => located.reference.merge("entity_id" => Assignment.identity(before)), "before" => before,
             "after" => after, "change" => change }
         end
 

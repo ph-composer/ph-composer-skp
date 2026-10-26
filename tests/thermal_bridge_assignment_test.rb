@@ -144,6 +144,25 @@ class ThermalBridgeAssignmentTest < PhComposerTestCase
     assert_equal "committed", cleared["effect"], cleared.inspect
   end
 
+  def test_a_record_with_no_id_reads_with_a_null_entity_id_and_clears_or_takes_a_fresh_id
+    [nil, :missing].each do |id|
+      record = { "schema_version" => 1, "thermal_bridge_type_id" => @parapet, "quantity" => 1 }
+      record["id"] = id unless id == :missing
+      STORE.write(@edges.first, record)
+      @model.active_path = [live(100)]
+      @model.selection.clear
+      @model.selection.add([live(100, 101)])
+      row = selection.fetch("edges").first
+      assert_nil row.dig("reference", "entity_id")
+      target = { "reference" => row.fetch("reference"), "expected_values" => row.fetch("values") }
+      assert_equal "committed", invoke("edges.clear", "targets" => [target])["effect"], id.inspect
+    end
+    STORE.write(live(100, 101), "schema_version" => 1, "thermal_bridge_type_id" => @parapet, "quantity" => 1)
+    assigned = assign([target(live(100, 101))], @slab)
+    assert_equal "committed", assigned["effect"], assigned.inspect
+    assert_match(/\Atbe_/, STORE.read(live(100, 101)).fetch("id"))
+  end
+
   def test_the_selection_pages_within_its_bound_and_a_changed_selection_expires_the_cursor
     @model.active_path = [@zone_a]
     @model.selection.add(@edges)
@@ -285,7 +304,7 @@ class ThermalBridgeAssignmentTest < PhComposerTestCase
   def target(entity, zone_path = [100])
     record = STORE.read(entity)
     reference = { "zone_id" => zone_path == [100] ? "zon_AAAAAAAAAAAA" : "zon_BBBBBBBBBBBB", "zone_path" => zone_path,
-                  "entity_path" => [entity.persistent_id], "entity_id" => record&.fetch("id") }
+                  "entity_path" => [entity.persistent_id], "entity_id" => TB::Assignment.identity(record) }
     { "reference" => reference, "expected_values" => TB::Assignment.values(record) }
   end
 

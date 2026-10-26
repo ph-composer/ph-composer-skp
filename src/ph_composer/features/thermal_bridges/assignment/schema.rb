@@ -14,6 +14,7 @@ module PhComposer
       # One assign or clear reaches at most this many Edge occurrences; one more refuses the whole command.
       GESTURE_EDGE_LIMIT = 250
       DEFAULT_QUANTITY = 1
+      ID_PATTERN = Records::Identity.pattern("tbe")
 
       TYPE_REFERENCE = Records::Reference.new(:key => "thermal_bridge_type_id", :target_kind => TYPE_KIND,
                                               :cardinality => "one", :required => true)
@@ -46,6 +47,13 @@ module PhComposer
 
         raise CodedError.new("validation.failed", "A thermal bridge assignment record is invalid: #{found.first}.",
                              "findings" => found)
+      end
+
+      # The record's id when it holds a valid one, or nil: a malformed record with no id has no identity to
+      # prove, so a reference names it with a null entity_id and its values guard the write.
+      def identity(record)
+        id = record && record["id"]
+        ID_PATTERN.match?(id.to_s) ? id : nil
       end
 
       def values(record)

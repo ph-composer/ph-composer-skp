@@ -363,6 +363,10 @@ module PhComposer
           end
           transform *= entity.transformation
         end
+        # A locked container at the end of the path refuses a write to itself, as one above it does.
+        if mutable && entity.respond_to?(:locked?) && entity.locked?
+          raise_target("target.locked", "The #{noun} is locked.")
+        end
         [entity, transform, current]
       end
 

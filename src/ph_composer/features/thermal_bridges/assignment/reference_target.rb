@@ -69,13 +69,15 @@ module PhComposer
           Zones::Index.new(model)
         end
 
+        # A null `entity_id` names an Edge with no assignment, or one whose record holds no valid id, which a
+        # write then guards by its values.
         def check_identity!(record, expected_id)
           if expected_id
             raise CodedError.new("target.not_found", "Edge #{expected_id} has no assignment.") unless record
             return if record["id"] == expected_id
 
             raise CodedError.new("target.changed", "The Edge's assignment has changed.")
-          elsif record
+          elsif Assignment.identity(record)
             raise CodedError.new("target.changed", "The Edge now has an assignment.")
           end
         end
