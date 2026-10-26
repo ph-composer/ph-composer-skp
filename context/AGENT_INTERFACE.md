@@ -494,6 +494,16 @@ For each feature, identify supported programmatic reads and writes. If an operat
 interactive geometry picking, document that limitation and the plan for an explicit-reference
 equivalent where feasible. Core data edits must not require UI scraping or arbitrary eval.
 
+Thermal bridges need no picking. `ph_composer.thermal_bridges.types.list` and `schedule.list` are the
+bounded reads (`types.all` and `schedule.all` their whole forms, for the panel), and `edges.selection`
+reads the native selection as explicit Edge references with each one's Zone and write refusal.
+`edges.assign` and `edges.clear` write explicit references, one Undo step each, refusing as a whole
+past 250 Edges. The right-click "Thermal bridge" menu and the edge tool are pointer routes; their
+explicit-reference equivalent is `edges.assign`. `runs.locate` shows a run's or a finding's Edges;
+`export_preflight` lists every finding before export, against the placed Windows' outlines that
+`ph_composer.windows.units.outlines` reads. [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Thermal Bridge
+Types", is the recipe.
+
 Zones exposes native split identity recovery as `ph_composer.zones.repair_split_face`. The native
 Repair menu and [synthetic scripting client](../tools/examples/authoring/split_identity_walkthrough.rb)
 use the same preview and invocation contract. Stored endpoint proof or an explicit retaining path

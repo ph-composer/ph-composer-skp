@@ -28,10 +28,10 @@ equipment's Ventilators family, which this packet exports into.
 ## Blockers
 
 - The Ventilator record in the equipment packet. Equipment is not interviewed.
-- Phase 3b: P3b-03, P3b-06, P3b-07 and P3b-08 are scoped and unauthorized; see hot-water-piping's
-  STATUS. P3b-04's chain rule is not needed here.
+- None from Phase 3b: its edge stages are on `main`; see hot-water-piping's STATUS. P3b-04's chain
+  rule is not needed here.
 - None from the edge identity spike: it passed on 2026-09-18 ([B4](../../../archive/phase-00-foundation/evidence/spike-edge.md));
-  its open cases close in P3b-01.
+  its open cases closed in P3b-01 (T01).
 
 ## Verification
 
@@ -44,3 +44,4 @@ None. Nothing is implemented.
 | 2026-09-18 | PRD drafted. |
 | 2026-10-21 | Phase 4 planned in detail; this packet's stage is a gate stub in the phase ledger. |
 | 2026-10-21 | Re-baselined against `main` at `420c783a`: foundation and remote blockers removed, Phase 3b dependencies named, metre conversion and records corrected, Q9 added. No interview, no implementation. |
+| 2026-10-26 | Phase 3b P3b-09 handoff: the edge tagging rules point at `context/TECH_STACK.md`, the edge stages are on `main`, and the edge registry question (D3b-01) is this packet's. |

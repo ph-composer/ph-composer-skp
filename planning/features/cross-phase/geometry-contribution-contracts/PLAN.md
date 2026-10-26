@@ -1,7 +1,7 @@
 # Edge capture and contributed drawing geometry
 
 DATE: 2026-10-13
-STATUS: Scoped capability; G-02 is implementation ready on its own, G-03 and G-04 wait for the thermal-bridge adopter. Not authorized. Stage ledger in [STATUS.md](STATUS.md).
+STATUS: Complete 2026-10-26: G-02 merged, G-03 superseded, G-01 and G-04 closed through thermal bridges. Stage ledger in [STATUS.md](STATUS.md).
 ISSUE: [#118](https://github.com/ph-composer/ph-composer-skp/issues/118)
 BASELINE: `cfe01a6aad99a0e09d5ecf0de5659c606d7ba4f9`
 FINDING: [F06](../../../archive/code-review/sections/03-services.md#f06-the-geometry-seams-cannot-yet-serve-ordinary-edges-or-derived-line-overlays)
