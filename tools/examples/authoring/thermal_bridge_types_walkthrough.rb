@@ -10,11 +10,13 @@ require_relative "client"
 module ThermalBridgeTypesWalkthrough
   PREFIX = "ph_composer.thermal_bridges.types"
 
-  # The catalog after `run`, by name: psi-value, group and source kind.
+  USER_DATA = { "walkthrough" => { "kept" => ["original"] } }.freeze
+  # The catalog after `run`, by name: psi-value, group, source kind, stored colour and user_data. The
+  # copy carries the parapet's colour and user_data.
   EXPECTED = {
-    "Walkthrough parapet" => [0.15, "15-Ambient", "manual"],
-    "Walkthrough slab edge" => [-0.02, "16-Perimeter", "manual"],
-    "Walkthrough parapet (copy)" => [0.15, "15-Ambient", "derived"]
+    "Walkthrough parapet" => [0.15, "15-Ambient", "manual", "#3366cc", USER_DATA],
+    "Walkthrough slab edge" => [-0.02, "16-Perimeter", "manual", nil, {}],
+    "Walkthrough parapet (copy)" => [0.15, "15-Ambient", "derived", "#3366cc", USER_DATA]
   }.freeze
 
   module_function
@@ -24,7 +26,9 @@ module ThermalBridgeTypesWalkthrough
     steps = []
     discovered = PhComposer::API.discover.fetch("features").any? { |row| row["id"] == "ph_composer.thermal_bridges" }
     steps << { "step" => "discover", "passed" => discovered }
-    parapet = create(client, steps, "name" => "Walkthrough parapet", "psi_w_mk" => 0.12)
+    parapet = invoke(client, steps, "create",
+                     "values" => { "name" => "Walkthrough parapet", "psi_w_mk" => 0.12, "color" => "#3366cc" },
+                     "user_data" => USER_DATA).dig("value", "id")
     create(client, steps, "name" => "Walkthrough slab edge", "psi_w_mk" => -0.02, "group" => "16-Perimeter")
     balcony = create(client, steps, "name" => "Walkthrough balcony")
     invoke(client, steps, "update", "id" => parapet, "values" => { "psi_w_mk" => 0.15 },
@@ -35,14 +39,15 @@ module ThermalBridgeTypesWalkthrough
     { "passed" => steps.all? { |row| row["passed"] }, "steps" => steps }
   end
 
-  # The catalog as types.all reads it: name to psi-value, group and source kind.
+  # The catalog as types.all reads it, in EXPECTED's shape.
   def state
     result = AuthoringExample::Client.new.query("#{PREFIX}.all")
     raise "types.all failed: #{result['code']}" unless result["status"] == "completed"
 
     result.dig("value", "records").to_h do |row|
       values = row.fetch("values")
-      [values.fetch("name"), [values["psi_w_mk"], values.fetch("group"), values.dig("source", "kind")]]
+      [values.fetch("name"), [values["psi_w_mk"], values.fetch("group"), values.dig("source", "kind"),
+                              values["color"], row.fetch("user_data")]]
     end
   end
 
