@@ -36,7 +36,7 @@ Agreed in the interview on 2026-10-03 and folded into `context/UBIQUITOUS_LANGUA
 | Thermal Bridge Type | A named junction detail with one psi-value. Model-local, editable, reusable |
 | Thermal bridge | One assigned run of edges with a measured length. The exported thing |
 | Run | A chain of connected edges with the same Zone, type and quantity, ending at a free end or a junction. A closed loop is one run. Derived at each scan, never stored |
-| Group | The three-way class honeybee-ph and METr share. Stored as honeybee-ph's `15-Ambient`, `16-Perimeter`, `17-FS/BC`; shown in METr's words, the third confirmed on METr's screen in P3b-05 |
+| Group | The three-way class honeybee-ph and METr share. Stored as honeybee-ph's `15-Ambient`, `16-Perimeter`, `17-FS/BC`; shown in METr's words, Ambient, Perimeter and Basement floor (read on METr's screen in P3b-05) |
 
 ## What honeybee-ph and METr take
 
@@ -191,7 +191,7 @@ Ed answered on 2026-10-03. The plan decisions that refine each answer, D3b-01 to
 | Q1 | Does the assignment live on the edge, with no separate thermal bridge record? | Yes. The edge is the record, with no registry and no id of its own (D3b-01, D3b-02) |
 | Q2 | One psi-value per type, or may an assignment override it? | Per type only. A second value is a second type, the same rule Window Types follow |
 | Q3 | Point thermal bridges and chi-values: honeybee-ph has no carrier | Confirmed in D3: linear only for MVP. Point bridges and chi-values are not authored, assigned or exported, and are never encoded as fake 1 m linear bridges |
-| Q4 | Group words: METr's or honeybee-ph's? | Stored as honeybee-ph's strings, shown in METr's words; the third word confirmed on METr's screen (D3b-03). Required, default Ambient (D3b-04) |
+| Q4 | Group words: METr's or honeybee-ph's? | Stored as honeybee-ph's strings, shown in METr's words; the third, "Basement floor", confirmed on METr's screen on 2026-10-26 (D3b-03). Required, default Ambient (D3b-04) |
 | Q5 | Do connected same-type edges merge into one exported thermal bridge? | Yes, as maximal chains split at junctions (D3b-06), named from the type plus a counter (D3b-07) |
 | Q6 | Is `quantity` exposed? | Yes, on the assignment, default 1. Kept in HBJSON; the METr consequence is checked in metr-export (D3b-08) |
 | Q7 | A shared edge between two Zones: which Zone owns it? | The Zone group that holds it. Interior junctions and edges counted twice across Zones are warnings (D3b-16) |

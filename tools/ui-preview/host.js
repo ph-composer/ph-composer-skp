@@ -17,6 +17,7 @@
   var SETTINGS = "ph_composer.zones.settings";
   var MATERIALS = "ph_composer.assemblies.materials";
   var ASSEMBLIES = "ph_composer.assemblies.assemblies";
+  var TB = "ph_composer.thermal_bridges.";
   var NOTHING_WRITTEN = "Nothing was written.";
 
   function Host(window, options) {
@@ -58,6 +59,8 @@
     this.materials = JSON.parse(JSON.stringify(settings.materials || { records: [], unreadable: [], categories: [] }));
     this.assemblies = JSON.parse(JSON.stringify(settings.assemblies || { records: [], unreadable: [] }));
     this.attachedZones = JSON.parse(JSON.stringify(settings.attachedZones || []));
+    this.thermalBridges = JSON.parse(JSON.stringify(settings.thermalBridges ||
+      { types: [], selected: [], runs: [], edgeFindings: [] }));
     this.preferences = { unit_system: settings.unitSystem || "SI", dimension_formats: {},
       number_format: { decimal: settings.decimal || ".", locale: settings.locale || "en-US" } };
   }
@@ -146,6 +149,10 @@
             left_out: [] })) },
         [MATERIALS]: { status: "completed", value: JSON.parse(JSON.stringify(this.materials)) },
         [ASSEMBLIES]: { status: "completed", value: JSON.parse(JSON.stringify(this.assemblies)) },
+        [TB + "types"]: { status: "completed", value: { records: JSON.parse(JSON.stringify(
+          this.thermalBridges.types)), unreadable: [] } },
+        [TB + "edges.selected"]: { status: "completed", value: { edges: JSON.parse(JSON.stringify(
+          this.thermalBridges.selected)), ignored: [], ignored_total: 0 } },
         [ATTACHED]: { status: "completed", code: "ok", revision: this.revision,
           value: { records: JSON.parse(JSON.stringify(this.attachedZones)), next_cursor: null,
             total: this.attachedZones.length } }
@@ -209,7 +216,10 @@
     this.sent.push(message);
     if (message.type === "panel.ready") this.snapshot();
     if (message.type === "action.invoke") this.invoke(message.payload);
-    if (message.type === "query.invoke") this.libraryQuery(message.payload);
+    if (message.type === "query.invoke") {
+      if (message.payload.name.indexOf(TB) === 0) this.scheduleQuery(message.payload);
+      else this.libraryQuery(message.payload);
+    }
     if (message.type === "file_export.invoke") this.publish("file_export.result", {
       request_id: message.payload.request_id, session: message.payload.session,
       outcome: refused("export.unavailable", "File writes are unavailable in this browser preview.", this.revision)
@@ -281,6 +291,7 @@
       }
       if (payload.name === "ph_composer.windows.place_tool.stop") this.windows.place_tool.active = false;
       if (payload.name === "ph_composer.windows.units.locate") this.selectedUnits = payload.params.units;
+      if (payload.name === TB + "runs.locate") this.locatedEdges = payload.params.edge_paths;
       if (payload.name === "ph_composer.spaces.mark_tool.start") {
         this.markTool = { active: true, weighting_factor: payload.params.weighting_factor, gesture_limit: 250 };
         this.colourBy = { mode: "ph_composer.spaces.by_weighting_factor", isolated: null };
@@ -308,6 +319,81 @@
       { height_m: 3, solid_volume_m3: 36, net_floor_area_m2: 12, current_height_m: 2.5 };
     this.publish("query.result", { request_id: payload.request_id, session: payload.session,
       outcome: { status: "completed", code: "ok", revision: this.revision, value: value } });
+  };
+
+  /* The schedule read, answered on the next turn as the host does: the fixture's runs with each type's current
+     name, group and psi-value, and totals over them. Synthetic; Ruby builds the runs from the Model. */
+  Host.prototype.scheduleQuery = function (payload) {
+    var host = this, data = this.thermalBridges;
+    this.window.setTimeout(function () {
+      var runs = data.runs.map(function (run) {
+        var type = data.types.filter(function (entry) { return entry.id === run.type_id; })[0];
+        var psi = type ? type.values.psi_w_mk : null;
+        return Object.assign({}, JSON.parse(JSON.stringify(run)), { type_name: type ? type.values.name : null,
+          group: type ? type.values.group : null, psi_w_mk: psi,
+          heat_loss_w_k: psi === null ? null : Math.round(psi * run.length_m * run.quantity * 1000) / 1000 });
+      });
+      var byType = data.types.map(function (type) {
+        var own = runs.filter(function (run) { return run.type_id === type.id; });
+        return { type_id: type.id, type_name: type.values.name, group: type.values.group, run_count: own.length,
+          edge_count: own.reduce(function (sum, run) { return sum + run.edge_paths.length; }, 0),
+          length_m: own.reduce(function (sum, run) { return sum + run.length_m; }, 0),
+          heat_loss_w_k: own.reduce(function (sum, run) { return sum + (run.heat_loss_w_k || 0); }, 0) };
+      }).filter(function (row) { return row.run_count; });
+      var byGroup = ["15-Ambient", "16-Perimeter", "17-FS/BC"].map(function (group) {
+        return { group: group, heat_loss_w_k: runs.filter(function (run) { return run.group === group; })
+          .reduce(function (sum, run) { return sum + (run.heat_loss_w_k || 0); }, 0) };
+      });
+      host.publish("query.result", { request_id: payload.request_id, session: payload.session,
+        outcome: { status: "completed", code: "ok", revision: host.revision, value: { runs: runs,
+          edge_findings: data.edgeFindings.map(function (finding) {
+            return { path: finding.path, code: finding.code, message: finding.message,
+              blocks_export: finding.blocks_export, locate: finding.locate };
+          }), edge_finding_total: data.edgeFindings.length, unreadable: [], unreadable_total: 0,
+          totals: { by_type: byType, by_group: byGroup, run_count: runs.length,
+            heat_loss_w_k: byGroup.reduce(function (sum, row) { return sum + row.heat_loss_w_k; }, 0) },
+          units: { length_m: "m", psi_w_mk: "W/mK", heat_loss_w_k: "W/K" } } } });
+    }, 0);
+  };
+
+  /* Thermal Bridge Type records and Edge assignment, kept to what the tab sends. Synthetic outcomes. */
+  Host.prototype.thermalBridgeAction = function (payload) {
+    var data = this.thermalBridges, params = payload.params, name = payload.name.slice(TB.length), id;
+    var target = data.types.filter(function (record) { return record.id === params.id; })[0];
+    function copy(value) { return JSON.parse(JSON.stringify(value)); }
+    if (params.id && !target) return refused("target.not_found", "That type is unavailable.", this.revision);
+    if (params.expected_values && Object.keys(params.expected_values).some(function (field) {
+      var current = target.values[field];
+      return JSON.stringify(current === undefined ? null : current) !== JSON.stringify(params.expected_values[field]);
+    })) return refused("target.changed", "The type changed. " + NOTHING_WRITTEN, this.revision);
+    if (name === "types.create" || name === "types.duplicate") {
+      id = "tbt_preview" + String(++this.sequence).padStart(5, "0");
+      var values = name === "types.create" ? Object.assign({ notes: "", datasheet_links: [], psi_w_mk: null,
+        group: "15-Ambient" }, copy(params.values)) : Object.assign(copy(target.values),
+        { name: params.name || target.values.name + " (copy)" });
+      data.types.push({ id: id, kind: TB + "type", schema_version: 1, user_data: {}, extension_data: {},
+        findings: [], values: values, display: { color: "#8a6fb0" }, export_ready: values.psi_w_mk !== null,
+        export_blockers: [] });
+    } else if (name === "types.update") {
+      Object.keys(params.values).forEach(function (field) { target.values[field] = params.values[field]; });
+    } else if (name === "types.delete") {
+      data.runs.forEach(function (run) {
+        if (run.type_id === target.id && params.replacement_id) run.type_id = params.replacement_id;
+      });
+      data.runs = data.runs.filter(function (run) { return run.type_id !== target.id; });
+      data.types.splice(data.types.indexOf(target), 1);
+    } else if (name === "edges.assign" || name === "edges.clear") {
+      params.targets.forEach(function (row) {
+        data.selected.forEach(function (edge) {
+          if (JSON.stringify(edge.reference) !== JSON.stringify(row.reference)) return;
+          edge.values = name === "edges.clear" ? {} : { thermal_bridge_type_id: params.thermal_bridge_type_id,
+            quantity: params.quantity };
+        });
+      });
+    } else return refused("request.unknown_operation", "Unavailable fixture action.", this.revision);
+    this.revision += 1;
+    return { status: "completed", code: "ok", message: "Done.", effect: "committed", revision: this.revision,
+      value: { id: id }, affected: [], findings: [], detail: null };
   };
 
   /* Synthetic Window outcomes exercise panel transport only; thermal values are fixture projections. */
@@ -482,7 +568,7 @@
     }
     if (payload.name.indexOf("ph_composer.zones.options.") === 0 ||
         payload.name.indexOf("ph_composer.windows.") === 0 ||
-        payload.name.indexOf("ph_composer.assemblies.") === 0 ||
+        payload.name.indexOf("ph_composer.assemblies.") === 0 || payload.name.indexOf(TB) === 0 ||
         payload.name.indexOf("ph_composer.zones.faces.attached_zone.") === 0) this.window.setTimeout(apply, 0);
     else apply();
   };
@@ -496,6 +582,7 @@
       return refused("revision.stale", "The Model changed since it was read. " + NOTHING_WRITTEN, this.revision);
     }
     if (payload.name.indexOf("ph_composer.windows.") === 0) return this.windowAction(payload);
+    if (payload.name.indexOf(TB) === 0) return this.thermalBridgeAction(payload);
     if (payload.name === "ph_composer.library.copy") return this.libraryCopy(payload);
     if (payload.name.indexOf("ph_composer.assemblies.") === 0 ||
         payload.name.indexOf("ph_composer.zones.faces.attached_zone.") === 0) return this.inventoryAction(payload);

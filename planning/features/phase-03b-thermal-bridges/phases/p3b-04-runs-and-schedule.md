@@ -1,7 +1,7 @@
 # P3b-04: runs, the schedule read and findings
 
 DATE: 2026-10-03
-STATUS: Implemented on branch `feature/thermal-bridges-p3b-04` (PR #310), T04 passed 2026-10-26; D3b-13 measured over budget, so the schedule is read on request with no snapshot section. Corrected to `main` at `420c783a` on 2026-10-21 (DECISIONS Part 1b)
+STATUS: Merged to main 2026-10-26 (PR #310, squash `85d81a46`), T04 passed 2026-10-26; D3b-13 measured over budget, so the schedule is read on request with no snapshot section. Corrected to `main` at `420c783a` on 2026-10-21 (DECISIONS Part 1b)
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 

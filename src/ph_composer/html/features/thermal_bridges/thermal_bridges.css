@@ -1,0 +1,37 @@
+/* The Thermal Bridges tab: the assign bar over the Types table and the Schedule's totals and findings. The
+   tables, controls and bubbles are the kit's; these rules only place this screen's own parts. */
+/* One row that always shows, so a selection never moves the table under it; it wraps at narrow widths. */
+.tb-assign-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 12px;
+  padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface, #fff); }
+.tb-assign-count { flex: 0 0 auto; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.tb-assign-bar select { width: auto; min-width: 12em; max-width: 100%; }
+.tb-assign-field { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.phc-workspace .tb-assign-quantity { width: 5em; }
+.tb-assign-quantity[aria-invalid="true"] { border-color: var(--red); }
+.tb-assign-reason[hidden] { display: none; }
+/* Each table scrolls inside itself, so a narrow panel never scrolls the tab sideways. */
+.tb-schedule-table, .tb-totals-table { min-width: 0; overflow: auto; }
+.tb-schedule-table { margin-top: 8px; }
+.tb-schedule-table tbody tr { cursor: pointer; }
+/* Words read from the left; numbers keep the table's right alignment. */
+.tb-types .phc-table :is(.col-group, .col-datasheet),
+.tb-schedule .phc-table :is(.col-display_name, .col-zone, .col-building_segment, .col-type_name, .col-group) {
+  text-align: left;
+}
+.tb-findings-layer .tb-findings { display: block; }
+.tb-schedule-status { font-size: 12px; color: var(--muted); }
+/* A value not measured yet, or measured before the last change. */
+.tb-muted { color: var(--muted); }
+.tb-schedule-status.tb-schedule-error { color: var(--red); }
+.phc-workspace .phc-table .tb-blocks-export { color: var(--amber); }
+.tb-finding { display: flex; align-items: baseline; gap: 10px; }
+.tb-finding p { flex: 1; margin: 0 0 6px; }
+.tb-finding-blocks { color: var(--warning-ink); font-weight: 600; }
+.tb-schedule-totals, .tb-schedule-others { margin-top: 18px; }
+.tb-schedule-totals[hidden], .tb-schedule-others[hidden] { display: none; }
+.tb-schedule-totals h2, .tb-schedule-others h2 { margin: 0 0 8px; font-size: 13px; }
+/* By type takes the full row and by group sits beneath, so neither table's last column falls out of view. */
+.tb-schedule-totals { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.tb-other-findings { margin: 0; padding: 0; list-style: none; }
+.tb-other-findings li { display: flex; align-items: baseline; gap: 10px; padding: 4px 0; border-bottom: 1px solid var(--line); }
+.tb-other-findings li span { flex: 1; }

@@ -3,7 +3,10 @@
 /* Beside the library sidebar the action bar is short of width, so the filter gives some up. */
 .phc-inventory-surface .phc-inventory-controls input { width: 150px; }
 .phc-inventory-table { width: 100%; min-width: 0; overflow: auto; margin-top: 8px; }
-.phc-inventory-table .phc-table .col-name { position: static; }
+/* An inventory's Name column scrolls sideways with the rest. Its header still sticks to the top, which also keeps
+   its resize handle inside the table instead of overhanging the pane. */
+.phc-inventory-table .phc-table td.col-name { position: static; }
+.phc-inventory-table .phc-table th.col-name { left: auto; }
 .phc-inventory-table .phc-table :is(.col-name, .col-category, .col-notes, .col-type, .col-exterior_condition) {
   text-align: left;
 }

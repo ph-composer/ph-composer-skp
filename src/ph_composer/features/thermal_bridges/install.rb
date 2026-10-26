@@ -9,7 +9,7 @@
 #   scan/           the live read: one walk for assigned Edges, Zones' answers for their paths, the schedule
 #   run_locate.rb   runs.locate, which selects a run's Edges through the foundation's context.open
 #   codes.rb        the codes under the thermal_bridge noun
-#   declarations/   what thermal bridges register
+#   declarations/   what thermal bridges register, the right-click menu among it
 require_relative "type/schema"
 require_relative "type/operations"
 require_relative "type/reads"
@@ -27,6 +27,7 @@ require_relative "declarations/shapes"
 require_relative "declarations/types"
 require_relative "declarations/assignment"
 require_relative "declarations/schedule"
+require_relative "declarations/menu"
 require_relative "codes"
 
 module PhComposer
@@ -38,6 +39,7 @@ module PhComposer
       TypeRegistration.install(feature)
       AssignmentRegistration.install(feature)
       ScheduleRegistration.install(feature)
+      MenuRegistration.install(feature)
       Codes.install(feature)
     end
   end

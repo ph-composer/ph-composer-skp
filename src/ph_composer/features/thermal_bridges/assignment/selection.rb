@@ -77,12 +77,18 @@ module PhComposer
         end
         private_class_method :rows, :row, :copied_ids, :ignored
 
+        # Whether a write can reach the Edge a selection row names: a Zone holds it, through no shared,
+        # locked or other Zone storage. The menu and the panel's assign bar both offer only such Edges.
+        def assignable?(row)
+          !row["reference"].nil? && row["write_refusal"].nil?
+        end
+
         def client(session)
           session.feature_state(:thermal_bridges_selection_menu) { Client.new(session) }
         end
 
-        # The selection route a menu or the panel's assign bar drives: read the selection, then one public
-        # invoke with the references and values it read, so a stale selection refuses rather than writing.
+        # The selection route the right-click menu drives: read the selection, then one public invoke with
+        # the references and values it read, so a stale selection refuses rather than writing.
         class Client
           PREFIX = "#{FEATURE_ID}.edges".freeze
 
@@ -93,35 +99,53 @@ module PhComposer
           end
 
           def assign(type_id, quantity: DEFAULT_QUANTITY)
-            invoke("assign") do |targets|
+            invoke("assign", ->(count) { "Assigned #{type_name(type_id)} to #{edges(count)}." }) do |targets|
               { "targets" => targets, "thermal_bridge_type_id" => type_id, "quantity" => quantity }
             end
           end
 
           def clear
-            invoke("clear") { |targets| { "targets" => targets } }
+            invoke("clear", ->(count) { "Cleared the thermal bridge from #{edges(count)}." }) do |targets|
+              { "targets" => targets }
+            end
           end
 
           private
 
-          def invoke(name)
+          # `done` words the confirmation from the number of Edges written, as the panel's assign bar does.
+          def invoke(name, done)
             read = API.query(:context => @context, :name => "#{PREFIX}.selection_all")
             return show(read) unless read["status"] == "completed"
 
             rows = read.fetch("value").fetch("edges")
-            unreachable = rows.find { |row| row["reference"].nil? }
             return show("status" => "refused", "message" => "Select Edges inside a Zone.") if rows.empty?
-            return show("status" => "refused", "message" => unreachable_message(unreachable)) if unreachable
 
-            targets = rows.map do |row|
+            # The Edges a write can reach, as the assign bar takes them; with none, why the first cannot be.
+            writable = rows.select { |row| Selection.assignable?(row) }
+            return show("status" => "refused", "message" => unreachable_message(rows.first)) if writable.empty?
+
+            targets = writable.map do |row|
               { "reference" => row.fetch("reference"), "expected_values" => row.fetch("values") }
             end
             @sequence += 1
-            show(API.invoke(:context => @context, :name => "#{PREFIX}.#{name}", :params => yield(targets),
-                            :request => { "sequence" => @sequence, "expected_revision" => read.fetch("revision") }))
+            result = API.invoke(:context => @context, :name => "#{PREFIX}.#{name}", :params => yield(targets),
+                                :request => { "sequence" => @sequence, "expected_revision" => read.fetch("revision") })
+            show(result["status"] == "completed" ? result.merge("message" => done.call(targets.length)) : result)
+          end
+
+          def edges(count)
+            count == 1 ? "1 Edge" : "#{count} Edges"
+          end
+
+          def type_name(type_id)
+            read = API.query(:context => @context, :name => "#{FEATURE_ID}.types.all")
+            row = read["status"] == "completed" && read.fetch("value").fetch("records").find { |r| r["id"] == type_id }
+            row ? row.dig("values", "name") : "the type"
           end
 
           def unreachable_message(row)
+            return "#{row.fetch('write_refusal').fetch('message')} Nothing was written." if row["reference"]
+
             "A selected Edge is not inside a Zone (#{row.fetch('reason').tr('_', ' ')}). Nothing was written."
           end
 

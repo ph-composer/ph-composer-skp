@@ -4236,6 +4236,22 @@
         "tools/examples/authoring/client.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "T05",
+      "label": "The Thermal Bridges tab on the classified reference model, Ed at the mouse: Types create, an in-place edit and a stale-value refusal, duplicate, delete with a replacement; the roof perimeter selected natively and assigned from the assign bar and from the right-click menu, then cleared; the Schedule read on opening, its totals, Locate into a nested Zone; a display unit switch with a draft open; METr's third group word read on its screen; native window captures for the UI polish review",
+      "mode": "mixed",
+      "authority": "planning/features/phase-03b-thermal-bridges/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/html/features/thermal_bridges/*",
+        "src/ph_composer/html/index.html",
+        "src/ph_composer/html/inventory_forms.js",
+        "src/ph_composer/html/library/library.css",
+        "src/ph_composer/features/thermal_bridges/declarations/menu.rb",
+        "src/ph_composer/features/thermal_bridges/assignment/selection.rb",
+        "tools/examples/authoring/thermal_bridge_reference_model.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }

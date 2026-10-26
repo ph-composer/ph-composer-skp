@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="../../src/ph_composer/html/library/library.css">
     <link rel="stylesheet" href="../../src/ph_composer/html/features/assemblies/assembly.css">
     <link rel="stylesheet" href="../../src/ph_composer/html/features/windows/windows.css">
+    <link rel="stylesheet" href="../../src/ph_composer/html/features/thermal_bridges/thermal_bridges.css">
     <!-- panel-styles:end -->
   </head>
   <body class="phc-workspace live-panel">
@@ -26,9 +27,9 @@
         <button type="button" data-tab="overview">Zones</button>
         <button type="button" data-tab="assemblies">Assemblies</button>
         <button type="button" data-tab="windows">Window Types</button>
+        <button type="button" data-tab="thermal_bridges">Thermal Bridges</button>
         <button type="button" data-tab="library">Library</button>
         <button type="button" data-tab="export">Export</button>
-        <button type="button" disabled data-tooltip="Planned" aria-label="Thermal Bridges, planned">Thermal Bridges</button>
         <button type="button" disabled data-tooltip="Planned" aria-label="Systems, planned">Systems</button>
       </nav>
       <div class="phc-unit-toggle" role="group" aria-label="Display units">
@@ -41,6 +42,7 @@
       <div data-pane="overview"></div>
       <div data-pane="windows" hidden></div>
       <div data-pane="assemblies" hidden></div>
+      <div data-pane="thermal_bridges" hidden></div>
       <div data-pane="library" hidden></div>
       <div data-pane="export" hidden></div>
     </main>
@@ -108,6 +110,11 @@
     <script src="../../src/ph_composer/html/features/spaces/selection.js"></script>
     <script src="../../src/ph_composer/html/sections/colour_by.js"></script>
     <script src="../../src/ph_composer/html/features/spaces/view.js"></script>
+    <script src="../../src/ph_composer/html/features/thermal_bridges/shared.js"></script>
+    <script src="../../src/ph_composer/html/features/thermal_bridges/assign_bar.js"></script>
+    <script src="../../src/ph_composer/html/features/thermal_bridges/schedule.js"></script>
+    <script src="../../src/ph_composer/html/features/thermal_bridges/types.js"></script>
+    <script src="../../src/ph_composer/html/features/thermal_bridges/section.js"></script>
     <script src="../../src/ph_composer/html/features/windows/editor_shared.js"></script>
     <script src="../../src/ph_composer/html/features/windows/audit.js"></script>
     <script src="../../src/ph_composer/html/features/windows/canvas.js"></script>

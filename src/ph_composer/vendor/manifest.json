@@ -101,9 +101,9 @@
       "sha256": "84c120c341bc4122a9428e925232e4583a1dc9ee47714132dc71bebd5bed5943"
     },
     "html/features/assemblies/materials.js": {
-      "bytes": 10243,
+      "bytes": 7873,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "a116475c329595aa524ec45a406e827df6632cb0f87d562f0eb4db1f77ed7204"
+      "sha256": "6c7f85815ca8e79bb6feaded016f87a9308a2deb689908d39268f690b25819d5"
     },
     "html/features/assemblies/section.js": {
       "bytes": 8152,
@@ -144,6 +144,36 @@
       "bytes": 21241,
       "mime": "text/javascript; charset=utf-8",
       "sha256": "478e0f90fedd22e881fcf8e21decdcdc211bd80d59b852b34346c36f874030d9"
+    },
+    "html/features/thermal_bridges/assign_bar.js": {
+      "bytes": 9363,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "03513fb47f1e0d707740899ed5e81a1891338d9b1b136e6ce620d2937340ca17"
+    },
+    "html/features/thermal_bridges/schedule.js": {
+      "bytes": 14740,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "f29a87d0e76885adcd699476d0c75ade7bc1549b3c16b22bcb880f3aae0773a6"
+    },
+    "html/features/thermal_bridges/section.js": {
+      "bytes": 3389,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "4184fa86571b9a4efd0f3403e1ab67eaa3a8e4a6ee2c52676d7364bb4b3d5d5f"
+    },
+    "html/features/thermal_bridges/shared.js": {
+      "bytes": 3192,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "e301a567441116407faf3ab58b3af96de39cf7642182bd191bf2f19b75886d76"
+    },
+    "html/features/thermal_bridges/thermal_bridges.css": {
+      "bytes": 2660,
+      "mime": "text/css; charset=utf-8",
+      "sha256": "b4e7954307385b48fb1795c4eda0241b1c727d1ff2a7d65075fd04df0a890dfe"
+    },
+    "html/features/thermal_bridges/types.js": {
+      "bytes": 11277,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "90f63e73801fa9d4a278285c00bbb603e14f516369a6b7b43cc41fbc448caba3"
     },
     "html/features/windows/audit.js": {
       "bytes": 3740,
@@ -301,19 +331,19 @@
       "sha256": "32cc7b6c39918da562237aba1209b358ec087c9238146cdcc16cf4c415b7754d"
     },
     "html/index.html": {
-      "bytes": 7318,
+      "bytes": 7729,
       "mime": "text/html; charset=utf-8",
-      "sha256": "4151b6f3a47c4a97b732ba3e3ce4fdbf5366a2db5c436501dd04977b93d7faa9"
+      "sha256": "4c3bcd9b85205bad50b04f8bcefa9dd07b9f028ce1b6b0771b73626ae15bfa54"
     },
     "html/inventory.js": {
-      "bytes": 9085,
+      "bytes": 12166,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "92265155f3cad69676a7fe93861e9066ff16edbdec30a6a74e7ba3b269df46c7"
+      "sha256": "73b23222f13942270fe20d0032331b8ca853ffb5aac3185cba3066e80776a26c"
     },
     "html/inventory_forms.js": {
-      "bytes": 17383,
+      "bytes": 20078,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "f8ab6517b150bac03a0fef2b779efaca209e77f27b8febfd95a1407aa1ac7bca"
+      "sha256": "fefa0db5f82629a13f55ae1b2f0f600ed5cc744151a89ef96bf205ed9977e459"
     },
     "html/inventory_grid.js": {
       "bytes": 16008,
@@ -346,9 +376,9 @@
       "sha256": "5e5fefa7bfa58c71868910e6371559e31861490b305e4de8b40f17f9ea45764b"
     },
     "html/library/library.css": {
-      "bytes": 11674,
+      "bytes": 11925,
       "mime": "text/css; charset=utf-8",
-      "sha256": "fe0f259a60f139082e67a82ece439a06fd63f0914a41050bf4e92141f3f39eed"
+      "sha256": "04b025b4be5aba6d55a218dec421ec65cf18525f7992264b3097a55c14f13d98"
     },
     "html/library/locations.js": {
       "bytes": 7573,
