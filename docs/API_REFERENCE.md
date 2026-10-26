@@ -49292,7 +49292,7 @@ Params:
       },
       "description": "The Edges of one run, or of one finding, as the schedule reads them.",
       "minItems": 1,
-      "maxItems": 500
+      "maxItems": 10000
     }
   }
 }
