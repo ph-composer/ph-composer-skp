@@ -79,5 +79,5 @@ after save, reopen and HBJSON reload; matching counts alone do not prove a round
 
 S01 to S12 close Phase 3a. Every "through PHX" check in the PRD is excluded
 and stays open in [metr-export](../../features/unscheduled/metr-export/README.md). The height drag handle
-(Q6) is not in any row. Thermal bridges acceptance is T01 to T09 in [its register](../../features/phase-03b-thermal-bridges/ACCEPTANCE.md). SketchUp 2023 and
+(Q6) is not in any row. Thermal bridges acceptance is T01 to T09 in [its register](../phase-03b-thermal-bridges/ACCEPTANCE.md). SketchUp 2023 and
 Windows remain their own gates.

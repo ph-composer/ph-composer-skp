@@ -30,7 +30,7 @@ HBJSON in the pinned honeybee stack and read back each `Space`, its `SpaceVolume
 segments, factors and airflow overrides.
 
 In this plan: Spaces, roadmap 3.1, as the [PRD](PRD.md) scopes it. Thermal bridges, roadmap 3.2,
-is [Phase 3b](../../features/phase-03b-thermal-bridges/PLAN.md).
+is [Phase 3b](../phase-03b-thermal-bridges/PLAN.md).
 
 Out of this plan: METr conversion and import
 (D12; every "through PHX" step waits with [metr-export](../../features/unscheduled/metr-export/README.md)),
@@ -181,6 +181,6 @@ Every active row of [ACCEPTANCE.md](ACCEPTANCE.md) passes on the proving host, t
 Spaces packet records what was delivered and what remains, durable rules are in `context/`, and
 `docs/PRODUCT.md` and the generated API reference describe what exists.
 
-Phase 3 closes when this plan and [Phase 3b](../../features/phase-03b-thermal-bridges/PLAN.md) have both
+Phase 3 closes when this plan and [Phase 3b](../phase-03b-thermal-bridges/PLAN.md) have both
 exited. Nothing here is a release,
 a SketchUp 2023 or Windows claim, or a certification claim.

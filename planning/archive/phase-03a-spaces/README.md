@@ -13,7 +13,7 @@ lives in and on [face-assignment](../face-assignment/README.md) for the Colour-b
 service. Mark floor is this packet's own tool, a sibling of Classify.
 
 Phase 3 is split into two independent sub-phases, each one flat packet:
-3a Spaces (this folder) and [3b thermal bridges](../../features/phase-03b-thermal-bridges/README.md). Phase 3
+3a Spaces (this folder) and [3b thermal bridges](../phase-03b-thermal-bridges/README.md). Phase 3
 ends when both close: a model carries its Spaces and its thermal bridges and matches what a
 designPH export gave. That is the first internal envelope-model release candidate (D1).
 
@@ -60,10 +60,10 @@ P3a-10).
 ## What Phase 3b needs from this packet
 
 Thermal bridges runs on its own track, but three of its stages wait for stages here:
-[P3b-03](../../features/phase-03b-thermal-bridges/phases/p3b-03-edge-assignment.md) and
-[P3b-08](../../features/phase-03b-thermal-bridges/phases/p3b-08-thermal-bridge-export.md) need P3a-01 (the
+[P3b-03](../phase-03b-thermal-bridges/phases/p3b-03-edge-assignment.md) and
+[P3b-08](../phase-03b-thermal-bridges/phases/p3b-08-thermal-bridge-export.md) need P3a-01 (the
 nested-container rule and R05 item 1; item 2 is already on `main`), and
-[P3b-06](../../features/phase-03b-thermal-bridges/phases/p3b-06-thermal-bridge-colour-by.md) needs P3a-05 (the
+[P3b-06](../phase-03b-thermal-bridges/phases/p3b-06-thermal-bridge-colour-by.md) needs P3a-05 (the
 `derived` geometry it draws edges with). The files both tracks change are listed in
 [PLAN.md](PLAN.md), "Order and parallel work".
 

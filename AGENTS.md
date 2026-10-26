@@ -135,7 +135,7 @@ working namespace D8 confirmed; the final public name is still open. The followi
 | `core/` | What several features need and none owns: the record engine, dictionaries, JSON and declaration-schema builders, geometry and units primitives, model operations |
 | `session/` | One `ModelSession` per open Model, its generation, observers and per-feature state objects. Names no feature |
 | `shell/` | Transport and the action registry: the panel dialog, actions, commands, preferences. Names no feature |
-| `features/` | One folder per feature, each registering itself in one `install`. `zones/` owns Zones, Faces and adjacency; `assemblies/` owns Materials and Assemblies; `windows/` owns products, Types, Units and Aperture export |
+| `features/` | One folder per feature, each registering itself in one `install`. `zones/` owns Zones, Faces and adjacency; `assemblies/` owns Materials and Assemblies; `windows/` owns products, Types, Units and Aperture export; `thermal_bridges/` owns Thermal Bridge Types, Edge assignments, runs, the edge tool and the thermal-bridge export section |
 | `colour_by/` | The shared Colour-by service: the mode registry's consumers, the viewport overlay and HUD, and the drawing cache. Names no feature |
 | `library/` | The optional provider seam, file/folder provider, catalog/copy coordinator and model-library export |
 | `agent_access/` | Local agent access: the token store and the Agent Access dialog, a foundation capability with no public operation |

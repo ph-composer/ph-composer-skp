@@ -1,7 +1,7 @@
 # Thermal bridges
 
 DATE: 2026-09-18
-STATUS: Scoped. Interviewed 2026-10-03; answers recorded in [DECISIONS.md](DECISIONS.md) and folded in below. Corrected to the code on `main` at `420c783a` on 2026-10-21 (the assignment id and the HUD label shape).
+STATUS: Complete 2026-10-26, archived with the packet; built as recorded in [STATUS.md](STATUS.md). Was: Scoped. Interviewed 2026-10-03; answers recorded in [DECISIONS.md](DECISIONS.md) and folded in below. Corrected to the code on `main` at `420c783a` on 2026-10-21 (the assignment id and the HUD label shape).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 
@@ -157,7 +157,7 @@ model are not thermal bridges.
 The thermal-bridge export section is optional (D3b-20): a run that fails is omitted with a finding
 and the HBJSON and report are still written. `quantity` is written as authored; HBJSON is the
 canonical artifact. Whether PHX carries a lone bridge's quantity into METr is checked in
-[metr-export](../unscheduled/metr-export/README.md), as is every METr row below.
+[metr-export](../../features/unscheduled/metr-export/README.md), as is every METr row below.
 
 ## Edge tagging rules
 
@@ -177,7 +177,7 @@ spike measures them.
 4. An edge carries at most one assignment of each kind. A thermal bridge edge is envelope
    geometry. A pipe or duct edge is a loose line in its own group. The two never share an edge.
 
-The spike ran as [B4](../../archive/phase-00-foundation/evidence/spike-edge.md) on 2026-09-18.
+The spike ran as [B4](../phase-00-foundation/evidence/spike-edge.md) on 2026-09-18.
 Its open cases (native Divide and Weld, a push-pull that removes the edge, `intersect_with`, and
 the heal) close in P3b-01.
 
@@ -214,12 +214,12 @@ balcony line; confirm the schedule lengths against hand measurement; split an as
 confirm the documented behavior; export and find the runs in the HBJSON on the right
 Building-Segments. One Undo per assign. Save and reopen. The detailed register and the
 hand-calculated model are in [ACCEPTANCE.md](ACCEPTANCE.md). The METr check (`typeTbZ`, length,
-psi-value) waits with [metr-export](../unscheduled/metr-export/README.md).
+psi-value) waits with [metr-export](../../features/unscheduled/metr-export/README.md).
 
 ## Prior art and evidence
 
 - honeybee-ph `honeybee_energy_ph/construction/thermal_bridge.py`, `honeybee_ph/bldg_segment.py`.
 - PHX `to_METr_JSON/metr_schemas.py`, `_PhxComponentThermalBridge`.
 - honeybee-grasshopper-ph "HBPH - Create Thermal Bridges": polylines in, thermal bridges out.
-- [face-assignment](../../archive/face-assignment/PRD.md): Classify tools and the Colour-by component.
-- [assemblies](../../archive/assemblies/PRD.md): the inventory pattern and the usage scan rule.
+- [face-assignment](../face-assignment/PRD.md): Classify tools and the Colour-by component.
+- [assemblies](../assemblies/PRD.md): the inventory pattern and the usage scan rule.

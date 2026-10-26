@@ -4,9 +4,9 @@ DATE: 2026-10-13
 STATUS: Complete 2026-10-26: G-02 merged, G-03 superseded, G-01 and G-04 closed through thermal bridges. Stage ledger in [STATUS.md](STATUS.md).
 ISSUE: [#118](https://github.com/ph-composer/ph-composer-skp/issues/118)
 BASELINE: `cfe01a6aad99a0e09d5ecf0de5659c606d7ba4f9`
-FINDING: [F06](../../../archive/code-review/sections/03-services.md#f06-the-geometry-seams-cannot-yet-serve-ordinary-edges-or-derived-line-overlays)
-DEPENDS ON: the [thermal-bridge plan](../../phase-03b-thermal-bridges/PLAN.md) P3b-06 and
-P3b-08 are the adopters; [foundation purity](../../../archive/foundation-purity/PLAN.md) P-02 touches the same
+FINDING: [F06](../code-review/sections/03-services.md#f06-the-geometry-seams-cannot-yet-serve-ordinary-edges-or-derived-line-overlays)
+DEPENDS ON: the [thermal-bridge plan](../phase-03b-thermal-bridges/PLAN.md) P3b-06 and
+P3b-08 are the adopters; [foundation purity](../foundation-purity/PLAN.md) P-02 touches the same
 capture file if both run.
 
 ## Goal
@@ -84,7 +84,7 @@ No scene graph, no arbitrary draw callbacks, no polygon primitive until Spaces s
 
 ### G-01: confirm the shapes with the adopter
 
-State: Deferred to the [phase 3b ledger](../../phase-03b-thermal-bridges/STATUS.md#deferred-foundation-stages).
+State: Deferred to the [phase 3b ledger](../phase-03b-thermal-bridges/STATUS.md#deferred-foundation-stages).
 
 With P3b-01 and P3b-06 of the thermal-bridge plan open, confirm: the minimum Edge facts (are
 `vertex_ids` and `face_ids` enough for run formation; is visibility needed in the entry); whether
@@ -119,7 +119,7 @@ Exit: tests pass; export goldens unchanged except added Edge rows in snapshot fi
 
 ### G-03: line primitive
 
-State: Deferred to the [phase 3b ledger](../../phase-03b-thermal-bridges/STATUS.md#deferred-foundation-stages).
+State: Deferred to the [phase 3b ledger](../phase-03b-thermal-bridges/STATUS.md#deferred-foundation-stages).
 
 Files: `colour_by/service.rb`, `overlay.rb`, `install.rb` (documentation comment); tests
 `tests/colour_by_test.rb`, `tests/colour_by_panel_test.js` if the legend shape changes.
@@ -135,7 +135,7 @@ Exit: tests pass; the shared service names no feature.
 
 ### G-04: adopter integration and native proof
 
-State: Deferred to the [phase 3b ledger](../../phase-03b-thermal-bridges/STATUS.md#deferred-foundation-stages).
+State: Deferred to the [phase 3b ledger](../phase-03b-thermal-bridges/STATUS.md#deferred-foundation-stages).
 
 The thermal-bridge P3b-06 and P3b-08 stages consume the primitives; their native checks prove lines
 are visible and runs export. This packet records the receipts by reference and closes F06 only when

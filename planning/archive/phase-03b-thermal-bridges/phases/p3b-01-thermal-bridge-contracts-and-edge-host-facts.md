@@ -30,7 +30,7 @@ Paths are relative to `src/ph_composer/`.
    D3b-22 and D3b-23 included, and correct any drift. Fold the D3b-22 answer into CONTRACTS
    section 2 and the D3b-23 answer into section 1's `runs/` contract; record G-01's answers (the
    Edge facts, per-entry filtering, legend counting, line width) in the
-   [geometry contribution contracts](../../cross-phase/geometry-contribution-contracts/STATUS.md)
+   [geometry contribution contracts](../../geometry-contribution-contracts/STATUS.md)
    packet as well; both were answered as recommended on 2026-10-21.
 2. **Answer the rest of CONTRACTS section 7.** Questions 2 and 3 each get a focused test
    (`EntityStore` round-trips a record on a stub Edge and the dictionary reaches the export

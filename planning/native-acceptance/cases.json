@@ -4172,7 +4172,7 @@
       "id": "T01",
       "label": "Thermal-bridge edge host facts: a tagged edge inside a Zone-like Group under native Divide, native Weld, a push-pull that deletes it, intersect_with across it, and the heal when a crossing edge is erased, each with Undo, Redo, save and fresh-process reopen",
       "mode": "mixed",
-      "authority": "planning/features/phase-03b-thermal-bridges/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-03b-thermal-bridges/ACCEPTANCE.md",
       "paths": [
         "tools/spikes/edge/edge_spike.rb",
         "src/ph_composer/core/records/entity_store.rb",
@@ -4184,7 +4184,7 @@
       "id": "T02",
       "label": "Thermal Bridge Type catalog with the panel closed: the walkthrough creates three types, edits, duplicates and deletes one through registered actions; native Undo and Redo of each step; save, fresh-process reopen and the same catalog read back through types.all",
       "mode": "mixed",
-      "authority": "planning/features/phase-03b-thermal-bridges/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-03b-thermal-bridges/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/thermal_bridges/type/*",
         "src/ph_composer/features/thermal_bridges/declarations/types.rb",
@@ -4201,7 +4201,7 @@
       "id": "T03",
       "label": "Edge assignment with the panel closed on the two-Zone reference model: native selection of roof perimeter Edges inside a Zone, edges.selection, assign, native Undo and Redo, the same inside a Zone under a rotated wrapper; the refusals for an Edge inside a placed Window unit and at the Model root; types.delete with a replacement and Undo; a native split of an assigned Edge read on both pieces; save and fresh-process reopen",
       "mode": "mixed",
-      "authority": "planning/features/phase-03b-thermal-bridges/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-03b-thermal-bridges/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/thermal_bridges/assignment/*",
         "src/ph_composer/features/thermal_bridges/declarations/assignment.rb",
@@ -4219,7 +4219,7 @@
       "id": "T04",
       "label": "The thermal-bridge schedule with the panel closed on the classified reference model: the five reference runs assigned through edges.assign and schedule.all compared with the hand calculation; the same read inside an open context; the counted-twice case and its Undo; an assignment copied to the Model root read as outside a Zone; runs.locate into a Zone under a turned wrapper; the 50,000 Edge measurement",
       "mode": "mixed",
-      "authority": "planning/features/phase-03b-thermal-bridges/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-03b-thermal-bridges/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/thermal_bridges/runs/*",
         "src/ph_composer/features/thermal_bridges/scan/*",
@@ -4241,7 +4241,7 @@
       "id": "T05",
       "label": "The Thermal Bridges tab on the classified reference model, Ed at the mouse: Types create, an in-place edit and a stale-value refusal, duplicate, delete with a replacement; the roof perimeter selected natively and assigned from the assign bar and from the right-click menu, then cleared; the Schedule read on opening, its totals, Locate into a nested Zone; a display unit switch with a draft open; METr's third group word read on its screen; native window captures for the UI polish review",
       "mode": "mixed",
-      "authority": "planning/features/phase-03b-thermal-bridges/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-03b-thermal-bridges/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/html/features/thermal_bridges/*",
         "src/ph_composer/html/index.html",
@@ -4257,7 +4257,7 @@
       "id": "T06",
       "label": "The Thermal bridges Colour-by mode on the reference model with the five runs and Zone W's roof assigned: turned on from the native Colour by menu; assigned Edges thick in their type's colour, depth-tested, inside the Zone under the turned wrapper, nothing for unassigned Edges; a hidden tag, a hidden tag folder and a hidden ancestor hide the drawing and keep the legend; the HUD and the panel legend read label, count and length in the display units, before and after a unit switch; the legend's select and Show only this; window captures; draw cost at 5,000 assigned Edges",
       "mode": "mixed",
-      "authority": "planning/features/phase-03b-thermal-bridges/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-03b-thermal-bridges/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/colour_by/*",
         "src/ph_composer/features/thermal_bridges/colour_modes.rb",
@@ -4273,7 +4273,7 @@
       "id": "T07",
       "label": "The edge tool on the reference model with Ed at the mouse: armed with Parapet from the assign bar, hover highlight in the type's colour and a refused Edge in red with its reason; three clicks and a drag across Zone B's roof perimeter, each one native Undo step; Escape mid-drag and a type change mid-drag leave the gesture unwritten or unchanged; a Model switch and a raised callback write nothing; an Edge in a Window Unit and one at the Model root refuse on the status bar and in the notice; a drag past 250 Edges refuses whole; Stop gives back the Colour-by mode; the assign cost at the limit and the hover cost per newly hovered Edge",
       "mode": "mixed",
-      "authority": "planning/features/phase-03b-thermal-bridges/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-03b-thermal-bridges/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/thermal_bridges/edge_tool.rb",
         "src/ph_composer/features/thermal_bridges/declarations/edge_tool.rb",
@@ -4291,7 +4291,7 @@
       "id": "T08",
       "label": "The thermal-bridge export on the reference model with the five runs, normal packaged RBZ: export through an approved location; the exact HBJSON reloaded in the pinned stack with one Building-Segment carrying the five runs (identifier, display_name, geometry type, length, psi, group, quantity) and conformance passing; save, fresh-process reopen and re-export give the same HBJSON; an assigned Edge at the Model root, a sill line on the Window Unit's outline and a roof Edge counted twice appear in preflight and the report, the pair written; a cleared psi-value blocks in preflight and export and keeps the prior pair; the snapshot and contributor measured on the 50,000 Edge Model",
       "mode": "mixed",
-      "authority": "planning/features/phase-03b-thermal-bridges/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-03b-thermal-bridges/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/thermal_bridges/export.rb",
         "src/ph_composer/features/thermal_bridges/runs/*",
@@ -4313,7 +4313,7 @@
       "id": "T09",
       "label": "Phase 3b integrated run on the reference model in a fresh process with the normal installed RBZ: the five Thermal Bridge Types authored in the panel; runs assigned from the assign bar, the Thermal bridge menu and the edge tool, including a Zone under a turned wrapper; native Undo and Redo; a second Model opened and closed; an assigned Edge split and healed; save, fresh-process reopen, export and the exact HBJSON reloaded against ACCEPTANCE's tables; normal composition restored",
       "mode": "mixed",
-      "authority": "planning/features/phase-03b-thermal-bridges/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-03b-thermal-bridges/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/thermal_bridges/*",
         "src/ph_composer/html/features/thermal_bridges/*",

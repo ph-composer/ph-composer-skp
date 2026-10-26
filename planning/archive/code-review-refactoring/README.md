@@ -1,7 +1,7 @@
 # Architecture refactoring plans
 
 DATE: 2026-10-13
-STATUS: Complete and archived 2026-10-14. Eleven of twelve packets delivered and archived (PRs 99 to 126); the geometry contribution packet moved to `planning/features/cross-phase/geometry-contribution-contracts/` with G-02 delivered and G-01, G-03 and G-04 deferred to the phase 3b ledger.
+STATUS: Complete and archived 2026-10-14. Eleven of twelve packets delivered and archived (PRs 99 to 126); the geometry contribution packet moved to `planning/archive/geometry-contribution-contracts/` with G-02 delivered and G-01, G-03 and G-04 deferred to the phase 3b ledger.
 ISSUE: none (local planning draft)
 BASELINE: `cfe01a6aad99a0e09d5ecf0de5659c606d7ba4f9`
 
@@ -31,7 +31,7 @@ stable, and rows a later simplification made moot are marked withdrawn rather th
 | Library contracts | F05, RF-04 | Complete; merged ([PR #112](https://github.com/bldgtyp/ph-composer/pull/112)) and archived | [plan](../library-contracts/PLAN.md), [status](../library-contracts/STATUS.md), [acceptance](../library-contracts/ACCEPTANCE.md) |
 | Entity customization | RF-01, RF-03, F07 | Complete; merged (PRs #110, #122, #123, #126) and archived | archived at [planning/archive/entity-customization](../entity-customization/PLAN.md) |
 | Zone-child lifecycle | copied-Zone Windows request, shared pattern | Complete; merged (PRs #114 to #117) and archived | [plan](../zone-child-lifecycle/PLAN.md), [status](../zone-child-lifecycle/STATUS.md), [acceptance](../zone-child-lifecycle/ACCEPTANCE.md) |
-| Geometry contribution contracts | F06 | G-02 merged ([PR #119](https://github.com/bldgtyp/ph-composer/pull/119)); G-01, G-03, G-04 wait for the thermal-bridge adopter | [plan](../../features/cross-phase/geometry-contribution-contracts/PLAN.md), [status](../../features/cross-phase/geometry-contribution-contracts/STATUS.md), [acceptance](../../features/cross-phase/geometry-contribution-contracts/ACCEPTANCE.md) |
+| Geometry contribution contracts | F06 | G-02 merged ([PR #119](https://github.com/bldgtyp/ph-composer/pull/119)); G-01, G-03, G-04 wait for the thermal-bridge adopter | [plan](../geometry-contribution-contracts/PLAN.md), [status](../geometry-contribution-contracts/STATUS.md), [acceptance](../geometry-contribution-contracts/ACCEPTANCE.md) |
 | Foundation purity | F03 | Complete; archived after PR 121 | [plan](../foundation-purity/PLAN.md), [status](../foundation-purity/STATUS.md), [acceptance](../foundation-purity/ACCEPTANCE.md) |
 
 [Delivery order](DELIVERY_ORDER.md) records dependencies and PR boundaries. [Decisions](DECISIONS.md)

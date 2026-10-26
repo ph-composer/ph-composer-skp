@@ -22,7 +22,7 @@ issues and PRs are linked from each packet row as they open.
 | [Library contracts](../library-contracts/STATUS.md) | F05, RF-04 | LC-01 to LC-04 | Complete; merged in PR 112 ([#111](https://github.com/bldgtyp/ph-composer/issues/111)), native receipt passed, archived |
 | [Entity customization](../entity-customization/STATUS.md) | RF-01, RF-03, F07 | EC-01 to EC-05 | Complete; merged in PRs 110, 122, 123, 126 ([#109](https://github.com/bldgtyp/ph-composer/issues/109)), archived |
 | [Zone-child lifecycle](../zone-child-lifecycle/STATUS.md) | copied-Zone request | ZC-01 to ZC-04 | Complete; merged in PRs 114 to 117 ([#113](https://github.com/bldgtyp/ph-composer/issues/113)), native receipt passed, archived |
-| [Geometry seams](../../features/cross-phase/geometry-contribution-contracts/STATUS.md) | F06 | G-01 to G-04 | G-02 merged ([#118](https://github.com/bldgtyp/ph-composer/issues/118)); packet moved to `features/cross-phase/`, G-01, G-03, G-04 deferred to the phase 3b ledger |
+| [Geometry seams](../geometry-contribution-contracts/STATUS.md) | F06 | G-01 to G-04 | G-02 merged ([#118](https://github.com/bldgtyp/ph-composer/issues/118)); packet moved to `features/cross-phase/`, G-01, G-03, G-04 deferred to the phase 3b ledger |
 | [Foundation purity](../foundation-purity/STATUS.md) | F03 | P-01 to P-03 | Complete; merged in PR 121 and archived |
 
 Each packet's `STATUS.md` is its stage ledger and the entry point for `implement`. The

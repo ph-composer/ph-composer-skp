@@ -12,7 +12,7 @@
 # Tags are synthetic: a type id, an assignment id and a namespaced JSON payload on each edge. The registry
 # is what a feature record would hold: assignment id to the edge persistent ids it was made on.
 #
-# The cases B4 left open (planning/features/phase-03b-thermal-bridges, stage P3b-01), each followed by
+# The cases B4 left open (planning/archive/phase-03b-thermal-bridges, stage P3b-01), each followed by
 # native Undo, Redo, save and a fresh-process reopen, read with `EdgeSpike.scan` after every step:
 #
 #   EdgeSpike.run(:crossing)        # a line drawn up the south wall splits the tagged base edge in two

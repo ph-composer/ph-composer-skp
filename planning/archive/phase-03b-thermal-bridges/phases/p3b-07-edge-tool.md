@@ -68,7 +68,7 @@ unit and at the Model root each refuse with a reason; the forced mode releases o
 
 ## Out of scope
 
-A toolbar button ([zones-entry-points](../../unscheduled/zones-entry-points/README.md) E1). A
+A toolbar button ([zones-entry-points](../../../features/unscheduled/zones-entry-points/README.md) E1). A
 connected-edge flood: SketchUp's own Select Connected serves the primary route.
 
 ## Done when

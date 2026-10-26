@@ -64,7 +64,7 @@ section and report schedule, and item 4 to Phase 3b's P3b-08.
 4. **An optional attaching section withholds the model.** An attaching section that is not required
    for export still withholds the canonical model when it refuses. No such section exists yet; settle
    the rule before the first one does. Allocated 2026-10-03 to Phase 3
-   [P3b-08](../../phase-03b-thermal-bridges/phases/p3b-08-thermal-bridge-export.md): Ed made the
+   [P3b-08](../../../archive/phase-03b-thermal-bridges/phases/p3b-08-thermal-bridge-export.md): Ed made the
    thermal-bridge section optional, so a refused run is omitted and disclosed and the canonical model
    is still written. Delivered by P3b-08 on 2026-10-26 (`feature/thermal-bridges-p3b-08`): `assemble`
    withholds the canonical model only for a refusal from a section required for export; an optional

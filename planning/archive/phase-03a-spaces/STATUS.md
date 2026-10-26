@@ -129,7 +129,7 @@ Register ids S01 to S12 are in [ACCEPTANCE.md](ACCEPTANCE.md).
 | Empty Room defect | R05 item 1 | P3a-01 | Merged through #135: refused as `object.unavailable` |
 | Section-read cycle refusal | R05 item 2 | none | Delivered on `main` by PR #122 (`registration.cycle`); P3a-01 corrects validation-and-export's STATUS |
 | Results from runs that cannot publish | R05 item 3 | P3a-10 | Merged through #166 (D3a-10) |
-| Optional attaching section rule | R05 item 4 | Moved to Phase 3b, [P3b-08](../../features/phase-03b-thermal-bridges/phases/p3b-08-thermal-bridge-export.md), which delivers the first optional attaching section (D3b-20) | Moved |
+| Optional attaching section rule | R05 item 4 | Moved to Phase 3b, [P3b-08](../phase-03b-thermal-bridges/phases/p3b-08-thermal-bridge-export.md), which delivers the first optional attaching section (D3b-20) | Moved |
 | Restore Zone reads Space stamps | zones Q14 | P3a-04 | Implemented in slice B1 |
 | Where Zones appear, re-ruled | zones Q13 | none | Settled 2026-10-15 by D3a-16: every view of the Zones tab shows the Zone rows |
 | Unit-switch repaint cost on a large table | units U1-F1 | P3a-07, measure first | Browser preview median 815 ms at 300 Spaces (P3a-12); host measurement in #154 |

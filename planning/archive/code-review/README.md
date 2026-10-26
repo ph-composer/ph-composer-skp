@@ -1,7 +1,7 @@
 # Code and architecture review
 
 DATE: 2026-10-13
-STATUS: Complete and archived 2026-10-14. All 17 findings resolved by the refactoring program (PRs 99 to 126, archived at [code-review-refactoring](../code-review-refactoring/README.md)); F06's remaining geometry stages G-01, G-03 and G-04 continue in [features/cross-phase/geometry-contribution-contracts](../../features/cross-phase/geometry-contribution-contracts/STATUS.md), scheduled by phase 3b.
+STATUS: Complete and archived 2026-10-14. All 17 findings resolved by the refactoring program (PRs 99 to 126, archived at [code-review-refactoring](../code-review-refactoring/README.md)); F06's remaining geometry stages G-01, G-03 and G-04 continue in [archive/geometry-contribution-contracts](../geometry-contribution-contracts/STATUS.md), scheduled by phase 3b.
 ISSUE: none (local review requested by Ed)
 BASELINE: `main` at `cfe01a6aad99a0e09d5ecf0de5659c606d7ba4f9`
 

@@ -47,7 +47,7 @@ Register: [ACCEPTANCE](../ACCEPTANCE.md). Host procedure:
 8. **Follow-ups filed.** The refactor candidates from D3a-3 and D3a-4, the toolbar with
    zones-entry-points, the PHX checks with metr-export, and anything a stage deferred, each as a
    row in `planning/STATUS.md` or a note in its owning packet.
-9. **Thermal bridges.** Tell [Phase 3b](../../../features/phase-03b-thermal-bridges/STATUS.md) what Spaces
+9. **Thermal bridges.** Tell [Phase 3b](../../phase-03b-thermal-bridges/STATUS.md) what Spaces
    built that it reuses (the viewport-tool shape, `derived` segments in Colour-by, the container
    rule), noting any shape that differs from its CONTRACTS.
 

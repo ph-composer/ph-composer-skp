@@ -1,12 +1,12 @@
 # Phase 3 contract bindings: thermal bridges
 
 DATE: 2026-10-03
-STATUS: Scoped. Proposed bindings, drafted from source at `08c4807`, updated to Ed's answers of 2026-10-03 and re-read against `main` at `420c783a` on 2026-10-21 (DECISIONS Part 1b; section 8 below). P3b-01 confirms the two questions still open in section 7 and runs the architecture review before any feature stage starts.
+STATUS: Complete 2026-10-26, archived with the packet; built as recorded in [STATUS.md](STATUS.md). Was: Scoped. Proposed bindings, drafted from source at `08c4807`, updated to Ed's answers of 2026-10-03 and re-read against `main` at `420c783a` on 2026-10-21 (DECISIONS Part 1b; section 8 below). P3b-01 confirms the two questions still open in section 7 and runs the architecture review before any feature stage starts.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#301](https://github.com/ph-composer/ph-composer-skp/issues/301)
 
 The [PRD](PRD.md) defers exact names and schemas to its plan. This file is that binding, the
-counterpart of Phase 3a's [Spaces bindings](../../archive/phase-03a-spaces/CONTRACTS.md), whose H1 to H10 these
+counterpart of Phase 3a's [Spaces bindings](../phase-03a-spaces/CONTRACTS.md), whose H1 to H10 these
 numbers follow. It restates no
 behavior. Where a row and the PRD disagree about behavior, the PRD wins and this file is corrected.
 Where a row follows a decision in [DECISIONS.md](DECISIONS.md), it names the decision; all were

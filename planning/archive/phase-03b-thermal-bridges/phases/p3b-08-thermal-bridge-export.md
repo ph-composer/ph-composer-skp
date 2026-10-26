@@ -114,7 +114,7 @@ and read its log with `diagnostics --run-id`. Observe the host with the developm
 
 ## Out of scope
 
-METr conversion and import ([metr-export](../../unscheduled/metr-export/README.md)). `fRsi_value`
+METr conversion and import ([metr-export](../../../features/unscheduled/metr-export/README.md)). `fRsi_value`
 and `is_interior_pipe` authoring. Point thermal bridges (D3).
 
 ## Done when

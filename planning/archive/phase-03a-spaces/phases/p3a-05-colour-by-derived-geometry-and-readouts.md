@@ -16,7 +16,7 @@ Designed once against both users, as the [README](../README.md), "Carried in", r
 Spaces volume preview, labels and selection totals (spaces Q22), and the Window Type mode's
 operation marks (window-types, deferred by D2-6). Ed confirmed D3a-5 on 2026-10-15: the marks
 are built here as slice B. Phase 3b's
-[P3b-06](../../../features/phase-03b-thermal-bridges/phases/p3b-06-thermal-bridge-colour-by.md) is a third
+[P3b-06](../../phase-03b-thermal-bridges/phases/p3b-06-thermal-bridge-colour-by.md) is a third
 user: it draws assigned Edges as `derived` segments with the Edge as `entity`, and adds a per-mode
 stroke weight itself. Nothing for it is built here.
 
@@ -39,7 +39,7 @@ Paths are relative to `src/ph_composer/`.
    legend counts, and what a readout may read. Added 2026-10-15: name thermal bridges as the third
    user and settle, once, the deferred geometry stage G-03's `ColourBy::LineEntry` against Phase
    3b's D3b-11 `derived` segments, so the contract gets one line primitive
-   ([geometry contribution contracts](../../../features/cross-phase/geometry-contribution-contracts/STATUS.md)).
+   ([geometry contribution contracts](../../geometry-contribution-contracts/STATUS.md)).
    Say how derived shapes interact with the occurrence mask (`Service#filter`) and with a mode's
    `group`, both added since this stage was planned.
 2. **Derived geometry (H7).** `ColourBy::Entry` gains `derived`: a list of world-space polygons,

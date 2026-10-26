@@ -5,7 +5,7 @@ STATUS: Complete. P-01 to P-03 merged to main in PR 121 and archived.
 ISSUE: [#120](https://github.com/bldgtyp/ph-composer/issues/120)
 BASELINE: `cfe01a6aad99a0e09d5ecf0de5659c606d7ba4f9`
 FINDING: [F03](../code-review/sections/01-foundation.md#f03-the-common-foundation-mixes-pure-and-native-geometry-responsibilities)
-DEPENDS ON: nothing. Coordinate with [geometry contribution](../../features/cross-phase/geometry-contribution-contracts/PLAN.md)
+DEPENDS ON: nothing. Coordinate with [geometry contribution](../geometry-contribution-contracts/PLAN.md)
 G-02 if both touch capture in the same period: one owner, one diff.
 
 ## Goal
