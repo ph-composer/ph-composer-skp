@@ -20,9 +20,10 @@ PhComposerUI.define("features/thermal_bridges/assign_bar", ["request", "snapshot
     return "A selected Edge cannot be assigned because " + (REASONS[row.reason] || "no Zone holds it") + ".";
   }
 
-  function AssignBar(session, send, guard, refused) {
+  /* `notify(message, tone)` raises the panel's notice: a refusal's reason, or the confirmation of a write. */
+  function AssignBar(session, send, guard, refused, notify) {
     var self = this;
-    this.guard = guard; this.refused = refused;
+    this.guard = guard; this.refused = refused; this.notify = notify;
     this.requests = request.channel(session, send, "thermal-bridge-assign");
     this.root = ui.element("div", "tb-assign-bar");
     this.root.setAttribute("role", "region");
@@ -68,6 +69,7 @@ PhComposerUI.define("features/thermal_bridges/assign_bar", ["request", "snapshot
     return null;
   };
   AssignBar.prototype.submit = function (action) {
+    var self = this;
     if (this.disposed || this.requests.busy()) return;
     var reason = this.guard && this.guard();
     if (reason) { this.refused(reason); return; }
@@ -80,7 +82,13 @@ PhComposerUI.define("features/thermal_bridges/assign_bar", ["request", "snapshot
       params.thermal_bridge_type_id = this.type.value;
       params.quantity = this.quantityValue();
     }
-    this.requests.run(shared.PREFIX + "edges." + action, params);
+    var type = this.types.filter(function (entry) { return entry.id === params.thermal_bridge_type_id; })[0];
+    var edges = plural(rows.length, "Edge");
+    // A refusal already reaches the user through the panel's notice for action results.
+    this.requests.run(shared.PREFIX + "edges." + action, params, { onDone: function () {
+      self.notify(action === "clear" ? "Cleared the thermal bridge from " + edges + "." :
+        "Assigned " + (type ? type.values.name : "the type") + " to " + edges + ".", "success");
+    } });
     this.paint();
   };
   AssignBar.prototype.busy = function () { return this.requests.busy(); };

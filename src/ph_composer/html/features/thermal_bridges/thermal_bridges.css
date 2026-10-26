@@ -30,11 +30,8 @@
 .tb-schedule-totals, .tb-schedule-others { margin-top: 18px; }
 .tb-schedule-totals[hidden], .tb-schedule-others[hidden] { display: none; }
 .tb-schedule-totals h2, .tb-schedule-others h2 { margin: 0 0 8px; font-size: 13px; }
-.tb-schedule-totals { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 8px 18px; }
-.tb-schedule-totals h2 { grid-column: 1 / -1; }
+/* By type takes the full row and by group sits beneath, so neither table's last column falls out of view. */
+.tb-schedule-totals { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
 .tb-other-findings { margin: 0; padding: 0; list-style: none; }
 .tb-other-findings li { display: flex; align-items: baseline; gap: 10px; padding: 4px 0; border-bottom: 1px solid var(--line); }
 .tb-other-findings li span { flex: 1; }
-@media (max-width: 640px) {
-  .tb-schedule-totals { grid-template-columns: minmax(0, 1fr); }
-}

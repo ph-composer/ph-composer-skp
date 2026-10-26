@@ -42,7 +42,8 @@ class ThermalBridgeMenuTest < PhComposerTestCase
     assert_equal ["Parapet", "Slab edge"], entries.map(&:label)
 
     before = @model.operations.length
-    entries.first.handler.call(@session)
+    result = entries.first.handler.call(@session)
+    assert_equal "Assigned Parapet to 1 Edge.", result.fetch("message")
     assert_equal [@parapet, 1], STORE.read(@edge).values_at("thermal_bridge_type_id", "quantity")
     assert_equal before + 1, @model.operations.length
   end
@@ -54,7 +55,7 @@ class ThermalBridgeMenuTest < PhComposerTestCase
     assert_equal ["Parapet", "Slab edge", "Clear thermal bridge"], entries.map(&:label)
     assert entries[1].separator_after
 
-    entries.last.handler.call(@session)
+    assert_equal "Cleared the thermal bridge from 1 Edge.", entries.last.handler.call(@session).fetch("message")
     assert_nil STORE.read(@edge)
   end
 

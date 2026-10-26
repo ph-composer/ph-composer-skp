@@ -9,6 +9,9 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared)
   var LOCATE = shared.PREFIX + "runs.locate";
   var PSI = fields.LINEAR_PSI, LENGTH = fields.LENGTH_M, HEAT = fields.HEAT_LOSS;
   var QUANTITIES = { length_m: LENGTH, psi_w_mk: PSI, heat_loss_w_k: HEAT };
+  // Narrow enough that every column fits a panel about 1,000 px wide; each still resizes from its header.
+  var WIDTHS = { display_name: 120, zone: 110, building_segment: 130, type_name: 120, group: 130, length_m: 80,
+    psi_w_mk: 110, quantity: 80, heat_loss_w_k: 100 };
   var COLUMNS = [["display_name", "Thermal bridge"], ["zone", "Zone"], ["building_segment", "Building-Segment"],
     ["type_name", "Type"], ["group", "Group"], ["length_m", "Length"], ["psi_w_mk", "ψ-value"],
     ["quantity", "Quantity"], ["heat_loss_w_k", "Heat loss"]];
@@ -42,8 +45,9 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared)
     this.status.setAttribute("role", "status");
     this.refresh = ui.button("Refresh", function () { refresh(); });
     this.refresh.setAttribute("aria-label", "Refresh the schedule");
-    this.controls.root.appendChild(this.status);
+    // Refresh keeps its place; the status after it comes and goes.
     this.controls.root.appendChild(this.refresh);
+    this.controls.root.appendChild(this.status);
     root.appendChild(this.controls.root);
     this.mount = ui.element("div", "tb-schedule-table");
     // A click on a run's row selects its Edges; its controls (Locate, the findings glyph) keep their own clicks,
@@ -69,9 +73,14 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared)
     root.appendChild(this.layer);
   }
   Schedule.prototype.guard = function () { return this.locate.busy() ? "Wait for Locate to finish." : null; };
+  /* Locate opens the context holding the Edges, which is an Undo step of its own and so a new revision, but
+     changes no data: a read current when Locate was sent stays current through it. */
   Schedule.prototype.sendLocate = function (paths) {
     if (this.disposed || this.locate.busy()) return;
-    this.locate.run(LOCATE, { edge_paths: JSON.parse(JSON.stringify(paths)) });
+    var read = this.read, current = this.state && !read.stale(this.state);
+    this.locate.run(LOCATE, { edge_paths: JSON.parse(JSON.stringify(paths)) }, { onDone: function () {
+      if (current) read.carryForward = true;
+    } });
     this.paint();
   };
   /* `shown` is whether the Schedule is on screen: a hidden one only settles Locate and repaints when shown, so
@@ -79,6 +88,11 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared)
   Schedule.prototype.render = function (state, shown) {
     if (this.disposed) return;
     this.locate.consume(state);
+    // The first snapshot after a Locate carries its new revision; the read adopts it.
+    if (this.read.carryForward && this.read.result && this.read.result.revision !== state.revision) {
+      this.read.result.revision = state.revision;
+      this.read.carryForward = false;
+    }
     this.state = state;
     if (!shown) return;
     var value = this.read.value();
@@ -94,7 +108,7 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared)
     if (this.disposed || !this.state) return;
     var self = this, value = this.read.value(), state = this.state;
     this.status.textContent = this.read.busy() ? "Reading the Model..." : this.read.error ||
-      (this.read.stale(state) ? "The Model has changed since this was read." : "");
+      (this.read.stale(state) ? "Changed since read" : "");
     this.status.classList.toggle("tb-schedule-error", Boolean(this.read.error) && !this.read.busy());
     this.refresh.disabled = this.read.busy();
     // One Building-Segment never shows the field.
@@ -116,7 +130,7 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared)
     var rows = projected.records.map(function (run) {
       return { key: run.identifier, record: run, tier: "Run", depth: 0, parent: null };
     });
-    tables.table(this.mount, this.runs, { rows: rows, expanded: this.expanded,
+    tables.table(this.mount, this.runs, { rows: rows, expanded: this.expanded, defaultWidths: WIDTHS,
       columns: [["actions", "Actions"]].concat(COLUMNS.map(function (column) {
         return [column[0], header(column[1], column[0])];
       })),

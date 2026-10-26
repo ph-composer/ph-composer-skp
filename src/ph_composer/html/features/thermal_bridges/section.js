@@ -1,5 +1,5 @@
 /* The Thermal Bridges tab: one page header over two peer subtabs, Types and Schedule, and the one schedule
-   read they share. The read walks the Model, so it runs when the tab is opened, when Schedule is chosen, and
+   read they share. The read walks the Model, so it runs when the tab is opened, when a subtab is chosen, and
    on Refresh, and only if the last read is missing or older than the Model (context/TECH_STACK.md,
    "Edge-owned assignments"). */
 PhComposerUI.define("features/thermal_bridges/section", ["panel", "subtabs", "workspace",
@@ -26,8 +26,9 @@ function (panel, Subtabs, ui, shared, types, schedules) {
       { id: "schedule", label: "Schedule", surface: scheduleSurface }],
     guard: function () { return self.guard(); },
     refused: function (reason) { panel.notify(reason, "warning"); },
-    changed: function (id) {
-      if (id === "schedule") self.readIfNeeded(self.state);
+    changed: function () {
+      // Choosing a subtab is a request: either one shows the read, so a missing or stale one is read again.
+      self.readIfNeeded(self.state);
       panel.repaint();
     } });
     root.appendChild(this.tabs.root);

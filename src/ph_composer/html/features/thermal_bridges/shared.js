@@ -20,6 +20,9 @@ PhComposerUI.define("features/thermal_bridges/shared", ["request", "snapshot"], 
     this.requests = request.channel(session, send, "thermal-bridge-schedule", "query.invoke");
     this.result = null;
     this.error = "";
+    // Set by a view command that changed the revision but no data (Locate), so the next snapshot's revision is
+    // adopted rather than marking the read stale.
+    this.carryForward = false;
   }
   ScheduleRead.prototype.read = function () {
     return Boolean(this.requests.run(PREFIX + "schedule.all", {}));
@@ -31,7 +34,7 @@ PhComposerUI.define("features/thermal_bridges/shared", ["request", "snapshot"], 
     if (!outcome) return false;
     if (outcome.status === "completed") {
       this.result = { value: outcome.value, revision: outcome.revision };
-      this.error = "";
+      this.error = ""; this.carryForward = false;
     } else this.error = snapshot.message(outcome, "The schedule could not be read.");
     return true;
   };

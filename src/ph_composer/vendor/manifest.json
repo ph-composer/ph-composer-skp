@@ -146,34 +146,34 @@
       "sha256": "478e0f90fedd22e881fcf8e21decdcdc211bd80d59b852b34346c36f874030d9"
     },
     "html/features/thermal_bridges/assign_bar.js": {
-      "bytes": 8737,
+      "bytes": 9363,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "fc6df37cafd912d5663b43f6637d5c2712ecd490c7ba35975f5f419f2738aa02"
+      "sha256": "03513fb47f1e0d707740899ed5e81a1891338d9b1b136e6ce620d2937340ca17"
     },
     "html/features/thermal_bridges/schedule.js": {
-      "bytes": 13767,
+      "bytes": 14740,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "36f0aff3d525a4e7a41622957cab33428a2fc935daf72288b782e5ccbe72d498"
+      "sha256": "f29a87d0e76885adcd699476d0c75ade7bc1549b3c16b22bcb880f3aae0773a6"
     },
     "html/features/thermal_bridges/section.js": {
-      "bytes": 3305,
+      "bytes": 3389,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "04a99c0cbe6ef75a634c3b6c06195f2bc64e87c3ec954ab59b77df2c7e7ccb03"
+      "sha256": "4184fa86571b9a4efd0f3403e1ab67eaa3a8e4a6ee2c52676d7364bb4b3d5d5f"
     },
     "html/features/thermal_bridges/shared.js": {
-      "bytes": 2986,
+      "bytes": 3207,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "286d9cd68eb17a50d47e24fadfb724ece0653370ba03de67ce8bc9bb0e02e95e"
+      "sha256": "fdd53dd5905cb9d3576c512c6811dbe58bddbbd16d3bcf72ad3ac160a817d6a7"
     },
     "html/features/thermal_bridges/thermal_bridges.css": {
-      "bytes": 2712,
+      "bytes": 2660,
       "mime": "text/css; charset=utf-8",
-      "sha256": "800ffa38bbb0c0642d04b9961b9d4ff927ecf9e244e78ffa968d402c6062e628"
+      "sha256": "b4e7954307385b48fb1795c4eda0241b1c727d1ff2a7d65075fd04df0a890dfe"
     },
     "html/features/thermal_bridges/types.js": {
-      "bytes": 11210,
+      "bytes": 11277,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "55120d68509118e3494c3f94ecbe3421dd681ed9ba15b8437f9759348e63634c"
+      "sha256": "90f63e73801fa9d4a278285c00bbb603e14f516369a6b7b43cc41fbc448caba3"
     },
     "html/features/windows/audit.js": {
       "bytes": 3740,

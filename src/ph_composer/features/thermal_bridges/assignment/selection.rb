@@ -99,18 +99,21 @@ module PhComposer
           end
 
           def assign(type_id, quantity: DEFAULT_QUANTITY)
-            invoke("assign") do |targets|
+            invoke("assign", ->(count) { "Assigned #{type_name(type_id)} to #{edges(count)}." }) do |targets|
               { "targets" => targets, "thermal_bridge_type_id" => type_id, "quantity" => quantity }
             end
           end
 
           def clear
-            invoke("clear") { |targets| { "targets" => targets } }
+            invoke("clear", ->(count) { "Cleared the thermal bridge from #{edges(count)}." }) do |targets|
+              { "targets" => targets }
+            end
           end
 
           private
 
-          def invoke(name)
+          # `done` words the confirmation from the number of Edges written, as the panel's assign bar does.
+          def invoke(name, done)
             read = API.query(:context => @context, :name => "#{PREFIX}.selection_all")
             return show(read) unless read["status"] == "completed"
 
@@ -125,8 +128,19 @@ module PhComposer
               { "reference" => row.fetch("reference"), "expected_values" => row.fetch("values") }
             end
             @sequence += 1
-            show(API.invoke(:context => @context, :name => "#{PREFIX}.#{name}", :params => yield(targets),
-                            :request => { "sequence" => @sequence, "expected_revision" => read.fetch("revision") }))
+            result = API.invoke(:context => @context, :name => "#{PREFIX}.#{name}", :params => yield(targets),
+                                :request => { "sequence" => @sequence, "expected_revision" => read.fetch("revision") })
+            show(result["status"] == "completed" ? result.merge("message" => done.call(targets.length)) : result)
+          end
+
+          def edges(count)
+            count == 1 ? "1 Edge" : "#{count} Edges"
+          end
+
+          def type_name(type_id)
+            read = API.query(:context => @context, :name => "#{FEATURE_ID}.types.all")
+            row = read["status"] == "completed" && read.fetch("value").fetch("records").find { |r| r["id"] == type_id }
+            row ? row.dig("values", "name") : "the type"
           end
 
           def unreachable_message(row)

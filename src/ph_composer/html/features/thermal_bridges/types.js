@@ -92,7 +92,7 @@ function (panel, snapshot, ui, fields, units, preferences, unitFields, RecordFor
     this.create = ui.button("+ New " + LABEL, function () { if (allowed()) self.newType.open(); });
     this.bar = new bars.AssignBar(session, send, function () { return self.assignGuard(); }, function (reason) {
       panel.notify(reason, "warning");
-    });
+    }, panel.notify);
     root.appendChild(this.bar.root);
     var table = ui.element("div", "tb-types-table");
     root.appendChild(table);
@@ -135,17 +135,16 @@ function (panel, snapshot, ui, fields, units, preferences, unitFields, RecordFor
     return { count: totals.edge_count, description: "Used by " + totals.edge_count +
       (totals.edge_count === 1 ? " Edge, " : " Edges, ") + length + " in all." };
   };
-  /* The number alone under a header naming the unit; a dash until the schedule is read, muted once the Model
-     has changed since. */
+  /* The number alone under a header naming the unit, from a read of the Model as it is; a dash before the
+     schedule is read and once the Model has changed since, since an old length would read as current. */
   Types.prototype.lengthCell = function (td, value) {
-    var known = value !== null && value !== undefined;
+    var known = value !== null && value !== undefined && !this.stale;
     td.textContent = known ? units.format(value, fields.LENGTH_M,
       units.profile(fields.LENGTH_M, preferences.current()), { showUnit: false }) : "—";
-    var stale = known && this.stale;
-    td.classList.toggle("tb-muted", !known || stale);
-    ui.tooltip(td, !known ? (this.read.error ? "The schedule could not be read: " + this.read.error :
-      "Open the Schedule or Refresh it to measure used length") :
-      stale ? "Measured before the last change; Refresh the Schedule to update" : "");
+    td.classList.toggle("tb-muted", !known);
+    ui.tooltip(td, known ? "" : this.read.error ? "The schedule could not be read: " + this.read.error :
+      this.read.busy() ? "Measuring used length…" :
+      "The Model has changed since used length was measured; open the Schedule or choose Types again");
   };
   /* The first datasheet link as text. Following it would navigate the panel, so it is shown, not opened. */
   Types.prototype.datasheetCell = function (td, record) {

@@ -110,6 +110,14 @@ Recorded 2026-10-26 while building the stage; the screen is proposed until Ed ac
   last read when shown. Findings sit behind an alert glyph
   that opens a bubble with each message and its own Locate; Edges in no run and unreadable assignments
   collect under "Not in the schedule".
+- **From Ed's host review (2026-10-26).** Five changes before acceptance:
+  - Assign and Clear confirm with a success notice from the bar and the menu ("Assigned Parapet to 3 Edges.").
+  - Used length shows a dash once the Model has changed since the read, and choosing either subtab reads again.
+  - A Locate the Schedule sent keeps its read current: opening a context is an Undo step and a new revision,
+    but changes no data.
+  - Refresh sits before the status, which is shorter ("Changed since read"), so the control row does not reflow.
+  - The Schedule's columns are narrower so all nine fit a panel about 1,000 px wide, and the totals by type
+    take the full row with the totals by group beneath.
 - **Kit fix.** `library/library.css` made every inventory's Name header static, so it scrolled away under
   the sticky header row and its resize handle overhung the pane by 4 px (Assemblies too). The header now
   stays sticky to the top only.

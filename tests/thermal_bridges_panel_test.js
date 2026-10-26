@@ -41,7 +41,7 @@ function key(input, name) {
   input.listeners.keydown({ key: name, preventDefault: function () {}, stopImmediatePropagation: function () {} });
 }
 
-test("opening the tab reads the schedule once; used length shows it and mutes once the Model changes", function () {
+test("opening the tab reads the schedule once; used length shows it, and a dash once the Model changes", function () {
   var o = setup(), reads = named(o, PREFIX + "schedule.all");
   assert.strictEqual(reads.length, 1);
   assert.strictEqual(reads[0].type, "query.invoke");
@@ -56,10 +56,14 @@ test("opening the tab reads the schedule once; used length shows it and mutes on
   assert.strictEqual(parapet().classList.contains("tb-muted"), false);
   o.state.revision = 2; o.paint();
   assert.strictEqual(named(o, PREFIX + "schedule.all").length, 1, "a changed Model is marked, not read again");
-  assert.strictEqual(parapet().textContent, "18");
-  assert.strictEqual(parapet().classList.contains("tb-muted"), true, "a length read before the change is muted");
+  assert.strictEqual(parapet().textContent, "—", "a length read before the change is not shown as current");
+  assert.strictEqual(parapet().classList.contains("tb-muted"), true);
   o.view.tabs.select("schedule");
   assert.strictEqual(named(o, PREFIX + "schedule.all").length, 2, "opening Schedule on a changed Model reads it");
+  readSchedule(o);
+  o.state.revision = 3; o.paint();
+  o.view.tabs.select("types");
+  assert.strictEqual(named(o, PREFIX + "schedule.all").length, 3, "choosing Types on a changed Model reads it");
 });
 
 test("a Types cell edit sends types.update with its expected value and keeps a refused draft", function () {
@@ -116,6 +120,7 @@ test("Assign sends the assignable Edges with their values; Clear only those hold
   assert.deepStrictEqual(JSON.parse(JSON.stringify(assign.targets[1].expected_values)),
     { thermal_bridge_type_id: "tbt_b", quantity: 2 });
   assert.strictEqual(bar.assign.disabled, true, "a pending Assign holds the bar");
+  assert.strictEqual(o.notices.length, 0, "nothing is confirmed before the Model answers");
   o.state.ui.actionResult = { request_id: named(o, PREFIX + "edges.assign")[0].payload.request_id,
     session: "session", outcome: { status: "refused", code: "target.changed", message: "An Edge changed." } };
   o.paint();
@@ -124,6 +129,10 @@ test("Assign sends the assignable Edges with their values; Clear only those hold
   bar.clear.listeners.click({});
   var clear = named(o, PREFIX + "edges.clear")[0].payload.params;
   assert.deepStrictEqual(clear.targets.map(function (target) { return target.reference.entity_path[0]; }), [102]);
+  o.state.ui.actionResult = { request_id: named(o, PREFIX + "edges.clear")[0].payload.request_id,
+    session: "session", outcome: { status: "completed", value: { cleared: 1 } } };
+  o.paint();
+  assert.deepStrictEqual(o.notices, ["Cleared the thermal bridge from 1 Edge."], "a completed write is confirmed");
   assert.deepStrictEqual(JSON.parse(JSON.stringify(clear.targets[0].expected_values)),
     { thermal_bridge_type_id: "tbt_b", quantity: 2 });
 });
@@ -179,6 +188,12 @@ test("a schedule row's Locate icon, and a click on the row, send runs.locate wit
   o.paint();
   o.view.schedule.mount.listeners.click({ target: zone });
   assert.strictEqual(named(o, PREFIX + "runs.locate").length, 2, "clicking a row's cell locates the run");
+  var second = named(o, PREFIX + "runs.locate")[1].payload.request_id;
+  o.state.ui.viewResults[second] = { request_id: second, session: "session", outcome: { status: "completed",
+    value: {} } };
+  o.state.revision = 2; o.paint();
+  assert.strictEqual(o.view.read.stale(o.state), false, "opening the Edges' context leaves the read current");
+  assert.strictEqual(o.view.schedule.status.textContent, "");
   assert.deepStrictEqual(JSON.parse(JSON.stringify(named(o, PREFIX + "runs.locate")[1].payload.params.edge_paths)),
     [[100, 101], [100, 102], [100, 103], [100, 104]]);
   var heat = o.root.querySelectorAll(".col-heat_loss_w_k").map(function (td) { return td.textContent; });
