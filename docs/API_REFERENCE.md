@@ -9397,7 +9397,247 @@ Example params:
 
 ### `ph_composer.thermal_bridges.edges.selection`
 
-The selected Edges under the active path, each with the Zone holding it, its assignment and the refusal a write meets; other entities are reported as ignored. Owner: `ph_composer.thermal_bridges`.
+One bounded page of the selected Edges under the active path, each with the Zone holding it, its assignment and the refusal a write meets; other entities are reported as ignored. Owner: `ph_composer.thermal_bridges`.
+
+Refuses: `gesture.too_large`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "edges",
+    "ignored",
+    "ignored_total",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "reference",
+          "zone",
+          "reason",
+          "values",
+          "copied",
+          "record_problem",
+          "write_refusal"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "reference": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path",
+              "entity_path",
+              "entity_id"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "entity_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1
+              },
+              "entity_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The Edge's assignment id, or null for an Edge with none."
+              }
+            },
+            "description": "The Edge's reference, or null when no Zone holds it."
+          },
+          "zone": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path",
+              "building_segment",
+              "level"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "building_segment": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "level": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "description": "The Zone holding the Edge, as ph_composer.zones.containment reads it."
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Why no Zone holds it; null with a Zone."
+          },
+          "values": {
+            "type": "object",
+            "description": "The Edge's assignment values as stored (thermal_bridge_type_id and quantity); empty when it has none."
+          },
+          "copied": {
+            "type": "boolean",
+            "description": "Whether another Edge carries the same assignment id, as a split or a copy leaves it. Routine; nothing repairs it."
+          },
+          "record_problem": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Why the stored assignment is invalid, or null. An invalid one can still be cleared or reassigned."
+          },
+          "write_refusal": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "description": "The refusal a write to the Edge meets from its path, or null."
+          }
+        }
+      }
+    },
+    "ignored": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "persistent_id",
+          "type"
+        ],
+        "properties": {
+          "persistent_id": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Selected entities that are not Edges, the first 50; never assigned."
+    },
+    "ignored_total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "How many selected entities are not Edges."
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 50
+}
+```
+
+### `ph_composer.thermal_bridges.edges.selection_all`
+
+Every selected Edge in one read, for the panel and the menu route. Owner: `ph_composer.thermal_bridges`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.thermal_bridges.edges.selection` instead.
 
 Refuses: `gesture.too_large`, `record.unreadable`, `validation.failed`, and the `query` common set.
 
@@ -9531,17 +9771,7 @@ Result:
           },
           "values": {
             "type": "object",
-            "additionalProperties": false,
-            "required": [],
-            "properties": {
-              "thermal_bridge_type_id": {
-                "type": "string"
-              },
-              "quantity": {
-                "type": "number"
-              }
-            },
-            "description": "The Edge's assignment values; empty when it has none."
+            "description": "The Edge's assignment values as stored (thermal_bridge_type_id and quantity); empty when it has none."
           },
           "copied": {
             "type": "boolean",
@@ -28896,16 +29126,6 @@ Params:
           },
           "expected_values": {
             "type": "object",
-            "additionalProperties": false,
-            "required": [],
-            "properties": {
-              "thermal_bridge_type_id": {
-                "type": "string"
-              },
-              "quantity": {
-                "type": "number"
-              }
-            },
             "description": "The Edge's assignment values as last read; {} or absent for an Edge with none. A changed value refuses as target.changed."
           }
         }
@@ -28979,7 +29199,7 @@ Undo step: Clear Thermal Bridge. Removes the assignment record from each Edge.
 
 Before calling: Each Edge is inside a Zone, reached through no shared, locked or other Zone storage. Each target carries the reference and values edges.selection last read.
 
-Refuses: `gesture.too_large`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
+Refuses: `copy.rule_missing`, `gesture.too_large`, `record.unreadable`, `reference.in_use`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -29037,16 +29257,6 @@ Params:
           },
           "expected_values": {
             "type": "object",
-            "additionalProperties": false,
-            "required": [],
-            "properties": {
-              "thermal_bridge_type_id": {
-                "type": "string"
-              },
-              "quantity": {
-                "type": "number"
-              }
-            },
             "description": "The Edge's assignment values as last read; {} or absent for an Edge with none. A changed value refuses as target.changed."
           }
         }
@@ -51998,4 +52208,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.8 | 2026-10-18 | The capture capability and ph_composer.view.capture are new; describe names the grant a view command declares when it is not view. |
 | 1.9 | 2026-10-21 | ph_composer.view.capture no longer answers window_state: every window state measured gives the current view. |
 | 1.10 | 2026-10-25 | ph_composer.thermal_bridges is new: the Thermal Bridge Type kind, types.list, types.all and its snapshot section, and types.create, types.update, types.duplicate and types.delete. |
-| 1.11 | 2026-10-25 | ph_composer.zones.containment is new. ph_composer.thermal_bridges.edges.assign, edges.clear, edges.selection and the edges.selected snapshot section are new, over the ph_composer.thermal_bridges.edge reference target; types.delete takes replacement_id. |
+| 1.11 | 2026-10-25 | ph_composer.zones.containment is new. ph_composer.thermal_bridges.edges.assign, edges.clear, edges.selection (bounded), edges.selection_all and the edges.selected snapshot section are new, over the ph_composer.thermal_bridges.edge reference target; types.delete takes replacement_id. |
