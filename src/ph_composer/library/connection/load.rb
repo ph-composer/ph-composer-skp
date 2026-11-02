@@ -84,6 +84,8 @@ module PhComposer
           return drop unless current?
 
           response = call(:poll_load) { @provider.poll_load(@operation) }
+          # The poll itself may have moved the connection on.
+          return drop unless current?
           return publish(response) unless response.nil?
 
           if Manager.clock.call - @started > TIMEOUT_SECONDS
@@ -93,6 +95,9 @@ module PhComposer
           schedule
         rescue Error => error
           fail_load(error)
+        rescue *EXTENSION_ERRORS
+          # An adapter or admission fault: the load ends `stale` or `unavailable`, never stuck `loading`.
+          fail_load(Error.new("library.provider_failed", "The library could not be loaded."))
         end
 
         def publish(response)
@@ -121,7 +126,7 @@ module PhComposer
         # Best effort: the provider's own failure to stop changes nothing here.
         def stop_provider
           @provider.cancel_load(@operation)
-        rescue StandardError
+        rescue *EXTENSION_ERRORS
           nil
         end
 
@@ -135,7 +140,7 @@ module PhComposer
         # A provider failure keeps its code only when the callback declares it.
         def call(callback)
           yield
-        rescue StandardError => error
+        rescue *EXTENSION_ERRORS => error
           raise Connection.refusal(error, @declaration, callback), :cause => nil
         end
       end

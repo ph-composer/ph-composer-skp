@@ -125,6 +125,15 @@ class LibraryHostedCopyTest < PhComposerTestCase
     end
     refused = invoke("#{PREFIX}.copy", params)
     assert_equal "library.model_changed", refused.fetch("code")
+    assert_equal "none", refused.fetch("effect")
+  end
+
+  # The window is checked again after the writes are staged, just before the action commits them.
+  def test_a_window_that_expires_while_the_writes_are_staged_refuses_with_no_write
+    readings = [100.0, 101.0, 100.0 + PhComposer::Library::Connection::Use::WINDOW_SECONDS + 1]
+    Manager.clock = -> { readings.length > 1 ? readings.shift : readings.first }
+    refuses_without_writing("library.use_expired")
+    assert_equal 1, @server.uses.length
   end
 
   def test_a_catalog_loaded_under_an_older_connection_must_be_loaded_again

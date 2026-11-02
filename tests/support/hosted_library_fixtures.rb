@@ -69,6 +69,7 @@ module HostedLibraryFixtures
 
     def disconnect
       @calls << :disconnect
+      HostedLibraryFixtures.server.fail(:disconnect)
       context.credentials.delete(context.provider_kind, @connection_id) if @connection_id
       @state = "disconnected"
       @connection_id = nil

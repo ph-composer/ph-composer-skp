@@ -88,10 +88,9 @@ class LibraryConnectionTest < PhComposerTestCase
     refute Registry.installed?("test.hosted")
   end
 
-  def test_a_refused_reinstall_is_logged_and_leaves_composer_composed
+  def test_a_refused_reinstall_is_left_out_and_leaves_composer_composed
     Registry.install([probe])
-    original = Registry.current.installed_batches.last
-    Registry.current.installed_batches[-1] = [probe(:lifecycle => [:sign_in])] + original
+    Registry.current.installed_batches[-1] = [probe(:lifecycle => [:sign_in])]
     PhComposer.compose
     assert Registry.installed?("ph_composer.library")
     refute Registry.installed?("test.probe")
@@ -169,6 +168,33 @@ class LibraryConnectionTest < PhComposerTestCase
     assert_nil state.transport(PROVIDER_ID, "materials")
     assert_equal "unloaded", state.fetch(PROVIDER_ID, "materials", Registry.current).fetch("state")
     assert_includes connection.calls, :disconnect
+  end
+
+  # The extension's own disconnect normally erases its credential; when it refuses, Remove still does.
+  def test_a_refused_disconnect_still_lets_remove_erase_the_credential_and_reports_the_refusal
+    connection.finish_sign_in
+    HostedLibraryFixtures.server.failures[:disconnect] = RuntimeError.new("revoke endpoint unreachable")
+    refused = setup_call("#{PREFIX}.remove")
+    assert_equal %w[refused library.provider_failed], refused.values_at("status", "code")
+    assert_nil PhComposer::Library::Connection::CredentialStore.read(PROVIDER_KIND, "connection-1")
+  end
+
+  def test_an_abstract_stub_or_a_changed_call_inside_the_factory_is_handled
+    stubbed = probe(:connection => lambda do |context|
+      context.changed.call
+      Class.new do
+        def status
+          raise NotImplementedError
+        end
+      end.new
+    end)
+    Registry.install([stubbed])
+    row = connections.find { |item| item.fetch("provider_kind") == "test.probe.hosted" }
+    assert_equal "unavailable", row.fetch("state")
+    Manager.connection(Registry.current.library_providers.fetch("test.probe.hosted"))
+           .define_singleton_method(:connect) { raise NotImplementedError }
+    refused = setup_call("#{PREFIX}.connect", "provider_kind" => "test.probe.hosted")
+    assert_equal "library.provider_failed", refused.fetch("code")
   end
 
   def test_a_new_connection_id_reported_through_changed_clears_the_old_connections_catalogs

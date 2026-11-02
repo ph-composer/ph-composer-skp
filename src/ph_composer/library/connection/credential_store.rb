@@ -88,8 +88,11 @@ module PhComposer
             service = service(provider_id)
             status, item = find(service, connection_id, :data => false)
             if status.zero?
-              check!(api.SecKeychainItemModifyAttributesAndData(item, nil, value.bytesize, value))
-              api.CFRelease(item)
+              begin
+                check!(api.SecKeychainItemModifyAttributesAndData(item, nil, value.bytesize, value))
+              ensure
+                api.CFRelease(item)
+              end
             else
               check!(status) unless status == NOT_FOUND
               check!(api.SecKeychainAddGenericPassword(nil, service.bytesize, service, connection_id.bytesize,
@@ -101,8 +104,8 @@ module PhComposer
             status, item, value = find(service(provider_id), connection_id, :data => true)
             return nil if status == NOT_FOUND
 
+            api.CFRelease(item) if status.zero?
             check!(status)
-            api.CFRelease(item)
             value
           end
 
@@ -111,9 +114,11 @@ module PhComposer
             return false if status == NOT_FOUND
 
             check!(status)
-            result = api.SecKeychainItemDelete(item)
-            api.CFRelease(item)
-            check!(result)
+            begin
+              check!(api.SecKeychainItemDelete(item))
+            ensure
+              api.CFRelease(item)
+            end
             true
           end
 

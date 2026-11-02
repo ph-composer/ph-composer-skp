@@ -57,10 +57,15 @@ class LibraryCredentialStoreTest < PhComposerTestCase
     assert_equal "library.credential_store_unavailable", code { Store.read("test.hosted", "c") }
   end
 
-  # Loading this file on a platform without Fiddle or the OS library must not fail; only use does.
-  def test_platform_backends_load_nothing_until_used
-    assert_instance_of Store::Keychain, Store::Keychain.new
-    assert_instance_of Store::CredentialManager, Store::CredentialManager.new
+  # Loading the store never loads Fiddle or an OS library, so a platform without them still loads
+  # Composer; only a backend's first use does.
+  def test_loading_the_store_loads_no_fiddle_and_each_platform_gets_its_backend
+    file = File.expand_path("../src/ph_composer/library/connection/credential_store.rb", __dir__)
+    script = 'module PhComposer; class CodedError < StandardError; end; module Library; ' \
+             'class Error < CodedError; end; module Connection; PUBLIC_ID = /x/.freeze; end; end; end; load ARGV[0]; ' \
+             'PhComposer::Library::Connection::CredentialStore::Keychain.new; ' \
+             'print $LOADED_FEATURES.grep(/fiddle/).empty?'
+    assert_equal "true", IO.popen([RbConfig.ruby, "-e", script, file], &:read)
     Store.backend = nil
     expected = if RUBY_PLATFORM.include?("darwin") then Store::Keychain
                elsif Gem.win_platform? then Store::CredentialManager

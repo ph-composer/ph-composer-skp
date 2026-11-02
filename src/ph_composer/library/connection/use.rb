@@ -89,7 +89,7 @@ module PhComposer
                                            :snapshot_id => @transport.dig("snapshot", "id"),
                                            :selection => Provider.immutable(selection))
           answer.is_a?(Symbol) ? answer.to_s : answer
-        rescue StandardError => error
+        rescue *EXTENSION_ERRORS => error
           raise Connection.refusal(error, @declaration, :authorize_use), :cause => nil
         end
       end

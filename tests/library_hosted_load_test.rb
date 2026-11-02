@@ -195,6 +195,32 @@ class LibraryHostedLoadTest < PhComposerTestCase
     assert_equal "library.source_revision_invalid", catalog.dig("failure", "code"), "duplicate"
   end
 
+  def test_an_unexpected_fault_while_publishing_ends_the_load_instead_of_leaving_it_loading
+    admission = PhComposer::Library::Admission
+    original = admission.method(:revisioned)
+    admission.define_singleton_method(:revisioned) { |*_arguments, **_options| raise NoMethodError, "adapter fault" }
+    load
+    @server.response = hosted_response
+    UI.run_timers
+    assert_equal %w[unavailable library.provider_failed], [catalog.fetch("state"), catalog.dig("failure", "code")]
+    assert_equal 0, UI.timer_count
+  ensure
+    admission.define_singleton_method(:revisioned, original)
+  end
+
+  # A connection id that changes during the poll drops the answer, even if the extension never said so.
+  def test_an_answer_whose_poll_moved_the_connection_on_is_not_published
+    load
+    @server.response = hosted_response
+    swapped = connection
+    @server.define_singleton_method(:response) do
+      swapped.instance_variable_set(:@connection_id, "connection-2")
+      @response
+    end
+    UI.run_timers
+    assert_nil catalog.fetch("generation")
+  end
+
   def test_a_malformed_snapshot_identity_is_refused_before_admission
     error = assert_raises(PhComposer::Library::Error) do
       hosted_response(:library_revision => 0)

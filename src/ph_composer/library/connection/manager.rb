@@ -18,6 +18,10 @@ module PhComposer
       # status changed outside a lifecycle action (a finished browser sign-in, a lost refresh).
       Context = Struct.new(:provider_kind, :credentials, :changed, keyword_init: true)
 
+      # What extension code may raise that core turns into a coded refusal: an abstract stub's
+      # NotImplementedError is a ScriptError, not a StandardError.
+      EXTENSION_ERRORS = [StandardError, NotImplementedError].freeze
+
       # A provider failure as the refusal it may become: its own code when the callback declared it,
       # `library.provider_failed` otherwise. Text, details and the cause are never kept.
       def self.refusal(error, declaration, callback)
@@ -77,8 +81,10 @@ module PhComposer
           record(declaration).connection
         end
 
+        # Reads the status first, so a connection id the extension changed without calling `changed`
+        # still moves the generation before anyone compares it.
         def generation(declaration)
-          record(declaration).generation
+          status(declaration).fetch("generation")
         end
 
         # The connection's public status: `state`, `label` and `connection_id`, never a credential. A
@@ -103,7 +109,7 @@ module PhComposer
           entry = record(declaration)
           begin
             entry.connection.public_send(action)
-          rescue StandardError => error
+          rescue *EXTENSION_ERRORS => error
             raise Connection.refusal(error, declaration, action), :cause => nil
           ensure
             advance(declaration, entry, :clear => action == :disconnect) unless action == :settings
@@ -120,7 +126,7 @@ module PhComposer
           refused = nil
           begin
             entry.connection.disconnect if Array(declaration.lifecycle).include?(:disconnect)
-          rescue StandardError => error
+          rescue *EXTENSION_ERRORS => error
             refused = Connection.refusal(error, declaration, :disconnect)
           end
           begin
@@ -141,15 +147,16 @@ module PhComposer
 
         def record(declaration)
           records[declaration.name] ||= begin
+            # A `changed` from inside the factory, before the record exists, has nothing to re-read.
             context = Context.new(:provider_kind => declaration.name, :credentials => credentials,
-                                  :changed => -> { changed(declaration) })
+                                  :changed => -> { changed(declaration) if records.key?(declaration.name) })
             made = declaration.connection.call(context)
             raise Error.new("library.provider_failed", "The library connection could not start.") if made.nil?
 
             Record.new(:connection => made, :generation => 1, :connection_id => nil, :observed => false)
           rescue Error
             raise
-          rescue StandardError
+          rescue *EXTENSION_ERRORS
             raise Error.new("library.provider_failed", "The library connection could not start."), :cause => nil
           end
         end
@@ -163,7 +170,7 @@ module PhComposer
           return { "state" => "unavailable", "label" => fallback, "connection_id" => nil } unless valid
 
           { "state" => value["state"], "label" => value["label"].strip, "connection_id" => value["connection_id"] }
-        rescue StandardError
+        rescue *EXTENSION_ERRORS
           { "state" => "unavailable", "label" => fallback, "connection_id" => nil }
         end
 
