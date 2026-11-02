@@ -27,9 +27,13 @@ module PhComposer
         properties = %w[provider_kind library_id record_kind record_id fingerprint copied_at].to_h do |key|
           [key, { "type" => "string", "minLength" => 1 }]
         end
+        # A hosted source's exact revision. Both keys or neither: a copy without them is legacy, and its
+        # revision is unknown, never inferred from a matching fingerprint.
         properties.merge!("kind" => { "type" => "string", "enum" => %w[manual derived library] },
                           "fingerprint_version" => { "type" => "integer", "enum" => [1] },
-                          "snapshot" => { "type" => "object" })
+                          "snapshot" => { "type" => "object" },
+                          "source_revision" => { "type" => "integer", "minimum" => 1 },
+                          "source_revision_schema_version" => { "type" => "integer", "enum" => [1] })
         SchemaShapes.object(properties, :optional => properties.keys - ["kind"])
       end
 
@@ -60,6 +64,9 @@ module PhComposer
 
         found = JsonSchema.validate(source.fetch("snapshot"), snapshot_schema)
         found << "Library fingerprint version must be 1." unless source.fetch("fingerprint_version") == 1
+        if source.key?("source_revision") != source.key?("source_revision_schema_version")
+          found << "Library source revision and its schema version go together."
+        end
         begin
           Time.iso8601(source.fetch("copied_at"))
         rescue ArgumentError

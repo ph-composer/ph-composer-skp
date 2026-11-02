@@ -23,6 +23,9 @@ module PhComposer
                 :export_contributors, :reference_retargeters, :transition_contributors, :proposal_participants,
                 :library_providers, :library_kinds, :colour_modes, :colour_readouts, :menu_items, :codes,
                 :subscriptions
+    # Each batch `Registry.install` published, in order, so a new composition can install again what
+    # another extension added (extension.rb, `compose`).
+    attr_reader :installed_batches
 
     class << self
       def current
@@ -42,6 +45,7 @@ module PhComposer
           raise RegistrationError, diagnostics unless diagnostics.empty?
 
           current.publish(staged)
+          current.installed_batches << features.dup.freeze
         ensure
           @installing = false
         end
@@ -81,6 +85,7 @@ module PhComposer
       @menu_items = {}
       @codes = {}
       @subscriptions = []
+      @installed_batches = []
       @unsubscribers = []
       @owners = {}
     end
@@ -200,7 +205,7 @@ module PhComposer
       Declarations::ReferenceRetargeter => %i[name owner target_kind],
       Declarations::TransitionContributor => %i[name owner transition refuses],
       Declarations::ProposalParticipant => %i[name owner description params result examples refuses participants],
-      Declarations::LibraryProvider => %i[name owner contract_version kinds],
+      Declarations::LibraryProvider => %i[name owner contract_version kinds lifecycle refuses],
       Declarations::LibraryKind => %i[name owner contract_version record_kind],
       Declarations::HostEventSubscription => %i[owner kind],
       Declarations::Code => %i[code owner description]
@@ -499,10 +504,12 @@ module PhComposer
         @staging.add(:declared_proposal_participants, id, name, declaration)
       end
 
-      def library_provider(name, contract_version:, kinds:, &factory)
+      # Version 2 adds `lifecycle:`, `connection:` and `refuses:` (Declarations::LibraryProvider).
+      def library_provider(name, contract_version:, kinds:, lifecycle: nil, connection: nil, refuses: nil, &factory)
         declaration = Declarations::LibraryProvider.new(:name => name, :owner => id,
                                                         :contract_version => contract_version, :kinds => kinds,
-                                                        :factory => factory)
+                                                        :factory => factory, :lifecycle => lifecycle,
+                                                        :connection => connection, :refuses => refuses)
         @staging.add(:declared_library_providers, id, name, declaration)
       end
 

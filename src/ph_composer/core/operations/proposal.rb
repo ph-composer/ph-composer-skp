@@ -13,6 +13,18 @@ module PhComposer
         @scopes = []
         @findings = []
         @captures = nil
+        @commit_checks = []
+      end
+
+      # A check that must still pass when the proposal is applied, not only when it was staged: a
+      # time-bound permission such as a library use check. Dispatch runs every one immediately before
+      # the native transaction opens (`run_commit_checks!`); one that raises refuses the whole proposal.
+      def add_commit_check(&check)
+        @commit_checks << check
+      end
+
+      def run_commit_checks!
+        @commit_checks.each(&:call)
       end
 
       def add_step(step, scopes:)

@@ -415,7 +415,74 @@ implemented example at `features/assemblies/library_kind.rb`. Providers use the
 and actions after private per-machine setup. The separate synthetic provider extension at
 `tools/examples/library_provider/` passes the shared provider contract, load-order diagnostics,
 registration refusal and panel-closed public API copy/read-back on both Rubies. Its native
-installation and standalone repository remain open. A connection provider is still proposed.
+installation and standalone repository remain open.
+
+### Hosted library providers
+
+A library that signs in and loads over the network declares contract version 2. Core owns when things
+happen; the extension owns how, including its transport, its sign-in, token refresh and how its
+service's errors map to connection states. Core holds no address, sign-in mode or vendor name.
+
+```ruby
+feature.library_provider("example.library.hosted", contract_version: 2, kinds: %w[materials],
+                         lifecycle: %i[connect disconnect reauthorize settings],
+                         connection: ->(context) { ExampleConnection.new(context) },
+                         refuses: { begin_load: [], poll_load: ["library.example_snapshot_gone"],
+                                    cancel_load: [], authorize_use: ["library.example_entitlement_ended"],
+                                    connect: [], disconnect: [], reauthorize: [], settings: [] }) do |_registry|
+  [ExampleProvider.new]
+end
+```
+
+- **Declaration.** `contract_version` is 1 or 2; version 1 declares none of `lifecycle:`,
+  `connection:` or `refuses:`, and version 2 declares all three. `lifecycle:` lists the actions the user
+  can start, from `connect`, `disconnect`, `reauthorize` and `settings`, and must include `disconnect`,
+  which Remove calls. `refuses:` has one list per
+  callback: the four provider callbacks below and each declared lifecycle action. Each code matches
+  `library.[a-z0-9_.]+`. A provider failure keeps its code only when that callback declares it, and
+  otherwise becomes `library.provider_failed`; its text never reaches an outcome. Discovery adds the
+  declared codes to the refusals of `ph_composer.library.load` (`begin_load`), `copy` and
+  `copy_into_proposal` (`authorize_use`) and the matching connection command.
+- **Connection.** Core calls the `connection:` factory once per SketchUp process
+  (`Library::Connection::Manager`), with a `Connection::Context` holding `provider_kind` (the
+  declaration name), `credentials` (the credential store) and `changed`, which the extension calls on
+  the main thread when its status changes outside a lifecycle action. The object answers `status`, a
+  Hash of `state` (`disconnected`, `authorizing`, `connected`, `reauthorization_required` or
+  `unavailable`), a nonblank `label` and an optional public `connection_id`, plus one method per
+  declared lifecycle action. A status that does not read as one is `unavailable`. Each action except
+  `settings`, and each new `connection_id`, starts a new connection generation: loads and use checks
+  begun under an older one are dropped, and `disconnect` or a new connection id clears what the
+  connection loaded. Local copies are never touched.
+- **Provider.** The provider factory is still called per lookup and starts no sign-in, network or
+  storage work. A version 2 instance answers `id`, `provider_kind`, `label`, `kinds`,
+  `begin_load(kind, connection:, operation:)`, `poll_load(operation)`, `cancel_load(operation)` and
+  `authorize_use(operation_id:, snapshot_id:, selection:)`. `operation` is a
+  `Connection::Operation` with `id`, `kind` and `generation`. `poll_load` returns nil while the load runs
+  and a `Library::Provider::RevisionedBatch` when it is done.
+- **Snapshot.** `RevisionedBatch.new(batch:, snapshot:, source_revisions:)` carries a v1 `Batch`,
+  unchanged, the snapshot `{ "id", "library_revision", "projection_schema_version" }` and one
+  positive integer source revision per row, keyed `"<wire kind>/<library id>/<record id>"`. A missing,
+  duplicate, zero, negative or foreign key refuses the whole snapshot with
+  `library.source_revision_invalid`; the v1 admission rules then apply unchanged.
+- **Use check.** `authorize_use` answers `allowed`, `reload_required`, `reauthorization_required` or
+  `unavailable` for the selection `[{ "kind", "library_id", "record_id", "source_revision" }]`. Core
+  asks it before a `create` or `use_library` copy stages any write, in preview and invoke alike, and
+  refuses with no write when the answer is not `allowed`, takes longer than five seconds, or the
+  connection generation, destination Model or loaded snapshot changed meanwhile. The proposal checks
+  the same again immediately before the enclosing action commits (`Proposal#add_commit_check`), so an
+  action importing several records through `copy_into_proposal` commits none once one has expired.
+  `keep_local` takes nothing from the library and asks nothing.
+- **Provenance.** A copy from a version 2 source keeps `source_revision` and
+  `source_revision_schema_version` (1) in its `source`, in the same Undo step as the copy. Local edits and
+  `keep_local` keep them; only `use_library` adopts a newer revision. A copy without them is a legacy
+  copy whose revision is unknown; a matching fingerprint never fills one in.
+- **Credentials.** `Library::Connection::CredentialStore.write(provider_id, connection_id, value)`,
+  `read` and `delete` keep one OS item per declaration name and connection id, never keyed by a firm
+  name or email. Values are at most 2,560 bytes and never leave the process. A failed write raises
+  `library.credential_store_failed`; the extension reports it as `reauthorization_required`.
+
+The fake hosted library in `tests/support/hosted_library_fixtures.rb` exercises the whole seam with no
+network.
 
 ### Registered file exports
 
@@ -831,6 +898,10 @@ A setup command changes session or machine state and never the Model or the view
 configured library into session memory (`ph_composer.library.load`), adding a library file or folder
 on this machine (`.providers.add_file`, `.providers.add_folder`), removing one
 (`.providers.remove`) and clearing a stored setup that can no longer be read (`.providers.reset`).
+Hosted libraries add `.connections.connect`, `.disconnect`, `.reauthorize`, `.settings` and `.remove`
+(sign out and erase the stored credential), each taking a `provider_kind`, and
+`ph_composer.library.cancel_load`; `ph_composer.library.connections` lists each connection's label,
+state and actions.
 It is a fourth verb because none of the other three fits: a read never
 changes state, an action is an undoable Model operation, and a view command changes only what the
 host shows.

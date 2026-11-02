@@ -16,11 +16,22 @@ module PhComposer
 
       module_function
 
+      # Version 1 catalogs are `unloaded`, `loaded`, `empty` or `failed`; version 2 catalogs are `unloaded`,
+      # `loading`, `ready` (with or without rows), `stale` (a failed load kept the last generation),
+      # `unavailable` (a failed load had none) or `cancelled`, and name the `snapshot` they were read from.
       def summary
         object({ "provider_id" => TEXT, "kind" => TEXT, "generation" => GENERATION,
-                 "state" => { "type" => "string", "enum" => %w[unloaded empty loaded failed] },
+                 "state" => { "type" => "string", "enum" => STATES },
                  "warnings" => list(note), "unavailable" => list(note), "freshness" => freshness,
-                 "published_at" => NULLABLE_TEXT, "failure" => failure, "age_seconds" => NULLABLE_NUMBER })
+                 "published_at" => NULLABLE_TEXT, "failure" => failure, "age_seconds" => NULLABLE_NUMBER,
+                 "snapshot" => snapshot }, :optional => ["snapshot"])
+      end
+
+      STATES = %w[unloaded empty loaded failed loading ready stale unavailable cancelled].freeze
+
+      def snapshot
+        positive = { "type" => "integer", "minimum" => 1 }
+        object({ "id" => TEXT, "library_revision" => positive, "projection_schema_version" => positive })
       end
 
       def note
@@ -41,8 +52,11 @@ module PhComposer
       def providers
         keys = %w[kind generation state failure age_seconds freshness]
         catalog = object(summary.fetch("properties").slice(*keys))
+        connection = object({ "state" => { "type" => "string", "enum" => Connection::STATES }, "label" => TEXT })
         list(object({ "id" => TEXT, "provider_kind" => TEXT, "label" => TEXT,
-                      "kinds" => list(TEXT), "catalogs" => list(catalog) }))
+                      "kinds" => list(TEXT), "catalogs" => list(catalog),
+                      "connection" => described(connection, "A hosted library's connection; absent for others.") },
+                    :optional => ["connection"]))
       end
 
       def resolution
@@ -66,7 +80,8 @@ module PhComposer
         row["properties"]["resolution"] = resolution if resolved
         row["required"] << "resolution" if resolved
         object(summary.fetch("properties").merge("rows" => list(row),
-                                                 "total" => Pages::TOTAL, "next_cursor" => Pages::NEXT_CURSOR))
+                                                 "total" => Pages::TOTAL, "next_cursor" => Pages::NEXT_CURSOR),
+               :optional => ["snapshot"])
       end
 
       def copy_result

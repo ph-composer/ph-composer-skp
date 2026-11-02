@@ -168,10 +168,15 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
       var page = this.store && this.store.selected && this.store.page;
       var status = this.store && this.store.selected && this.store.busy() ? "Loading library…" : "";
       if (this.store && this.store.error) status = this.store.error;
-      if (page && page.state === "failed") status = (page.failure && page.failure.message ||
-       "Library refresh failed.") +
-        (page.generation ? " Showing the last successful catalog, loaded " + Math.floor(page.age_seconds || 0) +
-          " seconds ago." : " No catalog is available.");
+      // A hosted library's load runs after the request returns: `loading` until its answer arrives.
+      if (page && page.state === "loading") status = "Loading library…";
+      if (page && page.state === "cancelled") status = "Loading was cancelled." +
+        (page.generation ? " Showing the last catalog." : "");
+      if (page && (page.state === "failed" || page.state === "stale" || page.state === "unavailable")) {
+        status = (page.failure && page.failure.message || "Library refresh failed.") +
+          (page.generation ? " Showing the last successful catalog, loaded " + Math.floor(page.age_seconds || 0) +
+            " seconds ago." : " No catalog is available.");
+      }
       if (page && (page.unavailable || []).length) status += " Some record kinds or libraries are unavailable.";
       if (page && (page.warnings || []).length) status += " Some library records were skipped or normalized.";
       this.sourceStatus.textContent = status;

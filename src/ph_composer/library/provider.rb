@@ -94,6 +94,41 @@ module PhComposer
             row["snapshot"].is_a?(Hash) && row.dig("snapshot", "id") == row["record_id"]
         end
       end
+
+      # What a contract version 2 provider's `poll_load` completes with: a v1 Batch, unchanged, plus the
+      # snapshot it was read from and each row's exact source revision, keyed by `source_key`. The
+      # revisions are checked against the rows at admission (Admission.revisioned), not here.
+      class RevisionedBatch
+        attr_reader :batch, :snapshot, :source_revisions
+
+        def initialize(batch:, snapshot:, source_revisions:)
+          valid = batch.is_a?(Batch) && valid_snapshot?(snapshot) && source_revisions.is_a?(Hash) &&
+                  Provider.json_value?([snapshot, source_revisions])
+          unless valid
+            raise Error.new("library.provider_invalid", "The provider snapshot response is malformed.")
+          end
+
+          @batch = batch
+          @snapshot = Provider.immutable(snapshot)
+          @source_revisions = Provider.immutable(source_revisions)
+          freeze
+        end
+
+        private
+
+        def valid_snapshot?(snapshot)
+          snapshot.is_a?(Hash) && snapshot.keys.sort == %w[id library_revision projection_schema_version] &&
+            snapshot["id"].is_a?(String) && /\A[A-Za-z0-9_.:-]{1,128}\z/.match?(snapshot["id"]) &&
+            %w[library_revision projection_schema_version].all? do |key|
+              snapshot[key].is_a?(Integer) && snapshot[key].positive?
+            end
+        end
+      end
+
+      # The key a row's source revision is listed under: `<wire kind>/<library id>/<record id>`.
+      def source_key(kind, row)
+        "#{kind}/#{row.fetch('library_id')}/#{row.fetch('record_id')}"
+      end
     end
   end
 end

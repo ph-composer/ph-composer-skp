@@ -10,6 +10,7 @@ require "minitest/autorun"
 require "tmpdir"
 require_relative "support/sketchup_stub"
 require_relative "support/fixture_files"
+require_relative "support/hosted_library_fixtures"
 
 # SketchUp 2023, the support floor, embeds Ruby 2.7.2; the current proving host embeds 3.2.2. A
 # loop running outside that span cannot see what either host will do, in either direction.
@@ -59,6 +60,9 @@ class PhComposerTestCase < Minitest::Test
     PhComposer::AgentAccess::Listener.server_factory = ->(port) { StubAgentServer.new(port) }
     # Hermetic: the real reader asks macOS `defaults`, which a test must not depend on.
     PhComposer::Preferences.apple_locale_reader = -> {}
+    # Hermetic: no test reads or writes this machine's keychain or Credential Manager.
+    PhComposer::Library::Connection::CredentialStore.backend = HostedLibraryFixtures::MemoryCredentials.new
+    HostedLibraryFixtures.reset
     @undeclared_refusals = []
     PhComposer::Refusals.audit = lambda do |declaration, code|
       next if (PhComposer::Refusals.declared(declaration) + PhComposer::Refusals.common(declaration)).include?(code)

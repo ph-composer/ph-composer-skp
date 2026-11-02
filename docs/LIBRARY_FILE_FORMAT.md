@@ -2,7 +2,7 @@
 
 The library file provider reads a UTF-8 JSON file, or the immediate JSON files in a folder. A
 library supplies definitions that the user copies into the SKP and edits locally. The implemented
-wire kinds are `materials`, `frames`, `glazings` and `psi_install_types`. The connection provider remains proposed.
+wire kinds are `materials`, `frames`, `glazings` and `psi_install_types`. Hosted libraries that sign in use a separate extension; this file format is unchanged by them.
 
 ## Envelope
 

@@ -204,7 +204,7 @@ class LibraryRegistrationTest < PhComposerTestCase
     diagnostics = refused(feature("test.library", nil) do |scope|
       scope.library_kind("test.library.wire", :contract_version => 2,
                                               :record_kind => "test.library.widget", :adapter => adapter)
-      scope.library_provider("test.library.file", :contract_version => 2, :kinds => ["widgets"]) {}
+      scope.library_provider("test.library.file", :contract_version => 3, :kinds => ["widgets"]) {}
     end)
     assert_equal 2, diagnostics.count { |item| item.code == "registration.contract_major" }
   end

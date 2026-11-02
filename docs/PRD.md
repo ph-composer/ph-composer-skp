@@ -57,8 +57,8 @@ exporter. The contributor architecture names the supported kinds of contribution
 
 The phase numbers follow the proposed roadmap and are not implementation authorization.
 Phase 1 is merged. Phase 2 Assemblies, file libraries and Windows are implemented and accepted
-on the feature branch within Current capability below; connection providers and later phases
-remain proposed.
+on the feature branch within Current capability below. The core seam for hosted libraries that sign
+in is implemented; the extensions that connect to a hosted library, and later phases, remain proposed.
 
 | Phase | Feature | User outcome |
 | --- | --- | --- |

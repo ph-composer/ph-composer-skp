@@ -61,14 +61,17 @@ module PhComposer
         choice = request.params.fetch("choice")
         result = { "resolution" => resolution, "local_id" => nil, "assigned" => false }
         id = local_id(request.params["local_id"], resolution)
+        use = nil
         case choice
         when "create"
           unless resolution.fetch("outcome") == "create"
             raise Error.new("library.review_required", "Resolve the existing local candidates before copying.")
           end
 
+          use = authorize_use(request, review)
           value = CallbackInvoker.call(request, declaration, declaration.adapter.create,
-                                       { "values" => review.mapped.merge("source" => attribution(request, review)) })
+                                       { "values" => review.mapped.merge("source" => attribution(request, review,
+                                                                                                 use)) })
           id = value.fetch("id")
         when "keep_local"
           raise Error.new("library.local_choice_required", "Choose an existing local record.") unless id
@@ -80,18 +83,36 @@ module PhComposer
             raise Error.new("params.invalid", "Replacement needs the reviewed local values.")
           end
 
+          use = authorize_use(request, review)
           CallbackInvoker.call(request, declaration, declaration.adapter.replace,
-                               { "id" => id, "values" => review.mapped.merge("source" => attribution(request, review)),
+                               { "id" => id, "values" => review.mapped.merge("source" => attribution(request, review,
+                                                                                                     use)),
                                  "expected_values" => expected })
         else
           raise Error.new("params.invalid", "Choose an explicit library copy action.")
         end
         result["assigned"] = assign(request, declaration, id)
+        hold_until_commit(use, proposal)
         result["local_id"] = id
         result
       rescue StandardError => error
         proposal.refuse(error)
         raise
+      end
+
+      # A version 2 source's use check (Connection::Use) before any write is staged; nil for version 1.
+      # Keeping a local record takes nothing from the library, so it needs none.
+      def authorize_use(request, review)
+        Connection::Use.authorize(request, provider(request), review.entry, review.row)
+      end
+
+      # The use answer must still hold now and when the enclosing action commits, which for a participant
+      # may be after further imports; the proposal checks it again then.
+      def hold_until_commit(use, proposal)
+        return unless use
+
+        use.confirm!
+        proposal.add_commit_check { use.confirm! }
       end
 
       def assign(request, declaration, id)
@@ -155,17 +176,20 @@ module PhComposer
       end
 
       # The `source` a copied record carries: its identity, the semantic fingerprint and the snapshot fields
-      # the adapter maps.
-      def attribution(request, review)
+      # the adapter maps, and for a version 2 source its exact source revision.
+      def attribution(request, review, use)
         adapter = review.declaration.adapter
         identity = review.source
         # The fingerprint is checked before the copy time is taken, so a refused copy caches no time.
         fingerprint = semantic_fingerprint(adapter, review.mapped)
         snapshot = review.row.fetch("snapshot").slice(*adapter.mapped_schema.fetch("properties").keys)
         copied_at = State.for(request.session).copy_time(request.revision, [review.entry.fetch("generation"), identity])
-        identity.merge("kind" => "library", "fingerprint" => fingerprint,
-                       "fingerprint_version" => adapter.fingerprint_version, "copied_at" => copied_at,
-                       "snapshot" => DeepCopy.call(snapshot))
+        value = identity.merge("kind" => "library", "fingerprint" => fingerprint,
+                               "fingerprint_version" => adapter.fingerprint_version, "copied_at" => copied_at,
+                               "snapshot" => DeepCopy.call(snapshot))
+        return value unless use
+
+        value.merge("source_revision" => use.source_revision, "source_revision_schema_version" => 1)
       end
 
       def local_id(id, resolution)
@@ -182,8 +206,8 @@ module PhComposer
 
         raise Error.new("library.adapter_invalid", "The kind adapter returned invalid mapped values.")
       end
-      private_class_method :reviewed_values?, :assign, :selected, :provider, :semantic_fingerprint, :attribution,
-                           :local_id, :validate!
+      private_class_method :reviewed_values?, :authorize_use, :hold_until_commit, :assign, :selected, :provider,
+                           :semantic_fingerprint, :attribution, :local_id, :validate!
     end
   end
 end

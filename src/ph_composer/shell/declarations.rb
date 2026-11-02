@@ -48,14 +48,16 @@ module PhComposer
       export.destination_changed export.replace_required export.privacy_undeclared export.relevance_unknown
       export.metadata_omitted export.user_data_passed export.revoked task.expired task.foreign
       library.adapter_invalid library.assignment_unavailable library.callback_invalid library.catalog_budget
-      library.catalog_stale library.catalog_too_large library.catalog_too_many_rows library.destination_changed
-      library.destination_invalid library.export_write_failed library.file_malformed library.file_too_large
-      library.file_unreadable library.format_invalid library.kind_unavailable library.local_choice_required
-      library.provider_ambiguous library.provider_failed library.provider_invalid
-      library.provider_unavailable library.review_required library.row_semantic_invalid library.row_unavailable
-      library.schema_unsupported
-      library.setup_invalid library.setup_too_large library.setup_unavailable library.setup_unreadable
-      library.update_destination_invalid library.update_destination_required
+      library.catalog_stale library.catalog_too_large library.catalog_too_many_rows library.connection_changed
+      library.connection_required library.credential_store_failed library.credential_store_unavailable
+      library.destination_changed library.destination_invalid library.export_write_failed library.file_malformed
+      library.file_too_large library.file_unreadable library.format_invalid library.kind_unavailable
+      library.lifecycle_unavailable library.load_timeout library.local_choice_required library.model_changed
+      library.provider_ambiguous library.provider_failed library.provider_invalid library.provider_unavailable
+      library.reauthorization_required library.reload_required library.review_required library.row_semantic_invalid
+      library.row_unavailable library.schema_unsupported library.selection_changed library.setup_invalid
+      library.setup_too_large library.setup_unavailable library.setup_unreadable library.source_revision_invalid
+      library.update_destination_invalid library.update_destination_required library.use_expired
       runtime.asset_refused runtime.boot_timeout runtime.boot_failed runtime.translation_failed runtime.stopped
       runtime.closed runtime.unresponsive runtime.conformance_failed
     ].freeze
@@ -242,7 +244,17 @@ module PhComposer
     # never receives a Model or request.
     # `kinds: ["*"]` exclusively declares every registered wire kind; it cannot mix with named kinds.
     # The coordinator resolves that capability against current adapters before constructing a provider.
-    LibraryProvider = Struct.new(:name, :owner, :contract_version, :kinds, :factory, keyword_init: true)
+    # Contract version 2 adds a hosted connection (library/connections.rb): the `lifecycle` actions the
+    # user can start, the `connection` factory core calls once per process, and the `refuses:` codes of
+    # each provider and connection callback, keyed by callback. Version 1 declares none of the three.
+    LibraryProvider = Struct.new(:name, :owner, :contract_version, :kinds, :factory, :lifecycle, :connection,
+                                 :refuses, keyword_init: true)
+    LIBRARY_PROVIDER_VERSIONS = [1, 2].freeze
+    LIBRARY_LIFECYCLE = %i[connect disconnect reauthorize settings].freeze
+    # Every version 2 provider answers these; each lifecycle action it declares is a callback too.
+    LIBRARY_PROVIDER_CALLBACKS = %i[begin_load poll_load cancel_load authorize_use].freeze
+    # The only codes a provider's failure may carry into an outcome or a catalog note.
+    LIBRARY_CODE = /\Alibrary\.[a-z0-9_.]+\z/.freeze
 
     # Pure wire methods use detached values. Local callbacks will run under this declaration's
     # owner, validating these schemas and sharing the caller's proposal; registration never runs them.

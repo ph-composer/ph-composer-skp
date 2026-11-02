@@ -364,6 +364,7 @@ module PhComposer
                                  :findings => proposal.findings, :message => "Nothing to change.")
       end
 
+      proposal.run_commit_checks!
       commit(session, action, request.engine, proposal, value)
     rescue CodedError => error
       coded_outcome(error, session, :mutation => true)

@@ -152,3 +152,41 @@ test("picking a library already in the list says so instead of saying nothing", 
   assert.strictEqual(o.dialog.error.textContent, "That library is already in the list.");
   assert.strictEqual(o.dialog.list.querySelector(".is-added"), null);
 });
+function withConnections(connections, providers) {
+  var o = setup("readable");
+  o.dialog.refresh({ session: "session", revision: 1, ui: { queryResults: {}, setupResults: {} }, sections: {
+    "ph_composer.library.provider_catalogs": { status: "completed", value: providers || [] },
+    "ph_composer.library.provider_setup": { status: "completed", value: { state: "readable" } },
+    "ph_composer.library.connection_states": { status: "completed", value: connections } } });
+  return o;
+}
+var HOSTED = { provider_kind: "test.hosted.library", label: "Hosted library", state: "disconnected",
+  lifecycle: ["connect", "disconnect", "reauthorize", "settings"] };
+test("a hosted library shows its state and offers the lifecycle actions that fit it, with Remove", function () {
+  var o = withConnections([HOSTED], [{ id: "hosted.firm", provider_kind: "test.hosted.library", label: "Firm",
+    kinds: ["materials"], catalogs: [] }]);
+  var text = allText(o.dialog.list);
+  assert.ok(text.includes("Hosted library") && text.includes("Not connected"));
+  assert.ok(!text.includes("Added by another tool") && !text.includes("Firm"));
+  assert.ok(named(o.dialog.list, "Connect Hosted library"));
+  assert.ok(!named(o.dialog.list, "Disconnect Hosted library"));
+  named(o.dialog.list, "Connect Hosted library").dispatchEvent({ type: "click" });
+  assert.deepStrictEqual(o.sent.map(function (item) { return [item.payload.name, plain(item.payload.params)]; }),
+    [["ph_composer.library.connections.connect", { provider_kind: "test.hosted.library" }]]);
+});
+test("a hosted library that must sign in again offers Reconnect and Disconnect; Remove is not file-gated",
+  function () {
+  var o = withConnections([Object.assign({}, HOSTED, { state: "reauthorization_required" })]);
+  assert.ok(allText(o.dialog.list).includes("Sign in again"));
+  assert.ok(named(o.dialog.list, "Reconnect Hosted library") && named(o.dialog.list, "Disconnect Hosted library"));
+  assert.ok(!named(o.dialog.list, "Connect Hosted library"));
+  named(o.dialog.list, "Remove Hosted library").dispatchEvent({ type: "click" });
+  assert.deepStrictEqual(o.sent.map(function (item) { return item.payload.name; }),
+    ["ph_composer.library.connections.remove"]);
+});
+test("a hosted library offers only the lifecycle actions it declares", function () {
+  var o = withConnections([Object.assign({}, HOSTED, { state: "connected", lifecycle: ["connect"] })]);
+  assert.ok(allText(o.dialog.list).includes("Connected"));
+  assert.ok(!named(o.dialog.list, "Disconnect Hosted library") && !named(o.dialog.list, "Settings… Hosted library"));
+  assert.ok(named(o.dialog.list, "Remove Hosted library"));
+});

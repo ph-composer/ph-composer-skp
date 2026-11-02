@@ -122,6 +122,9 @@
 .library-source-review > select { width: 100%; }
 .library-setup-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 12px 0; }
 .library-setup-row span { overflow-wrap: anywhere; min-width: 0; }
+/* A hosted library: its label takes the room, then its state and the actions that fit it, wrapping when narrow. */
+.library-setup-connection { flex-wrap: wrap; gap: 8px; }
+.library-setup-connection > span { flex: 1 1 160px; }
 @media (max-width: 700px) {
   .library-sidebar-root, .library-sidebar-root.is-collapsed { width: auto; flex-basis: auto; border-left: 0;
     border-top: 1px solid var(--line); padding: 10px 0 0; }
