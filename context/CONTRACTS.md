@@ -886,7 +886,7 @@ failed load leaves the published generation and rows unchanged and reads `stale`
 answered after 120 seconds fails with `library.load_timeout`. A poll that finds the session closed,
 the connection generation moved on or a newer load of the same catalog ends without publishing. The
 load command refuses `library.connection_required` or `library.reauthorization_required` unless the
-connection is connected. A snapshot whose source revisions do not name each row once with a positive
+connection is connected; a refused `begin_load` also marks the catalog as a failed load. A snapshot whose source revisions do not name each row once with a positive
 integer fails whole with `library.source_revision_invalid`.
 
 **Pages.** `catalog` and `in_file` page through `shell/pages.rb` like every other list: `limit`
@@ -924,8 +924,9 @@ proposals". Its own checks run in this order, each refusing the whole proposal:
 8. The owner's callbacks run with validated params (`params.invalid`) and results
    (`library.callback_invalid`), then assignment when requested
    (`library.assignment_unavailable` when the adapter has none). A version 2 copy then repeats the
-   step 7 window and identity checks before the action commits, and its `source` carries
-   `source_revision` and `source_revision_schema_version`.
+   step 7 window and identity checks, and registers them as a commit check that Dispatch runs again
+   immediately before the native transaction, after every participant has staged; its `source`
+   carries `source_revision` and `source_revision_schema_version`.
 
 **Callback write ownership.** A create, replace or assign callback shares the caller's proposal.
 Its request's engine is `engine.projected(proposal, writable_kinds:, refusal_code:)`

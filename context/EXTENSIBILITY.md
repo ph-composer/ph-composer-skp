@@ -436,7 +436,8 @@ end
 
 - **Declaration.** `contract_version` is 1 or 2; version 1 declares none of `lifecycle:`,
   `connection:` or `refuses:`, and version 2 declares all three. `lifecycle:` lists the actions the user
-  can start, from `connect`, `disconnect`, `reauthorize` and `settings`. `refuses:` has one list per
+  can start, from `connect`, `disconnect`, `reauthorize` and `settings`, and must include `disconnect`,
+  which Remove calls. `refuses:` has one list per
   callback: the four provider callbacks below and each declared lifecycle action. Each code matches
   `library.[a-z0-9_.]+`. A provider failure keeps its code only when that callback declares it, and
   otherwise becomes `library.provider_failed`; its text never reaches an outcome. Discovery adds the
@@ -467,8 +468,10 @@ end
   `unavailable` for the selection `[{ "kind", "library_id", "record_id", "source_revision" }]`. Core
   asks it before a `create` or `use_library` copy stages any write, in preview and invoke alike, and
   refuses with no write when the answer is not `allowed`, takes longer than five seconds, or the
-  connection generation, destination Model or loaded snapshot changed meanwhile. `keep_local` takes
-  nothing from the library and asks nothing.
+  connection generation, destination Model or loaded snapshot changed meanwhile. The proposal checks
+  the same again immediately before the enclosing action commits (`Proposal#add_commit_check`), so an
+  action importing several records through `copy_into_proposal` commits none once one has expired.
+  `keep_local` takes nothing from the library and asks nothing.
 - **Provenance.** A copy from a version 2 source keeps `source_revision` and
   `source_revision_schema_version` (1) in its `source`, in the same Undo step as the copy. Local edits and
   `keep_local` keep them; only `use_library` adopts a newer revision. A copy without them is a legacy

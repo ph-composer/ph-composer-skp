@@ -910,10 +910,12 @@ module PhComposer
       def check_library_lifecycle(item)
         lifecycle = item.lifecycle
         valid = lifecycle.is_a?(Array) && lifecycle.uniq.length == lifecycle.length &&
-                (lifecycle - Declarations::LIBRARY_LIFECYCLE).empty?
+                (lifecycle - Declarations::LIBRARY_LIFECYCLE).empty? && lifecycle.include?(:disconnect)
         return if valid
 
-        problem(item, "lifecycle must be unique actions from #{Declarations::LIBRARY_LIFECYCLE.join(', ')}")
+        # Remove signs out through `disconnect`, so a connection the user can remove must offer it.
+        problem(item, "lifecycle must be unique actions from #{Declarations::LIBRARY_LIFECYCLE.join(', ')}, " \
+                      "including disconnect")
       end
 
       # One list per callback the provider answers, each of `library.*` codes: a provider error keeps

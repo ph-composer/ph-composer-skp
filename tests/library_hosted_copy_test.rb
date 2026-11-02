@@ -136,6 +136,40 @@ class LibraryHostedCopyTest < PhComposerTestCase
     assert_equal 1, @server.uses.length
   end
 
+  # An action importing two records through the participant: each check passes when asked, but the
+  # first has expired by the time the action commits, so neither record is written.
+  def test_a_compound_import_commits_nothing_once_an_earlier_use_has_expired
+    two = [material("rec-1"), material("rec-2", :name => "Second insulation")]
+    @generation = load(hosted_response(:rows => two))
+    PhComposer::Registry.install([compound_import])
+    @server.use_answer = lambda do
+      @now += 3.0
+      "allowed"
+    end
+    refused = invoke("probe.hosted.import_two", "copies" => %w[rec-1 rec-2].map { |id| params(:record_id => id) })
+    assert_equal ["refused", "library.use_expired", "none"], refused.values_at("status", "code", "effect")
+    assert_equal 2, @server.uses.length
+    assert_empty materials
+  end
+
+  def compound_import
+    participant = "ph_composer.library.copy_into_proposal"
+    Module.new do
+      define_singleton_method(:name) { "HostedCompoundImport" }
+      define_singleton_method(:install) do |registry|
+        feature = registry.feature("probe.hosted", :contract_version => 1, :requires => ["ph_composer.library"])
+        feature.action("probe.hosted.import_two", :description => "Imports two library records.",
+                                                  :params => { "type" => "object" }, :result => { "type" => "object" },
+                                                  :refuses => [], :participants => [participant],
+                                                  :undo_name => "Import Two", :side_effects => "Copies two records.",
+                                                  :examples => [{}]) do |request, _proposal|
+          request.params.fetch("copies").each { |copy| request.participate(participant, copy) }
+          {}
+        end
+      end
+    end
+  end
+
   def test_a_catalog_loaded_under_an_older_connection_must_be_loaded_again
     API.setup(:context => @context, :name => "#{PREFIX}.connections.reauthorize",
               :params => { "provider_kind" => PROVIDER_KIND })

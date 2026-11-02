@@ -160,12 +160,22 @@ class LibraryHostedLoadTest < PhComposerTestCase
   def test_begin_load_keeps_a_declared_code_and_a_load_that_never_answers_times_out
     @server.failures[:begin_load] = PhComposer::Library::Error.new("library.hosted_busy", "busy")
     assert_equal "library.hosted_busy", load.fetch("code")
+    assert_equal %w[unavailable library.hosted_busy], [catalog.fetch("state"), catalog.dig("failure", "code")]
     @server.failures.clear
+    load
+    @server.response = hosted_response
+    UI.run_timers
+    @server.failures[:begin_load] = RuntimeError.new("busy")
+    assert_equal "library.provider_failed", load.fetch("code")
+    assert_equal ["stale", 1, ["rec-1"]], [catalog.fetch("state"), catalog.fetch("generation"),
+                                           catalog.fetch("rows").map { |row| row.fetch("record_id") }]
+    @server.failures.clear
+    @server.response = nil
     load
     UI.run_next_timer
     @now += PhComposer::Library::Connection::Load::TIMEOUT_SECONDS + 1
     UI.run_timers
-    assert_equal %w[unavailable library.load_timeout], [catalog.fetch("state"), catalog.dig("failure", "code")]
+    assert_equal %w[stale library.load_timeout], [catalog.fetch("state"), catalog.dig("failure", "code")]
   end
 
   # Every row needs exactly one positive revision under its own key; any break refuses the snapshot.

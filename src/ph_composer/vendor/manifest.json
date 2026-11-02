@@ -411,9 +411,9 @@
       "sha256": "2749c9deaf387ee3adb034e670d67ddbba82aaa52b7028d23afa7723e000fb6d"
     },
     "html/library/store.js": {
-      "bytes": 7519,
+      "bytes": 7894,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "9a1e33f9448ec17029bf319e72c20cd01aef8fed29403ed4dcc9bfb6d4d0e4d6"
+      "sha256": "8be2c73dbda4f150127599b5be7e612e46e7250faf10c5092ae2eab707abf29f"
     },
     "html/module.js": {
       "bytes": 2942,

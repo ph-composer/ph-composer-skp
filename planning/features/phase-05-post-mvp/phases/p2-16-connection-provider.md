@@ -72,9 +72,9 @@ SketchUp upgrade, and on Windows, is a later native gate.
 
 ## Evidence (2026-11-02, offline)
 
-- `make ci` green: Ruby suite 2,269 runs, 0 failures; JavaScript 758 pass; pytest 258 pass; RuboCop, eslint,
-  manifests and RBZ checks pass. New suites on Ruby 3.2.2 and 2.7.2: `library_connection_test` (12),
-  `library_hosted_load_test` (13), `library_hosted_copy_test` (9), `library_credential_store_test` (4), plus
+- `make ci` green: Ruby suite 2,271 runs, 0 failures; JavaScript 759 pass; pytest 258 pass; RuboCop, eslint,
+  manifests and RBZ checks pass. New suites on Ruby 3.2.2 and 2.7.2: `library_connection_test` (13),
+  `library_hosted_load_test` (13), `library_hosted_copy_test` (10), `library_credential_store_test` (4), plus
   connection rows in `library_setup_test.js` and hosted states in `library_sidebar_test.js`.
 - One pre-existing test changed: `library_registration_test.rb` used `contract_version: 2` as its unsupported
   provider example; it now uses 3, because 2 is supported.

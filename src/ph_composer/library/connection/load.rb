@@ -49,8 +49,14 @@ module PhComposer
           @operation = Operation.new(:id => "load_#{SecureRandom.hex(12)}", :kind => @kind,
                                      :generation => status.fetch("generation")).freeze
           @started = Manager.clock.call
-          call(:begin_load) do
-            @provider.begin_load(@kind, :connection => Manager.connection(@declaration), :operation => @operation)
+          begin
+            call(:begin_load) do
+              @provider.begin_load(@kind, :connection => Manager.connection(@declaration), :operation => @operation)
+            end
+          rescue Error => error
+            # Every reader sees the failed refresh, not only the command that asked for it.
+            fail_load(error)
+            raise
           end
           schedule
           @catalog.mark(@provider.id, @kind, "loading")

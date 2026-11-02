@@ -47,6 +47,12 @@ PhComposerUI.define("library/store", ["request", "snapshot"], function (request,
       }
     }, this);
     var current = this.catalog(this.provider());
+    /* A hosted library that disconnected dropped the generation the snapshot last named: its rows go too,
+       never shown as current. */
+    if (current && !current.generation && this.shownGeneration && this.page) {
+      this.page = Object.assign({}, current); this.rows = []; this.attempted = null;
+    }
+    this.shownGeneration = current ? current.generation : null;
     if (current && current.generation && !this.busy() &&
       this.attempted !== current.generation + ":" + state.revision &&
       (!this.page || this.page.generation !== current.generation || this.pageRevision !== state.revision)) {

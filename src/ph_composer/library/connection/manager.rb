@@ -117,15 +117,15 @@ module PhComposer
           status(declaration)
         end
 
-        # Disconnects when the extension offers it, erases the credential core can name, and clears what
-        # the connection loaded. Local copies in any Model are untouched.
+        # Disconnects (every version 2 connection declares it), erases the credential core can name, and
+        # clears what the connection loaded. Local copies in any Model are untouched.
         # A refused disconnect still erases the credential; the refusal is reported afterwards.
         def remove(declaration)
           entry = record(declaration)
           connection_id = public_status(entry.connection, declaration.name)["connection_id"]
           refused = nil
           begin
-            entry.connection.disconnect if Array(declaration.lifecycle).include?(:disconnect)
+            entry.connection.disconnect
           rescue *EXTENSION_ERRORS => error
             refused = Connection.refusal(error, declaration, :disconnect)
           end
@@ -150,14 +150,15 @@ module PhComposer
             # A `changed` from inside the factory, before the record exists, has nothing to re-read.
             context = Context.new(:provider_kind => declaration.name, :credentials => credentials,
                                   :changed => -> { changed(declaration) if records.key?(declaration.name) })
-            made = declaration.connection.call(context)
+            made = begin
+              declaration.connection.call(context)
+            rescue *EXTENSION_ERRORS
+              # Even a coded error keeps nothing: its code, text and details are the extension's.
+              nil
+            end
             raise Error.new("library.provider_failed", "The library connection could not start.") if made.nil?
 
             Record.new(:connection => made, :generation => 1, :connection_id => nil, :observed => false)
-          rescue Error
-            raise
-          rescue *EXTENSION_ERRORS
-            raise Error.new("library.provider_failed", "The library connection could not start."), :cause => nil
           end
         end
 

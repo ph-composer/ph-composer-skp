@@ -80,3 +80,19 @@ test("a Model change while a page is pending re-reads current guards; refusals d
   o.store.update(o.state); o.store.update(o.state);
   assert.strictEqual(o.sent.length, 2, "the same refusal waits for an explicit retry or changed state");
 });
+test("a hosted catalog that disconnects drops its shown rows instead of keeping them as current", function () {
+  var o = setup(); o.store.update(o.state); o.store.select("p");
+  answer(o, "setupResults", { generation: 1, state: "ready" });
+  answer(o, "queryResults", { generation: 1, state: "ready", rows: [{ library_id: "one", library_name: "One",
+    record_id: "r", snapshot: { id: "r", name: "Public" }, resolution: { outcome: "create", candidates: [] } }],
+    total: 1, next_cursor: null });
+  o.state.sections["ph_composer.library.provider_catalogs"].value[0].catalogs[0] =
+    { kind: "materials", state: "ready", generation: 1 };
+  o.store.update(o.state);
+  assert.strictEqual(o.store.rows.length, 1);
+  o.state.sections["ph_composer.library.provider_catalogs"].value[0].catalogs[0] =
+    { kind: "materials", state: "unloaded", generation: null };
+  o.state.revision = 2; o.store.update(o.state);
+  assert.strictEqual(o.store.rows.length, 0);
+  assert.strictEqual(o.store.page.state, "unloaded");
+});

@@ -40,9 +40,10 @@ class LibraryConnectionTest < PhComposerTestCase
       define_singleton_method(:name) { "HostedProbe" }
       define_singleton_method(:install) do |registry|
         scope = registry.feature("test.probe", :contract_version => 1)
-        values = { :contract_version => 2, :kinds => ["materials"], :lifecycle => [:connect],
+        values = { :contract_version => 2, :kinds => ["materials"], :lifecycle => %i[connect disconnect],
                    :connection => ->(_context) { Object.new },
-                   :refuses => REFUSES.slice(*PhComposer::Declarations::LIBRARY_PROVIDER_CALLBACKS, :connect) }
+                   :refuses => REFUSES.slice(*PhComposer::Declarations::LIBRARY_PROVIDER_CALLBACKS, :connect,
+                                             :disconnect) }
         scope.library_provider("test.probe.hosted", **values.merge(options)) { [] }
         extra&.call(scope)
       end
@@ -58,7 +59,7 @@ class LibraryConnectionTest < PhComposerTestCase
     called = []
     Registry.install([probe(:connection => ->(_context) { called << :connection })])
     published = Registry.current.library_providers.fetch("test.probe.hosted")
-    assert_equal [2, [:connect]], [published.contract_version, published.lifecycle]
+    assert_equal [2, %i[connect disconnect]], [published.contract_version, published.lifecycle]
     assert published.refuses.frozen?
     assert_equal ["library.hosted_busy"], published.refuses.fetch(:begin_load)
     assert_empty called
@@ -67,10 +68,12 @@ class LibraryConnectionTest < PhComposerTestCase
   def test_version_two_refuses_missing_connection_lifecycle_or_refusals_and_version_one_refuses_them
     assert_match(/needs a callable connection factory/, problems(probe(:connection => nil)))
     assert_match(/lifecycle must be unique actions/, problems(probe(:lifecycle => %i[connect sign_in])))
-    assert_match(/lifecycle must be unique actions/, problems(probe(:lifecycle => %i[connect connect])))
+    assert_match(/lifecycle must be unique actions/, problems(probe(:lifecycle => %i[connect connect disconnect])))
+    no_disconnect = REFUSES.slice(*PhComposer::Declarations::LIBRARY_PROVIDER_CALLBACKS, :connect)
+    assert_match(/including disconnect/, problems(probe(:lifecycle => [:connect], :refuses => no_disconnect)))
     missing = REFUSES.slice(:begin_load, :poll_load, :cancel_load)
     assert_match(/refuses must list codes for exactly/, problems(probe(:refuses => missing)))
-    foreign = REFUSES.slice(*PhComposer::Declarations::LIBRARY_PROVIDER_CALLBACKS, :connect)
+    foreign = REFUSES.slice(*PhComposer::Declarations::LIBRARY_PROVIDER_CALLBACKS, :connect, :disconnect)
                      .merge(:connect => ["auth.mfa_required"])
     assert_match(/connect\.refuses must be unique library\.\* codes/, problems(probe(:refuses => foreign)))
     assert_match(/declares lifecycle, connection, refuses, which needs contract version 2/,
@@ -125,8 +128,8 @@ class LibraryConnectionTest < PhComposerTestCase
     refute_includes JSON.generate(refused), "token"
     HostedLibraryFixtures.server.failures[:connect] = RuntimeError.new("https://example.invalid/?token=abc")
     assert_equal "library.provider_failed", setup_call("#{PREFIX}.connect").fetch("code")
-    Registry.install([probe(:lifecycle => [:connect])])
-    unavailable = setup_call("#{PREFIX}.disconnect", "provider_kind" => "test.probe.hosted")
+    Registry.install([probe])
+    unavailable = setup_call("#{PREFIX}.reauthorize", "provider_kind" => "test.probe.hosted")
     assert_equal "library.lifecycle_unavailable", unavailable.fetch("code")
     assert_equal "library.provider_unavailable",
                  setup_call("#{PREFIX}.connect", "provider_kind" => "ph_composer.library.file").fetch("code")
@@ -195,6 +198,17 @@ class LibraryConnectionTest < PhComposerTestCase
            .define_singleton_method(:connect) { raise NotImplementedError }
     refused = setup_call("#{PREFIX}.connect", "provider_kind" => "test.probe.hosted")
     assert_equal "library.provider_failed", refused.fetch("code")
+  end
+
+  # A factory's own coded error is still the extension's text: only library.provider_failed comes out.
+  def test_a_connection_factory_failure_keeps_no_code_text_or_detail
+    secret = "https://example.invalid/?token=synthetic-secret"
+    Registry.install([probe(:connection => lambda do |_context|
+      raise PhComposer::Library::Error.new("library.hosted_busy", secret, "body" => secret)
+    end)])
+    refused = setup_call("#{PREFIX}.connect", "provider_kind" => "test.probe.hosted")
+    assert_equal %w[refused library.provider_failed], refused.values_at("status", "code")
+    refute_includes JSON.generate(refused), "synthetic-secret"
   end
 
   def test_a_new_connection_id_reported_through_changed_clears_the_old_connections_catalogs

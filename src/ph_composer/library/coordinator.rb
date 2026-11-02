@@ -92,8 +92,7 @@ module PhComposer
           raise Error.new("params.invalid", "Choose an explicit library copy action.")
         end
         result["assigned"] = assign(request, declaration, id)
-        # The writes are staged; the use answer must still hold when the action commits them.
-        use&.confirm!
+        hold_until_commit(use, proposal)
         result["local_id"] = id
         result
       rescue StandardError => error
@@ -105,6 +104,15 @@ module PhComposer
       # Keeping a local record takes nothing from the library, so it needs none.
       def authorize_use(request, review)
         Connection::Use.authorize(request, provider(request), review.entry, review.row)
+      end
+
+      # The use answer must still hold now and when the enclosing action commits, which for a participant
+      # may be after further imports; the proposal checks it again then.
+      def hold_until_commit(use, proposal)
+        return unless use
+
+        use.confirm!
+        proposal.add_commit_check { use.confirm! }
       end
 
       def assign(request, declaration, id)
@@ -198,8 +206,8 @@ module PhComposer
 
         raise Error.new("library.adapter_invalid", "The kind adapter returned invalid mapped values.")
       end
-      private_class_method :reviewed_values?, :authorize_use, :assign, :selected, :provider, :semantic_fingerprint,
-                           :attribution, :local_id, :validate!
+      private_class_method :reviewed_values?, :authorize_use, :hold_until_commit, :assign, :selected, :provider,
+                           :semantic_fingerprint, :attribution, :local_id, :validate!
     end
   end
 end
