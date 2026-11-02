@@ -231,6 +231,31 @@ class LibraryHostedLoadTest < PhComposerTestCase
     assert_nil catalog.fetch("generation")
   end
 
+  def test_a_poll_that_cancels_or_replaces_its_own_load_never_publishes_its_answer
+    state = PhComposer::Library::State.for(@session)
+    load
+    @server.response = hosted_response(:snapshot => "snap-cancelled")
+    response = @server.response
+    @server.define_singleton_method(:response) do
+      state.cancel_load(PROVIDER_ID, "materials")
+      response
+    end
+    UI.run_timers
+    assert_equal ["cancelled", nil], [catalog.fetch("state"), catalog.fetch("generation")]
+  end
+
+  def test_a_complete_answer_after_the_deadline_is_refused_as_a_timeout
+    load
+    @server.response = hosted_response
+    UI.run_timers
+    load
+    @server.response = hosted_response(:snapshot => "snap-late")
+    @now += PhComposer::Library::Connection::Load::TIMEOUT_SECONDS + 1
+    UI.run_timers
+    assert_equal %w[stale library.load_timeout snap-1],
+                 [catalog.fetch("state"), catalog.dig("failure", "code"), catalog.dig("snapshot", "id")]
+  end
+
   def test_a_malformed_snapshot_identity_is_refused_before_admission
     error = assert_raises(PhComposer::Library::Error) do
       hosted_response(:library_revision => 0)

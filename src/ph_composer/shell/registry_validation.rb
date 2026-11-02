@@ -922,9 +922,10 @@ module PhComposer
       # its code only when that callback declares it.
       def check_library_provider_refusals(item)
         refuses = item.refuses
-        callbacks = Declarations::LIBRARY_PROVIDER_CALLBACKS + Array(item.lifecycle)
-        unless refuses.is_a?(Hash) && refuses.keys.sort == callbacks.uniq.sort
-          problem(item, "refuses must list codes for exactly #{callbacks.uniq.join(', ')}")
+        # Compared as sets, never sorted: a key of another type is a diagnostic, not an exception.
+        callbacks = (Declarations::LIBRARY_PROVIDER_CALLBACKS + Array(item.lifecycle)).uniq
+        unless refuses.is_a?(Hash) && refuses.length == callbacks.length && (callbacks - refuses.keys).empty?
+          problem(item, "refuses must list codes for exactly #{callbacks.join(', ')}")
           return
         end
         refuses.each do |callback, codes|

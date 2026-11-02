@@ -76,6 +76,10 @@ class LibraryConnectionTest < PhComposerTestCase
     foreign = REFUSES.slice(*PhComposer::Declarations::LIBRARY_PROVIDER_CALLBACKS, :connect, :disconnect)
                      .merge(:connect => ["auth.mfa_required"])
     assert_match(/connect\.refuses must be unique library\.\* codes/, problems(probe(:refuses => foreign)))
+    mixed = REFUSES.slice(*PhComposer::Declarations::LIBRARY_PROVIDER_CALLBACKS, :connect)
+                   .merge("disconnect" => [])
+    assert_match(/refuses must list codes for exactly/, problems(probe(:refuses => mixed)))
+    assert_match(/lifecycle must be unique actions/, problems(probe(:lifecycle => [:connect, "disconnect"])))
     assert_match(/declares lifecycle, connection, refuses, which needs contract version 2/,
                  problems(probe(:contract_version => 1)))
     refute Registry.installed?("test.probe")

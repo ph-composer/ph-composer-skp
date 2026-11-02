@@ -90,13 +90,14 @@ module PhComposer
           return drop unless current?
 
           response = call(:poll_load) { @provider.poll_load(@operation) }
-          # The poll itself may have moved the connection on.
+          # The poll itself may have cancelled or replaced this load, or moved the connection on.
+          return if finished?
           return drop unless current?
-          return publish(response) unless response.nil?
-
+          # An answer after the deadline is not accepted, however complete.
           if Manager.clock.call - @started > TIMEOUT_SECONDS
             raise Error.new("library.load_timeout", "The library did not finish loading in time.")
           end
+          return publish(response) unless response.nil?
 
           schedule
         rescue Error => error
