@@ -1,7 +1,7 @@
 # P2-16: generic connection seam for hosted Library providers
 
 DATE: 2026-09-30, rescoped 2026-11-02
-STATUS: Implemented on branch `feature/p2-16-connection-seam` (2026-11-02). Un-deferred by D5-1. Host gate pending.
+STATUS: Merged to main 2026-11-02 ([PR #329](https://github.com/ph-composer/ph-composer-skp/pull/329), `5df489e5`). Un-deferred by D5-1. Host gate pending: real-host observation with the first hosted extension.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/328 (replaces the closed #14)
 
