@@ -243,6 +243,16 @@ Values:
               "type": "object"
             }
           }
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_revision_schema_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
         }
       }
     },
@@ -501,6 +511,16 @@ Values:
               "pattern": "^#[0-9A-Fa-f]{6}$"
             }
           }
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_revision_schema_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
         }
       }
     },
@@ -958,6 +978,16 @@ Values:
               "pattern": "^#[0-9A-Fa-f]{6}$"
             }
           }
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_revision_schema_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
         }
       }
     },
@@ -1113,6 +1143,16 @@ Values:
               "type": "string"
             }
           }
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_revision_schema_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
         }
       }
     },
@@ -1278,6 +1318,16 @@ Values:
               "type": "string"
             }
           }
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_revision_schema_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
         }
       }
     },
@@ -1412,6 +1462,16 @@ Values:
               "x-unit": "W/mK"
             }
           }
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_revision_schema_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
         }
       }
     },
@@ -1817,6 +1877,16 @@ Values:
               }
             }
           }
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_revision_schema_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
         }
       }
     },
@@ -2621,6 +2691,16 @@ Result:
                         "type": "object"
                       }
                     }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
                   }
                 }
               },
@@ -3280,6 +3360,16 @@ Result:
                         "type": "object"
                       }
                     }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
                   }
                 }
               },
@@ -3980,6 +4070,16 @@ Result:
                         "pattern": "^#[0-9A-Fa-f]{6}$"
                       }
                     }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
                   }
                 }
               },
@@ -4384,6 +4484,16 @@ Result:
                         "pattern": "^#[0-9A-Fa-f]{6}$"
                       }
                     }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
                   }
                 }
               },
@@ -5067,7 +5177,12 @@ Result:
         "unloaded",
         "empty",
         "loaded",
-        "failed"
+        "failed",
+        "loading",
+        "ready",
+        "stale",
+        "unavailable",
+        "cancelled"
       ]
     },
     "warnings": {
@@ -5171,6 +5286,28 @@ Result:
       ],
       "minimum": 0
     },
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "library_revision",
+        "projection_schema_version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "library_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "projection_schema_version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
     "rows": {
       "type": "array",
       "items": {
@@ -5232,6 +5369,77 @@ Example params:
   "kind": "example_parts",
   "limit": 100
 }
+```
+
+### `ph_composer.library.connections`
+
+Hosted library connections: each one's label, state and the actions it offers. No credential or address. Owner: `ph_composer.library`.
+
+Refuses: only the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "provider_kind",
+      "label",
+      "state",
+      "lifecycle"
+    ],
+    "properties": {
+      "provider_kind": {
+        "type": "string"
+      },
+      "label": {
+        "type": "string"
+      },
+      "state": {
+        "type": "string",
+        "enum": [
+          "disconnected",
+          "authorizing",
+          "connected",
+          "reauthorization_required",
+          "unavailable"
+        ]
+      },
+      "lifecycle": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "connect",
+            "disconnect",
+            "reauthorize",
+            "settings"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
 ```
 
 ### `ph_composer.library.export_preview`
@@ -5499,7 +5707,12 @@ Result:
         "unloaded",
         "empty",
         "loaded",
-        "failed"
+        "failed",
+        "loading",
+        "ready",
+        "stale",
+        "unavailable",
+        "cancelled"
       ]
     },
     "warnings": {
@@ -5602,6 +5815,28 @@ Result:
         "null"
       ],
       "minimum": 0
+    },
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "library_revision",
+        "projection_schema_version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "library_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "projection_schema_version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
     },
     "rows": {
       "type": "array",
@@ -5849,7 +6084,12 @@ Result:
                 "unloaded",
                 "empty",
                 "loaded",
-                "failed"
+                "failed",
+                "loading",
+                "ready",
+                "stale",
+                "unavailable",
+                "cancelled"
               ]
             },
             "failure": {
@@ -5893,6 +6133,30 @@ Result:
             }
           }
         }
+      },
+      "connection": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "state",
+          "label"
+        ],
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "disconnected",
+              "authorizing",
+              "connected",
+              "reauthorization_required",
+              "unavailable"
+            ]
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "description": "A hosted library's connection; absent for others."
       }
     }
   }
@@ -11095,6 +11359,16 @@ Result:
                         "pattern": "^#[0-9A-Fa-f]{6}$"
                       }
                     }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
                   }
                 }
               },
@@ -11378,6 +11652,16 @@ Result:
                         "pattern": "^#[0-9A-Fa-f]{6}$"
                       }
                     }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
                   }
                 }
               },
@@ -11807,6 +12091,16 @@ Result:
                         "type": "string"
                       }
                     }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
                   }
                 }
               },
@@ -12167,6 +12461,16 @@ Result:
                         "type": "string"
                       }
                     }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
                   }
                 }
               },
@@ -12522,6 +12826,16 @@ Result:
                         "type": "string"
                       }
                     }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
                   }
                 }
               },
@@ -12864,6 +13178,16 @@ Result:
                         "type": "string"
                       }
                     }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
                   }
                 }
               },
@@ -13287,6 +13611,16 @@ Result:
                         "x-unit": "W/mK"
                       }
                     }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
                   }
                 }
               },
@@ -13585,6 +13919,16 @@ Result:
                         "x-unit": "W/mK"
                       }
                     }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
                   }
                 }
               },
@@ -14130,6 +14474,16 @@ Result:
                         }
                       }
                     }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
                   }
                 }
               },
@@ -15209,6 +15563,16 @@ Result:
                         }
                       }
                     }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
                   }
                 }
               },
@@ -20622,6 +20986,16 @@ Params:
                   "type": "object"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -21021,6 +21395,16 @@ Params:
                   "type": "object"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -21499,6 +21883,16 @@ Params:
                   "type": "object"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -21943,6 +22337,16 @@ Params:
                   "type": "object"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -22362,6 +22766,16 @@ Params:
                   "type": "object"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -22783,6 +23197,16 @@ Params:
                   "type": "object"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -23218,6 +23642,16 @@ Params:
                   "type": "object"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -23645,6 +24079,16 @@ Params:
                   "type": "object"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -24077,6 +24521,16 @@ Params:
                   "type": "object"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -24516,6 +24970,16 @@ Params:
                   "type": "object"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -24949,6 +25413,16 @@ Params:
                   "type": "object"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -25385,6 +25859,16 @@ Params:
                   "type": "object"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -25806,6 +26290,16 @@ Params:
                   "type": "object"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -26240,6 +26734,16 @@ Params:
                   "type": "object"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -26683,6 +27187,16 @@ Params:
                   "type": "object"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -27242,6 +27756,16 @@ Params:
                   "type": "object"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -27573,6 +28097,16 @@ Params:
                   "pattern": "^#[0-9A-Fa-f]{6}$"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -27808,6 +28342,16 @@ Params:
                   "pattern": "^#[0-9A-Fa-f]{6}$"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -28202,6 +28746,16 @@ Params:
                   "pattern": "^#[0-9A-Fa-f]{6}$"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -28315,7 +28869,7 @@ Copy or reuse one library record with optional assignment. Owner: `ph_composer.l
 
 Undo step: Copy Library Record. Copies or replaces local definitions and optional assignments in one Undo step.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `library.adapter_invalid`, `library.callback_invalid`, `library.catalog_stale`, `library.kind_unavailable`, `library.local_choice_required`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.review_required`, `library.row_semantic_invalid`, `library.row_unavailable`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `library.adapter_invalid`, `library.callback_invalid`, `library.catalog_stale`, `library.connection_changed`, `library.kind_unavailable`, `library.local_choice_required`, `library.model_changed`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.reauthorization_required`, `library.reload_required`, `library.review_required`, `library.row_semantic_invalid`, `library.row_unavailable`, `library.selection_changed`, `library.use_expired`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -30777,6 +31331,16 @@ Params:
                   "pattern": "^#[0-9A-Fa-f]{6}$"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -30973,6 +31537,16 @@ Params:
                   "pattern": "^#[0-9A-Fa-f]{6}$"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -31304,6 +31878,16 @@ Params:
                   "pattern": "^#[0-9A-Fa-f]{6}$"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -31515,6 +32099,16 @@ Params:
                   "type": "string"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -31748,6 +32342,16 @@ Params:
                   "type": "string"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -32140,6 +32744,16 @@ Params:
                   "type": "string"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -32369,6 +32983,16 @@ Params:
                   "type": "string"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -32584,6 +33208,16 @@ Params:
                   "type": "string"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -32943,6 +33577,16 @@ Params:
                   "type": "string"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -33138,6 +33782,16 @@ Params:
                   "x-unit": "W/mK"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -33309,6 +33963,16 @@ Params:
                   "x-unit": "W/mK"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -33578,6 +34242,16 @@ Params:
                   "x-unit": "W/mK"
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -34040,6 +34714,16 @@ Params:
                   }
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -34597,6 +35281,16 @@ Params:
                   }
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -35258,6 +35952,16 @@ Params:
                   }
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -35834,6 +36538,16 @@ Params:
                   }
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -36432,6 +37146,16 @@ Params:
                   }
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -37028,6 +37752,16 @@ Params:
                   }
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -37616,6 +38350,16 @@ Params:
                   }
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -38209,6 +38953,16 @@ Params:
                   }
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -38801,6 +39555,16 @@ Params:
                   }
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -39402,6 +40166,16 @@ Params:
                   }
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -39993,6 +40767,16 @@ Params:
                   }
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -40579,6 +41363,16 @@ Params:
                   }
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -41195,6 +41989,16 @@ Params:
                   }
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -41781,6 +42585,16 @@ Params:
                   }
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -42046,7 +42860,7 @@ Undo step: Edit Window Installations. Creates or edits installation products and
 
 Calls: `ph_composer.library.copy_into_proposal`.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `library.adapter_invalid`, `library.callback_invalid`, `library.catalog_stale`, `library.kind_unavailable`, `library.local_choice_required`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.review_required`, `library.row_semantic_invalid`, `library.row_unavailable`, `operation.participant_cycle`, `operation.proposal_required`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `library.adapter_invalid`, `library.callback_invalid`, `library.catalog_stale`, `library.connection_changed`, `library.kind_unavailable`, `library.local_choice_required`, `library.model_changed`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.reauthorization_required`, `library.reload_required`, `library.review_required`, `library.row_semantic_invalid`, `library.row_unavailable`, `library.selection_changed`, `library.use_expired`, `operation.participant_cycle`, `operation.proposal_required`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -42367,6 +43181,16 @@ Params:
                         }
                       }
                     }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
                   }
                 }
               },
@@ -42755,6 +43579,16 @@ Params:
                             "x-unit": "W/mK"
                           }
                         }
+                      },
+                      "source_revision": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "source_revision_schema_version": {
+                        "type": "integer",
+                        "enum": [
+                          1
+                        ]
                       }
                     }
                   },
@@ -42925,6 +43759,16 @@ Params:
                             "x-unit": "W/mK"
                           }
                         }
+                      },
+                      "source_revision": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "source_revision_schema_version": {
+                        "type": "integer",
+                        "enum": [
+                          1
+                        ]
                       }
                     }
                   },
@@ -43647,6 +44491,16 @@ Params:
                   }
                 }
               }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
             }
           }
         },
@@ -51090,11 +51944,458 @@ Example params:
 
 Called with a context granted `setup`.
 
+### `ph_composer.library.cancel_load`
+
+Cancel a hosted library load that is still running. The catalog it would have replaced stays as it was. Owner: `ph_composer.library`.
+
+Refuses: only the `setup_command` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_id",
+    "kind"
+  ],
+  "properties": {
+    "provider_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "A configured library, by the id ph_composer.library.providers lists."
+    },
+    "kind": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The library kind, such as materials or frames; providers lists the kinds each library serves."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "cancelled"
+  ],
+  "properties": {
+    "cancelled": {
+      "type": "boolean"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "provider_id": "example",
+  "kind": "materials"
+}
+```
+
+### `ph_composer.library.connections.connect`
+
+Start signing in to a hosted library. Owner: `ph_composer.library`.
+
+Refuses: `library.lifecycle_unavailable`, `library.provider_failed`, `library.provider_unavailable`, and the `setup_command` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_kind"
+  ],
+  "properties": {
+    "provider_kind": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The hosted library's provider kind, as ph_composer.library.connections lists it."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_kind",
+    "label",
+    "state",
+    "lifecycle"
+  ],
+  "properties": {
+    "provider_kind": {
+      "type": "string"
+    },
+    "label": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "disconnected",
+        "authorizing",
+        "connected",
+        "reauthorization_required",
+        "unavailable"
+      ]
+    },
+    "lifecycle": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "connect",
+          "disconnect",
+          "reauthorize",
+          "settings"
+        ]
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "provider_kind": "example.library.hosted"
+}
+```
+
+### `ph_composer.library.connections.disconnect`
+
+Sign out of a hosted library and clear what it loaded. Local copies stay. Owner: `ph_composer.library`.
+
+Refuses: `library.lifecycle_unavailable`, `library.provider_failed`, `library.provider_unavailable`, and the `setup_command` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_kind"
+  ],
+  "properties": {
+    "provider_kind": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The hosted library's provider kind, as ph_composer.library.connections lists it."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_kind",
+    "label",
+    "state",
+    "lifecycle"
+  ],
+  "properties": {
+    "provider_kind": {
+      "type": "string"
+    },
+    "label": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "disconnected",
+        "authorizing",
+        "connected",
+        "reauthorization_required",
+        "unavailable"
+      ]
+    },
+    "lifecycle": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "connect",
+          "disconnect",
+          "reauthorize",
+          "settings"
+        ]
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "provider_kind": "example.library.hosted"
+}
+```
+
+### `ph_composer.library.connections.reauthorize`
+
+Sign in to a hosted library again, keeping its connection. Owner: `ph_composer.library`.
+
+Refuses: `library.lifecycle_unavailable`, `library.provider_failed`, `library.provider_unavailable`, and the `setup_command` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_kind"
+  ],
+  "properties": {
+    "provider_kind": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The hosted library's provider kind, as ph_composer.library.connections lists it."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_kind",
+    "label",
+    "state",
+    "lifecycle"
+  ],
+  "properties": {
+    "provider_kind": {
+      "type": "string"
+    },
+    "label": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "disconnected",
+        "authorizing",
+        "connected",
+        "reauthorization_required",
+        "unavailable"
+      ]
+    },
+    "lifecycle": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "connect",
+          "disconnect",
+          "reauthorize",
+          "settings"
+        ]
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "provider_kind": "example.library.hosted"
+}
+```
+
+### `ph_composer.library.connections.remove`
+
+Disconnect a hosted library and erase its stored credential. Local copies stay. Owner: `ph_composer.library`.
+
+Refuses: `library.credential_store_failed`, `library.credential_store_unavailable`, `library.lifecycle_unavailable`, `library.provider_failed`, `library.provider_unavailable`, and the `setup_command` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_kind"
+  ],
+  "properties": {
+    "provider_kind": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The hosted library's provider kind, as ph_composer.library.connections lists it."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_kind",
+    "label",
+    "state",
+    "lifecycle"
+  ],
+  "properties": {
+    "provider_kind": {
+      "type": "string"
+    },
+    "label": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "disconnected",
+        "authorizing",
+        "connected",
+        "reauthorization_required",
+        "unavailable"
+      ]
+    },
+    "lifecycle": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "connect",
+          "disconnect",
+          "reauthorize",
+          "settings"
+        ]
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "provider_kind": "example.library.hosted"
+}
+```
+
+### `ph_composer.library.connections.settings`
+
+Open a hosted library's own settings. Owner: `ph_composer.library`.
+
+Refuses: `library.lifecycle_unavailable`, `library.provider_failed`, `library.provider_unavailable`, and the `setup_command` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_kind"
+  ],
+  "properties": {
+    "provider_kind": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The hosted library's provider kind, as ph_composer.library.connections lists it."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_kind",
+    "label",
+    "state",
+    "lifecycle"
+  ],
+  "properties": {
+    "provider_kind": {
+      "type": "string"
+    },
+    "label": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "disconnected",
+        "authorizing",
+        "connected",
+        "reauthorization_required",
+        "unavailable"
+      ]
+    },
+    "lifecycle": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "connect",
+          "disconnect",
+          "reauthorize",
+          "settings"
+        ]
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "provider_kind": "example.library.hosted"
+}
+```
+
 ### `ph_composer.library.load`
 
 Read a configured library into session memory. Owner: `ph_composer.library`.
 
-Refuses: `library.kind_unavailable`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, and the `setup_command` common set.
+Refuses: `library.connection_required`, `library.kind_unavailable`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.reauthorization_required`, and the `setup_command` common set.
 
 Params:
 
@@ -51159,7 +52460,12 @@ Result:
         "unloaded",
         "empty",
         "loaded",
-        "failed"
+        "failed",
+        "loading",
+        "ready",
+        "stale",
+        "unavailable",
+        "cancelled"
       ]
     },
     "warnings": {
@@ -51262,6 +52568,28 @@ Result:
         "null"
       ],
       "minimum": 0
+    },
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "library_revision",
+        "projection_schema_version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "library_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "projection_schema_version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
     }
   }
 }
@@ -52322,7 +53650,7 @@ Called by no client. An action of a feature that requires the owner names the pa
 
 Copy or reuse one library record, with optional assignment, inside the calling action's own proposal and Undo step. Owner: `ph_composer.library`.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `library.adapter_invalid`, `library.callback_invalid`, `library.catalog_stale`, `library.kind_unavailable`, `library.local_choice_required`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.review_required`, `library.row_semantic_invalid`, `library.row_unavailable`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `participant` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `library.adapter_invalid`, `library.callback_invalid`, `library.catalog_stale`, `library.connection_changed`, `library.kind_unavailable`, `library.local_choice_required`, `library.model_changed`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.reauthorization_required`, `library.reload_required`, `library.review_required`, `library.row_semantic_invalid`, `library.row_unavailable`, `library.selection_changed`, `library.use_expired`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `participant` common set.
 
 Params:
 

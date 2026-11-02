@@ -74,16 +74,30 @@ module PhComposer
     end
 
     # Registers the foundation and every listed feature. A registration problem fails loading here,
-    # with every diagnostic in the message, rather than leaving a partly available extension.
+    # with every diagnostic in the message, rather than leaving a partly available extension. Features
+    # another extension installed are installed again afterwards, batch by batch as they were first
+    # installed; one that no longer registers is logged and left out, never failing Composer.
     def self.compose
+      own = FOUNDATION_FEATURES + FEATURES
+      external = Registry.current.installed_batches.map { |batch| batch - own }.reject(&:empty?)
       Registry.reset
-      Registry.install(FOUNDATION_FEATURES + FEATURES)
+      Registry.install(own)
+      external.each do |batch|
+        Registry.install(batch)
+      rescue RegistrationError => error
+        Diagnostics.log("extension_reinstall_refused", "severity" => "warning",
+                                                       "code" => error.diagnostics.first&.code)
+      end
     end
 
     unless file_loaded?(__FILE__)
       Sessions.install
       compose
-      on_reset("composition") { compose }
+      # A test starts from Composer's own features alone, so one test's extension never reaches the next.
+      on_reset("composition") do
+        Registry.reset
+        compose
+      end
       Sessions.open_active
       Panel.install
       Commands.install

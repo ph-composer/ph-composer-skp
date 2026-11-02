@@ -1,7 +1,7 @@
 # P2-16: generic connection seam for hosted Library providers
 
 DATE: 2026-09-30, rescoped 2026-11-02
-STATUS: In progress on `feature/p2-16-connection-seam`. Un-deferred by D5-1, 2026-11-02.
+STATUS: Implemented on branch `feature/p2-16-connection-seam` (2026-11-02). Un-deferred by D5-1. Host gate pending.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/328 (replaces the closed #14)
 
@@ -69,6 +69,18 @@ SketchUp upgrade, and on Windows, is a later native gate.
   non-file setup and Remove; the credential store against a fake.
 - A fake v2 provider in the tests (no network) proves the seam. The example provider does not change.
 - `context/EXTENSIBILITY.md`, `context/CONTRACTS.md` and `planning/STATUS.md` updated in the same PR.
+
+## Evidence (2026-11-02, offline)
+
+- `make ci` green: Ruby suite 2,264 runs, 0 failures; JavaScript 758 pass; pytest 258 pass; RuboCop, eslint,
+  manifests and RBZ checks pass. New suites on Ruby 3.2.2 and 2.7.2: `library_connection_test` (10),
+  `library_hosted_load_test` (11), `library_hosted_copy_test` (8), `library_credential_store_test` (4), plus
+  connection rows in `library_setup_test.js` and hosted states in `library_sidebar_test.js`.
+- One pre-existing test changed: `library_registration_test.rb` used `contract_version: 2` as its unsupported
+  provider example; it now uses 3, because 2 is supported.
+- The macOS Keychain backend stored, replaced, read and deleted a synthetic value from command-line Ruby 3.2.2
+  and 2.7.2 on this Mac, leaving no item. Not a host gate: SketchUp 2023 to 2025, a locked keychain, the prompt
+  after a SketchUp upgrade and all of Windows remain unobserved.
 
 ## History: the 2026-09-30 scope (superseded by D5-1)
 

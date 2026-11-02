@@ -240,7 +240,7 @@ Codes are stable `noun.condition` strings, one per outcome:
 | Registration | `registration.duplicate_id`, `registration.missing_dependency`, `registration.cycle`, `registration.contract_major`, `registration.schema_invalid` |
 | Translation | `payload.contract`, `section.missing_dependency`, `section.cycle`, `section.duplicate`, `section.version_unsupported`, `object.unavailable`, `dependency.unavailable` |
 | Export | `export.blocked`, `export.busy`, `export.cancelled`, `export.failed`, `export.refused`, `export.model_changed`, `export.destination_changed`, `export.replace_required`, `export.privacy_undeclared`, `export.relevance_unknown`, `export.metadata_omitted` (a finding), `export.user_data_passed` (a finding: how many HBJSON objects of each type carry a user's user_data), `export.revoked` (the access that started the task was revoked before it wrote anything), `task.expired`, `task.foreign` (another caller started that task) |
-| Library | `library.adapter_invalid`, `library.assignment_unavailable`, `library.callback_invalid`, `library.catalog_budget`, `library.catalog_stale`, `library.catalog_too_large`, `library.catalog_too_many_rows`, `library.destination_changed`, `library.destination_invalid`, `library.export_write_failed`, `library.file_malformed`, `library.file_too_large`, `library.file_unreadable`, `library.format_invalid`, `library.kind_unavailable`, `library.local_choice_required`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.review_required`, `library.row_semantic_invalid`, `library.row_unavailable`, `library.schema_unsupported`, `library.setup_invalid`, `library.setup_too_large`, `library.setup_unavailable`, `library.setup_unreadable`, `library.update_destination_invalid`, `library.update_destination_required`. Catalog notes are listed in "Library providers and catalogs" |
+| Library | `library.adapter_invalid`, `library.assignment_unavailable`, `library.callback_invalid`, `library.catalog_budget`, `library.catalog_stale`, `library.catalog_too_large`, `library.catalog_too_many_rows`, `library.connection_changed`, `library.connection_required`, `library.credential_store_failed`, `library.credential_store_unavailable`, `library.destination_changed`, `library.destination_invalid`, `library.export_write_failed`, `library.file_malformed`, `library.file_too_large`, `library.file_unreadable`, `library.format_invalid`, `library.kind_unavailable`, `library.lifecycle_unavailable`, `library.load_timeout`, `library.local_choice_required`, `library.model_changed`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.reauthorization_required`, `library.reload_required`, `library.review_required`, `library.row_semantic_invalid`, `library.row_unavailable`, `library.schema_unsupported`, `library.selection_changed`, `library.setup_invalid`, `library.setup_too_large`, `library.setup_unavailable`, `library.setup_unreadable`, `library.source_revision_invalid`, `library.update_destination_invalid`, `library.update_destination_required`, `library.use_expired`. Catalog notes are listed in "Library providers and catalogs" |
 | Runtime | `runtime.asset_refused`, `runtime.boot_timeout`, `runtime.boot_failed`, `runtime.translation_failed`, `runtime.stopped`, `runtime.closed`, `runtime.unresponsive` (a ready runtime sent nothing within the export task's silence deadline), `runtime.conformance_failed` (the canonical HBJSON did not reconcile with the result) |
 
 Shared nouns (`request`, `session`, `revision`, `proposal`, `target`, `params`, `validation`,
@@ -878,6 +878,17 @@ failure carrying its code and a fixed message; a provider exception that is not 
 `library.provider_failed`. An entry never read has generation null and state `unloaded`. Setup
 changes drop the affected provider's entries in every open session. Nothing is cached to disk.
 
+**Hosted catalogs.** A contract version 2 provider's catalog is loaded by a timer-polled load
+(`library/connection/load.rb`). The load command answers `loading` at once. A complete admitted
+snapshot publishes the next generation as `ready`, with or without rows, and names its `snapshot`. A
+failed load leaves the published generation and rows unchanged and reads `stale` with its failure, or
+`unavailable` when nothing was published; a cancelled one reads `cancelled`. A load that has not
+answered after 120 seconds fails with `library.load_timeout`. A poll that finds the session closed,
+the connection generation moved on or a newer load of the same catalog ends without publishing. The
+load command refuses `library.connection_required` or `library.reauthorization_required` unless the
+connection is connected. A snapshot whose source revisions do not name each row once with a positive
+integer fails whole with `library.source_revision_invalid`.
+
 **Pages.** `catalog` and `in_file` page through `shell/pages.rb` like every other list: `limit`
 (default 100, maximum 500), `cursor` and `next_cursor`, with `total` on every page. Rows keep the
 provider's order; a cursor is bound to the generation it was read from, and an `in_file` cursor to
@@ -903,9 +914,18 @@ proposals". Its own checks run in this order, each refusing the whole proposal:
    refuses first (`library.local_choice_required`); an unknown choice is `params.invalid`. `create` needs outcome `create` (`library.review_required`);
    `keep_local` and `use_library` need one reviewed candidate (`library.local_choice_required`);
    `use_library` needs the candidate's reviewed `expected_values` (`params.invalid`).
-7. The owner's callbacks run with validated params (`params.invalid`) and results
+7. For a version 2 source and a `create` or `use_library` choice, the use check: the catalog must
+   have been loaded under the current connection generation (`library.reload_required`); the
+   provider's `authorize_use` must answer `allowed` (`library.reload_required`,
+   `library.reauthorization_required`, `library.provider_unavailable`, `library.provider_invalid`
+   for another answer, or a code it declares); and, measured from the start of that request, within
+   5,000 ms (`library.use_expired`) with the same connection generation (`library.connection_changed`),
+   destination Model (`library.model_changed`) and loaded snapshot (`library.selection_changed`).
+8. The owner's callbacks run with validated params (`params.invalid`) and results
    (`library.callback_invalid`), then assignment when requested
-   (`library.assignment_unavailable` when the adapter has none).
+   (`library.assignment_unavailable` when the adapter has none). A version 2 copy then repeats the
+   step 7 window and identity checks before the action commits, and its `source` carries
+   `source_revision` and `source_revision_schema_version`.
 
 **Callback write ownership.** A create, replace or assign callback shares the caller's proposal.
 Its request's engine is `engine.projected(proposal, writable_kinds:, refusal_code:)`

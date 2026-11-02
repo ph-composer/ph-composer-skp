@@ -7,6 +7,7 @@ require_relative "setup_commands"
 require_relative "export_registration"
 require_relative "copy_participant"
 require_relative "refuses"
+require_relative "connection/commands"
 
 module PhComposer
   module Library
@@ -100,7 +101,7 @@ module PhComposer
       end
       feature.setup_command("#{FEATURE_ID}.load",
                             :description => "Read a configured library into session memory.",
-                            :refuses => Refuses::LOAD,
+                            :refuses => Refuses::LOAD_COMMAND,
                             :params => object(selected_params.fetch("properties").slice("provider_id", "kind")),
                             :result => Schemas.summary,
                             :examples => [{ "provider_id" => "example", "kind" => "example_parts" }]) do |request|
@@ -118,6 +119,7 @@ module PhComposer
                                    :params => copy_params, :result => Schemas.copy_result,
                                    :examples => [COPY_EXAMPLE], &CopyParticipant.method(:call))
       SetupCommands.install(feature)
+      Connection::Commands.install(feature)
       ExportRegistration.install(feature)
     end
     private_class_method :install_commands

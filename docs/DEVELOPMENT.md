@@ -388,8 +388,9 @@ uv run tools/hostkit/host_bridge.py eval \
 These arrive with the parts they verify. Until then no command exists and none may be cited as a
 passing check.
 
-- **Library provider testing.** A local fixture server for connection providers arrives with the
-  library provider contract.
+- **Hosted library testing.** Core's connection seam is tested offline against a fake hosted library
+  (`tests/support/hosted_library_fixtures.rb`) with no network. A local fixture server, and host runs of
+  the OS credential store, arrive with the first hosted library extension.
 
 ## Phase 1 export verification
 

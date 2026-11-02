@@ -440,10 +440,15 @@ The owning feature supplies one source-attribution report line per copied record
 HBJSON. The [panel-closed example](../tools/examples/library/materials_walkthrough.rb) exercises
 load, preview, copy, retry and read-back.
 
-The connection provider remains proposed. Its HTTPS transport, grants, credential storage and
-asynchronous reconfiguration/disposal guards belong to the
-[libraries packet](../planning/archive/libraries/PRD.md). The file provider's
-implementation does not establish those host contracts.
+Hosted providers declare contract version 2 ([EXTENSIBILITY.md](EXTENSIBILITY.md), "Hosted library
+providers"). Core owns when things happen and the extension owns how: core keeps one connection object
+per declaration for the process (`library/connection/manager.rb`), polls version 2 loads on one-shot
+host timers like an export task (`library/connection/load.rb`), so no Ruby thread touches a Model,
+and runs the use check before a copy stages a write (`library/connection/use.rb`). Core does no HTTP
+and knows no sign-in mode, address or vendor. The OS credential store
+(`library/connection/credential_store.rb`) is Fiddle on `Security.framework` on macOS, observed on
+SketchUp 2026 only, and Credential Manager on Windows, written and not yet observed on any host. No
+credential, credential-bearing address or provider body reaches the HtmlDialog or a public result.
 
 ## Errors
 

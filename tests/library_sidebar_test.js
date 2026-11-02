@@ -147,3 +147,16 @@ test("the sidebar narrows to one category and orders names either way, and the c
   o.sidebar.renderList();
   assert.strictEqual(o.sidebar.category.value, "insulation", "a repaint keeps the category chosen");
 });
+test("a hosted catalog says it is loading, cancelled or stale, and keeps the last rows", function () {
+  var o = setup();
+  [["loading", null, /^Loading library…$/], ["cancelled", null, /cancelled\. Showing the last catalog/],
+    ["stale", { message: "The library could not be loaded." }, /could not be loaded\. Showing the last successful/]]
+    .forEach(function (row) {
+      Object.assign(o.sidebar.store.page, { state: row[0], failure: row[1], age_seconds: 5 });
+      Object.assign(o.state.sections["ph_composer.library.provider_catalogs"].value[0].catalogs[0],
+        { state: row[0], failure: row[1], age_seconds: 5 });
+      o.sidebar.refresh(o.state, {}, true);
+      assert.match(o.sidebar.sourceStatus.textContent, row[2]);
+      assert.strictEqual(o.sidebar.records.length, 1);
+    });
+});

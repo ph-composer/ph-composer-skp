@@ -48,6 +48,29 @@ module PhComposer
         raise Error.new("library.provider_invalid", "The provider response is malformed."), :cause => nil
       end
 
+      # A version 2 snapshot: the v1 admission of its batch, once every row has exactly one positive
+      # source revision and no revision names a row the batch does not hold. Any break refuses the
+      # whole snapshot, so no row is published without its exact revision. Returns the admitted batch
+      # and the revisions of the rows it kept.
+      def revisioned(response, kind:, adapter:)
+        unless response.is_a?(Provider::RevisionedBatch)
+          raise Error.new("library.provider_invalid", "The provider response is malformed.")
+        end
+
+        keys = response.batch.rows.map { |row| Provider.source_key(kind, row) }
+        revisions = response.source_revisions
+        valid = keys.uniq.length == keys.length && revisions.keys.sort == keys.sort &&
+                revisions.values.all? { |value| value.is_a?(Integer) && value.positive? }
+        unless valid
+          raise Error.new("library.source_revision_invalid",
+                          "The provider snapshot does not give every record exactly one source revision.")
+        end
+
+        batch = call(response.batch, :kind => kind, :adapter => adapter)
+        kept = batch.rows.map { |row| Provider.source_key(kind, row) }
+        [batch, Provider.immutable(revisions.slice(*kept))]
+      end
+
       # Each library that repeats a record id: the whole library is unavailable, not just the repeat.
       def duplicate_libraries(rows)
         rows.group_by { |row| [row.fetch("library_id"), row.fetch("record_id")] }

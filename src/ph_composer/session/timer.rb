@@ -1,16 +1,17 @@
 # frozen_string_literal: true
 
 module PhComposer
-  # One pending zero-delay UI timer at most: repeated requests before it fires coalesce into one run.
+  # One pending one-shot UI timer at most, zero-delay unless asked: repeated requests before it fires
+  # coalesce into one run.
   class CoalescedTimer
     def initialize
       @timer = nil
     end
 
-    def schedule(&block)
+    def schedule(delay: 0.0, &block)
       return false if pending?
 
-      @timer = UI.start_timer(0.0, false) do
+      @timer = UI.start_timer(delay, false) do
         @timer = nil
         block.call
       end

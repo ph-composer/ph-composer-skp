@@ -11,6 +11,7 @@ module PhComposer
       def initialize(clock: -> { Time.now.utc })
         @clock = clock
         @entries = {}
+        @transports = {}
         @generation = 0
       end
 
@@ -25,14 +26,7 @@ module PhComposer
           raise Error.new("library.provider_invalid", "The normalized catalog response is malformed.")
         end
 
-        @generation += 1
-        @entries[[provider.id, kind]] = Provider.immutable(
-          "provider_id" => provider.id, "kind" => kind, "generation" => @generation,
-          "state" => batch.rows.empty? ? "empty" : "loaded", "rows" => batch.rows,
-          "warnings" => batch.warnings, "unavailable" => batch.unavailable, "freshness" => batch.freshness,
-          "published_at" => @clock.call.utc.iso8601(6), "failure" => nil
-        )
-        fetch(provider.id, kind)
+        publish(provider.id, kind, batch, batch.rows.empty? ? "empty" : "loaded")
       rescue StandardError => error
         # A third-party provider exception may include its transport address. Neither its text,
         # details nor cause is copied into session state or an outcome.
@@ -59,10 +53,57 @@ module PhComposer
 
       def remove(provider_id)
         @entries.delete_if { |(id, _kind), _row| id == provider_id }
+        @transports.delete_if { |(id, _kind), _row| id == provider_id }
         nil
       end
 
+      # Every catalog a version 2 declaration's connection loaded, by provider id.
+      def loaded_by(provider_kind)
+        @transports.select { |_key, row| row.fetch("provider_kind") == provider_kind }.keys.map(&:first).uniq
+      end
+
+      # A version 2 load's admitted snapshot: the next generation, state `ready` even when it has no
+      # rows, with the snapshot identity public and the source revisions and the connection generation
+      # it was read under kept for copying (`transport`).
+      def publish_revisioned(provider_id, kind, batch, snapshot:, source_revisions:, connection_generation:,
+                             provider_kind:)
+        entry = publish(provider_id, kind, batch, "ready", "snapshot" => snapshot)
+        @transports[[provider_id, kind]] = Provider.immutable(
+          "generation" => entry.fetch("generation"), "snapshot" => snapshot, "provider_kind" => provider_kind,
+          "source_revisions" => source_revisions, "connection_generation" => connection_generation
+        )
+        entry
+      end
+
+      # What a published version 2 generation was read from, or nil for a v1 or unpublished catalog.
+      def transport(provider_id, kind)
+        @transports[[provider_id, kind]]
+      end
+
+      # A version 2 load's state while it runs or after it ends without a snapshot: `loading`,
+      # `cancelled`, or `failed`, which reads as `stale` while an earlier generation is kept and as
+      # `unavailable` without one. The published rows and generation never change here.
+      def mark(provider_id, kind, state, failure: nil)
+        old = @entries[[provider_id, kind]] || empty(provider_id, kind)
+        if state == "failed"
+          state = old.fetch("generation") ? "stale" : "unavailable"
+        end
+        @entries[[provider_id, kind]] = Provider.immutable(old.merge("state" => state, "failure" => failure))
+        fetch(provider_id, kind)
+      end
+
       private
+
+      def publish(provider_id, kind, batch, state, extra = {})
+        @generation += 1
+        @entries[[provider_id, kind]] = Provider.immutable(
+          { "provider_id" => provider_id, "kind" => kind, "generation" => @generation,
+            "state" => state, "rows" => batch.rows,
+            "warnings" => batch.warnings, "unavailable" => batch.unavailable, "freshness" => batch.freshness,
+            "published_at" => @clock.call.utc.iso8601(6), "failure" => nil }.merge(extra)
+        )
+        fetch(provider_id, kind)
+      end
 
       def empty(provider_id, kind)
         { "provider_id" => provider_id, "kind" => kind, "generation" => nil, "state" => "unloaded",

@@ -873,7 +873,7 @@ module PhComposer
           item.adapter.wire_kind if item.adapter.is_a?(Declarations::LibraryAdapter)
         end
         @staging.declared_library_providers.each do |item|
-          check_library_version(item, "contract", item.contract_version)
+          check_library_provider_version(item)
           problem(item, "needs a callable factory") unless item.factory.respond_to?(:call)
           kinds = item.kinds
           next if kinds == ["*"]
@@ -887,6 +887,49 @@ module PhComposer
             add("registration.missing_dependency", item.owner, item.name,
                 "#{item.name} serves #{kind}, which has no registered adapter.", kind)
           end
+        end
+      end
+
+      # Version 1 declares no connection; version 2 must declare all of it.
+      def check_library_provider_version(item)
+        unless Declarations::LIBRARY_PROVIDER_VERSIONS.include?(item.contract_version)
+          add("registration.contract_major", item.owner, item.name,
+              "#{item.name} contract #{item.contract_version.inspect} is unsupported; this build provides 1 and 2.")
+          return
+        end
+        if item.contract_version == 1
+          declared = %i[lifecycle connection refuses].reject { |part| item[part].nil? }
+          problem(item, "declares #{declared.join(', ')}, which needs contract version 2") unless declared.empty?
+          return
+        end
+        check_library_lifecycle(item)
+        problem(item, "needs a callable connection factory") unless item.connection.respond_to?(:call)
+        check_library_provider_refusals(item)
+      end
+
+      def check_library_lifecycle(item)
+        lifecycle = item.lifecycle
+        valid = lifecycle.is_a?(Array) && lifecycle.uniq.length == lifecycle.length &&
+                (lifecycle - Declarations::LIBRARY_LIFECYCLE).empty?
+        return if valid
+
+        problem(item, "lifecycle must be unique actions from #{Declarations::LIBRARY_LIFECYCLE.join(', ')}")
+      end
+
+      # One list per callback the provider answers, each of `library.*` codes: a provider error keeps
+      # its code only when that callback declares it.
+      def check_library_provider_refusals(item)
+        refuses = item.refuses
+        callbacks = Declarations::LIBRARY_PROVIDER_CALLBACKS + Array(item.lifecycle)
+        unless refuses.is_a?(Hash) && refuses.keys.sort == callbacks.uniq.sort
+          problem(item, "refuses must list codes for exactly #{callbacks.uniq.join(', ')}")
+          return
+        end
+        refuses.each do |callback, codes|
+          next if codes.is_a?(Array) && codes.uniq.length == codes.length &&
+                  codes.all? { |code| code.is_a?(String) && Declarations::LIBRARY_CODE.match?(code) }
+
+          problem(item, "#{callback}.refuses must be unique library.* codes")
         end
       end
     end

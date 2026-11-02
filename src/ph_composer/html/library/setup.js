@@ -4,7 +4,12 @@ PhComposerUI.define("library/setup", ["library/locations", "request", "snapshot"
   function (Locations, request, snapshot, ui) {
   "use strict";
   var PREFIX = "ph_composer.library.providers", SECTION = "ph_composer.library.provider_catalogs",
-    SETUP_SECTION = "ph_composer.library.provider_setup", el = ui.element;
+    SETUP_SECTION = "ph_composer.library.provider_setup", CONNECTIONS = "ph_composer.library.connection_states",
+    CONNECTION_PREFIX = "ph_composer.library.connections", el = ui.element;
+  /* A hosted library's connection state in the user's words. The extension signs in; this dialog only
+     starts its lifecycle actions and shows the state and label the host reports. */
+  var STATE_WORDS = { disconnected: "Not connected", authorizing: "Signing in…", connected: "Connected",
+    reauthorization_required: "Sign in again", unavailable: "Unavailable" };
   /* The two ways to add a library, each one native picker. The choice is shown at once while there is no
      library yet, because adding one is then the whole job; afterwards it waits behind "Add a library…". */
   var ROUTES = [
@@ -12,7 +17,8 @@ PhComposerUI.define("library/setup", ["library/locations", "request", "snapshot"
     { verb: "add_folder", label: "Library folder…", detail: "A folder of library files, read together." }];
   function Setup(session, send, changed) {
     var self = this;
-    this.changed = changed; this.providers = []; this.enabled = false; this.unreadable = false;
+    this.changed = changed; this.providers = []; this.connections = []; this.enabled = false;
+    this.unreadable = false;
     this.choosing = false; this.added = null;
     this.requests = request.channel(session, send, "library-setup", "setup.invoke");
     this.root = ui.formDialog("library-setup", function () { self.close(); });
@@ -60,6 +66,7 @@ PhComposerUI.define("library/setup", ["library/locations", "request", "snapshot"
     if (this.disposed) return;
     var providers = state.session === this.requests.session && snapshot.value(state, SECTION);
     this.enabled = Boolean(providers); this.providers = providers || [];
+    this.connections = (this.enabled && snapshot.value(state, CONNECTIONS)) || [];
     var setupState = this.enabled && snapshot.value(state, SETUP_SECTION);
     this.unreadable = Boolean(setupState) && setupState.state === "unreadable";
     if (!this.enabled) { this.requests.reset(); this.root.closeModal(); }
@@ -88,9 +95,13 @@ PhComposerUI.define("library/setup", ["library/locations", "request", "snapshot"
       outcome.value.length === before.length ? "That library is already in the list." : "";
   };
   Setup.prototype.paint = function () {
-    var self = this, busy = this.requests.busy(), empty = !this.providers.length;
+    var self = this, busy = this.requests.busy(), empty = !this.providers.length && !this.connections.length;
+    var hosted = this.connections.map(function (row) { return row.provider_kind; });
     this.list.replaceChildren();
-    this.providers.forEach(function (provider) {
+    this.connections.forEach(function (row) { self.list.appendChild(self.connectionRow(row, busy)); });
+    // A hosted library's catalogs appear under its connection row above, not again as a provider.
+    var listed = this.providers.filter(function (row) { return hosted.indexOf(row.provider_kind) < 0; });
+    listed.forEach(function (provider) {
       var row = el("div", "library-setup-row" + (provider.id === self.added ? " is-added" : ""));
       row.appendChild(el("span", "", provider.label));
       if (provider.provider_kind === "ph_composer.library.file") {
@@ -119,6 +130,37 @@ PhComposerUI.define("library/setup", ["library/locations", "request", "snapshot"
     if (active && this.root.contains && !this.root.hidden && active !== document.body &&
         (!active.isConnected || hiddenWithin(active, this.root))) this.cancel.focus();
   };
+  /* One hosted library: its label, its state, and the lifecycle actions it declares that fit that state.
+     Remove signs out and forgets the connection; copies already in the file stay. */
+  Setup.prototype.connectionRow = function (row, busy) {
+    var self = this, offers = row.lifecycle || [], state = row.state;
+    var line = el("div", "library-setup-row library-setup-connection");
+    line.appendChild(el("span", "", row.label));
+    line.appendChild(el("small", "muted", STATE_WORDS[state] || STATE_WORDS.unavailable));
+    var actions = [];
+    if (offers.indexOf("connect") >= 0 && (state === "disconnected" || state === "unavailable")) {
+      actions.push(["connect", "Connect"]);
+    }
+    if (offers.indexOf("reauthorize") >= 0 && state === "reauthorization_required") {
+      actions.push(["reauthorize", "Reconnect"]);
+    }
+    if (offers.indexOf("disconnect") >= 0 && state !== "disconnected") actions.push(["disconnect", "Disconnect"]);
+    if (offers.indexOf("settings") >= 0) actions.push(["settings", "Settings…"]);
+    actions.forEach(function (action) {
+      var button = ui.button(action[1], function () {
+        self.request(CONNECTION_PREFIX + "." + action[0], { provider_kind: row.provider_kind });
+      });
+      button.setAttribute("aria-label", action[1] + " " + row.label);
+      button.disabled = busy || !self.enabled;
+      line.appendChild(button);
+    });
+    var remove = ui.iconButton("Remove " + row.label, "delete", function () {
+      self.request(CONNECTION_PREFIX + ".remove", { provider_kind: row.provider_kind });
+    });
+    remove.classList.add("library-setup-remove"); remove.disabled = busy || !this.enabled;
+    line.appendChild(remove);
+    return line;
+  };
   function hiddenWithin(node, root) {
     for (var current = node; current && current !== root; current = current.parentNode) {
       if (current.hidden) return true;
@@ -134,12 +176,15 @@ PhComposerUI.define("library/setup", ["library/locations", "request", "snapshot"
     this.changed();
   };
   Setup.prototype.run = function (verb, params) {
+    return this.request(PREFIX + "." + verb, params, /^add_/.test(verb) ?
+      "Choose the library in the window that opened…" : "Waiting for library setup…");
+  };
+  Setup.prototype.request = function (name, params, waiting) {
     if (this.disposed || !this.enabled || this.requests.busy()) return false;
     this.pendingIds = this.providers.map(function (row) { return row.id; }); this.added = null;
-    this.requests.run(PREFIX + "." + verb, params);
+    this.requests.run(name, params);
     this.error.className = "cell-error library-setup-waiting";
-    this.error.textContent = /^add_/.test(verb) ? "Choose the library in the window that opened…" :
-      "Waiting for library setup…";
+    this.error.textContent = waiting || "Waiting for library setup…";
     this.paint(); this.changed(); return true;
   };
   Setup.prototype.close = function () {
