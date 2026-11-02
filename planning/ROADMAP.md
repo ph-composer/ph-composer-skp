@@ -153,7 +153,7 @@ to 7, piping and ducting are gate stubs until their interviews. No stage authori
 | 5.3 | [Window performance overlays](features/phase-05-post-mvp/window-performance-overlays/README.md) | Requested, PRD drafted | Needs 5.1 for radiation. A U-w ramp needs nothing and could come earlier |
 | 5.4 | Further library kinds and providers | Not drafted | Thermal Bridge Types, Pipe and Duct Types, equipment, climates |
 | 5.5 | PV and site | Not drafted | Named in the founding brief |
-| 2.5 | [Libraries: connection provider and sign-in](features/phase-05-post-mvp/phases/p2-16-connection-provider.md) | Deferred by D2-8, 2026-10-01 | PH-Navigator production endpoint still uses its older format. Scope unchanged |
+| 2.5 | [Libraries: generic connection seam](features/phase-05-post-mvp/phases/p2-16-connection-provider.md) | Un-deferred by D5-1, 2026-11-02: generic connection seam; the PH-Elements connector is the first extension | [#328](https://github.com/ph-composer/ph-composer-skp/issues/328); deferred by D2-8 on 2026-10-01 |
 
 ## Production-support release prerequisite
 
