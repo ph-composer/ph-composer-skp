@@ -20,20 +20,20 @@ Library on the PH-Elements service. Steps, read-backs and exports stay in gitign
 | Host | SketchUp 26.1.188, Ruby 3.2.2, macOS 26.7.1 |
 | Fixture | `lh1.skp`, a fresh copy of the same blank SketchUp 2026 Model as run 1 |
 | Library | Synthetic Firm B (one Material, "T10 synthetic mineral wool"); Synthetic Firm C for the firm change |
-| Controls | Ed at the mouse and default browser for the first Connect, the web edits, archive and revokes, one Disconnect and two authenticator codes; the development bridge for loads, copies, Undo and Redo, save, relaunch, faults and read-back; a built-in browser signed in as a second synthetic member for the later consents, Cancel and the firm change |
+| Controls | Ed at the mouse and default browser for the first Connect, the web edits, archive and revokes, one Disconnect and two authenticator codes; the development bridge for loads, copies, Undo and Redo, save, relaunch, faults and read-back; a second browser signed in to an authorized account that belongs to both synthetic firms (an Owner, so each consent asked it for an authenticator code, which Ed entered) for the later consents, Cancel and the firm change |
 
 ## Results
 
 | Assertion | Result | Observation |
 | --- | --- | --- |
-| connect | pass | The Libraries row showed the same pairing display as the consent page (four consents, all matching); connected with the firm label; responsive; no Keychain prompt; the stored item names its issuer |
+| connect | pass | The Libraries row showed the same pairing display as the consent page on every consent; connected with the firm label; responsive; no Keychain prompt; the stored item names its issuer |
 | replayed-callback | pass | A reloaded callback was refused; the connection was unaffected |
 | load | pass | Materials, Frames and Glazings `ready` as revisioned snapshots; empty kinds `ready` |
 | copy-undo-redo | pass | The copy carries `source_revision` and schema version 1; native Undo and Redo exact |
 | newer-revision | pass | Local edit kept the revision; keep-local wrote nothing; use-library adopted the newer revision; Undo and Redo exact |
 | identical-content | pass | Two revisions with the same fingerprint stay distinguishable; keep-local did not adopt the newer one |
 | reopen-keychain | pass | Save and fresh-process reopen kept the revision and restored the connection from the Keychain |
-| interrupted-replace | pass | `kill -9` during a held credential write left a complete item and the next launch recovered (run 1 left the spent marker and asked for a sign-in; both are complete outcomes) |
+| interrupted-replace | pass | Only the replacement write of a refresh was held, and `kill -9` landed while it was held: the next launch found the spent marker, never a partial item or a resendable credential, and asked for Connect. A first attempt killed after the replacement had been written and was not counted. The connection pointer was not yet on disk, so the item was orphaned ([ph-composer-elements#12](https://github.com/ph-composer/ph-composer-elements/issues/12)) |
 | model-switch | pass | A load with a second Model opened completed in its own Model only |
 | cancel | pass | Disconnect while signing in and Cancel on the consent page both ended `disconnected` with nothing stored |
 | firm-change | pass | A second Connect choosing another firm relabelled the row under a new connection, served the new firm's Library, kept copies and revoked the replaced connection at the service |
@@ -46,6 +46,7 @@ Library on the PH-Elements service. Steps, read-backs and exports stay in gitign
 ## Notes
 
 - The PH-Elements consent asks an Owner for a fresh authenticator code on every consent.
+- A forced quit soon after Connect loses the connection pointer, which SketchUp writes on a clean quit ([ph-composer-elements#12](https://github.com/ph-composer/ph-composer-elements/issues/12)).
 - Before the run, an item stored before the extension bound credentials to their issuer read as needing
   a sign-in and was never sent.
 - Open, outside LH1: the consent page's organization choices expose IDs, not names, to assistive
