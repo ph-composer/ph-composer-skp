@@ -71,6 +71,14 @@ class LibraryHostedLoadTest < PhComposerTestCase
     assert_nil catalog.fetch("generation")
   end
 
+  def test_a_library_that_never_had_a_record_loads_ready_and_empty_at_revision_zero
+    load
+    @server.response = hosted_response(:rows => [], :library_revision => 0)
+    UI.run_timers
+    assert_equal ["ready", 0, 0],
+                 [catalog.fetch("state"), catalog.fetch("total"), catalog.dig("snapshot", "library_revision")]
+  end
+
   def test_a_failed_reload_keeps_the_last_complete_snapshot_as_stale_with_an_undeclared_code_reduced
     load
     @server.response = hosted_response
@@ -258,7 +266,7 @@ class LibraryHostedLoadTest < PhComposerTestCase
 
   def test_a_malformed_snapshot_identity_is_refused_before_admission
     error = assert_raises(PhComposer::Library::Error) do
-      hosted_response(:library_revision => 0)
+      hosted_response(:library_revision => -1)
     end
     assert_equal "library.provider_invalid", error.code
     load
