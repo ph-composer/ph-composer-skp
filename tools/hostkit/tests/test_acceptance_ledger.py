@@ -221,7 +221,9 @@ class CatalogPathsTest(unittest.TestCase):
 
     def test_a_case_screens_what_it_reaches_without_naming_it(self) -> None:
         # E01's register checks the real panel loads with Zones / Faces and Export unchanged; a record engine
-        # is handed its catalog; A12's runtime host loads the runtime page.
+        # is handed its catalog; A12's runtime host loads the runtime page; LH1's hosted copy reaches a
+        # feature's Library adapter, its Model switch the session, its setup dialog the request module and
+        # its credential sweep both exports.
         reached = [
             ("E01", "src/ph_composer/html/features/zones/overview.js"),
             ("E01", "src/ph_composer/html/sections/export.js"),
@@ -229,6 +231,11 @@ class CatalogPathsTest(unittest.TestCase):
             ("A13", "src/ph_composer/core/records/catalog.rb"),
             ("A12", "src/ph_composer/html/runtime/index.html"),
             ("A12", "src/ph_composer/html/runtime/runtime.js"),
+            ("LH1", "src/ph_composer/features/assemblies/library_kind.rb"),
+            ("LH1", "src/ph_composer/session/model_session.rb"),
+            ("LH1", "src/ph_composer/html/request.js"),
+            ("LH1", "src/ph_composer/export/task.rb"),
+            ("LH1", "src/ph_composer/library/connection/credential_store.rb"),
         ]
         for case_id, name in reached:
             with self.subTest(case=case_id, name=name):
