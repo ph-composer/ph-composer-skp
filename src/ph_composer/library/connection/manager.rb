@@ -176,13 +176,21 @@ module PhComposer
 
           public = { "state" => value["state"], "label" => value["label"].strip,
                      "connection_id" => value["connection_id"] }
-          pairing = value["pairing_display"]
-          if value["state"] == "authorizing" && pairing.is_a?(String) && PAIRING_DISPLAY.match?(pairing)
-            public["pairing_display"] = pairing
-          end
+          pairing = pairing_display(value)
+          public["pairing_display"] = pairing if pairing
           public
         rescue *EXTENSION_ERRORS
           { "state" => "unavailable", "label" => fallback, "connection_id" => nil }
+        end
+
+        # The status's pairing display while authorizing, or nil. Checked on its own, so a value in an
+        # encoding the pattern cannot read drops only this field, never the rest of the status.
+        def pairing_display(value)
+          pairing = value["pairing_display"]
+          return nil unless value["state"] == "authorizing" && pairing.is_a?(String)
+          return nil unless pairing.valid_encoding? && pairing.encoding.ascii_compatible?
+
+          PAIRING_DISPLAY.match?(pairing) ? pairing : nil
         end
 
         # A different connection id is a different connection: its generation moves on and what the
@@ -200,7 +208,7 @@ module PhComposer
           entry.generation += 1
           Sessions.all.each { |session| State.for(session).connection_changed(declaration.name, :clear => clear) }
         end
-        private_class_method :record, :public_status, :observe, :advance
+        private_class_method :record, :public_status, :pairing_display, :observe, :advance
       end
 
       PhComposer.on_reset("connection manager") { Manager.reset }

@@ -159,6 +159,18 @@ class LibraryConnectionTest < PhComposerTestCase
     assert_equal ["authorizing", nil], shown.call("authorizing", 1234)
   end
 
+  def test_a_pairing_display_in_an_unreadable_encoding_drops_only_that_field
+    [(+"AB12-\xFF").force_encoding("UTF-8"), "AB12-CD34".encode("UTF-16LE")].each do |pairing|
+      connection.define_singleton_method(:status) do
+        { "state" => "authorizing", "label" => "Hosted test library", "connection_id" => "connection-1",
+          "pairing_display" => pairing }
+      end
+      status = Manager.status(declaration)
+      assert_equal ["authorizing", "Hosted test library", "connection-1", nil],
+                   status.values_at("state", "label", "connection_id", "pairing_display")
+    end
+  end
+
   def test_providers_metadata_names_the_connection_and_discovery_lists_declared_codes
     connection.finish_sign_in
     row = API.query(:context => @context, :name => "ph_composer.library.providers").fetch("value")
