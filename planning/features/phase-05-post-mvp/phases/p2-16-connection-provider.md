@@ -1,7 +1,7 @@
 # P2-16: generic connection seam for hosted Library providers
 
 DATE: 2026-09-30, rescoped 2026-11-02
-STATUS: Merged to main 2026-11-02 ([PR #329](https://github.com/ph-composer/ph-composer-skp/pull/329), `5df489e5`). Un-deferred by D5-1. Host gate observed 2026-11-03 ([case LH1](#host-gate-case-lh1), [evidence](../../../native-acceptance/evidence/lh1-hosted-library-2026-11-03.md)): fails only on the pairing display, which Composer did not show; the firm change was blocked by the test account. #334 added the pairing display, observed passing the same day; a full LH1 rerun on that build is owed before the gate closes.
+STATUS: Merged to main 2026-11-02 ([PR #329](https://github.com/ph-composer/ph-composer-skp/pull/329), `5df489e5`). Un-deferred by D5-1. Host gate passed 2026-11-03 ([case LH1](#host-gate-case-lh1) run 2, [evidence](../../../native-acceptance/evidence/lh1-hosted-library-2026-11-03-run2.md)): all sixteen assertions on the build with the pairing display (#334). SketchUp 2023 to 2025, Windows, a locked keychain and the post-upgrade prompt remain unobserved.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/328 (replaces the closed #14)
 
