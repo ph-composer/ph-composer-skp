@@ -119,9 +119,8 @@ module PhComposer
         def valid_snapshot?(snapshot)
           snapshot.is_a?(Hash) && snapshot.keys.sort == %w[id library_revision projection_schema_version] &&
             snapshot["id"].is_a?(String) && /\A[A-Za-z0-9_.:-]{1,128}\z/.match?(snapshot["id"]) &&
-            %w[library_revision projection_schema_version].all? do |key|
-              snapshot[key].is_a?(Integer) && snapshot[key].positive?
-            end
+            snapshot["library_revision"].is_a?(Integer) && !snapshot["library_revision"].negative? &&
+            snapshot["projection_schema_version"].is_a?(Integer) && snapshot["projection_schema_version"].positive?
         end
       end
 

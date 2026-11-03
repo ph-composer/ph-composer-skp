@@ -30,8 +30,8 @@ module PhComposer
       STATES = %w[unloaded empty loaded failed loading ready stale unavailable cancelled].freeze
 
       def snapshot
-        positive = { "type" => "integer", "minimum" => 1 }
-        object({ "id" => TEXT, "library_revision" => positive, "projection_schema_version" => positive })
+        object({ "id" => TEXT, "library_revision" => { "type" => "integer", "minimum" => 0 },
+                 "projection_schema_version" => { "type" => "integer", "minimum" => 1 } })
       end
 
       def note

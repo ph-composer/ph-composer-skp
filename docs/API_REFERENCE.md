@@ -5300,7 +5300,7 @@ Result:
         },
         "library_revision": {
           "type": "integer",
-          "minimum": 1
+          "minimum": 0
         },
         "projection_schema_version": {
           "type": "integer",
@@ -5830,7 +5830,7 @@ Result:
         },
         "library_revision": {
           "type": "integer",
-          "minimum": 1
+          "minimum": 0
         },
         "projection_schema_version": {
           "type": "integer",
@@ -52583,7 +52583,7 @@ Result:
         },
         "library_revision": {
           "type": "integer",
-          "minimum": 1
+          "minimum": 0
         },
         "projection_schema_version": {
           "type": "integer",

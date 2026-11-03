@@ -460,7 +460,8 @@ end
   `Connection::Operation` with `id`, `kind` and `generation`. `poll_load` returns nil while the load runs
   and a `Library::Provider::RevisionedBatch` when it is done.
 - **Snapshot.** `RevisionedBatch.new(batch:, snapshot:, source_revisions:)` carries a v1 `Batch`,
-  unchanged, the snapshot `{ "id", "library_revision", "projection_schema_version" }` and one
+  unchanged, the snapshot `{ "id", "library_revision", "projection_schema_version" }` (a
+  `library_revision` of 0 is a Library that never had a record; the schema version is positive) and one
   positive integer source revision per row, keyed `"<wire kind>/<library id>/<record id>"`. A missing,
   duplicate, zero, negative or foreign key refuses the whole snapshot with
   `library.source_revision_invalid`; the v1 admission rules then apply unchanged.
