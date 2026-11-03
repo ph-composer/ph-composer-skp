@@ -1,7 +1,7 @@
 # P2-16: generic connection seam for hosted Library providers
 
 DATE: 2026-09-30, rescoped 2026-11-02
-STATUS: Merged to main 2026-11-02 ([PR #329](https://github.com/ph-composer/ph-composer-skp/pull/329), `5df489e5`). Un-deferred by D5-1. Host gate pending: real-host observation with the first hosted extension.
+STATUS: Merged to main 2026-11-02 ([PR #329](https://github.com/ph-composer/ph-composer-skp/pull/329), `5df489e5`). Un-deferred by D5-1. Host gate pending: real-host observation with the first hosted extension ([case LH1](#host-gate-case-lh1)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/328 (replaces the closed #14)
 
@@ -81,6 +81,34 @@ SketchUp upgrade, and on Windows, is a later native gate.
 - The macOS Keychain backend stored, replaced, read and deleted a synthetic value from command-line Ruby 3.2.2
   and 2.7.2 on this Mac, leaving no item. Not a host gate: SketchUp 2023 to 2025, a locked keychain, the prompt
   after a SketchUp upgrade and all of Windows remain unobserved.
+
+## Host gate (case LH1)
+
+[`LH1`](../../../native-acceptance/cases.json) observes the merged seam on the installed RBZ with the
+first hosted extension, the PH-Elements connector
+([ph-composer/ph-composer-elements](https://github.com/ph-composer/ph-composer-elements)), against a
+synthetic firm Library on the PH-Elements service. Ledger rows carry synthetic firm and product names,
+versions and outcomes only: no handle, connection ID, service URL, account or consent-page capture.
+Each assertion passes only when observed in the host:
+
+- Connect from Libraries setup opens the browser; the pairing display matches; SketchUp stays responsive
+  during the wait; the connection reaches `connected` with the firm label; a replayed callback is refused.
+- Materials, Frames and Glazings load `ready` as revisioned snapshots.
+- A copy carries `source_revision` and `source_revision_schema_version`, through native Undo and Redo,
+  local edit, keep-local and use-library to a newer revision; two revisions with identical mapped content
+  stay distinguishable.
+- Save and fresh-process reopen keep the revision and restore the connection from the Keychain.
+- A credential replace interrupted by a forced quit leaves either the old or the new item, never a
+  partial one, and the next launch recovers or asks to reconnect.
+- A model switch with a load in flight and a second open Model apply nothing to the wrong Model.
+- Cancel in the browser and Cancel in Composer while authorizing end in `disconnected` with nothing stored.
+- A firm change, revoke from the service, an archived record refused by use-library with reload, and an
+  offline reopen each give the expected state, with local copies untouched.
+- Disconnect removes the Keychain item, clears loaded data, keeps copies, and the service sees the revoke.
+- No credential or credential-bearing URL in the SKP, HtmlDialog data, Ruby Console, logs or either export.
+
+Not observable on demand and recorded as such: a loopback port collision, a locked keychain, the prompt
+after a SketchUp upgrade. SketchUp 2023 to 2025 and Windows stay UNKNOWN.
 
 ## History: the 2026-09-30 scope (superseded by D5-1)
 

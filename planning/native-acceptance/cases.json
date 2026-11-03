@@ -4324,6 +4324,28 @@
         "tools/examples/authoring/thermal_bridge_reference_model.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "LH1",
+      "label": "Hosted Library seam (P2-16) on the installed RBZ with the first hosted extension (PH-Elements connector) and a synthetic firm Library: Connect from Libraries setup through the browser consent, pairing display matched, responsiveness during the wait, a replayed callback refused; Materials, Frames and Glazings loaded ready as revisioned snapshots; a copy with its source revision through native Undo and Redo, local edit, keep-local and use-library to a newer revision, two revisions with identical mapped content kept distinguishable; save and fresh-process reopen restoring the connection from the Keychain; a credential replace interrupted by a forced quit; a model switch with a load in flight and a second Model; Cancel in the browser and in Composer; a firm change; revoke from the service and an archived record refused by use-library; offline reopen; Disconnect removing the Keychain item and clearing loaded data with copies kept; no credential in the SKP, dialog data, Ruby Console, logs or exports",
+      "mode": "mixed",
+      "authority": "planning/features/phase-05-post-mvp/phases/p2-16-connection-provider.md",
+      "paths": [
+        "src/ph_composer/library/*",
+        "src/ph_composer/html/library/*",
+        "src/ph_composer/core/operations/proposal.rb",
+        "src/ph_composer/core/records/authoring_fields.rb",
+        "src/ph_composer/extension.rb",
+        "src/ph_composer/session/timer.rb",
+        "src/ph_composer/shell/api.rb",
+        "src/ph_composer/shell/declarations.rb",
+        "src/ph_composer/shell/dispatch.rb",
+        "src/ph_composer/shell/refusals.rb",
+        "src/ph_composer/shell/registry.rb",
+        "src/ph_composer/shell/registry_validation.rb",
+        "tools/rbz/*"
+      ],
+      "native_control_required": true
     }
   ]
 }
