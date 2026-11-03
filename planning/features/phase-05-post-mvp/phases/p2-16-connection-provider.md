@@ -1,7 +1,7 @@
 # P2-16: generic connection seam for hosted Library providers
 
 DATE: 2026-09-30, rescoped 2026-11-02
-STATUS: Merged to main 2026-11-02 ([PR #329](https://github.com/ph-composer/ph-composer-skp/pull/329), `5df489e5`). Un-deferred by D5-1. Host gate observed 2026-11-03 ([case LH1](#host-gate-case-lh1), [evidence](../../../native-acceptance/evidence/lh1-hosted-library-2026-11-03.md)): fails only on the pairing display, which Composer does not show; the firm change was blocked by the test account.
+STATUS: Merged to main 2026-11-02 ([PR #329](https://github.com/ph-composer/ph-composer-skp/pull/329), `5df489e5`). Un-deferred by D5-1. Host gate observed 2026-11-03 ([case LH1](#host-gate-case-lh1), [evidence](../../../native-acceptance/evidence/lh1-hosted-library-2026-11-03.md)): fails only on the pairing display, which Composer did not show; the firm change was blocked by the test account. #334 added the pairing display, observed passing the same day; a full LH1 rerun on that build is owed before the gate closes.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/328 (replaces the closed #14)
 
