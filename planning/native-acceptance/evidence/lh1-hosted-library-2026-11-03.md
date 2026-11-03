@@ -51,3 +51,17 @@ PH-Elements service. Steps, read-backs and exports stay in gitignored `_private/
 
 Not observable on demand: a loopback port collision, a locked keychain, the prompt after a SketchUp
 upgrade. SketchUp 2023 to 2025 and Windows stay UNKNOWN.
+
+## Addendum: connect after #334 (2026-11-03)
+
+[#334](https://github.com/ph-composer/ph-composer-skp/pull/334) (`8301bd02`) adds the optional
+`pairing_display` to a v2 connection status, shown beside "Signing in…"; the PH-Elements connector
+fills it from `bef2761`. Installed RBZ build d511e59d1f68 (commit 8301bd0267b1) with the connector at
+`bef2761`, fresh copy of the same blank fixture. Reconnect from Library setup read "Signing in…",
+then "Signing in…" with the code once the sign-in existed; the consent page showed the same code; after
+Allow the row read connected with the code gone, and the connections query carried no
+`pairing_display`. The connect clause that failed above is observed passing.
+
+This is an observation, not a ledger row: #334 changed files LH1 depends on, so the case reads stale
+and the ledger keeps the run above. A full LH1 rerun on a build that includes #334 is owed before the
+host gate is closed.
