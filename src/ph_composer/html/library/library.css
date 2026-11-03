@@ -125,6 +125,7 @@
 /* A hosted library: its label takes the room, then its state and the actions that fit it, wrapping when narrow. */
 .library-setup-connection { flex-wrap: wrap; gap: 8px; }
 .library-setup-connection > span { flex: 1 1 160px; }
+.library-setup-pairing { font-size: 1.1em; letter-spacing: 0.08em; }
 @media (max-width: 700px) {
   .library-sidebar-root, .library-sidebar-root.is-collapsed { width: auto; flex-basis: auto; border-left: 0;
     border-top: 1px solid var(--line); padding: 10px 0 0; }

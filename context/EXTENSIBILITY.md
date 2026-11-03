@@ -448,8 +448,11 @@ end
   declaration name), `credentials` (the credential store) and `changed`, which the extension calls on
   the main thread when its status changes outside a lifecycle action. The object answers `status`, a
   Hash of `state` (`disconnected`, `authorizing`, `connected`, `reauthorization_required` or
-  `unavailable`), a nonblank `label` and an optional public `connection_id`, plus one method per
-  declared lifecycle action. A status that does not read as one is `unavailable`. Each action except
+  `unavailable`), a nonblank `label`, an optional public `connection_id` and, while `authorizing`, an
+  optional `pairing_display` (a short code such as `AB12-CD34` that the extension's sign-in page also
+  shows; the Libraries dialog shows it beside "Signing in…" so the user can match the two), plus one
+  method per declared lifecycle action. A status that does not read as one is `unavailable`; a malformed
+  pairing display, or one in any other state, is left out. Each action except
   `settings`, and each new `connection_id`, starts a new connection generation: loads and use checks
   begun under an older one are dropped, and `disconnect` or a new connection id clears what the
   connection loaded. Local copies are never touched.

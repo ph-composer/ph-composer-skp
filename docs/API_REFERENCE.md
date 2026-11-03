@@ -5419,6 +5419,11 @@ Result:
           "unavailable"
         ]
       },
+      "pairing_display": {
+        "type": "string",
+        "pattern": "^[A-Z0-9]{2,8}(-[A-Z0-9]{2,8}){0,3}$",
+        "description": "While authorizing: the code the sign-in page also shows, to match the two."
+      },
       "lifecycle": {
         "type": "array",
         "items": {
@@ -52055,6 +52060,11 @@ Result:
         "unavailable"
       ]
     },
+    "pairing_display": {
+      "type": "string",
+      "pattern": "^[A-Z0-9]{2,8}(-[A-Z0-9]{2,8}){0,3}$",
+      "description": "While authorizing: the code the sign-in page also shows, to match the two."
+    },
     "lifecycle": {
       "type": "array",
       "items": {
@@ -52132,6 +52142,11 @@ Result:
         "reauthorization_required",
         "unavailable"
       ]
+    },
+    "pairing_display": {
+      "type": "string",
+      "pattern": "^[A-Z0-9]{2,8}(-[A-Z0-9]{2,8}){0,3}$",
+      "description": "While authorizing: the code the sign-in page also shows, to match the two."
     },
     "lifecycle": {
       "type": "array",
@@ -52211,6 +52226,11 @@ Result:
         "unavailable"
       ]
     },
+    "pairing_display": {
+      "type": "string",
+      "pattern": "^[A-Z0-9]{2,8}(-[A-Z0-9]{2,8}){0,3}$",
+      "description": "While authorizing: the code the sign-in page also shows, to match the two."
+    },
     "lifecycle": {
       "type": "array",
       "items": {
@@ -52289,6 +52309,11 @@ Result:
         "unavailable"
       ]
     },
+    "pairing_display": {
+      "type": "string",
+      "pattern": "^[A-Z0-9]{2,8}(-[A-Z0-9]{2,8}){0,3}$",
+      "description": "While authorizing: the code the sign-in page also shows, to match the two."
+    },
     "lifecycle": {
       "type": "array",
       "items": {
@@ -52366,6 +52391,11 @@ Result:
         "reauthorization_required",
         "unavailable"
       ]
+    },
+    "pairing_display": {
+      "type": "string",
+      "pattern": "^[A-Z0-9]{2,8}(-[A-Z0-9]{2,8}){0,3}$",
+      "description": "While authorizing: the code the sign-in page also shows, to match the two."
     },
     "lifecycle": {
       "type": "array",

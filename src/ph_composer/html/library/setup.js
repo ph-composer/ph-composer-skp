@@ -137,6 +137,13 @@ PhComposerUI.define("library/setup", ["library/locations", "request", "snapshot"
     var line = el("div", "library-setup-row library-setup-connection");
     line.appendChild(el("span", "", row.label));
     line.appendChild(el("small", "muted", STATE_WORDS[state] || STATE_WORDS.unavailable));
+    // While signing in, the code the browser's sign-in page also shows: matching them is the check.
+    if (state === "authorizing" && row.pairing_display) {
+      var code = el("code", "library-setup-pairing", row.pairing_display);
+      code.setAttribute("title", "Check that the sign-in page shows the same code.");
+      code.setAttribute("aria-label", "Sign-in code " + row.pairing_display);
+      line.appendChild(code);
+    }
     var actions = [];
     if (offers.indexOf("connect") >= 0 && (state === "disconnected" || state === "unavailable")) {
       actions.push(["connect", "Connect"]);

@@ -184,6 +184,13 @@ test("a hosted library that must sign in again offers Reconnect and Disconnect; 
   assert.deepStrictEqual(o.sent.map(function (item) { return item.payload.name; }),
     ["ph_composer.library.connections.remove"]);
 });
+test("a hosted library signing in shows the code the sign-in page shows, and only then", function () {
+  var o = withConnections([Object.assign({}, HOSTED, { state: "authorizing", pairing_display: "AB12-CD34" })]);
+  var text = allText(o.dialog.list);
+  assert.ok(text.includes("Signing in…") && text.includes("AB12-CD34"));
+  o = withConnections([Object.assign({}, HOSTED, { state: "connected", pairing_display: "AB12-CD34" })]);
+  assert.ok(!allText(o.dialog.list).includes("AB12-CD34"));
+});
 test("a hosted library offers only the lifecycle actions it declares", function () {
   var o = withConnections([Object.assign({}, HOSTED, { state: "connected", lifecycle: ["connect"] })]);
   assert.ok(allText(o.dialog.list).includes("Connected"));
