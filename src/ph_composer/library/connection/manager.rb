@@ -12,6 +12,9 @@ module PhComposer
       # `cancelled` and `unavailable` per provider and kind (Catalog#mark).
       STATES = %w[disconnected authorizing connected reauthorization_required unavailable].freeze
       PUBLIC_ID = /\A[A-Za-z0-9_.-]{1,128}\z/.freeze
+      # A short code the extension's sign-in page also shows, so the user can match the two. Display
+      # only: it confers nothing, and it is kept only while `authorizing`.
+      PAIRING_DISPLAY = /\A[A-Z0-9]{2,8}(?:-[A-Z0-9]{2,8}){0,3}\z/.freeze
 
       # What a connection factory is called with: the declaration's name, which keys its credentials;
       # the credential store; and `changed`, which the extension calls on the main thread whenever its
@@ -87,8 +90,9 @@ module PhComposer
           status(declaration).fetch("generation")
         end
 
-        # The connection's public status: `state`, `label` and `connection_id`, never a credential. A
-        # status that does not read as one is `unavailable`, under the declaration's name.
+        # The connection's public status: `state`, `label`, `connection_id` and, while `authorizing`, a
+        # well-formed `pairing_display`; never a credential. A status that does not read as one is
+        # `unavailable`, under the declaration's name; a malformed pairing display is left out.
         def status(declaration)
           entry = record(declaration)
           value = public_status(entry.connection, declaration.name)
@@ -170,7 +174,13 @@ module PhComposer
                                                    PUBLIC_ID.match?(value["connection_id"])))
           return { "state" => "unavailable", "label" => fallback, "connection_id" => nil } unless valid
 
-          { "state" => value["state"], "label" => value["label"].strip, "connection_id" => value["connection_id"] }
+          public = { "state" => value["state"], "label" => value["label"].strip,
+                     "connection_id" => value["connection_id"] }
+          pairing = value["pairing_display"]
+          if value["state"] == "authorizing" && pairing.is_a?(String) && PAIRING_DISPLAY.match?(pairing)
+            public["pairing_display"] = pairing
+          end
+          public
         rescue *EXTENSION_ERRORS
           { "state" => "unavailable", "label" => fallback, "connection_id" => nil }
         end

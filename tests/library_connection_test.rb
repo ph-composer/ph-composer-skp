@@ -146,6 +146,19 @@ class LibraryConnectionTest < PhComposerTestCase
     assert_equal "unavailable", connections.first.fetch("state")
   end
 
+  def test_a_pairing_display_shows_only_while_authorizing_and_only_when_well_formed
+    shown = lambda do |state, pairing|
+      connection.define_singleton_method(:status) do
+        { "state" => state, "label" => "Hosted test library", "pairing_display" => pairing }
+      end
+      connections.first.values_at("state", "pairing_display")
+    end
+    assert_equal %w[authorizing AB12-CD34], shown.call("authorizing", "AB12-CD34")
+    assert_equal ["connected", nil], shown.call("connected", "AB12-CD34")
+    assert_equal ["authorizing", nil], shown.call("authorizing", "https://example.invalid/?token=abc")
+    assert_equal ["authorizing", nil], shown.call("authorizing", 1234)
+  end
+
   def test_providers_metadata_names_the_connection_and_discovery_lists_declared_codes
     connection.finish_sign_in
     row = API.query(:context => @context, :name => "ph_composer.library.providers").fetch("value")

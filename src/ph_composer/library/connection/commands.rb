@@ -43,7 +43,7 @@ module PhComposer
 
         def read(registry)
           registry.library_providers.values.select { |row| row.contract_version == 2 }.map do |declaration|
-            Manager.status(declaration).slice("state", "label")
+            Manager.status(declaration).slice("state", "label", "pairing_display")
                    .merge("provider_kind" => declaration.name, "lifecycle" => declaration.lifecycle.map(&:to_s))
           end
         end
@@ -58,8 +58,8 @@ module PhComposer
             declaration = Manager.declaration(request.params.fetch("provider_kind"), request.registry)
             value = yield(declaration)
             Sessions.all.each(&:request_refresh)
-            value.slice("state", "label").merge("provider_kind" => declaration.name,
-                                                "lifecycle" => declaration.lifecycle.map(&:to_s))
+            value.slice("state", "label", "pairing_display")
+                 .merge("provider_kind" => declaration.name, "lifecycle" => declaration.lifecycle.map(&:to_s))
           end
         end
 
@@ -78,10 +78,13 @@ module PhComposer
         end
 
         def connection
+          pairing = Library.described({ "type" => "string", "pattern" => "^[A-Z0-9]{2,8}(-[A-Z0-9]{2,8}){0,3}$" },
+                                      "While authorizing: the code the sign-in page also shows, to match the two.")
           Library.object({ "provider_kind" => Schemas::TEXT, "label" => Schemas::TEXT,
-                           "state" => { "type" => "string", "enum" => STATES },
+                           "state" => { "type" => "string", "enum" => STATES }, "pairing_display" => pairing,
                            "lifecycle" => Schemas.list({ "type" => "string",
-                                                         "enum" => Declarations::LIBRARY_LIFECYCLE.map(&:to_s) }) })
+                                                         "enum" => Declarations::LIBRARY_LIFECYCLE.map(&:to_s) }) },
+                         :optional => ["pairing_display"])
         end
 
         def list
