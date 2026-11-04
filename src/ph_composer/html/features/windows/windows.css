@@ -184,6 +184,7 @@
 /* The equation reads a step larger than its notes, its terms spaced apart. */
 .window-audit-method.window-audit-equation { margin-bottom:4px; color:var(--ink); font-size:var(--text-lg);
   word-spacing:.12em; font-variant-numeric:tabular-nums; }
+.window-audit-equation sub { font-size:.85em; }
 .window-audit-equation + .window-audit-method { font-size:var(--text-sm); color:var(--muted); }
 /* The audit rows sit on the shared table surface: one hairline frame with the card radius. */
 .window-audit-list { border:1px solid var(--line); border-radius:var(--radius-md); overflow:hidden; }
@@ -315,3 +316,5 @@
 .phc-workspace .window-rail-tools .phc-icon-button[aria-label="Add Window Type"] { color: var(--interaction-highlight); }
 /* The Window Type tools are a plain icon run, like the drawing tools beneath them. */
 .phc-workspace .phc-toolbar.window-type-tools { border-color: transparent; padding: 0; }
+/* A Frame swatch: a 4 px band in the frame's colour round an open centre, edged by one quiet hairline. */
+.library-sidebar-swatch.is-frame { border-width: 4px; background: var(--surface); box-shadow: 0 0 0 1px #10242c40; }

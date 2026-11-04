@@ -221,9 +221,9 @@
       "sha256": "9eab652807eba50503a991b453e8010dab437e13619110eb1743931105696c9d"
     },
     "html/features/windows/library.js": {
-      "bytes": 2908,
+      "bytes": 3157,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "13ffefcb6d927808560d7df7a372cd988cfc0c23f360c10ba6d91a914230fa5c"
+      "sha256": "e42f81a59fbf3b2d19678a60a3df120a94085d6520c6245936d24ad94ee9a91d"
     },
     "html/features/windows/library_stage.js": {
       "bytes": 1468,
@@ -251,9 +251,9 @@
       "sha256": "f9bdafe79d3675118c31feff05ad4a5c82ada872c75110c636b411239ff6ae2d"
     },
     "html/features/windows/windows.css": {
-      "bytes": 32116,
+      "bytes": 32388,
       "mime": "text/css; charset=utf-8",
-      "sha256": "042028c95eaf4dd7cefb2e3a149fc735fb19326c3301840cbae6ce2997c9a961"
+      "sha256": "6e9944052f0063039105db2f40dcc5ff0c0f54449cca5d42f63589503782d0af"
     },
     "html/features/zones/assembly_assignment.js": {
       "bytes": 14183,
