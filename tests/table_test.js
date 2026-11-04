@@ -367,3 +367,15 @@ test("a tree four deep opens its third tier when asked, and its fourth carries n
   assert.deepStrictEqual(chevrons(), [true, true, true, false]);
   assert.strictEqual(h.root.querySelectorAll(".tier-3").length, 1, "the fourth tier has its own indent class");
 });
+
+test("a heading sets only a window symbol with its subscript; words that start with U stay plain", function () {
+  var h = harness();
+  paint(h, { columns: [["actions", "Actions"], ["name", "Uf W/(m² K)"], ["size", "Used length m"],
+    ["notes", "U-value W/(m² K)"]] });
+  function label(field) { return tagged(h, "col-" + field, "th")[0].querySelector(".phc-th-label"); }
+  assert.strictEqual(label("name").querySelector("sub").textContent, "f");
+  assert.deepStrictEqual(label("name").children.map(function (node) { return node.textContent; }),
+    ["U", "f", " W/(m² K)"]);
+  assert.strictEqual(label("size").querySelector("sub"), null);
+  assert.strictEqual(label("notes").querySelector("sub"), null);
+});

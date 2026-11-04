@@ -181,7 +181,9 @@
 .window-audit > h2 { margin:0 0 4px; font-size:var(--text-lg); }
 .window-audit-method { max-width:72ch; margin:0 0 16px; color:var(--muted-strong); font-size:14px; line-height:1.7; }
 .window-audit-method sub { font-size:.8em; margin:0 1px 0 0.5px; }
-.window-audit-method.window-audit-equation { margin-bottom:4px; color:var(--ink); font-variant-numeric:tabular-nums; }
+/* The equation reads a step larger than its notes, its terms spaced apart. */
+.window-audit-method.window-audit-equation { margin-bottom:4px; color:var(--ink); font-size:var(--text-lg);
+  word-spacing:.12em; font-variant-numeric:tabular-nums; }
 .window-audit-equation + .window-audit-method { font-size:var(--text-sm); color:var(--muted); }
 /* The audit rows sit on the shared table surface: one hairline frame with the card radius. */
 .window-audit-list { border:1px solid var(--line); border-radius:var(--radius-md); overflow:hidden; }

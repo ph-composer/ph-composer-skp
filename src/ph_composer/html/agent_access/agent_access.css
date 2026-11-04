@@ -58,3 +58,5 @@
 .agent-access-create-dialog .agent-access-capabilities { margin: 0; }
 .phc-form-dialog.agent-access-create-dialog .agent-access-capabilities .agent-access-capability:last-child {
   margin-bottom: 0; }
+/* The scope is not a seventh permission: a 16 px step sets it apart from the Access group. */
+.phc-form-dialog.agent-access-create-dialog .agent-access-capabilities + .agent-access-capability { margin-top: 8px; }
