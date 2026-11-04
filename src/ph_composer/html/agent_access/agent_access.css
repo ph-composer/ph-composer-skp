@@ -44,3 +44,6 @@
 .agent-access-list { border: 1px solid var(--line); border-radius: var(--radius-md); }
 .agent-access-row { padding: 8px 12px; }
 .agent-access-row:last-child { border-bottom: 0; }
+/* In a window shorter than the form, the body scrolls under a footer that a hairline sets apart. */
+.phc-workspace .agent-access-create-dialog .phc-dialog-actions { border-top: 1px solid var(--line); }
+.agent-access-create-dialog { max-height: calc(100vh - 32px); }

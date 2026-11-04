@@ -21,7 +21,7 @@
 /* The metric row reads as on every Builder: hairlines between the figures. */
 .assembly-header-metric { display: flex; flex-direction: column; gap: 3px; }
 .assembly-header-metric + .assembly-header-metric { padding-left: 16px; border-left: 1px solid var(--line); }
-.assembly-header-metric small { color: var(--muted); font-size: var(--text-sm); }
+.assembly-header-metric small { color: var(--muted); font-size: var(--text-md); line-height: 1.35; }
 .assembly-header-metric strong { white-space: nowrap; font-size: var(--text-lg); font-weight: 600; }
 .assembly-incomplete { flex: 1 1 100%; margin: 0; color: var(--muted); }
 .phc-workspace .assembly-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto auto;
@@ -64,7 +64,7 @@
 .assembly-dimension { position: relative; display: flex; align-items: center; justify-content: flex-end;
   padding-right: 22px; box-sizing: border-box; }
 .assembly-dimension-graphic { position: absolute; top: 0; left: 0; overflow: visible; pointer-events: none; }
-.assembly-width-row { padding: 0 0 10px; }
+.assembly-width-row { min-height: 50px; padding: 0 0 10px; box-sizing: border-box; }
 .assembly-width-track { position: relative; height: 40px; }
 /* Flex keeps the value and its inline input centered in the measured span. */
 .assembly-width-dimension { position: absolute; top: 0; height: 40px; padding-top: 18px; box-sizing: border-box;

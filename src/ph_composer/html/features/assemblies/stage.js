@@ -290,7 +290,8 @@ PhComposerUI.define("features/assemblies/stage", ["features/assemblies/canvas", 
       drawingStage.appendChild(dimensions);
       drawingStage.appendChild(drawing);
       frame.appendChild(drawingStage);
-      if (widthRow) frame.appendChild(widthRow);
+      // The width band is held open at rest, so selecting a Layer-Segment never moves the caption below.
+      frame.appendChild(widthRow || el("div", "assembly-width-row is-empty"));
       frame.appendChild(boundary(thermal, values.orientation === "last_layer_outside", values));
       scroll.appendChild(frame);
       root.appendChild(scroll);

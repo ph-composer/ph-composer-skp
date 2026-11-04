@@ -200,8 +200,8 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 /* A table wider than its pane shades the edge it continues past; the shade lifts once scrolled to the end. */
 .phc-inventory-table, .phc-table-mount, .tb-schedule-table, .tb-totals-table {
   background-color: #fff;
-  background-image: linear-gradient(to left, #fff 40%, #fff0), linear-gradient(to left, #10242c12, #10242c00);
-  background-position: right center, right center; background-size: 32px 100%, 10px 100%;
+  background-image: linear-gradient(to left, #fff 40%, #fff0), linear-gradient(to left, #10242c1a, #10242c00);
+  background-position: right center, right center; background-size: 48px 100%, 20px 100%;
   background-repeat: no-repeat; background-attachment: local, scroll; }
 .is-empty-table, .phc-inventory-table:not(.is-overflowing), .phc-table-mount:not(.is-overflowing) { background-image: none !important; }
 /* The record count, the table options and the help end the action bar as one cluster at its right. */

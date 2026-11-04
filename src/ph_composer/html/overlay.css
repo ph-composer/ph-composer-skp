@@ -351,3 +351,8 @@
 /* A dialog taller than its window scrolls its body; the footer stays in view at the bottom edge. */
 .phc-workspace .phc-dialog .phc-dialog-actions { position: sticky; bottom: -24px; z-index: 2; margin: 8px 0 -24px;
   padding: 12px 0 24px; background: #fff; }
+/* A toggle in a menu shows its state in a leading check slot, so a focused item never reads as the chosen one. */
+.phc-workspace .phc-action-menu .phc-action-menu-item.phc-setting-choice::before { content: ""; flex: 0 0 14px; width: 14px;
+  height: 14px; background: transparent;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat; }
+.phc-workspace .phc-action-menu .phc-action-menu-item.phc-setting-choice[aria-pressed="true"]::before { background: currentColor; }

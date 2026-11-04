@@ -54,7 +54,7 @@
 .window-header-metric { display:flex; min-width:126px; flex-direction:column; gap:4px; padding:0 18px; }
 .window-header-metric + .window-header-metric { border-left:1px solid var(--line); }
 .window-header-metric:first-child { padding-left:0; }
-.window-header-metric small { color:var(--muted); font-size:var(--text-sm); }
+.window-header-metric small { color:var(--muted); font-size:var(--text-md); line-height:1.35; }
 .window-title-editor { display:flex; flex:1; min-width:0; align-items:center; gap:4px; }
 .phc-workspace .window-title-input { flex:1; min-width:0; height:32px; min-height:32px; padding:0 6px; font-size:var(--text-xl); font-weight:600; }
 .phc-workspace .window-title-editor .phc-icon-button { width:28px; height:28px; min-height:28px; padding:4px; border-color:transparent; background:transparent; color:var(--muted); }
@@ -179,7 +179,7 @@
 /* The audit: a title, the method as a caption, then a quiet grid of Window Types whose terms open beneath. */
 .window-audit { padding:16px 0 24px; overflow:auto; }
 .window-audit > h2 { margin:0 0 4px; font-size:var(--text-lg); }
-.window-audit-method { max-width:72ch; margin:0 0 16px; color:var(--muted-strong); font-size:14px; line-height:1.65; }
+.window-audit-method { max-width:72ch; margin:0 0 16px; color:var(--muted-strong); font-size:14px; line-height:1.7; }
 .window-audit-method sub { font-size:.8em; margin:0 1px 0 0.5px; }
 /* The audit rows sit on the shared table surface: one hairline frame with the card radius. */
 .window-audit-list { border:1px solid var(--line); border-radius:var(--radius-md); overflow:hidden; }
