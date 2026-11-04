@@ -92,7 +92,7 @@ and `_private/host/ui-design-polish/`.
 | SketchUp 2026 | Native walkthrough passed on copied synthetic Model; Fresh final installed build verified: 38 Materials, one Assembly, two Zones, twelve Faces, one Space, one Window Type with products and three Thermal Bridge Types. Native navigation, tool grouping, menus, validation and Export readiness inspected |
 | SketchUp 2023 / Windows | Not exercised; no platform claim |
 | Council | Owner approved three available-model reviewers: GPT-6.1 Sol, GPT-6.1 Terra and GPT-6 Astra. Four rounds complete; every reviewer scores every requested design category/tab/container above 9, no actionable findings |
-| Design System reading aid | Not synchronized: branch is unmerged, and the skill requires a sync from main. Not synchronized: no supported artifact editing or synchronization command is available in this workflow; source CSS remains authoritative |
+| Design System reading aid | Not synchronized: no supported artifact editing or synchronization command is available in this workflow; source CSS remains authoritative |
 
 The native run used SketchUp 26.1.188 / Ruby 3.2.2, copied `blank-template.skp` to a disposable run
 Model, and authored synthetic data through the existing public-API walkthrough. A save/restart
