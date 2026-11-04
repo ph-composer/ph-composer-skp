@@ -127,6 +127,9 @@ html { height: 100%; }
   padding: 4px 10px;
 }
 .phc-workspace input::placeholder { color: var(--muted-faint); }
+/* A checkbox keeps its own 16 px box, not the text controls' height and padding, so it sits level with its label. */
+.phc-workspace input[type=checkbox] { width: 16px; height: 16px; min-height: 16px; padding: 0;
+  accent-color: var(--interaction-highlight); }
 /* Every choice reads the same: the field's own outline with the kit's chevron, never the native arrow. */
 .phc-workspace select {
   appearance: none; -webkit-appearance: none; padding-right: 28px;

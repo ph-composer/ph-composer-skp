@@ -29,7 +29,7 @@ PhComposerUI.define("features/windows/audit", ["units", "features/windows/editor
     this.audit.replaceChildren(); this.audit.appendChild(el("h2", "", "Window Type calculation audit"));
     // The equation stands on its own line; how it is applied follows as quieter notes.
     this.audit.appendChild(subscripted(el("p", "window-audit-method window-audit-equation"),
-      "Uninstalled U_w = (A_g·U_g + ΣA_f·U_f + ΣL_g·ψ_g) / A"));
+      "Uninstalled U_w = (A_g\u2009·\u2009U_g + ΣA_f\u2009·\u2009U_f + ΣL_g\u2009·\u2009ψ_g) / A"));
     this.audit.appendChild(subscripted(el("p", "window-audit-method"), "Installed effective U adds ΣL·ψ_install / A. " +
       "Coefficients are " + units.displayUnit(HEAT_LOSS, profile) +
       "; no intermediate rounding. Missing terms withhold dependent totals."));

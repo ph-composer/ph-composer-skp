@@ -22,7 +22,8 @@
    put each box on its own line under the previous capability's description. */
 .phc-form-dialog .agent-access-capability { display: flex; flex: 1 1 100%; flex-direction: row;
   align-items: flex-start; gap: 10px; margin: 0 0 12px; }
-.agent-access-capability input[type=checkbox] { flex: none; margin: 2px 0 0; }
+/* The kit's 16 px box (base.css), level with the bold title. */
+.agent-access-capability input[type=checkbox] { flex: none; margin: 0; }
 .agent-access-capability span { display: flex; flex-direction: column; gap: 2px; }
 .agent-access-secret { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; }
 .agent-access-secret-value { flex: 1; min-width: 0; font-family: ui-monospace, Menlo, monospace; }
