@@ -228,7 +228,7 @@ test("a narrow table reserves readable widths and follows column visibility and 
   };
   settings.actionsCell = function () {};
   paint(h, settings);
-  assert.strictEqual(table.style.minWidth, "682px", "three row actions and the custom action cell fit too");
+  assert.strictEqual(table.style.minWidth, "664px", "three narrow-packed row actions and the action cell fit too");
   settings.hiddenColumns = { actions: true };
   paint(h, settings);
   assert.strictEqual(table.style.minWidth, "530px", "hidden actions also consume no width");

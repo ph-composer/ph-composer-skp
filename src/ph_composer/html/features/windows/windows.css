@@ -44,7 +44,8 @@
 .window-rail-collapsed { overflow:hidden; }
 .phc-workspace .window-rail-strip { display:flex; align-items:center; gap:8px; writing-mode:vertical-rl; width:35px; height:100%; border:0; border-radius:0; padding:12px 8px; }
 .window-main { min-width:0; overflow:auto; padding:0 18px 18px; }
-.window-heading { min-height:94px; margin:0 -18px 0; padding:16px 20px; border-bottom:1px solid var(--line); flex-wrap:nowrap; gap:18px; }
+/* The heading flows into the drawing toolbar, whose own rule closes the pair: one rule, not two 50px apart. */
+.window-heading { min-height:94px; margin:0 -18px 0; padding:16px 20px 8px; border-bottom:0; flex-wrap:nowrap; gap:18px; }
 .window-identity { flex:1; min-width:220px; }
 .phc-workspace .window-title { flex:1; min-width:0; max-width:100%; min-height:28px; padding:0; border-color:transparent!important; background:transparent!important; font-size:17px; font-weight:600; line-height:1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; }
 .window-header-metrics { display:flex; align-items:stretch; flex-shrink:0; }
@@ -292,3 +293,4 @@
 }
 /* The Window count sits where every other screen puts its count: at the right, over the table. */
 .window-schedule > p.muted { margin:12px 0 8px; text-align:right; font-size:var(--text-sm); }
+.window-product-workspace .phc-inventory-controls input { width: 150px; }

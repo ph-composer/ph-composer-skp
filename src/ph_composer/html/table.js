@@ -489,7 +489,9 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
     // The Actions column is as wide as what its rows hold. A column holding only the row checkbox shrinks to it
     // and drops its heading word; one with icons keeps room for the word "Actions".
     var checkOnly = actionCount === 0 && !options.actionsCell && Boolean(options.check);
-    cache.actionsWidth = Math.max(16 + actionCount * 32 + (options.actionsCell ? 40 : 0) + (options.check ? 28 : 0),
+    // A narrow panel packs the icons closer (table.css), so record names keep more of the width.
+    var slot = typeof window !== "undefined" && window.innerWidth <= 500 ? 26 : 32;
+    cache.actionsWidth = Math.max(16 + actionCount * slot + (options.actionsCell ? 40 : 0) + (options.check ? 28 : 0),
       checkOnly ? 44 : 80);
     cache.node.classList.toggle("has-check-only-actions", checkOnly);
     if (cache.resizeHandles.actions) paintColumnWidth(cache, "actions");

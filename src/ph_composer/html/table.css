@@ -207,8 +207,11 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 .phc-inventory-controls .phc-pane-tools { margin-left: 0; }
 .phc-inventory-controls .phc-pane-tools:empty { display: none; }
 /* Chip columns keep room for their longest value; the last column keeps a gutter inside the frame. */
-.phc-table th.col-face_type, .phc-table th.col-boundary_condition { min-width: 170px; }
-.phc-table th.col-level, .phc-table th.col-building_segment { min-width: 140px; }
+.phc-table th.col-face_type, .phc-table th.col-boundary_condition,
+.phc-table.has-header-action-row th.has-header-actions:is(.col-face_type, .col-boundary_condition) { min-width: 170px; }
+.phc-table th.col-level, .phc-table th.col-building_segment,
+.phc-table.has-header-action-row th.has-header-actions:is(.col-level, .col-building_segment) { min-width: 140px; }
 .phc-table td:last-child, .phc-table th:last-child .phc-header-label-row { padding-right: 12px; }
 /* In a narrow panel the row's tools scroll away with the table; the name stays as its identity. */
-@media (max-width: 500px) { .phc-table td.col-actions { position: static; } }
+@media (max-width: 500px) { .phc-table td.col-actions { position: static; }
+  .phc-table .row-icon { width: 24px; height: 24px; min-height: 24px; padding: 3px; margin-right: 2px; } }

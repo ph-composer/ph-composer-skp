@@ -100,7 +100,7 @@
   min-height: 28px; padding: 4px; border: 0; border-radius: 0; background: transparent; font-size: 12px; font-weight: 400; }
 .phc-workspace .library-sidebar-row-button:hover:enabled, .phc-workspace .library-sidebar-row-button:focus-visible {
   background: var(--interaction-highlight-tint); }
-.library-sidebar-swatch { display: inline-block; width: 14px; min-width: 14px; height: 14px; border: 1px solid var(--line);
+.library-sidebar-swatch { display: inline-block; width: 14px; min-width: 14px; height: 14px; border: 1px solid #10242c33;
   border-radius: var(--radius-sm); }
 .library-sidebar-name { overflow: hidden; text-overflow: ellipsis; }
 .library-sidebar-row-button > .phc-glyph { flex: none; margin-left: auto; color: var(--muted); }
@@ -113,6 +113,8 @@
 .library-drag-hint { font-size: var(--text-xs); color: var(--muted); }
 /* The source browser remains reusable beside inventories and the Assembly Builder. */
 /* The workspace fills the pane, so the sidebar beside the table keeps its rule to the foot of the panel. */
+/* Beside the sidebar the action bar is shorter, so its search gives up width and the bar stays on one line. */
+.library-material-workspace .phc-inventory-controls input { width: 150px; }
 .library-material-workspace { display: flex; align-items: flex-start; gap: 18px; min-width: 0;
   min-height: calc(100vh - 190px); }
 .library-material-table { flex: 1; min-width: 0; }

@@ -1,9 +1,9 @@
 {
   "assets": {
     "html/agent_access/agent_access.css": {
-      "bytes": 3194,
+      "bytes": 3282,
       "mime": "text/css; charset=utf-8",
-      "sha256": "436f849a13879659433f3f57a12f3d74d5edef1c0e38a92fac374a831fdb63e8"
+      "sha256": "cbf344de02ea8033aa543c9b335c10de437161eb736aa9f8cd6113d41e656bd7"
     },
     "html/agent_access/index.html": {
       "bytes": 1149,
@@ -171,9 +171,9 @@
       "sha256": "e301a567441116407faf3ab58b3af96de39cf7642182bd191bf2f19b75886d76"
     },
     "html/features/thermal_bridges/thermal_bridges.css": {
-      "bytes": 3425,
+      "bytes": 3409,
       "mime": "text/css; charset=utf-8",
-      "sha256": "5866555f89e1ed5c2cb289461357dbf31814c20f839dd7a48c48b83c087f9f6f"
+      "sha256": "024de35a54e8bc6bbb5ed431f23a268d00d5b4eac616d9447ac6c9611d834374"
     },
     "html/features/thermal_bridges/types.js": {
       "bytes": 11277,
@@ -251,9 +251,9 @@
       "sha256": "f9bdafe79d3675118c31feff05ad4a5c82ada872c75110c636b411239ff6ae2d"
     },
     "html/features/windows/windows.css": {
-      "bytes": 29990,
+      "bytes": 30160,
       "mime": "text/css; charset=utf-8",
-      "sha256": "f65390a0610c5b4894fe97c4626740448a453d8060a4a143ab794648bb09d5b6"
+      "sha256": "072824fa238fbfb6207ee17f0cb001dee5bcf7c97c20f80ff483efade37affc7"
     },
     "html/features/zones/assembly_assignment.js": {
       "bytes": 14183,
@@ -381,9 +381,9 @@
       "sha256": "5e5fefa7bfa58c71868910e6371559e31861490b305e4de8b40f17f9ea45764b"
     },
     "html/library/library.css": {
-      "bytes": 13917,
+      "bytes": 14103,
       "mime": "text/css; charset=utf-8",
-      "sha256": "2f457aea018b64518827138f242edab71d36874ebdfd091b45fcc7c86c5a9dc4"
+      "sha256": "940467442f4ab1955161082f99fd0d27afb3b2d2008298505dd6acbae138ffd8"
     },
     "html/library/locations.js": {
       "bytes": 7573,
@@ -511,19 +511,19 @@
       "sha256": "90238a9908641b163007f151a46dcfa3d1059d5d31de464babc45f43a5e0f234"
     },
     "html/support/support.css": {
-      "bytes": 2406,
+      "bytes": 2411,
       "mime": "text/css; charset=utf-8",
-      "sha256": "88ac165c5afb4764b4633108fc70a14aa3309b2873c6a9def58f4df6ae96858f"
+      "sha256": "4d8f29c5fe558d20b03c0153f4dcb66448b69da678d8bca51367a927d84b0aa5"
     },
     "html/table.css": {
-      "bytes": 18987,
+      "bytes": 19286,
       "mime": "text/css; charset=utf-8",
-      "sha256": "77a5836d3471319b5c7d217eac02708a208343562842e634edc2d3db06d2ba60"
+      "sha256": "bee37c15f0519551339eeaac55b1dabd73b545b53b1ae1599e6bf81793805b9a"
     },
     "html/table.js": {
-      "bytes": 28867,
+      "bytes": 29051,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "ce194e636a7a90506f1fa7aceb66a5fa3db5fc58a7e53c3d047bfe55df4890a2"
+      "sha256": "3bdc01ea5f73f02e6f235c8a274fc386b14dd2ee8b9e4514661088b8d0824c78"
     },
     "html/table_contributions.js": {
       "bytes": 2905,

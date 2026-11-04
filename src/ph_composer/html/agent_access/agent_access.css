@@ -32,7 +32,8 @@
 .agent-access-inline:empty { display: none; }
 /* base.css sizes a bare button to its container; as in the panel (shell.css), buttons size to their label. */
 .agent-access button { width: auto; font-weight: 400; }
-.agent-access .agent-access-revoke { flex: none; color: var(--red); }
+/* Revoking asks again before it acts, so the row's button is neutral; red stays with the confirm step. */
+.agent-access .agent-access-revoke { flex: none; }
 /* A capability reads as its name in ink, then what it allows in quieter words beneath. */
 .agent-access-capability strong { color: var(--ink); font-size: var(--text-md); font-weight: 600; }
 .agent-access-capability small { color: var(--muted); font-size: var(--text-sm); font-weight: 400; line-height: 1.4; }

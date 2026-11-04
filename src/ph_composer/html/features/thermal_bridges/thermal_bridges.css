@@ -5,7 +5,7 @@
 .tb-assign-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 12px 0 12px;
   padding: 0; border: 0; border-radius: 0; background: transparent; }
 .tb-assign-count { flex: 0 0 auto; font-size: 13px; font-weight: 600; white-space: nowrap; }
-.tb-assign-bar select { width: auto; min-width: 12em; max-width: 100%; }
+.tb-assign-bar select { width: 180px; max-width: 100%; }
 .tb-assign-field { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
 .phc-workspace .tb-assign-quantity { width: 5em; }
 .tb-assign-quantity[aria-invalid="true"] { border-color: var(--red); }
