@@ -44,7 +44,7 @@
   font-weight: 600; }
 .tb-totals-caption { margin: 4px 0 -4px; color: var(--muted-strong); font-size: var(--text-sm); font-weight: 600; }
 /* Two columns of figures keep a readable width rather than spreading across the pane. */
-.tb-schedule-totals .tb-totals-table:last-child { max-width: 420px; }
+.tb-schedule-totals .tb-totals-table { max-width: 720px; }
 
 /* By type takes the full row and by group sits beneath, so neither table's last column falls out of view. */
 .tb-schedule-totals { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }

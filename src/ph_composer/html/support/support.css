@@ -34,3 +34,6 @@
   color: var(--interaction-highlight); }
 .phc-workspace .support-links button:hover:enabled { background: var(--interaction-highlight-tint); }
 .support-links { gap: 4px 12px; margin-left: -4px; }
+/* A small window gives its title a line of its own; the actions sit beneath it, left-aligned. */
+.phc-workspace .support .phc-heading { flex-direction: column; align-items: flex-start; gap: 10px; }
+.phc-workspace .support .phc-heading-actions { margin-left: 0; }

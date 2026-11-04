@@ -122,7 +122,7 @@
 .library-source-controls, .library-setup-adds, .library-review-choices { display: flex; flex-wrap: wrap; gap: 8px; }
 /* Library setup is a way into settings, not a field: a quiet text button in the sidebar. */
 .library-source-controls button { flex: 0 0 auto; font-size: var(--text-sm); white-space: nowrap; }
-.phc-workspace .library-source-controls button { padding: 0 2px; min-height: 26px; border-color: transparent; background: transparent;
+.phc-workspace .library-source-controls button { padding: 0; min-height: 26px; border-color: transparent; background: transparent;
   color: var(--interaction-highlight); }
 .phc-workspace .library-source-controls button:hover:enabled { background: transparent; text-decoration: underline; }
 .library-local-badge { margin-left: auto; color: var(--muted); font-size: var(--text-xs); white-space: nowrap; }
@@ -175,9 +175,9 @@
 .phc-workspace .library-setup-remove { width: 30px; height: 30px; min-height: 30px; padding: 5px; border-color: transparent;
   background: transparent; color: var(--muted-strong); }
 .phc-workspace .library-setup-remove:hover:enabled { color: var(--red); background: var(--error-surface); }
-.library-sidebar-narrowing { display: flex; gap: 6px; margin: 6px 0 2px; }
+/* Category and order stack as full-width fields, so neither truncates in the narrow sidebar. */
+.library-sidebar-narrowing { display: flex; flex-direction: column; gap: 6px; margin: 6px 0 2px; }
 .library-sidebar-narrowing[hidden] { display: none; }
 .library-sidebar-narrowing select { flex: 1 1 0; min-width: 0; }
 /* The category names are longer than the sort names, so the category choice takes the larger share. */
-.library-sidebar-narrowing .library-sidebar-category { flex: 1 1 auto; }
-.library-sidebar-narrowing .library-sidebar-order { flex: 0 0 86px; }
+

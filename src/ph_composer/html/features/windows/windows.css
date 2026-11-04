@@ -86,9 +86,9 @@
 .window-drawing svg { display:inline-block; vertical-align:top; font-size:12px; max-height:none; }
 .window-drawing.is-picking svg,.window-drawing.is-picking svg * { cursor:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke-linecap='round' stroke-linejoin='round'><g stroke='white' stroke-width='4'><path d='m12 9-8.414 8.414A2 2 0 0 0 3 18.828v1.344a2 2 0 0 1-.586 1.414A2 2 0 0 1 3.828 21h1.344a2 2 0 0 0 1.414-.586L15 12'/><path d='m18 9 .4.4a1 1 0 1 1-3 3l-3.8-3.8a1 1 0 1 1 3-3l.4.4 3.4-3.4a1 1 0 1 1 3 3z'/><path d='m2 22 .414-.414'/></g><g stroke='rgb(19,42,43)' stroke-width='1.75'><path d='m12 9-8.414 8.414A2 2 0 0 0 3 18.828v1.344a2 2 0 0 1-.586 1.414A2 2 0 0 1 3.828 21h1.344a2 2 0 0 0 1.414-.586L15 12'/><path d='m18 9 .4.4a1 1 0 1 1-3 3l-3.8-3.8a1 1 0 1 1 3-3l.4.4 3.4-3.4a1 1 0 1 1 3 3z'/><path d='m2 22 .414-.414'/></g></svg>") 2 22, crosshair; }
 .window-drawing.is-pasting svg,.window-drawing.is-pasting svg * { cursor:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke-linecap='round' stroke-linejoin='round'><g stroke='white' stroke-width='4'><path d='M11 7 6 2'/><path d='M18.992 12H2.041'/><path d='M21.145 18.38A3.34 3.34 0 0 1 20 16.5a3.3 3.3 0 0 1-1.145 1.88c-.575.46-.855 1.02-.855 1.595A2 2 0 0 0 20 22a2 2 0 0 0 2-2.025c0-.58-.285-1.13-.855-1.595'/><path d='m8.5 4.5 2.148-2.148a1.205 1.205 0 0 1 1.704 0l7.296 7.296a1.205 1.205 0 0 1 0 1.704l-7.592 7.592a3.615 3.615 0 0 1-5.112 0l-3.888-3.888a3.615 3.615 0 0 1 0-5.112L5.67 7.33'/></g><g stroke='rgb(19,42,43)' stroke-width='1.75'><path d='M11 7 6 2'/><path d='M18.992 12H2.041'/><path d='M21.145 18.38A3.34 3.34 0 0 1 20 16.5a3.3 3.3 0 0 1-1.145 1.88c-.575.46-.855 1.02-.855 1.595A2 2 0 0 0 20 22a2 2 0 0 0 2-2.025c0-.58-.285-1.13-.855-1.595'/><path d='m8.5 4.5 2.148-2.148a1.205 1.205 0 0 1 1.704 0l7.296 7.296a1.205 1.205 0 0 1 0 1.704l-7.592 7.592a3.615 3.615 0 0 1-5.112 0l-3.888-3.888a3.615 3.615 0 0 1 0-5.112L5.67 7.33'/></g></svg>") 20 21, copy; }
-.window-glass { fill:#f7fbfb; stroke:none; }
+.window-glass { fill:#e6f0f3; stroke:none; }
 .window-empty { fill:none; stroke:#6c7e82; stroke-width:1; stroke-dasharray:5 5; vector-effect:non-scaling-stroke; pointer-events:all; }
-.window-frame { fill:#eef1f1; stroke:#9aa8ac; stroke-width:.75; vector-effect:non-scaling-stroke; }
+.window-frame { fill:#dfe4e6; stroke:#9aa8ac; stroke-width:.75; vector-effect:non-scaling-stroke; }
 .window-element-outline { fill:none; stroke:#50656a; stroke-width:1; vector-effect:non-scaling-stroke; pointer-events:none; }
 .window-unit-outline { fill:none; stroke:#2c3e43; stroke-width:1.75; vector-effect:non-scaling-stroke; pointer-events:none; }
 .window-overlay { pointer-events:none; }
@@ -308,3 +308,5 @@
 .window-product-workspace .phc-inventory-controls input { width: 150px; }
 /* Adding a Window Type is the rail's main action, so its glyph takes the interaction teal. */
 .phc-workspace .window-rail-tools .phc-icon-button[aria-label="Add Window Type"] { color: var(--interaction-highlight); }
+/* The Window Type tools are a plain icon run, like the drawing tools beneath them. */
+.phc-workspace .phc-toolbar.window-type-tools { border-color: transparent; padding: 0; }

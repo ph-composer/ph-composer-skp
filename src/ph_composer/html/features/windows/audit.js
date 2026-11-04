@@ -23,7 +23,7 @@ PhComposerUI.define("features/windows/audit", ["units", "features/windows/editor
     // One row per Window Type, its two results in columns under one heading row; the terms open beneath it.
     var heading = el("div", "window-audit-columns");
     var unit = units.displayUnit(U_VALUE, units.profile(U_VALUE));
-    ["Window Type", "Uw (" + unit + ")", "Installed U (" + unit + ")"].forEach(function (label) {
+    ["Window Type", "Uw " + unit, "Installed U " + unit].forEach(function (label) {
       heading.appendChild(el("span", "", label)); });
     var list = el("div", "window-audit-list"); list.appendChild(heading); this.audit.appendChild(list);
     this.entries.forEach(function (entry) {

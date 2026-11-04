@@ -12,7 +12,8 @@
 .phc-overview .phc-view-tools:empty { display: none; }
 /* A setting reads as one row, its words at the left and its field at the right, in the bubble as anywhere. */
 .phc-zone-setting, .phc-bubble-content label.phc-zone-setting { display: flex; flex-direction: row; align-items: center;
-  justify-content: space-between; gap: 12px; margin: 4px 0; text-align: left; color: var(--ink); font-size: var(--text-md); }
+  justify-content: space-between; gap: 12px; margin: 4px 0; text-align: left; color: var(--muted); font-size: var(--text-sm);
+  font-weight: 500; }
 .phc-zone-setting input[type="number"] { width: 72px; }
 /* The table spans the pane and scrolls sideways at narrow widths with its identity columns (Actions,
    Hierarchy, Name) held at the left. The narrowest panel lets Hierarchy scroll and keeps Name beside
@@ -27,7 +28,7 @@
 }
 /* The tree is the pane's work surface. The overview fits it to the height its pane leaves (overview.js
    `place`); this budget holds until then, and is the Window schedule's height. */
-.phc-table-mount { overflow: auto; max-height: max(240px, calc(100vh - 220px)); border: 1px solid var(--line); border-radius: var(--radius-md); }
+.phc-table-mount { overflow: auto; max-height: max(240px, calc(100vh - 205px)); border: 1px solid var(--line); border-radius: var(--radius-md); }
 .phc-workspace .phc-blocked-reason { color: var(--warning-ink); border-color: transparent; background: transparent; }
 .phc-overview .phc-row-marker { padding: 0 6px; border-radius: var(--radius-pill); font-size: var(--text-xs);
   font-weight: 600; line-height: 18px; color: var(--warning-ink); background: var(--warning-surface); }

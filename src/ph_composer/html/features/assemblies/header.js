@@ -7,7 +7,7 @@ PhComposerUI.define("features/assemblies/header", ["features/assemblies/editor_s
     /* A metric's label carries its unit, so its value line is just the number, as on every Builder. */
     function metric(label, value, field, withheld) {
       var root = el("div", "assembly-header-metric"), profile = units.profile(field);
-      root.appendChild(el("small", "", label + " (" + units.displayUnit(field, profile) + ")"));
+      root.appendChild(el("small", "", label + " " + units.displayUnit(field, profile)));
       var shown = el("strong", "", withheld || ui.blank(value) ? "—" :
         units.format(value, field, profile, { showUnit: false }));
       if (withheld) { shown.setAttribute("data-u-withheld", "");

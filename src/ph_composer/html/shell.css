@@ -58,6 +58,10 @@
 /* The blocked line heads the findings it counts: one amber-edged block, the line as its header row. */
 .live-panel .phc-export-readiness.is-blocked + .phc-export-group { margin-top: -16px; padding: 4px 12px 2px;
   border: 1px solid var(--warning-border); border-top: 0; border-radius: 0 0 var(--radius-md) var(--radius-md); }
-.live-panel .phc-export-readiness.is-blocked + .phc-export-group h2 { margin: 10px 0 4px; }
+/* The header row already says what the list is, so the list's own heading is kept for assistive technology only. */
+.live-panel .phc-export-readiness.is-blocked + .phc-export-group h2 { position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; }
+.live-panel .phc-export-readiness.is-blocked + .phc-export-group .phc-export-findings { border-top: 0; }
+.live-panel [data-section="export"] .phc-heading + p { margin-top: -6px; color: var(--muted); }
 .live-panel .phc-export-readiness.is-blocked + .phc-export-group li:last-child { border-bottom: 0; }
 .live-panel .phc-export-readiness.is-blocked:not(:last-child) { border-radius: var(--radius-md) var(--radius-md) 0 0; }

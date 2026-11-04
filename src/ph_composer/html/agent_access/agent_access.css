@@ -21,7 +21,7 @@
 /* Box beside its label, one row per capability. Outranks overlay.css's `.phc-form-dialog label` column, which
    put each box on its own line under the previous capability's description. */
 .phc-form-dialog .agent-access-capability { display: flex; flex: 1 1 100%; flex-direction: row;
-  align-items: flex-start; gap: 10px; margin: 0 0 6px; }
+  align-items: flex-start; gap: 10px; margin: 0 0 12px; }
 .agent-access-capability input[type=checkbox] { flex: none; margin: 2px 0 0; }
 .agent-access-capability span { display: flex; flex-direction: column; gap: 2px; }
 .agent-access-secret { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; }
@@ -39,3 +39,8 @@
 .agent-access-capability small { color: var(--muted); font-size: var(--text-sm); font-weight: 400; line-height: 1.4; }
 .agent-access-capabilities legend { color: var(--ink); }
 .agent-access-row-text small { font-size: var(--text-sm); }
+/* The server state is a status line; the tokens are a framed list, as the Libraries dialog lists its libraries. */
+.agent-access-server { color: var(--muted); }
+.agent-access-list { border: 1px solid var(--line); border-radius: var(--radius-md); }
+.agent-access-row { padding: 8px 12px; }
+.agent-access-row:last-child { border-bottom: 0; }
