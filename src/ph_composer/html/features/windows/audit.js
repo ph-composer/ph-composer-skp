@@ -27,9 +27,12 @@ PhComposerUI.define("features/windows/audit", ["units", "features/windows/editor
     var expanded = Array.prototype.map.call(this.audit.querySelectorAll("details"), function (node) {
       return node.open; });
     this.audit.replaceChildren(); this.audit.appendChild(el("h2", "", "Window Type calculation audit"));
-    this.audit.appendChild(subscripted(el("p", "window-audit-method"), "Uninstalled U_w = (A_g·U_g + ΣA_f·U_f + " +
-      "ΣL_g·ψ_g) / A. Installed effective U adds ΣL·ψ_install / A. Coefficients are " +
-      units.displayUnit(HEAT_LOSS, profile) + "; no intermediate rounding. Missing terms withhold dependent totals."));
+    // The equation stands on its own line; how it is applied follows as quieter notes.
+    this.audit.appendChild(subscripted(el("p", "window-audit-method window-audit-equation"),
+      "Uninstalled U_w = (A_g·U_g + ΣA_f·U_f + ΣL_g·ψ_g) / A"));
+    this.audit.appendChild(subscripted(el("p", "window-audit-method"), "Installed effective U adds ΣL·ψ_install / A. " +
+      "Coefficients are " + units.displayUnit(HEAT_LOSS, profile) +
+      "; no intermediate rounding. Missing terms withhold dependent totals."));
     // One row per Window Type, its two results in columns under one heading row; the terms open beneath it.
     var heading = el("div", "window-audit-columns");
     var unit = units.displayUnit(U_VALUE, units.profile(U_VALUE));

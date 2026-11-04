@@ -3,12 +3,12 @@
 .phc-dimension-lines line { stroke: #8a979c; stroke-width: .75; vector-effect: non-scaling-stroke; }
 .phc-dimension-lines circle { fill: #6c7e82; }
 .phc-dimension-value { cursor: pointer; fill: #425a60; color: #425a60;
-  font-size: calc(12px * var(--phc-dimension-scale, 1)); font-variant-numeric: tabular-nums; }
+  font-size: calc(13px * var(--phc-dimension-scale, 1)); font-variant-numeric: tabular-nums; }
 .phc-dimension-value:hover { fill: var(--drawing-highlight-hover); color: var(--drawing-highlight-hover);
   font-weight: 600; }
 .phc-workspace button.phc-dimension-value { min-height: 0; padding: 0 3px; border: 0;
   border-radius: 0; background: #fff; line-height: 16px; white-space: nowrap;
-  font-size: calc(12px * var(--phc-dimension-scale, 1)); }
+  font-size: calc(13px * var(--phc-dimension-scale, 1)); }
 .phc-workspace button.phc-dimension-value:hover:enabled { background: #fff;
   color: var(--drawing-highlight-hover); outline: none; }
 .phc-workspace .phc-dimension-value:focus-visible { outline: 2px solid var(--drawing-highlight);

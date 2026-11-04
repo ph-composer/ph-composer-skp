@@ -9,7 +9,13 @@ PhComposerUI.define("features/windows/form", ["record_form", "snapshot", "unit_f
       action: shared.PREFIX + kind + ".create", submitLabel: "Create " + spec.label,
       pendingText: "Saving…", failureText: "The product was not changed.", changed: changed });
     spec.columns.filter(function (column) { return column[0] !== "color"; }).forEach(function (column) {
-      var label = ui.element("label", "", column[1]), input = ui.element("input");
+      // A PH symbol takes its subscript in the visible label ("Uf" reads U with f); the field keeps the plain name.
+      var symbol = /^(U|\u03c8)-?([a-z]+)$/.exec(column[1]);
+      var label = ui.element("label", "", symbol ? "" : column[1]);
+      if (symbol) {
+        label.appendChild(ui.element("span", "", symbol[1])); label.appendChild(ui.element("sub", "", symbol[2]));
+      }
+      var input = ui.element("input");
       self.fieldLabels[column[0]] = label;
       input.setAttribute("aria-label", column[1]); self.fields[column[0]] = input;
       if (spec.quantities[column[0]]) {

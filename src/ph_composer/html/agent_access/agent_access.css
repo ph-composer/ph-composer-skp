@@ -41,9 +41,10 @@
 .agent-access-row-text small { font-size: var(--text-sm); }
 /* The server state is a status line; the tokens are a framed list, as the Libraries dialog lists its libraries. */
 .agent-access-server { color: var(--muted); }
-.agent-access-list { border: 1px solid var(--line); border-radius: var(--radius-md); }
-.agent-access-row { padding: 8px 12px; }
+/* Tokens are ruled rows, as Help & Diagnostics lists its records. */
+.agent-access-list { border: 0; border-top: 1px solid var(--line); border-radius: 0; }
+.agent-access-row { padding: 8px 0; }
 .agent-access-row:last-child { border-bottom: 0; }
 /* In a window shorter than the form, the body scrolls under a footer that a hairline sets apart. */
 .phc-workspace .agent-access-create-dialog .phc-dialog-actions { border-top: 1px solid var(--line); }
-.agent-access-create-dialog { max-height: calc(100vh - 32px); }
+.phc-dialog.agent-access-create-dialog { width: min(528px, calc(100vw - 32px)); max-height: calc(100vh - 32px); margin: auto; }
