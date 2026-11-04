@@ -51,6 +51,7 @@
 .window-header-metrics { display:flex; align-items:stretch; flex-shrink:0; }
 .window-header-metric { display:flex; min-width:126px; flex-direction:column; gap:4px; padding:0 18px; }
 .window-header-metric + .window-header-metric { border-left:1px solid var(--line); }
+.window-header-metric:first-child { padding-left:0; }
 .window-header-metric small { color:var(--muted); font-size:var(--text-sm); }
 .window-title-editor { display:flex; flex:1; min-width:0; align-items:center; gap:4px; }
 .phc-workspace .window-title-input { flex:1; min-width:0; height:32px; min-height:32px; padding:0 6px; font-size:17px; font-weight:600; }

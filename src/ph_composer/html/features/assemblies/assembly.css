@@ -1,5 +1,7 @@
 /* Assembly Builder owns its work surface; all shared interaction colours come from base.css. */
-.assembly-editor { display: flex; align-items: stretch; gap: 16px; min-width: 0; padding: 16px 0; box-sizing: border-box; }
+/* The Builder fills the pane, so its sidebar rule runs to the foot of the panel. */
+.assembly-editor { display: flex; align-items: stretch; gap: 16px; min-width: 0; min-height: calc(100vh - 110px); padding: 16px 0; box-sizing: border-box; }
+@media (max-width: 700px) { .assembly-editor { min-height: 0; } }
 .assembly-editor-main { flex: 1 1 0; min-width: 0; }
 .assembly-header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 14px; }
 .phc-workspace .assembly-back { flex: 1 1 100%; margin: 0 0 -6px; padding: 0; border: 0; background: transparent;
@@ -16,7 +18,9 @@
 .assembly-hint { min-width: 90px; max-width: 170px; }
 .assembly-color { width: 28px; min-width: 28px; height: 28px; border: 1px solid var(--line); border-radius: var(--radius-sm); }
 .assembly-header-metrics { display: flex; flex-wrap: wrap; gap: 16px; }
+/* The metric row reads as on every Builder: hairlines between the figures. */
 .assembly-header-metric { display: flex; flex-direction: column; gap: 3px; }
+.assembly-header-metric + .assembly-header-metric { padding-left: 16px; border-left: 1px solid var(--line); }
 .assembly-header-metric small { color: var(--muted); font-size: var(--text-sm); }
 .assembly-header-metric strong { white-space: nowrap; font-size: var(--text-lg); font-weight: 600; }
 .assembly-incomplete { flex: 1 1 100%; margin: 0; color: var(--muted); }
@@ -151,5 +155,5 @@ body.assembly-layer-dragging .assembly-hit-target { pointer-events: none; }
   white-space: nowrap; background: #fff; border: 1px solid var(--drawing-highlight); border-radius: var(--radius-sm);
   box-shadow: 0 3px 14px #0003; }
 /* The way to the sidebar reads as a link-weight action beside the prompt, not a second boxed control. */
-.phc-workspace .assembly-library-link { border-color: transparent; background: transparent; color: var(--ink); }
+.phc-workspace .assembly-library-link { border-color: transparent; background: transparent; color: var(--interaction-highlight); }
 .phc-workspace .assembly-library-link:hover:enabled { background: #0d2a300f; border-color: transparent; }

@@ -33,8 +33,9 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 .phc-table .phc-row-marker { margin-left: 5px; color: var(--muted); font-size: 11px; }
 /* Below a heading row the hierarchy word is a quiet label, so the record names carry each row. */
 .phc-table .tier-1 .col-hierarchy { padding-left: 14px; color: var(--muted); font-size: var(--text-sm); }
-.phc-table .tier-2 .col-hierarchy { padding-left: 30px; color: var(--muted); font-size: var(--text-sm); }
-.phc-table .tier-3 .col-hierarchy { padding-left: 46px; color: var(--muted); font-size: var(--text-sm); }
+/* Each tier steps by one chevron slot, so a leaf under a group lines up with a leaf under its Zone. */
+.phc-table .tier-2 .col-hierarchy { padding-left: 36px; color: var(--muted); font-size: var(--text-sm); }
+.phc-table .tier-3 .col-hierarchy { padding-left: 58px; color: var(--muted); font-size: var(--text-sm); }
 /* A value the row does not set itself (an average, an inherited or implied rate), read only. */
 .phc-table td.is-muted { color: var(--muted); }
 .phc-table input { width: 100%; min-width: 0; min-height: 28px; padding: 3px 6px; }
@@ -215,3 +216,9 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 /* In a narrow panel the row's tools scroll away with the table; the name stays as its identity. */
 @media (max-width: 500px) { .phc-table td.col-actions { position: static; }
   .phc-table .row-icon { width: 24px; height: 24px; min-height: 24px; padding: 3px; margin-right: 2px; } }
+/* The cell grid's tools join the action bar as its own items: the fill tools keep their idle place left of the
+   count, so the count, options and help still end flush at the bar's right edge. */
+.phc-inventory-controls > .phc-grid-toolbar { display: contents; }
+.phc-inventory-controls > .phc-grid-toolbar > .phc-grid-tool-group { order: 1; }
+.phc-inventory-controls > .phc-view-count, .phc-inventory-controls > .phc-view-count ~ *,
+.phc-inventory-controls > .phc-grid-toolbar > .phc-help { order: 2; }

@@ -333,8 +333,11 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
     if (!record) { Object.keys(this.sidebars).forEach(function (kind) {
       self.sidebars[kind].root.hidden = true;
       self.sidebars[kind].refresh(self.state, {}, false);
-    }); this.audit.replaceChildren(el("p", "phc-empty", this.enabled ? "Add a Window Type." :
-      "Window Type definitions are unavailable.")); return; }
+    });
+    // The empty audit keeps the table's frame, as every empty table does.
+    var emptyAudit = el("div", "window-audit-list");
+    emptyAudit.appendChild(el("p", "phc-empty", this.enabled ? "Add a Window Type." :
+      "Window Type definitions are unavailable.")); this.audit.replaceChildren(emptyAudit); return; }
     this.title.textContent = record.name;
     if (!this.viewSide.children.length) VIEW_SIDES.forEach(function (side) {
       self.viewSide.appendChild(ui.option(side.id, side.label)); });

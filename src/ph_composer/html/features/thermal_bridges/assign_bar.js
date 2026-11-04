@@ -51,7 +51,8 @@ PhComposerUI.define("features/thermal_bridges/assign_bar", ["request", "snapshot
     });
     var quantity = ui.element("label", "tb-assign-field", "Quantity");
     quantity.appendChild(this.quantity);
-    [this.count, this.type, quantity, this.assign, this.clear, this.tool.arm, this.tool.stop, this.reason]
+    // Why Assign is blocked stands beside Assign (ui-polish: the reason sits with the action it blocks).
+    [this.count, this.type, quantity, this.assign, this.reason, this.clear, this.tool.arm, this.tool.stop]
       .forEach(function (node) { self.root.appendChild(node); });
     this.type.addEventListener("change", function () {
       self.chosen = self.type.value;

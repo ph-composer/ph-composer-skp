@@ -329,4 +329,5 @@ html { height: 100%; }
 .phc-workspace .phc-icon-button.phc-blocked-reason, .phc-workspace .phc-icon-button.phc-blocked-reason:hover:enabled {
   color: var(--warning-ink); }
 /* A narrow panel keeps each row of sub-tabs on one line, scrolling sideways rather than wrapping a lone tab. */
-@media (max-width: 500px) { .phc-subtabs { flex-wrap: nowrap; overflow-x: auto; } .phc-workspace .phc-subtabs button { flex: none; } }
+@media (max-width: 500px) { .phc-subtabs { flex-wrap: nowrap; overflow-x: auto; -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); }
+  .phc-workspace .phc-subtabs button { flex: none; } .phc-subtabs::after { content: ""; flex: 0 0 20px; } }
