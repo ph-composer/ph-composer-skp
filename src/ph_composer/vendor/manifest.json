@@ -251,9 +251,9 @@
       "sha256": "f9bdafe79d3675118c31feff05ad4a5c82ada872c75110c636b411239ff6ae2d"
     },
     "html/features/windows/windows.css": {
-      "bytes": 31694,
+      "bytes": 31509,
       "mime": "text/css; charset=utf-8",
-      "sha256": "85637467b1bb95b82a396ee641511cb53a66cf286f95306ad38b84e07cd86d45"
+      "sha256": "9c85eede6c68bf65d626ce9fe139e1da2f5529877840fbc94962962e0ad5494e"
     },
     "html/features/zones/assembly_assignment.js": {
       "bytes": 14183,

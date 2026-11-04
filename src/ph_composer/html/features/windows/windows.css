@@ -76,9 +76,7 @@
    its fill, so the active state still reads. */
 .window-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:8px 18px; min-height:50px; padding:9px 0; border-bottom:1px solid var(--line); }
 .window-tool-group { display:flex; align-items:center; gap:2px; padding:0; border:0; background:transparent; }
-/* Groups are told apart by a hairline on a wide panel; a narrow one wraps them and drops the rule, so no line
-   starts with an orphan rule. */
-@media (min-width:701px) { .window-tool-group:not([hidden]) ~ .window-tool-group:not([hidden]) { padding-left:16px; border-left:1px solid var(--line); } }
+/* Groups are told apart by space alone: the toolbar wraps at most panel widths, and a rule would start a line. */
 .window-tool-group[hidden] { display:none; }
 .window-workspace .window-tool-group > button { border-color:transparent; }
 .window-selection-tools { margin-left:auto; }
