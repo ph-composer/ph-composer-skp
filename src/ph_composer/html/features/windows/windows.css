@@ -36,7 +36,9 @@
 .phc-workspace .window-workspace .window-type-row.selected>button:first-child { color:var(--interaction-highlight); font-weight:600; }
 .window-type-row>.window-type-flag { display:inline-flex; flex:none; margin-right:8px; color:#9a6b00; cursor:help; }
 .window-type-row>.window-type-flag svg { width:14px; height:14px; }
-.window-empty-prompt { margin:0; padding:24px 20px; }
+/* With no Window Type the work surface shows the kit's framed empty state. */
+.window-empty-prompt { align-self:start; margin:16px 20px; padding:36px 16px 32px; border:1px solid var(--line); border-radius:var(--radius-md); }
+.window-layout { min-height:calc(100vh - 200px); }
 .phc-workspace .window-workspace .window-type-row>button:focus-visible:enabled { outline:2px solid var(--interaction-highlight); outline-offset:-2px; }
 .window-card.selected { border-color:var(--interaction-highlight); background:var(--interaction-highlight-tint); }
 .window-group { position:relative; padding:12px 8px 7px; color:var(--muted-strong); font-size:var(--text-sm); font-weight:600; }
@@ -47,17 +49,17 @@
 /* The heading flows into the drawing toolbar, whose own rule closes the pair: one rule, not two 50px apart. */
 .window-heading { min-height:94px; margin:0 -18px 0; padding:16px 20px 8px; border-bottom:0; flex-wrap:nowrap; gap:18px; }
 .window-identity { flex:1; min-width:220px; }
-.phc-workspace .window-title { flex:1; min-width:0; max-width:100%; min-height:28px; padding:0; border-color:transparent!important; background:transparent!important; font-size:17px; font-weight:600; line-height:1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; }
+.phc-workspace .window-title { flex:1; min-width:0; max-width:100%; min-height:28px; padding:0; border-color:transparent!important; background:transparent!important; font-size:var(--text-xl); font-weight:600; line-height:1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; }
 .window-header-metrics { display:flex; align-items:stretch; flex-shrink:0; }
 .window-header-metric { display:flex; min-width:126px; flex-direction:column; gap:4px; padding:0 18px; }
 .window-header-metric + .window-header-metric { border-left:1px solid var(--line); }
 .window-header-metric:first-child { padding-left:0; }
 .window-header-metric small { color:var(--muted); font-size:var(--text-sm); }
 .window-title-editor { display:flex; flex:1; min-width:0; align-items:center; gap:4px; }
-.phc-workspace .window-title-input { flex:1; min-width:0; height:32px; min-height:32px; padding:0 6px; font-size:17px; font-weight:600; }
+.phc-workspace .window-title-input { flex:1; min-width:0; height:32px; min-height:32px; padding:0 6px; font-size:var(--text-xl); font-weight:600; }
 .phc-workspace .window-title-editor .phc-icon-button { width:28px; height:28px; min-height:28px; padding:4px; border-color:transparent; background:transparent; color:var(--muted); }
 .window-header-metric strong { color:#1e2931; font-size:16px; font-weight:600; white-space:nowrap; font-variant-numeric:tabular-nums; }
-.window-type-actions { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:8px; max-width:330px; }
+.window-type-actions { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:8px; max-width:360px; }
 .window-type-actions button { white-space:nowrap; }
 /* Place is filled at rest, so "on" is a ring inside the fill and the darker teal, as a pressed toggle reads. */
 .phc-workspace .window-type-actions .primary[aria-pressed="true"] { background:var(--interaction-highlight-hover); box-shadow:inset 0 0 0 2px #fff, 0 0 0 1px var(--interaction-highlight-hover); }
@@ -65,7 +67,7 @@
 .window-placement-chosen { font-weight:600; }
 .window-anchor-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; }
 .phc-workspace .window-anchor-grid button { min-height:28px; padding:2px 6px; font-size:12px; white-space:nowrap; }
-.window-empty-mark { fill:var(--muted); font-size:calc(10px * var(--window-type, 1)); letter-spacing:.06em; text-transform:uppercase; pointer-events:none; }
+.window-empty-mark { fill:var(--muted); font-size:calc(11px * var(--window-type, 1)); letter-spacing:.06em; text-transform:uppercase; pointer-events:none; }
 .window-placement-hint { flex:1 1 280px; font-size:var(--text-sm); }
 .window-schedule { min-width:0; }
 .window-schedule > .muted { margin:8px 0; }
@@ -74,7 +76,9 @@
    its fill, so the active state still reads. */
 .window-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:8px 18px; min-height:50px; padding:9px 0; border-bottom:1px solid var(--line); }
 .window-tool-group { display:flex; align-items:center; gap:2px; padding:0; border:0; background:transparent; }
-/* Groups are told apart by space, so a group that wraps to a new line starts flush, with no orphan rule. */
+/* Groups are told apart by a hairline on a wide panel; a narrow one wraps them and drops the rule, so no line
+   starts with an orphan rule. */
+@media (min-width:701px) { .window-tool-group:not([hidden]) ~ .window-tool-group:not([hidden]) { padding-left:16px; border-left:1px solid var(--line); } }
 .window-tool-group[hidden] { display:none; }
 .window-workspace .window-tool-group > button { border-color:transparent; }
 .window-selection-tools { margin-left:auto; }
@@ -247,10 +251,19 @@
 /* The defaults stay inside a narrow panel: a long Psi-Install name shrinks to an ellipsis, its full name in
    the tooltip and accessible label. */
 .phc-inventory-settings>.phc-bubble-anchor { min-width:0; max-width:100%; }
-/* A default reads as a labelled field: its name muted, its value in ink, the chevron at the field's end. */
-.window-default-control { display:inline-flex; align-items:center; gap:6px; max-width:100%; min-width:0; white-space:nowrap; }
-.window-default-control>span:first-child { color:var(--muted); font-size:var(--text-sm); font-weight:500; }
-.window-default-control>.phc-glyph { margin-left:4px; color:var(--muted-strong); }
+/* A default reads as "Label [value ⌄]", as Group by and Order by do: the label outside, the value and chevron
+   drawn as one field. */
+.phc-workspace .window-default-control { display:inline-flex; align-items:center; gap:0; max-width:100%; min-width:0;
+  padding:0; border:0; background:transparent; white-space:nowrap; }
+.phc-workspace .window-default-control:hover:enabled { background:transparent; }
+.window-default-control>span:first-child { margin-right:6px; color:var(--muted); font-size:var(--text-sm); font-weight:500; }
+.window-default-control>.window-default-value { height:var(--control-height); padding:0 4px 0 10px; border:1px solid var(--line-strong);
+  border-right:0; border-radius:var(--radius-sm) 0 0 var(--radius-sm); background:#fff; line-height:28px; }
+.window-default-control>.phc-glyph { height:var(--control-height); padding:7px 8px 0 4px; border:1px solid var(--line-strong);
+  border-left:0; border-radius:0 var(--radius-sm) var(--radius-sm) 0; background:#fff; color:var(--muted-strong); }
+.window-default-control>.phc-glyph svg { width:14px; height:14px; }
+.window-default-control:hover:enabled>.window-default-value, .window-default-control:hover:enabled>.phc-glyph {
+  border-color:var(--interaction-highlight-outline); }
 .window-default-control>span:first-child,.window-default-control>.phc-glyph { flex:none; }
 .window-default-value { min-width:0; max-width:11em; overflow:hidden; text-overflow:ellipsis; }
 .window-default-control .muted { color:var(--muted); }

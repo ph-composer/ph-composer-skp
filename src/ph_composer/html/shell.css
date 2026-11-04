@@ -55,3 +55,9 @@
   padding: 6px 0; border-bottom: 1px solid var(--line); }
 .live-panel .phc-export-finding { flex: 1 1 260px; min-width: 0; }
 .live-panel .phc-export-count { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* The blocked line heads the findings it counts: one amber-edged block, the line as its header row. */
+.live-panel .phc-export-readiness.is-blocked + .phc-export-group { margin-top: -16px; padding: 4px 12px 2px;
+  border: 1px solid var(--warning-border); border-top: 0; border-radius: 0 0 var(--radius-md) var(--radius-md); }
+.live-panel .phc-export-readiness.is-blocked + .phc-export-group h2 { margin: 10px 0 4px; }
+.live-panel .phc-export-readiness.is-blocked + .phc-export-group li:last-child { border-bottom: 0; }
+.live-panel .phc-export-readiness.is-blocked:not(:last-child) { border-radius: var(--radius-md) var(--radius-md) 0 0; }

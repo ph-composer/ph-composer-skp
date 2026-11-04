@@ -44,8 +44,9 @@ PhComposerUI.define("features/assemblies/inspector", ["features/assemblies/edito
       root.appendChild(tools);
       if (!selected) {
         selection.appendChild(el("span", "muted assembly-selection-label", "Select a Layer-Segment"));
-        var library = ui.button("Material Library", function () { self.sidebar.reveal(null); });
-        library.setAttribute("data-editor-local", ""); library.className = "assembly-library-link";
+        // The sidebar already titles itself; the way to it is the kit's sidebar glyph, named in its tooltip.
+        var library = ui.iconButton("Material Library", "sidebar", function () { self.sidebar.reveal(null); });
+        library.setAttribute("data-editor-local", "");
         selection.appendChild(library);
         return root;
       }

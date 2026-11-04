@@ -91,3 +91,10 @@
 /* The Zone options dialog scrolls its own list, so its footer stays in flow rather than sticking. */
 .phc-workspace .phc-dialog.phc-zone-options-dialog .phc-dialog-actions { position: static; margin: 12px 0 0; padding: 0;
   box-shadow: none; }
+/* A view's own tools (Spaces' range fill) join the action bar the same way: idle fill tools left of the count,
+   help at the right end with the count, so every view's cluster ends flush at the same edge. */
+.phc-overview .phc-inventory-controls > .phc-view-tools,
+.phc-overview .phc-inventory-controls > .phc-view-tools > .phc-grid-toolbar { display: contents; }
+.phc-overview .phc-inventory-controls > .phc-view-tools > *,
+.phc-overview .phc-inventory-controls > .phc-view-tools > .phc-grid-toolbar > * { order: 2; }
+.phc-overview .phc-inventory-controls > .phc-view-tools > .phc-grid-toolbar > .phc-grid-tool-group { order: 1; }

@@ -42,9 +42,14 @@
 /* The by-group table ends with the whole schedule's total, set apart as a total. */
 .tb-schedule-totals .tb-totals-table:last-child tbody tr:last-child td { border-top: 1px solid var(--line-strong);
   font-weight: 600; }
+.tb-totals-caption { margin: 4px 0 -4px; color: var(--muted-strong); font-size: var(--text-sm); font-weight: 600; }
+/* Two columns of figures keep a readable width rather than spreading across the pane. */
+.tb-schedule-totals .tb-totals-table:last-child { max-width: 420px; }
 
 /* By type takes the full row and by group sits beneath, so neither table's last column falls out of view. */
 .tb-schedule-totals { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
-.tb-other-findings { margin: 0; padding: 0; list-style: none; }
-.tb-other-findings li { display: flex; align-items: baseline; gap: 10px; padding: 4px 0; border-bottom: 1px solid var(--line); }
+/* What belongs to no run is a framed list like the tables above it. */
+.tb-other-findings { margin: 0; padding: 0; list-style: none; border: 1px solid var(--line); border-radius: var(--radius-md); }
+.tb-other-findings li { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 12px; border-bottom: 1px solid var(--line); }
+.tb-other-findings li:last-child { border-bottom: 0; }
 .tb-other-findings li span { flex: 1; }

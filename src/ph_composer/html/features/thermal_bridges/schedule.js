@@ -64,7 +64,9 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared)
     this.byType = ui.element("div", "tb-totals-table");
     this.byGroup = ui.element("div", "tb-totals-table");
     this.totals.appendChild(ui.element("h2", "", "Totals"));
-    this.totals.appendChild(this.byType); this.totals.appendChild(this.byGroup);
+    // Each totals table names what it sums, so the second never reads as a stray table under the first.
+    this.totals.appendChild(ui.element("h3", "tb-totals-caption", "By type")); this.totals.appendChild(this.byType);
+    this.totals.appendChild(ui.element("h3", "tb-totals-caption", "By group")); this.totals.appendChild(this.byGroup);
     root.appendChild(this.totals);
     this.others = ui.element("div", "tb-schedule-others");
     root.appendChild(this.others);

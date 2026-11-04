@@ -92,7 +92,7 @@ check({ name: "windows", output: directory }, async ({ newPage, step }) => {
     await page.getByRole("button", { name: "Library", exact: true }).click();
     await page.getByRole("tab", { name: "Frames", exact: true }).click();
     await page.getByRole("button", { name: "+ New Frame", exact: true }).click();
-    const form = page.getByRole("dialog", { name: "Create Frame", exact: true });
+    const form = page.getByRole("dialog", { name: "New Frame", exact: true });
     await form.getByRole("textbox", { name: "Name", exact: true }).fill("Manual frame");
     await form.getByRole("button", { name: "Create", exact: true }).click();
     await form.waitFor({ state: "hidden" });

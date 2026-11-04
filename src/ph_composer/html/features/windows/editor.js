@@ -41,7 +41,7 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
     }); root.appendChild(this.installEditor.root);
     this.buildRail(); this.buildHeading(); this.buildWorkspace(); this.buildSidebar(); this.buildKeyboard();
     this.placement = new Placement.Controls(this); root.insertBefore(this.placement.root, this.layout);
-    this.typeActions.insertBefore(this.placement.anchorRoot, this.placeButton);
+    this.typeTools.insertBefore(this.placement.anchorRoot, this.readinessButton);
     this.schedule = new Schedule.Schedule(this); this.scheduleSurface.appendChild(this.schedule.root);
   }
   View.prototype.rawRecord = function (id) {
@@ -113,15 +113,18 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
     }
     this.uwMetric = metric("Uw"); this.installedMetric = metric("Uw,installed");
     this.typeActions = el("div", "window-type-actions"); this.heading.appendChild(this.typeActions);
+    // The Window Type's tools read as one grouped control, then Place, then the overflow menu.
+    this.typeTools = el("div", "phc-toolbar window-type-tools"); this.typeTools.setAttribute("role", "toolbar");
+    this.typeTools.setAttribute("aria-label", "Window Type tools"); this.typeActions.appendChild(this.typeTools);
     this.installButton = ui.iconButton("Edit Window Type installs", "installs", function () {
       if (self.guard()) { self.notice.show(self.guard()); return; }
       var record = self.rawRecord(); if (record) { self.installEditor.open(record); self.paint(); }
-    }); this.typeActions.appendChild(this.installButton);
+    }); this.typeTools.appendChild(this.installButton);
     this.paintDimensionControl();
     this.readinessButton = ui.helpButton("Before placing", "Enter every row height and column width. " +
       "Choose a Face in a Zone; paired Surface Faces, overhangs and overlaps are refused. " +
       "For export, complete the products, operation and installs and classify the host Outdoors.");
-    this.typeActions.appendChild(this.readinessButton);
+    this.typeTools.appendChild(this.readinessButton);
     this.placeButton = ui.button("Place", function () { self.placement.choose(self.active); });
     this.placeButton.className = "primary";
     this.typeActions.appendChild(this.placeButton);
@@ -148,7 +151,7 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
       this.dimensionControl.close(false);
       var old = this.dimensionControl.root;
       old.parentNode.insertBefore(next.root, old); old.parentNode.removeChild(old);
-    } else this.typeActions.appendChild(next.root);
+    } else this.typeTools.appendChild(next.root);
     this.dimensionControl = next; this.dimensionControlSignature = signature;
   };
   View.prototype.depthOverride = function () {

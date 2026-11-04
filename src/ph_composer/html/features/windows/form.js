@@ -16,7 +16,10 @@ PhComposerUI.define("features/windows/form", ["record_form", "snapshot", "unit_f
         self.unitFields[column[0]] = new unitFields.UnitField({ input: input, field: spec.quantities[column[0]] });
         label.appendChild(self.unitFields[column[0]].root);
       } else label.appendChild(input);
-      if (column[0] === "name") RecordForm.required(label, input);
+      if (column[0] === "name") {
+        RecordForm.required(label, input);
+        input.addEventListener("input", function () { self.paintReady(); });
+      }
       self.form.appendChild(label);
     });
     this.explanation = ui.element("p", "muted"); this.form.appendChild(this.explanation);
@@ -28,7 +31,9 @@ PhComposerUI.define("features/windows/form", ["record_form", "snapshot", "unit_f
     if (this.disposed || !this.enabled || this.busy()) return;
     this.method = method; this.record = record && shared.clone(record); this.records = (records || []).slice();
     this.spec.action = shared.PREFIX + this.kind + "." + method;
-    this.title.textContent = ui.titleCase(method) + " " + (record ? record.values.name : this.productSpec.label);
+    // A new product's dialog is titled as every other record's: New, then what it makes.
+    this.title.textContent = method === "create" ? "New " + this.productSpec.label :
+      ui.titleCase(method) + " " + (record ? record.values.name : this.productSpec.label);
     this.root.setAttribute("aria-label", this.title.textContent);
     this.submitButton.textContent = method === "delete" ? "Delete" : method === "duplicate" ? "Duplicate" : "Create";
     this.submitButton.setAttribute("aria-label", this.submitButton.textContent);
@@ -47,7 +52,18 @@ PhComposerUI.define("features/windows/form", ["record_form", "snapshot", "unit_f
     this.explanation.textContent = method === "delete" ? record.use_count ? "Replace all " + record.use_count +
       " uses, including any Model default, before removing this product." : "Remove this unused product." :
       "Products remain editable definitions in this model.";
+    this.paintReady();
     this.show(); if (method !== "delete") this.fields.name.focus();
+  };
+  /* Create and Duplicate wait for the required Name, and say so where the footer's hint goes, as the other
+     record dialogs do. */
+  var NAME_HINT = "Enter a name.";
+  Form.prototype.paintReady = function () {
+    if (this.method === "delete" || this.busy()) return;
+    var missing = !String(this.fields.name.value || "").trim();
+    this.submitButton.disabled = missing;
+    if (missing || this.error.textContent === NAME_HINT) this.error.textContent = missing ? NAME_HINT : "";
+    this.error.classList.toggle("phc-form-hint", this.error.textContent === NAME_HINT);
   };
   Form.prototype.copyName = function (record) {
     var base = record.values.name.trim(), candidate = base + " (copy)", n = 1;
