@@ -13,8 +13,11 @@ PhComposerUI.define("features/thermal_bridges/edge_tool", ["request", "snapshot"
     var self = this;
     this.refused = refused;
     this.channel = request.channel(session, send, "thermal-bridge-edge-tool", "view.invoke");
-    this.arm = ui.button("Assign by clicking");
+    this.arm = ui.button("");
     this.arm.className = "tb-edge-tool-arm";
+    this.arm.setAttribute("aria-label", "Assign by clicking");
+    this.arm.appendChild(ui.glyph("paint_bucket"));
+    this.arm.appendChild(ui.element("span", "tb-edge-tool-label", "Assign by clicking"));
     this.stop = ui.button("Stop", function () { self.stopTool(); });
     this.stop.setAttribute("aria-label", "Stop assigning by clicking");
     this.state = { active: false };

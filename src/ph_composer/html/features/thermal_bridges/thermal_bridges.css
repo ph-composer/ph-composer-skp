@@ -12,6 +12,7 @@
 .tb-assign-reason[hidden] { display: none; }
 /* The reason sits against the Assign it explains, not spaced like another control. */
 .tb-assign-reason { margin-left: -8px; }
+.tb-edge-tool-arm { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
 /* The kit marks a pressed text button only on hover and focus; the running edge tool stays marked at rest, as a
    pressed icon button does, so the cue survives the panel losing focus to SketchUp. */
 .phc-workspace .tb-assign-bar .tb-edge-tool-arm[aria-pressed="true"] {
@@ -56,4 +57,13 @@
 .tb-other-findings li:last-child { border-bottom: 0; }
 .tb-other-findings li span { flex: 1; }
 /* A narrow panel lays the bar out in two deliberate rows: the count and type, then what acts on them. */
-@media (max-width: 500px) { .tb-assign-bar select { flex: 1 1 160px; width: auto; } .tb-assign-bar { gap: 8px; } }
+@media (max-width: 500px) {
+  .tb-assign-bar select { flex: 1 1 160px; width: auto; }
+  .tb-assign-bar { gap: 8px; }
+  .phc-workspace .tb-edge-tool-arm { width: 30px; padding: 5px; }
+  .tb-edge-tool-label { display: none; }
+}
+@media (max-width:500px) and (max-height:600px) {
+  .tb-assign-bar { gap:6px 8px; margin:8px 0; }
+  .tb-types .phc-inventory-controls { row-gap:4px; }
+}

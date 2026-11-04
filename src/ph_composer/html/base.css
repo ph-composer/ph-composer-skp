@@ -36,6 +36,7 @@
   --radius-lg: 10px;
   --radius-pill: 999px;
   --control-height: 30px;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --shadow-float: 0 6px 20px #10242c1a, 0 1px 2px #10242c14;
   /* Semantic roles that repeat across the screens. */
   --warning-ink: #785400;
@@ -62,7 +63,7 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
 }
 h1, h2, p { margin-top: 0; }
@@ -106,9 +107,9 @@ footer { padding: 0 20px 18px; color: var(--muted); font-size: 11px; }
 html { height: 100%; }
 .phc-workspace {
   --accent: var(--interaction-highlight);
-  color: #1e2931;
+  color: var(--ink);
   background: #fff;
-  font: 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font: var(--text-md) var(--font-sans);
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -235,6 +236,15 @@ html { height: 100%; }
 .phc-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; min-height: 60px; padding: 14px 0 10px; }
 .phc-heading h1 { margin: 0; font-size: var(--text-xl); font-weight: 600; letter-spacing: -0.01em; }
 .phc-heading-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+/* A staged editor keeps its commit and cancellation in reach while its work surface scrolls. */
+.phc-sticky-heading { position: sticky; top: 0; z-index: 15; background: var(--surface);
+  border-bottom: 1px solid var(--line); }
+/* A record editor supplies the visible title when a short panel cannot afford a second context title. */
+@media (max-width: 500px) and (max-height: 600px) {
+  .phc-heading { min-height: 48px; padding: 8px 0 6px; }
+  .phc-heading.phc-context-heading { position: absolute; width: 1px; height: 1px; min-height: 0;
+    margin: 0; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
 /* A group of related tools reads as one control: a shared outline around buttons that drop their own. An
    empty group takes no room. */
 .phc-toolbar { display: inline-flex; align-items: center; gap: 2px; padding: 2px; border: 1px solid var(--line);
@@ -296,8 +306,16 @@ html { height: 100%; }
 }
 @media (max-width: 500px) {
   :root { --page-gutter: 8px; }
-  .phc-tabs { gap: 2px; }
-  .phc-tabs button { padding: 6px; }
+  /* Let tabs use the full width. A final slot reserves the unit switch beside the last row,
+     rather than reserving its width on every row and forcing a third navigation row. */
+  .phc-app-header { position: relative; }
+  .phc-tabs { gap: 2px; padding-right: 8px; }
+  .phc-tabs::after { content: ""; flex: none; width: 76px; height: 30px; }
+  .phc-workspace .phc-tabs button { padding-left: 8px; padding-right: 8px; }
+  .phc-unit-toggle { position: absolute; right: 8px; bottom: 8px; margin: 0; }
+  /* The window already names the product. Keep its version, edit context and help on one quiet line. */
+  .phc-footer { gap: 8px; }
+  .phc-footer-product { display: none; }
   .phc-heading h1 { font-size: 17px; }
   .phc-form { max-height: 220px; overflow: auto; }
 }
@@ -332,7 +350,16 @@ html { height: 100%; }
 .phc-workspace .phc-icon-button.phc-blocked-reason, .phc-workspace .phc-icon-button.phc-blocked-reason:hover:enabled {
   color: var(--warning-ink); }
 /* A narrow panel keeps each row of sub-tabs on one line, scrolling sideways rather than wrapping a lone tab. */
-@media (max-width: 500px) { .phc-subtabs { flex-wrap: nowrap; overflow-x: auto; -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); }
-  .phc-workspace .phc-subtabs button { flex: none; } .phc-subtabs::after { content: ""; flex: 0 0 20px; } }
+.phc-subtabs-overflow { display: none; }
+/* A fixed edge cue makes additional sections discoverable on systems with hidden scrollbars. */
+@media (max-width: 500px) {
+  .phc-subtabs { flex-wrap: nowrap; overflow-x: auto; }
+  .phc-workspace .phc-subtabs button { flex: none; }
+  .phc-subtabs.has-overflow .phc-subtabs-overflow { position: sticky; right: 0; display: flex; flex: 0 0 24px;
+    align-items: center; justify-content: flex-end; color: var(--muted-strong);
+    background: linear-gradient(to right, #fff0, var(--surface) 30%); pointer-events: none; }
+  .phc-subtabs-overflow svg { width: 14px; height: 14px; transform: rotate(-90deg); }
+  .phc-subtabs-overflow.is-at-end svg { transform: rotate(90deg); }
+}
 /* PH subscripts read at a comfortable size with a shallow drop, so they never loosen a line. */
 .phc-workspace sub { font-size: .8em; line-height: 0; vertical-align: -.2em; }

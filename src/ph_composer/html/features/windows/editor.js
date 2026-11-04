@@ -139,6 +139,10 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
     });
     this.moreActions.add("Duplicate Window Type", function () { self.duplicateType(self.record()); }, {
       icon: "duplicate" });
+    this.moreActions.add("About Undo and Redo", function () {
+      self.notice.show("Use SketchUp Edit > Undo to reverse the last complete Model gesture. " +
+        "Redo is in the same menu.");
+    }, { icon: "undo" });
     this.moreActions.add("Delete Window Type", function () { self.deleteType(self.record(),
       self.moreActions.trigger); },
       { icon: "delete", destructive: true });
@@ -232,9 +236,6 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
       this.flip.setAttribute("data-window-action", "flip"); definitionTools.appendChild(this.flip);
     this.pick = ui.iconButton("Copy element properties with eyedropper", "eyedropper", function () {
       self.togglePick(); }); definitionTools.appendChild(this.pick);
-    definitionTools.appendChild(ui.iconButton("About Undo and Redo", "undo", function () {
-      self.notice.show("Use SketchUp Edit > Undo to reverse the last complete Model gesture. " +
-        "Redo is in the same menu."); }));
     this.drawing = el("div", "window-drawing"); this.canvas = new Canvas(this);
       this.drawing.appendChild(this.canvas.root); this.main.appendChild(this.drawing);
     this.cardFilter = el("div", "window-card-filter"); this.cardFilter.hidden = true;
@@ -322,10 +323,12 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
     var self = this; if (this.disposed) return;
     this.paintDimensionControl();
     this.surface = this.tabs.active;
+    this.root.classList.toggle("is-installing", !this.installEditor.root.hidden);
     this.layout.hidden = this.surface !== "builder" || !this.installEditor.root.hidden;
     this.audit.hidden = this.surface !== "audit" || !this.installEditor.root.hidden;
     this.scheduleSurface.hidden = this.surface !== "schedule" || !this.installEditor.root.hidden;
     this.renderList(); var record = this.record(); this.main.hidden = !record;
+    this.header.root.classList.toggle("phc-context-heading", this.surface === "builder" && Boolean(record));
     this.emptyPrompt.hidden = Boolean(record) || !this.enabled;
     this.paintPending();
     this.placement.paint(); this.schedule.paint();

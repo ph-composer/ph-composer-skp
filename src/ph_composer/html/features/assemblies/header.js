@@ -92,8 +92,9 @@ PhComposerUI.define("features/assemblies/header", ["features/assemblies/editor_s
       metrics.appendChild(metric("Total thickness", display.total_thickness_mm, shared.DIMENSION));
       metrics.appendChild(metric("U-value with films", thermal.u_effective_w_m2k, shared.U_VALUE,
         withheld || (ui.blank(thermal.u_effective_w_m2k) ? shared.reason(record) : null)));
-      metrics.appendChild(metric("U-value construction only", thermal.u_construction_w_m2k, shared.U_VALUE,
-        withheld || (ui.blank(thermal.u_construction_w_m2k) ? shared.reason(record) : null)));
+      var construction = metric("U-value construction only", thermal.u_construction_w_m2k, shared.U_VALUE,
+        withheld || (ui.blank(thermal.u_construction_w_m2k) ? shared.reason(record) : null));
+      construction.classList.add("assembly-construction-metric"); metrics.appendChild(construction);
       metrics.appendChild(information(record, thermal, withheld));
       root.appendChild(metrics);
       if (withheld) root.appendChild(el("p", "assembly-incomplete", withheld));

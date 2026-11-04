@@ -3,9 +3,10 @@
    new Subtabs({ label, state, stateKey, tabs: [{ id, label, surface }], guard, refused, changed, reselected })
    guard(nextId) returns a refusal message while a draft or operation must remain visible; refused(reason, nextId)
    then runs. reselected(id) runs when the shown tab is chosen again, for an owner whose surface is covered. */
-PhComposerUI.define("subtabs", ["dom"], function (ui) {
+PhComposerUI.define("subtabs", ["dom", "icons"], function (ui, icons) {
   "use strict";
   var sequence = 0;
+  var OVERFLOW_INSET = 32; // The narrow strip's 24 px cue and 8 px gutter.
 
   function Subtabs(options) {
     if (!options.label || !options.tabs.length) throw new Error("Subtabs require a label and work surfaces.");
@@ -39,8 +40,41 @@ PhComposerUI.define("subtabs", ["dom"], function (ui) {
       self.root.appendChild(button);
     });
     this.active = this.buttons[this.state[this.stateKey]] ? this.state[this.stateKey] : this.tabs[0].id;
+    this.overflow = ui.element("span", "phc-subtabs-overflow");
+    this.overflow.setAttribute("aria-hidden", "true");
+    this.overflow.appendChild(icons.glyph("chevron"));
+    this.root.appendChild(this.overflow);
+    this.onScroll = function () { self.updateOverflow(); };
+    this.root.addEventListener("scroll", this.onScroll);
+    if (window.ResizeObserver) {
+      this.resize = new window.ResizeObserver(function () { self.reveal(); });
+      this.resize.observe(this.root);
+    }
     this.paint();
   }
+
+  Subtabs.prototype.updateOverflow = function () {
+    if (this.disposed || !this.root.clientWidth) return;
+    var first = this.buttons[this.tabs[0].id].getBoundingClientRect();
+    var last = this.buttons[this.tabs[this.tabs.length - 1].id].getBoundingClientRect();
+    var padding = parseFloat(window.getComputedStyle(this.root).paddingLeft) || 0;
+    this.root.classList.toggle("has-overflow", last.right - first.left > this.root.clientWidth - 2 * padding);
+    var atEnd = last.right <= this.root.getBoundingClientRect().right - OVERFLOW_INSET + 1;
+    this.overflow.classList.toggle("is-at-end", atEnd);
+  };
+
+  // Selection and resize keep the active label clear of the cue. A manual pan remains the user's view.
+  Subtabs.prototype.reveal = function () {
+    if (this.disposed || !this.root.clientWidth) return;
+    // Mount the cue before scrolling, so a newly narrow strip includes its trailing space in the range.
+    this.updateOverflow();
+    if (this.root.scrollWidth > this.root.clientWidth) {
+      var frame = this.root.getBoundingClientRect(), box = this.buttons[this.active].getBoundingClientRect();
+      if (box.right > frame.right - OVERFLOW_INSET) this.root.scrollLeft += box.right - frame.right + OVERFLOW_INSET;
+      else if (box.left < frame.left + 8) this.root.scrollLeft -= frame.left + 8 - box.left;
+    }
+    this.updateOverflow();
+  };
 
   /* A field that a blur would commit or lose, inside the shown surface. A search field, checkbox or radio holds
      no draft: its value already applies, so it never holds a switch. */
@@ -55,6 +89,7 @@ PhComposerUI.define("subtabs", ["dom"], function (ui) {
     if (this.disposed || !this.buttons[id]) return false;
     if (id === this.active) {
       if (this.options.reselected) this.options.reselected(id);
+      this.reveal();
       return true;
     }
     var reason = this.options.guard && this.options.guard(id);
@@ -66,6 +101,7 @@ PhComposerUI.define("subtabs", ["dom"], function (ui) {
     this.active = id;
     this.paint();
     if (this.options.changed) this.options.changed(id);
+    this.reveal();
     return true;
   };
   Subtabs.prototype.paint = function () {
@@ -88,8 +124,15 @@ PhComposerUI.define("subtabs", ["dom"], function (ui) {
     else return;
     event.preventDefault();
     var id = this.tabs[target].id;
-    if (this.select(id)) this.buttons[id].focus({ preventScroll: true });
+    if (this.select(id)) {
+      var button = this.buttons[id];
+      button.focus({ preventScroll: true });
+    }
   };
-  Subtabs.prototype.dispose = function () { this.disposed = true; };
+  Subtabs.prototype.dispose = function () {
+    this.disposed = true;
+    this.root.removeEventListener("scroll", this.onScroll);
+    if (this.resize) this.resize.disconnect();
+  };
   return Subtabs;
 });

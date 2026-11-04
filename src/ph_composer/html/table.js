@@ -550,5 +550,19 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
   }
 
 
-  return { table: table, STICKY_WIDTHS: STICKY_WIDTHS };
+  /* A tree may open a narrow view at its first identity column. Each mount keeps the one-time
+     orientation and later manual pans; no columns are reordered or hidden. */
+  function orientNarrow(root) {
+    var cache = root._table;
+    if (!cache || cache.initialScrollSet || !cache.empty.hidden || !root.clientWidth) return;
+    cache.initialScrollSet = true;
+    if (window.innerWidth > 500 || root.scrollLeft) return;
+    var first = cache.columns.filter(function (column) {
+      return column[0] !== "actions" && column[0] !== "hierarchy" && !cache.headers[column[0]].hidden;
+    })[0];
+    var header = first && cache.headers[first[0]];
+    if (header) root.scrollLeft = Math.max(0, header.getBoundingClientRect().left - root.getBoundingClientRect().left);
+  }
+
+  return { table: table, orientNarrow: orientNarrow, STICKY_WIDTHS: STICKY_WIDTHS };
 });

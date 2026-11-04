@@ -23,6 +23,15 @@
 .assembly-header-metric + .assembly-header-metric { padding-left: 16px; border-left: 1px solid var(--line); }
 .assembly-header-metric small { color: var(--muted); font-size: var(--text-md); line-height: 1.35; }
 .assembly-header-metric strong { white-space: nowrap; font-size: var(--text-lg); font-weight: 600; }
+/* In a short, narrow panel lead with thickness and the U-value used by the Model. The existing
+   information bubble still shows the construction-only value and both surface films. */
+@media (max-width: 500px) and (max-height: 600px) {
+  .assembly-header-metrics { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    width: 100%; gap: 8px; }
+  .assembly-header-metric + .assembly-header-metric { padding-left: 8px; }
+  .assembly-header-metric strong { margin-top: auto; }
+  .assembly-construction-metric { display: none; }
+}
 .assembly-incomplete { flex: 1 1 100%; margin: 0; color: var(--muted); }
 .phc-workspace .assembly-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center; gap: 6px 10px; width: 100%; max-width: 1040px; min-height: 56px;
@@ -49,6 +58,12 @@
 .assembly-dimension-editor input { width: 100px; }
 .phc-dimension-inline .assembly-dimension-editor .phc-unit-field { flex-wrap: nowrap; }
 .assembly-dimension-editor .phc-unit-error { flex: 1 1 100%; }
+.phc-bubble-content .assembly-dimension-editor .phc-unit-field { display: grid;
+  grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+.phc-bubble-content .assembly-dimension-editor .phc-unit-error { grid-column: 1 / -1; }
+.assembly-dimension-error-anchor { position: absolute; width: 0; height: 0; }
+.phc-workspace .assembly-dimension-error { width: 260px; --bubble-border: var(--red); }
+.assembly-dimension-error .phc-unit-error { margin: 0; color: var(--red); line-height: 1.45; }
 .assembly-bubble-choices { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 10px; }
 .assembly-bubble-choices > small { flex: 1 1 100%; }
 .assembly-canvas-block { margin-top: 18px; min-width: 0; }
@@ -119,8 +134,8 @@
   .assembly-editor { flex-direction: column; gap: 10px; }
   .assembly-header-metrics { gap: 12px; }
   .assembly-selection-tools strong.assembly-selection-label { display: none; }
-  .phc-workspace .assembly-toolbar { min-height: 128px; }
-  .assembly-toolbar .assembly-selection-tools { min-height: 68px; align-content: center; }
+  .phc-workspace .assembly-toolbar { min-height: 92px; }
+  .assembly-toolbar .assembly-selection-tools { min-height: 32px; align-content: center; }
   .assembly-selection-label { white-space: normal; }
 }
 .assembly-material-facts { display: grid; gap: 4px; margin: 10px 0; }

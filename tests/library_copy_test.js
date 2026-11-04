@@ -48,7 +48,26 @@ test("a name-free kind's review title and local choices read the declared label"
   o.copy.use(o.row);
   assert.strictEqual(o.copy.title.textContent, "Review Wall tag");
   assert.deepStrictEqual(o.copy.candidates.children.map(function (option) { return option.textContent; }),
-    ["Choose a local copy…", "Wall tag · a", "Unlabelled · b"]);
+    ["Choose a local copy…", "Wall tag", "Unlabelled"]);
+  assert.deepStrictEqual(o.copy.candidates.children.map(function (option) { return option.value; }), ["", "a", "b"]);
+});
+test("same-label candidates stay distinguishable without showing record keys", function () {
+  var o = setup({ outcome: "ambiguous_name", candidates: [
+    { id: "mat_private_a", display_label: "Insulation", expected_values: {}, differences: [] },
+    { id: "mat_private_b", display_label: "Insulation", expected_values: {}, differences: [] }] });
+  o.copy.open(o.row);
+  assert.deepStrictEqual(o.copy.candidates.children.slice(1).map(function (option) { return option.textContent; }),
+    ["Insulation (local copy 1)", "Insulation (local copy 2)"]);
+  o.copy.candidates.value = "mat_private_b"; o.copy.apply("keep_local");
+  assert.strictEqual(o.sent[0].payload.params.local_id, "mat_private_b");
+});
+test("equal link counts still show the destinations that replacement changes", function () {
+  var o = setup({ outcome: "review_required", candidates: [{ id: "local", display_label: "Insulation",
+    expected_values: {}, differences: [{ field: "datasheet_links", local_present: true, incoming_present: true,
+      local: ["https://example.com/local.pdf"], incoming: ["https://example.com/revised.pdf"] }] }] });
+  o.copy.open(o.row);
+  assert.strictEqual(o.copy.comparison.querySelector(".phc-property-value").textContent,
+    "https://example.com/local.pdf / https://example.com/revised.pdf");
 });
 test("an empty authored guard still allows replacement; a missing one does not", function () {
   var o = setup({ outcome: "review_required",

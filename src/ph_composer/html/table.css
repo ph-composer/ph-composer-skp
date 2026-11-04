@@ -107,6 +107,18 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 .phc-group-chevron svg { width: 14px; height: 14px; }
 .phc-group-toggle[aria-expanded="false"] .phc-group-chevron { transform: rotate(-90deg); }
 .phc-inventory-controls input { width: 190px; }
+@media (max-width: 500px) {
+  .phc-inventory-controls { gap: 8px; }
+  .phc-workspace .phc-inventory-controls input[type=search] { width: 140px; }
+  .phc-inventory-controls .phc-view-control select { max-width: 140px; }
+  /* Keep the filter, grouping and count together; ordering and grid tools share the next row. */
+  .phc-workspace .phc-inventory-controls.has-order-controls input[type=search] { width: 124px; }
+  .phc-inventory-controls.has-order-controls .phc-view-control select { max-width: 124px; }
+  .phc-inventory-controls.has-order-controls > .phc-view-order,
+  .phc-inventory-controls.has-order-controls > .phc-view-direction { order: 1; }
+  .phc-workspace .phc-inventory-controls.has-order-controls > .phc-view-count { order: 0; }
+  .phc-workspace .phc-inventory-controls.has-order-controls > .phc-grid-toolbar > .phc-help { order: 1; }
+}
 .phc-view-count { color: var(--muted); font-size: 12px; }
 .phc-group-label { font-weight: 600; }
 /* A tree table (`tree: true`): each top-level row heads its group, so it reads as a heading over the
@@ -172,6 +184,13 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 .phc-table.reveals-row-actions tr:hover td .row-check, .phc-table.reveals-row-actions tr:focus-within td .row-check,
 .phc-table.reveals-row-actions .row-check:checked, .phc-table.reveals-row-actions .row-check:indeterminate,
 .phc-table.reveals-row-actions.has-checked .row-check { opacity: 1; }
+
+/* Inventories keep opening, assigning and usage visible. Record housekeeping is quieter until the
+   user reaches that row, without moving its controls or changing the keyboard order. */
+@media (hover: hover) {
+  .phc-inventory-table tr:not(:hover):not(:focus-within) .row-icon[data-row-action="duplicate"],
+  .phc-inventory-table tr:not(:hover):not(:focus-within) .row-icon[data-row-action="delete"] { opacity: 0; }
+}
 
 .phc-column-filter-swatch { flex: 0 0 12px; width: 12px; height: 12px; border: 1px solid #0003; border-radius: var(--radius-sm); }
 

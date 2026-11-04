@@ -43,6 +43,7 @@ PhComposerUI.define("view_controls", ["dom", "icons"], function (dom, icons) {
       filtered = self.filter.value; changed(); return true;
     }
     this.options = options; this.root = element("div", "phc-inventory-controls");
+    if (!options.columnSort) this.root.classList.add("has-order-controls");
     this.collapsed = Object.create(null); this.groups = [];
     function select(label, choices, initial, key) {
       var wrap = element("label", "phc-view-control", label), input = element("select");
@@ -65,8 +66,10 @@ PhComposerUI.define("view_controls", ["dom", "icons"], function (dom, icons) {
     });
     this.root.appendChild(this.clear);
     this.groupBy = select("Group by", [["", "None"]].concat(options.groups || []), "", "group");
+    this.groupBy.parentNode.classList.add("phc-view-group");
     if (options.groups === undefined) this.groupBy.parentNode.hidden = true;
     this.orderBy = select("Order by", options.fields, options.initialOrder || "name", "field");
+    this.orderBy.parentNode.classList.add("phc-view-order");
     this._fieldSignature = JSON.stringify(options.fields);
     // One button for the two directions: its icon shows the order in force and its name the change it offers.
     this.direction = { value: "asc" };
@@ -80,6 +83,7 @@ PhComposerUI.define("view_controls", ["dom", "icons"], function (dom, icons) {
         ascending ? "sort_ascending" : "sort_descending");
     }
     paintDirection();
+    this.directionToggle.classList.add("phc-view-direction");
     this.root.appendChild(this.directionToggle);
     this.columnSort = options.columnSort ? { field: options.initialOrder || "name", direction: "asc" } : null;
     if (options.columnSort) { this.orderBy.parentNode.hidden = true; this.directionToggle.hidden = true; }

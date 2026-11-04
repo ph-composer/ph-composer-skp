@@ -34,8 +34,11 @@ PhComposerUI.define("library/copy", ["request", "units", "workspace"], function 
       row.resolution.outcome === "ambiguous_name" ? "Choose a local definition. No copy is selected automatically." :
       "Keep local values or replace copied properties from this library. Local user data is preserved.";
     var blank = el("option", "", "Choose a local copy…"); blank.value = ""; this.candidates.appendChild(blank);
-    candidates.forEach(function (candidate) {
-      var option = el("option", "", (candidate.display_label || "Unlabelled") + " · " + candidate.id);
+    candidates.forEach(function (candidate, index) {
+      var label = candidate.display_label || "Unlabelled";
+      if (candidates.filter(function (other) { return (other.display_label || "Unlabelled") === label;
+      }).length > 1) label += " (local copy " + (index + 1) + ")";
+      var option = el("option", "", label);
       option.value = candidate.id;
       this.candidates.appendChild(option);
     }, this);
@@ -55,6 +58,9 @@ PhComposerUI.define("library/copy", ["request", "units", "workspace"], function 
         var property = self.adapter.properties.filter(function (item) { return item[1] === difference.field; })[0];
         function display(value, present) {
           if (!present) return "Not supplied";
+          if (difference.field === "datasheet_links" && Array.isArray(value)) {
+            return value.length ? value.join("\n") : "None";
+          }
           if (property && property[2]) return units.format(value, property[2], units.profile(property[2]));
           return ui.blank(value) ? "—" : (typeof value === "object" ? JSON.stringify(value) : String(value));
         }

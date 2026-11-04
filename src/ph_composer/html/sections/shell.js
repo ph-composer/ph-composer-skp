@@ -10,8 +10,12 @@ PhComposerUI.define("sections/shell", ["panel", "workspace"], function (panel, u
     ui.memoPaint(root, "footer", [state.version, path], function () {
       var help = ui.button("Help & Diagnostics", function () { send("panel.support", { incident: null }); });
       help.className = "phc-footer-link";
+      var build = element("span", "phc-footer-build");
+      build.appendChild(element("span", "phc-footer-product", state.product + " "));
+      build.appendChild(element("span", "", state.version));
+      ui.tooltip(build, state.product + " " + state.version);
       root.replaceChildren(
-        element("span", "", state.product + " " + state.version),
+        build,
         element("span", "", "Editing: " + (path.length ? path.map(function (name) {
           return name || "Unnamed group";
         }).join(" / ") : "Model")),

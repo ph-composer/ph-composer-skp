@@ -40,6 +40,10 @@ check({ name: "windows", output: directory }, async ({ newPage, step }) => {
     await pane.getByRole("tab", { name: "Schedule", exact: true }).click();
     const schedule = pane.locator(".window-schedule");
     await schedule.getByText(/Net opaque host area/).waitFor();
+    if (width <= 420) assert(await schedule.locator(".phc-table-mount").evaluate(node => {
+      const frame = node.getBoundingClientRect(), name = node.querySelector("th.col-name").getBoundingClientRect();
+      return node.scrollLeft > 0 && name.left >= frame.left && name.right <= frame.right;
+    }), "the narrow Schedule opens on complete identities at " + width);
     assert.strictEqual(await schedule.locator("[data-row-key='[100,300]'] .col-net_area").textContent(), "—");
     assert.strictEqual(await schedule.locator("[data-row-key='type:wnt_a'] .col-count").textContent(), "3");
     await schedule.getByText("Living Zone", { exact: true }).first().waitFor();
@@ -66,6 +70,12 @@ check({ name: "windows", output: directory }, async ({ newPage, step }) => {
     await pane.getByRole("button", { name: "Clear element selection" }).click();
     await pane.getByRole("button", { name: "Edit Window Type installs" }).click();
     const installs = pane.locator(".window-install-editor");
+    await installs.locator(".window-install-panel").scrollIntoViewIfNeeded();
+    assert.ok(await installs.getByRole("button", { name: "Save Installs", exact: true }).evaluate(node => {
+      const box = node.getBoundingClientRect(), frame = node.closest(".panel-panes").getBoundingClientRect();
+      return box.top >= frame.top && box.bottom <= frame.bottom;
+    }), "Save stays reachable while choosing products at " + width);
+    await installs.locator(".phc-heading").scrollIntoViewIfNeeded();
     await page.screenshot({ path: path.join(directory, "installs-" + width + ".png"), fullPage: true });
     const before = await page.evaluate(() => previewHost.sent.filter(message => message.type === "action.invoke").length);
     await installs.locator(".window-install-list").getByRole("button", { name: /^Insulated junction/ }).click();
@@ -116,5 +126,17 @@ check({ name: "windows", output: directory }, async ({ newPage, step }) => {
     await page.close();
     console.log("Window screens " + width + "px: pass");
   }
+  step("Installs commit stays visible at minimum height");
+  const minimum = await newPage({ viewport: { width: 360, height: 520 } });
+  await minimum.goto(`http://127.0.0.1:${port}/tools/ui-preview/?fixture=windows`);
+  await minimum.locator("[data-tab=windows]").click();
+  await minimum.getByRole("button", { name: "Edit Window Type installs", exact: true }).click();
+  await minimum.locator(".window-install-panel").scrollIntoViewIfNeeded();
+  assert.ok(await minimum.getByRole("button", { name: "Save Installs", exact: true }).evaluate(node => {
+    const box = node.getBoundingClientRect(), frame = node.closest(".panel-panes").getBoundingClientRect();
+    return box.top >= frame.top && box.bottom <= frame.bottom;
+  }), "Save stays visible while choosing products at 360 x 520");
+  await minimum.mouse.move(0, 0);
+  await minimum.screenshot({ path: path.join(directory, "installs-minimum-scrolled.png") });
   return "Evidence: " + directory;
 });

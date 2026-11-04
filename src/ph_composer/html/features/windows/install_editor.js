@@ -22,6 +22,7 @@ PhComposerUI.define("features/windows/install_editor", ["features/windows/editor
     this.save = ui.button("Save Installs", function () { self.saveAction(); });
     this.save.setAttribute("aria-label", "Save Installs"); this.cancel.setAttribute("aria-label", "Cancel Installs");
     this.header = ui.pageHeader({ title: "Window Type Installs", actions: [this.cancel], primary: this.save });
+    this.header.root.classList.add("phc-sticky-heading");
     this.root.appendChild(this.header.root);
     this.notice = el("p", "muted"); this.notice.setAttribute("role", "status"); this.root.appendChild(this.notice);
     this.body = el("div", "window-install-body"); this.root.appendChild(this.body);
