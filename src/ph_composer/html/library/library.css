@@ -69,7 +69,7 @@
 
 .phc-inventory-surface .phc-inventory-controls, [data-pane="assemblies"] .phc-inventory-controls { margin: 12px 0; }
 /* The action bar's fields keep one width on every screen, so the bar reads the same from tab to tab. */
-.phc-inventory-controls .phc-view-control select { width: 124px; max-width: 124px; }
+.phc-inventory-controls .phc-view-control select { width: auto; min-width: 124px; max-width: 176px; }
 .phc-inventory-controls .phc-view-control { max-width: 100%; }
 .phc-inventory-controls .phc-view-control :is(input, select) { min-width: 0; max-width: 100%; }
 /* A tab's settings stay together at the end of the action bar and wrap to their own line as one group. */
@@ -179,5 +179,5 @@
 .library-sidebar-narrowing[hidden] { display: none; }
 .library-sidebar-narrowing select { flex: 1 1 0; min-width: 0; }
 /* The category names are longer than the sort names, so the category choice takes the larger share. */
-.library-sidebar-narrowing .library-sidebar-category { flex-grow: 3; }
-.library-sidebar-narrowing .library-sidebar-order { flex-grow: 2; }
+.library-sidebar-narrowing .library-sidebar-category { flex: 1 1 auto; }
+.library-sidebar-narrowing .library-sidebar-order { flex: 0 0 86px; }

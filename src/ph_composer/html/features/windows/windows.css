@@ -295,3 +295,5 @@
 /* The Window count sits where every other screen puts its count: at the right, over the table. */
 .window-schedule > p.muted { margin:12px 0 8px; text-align:right; font-size:var(--text-sm); }
 .window-product-workspace .phc-inventory-controls input { width: 150px; }
+/* Adding a Window Type is the rail's main action, so its glyph takes the interaction teal. */
+.phc-workspace .window-rail-tools .phc-icon-button[aria-label="Add Window Type"] { color: var(--interaction-highlight); }
