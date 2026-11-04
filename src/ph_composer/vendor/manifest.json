@@ -1,9 +1,9 @@
 {
   "assets": {
     "html/agent_access/agent_access.css": {
-      "bytes": 4021,
+      "bytes": 4494,
       "mime": "text/css; charset=utf-8",
-      "sha256": "d165500a443bd86ab78f60f0d358a8e79ad31750a2f373a574012861e5c66f52"
+      "sha256": "3cca6b5db9bb7f5853f6c4ef75ccd53cc64bec06ed469071c9203d0502919ceb"
     },
     "html/agent_access/index.html": {
       "bytes": 1149,
@@ -16,9 +16,9 @@
       "sha256": "35d3eeae6a51623ab23331e3def5cce1c3b3d54142ada4343c193308c827f995"
     },
     "html/base.css": {
-      "bytes": 17796,
+      "bytes": 17972,
       "mime": "text/css; charset=utf-8",
-      "sha256": "48bbf60c9057a593382300c1a5b768f45b85fa7822b953619608a28c45fc792c"
+      "sha256": "a423d9624faccad69aaa37ba497889fa786c0c6b68568c0b05608ee03bb99c88"
     },
     "html/boot.js": {
       "bytes": 369,
@@ -156,9 +156,9 @@
       "sha256": "f920be374090ff2e3b23f250393474ea2db8d62fba5f0b0eca702653427b2975"
     },
     "html/features/thermal_bridges/schedule.js": {
-      "bytes": 15130,
+      "bytes": 15156,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "d3427e79e64094d0003b1f199f60a9a51504b32a2fa9d6f3c2655c13e06311e1"
+      "sha256": "cc765db100ba82eadc7f731c55915cff563464c35396facf7f028188ded4958d"
     },
     "html/features/thermal_bridges/section.js": {
       "bytes": 3389,
@@ -206,9 +206,9 @@
       "sha256": "508381b6dc06b14f1bf5402cd9ffc3f4a80047f0d4a6fc2b9839791728778c64"
     },
     "html/features/windows/form.js": {
-      "bytes": 6955,
+      "bytes": 7131,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "9c5a5713bc571047163e960b2bf30a67672d15ac6457236804bd8f8009a58f8d"
+      "sha256": "1e06710475f938e92703afa7a00b4cfd5ece654127f944743c48bb26be166d0f"
     },
     "html/features/windows/install_editor.js": {
       "bytes": 25377,
@@ -343,7 +343,7 @@
     "html/inventory.js": {
       "bytes": 12199,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "4465c77d45457971a7e4b6b5e7a59d67e7e94105c3c5dcb8fbf0993905ddc14e"
+      "sha256": "dbbe1848f98a31b36c23e3b700fbe05fbe8c8f2f53df874dc1211dd99e650582"
     },
     "html/inventory_forms.js": {
       "bytes": 20078,

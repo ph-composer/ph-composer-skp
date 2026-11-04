@@ -231,7 +231,8 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared)
     }, empty: "" });
     var groups = totals.by_group.concat([{ group: null, heat_loss_w_k: totals.heat_loss_w_k }]);
     // Group spans the By type table's first two columns, so the two tables share their verticals.
-    tables.table(this.byGroup, groups, { defaultWidths: { group: 288 }, rows: groups.map(function (row) {
+    tables.table(this.byGroup, groups, { defaultWidths: { group: 288, heat_loss_w_k: 432 },
+      rows: groups.map(function (row) {
       return { key: row.group || "all", record: row, tier: "Group", depth: 0, parent: null };
     }), columns: [["group", "Group"], ["heat_loss_w_k", header("Heat loss", "heat_loss_w_k")]],
     value: function (row, name) { return row.record[name]; }, cell: function (td, row, name) {

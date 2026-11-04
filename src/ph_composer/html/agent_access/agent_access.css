@@ -48,3 +48,9 @@
 /* In a window shorter than the form, the body scrolls under a footer that a hairline sets apart. */
 .phc-workspace .agent-access-create-dialog .phc-dialog-actions { border-top: 1px solid var(--line); }
 .phc-dialog.agent-access-create-dialog { width: min(528px, calc(100vw - 32px)); max-height: calc(100vh - 32px); margin: auto; }
+/* The New token form fits a small window: tighter gaps between its groups, so rows are not cut at rest. */
+.phc-dialog.agent-access-create-dialog { padding: 20px; }
+.agent-access-create-dialog .agent-access-field { margin-bottom: 8px; }
+.agent-access-create-dialog .agent-access-capabilities legend { margin-bottom: 4px; }
+.phc-form-dialog.agent-access-create-dialog .agent-access-capability { margin-bottom: 8px; }
+.agent-access-create-dialog h2 { margin-bottom: 12px; }

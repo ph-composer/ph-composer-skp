@@ -331,3 +331,5 @@ html { height: 100%; }
 /* A narrow panel keeps each row of sub-tabs on one line, scrolling sideways rather than wrapping a lone tab. */
 @media (max-width: 500px) { .phc-subtabs { flex-wrap: nowrap; overflow-x: auto; -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); }
   .phc-workspace .phc-subtabs button { flex: none; } .phc-subtabs::after { content: ""; flex: 0 0 20px; } }
+/* PH subscripts read at a comfortable size with a shallow drop, so they never loosen a line. */
+.phc-workspace sub { font-size: .8em; line-height: 0; vertical-align: -.2em; }

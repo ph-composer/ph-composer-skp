@@ -13,7 +13,9 @@ PhComposerUI.define("features/windows/form", ["record_form", "snapshot", "unit_f
       var symbol = /^(U|\u03c8)-?([a-z]+)$/.exec(column[1]);
       var label = ui.element("label", "", symbol ? "" : column[1]);
       if (symbol) {
-        label.appendChild(ui.element("span", "", symbol[1])); label.appendChild(ui.element("sub", "", symbol[2]));
+        // One inline run, so the label's column layout never splits the symbol from its subscript.
+        var name = ui.element("span", "phc-symbol"); label.appendChild(name);
+        name.appendChild(ui.element("span", "", symbol[1])); name.appendChild(ui.element("sub", "", symbol[2]));
       }
       var input = ui.element("input");
       self.fieldLabels[column[0]] = label;
