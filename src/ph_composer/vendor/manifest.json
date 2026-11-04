@@ -171,9 +171,9 @@
       "sha256": "e301a567441116407faf3ab58b3af96de39cf7642182bd191bf2f19b75886d76"
     },
     "html/features/thermal_bridges/thermal_bridges.css": {
-      "bytes": 3884,
+      "bytes": 4105,
       "mime": "text/css; charset=utf-8",
-      "sha256": "a6af8086fa2d97dd654ebc8430c0fd7f251562212f72dd45e8e3ccd43b8c1d6a"
+      "sha256": "6dc6c92a475d72bc2fc744648f17ed1dc439cd6136770361154d51d025f1dbd4"
     },
     "html/features/thermal_bridges/types.js": {
       "bytes": 11277,
@@ -181,9 +181,9 @@
       "sha256": "90f63e73801fa9d4a278285c00bbb603e14f516369a6b7b43cc41fbc448caba3"
     },
     "html/features/windows/audit.js": {
-      "bytes": 4426,
+      "bytes": 4897,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "3e31bfadb983fc627fb772dc2ac49df8da49b0a7d7f929a07bf6dd374e9e0f3e"
+      "sha256": "f2af118ad8c2fd9bbd15dbdc47465322dfa37204ae2aa3c149bcc0c8e7f79943"
     },
     "html/features/windows/canvas.js": {
       "bytes": 18076,
@@ -191,9 +191,9 @@
       "sha256": "3c1e4123e68b07c5ef5f5c32d0f63160e36732c4dbb0ef5805e985b3be6881de"
     },
     "html/features/windows/cards.js": {
-      "bytes": 27552,
+      "bytes": 27545,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "d92a4d63e789c9f9169e6d70538ea530a6f47ec9e1e3b8b3ffb94aba8df8b70f"
+      "sha256": "118281cbc95238b0c224ed2cc8e2f0feebf2d6755f9e34844b1add6bb327b515"
     },
     "html/features/windows/editor.js": {
       "bytes": 29886,
@@ -251,9 +251,9 @@
       "sha256": "f9bdafe79d3675118c31feff05ad4a5c82ada872c75110c636b411239ff6ae2d"
     },
     "html/features/windows/windows.css": {
-      "bytes": 31685,
+      "bytes": 31686,
       "mime": "text/css; charset=utf-8",
-      "sha256": "de156ff1b4d8c8bb82ae87b30c8c5f3af3d2380f969611cff3b7e18280e42f89"
+      "sha256": "faca8fda5980d832a721eac58c37b4d2a6231209210f7cbe8765080e3ebd754e"
     },
     "html/features/zones/assembly_assignment.js": {
       "bytes": 14183,
@@ -343,7 +343,7 @@
     "html/inventory.js": {
       "bytes": 12166,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "73b23222f13942270fe20d0032331b8ca853ffb5aac3185cba3066e80776a26c"
+      "sha256": "3ade605bc7b2be2391b23a5ab4903379970d7bdf62b5a9583a13d008203e2039"
     },
     "html/inventory_forms.js": {
       "bytes": 20078,

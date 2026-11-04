@@ -53,3 +53,5 @@
 .tb-other-findings li { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 12px; border-bottom: 1px solid var(--line); }
 .tb-other-findings li:last-child { border-bottom: 0; }
 .tb-other-findings li span { flex: 1; }
+/* A narrow panel lays the bar out in two deliberate rows: the count and type, then what acts on them. */
+@media (max-width: 500px) { .tb-assign-bar select { flex: 1 1 160px; width: auto; } .tb-assign-bar { gap: 8px; } }

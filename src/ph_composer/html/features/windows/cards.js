@@ -84,7 +84,7 @@ PhComposerUI.define("features/windows/cards", ["panel", "unit_field", "units", "
 
   methods.paintMetric = function (value, number, missing) {
     var profile = units.profile(U_VALUE);
-    value.unit.textContent = " (" + units.displayUnit(U_VALUE, profile) + ")";
+    value.unit.textContent = " " + units.displayUnit(U_VALUE, profile);
     value.textContent = number == null ? "—" : units.format(number, U_VALUE, profile, { showUnit: false });
     ui.tooltip(value, number == null ? missing : "");
   };

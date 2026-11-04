@@ -47,7 +47,7 @@
 .phc-workspace .window-rail-strip { display:flex; align-items:center; gap:8px; writing-mode:vertical-rl; width:35px; height:100%; border:0; border-radius:0; padding:12px 8px; }
 .window-main { min-width:0; overflow:auto; padding:0 18px 18px; }
 /* The heading flows into the drawing toolbar, whose own rule closes the pair: one rule, not two 50px apart. */
-.window-heading { min-height:94px; margin:0 -18px 0; padding:16px 20px 8px; border-bottom:0; flex-wrap:nowrap; gap:18px; }
+.window-heading { min-height:94px; margin:0 -18px 0; padding:16px 20px 14px; border-bottom:0; flex-wrap:nowrap; gap:18px; }
 .window-identity { flex:1; min-width:220px; }
 .phc-workspace .window-title { flex:1; min-width:0; max-width:100%; min-height:28px; padding:0; border-color:transparent!important; background:transparent!important; font-size:var(--text-xl); font-weight:600; line-height:1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; }
 .window-header-metrics { display:flex; align-items:stretch; flex-shrink:0; }
@@ -198,7 +198,7 @@
   transform:translateY(-60%) rotate(-45deg); transition:transform .12s; }
 .window-audit-type[open] > summary::before { transform:translateY(-75%) rotate(45deg); }
 .window-audit-type > summary:hover { background:var(--row-hover-wash); }
-.window-audit-name { font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.window-audit-name { font-weight:400; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .window-audit-type p { margin:0; padding:3px 12px 3px 32px; color:var(--muted-strong); font-size:var(--text-sm);
   line-height:1.5; font-variant-numeric:tabular-nums; }
 .window-audit-type p:empty { display:none; }
