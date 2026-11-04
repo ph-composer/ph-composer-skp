@@ -251,9 +251,9 @@
       "sha256": "f9bdafe79d3675118c31feff05ad4a5c82ada872c75110c636b411239ff6ae2d"
     },
     "html/features/windows/windows.css": {
-      "bytes": 32497,
+      "bytes": 32629,
       "mime": "text/css; charset=utf-8",
-      "sha256": "782bd5af7375d80958513a64188f2b6176515fd6a0c9d1fa9b64b9ff7b655f97"
+      "sha256": "a324ba9323b36ddacaf862577674202d83198f61ccfebdda320aef3804b9a508"
     },
     "html/features/zones/assembly_assignment.js": {
       "bytes": 14183,
@@ -321,9 +321,9 @@
       "sha256": "260284f4f31732e0639dda8579367b93bd13eaf7caa32dc984215663542b9f83"
     },
     "html/features/zones/zones.css": {
-      "bytes": 7763,
+      "bytes": 8353,
       "mime": "text/css; charset=utf-8",
-      "sha256": "505f27cffb3f66c5963720b0c94a453006d970cdc2a0c99a65cf8b83d96fe162"
+      "sha256": "fc66356e6af9183362e9f80798826949a665d017a1f77d867a2a710cf1735714"
     },
     "html/fields.js": {
       "bytes": 1833,
@@ -516,14 +516,14 @@
       "sha256": "61fa05fa4086b6022a5005a7fb9173b9bc6b85152507e8a4840783448895fc67"
     },
     "html/table.css": {
-      "bytes": 20106,
+      "bytes": 19807,
       "mime": "text/css; charset=utf-8",
-      "sha256": "f6e86519e2b8adf44ce172c9444b4d40fcd2f538dcd20546874d190f536acb2e"
+      "sha256": "1b6ba41424994dec65507a4d2d68956695694886bfee5faa6f7506570c73abdb"
     },
     "html/table.js": {
-      "bytes": 30155,
+      "bytes": 31311,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "3afe8d7fac511a661e3d557ee99532eb7ed035ee6ce0cc8566a7f4fe3efcd6e5"
+      "sha256": "da2b3fc6278963d21cd67a64c354863611a4a90a8db5ca46668d7b7fec3522f3"
     },
     "html/table_contributions.js": {
       "bytes": 2905,

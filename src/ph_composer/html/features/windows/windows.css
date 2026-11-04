@@ -193,7 +193,9 @@
   align-items:center; column-gap:16px; padding:0 12px 0 32px; }
 .window-audit-columns { min-height:36px; border-bottom:1px solid var(--line); background:var(--surface-alt);
   color:var(--muted-strong); font-size:var(--text-sm); font-weight:600; }
-@media (max-width:500px) { .window-audit-columns, .window-audit-type > summary { grid-template-columns:minmax(90px,1fr) 96px 96px; column-gap:8px; padding-right:8px; } }
+/* At the narrowest panel the two result tracks give way, so the grid fits the 360 px panel's frame. */
+@media (max-width:500px) { .window-audit-columns, .window-audit-type > summary {
+  grid-template-columns:minmax(72px,1fr) minmax(64px,88px) minmax(64px,88px); column-gap:8px; padding-right:8px; } }
 .window-audit-columns > span:not(:first-child), .window-audit-value { text-align:right; font-variant-numeric:tabular-nums; }
 .window-audit-type { border-bottom:1px solid #edf0f2; }
 .window-audit-type > summary { position:relative; min-height:36px; cursor:pointer; list-style:none; }

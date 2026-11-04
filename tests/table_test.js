@@ -379,3 +379,26 @@ test("a heading sets only a window symbol with its subscript; words that start w
   assert.strictEqual(label("size").querySelector("sub"), null);
   assert.strictEqual(label("notes").querySelector("sub"), null);
 });
+
+test("columns align by their cells: numbers right, words and chips left, blank quantities right", function () {
+  var h = harness();
+  paint(h, {
+    columns: [["actions", "Actions"], ["name", "Name"], ["label", "Label"], ["size", "Size"], ["kind", "Kind"],
+      ["depth", "Depth mm"]],
+    value: function (row, field) {
+      return field === "label" ? row.record.name : field === "size" ? row.record.size : "";
+    },
+    cell: function (td, row, field) {
+      if (field !== "kind") return false;
+      td.appendChild(h.context.document.createElement("span")).className = "phc-enum-pill";
+      return true;
+    }
+  });
+  function heading(field) { return tagged(h, "col-" + field, "th")[0]; }
+  assert.deepStrictEqual(["label", "size", "kind", "depth"].map(function (field) {
+    return heading(field).classList.contains("is-end"); }), [false, true, false, true]);
+  assert.ok(cells(h, "label").every(function (td) { return td.classList.contains("is-start"); }));
+  assert.ok(cells(h, "size").every(function (td) { return !td.classList.contains("is-start"); }));
+  assert.ok(cells(h, "kind").every(function (td) {
+    return td.classList.contains("is-start") && td.classList.contains("has-chip"); }));
+});

@@ -23,9 +23,16 @@
   .phc-overview .phc-table th.col-name { left: calc(var(--col-actions-width) + var(--col-hierarchy-width)); }
 }
 @media (max-width: 500px) {
-  .phc-overview .phc-table th.col-name { left: var(--col-actions-width); }
-  .phc-overview .phc-table td.col-name { left: 0; }
+  /* Actions scroll away with the rows here (table.css), so heading and cell both pin Name at the left edge. */
+  .phc-overview .phc-table th.col-name, .phc-overview .phc-table td.col-name { left: 0; }
 }
+/* The Zone chip columns keep room for their longest value. */
+.phc-overview .phc-table th.col-face_type, .phc-overview .phc-table th.col-boundary_condition,
+.phc-overview .phc-table.has-header-action-row th.has-header-actions:is(.col-face_type, .col-boundary_condition) {
+  min-width: 150px; }
+.phc-overview .phc-table th.col-level, .phc-overview .phc-table th.col-building_segment,
+.phc-overview .phc-table.has-header-action-row th.has-header-actions:is(.col-level, .col-building_segment) {
+  min-width: 112px; }
 /* The tree is the pane's work surface. The overview fits it to the height its pane leaves (overview.js
    `place`); this budget holds until then, and is the Window schedule's height. */
 .phc-table-mount { overflow: auto; max-height: max(240px, calc(100vh - 205px)); border: 1px solid var(--line); border-radius: var(--radius-md); }

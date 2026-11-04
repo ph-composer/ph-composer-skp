@@ -76,16 +76,32 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
     }, 0);
     cache.node.style.minWidth = width + "px";
   }
+  /* The edge shade marks only a table that truly runs past its frame. A width change (a column dragged or reset)
+     and a panel resize both move that line, so each re-reads it; one window listener serves every table. */
+  var overflowTables = [], overflowWatched = false;
+  function markOverflow(cache) {
+    var root = cache.root;
+    if (root) root.classList.toggle("is-overflowing", root.scrollWidth - root.clientWidth > 8);
+  }
+  function watchOverflow(cache) {
+    overflowTables.push(cache);
+    if (overflowWatched || typeof window === "undefined" || !window.addEventListener) return;
+    overflowWatched = true;
+    window.addEventListener("resize", function () {
+      overflowTables = overflowTables.filter(function (entry) { return entry.root.isConnected; });
+      overflowTables.forEach(markOverflow);
+    });
+  }
   function setColumnWidth(cache, field, width, source) {
     cache.columnWidths[field] = Math.max(minimumColumnWidth(cache, field), Math.min(480, Math.round(width)));
     paintColumnWidth(cache, field);
-    paintTableWidth(cache);
+    paintTableWidth(cache); markOverflow(cache);
     if (cache.options.columnResize) cache.options.columnResize(field, cache.columnWidths[field], source);
     return cache.columnWidths[field];
   }
   function resetColumnWidth(cache, field) {
     delete cache.columnWidths[field]; paintColumnWidth(cache, field);
-    paintTableWidth(cache);
+    paintTableWidth(cache); markOverflow(cache);
     if (cache.options.columnResize) cache.options.columnResize(field, null);
     if (cache.options.columnResizeEnd) cache.options.columnResizeEnd(field, null);
   }
@@ -163,10 +179,11 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
       cache.columns.forEach(function (column) {
         if (cache.resizeHandles[column[0]]) paintColumnWidth(cache, column[0]);
       });
-      paintTableWidth(cache);
+      paintTableWidth(cache); markOverflow(cache);
       if (cache.options.columnResize) cache.options.columnResize(null, null);
       if (cache.options.columnResizeEnd) cache.options.columnResizeEnd(null, null);
     };
+    cache.root = root; watchOverflow(cache);
     node.appendChild(cache.body); root.replaceChildren(node, cache.empty); root._table = cache;
     overlay.attachTooltip(root);
     return cache;
@@ -428,7 +445,8 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
     for (var index = 0; index < cells.length && index < 12; index += 1) {
       var cell = cells[index];
       if (cell.classList.contains("is-numeric")) return "number";
-      if (cell.querySelector("select, .phc-enum-pill, input:not([type=checkbox])")) return "text";
+      var controls = cell.querySelectorAll("select, .phc-enum-pill, input");
+      if (Array.prototype.some.call(controls, function (node) { return node.type !== "checkbox"; })) return "text";
       var text = (cell.textContent || "").trim();
       if (!text || text === "\u2014" || text === "-" || text === "?") continue;
       if (!NUMBER.test(text)) return "text";
@@ -440,7 +458,13 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
     cache.columns.forEach(function (column) {
       var field = column[0], th = cache.headers[field];
       if (!th || LEADING[field]) return;
-      var cells = cache.body.querySelectorAll("tr:not(.phc-group-row) > td.col-" + field);
+      // Each record row's own cell for the field; group heading rows carry no column cells to read.
+      var cells = [];
+      Array.prototype.forEach.call(cache.body.children, function (tr) {
+        if (tr.classList.contains("phc-group-row")) return;
+        var cell = tr.querySelector(".col-" + field);
+        if (cell) cells.push(cell);
+      });
       // With no rows yet, a heading that names a quantity or a unit still reads from the right, so a column
       // keeps its alignment from the empty Model to the full one.
       var kind = cells.length ? columnKind(cells) : null;
@@ -452,7 +476,7 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
       Array.prototype.forEach.call(cells, function (cell) {
         cell.classList.toggle("is-start", text);
         // A cell showing a chip lets the chip carry its state (a flag), not the whole cell.
-        cell.classList.toggle("has-chip", Boolean(cell.querySelector("select.phc-enum-cell, .phc-enum-pill")));
+        cell.classList.toggle("has-chip", Boolean(cell.querySelector(".phc-enum-cell, .phc-enum-pill")));
       });
     });
   }
@@ -514,8 +538,7 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
     paintTableWidth(cache);
     while (cache.body.children.length > position) cache.body.removeChild(cache.body.lastChild);
     alignColumns(cache);
-    // The edge shade marks only a table that truly runs past its frame.
-    root.classList.toggle("is-overflowing", root.scrollWidth - root.clientWidth > 8);
+    markOverflow(cache);
     Object.keys(cache.rows).forEach(function (key) {
       if (!retained[key]) { delete cache.rows[key]; delete expanded[key]; }
     });
