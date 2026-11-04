@@ -1,5 +1,5 @@
 .PHONY: ci syntax lint lint-ruby lint-js lint-python lint-citations lint-paths test fixtures fixtures-check coverage hostkit-test python-check \
-        panel-manifest panel-manifest-check ui-preview ui-deps ui-checks rbz rbz-check install clean bridge-install \
+        panel-manifest panel-manifest-check ui-preview ui-deps ui-checks ui-gallery rbz rbz-check install clean bridge-install \
         bridge-uninstall runtime-check runtime-pin-check runtime-manifest runtime-browser-check phase-one-proof \
         hooks hooks-auto help help-check
 
@@ -182,6 +182,8 @@ ui-deps:
 
 # The browser checks in tools/ui-preview/ against the preview, on a loopback server this target starts and
 # stops. UI_CHECKS narrows the run, as in `make ui-checks UI_CHECKS=tools/ui-preview/spaces_checks.cjs`.
+# When the default port is already serving (the preview pane), the run takes a free port instead; a port
+# given on the command line or in the environment is refused when busy.
 # Without Playwright the target skips by name. Not part of `ci`: it launches a browser. A browser pass is
 # not host acceptance.
 UI_CHECKS ?= $(sort $(wildcard tools/ui-preview/*.cjs))
@@ -191,17 +193,28 @@ ui-checks:
 	if ! node -e "require.resolve('playwright')" >/dev/null 2>&1; then \
 	  echo "ui-checks: skipped, Playwright is not resolvable from NODE_PATH=$$NODE_PATH; run 'make ui-deps' (tools/ui-preview/.index.md)"; exit 0; \
 	fi; \
-	if curl -s -o /dev/null "http://127.0.0.1:$(UI_PREVIEW_PORT)/"; then \
-	  echo "ui-checks: port $(UI_PREVIEW_PORT) is already serving; stop that server or set UI_PREVIEW_PORT"; exit 1; \
+	port=$(UI_PREVIEW_PORT); \
+	if curl -s -o /dev/null "http://127.0.0.1:$$port/"; then \
+	  if [ "$(origin UI_PREVIEW_PORT)" != file ]; then \
+	    echo "ui-checks: port $$port is already serving; stop that server or choose another UI_PREVIEW_PORT"; exit 1; \
+	  fi; \
+	  port=$$(python3 -c 'import socket; s = socket.socket(); s.bind(("127.0.0.1", 0)); print(s.getsockname()[1])'); \
+	  echo "ui-checks: port $(UI_PREVIEW_PORT) is already serving (the preview?), so this run serves on $$port"; \
 	fi; \
-	uv run --no-project python -m http.server $(UI_PREVIEW_PORT) --bind 127.0.0.1 >/dev/null 2>&1 & server=$$!; \
+	uv run --no-project python -m http.server $$port --bind 127.0.0.1 >/dev/null 2>&1 & server=$$!; \
 	trap 'kill $$server 2>/dev/null; wait $$server 2>/dev/null' EXIT; \
-	for attempt in $$(seq 50); do curl -s -o /dev/null "http://127.0.0.1:$(UI_PREVIEW_PORT)/" && break; sleep 0.2; done; \
+	for attempt in $$(seq 50); do curl -s -o /dev/null "http://127.0.0.1:$$port/" && break; sleep 0.2; done; \
 	status=0; \
 	for script in $(UI_CHECKS); do \
-	  UI_PREVIEW_PORT=$(UI_PREVIEW_PORT) node "$$script" || status=1; \
+	  UI_PREVIEW_PORT=$$port node "$$script" || status=1; \
 	done; \
 	exit $$status
+
+# Full-size screenshots of every tab, subtab and key container at each panel size, for a design review
+# (tools/ui-preview/.index.md). A capture, not a check: UI_GALLERY_OUT names the folder (a temporary
+# folder by default), UI_GALLERY_SIZES and UI_GALLERY_FIXTURES narrow the run.
+ui-gallery:
+	@$(MAKE) --no-print-directory ui-checks UI_CHECKS=tools/ui-preview/gallery/gallery.cjs
 
 # The development host bridge and helpers: Ruby tests against the stub, then the Python client. Some Python
 # tests run Ruby they generate; when the floor's Ruby (2.7) is installed they run again under it, so syntax

@@ -126,6 +126,30 @@ check({ name: "windows", output: directory }, async ({ newPage, step }) => {
     await page.close();
     console.log("Window screens " + width + "px: pass");
   }
+  // The audit list clips its overflow, so a grid wider than the list hides the Installed column.
+  // 501 and 520 sit just above the narrow breakpoint, where the wide tracks fit least.
+  for (const width of [520, 501, 360]) {
+    step(`U-Values audit fits at ${width}px`);
+    const page = await newPage({ viewport: { width: width, height: 732 } });
+    await page.goto(`http://127.0.0.1:${port}/tools/ui-preview/?fixture=windows`);
+    await page.locator("[data-tab=windows]").click();
+    const pane = page.locator("[data-pane=windows]");
+    await pane.getByRole("tab", { name: "U-Values", exact: true }).click();
+    await pane.getByText("Window Type calculation audit", { exact: true }).waitFor();
+    const facts = await pane.locator(".window-audit-list").evaluate(list => {
+      const frame = list.getBoundingClientRect();
+      const rows = Array.from(list.querySelectorAll(".window-audit-columns, .window-audit-type > summary"));
+      return { rows: rows.length, overflow: list.scrollWidth - list.clientWidth,
+        clipped: rows.filter(row => Array.from(row.children).some(cell =>
+          cell.getBoundingClientRect().right > frame.right - 1)).length };
+    });
+    assert.ok(facts.rows > 1, "the audit shows its heading and at least one Window Type");
+    assert.strictEqual(facts.overflow, 0, `the audit grid fits its list at ${width}px`);
+    assert.strictEqual(facts.clipped, 0, `no audit cell ends past the list at ${width}px`);
+    await page.screenshot({ path: path.join(directory, "audit-" + width + ".png") });
+    await page.close();
+  }
+  console.log("U-Values audit fits at 520, 501 and 360px: pass");
   step("Installs commit stays visible at minimum height");
   const minimum = await newPage({ viewport: { width: 360, height: 520 } });
   await minimum.goto(`http://127.0.0.1:${port}/tools/ui-preview/?fixture=windows`);
