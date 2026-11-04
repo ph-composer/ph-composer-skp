@@ -20,7 +20,6 @@ reconcile them at each packet's intake rather than treating the old reason as a 
 
 | Phase | Item | Kind | State | Issue | Pointer |
 | ----- | ---- | ---- | ----- | ----- | ------- |
-| n/a | Whole-app UI design polish | UI | Implemented on `codex/ui-design-polish`; 296 screenshots, full browser suite and native inspection passed; council accepted with minimum design score 9.1; full offline gate passed. Locally committed and unmerged | [#338](https://github.com/ph-composer/ph-composer-skp/issues/338) | [ui-design-polish](features/unscheduled/ui-design-polish.md) |
 | none | GitHub organization and SketchUp repository migration | workflow | Implemented and native-verified 2026-10-25; merge tracked in PR #306 | [#305](https://github.com/ph-composer/ph-composer-skp/issues/305) | [migration plan](features/unscheduled/github-organization-migration.md) |
 | 4 | Mechanical, coordinating packet | phase | Scoped; planned 2026-10-21 as P4-01 to P4-15, D4-01 to D4-12 answered as recommended, none authorized | none (local planning draft) | [features/phase-04-mechanical/](features/phase-04-mechanical/README.md); tracked in its [ledger](features/phase-04-mechanical/STATUS.md) |
 | 4 | Hot water piping | feature | Requested, PRD drafted; re-baselined against `main` 2026-10-21 | none (local planning draft) | [features/phase-04-mechanical/hot-water-piping/](features/phase-04-mechanical/hot-water-piping/README.md) |

@@ -1,10 +1,13 @@
 # UI design polish and visual audit
 
 DATE: 2026-11-04
-STATUS: Implemented and locally verified; council accepted; unmerged
+STATUS: Complete
+AUTHOR: PH Tools
+PR: https://github.com/ph-composer/ph-composer-skp/pull/339
 ISSUE: [#338](https://github.com/ph-composer/ph-composer-skp/issues/338)
 BRANCH: `codex/ui-design-polish`
 BASE: `5371cca2`
+DELIVERY_BASE: `15fd4ce0` (PR #337 squash, identical starting tree)
 
 ## Authorized scope
 
@@ -89,7 +92,7 @@ and `_private/host/ui-design-polish/`.
 | SketchUp 2026 | Native walkthrough passed on copied synthetic Model; Fresh final installed build verified: 38 Materials, one Assembly, two Zones, twelve Faces, one Space, one Window Type with products and three Thermal Bridge Types. Native navigation, tool grouping, menus, validation and Export readiness inspected |
 | SketchUp 2023 / Windows | Not exercised; no platform claim |
 | Council | Owner approved three available-model reviewers: GPT-6.1 Sol, GPT-6.1 Terra and GPT-6 Astra. Four rounds complete; every reviewer scores every requested design category/tab/container above 9, no actionable findings |
-| Design System reading aid | Not synchronized: branch is unmerged, and the skill requires a sync from main. Pending after acceptance/merge |
+| Design System reading aid | Not synchronized: branch is unmerged, and the skill requires a sync from main. Not synchronized: no supported artifact editing or synchronization command is available in this workflow; source CSS remains authoritative |
 
 The native run used SketchUp 26.1.188 / Ruby 3.2.2, copied `blank-template.skp` to a disposable run
 Model, and authored synthetic data through the existing public-API walkthrough. A save/restart
@@ -172,7 +175,11 @@ walkthroughs passed for Assemblies, Zones, Spaces, Windows and Thermal Bridge Ty
 
 ## Remaining boundaries
 
-The branch is local and unmerged. No release, SketchUp 2023/Chromium 88 or Windows claim is made.
+Delivery is tracked by [PR #339](https://github.com/ph-composer/ph-composer-skp/pull/339), which closes
+[#338](https://github.com/ph-composer/ph-composer-skp/issues/338). The completed implementation and
+acceptance record is archived here; the PR records the merge and remote CI result. No release,
+SketchUp 2023/Chromium 88 or Windows claim is made.
 Native destination picker, actual export execution and viewport-tool acceptance were outside this
-visual batch. Browser Export states use synthetic responses. The private Design System reading aid
-remains pending until an authorized merge, because its skill requires synchronization from main.
+visual batch. Browser Export states use synthetic responses. The private Claude Design System reading aid
+was not synchronized: this workflow has no supported artifact editing or synchronization command.
+The shared stylesheets in the merged source remain authoritative.

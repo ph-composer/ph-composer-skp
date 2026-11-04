@@ -1,6 +1,6 @@
 # Planning archive
 
-DATE: 2026-10-21
+DATE: 2026-11-04
 STATUS: Index of completed and superseded planning work, newest first.
 AUTHOR: Ed May, BLDGTYP
 
@@ -9,6 +9,7 @@ reached.
 
 | Slug | Date | Outcome | Issue or PR |
 | --- | --- | --- | --- |
+| [ui-design-polish](ui-design-polish.md) | 2026-11-04 | Complete: shared UI polish across all 14 routes and key containers; 296 captures, four independent council rounds with final design minima above 9, offline/browser gates and SketchUp 2026 inspection passed; delivery through PR #339 | [#338](https://github.com/ph-composer/ph-composer-skp/issues/338); [PR #339](https://github.com/ph-composer/ph-composer-skp/pull/339) |
 | [phase-03b-thermal-bridges](phase-03b-thermal-bridges/README.md) | 2026-10-26 | Thermal bridges: Thermal Bridge Types, assignments stored on Edges inside Zones, runs and the schedule, the Thermal Bridges tab, Colour by thermal bridges, the edge tool and the HBJSON export as the first optional section. Nine stages through PRs #302 and #308 to #315; T01 to T09 pass with ledger results, T09 the integrated run under native control. The edge tagging rules are in `context/TECH_STACK.md` for piping and ducting; the footprint baseline reset to 24,541,739 bytes (D3b-24). Phase 3 is complete | [#301](https://github.com/ph-composer/ph-composer-skp/issues/301); PRs [#302](https://github.com/ph-composer/ph-composer-skp/pull/302), [#308](https://github.com/ph-composer/ph-composer-skp/pull/308) to [#315](https://github.com/ph-composer/ph-composer-skp/pull/315) |
 | [geometry-contribution-contracts](geometry-contribution-contracts/STATUS.md) | 2026-10-26 | Edge entries in the export snapshot (G-02, PR 119); the line primitive superseded by Phase 3a's `derived` segments (G-03); the Edge facts and the thermal-bridge adopter's drawing, export and measurement closed through Phase 3b (G-01, G-04) | [#118](https://github.com/ph-composer/ph-composer-skp/issues/118) |
 | [security-hardening](security-hardening/README.md) | 2026-10-21 | The review's eleven findings delivered in four PRs: commit-pinned CI actions, Dependabot, `SECURITY.md` and a release checklist (#293); agent setup that leads with the environment-variable token form, with docs on where the token is kept and shared computers (#294); `make lint-paths`, an owner-only bridge state file and the "Security posture" context fold (#299); material colour as six-digit hex, every report value through `ReportHtml` under a lexer guard, and a Content-Security-Policy on all five shipped pages with `boot.js` and `panel_csp_violation`, host gate SH-03-A8 recorded pass (#300). SH-05, the listener's port-squatting fix, stays deferred to the agent connection and access-grant packet | [#292](https://github.com/bldgtyp/ph-composer/issues/292); PRs [#293](https://github.com/bldgtyp/ph-composer/pull/293), [#294](https://github.com/bldgtyp/ph-composer/pull/294), [#299](https://github.com/bldgtyp/ph-composer/pull/299), [#300](https://github.com/bldgtyp/ph-composer/pull/300) |
