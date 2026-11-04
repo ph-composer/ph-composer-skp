@@ -16,7 +16,7 @@
 .agent-access-row.is-revoked .agent-access-row-label { color: var(--muted); font-weight: 400; }
 .agent-access-empty { margin: 12px 0; }
 .agent-access-field { display: flex; flex-direction: column; gap: 4px; margin: 0 0 12px; }
-.agent-access-capabilities { margin: 0 0 12px; padding: 0; border: 0; }
+.agent-access-capabilities { margin: 0 0 4px; padding: 0; border: 0; }
 .agent-access-capabilities legend { padding: 0; margin: 0 0 6px; font-weight: 600; }
 /* Box beside its label, one row per capability. Outranks overlay.css's `.phc-form-dialog label` column, which
    put each box on its own line under the previous capability's description. */

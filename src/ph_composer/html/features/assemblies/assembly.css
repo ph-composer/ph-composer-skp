@@ -52,7 +52,7 @@
 .assembly-bubble-choices { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 10px; }
 .assembly-bubble-choices > small { flex: 1 1 100%; }
 .assembly-canvas-block { margin-top: 18px; min-width: 0; }
-.assembly-boundary { color: var(--muted-strong); font-size: var(--text-xs); letter-spacing: .03em; padding: 8px 0; }
+.assembly-boundary { color: var(--muted-strong); font-size: var(--text-sm); letter-spacing: .03em; padding: 8px 0; }
 .assembly-stage-scroll { overflow: auto; max-height: 55vh; padding: 5px 4px; }
 /* Equal gutters center the geometry, rather than the geometry plus its left-hand dimensions. Auto margins
    become zero when the frame outgrows the viewport, leaving both ends reachable by the scroll bar. */

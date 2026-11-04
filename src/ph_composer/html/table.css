@@ -58,14 +58,14 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
   .phc-table td.col-hierarchy { position: static; }
   .phc-table th.col-hierarchy { left: auto; }
 }
-.phc-table .row-icon { width: 28px; height: 28px; min-height: 28px; padding: 5px; margin-right: 2px; border: 0; background: transparent; color: var(--icon-ink); vertical-align: middle; }
+.phc-table .row-icon { width: 27px; height: 28px; min-height: 28px; padding: 5px; margin-right: 1px; border: 0; background: transparent; color: var(--icon-ink); vertical-align: middle; }
 .phc-table .row-icon svg { display: block; }
 /* An action the row cannot take keeps its slot but draws nothing, so the icons line up down the column. */
 .phc-table .row-icon:disabled { visibility: hidden; }
 .phc-table .row-delete:hover:enabled, .phc-table .row-delete:focus-visible { color: var(--red); background: var(--error-surface); }
 .phc-table .row-icon:last-child { margin-right: 0; }
 /* The hairline sits in the gap the icons already have, so a group costs the column no width. */
-.phc-table .row-icon.row-icon-starts { box-shadow: -2px 0 0 -1px var(--line); }
+.phc-table .row-icon.row-icon-starts { box-shadow: -1px 0 0 0 var(--line); }
 /* A disclosure chevron is a glyph, not a box: no resting border or fill, the row's height as its target,
    and the shared focus ring. */
 .phc-workspace .phc-table .row-chevron { display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; width: 22px; height: 28px; min-height: 28px; padding: 0; border: 0; background: transparent; color: var(--muted-strong); }

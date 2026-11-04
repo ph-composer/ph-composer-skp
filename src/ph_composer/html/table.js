@@ -434,7 +434,7 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
       if (!NUMBER.test(text)) return "text";
       kind = "number";
     }
-    return kind || "text";
+    return kind;
   }
   function alignColumns(cache) {
     cache.columns.forEach(function (column) {
@@ -443,8 +443,11 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
       var cells = cache.body.querySelectorAll("tr:not(.phc-group-row) > td.col-" + field);
       // With no rows yet, a heading that names a quantity or a unit still reads from the right, so a column
       // keeps its alignment from the empty Model to the full one.
-      if (!cells.length) { th.classList.toggle("is-end", QUANTITY_LABEL.test(column[1] || "")); return; }
-      var text = columnKind(cells) === "text";
+      var kind = cells.length ? columnKind(cells) : null;
+      // With no rows, or rows whose cells are all blank, a heading that names a quantity or unit still reads from
+      // the right, so a column keeps its side from the empty Model to the full one.
+      if (!kind) { th.classList.toggle("is-end", QUANTITY_LABEL.test(column[1] || "")); if (!cells.length) return; }
+      var text = kind ? kind === "text" : !QUANTITY_LABEL.test(column[1] || "");
       th.classList.toggle("is-end", !text);
       Array.prototype.forEach.call(cells, function (cell) {
         cell.classList.toggle("is-start", text);
@@ -486,11 +489,20 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
       }
       position += 1;
     });
+    // An empty table asks its action provider what a row would hold, so the column keeps the width it will have
+    // once records exist. A provider that needs a real row simply leaves the count at zero.
+    if (!rows.length && typeof options.actions === "function") {
+      try {
+        var sample = options.actions({ key: "", depth: 0, tier: "", parent: null,
+          record: { id: "", values: { name: "" }, uses: [], use_count: 0 } }, options.state);
+        actionCount = Array.isArray(sample) ? sample.length : 0;
+      } catch (unused) { actionCount = 0; }
+    }
     // The Actions column is as wide as what its rows hold. A column holding only the row checkbox shrinks to it
     // and drops its heading word; one with icons keeps room for the word "Actions".
     var checkOnly = rows.length > 0 && actionCount === 0 && !options.actionsCell && Boolean(options.check);
     // A narrow panel packs the icons closer (table.css), so record names keep more of the width.
-    var slot = typeof window !== "undefined" && window.innerWidth <= 500 ? 26 : 30;
+    var slot = typeof window !== "undefined" && window.innerWidth <= 500 ? 26 : 28;
     cache.actionsWidth = Math.max(16 + actionCount * slot + (options.actionsCell ? 40 : 0) + (options.check ? 28 : 0),
       checkOnly ? 44 : options.check ? 108 : 80);
     cache.node.classList.toggle("has-check-only-actions", checkOnly);

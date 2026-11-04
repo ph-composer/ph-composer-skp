@@ -1,9 +1,9 @@
 {
   "assets": {
     "html/agent_access/agent_access.css": {
-      "bytes": 3624,
+      "bytes": 3623,
       "mime": "text/css; charset=utf-8",
-      "sha256": "31769c2928bf2de82f5569a94aad388649d10d3af44682d4e0a672904b8adebf"
+      "sha256": "f3277bed4d1ea409fd409bc6ee096ecb0651ead0735d8bf028872ae3722c2bed"
     },
     "html/agent_access/index.html": {
       "bytes": 1149,
@@ -53,7 +53,7 @@
     "html/features/assemblies/assembly.css": {
       "bytes": 12653,
       "mime": "text/css; charset=utf-8",
-      "sha256": "9ccea870d5ffeed24205bf422834d7c8120e7c5b8603bddeaa6dafe8300f8ac8"
+      "sha256": "1197ccf7b832490e30525040898b31f2d88e77d40355dc20092f98b1b4b3af15"
     },
     "html/features/assemblies/canvas.js": {
       "bytes": 8977,
@@ -251,9 +251,9 @@
       "sha256": "f9bdafe79d3675118c31feff05ad4a5c82ada872c75110c636b411239ff6ae2d"
     },
     "html/features/windows/windows.css": {
-      "bytes": 31756,
+      "bytes": 31757,
       "mime": "text/css; charset=utf-8",
-      "sha256": "aac744668f34518b8013759c720e249b72fff7602c4fe06ed2d5d8c7c5e33c27"
+      "sha256": "babce09129202378ec63a32fa8613bb1857384db182e3702adb9d3b216edb691"
     },
     "html/features/zones/assembly_assignment.js": {
       "bytes": 14183,
@@ -343,7 +343,7 @@
     "html/inventory.js": {
       "bytes": 12199,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "62fd22bb904da22674ed93334c6359be7dce0191f79af819293a5a9fbfd0a31c"
+      "sha256": "7ee6fbb8d36e576cb1123ac41c61ffe63338b0e1ea88c9dda2bd2c7890bd4aee"
     },
     "html/inventory_forms.js": {
       "bytes": 20078,
@@ -511,19 +511,19 @@
       "sha256": "90238a9908641b163007f151a46dcfa3d1059d5d31de464babc45f43a5e0f234"
     },
     "html/support/support.css": {
-      "bytes": 2676,
+      "bytes": 2911,
       "mime": "text/css; charset=utf-8",
-      "sha256": "4cc64d0ff975462b069c02881e046bb9c9aacf6bd436b7700b06d669738e42ed"
+      "sha256": "61fa05fa4086b6022a5005a7fb9173b9bc6b85152507e8a4840783448895fc67"
     },
     "html/table.css": {
-      "bytes": 20109,
+      "bytes": 20106,
       "mime": "text/css; charset=utf-8",
-      "sha256": "308a37b10a8f4e405a02a61646279835545a9bf5cc4467f102486520833974d7"
+      "sha256": "5077723cab19223dcb122a464d5b37e3611b445976a3a14d9e6d79c15248e68b"
     },
     "html/table.js": {
-      "bytes": 29092,
+      "bytes": 29959,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "7caae245b95dd3ae3ac29b578fe75047b3604cd1080cb100da3b42a39ec2196d"
+      "sha256": "791232e92118d16187261c90e7b9765bbb72afed3b1713c0f712aeef92016244"
     },
     "html/table_contributions.js": {
       "bytes": 2905,

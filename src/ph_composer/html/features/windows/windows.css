@@ -67,14 +67,14 @@
 .window-placement-chosen { font-weight:600; }
 .window-anchor-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; }
 .phc-workspace .window-anchor-grid button { min-height:28px; padding:2px 6px; font-size:12px; white-space:nowrap; }
-.window-empty-mark { fill:var(--muted); font-size:calc(11px * var(--window-type, 1)); letter-spacing:.06em; text-transform:uppercase; pointer-events:none; }
+.window-empty-mark { fill:var(--muted-strong); font-size:calc(12px * var(--window-type, 1)); letter-spacing:.06em; text-transform:uppercase; pointer-events:none; }
 .window-placement-hint { flex:1 1 280px; font-size:var(--text-sm); }
 .window-schedule { min-width:0; }
 .window-schedule > .muted { margin:8px 0; }
 .window-repair-dialog select { width:100%; min-width:0; }
 /* One outlined group per job, spaced apart; buttons inside a group drop their own border, and a pressed tool keeps
    its fill, so the active state still reads. */
-.window-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:8px 24px; min-height:50px; padding:9px 0; border-bottom:1px solid var(--line); }
+.window-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:8px 14px; min-height:50px; padding:9px 0; border-bottom:1px solid var(--line); }
 .window-tool-group { display:flex; align-items:center; gap:2px; padding:0; border:0; background:transparent; }
 /* Groups are told apart by space alone: the toolbar wraps at most panel widths, and a rule would start a line. */
 .window-tool-group[hidden] { display:none; }
@@ -101,7 +101,7 @@
 .window-name-control { cursor:text; }
 .window-name-control rect { fill:#fff; stroke:#aab7ba; stroke-width:1; vector-effect:non-scaling-stroke; }
 .window-name-control:hover rect { stroke:var(--drawing-highlight); stroke-width:2; }
-.window-name { fill:#20363a; font-size:calc(11px * var(--window-type, 1)); font-weight:600; pointer-events:none; }
+.window-name { fill:#20363a; font-size:calc(12px * var(--window-type, 1)); font-weight:600; pointer-events:none; }
 .window-name-control.compact .window-name { font-size:calc(9px * var(--window-type, 1)); paint-order:stroke; stroke:#fff; stroke-width:3px; stroke-linejoin:round; }
 .window-overall-dimension { fill:#1e2931; font-size:calc(12px * var(--window-type, 1)); font-weight:650; font-variant-numeric:tabular-nums; }
 .window-canvas.proposed .window-overall-dimension { fill:#8a5a00; }
@@ -179,8 +179,8 @@
 /* The audit: a title, the method as a caption, then a quiet grid of Window Types whose terms open beneath. */
 .window-audit { padding:16px 0 24px; overflow:auto; }
 .window-audit > h2 { margin:0 0 4px; font-size:var(--text-lg); }
-.window-audit-method { max-width:72ch; margin:0 0 16px; color:var(--muted-strong); font-size:var(--text-md); line-height:1.6; }
-.window-audit-method sub { font-size:.75em; margin-right:1px; }
+.window-audit-method { max-width:72ch; margin:0 0 16px; color:var(--muted-strong); font-size:14px; line-height:1.65; }
+.window-audit-method sub { font-size:.8em; margin:0 1px 0 0.5px; }
 /* The audit rows sit on the shared table surface: one hairline frame with the card radius. */
 .window-audit-list { border:1px solid var(--line); border-radius:var(--radius-md); overflow:hidden; }
 .window-audit-type:last-child { border-bottom:0; }
