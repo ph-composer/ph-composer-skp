@@ -189,7 +189,9 @@
 /* The audit rows sit on the shared table surface: one hairline frame with the card radius. */
 .window-audit-list { border:1px solid var(--line); border-radius:var(--radius-md); overflow:hidden; }
 .window-audit-type:last-child { border-bottom:0; }
-.window-audit-columns, .window-audit-type > summary { display:grid; grid-template-columns:minmax(120px,1fr) 150px 150px;
+/* The result tracks shrink with the panel, so the grid fits at every width above the narrow breakpoint. */
+.window-audit-columns, .window-audit-type > summary { display:grid;
+  grid-template-columns:minmax(96px,1fr) minmax(96px,150px) minmax(96px,150px);
   align-items:center; column-gap:16px; padding:0 12px 0 32px; }
 .window-audit-columns { min-height:36px; border-bottom:1px solid var(--line); background:var(--surface-alt);
   color:var(--muted-strong); font-size:var(--text-sm); font-weight:600; }
