@@ -2,7 +2,7 @@
    tables, controls and bubbles are the kit's; these rules only place this screen's own parts. */
 /* One row that always shows, so a selection never moves the table under it; it wraps at narrow widths. */
 /* A toolbar row like the one beneath it: no box, the count in bold leading the controls it applies to. */
-.tb-assign-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 12px 0 0;
+.tb-assign-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 12px 0 12px;
   padding: 0; border: 0; border-radius: 0; background: transparent; }
 .tb-assign-count { flex: 0 0 auto; font-size: 13px; font-weight: 600; white-space: nowrap; }
 .tb-assign-bar select { width: auto; min-width: 12em; max-width: 100%; }

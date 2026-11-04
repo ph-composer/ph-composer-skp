@@ -350,4 +350,4 @@
 .phc-workspace .phc-recovery-row button { flex: none; width: auto; }
 /* A dialog taller than its window scrolls its body; the footer stays in view at the bottom edge. */
 .phc-workspace .phc-dialog .phc-dialog-actions { position: sticky; bottom: -24px; z-index: 2; margin: 8px 0 -24px;
-  padding: 12px 0 24px; background: #fff; box-shadow: 0 -10px 10px -10px #10242c1f; }
+  padding: 12px 0 24px; background: #fff; }

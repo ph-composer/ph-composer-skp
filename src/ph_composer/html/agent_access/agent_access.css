@@ -21,7 +21,7 @@
 /* Box beside its label, one row per capability. Outranks overlay.css's `.phc-form-dialog label` column, which
    put each box on its own line under the previous capability's description. */
 .phc-form-dialog .agent-access-capability { display: flex; flex: 1 1 100%; flex-direction: row;
-  align-items: flex-start; gap: 8px; margin: 0 0 8px; }
+  align-items: flex-start; gap: 10px; margin: 0 0 6px; }
 .agent-access-capability input[type=checkbox] { flex: none; margin: 2px 0 0; }
 .agent-access-capability span { display: flex; flex-direction: column; gap: 2px; }
 .agent-access-secret { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; }

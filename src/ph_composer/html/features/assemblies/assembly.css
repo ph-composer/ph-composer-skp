@@ -6,7 +6,7 @@
   color: var(--muted); font-size: 12px; font-weight: 400; text-align: left; white-space: nowrap; }
 .assembly-back::before { content: "\2039\00a0"; }
 .phc-workspace .assembly-back:hover:enabled { background: transparent; color: var(--interaction-highlight); }
-.assembly-identity { flex: 1 1 220px; min-width: 0; }
+.assembly-identity { flex: 1 1 340px; min-width: 0; }
 /* The title reads as a title and takes a field's box only under the pointer or with focus. */
 .assembly-name .phc-cell-input { font-size: 20px; font-weight: 650; width: 100%; border-color: transparent;
   background: transparent; padding-left: 0; }
@@ -151,4 +151,5 @@ body.assembly-layer-dragging .assembly-hit-target { pointer-events: none; }
   white-space: nowrap; background: #fff; border: 1px solid var(--drawing-highlight); border-radius: var(--radius-sm);
   box-shadow: 0 3px 14px #0003; }
 /* The way to the sidebar reads as a link-weight action beside the prompt, not a second boxed control. */
-.phc-workspace .assembly-library-link { border-color: transparent; background: transparent; color: var(--interaction-highlight); }
+.phc-workspace .assembly-library-link { border-color: transparent; background: transparent; color: var(--ink); }
+.phc-workspace .assembly-library-link:hover:enabled { background: #0d2a300f; border-color: transparent; }

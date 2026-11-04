@@ -23,9 +23,9 @@ PhComposerUI.define("features/windows/audit", ["units", "features/windows/editor
     // One row per Window Type, its two results in columns under one heading row; the terms open beneath it.
     var heading = el("div", "window-audit-columns");
     var unit = units.displayUnit(U_VALUE, units.profile(U_VALUE));
-    ["Window Type", "Uw " + unit, "Installed U " + unit].forEach(function (label) {
+    ["Window Type", "Uw (" + unit + ")", "Installed U (" + unit + ")"].forEach(function (label) {
       heading.appendChild(el("span", "", label)); });
-    this.audit.appendChild(heading);
+    var list = el("div", "window-audit-list"); list.appendChild(heading); this.audit.appendChild(list);
     this.entries.forEach(function (entry) {
       var calc = entry.calculation, group = el("details", "window-audit-type"), summary = el("summary");
       summary.appendChild(el("span", "window-audit-name", entry.record.name));
@@ -56,7 +56,7 @@ PhComposerUI.define("features/windows/audit", ["units", "features/windows/editor
         group.appendChild(el("p", "", cell.name + " · Empty, excluded wall area; no window thermal contribution."));
       });
       (calc.findings || []).forEach(function (finding) { group.appendChild(el("p", "", finding.message)); });
-      this.audit.appendChild(group);
+      list.appendChild(group);
     }, this);
     Array.prototype.forEach.call(this.audit.querySelectorAll("details"), function (node, index) {
       node.open = Boolean(expanded[index]); });

@@ -39,7 +39,7 @@
 .window-empty-prompt { margin:0; padding:24px 20px; }
 .phc-workspace .window-workspace .window-type-row>button:focus-visible:enabled { outline:2px solid var(--interaction-highlight); outline-offset:-2px; }
 .window-card.selected { border-color:var(--interaction-highlight); background:var(--interaction-highlight-tint); }
-.window-group { position:relative; padding:12px 8px 7px; color:var(--muted); font-size:var(--text-xs); font-weight:600; letter-spacing:.06em; text-transform:uppercase; }
+.window-group { position:relative; padding:12px 8px 7px; color:var(--muted-strong); font-size:var(--text-sm); font-weight:600; }
 .window-group::after { bottom:0; }
 .window-rail-collapsed { overflow:hidden; }
 .phc-workspace .window-rail-strip { display:flex; align-items:center; gap:8px; writing-mode:vertical-rl; width:35px; height:100%; border:0; border-radius:0; padding:12px 8px; }
@@ -176,10 +176,14 @@
 .window-audit { padding:16px 0 24px; overflow:auto; }
 .window-audit > h2 { margin:0 0 4px; font-size:var(--text-lg); }
 .window-audit-method { max-width:72ch; margin:0 0 16px; color:var(--muted); font-size:var(--text-sm); line-height:1.5; }
-.window-audit-columns, .window-audit-type > summary { display:grid; grid-template-columns:minmax(160px,1fr) 150px 150px;
+/* The audit rows sit on the shared table surface: one hairline frame with the card radius. */
+.window-audit-list { border:1px solid var(--line); border-radius:var(--radius-md); overflow:hidden; }
+.window-audit-type:last-child { border-bottom:0; }
+.window-audit-columns, .window-audit-type > summary { display:grid; grid-template-columns:minmax(120px,1fr) 150px 150px;
   align-items:center; column-gap:16px; padding:0 12px 0 32px; }
-.window-audit-columns { min-height:32px; border-bottom:1px solid var(--line); background:var(--surface-alt);
-  color:var(--muted-strong); font-size:var(--text-sm); font-weight:600; border-radius:var(--radius-md) var(--radius-md) 0 0; }
+.window-audit-columns { min-height:36px; border-bottom:1px solid var(--line); background:var(--surface-alt);
+  color:var(--muted-strong); font-size:var(--text-sm); font-weight:600; }
+@media (max-width:500px) { .window-audit-columns, .window-audit-type > summary { grid-template-columns:minmax(90px,1fr) 96px 96px; column-gap:8px; padding-right:8px; } }
 .window-audit-columns > span:not(:first-child), .window-audit-value { text-align:right; font-variant-numeric:tabular-nums; }
 .window-audit-type { border-bottom:1px solid #edf0f2; }
 .window-audit-type > summary { position:relative; min-height:36px; cursor:pointer; list-style:none; }

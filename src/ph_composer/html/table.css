@@ -104,7 +104,7 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 .phc-group-chevron { width: 12px; }
 .phc-group-chevron svg { width: 14px; height: 14px; }
 .phc-group-toggle[aria-expanded="false"] .phc-group-chevron { transform: rotate(-90deg); }
-.phc-inventory-controls input { width: 168px; }
+.phc-inventory-controls input { width: 190px; }
 .phc-view-count { color: var(--muted); font-size: 12px; }
 .phc-group-label { font-weight: 600; }
 /* A tree table (`tree: true`): each top-level row heads its group, so it reads as a heading over the
@@ -113,8 +113,6 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 /* A heading row's name is a field; it takes the row's weight too. */
 .phc-table.is-tree tr.tier-0 .phc-cell-input { font-weight: 600; }
 .phc-table.has-check-only-actions th.col-actions .phc-th-label { display: none; }
-/* One rule above each group, drawn inside the row so it never doubles the hairline beneath the row before. */
-.phc-table.is-tree tbody tr.tier-0:not(:first-child) > td { box-shadow: inset 0 1px var(--line-strong); }
 .live-panel .phc-table.is-tree .host-selected td, .phc-table.is-tree tr.tier-0:focus-within > td { background-color: #e6f1f3; }
 
 /* Header actions (a column menu, a Colour-by toggle) sit below the label and show while the pointer is over
@@ -209,8 +207,8 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 .phc-inventory-controls .phc-pane-tools { margin-left: 0; }
 .phc-inventory-controls .phc-pane-tools:empty { display: none; }
 /* Chip columns keep room for their longest value; the last column keeps a gutter inside the frame. */
-.phc-table th.col-face_type, .phc-table th.col-boundary_condition { min-width: 150px; }
-.phc-table th.col-level, .phc-table th.col-building_segment { min-width: 112px; }
+.phc-table th.col-face_type, .phc-table th.col-boundary_condition { min-width: 170px; }
+.phc-table th.col-level, .phc-table th.col-building_segment { min-width: 140px; }
 .phc-table td:last-child, .phc-table th:last-child .phc-header-label-row { padding-right: 12px; }
 /* In a narrow panel the row's tools scroll away with the table; the name stays as its identity. */
 @media (max-width: 500px) { .phc-table td.col-actions { position: static; } }

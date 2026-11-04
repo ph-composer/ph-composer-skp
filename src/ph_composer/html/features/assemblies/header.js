@@ -1,13 +1,15 @@
 /* Identity, typed hints and the two canonical Ruby thermal results. */
 PhComposerUI.define("features/assemblies/header", ["features/assemblies/editor_shared", "snapshot", "unit_field",
-  "workspace"],
-  function (shared, snapshot, unitFields, ui) {
+  "units", "workspace"],
+  function (shared, snapshot, unitFields, units, ui) {
     "use strict";
     var el = ui.element;
+    /* A metric's label carries its unit, so its value line is just the number, as on every Builder. */
     function metric(label, value, field, withheld) {
-      var root = el("div", "assembly-header-metric");
-      root.appendChild(el("small", "", label));
-      var shown = el("strong", "", withheld ? "—" : shared.format(value, field));
+      var root = el("div", "assembly-header-metric"), profile = units.profile(field);
+      root.appendChild(el("small", "", label + " (" + units.displayUnit(field, profile) + ")"));
+      var shown = el("strong", "", withheld || ui.blank(value) ? "—" :
+        units.format(value, field, profile, { showUnit: false }));
       if (withheld) { shown.setAttribute("data-u-withheld", "");
         shown.setAttribute("aria-label", label + " withheld. " + withheld); }
       root.appendChild(shown);
