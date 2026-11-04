@@ -181,9 +181,9 @@
       "sha256": "90f63e73801fa9d4a278285c00bbb603e14f516369a6b7b43cc41fbc448caba3"
     },
     "html/features/windows/audit.js": {
-      "bytes": 5205,
+      "bytes": 5332,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "60519c91e2809b132a15465802400321d3bded8f1d5d84b5c6f48158f6f1c958"
+      "sha256": "d6c98c3311317838308f5788c5db8526ef1eac0d047c03cdb2e10151d470b56e"
     },
     "html/features/windows/canvas.js": {
       "bytes": 18076,

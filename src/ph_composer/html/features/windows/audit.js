@@ -27,9 +27,10 @@ PhComposerUI.define("features/windows/audit", ["units", "features/windows/editor
     var expanded = Array.prototype.map.call(this.audit.querySelectorAll("details"), function (node) {
       return node.open; });
     this.audit.replaceChildren(); this.audit.appendChild(el("h2", "", "Window Type calculation audit"));
-    // The equation stands on its own line; how it is applied follows as quieter notes.
+    // The equation stands on its own line; how it is applied follows as quieter notes. Products take a
+    // quarter-em space either side of the dot and Σ a thin space, so the terms read apart at 1x.
     this.audit.appendChild(subscripted(el("p", "window-audit-method window-audit-equation"),
-      "Uninstalled U_w = (A_g\u2009·\u2009U_g + ΣA_f\u2009·\u2009U_f + ΣL_g\u2009·\u2009ψ_g) / A"));
+      "Uninstalled U_w = (A_g\u2005·\u2005U_g + Σ\u2009A_f\u2005·\u2005U_f + Σ\u2009L_g\u2005·\u2005ψ_g) / A"));
     this.audit.appendChild(subscripted(el("p", "window-audit-method"), "Installed effective U adds ΣL·ψ_install / A. " +
       "Coefficients are " + units.displayUnit(HEAT_LOSS, profile) +
       "; no intermediate rounding. Missing terms withhold dependent totals."));
