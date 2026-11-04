@@ -5,7 +5,7 @@
 .live-panel .phc-table [aria-invalid="true"] { border-color: var(--red); }
 .live-panel .phc-table .host-selected td { background: #edf6f7; }
 .live-panel .phc-table td { overflow: hidden; text-overflow: ellipsis; }
-.phc-table { --col-actions-width: var(--row-actions-width, 80px); --col-hierarchy-width: 110px; --col-name-width: 220px; border-collapse: separate; border-spacing: 0; width: 100%; table-layout: fixed; font-variant-numeric: tabular-nums; }
+.phc-table { --col-actions-width: var(--row-actions-width, 80px); --col-hierarchy-width: 96px; --col-name-width: 220px; border-collapse: separate; border-spacing: 0; width: 100%; table-layout: fixed; font-variant-numeric: tabular-nums; }
 /* A quiet grid: a hairline under each row, and column separators only in the header, where they are
    the resize handles' place. */
 .phc-table th, .phc-table td { height: 34px; padding: 3px 8px; border-bottom: 1px solid #edf0f2; text-align: right; white-space: nowrap; }
@@ -55,7 +55,7 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
   .phc-table td.col-hierarchy { position: static; }
   .phc-table th.col-hierarchy { left: auto; }
 }
-.phc-table .row-icon { width: 28px; height: 28px; min-height: 28px; padding: 5px; margin-right: 4px; border: 0; background: transparent; color: var(--muted-strong); vertical-align: middle; }
+.phc-table .row-icon { width: 28px; height: 28px; min-height: 28px; padding: 5px; margin-right: 4px; border: 0; background: transparent; color: var(--icon-ink); vertical-align: middle; }
 .phc-table .row-icon svg { display: block; }
 /* An action the row cannot take keeps its slot but draws nothing, so the icons line up down the column. */
 .phc-table .row-icon:disabled { visibility: hidden; }
@@ -101,12 +101,12 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 .phc-group-chevron { width: 12px; }
 .phc-group-chevron svg { width: 14px; height: 14px; }
 .phc-group-toggle[aria-expanded="false"] .phc-group-chevron { transform: rotate(-90deg); }
-.phc-inventory-controls input { width: 190px; }
+.phc-inventory-controls input { width: 180px; }
 .phc-view-count { color: var(--muted); font-size: 12px; }
 .phc-group-label { font-weight: 600; }
 /* A tree table (`tree: true`): each top-level row heads its group, so it reads as a heading over the
    quieter rows beneath it, with a firmer rule between groups. */
-.phc-table.is-tree tr.tier-0 > td { background-color: #fafbfc; font-weight: 600; }
+.phc-table.is-tree tr.tier-0 > td { background-color: var(--surface-alt); font-weight: 600; }
 .phc-table.is-tree tbody tr.tier-0:not(:first-child) > td { border-top: 1px solid var(--line-strong); }
 .live-panel .phc-table.is-tree .host-selected td, .phc-table.is-tree tr.tier-0:focus-within > td { background-color: #e6f1f3; }
 
@@ -175,13 +175,28 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 .phc-column-filter-value > span:last-child { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
 /* A fixed bubble still belongs to its sticky header's stacking context. Keep it above floating bars. */
 .phc-table th.has-open-bubble { z-index: 30; }
-/* A table with no rows says so once, centred in the space the rows would take. */
-.phc-empty { margin: 0; padding: 32px 16px; color: var(--muted); text-align: center; line-height: 1.5; }
+/* A table with no rows says so once, centred in the space the rows would take, under a quiet mark. */
+.phc-empty { margin: 0; padding: 36px 16px 32px; color: var(--muted); text-align: center; line-height: 1.5; }
+.phc-empty::before { content: ""; display: block; width: 24px; height: 24px; margin: 0 auto 10px; background: var(--muted-faint);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 12h-6l-2 3h-4l-2-3H2'/%3E%3Cpath d='M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'/%3E%3C/svg%3E") center / contain no-repeat; }
 .phc-empty:empty { display: none; }
 
+/* Every table sits on one surface: a hairline frame with the panel's card radius. */
+.phc-inventory-table, .phc-table-mount, .tb-schedule-table, .tb-totals-table { border: 1px solid var(--line);
+  border-radius: var(--radius-md); }
+.phc-inventory-table .phc-table tbody tr:last-child > td, .phc-table-mount .phc-table tbody tr:last-child > td,
+.tb-schedule-table .phc-table tbody tr:last-child > td, .tb-totals-table .phc-table tbody tr:last-child > td { border-bottom: 0; }
+/* A table whose columns hold no actions keeps the compact one-band header. */
+.phc-table.has-header-action-row.is-actionless th { height: 38px; vertical-align: middle; }
+.phc-table.is-actionless .phc-header-actions { display: none; }
+.has-header-action-row.is-actionless .phc-header-label-row { align-items: center; height: 36px; padding-bottom: 0; }
 /* A table wider than its pane shades the edge it continues past; the shade lifts once scrolled to the end. */
 .phc-inventory-table, .phc-table-mount, .tb-schedule-table, .tb-totals-table {
   background-color: #fff;
-  background-image: linear-gradient(to left, #fff 40%, #fff0), linear-gradient(to left, #10242c1c, #10242c00);
-  background-position: right center, right center; background-size: 40px 100%, 14px 100%;
+  background-image: linear-gradient(to left, #fff 40%, #fff0), linear-gradient(to left, #10242c12, #10242c00);
+  background-position: right center, right center; background-size: 32px 100%, 10px 100%;
   background-repeat: no-repeat; background-attachment: local, scroll; }
+.is-empty-table { background-image: none !important; }
+/* The record count, the table options and the help end the action bar as one cluster at its right. */
+.phc-inventory-controls .phc-view-count { margin-left: auto; }
+.phc-inventory-controls .phc-pane-tools { margin-left: 0; }

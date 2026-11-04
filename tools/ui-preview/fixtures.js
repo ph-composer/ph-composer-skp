@@ -883,8 +883,8 @@
       zone: zoneId && { zone_id: zoneId, zone_path: zonePath(zoneId) } };
   }
   // The section: each Zone's sums over its Spaces, as the host computes them.
-  function spacesSection(spaces) {
-    var zones = AUTHORING.zones.map(function (zone) {
+  function spacesSection(spaces, zoneRecords) {
+    var zones = (zoneRecords || AUTHORING.zones).map(function (zone) {
       var own = spaces.filter(function (space) { return space.zone && space.zone.zone_id === zone.id; });
       var inheriting = own.filter(function (space) { return space.airflow_mode === "inheriting"; }).length;
       var flows = {};
@@ -1040,7 +1040,16 @@
         index % 7 === 6 ? null : Math.round(((index % 9) * 0.03 - 0.04) * 1000) / 1000,
         TB_GROUPS[index % 3], TB_COLORS[index % 5]);
     });
-    dense.spaces = copy(LARGE_SPACES);
+    // 300 Spaces spread over the dense Model's own twelve Zones.
+    dense.spaces = spacesSection(Array.apply(null, { length: 300 }).map(function (unused, index) {
+      var zone = dense.zones[index % 12], root = zone.reference.zone_path[0], id = 5000 + index;
+      var space = spaceRow([root, id], zone.id, String(101 + index), "Room " + (index + 1),
+        index % 3 ? { v_sup_m3h: 20 + index % 7, v_eta_m3h: 18 + index % 5 } : {},
+        [spaceVolume([root, id, 1], 1, 2.4 + (index % 4) / 10, [spaceSegment([root, id, 1, 1], 8 + index % 9,
+          index % 5 ? 1 : 0.5)])]);
+      space.zone.zone_path = [root];
+      return space;
+    }), dense.zones);
     return dense;
   }
   FIXTURES.dense = buildDense();

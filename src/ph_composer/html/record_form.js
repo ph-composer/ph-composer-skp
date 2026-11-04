@@ -12,7 +12,8 @@ PhComposerUI.define("record_form", ["request", "workspace"], function (request, 
     this.session = session; this.send = send; this.spec = spec; this.changed = spec.changed;
     this.requests = request.channel(session, send, spec.label);
     if (spec.dialog === false) { this.root = ui.element("div", "phc-form"); this.root.hidden = true; }
-    else this.root = ui.formDialog(spec.className || "", function () { self.hide(); });
+    else this.root = ui.formDialog((spec.className || "") + (spec.destructive ? " phc-confirm-dialog" : ""),
+      function () { self.hide(); });
     this.title = ui.element("h2", "", spec.title); this.root.appendChild(this.title);
     this.form = ui.element("form");
     this.submitButton = ui.element("button", "primary", spec.submitLabel); this.submitButton.type = "submit";

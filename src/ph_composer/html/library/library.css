@@ -1,7 +1,6 @@
 /* Definition inventories share the table kit; feature styling only supplies their display treatments. */
 .phc-inventory-surface { padding: 0; border: 0; margin: 0; border-radius: 0; }
 /* Beside the library sidebar the action bar is short of width, so the filter gives some up. */
-.phc-inventory-surface .phc-inventory-controls input { width: 150px; }
 .phc-inventory-table { width: 100%; min-width: 0; overflow: auto; margin-top: 8px; }
 /* An inventory's Name column scrolls sideways with the rest. Its header still sticks to the top, which also keeps
    its resize handle inside the table instead of overhanging the pane. */
@@ -69,16 +68,16 @@
 .phc-color-square[aria-disabled="true"] { cursor: default; opacity: .6; }
 
 .phc-inventory-surface .phc-inventory-controls, [data-pane="assemblies"] .phc-inventory-controls { margin: 12px 0; }
-/* A choice in the action bar is as wide as its words, so the bar keeps to one line where it can. */
-.phc-inventory-controls .phc-view-control select { max-width: 160px; }
+/* The action bar's fields keep one width on every screen, so the bar reads the same from tab to tab. */
+.phc-inventory-controls .phc-view-control select { width: 132px; max-width: 132px; }
 .phc-inventory-controls .phc-view-control { max-width: 100%; }
 .phc-inventory-controls .phc-view-control :is(input, select) { min-width: 0; max-width: 100%; }
 /* A tab's settings stay together at the end of the action bar and wrap to their own line as one group. */
-.phc-inventory-settings { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-left: auto;
+.phc-inventory-settings { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-left: 0;
   min-width: 0; max-width: 100%; }
 
 /* The sidebar is a full-height column: its rule runs to the foot of the pane, not the end of its content. */
-.library-sidebar-root { width: 248px; flex: 0 0 248px; min-width: 0; align-self: stretch; border-left: 1px solid var(--line); padding: 12px 0 0 14px; }
+.library-sidebar-root { width: 224px; flex: 0 0 224px; min-width: 0; align-self: stretch; border-left: 1px solid var(--line); padding: 12px 0 0 14px; }
 .library-sidebar-root.is-collapsed { width: 42px; flex-basis: 42px; }
 /* The sidebar reads as a title, group captions and record rows. Each is a button for the keyboard, and only the
    kit's general button look is taken off, which needs the workspace prefix to outrank it. */
@@ -170,8 +169,7 @@
 .phc-workspace .library-setup-remove:hover:enabled { color: var(--red); background: var(--error-surface); }
 .library-sidebar-narrowing { display: flex; gap: 6px; margin: 6px 0 2px; }
 .library-sidebar-narrowing[hidden] { display: none; }
-/* Sidebar choices are fields, like the source select above them; chips are for values in tables. */
 .library-sidebar-narrowing select { flex: 1 1 0; min-width: 0; }
-.phc-workspace .library-sidebar-narrowing select.phc-choice-pill { height: var(--control-height); min-height: var(--control-height);
-  padding: 0 26px 0 10px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background-color: #fff;
-  font-size: var(--text-md); }
+/* The category names are longer than the sort names, so the category choice takes the larger share. */
+.library-sidebar-narrowing .library-sidebar-category { flex-grow: 3; }
+.library-sidebar-narrowing .library-sidebar-order { flex-grow: 2; }

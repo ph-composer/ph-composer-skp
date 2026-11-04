@@ -37,3 +37,4 @@
 .agent-access-capability strong { color: var(--ink); font-size: var(--text-md); font-weight: 600; }
 .agent-access-capability small { color: var(--muted); font-size: var(--text-sm); font-weight: 400; line-height: 1.4; }
 .agent-access-capabilities legend { color: var(--ink); }
+.agent-access-row-text small { font-size: var(--text-sm); }

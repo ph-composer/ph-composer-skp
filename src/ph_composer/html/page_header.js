@@ -1,7 +1,8 @@
 /* The one page header every pane opens with: the title, then at the right the secondary actions and the
    one primary action last. A screen never styles its own heading. A record count belongs to the control
    row under it (view_controls.js), where it can say how many a filter shows.
-   pageHeader({ title, actions: [node], primary: node }) returns
+   The page's overflow menu, when it has one, stands last, after the primary (`menu`).
+   pageHeader({ title, actions: [node], primary: node, menu: node }) returns
    { root, setTitle(text), setActions(nodes), setPrimary(node) }; a null primary shows nothing. */
 PhComposerUI.define("page_header", ["dom"], function (dom) {
   "use strict";
@@ -9,11 +10,12 @@ PhComposerUI.define("page_header", ["dom"], function (dom) {
   function pageHeader(options) {
     var root = dom.element("div", "phc-heading");
     var actions = dom.element("div", "phc-heading-actions"), secondary = [], primary = null;
+    var menu = options.menu || null;
     var title = dom.element("h1", "", options.title);
     root.appendChild(title);
     root.appendChild(actions);
     function place() {
-      actions.replaceChildren.apply(actions, primary ? secondary.concat([primary]) : secondary);
+      actions.replaceChildren.apply(actions, secondary.concat(primary ? [primary] : [], menu ? [menu] : []));
     }
     var header = {
       root: root,

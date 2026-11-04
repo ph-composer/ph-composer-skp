@@ -171,6 +171,7 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
   }
   function paintHeaders(cache, options) {
     cache.node.classList.toggle("has-header-action-row", Boolean(options.headerActions));
+    var anyActions = false;
     cache.columns.forEach(function (column) {
       var field = column[0], th = cache.headers[field];
       if (th._labelText !== column[1]) {
@@ -179,8 +180,9 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
         th._labelText = column[1];
       }
       if (options.header) options.header(th, field);
-      paintHeaderActions(th, options.headerActions ? options.headerActions(field) || [] : [],
-        Boolean(options.headerActions));
+      var actions = options.headerActions ? options.headerActions(field) || [] : [];
+      if (actions.length) anyActions = true;
+      paintHeaderActions(th, actions, Boolean(options.headerActions));
       var hidden = Boolean(options.hiddenColumns && options.hiddenColumns[field]);
       th.hidden = hidden; cache.columnElements[field].hidden = hidden;
       cache.columnElements[field].style.display = hidden ? "none" : "";
@@ -191,6 +193,8 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
         paintColumnWidth(cache, field);
       }
     });
+    // A table whose columns hold no actions right now keeps the compact one-band header.
+    cache.node.classList.toggle("is-actionless", !anyActions);
   }
   /* A row's checkbox, first in its Actions cell, and the header's in the Actions header. `options.check` is
      { state(row) -> true | false | "mixed" | null (no box), toggle(row, event), header() -> true | false |
@@ -422,11 +426,11 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
       if (cell.classList.contains("is-numeric")) return "number";
       if (cell.querySelector("select, .phc-enum-pill, input:not([type=checkbox])")) return "text";
       var text = (cell.textContent || "").trim();
-      if (!text || text === "\u2014" || text === "?") continue;
+      if (!text || text === "\u2014" || text === "-" || text === "?") continue;
       if (!NUMBER.test(text)) return "text";
       kind = "number";
     }
-    return kind || "number";
+    return kind || "text";
   }
   function alignColumns(cache) {
     cache.columns.forEach(function (column) {
@@ -458,6 +462,8 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
     paintHeaders(cache, options);
     paintHeaderCheck(cache);
     cache.empty.hidden = (options.visibleCount === undefined ? rows.length : options.visibleCount) > 0;
+    // An empty table draws no scroll shade: there is nothing beyond its edge to read.
+    root.classList.toggle("is-empty-table", !cache.empty.hidden);
     cache.empty.textContent = options.empty || "No records.";
     rows.forEach(function (row) {
       var group = options.group ? options.group(row) : null;

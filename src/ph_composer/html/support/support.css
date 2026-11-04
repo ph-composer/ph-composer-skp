@@ -11,7 +11,7 @@
 .support-problems { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
 .support-problem { display: grid; grid-template-columns: max-content 1fr max-content; gap: 12px; padding: 6px 0;
   border-bottom: 1px solid var(--line); }
-.support-problem.is-selected { background: var(--interaction-highlight-tint); }
+.support-problem.is-selected { background: var(--interaction-highlight-soft); }
 .support-problem-time, .support-problem-incident { color: var(--muted); font-variant-numeric: tabular-nums; }
 .support-links { display: flex; flex-wrap: wrap; gap: 8px; }
 .support-details { margin: 8px 0 0; }

@@ -20,6 +20,7 @@
 /* Each table scrolls inside itself, so a narrow panel never scrolls the tab sideways. */
 .tb-schedule-table, .tb-totals-table { min-width: 0; overflow: auto; }
 .tb-schedule-table { margin-top: 8px; }
+.tb-schedule > .phc-inventory-controls { margin: 12px 0 0; }
 .tb-schedule-table tbody tr { cursor: pointer; }
 /* Words read from the left; numbers keep the table's right alignment. */
 .tb-types .phc-table :is(.col-group, .col-datasheet),
@@ -41,8 +42,7 @@
 /* The by-group table ends with the whole schedule's total, set apart as a total. */
 .tb-schedule-totals .tb-totals-table:last-child tbody tr:last-child td { border-top: 1px solid var(--line-strong);
   font-weight: 600; }
-/* Two columns of figures need no full pane: the group totals keep a readable width. */
-.tb-schedule-totals .tb-totals-table:last-child { max-width: 480px; }
+
 /* By type takes the full row and by group sits beneath, so neither table's last column falls out of view. */
 .tb-schedule-totals { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
 .tb-other-findings { margin: 0; padding: 0; list-style: none; }

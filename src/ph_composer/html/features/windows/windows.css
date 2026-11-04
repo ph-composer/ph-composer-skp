@@ -46,13 +46,13 @@
 .window-main { min-width:0; overflow:auto; padding:0 18px 18px; }
 .window-heading { min-height:94px; margin:0 -18px 0; padding:16px 20px; border-bottom:1px solid var(--line); flex-wrap:nowrap; gap:18px; }
 .window-identity { flex:1; min-width:220px; }
-.phc-workspace .window-title { flex:1; min-width:0; max-width:100%; min-height:28px; padding:0; border-color:transparent!important; background:transparent!important; font-size:20px; font-weight:600; line-height:1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; }
+.phc-workspace .window-title { flex:1; min-width:0; max-width:100%; min-height:28px; padding:0; border-color:transparent!important; background:transparent!important; font-size:17px; font-weight:600; line-height:1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; }
 .window-header-metrics { display:flex; align-items:stretch; flex-shrink:0; }
 .window-header-metric { display:flex; min-width:126px; flex-direction:column; gap:4px; padding:0 18px; }
 .window-header-metric + .window-header-metric { border-left:1px solid var(--line); }
 .window-header-metric small { color:var(--muted); font-size:var(--text-sm); }
 .window-title-editor { display:flex; flex:1; min-width:0; align-items:center; gap:4px; }
-.phc-workspace .window-title-input { flex:1; min-width:0; height:32px; min-height:32px; padding:0 6px; font-size:20px; font-weight:600; }
+.phc-workspace .window-title-input { flex:1; min-width:0; height:32px; min-height:32px; padding:0 6px; font-size:17px; font-weight:600; }
 .phc-workspace .window-title-editor .phc-icon-button { width:28px; height:28px; min-height:28px; padding:4px; border-color:transparent; background:transparent; color:var(--muted); }
 .window-header-metric strong { color:#1e2931; font-size:16px; font-weight:600; white-space:nowrap; font-variant-numeric:tabular-nums; }
 .window-type-actions { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:8px; max-width:330px; }
@@ -70,14 +70,13 @@
 .window-repair-dialog select { width:100%; min-width:0; }
 /* One outlined group per job, spaced apart; buttons inside a group drop their own border, and a pressed tool keeps
    its fill, so the active state still reads. */
-.window-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:8px 10px; min-height:50px; padding:9px 0; border-bottom:1px solid var(--line); }
+.window-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:8px 18px; min-height:50px; padding:9px 0; border-bottom:1px solid var(--line); }
 .window-tool-group { display:flex; align-items:center; gap:2px; padding:0; border:0; background:transparent; }
-/* Groups are told apart by a hairline between them, not a box around each. */
-.window-tool-group:not([hidden]) ~ .window-tool-group:not([hidden]) { padding-left:10px; border-left:1px solid var(--line); border-radius:0; }
+/* Groups are told apart by space, so a group that wraps to a new line starts flush, with no orphan rule. */
 .window-tool-group[hidden] { display:none; }
 .window-workspace .window-tool-group > button { border-color:transparent; }
 .window-selection-tools { margin-left:auto; }
-.window-tool-caption { padding:0 4px 0 6px; color:var(--muted); font-size:var(--text-sm); }
+.window-tool-caption { padding:0 6px 0 0; color:var(--muted); font-size:var(--text-sm); }
 .window-workspace .window-toolbar select { min-height:28px; }
 .window-drawing { overflow:auto; text-align:center; min-height:280px; padding:14px 0 6px; }
 .window-drawing svg { display:inline-block; vertical-align:top; font-size:12px; max-height:none; }
@@ -261,7 +260,7 @@
   .window-type-list { max-height:150px; overflow:auto; }
   .window-main { padding:8px; overflow:visible; }
   .window-workspace .window-heading { padding:12px; margin:-8px -8px 0; }
-  .window-workspace .window-title { font-size:18px; }
+  .window-workspace .window-title { font-size:var(--text-lg); }
   .window-tool-group { flex-wrap:wrap; }
   .window-install-body { grid-template-columns:minmax(0,1fr); }
   .window-element-table { overflow:auto; }
@@ -269,11 +268,11 @@
 }
 .window-install-edge-label { fill:#314e50; font-size:12px; font-weight:600; paint-order:stroke;
   stroke:#fff; stroke-width:4px; stroke-linejoin:round; pointer-events:none; }
-.window-product-workspace { display:flex; align-items:flex-start; gap:18px; min-width:0; }
+.window-product-workspace { display:flex; align-items:flex-start; gap:18px; min-width:0; min-height:calc(100vh - 190px); }
 .window-product-table { flex:1; min-width:0; }
 .window-product-select.is-drop-target { outline:2px solid var(--accent); background:#eef7f5; }
 @media (max-width:900px) {
-  .window-product-workspace { flex-direction:column; }
+  .window-product-workspace { flex-direction:column; min-height:0; }
   .window-product-table, .window-product-workspace > .library-sidebar-root { width:100%; box-sizing:border-box; }
 }
 .window-install-body { grid-template-columns:minmax(180px,1fr) minmax(180px,240px) 260px; }

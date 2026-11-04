@@ -82,7 +82,7 @@ PhComposerUI.define("icons", ["dom"], function (dom) {
   function svgIcon(name, size) {
     if (!has(name)) throw new Error("Unknown icon \"" + name + "\"");
     return '<svg width="' + size + '" height="' + size +
-      '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" ' +
+      '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" ' +
       'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + ICONS[name] + '</svg>';
   }
   function glyph(kind) {

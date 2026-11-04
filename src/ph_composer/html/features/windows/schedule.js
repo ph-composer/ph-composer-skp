@@ -199,7 +199,7 @@ function (request, snapshot, tables, faceWords, ui, units, fields) {
     var self = this;
     this.summary.textContent = this.enabled ? this.units.length + " Window" + (this.units.length === 1 ? "" : "s") :
       "Window occurrences are unavailable.";
-    tables.table(this.mount, this.units, { rows: this.rows(), expanded: this.expanded,
+    tables.table(this.mount, this.units, { rows: this.rows(), expanded: this.expanded, tree: true,
       columns: [["actions", "Actions"], ["hierarchy", "Hierarchy"], ["name", "Window Type / Unit"], ["count", "Count"],
         ["zone", "Zone"], ["host", "Host Face"],
         ["net_area", units.header("Net opaque host area", fields.AREA_M2, units.profile(fields.AREA_M2))],

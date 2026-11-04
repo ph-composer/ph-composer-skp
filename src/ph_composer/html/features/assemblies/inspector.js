@@ -45,7 +45,7 @@ PhComposerUI.define("features/assemblies/inspector", ["features/assemblies/edito
       if (!selected) {
         selection.appendChild(el("span", "muted assembly-selection-label", "Select a Layer-Segment"));
         var library = ui.button("Material Library", function () { self.sidebar.reveal(null); });
-        library.setAttribute("data-editor-local", "");
+        library.setAttribute("data-editor-local", ""); library.className = "assembly-library-link";
         selection.appendChild(library);
         return root;
       }

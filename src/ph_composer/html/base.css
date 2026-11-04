@@ -45,8 +45,10 @@
   --warning-border: #d8b45c;
   --error-surface: #fff0ed;
   --muted-strong: #46565e;
+  /* Glyph ink at rest: a step darker than secondary text, so thin outline icons keep their definition. */
+  --icon-ink: #3a4a51;
   --interaction-highlight-outline: #07536040;
-  --interaction-highlight-soft: #e5effb;
+  --interaction-highlight-soft: #e3eff1;
   /* The row hover wash, laid over a cell's own background. */
   --row-hover-wash: #0753600d;
   /* Opaque backing for sticky table columns (table.css). */
@@ -129,7 +131,7 @@ html { height: 100%; }
 .phc-workspace select {
   appearance: none; -webkit-appearance: none; padding-right: 28px;
   background-image: var(--choice-chevron, var(--choice-chevron-dark)); background-repeat: no-repeat;
-  background-position: right 8px center; background-size: 14px 14px;
+  background-position: right 8px center; background-size: 14px 14px; text-overflow: ellipsis;
 }
 .phc-workspace button { cursor: pointer; }
 .phc-workspace button:hover:enabled { background-color: var(--interaction-highlight-tint); border-color: var(--interaction-highlight-outline); }
@@ -162,7 +164,7 @@ html { height: 100%; }
   border-color: var(--interaction-highlight);
 }
 /* A primary that cannot run yet is the quiet disabled button: no washed-out teal. */
-.phc-workspace .primary:disabled { color: var(--muted-faint); background: var(--surface-alt); border-color: var(--line); }
+.phc-workspace .primary:disabled { color: var(--muted); background: var(--surface-alt); border-color: var(--line-strong); }
 .phc-app-header {
   display: flex;
   min-width: 0;
@@ -180,7 +182,7 @@ html { height: 100%; }
 .phc-workspace .phc-tabs button:disabled { color: var(--muted-faint); background: transparent; }
 /* Sub-tabs are a quieter second level: text tabs on one rule, the current one underlined in teal. */
 .phc-subtabs { display: flex; flex-wrap: wrap; gap: 4px 20px; padding: 0 var(--page-gutter); border-bottom: 1px solid var(--line); }
-.phc-workspace .phc-subtabs button { min-height: 38px; padding: 0 2px; border: 0; border-radius: 0; background: transparent;
+.phc-workspace .phc-subtabs button { min-height: 36px; padding: 0 2px; border: 0; border-radius: 0; background: transparent;
   color: var(--muted); font-weight: 500; }
 .phc-workspace .phc-subtabs button:hover:enabled { background: transparent; color: var(--ink); }
 .phc-workspace .phc-subtabs [aria-selected="true"],
@@ -237,16 +239,16 @@ html { height: 100%; }
 .phc-toolbar:empty { display: none; }
 .phc-workspace .phc-toolbar button { border-color: transparent; }
 .phc-toolbar-button { display: inline-flex; align-items: center; gap: 6px; }
-/* A choice between named states in a toolbar (a viewing side, a product kind) is the table's pill: compact,
-   neutral, with the shared inset chevron. */
-.phc-workspace select.phc-choice-pill { height: 28px; min-height: 28px; padding: 0 30px 0 12px; border: 0;
-  border-radius: var(--radius-pill); font-size: 12px; background-color: var(--category-fill, #edf1f2); }
+/* A choice between named states in a toolbar (a viewing side, a product kind) is a field, like every other
+   toolbar choice: chips are for values inside table cells. */
+.phc-workspace select.phc-choice-pill { height: var(--control-height); min-height: var(--control-height); padding: 0 28px 0 10px;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm); font-size: var(--text-md); background-color: #fff; }
 /* Native select arrows sit against the rounded edge regardless of padding. Keep the native control,
    but draw its chevron with a consistent inset across table, toolbar and Assembly pills. */
 .phc-workspace select.phc-enum-cell, .phc-workspace select.phc-choice-pill {
   appearance: none; -webkit-appearance: none;
   background-image: var(--choice-chevron, var(--choice-chevron-dark));
-  background-repeat: no-repeat; background-position: right 8px center; background-size: 16px 16px;
+  background-repeat: no-repeat; background-position: right 8px center; background-size: 14px 14px;
 }
 .phc-toolbar-button svg { flex: none; }
 .phc-footer {
@@ -308,7 +310,7 @@ html { height: 100%; }
   padding:5px;
   border-color:transparent;
   background-color:transparent;
-  color:var(--muted-strong);
+  color:var(--icon-ink);
 }
 .phc-workspace .phc-icon-button:hover:enabled, .phc-workspace .phc-help:hover:enabled {
   color:var(--ink); background-color:#0d2a300f; border-color:transparent; }
@@ -323,3 +325,6 @@ html { height: 100%; }
   border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg);
   transition: transform .12s; vertical-align: middle; }
 .phc-workspace details[open] > summary::before { transform: rotate(45deg); }
+/* A reason an action is blocked is a warning: its alert mark is amber wherever it stands. */
+.phc-workspace .phc-icon-button.phc-blocked-reason, .phc-workspace .phc-icon-button.phc-blocked-reason:hover:enabled {
+  color: var(--warning-ink); }

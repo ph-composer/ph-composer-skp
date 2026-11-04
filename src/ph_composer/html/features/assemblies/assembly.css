@@ -150,3 +150,5 @@ body.assembly-layer-dragging .assembly-hit-target { pointer-events: none; }
 .assembly-drag-ghost { position: fixed; z-index: 100; pointer-events: none; padding: 5px 9px; font-size: 12px;
   white-space: nowrap; background: #fff; border: 1px solid var(--drawing-highlight); border-radius: var(--radius-sm);
   box-shadow: 0 3px 14px #0003; }
+/* The way to the sidebar reads as a link-weight action beside the prompt, not a second boxed control. */
+.phc-workspace .assembly-library-link { border-color: transparent; background: transparent; color: var(--interaction-highlight); }

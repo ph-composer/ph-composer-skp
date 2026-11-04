@@ -41,8 +41,8 @@ PhComposerUI.define("support/page", ["dom", "overlay", "page_header"], function 
     this.menu.add("Reopen panel…", function () { self.confirmReopen(); });
     this.menu.add("Reset display preferences…", function () { self.confirmReset(); });
     this.menu.add("Clear diagnostic history…", function () { self.confirmClear(); }, { destructive: true });
-    this.header = header.pageHeader({ title: "Help & Diagnostics", actions: [this.save, this.menu.root],
-      primary: this.copy });
+    this.header = header.pageHeader({ title: "Help & Diagnostics", actions: [this.save], primary: this.copy,
+      menu: this.menu.root });
     this.root.appendChild(this.header.root);
     this.identity = el("p", "muted support-identity"); this.root.appendChild(this.identity);
 
