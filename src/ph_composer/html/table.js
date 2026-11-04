@@ -411,17 +411,36 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
   }
   /* options: rows, columns, value(row, field) and empty are required; `tree: true` styles top-level rows as
      group headings; see the callers for the other optional hooks. */
-  /* A heading reads from the same edge as its column's values: the first shown row's cell, or the field inside
-     it, decides. A screen keeps one alignment rule per column and the header follows it, never a second rule. */
-  function alignHeaders(cache) {
-    if (typeof window === "undefined" || !window.getComputedStyle) return;
+  /* Numbers read from the right; words and chips from the left. A column's own cells decide which it holds, so
+     a screen states no alignment and its heading always agrees with its values. */
+  var NUMBER = /^[\u2212+-]?\d[\d\s.,]*(\s*[^\d\s]{1,12})?$/;
+  var LEADING = { actions: true, hierarchy: true, name: true };
+  function columnKind(cells) {
+    var kind = null;
+    for (var index = 0; index < cells.length && index < 12; index += 1) {
+      var cell = cells[index];
+      if (cell.classList.contains("is-numeric")) return "number";
+      if (cell.querySelector("select, .phc-enum-pill, input:not([type=checkbox])")) return "text";
+      var text = (cell.textContent || "").trim();
+      if (!text || text === "\u2014" || text === "?") continue;
+      if (!NUMBER.test(text)) return "text";
+      kind = "number";
+    }
+    return kind || "number";
+  }
+  function alignColumns(cache) {
     cache.columns.forEach(function (column) {
-      var th = cache.headers[column[0]];
-      var cell = cache.body.querySelector("tr:not(.phc-group-row) > td.col-" + column[0]);
-      if (!th || !cell) return;
-      var source = cell.querySelector(".phc-cell-input:not(select)") || cell;
-      var align = window.getComputedStyle(source).textAlign;
-      th.classList.toggle("is-end", align === "right" || align === "end");
+      var field = column[0], th = cache.headers[field];
+      if (!th || LEADING[field]) return;
+      var cells = cache.body.querySelectorAll("tr:not(.phc-group-row) > td.col-" + field);
+      if (!cells.length) return;
+      var text = columnKind(cells) === "text";
+      th.classList.toggle("is-end", !text);
+      Array.prototype.forEach.call(cells, function (cell) {
+        cell.classList.toggle("is-start", text);
+        // A cell showing a chip lets the chip carry its state (a flag), not the whole cell.
+        cell.classList.toggle("has-chip", Boolean(cell.querySelector("select.phc-enum-cell, .phc-enum-pill")));
+      });
     });
   }
   function table(root, records, options) {
@@ -460,7 +479,7 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
     root.style.setProperty("--row-actions-width", (actionsVisible ? cache.actionsWidth : 0) + "px");
     paintTableWidth(cache);
     while (cache.body.children.length > position) cache.body.removeChild(cache.body.lastChild);
-    alignHeaders(cache);
+    alignColumns(cache);
     Object.keys(cache.rows).forEach(function (key) {
       if (!retained[key]) { delete cache.rows[key]; delete expanded[key]; }
     });

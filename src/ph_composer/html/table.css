@@ -11,7 +11,9 @@
 .phc-table th, .phc-table td { height: 34px; padding: 3px 8px; border-bottom: 1px solid #edf0f2; text-align: right; white-space: nowrap; }
 .phc-table th { position: sticky; top: 0; z-index: 3; background: var(--surface-alt); border-bottom-color: var(--line); border-right: 1px solid var(--line); color: var(--muted-strong); font-weight: 600; white-space: normal; height: 38px; }
 .live-panel .phc-table th { font-size: var(--text-sm); }
-.phc-table td { background: #fff; }
+/* Only the sticky identity cells are opaque, so the scroller's edge shade shows through the rest. */
+.phc-table td { background: transparent; }
+.phc-table td.col-actions, .phc-table td.col-hierarchy, .phc-table td.col-name { background-color: #fff; }
 .phc-table .col-hierarchy { width: var(--col-hierarchy-width); text-align: left; }
 .phc-table .col-name { width: var(--col-name-width); text-align: left; }
 .phc-table .col-actions { width: var(--col-actions-width); min-width: var(--col-actions-width); text-align: left; left: 0; position: sticky; z-index: 2; }
@@ -28,14 +30,14 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 .phc-table button { padding: 2px 5px; min-height: 26px; }
 .phc-table .row-target { border: 0; background: transparent; }
 .phc-table .phc-row-marker { margin-left: 5px; color: var(--muted); font-size: 11px; }
-.phc-table .tier-1 .col-hierarchy { padding-left: 14px; }
-.phc-table .tier-2 .col-hierarchy { padding-left: 30px; color: var(--muted); }
-.phc-table .tier-3 .col-hierarchy { padding-left: 46px; color: var(--muted); }
+.phc-table .tier-1 .col-hierarchy { padding-left: 14px; color: var(--muted-strong); }
+.phc-table .tier-2 .col-hierarchy { padding-left: 30px; color: var(--muted-strong); }
+.phc-table .tier-3 .col-hierarchy { padding-left: 46px; color: var(--muted-strong); }
 /* A value the row does not set itself (an average, an inherited or implied rate), read only. */
 .phc-table td.is-muted { color: var(--muted); }
 .phc-table input { width: 100%; min-width: 0; min-height: 28px; padding: 3px 6px; }
 .phc-table td.phc-editable-cell { padding: 0; }
-.phc-table .phc-cell-input { min-height: 35px; padding: 6px 8px; border-color: transparent; border-radius: 0; background: transparent; box-shadow: none; }
+.phc-table .phc-cell-input { min-height: 35px; padding: 6px 8px; border-color: transparent; border-radius: 0; background: transparent; box-shadow: none; text-overflow: ellipsis; }
 /* Hover marks the whole row with a wash laid over whatever the cell already shows (white, a flag, a
    selection), so it never borrows a chip's colour or hides a state. The focused cell keeps its ring. */
 .phc-table tbody tr:hover > td { background-image: linear-gradient(var(--row-hover-wash), var(--row-hover-wash)); }
@@ -55,7 +57,8 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 }
 .phc-table .row-icon { width: 28px; height: 28px; min-height: 28px; padding: 5px; margin-right: 4px; border: 0; background: transparent; color: var(--muted-strong); vertical-align: middle; }
 .phc-table .row-icon svg { display: block; }
-.phc-table .row-icon:disabled { opacity: .35; background: transparent; }
+/* An action the row cannot take keeps its slot but draws nothing, so the icons line up down the column. */
+.phc-table .row-icon:disabled { visibility: hidden; }
 .phc-table .row-delete:hover:enabled, .phc-table .row-delete:focus-visible { color: var(--red); background: var(--error-surface); }
 .phc-table .row-icon:last-child { margin-right: 0; }
 /* The hairline sits in the gap the icons already have, so a group costs the column no width. */
@@ -69,19 +72,21 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 /* A cell that still needs something from the user: amber, with the reason in its tooltip. A value not
    yet given reads "?". */
 .phc-table td.is-flagged { background: var(--warning-surface); color: var(--warning-ink); }
-/* The cell carries the flag; its chip goes clear so the amber shows once. */
-.phc-table td.is-flagged select.phc-enum-cell { background-color: transparent; color: var(--warning-ink); }
+/* A chip that still needs a value carries the amber itself, in the chip's own shape. */
+.phc-table td.is-flagged.has-chip { background: transparent; }
+.phc-table td.is-flagged select.phc-enum-cell { background-color: var(--warning-surface-alt); color: var(--warning-ink); }
 .phc-table .row-chevron[aria-expanded="true"] svg { transform: rotate(90deg); }
 .phc-inventory-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-right: auto; }
 .phc-view-control { display: flex; align-items: center; gap: 6px; color: var(--muted); }
 /* An enum cell is a pill with a chevron on every screen. A value with a colour of its own sets
    --category-fill on the cell, and --category-ink when that fill is dark; the rest take the neutral fill. */
-.phc-table select.phc-enum-cell { width: calc(100% - 8px); height: 24px; min-height: 24px; margin: 0 4px;
+/* A chip is as wide as its longest choice, never a bar across the column. */
+.phc-table select.phc-enum-cell { width: auto; min-width: 72px; max-width: calc(100% - 8px); height: 24px; min-height: 24px; margin: 0 4px;
   padding: 0 28px 0 10px; border: 0; border-radius: var(--radius-pill); font: inherit; font-size: var(--text-sm);
   text-overflow: ellipsis; background-color: var(--category-fill, #edf1f2); color: var(--category-ink, inherit); }
 /* A value set elsewhere (a paired Surface): retain its category colour, with a lock instead of the editable
    chip's chevron. Keep the label at full contrast. */
-.phc-table .phc-enum-pill { display: inline-block; width: 100%; height: 24px; padding: 0 30px 0 10px; overflow: hidden;
+.phc-table .phc-enum-pill { display: inline-block; width: auto; min-width: 72px; max-width: 100%; height: 24px; padding: 0 30px 0 10px; overflow: hidden;
   border-radius: var(--radius-pill); font-size: var(--text-sm); line-height: 24px; text-overflow: ellipsis; vertical-align: middle; white-space: nowrap;
   cursor: default; background-color: var(--category-fill, #edf1f2);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23132a2b' stroke-opacity='.55' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5' y='10' width='14' height='11' rx='2'/%3E%3Cpath d='M8 10V6a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E");
@@ -110,13 +115,14 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
    stays at rest. Opacity, not visibility, keeps them reachable by keyboard. */
 /* Two visual rows inside each column header keep its label, actions, resize handle and sticky position
    together. Every column reserves both bands, even one without actions. Narrowed labels elide, not wrap. */
-.phc-table.has-header-action-row th { height: 62px; padding: 0; text-align: left; vertical-align: top; }
-/* A heading over numbers reads from the right, as its values do (table.js alignHeaders). */
+.phc-table.has-header-action-row th { height: 58px; padding: 0; text-align: left; vertical-align: top; }
+/* Numbers read from the right, words and chips from the left, and the heading with them (table.js alignColumns). */
 .phc-table th:not(.is-end) { text-align: left; }
+.phc-table td.is-start { text-align: left; }
 .phc-table.has-header-action-row th.is-end .phc-header-label-row,
 .phc-table.has-header-action-row th.is-end .phc-header-actions { justify-content: flex-end; }
 .phc-table.has-header-action-row th.has-header-actions { min-width: 72px; }
-.has-header-action-row .phc-header-label-row { display: flex; align-items: center; height: 34px; padding: 0 8px;
+.has-header-action-row .phc-header-label-row { display: flex; align-items: flex-end; height: 30px; padding: 0 8px 2px;
   box-sizing: border-box; }
 .has-header-action-row .phc-th-label { min-width: 0; overflow: hidden; text-overflow: ellipsis;
   white-space: nowrap; }
@@ -143,7 +149,7 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 .phc-column-filter { display: grid; gap: 2px; margin-top: 4px; padding-top: 6px; border-top: 1px solid var(--line); }
 .phc-column-filter-heading { padding: 0 6px 2px; color: var(--muted); font-size: 11px; }
 .phc-bubble-content label.phc-column-filter-value { flex-direction: row; align-items: center; gap: 8px; padding: 4px 6px;
-  border-radius: 4px; cursor: pointer; }
+  border-radius: var(--radius-sm); cursor: pointer; }
 .phc-column-filter-value:hover { background: var(--interaction-highlight-tint); }
 .phc-workspace .phc-bubble-content .phc-column-filter-clear { justify-content: flex-start; margin-top: 4px;
   border-color: transparent; background: transparent; color: var(--interaction-highlight); }
@@ -160,7 +166,7 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 .phc-table.reveals-row-actions .row-check:checked, .phc-table.reveals-row-actions .row-check:indeterminate,
 .phc-table.reveals-row-actions.has-checked .row-check { opacity: 1; }
 
-.phc-column-filter-swatch { flex: 0 0 12px; width: 12px; height: 12px; border: 1px solid #0003; border-radius: 3px; }
+.phc-column-filter-swatch { flex: 0 0 12px; width: 12px; height: 12px; border: 1px solid #0003; border-radius: var(--radius-sm); }
 
 /* Visibility and the optional secondary action have independent click targets. */
 .phc-column-value-row { display: flex; align-items: center; gap: 4px; }
@@ -172,3 +178,10 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 /* A table with no rows says so once, centred in the space the rows would take. */
 .phc-empty { margin: 0; padding: 32px 16px; color: var(--muted); text-align: center; line-height: 1.5; }
 .phc-empty:empty { display: none; }
+
+/* A table wider than its pane shades the edge it continues past; the shade lifts once scrolled to the end. */
+.phc-inventory-table, .phc-table-mount, .tb-schedule-table, .tb-totals-table {
+  background-color: #fff;
+  background-image: linear-gradient(to left, #fff 40%, #fff0), linear-gradient(to left, #10242c1c, #10242c00);
+  background-position: right center, right center; background-size: 40px 100%, 14px 100%;
+  background-repeat: no-repeat; background-attachment: local, scroll; }

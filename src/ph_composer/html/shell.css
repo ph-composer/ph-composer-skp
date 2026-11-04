@@ -42,7 +42,7 @@
 .live-panel .phc-export-blocked-report { margin: 16px 0; }
 .live-panel .phc-export-blocked-report summary { cursor: pointer; }
 .live-panel .phc-export-blocked-report iframe { display: block; width: 100%; height: 480px; margin-top: 8px;
-  border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+  border: 1px solid var(--line); border-radius: var(--radius-md); background: #fff; }
 .live-panel .phc-export-readiness { margin: 4px 0 16px; font-weight: 600; }
 /* What still blocks the run reads as one amber line with its alert mark, the checklist under it. */
 .live-panel .phc-export-readiness.is-blocked { display: flex; align-items: center; gap: 8px; padding: 10px 12px;

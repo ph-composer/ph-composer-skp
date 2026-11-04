@@ -14,7 +14,7 @@
   --choice-chevron-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   /* One cool neutral ramp for every page: the panel, its dialogs and the two separate windows. */
   --muted: #5d6b73;
-  --muted-faint: #8a969c;
+  --muted-faint: #7b878e;
   --paper: #fff;
   --card: #fff;
   --line: #e1e6e9;
@@ -36,7 +36,7 @@
   --radius-lg: 10px;
   --radius-pill: 999px;
   --control-height: 30px;
-  --shadow-float: 0 10px 30px #10242c1f, 0 1px 3px #10242c14;
+  --shadow-float: 0 6px 20px #10242c1a, 0 1px 2px #10242c14;
   /* Semantic roles that repeat across the screens. */
   --warning-ink: #785400;
   --warning-surface: #fff0c2;
@@ -161,7 +161,8 @@ html { height: 100%; }
   background: var(--interaction-highlight);
   border-color: var(--interaction-highlight);
 }
-.phc-workspace .primary:disabled { color: #fff; background: var(--accent); border-color: var(--accent); opacity: .4; }
+/* A primary that cannot run yet is the quiet disabled button: no washed-out teal. */
+.phc-workspace .primary:disabled { color: var(--muted-faint); background: var(--surface-alt); border-color: var(--line); }
 .phc-app-header {
   display: flex;
   min-width: 0;
@@ -197,7 +198,7 @@ html { height: 100%; }
 .phc-editable-cell .cell-error {
   position: absolute; z-index: 8; top: 100%; left: 0; padding: 6px 10px;
   background: var(--error-surface); color: var(--red); border: 1px solid var(--red);
-  border-radius: 4px; white-space: normal; min-width: 180px; max-width: 280px; visibility: hidden;
+  border-radius: var(--radius-sm); white-space: normal; min-width: 180px; max-width: 280px; visibility: hidden;
 }
 .phc-editable-cell:hover .cell-error, .phc-editable-cell:focus-within .cell-error { visibility: visible; }
 /* A cell showing its error sits above later rows, whose sticky cells would otherwise cover the bubble,
@@ -212,14 +213,18 @@ html { height: 100%; }
 .phc-table td.inventory-selected { background: var(--interaction-highlight-tint); }
 .phc-table td.inventory-selected .phc-cell-input { box-shadow: inset 0 0 0 1px var(--interaction-highlight); }
 .phc-unit-toggle { display: flex; flex: 0 0 auto; align-items: center; align-self: center; margin: 0 16px 0 8px; }
-.phc-workspace .phc-unit-toggle button { min-width: 34px; min-height: 26px; padding: 2px 8px; border-radius: 0; }
-.phc-workspace .phc-unit-toggle button:first-child { border-radius: 4px 0 0 4px; }
-.phc-workspace .phc-unit-toggle button:last-child { margin-left: -1px; border-radius: 0 4px 4px 0; }
-.phc-workspace .phc-unit-toggle button[aria-pressed="true"] {
+.phc-workspace .phc-unit-toggle button { min-width: 36px; min-height: 28px; padding: 2px 8px; border-radius: 0; color: var(--muted-strong); }
+.phc-workspace .phc-unit-toggle button:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.phc-workspace .phc-unit-toggle button:last-child { margin-left: -1px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+/* The current unit system is a setting, so it reads as the chosen setting: teal tint and teal text. Solid
+   teal stays with navigation and the primary action. */
+.phc-workspace .phc-unit-toggle button[aria-pressed="true"], .phc-workspace .phc-unit-toggle button[aria-pressed="true"]:hover:enabled {
   position: relative;
-  color: #fff;
-  border-color: var(--accent);
-  background: var(--accent);
+  z-index: 1;
+  color: var(--interaction-highlight);
+  border-color: var(--interaction-highlight);
+  background: var(--interaction-highlight-tint);
+  font-weight: 600;
 }
 /* The page header (page_header.js): title, muted count, then the actions at the right. */
 .phc-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; min-height: 60px; padding: 14px 0 10px; }
@@ -235,7 +240,7 @@ html { height: 100%; }
 /* A choice between named states in a toolbar (a viewing side, a product kind) is the table's pill: compact,
    neutral, with the shared inset chevron. */
 .phc-workspace select.phc-choice-pill { height: 28px; min-height: 28px; padding: 0 30px 0 12px; border: 0;
-  border-radius: 14px; font-size: 12px; background-color: var(--category-fill, #edf1f2); }
+  border-radius: var(--radius-pill); font-size: 12px; background-color: var(--category-fill, #edf1f2); }
 /* Native select arrows sit against the rounded edge regardless of padding. Keep the native control,
    but draw its chevron with a consistent inset across table, toolbar and Assembly pills. */
 .phc-workspace select.phc-enum-cell, .phc-workspace select.phc-choice-pill {
@@ -271,9 +276,9 @@ html { height: 100%; }
   gap: 4px 6px;
   max-width: 100%;
 }
-.phc-unit-field .phc-unit-label { color: var(--muted); font-size: 11px; white-space: nowrap; }
+.phc-unit-field .phc-unit-label { color: var(--muted); font-size: var(--text-sm); white-space: nowrap; }
 .phc-unit-field .phc-unit-error { grid-column: 1 / -1; }
-.cell-error { display: block; color: #9c3028; font-size: 11px; white-space: normal; }
+.cell-error { display: block; color: #9c3028; font-size: var(--text-sm); white-space: normal; }
 /* An invalid entry keeps a red edge while it has focus and after it loses it. */
 .phc-workspace input[aria-invalid="true"],
 .phc-workspace input[aria-invalid="true"]:focus-visible { border-color: var(--red); outline-color: var(--red); }
@@ -310,3 +315,11 @@ html { height: 100%; }
 .phc-workspace .phc-icon-button:disabled { background-color:transparent; border-color:transparent; opacity:.45; }
 .phc-help svg { display:block; }
 .phc-icon-button svg { display:block; }
+
+/* A disclosure is the kit's chevron, turned when open, never the native triangle. */
+.phc-workspace summary { list-style: none; cursor: pointer; }
+.phc-workspace summary::-webkit-details-marker { display: none; }
+.phc-workspace summary::before { content: ""; display: inline-block; width: 5px; height: 5px; margin: 0 10px 2px 2px;
+  border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg);
+  transition: transform .12s; vertical-align: middle; }
+.phc-workspace details[open] > summary::before { transform: rotate(45deg); }

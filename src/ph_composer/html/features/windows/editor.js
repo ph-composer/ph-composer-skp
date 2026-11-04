@@ -99,7 +99,7 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
     var self = this;
     this.main = el("div", "window-main"); this.layout.appendChild(this.main);
     // Shown in the Builder's place while there is no Window Type to build.
-    this.emptyPrompt = el("p", "muted window-empty-prompt",
+    this.emptyPrompt = el("p", "phc-empty window-empty-prompt",
       "No Window Types yet. Choose + in the Window Types list."); this.layout.appendChild(this.emptyPrompt);
     this.heading = el("div", "window-heading"); this.main.appendChild(this.heading);
     this.identity = el("div", "window-identity"); this.heading.appendChild(this.identity);
@@ -169,10 +169,9 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
     this.railStrip.setAttribute("aria-label", "Expand Window Types sidebar");
       this.railStrip.setAttribute("aria-expanded", "false"); this.rail.appendChild(this.railStrip);
     this.railContent = el("div", "window-rail-content"); this.rail.appendChild(this.railContent);
-    var railHeader = el("div", "window-rail-header"); railHeader.appendChild(el("strong", "", "Window Types"));
+    // The page title names the list, so the rail opens straight on its tools, the collapse control at their end.
     this.railCollapse = ui.iconButton("Collapse Window Types sidebar", "sidebar", function () { self.toggleRail(); });
-    this.railCollapse.setAttribute("aria-expanded", "true"); railHeader.appendChild(this.railCollapse);
-      this.railContent.appendChild(railHeader);
+    this.railCollapse.setAttribute("aria-expanded", "true"); this.railCollapse.classList.add("window-rail-collapse");
     var railTools = el("div", "window-rail-tools"); this.railContent.appendChild(railTools);
     this.chooser = el("select"); this.chooser.setAttribute("aria-label", "Active Window Type");
       this.chooser.addEventListener("change", function () { self.choose(self.chooser.value); });
@@ -185,6 +184,7 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
       "New display group", "", function (value) {
       if (self.groupNames.indexOf(value) < 0) self.groupNames.push(value); self.paint(); },
       "Group/order affect this view only."); }); railTools.appendChild(this.addGroup);
+    railTools.appendChild(this.railCollapse);
     this.list = el("div", "window-type-list"); this.railContent.appendChild(this.list);
   };
 
@@ -333,7 +333,7 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
     if (!record) { Object.keys(this.sidebars).forEach(function (kind) {
       self.sidebars[kind].root.hidden = true;
       self.sidebars[kind].refresh(self.state, {}, false);
-    }); this.audit.replaceChildren(el("p", "muted", this.enabled ? "Add a Window Type." :
+    }); this.audit.replaceChildren(el("p", "phc-empty", this.enabled ? "Add a Window Type." :
       "Window Type definitions are unavailable.")); return; }
     this.title.textContent = record.name;
     if (!this.viewSide.children.length) VIEW_SIDES.forEach(function (side) {

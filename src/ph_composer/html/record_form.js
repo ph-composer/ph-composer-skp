@@ -26,11 +26,12 @@ PhComposerUI.define("record_form", ["request", "workspace"], function (request, 
       });
     }
   }
-  /* Appends the status line and the confirmation row after the owner's fields, so what a blocked commit waits
-     for reads just above it. */
+  /* Appends the confirmation row after the owner's fields, its status line first in that row, so what a blocked
+     commit waits for reads beside it. */
   RecordForm.prototype.finish = function () {
-    this.form.appendChild(this.error);
-    this.form.appendChild(ui.actionRow(this.cancel, this.submitButton, Boolean(this.spec.destructive)));
+    var actions = ui.actionRow(this.cancel, this.submitButton, Boolean(this.spec.destructive));
+    actions.insertBefore(this.error, actions.firstChild);
+    this.form.appendChild(actions);
     this.root.appendChild(this.form);
   };
   RecordForm.prototype.show = function () {

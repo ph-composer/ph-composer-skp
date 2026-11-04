@@ -1,8 +1,9 @@
 /* The Thermal Bridges tab: the assign bar over the Types table and the Schedule's totals and findings. The
    tables, controls and bubbles are the kit's; these rules only place this screen's own parts. */
 /* One row that always shows, so a selection never moves the table under it; it wraps at narrow widths. */
-.tb-assign-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 12px 0;
-  padding: 8px 12px; border: 0; border-radius: var(--radius-md); background: var(--surface-alt); }
+/* A toolbar row like the one beneath it: no box, the count in bold leading the controls it applies to. */
+.tb-assign-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 12px 0 0;
+  padding: 0 0 12px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; }
 .tb-assign-count { flex: 0 0 auto; font-size: 13px; font-weight: 600; white-space: nowrap; }
 .tb-assign-bar select { width: auto; min-width: 12em; max-width: 100%; }
 .tb-assign-field { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
@@ -36,7 +37,12 @@
 .tb-finding-blocks { color: var(--warning-ink); font-weight: 600; }
 .tb-schedule-totals, .tb-schedule-others { margin-top: 18px; }
 .tb-schedule-totals[hidden], .tb-schedule-others[hidden] { display: none; }
-.tb-schedule-totals h2, .tb-schedule-others h2 { margin: 0 0 8px; font-size: 13px; }
+.tb-schedule-totals h2, .tb-schedule-others h2 { margin: 8px 0 4px; font-size: var(--text-lg); font-weight: 600; }
+/* The by-group table ends with the whole schedule's total, set apart as a total. */
+.tb-schedule-totals .tb-totals-table:last-child tbody tr:last-child td { border-top: 1px solid var(--line-strong);
+  font-weight: 600; }
+/* Two columns of figures need no full pane: the group totals keep a readable width. */
+.tb-schedule-totals .tb-totals-table:last-child { max-width: 480px; }
 /* By type takes the full row and by group sits beneath, so neither table's last column falls out of view. */
 .tb-schedule-totals { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
 .tb-other-findings { margin: 0; padding: 0; list-style: none; }

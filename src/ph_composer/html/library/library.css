@@ -11,6 +11,7 @@
   text-align: left;
 }
 .phc-inventory-table .phc-table select.phc-cell-input { width: 100%; font: inherit; }
+.phc-inventory-table .phc-table select.phc-cell-input.phc-enum-cell { width: auto; }
 .category-warm { --category-fill: #fff2cc; }
 .category-rose { --category-fill: #f6e3e3; }
 .category-wood { --category-fill: #efe3d1; }
@@ -47,7 +48,7 @@
 .phc-custom-color label { width: 100px; }
 .phc-custom-color label input { width: 100%; }
 .phc-color-square {
-  position: relative; height: 120px; border: 1px solid #8c989e; border-radius: 4px; cursor: crosshair; touch-action: none;
+  position: relative; height: 120px; border: 1px solid #8c989e; border-radius: var(--radius-sm); cursor: crosshair; touch-action: none;
   background-image: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, transparent);
 }
 .phc-color-square:focus-visible { outline: 2px solid var(--interaction-highlight); outline-offset: 2px; }
@@ -62,19 +63,22 @@
 }
 .phc-color-hue::-webkit-slider-thumb {
   appearance: none; -webkit-appearance: none; width: 10px; height: 20px; border: 2px solid white;
-  border-radius: 4px; background: transparent; box-shadow: 0 0 0 1px #53676e; cursor: ew-resize;
+  border-radius: var(--radius-sm); background: transparent; box-shadow: 0 0 0 1px #53676e; cursor: ew-resize;
 }
-.phc-color-preview { display: block; height: 36px; border: 1px solid #8c989e; border-radius: 4px; }
+.phc-color-preview { display: block; height: 36px; border: 1px solid #8c989e; border-radius: var(--radius-sm); }
 .phc-color-square[aria-disabled="true"] { cursor: default; opacity: .6; }
 
 .phc-inventory-surface .phc-inventory-controls, [data-pane="assemblies"] .phc-inventory-controls { margin: 12px 0; }
+/* A choice in the action bar is as wide as its words, so the bar keeps to one line where it can. */
+.phc-inventory-controls .phc-view-control select { max-width: 160px; }
 .phc-inventory-controls .phc-view-control { max-width: 100%; }
 .phc-inventory-controls .phc-view-control :is(input, select) { min-width: 0; max-width: 100%; }
 /* A tab's settings stay together at the end of the action bar and wrap to their own line as one group. */
 .phc-inventory-settings { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-left: auto;
   min-width: 0; max-width: 100%; }
 
-.library-sidebar-root { width: 264px; flex: 0 0 264px; min-width: 0; border-left: 1px solid var(--line); padding-left: 12px; }
+/* The sidebar is a full-height column: its rule runs to the foot of the pane, not the end of its content. */
+.library-sidebar-root { width: 248px; flex: 0 0 248px; min-width: 0; align-self: stretch; border-left: 1px solid var(--line); padding: 12px 0 0 14px; }
 .library-sidebar-root.is-collapsed { width: 42px; flex-basis: 42px; }
 /* The sidebar reads as a title, group captions and record rows. Each is a button for the keyboard, and only the
    kit's general button look is taken off, which needs the workspace prefix to outrank it. */
@@ -87,10 +91,10 @@
 .phc-workspace .library-sidebar-root.is-collapsed .library-sidebar-toggle { writing-mode: vertical-rl; padding: 12px 8px; }
 .library-sidebar-root.is-collapsed .library-sidebar-toggle::after { display: none; }
 .library-sidebar-content { display: flex; flex-direction: column; gap: 9px; }
-.library-sidebar-source { color: var(--muted); font-size: 11px; }
-.library-sidebar-content > input { width: 100%; box-sizing: border-box; font-size: 11px; }
+.library-sidebar-source { color: var(--muted); font-size: var(--text-sm); }
+.library-sidebar-content > input { width: 100%; box-sizing: border-box; }
 .library-sidebar-list { max-height: 70vh; overflow: auto; }
-.phc-workspace .library-sidebar-group-heading { width: 100%; text-align: left; padding: 10px 4px 5px; font-size: 10px;
+.phc-workspace .library-sidebar-group-heading { width: 100%; text-align: left; padding: 10px 4px 5px; font-size: var(--text-xs);
   font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border: 0;
   border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; }
 .phc-workspace .library-sidebar-row-button { width: 100%; display: flex; align-items: center; gap: 8px; text-align: left;
@@ -98,31 +102,34 @@
 .phc-workspace .library-sidebar-row-button:hover:enabled, .phc-workspace .library-sidebar-row-button:focus-visible {
   background: var(--interaction-highlight-tint); }
 .library-sidebar-swatch { display: inline-block; width: 14px; min-width: 14px; height: 14px; border: 1px solid var(--line);
-  border-radius: 3px; }
+  border-radius: var(--radius-sm); }
 .library-sidebar-name { overflow: hidden; text-overflow: ellipsis; }
 .library-sidebar-row-button > .phc-glyph { flex: none; margin-left: auto; color: var(--muted); }
 .library-sidebar-row-button > .phc-glyph svg { width: 14px; height: 14px; }
 .library-record-card { min-width: 220px; }
 .library-sidebar-row.is-dragging { opacity: .5; }
 .library-drag-ghost { position: fixed; z-index: 100; pointer-events: none; display: flex; gap: 8px; padding: 9px 12px;
-  background: white; border: 1px solid var(--drawing-highlight); border-radius: 4px; box-shadow: 0 3px 14px #0003; }
+  background: white; border: 1px solid var(--drawing-highlight); border-radius: var(--radius-sm); box-shadow: 0 3px 14px #0003; }
 .library-drag-label { display: flex; flex-direction: column; }
-.library-drag-hint { font-size: 10px; color: var(--muted); }
+.library-drag-hint { font-size: var(--text-xs); color: var(--muted); }
 /* The source browser remains reusable beside inventories and the Assembly Builder. */
-.library-material-workspace { display: flex; align-items: flex-start; gap: 18px; min-width: 0; }
+/* The workspace fills the pane, so the sidebar beside the table keeps its rule to the foot of the panel. */
+.library-material-workspace { display: flex; align-items: flex-start; gap: 18px; min-width: 0;
+  min-height: calc(100vh - 190px); }
 .library-material-table { flex: 1; min-width: 0; }
 .library-sidebar-source { width: 100%; box-sizing: border-box; }
 .library-source-controls, .library-setup-adds, .library-review-choices { display: flex; flex-wrap: wrap; gap: 8px; }
 .library-source-controls button { flex: 0 0 auto; font-size: var(--text-sm); white-space: nowrap; }
-.library-local-badge { margin-left: auto; color: var(--muted); font-size: 10px; white-space: nowrap; }
-.library-source-badge { display: block; padding: 2px 4px; font-size: 10px; color: var(--muted); border: 0;
+.library-local-badge { margin-left: auto; color: var(--muted); font-size: var(--text-xs); white-space: nowrap; }
+.library-source-badge { display: block; padding: 2px 4px; font-size: var(--text-xs); color: var(--muted); border: 0;
   background: transparent; text-align: left; }
 .library-source-badge:disabled { opacity: 1; }
 .library-source-review { width: min(600px, calc(100vw - 32px)); }
 .library-source-comparison { display: flex; flex-direction: column; gap: 8px; margin: 14px 0; max-height: 50vh;
   overflow: auto; overflow-wrap: anywhere; }
 .library-source-review > select { width: 100%; }
-.library-setup-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 12px 0; }
+.library-setup-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0; min-height: 44px;
+  padding: 6px 0; border-bottom: 1px solid var(--line); }
 .library-setup-row span { overflow-wrap: anywhere; min-width: 0; }
 /* A hosted library: its label takes the room, then its state and the actions that fit it, wrapping when narrow. */
 .library-setup-connection { flex-wrap: wrap; gap: 8px; }
@@ -133,7 +140,7 @@
     border-top: 1px solid var(--line); padding: 10px 0 0; }
   .phc-workspace .library-sidebar-root.is-collapsed .library-sidebar-toggle { writing-mode: horizontal-tb; padding: 8px; }
 
-  .library-material-workspace { flex-direction: column; }
+  .library-material-workspace { flex-direction: column; min-height: 0; }
   .library-material-table, .library-material-workspace > .library-sidebar-root { width: 100%; box-sizing: border-box; }
   .library-source-review .phc-dialog-actions { flex-wrap: wrap; }
 }
@@ -150,7 +157,7 @@
 .phc-workspace .library-setup-route { display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
   padding: 12px 14px; text-align: left; white-space: normal; }
 .library-setup-route small { font-weight: 400; line-height: 1.4; }
-.library-setup-row.is-added { margin: 8px -8px; padding: 4px 8px; border-radius: 6px;
+.library-setup-row.is-added { margin: 8px -8px; padding: 4px 8px; border-radius: var(--radius-md);
   background: var(--interaction-highlight-tint); }
 .library-setup-success { margin: 8px 0 0; color: var(--interaction-highlight); }
 .library-setup-waiting { color: var(--muted); }
@@ -163,4 +170,8 @@
 .phc-workspace .library-setup-remove:hover:enabled { color: var(--red); background: var(--error-surface); }
 .library-sidebar-narrowing { display: flex; gap: 6px; margin: 6px 0 2px; }
 .library-sidebar-narrowing[hidden] { display: none; }
+/* Sidebar choices are fields, like the source select above them; chips are for values in tables. */
 .library-sidebar-narrowing select { flex: 1 1 0; min-width: 0; }
+.phc-workspace .library-sidebar-narrowing select.phc-choice-pill { height: var(--control-height); min-height: var(--control-height);
+  padding: 0 26px 0 10px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background-color: #fff;
+  font-size: var(--text-md); }

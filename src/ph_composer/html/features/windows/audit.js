@@ -22,13 +22,15 @@ PhComposerUI.define("features/windows/audit", ["units", "features/windows/editor
         "; no intermediate rounding. Missing terms withhold dependent totals."));
     // One row per Window Type, its two results in columns under one heading row; the terms open beneath it.
     var heading = el("div", "window-audit-columns");
-    ["Window Type", "Uw", "Installed U"].forEach(function (label) { heading.appendChild(el("span", "", label)); });
+    var unit = units.displayUnit(U_VALUE, units.profile(U_VALUE));
+    ["Window Type", "Uw " + unit, "Installed U " + unit].forEach(function (label) {
+      heading.appendChild(el("span", "", label)); });
     this.audit.appendChild(heading);
     this.entries.forEach(function (entry) {
       var calc = entry.calculation, group = el("details", "window-audit-type"), summary = el("summary");
       summary.appendChild(el("span", "window-audit-name", entry.record.name));
-      summary.appendChild(el("span", "window-audit-value", format(calc.uw_w_m2k, U_VALUE)));
-      summary.appendChild(el("span", "window-audit-value", format(calc.u_effective_w_m2k, U_VALUE)));
+      summary.appendChild(el("span", "window-audit-value", shared.bare(calc.uw_w_m2k, U_VALUE)));
+      summary.appendChild(el("span", "window-audit-value", shared.bare(calc.u_effective_w_m2k, U_VALUE)));
       group.appendChild(summary);
       group.appendChild(el("p", "", "Glazed gross area " + format(calc.area_m2, AREA) + " · Empty wall area " +
         format(calc.empty_area_m2, AREA)));

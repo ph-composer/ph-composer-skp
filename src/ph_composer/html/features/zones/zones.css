@@ -10,7 +10,9 @@
 /* The shown view's tools in the controls row: its help, then what it binds there (Spaces' range-edit tools). */
 .phc-overview .phc-view-tools { display: flex; align-items: center; gap: 8px; }
 .phc-overview .phc-view-tools:empty { display: none; }
-.phc-zone-setting { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 8px 0; }
+/* A setting reads as one row, its words at the left and its field at the right, in the bubble as anywhere. */
+.phc-zone-setting, .phc-bubble-content label.phc-zone-setting { display: flex; flex-direction: row; align-items: center;
+  justify-content: space-between; gap: 12px; margin: 4px 0; text-align: left; color: var(--ink); font-size: var(--text-md); }
 .phc-zone-setting input[type="number"] { width: 72px; }
 /* The table spans the pane and scrolls sideways at narrow widths with its identity columns (Actions,
    Hierarchy, Name) held at the left. The narrowest panel lets Hierarchy scroll and keeps Name beside
@@ -64,13 +66,13 @@
 .phc-zone-option-colour input[type="color"] { width: 28px; height: 28px; padding: 0; }
 .phc-zone-option-colour input[type="text"] { width: 78px; min-width: 0; font-family: monospace; }
 .phc-zone-option-palette { display: flex; gap: 4px; width: 100%; }
-.phc-zone-option-palette button { width: 16px; height: 16px; min-height: 16px; min-width: 0; padding: 0; border: 1px solid var(--line); border-radius: 3px; }
+.phc-zone-option-palette button { width: 16px; height: 16px; min-height: 16px; min-width: 0; padding: 0; border: 1px solid var(--line); border-radius: var(--radius-sm); }
 .phc-zone-option-palette button:focus-visible { outline: 2px solid var(--interaction-highlight); outline-offset: 2px; }
 .phc-zone-option-usage, .phc-zone-option-help { font-size: 12px; color: var(--muted); }
 .phc-zone-options-dialog .phc-zone-option-default { flex: 0 0 auto; flex-direction: row; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 12px 0; }
 .phc-zone-option-default select { min-width: 0; max-width: 55%; }
 .phc-zone-option-removal { grid-column: 1 / -1; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 10px;
-  border: 1px solid var(--line); border-radius: 4px; }
+  border: 1px solid var(--line); border-radius: var(--radius-sm); }
 .phc-zone-option-removal > span { width: 100%; }
 .phc-zone-option-removal select { min-width: 0; max-width: 100%; }
 .phc-zone-adoption-row { grid-template-columns: minmax(120px, 1fr) minmax(140px, 1fr); }
