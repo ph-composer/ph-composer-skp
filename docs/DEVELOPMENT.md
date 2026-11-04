@@ -352,7 +352,12 @@ make ui-preview                                  # http://127.0.0.1:8765/tools/u
 make ui-deps                                     # once: Playwright into ~/.cache/ph-composer-ui
 make ui-checks                                   # every check
 make ui-checks UI_CHECKS=tools/ui-preview/spaces_checks.cjs
+make ui-gallery                                  # screenshots of every screen for a design review
 ```
+
+`ui-checks` serves the preview itself on port 8765, or on a free port when the preview is already running there.
+`ui-gallery` captures every tab, subtab and key dialog at each panel size, as full-size images in
+`UI_GALLERY_OUT`; it asserts nothing.
 
 `ui-checks` finds Playwright in `UI_DEPS` (`~/.cache/ph-composer-ui`, outside the repository) or in
 `NODE_PATH` when that is set, and prints a skip line without it. A check of a panel screen measures the
