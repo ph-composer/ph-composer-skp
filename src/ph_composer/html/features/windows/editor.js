@@ -107,7 +107,9 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
     this.title.className = "window-title"; this.identity.appendChild(this.title);
     this.headerMetrics = el("div", "window-header-metrics"); this.heading.appendChild(this.headerMetrics);
     function metric(label) {
-      var root = el("div", "window-header-metric"), caption = el("small", "", label), value = el("strong", "", "—");
+      // PH names take their subscripts: "Uw,installed" reads U with the subscript "w,installed".
+      var root = el("div", "window-header-metric"), caption = el("small"), value = el("strong", "", "—");
+      caption.appendChild(el("span", "", label.charAt(0))); caption.appendChild(el("sub", "", label.slice(1)));
       value.unit = el("span", "window-metric-unit"); caption.appendChild(value.unit);
       root.appendChild(caption); root.appendChild(value); self.headerMetrics.appendChild(root); return value;
     }

@@ -44,7 +44,7 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
     level: { mode: "ph_composer.zones.by_level" } };
   var ZONE_SORTED = ["name", "building_segment", "level", "ground_depth_mm"];
   var ZONE_FILTERED = { building_segment: true, level: true };
-  var ZONE_WIDTHS = { name: 142, building_segment: 136, level: 84, ground_depth_mm: 128 };
+  var ZONE_WIDTHS = { name: 142, building_segment: 136, level: 112, ground_depth_mm: 128 };
   // Listed while no view is: the Zone rows alone, with nothing beneath them.
   var NO_VIEW = { id: "", label: "Zones" };
 

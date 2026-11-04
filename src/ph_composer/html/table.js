@@ -492,7 +492,7 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
     // A narrow panel packs the icons closer (table.css), so record names keep more of the width.
     var slot = typeof window !== "undefined" && window.innerWidth <= 500 ? 26 : 30;
     cache.actionsWidth = Math.max(16 + actionCount * slot + (options.actionsCell ? 40 : 0) + (options.check ? 28 : 0),
-      checkOnly ? 44 : 80);
+      checkOnly ? 44 : options.check ? 108 : 80);
     cache.node.classList.toggle("has-check-only-actions", checkOnly);
     if (cache.resizeHandles.actions) paintColumnWidth(cache, "actions");
     var actionsVisible = cache.headers.actions && !cache.headers.actions.hidden;

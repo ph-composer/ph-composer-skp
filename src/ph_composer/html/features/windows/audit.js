@@ -9,11 +9,13 @@ PhComposerUI.define("features/windows/audit", ["units", "features/windows/editor
   var methods = {};
   /* The method's symbols take their PH subscripts: "U_w" is set as U with a subscript w. */
   function subscripted(node, text) {
-    text.split(/([A-Za-z\u03c8]_[a-z]+)/).forEach(function (part) {
-      var symbol = /^([A-Za-z\u03c8])_([a-z]+)$/.exec(part);
-      if (!symbol) { if (part) node.appendChild(el("span", "", part)); return; }
-      node.appendChild(el("span", "", symbol[1])); node.appendChild(el("sub", "", symbol[2]));
+    var buffer = "";
+    text.split(/([A-Za-z\u03c8]_[a-z,]+)/).forEach(function (part) {
+      var symbol = /^([A-Za-z\u03c8])_([a-z,]+)$/.exec(part);
+      if (!symbol) { buffer += part; return; }
+      node.appendChild(el("span", "", buffer + symbol[1])); node.appendChild(el("sub", "", symbol[2])); buffer = "";
     });
+    if (buffer) node.appendChild(el("span", "", buffer));
     return node;
   }
 
@@ -31,8 +33,8 @@ PhComposerUI.define("features/windows/audit", ["units", "features/windows/editor
     // One row per Window Type, its two results in columns under one heading row; the terms open beneath it.
     var heading = el("div", "window-audit-columns");
     var unit = units.displayUnit(U_VALUE, units.profile(U_VALUE));
-    ["Window Type", "Uw " + unit, "Installed U " + unit].forEach(function (label) {
-      heading.appendChild(el("span", "", label)); });
+    ["Window Type", "U_w " + unit, "Installed U_w " + unit].forEach(function (label) {
+      heading.appendChild(subscripted(el("span"), label)); });
     var list = el("div", "window-audit-list"); list.appendChild(heading); this.audit.appendChild(list);
     this.entries.forEach(function (entry) {
       var calc = entry.calculation, group = el("details", "window-audit-type"), summary = el("summary");

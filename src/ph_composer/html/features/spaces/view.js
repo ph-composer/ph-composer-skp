@@ -364,7 +364,7 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
       ["net_area_factor", "Net area factor"]],
     sorted: SORTED,
     // Four tree levels, each indented, with a chevron and a finding marker, need a wider Hierarchy column.
-    widths: { hierarchy: 168, number: 64, floor_area_m2: 104, weighting_factor: 112, weighted_area_m2: 116,
+    widths: { hierarchy: 124, number: 64, floor_area_m2: 104, weighting_factor: 132, weighted_area_m2: 132,
       height_m: 84,
       net_volume_m3: 112, v_sup_m3h: 104, v_eta_m3h: 104, v_tran_m3h: 112, net_area_factor: 112 },
     create: create, consume: consume,

@@ -91,7 +91,7 @@
 .library-sidebar-root.is-collapsed .library-sidebar-toggle::after { display: none; }
 .library-sidebar-content { display: flex; flex-direction: column; gap: 9px; }
 .library-sidebar-source { color: var(--muted); font-size: var(--text-sm); }
-.library-sidebar-content > input { width: 100%; box-sizing: border-box; }
+.library-sidebar-content > input { width: 100%; box-sizing: border-box; text-overflow: ellipsis; }
 .library-sidebar-list { max-height: 70vh; overflow: auto; }
 .phc-workspace .library-sidebar-group-heading { width: 100%; text-align: left; padding: 10px 4px 5px; font-size: var(--text-sm);
   font-weight: 600; color: var(--muted-strong); border: 0;
@@ -181,3 +181,7 @@
 .library-sidebar-narrowing select { flex: 1 1 0; min-width: 0; }
 /* The category names are longer than the sort names, so the category choice takes the larger share. */
 
+/* The export summary: counts first, then what will not travel, set apart as quieter notes. */
+.library-export-summary p { margin: 0 0 4px; font-variant-numeric: tabular-nums; }
+.library-export-summary p:not(.muted) + p.muted { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+.library-export-summary p.muted { color: var(--muted); font-size: var(--text-sm); }

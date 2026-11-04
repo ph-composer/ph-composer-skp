@@ -137,7 +137,7 @@ html { height: 100%; }
 .phc-workspace button:hover:enabled { background-color: var(--interaction-highlight-tint); border-color: var(--interaction-highlight-outline); }
 .phc-workspace :focus-visible { outline: 2px solid var(--interaction-highlight); outline-offset: -2px; }
 /* Disabled is quieter ink on the same surface, never a grey fill that reads as pressed. */
-.phc-workspace :disabled { color: var(--muted-faint); background-color: #fff; border-color: var(--line); cursor: not-allowed; }
+.phc-workspace :disabled { color: var(--muted-faint); background-color: var(--surface-alt); border-color: var(--line); cursor: not-allowed; }
 .phc-workspace .primary { color: white; background: var(--accent); border-color: var(--accent); }
 .phc-workspace button.primary:hover:enabled, .phc-workspace button.primary:focus:enabled,
 .phc-workspace button[aria-pressed="true"]:hover:enabled, .phc-workspace button[aria-pressed="true"]:focus:enabled {

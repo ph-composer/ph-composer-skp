@@ -77,8 +77,9 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 .phc-table td.is-flagged { background: var(--warning-surface); color: var(--warning-ink); }
 /* A chip that still needs a value carries the amber itself, in the chip's own shape. */
 .phc-table td.is-flagged.has-chip { background: transparent; }
-.phc-table td.is-flagged select.phc-enum-cell { background-color: var(--warning-surface); color: var(--warning-ink);
-  box-shadow: inset 0 0 0 1px var(--warning-border); font-weight: 600; }
+/* A value still to choose reads as an empty slot, not as another hue: white with a dashed amber edge. */
+.phc-table td.is-flagged select.phc-enum-cell { background-color: #fff; color: var(--warning-ink);
+  border: 1px dashed var(--warning-border); box-shadow: none; font-weight: 600; }
 .phc-table .row-chevron[aria-expanded="true"] svg { transform: rotate(90deg); }
 .phc-inventory-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-right: auto; }
 .phc-view-control { display: flex; align-items: center; gap: 6px; color: var(--muted); }
@@ -209,9 +210,9 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 .phc-inventory-controls .phc-pane-tools:empty { display: none; }
 /* Chip columns keep room for their longest value; the last column keeps a gutter inside the frame. */
 .phc-table th.col-face_type, .phc-table th.col-boundary_condition,
-.phc-table.has-header-action-row th.has-header-actions:is(.col-face_type, .col-boundary_condition) { min-width: 170px; }
+.phc-table.has-header-action-row th.has-header-actions:is(.col-face_type, .col-boundary_condition) { min-width: 150px; }
 .phc-table th.col-level, .phc-table th.col-building_segment,
-.phc-table.has-header-action-row th.has-header-actions:is(.col-level, .col-building_segment) { min-width: 140px; }
+.phc-table.has-header-action-row th.has-header-actions:is(.col-level, .col-building_segment) { min-width: 112px; }
 .phc-table td:last-child, .phc-table th:last-child .phc-header-label-row { padding-right: 12px; }
 /* In a narrow panel the row's tools scroll away with the table; the name stays as its identity. */
 @media (max-width: 500px) { .phc-table td.col-actions { position: static; }
@@ -222,3 +223,5 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 .phc-inventory-controls > .phc-grid-toolbar > .phc-grid-tool-group { order: 1; }
 .phc-inventory-controls > .phc-view-count, .phc-inventory-controls > .phc-view-count ~ *,
 .phc-inventory-controls > .phc-grid-toolbar > .phc-help { order: 2; }
+/* Row glyphs read at the weight of the text beside them. */
+.phc-table .row-icon svg { width: 17px; height: 17px; }
