@@ -16,12 +16,20 @@ PhComposerUI.define("features/windows/audit", ["units", "features/windows/editor
     var expanded = Array.prototype.map.call(this.audit.querySelectorAll("details"), function (node) {
       return node.open; });
     this.audit.replaceChildren(); this.audit.appendChild(el("h2", "", "Window Type calculation audit"));
-    this.audit.appendChild(el("p", "", "Uninstalled Uw = (Ag·Ug + ΣAf·Uf + ΣLg·ψg) / A. Installed effective U adds " +
+    this.audit.appendChild(el("p", "window-audit-method", "Uninstalled Uw = (Ag·Ug + ΣAf·Uf + ΣLg·ψg) / A. " +
+      "Installed effective U adds " +
       "ΣL·ψ-install / A. Coefficients are " + units.displayUnit(HEAT_LOSS, profile) +
         "; no intermediate rounding. Missing terms withhold dependent totals."));
+    // One row per Window Type, its two results in columns under one heading row; the terms open beneath it.
+    var heading = el("div", "window-audit-columns");
+    ["Window Type", "Uw", "Installed U"].forEach(function (label) { heading.appendChild(el("span", "", label)); });
+    this.audit.appendChild(heading);
     this.entries.forEach(function (entry) {
-      var calc = entry.calculation, group = el("details"); group.appendChild(el("summary", "", entry.record.name +
-        " · Uw " + format(calc.uw_w_m2k, U_VALUE) + " · Installed U " + format(calc.u_effective_w_m2k, U_VALUE)));
+      var calc = entry.calculation, group = el("details", "window-audit-type"), summary = el("summary");
+      summary.appendChild(el("span", "window-audit-name", entry.record.name));
+      summary.appendChild(el("span", "window-audit-value", format(calc.uw_w_m2k, U_VALUE)));
+      summary.appendChild(el("span", "window-audit-value", format(calc.u_effective_w_m2k, U_VALUE)));
+      group.appendChild(summary);
       group.appendChild(el("p", "", "Glazed gross area " + format(calc.area_m2, AREA) + " · Empty wall area " +
         format(calc.empty_area_m2, AREA)));
       (calc.elements || []).forEach(function (detail) {

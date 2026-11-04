@@ -26,3 +26,5 @@
 @media (max-width: 420px) {
   .support-problem { grid-template-columns: 1fr; gap: 2px; }
 }
+/* The disclosure reads as the panel's other quiet controls. */
+.support-details summary { color: var(--muted-strong); font-weight: 500; }

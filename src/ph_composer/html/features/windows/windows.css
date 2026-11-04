@@ -5,7 +5,7 @@
 .window-heading,.window-card-heading { display:flex; align-items:center; flex-wrap:wrap; gap:6px; }
 .window-toolbar button[aria-pressed=true] { background:var(--interaction-highlight); color:#fff; }
 .window-layout { display:grid; grid-template-columns:210px minmax(0,1fr); min-height:0; flex:1; }
-.window-rail { min-width:0; border-right:2px solid #bbc4ca; overflow:auto; }
+.window-rail { min-width:0; border-right:1px solid var(--line); overflow:auto; }
 .window-rail-content { min-height:100%; display:flex; flex-direction:column; }
 .window-rail-header { display:flex; align-items:center; gap:6px; padding:8px 9px 6px 12px; }
 .window-rail-header strong { flex:1; font-size:13px; letter-spacing:.01em; }
@@ -70,7 +70,9 @@
 /* One outlined group per job, spaced apart; buttons inside a group drop their own border, and a pressed tool keeps
    its fill, so the active state still reads. */
 .window-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:8px 10px; min-height:50px; padding:9px 0; border-bottom:1px solid var(--line); }
-.window-tool-group { display:flex; align-items:center; gap:2px; padding:2px; border:1px solid var(--line); border-radius:6px; background:#fff; }
+.window-tool-group { display:flex; align-items:center; gap:2px; padding:0; border:0; background:transparent; }
+/* Groups are told apart by a hairline between them, not a box around each. */
+.window-tool-group:not([hidden]) ~ .window-tool-group:not([hidden]) { padding-left:10px; border-left:1px solid var(--line); border-radius:0; }
 .window-tool-group[hidden] { display:none; }
 .window-workspace .window-tool-group > button { border-color:transparent; }
 .window-selection-tools { margin-left:auto; }
@@ -170,8 +172,32 @@
 .phc-workspace .window-picker-menu { width:240px; }
 .window-picker-menu .window-picker-field { gap:3px; margin:0 2px 8px; color:var(--muted); font-size:11px; }
 .window-workspace .window-picker-menu .window-picker-field + .phc-action-menu-item { margin-top:2px; }
-.window-audit { padding:16px; overflow:auto; }
-.window-audit details { margin:10px; }
+/* The audit: a title, the method as a caption, then a quiet grid of Window Types whose terms open beneath. */
+.window-audit { padding:16px 0 24px; overflow:auto; }
+.window-audit > h2 { margin:0 0 4px; font-size:var(--text-lg); }
+.window-audit-method { max-width:72ch; margin:0 0 16px; color:var(--muted); font-size:var(--text-sm); line-height:1.5; }
+.window-audit-columns, .window-audit-type > summary { display:grid; grid-template-columns:minmax(160px,1fr) 150px 150px;
+  align-items:center; column-gap:16px; padding:0 12px 0 32px; }
+.window-audit-columns { min-height:32px; border-bottom:1px solid var(--line); background:var(--surface-alt);
+  color:var(--muted-strong); font-size:var(--text-sm); font-weight:600; border-radius:var(--radius-md) var(--radius-md) 0 0; }
+.window-audit-columns > span:not(:first-child), .window-audit-value { text-align:right; font-variant-numeric:tabular-nums; }
+.window-audit-type { border-bottom:1px solid #edf0f2; }
+.window-audit-type > summary { position:relative; min-height:36px; cursor:pointer; list-style:none; }
+.window-audit-type > summary::-webkit-details-marker { display:none; }
+/* The disclosure is the kit's chevron, turned when open. */
+.window-audit-type > summary::before { content:""; position:absolute; left:14px; top:50%; width:5px; height:5px;
+  border-right:1.5px solid var(--muted-strong); border-bottom:1.5px solid var(--muted-strong);
+  transform:translateY(-60%) rotate(-45deg); transition:transform .12s; }
+.window-audit-type[open] > summary::before { transform:translateY(-75%) rotate(45deg); }
+.window-audit-type > summary:hover { background:var(--row-hover-wash); }
+.window-audit-name { font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.window-audit-type p { margin:0; padding:3px 12px 3px 32px; color:var(--muted-strong); font-size:var(--text-sm);
+  line-height:1.5; font-variant-numeric:tabular-nums; }
+.window-audit-type p:empty { display:none; }
+.window-audit-type details { margin:4px 0 8px 32px; padding:4px 0; border-left:2px solid var(--line); }
+.window-audit-type details > summary { padding:3px 12px; cursor:pointer; color:var(--ink); font-size:var(--text-sm);
+  font-weight:600; }
+.window-audit-type details p { padding-left:24px; }
 .window-layout.collapsed { grid-template-columns:36px minmax(0,1fr); }
 .phc-workspace .window-workspace .phc-bubble { position:fixed; z-index:1000; max-width:calc(100vw - 20px); max-height:calc(100vh - 30px); overflow:auto; }
 .window-workspace [hidden] { display:none!important; }

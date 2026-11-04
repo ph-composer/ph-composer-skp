@@ -373,7 +373,8 @@ PhComposerUI.define("overlay", ["dom", "icons"], function (dom, icons) {
     return bubble.root;
   }
   function helpButton(label, explanation) {
-    var help = button("?"); help.className = "phc-help";
+    var help = button(""); help.className = "phc-help";
+    help.innerHTML = icons.svgIcon("help", 16);
     dom.tooltip(help, explanation);
     help.setAttribute("aria-label", label + ": " + explanation);
     return help;

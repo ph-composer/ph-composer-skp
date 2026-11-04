@@ -52,7 +52,7 @@ check({ name: "windows", output: directory }, async ({ newPage, step }) => {
     assert.deepStrictEqual(await page.evaluate(() => ({ revision: previewHost.revision,
       actions: previewHost.sent.filter(message => message.type === "action.invoke").length })), toolStart);
     await page.screenshot({ path: path.join(directory, "schedule-" + width + ".png"), fullPage: true });
-    await pane.getByRole("tab", { name: "Window Types", exact: true }).click();
+    await pane.getByRole("tab", { name: "Types", exact: true }).click();
     await page.screenshot({ path: path.join(directory, "builder-" + width + ".png"), fullPage: true });
     // A full-page screenshot resizes the page, and the drawing repaints on resize: let that repaint land
     // before holding one of its elements.

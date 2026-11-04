@@ -24,10 +24,10 @@
 }
 /* The tree is the pane's work surface. The overview fits it to the height its pane leaves (overview.js
    `place`); this budget holds until then, and is the Window schedule's height. */
-.phc-table-mount { overflow: auto; max-height: max(240px, calc(100vh - 250px)); border: 1px solid var(--line); border-radius: 6px; }
+.phc-table-mount { overflow: auto; max-height: max(240px, calc(100vh - 250px)); border: 1px solid var(--line); border-radius: var(--radius-md); }
 .phc-workspace .phc-blocked-reason { color: var(--warning-ink); border-color: transparent; background: transparent; }
-.phc-overview .phc-row-marker { padding: 1px 4px; border-radius: 3px;
-  color: var(--warning-ink); background: var(--warning-surface); }
+.phc-overview .phc-row-marker { padding: 0 6px; border-radius: var(--radius-pill); font-size: var(--text-xs);
+  font-weight: 600; line-height: 18px; color: var(--warning-ink); background: var(--warning-surface); }
 .phc-overview .phc-row-marker.is-icon { display: inline-flex; vertical-align: middle; padding: 1px; }
 .phc-overview .phc-row-marker.is-icon svg { width: 14px; height: 14px; }
 /* The selection bar floats over the bottom of the table, positioned in the overview's root, so it never
@@ -39,7 +39,6 @@
 .phc-selection-field { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
 .phc-selection-field select { min-width: 120px; max-width: 200px; color: var(--ink); }
 .phc-selection-assembly { display: grid; gap: 4px; }
-.phc-empty { margin: 0; padding: 12px; color: var(--muted); }
 
 
 

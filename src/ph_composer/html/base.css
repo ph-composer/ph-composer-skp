@@ -12,14 +12,31 @@
   --ink: #132a2b;
   --choice-chevron-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23132a2b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   --choice-chevron-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  --muted: #5e6e6c;
-  --paper: #f4f1e9;
-  --card: #fffdf7;
-  --line: #d7d2c6;
-  --green: #0d735c;
-  --green-dark: #075140;
+  /* One cool neutral ramp for every page: the panel, its dialogs and the two separate windows. */
+  --muted: #5d6b73;
+  --muted-faint: #8a969c;
+  --paper: #fff;
+  --card: #fff;
+  --line: #e1e6e9;
+  --line-strong: #c9d2d7;
+  --surface-alt: #f6f8f9;
+  --green: #075360;
+  --green-dark: #064550;
   --amber: #a45d05;
   --red: #a43a2d;
+  /* The type scale: metadata, controls, body, section titles, page titles. */
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-md: 13px;
+  --text-lg: 15px;
+  --text-xl: 20px;
+  /* The radius scale: controls and swatches, cards and bars, dialogs and bubbles, pills. */
+  --radius-sm: 5px;
+  --radius-md: 7px;
+  --radius-lg: 10px;
+  --radius-pill: 999px;
+  --control-height: 30px;
+  --shadow-float: 0 10px 30px #10242c1f, 0 1px 3px #10242c14;
   /* Semantic roles that repeat across the screens. */
   --warning-ink: #785400;
   --warning-surface: #fff0c2;
@@ -27,7 +44,7 @@
   --warning-surface-alt: #ffe6a0;
   --warning-border: #d8b45c;
   --error-surface: #fff0ed;
-  --muted-strong: #53676e;
+  --muted-strong: #46565e;
   --interaction-highlight-outline: #07536040;
   --interaction-highlight-soft: #e5effb;
   /* The row hover wash, laid over a cell's own background. */
@@ -37,8 +54,6 @@
   /* The inset every pane's content shares with the tab row. */
   --page-gutter: 20px;
 }
-/* The live panel repaints the shell's paper and green for the workspace screens. */
-.live-panel { --paper: #fff; --card: #fff; --green: #075360; --green-dark: #075360; }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body {
@@ -49,24 +64,19 @@ body {
   font-size: 14px;
 }
 h1, h2, p { margin-top: 0; }
-h1 { margin-bottom: 0; font-size: 27px; letter-spacing: -0.03em; }
-h2 { margin-bottom: 0; font-size: 15px; }
-h3 { margin: 0 0 6px; font-size: 15px; }
+h1 { margin-bottom: 0; font-size: var(--text-xl); font-weight: 600; letter-spacing: -0.01em; }
+h2 { margin-bottom: 0; font-size: var(--text-lg); font-weight: 600; }
+h3 { margin: 0 0 6px; font-size: var(--text-md); font-weight: 600; }
 main { padding: 16px; }
-section {
-  margin-bottom: 12px;
-  padding: 17px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--card);
-}
+/* A section is a run of content under its heading, not a card: pages separate regions with space and rules. */
+section { margin-bottom: 20px; }
 section p { margin: 10px 0 14px; color: var(--muted); line-height: 1.45; }
-label { display: grid; gap: 4px; color: var(--muted); font-size: 11px; font-weight: 600; }
+label { display: grid; gap: 4px; color: var(--muted); font-size: var(--text-sm); font-weight: 500; }
 input {
   min-width: 0;
   padding: 7px;
-  border: 1px solid var(--line);
-  border-radius: 4px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
   color: var(--ink);
   background: #fff;
   font: inherit;
@@ -77,30 +87,23 @@ input:focus {
   outline-offset: -2px;
 }
 button {
-  width: 100%;
   padding: 9px 10px;
-  border: 1px solid #8d9996;
-  border-radius: 5px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
   color: var(--ink);
   background: #fff;
   font: inherit;
-  font-weight: 600;
   cursor: pointer;
 }
-button:hover, button:focus {
-  border-color: var(--interaction-highlight);
-  outline: 2px solid var(--interaction-highlight);
-  outline-offset: -2px;
-}
+button:hover { border-color: var(--interaction-highlight); }
+button:focus-visible { outline: 2px solid var(--interaction-highlight); outline-offset: -2px; }
 button.primary { border-color: var(--green); color: #fff; background: var(--green); }
-button.primary:hover, button.primary:focus { background: var(--interaction-highlight-hover); }
+button.primary:hover, button.primary:focus-visible { background: var(--interaction-highlight-hover); }
 footer { padding: 0 20px 18px; color: var(--muted); font-size: 11px; }
 /* The persistent panel shell. */
 html { height: 100%; }
 .phc-workspace {
   --accent: var(--interaction-highlight);
-  --line: #dce2e5;
-  --muted: #67747c;
   color: #1e2931;
   background: #fff;
   font: 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -112,17 +115,27 @@ html { height: 100%; }
 .phc-workspace * { box-sizing: border-box; }
 .phc-workspace button, .phc-workspace input, .phc-workspace select {
   font: inherit;
+  font-size: 13px;
+  font-weight: 400;
   color: inherit;
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   background: #fff;
-  border-radius: 4px;
-  min-height: 30px;
-  padding: 4px 9px;
+  border-radius: var(--radius-sm);
+  min-height: var(--control-height);
+  padding: 4px 10px;
+}
+.phc-workspace input::placeholder { color: var(--muted-faint); }
+/* Every choice reads the same: the field's own outline with the kit's chevron, never the native arrow. */
+.phc-workspace select {
+  appearance: none; -webkit-appearance: none; padding-right: 28px;
+  background-image: var(--choice-chevron, var(--choice-chevron-dark)); background-repeat: no-repeat;
+  background-position: right 8px center; background-size: 14px 14px;
 }
 .phc-workspace button { cursor: pointer; }
-.phc-workspace button:hover:enabled { background: var(--interaction-highlight-tint); }
+.phc-workspace button:hover:enabled { background-color: var(--interaction-highlight-tint); border-color: var(--interaction-highlight-outline); }
 .phc-workspace :focus-visible { outline: 2px solid var(--interaction-highlight); outline-offset: -2px; }
-.phc-workspace :disabled { color: #7b858c; background: #f5f7f8; cursor: not-allowed; }
+/* Disabled is quieter ink on the same surface, never a grey fill that reads as pressed. */
+.phc-workspace :disabled { color: var(--muted-faint); background-color: #fff; border-color: var(--line); cursor: not-allowed; }
 .phc-workspace .primary { color: white; background: var(--accent); border-color: var(--accent); }
 .phc-workspace button.primary:hover:enabled, .phc-workspace button.primary:focus:enabled,
 .phc-workspace button[aria-pressed="true"]:hover:enabled, .phc-workspace button[aria-pressed="true"]:focus:enabled {
@@ -148,27 +161,33 @@ html { height: 100%; }
   background: var(--interaction-highlight);
   border-color: var(--interaction-highlight);
 }
-.phc-workspace .primary:disabled { color: #7b858c; background: #e9edef; border-color: var(--line); }
+.phc-workspace .primary:disabled { color: #fff; background: var(--accent); border-color: var(--accent); opacity: .4; }
 .phc-app-header {
   display: flex;
   min-width: 0;
   flex-shrink: 0;
   align-items: stretch;
   border-bottom: 1px solid var(--line);
-  background: #f8f9fa;
+  background: var(--surface-alt);
 }
-.phc-tabs { display: flex; flex-wrap: wrap; min-width: 0; flex: 1 1 auto; gap: 2px 6px; padding: 10px var(--page-gutter); }
+.phc-tabs { display: flex; flex-wrap: wrap; min-width: 0; flex: 1 1 auto; gap: 4px; padding: 8px var(--page-gutter); }
 /* A tab is as wide as its label. A row too narrow for them all wraps, so no tab is clipped or off-screen. */
-.phc-tabs button { flex: none; padding: 9px 14px; border: 0; white-space: nowrap; }
-.phc-tabs [aria-pressed=true] { background: var(--accent); color: white; }
-.phc-subtabs { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px var(--page-gutter); border-bottom: 1px solid var(--line); }
-.phc-workspace .phc-subtabs button { background: transparent; color: var(--muted-strong); border-color: transparent; }
+.phc-workspace .phc-tabs button { flex: none; min-height: 32px; padding: 6px 12px; border: 0; border-radius: var(--radius-md);
+  color: var(--muted-strong); font-weight: 500; white-space: nowrap; }
+.phc-workspace .phc-tabs button:hover:enabled { color: var(--ink); background-color: #0d2a3010; }
+.phc-workspace .phc-tabs [aria-pressed=true], .phc-workspace .phc-tabs [aria-pressed=true]:hover:enabled { background: var(--accent); color: #fff; }
+.phc-workspace .phc-tabs button:disabled { color: var(--muted-faint); background: transparent; }
+/* Sub-tabs are a quieter second level: text tabs on one rule, the current one underlined in teal. */
+.phc-subtabs { display: flex; flex-wrap: wrap; gap: 4px 20px; padding: 0 var(--page-gutter); border-bottom: 1px solid var(--line); }
+.phc-workspace .phc-subtabs button { min-height: 38px; padding: 0 2px; border: 0; border-radius: 0; background: transparent;
+  color: var(--muted); font-weight: 500; }
+.phc-workspace .phc-subtabs button:hover:enabled { background: transparent; color: var(--ink); }
 .phc-workspace .phc-subtabs [aria-selected="true"],
 .phc-workspace .phc-subtabs [aria-selected="true"]:hover:enabled,
 .phc-workspace .phc-subtabs [aria-selected="true"]:focus:enabled {
   color: var(--interaction-highlight);
-  background: var(--interaction-highlight-tint);
-  border-color: var(--interaction-highlight);
+  background: transparent;
+  box-shadow: inset 0 -2px var(--interaction-highlight);
 }
 .phc-grid-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 .phc-grid-tool-group { display: flex; gap: 4px; }
@@ -203,13 +222,13 @@ html { height: 100%; }
   background: var(--accent);
 }
 /* The page header (page_header.js): title, muted count, then the actions at the right. */
-.phc-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; min-height: 52px; padding: 10px 0; }
-.phc-heading h1 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: 0; }
+.phc-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; min-height: 60px; padding: 14px 0 10px; }
+.phc-heading h1 { margin: 0; font-size: var(--text-xl); font-weight: 600; letter-spacing: -0.01em; }
 .phc-heading-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-left: auto; }
 /* A group of related tools reads as one control: a shared outline around buttons that drop their own. An
    empty group takes no room. */
 .phc-toolbar { display: inline-flex; align-items: center; gap: 2px; padding: 2px; border: 1px solid var(--line);
-  border-radius: 6px; background: #fff; }
+  border-radius: var(--radius-md); background: #fff; }
 .phc-toolbar:empty { display: none; }
 .phc-workspace .phc-toolbar button { border-color: transparent; }
 .phc-toolbar-button { display: inline-flex; align-items: center; gap: 6px; }
@@ -227,14 +246,15 @@ html { height: 100%; }
 .phc-toolbar-button svg { flex: none; }
 .phc-footer {
   display: flex;
+  align-items: baseline;
   flex-wrap: wrap;
   flex-shrink: 0;
   gap: 8px 24px;
   padding: 10px 16px;
   border-top: 1px solid var(--line);
   color: var(--muted);
-  background: #f8f9fa;
-  font-size: 12px;
+  background: var(--surface-alt);
+  font-size: var(--text-sm);
 }
 /* A quiet text link at the footer's end, so Help & Diagnostics is always one click away. */
 .phc-footer .phc-footer-link { width: auto; margin-left: auto; padding: 0; border: 0; background: none;
@@ -258,7 +278,7 @@ html { height: 100%; }
 .phc-workspace input[aria-invalid="true"],
 .phc-workspace input[aria-invalid="true"]:focus-visible { border-color: var(--red); outline-color: var(--red); }
 .phc-form h2 { font-size: 16px; margin: 0 0 12px; }
-.phc-workspace .empty { padding: 24px; color: var(--muted); }
+.phc-workspace .empty { padding: 32px 16px; color: var(--muted); text-align: center; }
 @media (max-width: 900px) {
   .phc-tabs { gap: 4px; }
   .phc-tabs button { padding: 9px 8px; }
@@ -272,14 +292,21 @@ html { height: 100%; }
   .phc-form { max-height: 220px; overflow: auto; }
 }
 .phc-glyph, .phc-glyph svg { display: block; flex: none; }
-/* The shared icon button. */
-.phc-workspace .phc-icon-button {
+/* The shared icon button and the help button: a glyph at rest, a soft wash on hover, a fill when pressed. */
+.phc-workspace .phc-icon-button, .phc-workspace .phc-help {
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  width:32px;
-  height:32px;
-  min-height:32px;
+  width:var(--control-height);
+  height:var(--control-height);
+  min-height:var(--control-height);
   padding:5px;
+  border-color:transparent;
+  background-color:transparent;
+  color:var(--muted-strong);
 }
+.phc-workspace .phc-icon-button:hover:enabled, .phc-workspace .phc-help:hover:enabled {
+  color:var(--ink); background-color:#0d2a300f; border-color:transparent; }
+.phc-workspace .phc-icon-button:disabled { background-color:transparent; border-color:transparent; opacity:.45; }
+.phc-help svg { display:block; }
 .phc-icon-button svg { display:block; }

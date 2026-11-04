@@ -26,10 +26,12 @@ PhComposerUI.define("record_form", ["request", "workspace"], function (request, 
       });
     }
   }
-  /* Appends the confirmation row and the status line after the owner's fields. */
+  /* Appends the status line and the confirmation row after the owner's fields, so what a blocked commit waits
+     for reads just above it. */
   RecordForm.prototype.finish = function () {
+    this.form.appendChild(this.error);
     this.form.appendChild(ui.actionRow(this.cancel, this.submitButton, Boolean(this.spec.destructive)));
-    this.root.appendChild(this.form); this.root.appendChild(this.error);
+    this.root.appendChild(this.form);
   };
   RecordForm.prototype.show = function () {
     if (this.spec.dialog === false) this.root.hidden = false; else this.root.openModal();

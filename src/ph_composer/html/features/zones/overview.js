@@ -612,6 +612,8 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
       parts.page = ui.pageHeader({ title: "Zones", actions: [parts.toolbar, parts.settings] });
       state.header = parts;
     }
+    // A toolbar no section has filled yet would draw as an empty outlined box.
+    state.header.toolbar.hidden = !state.header.toolbar.querySelector("button, input, select");
     var settings = call(active(state), "settings", [], null), holder = state.header.settings;
     if (holder.children[0] !== (settings || undefined) || holder.children.length > 1) {
       if (settings) holder.replaceChildren(settings); else holder.replaceChildren();
@@ -634,7 +636,7 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
     screenState.optionDialog.consume(state, zoneOptions.read(state));
     if (!root.querySelector(".phc-zone-views")) {
       root.className = "phc-overview";
-      root.replaceChildren(ui.element("div", "phc-view-tabs"), ui.element("div", "phc-heading-mount"),
+      root.replaceChildren(ui.element("div", "phc-heading-mount"), ui.element("div", "phc-view-tabs"),
         screenState.controls.root, ui.element("div", "phc-zone-views"));
       screenState.tabsSignature = null;
     }

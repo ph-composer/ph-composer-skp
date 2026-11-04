@@ -411,6 +411,19 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
   }
   /* options: rows, columns, value(row, field) and empty are required; `tree: true` styles top-level rows as
      group headings; see the callers for the other optional hooks. */
+  /* A heading reads from the same edge as its column's values: the first shown row's cell, or the field inside
+     it, decides. A screen keeps one alignment rule per column and the header follows it, never a second rule. */
+  function alignHeaders(cache) {
+    if (typeof window === "undefined" || !window.getComputedStyle) return;
+    cache.columns.forEach(function (column) {
+      var th = cache.headers[column[0]];
+      var cell = cache.body.querySelector("tr:not(.phc-group-row) > td.col-" + column[0]);
+      if (!th || !cell) return;
+      var source = cell.querySelector(".phc-cell-input:not(select)") || cell;
+      var align = window.getComputedStyle(source).textAlign;
+      th.classList.toggle("is-end", align === "right" || align === "end");
+    });
+  }
   function table(root, records, options) {
     var focused = document.activeElement, hadFocus = focused && root.contains(focused);
     var rows = options.rows, expanded = options.expanded || Object.create(null);
@@ -447,6 +460,7 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
     root.style.setProperty("--row-actions-width", (actionsVisible ? cache.actionsWidth : 0) + "px");
     paintTableWidth(cache);
     while (cache.body.children.length > position) cache.body.removeChild(cache.body.lastChild);
+    alignHeaders(cache);
     Object.keys(cache.rows).forEach(function (key) {
       if (!retained[key]) { delete cache.rows[key]; delete expanded[key]; }
     });

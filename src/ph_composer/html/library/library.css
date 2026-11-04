@@ -19,11 +19,13 @@
 .category-violet { --category-fill: #ede7f4; }
 .phc-category-bar { width: 4px; height: 18px; border-radius: 2px; background: var(--category-fill, #d7d2c6); }
 .phc-inventory-table .phc-table .phc-record-color {
-  display: block; width: 28px; height: 28px; min-height: 28px; margin: auto; border: 1px solid #8c989e;
+  display: block; width: 20px; height: 20px; min-height: 20px; margin: auto; padding: 0; border: 1px solid #10242c33;
+  border-radius: var(--radius-sm);
 }
-.phc-inventory-table .phc-table .phc-uses-count {
-  min-height: 22px; min-width: 22px; padding: 2px 5px; border-radius: 12px;
-  background: #eaf3f4; color: var(--interaction-highlight); border: 0;
+/* A count badge is neutral: a number to open, not a state. */
+.phc-workspace .phc-inventory-table .phc-table .phc-uses-count {
+  min-height: 20px; min-width: 20px; padding: 0 6px; border-radius: var(--radius-pill);
+  background: #eef2f3; color: var(--muted-strong); border: 0; font-size: var(--text-xs); font-weight: 600;
 }
 .phc-inventory-table .phc-bubble-anchor { display: inline-block; vertical-align: middle; }
 .phc-withheld { color: var(--amber); cursor: help; border-bottom: 1px dotted currentColor; padding: 3px; }
@@ -111,7 +113,7 @@
 .library-material-table { flex: 1; min-width: 0; }
 .library-sidebar-source { width: 100%; box-sizing: border-box; }
 .library-source-controls, .library-setup-adds, .library-review-choices { display: flex; flex-wrap: wrap; gap: 8px; }
-.library-source-controls button { flex: 1; font-size: 11px; white-space: nowrap; }
+.library-source-controls button { flex: 0 0 auto; font-size: var(--text-sm); white-space: nowrap; }
 .library-local-badge { margin-left: auto; color: var(--muted); font-size: 10px; white-space: nowrap; }
 .library-source-badge { display: block; padding: 2px 4px; font-size: 10px; color: var(--muted); border: 0;
   background: transparent; text-align: left; }

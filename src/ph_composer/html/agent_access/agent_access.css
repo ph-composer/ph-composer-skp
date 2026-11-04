@@ -31,3 +31,7 @@
 /* base.css sizes a bare button to its container; as in the panel (shell.css), buttons size to their label. */
 .agent-access button { width: auto; font-weight: 400; }
 .agent-access .agent-access-revoke { flex: none; color: var(--red); }
+/* A capability reads as its name in ink, then what it allows in quieter words beneath. */
+.agent-access-capability strong { color: var(--ink); font-size: var(--text-md); font-weight: 600; }
+.agent-access-capability small { color: var(--muted); font-size: var(--text-sm); font-weight: 400; line-height: 1.4; }
+.agent-access-capabilities legend { color: var(--ink); }

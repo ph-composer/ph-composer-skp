@@ -22,7 +22,7 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
     this.layout = el("div", "window-layout"); this.audit = el("div", "window-audit");
     this.scheduleSurface = el("div");
     this.tabs = new Subtabs({ label: "Window Types sections", state: this.page, stateKey: "surface",
-      tabs: [{ id: "builder", label: "Window Types", surface: this.layout },
+      tabs: [{ id: "builder", label: "Types", surface: this.layout },
         { id: "audit", label: "U-Values", surface: this.audit },
         { id: "schedule", label: "Schedule", surface: this.scheduleSurface }], guard: function () {
           return self.guard(); },
@@ -30,6 +30,9 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
         if (self.installEditor.root.hidden) self.notice.show(reason); else self.leaveInstalls(id);
       }, reselected: function (id) { if (!self.installEditor.root.hidden) self.leaveInstalls(id); },
       changed: function () { self.paint(); } });
+    // One page header over the peer sub-tabs, as every tab opens.
+    this.header = ui.pageHeader({ title: "Window Types" });
+    root.appendChild(this.header.root);
     root.appendChild(this.tabs.root); root.appendChild(this.layout); root.appendChild(this.audit);
     root.appendChild(this.scheduleSurface);
     this.installEditor = new InstallEditor(session, send, function (message) {
