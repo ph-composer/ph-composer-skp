@@ -26,6 +26,20 @@ function visibleRows(page) {
 }
 
 check({ name: "spaces", output }, async ({ newPage, step }) => {
+    step("a narrow view opens on identity and preserves a later horizontal pan");
+    const narrow = await newPage({ viewport: { width: 360, height: 520 } });
+    await open(narrow, "spaces");
+    const narrowTable = narrow.locator(".phc-zone-view:not([hidden]) .phc-table-mount");
+    assert(await narrowTable.evaluate(node => {
+      const frame = node.getBoundingClientRect(), name = node.querySelector("th.col-name").getBoundingClientRect();
+      return node.scrollLeft > 0 && name.left >= frame.left && name.right <= frame.right;
+    }), "Space names are in the initial viewport");
+    await narrow.screenshot({ path: path.join(output, "spaces-narrow-identity.png") });
+    await narrowTable.evaluate(node => { node.scrollLeft = 0; });
+    await narrow.getByRole("tab", { name: "Faces", exact: true }).click();
+    await narrow.getByRole("tab", { name: "Spaces", exact: true }).click();
+    assert.equal(await narrowTable.evaluate(node => node.scrollLeft), 0, "returning preserves the user's pan");
+    await narrow.close();
     const page = await newPage({ viewport: { width: 1280, height: 900 } });
     page.setDefaultTimeout(5000);
 

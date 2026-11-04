@@ -37,12 +37,18 @@ check({ name: "dimension", output }, async ({ newPage, step }) => {
       return document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2) === node;
     }), "the thin Layer input is not covered by its neighbor");
     await thinField.fill("invalid"); await thinField.press("Enter");
-    const thinError = thinField.locator("..").locator(".phc-unit-error");
+    const thinErrorBubble = editor.getByRole("dialog", { name: "Layer 1 thickness", exact: true });
+    const thinError = thinErrorBubble.locator(".phc-unit-error");
+    await thinErrorBubble.waitFor({ state: "visible" });
+    assert.equal(await thinErrorBubble.evaluate(node => node.classList.contains("assembly-dimension-error")), true);
     assert(await thinError.evaluate(node => {
       const box = node.getBoundingClientRect();
       return document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2) === node;
     }), "the inline validation message is visible above neighboring drawing targets");
     assert.equal((await thinField.boundingBox()).x, thinBox.x, "validation does not shift the input");
+    assert.equal((await thinField.boundingBox()).y, thinBox.y, "validation does not move the input vertically");
+    assert.equal(await thinField.evaluate(node => document.activeElement === node), true,
+      "detached validation leaves keyboard focus in the input");
     await page.screenshot({ path: path.join(output, "assembly-inline-thin-layer-invalid.png") });
     await thinField.press("Escape");
     await thinTrigger.click(); await thinField.fill("25");

@@ -69,7 +69,10 @@ test("ready asks for the first snapshot, which fills the status bar", function (
   p.receive("panel.snapshot", snapshot("session-a", 3, { edit_path: ["Level 1", ""] }));
 
   var footer = p.query("[data-section='footer']").children;
-  assert.deepStrictEqual(footer.map(function (node) { return node.textContent; }),
+  assert.deepStrictEqual(footer.map(function (node) {
+    return node.children.length ? node.children.map(function (child) { return child.textContent; }).join("") :
+      node.textContent;
+  }),
     ["PH-Composer 0.1.0-dev", "Editing: Level 1 / Unnamed group", "Help & Diagnostics"]);
   footer[2].listeners.click({});
   assert.deepStrictEqual(p.sent[p.sent.length - 1], { type: "panel.support", payload: { incident: null } });
@@ -564,13 +567,43 @@ test("a blocked run's report shows collapsed in the Export tab and stays as the 
       value: { result: { findings: [] }, report_html: html } } } } });
   var details = pane().querySelector("details");
   assert.ok(details, "the report is offered");
-  assert.strictEqual(details.querySelector("summary").textContent, "Report from the run that was not created");
+  assert.strictEqual(details.querySelector("summary").textContent, "Last export report");
   var frame = details.querySelector("iframe");
   assert.strictEqual(frame.srcdoc, html);
   assert.strictEqual(frame.getAttribute("sandbox"), "");
   details.open = true;
   p.receive("panel.snapshot", snapshot("session-a", 4));
   assert.strictEqual(pane().querySelector("details"), details, "a repaint keeps the same panel, open");
+});
+
+test("a new destination cancellation or refusal stays separate from the previous successful Export", function () {
+  ["cancelled", "refused"].forEach(function (status) {
+    var p = page();
+    p.receive("panel.snapshot", snapshot("session-a", 4));
+    enterExport(p);
+    var pane = function () { return p.query("[data-section='export']"); };
+    pane().querySelector("button").listeners.click({});
+    p.receive("export.result", { request_id: p.sent[0].payload.request_id, session: "session-a", outcome: {
+      status: "completed", value: { task_id: "previous", outcome: { status: "completed",
+        message: "HBJSON and Export report created.", value: { location: { label: "previous.hbjson" },
+          result: { canonical_model: { rooms: 2, faces: 12, surface_pairs: 1 },
+            findings: [{ message: "Previous run advisory.", code: "previous.advisory" }] } } } } } });
+    pane().querySelector("button").listeners.click({});
+    var current = status === "cancelled" ? "Export cancelled. Nothing was written." : "Runtime unavailable.";
+    p.receive("export.result", { request_id: p.sent[p.sent.length - 1].payload.request_id, session: "session-a",
+      outcome: { status: status, message: current, findings: [{ message: "Current request detail." }] } });
+    var history = pane().querySelector(".phc-export-last");
+    function text(node) { return node.textContent + node.children.map(text).join(""); }
+    var historyText = text(history);
+    assert.strictEqual(pane().querySelector(".phc-export-status").textContent, current);
+    assert.ok(historyText.includes("Last export: HBJSON and Export report created."));
+    assert.ok(historyText.includes("2 Rooms · 12 Faces · 1 Surface pair"));
+    assert.ok(historyText.includes("Written to previous.hbjson."));
+    assert.ok(historyText.includes("Previous run advisory."));
+    assert.ok(!historyText.includes(current));
+    assert.ok(!historyText.includes("Current request detail."));
+    assert.ok(text(pane()).includes("From this request"));
+  });
 });
 
 test("blocking preflight disables destination selection and preserves its complete findings", function () {
@@ -583,6 +616,30 @@ test("blocking preflight disables destination selection and preserves its comple
   assert.strictEqual(pane.querySelector(".phc-export-readiness").textContent, "Finish 1 thing before exporting.");
   pane.querySelector("button").listeners.click({});
   assert.deepStrictEqual(p.sent, []);
+});
+
+test("long advisory lists disclose independently of blockers and retain the user's choice within a Model", function () {
+  var p = page(), findings = [{ code: "construction.missing", message: "Assign an Assembly.", blocks_export: true }];
+  for (var i = 0; i < 6; i += 1) findings.push({ code: "material.optional", blocks_export: false,
+    message: "Review properties for Material " + (i + 1) + "." });
+  p.receive("panel.snapshot", snapshot("session-a", 1));
+  enterExport(p, findings);
+  var pane = p.query("[data-section='export']"), details = pane.querySelector(".phc-export-advisories");
+  assert.strictEqual(details.open, false);
+  assert.strictEqual(details.querySelector("summary").textContent, "Worth checking · 6 findings");
+  assert.strictEqual(pane.querySelector(".phc-export-finding").textContent, "Assign an Assembly.");
+  assert.strictEqual(details.querySelectorAll("li").length, 6, "no advisory is omitted");
+  details.open = true; details.listeners.toggle({});
+  function refresh(session, revision) {
+    p.receive("panel.snapshot", snapshot(session, revision));
+    var request = p.sent.filter(function (message) { return message.type === "export.preflight"; }).pop();
+    p.receive("export.result", { request_id: request.payload.request_id, session: session,
+      outcome: { status: "completed", value: { findings: findings, repairs: [] } } });
+  }
+  refresh("session-a", 2);
+  assert.strictEqual(p.query(".phc-export-advisories").open, true, "a refreshed check keeps the disclosure open");
+  refresh("session-b", 1);
+  assert.strictEqual(p.query(".phc-export-advisories").open, false, "another Model starts with its own view state");
 });
 
 test("Export states each cause once, without record ids, with one Locate and a way to its tab", function () {
@@ -631,6 +688,7 @@ test("Export lists what its line counts after an earlier export, keeps a typed n
     outcome: { status: "completed", value: { task_id: "task-old", stage: "finished", cancellable: false,
       outcome: { status: "refused", message: "Export blocked.", findings: [blocker] } } } });
   var pane = p.query("[data-section='export']"), groups = pane.querySelectorAll(".phc-export-group");
+  assert.strictEqual(pane.querySelector(".phc-export-status").textContent, "Last export: Export blocked.");
   assert.strictEqual(pane.querySelector(".phc-export-readiness").textContent, "Finish 1 thing before exporting.");
   assert.deepStrictEqual(groups.map(function (group) { return group.querySelector("h2").textContent; }),
     ["Before exporting"], "listed once, not again under the last export");
@@ -666,6 +724,10 @@ test("running Export remains visible until cancelled and a Model switch drops it
   var start = p.sent[0].payload.request_id;
   p.receive("export.result", { request_id: start, session: "session-a", outcome: { status: "completed",
     value: { task_id: "task-a", stage: "reading", cancellable: true, outcome: null } } });
+  assert.strictEqual(p.query("[data-section='export']").querySelector(".phc-export-readiness"), null,
+    "the active stage replaces Ready to export");
+  assert.strictEqual(p.query("[data-section='export']").querySelector(".phc-export-status").textContent,
+    "Reading Model…");
   p.panel.showTab("overview");
   assert.strictEqual(p.panel.state.ui.activeTab, "export");
   var buttons = p.query("[data-section='export']").querySelectorAll("button");

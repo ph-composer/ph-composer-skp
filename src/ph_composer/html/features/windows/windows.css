@@ -1,6 +1,8 @@
 /* Window drawing and product-card styles ported from the frozen desktop reference. */
 /* The workspace scrolls, so it carries the page gutter itself and its rules reach the panel edge. */
 .window-workspace { position:relative; display:flex; flex-direction:column; min-height:0; height:100%; overflow:auto; }
+/* Installs scrolls with the panel, so its sticky commit header follows that same scroller. */
+.window-workspace.is-installing { overflow:visible; }
 .live-panel section.window-workspace { margin:0 calc(-1 * var(--page-gutter)); padding:0 var(--page-gutter); }
 .window-heading,.window-card-heading { display:flex; align-items:center; flex-wrap:wrap; gap:6px; }
 .window-toolbar button[aria-pressed=true] { background:var(--interaction-highlight); color:#fff; }
@@ -318,8 +320,24 @@
 .window-product-workspace .phc-inventory-controls input { width: 150px; }
 /* Adding a Window Type is the rail's main action, so its glyph takes the interaction teal. */
 .phc-workspace .window-rail-tools .phc-icon-button[aria-label="Add Window Type"] { color: var(--interaction-highlight); }
-/* The Window Type tools are a plain icon run, like the drawing tools beneath them. */
+/* The wide Window Type tools are a plain icon run, like the drawing tools beneath them. */
 .phc-workspace .phc-toolbar.window-type-tools { border-color: transparent; padding: 0; }
+/* At the minimum panel size, identity and performance share the first row. The actions keep their own row,
+   leaving more of the elevation visible without shrinking the drawing tools or their hit targets. */
+@media (max-width:500px) {
+  .window-workspace .window-heading { display:grid; grid-template-columns:minmax(0,1fr) auto; padding:8px 12px; gap:8px 12px; }
+  .window-workspace .window-identity { min-width:0; }
+  .window-workspace .window-header-metric { min-width:0; width:84px; padding:0 8px; }
+  .window-workspace .window-header-metric:first-child { width:72px; padding-left:0; }
+  .window-workspace .window-header-metric small { font-size:var(--text-sm); }
+  .window-workspace .window-type-actions { grid-column:1 / -1; justify-content:flex-start; }
+  /* Lightly frame each job so a narrow run of glyphs still reads as distinct tool groups. */
+  .window-toolbar { column-gap:8px; }
+  .window-tool-group { gap:0; padding:1px; border:1px solid var(--line);
+    border-radius:var(--radius-md); background:var(--surface-alt); }
+  .phc-workspace .phc-toolbar.window-type-tools { padding:1px; border-color:var(--line);
+    background:var(--surface-alt); }
+}
 /* A Frame swatch is drawn as the elevation draws a frame: square corners, a 4 px band in the frame's colour,
    and hairlines on its outer edge and round the opening. */
 .library-sidebar-swatch.is-frame { border-width: 4px; border-radius: 1px; background: var(--surface);

@@ -85,6 +85,7 @@
   white-space: normal;
 }
 .phc-dialog {
+  --dialog-padding: 24px;
   box-sizing: border-box;
   width: 560px;
   max-width: calc(100vw - 32px);
@@ -92,13 +93,13 @@
   overflow: auto;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  padding: 24px;
+  padding: var(--dialog-padding);
   color: var(--ink);
   background: #fff;
   box-shadow: 0 16px 48px #10242c24, 0 2px 6px #10242c14;
 }
 .phc-dialog::backdrop { background: rgba(15, 23, 28, .18); }
-.phc-workspace .phc-dialog-close { position: absolute; top: 21px; right: 18px; width: 30px; height: 30px;
+.phc-workspace .phc-dialog-close { position: absolute; top: calc(var(--dialog-padding) - 3px); right: calc(var(--dialog-padding) - 6px); width: 30px; height: 30px;
   min-height: 30px; padding: 5px; border-color: transparent; background: transparent; color: var(--muted-strong); }
 .phc-blocked-reason-text { max-width: 280px; margin: 0; line-height: 1.45; }
 .phc-dialog h2 { margin: 0 32px 18px 0; font-size: var(--text-xl); font-weight: 600; }
@@ -119,7 +120,7 @@
   border: 1px solid var(--bubble-border);
   border-radius: var(--radius-lg);
   background: #fff;
-  color: #1e2931;
+  color: var(--ink);
   box-shadow: var(--shadow-float);
   text-align: left;
 }
@@ -182,7 +183,8 @@
 .phc-workspace .phc-action-menu { width: 230px; padding: 10px; }
 .phc-action-menu .phc-bubble-heading { margin: 0 0 6px; padding: 0 2px 6px; border-bottom: 1px solid var(--line); }
 .phc-action-menu .phc-bubble-content { gap: 2px; }
-.phc-action-menu > .phc-bubble-content { overflow: visible; }
+/* A clamped menu scrolls its own choices; otherwise its last actions escape the bubble and the window. */
+.phc-action-menu > .phc-bubble-content { overflow-y: auto; }
 .phc-action-menu .phc-bubble-anchor { display: block; }
 .phc-action-menu-item > span:not(.phc-glyph) {
   flex: 1;
@@ -221,6 +223,7 @@
 /* App-wide confirmation buttons: Cancel left, primary action right. */
 .phc-workspace .phc-dialog-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
   width: 100%;
@@ -232,6 +235,7 @@
   justify-content: center;
   gap: 7px;
   min-width: 90px;
+  max-width: 100%;
   flex: 0 0 auto;
 }
 .phc-workspace .phc-dialog-actions .primary { background: var(--accent); color: #fff; border-color: var(--accent); }
@@ -297,7 +301,7 @@
   color: var(--muted);
   font-size: 12px;
 }
-.phc-form-dialog input:not([type=checkbox]), .phc-form-dialog select { width: 100%; color: #1e2931; font-size: 13px; }
+.phc-form-dialog input:not([type=checkbox]), .phc-form-dialog select { width: 100%; color: var(--ink); font-size: var(--text-md); }
 /* A unit sits inside its field at the right, so every field in a form keeps the same width. */
 .phc-form-dialog .phc-unit-field { display: block; position: relative; width: 100%; }
 .phc-form-dialog .phc-unit-field input { padding-right: 78px; }
@@ -310,8 +314,13 @@
 /* The form's message sits above its footer, at the right where the blocked commit is. */
 .phc-form-dialog .cell-error { margin-top: 6px; color: #8f2f27; }
 /* The form's status shares the footer row, at its left; the actions keep the right. */
-.phc-workspace .phc-dialog-actions > .cell-error { flex: 1 1 auto; align-self: center; min-width: 0; margin: 0 8px 0 0; }
+.phc-workspace .phc-dialog-actions > .cell-error { flex: 1 1 180px; align-self: center; min-width: 0;
+  overflow-wrap: anywhere; margin: 0 8px 0 0; }
 .phc-workspace .phc-dialog-actions > .cell-error:empty { display: none; }
+/* In a narrow window the message gets its own line, keeping Cancel and the commit together beneath it. */
+@media (max-width: 600px) {
+  .phc-workspace .phc-dialog-actions > .cell-error { flex-basis: 100%; margin-right: 0; }
+}
 .phc-form-dialog > .cell-error { margin-top: 10px; color: #8f2f27; }
 .phc-form-dialog > .cell-error:empty { display: none; }
 
@@ -342,8 +351,8 @@
 .phc-recovery-row { display: flex; align-items: center; gap: 12px; }
 .phc-workspace .phc-recovery-row button { flex: none; width: auto; }
 /* A dialog taller than its window scrolls its body; the footer stays in view at the bottom edge. */
-.phc-workspace .phc-dialog .phc-dialog-actions { position: sticky; bottom: -24px; z-index: 2; margin: 8px 0 -24px;
-  padding: 12px 0 24px; background: #fff; }
+.phc-workspace .phc-dialog .phc-dialog-actions { position: sticky; bottom: calc(-1 * var(--dialog-padding)); z-index: 2;
+  margin: 8px 0 calc(-1 * var(--dialog-padding)); padding: 12px 0 var(--dialog-padding); background: var(--surface); }
 /* A toggle in a menu shows its state in a leading check slot, so a focused item never reads as the chosen one. */
 .phc-workspace .phc-action-menu .phc-action-menu-item.phc-setting-choice::before { content: ""; flex: 0 0 14px; width: 14px;
   height: 14px; background: transparent;

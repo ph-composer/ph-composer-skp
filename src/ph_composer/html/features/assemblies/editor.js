@@ -73,7 +73,8 @@ function (shared, header, inspector, layerDrag, stage, AssemblyForm, fields, for
     this.removal = ui.formDialog("", function () { self.removal.closeModal(); });
     this.root.appendChild(this.removal);
     this.root.addEventListener("keydown", function (event) {
-      if (event.defaultPrevented || event.key !== "Escape" || self.busy()) return;
+      if (event.defaultPrevented || event.key !== "Escape" || self.busy() ||
+        !self.removal.hidden || !self.color.root.hidden) return;
       var open = Object.keys(self.dimensions).filter(function (key) {
         return self.dimensions[key].inlineOpen;
       })[0];
@@ -158,11 +159,24 @@ function (shared, header, inspector, layerDrag, stage, AssemblyForm, fields, for
     entry.field.error.textContent = message;
     entry.field.error.hidden = false;
     entry.field.input.setAttribute("aria-invalid", "true");
+    if (!entry.inlineOpen || this.painting) return;
+    // The drawing scrollport must not clip the explanation. Keep the input in place and use the same
+    // detached, viewport-clamped bubble as the other drawing controls, without moving keyboard focus.
+    if (!entry.errorBubble) {
+      entry.errorBubble = new ui.Bubble(entry.field.input, entry.spec.label,
+        { detachedTrigger: true, ownTrigger: true });
+      entry.errorBubble.root.classList.add("assembly-dimension-error-anchor");
+      entry.errorBubble.panel.classList.add("assembly-dimension-error");
+      entry.errorBubble.content.appendChild(entry.field.error);
+      this.root.appendChild(entry.errorBubble.root);
+    }
+    entry.errorBubble.open(false);
   };
   Editor.prototype.endInlineDimension = function (key, focus) {
     var entry = this.dimensions[key];
     if (!entry || !entry.inlineControl) return;
     entry.inlineOpen = false;
+    if (entry.errorBubble) entry.errorBubble.close(false);
     entry.inlineControl.show(false, focus && !this.painting);
     if (focus && this.painting) this.inlineFocusKey = key;
   };
@@ -186,6 +200,7 @@ function (shared, header, inspector, layerDrag, stage, AssemblyForm, fields, for
         } });
       entry.field.input.setAttribute("data-builder-dimension", key);
       entry.field.input.addEventListener("input", function () {
+        if (entry.errorBubble) entry.errorBubble.close(false);
         if (!entry.expected) entry.expected = self.expected();
       });
       // UnitField owns text, parsing and unit context. The owner keeps it editing until host acceptance, so
@@ -374,10 +389,17 @@ function (shared, header, inspector, layerDrag, stage, AssemblyForm, fields, for
       this.inspector(record, materials, shared.selected(record, this.selection)), this.stage(record, materials));
     Object.keys(this.dimensions).forEach(function (key) {
       if (this.dimensions[key].live) return;
+      if (this.dimensions[key].errorBubble) {
+        this.dimensions[key].errorBubble.close(false); this.dimensions[key].errorBubble.root.remove();
+      }
       this.dimensions[key].field.dispose();
       delete this.dimensions[key];
     }, this);
     this.painting = false;
+    Object.keys(this.dimensions).forEach(function (key) {
+      var entry = this.dimensions[key];
+      if (entry.inlineOpen && !entry.field.error.hidden) this.dimensionError(entry, entry.field.error.textContent);
+    }, this);
     this.sidebar.refresh(state, { record: record, selection: this.selection },
       Boolean(snapshot.value(state, MATERIALS)));
     this.paintPending();
@@ -418,7 +440,10 @@ function (shared, header, inspector, layerDrag, stage, AssemblyForm, fields, for
     this.color.dispose();
     this.sidebar.dispose();
     this.removal.closeModal();
-    Object.keys(this.dimensions).forEach(function (key) { this.dimensions[key].field.dispose(); }, this);
+    Object.keys(this.dimensions).forEach(function (key) {
+      if (this.dimensions[key].errorBubble) this.dimensions[key].errorBubble.close(false);
+      this.dimensions[key].field.dispose();
+    }, this);
     ui.Bubble.closeActive(this.root);
   };
   Object.assign(Editor.prototype, header, inspector, stage);

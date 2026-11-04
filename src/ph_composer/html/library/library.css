@@ -132,6 +132,9 @@
 .library-source-review { width: min(600px, calc(100vw - 32px)); }
 .library-source-comparison { display: flex; flex-direction: column; gap: 8px; margin: 14px 0; max-height: 50vh;
   overflow: auto; overflow-wrap: anywhere; }
+.library-source-comparison .phc-property-row { align-items: flex-start; }
+.library-source-comparison .phc-property-value { min-width: 0; max-width: 68%; white-space: pre-line;
+  overflow-wrap: anywhere; text-align: right; }
 .library-source-review > select { width: 100%; }
 .library-setup-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0; min-height: 44px;
   padding: 6px 0; border-bottom: 1px solid var(--line); }

@@ -58,8 +58,8 @@ check({ name: "panel_policy", output }, async ({ newPage, step, expect }) => {
     status: "completed", value: { task_id: "task-1", outcome: { status: "refused", code: "export.blocked",
       message: "Export not created. Resolve the blocking findings.", findings: [],
       value: { result: { findings: [] }, report_html: REPORT } } } } });
-  await page.getByText("Report from the run that was not created").click();
-  const frame = page.frameLocator("iframe[title='Export report from the run that was not created']");
+  await page.getByText("Last export report").click();
+  const frame = page.frameLocator("iframe[title='Last export report']");
   const heading = frame.getByRole("heading", { name: "Export not created" });
   await heading.waitFor();
   assert.equal(await heading.evaluate(node => getComputedStyle(node).color), "rgb(170, 0, 0)",

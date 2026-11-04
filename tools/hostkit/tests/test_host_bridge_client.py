@@ -382,6 +382,13 @@ class QuitTest(unittest.TestCase):
 
 
 class LaunchTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.directory = TemporaryDirectory()
+        self.addCleanup(self.directory.cleanup)
+        patcher = patch.object(hb, "SUPPORT", Path(self.directory.name))
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
     def launch(self, model: Path, wait: object) -> None:
         with (
             patch.object(hb, "quit_sketchup", return_value="SketchUp not running"),

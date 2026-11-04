@@ -9,6 +9,28 @@ const output = process.env.PH_COMPOSER_PREVIEW_EVIDENCE ||
 const port = process.env.UI_PREVIEW_PORT || "8765";
 fs.mkdirSync(output, { recursive: true });
 check({ name: "builder", output }, async ({ newPage, step }) => {
+    step("invalid inline dimensions keep a complete explanation in the minimum pane");
+    const minimum = await newPage({ viewport: { width: 360, height: 520 } });
+    await minimum.goto(`http://127.0.0.1:${port}/tools/ui-preview/?fixture=builder`);
+    await minimum.locator("[data-tab=assemblies]").click();
+    await minimum.getByRole("button", { name: "Open Wall", exact: true }).click();
+    await minimum.getByRole("button", { name: "Layer 2 thickness", exact: true }).click();
+    const input = minimum.getByRole("textbox", { name: "Layer 2 thickness", exact: true });
+    const before = await input.boundingBox();
+    await input.fill("invalid"); await input.press("Enter");
+    const explanation = minimum.getByRole("dialog", { name: "Layer 2 thickness", exact: true });
+    await explanation.waitFor();
+    assert(await explanation.locator(".phc-unit-error").evaluate(node => {
+      const box = node.getBoundingClientRect(), frame = document.querySelector(".panel-panes").getBoundingClientRect();
+      return box.top >= frame.top && box.bottom <= frame.bottom && box.left >= frame.left && box.right <= frame.right;
+    }), "the entire correction fits above the footer");
+    assert.deepEqual(await input.boundingBox(), before, "the error does not move the dimension");
+    assert(await input.evaluate(node => node === document.activeElement), "typing focus stays in the dimension");
+    await minimum.screenshot({ path: path.join(output, "dimension-invalid-minimum.png") });
+    await input.press("Escape");
+    await explanation.waitFor({ state: "hidden" });
+    assert.equal(await minimum.evaluate(() => previewHost.sent.filter(message => message.type === "action.invoke").length), 0);
+    await minimum.close();
     const page = await newPage({ viewport: { width: 1280, height: 900 } });
     step("open the builder fixture");
     await page.goto(`http://127.0.0.1:${port}/tools/ui-preview/?fixture=builder`);
@@ -21,6 +43,15 @@ check({ name: "builder", output }, async ({ newPage, step }) => {
     const writes = () => page.evaluate(() => window.previewHost.sent.filter(x => x.type === "action.invoke").length);
     const baseline = await writes();
     await editor.locator("[data-segment-id='seg_stud_0'].assembly-hit-target").click();
+    step("Escape cancels removal before changing drawing selection");
+    await editor.getByRole("button", { name: "Delete segment", exact: true }).click();
+    const removal = editor.getByRole("dialog", { name: "Delete segment", exact: true });
+    await removal.waitFor();
+    await page.keyboard.press("Escape");
+    await removal.waitFor({ state: "hidden" });
+    assert.equal(await editor.locator(".assembly-hit-target[aria-pressed='true']").getAttribute("data-segment-id"),
+      "seg_stud_0", "cancelling removal preserves selection");
+    assert.equal(await writes(), baseline, "cancelling removal writes nothing");
     await editor.locator("[data-library-row='mat_a']").click();
     const details = editor.getByRole("dialog", { name: "Mineral wool", exact: true });
     await details.getByText("Conductivity", { exact: true }).waitFor();

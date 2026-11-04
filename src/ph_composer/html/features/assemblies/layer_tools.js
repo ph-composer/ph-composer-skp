@@ -52,6 +52,7 @@ PhComposerUI.define("features/assemblies/layer_tools", ["features/assemblies/edi
           return Boolean(segment.material_id);
         }) ? "Delete this Layer and all its Layer-Segments, including their Material assignments?" : null);
       }, record.values.layers.length === 1);
+      remove.classList.add("phc-danger-action");
       remove.setAttribute("data-builder-action", "layers.remove"); bubble.content.appendChild(remove);
       return bubble;
     }

@@ -6,6 +6,7 @@ PhComposerUI.define("sections/export", ["panel", "workspace"], function (panel, 
   var sequence = 0, session = null, revision = null, last = null, seen = null, timer = null;
   var pending = {}, checks = null, selected = {}, task = null, message = "", findings = [], retrieved = false;
   var blockedReport = null;
+  var advisoriesOpen = false;
   var stages = { queued: "Preparing export…", reading: "Reading Model…", translating: "Translating Model…",
     checking: "Checking export…", writing: "Writing HBJSON and report…" };
   var CHANNELS = { start: "export.start", preflight: "export.preflight", status: "export.status",
@@ -24,6 +25,7 @@ PhComposerUI.define("sections/export", ["panel", "workspace"], function (panel, 
   function choose() {
     if (active() || waiting("start") || waiting("preflight") || !checks ||
         checks.findings.some(function (f) { return f.blocks_export; })) return;
+    message = ""; findings = [];
     request("start", { repairs: Object.keys(selected).filter(function (id) { return selected[id]; }) });
     repaint();
   }
@@ -57,11 +59,7 @@ PhComposerUI.define("sections/export", ["panel", "workspace"], function (panel, 
     } else if (outcome.status === "completed") {
       var next = outcome.value;
       if (!(task && task.outcome && next && next.task_id === task.task_id && !next.outcome)) task = next;
-      if (task && task.outcome) {
-        message = task.outcome.message;
-        findings = task.outcome.findings || [];
-        if (task.outcome.value && task.outcome.value.result) findings = task.outcome.value.result.findings;
-      } else message = "";
+      if (operation !== "latest") { message = ""; findings = []; }
     } else {
       message = outcome.message || "The export request could not complete.";
       findings = outcome.findings || [];
@@ -113,9 +111,15 @@ PhComposerUI.define("sections/export", ["panel", "workspace"], function (panel, 
   // Where a finding is looked into: the tab the feature that reported it said its records are worked on.
   function tabFor(group) { return panel.tabFor(group.findings[0].section); }
   function counted(count, noun) { return String(count) + " " + noun + (Number(count) === 1 ? "" : "s"); }
-  function findingList(title, rows) {
-    var block = element("section", "phc-export-group");
-    block.appendChild(element("h2", "", title));
+  function findingList(title, rows, collapsible) {
+    var block = element(collapsible ? "details" : "section", "phc-export-group" +
+      (collapsible ? " phc-export-advisories" : ""));
+    block.appendChild(element(collapsible ? "summary" : "h2", "", collapsible ?
+      title + " · " + counted(rows.length, "finding") : title));
+    if (collapsible) {
+      block.open = advisoriesOpen;
+      block.addEventListener("toggle", function () { if (block.isConnected) advisoriesOpen = block.open; });
+    }
     var list = element("ul", "phc-export-findings");
     grouped(rows).forEach(function (group) {
       var row = element("li"), count = group.findings.length, locate = locateAll(group), tab = tabFor(group);
@@ -150,17 +154,19 @@ PhComposerUI.define("sections/export", ["panel", "workspace"], function (panel, 
       Boolean(active() || waiting("start") || waiting("preflight") || blocked));
     var secondary = active() ? [ui.button(waiting("cancel") ? "Cancelling…" : "Cancel export", cancel,
       !task.cancellable || waiting("cancel"))] : [];
-    var status = element("p", "phc-export-status", active() ? stages[task.stage] || "Export running…" : message);
+    var status = element("p", "phc-export-status" + (active() ? " is-running" : ""), active() ?
+      stages[task.stage] || "Export running…" : message);
     status.setAttribute("role", "status");
     var header = ui.pageHeader({ title: "Export", actions: secondary, primary: choosing });
     root.replaceChildren(header.root, element("p", "", "Export creates an HBJSON model and an HTML Export report."));
+    if (active()) root.appendChild(status);
     if (!checks) root.appendChild(element("p", "phc-export-readiness", "Checking the Model…"));
     if (checks) {
       var causes = grouped(blocking).length;
       var ready = element("p", "phc-export-readiness" + (causes ? " is-blocked" : ""), checks.failed ?
         "The Model could not be checked." : causes ?
           "Finish " + causes + (causes === 1 ? " thing" : " things") + " before exporting." : "Ready to export.");
-      root.appendChild(ready);
+      if (!active()) root.appendChild(ready);
       checks.repairs.forEach(function (repair) {
         var label = element("label", "phc-export-repair"), input = element("input");
         input.type = "checkbox"; input.checked = Boolean(selected[repair.id]);
@@ -171,16 +177,25 @@ PhComposerUI.define("sections/export", ["panel", "workspace"], function (panel, 
       // Listed whenever the line above counts them, whether or not an earlier export is still on the page.
       if (!active()) {
         if (blocking.length) root.appendChild(findingList("Before exporting", blocking));
-        if (advisory.length) root.appendChild(findingList("Worth checking", advisory));
+        if (advisory.length) root.appendChild(findingList("Worth checking", advisory, grouped(advisory).length > 5));
       }
     }
-    root.appendChild(status);
+    if (!active() && (message || !task || !task.outcome)) root.appendChild(status);
+    // A picker cancellation or request refusal does not create a task. Keep that message separate from
+    // the preceding run: its outcome, counts, destination, report and findings all come from one handle.
+    var history = element("section", "phc-export-last"), terminal = task && task.outcome;
+    if (terminal) {
+      var lastStatus = element("p", "phc-export-status", "Last export: " + terminal.message);
+      lastStatus.setAttribute("role", "status");
+      history.appendChild(lastStatus);
+      root.appendChild(history);
+    }
     if (task && task.outcome && task.outcome.value && task.outcome.value.result) {
       var canonical = task.outcome.value.result.canonical_model;
-      if (canonical) root.appendChild(element("p", "", counted(canonical.rooms, "Room") + " · " +
+      if (canonical) history.appendChild(element("p", "", counted(canonical.rooms, "Room") + " · " +
         counted(canonical.faces, "Face") + " · " + counted(canonical.surface_pairs, "Surface pair")));
       if (task.outcome.value.location) {
-        root.appendChild(element("p", "", "Written to " + task.outcome.value.location.label + "."));
+        history.appendChild(element("p", "", "Written to " + task.outcome.value.location.label + "."));
       }
     }
     // A blocked run wrote nothing, but its report still holds the figures needed to clear the block. It is
@@ -189,20 +204,24 @@ PhComposerUI.define("sections/export", ["panel", "workspace"], function (panel, 
     if (html) {
       if (!blockedReport || blockedReport.html !== html) {
         var details = element("details", "phc-export-blocked-report"), frame = element("iframe");
-        details.appendChild(element("summary", "", "Report from the run that was not created"));
+        details.appendChild(element("summary", "", "Last export report"));
         frame.setAttribute("sandbox", "");
-        frame.setAttribute("title", "Export report from the run that was not created");
+        frame.setAttribute("title", "Last export report");
         frame.srcdoc = html;
         details.appendChild(frame);
         blockedReport = { html: html, node: details };
       }
-      root.appendChild(blockedReport.node);
+      history.appendChild(blockedReport.node);
     }
     // What the last export reported and the checks above do not already say.
     var listed = Object.create(null);
     if (checks && !active()) checks.findings.forEach(function (finding) { listed[cause(finding)] = true; });
-    var reported = findings.filter(function (finding) { return !listed[cause(finding)]; });
-    if (reported.length) root.appendChild(findingList("From the last export", reported));
+    var previous = terminal ? terminal.value && terminal.value.result ?
+      terminal.value.result.findings || [] : terminal.findings || [] : [];
+    var reported = previous.filter(function (finding) { return !listed[cause(finding)]; });
+    if (reported.length) history.appendChild(findingList("From the last export", reported));
+    var requestFindings = findings.filter(function (finding) { return !listed[cause(finding)]; });
+    if (requestFindings.length) root.appendChild(findingList("From this request", requestFindings));
   }
   function render(root, state, send) {
     last = { root: root, state: state, send: send };
@@ -210,6 +229,7 @@ PhComposerUI.define("sections/export", ["panel", "workspace"], function (panel, 
       window.clearTimeout(timer); timer = null; session = state.session; revision = null; seen = null;
       pending = {}; checks = null; selected = {}; task = null; message = ""; findings = []; retrieved = false;
       blockedReport = null;
+      advisoriesOpen = false;
     }
     accept(state.ui.exportResult);
     if (state.ui.activeTab === "export") {

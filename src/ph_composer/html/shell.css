@@ -36,6 +36,7 @@
 /* The Export pane: one command and the host's answer under it. */
 .live-panel .phc-export-status { margin: 0; padding: 4px 0 12px; color: var(--muted); }
 .live-panel .phc-export-status:empty { display: none; }
+.live-panel .phc-export-status.is-running { color: var(--ink); font-weight: 600; }
 .live-panel .phc-export-repair { display: flex; align-items: center; gap: 8px; margin: 16px 0; }
 .live-panel .phc-export-repair input { min-height: 0; width: 16px; height: 16px; padding: 0; margin: 0; }
 /* A blocked run's report, shown in place and collapsed: the figures it computed, under its own heading. */
@@ -50,6 +51,11 @@
 .live-panel .phc-export-readiness.is-blocked::before { content: ""; flex: none; width: 16px; height: 16px; background: currentColor;
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/%3E%3Cpath d='M12 9v4'/%3E%3Cpath d='M12 17h.01'/%3E%3C/svg%3E") center / contain no-repeat; }
 .live-panel .phc-export-group h2 { margin: 20px 0 6px; color: var(--ink); font-size: var(--text-md); font-weight: 600; }
+/* A long advisory list stays available without burying the blockers and the export action. */
+.phc-export-advisories { margin-top: 20px; }
+.phc-export-advisories > summary { padding: 10px 12px; border: 1px solid var(--line);
+  border-radius: var(--radius-md); background: var(--surface-alt); color: var(--ink); font-weight: 600; }
+.phc-export-advisories[open] > summary { margin-bottom: 8px; }
 .live-panel .phc-export-findings { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
 .live-panel .phc-export-findings li { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; min-height: 44px;
   padding: 6px 0; border-bottom: 1px solid var(--line); }
@@ -65,3 +71,4 @@
 .live-panel [data-section="export"] .phc-heading + p { margin-top: -6px; color: var(--muted); }
 .live-panel .phc-export-readiness.is-blocked + .phc-export-group li:last-child { border-bottom: 0; }
 .live-panel .phc-export-readiness.is-blocked:not(:last-child) { border-radius: var(--radius-md) var(--radius-md) 0 0; }
+.phc-export-last { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }

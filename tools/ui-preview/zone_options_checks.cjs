@@ -65,5 +65,22 @@ check({ name: "zone_options", output }, async ({ newPage, step }) => {
   await dialog.waitFor({ state: "detached" });
   assert.equal(await page.evaluate(() => window.previewHost.zoneOptions.default_segment_id), "bsg_annex");
   assert(await page.evaluate(() => window.previewHost.zones.every(zone => zone.values.building_segment_id === "bsg_annex")));
+  step("clamped column-menu actions remain reachable in the minimum panel");
+  await page.setViewportSize({ width: 360, height: 520 });
+  await page.goto(`${BASE}?fixture=zoneoptions`);
+  const trigger = page.getByRole("button", { name: "Building-Segment column menu", exact: true });
+  await trigger.scrollIntoViewIfNeeded();
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  await trigger.click();
+  const manage = page.getByRole("button", { name: "Manage Building Segments…", exact: true });
+  await manage.scrollIntoViewIfNeeded();
+  assert(await manage.evaluate(node => {
+    const box = node.getBoundingClientRect(), menu = node.closest(".phc-bubble").getBoundingClientRect();
+    return box.top >= menu.top && box.bottom <= menu.bottom && box.bottom <= innerHeight;
+  }), "the last action scrolls inside its bubble and stays in the window");
+  await manage.click();
+  await page.getByRole("dialog").getByRole("heading", { name: "Manage Building Segments", exact: true }).waitFor();
+  await page.screenshot({ path: path.join(output, "management-minimum.png") });
+  await page.keyboard.press("Escape");
   return `Zone options browser checks passed; evidence: ${output}`;
 });

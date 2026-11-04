@@ -804,7 +804,9 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
       // and the user can still drag any column wider.
       defaultWidths: Object.assign({}, ZONE_WIDTHS, own.view.widths || {}),
       tree: true, tiers: own.view.tiers, rows: shown, columns: shownColumns,
-      painted: function () { call(own, "painted"); },
+      painted: function () {
+        call(own, "painted"); tables.orientNarrow(own.mount);
+      },
       // Shutting a row while the view holds a draft could hide it; opening never does.
       mayToggle: function (row, opening) {
         var reason = opening ? null : call(own, "draftReason", [], null);

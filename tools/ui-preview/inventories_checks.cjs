@@ -17,6 +17,25 @@ check({ name: "inventories", output }, async ({ newPage, step }) => {
     const library = page.locator("[data-section='library']");
     await library.getByRole("heading", { name: "Library", exact: true }).waitFor();
     await library.locator(".phc-view-count").getByText("2 total", { exact: true }).waitFor();
+    step("inventory housekeeping reveals without moving the row");
+    const row = library.locator("[data-row-key='mat_a']");
+    const duplicateAction = row.getByRole("button", { name: "Duplicate Mineral wool", exact: true });
+    await page.mouse.move(0, 0);
+    assert.equal(await duplicateAction.evaluate(node => getComputedStyle(node).opacity), "0");
+    const idleBounds = await duplicateAction.boundingBox();
+    await row.hover();
+    assert.equal(await duplicateAction.evaluate(node => getComputedStyle(node).opacity), "1");
+    assert.deepEqual(await duplicateAction.boundingBox(), idleBounds, "hover keeps the action's target still");
+    await page.mouse.move(0, 0);
+    await duplicateAction.focus();
+    assert.equal(await duplicateAction.evaluate(node => getComputedStyle(node).opacity), "1",
+      "keyboard focus reveals the row's actions");
+    await duplicateAction.press("Enter");
+    const keyboardDuplicate = library.getByRole("dialog", { name: /Duplicate Material$/ });
+    await keyboardDuplicate.waitFor();
+    await page.keyboard.press("Escape");
+    await keyboardDuplicate.waitFor({ state: "hidden" });
+    assert(await duplicateAction.evaluate(node => node === document.activeElement), "Cancel returns to the action");
     assert.equal(await library.locator("[data-material-use-count]").textContent(), "1");
     await library.locator("[data-material-use-count]").click();
     await library.getByRole("dialog", { name: "Used by Assemblies" }).getByText("Wall", { exact: true }).waitFor();

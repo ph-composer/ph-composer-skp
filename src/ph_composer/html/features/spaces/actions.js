@@ -182,7 +182,7 @@ function (panel, requests, ui, units, preferences, fields) {
       ui.actionRow(cancel, ui.button(commit, function () {
         dialog.closeModal();
         if (!self.host.disposed && !self.busy()) { run(revision); panel.repaint(); }
-      })));
+      }), true));
     dialog.openModal();
     cancel.focus();
   };

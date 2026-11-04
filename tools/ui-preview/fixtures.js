@@ -263,6 +263,10 @@
         density_kg_m3: 55, specific_heat_j_kgk: 1000, emissivity: 0.9, color: "#fff2cc",
         notes: "Revised library notes", datasheet_links: [] } }
   ], other: [] };
+  // A copied definition whose local and incoming links are both populated, for comparison review.
+  FIXTURES.copylinks = JSON.parse(JSON.stringify(FIXTURES.libraries));
+  FIXTURES.copylinks.materials.records[0].values.datasheet_links = ["https://example.com/local.pdf"];
+  FIXTURES.copylinks.libraryCatalogs.synthetic[1].snapshot.datasheet_links = ["https://example.com/revised.pdf"];
 
   // The Builder reference with five uneven Layers, one a membrane, for dragging whole Layers.
   FIXTURES.layerdrag = JSON.parse(JSON.stringify(FIXTURES.builder));
@@ -1028,6 +1032,38 @@
       record.values.name = ["Casement", "Fixed", "Door", "Slider", "Tilt-turn", "Ribbon"][index % 6] + " W" +
         String(index + 1).padStart(2, "0");
       return record;
+    });
+    // Keep the referenced products intact, then populate each independent inventory with unused copies.
+    dense.attachedZones = dense.attachedZones.concat(Array.apply(null, { length: 23 }).map(function (unused, index) {
+      var record = copy(dense.attachedZones[0]);
+      record.id = "atz_dense_" + (index + 1);
+      record.values.name = ["Garage", "Unheated basement", "Enclosed porch", "Service room"][index % 4] +
+        " " + (index + 2);
+      record.values.temperature_reduction_factor = Math.round((0.5 + index % 10 * 0.05) * 100) / 100;
+      record.uses = []; record.use_count = 0;
+      return record;
+    }));
+    ["frames", "glazings", "psi_install_types"].forEach(function (kind) {
+      var records = dense.windows[kind].records;
+      dense.windows[kind].records = records.concat(Array.apply(null, { length: 23 }).map(function (unused, index) {
+        var record = copy(records[0]);
+        record.id = { frames: "frm", glazings: "glz", psi_install_types: "psi" }[kind] + "_dense_" + (index + 1);
+        record.values.name = {
+          frames: ["Timber frame", "Insulated timber frame", "Composite frame", "Thermally broken frame"],
+          glazings: ["Triple glazing", "Solar-control glazing", "Low-iron glazing", "Acoustic glazing"],
+          psi_install_types: ["Insulated sill junction", "Recessed jamb", "Head junction", "Door threshold"]
+        }[kind][index % 4] + " " + (index + 2);
+        if (kind === "frames") {
+          record.values.width_m = (70 + index % 7 * 5) / 1000;
+          record.values.uf_w_m2k = (80 + index % 9 * 5) / 100;
+          record.values.psi_g_w_mk = (25 + index % 6 * 5) / 1000;
+        } else if (kind === "glazings") {
+          record.values.ug_w_m2k = (50 + index % 7 * 5) / 100;
+          record.values.g_value = (35 + index % 6 * 4) / 100;
+        } else record.values.psi_w_mk = (15 + index % 8 * 5) / 1000;
+        record.uses = []; record.use_count = 0; record.element_use_count = 0;
+        return record;
+      }));
     });
     var TB_NAMES = ["Parapet", "Slab edge", "Balcony", "Window sill", "Window head", "Foundation",
       "Corner", "Roof eave", "Steel lintel", "Shelf angle"];

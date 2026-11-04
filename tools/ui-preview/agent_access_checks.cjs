@@ -38,5 +38,39 @@ check({ name: "agent_access", output }, async ({ newPage, step }) => {
     }
     await page.screenshot({ path: path.join(output, `new-token-${width}.png`) });
   }
+  await page.keyboard.press("Escape");
+  step("issued and revoke dialogs preserve the shared viewport limit");
+  const token = { id: "synthetic-review-token", label: "Synthetic review agent", capabilities: ["read"],
+    created_at: "2026-11-01T12:00:00Z" };
+  const receive = (type, payload) => page.evaluate(({ type, payload }) => {
+    PhComposerUI.get("agent_access/page").receive({ type, payload });
+  }, { type, payload });
+  for (const [width, height] of [[420, 732], [360, 520]]) {
+    await page.setViewportSize({ width, height });
+    await receive("access.state", { ...STATE.payload, tokens: [token], server: { state: "listening", port: 52761 } });
+    await page.getByRole("button", { name: "Revoke Synthetic review agent", exact: true }).click();
+    for (const kind of ["revoke", "issued"]) {
+      if (kind === "issued") await receive("access.issued", {
+        token: "SYNTHETIC-NOT-A-CREDENTIAL", row: token, clients: [] });
+      const modal = page.locator("dialog[open]");
+      assert(await modal.evaluate(node => {
+        const box = node.getBoundingClientRect();
+        const actions = node.querySelector(".phc-dialog-actions").getBoundingClientRect();
+        return box.left >= 15 && box.right <= innerWidth - 15 && box.top >= 0 && box.bottom <= innerHeight &&
+          actions.left >= box.left && actions.right <= box.right && actions.bottom <= innerHeight;
+      }), `${kind}: dialog and footer fit ${width} x ${height}`);
+      await page.screenshot({ path: path.join(output, `${kind}-${width}x${height}.png`) });
+      await page.keyboard.press("Escape");
+    }
+  }
+  step("wide recovery state retains one centered reading column");
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await receive("access.state", { ...STATE.payload, state: "unreadable",
+    server: { state: "unavailable", port: 52761, message: "The port is already in use." } });
+  const edges = await page.locator(".agent-access > .phc-heading, .agent-access-server, .agent-access-unreadable")
+    .evaluateAll(nodes => nodes.map(node => node.getBoundingClientRect().left));
+  assert.equal(edges.length, 3);
+  assert(Math.max(...edges) - Math.min(...edges) < 1, "heading, server state and recovery share a left edge");
+  await page.screenshot({ path: path.join(output, "unavailable-wide.png") });
   return `Agent Access browser checks passed; evidence: ${output}`;
 });

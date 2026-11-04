@@ -7,6 +7,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { check } = require("./support/browser_evidence.cjs");
+const { setPanelSize, settle, paneFacts } = require("./support/pane_fit.cjs");
 
 const PORT = process.env.UI_PREVIEW_PORT || "8765";
 const BASE = `http://127.0.0.1:${PORT}/tools/ui-preview/`;
@@ -142,6 +143,92 @@ check({ name: "preview", output }, async ({ newPage, step }) => {
     await page.keyboard.press("Escape");
   }
 
+  step("narrow subtab discovery and keyboard navigation");
+  await page.goto(`${BASE}?fixture=rich`);
+  await setPanelSize(page, 360, 520);
+  await page.locator("[data-tab=library]").click();
+  const libraryTabs = page.getByRole("tablist", { name: "Library definitions", exact: true });
+  const cue = libraryTabs.locator(".phc-subtabs-overflow");
+  await cue.waitFor({ state: "visible" });
+  assert(await cue.evaluate(node => {
+    const box = node.getBoundingClientRect(), nav = node.parentElement.getBoundingClientRect();
+    const padding = parseFloat(getComputedStyle(node.parentElement).paddingRight) || 0;
+    return box.left > nav.left + nav.width / 2 && box.right <= nav.right + 1 &&
+      nav.right - box.right <= padding + 1;
+  }), "the passive overflow cue stays at the visible right edge");
+  assert.equal((await paneFacts(page, { floating: [], header: null })).sideways, false,
+    "overflowing subtabs do not widen the panel pane");
+  await page.mouse.move(0, 0); await shot("library-subtabs-overflow-360x520");
+  const materials = libraryTabs.getByRole("tab", { name: "Materials", exact: true });
+  const psi = libraryTabs.getByRole("tab", { name: "Psi-Install Types", exact: true });
+  await materials.focus(); await materials.press("End"); await settle(page);
+  await page.waitForFunction(() => document.querySelector(
+    '[aria-label="Library definitions"] .phc-subtabs-overflow').classList.contains("is-at-end"), null, { timeout: 3000 });
+  assert.equal(await psi.getAttribute("aria-selected"), "true", "End selects the final shipping tab");
+  assert(await psi.evaluate(node => {
+    const range = document.createRange(); range.selectNodeContents(node);
+    const label = range.getBoundingClientRect(), nav = node.parentElement.getBoundingClientRect();
+    const cue = node.parentElement.querySelector(".phc-subtabs-overflow").getBoundingClientRect();
+    return document.activeElement === node && label.left >= nav.left && label.right <= cue.left + 1;
+  }), "native keyboard focus scrolls the entire Psi-Install label clear of the cue");
+  assert.equal(await cue.locator("svg").evaluate(node => getComputedStyle(node).transform),
+    "matrix(0, 1, -1, 0, 0, 0)", "the cue points back at the scroll end");
+  await shot("library-subtabs-end-360x520");
+  await psi.press("Home"); await settle(page);
+  assert.equal(await materials.getAttribute("aria-selected"), "true", "Home restores Materials");
+  assert.equal(await cue.evaluate(node => node.classList.contains("is-at-end")), false);
+  await setPanelSize(page, 1280, 800); await cue.waitFor({ state: "hidden" });
+  await setPanelSize(page, 360, 520); await cue.waitFor({ state: "visible" });
+  async function selectedPsiIsClear(reason) {
+    await page.waitForFunction(() => document.querySelector(
+      '[aria-label="Library definitions"] .phc-subtabs-overflow').classList.contains("is-at-end"), null, { timeout: 3000 });
+    assert.equal(await psi.getAttribute("aria-selected"), "true", reason);
+    assert(await psi.evaluate(node => {
+      const range = document.createRange(); range.selectNodeContents(node);
+      const label = range.getBoundingClientRect(), nav = node.parentElement.getBoundingClientRect();
+      const cue = node.parentElement.querySelector(".phc-subtabs-overflow").getBoundingClientRect();
+      return label.left >= nav.left && label.right <= cue.left + 1;
+    }), `${reason}: the full label clears the passive cue`);
+    assert.equal((await paneFacts(page, { floating: [], header: null })).sideways, false);
+  }
+  step("pointer selection and remembered final subtab");
+  for (const width of [360, 420]) {
+    await setPanelSize(page, width, 520);
+    await materials.focus(); await materials.press("Home"); await settle(page);
+    const target = await psi.boundingBox(), frame = await libraryTabs.boundingBox();
+    // Click the currently visible edge, without Playwright auto-scrolling the whole button first.
+    const x = Math.min(frame.x + frame.width - 2, target.x + 4), y = target.y + target.height / 2;
+    assert(x >= target.x && x < target.x + target.width, "the pointer targets the partially visible final tab");
+    await page.mouse.click(x, y); await settle(page);
+    await selectedPsiIsClear(`pointer selection at ${width}px`);
+    await page.mouse.move(0, 0); await shot(`library-subtabs-pointer-psi-${width}x520`);
+  }
+  await setPanelSize(page, 1280, 800); await cue.waitFor({ state: "hidden" });
+  await setPanelSize(page, 360, 520); await selectedPsiIsClear("resize preserves selected Psi visibility");
+  await page.evaluate(() => {
+    window.previewOriginalSubtabsSession = previewHost.session;
+    window.previewOldSubtabs = document.querySelector('[data-section="library"]')._view.tabs;
+    previewHost.session = "subtabs-rebuilt-session"; previewHost.snapshot();
+  });
+  await page.locator("[data-tab=library]").click(); await cue.waitFor({ state: "visible" });
+  assert(await page.evaluate(() => previewOldSubtabs.disposed && !previewOldSubtabs.root.isConnected &&
+    document.querySelector('[data-section="library"]')._view.tabs !== previewOldSubtabs),
+  "a Model session rebuild disposes the old navigation and replaces its observed root");
+  assert.equal(await libraryTabs.locator(".phc-subtabs-overflow").count(), 1, "rebuild leaves one current cue");
+  await page.evaluate(() => { previewHost.session = previewOriginalSubtabsSession; previewHost.snapshot(); });
+  await page.locator("[data-tab=library]").click();
+  await selectedPsiIsClear("returning to the original Model restores its remembered final tab");
+  await page.mouse.move(0, 0); await shot("library-subtabs-remembered-psi-360x520");
+  await page.locator("[data-tab=thermal_bridges]").click(); await settle(page);
+  const thermalTabs = page.getByRole("tablist", { name: "Thermal Bridges", exact: true });
+  assert.equal(await thermalTabs.locator(".phc-subtabs-overflow").isVisible(), false,
+    "fitting Types and Schedule tabs have no overflow cue");
+  assert.equal((await paneFacts(page, { floating: [], header: null })).sideways, false);
+  await page.mouse.move(0, 0); await shot("thermal-bridge-types-subtabs-360x520");
+  await page.locator("[data-tab=windows]").click();
+  await page.locator(".panel-panes").evaluate(node => { node.scrollTop = 0; });
+  await settle(page); await shot("window-toolbar-360x520");
+
   return `PASS: preview on the real panel: 4 viewports, draft through a unit switch, invalid entry, ` +
-    `form Escape, refused edit warning, empty, Export and authoring panes; evidence in ${output}`;
+    `form Escape, refused edit warning, empty, Export, authoring and narrow subtab navigation; evidence in ${output}`;
 });
