@@ -10,7 +10,7 @@
 .live-panel [data-pane].has-inspector:not([hidden]) { display: flex; align-items: flex-start; gap: 16px; }
 .phc-pane-main { flex: 1 1 0; min-width: 0; }
 .phc-pane-inspector > section:focus { outline: 0; }
-.phc-pane-inspector { flex: 0 0 264px; min-width: 0; margin-top: 52px; padding-left: 12px; border-left: 1px solid var(--line); }
+.phc-pane-inspector { flex: 0 0 264px; align-self: stretch; min-width: 0; margin-top: 52px; padding-left: 12px; border-left: 1px solid var(--line); }
 .phc-pane-tools { display: flex; align-items: center; gap: 8px; margin-left: auto; }
 /* The header's authoring tools join whatever toolbar the work surface places them in. */
 .phc-pane-actions, .phc-pane-actions > section { display: contents; }
@@ -45,11 +45,11 @@
   border: 1px solid var(--line); border-radius: var(--radius-md); background: #fff; }
 .live-panel .phc-export-readiness { margin: 4px 0 16px; font-weight: 600; }
 /* What still blocks the run reads as one amber line with its alert mark, the checklist under it. */
-.live-panel .phc-export-readiness.is-blocked { display: flex; align-items: center; gap: 8px; padding: 10px 12px;
-  border-radius: var(--radius-md); background: var(--warning-surface); color: var(--warning-ink); }
+.live-panel .phc-export-readiness.is-blocked { display: flex; align-items: center; gap: 8px; padding: 9px 12px;
+  border: 1px solid var(--warning-border); border-radius: var(--radius-md); background: #fff8df; color: #4f3a0b; font-weight: 500; }
 .live-panel .phc-export-readiness.is-blocked::before { content: ""; flex: none; width: 16px; height: 16px; background: currentColor;
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/%3E%3Cpath d='M12 9v4'/%3E%3Cpath d='M12 17h.01'/%3E%3C/svg%3E") center / contain no-repeat; }
-.live-panel .phc-export-group h2 { margin: 20px 0 6px; color: var(--muted-strong); font-size: var(--text-sm); font-weight: 600; }
+.live-panel .phc-export-group h2 { margin: 20px 0 6px; color: var(--ink); font-size: var(--text-md); font-weight: 600; }
 .live-panel .phc-export-findings { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
 .live-panel .phc-export-findings li { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; min-height: 44px;
   padding: 6px 0; border-bottom: 1px solid var(--line); }

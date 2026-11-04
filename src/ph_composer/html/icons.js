@@ -61,7 +61,7 @@ PhComposerUI.define("icons", ["dom"], function (dom) {
     undo: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
     installs: '<path d="M4 5h16v14H4Z"/><path d="M8 5v14M16 5v14M4 9h4m8 6h4"/>',
     anchor: '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/>',
-    more: '<circle cx="5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1" fill="currentColor" stroke="none"/>',
+    more: '<circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none"/>',
     ruler: '<path d="M4 17 17 4l3 3L7 20Z"/><path d="m14 7 3 3M11 10l2 2M8 13l3 3"/>',
     assign: '<rect x="3" y="5" width="8" height="8" rx="1"/><path d="M7 13v6h13V8h-6m1 6h5m-2.5-2.5L20 14l-2.5 2.5"/>'
     ,fill_down: '<path d="M5 4h14v5H5Z"/><path d="M12 11v9m-4-4 4 4 4-4"/>'

@@ -32,7 +32,7 @@
 .phc-workspace .window-row-editor .phc-icon-button { width:22px; height:22px; min-height:22px; padding:3px; }
 /* The current Window Type reads as every selected row does: teal tint, teal text. */
 .window-type-row { margin:1px 4px; border-radius:var(--radius-sm); }
-.window-type-row.selected { background:var(--interaction-highlight-tint); }
+.window-type-row.selected { background:var(--interaction-highlight-soft); }
 .phc-workspace .window-workspace .window-type-row.selected>button:first-child { color:var(--interaction-highlight); font-weight:600; }
 .window-type-row>.window-type-flag { display:inline-flex; flex:none; margin-right:8px; color:#9a6b00; cursor:help; }
 .window-type-row>.window-type-flag svg { width:14px; height:14px; }
@@ -241,7 +241,10 @@
 /* The defaults stay inside a narrow panel: a long Psi-Install name shrinks to an ellipsis, its full name in
    the tooltip and accessible label. */
 .phc-inventory-settings>.phc-bubble-anchor { min-width:0; max-width:100%; }
-.window-default-control { display:inline-flex; align-items:center; gap:4px; max-width:100%; min-width:0; white-space:nowrap; }
+/* A default reads as a labelled field: its name muted, its value in ink, the chevron at the field's end. */
+.window-default-control { display:inline-flex; align-items:center; gap:6px; max-width:100%; min-width:0; white-space:nowrap; }
+.window-default-control>span:first-child { color:var(--muted); font-size:var(--text-sm); font-weight:500; }
+.window-default-control>.phc-glyph { margin-left:4px; color:var(--muted-strong); }
 .window-default-control>span:first-child,.window-default-control>.phc-glyph { flex:none; }
 .window-default-value { min-width:0; max-width:11em; overflow:hidden; text-overflow:ellipsis; }
 .window-default-control .muted { color:var(--muted); }
@@ -283,3 +286,5 @@
 @media (max-width:650px) {
   .window-install-body { grid-template-columns:minmax(0,1fr); }
 }
+/* The Window count sits where every other screen puts its count: at the right, over the table. */
+.window-schedule > p.muted { margin:12px 0 8px; text-align:right; font-size:var(--text-sm); }

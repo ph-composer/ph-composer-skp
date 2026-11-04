@@ -22,7 +22,8 @@
   .phc-overview .phc-table th.col-name { left: calc(var(--col-actions-width) + var(--col-hierarchy-width)); }
 }
 @media (max-width: 500px) {
-  .phc-overview .phc-table th.col-name, .phc-overview .phc-table td.col-name { left: var(--col-actions-width); }
+  .phc-overview .phc-table th.col-name { left: var(--col-actions-width); }
+  .phc-overview .phc-table td.col-name { left: 0; }
 }
 /* The tree is the pane's work surface. The overview fits it to the height its pane leaves (overview.js
    `place`); this budget holds until then, and is the Window schedule's height. */
@@ -87,3 +88,6 @@
   .phc-zone-option-row { grid-template-columns: minmax(0, 1fr); }
   .phc-zone-option-colour { justify-content: flex-start; }
 }
+/* The Zone options dialog scrolls its own list, so its footer stays in flow rather than sticking. */
+.phc-workspace .phc-dialog.phc-zone-options-dialog .phc-dialog-actions { position: static; margin: 12px 0 0; padding: 0;
+  box-shadow: none; }

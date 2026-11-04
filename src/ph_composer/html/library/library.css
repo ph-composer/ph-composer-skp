@@ -69,7 +69,7 @@
 
 .phc-inventory-surface .phc-inventory-controls, [data-pane="assemblies"] .phc-inventory-controls { margin: 12px 0; }
 /* The action bar's fields keep one width on every screen, so the bar reads the same from tab to tab. */
-.phc-inventory-controls .phc-view-control select { width: 132px; max-width: 132px; }
+.phc-inventory-controls .phc-view-control select { width: 124px; max-width: 124px; }
 .phc-inventory-controls .phc-view-control { max-width: 100%; }
 .phc-inventory-controls .phc-view-control :is(input, select) { min-width: 0; max-width: 100%; }
 /* A tab's settings stay together at the end of the action bar and wrap to their own line as one group. */
@@ -137,7 +137,9 @@
 @media (max-width: 700px) {
   .library-sidebar-root, .library-sidebar-root.is-collapsed { width: auto; flex-basis: auto; border-left: 0;
     border-top: 1px solid var(--line); padding: 10px 0 0; }
-  .phc-workspace .library-sidebar-root.is-collapsed .library-sidebar-toggle { writing-mode: horizontal-tb; padding: 8px; }
+  .phc-workspace .library-sidebar-root.is-collapsed .library-sidebar-toggle { writing-mode: horizontal-tb; padding: 8px 0; }
+  /* Folded under the table, the title keeps its chevron so it still reads as the control that opens it. */
+  .library-sidebar-root.is-collapsed .library-sidebar-toggle::after { display: block; transform: translateY(-30%) rotate(-45deg); }
 
   .library-material-workspace { flex-direction: column; min-height: 0; }
   .library-material-table, .library-material-workspace > .library-sidebar-root { width: 100%; box-sizing: border-box; }

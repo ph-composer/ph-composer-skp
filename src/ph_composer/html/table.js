@@ -41,8 +41,10 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
     });
   }
   function defaultColumnWidth(cache, field) {
-    return Object.prototype.hasOwnProperty.call(cache.defaultWidths, field) ?
-      cache.defaultWidths[field] : DEFAULT_WIDTH;
+    // The Actions column defaults to what its rows hold (table() measures it), not a generic column's width.
+    var own = Object.prototype.hasOwnProperty.call(cache.defaultWidths, field);
+    if (field === "actions" && cache.actionsWidth && !own) return cache.actionsWidth;
+    return own ? cache.defaultWidths[field] : DEFAULT_WIDTH;
   }
   function minimumColumnWidth(cache, field) {
     var configured = cache.options.columnMinWidths && Number(cache.options.columnMinWidths[field]);
@@ -419,6 +421,8 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
      a screen states no alignment and its heading always agrees with its values. */
   var NUMBER = /^[\u2212+-]?\d[\d\s.,]*(\s*[^\d\s]{1,12})?$/;
   var LEADING = { actions: true, hierarchy: true, name: true };
+  var QUANTITY_LABEL = new RegExp("(\\s(mm|m|m²|m³|in|ft|ft²|ft³|kg|W/K)$|W/\\(|/\\(|factor|count|quantity|runs|" +
+    "thickness|length|area|value|\u03c8|\u03bb|emissivity|density|conductivity|heat)", "i");
   function columnKind(cells) {
     var kind = null;
     for (var index = 0; index < cells.length && index < 12; index += 1) {
@@ -437,7 +441,9 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
       var field = column[0], th = cache.headers[field];
       if (!th || LEADING[field]) return;
       var cells = cache.body.querySelectorAll("tr:not(.phc-group-row) > td.col-" + field);
-      if (!cells.length) return;
+      // With no rows yet, a heading that names a quantity or a unit still reads from the right, so a column
+      // keeps its alignment from the empty Model to the full one.
+      if (!cells.length) { th.classList.toggle("is-end", QUANTITY_LABEL.test(column[1] || "")); return; }
       var text = columnKind(cells) === "text";
       th.classList.toggle("is-end", !text);
       Array.prototype.forEach.call(cells, function (cell) {
@@ -452,7 +458,7 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
     var rows = options.rows, expanded = options.expanded || Object.create(null);
     var visible = Object.create(null), retained = Object.create(null), retainedGroups = Object.create(null);
     var cache = root._table || buildCache(root, options.columns, options);
-    var position = 0, actionCount = 2;
+    var position = 0, actionCount = 0;
     cache.options = options; cache.records = records; cache.columns = options.columns;
     // A tree's top-level rows head their groups (table.css).
     cache.node.classList.toggle("is-tree", Boolean(options.tree));
@@ -480,12 +486,20 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
       }
       position += 1;
     });
-    cache.actionsWidth = 16 + actionCount * 32 + (options.actionsCell ? 40 : 0) + (options.check ? 28 : 0);
+    // The Actions column is as wide as what its rows hold. A column holding only the row checkbox shrinks to it
+    // and drops its heading word; one with icons keeps room for the word "Actions".
+    var checkOnly = actionCount === 0 && !options.actionsCell && Boolean(options.check);
+    cache.actionsWidth = Math.max(16 + actionCount * 32 + (options.actionsCell ? 40 : 0) + (options.check ? 28 : 0),
+      checkOnly ? 44 : 80);
+    cache.node.classList.toggle("has-check-only-actions", checkOnly);
+    if (cache.resizeHandles.actions) paintColumnWidth(cache, "actions");
     var actionsVisible = cache.headers.actions && !cache.headers.actions.hidden;
     root.style.setProperty("--row-actions-width", (actionsVisible ? cache.actionsWidth : 0) + "px");
     paintTableWidth(cache);
     while (cache.body.children.length > position) cache.body.removeChild(cache.body.lastChild);
     alignColumns(cache);
+    // The edge shade marks only a table that truly runs past its frame.
+    root.classList.toggle("is-overflowing", root.scrollWidth - root.clientWidth > 8);
     Object.keys(cache.rows).forEach(function (key) {
       if (!retained[key]) { delete cache.rows[key]; delete expanded[key]; }
     });
