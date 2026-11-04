@@ -141,7 +141,7 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
       var columnElement = element("col", "col-" + column[0]);
       var th = element("th", "col-" + column[0]);
       th._heading = element("span", "phc-header-label-row");
-      th._label = element("span", "phc-th-label", column[1]);
+      th._label = dom.symbolText(element("span", "phc-th-label"), column[1]);
       th._labelText = column[1];
       dom.tooltip(th._label, column[1]);
       th._heading.appendChild(th._label);
@@ -177,7 +177,7 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
     cache.columns.forEach(function (column) {
       var field = column[0], th = cache.headers[field];
       if (th._labelText !== column[1]) {
-        th._label.textContent = column[1];
+        dom.symbolText(th._label, column[1]);
         dom.tooltip(th._label, column[1]);
         th._labelText = column[1];
       }
@@ -498,6 +498,8 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
         actionCount = Array.isArray(sample) ? sample.length : 0;
       } catch (unused) { actionCount = 0; }
     }
+    // A provider whose rows need a real record declares its usual count, so an empty table keeps that width.
+    actionCount = Math.max(actionCount, options.actionSlots || 0);
     // The Actions column is as wide as what its rows hold. A column holding only the row checkbox shrinks to it
     // and drops its heading word; one with icons keeps room for the word "Actions".
     var checkOnly = rows.length > 0 && actionCount === 0 && !options.actionsCell && Boolean(options.check);

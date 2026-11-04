@@ -407,6 +407,8 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
     filteredFields: { weighting_factor: true },
     filterValues: filterValues, filterLabel: function (vs, field, value) { return value; },
     zoneMatch: zoneMatch, rowMatch: rowMatch, viewportPaths: viewportPaths,
+    // A Space row holds four actions (locate, open, move, delete), so an empty table keeps the width rows give it.
+    actionSlots: 4,
     actions: function (vs, row) { return vs.actions.actions(row); },
     action: function (vs, row, item) { vs.actions.run(row, item); },
     selected: function (vs, row) { return vs.actions.open(row); }

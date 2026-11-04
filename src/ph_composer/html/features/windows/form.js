@@ -1,6 +1,6 @@
 /* Product lifecycle dialogs freeze the authored baseline and use the shared request/form contract. */
-PhComposerUI.define("features/windows/form", ["record_form", "snapshot", "unit_field",
-  "features/windows/editor_shared", "workspace"], function (RecordForm, snapshot, unitFields, shared, ui) {
+PhComposerUI.define("features/windows/form", ["dom", "record_form", "snapshot", "unit_field",
+  "features/windows/editor_shared", "workspace"], function (dom, RecordForm, snapshot, unitFields, shared, ui) {
   "use strict";
   function Form(session, send, kind, spec, changed) {
     var self = this; this.kind = kind; this.productSpec = spec; this.fields = {}; this.unitFields = {};
@@ -10,13 +10,8 @@ PhComposerUI.define("features/windows/form", ["record_form", "snapshot", "unit_f
       pendingText: "Saving…", failureText: "The product was not changed.", changed: changed });
     spec.columns.filter(function (column) { return column[0] !== "color"; }).forEach(function (column) {
       // A PH symbol takes its subscript in the visible label ("Uf" reads U with f); the field keeps the plain name.
-      var symbol = /^(U|\u03c8)-?([a-z]+)$/.exec(column[1]);
-      var label = ui.element("label", "", symbol ? "" : column[1]);
-      if (symbol) {
-        // One inline run, so the label's column layout never splits the symbol from its subscript.
-        var name = ui.element("span", "phc-symbol"); label.appendChild(name);
-        name.appendChild(ui.element("span", "", symbol[1])); name.appendChild(ui.element("sub", "", symbol[2]));
-      }
+      var label = ui.element("label");
+      label.appendChild(dom.symbolText(ui.element("span", "phc-symbol"), column[1]));
       var input = ui.element("input");
       self.fieldLabels[column[0]] = label;
       input.setAttribute("aria-label", column[1]); self.fields[column[0]] = input;

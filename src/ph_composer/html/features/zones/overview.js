@@ -824,7 +824,7 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
           call(own, "cell", [td, row, field], false);
       },
       marker: function (row) { return marker(own, row); }, actions: function (row) { return actions(own, row); },
-      rowHidden: hidden, hiddenColumns: own.hiddenColumns, revealRowActions: true,
+      rowHidden: hidden, hiddenColumns: own.hiddenColumns, revealRowActions: true, actionSlots: own.view.actionSlots,
       check: check || undefined,
       headerActions: function (field) { return headerActions(state, own, field, labels[field]); },
       inspect: function (row) { call(own, "inspect", [row]); },

@@ -230,8 +230,8 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared)
       td.textContent = number(row.record[name], QUANTITIES[name]); return true;
     }, empty: "" });
     var groups = totals.by_group.concat([{ group: null, heat_loss_w_k: totals.heat_loss_w_k }]);
-    // Group spans the By type table's first two columns, so the two tables share their verticals.
-    tables.table(this.byGroup, groups, { defaultWidths: { group: 288, heat_loss_w_k: 432 },
+    // Group spans By type's first four columns, so both Heat loss W/K columns share one width and one rule.
+    tables.table(this.byGroup, groups, { defaultWidths: { group: 574, heat_loss_w_k: 146 },
       rows: groups.map(function (row) {
       return { key: row.group || "all", record: row, tier: "Group", depth: 0, parent: null };
     }), columns: [["group", "Group"], ["heat_loss_w_k", header("Heat loss", "heat_loss_w_k")]],
