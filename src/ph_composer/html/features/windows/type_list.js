@@ -157,6 +157,8 @@ function (shared, preferences, ui) {
     this.list.replaceChildren();
     this.groupNames.forEach(function (group) {
       var heading = el("div", "window-group", group || "Window Types"); heading.setAttribute("tabindex", "0");
+      // The rail's own title already names the one ungrouped list; a caption only helps once groups exist.
+      heading.hidden = self.groupNames.length === 1 && !group;
         self.list.appendChild(heading);
       function move(id) { self.groups[id] = group; self.manual = true; self.paint(); }
       heading.addEventListener("dragover", function (e) { e.preventDefault(); }); heading.addEventListener("drop",

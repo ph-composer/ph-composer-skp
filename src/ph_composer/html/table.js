@@ -41,8 +41,10 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
     });
   }
   function defaultColumnWidth(cache, field) {
-    return Object.prototype.hasOwnProperty.call(cache.defaultWidths, field) ?
-      cache.defaultWidths[field] : DEFAULT_WIDTH;
+    // The Actions column defaults to what its rows hold (table() measures it), not a generic column's width.
+    var own = Object.prototype.hasOwnProperty.call(cache.defaultWidths, field);
+    if (field === "actions" && cache.actionsWidth && !own) return cache.actionsWidth;
+    return own ? cache.defaultWidths[field] : DEFAULT_WIDTH;
   }
   function minimumColumnWidth(cache, field) {
     var configured = cache.options.columnMinWidths && Number(cache.options.columnMinWidths[field]);
@@ -74,16 +76,32 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
     }, 0);
     cache.node.style.minWidth = width + "px";
   }
+  /* The edge shade marks only a table that truly runs past its frame. A width change (a column dragged or reset)
+     and a panel resize both move that line, so each re-reads it; one window listener serves every table. */
+  var overflowTables = [], overflowWatched = false;
+  function markOverflow(cache) {
+    var root = cache.root;
+    if (root) root.classList.toggle("is-overflowing", root.scrollWidth - root.clientWidth > 8);
+  }
+  function watchOverflow(cache) {
+    overflowTables.push(cache);
+    if (overflowWatched || typeof window === "undefined" || !window.addEventListener) return;
+    overflowWatched = true;
+    window.addEventListener("resize", function () {
+      overflowTables = overflowTables.filter(function (entry) { return entry.root.isConnected; });
+      overflowTables.forEach(markOverflow);
+    });
+  }
   function setColumnWidth(cache, field, width, source) {
     cache.columnWidths[field] = Math.max(minimumColumnWidth(cache, field), Math.min(480, Math.round(width)));
     paintColumnWidth(cache, field);
-    paintTableWidth(cache);
+    paintTableWidth(cache); markOverflow(cache);
     if (cache.options.columnResize) cache.options.columnResize(field, cache.columnWidths[field], source);
     return cache.columnWidths[field];
   }
   function resetColumnWidth(cache, field) {
     delete cache.columnWidths[field]; paintColumnWidth(cache, field);
-    paintTableWidth(cache);
+    paintTableWidth(cache); markOverflow(cache);
     if (cache.options.columnResize) cache.options.columnResize(field, null);
     if (cache.options.columnResizeEnd) cache.options.columnResizeEnd(field, null);
   }
@@ -139,7 +157,7 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
       var columnElement = element("col", "col-" + column[0]);
       var th = element("th", "col-" + column[0]);
       th._heading = element("span", "phc-header-label-row");
-      th._label = element("span", "phc-th-label", column[1]);
+      th._label = dom.symbolText(element("span", "phc-th-label"), column[1]);
       th._labelText = column[1];
       dom.tooltip(th._label, column[1]);
       th._heading.appendChild(th._label);
@@ -161,26 +179,29 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
       cache.columns.forEach(function (column) {
         if (cache.resizeHandles[column[0]]) paintColumnWidth(cache, column[0]);
       });
-      paintTableWidth(cache);
+      paintTableWidth(cache); markOverflow(cache);
       if (cache.options.columnResize) cache.options.columnResize(null, null);
       if (cache.options.columnResizeEnd) cache.options.columnResizeEnd(null, null);
     };
+    cache.root = root; watchOverflow(cache);
     node.appendChild(cache.body); root.replaceChildren(node, cache.empty); root._table = cache;
     overlay.attachTooltip(root);
     return cache;
   }
   function paintHeaders(cache, options) {
     cache.node.classList.toggle("has-header-action-row", Boolean(options.headerActions));
+    var anyActions = false;
     cache.columns.forEach(function (column) {
       var field = column[0], th = cache.headers[field];
       if (th._labelText !== column[1]) {
-        th._label.textContent = column[1];
+        dom.symbolText(th._label, column[1]);
         dom.tooltip(th._label, column[1]);
         th._labelText = column[1];
       }
       if (options.header) options.header(th, field);
-      paintHeaderActions(th, options.headerActions ? options.headerActions(field) || [] : [],
-        Boolean(options.headerActions));
+      var actions = options.headerActions ? options.headerActions(field) || [] : [];
+      if (actions.length) anyActions = true;
+      paintHeaderActions(th, actions, Boolean(options.headerActions));
       var hidden = Boolean(options.hiddenColumns && options.hiddenColumns[field]);
       th.hidden = hidden; cache.columnElements[field].hidden = hidden;
       cache.columnElements[field].style.display = hidden ? "none" : "";
@@ -191,6 +212,8 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
         paintColumnWidth(cache, field);
       }
     });
+    // A table whose columns hold no actions right now keeps the compact one-band header.
+    cache.node.classList.toggle("is-actionless", !anyActions);
   }
   /* A row's checkbox, first in its Actions cell, and the header's in the Actions header. `options.check` is
      { state(row) -> true | false | "mixed" | null (no box), toggle(row, event), header() -> true | false |
@@ -411,12 +434,58 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
   }
   /* options: rows, columns, value(row, field) and empty are required; `tree: true` styles top-level rows as
      group headings; see the callers for the other optional hooks. */
+  /* Numbers read from the right; words and chips from the left. A column's own cells decide which it holds, so
+     a screen states no alignment and its heading always agrees with its values. */
+  var NUMBER = /^[\u2212+-]?\d[\d\s.,]*(\s*[^\d\s]{1,12})?$/;
+  var LEADING = { actions: true, hierarchy: true, name: true };
+  var QUANTITY_LABEL = new RegExp("(\\s(mm|m|m²|m³|in|ft|ft²|ft³|kg|W/K)$|W/\\(|/\\(|factor|count|quantity|runs|" +
+    "thickness|length|area|value|\u03c8|\u03bb|emissivity|density|conductivity|heat)", "i");
+  function columnKind(cells) {
+    var kind = null;
+    for (var index = 0; index < cells.length && index < 12; index += 1) {
+      var cell = cells[index];
+      if (cell.classList.contains("is-numeric")) return "number";
+      var controls = cell.querySelectorAll("select, .phc-enum-pill, input");
+      if (Array.prototype.some.call(controls, function (node) { return node.type !== "checkbox"; })) return "text";
+      var text = (cell.textContent || "").trim();
+      if (!text || text === "\u2014" || text === "-" || text === "?") continue;
+      if (!NUMBER.test(text)) return "text";
+      kind = "number";
+    }
+    return kind;
+  }
+  function alignColumns(cache) {
+    cache.columns.forEach(function (column) {
+      var field = column[0], th = cache.headers[field];
+      if (!th || LEADING[field]) return;
+      // Each record row's own cell for the field; group heading rows carry no column cells to read.
+      var cells = [];
+      Array.prototype.forEach.call(cache.body.children, function (tr) {
+        if (tr.classList.contains("phc-group-row")) return;
+        var cell = tr.querySelector(".col-" + field);
+        if (cell) cells.push(cell);
+      });
+      // With no rows yet, a heading that names a quantity or a unit still reads from the right, so a column
+      // keeps its alignment from the empty Model to the full one.
+      var kind = cells.length ? columnKind(cells) : null;
+      // With no rows, or rows whose cells are all blank, a heading that names a quantity or unit still reads from
+      // the right, so a column keeps its side from the empty Model to the full one.
+      if (!kind) { th.classList.toggle("is-end", QUANTITY_LABEL.test(column[1] || "")); if (!cells.length) return; }
+      var text = kind ? kind === "text" : !QUANTITY_LABEL.test(column[1] || "");
+      th.classList.toggle("is-end", !text);
+      Array.prototype.forEach.call(cells, function (cell) {
+        cell.classList.toggle("is-start", text);
+        // A cell showing a chip lets the chip carry its state (a flag), not the whole cell.
+        cell.classList.toggle("has-chip", Boolean(cell.querySelector(".phc-enum-cell, .phc-enum-pill")));
+      });
+    });
+  }
   function table(root, records, options) {
     var focused = document.activeElement, hadFocus = focused && root.contains(focused);
     var rows = options.rows, expanded = options.expanded || Object.create(null);
     var visible = Object.create(null), retained = Object.create(null), retainedGroups = Object.create(null);
     var cache = root._table || buildCache(root, options.columns, options);
-    var position = 0, actionCount = 2;
+    var position = 0, actionCount = 0;
     cache.options = options; cache.records = records; cache.columns = options.columns;
     // A tree's top-level rows head their groups (table.css).
     cache.node.classList.toggle("is-tree", Boolean(options.tree));
@@ -426,6 +495,8 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
     paintHeaders(cache, options);
     paintHeaderCheck(cache);
     cache.empty.hidden = (options.visibleCount === undefined ? rows.length : options.visibleCount) > 0;
+    // An empty table draws no scroll shade: there is nothing beyond its edge to read.
+    root.classList.toggle("is-empty-table", !cache.empty.hidden);
     cache.empty.textContent = options.empty || "No records.";
     rows.forEach(function (row) {
       var group = options.group ? options.group(row) : null;
@@ -442,11 +513,32 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
       }
       position += 1;
     });
-    cache.actionsWidth = 16 + actionCount * 32 + (options.actionsCell ? 40 : 0) + (options.check ? 28 : 0);
+    // An empty table asks its action provider what a row would hold, so the column keeps the width it will have
+    // once records exist. A provider that needs a real row simply leaves the count at zero.
+    if (!rows.length && typeof options.actions === "function") {
+      try {
+        var sample = options.actions({ key: "", depth: 0, tier: "", parent: null,
+          record: { id: "", values: { name: "" }, uses: [], use_count: 0 } }, options.state);
+        actionCount = Array.isArray(sample) ? sample.length : 0;
+      } catch (unused) { actionCount = 0; }
+    }
+    // A provider whose rows need a real record declares its usual count, so an empty table keeps that width.
+    actionCount = Math.max(actionCount, options.actionSlots || 0);
+    // The Actions column is as wide as what its rows hold. A column holding only the row checkbox shrinks to it
+    // and drops its heading word; one with icons keeps room for the word "Actions".
+    var checkOnly = rows.length > 0 && actionCount === 0 && !options.actionsCell && Boolean(options.check);
+    // A narrow panel packs the icons closer (table.css), so record names keep more of the width.
+    var slot = typeof window !== "undefined" && window.innerWidth <= 500 ? 26 : 28;
+    cache.actionsWidth = Math.max(16 + actionCount * slot + (options.actionsCell ? 40 : 0) + (options.check ? 28 : 0),
+      checkOnly ? 44 : options.check ? 108 : 80);
+    cache.node.classList.toggle("has-check-only-actions", checkOnly);
+    if (cache.resizeHandles.actions) paintColumnWidth(cache, "actions");
     var actionsVisible = cache.headers.actions && !cache.headers.actions.hidden;
     root.style.setProperty("--row-actions-width", (actionsVisible ? cache.actionsWidth : 0) + "px");
     paintTableWidth(cache);
     while (cache.body.children.length > position) cache.body.removeChild(cache.body.lastChild);
+    alignColumns(cache);
+    markOverflow(cache);
     Object.keys(cache.rows).forEach(function (key) {
       if (!retained[key]) { delete cache.rows[key]; delete expanded[key]; }
     });

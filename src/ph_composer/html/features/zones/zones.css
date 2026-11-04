@@ -10,7 +10,10 @@
 /* The shown view's tools in the controls row: its help, then what it binds there (Spaces' range-edit tools). */
 .phc-overview .phc-view-tools { display: flex; align-items: center; gap: 8px; }
 .phc-overview .phc-view-tools:empty { display: none; }
-.phc-zone-setting { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 8px 0; }
+/* A setting reads as one row, its words at the left and its field at the right, in the bubble as anywhere. */
+.phc-zone-setting, .phc-bubble-content label.phc-zone-setting { display: flex; flex-direction: row; align-items: center;
+  justify-content: space-between; gap: 12px; margin: 4px 0; text-align: left; color: var(--muted); font-size: var(--text-sm);
+  font-weight: 500; }
 .phc-zone-setting input[type="number"] { width: 72px; }
 /* The table spans the pane and scrolls sideways at narrow widths with its identity columns (Actions,
    Hierarchy, Name) held at the left. The narrowest panel lets Hierarchy scroll and keeps Name beside
@@ -20,14 +23,22 @@
   .phc-overview .phc-table th.col-name { left: calc(var(--col-actions-width) + var(--col-hierarchy-width)); }
 }
 @media (max-width: 500px) {
-  .phc-overview .phc-table th.col-name, .phc-overview .phc-table td.col-name { left: var(--col-actions-width); }
+  /* Actions scroll away with the rows here (table.css), so heading and cell both pin Name at the left edge. */
+  .phc-overview .phc-table th.col-name, .phc-overview .phc-table td.col-name { left: 0; }
 }
+/* The Zone chip columns keep room for their longest value. */
+.phc-overview .phc-table th.col-face_type, .phc-overview .phc-table th.col-boundary_condition,
+.phc-overview .phc-table.has-header-action-row th.has-header-actions:is(.col-face_type, .col-boundary_condition) {
+  min-width: 150px; }
+.phc-overview .phc-table th.col-level, .phc-overview .phc-table th.col-building_segment,
+.phc-overview .phc-table.has-header-action-row th.has-header-actions:is(.col-level, .col-building_segment) {
+  min-width: 112px; }
 /* The tree is the pane's work surface. The overview fits it to the height its pane leaves (overview.js
    `place`); this budget holds until then, and is the Window schedule's height. */
-.phc-table-mount { overflow: auto; max-height: max(240px, calc(100vh - 250px)); border: 1px solid var(--line); border-radius: 6px; }
+.phc-table-mount { overflow: auto; max-height: max(240px, calc(100vh - 205px)); border: 1px solid var(--line); border-radius: var(--radius-md); }
 .phc-workspace .phc-blocked-reason { color: var(--warning-ink); border-color: transparent; background: transparent; }
-.phc-overview .phc-row-marker { padding: 1px 4px; border-radius: 3px;
-  color: var(--warning-ink); background: var(--warning-surface); }
+.phc-overview .phc-row-marker { padding: 0 6px; border-radius: var(--radius-pill); font-size: var(--text-xs);
+  font-weight: 600; line-height: 18px; color: var(--warning-ink); background: var(--warning-surface); }
 .phc-overview .phc-row-marker.is-icon { display: inline-flex; vertical-align: middle; padding: 1px; }
 .phc-overview .phc-row-marker.is-icon svg { width: 14px; height: 14px; }
 /* The selection bar floats over the bottom of the table, positioned in the overview's root, so it never
@@ -39,7 +50,6 @@
 .phc-selection-field { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
 .phc-selection-field select { min-width: 120px; max-width: 200px; color: var(--ink); }
 .phc-selection-assembly { display: grid; gap: 4px; }
-.phc-empty { margin: 0; padding: 12px; color: var(--muted); }
 
 
 
@@ -65,13 +75,13 @@
 .phc-zone-option-colour input[type="color"] { width: 28px; height: 28px; padding: 0; }
 .phc-zone-option-colour input[type="text"] { width: 78px; min-width: 0; font-family: monospace; }
 .phc-zone-option-palette { display: flex; gap: 4px; width: 100%; }
-.phc-zone-option-palette button { width: 16px; height: 16px; min-height: 16px; min-width: 0; padding: 0; border: 1px solid var(--line); border-radius: 3px; }
+.phc-zone-option-palette button { width: 16px; height: 16px; min-height: 16px; min-width: 0; padding: 0; border: 1px solid var(--line); border-radius: var(--radius-sm); }
 .phc-zone-option-palette button:focus-visible { outline: 2px solid var(--interaction-highlight); outline-offset: 2px; }
 .phc-zone-option-usage, .phc-zone-option-help { font-size: 12px; color: var(--muted); }
 .phc-zone-options-dialog .phc-zone-option-default { flex: 0 0 auto; flex-direction: row; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 12px 0; }
 .phc-zone-option-default select { min-width: 0; max-width: 55%; }
 .phc-zone-option-removal { grid-column: 1 / -1; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 10px;
-  border: 1px solid var(--line); border-radius: 4px; }
+  border: 1px solid var(--line); border-radius: var(--radius-sm); }
 .phc-zone-option-removal > span { width: 100%; }
 .phc-zone-option-removal select { min-width: 0; max-width: 100%; }
 .phc-zone-adoption-row { grid-template-columns: minmax(120px, 1fr) minmax(140px, 1fr); }
@@ -86,3 +96,13 @@
   .phc-zone-option-row { grid-template-columns: minmax(0, 1fr); }
   .phc-zone-option-colour { justify-content: flex-start; }
 }
+/* The Zone options dialog scrolls its own list, so its footer stays in flow rather than sticking. */
+.phc-workspace .phc-dialog.phc-zone-options-dialog .phc-dialog-actions { position: static; margin: 12px 0 0; padding: 0;
+  box-shadow: none; }
+/* A view's own tools (Spaces' range fill) join the action bar the same way: idle fill tools left of the count,
+   help at the right end with the count, so every view's cluster ends flush at the same edge. */
+.phc-overview .phc-inventory-controls > .phc-view-tools,
+.phc-overview .phc-inventory-controls > .phc-view-tools > .phc-grid-toolbar { display: contents; }
+.phc-overview .phc-inventory-controls > .phc-view-tools > *,
+.phc-overview .phc-inventory-controls > .phc-view-tools > .phc-grid-toolbar > * { order: 2; }
+.phc-overview .phc-inventory-controls > .phc-view-tools > .phc-grid-toolbar > .phc-grid-tool-group { order: 1; }

@@ -13,7 +13,7 @@ function (request, snapshot, tables, faceWords, ui, units, fields) {
     "window.scaled": "Scaled", "window.sheared": "Sheared", "window.mirrored": "Mirrored" };
   /* Each repair the Ruby findings name, in the order the row menu offers them. */
   var REPAIRS = [["reset_to_type", "Reset to Type", "undo"], ["new_flipped_type", "New flipped Type", "mirror"],
-    ["rehost", "Re-host Window", "anchor"], ["repair_copied_identities", "Repair copied identities", "repair"]];
+    ["rehost", "Re-host Window", "enter"], ["repair_copied_identities", "Repair copied identities", "repair"]];
   function Schedule(owner) {
     this.owner = owner; this.expanded = owner.page.scheduleExpanded || {};
     owner.page.scheduleExpanded = this.expanded;
@@ -88,12 +88,14 @@ function (request, snapshot, tables, faceWords, ui, units, fields) {
   Schedule.prototype.actions = function (row) {
     if (row.record.type) return [{ id: "place", label: "Place " + row.record.name, icon: "add",
       disabled: !this.owner.placement.enabled || !this.owner.placement.available(row.record.type.id) }];
-    var named = repairs(row.record.unit), actions = [{ id: "locate", label: "Locate Window", icon: "locate" }];
-    REPAIRS.forEach(function (repair) {
-      if (named[repair[0]]) actions.push({ id: repair[0], label: repair[1], icon: repair[2] });
+    // Every Unit row's own actions come first, so they line up down the column; the repairs its findings name
+    // follow as a set-apart group, which only some rows have.
+    var named = repairs(row.record.unit), actions = [{ id: "locate", label: "Locate Window", icon: "locate" },
+      { id: "swap_type", label: "Swap Window Type", icon: "variant" },
+      { id: "remove", label: "Remove Window", icon: "delete" }];
+    REPAIRS.filter(function (repair) { return named[repair[0]]; }).forEach(function (repair, index) {
+      actions.push({ id: repair[0], label: repair[1], icon: repair[2], starts: index === 0 });
     });
-    actions.push({ id: "swap_type", label: "Swap Window Type", icon: "variant" });
-    actions.push({ id: "remove", label: "Remove Window", icon: "delete" });
     actions.forEach(function (action) { if (action.id !== "locate") action.disabled = !this.owner.enabled; }, this);
     return actions;
   };
@@ -199,7 +201,8 @@ function (request, snapshot, tables, faceWords, ui, units, fields) {
     var self = this;
     this.summary.textContent = this.enabled ? this.units.length + " Window" + (this.units.length === 1 ? "" : "s") :
       "Window occurrences are unavailable.";
-    tables.table(this.mount, this.units, { rows: this.rows(), expanded: this.expanded,
+    tables.table(this.mount, this.units, { rows: this.rows(), expanded: this.expanded, tree: true,
+      defaultWidths: { count: 84 },
       columns: [["actions", "Actions"], ["hierarchy", "Hierarchy"], ["name", "Window Type / Unit"], ["count", "Count"],
         ["zone", "Zone"], ["host", "Host Face"],
         ["net_area", units.header("Net opaque host area", fields.AREA_M2, units.profile(fields.AREA_M2))],
@@ -209,6 +212,8 @@ function (request, snapshot, tables, faceWords, ui, units, fields) {
         if (field === "name") {
           ui.tooltip(cell, row.record.audit || row.record.name);
         }
+        // A Window Type nobody has placed yet reads as a quiet zero.
+        if (field === "count") cell.classList.toggle("is-muted", row.record.count === 0);
       },
       disabled: Boolean(this.owner.guard()), actions: function (row) { return self.actions(row); },
       action: function (row, action, trigger) { self.act(row, action, trigger); },

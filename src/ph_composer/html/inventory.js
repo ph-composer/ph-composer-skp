@@ -177,7 +177,8 @@ function (request, snapshot, ui, tables, viewControls, RecordEdits, Grid, units,
     this.edits.batchPending = this.ranges.busy();
     this.edits.refresh(rows, state);
     this.tableOptions = { rows: rows, columns: [["actions", "Actions"]].concat(columns), stickyWidths: {},
-      defaultWidths: { name: 220, notes: 240, color: 72, category: 210, exterior_condition: 175 },
+      defaultWidths: { name: 228, notes: 180, color: 60, category: 170, exterior_condition: 140,
+        total_thickness_mm: 104 },
       disabled: !payload || this.busy(),
       value: function (row, field) { return config.value(row.record, field); },
       rowHidden: projected.hidden, group: projected.group, visibleCount: projected.visibleCount,

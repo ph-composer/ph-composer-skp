@@ -44,7 +44,7 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
     level: { mode: "ph_composer.zones.by_level" } };
   var ZONE_SORTED = ["name", "building_segment", "level", "ground_depth_mm"];
   var ZONE_FILTERED = { building_segment: true, level: true };
-  var ZONE_WIDTHS = { name: 142, building_segment: 136, level: 84, ground_depth_mm: 128 };
+  var ZONE_WIDTHS = { name: 142, building_segment: 136, level: 112, ground_depth_mm: 128 };
   // Listed while no view is: the Zone rows alone, with nothing beneath them.
   var NO_VIEW = { id: "", label: "Zones" };
 
@@ -612,6 +612,8 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
       parts.page = ui.pageHeader({ title: "Zones", actions: [parts.toolbar, parts.settings] });
       state.header = parts;
     }
+    // A toolbar no section has filled yet would draw as an empty outlined box.
+    state.header.toolbar.hidden = !state.header.toolbar.querySelector("button, input, select");
     var settings = call(active(state), "settings", [], null), holder = state.header.settings;
     if (holder.children[0] !== (settings || undefined) || holder.children.length > 1) {
       if (settings) holder.replaceChildren(settings); else holder.replaceChildren();
@@ -634,7 +636,7 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
     screenState.optionDialog.consume(state, zoneOptions.read(state));
     if (!root.querySelector(".phc-zone-views")) {
       root.className = "phc-overview";
-      root.replaceChildren(ui.element("div", "phc-view-tabs"), ui.element("div", "phc-heading-mount"),
+      root.replaceChildren(ui.element("div", "phc-heading-mount"), ui.element("div", "phc-view-tabs"),
         screenState.controls.root, ui.element("div", "phc-zone-views"));
       screenState.tabsSignature = null;
     }
@@ -822,7 +824,7 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
           call(own, "cell", [td, row, field], false);
       },
       marker: function (row) { return marker(own, row); }, actions: function (row) { return actions(own, row); },
-      rowHidden: hidden, hiddenColumns: own.hiddenColumns, revealRowActions: true,
+      rowHidden: hidden, hiddenColumns: own.hiddenColumns, revealRowActions: true, actionSlots: own.view.actionSlots,
       check: check || undefined,
       headerActions: function (field) { return headerActions(state, own, field, labels[field]); },
       inspect: function (row) { call(own, "inspect", [row]); },

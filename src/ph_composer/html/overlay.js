@@ -18,7 +18,8 @@ PhComposerUI.define("overlay", ["dom", "icons"], function (dom, icons) {
     trigger.setAttribute("aria-controls", this.panel.getAttribute("id"));
     trigger.setAttribute("aria-expanded", "false");
     var header = element("div", "phc-bubble-heading"); header.appendChild(element("strong", "", title));
-    var close = button("×", function () { self.close(true); }); close.setAttribute("aria-label", "Close " + title);
+    var close = button("", function () { self.close(true); }); close.setAttribute("aria-label", "Close " + title);
+    close.innerHTML = icons.svgIcon("clear", 16);
     header.appendChild(close); this.panel.appendChild(header); this.heading = header; this.closeButton = close;
     this.content = element("div", "phc-bubble-content"); this.panel.appendChild(this.content);
     // Drawing labels stay in their SVG/scrollport; their editor mounts outside that region.
@@ -373,7 +374,8 @@ PhComposerUI.define("overlay", ["dom", "icons"], function (dom, icons) {
     return bubble.root;
   }
   function helpButton(label, explanation) {
-    var help = button("?"); help.className = "phc-help";
+    var help = button(""); help.className = "phc-help";
+    help.innerHTML = icons.svgIcon("help", 16);
     dom.tooltip(help, explanation);
     help.setAttribute("aria-label", label + ": " + explanation);
     return help;

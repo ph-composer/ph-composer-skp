@@ -320,6 +320,12 @@ PhComposerUI.define("record_edits", ["request", "snapshot", "unit_preferences", 
         td.replaceChildren.apply(td, [cell.input].concat(cell.cancelButton ? [cell.cancelButton] : [], [cell.error]));
       }
       td.classList.add("phc-editable-cell");
+      // A quantity or a plain number reads from the right, as read-only numbers do.
+      var numeric = Boolean(this.quantities[field]) || this.numericFields.indexOf(field) >= 0;
+      td.classList.toggle("is-numeric", numeric);
+      // An empty number reads as the tables' missing-value dash, not a blank cell.
+      var field_ = cell.input;
+      if (numeric && field_.tagName.toLowerCase() === "input" && !field_.placeholder) field_.placeholder = "\u2014";
       cell.row = row;
       cell.input.setAttribute("aria-label", this.label ? this.label(row, field, cell) :
         ((row.record.values || {}).name || row.record.id) + " " + ui.titleCase(field));

@@ -191,7 +191,11 @@ PhComposerUI.define("inventory_grid", ["record_edits", "workspace"], function (R
     this.paintCell(cell);
     if (input._gridCell) return;
     input._gridCell = cell;
-    input.addEventListener("mousedown", function (event) { self.select(cell, event.shiftKey); });
+    input.addEventListener("mousedown", function (event) {
+      // Shift extends the cell range, not the browser's text selection, which would pull focus back to the anchor.
+      self.select(cell, event.shiftKey);
+      if (event.shiftKey && event.preventDefault) { event.preventDefault(); input.focus(); }
+    });
     input.addEventListener("focus", function () { if (self.end !== cell) self.select(cell, false); });
     input.addEventListener("dblclick", function () { self.beginEdit(cell); });
     input.addEventListener("blur", function () {

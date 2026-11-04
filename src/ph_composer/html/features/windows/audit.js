@@ -7,6 +7,17 @@ PhComposerUI.define("features/windows/audit", ["units", "features/windows/editor
     HEAT_LOSS = shared.HEAT_LOSS,
     AUDIT_DETAIL = shared.AUDIT_DETAIL, format = shared.format;
   var methods = {};
+  /* The method's symbols take their PH subscripts: "U_w" is set as U with a subscript w. */
+  function subscripted(node, text) {
+    var buffer = "";
+    text.split(/([A-Za-z\u03c8]_[a-z,]+)/).forEach(function (part) {
+      var symbol = /^([A-Za-z\u03c8])_([a-z,]+)$/.exec(part);
+      if (!symbol) { buffer += part; return; }
+      node.appendChild(el("span", "", buffer + symbol[1])); node.appendChild(el("sub", "", symbol[2])); buffer = "";
+    });
+    if (buffer) node.appendChild(el("span", "", buffer));
+    return node;
+  }
 
   methods.paintAudit = function () {
     if (this.surface !== "audit") return;
@@ -16,12 +27,25 @@ PhComposerUI.define("features/windows/audit", ["units", "features/windows/editor
     var expanded = Array.prototype.map.call(this.audit.querySelectorAll("details"), function (node) {
       return node.open; });
     this.audit.replaceChildren(); this.audit.appendChild(el("h2", "", "Window Type calculation audit"));
-    this.audit.appendChild(el("p", "", "Uninstalled Uw = (Ag·Ug + ΣAf·Uf + ΣLg·ψg) / A. Installed effective U adds " +
-      "ΣL·ψ-install / A. Coefficients are " + units.displayUnit(HEAT_LOSS, profile) +
-        "; no intermediate rounding. Missing terms withhold dependent totals."));
+    // The equation stands on its own line; how it is applied follows as quieter notes. Products take a
+    // quarter-em space either side of the dot and Σ a thin space, so the terms read apart at 1x.
+    this.audit.appendChild(subscripted(el("p", "window-audit-method window-audit-equation"),
+      "Uninstalled U_w = (A_g\u2005·\u2005U_g + Σ\u2009A_f\u2005·\u2005U_f + Σ\u2009L_g\u2005·\u2005ψ_g) / A"));
+    this.audit.appendChild(subscripted(el("p", "window-audit-method"), "Installed effective U adds ΣL·ψ_install / A. " +
+      "Coefficients are " + units.displayUnit(HEAT_LOSS, profile) +
+      "; no intermediate rounding. Missing terms withhold dependent totals."));
+    // One row per Window Type, its two results in columns under one heading row; the terms open beneath it.
+    var heading = el("div", "window-audit-columns");
+    var unit = units.displayUnit(U_VALUE, units.profile(U_VALUE));
+    ["Window Type", "U_w " + unit, "Installed U_w " + unit].forEach(function (label) {
+      heading.appendChild(subscripted(el("span"), label)); });
+    var list = el("div", "window-audit-list"); list.appendChild(heading); this.audit.appendChild(list);
     this.entries.forEach(function (entry) {
-      var calc = entry.calculation, group = el("details"); group.appendChild(el("summary", "", entry.record.name +
-        " · Uw " + format(calc.uw_w_m2k, U_VALUE) + " · Installed U " + format(calc.u_effective_w_m2k, U_VALUE)));
+      var calc = entry.calculation, group = el("details", "window-audit-type"), summary = el("summary");
+      summary.appendChild(el("span", "window-audit-name", entry.record.name));
+      summary.appendChild(el("span", "window-audit-value", shared.bare(calc.uw_w_m2k, U_VALUE)));
+      summary.appendChild(el("span", "window-audit-value", shared.bare(calc.u_effective_w_m2k, U_VALUE)));
+      group.appendChild(summary);
       group.appendChild(el("p", "", "Glazed gross area " + format(calc.area_m2, AREA) + " · Empty wall area " +
         format(calc.empty_area_m2, AREA)));
       (calc.elements || []).forEach(function (detail) {
@@ -46,7 +70,7 @@ PhComposerUI.define("features/windows/audit", ["units", "features/windows/editor
         group.appendChild(el("p", "", cell.name + " · Empty, excluded wall area; no window thermal contribution."));
       });
       (calc.findings || []).forEach(function (finding) { group.appendChild(el("p", "", finding.message)); });
-      this.audit.appendChild(group);
+      list.appendChild(group);
     }, this);
     Array.prototype.forEach.call(this.audit.querySelectorAll("details"), function (node, index) {
       node.open = Boolean(expanded[index]); });

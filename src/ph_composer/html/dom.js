@@ -30,6 +30,17 @@ PhComposerUI.define("dom", [], function () {
     else node.removeAttribute("data-tooltip");
     return node;
   }
+  /* Writes a label whose leading PH symbol takes its subscript: "Uf W/(m² K)" sets U with f, "ψ-install" sets ψ
+     with install. Only the window symbols (Uf, Ug, Uw, ψg, ψ-install) qualify; words such as "Used" or
+     "U-value" are written as is. One inline run, so a column layout never splits the symbol. */
+  function symbolText(node, text) {
+    var symbol = /^(U|\u03c8)-?(f|g|w|install)(?=\s|$)(.*)$/.exec(String(text));
+    node.textContent = symbol ? "" : text;
+    if (!symbol) return node;
+    node.appendChild(element("span", "", symbol[1])); node.appendChild(element("sub", "", symbol[2]));
+    if (symbol[3]) node.appendChild(element("span", "", symbol[3]));
+    return node;
+  }
   function titleCase(value) {
     if (value === null || value === undefined) return "";
     return String(value).replace(/_/g, " ").replace(/^./, function (letter) { return letter.toUpperCase(); });
@@ -85,5 +96,5 @@ PhComposerUI.define("dom", [], function () {
 
   return { element: element, svg: svg, button: button, option: option, titleCase: titleCase,
     number: number, blank: blank, compareText: compareText, propertyRow: propertyRow, memoPaint: memoPaint,
-    pulse: pulse, tooltip: tooltip };
+    pulse: pulse, tooltip: tooltip, symbolText: symbolText };
 });

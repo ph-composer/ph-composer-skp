@@ -22,10 +22,10 @@
   min-height: max-content;
   margin-top: 10px;
   padding: 10px 44px 10px 14px;
-  border: 1px solid #cfd8db;
-  border-radius: 6px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
   background: #fff;
-  box-shadow: 0 8px 24px #1e293126;
+  box-shadow: var(--shadow-float);
   color: var(--ink);
   line-height: 1.4;
   overflow-wrap: anywhere;
@@ -64,6 +64,11 @@
 }
 .phc-floating-notice-action[hidden] { display: none; }
 .phc-floating-notice[data-tone="warning"] { border-color: var(--warning-border); background: #fff8df; color: #4f3a0b; }
+/* A warning or an error carries the alert mark the Export readiness line uses. */
+.phc-floating-notice[data-tone="warning"] .phc-floating-notice-message::before,
+.phc-floating-notice[data-tone="error"] .phc-floating-notice-message::before { content: ""; display: inline-block;
+  width: 15px; height: 15px; margin: 0 8px 0 0; vertical-align: -3px; background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/%3E%3Cpath d='M12 9v4'/%3E%3Cpath d='M12 17h.01'/%3E%3C/svg%3E") center / contain no-repeat; }
 .phc-workspace .phc-floating-notice[data-tone="warning"] .phc-floating-notice-dismiss { color: #6b5220; }
 .phc-floating-notice[data-tone="error"] { border-color: #e3a79d; background: var(--error-surface); color: #7a2418; }
 .phc-workspace .phc-floating-notice[data-tone="error"] .phc-floating-notice-dismiss { color: #7a2418; }
@@ -74,7 +79,7 @@
   padding: 7px 10px;
   background: #233c43;
   color: white;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   box-shadow: 0 2px 8px #0002;
   font-size: 12px;
   white-space: normal;
@@ -86,23 +91,24 @@
   max-height: calc(100vh - 48px);
   overflow: auto;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 24px;
   color: var(--ink);
   background: #fff;
+  box-shadow: 0 16px 48px #10242c24, 0 2px 6px #10242c14;
 }
-.phc-dialog::backdrop { background: rgba(20, 35, 40, .35); }
-.phc-workspace .phc-dialog-close { position: absolute; top: 14px; right: 14px; width: 30px; height: 30px;
+.phc-dialog::backdrop { background: rgba(15, 23, 28, .18); }
+.phc-workspace .phc-dialog-close { position: absolute; top: 21px; right: 18px; width: 30px; height: 30px;
   min-height: 30px; padding: 5px; border-color: transparent; background: transparent; color: var(--muted-strong); }
 .phc-blocked-reason-text { max-width: 280px; margin: 0; line-height: 1.45; }
-.phc-dialog h2 { margin: 0 32px 18px 0; font-size: 20px; }
-.phc-dialog h3 { margin: 16px 0 6px; font-size: 14px; }
+.phc-dialog h2 { margin: 0 32px 18px 0; font-size: var(--text-xl); font-weight: 600; }
+.phc-dialog h3 { margin: 16px 0 6px; font-size: var(--text-md); font-weight: 600; }
 .phc-dialog p, .phc-dialog li { line-height: 1.5; }
 /* Shared anchored bubbles: non-modal editors with an explicit pointing edge. */
 .phc-bubble-anchor { position: relative; display: inline-block; }
 .phc-workspace .phc-bubble {
   --bubble-pointer: 24px;
-  --bubble-border: #7b858e;
+  --bubble-border: var(--line-strong);
   position: fixed;
   z-index: 1000;
   box-sizing: border-box;
@@ -111,10 +117,10 @@
   max-height: calc(100vh - 24px);
   padding: 16px;
   border: 1px solid var(--bubble-border);
-  border-radius: 9px;
+  border-radius: var(--radius-lg);
   background: #fff;
   color: #1e2931;
-  box-shadow: 0 5px 22px #22343c26;
+  box-shadow: var(--shadow-float);
   text-align: left;
 }
 .phc-bubble[hidden] { display: none; }
@@ -151,7 +157,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  font-size: 20px;
+  color: var(--muted-strong);
   line-height: 1;
   text-align: center;
 }
@@ -197,16 +203,11 @@
 }
 .phc-workspace .phc-action-menu .phc-action-menu-item:hover:enabled,
 .phc-workspace .phc-action-menu .phc-action-menu-item:focus:enabled {
-  border-color: var(--interaction-highlight);
+  border-color: transparent;
+  outline: 0;
   background: var(--interaction-highlight-tint);
 }
-.phc-workspace .phc-bubble-content input[type=checkbox] {
-  width: 16px;
-  height: 16px;
-  min-height: 16px;
-  padding: 0;
-  accent-color: var(--interaction-highlight);
-}
+.phc-workspace .phc-action-menu .phc-action-menu-item:focus-visible { box-shadow: inset 0 0 0 1px var(--interaction-highlight-outline); }
 .phc-workspace .phc-bubble-content .phc-danger-action {
   border: 0;
   border-top: 1px solid var(--line);
@@ -214,7 +215,7 @@
   padding-top: 12px;
   background: transparent;
 }
-.phc-menu-state { display: block; color: var(--muted); font-size: 11px; margin-top: 3px; }
+.phc-menu-state { display: block; color: var(--muted); font-size: var(--text-xs); margin-top: 3px; }
 .phc-bubble.is-submenu::before { top: var(--bubble-pointer-y); left: -7px; transform: rotate(-45deg); }
 .phc-bubble.is-submenu.opens-left::before { left: auto; right: -7px; transform: rotate(135deg); }
 /* App-wide confirmation buttons: Cancel left, primary action right. */
@@ -223,7 +224,7 @@
   justify-content: flex-end;
   gap: 8px;
   width: 100%;
-  margin-top: 12px;
+  margin-top: 20px;
 }
 .phc-workspace .phc-dialog-actions > button {
   display: inline-flex;
@@ -235,8 +236,6 @@
 }
 .phc-workspace .phc-dialog-actions .primary { background: var(--accent); color: #fff; border-color: var(--accent); }
 .phc-workspace .phc-dialog-actions .phc-action-delete { background: #b42318; border-color: #b42318; }
-.phc-action-apply::before { content: '✓'; }
-.phc-action-cancel::before { content: '×'; }
 .phc-action-delete::before {
   content: '';
   display: inline-block;
@@ -263,14 +262,9 @@
   color: var(--muted);
 }
 /* Keep help control outlines inside the scrollable bubble content. */
-.phc-workspace .phc-bubble-content .phc-help:hover:enabled,
-.phc-workspace .phc-bubble-content .phc-help:focus {
+.phc-workspace .phc-bubble-content .phc-help:hover:enabled {
   color: var(--interaction-highlight-hover);
-  border-color: var(--interaction-highlight);
-  outline: 2px solid var(--interaction-highlight);
-  outline-offset: -2px;
   background: var(--interaction-highlight-tint);
-  box-shadow: none;
 }
 .phc-workspace .phc-dialog-actions .primary:hover:enabled,
 .phc-workspace .phc-dialog-actions .primary:focus:enabled {
@@ -279,9 +273,10 @@
 }
 /* Outranks the fills above, which tie base.css's .primary:disabled and load after it. */
 .phc-workspace .phc-dialog-actions .primary:disabled,
-.phc-workspace .phc-dialog-actions .phc-action-delete:disabled {
-  color: #7b858c; background: #e9edef; border-color: var(--line);
-}
+.phc-workspace .phc-dialog-actions .phc-action-delete:disabled { color: var(--muted); background: var(--surface-alt);
+  border-color: var(--line-strong); }
+/* A confirmation asks one thing, so it takes a narrower dialog than a record form. */
+.phc-dialog.phc-confirm-dialog { width: 440px; }
 /* Record forms open in the shared modal; fields wrap into two columns at the dialog width. */
 .phc-form-dialog h2 { margin: 0 36px 16px 0; }
 .phc-form-dialog form, .phc-form-dialog .phc-form-fields {
@@ -290,8 +285,7 @@
 .phc-form-dialog form > :not(label) { flex-basis: 100%; }
 /* On the label's own line, at its right end, so a required field is no taller than its neighbours. */
 .phc-form-dialog label { position: relative; }
-.phc-required { position: absolute; top: 1px; right: 0; color: var(--muted); font-size: 10px; font-weight: 400;
-  letter-spacing: .04em; }
+.phc-required { position: absolute; top: 1px; right: 0; color: var(--muted-faint); font-size: var(--text-xs); font-weight: 400; }
 /* What a disabled Create is waiting for is guidance, not an error. */
 .phc-form-dialog .cell-error.phc-form-hint { color: var(--muted); }
 .phc-form-dialog label {
@@ -304,8 +298,20 @@
   font-size: 12px;
 }
 .phc-form-dialog input:not([type=checkbox]), .phc-form-dialog select { width: 100%; color: #1e2931; font-size: 13px; }
-.phc-form-dialog .phc-unit-field { display: grid; grid-template-columns: minmax(0, 1fr) auto; width: 100%; }
+/* A unit sits inside its field at the right, so every field in a form keeps the same width. */
+.phc-form-dialog .phc-unit-field { display: block; position: relative; width: 100%; }
+.phc-form-dialog .phc-unit-field input { padding-right: 78px; }
+.phc-form-dialog .phc-unit-field .phc-unit-label { position: absolute; top: 0; right: 10px; line-height: var(--control-height);
+  pointer-events: none; }
 .phc-form-dialog p { margin: 0; }
+/* A sentence the dialog says before its fields stands apart from the first label. */
+.phc-form-dialog > p { margin: 0 0 16px; color: var(--muted-strong); line-height: 1.5; }
+.phc-form-dialog > p:empty { display: none; }
+/* The form's message sits above its footer, at the right where the blocked commit is. */
+.phc-form-dialog .cell-error { margin-top: 6px; color: #8f2f27; }
+/* The form's status shares the footer row, at its left; the actions keep the right. */
+.phc-workspace .phc-dialog-actions > .cell-error { flex: 1 1 auto; align-self: center; min-width: 0; margin: 0 8px 0 0; }
+.phc-workspace .phc-dialog-actions > .cell-error:empty { display: none; }
 .phc-form-dialog > .cell-error { margin-top: 10px; color: #8f2f27; }
 .phc-form-dialog > .cell-error:empty { display: none; }
 
@@ -335,3 +341,11 @@
 .phc-recovery[hidden] { display: none; }
 .phc-recovery-row { display: flex; align-items: center; gap: 12px; }
 .phc-workspace .phc-recovery-row button { flex: none; width: auto; }
+/* A dialog taller than its window scrolls its body; the footer stays in view at the bottom edge. */
+.phc-workspace .phc-dialog .phc-dialog-actions { position: sticky; bottom: -24px; z-index: 2; margin: 8px 0 -24px;
+  padding: 12px 0 24px; background: #fff; }
+/* A toggle in a menu shows its state in a leading check slot, so a focused item never reads as the chosen one. */
+.phc-workspace .phc-action-menu .phc-action-menu-item.phc-setting-choice::before { content: ""; flex: 0 0 14px; width: 14px;
+  height: 14px; background: transparent;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat; }
+.phc-workspace .phc-action-menu .phc-action-menu-item.phc-setting-choice[aria-pressed="true"]::before { background: currentColor; }

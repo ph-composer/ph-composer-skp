@@ -11,7 +11,7 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared)
   var QUANTITIES = { length_m: LENGTH, psi_w_mk: PSI, heat_loss_w_k: HEAT };
   // Narrow enough that every column fits a panel about 1,000 px wide; each still resizes from its header.
   var WIDTHS = { display_name: 120, zone: 110, building_segment: 130, type_name: 120, group: 130, length_m: 80,
-    psi_w_mk: 110, quantity: 80, heat_loss_w_k: 100 };
+    psi_w_mk: 110, quantity: 76, heat_loss_w_k: 124 };
   var COLUMNS = [["display_name", "Thermal bridge"], ["zone", "Zone"], ["building_segment", "Building-Segment"],
     ["type_name", "Type"], ["group", "Group"], ["length_m", "Length"], ["psi_w_mk", "ψ-value"],
     ["quantity", "Quantity"], ["heat_loss_w_k", "Heat loss"]];
@@ -64,7 +64,9 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared)
     this.byType = ui.element("div", "tb-totals-table");
     this.byGroup = ui.element("div", "tb-totals-table");
     this.totals.appendChild(ui.element("h2", "", "Totals"));
-    this.totals.appendChild(this.byType); this.totals.appendChild(this.byGroup);
+    // Each totals table names what it sums, so the second never reads as a stray table under the first.
+    this.totals.appendChild(ui.element("h3", "tb-totals-caption", "By type")); this.totals.appendChild(this.byType);
+    this.totals.appendChild(ui.element("h3", "tb-totals-caption", "By group")); this.totals.appendChild(this.byGroup);
     root.appendChild(this.totals);
     this.others = ui.element("div", "tb-schedule-others");
     root.appendChild(this.others);
@@ -228,7 +230,9 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared)
       td.textContent = number(row.record[name], QUANTITIES[name]); return true;
     }, empty: "" });
     var groups = totals.by_group.concat([{ group: null, heat_loss_w_k: totals.heat_loss_w_k }]);
-    tables.table(this.byGroup, groups, { rows: groups.map(function (row) {
+    // Group spans By type's first four columns, so both Heat loss W/K columns share one width and one rule.
+    tables.table(this.byGroup, groups, { defaultWidths: { group: 574, heat_loss_w_k: 146 },
+      rows: groups.map(function (row) {
       return { key: row.group || "all", record: row, tier: "Group", depth: 0, parent: null };
     }), columns: [["group", "Group"], ["heat_loss_w_k", header("Heat loss", "heat_loss_w_k")]],
     value: function (row, name) { return row.record[name]; }, cell: function (td, row, name) {

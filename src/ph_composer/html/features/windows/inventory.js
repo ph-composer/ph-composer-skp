@@ -120,7 +120,7 @@ function (panel, inventories, forms, Form, shared, fields, request, snapshot, un
   function settingControl(label) {
     var trigger = ui.button(""), value = ui.element("span", "window-default-value");
     trigger.className = "window-default-control";
-    trigger.replaceChildren(ui.element("span", "", label + ": "), value, ui.glyph("chevron"));
+    trigger.replaceChildren(ui.element("span", "", label), value, ui.glyph("chevron"));
     trigger.valueText = value; return trigger;
   }
   Inventory.prototype.buildDefaults = function () {

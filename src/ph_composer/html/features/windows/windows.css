@@ -5,16 +5,14 @@
 .window-heading,.window-card-heading { display:flex; align-items:center; flex-wrap:wrap; gap:6px; }
 .window-toolbar button[aria-pressed=true] { background:var(--interaction-highlight); color:#fff; }
 .window-layout { display:grid; grid-template-columns:210px minmax(0,1fr); min-height:0; flex:1; }
-.window-rail { min-width:0; border-right:2px solid #bbc4ca; overflow:auto; }
+.window-rail { min-width:0; border-right:1px solid var(--line); overflow:auto; }
 .window-rail-content { min-height:100%; display:flex; flex-direction:column; }
-.window-rail-header { display:flex; align-items:center; gap:6px; padding:8px 9px 6px 12px; }
-.window-rail-header strong { flex:1; font-size:13px; letter-spacing:.01em; }
-.window-rail-tools { display:flex; align-items:center; gap:4px; padding:4px 8px 8px; border-bottom:1px solid var(--line); }
+.window-rail-tools { display:flex; align-items:center; gap:2px; padding:8px 8px 8px 4px; border-bottom:1px solid var(--line); }
+.window-rail-tools .window-rail-collapse { margin-left:auto; }
 .window-workspace .window-rail-tools select { display:none; }
 .window-type-list { padding:6px 0 10px; }
 .window-type-row { position:relative; display:flex; height:28px; box-sizing:border-box; align-items:center; }
-.window-type-row + .window-type-row::before,.window-group::after { content:""; position:absolute; left:8px; right:8px; height:1px; background:var(--line); pointer-events:none; }
-.window-type-row + .window-type-row::before { top:0; }
+.window-group::after { content:""; position:absolute; left:8px; right:8px; height:1px; background:var(--line); pointer-events:none; }
 .phc-workspace .window-workspace .window-type-row>button,.phc-workspace .window-workspace .window-type-row>button:hover:enabled,.phc-workspace .window-workspace .window-type-row>button:focus { border:0; border-radius:0; background:transparent; outline:none; }
 .phc-workspace .window-workspace .window-type-row>button:first-child { flex:1; min-width:0; height:28px; min-height:28px; padding:2px 8px; font-size:12px; font-weight:400; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .phc-workspace .window-type-row-actions .window-type-move { cursor:grab; }
@@ -32,29 +30,36 @@
 .window-row-editor { padding:0 4px 0 6px; }
 .phc-workspace .window-row-editor .window-title-input { height:24px; min-height:24px; padding:0 5px; font-size:12px; font-weight:400; }
 .phc-workspace .window-row-editor .phc-icon-button { width:22px; height:22px; min-height:22px; padding:3px; }
-.window-type-row.selected { background:var(--interaction-highlight-tint); }
+/* The current Window Type reads as every selected row does: teal tint, teal text. */
+.window-type-row { margin:1px 4px; border-radius:var(--radius-sm); }
+.window-type-row.selected { background:var(--interaction-highlight-soft); }
+.phc-workspace .window-workspace .window-type-row.selected>button:first-child { color:var(--interaction-highlight); font-weight:600; }
 .window-type-row>.window-type-flag { display:inline-flex; flex:none; margin-right:8px; color:#9a6b00; cursor:help; }
 .window-type-row>.window-type-flag svg { width:14px; height:14px; }
-.window-empty-prompt { margin:0; padding:24px 20px; }
+/* With no Window Type the work surface shows the kit's framed empty state. */
+.window-empty-prompt { align-self:start; margin:16px 20px; padding:36px 16px 32px; border:1px solid var(--line); border-radius:var(--radius-md); }
+.window-layout { min-height:calc(100vh - 200px); }
 .phc-workspace .window-workspace .window-type-row>button:focus-visible:enabled { outline:2px solid var(--interaction-highlight); outline-offset:-2px; }
 .window-card.selected { border-color:var(--interaction-highlight); background:var(--interaction-highlight-tint); }
-.window-group { position:relative; padding:12px 8px 7px; color:var(--muted); font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+.window-group { position:relative; padding:12px 8px 7px; color:var(--muted-strong); font-size:var(--text-sm); font-weight:600; }
 .window-group::after { bottom:0; }
 .window-rail-collapsed { overflow:hidden; }
 .phc-workspace .window-rail-strip { display:flex; align-items:center; gap:8px; writing-mode:vertical-rl; width:35px; height:100%; border:0; border-radius:0; padding:12px 8px; }
 .window-main { min-width:0; overflow:auto; padding:0 18px 18px; }
-.window-heading { min-height:94px; margin:0 -18px 0; padding:16px 20px; border-bottom:1px solid var(--line); flex-wrap:nowrap; gap:18px; }
+/* The heading flows into the drawing toolbar, whose own rule closes the pair: one rule, not two 50px apart. */
+.window-heading { min-height:94px; margin:0 -18px 0; padding:16px 20px 14px; border-bottom:0; flex-wrap:nowrap; gap:18px; }
 .window-identity { flex:1; min-width:220px; }
-.phc-workspace .window-title { flex:1; min-width:0; max-width:100%; min-height:28px; padding:0; border-color:transparent!important; background:transparent!important; font-size:20px; font-weight:600; line-height:1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; }
+.phc-workspace .window-title { flex:1; min-width:0; max-width:100%; min-height:28px; padding:0; border-color:transparent!important; background:transparent!important; font-size:var(--text-xl); font-weight:600; line-height:1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; }
 .window-header-metrics { display:flex; align-items:stretch; flex-shrink:0; }
 .window-header-metric { display:flex; min-width:126px; flex-direction:column; gap:4px; padding:0 18px; }
 .window-header-metric + .window-header-metric { border-left:1px solid var(--line); }
-.window-header-metric small { color:var(--muted); font-size:11px; }
+.window-header-metric:first-child { padding-left:0; }
+.window-header-metric small { color:var(--muted); font-size:var(--text-md); line-height:1.35; }
 .window-title-editor { display:flex; flex:1; min-width:0; align-items:center; gap:4px; }
-.phc-workspace .window-title-input { flex:1; min-width:0; height:32px; min-height:32px; padding:0 6px; font-size:20px; font-weight:600; }
+.phc-workspace .window-title-input { flex:1; min-width:0; height:32px; min-height:32px; padding:0 6px; font-size:var(--text-xl); font-weight:600; }
 .phc-workspace .window-title-editor .phc-icon-button { width:28px; height:28px; min-height:28px; padding:4px; border-color:transparent; background:transparent; color:var(--muted); }
 .window-header-metric strong { color:#1e2931; font-size:16px; font-weight:600; white-space:nowrap; font-variant-numeric:tabular-nums; }
-.window-type-actions { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:8px; max-width:330px; }
+.window-type-actions { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:8px; max-width:360px; }
 .window-type-actions button { white-space:nowrap; }
 /* Place is filled at rest, so "on" is a ring inside the fill and the darker teal, as a pressed toggle reads. */
 .phc-workspace .window-type-actions .primary[aria-pressed="true"] { background:var(--interaction-highlight-hover); box-shadow:inset 0 0 0 2px #fff, 0 0 0 1px var(--interaction-highlight-hover); }
@@ -62,27 +67,28 @@
 .window-placement-chosen { font-weight:600; }
 .window-anchor-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; }
 .phc-workspace .window-anchor-grid button { min-height:28px; padding:2px 6px; font-size:12px; white-space:nowrap; }
-.window-empty-mark { fill:var(--muted); font-size:calc(10px * var(--window-type, 1)); letter-spacing:.06em; text-transform:uppercase; pointer-events:none; }
-.window-placement-hint { flex:1 1 280px; font-size:11px; }
+.window-empty-mark { fill:var(--muted-strong); font-size:calc(12px * var(--window-type, 1)); letter-spacing:.06em; text-transform:uppercase; pointer-events:none; }
+.window-placement-hint { flex:1 1 280px; font-size:var(--text-sm); }
 .window-schedule { min-width:0; }
 .window-schedule > .muted { margin:8px 0; }
 .window-repair-dialog select { width:100%; min-width:0; }
 /* One outlined group per job, spaced apart; buttons inside a group drop their own border, and a pressed tool keeps
    its fill, so the active state still reads. */
-.window-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:8px 10px; min-height:50px; padding:9px 0; border-bottom:1px solid var(--line); }
-.window-tool-group { display:flex; align-items:center; gap:2px; padding:2px; border:1px solid var(--line); border-radius:6px; background:#fff; }
+.window-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:8px 14px; min-height:50px; padding:9px 0; border-bottom:1px solid var(--line); }
+.window-tool-group { display:flex; align-items:center; gap:2px; padding:0; border:0; background:transparent; }
+/* Groups are told apart by space alone: the toolbar wraps at most panel widths, and a rule would start a line. */
 .window-tool-group[hidden] { display:none; }
 .window-workspace .window-tool-group > button { border-color:transparent; }
 .window-selection-tools { margin-left:auto; }
-.window-tool-caption { padding:0 4px 0 6px; color:var(--muted); font-size:11px; }
+.window-tool-caption { padding:0 6px 0 0; color:var(--muted); font-size:var(--text-sm); }
 .window-workspace .window-toolbar select { min-height:28px; }
 .window-drawing { overflow:auto; text-align:center; min-height:280px; padding:14px 0 6px; }
 .window-drawing svg { display:inline-block; vertical-align:top; font-size:12px; max-height:none; }
 .window-drawing.is-picking svg,.window-drawing.is-picking svg * { cursor:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke-linecap='round' stroke-linejoin='round'><g stroke='white' stroke-width='4'><path d='m12 9-8.414 8.414A2 2 0 0 0 3 18.828v1.344a2 2 0 0 1-.586 1.414A2 2 0 0 1 3.828 21h1.344a2 2 0 0 0 1.414-.586L15 12'/><path d='m18 9 .4.4a1 1 0 1 1-3 3l-3.8-3.8a1 1 0 1 1 3-3l.4.4 3.4-3.4a1 1 0 1 1 3 3z'/><path d='m2 22 .414-.414'/></g><g stroke='rgb(19,42,43)' stroke-width='1.75'><path d='m12 9-8.414 8.414A2 2 0 0 0 3 18.828v1.344a2 2 0 0 1-.586 1.414A2 2 0 0 1 3.828 21h1.344a2 2 0 0 0 1.414-.586L15 12'/><path d='m18 9 .4.4a1 1 0 1 1-3 3l-3.8-3.8a1 1 0 1 1 3-3l.4.4 3.4-3.4a1 1 0 1 1 3 3z'/><path d='m2 22 .414-.414'/></g></svg>") 2 22, crosshair; }
 .window-drawing.is-pasting svg,.window-drawing.is-pasting svg * { cursor:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke-linecap='round' stroke-linejoin='round'><g stroke='white' stroke-width='4'><path d='M11 7 6 2'/><path d='M18.992 12H2.041'/><path d='M21.145 18.38A3.34 3.34 0 0 1 20 16.5a3.3 3.3 0 0 1-1.145 1.88c-.575.46-.855 1.02-.855 1.595A2 2 0 0 0 20 22a2 2 0 0 0 2-2.025c0-.58-.285-1.13-.855-1.595'/><path d='m8.5 4.5 2.148-2.148a1.205 1.205 0 0 1 1.704 0l7.296 7.296a1.205 1.205 0 0 1 0 1.704l-7.592 7.592a3.615 3.615 0 0 1-5.112 0l-3.888-3.888a3.615 3.615 0 0 1 0-5.112L5.67 7.33'/></g><g stroke='rgb(19,42,43)' stroke-width='1.75'><path d='M11 7 6 2'/><path d='M18.992 12H2.041'/><path d='M21.145 18.38A3.34 3.34 0 0 1 20 16.5a3.3 3.3 0 0 1-1.145 1.88c-.575.46-.855 1.02-.855 1.595A2 2 0 0 0 20 22a2 2 0 0 0 2-2.025c0-.58-.285-1.13-.855-1.595'/><path d='m8.5 4.5 2.148-2.148a1.205 1.205 0 0 1 1.704 0l7.296 7.296a1.205 1.205 0 0 1 0 1.704l-7.592 7.592a3.615 3.615 0 0 1-5.112 0l-3.888-3.888a3.615 3.615 0 0 1 0-5.112L5.67 7.33'/></g></svg>") 20 21, copy; }
-.window-glass { fill:#f7fbfb; stroke:none; }
+.window-glass { fill:#e6f0f3; stroke:none; }
 .window-empty { fill:none; stroke:#6c7e82; stroke-width:1; stroke-dasharray:5 5; vector-effect:non-scaling-stroke; pointer-events:all; }
-.window-frame { fill:#eef1f1; stroke:#9aa8ac; stroke-width:.75; vector-effect:non-scaling-stroke; }
+.window-frame { fill:#dfe4e6; stroke:#9aa8ac; stroke-width:.75; vector-effect:non-scaling-stroke; }
 .window-element-outline { fill:none; stroke:#50656a; stroke-width:1; vector-effect:non-scaling-stroke; pointer-events:none; }
 .window-unit-outline { fill:none; stroke:#2c3e43; stroke-width:1.75; vector-effect:non-scaling-stroke; pointer-events:none; }
 .window-overlay { pointer-events:none; }
@@ -95,7 +101,7 @@
 .window-name-control { cursor:text; }
 .window-name-control rect { fill:#fff; stroke:#aab7ba; stroke-width:1; vector-effect:non-scaling-stroke; }
 .window-name-control:hover rect { stroke:var(--drawing-highlight); stroke-width:2; }
-.window-name { fill:#20363a; font-size:calc(11px * var(--window-type, 1)); font-weight:600; pointer-events:none; }
+.window-name { fill:#20363a; font-size:calc(12px * var(--window-type, 1)); font-weight:600; pointer-events:none; }
 .window-name-control.compact .window-name { font-size:calc(9px * var(--window-type, 1)); paint-order:stroke; stroke:#fff; stroke-width:3px; stroke-linejoin:round; }
 .window-overall-dimension { fill:#1e2931; font-size:calc(12px * var(--window-type, 1)); font-weight:650; font-variant-numeric:tabular-nums; }
 .window-canvas.proposed .window-overall-dimension { fill:#8a5a00; }
@@ -111,7 +117,7 @@
 .window-insert path { fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; vector-effect:non-scaling-stroke; }
 .window-insert:hover,.window-insert:focus { color:var(--drawing-highlight-hover); filter:drop-shadow(0 0 3px var(--drawing-highlight-halo)); }
 .window-drawing [role=button]:focus-visible { outline:2px solid var(--drawing-highlight); outline-offset:3px; }
-.window-workspace .window-card { border:1px solid var(--line); border-radius:4px; margin:6px 0; background:#fff; overflow-x:auto; }
+.window-workspace .window-card { border:1px solid var(--line); border-radius: var(--radius-sm); margin:6px 0; background:#fff; overflow-x:auto; }
 .window-card-heading { min-height:32px; padding:3px 6px 3px 4px; gap:10px; }
 .window-card-filter { display:flex; align-items:center; gap:10px; margin-top:10px; color:var(--muted); font-size:12px; }
 .phc-workspace .window-workspace .window-card-filter button { min-height:26px; padding:2px 8px; }
@@ -119,11 +125,11 @@
 .window-card-uw { color:var(--muted); font-size:12px; white-space:nowrap; font-variant-numeric:tabular-nums; }
 .window-card-uw strong { margin-left:5px; color:var(--ink); font-weight:600; }
 .window-element-table { min-width:600px; padding:0 6px 6px; font-size:12px; }
-.window-element-row { display:grid; grid-template-columns:108px minmax(170px,1fr) 88px 60px 50px 84px; column-gap:8px; align-items:center; min-height:28px; padding:0 6px; border-radius:3px; }
+.window-element-row { display:grid; grid-template-columns:108px minmax(170px,1fr) 88px 60px 50px 84px; column-gap:8px; align-items:center; min-height:28px; padding:0 6px; border-radius: var(--radius-sm); }
 .window-element-row:nth-child(odd):not(.window-element-head) { background:#1e293108; }
 .window-element-head { min-height:0; padding-bottom:4px; border-bottom:1px solid var(--line); border-radius:0; line-height:1.25; font-size:11px; }
 .window-element-head>span { display:flex; flex-direction:column; align-items:flex-end; white-space:nowrap; }
-.window-element-unit { color:var(--muted); font-size:10px; }
+.window-element-unit { color:var(--muted); font-size:var(--text-xs); }
 .window-element-label { display:flex; align-items:center; justify-content:space-between; gap:4px; white-space:nowrap; }
 .window-workspace .window-element-label .phc-glyph { display:inline-flex; color:#9a6b00; cursor:help; }
 .window-workspace .window-element-label .phc-glyph svg { width:14px; height:14px; }
@@ -141,7 +147,7 @@
 .phc-workspace .window-operation-controls button { height:24px; min-height:24px; padding:0 8px; font-size:12px; }
 .phc-workspace .window-operation-controls button[aria-pressed=true] { border-color:var(--interaction-highlight); background:var(--interaction-highlight-tint); color:var(--interaction-highlight); }
 .window-card-empty { margin:0; padding:0 10px 8px; color:var(--muted); font-size:12px; }
-.window-findings { display:flex; align-items:center; gap:6px; margin:4px 6px 6px; padding:4px 8px; border-radius:3px; background:var(--warning-surface); color:var(--warning-ink); font-size:12px; }
+.window-findings { display:flex; align-items:center; gap:6px; margin:4px 6px 6px; padding:4px 8px; border-radius: var(--radius-sm); background:var(--warning-surface); color:var(--warning-ink); font-size:12px; }
 .window-workspace .window-findings .phc-glyph { flex:none; align-self:center; display:inline-flex; }
 .window-findings strong { flex:none; font-weight:600; }
 .window-findings ul { display:flex; flex-wrap:wrap; min-width:0; margin:0; padding:0; list-style:none; color:#40535a; }
@@ -150,12 +156,12 @@
 .phc-workspace .window-picker { width:340px; }
 .window-workspace .window-picker .phc-bubble-heading { gap:6px; }
 .window-workspace .window-picker .phc-bubble-heading strong { flex:1; min-width:0; }
-.phc-workspace .window-workspace .window-picker .phc-bubble-heading .phc-action-menu-anchor>button { display:inline-flex; align-items:center; justify-content:center; flex:0 0 28px; width:28px; height:28px; min-height:28px; padding:4px; border:1px solid transparent; border-radius:4px; background:transparent; }
+.phc-workspace .window-workspace .window-picker .phc-bubble-heading .phc-action-menu-anchor>button { display:inline-flex; align-items:center; justify-content:center; flex:0 0 28px; width:28px; height:28px; min-height:28px; padding:4px; border:1px solid transparent; border-radius: var(--radius-sm); background:transparent; }
 .phc-workspace .window-workspace .window-picker .phc-bubble-heading .phc-action-menu-anchor>button.is-filtered { color:var(--interaction-highlight); border-color:var(--interaction-highlight); background:var(--interaction-highlight-tint); }
 .window-workspace .window-picker .phc-bubble-content { overflow:hidden; margin:0 -16px; padding:2px 16px; }
 .phc-workspace .window-workspace .window-picker .library-sidebar-search { flex:none; flex-direction:row; align-items:center; gap:6px; min-height:32px; }
 .window-workspace .window-picker .library-sidebar-search .phc-glyph { display:inline-flex; color:var(--muted); }
-.window-picker-filters { flex:none; margin:-4px 0 0; color:var(--muted); font-size:11px; }
+.window-picker-filters { flex:none; margin:-4px 0 0; color:var(--muted); font-size:var(--text-sm); }
 .window-picker-list { display:flex; flex-direction:column; flex:0 1 auto; min-height:0; max-height:280px; overflow:auto; margin:0 -16px; }
 .phc-workspace .window-picker-list .window-picker-choice { position:relative; display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:8px; align-items:center; width:100%; min-height:42px; padding:4px 16px; border:0; border-radius:0; background:transparent; font-weight:400; text-align:left; }
 .window-picker-choice + .window-picker-choice::before { content:""; position:absolute; top:0; left:16px; right:16px; height:1px; background:var(--line); pointer-events:none; }
@@ -163,15 +169,53 @@
 .phc-workspace .window-picker-list .window-picker-choice.is-current { background:var(--interaction-highlight-tint); }
 .window-picker-name,.window-picker-meta { grid-column:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .window-picker-name { font-size:12px; }
-.window-picker-meta { color:var(--muted); font-size:11px; font-variant-numeric:tabular-nums; }
+.window-picker-meta { color:var(--muted); font-size:var(--text-sm); font-variant-numeric:tabular-nums; }
 .window-workspace .window-picker-choice .phc-glyph { grid-column:2; grid-row:1 / span 2; display:inline-flex; color:var(--interaction-highlight); }
 .window-picker-list>p { margin:8px 16px; color:var(--muted); font-size:12px; }
 .window-picker-list>p.window-picker-missing { color:var(--warning-ink); }
 .phc-workspace .window-picker-menu { width:240px; }
-.window-picker-menu .window-picker-field { gap:3px; margin:0 2px 8px; color:var(--muted); font-size:11px; }
+.window-picker-menu .window-picker-field { gap:3px; margin:0 2px 8px; color:var(--muted); font-size:var(--text-sm); }
 .window-workspace .window-picker-menu .window-picker-field + .phc-action-menu-item { margin-top:2px; }
-.window-audit { padding:16px; overflow:auto; }
-.window-audit details { margin:10px; }
+/* The audit: a title, the method as a caption, then a quiet grid of Window Types whose terms open beneath. */
+.window-audit { padding:16px 0 24px; overflow:auto; }
+.window-audit > h2 { margin:0 0 4px; font-size:var(--text-lg); }
+.window-audit-method { max-width:72ch; margin:0 0 16px; color:var(--muted-strong); font-size:14px; line-height:1.7; }
+.window-audit-method sub { font-size:.8em; margin:0 1px 0 0.5px; }
+/* The equation reads a step larger than its notes, its terms spaced apart. */
+.window-audit-method.window-audit-equation { margin-bottom:4px; color:var(--ink); font-size:var(--text-lg);
+  word-spacing:.12em; font-variant-numeric:tabular-nums; }
+.window-audit-equation sub { font-size:.85em; }
+.window-audit-equation + .window-audit-method { font-size:var(--text-sm); color:var(--muted); }
+/* The audit rows sit on the shared table surface: one hairline frame with the card radius. */
+.window-audit-list { border:1px solid var(--line); border-radius:var(--radius-md); overflow:hidden; }
+.window-audit-type:last-child { border-bottom:0; }
+/* The result tracks shrink with the panel, so the grid fits at every width above the narrow breakpoint. */
+.window-audit-columns, .window-audit-type > summary { display:grid;
+  grid-template-columns:minmax(96px,1fr) minmax(96px,150px) minmax(96px,150px);
+  align-items:center; column-gap:16px; padding:0 12px 0 32px; }
+.window-audit-columns { min-height:36px; border-bottom:1px solid var(--line); background:var(--surface-alt);
+  color:var(--muted-strong); font-size:var(--text-sm); font-weight:600; }
+/* At the narrowest panel the two result tracks give way, so the grid fits the 360 px panel's frame. */
+@media (max-width:500px) { .window-audit-columns, .window-audit-type > summary {
+  grid-template-columns:minmax(72px,1fr) minmax(64px,88px) minmax(64px,88px); column-gap:8px; padding-right:8px; } }
+.window-audit-columns > span:not(:first-child), .window-audit-value { text-align:right; font-variant-numeric:tabular-nums; }
+.window-audit-type { border-bottom:1px solid #edf0f2; }
+.window-audit-type > summary { position:relative; min-height:36px; cursor:pointer; list-style:none; }
+.window-audit-type > summary::-webkit-details-marker { display:none; }
+/* The disclosure is the kit's chevron, turned when open. */
+.window-audit-type > summary::before { content:""; position:absolute; left:14px; top:50%; width:5px; height:5px;
+  border-right:1.5px solid var(--muted-strong); border-bottom:1.5px solid var(--muted-strong);
+  transform:translateY(-60%) rotate(-45deg); transition:transform .12s; }
+.window-audit-type[open] > summary::before { transform:translateY(-75%) rotate(45deg); }
+.window-audit-type > summary:hover { background:var(--row-hover-wash); }
+.window-audit-name { font-weight:400; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.window-audit-type p { margin:0; padding:3px 12px 3px 32px; color:var(--muted-strong); font-size:var(--text-sm);
+  line-height:1.5; font-variant-numeric:tabular-nums; }
+.window-audit-type p:empty { display:none; }
+.window-audit-type details { margin:4px 0 8px 32px; padding:4px 0; border-left:2px solid var(--line); }
+.window-audit-type details > summary { padding:3px 12px; cursor:pointer; color:var(--ink); font-size:var(--text-sm);
+  font-weight:600; }
+.window-audit-type details p { padding-left:24px; }
 .window-layout.collapsed { grid-template-columns:36px minmax(0,1fr); }
 .phc-workspace .window-workspace .phc-bubble { position:fixed; z-index:1000; max-width:calc(100vw - 20px); max-height:calc(100vh - 30px); overflow:auto; }
 .window-workspace [hidden] { display:none!important; }
@@ -215,7 +259,19 @@
 /* The defaults stay inside a narrow panel: a long Psi-Install name shrinks to an ellipsis, its full name in
    the tooltip and accessible label. */
 .phc-inventory-settings>.phc-bubble-anchor { min-width:0; max-width:100%; }
-.window-default-control { display:inline-flex; align-items:center; gap:4px; max-width:100%; min-width:0; white-space:nowrap; }
+/* A default reads as "Label [value ⌄]", as Group by and Order by do: the label outside, the value and chevron
+   drawn as one field. */
+.phc-workspace .window-default-control { display:inline-flex; align-items:center; gap:0; max-width:100%; min-width:0;
+  padding:0; border:0; background:transparent; white-space:nowrap; }
+.phc-workspace .window-default-control:hover:enabled { background:transparent; }
+.window-default-control>span:first-child { margin-right:6px; color:var(--muted); font-size:var(--text-sm); font-weight:500; }
+.window-default-control>.window-default-value { height:var(--control-height); padding:0 4px 0 10px; border:1px solid var(--line-strong);
+  border-right:0; border-radius:var(--radius-sm) 0 0 var(--radius-sm); background:#fff; line-height:28px; }
+.window-default-control>.phc-glyph { height:var(--control-height); padding:7px 8px 0 4px; border:1px solid var(--line-strong);
+  border-left:0; border-radius:0 var(--radius-sm) var(--radius-sm) 0; background:#fff; color:var(--muted-strong); }
+.window-default-control>.phc-glyph svg { width:14px; height:14px; }
+.window-default-control:hover:enabled>.window-default-value, .window-default-control:hover:enabled>.phc-glyph {
+  border-color:var(--interaction-highlight-outline); }
 .window-default-control>span:first-child,.window-default-control>.phc-glyph { flex:none; }
 .window-default-value { min-width:0; max-width:11em; overflow:hidden; text-overflow:ellipsis; }
 .window-default-control .muted { color:var(--muted); }
@@ -234,7 +290,7 @@
   .window-type-list { max-height:150px; overflow:auto; }
   .window-main { padding:8px; overflow:visible; }
   .window-workspace .window-heading { padding:12px; margin:-8px -8px 0; }
-  .window-workspace .window-title { font-size:18px; }
+  .window-workspace .window-title { font-size:var(--text-lg); }
   .window-tool-group { flex-wrap:wrap; }
   .window-install-body { grid-template-columns:minmax(0,1fr); }
   .window-element-table { overflow:auto; }
@@ -242,11 +298,11 @@
 }
 .window-install-edge-label { fill:#314e50; font-size:12px; font-weight:600; paint-order:stroke;
   stroke:#fff; stroke-width:4px; stroke-linejoin:round; pointer-events:none; }
-.window-product-workspace { display:flex; align-items:flex-start; gap:18px; min-width:0; }
+.window-product-workspace { display:flex; align-items:flex-start; gap:18px; min-width:0; min-height:calc(100vh - 190px); }
 .window-product-table { flex:1; min-width:0; }
 .window-product-select.is-drop-target { outline:2px solid var(--accent); background:#eef7f5; }
 @media (max-width:900px) {
-  .window-product-workspace { flex-direction:column; }
+  .window-product-workspace { flex-direction:column; min-height:0; }
   .window-product-table, .window-product-workspace > .library-sidebar-root { width:100%; box-sizing:border-box; }
 }
 .window-install-body { grid-template-columns:minmax(180px,1fr) minmax(180px,240px) 260px; }
@@ -257,3 +313,14 @@
 @media (max-width:650px) {
   .window-install-body { grid-template-columns:minmax(0,1fr); }
 }
+/* The Window count sits where every other screen puts its count: at the right, over the table. */
+.window-schedule > p.muted { margin:12px 0 8px; text-align:left; font-size:var(--text-sm); }
+.window-product-workspace .phc-inventory-controls input { width: 150px; }
+/* Adding a Window Type is the rail's main action, so its glyph takes the interaction teal. */
+.phc-workspace .window-rail-tools .phc-icon-button[aria-label="Add Window Type"] { color: var(--interaction-highlight); }
+/* The Window Type tools are a plain icon run, like the drawing tools beneath them. */
+.phc-workspace .phc-toolbar.window-type-tools { border-color: transparent; padding: 0; }
+/* A Frame swatch is drawn as the elevation draws a frame: square corners, a 4 px band in the frame's colour,
+   and hairlines on its outer edge and round the opening. */
+.library-sidebar-swatch.is-frame { border-width: 4px; border-radius: 1px; background: var(--surface);
+  box-shadow: 0 0 0 1px #3a4a51, inset 0 0 0 1px #3a4a51; }

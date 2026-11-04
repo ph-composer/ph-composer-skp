@@ -228,7 +228,7 @@ test("a narrow table reserves readable widths and follows column visibility and 
   };
   settings.actionsCell = function () {};
   paint(h, settings);
-  assert.strictEqual(table.style.minWidth, "682px", "three row actions and the custom action cell fit too");
+  assert.strictEqual(table.style.minWidth, "664px", "three narrow-packed row actions and the action cell fit too");
   settings.hiddenColumns = { actions: true };
   paint(h, settings);
   assert.strictEqual(table.style.minWidth, "530px", "hidden actions also consume no width");
@@ -366,4 +366,39 @@ test("a tree four deep opens its third tier when asked, and its fourth carries n
   h.tables.table(h.root, deep, options({ rows: deep, tree: true, expanded: expanded, tiers: 3 }));
   assert.deepStrictEqual(chevrons(), [true, true, true, false]);
   assert.strictEqual(h.root.querySelectorAll(".tier-3").length, 1, "the fourth tier has its own indent class");
+});
+
+test("a heading sets only a window symbol with its subscript; words that start with U stay plain", function () {
+  var h = harness();
+  paint(h, { columns: [["actions", "Actions"], ["name", "Uf W/(m² K)"], ["size", "Used length m"],
+    ["notes", "U-value W/(m² K)"]] });
+  function label(field) { return tagged(h, "col-" + field, "th")[0].querySelector(".phc-th-label"); }
+  assert.strictEqual(label("name").querySelector("sub").textContent, "f");
+  assert.deepStrictEqual(label("name").children.map(function (node) { return node.textContent; }),
+    ["U", "f", " W/(m² K)"]);
+  assert.strictEqual(label("size").querySelector("sub"), null);
+  assert.strictEqual(label("notes").querySelector("sub"), null);
+});
+
+test("columns align by their cells: numbers right, words and chips left, blank quantities right", function () {
+  var h = harness();
+  paint(h, {
+    columns: [["actions", "Actions"], ["name", "Name"], ["label", "Label"], ["size", "Size"], ["kind", "Kind"],
+      ["depth", "Depth mm"]],
+    value: function (row, field) {
+      return field === "label" ? row.record.name : field === "size" ? row.record.size : "";
+    },
+    cell: function (td, row, field) {
+      if (field !== "kind") return false;
+      td.appendChild(h.context.document.createElement("span")).className = "phc-enum-pill";
+      return true;
+    }
+  });
+  function heading(field) { return tagged(h, "col-" + field, "th")[0]; }
+  assert.deepStrictEqual(["label", "size", "kind", "depth"].map(function (field) {
+    return heading(field).classList.contains("is-end"); }), [false, true, false, true]);
+  assert.ok(cells(h, "label").every(function (td) { return td.classList.contains("is-start"); }));
+  assert.ok(cells(h, "size").every(function (td) { return !td.classList.contains("is-start"); }));
+  assert.ok(cells(h, "kind").every(function (td) {
+    return td.classList.contains("is-start") && td.classList.contains("has-chip"); }));
 });

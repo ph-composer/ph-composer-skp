@@ -2,9 +2,11 @@
 /* The page scrolls inside its own region: the workspace body clips, and eight live tokens with their
    revoked history outgrow the smallest window. */
 .agent-access { flex: 1; min-height: 0; overflow-y: auto; padding: 0 16px 16px; }
+/* The page keeps a readable measure, centred in a wider window. */
+.agent-access > * { max-width: 640px; margin-left: auto; margin-right: auto; }
 .agent-access-server { margin: 0 0 12px; }
 .agent-access-unreadable { margin: 0 0 12px; padding: 10px 12px; border: 1px solid var(--warning-border);
-  border-radius: 6px; background: var(--warning-surface); color: var(--warning-ink); }
+  border-radius: var(--radius-md); background: var(--warning-surface); color: var(--warning-ink); }
 .agent-access-unreadable p { margin: 0 0 8px; }
 .agent-access-list { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
 .agent-access-row { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 8px 0;
@@ -14,13 +16,14 @@
 .agent-access-row.is-revoked .agent-access-row-label { color: var(--muted); font-weight: 400; }
 .agent-access-empty { margin: 12px 0; }
 .agent-access-field { display: flex; flex-direction: column; gap: 4px; margin: 0 0 12px; }
-.agent-access-capabilities { margin: 0 0 12px; padding: 0; border: 0; }
+.agent-access-capabilities { margin: 0 0 4px; padding: 0; border: 0; }
 .agent-access-capabilities legend { padding: 0; margin: 0 0 6px; font-weight: 600; }
 /* Box beside its label, one row per capability. Outranks overlay.css's `.phc-form-dialog label` column, which
    put each box on its own line under the previous capability's description. */
 .phc-form-dialog .agent-access-capability { display: flex; flex: 1 1 100%; flex-direction: row;
-  align-items: flex-start; gap: 8px; margin: 0 0 8px; }
-.agent-access-capability input[type=checkbox] { flex: none; margin: 2px 0 0; }
+  align-items: flex-start; gap: 10px; margin: 0 0 12px; }
+/* The kit's 16 px box (base.css), level with the bold title. */
+.agent-access-capability input[type=checkbox] { flex: none; margin: 0; }
 .agent-access-capability span { display: flex; flex-direction: column; gap: 2px; }
 .agent-access-secret { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; }
 .agent-access-secret-value { flex: 1; min-width: 0; font-family: ui-monospace, Menlo, monospace; }
@@ -30,4 +33,31 @@
 .agent-access-inline:empty { display: none; }
 /* base.css sizes a bare button to its container; as in the panel (shell.css), buttons size to their label. */
 .agent-access button { width: auto; font-weight: 400; }
-.agent-access .agent-access-revoke { flex: none; color: var(--red); }
+/* Revoking asks again before it acts, so the row's button is neutral; red stays with the confirm step. */
+.agent-access .agent-access-revoke { flex: none; }
+/* A capability reads as its name in ink, then what it allows in quieter words beneath. */
+.agent-access-capability strong { color: var(--ink); font-size: var(--text-md); font-weight: 600; }
+.agent-access-capability small { color: var(--muted); font-size: var(--text-sm); font-weight: 400; line-height: 1.4; }
+.agent-access-capabilities legend { color: var(--ink); }
+.agent-access-row-text small { font-size: var(--text-sm); }
+/* The server state is a status line; the tokens are a framed list, as the Libraries dialog lists its libraries. */
+.agent-access-server { color: var(--muted); }
+/* Tokens are ruled rows, closed top and bottom, as Help & Diagnostics lists its records. */
+.agent-access-list { border: 0; border-top: 1px solid var(--line); border-radius: 0; }
+.agent-access-row { padding: 8px 0; }
+/* In a window shorter than the form, the body scrolls under a footer that a hairline sets apart. */
+.phc-workspace .agent-access-create-dialog .phc-dialog-actions { border-top: 1px solid var(--line); }
+.phc-dialog.agent-access-create-dialog { width: min(528px, calc(100vw - 32px)); max-height: calc(100vh - 32px); margin: auto; }
+/* The New token form fits a small window: tighter gaps between its groups, so rows are not cut at rest. */
+.phc-dialog.agent-access-create-dialog { padding: 20px; }
+.agent-access-create-dialog .agent-access-field { margin-bottom: 8px; }
+.agent-access-create-dialog .agent-access-capabilities legend { margin-bottom: 4px; }
+.phc-form-dialog.agent-access-create-dialog .agent-access-capability { margin-bottom: 8px; }
+.agent-access-create-dialog h2 { margin-bottom: 12px; }
+/* "This Model only" follows the Access options at their own 8 px step, so it reads as one more option. */
+.agent-access-create-dialog form { row-gap: 8px; }
+.agent-access-create-dialog .agent-access-capabilities { margin: 0; }
+.phc-form-dialog.agent-access-create-dialog .agent-access-capabilities .agent-access-capability:last-child {
+  margin-bottom: 0; }
+/* The scope is not a seventh permission: a 16 px step sets it apart from the Access group. */
+.phc-form-dialog.agent-access-create-dialog .agent-access-capabilities + .agent-access-capability { margin-top: 8px; }

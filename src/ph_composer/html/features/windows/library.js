@@ -26,7 +26,10 @@ PhComposerUI.define("features/windows/library", ["features/windows/editor_shared
         return [row.values.name, row.values.manufacturer, row.values.product_code, row.values.notes].join(" ");
       }, decorate: function (node, row) {
         if (!row.values.color) return;
-        var swatch = ui.element("span", "library-sidebar-swatch"); swatch.style.backgroundColor = row.values.color;
+        // A Frame's swatch is drawn as a frame (its colour as a band round an open centre), so a pale frame
+        // colour never reads as an empty checkbox.
+        var swatch = ui.element("span", "library-sidebar-swatch" + (kind === "frames" ? " is-frame" : ""));
+        swatch.style[kind === "frames" ? "borderColor" : "backgroundColor"] = row.values.color;
         node.appendChild(swatch);
       }, target: target || function () { return { hint: "Choose a target first." }; } });
   }

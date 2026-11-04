@@ -1,14 +1,17 @@
 /* The Thermal Bridges tab: the assign bar over the Types table and the Schedule's totals and findings. The
    tables, controls and bubbles are the kit's; these rules only place this screen's own parts. */
 /* One row that always shows, so a selection never moves the table under it; it wraps at narrow widths. */
-.tb-assign-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 12px;
-  padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface, #fff); }
+/* A toolbar row like the one beneath it: no box, the count in bold leading the controls it applies to. */
+.tb-assign-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 12px 0 12px;
+  padding: 0; border: 0; border-radius: 0; background: transparent; }
 .tb-assign-count { flex: 0 0 auto; font-size: 13px; font-weight: 600; white-space: nowrap; }
-.tb-assign-bar select { width: auto; min-width: 12em; max-width: 100%; }
+.tb-assign-bar select { width: 180px; max-width: 100%; }
 .tb-assign-field { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
 .phc-workspace .tb-assign-quantity { width: 5em; }
 .tb-assign-quantity[aria-invalid="true"] { border-color: var(--red); }
 .tb-assign-reason[hidden] { display: none; }
+/* The reason sits against the Assign it explains, not spaced like another control. */
+.tb-assign-reason { margin-left: -8px; }
 /* The kit marks a pressed text button only on hover and focus; the running edge tool stays marked at rest, as a
    pressed icon button does, so the cue survives the panel losing focus to SketchUp. */
 .phc-workspace .tb-assign-bar .tb-edge-tool-arm[aria-pressed="true"] {
@@ -19,6 +22,7 @@
 /* Each table scrolls inside itself, so a narrow panel never scrolls the tab sideways. */
 .tb-schedule-table, .tb-totals-table { min-width: 0; overflow: auto; }
 .tb-schedule-table { margin-top: 8px; }
+.tb-schedule > .phc-inventory-controls { margin: 12px 0 0; }
 .tb-schedule-table tbody tr { cursor: pointer; }
 /* Words read from the left; numbers keep the table's right alignment. */
 .tb-types .phc-table :is(.col-group, .col-datasheet),
@@ -36,9 +40,20 @@
 .tb-finding-blocks { color: var(--warning-ink); font-weight: 600; }
 .tb-schedule-totals, .tb-schedule-others { margin-top: 18px; }
 .tb-schedule-totals[hidden], .tb-schedule-others[hidden] { display: none; }
-.tb-schedule-totals h2, .tb-schedule-others h2 { margin: 0 0 8px; font-size: 13px; }
+.tb-schedule-totals h2, .tb-schedule-others h2 { margin: 8px 0 4px; font-size: var(--text-md); font-weight: 600; }
+/* The by-group table ends with the whole schedule's total, set apart as a total. */
+.tb-schedule-totals .tb-totals-table:last-child tbody tr:last-child td { border-top: 1px solid var(--line-strong);
+  font-weight: 600; }
+.tb-totals-caption { margin: 4px 0 -4px; color: var(--muted-strong); font-size: var(--text-sm); font-weight: 600; }
+/* Two columns of figures keep a readable width rather than spreading across the pane. */
+.tb-schedule-totals .tb-totals-table { max-width: 720px; }
+
 /* By type takes the full row and by group sits beneath, so neither table's last column falls out of view. */
 .tb-schedule-totals { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
-.tb-other-findings { margin: 0; padding: 0; list-style: none; }
-.tb-other-findings li { display: flex; align-items: baseline; gap: 10px; padding: 4px 0; border-bottom: 1px solid var(--line); }
+/* What belongs to no run is a framed list like the tables above it. */
+.tb-other-findings { margin: 0; padding: 0; list-style: none; border: 1px solid var(--line); border-radius: var(--radius-md); }
+.tb-other-findings li { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 12px; border-bottom: 1px solid var(--line); }
+.tb-other-findings li:last-child { border-bottom: 0; }
 .tb-other-findings li span { flex: 1; }
+/* A narrow panel lays the bar out in two deliberate rows: the count and type, then what acts on them. */
+@media (max-width: 500px) { .tb-assign-bar select { flex: 1 1 160px; width: auto; } .tb-assign-bar { gap: 8px; } }

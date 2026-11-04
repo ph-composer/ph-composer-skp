@@ -1,8 +1,9 @@
 /* Help & Diagnostics (page.js). Built on base.css and overlay.css; only its own regions here. */
-.support { flex: 1; min-height: 0; overflow-y: auto; padding: 0 16px 16px; }
+.support { flex: 1; min-height: 0; overflow-y: auto; padding: 0 20px 16px 16px; }
 .support-identity { margin: 0 0 16px; }
-.support-section { margin: 0 0 16px; }
-.support-section h2 { margin: 0 0 6px; font-size: 13px; font-weight: 600; }
+/* Section titles are captions over their rows, as the sidebar group captions are. */
+.support-section { margin-bottom: 24px; }
+.support-section h2 { margin: 0 0 6px; color: var(--ink); font-size: var(--text-md); font-weight: 600; }
 .support-row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0;
   border-bottom: 1px solid var(--line); }
 .support-row-label { flex: none; }
@@ -11,7 +12,9 @@
 .support-problems { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
 .support-problem { display: grid; grid-template-columns: max-content 1fr max-content; gap: 12px; padding: 6px 0;
   border-bottom: 1px solid var(--line); }
-.support-problem.is-selected { background: var(--interaction-highlight-tint); }
+/* The incident this window opened for is marked by its code in teal, not a resting tint that reads as hover. */
+.support-problem.is-selected .support-problem-label { font-weight: 600; }
+.support-problem.is-selected .support-problem-incident { color: var(--interaction-highlight); font-weight: 600; }
 .support-problem-time, .support-problem-incident { color: var(--muted); font-variant-numeric: tabular-nums; }
 .support-links { display: flex; flex-wrap: wrap; gap: 8px; }
 .support-details { margin: 8px 0 0; }
@@ -26,3 +29,13 @@
 @media (max-width: 420px) {
   .support-problem { grid-template-columns: 1fr; gap: 2px; }
 }
+/* The disclosure reads as the panel's other quiet controls. */
+.support-details summary { color: var(--muted-strong); font-weight: 500; }
+/* Help routes are links in a row, quieter than the window's own actions. */
+.phc-workspace .support-links button { min-height: var(--control-height); padding: 0 10px; border-color: transparent;
+  background: transparent; color: var(--interaction-highlight); }
+.phc-workspace .support-links button:hover:enabled { background: var(--interaction-highlight-tint); }
+.support-links { gap: 4px; margin-left: -10px; }
+/* A small window gives its title a line of its own; the actions sit beneath it, left-aligned. */
+.phc-workspace .support .phc-heading { flex-direction: column; align-items: flex-start; gap: 10px; }
+.phc-workspace .support .phc-heading-actions { margin-left: 0; }

@@ -1,6 +1,6 @@
 /* Product lifecycle dialogs freeze the authored baseline and use the shared request/form contract. */
-PhComposerUI.define("features/windows/form", ["record_form", "snapshot", "unit_field",
-  "features/windows/editor_shared", "workspace"], function (RecordForm, snapshot, unitFields, shared, ui) {
+PhComposerUI.define("features/windows/form", ["dom", "record_form", "snapshot", "unit_field",
+  "features/windows/editor_shared", "workspace"], function (dom, RecordForm, snapshot, unitFields, shared, ui) {
   "use strict";
   function Form(session, send, kind, spec, changed) {
     var self = this; this.kind = kind; this.productSpec = spec; this.fields = {}; this.unitFields = {};
@@ -9,14 +9,20 @@ PhComposerUI.define("features/windows/form", ["record_form", "snapshot", "unit_f
       action: shared.PREFIX + kind + ".create", submitLabel: "Create " + spec.label,
       pendingText: "Saving…", failureText: "The product was not changed.", changed: changed });
     spec.columns.filter(function (column) { return column[0] !== "color"; }).forEach(function (column) {
-      var label = ui.element("label", "", column[1]), input = ui.element("input");
+      // A PH symbol takes its subscript in the visible label ("Uf" reads U with f); the field keeps the plain name.
+      var label = ui.element("label");
+      label.appendChild(dom.symbolText(ui.element("span", "phc-symbol"), column[1]));
+      var input = ui.element("input");
       self.fieldLabels[column[0]] = label;
       input.setAttribute("aria-label", column[1]); self.fields[column[0]] = input;
       if (spec.quantities[column[0]]) {
         self.unitFields[column[0]] = new unitFields.UnitField({ input: input, field: spec.quantities[column[0]] });
         label.appendChild(self.unitFields[column[0]].root);
       } else label.appendChild(input);
-      if (column[0] === "name") RecordForm.required(label, input);
+      if (column[0] === "name") {
+        RecordForm.required(label, input);
+        input.addEventListener("input", function () { self.paintReady(); });
+      }
       self.form.appendChild(label);
     });
     this.explanation = ui.element("p", "muted"); this.form.appendChild(this.explanation);
@@ -28,7 +34,9 @@ PhComposerUI.define("features/windows/form", ["record_form", "snapshot", "unit_f
     if (this.disposed || !this.enabled || this.busy()) return;
     this.method = method; this.record = record && shared.clone(record); this.records = (records || []).slice();
     this.spec.action = shared.PREFIX + this.kind + "." + method;
-    this.title.textContent = ui.titleCase(method) + " " + (record ? record.values.name : this.productSpec.label);
+    // A new product's dialog is titled as every other record's: New, then what it makes.
+    this.title.textContent = method === "create" ? "New " + this.productSpec.label :
+      ui.titleCase(method) + " " + (record ? record.values.name : this.productSpec.label);
     this.root.setAttribute("aria-label", this.title.textContent);
     this.submitButton.textContent = method === "delete" ? "Delete" : method === "duplicate" ? "Duplicate" : "Create";
     this.submitButton.setAttribute("aria-label", this.submitButton.textContent);
@@ -47,7 +55,18 @@ PhComposerUI.define("features/windows/form", ["record_form", "snapshot", "unit_f
     this.explanation.textContent = method === "delete" ? record.use_count ? "Replace all " + record.use_count +
       " uses, including any Model default, before removing this product." : "Remove this unused product." :
       "Products remain editable definitions in this model.";
+    this.paintReady();
     this.show(); if (method !== "delete") this.fields.name.focus();
+  };
+  /* Create and Duplicate wait for the required Name, and say so where the footer's hint goes, as the other
+     record dialogs do. */
+  var NAME_HINT = "Enter a name.";
+  Form.prototype.paintReady = function () {
+    if (this.method === "delete" || this.busy()) return;
+    var missing = !String(this.fields.name.value || "").trim();
+    this.submitButton.disabled = missing;
+    if (missing || this.error.textContent === NAME_HINT) this.error.textContent = missing ? NAME_HINT : "";
+    this.error.classList.toggle("phc-form-hint", this.error.textContent === NAME_HINT);
   };
   Form.prototype.copyName = function (record) {
     var base = record.values.name.trim(), candidate = base + " (copy)", n = 1;

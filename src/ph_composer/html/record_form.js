@@ -12,7 +12,8 @@ PhComposerUI.define("record_form", ["request", "workspace"], function (request, 
     this.session = session; this.send = send; this.spec = spec; this.changed = spec.changed;
     this.requests = request.channel(session, send, spec.label);
     if (spec.dialog === false) { this.root = ui.element("div", "phc-form"); this.root.hidden = true; }
-    else this.root = ui.formDialog(spec.className || "", function () { self.hide(); });
+    else this.root = ui.formDialog((spec.className || "") + (spec.destructive ? " phc-confirm-dialog" : ""),
+      function () { self.hide(); });
     this.title = ui.element("h2", "", spec.title); this.root.appendChild(this.title);
     this.form = ui.element("form");
     this.submitButton = ui.element("button", "primary", spec.submitLabel); this.submitButton.type = "submit";
@@ -26,10 +27,13 @@ PhComposerUI.define("record_form", ["request", "workspace"], function (request, 
       });
     }
   }
-  /* Appends the confirmation row and the status line after the owner's fields. */
+  /* Appends the confirmation row after the owner's fields, its status line first in that row, so what a blocked
+     commit waits for reads beside it. */
   RecordForm.prototype.finish = function () {
-    this.form.appendChild(ui.actionRow(this.cancel, this.submitButton, Boolean(this.spec.destructive)));
-    this.root.appendChild(this.form); this.root.appendChild(this.error);
+    var actions = ui.actionRow(this.cancel, this.submitButton, Boolean(this.spec.destructive));
+    actions.insertBefore(this.error, actions.firstChild);
+    this.form.appendChild(actions);
+    this.root.appendChild(this.form);
   };
   RecordForm.prototype.show = function () {
     if (this.spec.dialog === false) this.root.hidden = false; else this.root.openModal();

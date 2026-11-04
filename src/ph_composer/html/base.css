@@ -12,14 +12,31 @@
   --ink: #132a2b;
   --choice-chevron-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23132a2b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   --choice-chevron-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  --muted: #5e6e6c;
-  --paper: #f4f1e9;
-  --card: #fffdf7;
-  --line: #d7d2c6;
-  --green: #0d735c;
-  --green-dark: #075140;
+  /* One cool neutral ramp for every page: the panel, its dialogs and the two separate windows. */
+  --muted: #5d6b73;
+  --muted-faint: #7b878e;
+  --paper: #fff;
+  --card: #fff;
+  --line: #e1e6e9;
+  --line-strong: #c9d2d7;
+  --surface-alt: #f6f8f9;
+  --green: #075360;
+  --green-dark: #064550;
   --amber: #a45d05;
   --red: #a43a2d;
+  /* The type scale: metadata, controls, body, section titles, page titles. */
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-md: 13px;
+  --text-lg: 15px;
+  --text-xl: 20px;
+  /* The radius scale: controls and swatches, cards and bars, dialogs and bubbles, pills. */
+  --radius-sm: 5px;
+  --radius-md: 7px;
+  --radius-lg: 10px;
+  --radius-pill: 999px;
+  --control-height: 30px;
+  --shadow-float: 0 6px 20px #10242c1a, 0 1px 2px #10242c14;
   /* Semantic roles that repeat across the screens. */
   --warning-ink: #785400;
   --warning-surface: #fff0c2;
@@ -27,9 +44,11 @@
   --warning-surface-alt: #ffe6a0;
   --warning-border: #d8b45c;
   --error-surface: #fff0ed;
-  --muted-strong: #53676e;
+  --muted-strong: #46565e;
+  /* Glyph ink at rest: a step darker than secondary text, so thin outline icons keep their definition. */
+  --icon-ink: #3a4a51;
   --interaction-highlight-outline: #07536040;
-  --interaction-highlight-soft: #e5effb;
+  --interaction-highlight-soft: #e3eff1;
   /* The row hover wash, laid over a cell's own background. */
   --row-hover-wash: #0753600d;
   /* Opaque backing for sticky table columns (table.css). */
@@ -37,8 +56,6 @@
   /* The inset every pane's content shares with the tab row. */
   --page-gutter: 20px;
 }
-/* The live panel repaints the shell's paper and green for the workspace screens. */
-.live-panel { --paper: #fff; --card: #fff; --green: #075360; --green-dark: #075360; }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body {
@@ -49,24 +66,19 @@ body {
   font-size: 14px;
 }
 h1, h2, p { margin-top: 0; }
-h1 { margin-bottom: 0; font-size: 27px; letter-spacing: -0.03em; }
-h2 { margin-bottom: 0; font-size: 15px; }
-h3 { margin: 0 0 6px; font-size: 15px; }
+h1 { margin-bottom: 0; font-size: var(--text-xl); font-weight: 600; letter-spacing: -0.01em; }
+h2 { margin-bottom: 0; font-size: var(--text-lg); font-weight: 600; }
+h3 { margin: 0 0 6px; font-size: var(--text-md); font-weight: 600; }
 main { padding: 16px; }
-section {
-  margin-bottom: 12px;
-  padding: 17px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--card);
-}
+/* A section is a run of content under its heading, not a card: pages separate regions with space and rules. */
+section { margin-bottom: 20px; }
 section p { margin: 10px 0 14px; color: var(--muted); line-height: 1.45; }
-label { display: grid; gap: 4px; color: var(--muted); font-size: 11px; font-weight: 600; }
+label { display: grid; gap: 4px; color: var(--muted); font-size: var(--text-sm); font-weight: 500; }
 input {
   min-width: 0;
   padding: 7px;
-  border: 1px solid var(--line);
-  border-radius: 4px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
   color: var(--ink);
   background: #fff;
   font: inherit;
@@ -77,30 +89,23 @@ input:focus {
   outline-offset: -2px;
 }
 button {
-  width: 100%;
   padding: 9px 10px;
-  border: 1px solid #8d9996;
-  border-radius: 5px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
   color: var(--ink);
   background: #fff;
   font: inherit;
-  font-weight: 600;
   cursor: pointer;
 }
-button:hover, button:focus {
-  border-color: var(--interaction-highlight);
-  outline: 2px solid var(--interaction-highlight);
-  outline-offset: -2px;
-}
+button:hover { border-color: var(--interaction-highlight); }
+button:focus-visible { outline: 2px solid var(--interaction-highlight); outline-offset: -2px; }
 button.primary { border-color: var(--green); color: #fff; background: var(--green); }
-button.primary:hover, button.primary:focus { background: var(--interaction-highlight-hover); }
+button.primary:hover, button.primary:focus-visible { background: var(--interaction-highlight-hover); }
 footer { padding: 0 20px 18px; color: var(--muted); font-size: 11px; }
 /* The persistent panel shell. */
 html { height: 100%; }
 .phc-workspace {
   --accent: var(--interaction-highlight);
-  --line: #dce2e5;
-  --muted: #67747c;
   color: #1e2931;
   background: #fff;
   font: 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -112,17 +117,30 @@ html { height: 100%; }
 .phc-workspace * { box-sizing: border-box; }
 .phc-workspace button, .phc-workspace input, .phc-workspace select {
   font: inherit;
+  font-size: 13px;
+  font-weight: 400;
   color: inherit;
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   background: #fff;
-  border-radius: 4px;
-  min-height: 30px;
-  padding: 4px 9px;
+  border-radius: var(--radius-sm);
+  min-height: var(--control-height);
+  padding: 4px 10px;
+}
+.phc-workspace input::placeholder { color: var(--muted-faint); }
+/* A checkbox keeps its own 16 px box, not the text controls' height and padding, so it sits level with its label. */
+.phc-workspace input[type=checkbox] { width: 16px; height: 16px; min-height: 16px; padding: 0;
+  accent-color: var(--interaction-highlight); }
+/* Every choice reads the same: the field's own outline with the kit's chevron, never the native arrow. */
+.phc-workspace select {
+  appearance: none; -webkit-appearance: none; padding-right: 28px;
+  background-image: var(--choice-chevron, var(--choice-chevron-dark)); background-repeat: no-repeat;
+  background-position: right 8px center; background-size: 14px 14px; text-overflow: ellipsis;
 }
 .phc-workspace button { cursor: pointer; }
-.phc-workspace button:hover:enabled { background: var(--interaction-highlight-tint); }
+.phc-workspace button:hover:enabled { background-color: var(--interaction-highlight-tint); border-color: var(--interaction-highlight-outline); }
 .phc-workspace :focus-visible { outline: 2px solid var(--interaction-highlight); outline-offset: -2px; }
-.phc-workspace :disabled { color: #7b858c; background: #f5f7f8; cursor: not-allowed; }
+/* Disabled is quieter ink on the same surface, never a grey fill that reads as pressed. */
+.phc-workspace :disabled { color: var(--muted-faint); background-color: var(--surface-alt); border-color: var(--line); cursor: not-allowed; }
 .phc-workspace .primary { color: white; background: var(--accent); border-color: var(--accent); }
 .phc-workspace button.primary:hover:enabled, .phc-workspace button.primary:focus:enabled,
 .phc-workspace button[aria-pressed="true"]:hover:enabled, .phc-workspace button[aria-pressed="true"]:focus:enabled {
@@ -148,27 +166,34 @@ html { height: 100%; }
   background: var(--interaction-highlight);
   border-color: var(--interaction-highlight);
 }
-.phc-workspace .primary:disabled { color: #7b858c; background: #e9edef; border-color: var(--line); }
+/* A primary that cannot run yet is the quiet disabled button: no washed-out teal. */
+.phc-workspace .primary:disabled { color: var(--muted); background: var(--surface-alt); border-color: var(--line-strong); }
 .phc-app-header {
   display: flex;
   min-width: 0;
   flex-shrink: 0;
   align-items: stretch;
   border-bottom: 1px solid var(--line);
-  background: #f8f9fa;
+  background: var(--surface-alt);
 }
-.phc-tabs { display: flex; flex-wrap: wrap; min-width: 0; flex: 1 1 auto; gap: 2px 6px; padding: 10px var(--page-gutter); }
+.phc-tabs { display: flex; flex-wrap: wrap; min-width: 0; flex: 1 1 auto; gap: 4px; padding: 8px var(--page-gutter); }
 /* A tab is as wide as its label. A row too narrow for them all wraps, so no tab is clipped or off-screen. */
-.phc-tabs button { flex: none; padding: 9px 14px; border: 0; white-space: nowrap; }
-.phc-tabs [aria-pressed=true] { background: var(--accent); color: white; }
-.phc-subtabs { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px var(--page-gutter); border-bottom: 1px solid var(--line); }
-.phc-workspace .phc-subtabs button { background: transparent; color: var(--muted-strong); border-color: transparent; }
+.phc-workspace .phc-tabs button { flex: none; min-height: var(--control-height); padding: 5px 12px; border: 0; border-radius: var(--radius-sm);
+  color: var(--muted-strong); font-weight: 500; white-space: nowrap; }
+.phc-workspace .phc-tabs button:hover:enabled { color: var(--ink); background-color: #0d2a3010; }
+.phc-workspace .phc-tabs [aria-pressed=true], .phc-workspace .phc-tabs [aria-pressed=true]:hover:enabled { background: var(--accent); color: #fff; }
+.phc-workspace .phc-tabs button:disabled { color: var(--muted-faint); background: transparent; }
+/* Sub-tabs are a quieter second level: text tabs on one rule, the current one underlined in teal. */
+.phc-subtabs { display: flex; flex-wrap: wrap; gap: 0 18px; padding: 0 var(--page-gutter); border-bottom: 1px solid var(--line); }
+.phc-workspace .phc-subtabs button { min-height: 36px; padding: 0 2px; border: 0; border-radius: 0; background: transparent;
+  color: var(--muted); font-weight: 500; }
+.phc-workspace .phc-subtabs button:hover:enabled { background: transparent; color: var(--ink); }
 .phc-workspace .phc-subtabs [aria-selected="true"],
 .phc-workspace .phc-subtabs [aria-selected="true"]:hover:enabled,
 .phc-workspace .phc-subtabs [aria-selected="true"]:focus:enabled {
   color: var(--interaction-highlight);
-  background: var(--interaction-highlight-tint);
-  border-color: var(--interaction-highlight);
+  background: transparent;
+  box-shadow: inset 0 -2px var(--interaction-highlight);
 }
 .phc-grid-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 .phc-grid-tool-group { display: flex; gap: 4px; }
@@ -178,7 +203,7 @@ html { height: 100%; }
 .phc-editable-cell .cell-error {
   position: absolute; z-index: 8; top: 100%; left: 0; padding: 6px 10px;
   background: var(--error-surface); color: var(--red); border: 1px solid var(--red);
-  border-radius: 4px; white-space: normal; min-width: 180px; max-width: 280px; visibility: hidden;
+  border-radius: var(--radius-sm); white-space: normal; min-width: 180px; max-width: 280px; visibility: hidden;
 }
 .phc-editable-cell:hover .cell-error, .phc-editable-cell:focus-within .cell-error { visibility: visible; }
 /* A cell showing its error sits above later rows, whose sticky cells would otherwise cover the bubble,
@@ -192,49 +217,54 @@ html { height: 100%; }
 .phc-icon-button.phc-cell-cancel[hidden] { display: none; }
 .phc-table td.inventory-selected { background: var(--interaction-highlight-tint); }
 .phc-table td.inventory-selected .phc-cell-input { box-shadow: inset 0 0 0 1px var(--interaction-highlight); }
-.phc-unit-toggle { display: flex; flex: 0 0 auto; align-items: center; align-self: center; margin: 0 16px 0 8px; }
-.phc-workspace .phc-unit-toggle button { min-width: 34px; min-height: 26px; padding: 2px 8px; border-radius: 0; }
-.phc-workspace .phc-unit-toggle button:first-child { border-radius: 4px 0 0 4px; }
-.phc-workspace .phc-unit-toggle button:last-child { margin-left: -1px; border-radius: 0 4px 4px 0; }
-.phc-workspace .phc-unit-toggle button[aria-pressed="true"] {
+.phc-unit-toggle { display: flex; flex: 0 0 auto; align-items: center; align-self: center; margin: 0 var(--page-gutter) 0 8px; }
+.phc-workspace .phc-unit-toggle button { min-width: 36px; min-height: 28px; padding: 2px 8px; border-radius: 0; color: var(--muted-strong); }
+.phc-workspace .phc-unit-toggle button:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.phc-workspace .phc-unit-toggle button:last-child { margin-left: -1px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+/* The current unit system is a setting, so it reads as the chosen setting: teal tint and teal text. Solid
+   teal stays with navigation and the primary action. */
+.phc-workspace .phc-unit-toggle button[aria-pressed="true"], .phc-workspace .phc-unit-toggle button[aria-pressed="true"]:hover:enabled {
   position: relative;
-  color: #fff;
-  border-color: var(--accent);
-  background: var(--accent);
+  z-index: 1;
+  color: var(--interaction-highlight);
+  border-color: var(--interaction-highlight);
+  background: var(--interaction-highlight-tint);
+  font-weight: 600;
 }
 /* The page header (page_header.js): title, muted count, then the actions at the right. */
-.phc-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; min-height: 52px; padding: 10px 0; }
-.phc-heading h1 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: 0; }
+.phc-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; min-height: 60px; padding: 14px 0 10px; }
+.phc-heading h1 { margin: 0; font-size: var(--text-xl); font-weight: 600; letter-spacing: -0.01em; }
 .phc-heading-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-left: auto; }
 /* A group of related tools reads as one control: a shared outline around buttons that drop their own. An
    empty group takes no room. */
 .phc-toolbar { display: inline-flex; align-items: center; gap: 2px; padding: 2px; border: 1px solid var(--line);
-  border-radius: 6px; background: #fff; }
+  border-radius: var(--radius-md); background: #fff; }
 .phc-toolbar:empty { display: none; }
 .phc-workspace .phc-toolbar button { border-color: transparent; }
 .phc-toolbar-button { display: inline-flex; align-items: center; gap: 6px; }
-/* A choice between named states in a toolbar (a viewing side, a product kind) is the table's pill: compact,
-   neutral, with the shared inset chevron. */
-.phc-workspace select.phc-choice-pill { height: 28px; min-height: 28px; padding: 0 30px 0 12px; border: 0;
-  border-radius: 14px; font-size: 12px; background-color: var(--category-fill, #edf1f2); }
+/* A choice between named states in a toolbar (a viewing side, a product kind) is a field, like every other
+   toolbar choice: chips are for values inside table cells. */
+.phc-workspace select.phc-choice-pill { height: var(--control-height); min-height: var(--control-height); padding: 0 28px 0 10px;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm); font-size: var(--text-md); background-color: #fff; }
 /* Native select arrows sit against the rounded edge regardless of padding. Keep the native control,
    but draw its chevron with a consistent inset across table, toolbar and Assembly pills. */
 .phc-workspace select.phc-enum-cell, .phc-workspace select.phc-choice-pill {
   appearance: none; -webkit-appearance: none;
   background-image: var(--choice-chevron, var(--choice-chevron-dark));
-  background-repeat: no-repeat; background-position: right 8px center; background-size: 16px 16px;
+  background-repeat: no-repeat; background-position: right 8px center; background-size: 14px 14px;
 }
 .phc-toolbar-button svg { flex: none; }
 .phc-footer {
   display: flex;
+  align-items: baseline;
   flex-wrap: wrap;
   flex-shrink: 0;
   gap: 8px 24px;
   padding: 10px 16px;
   border-top: 1px solid var(--line);
   color: var(--muted);
-  background: #f8f9fa;
-  font-size: 12px;
+  background: var(--surface-alt);
+  font-size: var(--text-sm);
 }
 /* A quiet text link at the footer's end, so Help & Diagnostics is always one click away. */
 .phc-footer .phc-footer-link { width: auto; margin-left: auto; padding: 0; border: 0; background: none;
@@ -251,14 +281,14 @@ html { height: 100%; }
   gap: 4px 6px;
   max-width: 100%;
 }
-.phc-unit-field .phc-unit-label { color: var(--muted); font-size: 11px; white-space: nowrap; }
+.phc-unit-field .phc-unit-label { color: var(--muted); font-size: var(--text-sm); white-space: nowrap; }
 .phc-unit-field .phc-unit-error { grid-column: 1 / -1; }
-.cell-error { display: block; color: #9c3028; font-size: 11px; white-space: normal; }
+.cell-error { display: block; color: #9c3028; font-size: var(--text-sm); white-space: normal; }
 /* An invalid entry keeps a red edge while it has focus and after it loses it. */
 .phc-workspace input[aria-invalid="true"],
 .phc-workspace input[aria-invalid="true"]:focus-visible { border-color: var(--red); outline-color: var(--red); }
 .phc-form h2 { font-size: 16px; margin: 0 0 12px; }
-.phc-workspace .empty { padding: 24px; color: var(--muted); }
+.phc-workspace .empty { padding: 32px 16px; color: var(--muted); text-align: center; }
 @media (max-width: 900px) {
   .phc-tabs { gap: 4px; }
   .phc-tabs button { padding: 9px 8px; }
@@ -272,14 +302,37 @@ html { height: 100%; }
   .phc-form { max-height: 220px; overflow: auto; }
 }
 .phc-glyph, .phc-glyph svg { display: block; flex: none; }
-/* The shared icon button. */
-.phc-workspace .phc-icon-button {
+/* The shared icon button and the help button: a glyph at rest, a soft wash on hover, a fill when pressed. */
+.phc-workspace .phc-icon-button, .phc-workspace .phc-help {
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  width:32px;
-  height:32px;
-  min-height:32px;
+  width:var(--control-height);
+  height:var(--control-height);
+  min-height:var(--control-height);
   padding:5px;
+  border-color:transparent;
+  background-color:transparent;
+  color:var(--icon-ink);
 }
+.phc-workspace .phc-icon-button:hover:enabled, .phc-workspace .phc-help:hover:enabled {
+  color:var(--ink); background-color:#0d2a300f; border-color:transparent; }
+.phc-workspace .phc-icon-button:disabled { background-color:transparent; border-color:transparent; opacity:.45; }
+.phc-help svg { display:block; }
 .phc-icon-button svg { display:block; }
+
+/* A disclosure is the kit's chevron, turned when open, never the native triangle. */
+.phc-workspace summary { list-style: none; cursor: pointer; }
+.phc-workspace summary::-webkit-details-marker { display: none; }
+.phc-workspace summary::before { content: ""; display: inline-block; width: 5px; height: 5px; margin: 0 10px 2px 2px;
+  border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg);
+  transition: transform .12s; vertical-align: middle; }
+.phc-workspace details[open] > summary::before { transform: rotate(45deg); }
+/* A reason an action is blocked is a warning: its alert mark is amber wherever it stands. */
+.phc-workspace .phc-icon-button.phc-blocked-reason, .phc-workspace .phc-icon-button.phc-blocked-reason:hover:enabled {
+  color: var(--warning-ink); }
+/* A narrow panel keeps each row of sub-tabs on one line, scrolling sideways rather than wrapping a lone tab. */
+@media (max-width: 500px) { .phc-subtabs { flex-wrap: nowrap; overflow-x: auto; -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); }
+  .phc-workspace .phc-subtabs button { flex: none; } .phc-subtabs::after { content: ""; flex: 0 0 20px; } }
+/* PH subscripts read at a comfortable size with a shallow drop, so they never loosen a line. */
+.phc-workspace sub { font-size: .8em; line-height: 0; vertical-align: -.2em; }

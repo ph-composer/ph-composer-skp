@@ -22,7 +22,7 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
     this.layout = el("div", "window-layout"); this.audit = el("div", "window-audit");
     this.scheduleSurface = el("div");
     this.tabs = new Subtabs({ label: "Window Types sections", state: this.page, stateKey: "surface",
-      tabs: [{ id: "builder", label: "Window Types", surface: this.layout },
+      tabs: [{ id: "builder", label: "Types", surface: this.layout },
         { id: "audit", label: "U-Values", surface: this.audit },
         { id: "schedule", label: "Schedule", surface: this.scheduleSurface }], guard: function () {
           return self.guard(); },
@@ -30,6 +30,9 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
         if (self.installEditor.root.hidden) self.notice.show(reason); else self.leaveInstalls(id);
       }, reselected: function (id) { if (!self.installEditor.root.hidden) self.leaveInstalls(id); },
       changed: function () { self.paint(); } });
+    // One page header over the peer sub-tabs, as every tab opens.
+    this.header = ui.pageHeader({ title: "Window Types" });
+    root.appendChild(this.header.root);
     root.appendChild(this.tabs.root); root.appendChild(this.layout); root.appendChild(this.audit);
     root.appendChild(this.scheduleSurface);
     this.installEditor = new InstallEditor(session, send, function (message) {
@@ -38,7 +41,7 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
     }); root.appendChild(this.installEditor.root);
     this.buildRail(); this.buildHeading(); this.buildWorkspace(); this.buildSidebar(); this.buildKeyboard();
     this.placement = new Placement.Controls(this); root.insertBefore(this.placement.root, this.layout);
-    this.typeActions.insertBefore(this.placement.anchorRoot, this.placeButton);
+    this.typeTools.insertBefore(this.placement.anchorRoot, this.readinessButton);
     this.schedule = new Schedule.Schedule(this); this.scheduleSurface.appendChild(this.schedule.root);
   }
   View.prototype.rawRecord = function (id) {
@@ -96,7 +99,7 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
     var self = this;
     this.main = el("div", "window-main"); this.layout.appendChild(this.main);
     // Shown in the Builder's place while there is no Window Type to build.
-    this.emptyPrompt = el("p", "muted window-empty-prompt",
+    this.emptyPrompt = el("p", "phc-empty window-empty-prompt",
       "No Window Types yet. Choose + in the Window Types list."); this.layout.appendChild(this.emptyPrompt);
     this.heading = el("div", "window-heading"); this.main.appendChild(this.heading);
     this.identity = el("div", "window-identity"); this.heading.appendChild(this.identity);
@@ -104,21 +107,26 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
     this.title.className = "window-title"; this.identity.appendChild(this.title);
     this.headerMetrics = el("div", "window-header-metrics"); this.heading.appendChild(this.headerMetrics);
     function metric(label) {
-      var root = el("div", "window-header-metric"), caption = el("small", "", label), value = el("strong", "", "—");
+      // PH names take their subscripts: "Uw,installed" reads U with the subscript "w,installed".
+      var root = el("div", "window-header-metric"), caption = el("small"), value = el("strong", "", "—");
+      caption.appendChild(el("span", "", label.charAt(0))); caption.appendChild(el("sub", "", label.slice(1)));
       value.unit = el("span", "window-metric-unit"); caption.appendChild(value.unit);
       root.appendChild(caption); root.appendChild(value); self.headerMetrics.appendChild(root); return value;
     }
     this.uwMetric = metric("Uw"); this.installedMetric = metric("Uw,installed");
     this.typeActions = el("div", "window-type-actions"); this.heading.appendChild(this.typeActions);
+    // The Window Type's tools read as one grouped control, then Place, then the overflow menu.
+    this.typeTools = el("div", "phc-toolbar window-type-tools"); this.typeTools.setAttribute("role", "toolbar");
+    this.typeTools.setAttribute("aria-label", "Window Type tools"); this.typeActions.appendChild(this.typeTools);
     this.installButton = ui.iconButton("Edit Window Type installs", "installs", function () {
       if (self.guard()) { self.notice.show(self.guard()); return; }
       var record = self.rawRecord(); if (record) { self.installEditor.open(record); self.paint(); }
-    }); this.typeActions.appendChild(this.installButton);
+    }); this.typeTools.appendChild(this.installButton);
     this.paintDimensionControl();
     this.readinessButton = ui.helpButton("Before placing", "Enter every row height and column width. " +
       "Choose a Face in a Zone; paired Surface Faces, overhangs and overlaps are refused. " +
       "For export, complete the products, operation and installs and classify the host Outdoors.");
-    this.typeActions.appendChild(this.readinessButton);
+    this.typeTools.appendChild(this.readinessButton);
     this.placeButton = ui.button("Place", function () { self.placement.choose(self.active); });
     this.placeButton.className = "primary";
     this.typeActions.appendChild(this.placeButton);
@@ -145,7 +153,7 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
       this.dimensionControl.close(false);
       var old = this.dimensionControl.root;
       old.parentNode.insertBefore(next.root, old); old.parentNode.removeChild(old);
-    } else this.typeActions.appendChild(next.root);
+    } else this.typeTools.appendChild(next.root);
     this.dimensionControl = next; this.dimensionControlSignature = signature;
   };
   View.prototype.depthOverride = function () {
@@ -166,10 +174,9 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
     this.railStrip.setAttribute("aria-label", "Expand Window Types sidebar");
       this.railStrip.setAttribute("aria-expanded", "false"); this.rail.appendChild(this.railStrip);
     this.railContent = el("div", "window-rail-content"); this.rail.appendChild(this.railContent);
-    var railHeader = el("div", "window-rail-header"); railHeader.appendChild(el("strong", "", "Window Types"));
+    // The page title names the list, so the rail opens straight on its tools, the collapse control at their end.
     this.railCollapse = ui.iconButton("Collapse Window Types sidebar", "sidebar", function () { self.toggleRail(); });
-    this.railCollapse.setAttribute("aria-expanded", "true"); railHeader.appendChild(this.railCollapse);
-      this.railContent.appendChild(railHeader);
+    this.railCollapse.setAttribute("aria-expanded", "true"); this.railCollapse.classList.add("window-rail-collapse");
     var railTools = el("div", "window-rail-tools"); this.railContent.appendChild(railTools);
     this.chooser = el("select"); this.chooser.setAttribute("aria-label", "Active Window Type");
       this.chooser.addEventListener("change", function () { self.choose(self.chooser.value); });
@@ -182,6 +189,7 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
       "New display group", "", function (value) {
       if (self.groupNames.indexOf(value) < 0) self.groupNames.push(value); self.paint(); },
       "Group/order affect this view only."); }); railTools.appendChild(this.addGroup);
+    railTools.appendChild(this.railCollapse);
     this.list = el("div", "window-type-list"); this.railContent.appendChild(this.list);
   };
 
@@ -330,8 +338,11 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
     if (!record) { Object.keys(this.sidebars).forEach(function (kind) {
       self.sidebars[kind].root.hidden = true;
       self.sidebars[kind].refresh(self.state, {}, false);
-    }); this.audit.replaceChildren(el("p", "muted", this.enabled ? "Add a Window Type." :
-      "Window Type definitions are unavailable.")); return; }
+    });
+    // The empty audit keeps the table's frame, as every empty table does.
+    var emptyAudit = el("div", "window-audit-list");
+    emptyAudit.appendChild(el("p", "phc-empty", this.enabled ? "Add a Window Type." :
+      "Window Type definitions are unavailable.")); this.audit.replaceChildren(emptyAudit); return; }
     this.title.textContent = record.name;
     if (!this.viewSide.children.length) VIEW_SIDES.forEach(function (side) {
       self.viewSide.appendChild(ui.option(side.id, side.label)); });

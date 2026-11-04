@@ -883,8 +883,8 @@
       zone: zoneId && { zone_id: zoneId, zone_path: zonePath(zoneId) } };
   }
   // The section: each Zone's sums over its Spaces, as the host computes them.
-  function spacesSection(spaces) {
-    var zones = AUTHORING.zones.map(function (zone) {
+  function spacesSection(spaces, zoneRecords) {
+    var zones = (zoneRecords || AUTHORING.zones).map(function (zone) {
       var own = spaces.filter(function (space) { return space.zone && space.zone.zone_id === zone.id; });
       var inheriting = own.filter(function (space) { return space.airflow_mode === "inheriting"; }).length;
       var flows = {};
@@ -940,6 +940,119 @@
       { reference: looseFace(903), reason: "shares_edge",
         message: "The Face shares an Edge with an unselected Face; grouping it would split that Face." }] } });
   FIXTURES.spaceslarge = Object.assign(JSON.parse(JSON.stringify(FIXTURES.authoring)), { spaces: LARGE_SPACES });
+
+  /* ------------------------------------------- Whole-app Models: every tab with something to show */
+
+  function copy(value) { return JSON.parse(JSON.stringify(value)); }
+  // `rich`: a few of everything, one Model across every tab, for reviewing the app as a whole.
+  FIXTURES.rich = copy(FIXTURES.windows);
+  FIXTURES.rich.materials = copy(FIXTURES.libraries.materials);
+  FIXTURES.rich.assemblies = copy(FIXTURES.builder.assemblies);
+  FIXTURES.rich.thermalBridges = copy(FIXTURES.thermalbridges.thermalBridges);
+  FIXTURES.rich.spaces = copy(REFERENCE_SPACES);
+  FIXTURES.rich.libraryProviders = copy(FIXTURES.windows.libraryProviders)
+    .concat(copy(FIXTURES.libraries.libraryProviders));
+  FIXTURES.rich.libraryCatalogs = Object.assign(copy(FIXTURES.windows.libraryCatalogs),
+    copy(FIXTURES.libraries.libraryCatalogs));
+  FIXTURES.rich.librarySetupState = "readable";
+
+  // `dense`: the same Model at project scale, to see how each screen holds up under many records.
+  var MATERIAL_NAMES = ["Mineral wool", "Wood fibre board", "EPS", "XPS", "Polyiso", "Cellulose", "Concrete",
+    "Brick", "CLT", "Gypsum board", "OSB", "Plywood", "Steel", "Aluminium", "Air gap", "Stone wool batt",
+    "Cork", "Hemp-lime", "Lime plaster", "Cement board"];
+  var MATERIAL_CATEGORIES = [["insulation", "Insulation", "warm", "#fff2cc"], ["woods", "Woods", "wood", "#c69c6d"],
+    ["masonry", "Masonry", "stone", "#d7ccc8"], ["metals", "Metals", "cool", "#b0bec5"],
+    ["boards", "Boards", "neutral", "#e0e0e0"]];
+  function buildDense() {
+    var dense = copy(FIXTURES.rich), template = dense.materials.records[0];
+    dense.materials.categories = MATERIAL_CATEGORIES.map(function (entry) {
+      return { id: entry[0], label: entry[1], tone: entry[2] };
+    });
+    dense.materials.records = Array.apply(null, { length: 48 }).map(function (unused, index) {
+      var record = copy(template), category = MATERIAL_CATEGORIES[index % MATERIAL_CATEGORIES.length];
+      record.id = index < 2 ? ["mat_a", "mat_b"][index] : "mat_" + (100 + index);
+      record.values.name = MATERIAL_NAMES[index % MATERIAL_NAMES.length] +
+        (index >= MATERIAL_NAMES.length ? " " + (Math.floor(index / MATERIAL_NAMES.length) + 1) : "");
+      record.values.category = category[0];
+      record.values.color = category[3];
+      record.values.conductivity_w_mk = Math.round((0.03 + (index % 9) * 0.07) * 1000) / 1000;
+      record.values.density_kg_m3 = 20 + (index % 11) * 85;
+      record.values.notes = index % 4 ? "" : "Datasheet value, " + (2019 + index % 6);
+      record.uses = []; record.use_count = index % 3;
+      return record;
+    });
+    var assembly = dense.assemblies.records;
+    var ASSEMBLY_NAMES = ["Exterior wall", "Party wall", "Roof", "Ground floor slab", "Basement wall",
+      "Interior floor", "Parapet", "Exposed floor"];
+    var ASSEMBLY_TYPES = ["Wall", "Wall", "RoofCeiling", "Floor", "Wall", "Floor", "Wall", "Floor"];
+    var COLORS = ["#c5e1a5", "#bbdefb", "#ffe0b2", "#d1c4e9", "#b2dfdb", "#f8bbd0", "#e6ee9c", "#cfd8dc"];
+    dense.assemblies.records = Array.apply(null, { length: 32 }).map(function (unused, index) {
+      var record = copy(assembly[index % 2]);
+      record.id = index < 2 ? ["asm_a", "asm_b"][index] : "asm_" + (100 + index);
+      record.values.name = ASSEMBLY_NAMES[index % 8] + " " + String.fromCharCode(65 + Math.floor(index / 8)) +
+        (index % 5 === 3 ? " with a long descriptive name for the service cavity" : "");
+      record.values.type = ASSEMBLY_TYPES[index % 8];
+      record.values.color = COLORS[index % 8];
+      record.values.notes = index % 3 ? "" : "Per architect's set, rev " + (index % 4 + 1);
+      return record;
+    });
+    // Twelve Zones over three Levels, eight Faces each, a mix of states.
+    var LEVELS = ["Ground", "Level 2", "Level 3"];
+    var FACE_STATES = [["Wall", "Outdoors"], ["Wall", "Outdoors"], ["Wall", "Surface"], ["Floor", "Ground"],
+      ["RoofCeiling", "Outdoors"], ["Wall", null], [null, null], ["Wall", "Adiabatic"]];
+    dense.zones = []; dense.faces = [];
+    for (var z = 0; z < 12; z += 1) {
+      var zoneId = "zon_D" + String(z).padStart(2, "0") + "ense00000";
+      var root = 1000 + z * 100;
+      dense.zones.push({ id: zoneId, schema_version: 1, user_data: {}, extension_data: {},
+        reference: { zone_id: zoneId, zone_path: [root] }, state: "found", face_count: 8,
+        values: { name: "Unit " + (z + 1) + (z % 4 === 0 ? " (corner)" : ""),
+          building_segment: z < 8 ? "Block A" : "Block B",
+          level: LEVELS[z % 3], ground_depth_mm: z % 3 ? 0 : 450 } });
+      FACE_STATES.forEach(function (state, index) {
+        var path = root + index + 1, classified = state[0] && state[1];
+        var values = state[0] ? { id: "fac_D" + path, face_type: state[0] } : {};
+        if (state[1]) values.boundary_condition = state[1];
+        if (classified && index % 2 === 0) values.assembly_id = "asm_" + (index % 2 ? "b" : "a");
+        dense.faces.push({ reference: { zone_id: zoneId, zone_path: [root], entity_path: [path],
+          entity_id: state[0] ? "fac_D" + path : null }, zone_name: "", area_m2: 6 + (index * 3.7 + z) % 24,
+          values: values, state: classified ? "classified" : state[0] ? "incomplete" : "unclassified",
+          suggested: { face_type: "Wall", boundary_condition: "Outdoors" } });
+      });
+    }
+    // Twenty-four Window Types and twenty Thermal Bridge Types.
+    var windowTemplate = dense.windows.types.records[0];
+    dense.windows.types.records = Array.apply(null, { length: 24 }).map(function (unused, index) {
+      var record = copy(windowTemplate);
+      record.id = index ? "wnt_" + (100 + index) : "wnt_a";
+      record.values.name = ["Casement", "Fixed", "Door", "Slider", "Tilt-turn", "Ribbon"][index % 6] + " W" +
+        String(index + 1).padStart(2, "0");
+      return record;
+    });
+    var TB_NAMES = ["Parapet", "Slab edge", "Balcony", "Window sill", "Window head", "Foundation",
+      "Corner", "Roof eave", "Steel lintel", "Shelf angle"];
+    var TB_GROUPS = ["15-Ambient", "16-Perimeter", "17-FS/BC"];
+    var TB_COLORS = ["#c8553d", "#6a8eae", "#d9a23b", "#5b8c5a", "#8e6c8a"];
+    dense.thermalBridges.types = Array.apply(null, { length: 20 }).map(function (unused, index) {
+      var kept = ["tbt_Aa11Bb22Cc33", "tbt_Dd44Ee55Ff66", "tbt_Gg77Hh88Ii99"][index];
+      return tbType(kept || "tbt_D" + String(index).padStart(2, "0") + "ense0000", TB_NAMES[index % 10] +
+        (index >= 10 ? " (Block B)" : ""),
+        index % 7 === 6 ? null : Math.round(((index % 9) * 0.03 - 0.04) * 1000) / 1000,
+        TB_GROUPS[index % 3], TB_COLORS[index % 5]);
+    });
+    // 300 Spaces spread over the dense Model's own twelve Zones.
+    dense.spaces = spacesSection(Array.apply(null, { length: 300 }).map(function (unused, index) {
+      var zone = dense.zones[index % 12], root = zone.reference.zone_path[0], id = 5000 + index;
+      var space = spaceRow([root, id], zone.id, String(101 + index), "Room " + (index + 1),
+        index % 3 ? { v_sup_m3h: 20 + index % 7, v_eta_m3h: 18 + index % 5 } : {},
+        [spaceVolume([root, id, 1], 1, 2.4 + (index % 4) / 10, [spaceSegment([root, id, 1, 1], 8 + index % 9,
+          index % 5 ? 1 : 0.5)])]);
+      space.zone.zone_path = [root];
+      return space;
+    }), dense.zones);
+    return dense;
+  }
+  FIXTURES.dense = buildDense();
 
   global.PhComposerPreviewFixtures = {
     names: Object.keys(FIXTURES),
