@@ -813,3 +813,88 @@ interior Surface Faces (W-084). Also present: two `space.airflow_imbalance` warn
 the repair "Solve stale adjacencies before export" still offered (W-034). So the HBJSON could not
 be exported as modelled; an end-to-end export and comparison against the reference models needs
 W-084 settled, or a temporary Assembly on the interior pair.
+
+**W-112** · 7 · agent-access · medium (Claude's observation)
+Export test on a copy (`07_Export_Test.skp`, saved from Ed's `06_Thermal_Bridges.skp`). Claude
+created two placeholder Assemblies through the agent (`assemblies.create`). The first try was
+refused "Layer id is invalid": `describe` gives layer and segment `id` as plain strings, but the
+validator requires `lyr_`/`seg_` plus 12 hex characters. The schema should state the pattern, or
+create should mint ids when absent (an agent should not invent ids).
+After that, `assemblies.create` and `zones.faces.assign_assembly` (with expected values from the
+last read, idempotency keys) worked first time: clear outcomes, one Undo step each.
+
+**W-113** · 7 · question · medium (Claude's observation)
+With "TEMP Interior Floor" on the Floor side and "TEMP Interior RoofCeiling" on the ceiling side of
+the Surface pair, preflight warns `face.assembly_pair_mismatch` (twice, non-blocking). One slab
+seen from both sides should be one Assembly, reversed on one side; the assign flow should offer
+that (assign to the pair) rather than warn after the fact. Export now has no blockers.
+
+**W-114** · 7 · friction · low (Claude's observation)
+`locations.list` holds approved export destinations left from development ("Export destination
+1", "T08 reference (bridge setup stand-in)"), some unavailable. Same clutter pattern as W-009.
+
+**W-115** · 7 · agent-access · high
+To let the agent export, the user must approve a destination. Claude asked Ed to "approve an
+export folder in the Export tab"; the Export tab has only "Choose destination..." (a one-off
+export), so nothing was approved and Ed could not tell. The agent's own request
+(`setup` `locations.approve_destination`) is refused `access.user_required` ("needs the user to
+choose ... from the PH-Composer panel or menu"), with no dialog opened. The real entry is
+Extensions > PH-Composer > Libraries > Approve Export Destination... (`shell/location_commands.rb`)
+or the Library tab's locations section: an export permission filed under Libraries.
+Expected: the Export tab offers "Allow agents to export here" (or the Agent Access dialog does), and
+the refusal tells the agent the exact path to give the user. Ideally the agent's request opens
+the native dialog for the user to answer, since the user still chooses.
+Ed: fix this for future agent work. The approval path must be findable by the user and nameable
+by the agent.
+
+**W-116** · 7 · agent-access · high (Claude's observation)
+Ed approved a destination via the menu ("Export destination 3"). The agent's `export_preflight`
+with that location passed (destination does not exist yet), but `start_export` then refused
+"The export destination must end in .hbjson." The native dialog behind Approve Export Destination
+is generic (`save_file`) and let Ed save a name without the extension; the agent sees only the
+label, never the file name, so it cannot tell or fix it, and the user must approve again.
+Expected: the approval dialog fixes the `.hbjson` extension (or appends it); `export_preflight`
+with a location reports the same refusal `start_export` would; the refusal says to approve again
+and how.
+
+**W-117** · 7 · good · medium (Claude's observation)
+The agent export ran end to end: `start_export` to the approved location, `export_status` reports
+`export.complete`, 76 objects, nothing unavailable; `tutorial_house.hbjson` (166 KB) and the HTML
+report written. The HBJSON loads in honeybee with honeybee-ph: 2 Rooms, 12 Faces, 24 Apertures; all
+15 Spaces with numbers, names, floor areas and volumes; one Building-Segment "Main" carrying the
+three thermal bridges (39.0 m each); Space airflows present.
+Against the Honeybee-PH tutorial (`Model_v2.hbjson`, geometry only): apertures 24 vs 24,
+32.43 vs 32.46 m2; exterior Face area 403.6 vs 392.9 m2 (+2.7 %); volume 510 vs 489 m3 (+4.4 %).
+The differences are Ed's modelling choices (a box upper Zone, a full upper floor), not export
+errors. The reference file no longer loads with current honeybee-ph (`divisions` missing on an old
+material), so it was compared with honeybee-core only.
+
+**W-118** · 7 · bug · high (Claude's observation)
+honeybee's `check_all` rejects the exported model: the Surface pair's constructions are not the
+same layers reversed ("does not have material layers matching in reversed order with its adjacent
+pair"). PH-Composer only warns (`face.assembly_pair_mismatch`, non-blocking), so it exports a
+model honeybee calls invalid. Either block on it, or (better, W-113) assign one Assembly to the
+pair and write the reversed construction on the other side automatically.
+
+**W-119** · 7 · bug · medium (Claude's observation)
+The export report says "Findings: No findings" and the run summary `findings: 0`, while the
+preflight just before listed four warnings (two airflow imbalance, two pair mismatch). Warnings
+seen in preflight should appear in the report too.
+
+**W-120** · 7 · bug · high (Claude's observation)
+PHX (local `PHX` at `7d3384a`) cannot convert the export: both `hbjson_to_wufi_xml` and
+`hbjson_to_metr_json` stop in identity validation with 15 `dangling-reference` issues, one per
+Space: `occupancy.schedule.id_num -> project.patterns.occupancy (no matching object)`. The HBJSON
+carries no honeybee loads at all (no People, infiltration or ventilation load; PHX logs "No people
+found ... creating default", "No infiltration found", "host Room has no HB Ventilation load" for every
+Space). Root cause not traced: either PHX's no-People default path registers no occupancy pattern
+(a PHX bug any load-free HBJSON would hit), or PH-Composer must write programs and loads. Trace
+both before filing; this blocks the METr exporter that is PH-Composer's first output target.
+
+**W-121** · 7 · bug · medium (Claude's observation)
+Confirms W-066 and W-074: every Material in the HBJSON has density 16.02 kg/m3 and specific heat
+4186.8 J/kgK (the 1 lb/ft3 and 1 Btu/(lb F) placeholders), including Concrete. Placeholders reach
+the export as data.
+
+Export test files: `__test_project__/07_Export_Test.skp` (with the two TEMP interior Assemblies),
+`__test_project__/_export/`.
