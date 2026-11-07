@@ -248,6 +248,47 @@ module PhComposer
           Array(face.edges).any? { |edge| Array(edge.faces).any? { |other| !face_ids.include?(other.persistent_id) } }
         end.map(&:persistent_id)
       end
+
+      # The ids among `face_ids` that make up a closed shell: four or more Faces of `entities` joined by Edges,
+      # every Edge of every one bounding exactly two Faces of the set. A floor outline, sloped or not, is never one.
+      def closed_shells(entities, face_ids)
+        faces = entities.to_a.grep(Sketchup::Face).select { |face| face_ids.include?(face.persistent_id) }
+        ids = faces.map(&:persistent_id)
+        components(faces, ids).select { |component| closed?(component, ids) }.flatten.map(&:persistent_id)
+      end
+
+      def components(faces, ids)
+        seen = []
+        faces.each_with_object([]) do |start, found|
+          next if seen.include?(start.persistent_id)
+
+          seen << start.persistent_id
+          component = [start]
+          component.each do |face|
+            neighbours(face).each do |other|
+              next if seen.include?(other.persistent_id) || !ids.include?(other.persistent_id)
+
+              seen << other.persistent_id
+              component << other
+            end
+          end
+          found << component
+        end
+      end
+
+      def neighbours(face)
+        Array(face.edges).flat_map { |edge| Array(edge.faces) }.uniq - [face]
+      end
+
+      # The fewest Faces that enclose a volume is four.
+      def closed?(component, ids)
+        component.length >= 4 && component.all? do |face|
+          edges = Array(face.edges)
+          !edges.empty? && edges.all? do |edge|
+            Array(edge.faces).length == 2 && edge.faces.all? { |other| ids.include?(other.persistent_id) }
+          end
+        end
+      end
     end
 
     # Native names are presentation: the stored fields are authoritative and these are written from them.
