@@ -16,3 +16,4 @@ requests. A packet moves into a phase directory when it is scheduled.
 | [legend-hover-highlight](legend-hover-highlight/README.md) | feature | Requested |
 | [zones-entry-points](zones-entry-points/README.md) | feature | Requested |
 | [panel-keyboard-focus](panel-keyboard-focus/README.md) | feature | Requested |
+| [spaces-authoring](spaces-authoring/README.md) | feature, design | Scoped; design packet for #352 (walkthrough WT-06), waiting for Ed's decisions W6-1 to W6-11 |
