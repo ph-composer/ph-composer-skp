@@ -290,6 +290,99 @@ class SpacesOperationsTest < PhComposerTestCase
                  preview.dig("left_out", 0, "message"), "the refusal says how to recover")
   end
 
+  # A closed solid drawn loose in `entities`: walls between two rings of points in metres, then the bottom and
+  # top. Its Faces share their Edges, as the host's do. Returns [bottom, top, walls].
+  def closed_solid(entities, low_m, high_m, first_id)
+    low, high = [low_m, high_m].map do |ring|
+      ring.map { |x, y, z| Geom::Point3d.new(x * INCHES, y * INCHES, z * INCHES) }
+    end
+    count = low.length
+    edge = ->(offset, from, to) { Sketchup::Edge.new((first_id * 10) + offset, from, to) }
+    rings = [[low, 0], [high, count]].map do |points, base|
+      points.each_index.map { |index| edge.call(base + index, points[index], points[(index + 1) % count]) }
+    end
+    posts = low.each_index.map { |index| edge.call((2 * count) + index, low[index], high[index]) }
+    walls = low.each_index.map do |index|
+      following = (index + 1) % count
+      points = [low[index], low[following], high[following], high[index]]
+      edges = [rings[0][index], rings[1][index], posts[index], posts[following]]
+      Sketchup::Face.new(first_id + index, {}, :points => points, :edges => edges)
+    end
+    bottom = Sketchup::Face.new(first_id + count, {}, :points => low.reverse, :edges => rings[0])
+    top = Sketchup::Face.new(first_id + count + 1, {}, :points => high, :edges => rings[1])
+    [*walls, bottom, top].each { |face| entities << face }
+    [bottom, top, walls]
+  end
+
+  # W-037 and W-045: the walkthrough's L-shaped room, 4.88 m2 in plan. Create Space once took all eight Faces,
+  # walls included, and counted 9.76 m2.
+  def l_shaped_solid(entities, height = 2.4)
+    plan = [[0, 10], [3.2, 10], [3.2, 11.15], [1.2, 11.15], [1.2, 12.15], [0, 12.15]]
+    closed_solid(entities, plan.map { |x, y| [x, y, 0] }, plan.map { |x, y| [x, y, height] }, 150)
+  end
+
+  # A solid with no vertical side: a 4 m square bottom under a 2 m square top, 2 m above it.
+  def sloped_solid(entities)
+    closed_solid(entities, rectangle(10, 10, 4, 4), rectangle(11, 11, 2, 2, 2), 180)
+  end
+
+  def test_create_space_on_a_solid_refuses_its_walls_and_counts_no_floor_twice
+    zone_with_outlines
+    bottom, top, walls = l_shaped_solid(@zone_group.entities)
+    sloped = sloped_solid(@zone_group.entities).flatten
+    downward = floor_face(170, rectangle(6, 10, 1, 1).reverse)
+    @zone_group.entities << downward
+    faces = [bottom, top, *walls, *sloped, downward].map { |face| face_reference(face) }
+    preview = query("ph_composer.spaces.create_preview", "zone" => @zone, "faces" => faces)
+    assert_equal [[170]], preview.fetch("accepted").map { |face| face["entity_path"] },
+                 "a solid's walls are not floors and its top is not a second floor; a flat outline facing down is"
+    reasons = preview.fetch("left_out").to_h { |row| [row.dig("reference", "entity_path").last, row] }
+    assert_equal %w[vertical] * 6, walls.map { |wall| reasons.dig(wall.persistent_id, "reason") }
+    assert_equal %w[solid solid], [bottom, top].map { |face| reasons.dig(face.persistent_id, "reason") }
+    assert_equal %w[solid] * 6, sloped.map { |face| reasons.dig(face.persistent_id, "reason") },
+                 "a solid with sloped sides is refused whole, not counted top and bottom"
+    message = reasons.dig(bottom.persistent_id, "message")
+    assert_match(/A Space is a floor outline plus a height/, message)
+    assert_match(/Height from solid/, message)
+    before = @model.operations.length
+    assert_equal %w[refused space.nothing_to_create], create([bottom, top, *walls]).values_at("status", "code")
+    assert_equal before, @model.operations.length
+    assert_empty spaces
+  end
+
+  def test_a_new_volume_refuses_a_closed_solid
+    zone_with_outlines
+    create([@living])
+    space_group = @zone_group.entities.to_a.find { |entity| PhComposer::Spaces::SPACE_STORE.read(entity) }
+    @model.active_path = [@wrapper, @zone_group, space_group]
+    space = spaces.first.fetch("reference")
+    faces = sloped_solid(space_group.entities).flatten.map { |face| space.fetch("entity_path") + [face.persistent_id] }
+    result = invoke("ph_composer.spaces.volumes.create", "space" => space, "faces" => faces)
+    assert_equal %w[refused target.wrong_kind], result.values_at("status", "code")
+    assert_match(/A Space is a floor outline plus a height/, result.fetch("message"))
+  end
+
+  def test_a_vertical_face_is_never_a_floor_candidate_a_marked_floor_or_a_new_volume
+    zone_with_outlines
+    create([@living])
+    space_group = @zone_group.entities.to_a.find { |entity| PhComposer::Spaces::SPACE_STORE.read(entity) }
+    wall = floor_face(140, [[0, 0, 0], [1, 0, 0], [1, 0, 1], [0, 0, 1]])
+    space_group.entities << wall
+    space = spaces.first.fetch("reference")
+    candidate = query("ph_composer.spaces.candidate_faces.list", "space" => space).fetch("candidate_faces").first
+    assert_equal "target.wrong_kind", candidate.dig("refusal", "code")
+    volume_group = space_group.entities.to_a.find { |entity| PhComposer::Spaces::VOLUME_STORE.read(entity) }
+    volume_group.entities << floor_face(141, [[0, 1, 0], [1, 1, 0], [1, 1, 1], [0, 1, 1]])
+    volume = spaces.first.dig("volumes", 0, "reference")
+    marked = invoke("ph_composer.spaces.floors.mark", "faces" => [volume.fetch("entity_path") + [141]],
+                                                      "weighting_factor" => 1.0)
+    assert_equal %w[refused target.wrong_kind], marked.values_at("status", "code")
+    @model.active_path = [@wrapper, @zone_group, space_group]
+    result = invoke("ph_composer.spaces.volumes.create", "space" => space,
+                                                         "faces" => [space.fetch("entity_path") + [140]])
+    assert_equal %w[refused target.wrong_kind], result.values_at("status", "code")
+  end
+
   def test_a_new_volume_refuses_faces_that_share_an_edge_with_an_unselected_face
     zone_with_outlines
     create([@living])
