@@ -50,9 +50,12 @@ to H3 below, run before S21-2 is built.
 1. **Menu.** Convert to Window Type... on the context menu and the Extensions menu when the selection
    holds at least one Face. Like Create Space, it opens a review in the panel; nothing changes until
    Convert.
-2. **Accepted geometry.** Each selected Face must be a rectangle (four Edges, right angles within
-   0.1 degree) lying on one Zone Face, its sides parallel to that Face's up and right axes from
-   `placement/plane.rb`. Two places count as "on" a Zone Face (W7-1): inside the open Zone, drawn on
+2. **Accepted geometry.** Each selected Face must be a rectangle lying on one Zone Face, its sides
+   parallel to that Face's up and right axes from `placement/plane.rb`. A rectangle is read by its
+   corners, not its Edges: after collinear boundary vertices are merged, as Restore does
+   (`units/restore_panes.rb`), its outer loop has four corners at right angles within 0.1 degree and
+   it has no inner loop. A side split by a T junction in a mulled layout (a tall rectangle beside two
+   stacked ones) is still one side; the original Edges are kept for the guard and the erase. Two places count as "on" a Zone Face (W7-1): inside the open Zone, drawn on
    the Face itself, or outside it, coplanar with the Face and within its outer loop. Every other Face
    is listed as left out with its reason, as Create Space's review does.
 3. **Grouping and mulling.** Rectangles that share an Edge segment form one group; a group becomes
@@ -72,15 +75,20 @@ to H3 below, run before S21-2 is built.
    healed Face at the rectangle's position (anchor and offsets computed from the geometry). One native
    Undo restores the rectangles and leaves no Type or Unit behind (W7-9).
 7. **Parity.** The review reads through a query (`ph_composer.windows.units.convert_review`) and Convert
-   runs through an action (`ph_composer.windows.units.convert`) taking the Face references and each
-   group's choice, so an agent converts with the panel closed.
+   runs through an action (`ph_composer.windows.units.convert`), so an agent converts with the panel
+   closed. The source rectangles are named by root-to-Face persistent-id paths, as Restore's
+   `pane_paths` are, because a rectangle outside every Zone has no Zone Face reference
+   ([CONTRACTS.md](../../../../context/CONTRACTS.md), the Face target shape). The host is resolved
+   separately and reported as a Zone Face reference. The review returns each source's geometry, and
+   Convert refuses with `target.changed` when a source no longer matches it, as Restore refuses
+   changed panes. A rectangle lying on two coplanar Zone Faces is left out as `window.host_ambiguous`.
 
 ## Decisions for Ed
 
 | ID | Question | Recommendation | Alternative |
 | --- | --- | --- | --- |
 | W7-1 | Where may the rectangle be drawn? | Both: on the Zone Face inside the open Zone (Convert heals the host), or outside every Zone, coplanar with a Zone Face and within it (Convert just erases the rectangle). Inference reaches across Groups, so the second keeps Zone geometry untouched while snapping to CAD | Only inside the open Zone, as Ed described it |
-| W7-2 | A rectangle that shares the host's boundary (a door on the floor line, a window at a corner) | Accepted when spike H2 shows the merge restores one host Face with its record; refused with `window.overhang` until then | Always refused: the user draws it inset and moves the Unit after |
+| W7-2 | A rectangle that shares the host's boundary (a door on the floor line, a window at a corner) | Accepted when spike H2 shows the merge restores one host Face with its record; until then left out as `window.convert_on_boundary` ("Convert cannot yet replace a rectangle that touches its host Face's edge."), a condition of its own: `window.overhang` stays the containment refusal it is for Place | Always refused: the user draws it inset and moves the Unit after |
 | W7-3 | Rotated rectangles and the sill on flat roofs | Refused when a side is not parallel to the host's up or right axis (`window.not_aligned`); on a horizontal Face, up is the green axis as Place does. A skylight drawn at an angle on a flat roof is the one case this refuses that a user may want | Accept any rectangle and take the side nearest the host's up axis as the sill, placing a rotated Unit. Place has no rotation today, so this adds one to the Unit contract |
 | W7-4 | Does the rectangle mean the frame outer size or the rough opening? | The frame outer size: the Type's bands, so the Unit's outline is the rectangle and the user draws the frame outline | The rough opening, with an installation gap setting that shrinks the Type. No carrier exists for the gap today |
 | W7-5 | How do several selected rectangles become a mulled Type? | Rectangles sharing an Edge segment form one group and one Type; the group must tile a rectangle; separate rectangles are separate groups | Every selection is one Type whatever touches, refused when it does not tile |
@@ -122,6 +130,10 @@ One PR each, through the walkthrough plan's rules. Order is dependency order.
 - Three rectangles sharing Edges in a row of a 0.6 m, 1.2 m and 0.6 m width give one Type with three
   columns and three elements; an L of three rectangles is left out as `window.mull_not_rectangular`
   and nothing changes.
+- A full-height rectangle beside two stacked ones (a T junction splitting the tall one's side into
+  two Edges) gives one Type of two columns and two rows whose tall element spans both rows.
+- A rectangle drawn outside every Zone, coplanar with a Zone wall, converts by its root-to-Face path;
+  the same call after the rectangle was moved is refused with `target.changed` and writes nothing.
 - Four separate same-size rectangles give one new Type and four Units, or four Units of an existing
   Type of that size when the review keeps its preselection.
 - A rectangle at an angle to the host's up axis is left out as `window.not_aligned` (W7-3 as
