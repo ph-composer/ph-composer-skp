@@ -1,0 +1,2 @@
+Attributes for energy are invalid.
+Face "fac_b3097d6ccd6e[fac_b3097d6ccd6e]" with construction "ph_composer_asm_YlAVwLSiuVjT" does not have material layers matching in reversed order with its adjacent pair "fac_f1198f514ff3[fac_f1198f514ff3]" with construction "ph_composer_asm_rAQGMx5TDBy2".

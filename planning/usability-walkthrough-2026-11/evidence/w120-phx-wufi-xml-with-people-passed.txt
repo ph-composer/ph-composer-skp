@@ -1,0 +1,26 @@
+2026-11-07 14:25:38,309 - INFO - <module> - Logging with log-level: 0
+2026-11-07 14:25:38,309 - INFO - <module> - Group Components: True
+2026-11-07 14:25:38,309 - INFO - <module> - Merging Faces: False
+2026-11-07 14:25:38,309 - INFO - <module> - Merging Spaces by ERV: False
+2026-11-07 14:25:38,309 - INFO - <module> - Merging Exhaust Ventilation Devices: False
+2026-11-07 14:25:38,309 - INFO - <module> - > Reading in the HBJSON file: ./<scratch>/phx/with_people.hbjson
+2026-11-07 14:25:38,319 - INFO - convert_hbjson_dict_to_hb_model - Converting HB-Model from Meters to Meters.
+2026-11-07 14:25:38,319 - INFO - <module> - > Generating the PHX-Project from the Honeybee-Model: "Model: ph_composer_model"
+2026-11-07 14:25:38,323 - WARNING - merge_infiltrations - No infiltration found on any rooms. Creating default infiltration with 0.0 flow_per_exterior_area.
+2026-11-07 14:25:38,324 - WARNING - create_room_from_space - Space '100-Stair': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:25:38,324 - WARNING - create_room_from_space - Space '101-Entry': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:25:38,324 - WARNING - create_room_from_space - Space '102-Closet': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:25:38,324 - WARNING - create_room_from_space - Space '103-Mech Room': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:25:38,324 - WARNING - create_room_from_space - Space '104-Kitchen': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:25:38,324 - WARNING - create_room_from_space - Space '105-Living Room': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:25:38,324 - WARNING - create_room_from_space - Space '106-Den': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:25:38,324 - WARNING - create_room_from_space - Space '107-Bathroom': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:25:38,324 - WARNING - create_room_from_space - Space '108-Closet': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:25:38,324 - WARNING - create_room_from_space - Space '200-Open to Below': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:25:38,324 - WARNING - create_room_from_space - Space '201-Bedroom': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:25:38,324 - WARNING - create_room_from_space - Space '202-Bathroom': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:25:38,325 - WARNING - create_room_from_space - Space '203-Landing': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:25:38,325 - WARNING - create_room_from_space - Space '204-Bedroom': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:25:38,325 - WARNING - create_room_from_space - Space '205-Closet': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:25:38,328 - INFO - <module> - > Generating XML Text for the PHX-Project: "PhxProject"
+2026-11-07 14:25:38,377 - INFO - <module> - > Saving the XML file to: ./<scratch>/phx/with_people.xml

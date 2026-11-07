@@ -898,3 +898,24 @@ the export as data.
 
 Export test files: `__test_project__/07_Export_Test.skp` (with the two TEMP interior Assemblies),
 `__test_project__/_export/`.
+
+**W-122** · 7 · bug · high (Claude's observation; follow-up to W-120, which was filed as `bug`
+before the cause was traced: read W-120 as a question superseded by this entry)
+Round trip: the same exported HBJSON with a zero-occupant honeybee People load added to each Room
+(constant schedule) converts cleanly with PHX `hbjson_to_wufi_xml` (117 KB WUFI XML, no identity
+issues). Without People it fails as in W-120. So the failure is PHX's no-People default path:
+`merge_occupancies` (`PHX/from_HBJSON/cleanup.py`) creates `default_people` with a new
+`default_occ_schedule`, but that schedule never reaches `project.utilization_patterns_occupancy`,
+so every Space's occupancy reference dangles. File against PHX. PH-Composer could also write an
+explicit People load, but should not have to.
+Evidence: `evidence/w120-phx-wufi-xml-failed.txt`, `evidence/w120-phx-metr-json-failed.txt`,
+`evidence/w120-phx-wufi-xml-with-people-passed.txt`, `evidence/w118-honeybee-check-all.txt`.
+Also checked: Space airflows in the HBJSON are correct (25 cfm = 0.0118 m3/s on supply and
+extract Spaces, 50 cfm on the Kitchen); PHX accepted the Surface pair whose constructions honeybee
+rejects (W-118).
+
+**W-123** · 1 · friction · low (Claude's observation; answers W-034)
+`zones/export.rb` offers the repair "Solve stale adjacencies before export" whenever the model has
+any Zone, checked by default; it does not detect staleness. The label claims something the check
+never established. Rename (for example "Re-solve adjacencies before export") or offer it only when
+pairs are actually stale.

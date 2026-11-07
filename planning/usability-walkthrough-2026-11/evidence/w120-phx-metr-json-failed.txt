@@ -1,0 +1,57 @@
+2026-11-07 14:22:40,696 - INFO - <module> - Logging with log-level: 0
+2026-11-07 14:22:40,697 - INFO - <module> - Group Components: True
+2026-11-07 14:22:40,697 - INFO - <module> - Merging Faces: False
+2026-11-07 14:22:40,697 - INFO - <module> - Merging Spaces by ERV: False
+2026-11-07 14:22:40,697 - INFO - <module> - Merging Exhaust Ventilation Devices: False
+2026-11-07 14:22:40,697 - INFO - <module> - > Reading in the HBJSON file: ./<repo>/__test_project__/_export/tutorial_house.hbjson
+2026-11-07 14:22:40,706 - INFO - convert_hbjson_dict_to_hb_model - Converting HB-Model from Meters to Meters.
+2026-11-07 14:22:40,706 - INFO - <module> - > Generating the PHX-Project from the Honeybee-Model: "Model: ph_composer_model"
+2026-11-07 14:22:40,709 - WARNING - merge_infiltrations - No infiltration found on any rooms. Creating default infiltration with 0.0 flow_per_exterior_area.
+2026-11-07 14:22:40,709 - WARNING - merge_occupancies - No people found on any rooms. Creating default people object with 0.0 people_per_area.
+2026-11-07 14:22:40,709 - WARNING - create_room_from_space - Space '100-Stair': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:22:40,709 - WARNING - create_room_from_space - Space '101-Entry': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:22:40,709 - WARNING - create_room_from_space - Space '102-Closet': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:22:40,709 - WARNING - create_room_from_space - Space '103-Mech Room': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:22:40,709 - WARNING - create_room_from_space - Space '104-Kitchen': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:22:40,709 - WARNING - create_room_from_space - Space '105-Living Room': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:22:40,709 - WARNING - create_room_from_space - Space '106-Den': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:22:40,709 - WARNING - create_room_from_space - Space '107-Bathroom': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:22:40,709 - WARNING - create_room_from_space - Space '108-Closet': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:22:40,709 - WARNING - create_room_from_space - Space '200-Open to Below': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:22:40,709 - WARNING - create_room_from_space - Space '201-Bedroom': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:22:40,710 - WARNING - create_room_from_space - Space '202-Bathroom': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:22:40,710 - WARNING - create_room_from_space - Space '203-Landing': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:22:40,710 - WARNING - create_room_from_space - Space '204-Bedroom': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:22:40,710 - WARNING - create_room_from_space - Space '205-Closet': host Room has no HB Ventilation load. Using zero design flow on a constant pattern; Space-level _v_sup / _v_eta / _v_tran still apply.
+2026-11-07 14:22:40,714 - INFO - <module> - > Generating METr JSON for the PHX-Project: "PhxProject"
+Traceback (most recent call last):
+  File "<home-path>", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "<home-path>", line 86, in _run_code
+    exec(code, run_globals)
+  File "<PHX>/PHX/hbjson_to_metr_json.py", line 193, in <module>
+    metr_json_text = metr_builder.generate_metr_json_text(phx_project)
+  File "<PHX>/PHX/to_METr_JSON/metr_builder.py", line 48, in generate_metr_json_text
+    metr_dict = generate_metr_json_dict(_phx_object, _schema_name)
+  File "<PHX>/PHX/to_METr_JSON/metr_builder.py", line 29, in generate_metr_json_dict
+    validate_project_export_readiness(_phx_object, IdentityValidationTarget.METR)
+  File "<PHX>/PHX/model/identity_validation.py", line 302, in validate_project_export_readiness
+    validate_project_identities(project, resolved_target)
+  File "<PHX>/PHX/model/identity_validation.py", line 284, in validate_project_identities
+    raise IdentityValidationError(resolved_target, validator.issues)
+PHX.model.identity_validation.IdentityValidationError: metr identity validation failed with 15 issue(s):
+- dangling-reference: variants[0].zones[0].spaces[0].occupancy.schedule.id_num -> 'project.patterns.occupancy' ID 1 (no matching object)
+- dangling-reference: variants[0].zones[0].spaces[1].occupancy.schedule.id_num -> 'project.patterns.occupancy' ID 2 (no matching object)
+- dangling-reference: variants[0].zones[0].spaces[2].occupancy.schedule.id_num -> 'project.patterns.occupancy' ID 3 (no matching object)
+- dangling-reference: variants[0].zones[0].spaces[3].occupancy.schedule.id_num -> 'project.patterns.occupancy' ID 4 (no matching object)
+- dangling-reference: variants[0].zones[0].spaces[4].occupancy.schedule.id_num -> 'project.patterns.occupancy' ID 5 (no matching object)
+- dangling-reference: variants[0].zones[0].spaces[5].occupancy.schedule.id_num -> 'project.patterns.occupancy' ID 6 (no matching object)
+- dangling-reference: variants[0].zones[0].spaces[6].occupancy.schedule.id_num -> 'project.patterns.occupancy' ID 7 (no matching object)
+- dangling-reference: variants[0].zones[0].spaces[7].occupancy.schedule.id_num -> 'project.patterns.occupancy' ID 8 (no matching object)
+- dangling-reference: variants[0].zones[0].spaces[8].occupancy.schedule.id_num -> 'project.patterns.occupancy' ID 9 (no matching object)
+- dangling-reference: variants[0].zones[0].spaces[9].occupancy.schedule.id_num -> 'project.patterns.occupancy' ID 10 (no matching object)
+- dangling-reference: variants[0].zones[0].spaces[10].occupancy.schedule.id_num -> 'project.patterns.occupancy' ID 11 (no matching object)
+- dangling-reference: variants[0].zones[0].spaces[11].occupancy.schedule.id_num -> 'project.patterns.occupancy' ID 12 (no matching object)
+- dangling-reference: variants[0].zones[0].spaces[12].occupancy.schedule.id_num -> 'project.patterns.occupancy' ID 13 (no matching object)
+- dangling-reference: variants[0].zones[0].spaces[13].occupancy.schedule.id_num -> 'project.patterns.occupancy' ID 14 (no matching object)
+- dangling-reference: variants[0].zones[0].spaces[14].occupancy.schedule.id_num -> 'project.patterns.occupancy' ID 15 (no matching object)
