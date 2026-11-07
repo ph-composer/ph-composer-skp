@@ -4,6 +4,19 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
   function (adapters, Drag, rows, Store, Copy, Setup, ui) {
     "use strict";
     var el = ui.element;
+    // Catalog notes for rows admission left out (context/CONTRACTS.md, "Catalog notes"), worded here:
+    // a note carries only codes and identities, never a provider's text. A row kept with an optional
+    // field absent or an unknown field dropped is normalized; any other note (a skipped file, a
+    // provider's own code, a skip that names no record) is reported without a list.
+    var SKIPPED = {
+      "library.row_required_invalid": "a required value, such as its name, is missing or not valid",
+      "library.row_optional_invalid": "a value is outside what PH-Composer accepts",
+      "library.unit_invalid": "a value has no unit PH-Composer reads",
+      "library.row_semantic_invalid": "its values are not valid",
+      "library.row_label_invalid": "its name is blank"
+    };
+    var KEPT = { "library.row_optional_absent": true, "library.row_fields_omitted": true };
+    var SKIPPED_SHOWN = 20;
     function Sidebar(options) {
       var self = this;
       this.adapter = adapters.adapter(options.adapter);
@@ -35,6 +48,8 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
       this.content.appendChild(this.source);
       this.sourceStatus = el("small", "muted"); this.sourceStatus.setAttribute("role", "status");
       this.content.appendChild(this.sourceStatus);
+      this.skipped = el("ul", "library-sidebar-skipped"); this.skipped.setAttribute("aria-label", "Records not loaded");
+      this.skipped.hidden = true; this.content.appendChild(this.skipped);
       this.refreshButton = ui.button("Refresh", function () { if (!self.busy()) self.store.refresh(); });
       this.setupButton = ui.button("Library setup…", function () { if (!self.busy()) self.setup.open(); });
       var controls = el("div", "library-source-controls"); controls.appendChild(this.refreshButton);
@@ -178,9 +193,29 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
             " seconds ago." : " No catalog is available.");
       }
       if (page && (page.unavailable || []).length) status += " Some record kinds or libraries are unavailable.";
-      if (page && (page.warnings || []).length) status += " Some library records were skipped or normalized.";
+      var notes = page && page.warnings || [];
+      var skipped = notes.filter(function (note) { return SKIPPED[note.code] && note.record_id; });
+      var other = notes.filter(function (note) { return skipped.indexOf(note) < 0; });
+      if (other.some(function (note) { return KEPT[note.code]; })) status += " Some library records were normalized.";
+      if (other.some(function (note) { return !KEPT[note.code]; })) {
+        status += " Some library records or files were skipped.";
+      }
+      if (skipped.length) status += " " + skipped.length + (skipped.length === 1 ? " record was" : " records were") +
+        " not loaded:";
       this.sourceStatus.textContent = status;
+      this.renderSkipped(skipped);
       this.renderList();
+    };
+    // Each row left out, by record ID (its name may be what was missing) and the reason in PH-Composer's words.
+    Sidebar.prototype.renderSkipped = function (skipped) {
+      this.skipped.replaceChildren();
+      skipped.slice(0, SKIPPED_SHOWN).forEach(function (note) {
+        this.skipped.appendChild(el("li", "", "Record " + note.record_id + ": " + SKIPPED[note.code] + "."));
+      }, this);
+      if (skipped.length > SKIPPED_SHOWN) {
+        this.skipped.appendChild(el("li", "muted", "And " + (skipped.length - SKIPPED_SHOWN) + " more."));
+      }
+      this.skipped.hidden = !skipped.length;
     };
     Sidebar.prototype.add = function (row) {
       if (this.disposed || !this.enabled || this.busy() || !this.copy || !this.records.some(function (live) {
