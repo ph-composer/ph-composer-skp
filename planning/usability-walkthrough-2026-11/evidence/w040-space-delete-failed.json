@@ -1,0 +1,397 @@
+{
+  "schema": 1,
+  "kind": "ph-composer.diagnostic-read",
+  "status": "read",
+  "error": null,
+  "filters": {
+    "severity": "warning",
+    "limit": "3",
+    "newest": "true"
+  },
+  "log_schema": 1,
+  "supported_log_schemas": [
+    1
+  ],
+  "health": {
+    "writing": true,
+    "last_error": null
+  },
+  "build": {
+    "extension_version": "0.1.0-dev",
+    "build": "db1eccf9568a",
+    "commit": "a39e1e197350",
+    "manifest": "5b3bcf0ae53f"
+  },
+  "receipt": "Installed-byte proof is the acceptance package comparison (tools/hostkit/acceptance_run.py), not this read.",
+  "matched": 3,
+  "unsupported_schema": 0,
+  "unreadable": 0,
+  "events": [
+    {
+      "timestamp": "2026-11-07T16:30:59Z",
+      "schema": 1,
+      "event": "operation_failed",
+      "extension_version": "0.1.0-dev",
+      "build": "db1eccf9568a",
+      "session": "012fa11a-831e-4d93-a111-4e7da8348ad1",
+      "request": "012fa11a-831e-4d93-a111-4e7da8348ad1:spaces-actions:39",
+      "status": "failed",
+      "severity": "error",
+      "error_class": "ArgumentError",
+      "frames": [
+        {
+          "file": "ph_composer/features/spaces/steps.rb",
+          "line": 225,
+          "method": "erase_entities"
+        },
+        {
+          "file": "ph_composer/features/spaces/steps.rb",
+          "line": 225,
+          "method": "apply"
+        },
+        {
+          "file": "ph_composer/core/operations/proposal.rb",
+          "line": 46,
+          "method": "apply"
+        },
+        {
+          "file": "ph_composer/core/operations/proposal.rb",
+          "line": 46,
+          "method": "each"
+        },
+        {
+          "file": "ph_composer/core/operations/proposal.rb",
+          "line": 46,
+          "method": "apply"
+        },
+        {
+          "file": "ph_composer/shell/dispatch.rb",
+          "line": 386,
+          "method": "commit"
+        },
+        {
+          "file": "ph_composer/core/model_operation.rb",
+          "line": 16,
+          "method": "perform"
+        },
+        {
+          "file": "ph_composer/shell/dispatch.rb",
+          "line": 386,
+          "method": "commit"
+        },
+        {
+          "file": "ph_composer/session/model_session.rb",
+          "line": 84,
+          "method": "mutate"
+        },
+        {
+          "file": "ph_composer/shell/dispatch.rb",
+          "line": 385,
+          "method": "commit"
+        },
+        {
+          "file": "ph_composer/shell/dispatch.rb",
+          "line": 368,
+          "method": "run"
+        },
+        {
+          "file": "ph_composer/shell/dispatch.rb",
+          "line": 184,
+          "method": "mutation"
+        },
+        {
+          "file": "ph_composer/session/model_session.rb",
+          "line": 70,
+          "method": "exclusive"
+        },
+        {
+          "file": "ph_composer/shell/dispatch.rb",
+          "line": 183,
+          "method": "mutation"
+        },
+        {
+          "file": "ph_composer/shell/dispatch.rb",
+          "line": 129,
+          "method": "invoke"
+        },
+        {
+          "file": "ph_composer/shell/api.rb",
+          "line": 205,
+          "method": "invoke"
+        },
+        {
+          "file": "ph_composer/shell/panel.rb",
+          "line": 243,
+          "method": "invoke"
+        },
+        {
+          "file": "ph_composer/shell/panel.rb",
+          "line": 176,
+          "method": "route"
+        },
+        {
+          "file": "ph_composer/shell/panel.rb",
+          "line": 164,
+          "method": "handle"
+        },
+        {
+          "file": "ph_composer/core/diagnostics.rb",
+          "line": 136,
+          "method": "with_context"
+        }
+      ],
+      "operation": "ph_composer.spaces.delete",
+      "effect": "rolled_back",
+      "code": "operation.failed",
+      "incident": "PHC-7CDF84",
+      "line": 16
+    },
+    {
+      "timestamp": "2026-11-07T16:33:01Z",
+      "schema": 1,
+      "event": "operation_failed",
+      "extension_version": "0.1.0-dev",
+      "build": "db1eccf9568a",
+      "session": "012fa11a-831e-4d93-a111-4e7da8348ad1",
+      "request": "012fa11a-831e-4d93-a111-4e7da8348ad1:spaces-actions:40",
+      "status": "failed",
+      "severity": "error",
+      "error_class": "ArgumentError",
+      "frames": [
+        {
+          "file": "ph_composer/features/spaces/steps.rb",
+          "line": 225,
+          "method": "erase_entities"
+        },
+        {
+          "file": "ph_composer/features/spaces/steps.rb",
+          "line": 225,
+          "method": "apply"
+        },
+        {
+          "file": "ph_composer/core/operations/proposal.rb",
+          "line": 46,
+          "method": "apply"
+        },
+        {
+          "file": "ph_composer/core/operations/proposal.rb",
+          "line": 46,
+          "method": "each"
+        },
+        {
+          "file": "ph_composer/core/operations/proposal.rb",
+          "line": 46,
+          "method": "apply"
+        },
+        {
+          "file": "ph_composer/shell/dispatch.rb",
+          "line": 386,
+          "method": "commit"
+        },
+        {
+          "file": "ph_composer/core/model_operation.rb",
+          "line": 16,
+          "method": "perform"
+        },
+        {
+          "file": "ph_composer/shell/dispatch.rb",
+          "line": 386,
+          "method": "commit"
+        },
+        {
+          "file": "ph_composer/session/model_session.rb",
+          "line": 84,
+          "method": "mutate"
+        },
+        {
+          "file": "ph_composer/shell/dispatch.rb",
+          "line": 385,
+          "method": "commit"
+        },
+        {
+          "file": "ph_composer/shell/dispatch.rb",
+          "line": 368,
+          "method": "run"
+        },
+        {
+          "file": "ph_composer/shell/dispatch.rb",
+          "line": 184,
+          "method": "mutation"
+        },
+        {
+          "file": "ph_composer/session/model_session.rb",
+          "line": 70,
+          "method": "exclusive"
+        },
+        {
+          "file": "ph_composer/shell/dispatch.rb",
+          "line": 183,
+          "method": "mutation"
+        },
+        {
+          "file": "ph_composer/shell/dispatch.rb",
+          "line": 129,
+          "method": "invoke"
+        },
+        {
+          "file": "ph_composer/shell/api.rb",
+          "line": 205,
+          "method": "invoke"
+        },
+        {
+          "file": "ph_composer/shell/panel.rb",
+          "line": 243,
+          "method": "invoke"
+        },
+        {
+          "file": "ph_composer/shell/panel.rb",
+          "line": 176,
+          "method": "route"
+        },
+        {
+          "file": "ph_composer/shell/panel.rb",
+          "line": 164,
+          "method": "handle"
+        },
+        {
+          "file": "ph_composer/core/diagnostics.rb",
+          "line": 136,
+          "method": "with_context"
+        }
+      ],
+      "operation": "ph_composer.spaces.delete",
+      "effect": "rolled_back",
+      "code": "operation.failed",
+      "incident": "PHC-445CCC",
+      "line": 17
+    },
+    {
+      "timestamp": "2026-11-07T16:33:07Z",
+      "schema": 1,
+      "event": "operation_failed",
+      "extension_version": "0.1.0-dev",
+      "build": "db1eccf9568a",
+      "session": "012fa11a-831e-4d93-a111-4e7da8348ad1",
+      "request": "012fa11a-831e-4d93-a111-4e7da8348ad1:spaces-actions:41",
+      "status": "failed",
+      "severity": "error",
+      "error_class": "ArgumentError",
+      "frames": [
+        {
+          "file": "ph_composer/features/spaces/steps.rb",
+          "line": 225,
+          "method": "erase_entities"
+        },
+        {
+          "file": "ph_composer/features/spaces/steps.rb",
+          "line": 225,
+          "method": "apply"
+        },
+        {
+          "file": "ph_composer/core/operations/proposal.rb",
+          "line": 46,
+          "method": "apply"
+        },
+        {
+          "file": "ph_composer/core/operations/proposal.rb",
+          "line": 46,
+          "method": "each"
+        },
+        {
+          "file": "ph_composer/core/operations/proposal.rb",
+          "line": 46,
+          "method": "apply"
+        },
+        {
+          "file": "ph_composer/shell/dispatch.rb",
+          "line": 386,
+          "method": "commit"
+        },
+        {
+          "file": "ph_composer/core/model_operation.rb",
+          "line": 16,
+          "method": "perform"
+        },
+        {
+          "file": "ph_composer/shell/dispatch.rb",
+          "line": 386,
+          "method": "commit"
+        },
+        {
+          "file": "ph_composer/session/model_session.rb",
+          "line": 84,
+          "method": "mutate"
+        },
+        {
+          "file": "ph_composer/shell/dispatch.rb",
+          "line": 385,
+          "method": "commit"
+        },
+        {
+          "file": "ph_composer/shell/dispatch.rb",
+          "line": 368,
+          "method": "run"
+        },
+        {
+          "file": "ph_composer/shell/dispatch.rb",
+          "line": 184,
+          "method": "mutation"
+        },
+        {
+          "file": "ph_composer/session/model_session.rb",
+          "line": 70,
+          "method": "exclusive"
+        },
+        {
+          "file": "ph_composer/shell/dispatch.rb",
+          "line": 183,
+          "method": "mutation"
+        },
+        {
+          "file": "ph_composer/shell/dispatch.rb",
+          "line": 129,
+          "method": "invoke"
+        },
+        {
+          "file": "ph_composer/shell/api.rb",
+          "line": 205,
+          "method": "invoke"
+        },
+        {
+          "file": "ph_composer/shell/panel.rb",
+          "line": 243,
+          "method": "invoke"
+        },
+        {
+          "file": "ph_composer/shell/panel.rb",
+          "line": 176,
+          "method": "route"
+        },
+        {
+          "file": "ph_composer/shell/panel.rb",
+          "line": 164,
+          "method": "handle"
+        },
+        {
+          "file": "ph_composer/core/diagnostics.rb",
+          "line": 136,
+          "method": "with_context"
+        }
+      ],
+      "operation": "ph_composer.spaces.delete",
+      "effect": "rolled_back",
+      "code": "operation.failed",
+      "incident": "PHC-D2129B",
+      "line": 18
+    }
+  ],
+  "truncated": false,
+  "cursor_state": "newest",
+  "history": {
+    "source": "process_tail",
+    "process": "873c43da",
+    "first_line": 0,
+    "lines": 20,
+    "tail_bytes": 262144
+  }
+}
