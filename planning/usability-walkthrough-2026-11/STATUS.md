@@ -10,7 +10,7 @@ Plan: [PLAN.md](PLAN.md). States: `Scoped` · `In progress` · `Implemented on b
 
 | Stage | Issue | State | PR | Evidence |
 | --- | --- | --- | --- | --- |
-| WT-01 | #358 | Scoped | | |
+| WT-01 | #358 | Implemented on branch | | Pre-fill not reproduced at `a39e1e19` (installed build `diff -rq` clean; preview form opens blank in SI and IP and sends `null`; host `materials.create` with nulls stored `null`). Rows 2 and 3 already met by `material.thermal_mass_defaulted` and existing Ruby and Python tests. New check in `inventories_checks.cjs` passes, fails on a seeded density (mutation run) |
 | WT-02 | #359 | Scoped | | |
 | WT-03 | PH-Tools/PHX#169 | Scoped | | |
 | WT-04 | #354 | Scoped | | |

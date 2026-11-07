@@ -51,14 +51,33 @@ check({ name: "inventories", output }, async ({ newPage, step }) => {
     await color.waitFor({ state: "hidden" });
     assert.notEqual(await page.evaluate(() => window.previewHost.materials.records[0].values.color), "#fff2cc");
 
-    await library.getByRole("button", { name: "+ New Material", exact: true }).click();
+    step("New Material opens with thermal properties blank and sends them unset, in SI and IP");
     const materialForm = library.getByRole("dialog", { name: "New Material", exact: true });
+    const thermal = ["Conductivity", "Density", "Specific heat", "Emissivity"];
+    for (const system of ["IP", "SI"]) {
+      await page.getByRole("button", { name: `Set display units to ${system}`, exact: true }).click();
+      await library.getByRole("button", { name: "+ New Material", exact: true }).click();
+      for (const name of thermal) {
+        assert.equal(await materialForm.getByRole("textbox", { name, exact: true }).inputValue(), "",
+          `${name} opens blank in ${system}`);
+      }
+      if (system === "IP") {
+        await page.keyboard.press("Escape");
+        await materialForm.waitFor({ state: "hidden" });
+      }
+    }
     await materialForm.getByRole("textbox", { name: "Name", exact: true }).fill("New board");
     await materialForm.getByRole("combobox", { name: "Category", exact: true }).selectOption("woods");
     await materialForm.getByRole("textbox", { name: "Conductivity", exact: true }).fill("0.05 W/(m K)");
     await materialForm.getByRole("textbox", { name: "Conductivity", exact: true }).press("Enter");
     await materialForm.waitFor({ state: "hidden" });
     assert.equal(await page.evaluate(() => window.previewHost.materials.records[2].values.conductivity_w_mk), 0.05);
+    const created = await page.evaluate(() => window.previewHost.sent.filter(message => message.type === "action.invoke" &&
+      message.payload.name === "ph_composer.assemblies.materials.create").slice(-1)[0].payload.params.values);
+    assert.deepEqual([created.density_kg_m3, created.specific_heat_j_kgk, created.emissivity], [null, null, null],
+      "unset thermal properties are sent as null, never a placeholder");
+    const stored = await page.evaluate(() => window.previewHost.materials.records[2].values);
+    assert.deepEqual([stored.density_kg_m3, stored.specific_heat_j_kgk, stored.emissivity], [null, null, null]);
     await library.getByRole("button", { name: "Duplicate New board", exact: true }).click();
     const duplicate = library.getByRole("dialog", { name: /Duplicate Material$/ });
     assert.equal(await duplicate.getByRole("checkbox", { name: "Copy datasheet links", exact: true }).isChecked(), false);

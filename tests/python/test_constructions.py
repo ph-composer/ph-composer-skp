@@ -101,11 +101,16 @@ def test_reversed_membrane_is_side_channel_only_and_has_full_outside_index() -> 
 
 
 def test_mass_defaults_are_actual_written_values_with_nonblocking_disclosure() -> None:
-    result = translate(document(), (ConstructionSection(),))
+    source = document()
+    records = source["sections"][ConstructionSection.id]["records"]
+    unset = next(row for row in records if row["id"] == "asm_Default00001")["materials"][0]
+    unset["emissivity"] = None
+    assert (unset["density_kg_m3"], unset["specific_heat_j_kgk"]) == (None, None)
+    result = translate(source, (ConstructionSection(),))
     host = reload(
         cast(TranslatedConstruction, result.objects(ConstructionSection.id)["asm_Default00001"]).construction
     ).materials[0]
-    assert (host.density, host.specific_heat) == (600, 1000)
+    assert (host.density, host.specific_heat, host.thermal_absorptance) == (600, 1000, 0.9)
     finding = next(f for f in result.findings if f.code == "material.thermal_mass_defaulted")
     assert not finding.blocks_export
     assert "600" in finding.message and "1000" in finding.message
