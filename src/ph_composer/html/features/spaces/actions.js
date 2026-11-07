@@ -147,8 +147,8 @@ function (panel, requests, ui, units, preferences, fields) {
       case "spaces.restore": this.edits.run(PREFIX + ".volumes.restore_position", { volume: reference }); break;
       case "spaces.independent": this.edits.run(PREFIX + ".make_independent", { reference: reference }); break;
       case "spaces.delete":
-        this.askFirst("Delete " + describe(record), "The Space, its Volumes and their Floor Segments are erased. " +
-          "One Undo brings them back.", "Delete", function (revision) {
+        this.askFirst("Delete Space?", describe(record) + ", its Volumes and their Floor Segments will be erased.",
+          "Delete", function (revision) {
           self.runAt(revision, PREFIX + ".delete", { space: reference });
         });
         break;

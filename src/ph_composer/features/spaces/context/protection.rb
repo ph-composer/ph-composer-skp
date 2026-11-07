@@ -57,12 +57,13 @@ module PhComposer
       end
 
       # Locks `volume` in one transparent operation. A lock that cannot be written is put back and the
-      # operation still commits, because aborting it would undo the step it joined. Answers whether it
-      # wrote.
+      # operation still commits, because aborting it would undo the step it joined. Inside an extension
+      # operation (Delete Space closing the path) the lock joins that operation instead: a nested start
+      # would split its Undo step. Answers whether it wrote.
       def protect(model, volume)
         return false unless volume && valid?(volume) && !volume.locked?
 
-        started = model.start_operation("Protect Volume", true, false, true)
+        started = !Sessions.for(model).mutating? && model.start_operation("Protect Volume", true, false, true)
         begin
           volume.locked = true
         rescue StandardError => error

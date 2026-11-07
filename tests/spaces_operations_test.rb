@@ -229,6 +229,27 @@ class SpacesOperationsTest < PhComposerTestCase
     assert_empty spaces
   end
 
+  # The panel opens a Space as the edit context, and SketchUp refuses to erase a Group on that path.
+  def test_delete_space_works_from_any_edit_context_in_one_undo_step
+    zone_with_outlines
+    create([@living])
+    space_id, volume_id = spaces.first.dig("volumes", 0, "reference", "entity_path").last(2)
+    space_group = entity_path([90, 100, space_id]).last
+    space_group.entities.to_a.find { |entity| entity.persistent_id == volume_id }.locked = false
+    [[], [90, 100], [90, 100, space_id], [90, 100, space_id, volume_id]].each do |open|
+      @model.active_path = open.empty? ? nil : entity_path(open)
+      before = @model.operations.length
+      deleted = invoke("ph_composer.spaces.delete", "space" => spaces.first.fetch("reference"))
+      assert_equal "completed", deleted["status"], "open #{open}: #{deleted.inspect}"
+      assert_equal before + 1, @model.operations.length
+      assert_empty @model.nested_starts, "Volume protection joins the Delete instead of splitting it"
+      assert_empty spaces
+      assert_equal open.first(2), Array(@model.active_path).map(&:persistent_id)
+      Sketchup.undo
+      assert_equal 1, spaces.length
+    end
+  end
+
   def test_removing_an_identity_another_record_still_names_refuses_with_nothing_written
     zone_with_outlines
     create([@living])
@@ -377,6 +398,13 @@ class SpacesOperationsTest < PhComposerTestCase
   def edit(row, values, expected)
     invoke("ph_composer.spaces.update", "reference" => row.fetch("reference"), "values" => values,
                                         "expected_values" => expected)
+  end
+
+  def entity_path(ids)
+    entities = @model.entities
+    ids.map do |id|
+      entities.to_a.find { |entity| entity.persistent_id == id }.tap { |found| entities = found.entities }
+    end
   end
 
   def query(name, params = {})

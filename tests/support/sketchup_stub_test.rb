@@ -218,6 +218,18 @@ class SketchupStubTest < PhComposerTestCase
     assert_same group.entities, model.active_entities
   end
 
+  def test_erase_refuses_a_group_on_the_active_path
+    model = Sketchup::Model.new
+    Sketchup.active_model = model
+    outer = model.entities.add_group
+    inner = outer.entities.add_group
+    model.active_path = [outer, inner]
+
+    assert_raises(ArgumentError) { outer.entities.erase_entities(inner) }
+    model.active_path = [outer]
+    assert outer.entities.erase_entities(inner)
+  end
+
   def test_root_scan_count_increments_for_each_root_traversal
     entities = Sketchup::Entities.new([Sketchup::Face.new(1), Sketchup::Face.new(2)])
     entities.root = true
