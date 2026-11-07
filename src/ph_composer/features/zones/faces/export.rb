@@ -16,6 +16,8 @@ module PhComposer
                               .freeze
         # One preflight finding before it is placed on its Face: `blocking` says whether it blocks export.
         Issue = Struct.new(:code, :message, :blocking, keyword_init: true)
+        # The Face record fields the export section carries.
+        EXPORTED_FIELDS = %w[face_type boundary_condition assembly_id assembly_reversed adjacency].freeze
 
         module_function
 
@@ -28,7 +30,7 @@ module PhComposer
             owner = Zones::ExportProjection.zone_owner(reader.snapshot, entry)
             valid = stored && Schema.problems(stored).empty?
             record = valid && reader.entity_record(stored,
-                                                   :fields => %w[face_type boundary_condition assembly_id adjacency],
+                                                   :fields => EXPORTED_FIELDS,
                                                    :target_kind => REFERENCE_KIND, :user_data => true)
             { "path" => entry.path, "record" => record || nil, "zone_id" => owner && owner[1]["id"],
               "geometry" => entry.geometry }
@@ -108,18 +110,25 @@ module PhComposer
           issues.concat(attached_zone_issues(request, record)) if record["boundary_condition"] == "AttachedZone"
           return issues unless record["boundary_condition"] && (!state || state == "current")
 
-          issues.concat(construction_issues(request, record))
+          issues.concat(construction_issues(request, occurrence, record, index))
           issues.concat(AssemblyAssignment.findings(request, occurrence, record, index).map do |finding|
-            issue(finding.fetch("code"), finding.fetch("message"), false)
+            # honeybee rejects a Surface pair whose sides do not mirror one construction, so it blocks.
+            issue(finding.fetch("code"), finding.fetch("message"), BLOCKING_FINDINGS.include?(finding.fetch("code")))
           end)
           issues
         end
 
-        def construction_issues(request, record)
+        BLOCKING_FINDINGS = %w[face.assembly_pair_mismatch].freeze
+
+        def construction_issues(request, occurrence, record, index)
           id = record["assembly_id"]
           # The finding's object_id carries the Face; its sentence is for a reader and names no record id, so
           # every Face with one cause reads the same.
-          return [issue("construction.missing", "This Face has no Assembly.", true)] unless id
+          unless id
+            return [] if interior_within_segment?(request, occurrence, record, index)
+
+            return [issue("construction.missing", missing_message(record), true)]
+          end
 
           state = AssemblyAssignment.state(request, record)
           if state != "resolved"
@@ -132,6 +141,31 @@ module PhComposer
           reason = assembly.fetch("export_blockers").first.fetch("message")
           name = assembly.fetch("values")["name"]
           [issue("construction.incomplete", "This Face's Assembly #{name} is not finished: #{reason}", true)]
+        end
+
+        # An interior Face within one Building-Segment exports with no construction; PHX drops it from
+        # the PH model and honeybee applies its default interior construction. Across Building-Segments the
+        # Face is part of a segment's envelope, so it needs an Assembly.
+        def interior_within_segment?(request, occurrence, record, index)
+          return false unless record["boundary_condition"] == "Surface"
+
+          other = Zones::Occurrences.resolve_face(request.model, record.fetch("adjacency").fetch("counterpart"),
+                                                  :index => index)
+          segment(occurrence.zone.record) == segment(other.zone.record)
+        rescue CodedError
+          false
+        end
+
+        # A Zone's Building-Segment as the export groups it: the managed choice when it has one, else its name.
+        def segment(zone_record)
+          id = zone_record["building_segment_id"]
+          id ? ["managed", id] : ["legacy", zone_record["building_segment"]]
+        end
+
+        def missing_message(record)
+          return "This Face has no Assembly." unless record["boundary_condition"] == "Surface"
+
+          "This interior Face joins two Building-Segments, so it needs an Assembly."
         end
 
         def attached_zone_issues(request, record)
@@ -177,7 +211,7 @@ module PhComposer
             end
 
             exported = reader.entity_record(
-              record, :fields => %w[face_type boundary_condition assembly_id adjacency],
+              record, :fields => EXPORTED_FIELDS,
                       :target_kind => REFERENCE_KIND, :path => entry.path, :user_data => true
             ).merge(
               "zone_id" => stamp.fetch("zone_id"), "geometry" => geometry.to_h

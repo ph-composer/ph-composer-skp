@@ -165,6 +165,10 @@ def test_actual_model_references_share_authored_construction_and_exclude_unused_
     assigned = ["asm_Single000001", "asm_Mixed0000001", "asm_Steel0000001", "asm_Repeat000001", "asm_Membrane0001"]
     for index, face in enumerate(faces):
         face["assembly_id"] = assigned[index % len(assigned)]
+    # A Surface pair names one Assembly, reversed on its counterpart.
+    pair = {face["id"]: face for face in faces if face["boundary_condition"] == "Surface"}
+    for face in pair.values():
+        face["assembly_id"] = pair[face["adjacency"]["counterpart"]["entity_id"]]["assembly_id"] = face["assembly_id"]
     result = cast(dict[str, Any], translate(payload, SECTIONS).to_document())
     assert result["summary"]["publishable"] is True
     check(result["canonical_model"])
@@ -174,7 +178,8 @@ def test_actual_model_references_share_authored_construction_and_exclude_unused_
     for source in faces:
         actual = emitted[source["id"]].properties.energy.construction
         assert actual.user_data["ph_composer"]["assembly_id"] == source["assembly_id"]
-        assert actual.identifier == f"ph_composer_{source['assembly_id']}"
+        suffix = "_reversed" if source.get("assembly_reversed") else ""
+        assert actual.identifier == f"ph_composer_{source['assembly_id']}{suffix}"
         if source["assembly_id"] == "asm_Steel0000001":
             assert actual.materials[0].properties.ph.divisions.steel_stud_spacing_mm == 600
     shared = [
@@ -206,6 +211,7 @@ def test_unavailable_face_construction_costs_zone_and_keeps_independent_zone(
         if face["boundary_condition"] == "Surface":
             face["boundary_condition"] = "Outdoors"
             face["adjacency"] = None
+            face.pop("assembly_reversed", None)
     face = next(row for row in faces if row["zone_id"] == "zon_AAAAAAAAAAAA")
     face["assembly_id"] = unavailable
     result = cast(dict[str, Any], translate(payload, SECTIONS).to_document())

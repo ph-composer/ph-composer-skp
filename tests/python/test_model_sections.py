@@ -84,7 +84,9 @@ class FakeModel:
 
 class FakeConstructionSection(ConstructionSection):
     def translate(self, record: Any, inputs: Inputs) -> TranslatedConstruction:
-        return TranslatedConstruction(record, {"assembly_id": record.id}, (), ())
+        return TranslatedConstruction(
+            record, {"assembly_id": record.id}, (), (), {"assembly_id": record.id, "reversed": True}
+        )
 
     def result_fields(self, objects: Any) -> dict[str, Any]:
         return {}
@@ -467,3 +469,67 @@ def test_a_zone_whose_faces_are_all_omitted_is_refused_and_the_rest_reloads() ->
     hbjson = json.loads(canonical["hbjson"])
     assert [room["identifier"] for room in hbjson["rooms"]] == list(translation.objects(ZoneSection.id))
     assert all(room["faces"] for room in hbjson["rooms"])
+
+
+def surface_pair(document: dict[str, Any]) -> list[dict[str, Any]]:
+    faces = document["sections"]["ph_composer.zones.faces.export.faces"]["records"]
+    return sorted((face for face in faces if face["boundary_condition"] == "Surface"), key=lambda face: face["id"])
+
+
+def reload_model(result: dict[str, Any]) -> Any:
+    from ph_composer_translation import stack
+
+    stack.load("honeybee_energy._extend_honeybee")
+    stack.load("honeybee_ph")
+    return stack.load("honeybee.model").Model.from_dict(json.loads(result["canonical_model"]["hbjson"]))
+
+
+@pytest.mark.parametrize("assigned", [False, True])
+def test_an_interior_surface_pair_exports_a_model_honeybee_accepts(assigned: bool) -> None:
+    """Within one Building-Segment the pair needs no Assembly; an assigned pair carries one Assembly,
+    reversed on the counterpart, so honeybee's check_all (reversed interior layers among them) passes."""
+    document = load_fixture()
+    first, second = surface_pair(document)
+    assert second["assembly_reversed"] is True and first["assembly_id"] == second["assembly_id"]
+    if not assigned:
+        first["assembly_id"] = second["assembly_id"] = None
+        del second["assembly_reversed"]
+    result = cast(dict[str, Any], translate(document, SECTIONS).to_document())
+
+    assert result["summary"]["publishable"] is True, result["findings"]
+    model = reload_model(result)
+    assert model.check_all(raise_exception=False) == ""
+    faces = {face.identifier: face for face in model.faces}
+    host, counterpart = faces[first["id"]].properties.energy, faces[second["id"]].properties.energy
+    if assigned:
+        assert counterpart.construction.materials == tuple(reversed(host.construction.materials))
+        assert counterpart.construction.identifier == f"{host.construction.identifier}_reversed"
+    else:
+        assert not host.is_construction_set_on_object and not counterpart.is_construction_set_on_object
+
+
+@pytest.mark.parametrize("change", ["unreversed", "one_side"])
+def test_a_surface_pair_honeybee_would_reject_is_refused_rather_than_written(change: str) -> None:
+    document = load_fixture()
+    first, second = surface_pair(document)
+    if change == "unreversed":
+        del second["assembly_reversed"]
+    else:
+        first["assembly_id"] = None
+    result = cast(dict[str, Any], translate(document, SECTIONS).to_document())
+
+    assert result["summary"]["publishable"] is False
+    assert any("reversed" in finding["message"] for finding in result["findings"])
+
+
+def test_an_unassigned_surface_pair_across_building_segments_is_refused() -> None:
+    document = load_fixture()
+    first, second = surface_pair(document)
+    first["assembly_id"] = second["assembly_id"] = None
+    del second["assembly_reversed"]
+    zones = document["sections"]["ph_composer.zones.export.zones"]["records"]
+    next(zone for zone in zones if zone["id"] == second["zone_id"])["building_segment"] = "Annex"
+    result = cast(dict[str, Any], translate(document, SECTIONS).to_document())
+
+    assert result["summary"]["publishable"] is False
+    assert any("Building-Segment" in finding["message"] for finding in result["findings"])

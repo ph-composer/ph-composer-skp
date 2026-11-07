@@ -29,28 +29,73 @@ class AssemblyAssignmentReadsTest < PhComposerTestCase
     refute_nil STORE.read(entities.first)
   end
 
-  def test_nonblocking_type_exterior_and_surface_mismatches_are_named
+  def test_hint_mismatches_name_only_the_authored_side_and_a_broken_pair_is_named_on_both
     rows = assignment_pair(300)
     first = assignment_assembly("First", "type" => "Floor", "exterior_condition" => "Ground")
     second = assignment_assembly("Second", "type" => "Wall", "exterior_condition" => "Outdoors")
     assignment_invoke("#{FACE_PREFIX}.assign_assembly", assignment_params([rows.first], first))
-    assignment_invoke("#{FACE_PREFIX}.assign_assembly", assignment_params([assignment_faces.last], second))
     rows = assignment_faces
-    assert_equal %w[face.assembly_type_mismatch face.assembly_exterior_condition_mismatch face.assembly_pair_mismatch],
+    assert_equal %w[face.assembly_type_mismatch face.assembly_exterior_condition_mismatch],
                  rows.first.fetch("findings").map { |finding| finding.fetch("code") }
+    assert_empty rows.last.fetch("findings"), "the reversed side holds the Assembly from the other Zone"
+    entity = assignment_entity(rows.last)
+    STORE.write(entity, STORE.read(entity).merge("assembly_id" => second).tap { |row| row.delete("assembly_reversed") })
+    rows = assignment_faces
+    assert_includes rows.first.fetch("findings").map { |finding| finding.fetch("code") }, "face.assembly_pair_mismatch"
     assert_equal %w[face.assembly_exterior_condition_mismatch face.assembly_pair_mismatch],
                  rows.last.fetch("findings").map { |finding| finding.fetch("code") }
-    assert rows.all? { |row| row.fetch("state") == "classified" }
     assert rows.all? { |row| row.fetch("adjacency_state") == "current" }
+
+    result = assignment_invoke("#{FACE_PREFIX}.assign_assembly", assignment_params([rows.first], first))
+    assert_equal "completed", result.fetch("status"), result.inspect
+    assert_equal [[first, nil], [first, true]], pair_values, "assigning the same Assembly again repairs the pair"
   end
 
-  def test_one_unassigned_surface_endpoint_has_no_pair_mismatch_warning
+  def test_assigning_one_side_of_a_pair_gives_the_other_side_the_assembly_reversed
     rows = assignment_pair(350)
     id = assignment_assembly("One side")
+    result = assignment_invoke("#{FACE_PREFIX}.assign_assembly", assignment_params([rows.first], id))
+    assert_equal "completed", result.fetch("status"), result.inspect
+    assert_equal [[id, nil], [id, true]], pair_values
+    assert(assignment_faces.all? { |row| row.fetch("findings").empty? })
+
+    assignment_invoke("#{FACE_PREFIX}.assign_assembly", assignment_params([assignment_faces.last], id))
+    assert_equal [[id, true], [id, nil]], pair_values, "the side a gesture names becomes the authored side"
+
+    assignment_invoke("#{FACE_PREFIX}.assign_assembly", assignment_params([assignment_faces.first], nil))
+    assert_equal [[nil, nil], [nil, nil]], pair_values, "clearing one side clears the pair"
+  end
+
+  def test_classify_and_both_sides_in_one_gesture_keep_one_authored_side
+    assignment_pair(370)
+    id = assignment_assembly("Classified")
+    assignment_classify(assignment_faces.reverse, assembly_intent(id))
+    assert_equal [[id, true], [id, nil]], pair_values, "the first Face named is the authored side"
+  end
+
+  def test_solving_a_pair_whose_sides_share_an_assembly_settles_it_reversed_on_one_side
+    rows = assignment_pair(380)
+    id = assignment_assembly("Shared before solving")
     assignment_invoke("#{FACE_PREFIX}.assign_assembly", assignment_params([rows.first], id))
-    rows = assignment_faces
-    assert_empty rows.last.fetch("findings")
-    assert_empty rows.first.fetch("findings")
+    outdoors = { "boundary_condition" => { "mode" => "set", "value" => "Outdoors" } }
+    assert_equal "completed", assignment_classify(assignment_faces, outdoors).fetch("status")
+    assert_equal [[id, nil], [id, nil]], pair_values, "retiring a pair keeps each side's Assembly"
+    zones = assignment_query("ph_composer.zones.list").fetch("zones")
+    solved = assignment_invoke("ph_composer.zones.solve_adjacency",
+                               "zones" => zones.map { |zone| zone.fetch("reference") })
+    assert_equal "completed", solved.fetch("status"), solved.inspect
+    assert_equal [id, id], pair_values.map(&:first)
+    assert_equal 1, pair_values.count { |_id, reversed| reversed }
+    assert(assignment_faces.all? { |row| row.fetch("findings").empty? })
+  end
+
+  def pair_values
+    assignment_faces.map { |row| row.fetch("values").values_at("assembly_id", "assembly_reversed") }
+  end
+
+  def assignment_entity(row)
+    group = @model.entities.to_a.find { |entity| entity.persistent_id == row.dig("reference", "zone_path").last }
+    group.entities.to_a.find { |entity| entity.persistent_id == row.dig("reference", "entity_path").last }
   end
 
   def test_colour_mode_uses_effective_read_colour_and_marks_absent_and_dangling

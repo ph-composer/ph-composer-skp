@@ -438,6 +438,18 @@ all writes if any target is stale or unreachable. Assembly delete may omit repla
 in-use refusal), name a replacement, or explicitly pass null to clear all references through the
 registered referrer handlers. Definitions never name Zones or Faces.
 
+**Interior pair Assembly.** A Surface pair is one interior element. Its two sides name no Assembly,
+or both name one Assembly and exactly one side stores `assembly_reversed: true`; that side exports
+the construction with its layers reversed (`ph_composer_<assembly id>_reversed`), so honeybee's
+reversed-layer check passes. The Face a gesture names for its Assembly (`assign_assembly`, or
+`classify` with an `assembly_id` intent) is the authored side and its counterpart is written in the
+same proposal; when a gesture names both, the first is authored. Solve adjacencies settles a new pair
+whose sides share one Assembly, or where only one side has one. A Face leaving its pair drops
+`assembly_reversed` with `adjacency`. An Assembly is required on a Surface Face only when its
+counterpart's Zone is in another Building-Segment; within one, the pair may export with no
+construction, honeybee's default interior construction applies and PHX drops the pair. A pair that
+breaks this rule blocks export (`face.assembly_pair_mismatch`).
+
 A Face target uses this reference shape; a Zone target carries only `zone_id` and `zone_path`:
 
 ```json

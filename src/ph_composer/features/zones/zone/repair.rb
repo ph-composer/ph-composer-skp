@@ -242,7 +242,7 @@ module PhComposer
                                                                "Face", record.fetch("id"), mapping,
                                                                :engine => engine,
                                                                :reference_plan => reference_plan)
-        after.delete("adjacency")
+        Faces::Schema.leave_pair!(after)
         after.delete("boundary_condition") if record["boundary_condition"] == "Surface"
         Faces::Schema.validate!(after)
       end

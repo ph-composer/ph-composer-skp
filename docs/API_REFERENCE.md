@@ -2221,6 +2221,10 @@ Values:
       ],
       "description": "Id of the Face's Assembly."
     },
+    "assembly_reversed": {
+      "type": "boolean",
+      "description": "True on the counterpart side of a Surface pair: the pair's Assembly seen from the other Zone, layers reversed. Only with Surface and an assembly_id."
+    },
     "adjacency": {
       "type": "object",
       "description": "The Surface pair envelope Solve adjacencies writes; only with Surface."
@@ -18089,6 +18093,10 @@ Result:
                 ],
                 "description": "Id of the Face's Assembly."
               },
+              "assembly_reversed": {
+                "type": "boolean",
+                "description": "True on the counterpart side of a Surface pair: the pair's Assembly seen from the other Zone, layers reversed. Only with Surface and an assembly_id."
+              },
               "adjacency": {
                 "type": "object",
                 "description": "The Surface pair envelope Solve adjacencies writes; only with Surface."
@@ -18876,6 +18884,10 @@ Result:
                 ],
                 "description": "Id of the Face's Assembly."
               },
+              "assembly_reversed": {
+                "type": "boolean",
+                "description": "True on the counterpart side of a Surface pair: the pair's Assembly seen from the other Zone, layers reversed. Only with Surface and an assembly_id."
+              },
               "adjacency": {
                 "type": "object",
                 "description": "The Surface pair envelope Solve adjacencies writes; only with Surface."
@@ -18974,6 +18986,7 @@ Params:
           "boundary_condition",
           "attached_zone_id",
           "assembly_id",
+          "assembly_reversed",
           "adjacency"
         ]
       },
@@ -19090,6 +19103,10 @@ Result:
                   "null"
                 ],
                 "description": "Id of the Face's Assembly."
+              },
+              "assembly_reversed": {
+                "type": "boolean",
+                "description": "True on the counterpart side of a Surface pair: the pair's Assembly seen from the other Zone, layers reversed. Only with Surface and an assembly_id."
               },
               "adjacency": {
                 "type": "object",
@@ -19407,6 +19424,10 @@ Result:
                   "null"
                 ],
                 "description": "Id of the Face's Assembly."
+              },
+              "assembly_reversed": {
+                "type": "boolean",
+                "description": "True on the counterpart side of a Surface pair: the pair's Assembly seen from the other Zone, layers reversed. Only with Surface and an assembly_id."
               },
               "adjacency": {
                 "type": "object",
@@ -45857,6 +45878,10 @@ Params:
                 ],
                 "description": "Id of the Face's Assembly."
               },
+              "assembly_reversed": {
+                "type": "boolean",
+                "description": "True on the counterpart side of a Surface pair: the pair's Assembly seen from the other Zone, layers reversed. Only with Surface and an assembly_id."
+              },
               "adjacency": {
                 "type": "object",
                 "description": "The Surface pair envelope Solve adjacencies writes; only with Surface."
@@ -46103,6 +46128,10 @@ Params:
             "null"
           ],
           "description": "Id of the Face's Assembly."
+        },
+        "assembly_reversed": {
+          "type": "boolean",
+          "description": "True on the counterpart side of a Surface pair: the pair's Assembly seen from the other Zone, layers reversed. Only with Surface and an assembly_id."
         },
         "adjacency": {
           "type": "object",
@@ -46754,6 +46783,10 @@ Params:
             "null"
           ],
           "description": "Id of the Face's Assembly."
+        },
+        "assembly_reversed": {
+          "type": "boolean",
+          "description": "True on the counterpart side of a Surface pair: the pair's Assembly seen from the other Zone, layers reversed. Only with Surface and an assembly_id."
         },
         "adjacency": {
           "type": "object",
@@ -55116,9 +55149,9 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `construction.dangling` | A Face names an Assembly that is not in the Model. |
 | `construction.incomplete` | A Face names an Assembly that cannot export yet; the message gives the first of its export_blockers. |
 | `construction.invalid` | A Face names an Assembly record that cannot be read. |
-| `construction.missing` | An exported Face names no Assembly. |
+| `construction.missing` | An exported Face names no Assembly. An interior Face within one Building-Segment needs none. |
 | `face.assembly_exterior_condition_mismatch` | The Face's boundary condition differs from its Assembly's exterior condition. |
-| `face.assembly_pair_mismatch` | The two Faces of a Surface pair name different Assemblies. |
+| `face.assembly_pair_mismatch` | The two Faces of a Surface pair do not hold one Assembly, reversed on one side. |
 | `face.assembly_type_mismatch` | The Face's type differs from its Assembly's type. |
 | `face.boundary_unassigned` | A Face has no boundary condition and is omitted from the export. |
 | `face.identity_unique` | The Face has no split copies sharing its identity to repair. |
@@ -55158,3 +55191,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.13 | 2026-10-26 | ph_composer.thermal_bridges.edge_tool.choose and edge_tool.stop are new view commands, with edge_tool.state and the edge_tool snapshot section: the pointer route to edges.assign. |
 | 1.14 | 2026-10-26 | ph_composer.windows.units.outlines (bounded) is new: each placed Window's world outline. ph_composer.thermal_bridges.export_preflight is new, with the ph_composer.thermal_bridges.export.thermal_bridges export section and the thermal_bridge.on_window_perimeter code. |
 | 1.15 | 2026-10-26 | The definition lists (ph_composer.assemblies.materials.list and assemblies.list, the Window product and Type lists, ph_composer.thermal_bridges.types.list) take fields, keeping kind, id and schema_version on every row, and cut each page by size as well as by limit. |
+| 1.16 | 2026-11-07 | A Face record gains assembly_reversed, true on the counterpart side of a Surface pair. ph_composer.zones.faces.assign_assembly, and classify with an assembly_id intent, also write the counterpart (its face_ids include it). face.assembly_pair_mismatch now blocks export; construction.missing no longer applies to a Surface Face whose pair is within one Building-Segment. |

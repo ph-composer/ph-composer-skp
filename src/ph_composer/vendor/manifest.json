@@ -591,9 +591,9 @@
       "sha256": "75c0da2af7b3a437ef349eb7ca4c3162ff109e74e71de3b73718e326ee190330"
     },
     "python/ph_composer_translation/constructions.py": {
-      "bytes": 7232,
+      "bytes": 8439,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "f90d16191053b78aeee9d00b9270bbb992172934ced3bf00d4cf7f7087818f1f"
+      "sha256": "d07556340bf1063c51e4b8d2015393fa0980df0cf0a7ab49eb60f387b5c4236c"
     },
     "python/ph_composer_translation/contract/__init__.py": {
       "bytes": 2490,
@@ -641,9 +641,9 @@
       "sha256": "81afd69d32d75db8e3e2b9f305fd568c4c000be8a8d0d37128bbf637ccfd734f"
     },
     "python/ph_composer_translation/model_sections.py": {
-      "bytes": 20342,
+      "bytes": 23885,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "64bdc8cd77e00105d440798c0f898c1fa145dec8ae9a8516f2420572ecccc522"
+      "sha256": "de11f33cdc040ede9d8a1cabad8639899090c8450b474ac5040431352d4c1c24"
     },
     "python/ph_composer_translation/result.py": {
       "bytes": 3570,

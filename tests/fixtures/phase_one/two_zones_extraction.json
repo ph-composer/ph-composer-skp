@@ -491,6 +491,7 @@
             }
           },
           "assembly_id": "asm_Single000001",
+          "assembly_reversed": true,
           "boundary_condition": "Surface",
           "face_type": "Wall",
           "geometry": {

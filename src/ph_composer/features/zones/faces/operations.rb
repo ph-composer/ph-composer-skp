@@ -160,6 +160,14 @@ module PhComposer
 
         updates = classify_updates(request, targets, retirements, intent)
         updates.concat(retirement_only_updates(targets, retirements))
+        named = if %w[set clear].include?(intent.dig("assembly_id", "mode"))
+                  targets.select { |_occurrence, record| record }
+                         .map { |occurrence, record| [occurrence.reference(record.fetch("id")), record] }
+                else
+                  []
+                end
+        AssemblyAssignment.mirror_pairs(request, updates, index, :named => named)
+        check_limit!(updates.length)
         return { "face_ids" => [] } if updates.empty?
 
         scopes = updates.map do |update|
@@ -346,6 +354,8 @@ module PhComposer
           when "set" then record[field] = operation.fetch("value")
           end
         end
+        # A Face whose Assembly the gesture sets or clears is the authored side of its Surface pair.
+        record.delete("assembly_reversed") if %w[set clear].include?(intent.dig("assembly_id", "mode"))
         AssemblyAssignment.fill_hints(request, record, intent)
         # The reference belongs to the condition. Moving off AttachedZone drops it, so no Face keeps a
         # reference its own condition no longer explains; but a caller asking for the reference

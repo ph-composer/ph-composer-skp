@@ -29,10 +29,12 @@ module PhComposer
         "construction.incomplete" => "A Face names an Assembly that cannot export yet; the message gives the first " \
                                      "of its export_blockers.",
         "construction.invalid" => "A Face names an Assembly record that cannot be read.",
-        "construction.missing" => "An exported Face names no Assembly.",
+        "construction.missing" => "An exported Face names no Assembly. An interior Face within one " \
+                                  "Building-Segment needs none.",
         "face.assembly_exterior_condition_mismatch" => "The Face's boundary condition differs from its Assembly's " \
                                                        "exterior condition.",
-        "face.assembly_pair_mismatch" => "The two Faces of a Surface pair name different Assemblies.",
+        "face.assembly_pair_mismatch" => "The two Faces of a Surface pair do not hold one Assembly, " \
+                                         "reversed on one side.",
         "face.assembly_type_mismatch" => "The Face's type differs from its Assembly's type.",
         "face.boundary_unassigned" => "A Face has no boundary condition and is omitted from the export.",
         "face.identity_unique" => "The Face has no split copies sharing its identity to repair.",

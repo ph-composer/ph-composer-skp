@@ -196,4 +196,6 @@ model = JSON.parse(bytes)
 
 A Face without an authored Assembly blocks the export as `export.blocked`, and the preflight
 findings name each one with the code `construction.missing`. Assign Assemblies with
-`ph_composer.zones.faces.assign_assembly` before starting a real export.
+`ph_composer.zones.faces.assign_assembly` before starting a real export. An interior Face (a
+Surface pair) needs an Assembly only when its two Zones are in different Building-Segments.
+Assigning one side gives the other side the same Assembly, reversed.

@@ -315,7 +315,8 @@ module PhComposer
         end
 
         pair_id = pair_id_for(left, right)
-        [with_pair(left, right, pair_id), with_pair(right, left, pair_id), pair_id]
+        Faces::AssemblyAssignment.settle_new_pair!(with_pair(left, right, pair_id), with_pair(right, left, pair_id)) +
+          [pair_id]
       end
 
       # A pair's id derives from its two Face ids alone, in either order, so a full match, a cut and a
@@ -464,8 +465,7 @@ module PhComposer
       private_class_method :geometry_stamp
 
       def retired(record)
-        result = DeepCopy.call(record)
-        result.delete("adjacency")
+        result = Faces::Schema.leave_pair!(DeepCopy.call(record))
         result.delete("boundary_condition")
         Faces::Schema.validate!(result)
       end

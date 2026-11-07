@@ -53,6 +53,8 @@ class FaceSpec:
     area_m2: float
     omission: FaceOmission | None
     user_data: JSONObject = field(default_factory=dict)
+    # The counterpart side of a Surface pair: it names the pair's Assembly and takes its layers reversed.
+    assembly_reversed: bool = False
 
 
 @dataclass(frozen=True)
@@ -106,6 +108,11 @@ class FaceSection(Section[FaceSpec, FaceSpec]):
         assembly = raw.get("assembly_id")
         if assembly is not None and not isinstance(assembly, str):
             raise RecordError(f"face {identifier} assembly_id must be text or null")
+        reversed_assembly = raw.get("assembly_reversed", False)
+        if not isinstance(reversed_assembly, bool):
+            raise RecordError(f"face {identifier} assembly_reversed must be true or false")
+        if reversed_assembly and (assembly is None or boundary != "Surface"):
+            raise RecordError(f"face {identifier} names a reversed Assembly without a Surface Assembly")
         geometry = raw.get("geometry")
         if not isinstance(geometry, Mapping):
             raise RecordError(f"face {identifier} geometry must be an object")
@@ -127,6 +134,7 @@ class FaceSection(Section[FaceSpec, FaceSpec]):
             area,
             omission,
             user_data(raw.get("user_data"), f"face {identifier}"),
+            reversed_assembly,
         )
 
     def translate(self, record: FaceSpec, inputs: Inputs) -> FaceSpec:
@@ -236,10 +244,7 @@ class ZoneSection(Section[ZoneRecord, TranslatedZone]):
                 continue
             if specification.boundary_condition == "Surface":
                 _validate_surface(specification, inputs)
-            try:
-                construction = inputs.get(CONSTRUCTIONS, specification.assembly_id or "(unassigned)").construction
-            except DependencyUnavailable as error:
-                raise DependencyUnavailable(error.section, error.object_id, f"Face {face_id}") from error
+            construction = _construction(specification, inputs, face_id)
             points = [[lb_point.Point3D(*point) for point in loop] for loop in specification.loops_m]
             geometry = lb_face.Face3D(points[0], holes=points[1:] or None)
             try:
@@ -253,7 +258,10 @@ class ZoneSection(Section[ZoneRecord, TranslatedZone]):
                 face = hb_face.Face(specification.identifier, geometry, face_type, boundary)
                 if specification.user_data:
                     face.user_data = dict(specification.user_data)
-                face.properties.energy.construction = construction
+                # An unassigned interior Face keeps honeybee's default interior construction; `attach` refuses
+                # one whose counterpart is in another Building-Segment.
+                if construction is not None:
+                    face.properties.energy.construction = construction
             except (AssertionError, AttributeError, KeyError, ValueError) as error:
                 raise RecordError(f"face {face_id} could not be built: {error}") from error
             faces[face_id] = face
@@ -333,7 +341,11 @@ class ZoneSection(Section[ZoneRecord, TranslatedZone]):
                     continue
                 emitted[identifier].set_adjacency(emitted[counterpart_id])
                 paired.update((identifier, counterpart_id))
-        host.add_rooms([zone.room for zone in objects])
+        refused = _unmatched_pairs(objects, specifications, paired)
+        host.add_rooms([zone.room for zone in objects if zone.source.identifier not in refused])
+        if refused:
+            reasons = "; ".join(sorted(set(refused.values())))
+            raise AttachmentRefused(reasons, [zone for zone in objects if zone.source.identifier in refused])
         if unpaired:
             names = ", ".join(sorted({zone.source.identifier for zone in unpaired}))
             raise AttachmentRefused(f"Surface Faces of Zone {names} have no emitted reciprocal counterpart", unpaired)
@@ -344,7 +356,8 @@ class ZoneSection(Section[ZoneRecord, TranslatedZone]):
             for identifier in zone.faces:
                 specification = zone.specifications[identifier]
                 assembly_id = specification.assembly_id
-                assert assembly_id is not None
+                if assembly_id is None:
+                    continue
                 row = usage.setdefault(assembly_id, _ConstructionUsage())
                 row.face_count += 1
                 row.gross_area_m2 += specification.area_m2
@@ -428,6 +441,56 @@ def _validate_surface(specification: FaceSpec, inputs: Inputs) -> None:
     counterpart_zone = endpoint.get("zone_id") if isinstance(endpoint, Mapping) else None
     if counterpart.zone_id != counterpart_zone:
         raise RecordError(f"Surface face {specification.identifier} counterpart names the wrong Zone")
+
+
+def _construction(specification: FaceSpec, inputs: Inputs, face_id: str) -> Any:
+    """The construction a Face carries, or None for an unassigned Surface Face."""
+    if specification.assembly_id is None and specification.boundary_condition == "Surface":
+        return None
+    try:
+        translated = inputs.get(CONSTRUCTIONS, specification.assembly_id or "(unassigned)")
+    except DependencyUnavailable as error:
+        raise DependencyUnavailable(error.section, error.object_id, f"Face {face_id}") from error
+    if not specification.assembly_reversed:
+        return translated.construction
+    if translated.reversed_construction is None:
+        raise RecordError(f"face {face_id} Assembly {specification.assembly_id} has no reversed construction")
+    return translated.reversed_construction
+
+
+def _unmatched_pairs(
+    objects: Sequence[TranslatedZone], specifications: Mapping[str, FaceSpec], paired: set[str]
+) -> dict[str, str]:
+    """Zones whose Surface pair breaks the interior pair rule, each with the reason, keyed by Zone identifier
+    (context/CONTRACTS.md, "Interior pair Assembly"). A pair is unassigned within one Building-Segment, or
+    one Assembly reversed on exactly one side, which gives honeybee the mirrored layers its check requires."""
+    owners = {identifier: zone for zone in objects for identifier in zone.faces}
+    refused: dict[str, str] = {}
+    for identifier in sorted(paired):
+        mine = specifications[identifier]
+        counterpart_id = _counterpart_id(mine)
+        if identifier > counterpart_id:
+            continue
+        theirs = specifications[counterpart_id]
+        here, there = owners[identifier], owners[counterpart_id]
+        reason = None
+        if mine.assembly_id is None and theirs.assembly_id is None:
+            if _segment_identity(here.source) != _segment_identity(there.source):
+                reason = (
+                    f"Surface pair {identifier} and {counterpart_id} crosses Building-Segments and needs an Assembly"
+                )
+        elif mine.assembly_id != theirs.assembly_id or mine.assembly_reversed == theirs.assembly_reversed:
+            reason = (
+                f"Surface pair {identifier} and {counterpart_id} needs one Assembly, reversed on one side; "
+                "assign the Assembly again to one side"
+            )
+        if reason:
+            refused[here.source.identifier] = refused[there.source.identifier] = reason
+    return refused
+
+
+def _segment_identity(zone: ZoneRecord) -> tuple[str, str]:
+    return ("managed", zone.building_segment_id) if zone.building_segment_id else ("legacy", zone.building_segment)
 
 
 def _segment_identifier(name: str) -> str:

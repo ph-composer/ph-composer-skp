@@ -22,12 +22,14 @@ class AssemblyAssignmentTest < PhComposerTestCase
     result = assignment_classify([rows.first], assembly_intent(id))
     assert_equal "committed", result.fetch("effect"), result.inspect
     assert_equal before.merge("assembly_id" => id), STORE.read(entity)
-    assert_equal rows.last.fetch("values"), assignment_faces.last.fetch("values")
+    assert_equal rows.last.fetch("values").merge("assembly_id" => id, "assembly_reversed" => true),
+                 assignment_faces.last.fetch("values"), "the counterpart holds the pair's Assembly reversed"
     keep = assignment_classify([assignment_faces.first], assembly_intent(nil, "keep"))
     assert_equal "none", keep.fetch("effect")
     clear = assignment_classify([assignment_faces.first], assembly_intent(nil, "clear"))
     assert_equal "committed", clear.fetch("effect")
     assert_equal before, STORE.read(entity)
+    assert_equal rows.last.fetch("values"), assignment_faces.last.fetch("values")
     assert assignment_faces.all? { |row| row.fetch("adjacency_state") == "current" }
   end
 
@@ -52,8 +54,9 @@ class AssemblyAssignmentTest < PhComposerTestCase
     id = assignment_assembly("First", "type" => "Floor", "exterior_condition" => "Ground")
     result = assignment_invoke("#{FACE_PREFIX}.assign_assembly", assignment_params(rows, id))
     assert_equal %w[completed committed], result.values_at("status", "effect"), result.inspect
-    assert_equal rows.map { |row| row.fetch("values").merge("assembly_id" => id) },
-                 assignment_faces.map { |row| row.fetch("values") }
+    assigned = rows.map { |row| row.fetch("values").merge("assembly_id" => id) }
+    assigned.last["assembly_reversed"] = true
+    assert_equal assigned, assignment_faces.map { |row| row.fetch("values") }
     before_operations = @model.operations.length
     noop = assignment_invoke("#{FACE_PREFIX}.assign_assembly", assignment_params(assignment_faces, id))
     assert_equal "none", noop.fetch("effect")

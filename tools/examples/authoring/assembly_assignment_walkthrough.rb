@@ -33,16 +33,17 @@ module PhComposerAssemblyAssignmentWalkthrough
       invoke.call("#{ASSEMBLIES}.create", "values" => { "name" => "Assignment walkthrough #{label}" })
             .dig("value", "id")
     end
-    targets = [left, right].map do |row|
-      { "reference" => row.fetch("reference"), "expected_values" => row.fetch("values") }
-    end
+    # One side is enough: the counterpart takes the same Assembly reversed.
+    targets = [{ "reference" => left.fetch("reference"), "expected_values" => left.fetch("values") }]
     invoke.call("#{FACES}.assign_assembly", "targets" => targets, "assembly_id" => ids.first)
     assigned = query(context, "#{FACES}.all").dig("value", "faces")
     sides = assigned.select { |row| [left, right].any? { |old| old.fetch("reference") == row.fetch("reference") } }
     preserved = sides.all? do |row|
       old = [left, right].find { |entry| entry.fetch("reference") == row.fetch("reference") }
-      row.fetch("values").reject { |key, _value| key == "assembly_id" } ==
-        old.fetch("values").reject { |key, _value| key == "assembly_id" } && row["adjacency_state"] == "current"
+      assignment = %w[assembly_id assembly_reversed]
+      row.fetch("values").reject { |key, _value| assignment.include?(key) } ==
+        old.fetch("values").reject { |key, _value| assignment.include?(key) } &&
+        row.dig("values", "assembly_id") == ids.first && row["adjacency_state"] == "current"
     end
     invoke.call("#{ASSEMBLIES}.delete", "id" => ids.first, "replacement_id" => ids.last)
     after = query(context, "#{FACES}.all").dig("value", "faces")
