@@ -8,6 +8,8 @@ module PhComposer
     module Metrics
       # A Face whose normal is within about 0.08 degrees of vertical reads as horizontal.
       HORIZONTAL_Z = 0.999999
+      # A Face whose normal is within about 0.6 degrees of horizontal is a wall: it has no plan area to count.
+      VERTICAL_Z = 0.01
       # Supply and extract differ by more than this share of the larger sum.
       IMBALANCE_SHARE = 0.1
       # The quantities a Zone, a Building-Segment and the Model sum.
@@ -34,6 +36,10 @@ module PhComposer
 
       def horizontal?(normal)
         normal[2].abs >= HORIZONTAL_Z
+      end
+
+      def vertical?(normal)
+        normal[2].abs < VERTICAL_Z
       end
 
       def segment(loops_m, normal, record)

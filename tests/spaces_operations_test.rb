@@ -290,6 +290,68 @@ class SpacesOperationsTest < PhComposerTestCase
                  preview.dig("left_out", 0, "message"), "the refusal says how to recover")
   end
 
+  # W-037 and W-045: an L-shaped solid of 4.88 m2 plan area drawn loose in the Zone. Its eight Faces share
+  # their Edges, as the host's do. Create Space once took them all, walls included, and counted 9.76 m2.
+  def l_shaped_solid(height = 2.4)
+    plan = [[0, 10], [3.2, 10], [3.2, 11.15], [1.2, 11.15], [1.2, 12.15], [0, 12.15]]
+    low, high = [0, height].map { |z| plan.map { |x, y| Geom::Point3d.new(x * INCHES, y * INCHES, z * INCHES) } }
+    edge = ->(id, from, to) { Sketchup::Edge.new(id, from, to) }
+    rings = [[low, 400], [high, 410]].map do |points, base|
+      points.each_index.map { |index| edge.call(base + index, points[index], points[(index + 1) % 6]) }
+    end
+    posts = low.each_index.map { |index| edge.call(420 + index, low[index], high[index]) }
+    walls = low.each_index.map do |index|
+      following = (index + 1) % 6
+      Sketchup::Face.new(150 + index, {}, :points => [low[index], low[following], high[following], high[index]],
+                                          :edges => [rings[0][index], rings[1][index], posts[index], posts[following]])
+    end
+    bottom = Sketchup::Face.new(160, {}, :points => low.reverse, :edges => rings[0])
+    top = Sketchup::Face.new(161, {}, :points => high, :edges => rings[1])
+    [*walls, bottom, top].each { |face| @zone_group.entities << face }
+    [bottom, top, walls]
+  end
+
+  def test_create_space_on_a_solid_refuses_its_walls_and_counts_no_floor_twice
+    zone_with_outlines
+    bottom, top, walls = l_shaped_solid
+    downward = floor_face(170, rectangle(6, 10, 1, 1).reverse)
+    @zone_group.entities << downward
+    faces = [bottom, top, *walls, downward].map { |face| face_reference(face) }
+    preview = query("ph_composer.spaces.create_preview", "zone" => @zone, "faces" => faces)
+    assert_equal [[170]], preview.fetch("accepted").map { |face| face["entity_path"] },
+                 "a solid's walls are not floors and its top is not a second floor; a flat outline facing down is"
+    reasons = preview.fetch("left_out").to_h { |row| [row.dig("reference", "entity_path").last, row] }
+    assert_equal %w[vertical] * 6, walls.map { |wall| reasons.dig(wall.persistent_id, "reason") }
+    assert_equal %w[solid solid], [bottom, top].map { |face| reasons.dig(face.persistent_id, "reason") }
+    assert_match(/A Space is a floor outline plus a height/, reasons.dig(160, "message"))
+    assert_match(/Height from solid/, reasons.dig(160, "message"))
+    before = @model.operations.length
+    assert_equal %w[refused space.nothing_to_create], create([bottom, top, *walls]).values_at("status", "code")
+    assert_equal before, @model.operations.length
+    assert_empty spaces
+  end
+
+  def test_a_vertical_face_is_never_a_floor_candidate_a_marked_floor_or_a_new_volume
+    zone_with_outlines
+    create([@living])
+    space_group = @zone_group.entities.to_a.find { |entity| PhComposer::Spaces::SPACE_STORE.read(entity) }
+    wall = floor_face(140, [[0, 0, 0], [1, 0, 0], [1, 0, 1], [0, 0, 1]])
+    space_group.entities << wall
+    space = spaces.first.fetch("reference")
+    candidate = query("ph_composer.spaces.candidate_faces.list", "space" => space).fetch("candidate_faces").first
+    assert_equal "target.wrong_kind", candidate.dig("refusal", "code")
+    volume_group = space_group.entities.to_a.find { |entity| PhComposer::Spaces::VOLUME_STORE.read(entity) }
+    volume_group.entities << floor_face(141, [[0, 1, 0], [1, 1, 0], [1, 1, 1], [0, 1, 1]])
+    volume = spaces.first.dig("volumes", 0, "reference")
+    marked = invoke("ph_composer.spaces.floors.mark", "faces" => [volume.fetch("entity_path") + [141]],
+                                                      "weighting_factor" => 1.0)
+    assert_equal %w[refused target.wrong_kind], marked.values_at("status", "code")
+    @model.active_path = [@wrapper, @zone_group, space_group]
+    result = invoke("ph_composer.spaces.volumes.create", "space" => space,
+                                                         "faces" => [space.fetch("entity_path") + [140]])
+    assert_equal %w[refused target.wrong_kind], result.values_at("status", "code")
+  end
+
   def test_a_new_volume_refuses_faces_that_share_an_edge_with_an_unselected_face
     zone_with_outlines
     create([@living])

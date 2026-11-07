@@ -41,6 +41,10 @@ module PhComposer
       # it out; the way out is to draw it where it touches no other Face.
       SHARES_EDGE = "The Face shares an Edge with an unselected Face; grouping it would split that Face. Undo " \
                     "the outline, then draw it just below the floor or inset from the walls, touching no other Face."
+      # A solid's walls are left out as walls; its top and bottom then share Edges with them. Taking both
+      # would count the floor twice, so neither is taken.
+      SOLID = "The Face is part of a solid. A Space is a floor outline plus a height: draw the floor outline " \
+              "alone, touching no other Face, then set the height, or group the solid and use Height from solid."
 
       module_function
 
@@ -235,7 +239,10 @@ module PhComposer
                              "Only Faces become Floor Segments.") unless face.is_a?(Sketchup::Face)
 
         stored = FLOOR_SEGMENT_STORE.read(face)
-        return unless stored
+        unless stored
+          Eligibility.not_a_wall!(face, volume.transform)
+          return nil
+        end
 
         reference = { "floor_segment_id" => stored.fetch("id"), "entity_path" => face_path }
         Resolve.occurrence(scan, reference, :mutable => true).record
@@ -308,11 +315,24 @@ module PhComposer
                                            :face_id => Integer(reference.fetch("entity_path").last))
           end
         end
-        eligible = without_edge_sharing(request.locate(ZONE_KIND, zone, :mutable => false), candidates)
+        located_zone = request.locate(ZONE_KIND, zone, :mutable => false)
+        eligible = without_edge_sharing(located_zone, candidates)
+        walls = left_out.select { |row| row["reason"] == "vertical" }
+                        .map { |row| Integer(row.dig("reference", "entity_path").last) }
         left_out.concat((candidates - eligible).map do |face|
-          { "reference" => face.reference, "reason" => "shares_edge", "message" => SHARES_EDGE }
+          solid = part_of_solid?(located_zone.entity.entities, face.face_id, walls)
+          reason = solid ? ["solid", SOLID] : ["shares_edge", SHARES_EDGE]
+          { "reference" => face.reference, "reason" => reason.first, "message" => reason.last }
         end)
         [eligible, left_out]
+      end
+
+      # Whether every Edge of the Face bounds one of the selected walls: the top or bottom of a drawn solid,
+      # not an outline that merely touches a wall.
+      def part_of_solid?(entities, face_id, walls)
+        face = entities.to_a.find { |entity| entity.persistent_id == face_id }
+        edges = Array(face&.edges)
+        !edges.empty? && edges.all? { |edge| Array(edge.faces).any? { |other| walls.include?(other.persistent_id) } }
       end
 
       # The candidates that share no Edge with a Face outside the set. Dropping a Face makes it an
@@ -336,6 +356,7 @@ module PhComposer
 
         located = request.locate(FACE_KIND, reference, :mutable => true, :index => index)
         return ["floor_segment", "The Face is already a Floor Segment."] if FLOOR_SEGMENT_STORE.read(located.entity)
+        return ["vertical", Eligibility::WALL] if Eligibility.wall?(located.entity, located.transform)
 
         nil
       rescue CodedError => error
@@ -353,6 +374,8 @@ module PhComposer
           unless face.is_a?(Sketchup::Face) && FLOOR_SEGMENT_STORE.read(face).nil?
             raise CodedError.new("target.wrong_kind", "A new Volume takes loose Faces that are not yet marked.")
           end
+
+          Eligibility.not_a_wall!(face, occurrence.transform)
 
           face.persistent_id
         end.uniq.tap do |ids|
