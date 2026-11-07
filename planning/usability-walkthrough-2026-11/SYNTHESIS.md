@@ -1,9 +1,9 @@
 # Usability walkthrough: synthesis
 
 DATE: 2026-11-07
-STATUS: Draft for Ed's review. No issues posted yet.
+STATUS: Accepted by Ed 2026-11-07; issues posted 2026-11-07.
 AUTHOR: Ed May, BLDGTYP (walkthrough); Claude (synthesis)
-ISSUE: none (local planning draft; issues below are drafts)
+ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/373 (tracking)
 
 Source: [LOG.md](LOG.md), 123 raw entries (W-001 to W-123) from the 2026-11-07 run on `main`
 `a39e1e19`. This file groups them, settles overlaps and conflicts, and drafts one GitHub issue
@@ -29,7 +29,9 @@ added, honeybee rejects it, and PHX cannot convert it. Three problems stop a rea
 ## Decisions for Ed
 
 Each is needed before its issue can be planned. Recommendation first; all recommendations are
-Claude's unless the row says otherwise.
+Claude's unless the row says otherwise. **Accepted 2026-11-07:** Ed approved every
+recommendation below ("go ahead ... with your picks"); the issues carry them as decided. D3's
+PHI/Phius question and D5's per-client verification remain open inside their issues.
 
 | # | Decision | Recommendation | Issue |
 | --- | --- | --- | --- |
@@ -69,6 +71,44 @@ Existing: `bug`, `enhancement`, `priority: P1` to `P4`, `size: S/M/L`. New: **`a
 for anything an agent cannot do that a user can (Ed asked for this class to be tracked).
 Optional: `walkthrough-2026-11` to keep the set findable.
 
+## Posted issues
+
+Posted 2026-11-07 with the labels proposed above. Tracking issue: [#373](https://github.com/ph-composer/ph-composer-skp/issues/373). Each issue carries its summary, decision, acceptance criteria and the raw W-entries verbatim.
+
+| Item | Issue | Title |
+| --- | --- | --- |
+| S-01 | [#343](https://github.com/ph-composer/ph-composer-skp/issues/343) | Agent Access: move into the panel and simplify the token screens |
+| S-02 | [#344](https://github.com/ph-composer/ph-composer-skp/issues/344) | Agent connection: the default Claude Code setup cannot reach GUI clients |
+| S-03 | [#345](https://github.com/ph-composer/ph-composer-skp/issues/345) | Agent token bound to "This Model only" stops working after Save As, silently |
+| S-04 | [#346](https://github.com/ph-composer/ph-composer-skp/issues/346) | Export approval for agents is hidden and can approve an invalid file |
+| S-05 | [#347](https://github.com/ph-composer/ph-composer-skp/issues/347) | Agent schema and diagnostics gaps (Assembly layer ids, listener stop) |
+| S-06 | [#348](https://github.com/ph-composer/ph-composer-skp/issues/348) | Show outcomes and refusals in SketchUp, not only in the panel |
+| S-07 | [#349](https://github.com/ph-composer/ph-composer-skp/issues/349) | Context menu: split Classify faces, show current values, one PH-Composer home |
+| S-08 | [#350](https://github.com/ph-composer/ph-composer-skp/issues/350) | Colour-by overlay ignores SketchUp view state (section planes, Hide Rest of Model, filters) |
+| S-09 | [#351](https://github.com/ph-composer/ph-composer-skp/issues/351) | Thermal Bridges: Colour-by entry points and a by-Group mode |
+| S-10 | [#352](https://github.com/ph-composer/ph-composer-skp/issues/352) | Spaces: creation, editing and visibility redesign (design packet) |
+| S-11 | [#353](https://github.com/ph-composer/ph-composer-skp/issues/353) | Create Space on a solid registers walls as floors and double-counts iCFA |
+| S-12 | [#354](https://github.com/ph-composer/ph-composer-skp/issues/354) | Delete Space fails while its Zone is open |
+| S-13 | [#355](https://github.com/ph-composer/ph-composer-skp/issues/355) | Spaces table: wording, Height placement, sort order, per-Zone balance check |
+| S-14 | [#356](https://github.com/ph-composer/ph-composer-skp/issues/356) | Zones view polish (Geometry tab, ground depth, Building Segments modal, naming) |
+| S-15 | [#357](https://github.com/ph-composer/ph-composer-skp/issues/357) | Material entry: thermal input forms, colour, create from the Assembly page |
+| S-16 | [#358](https://github.com/ph-composer/ph-composer-skp/issues/358) | Material placeholder density and specific heat are exported as data |
+| S-17 | [#359](https://github.com/ph-composer/ph-composer-skp/issues/359) | Interior Surface pairs: Assembly rules and honeybee validity |
+| S-18 | [#360](https://github.com/ph-composer/ph-composer-skp/issues/360) | Assembly builder polish |
+| S-19 | [#361](https://github.com/ph-composer/ph-composer-skp/issues/361) | Library sidebar and tables polish |
+| S-20 | [#362](https://github.com/ph-composer/ph-composer-skp/issues/362) | Frames: Brand field and an optional auto-name |
+| S-21 | [#363](https://github.com/ph-composer/ph-composer-skp/issues/363) | Draw a rectangle in SketchUp, convert it to a Window Type (design packet) |
+| S-22 | [#364](https://github.com/ph-composer/ph-composer-skp/issues/364) | Window Place tool: snapping, a visible hint, and a guard against unhosted Units |
+| S-23 | [#365](https://github.com/ph-composer/ph-composer-skp/issues/365) | Window Units: editable names and selection sync with the Schedule |
+| S-24 | [#366](https://github.com/ph-composer/ph-composer-skp/issues/366) | Window Type builder bugs: dimension format, mulled paste, slide symbol |
+| S-25 | [#367](https://github.com/ph-composer/ph-composer-skp/issues/367) | Notices, popovers, chips and tooltips: dismissal, clipping, contrast, swatches |
+| S-26 | [#368](https://github.com/ph-composer/ph-composer-skp/issues/368) | Psi-Install editor polish |
+| S-27 | [#369](https://github.com/ph-composer/ph-composer-skp/issues/369) | Thermal bridges on Edges shared by two Zones are counted twice |
+| S-28 | [#370](https://github.com/ph-composer/ph-composer-skp/issues/370) | Export report omits warnings that preflight showed |
+| S-30 | [#371](https://github.com/ph-composer/ph-composer-skp/issues/371) | Model default install psi-value (0.04 W/mK) |
+| S-31 | [#372](https://github.com/ph-composer/ph-composer-skp/issues/372) | Assemblies: unclear replace-and-delete action, repeated U-value messages, Paint navigates away |
+| S-29 | [PH-Tools/PHX#169](https://github.com/PH-Tools/PHX/issues/169) | HBJSON with no People load fails WUFI and METr export |
+
 ## Issue drafts
 
 Priority: P1 blocks real use, produces wrong data, or is Ed's named top change; P2 a clear
@@ -76,7 +116,7 @@ workflow problem; P3 polish. "Packet" means a planning packet is needed before i
 
 ### Agent access
 
-**S-01 · Agent Access: move into the panel and simplify the token screens** · enhancement,
+**S-01 (#343) · Agent Access: move into the panel and simplify the token screens** · enhancement,
 agent-access · P2 · M · W-001, W-003, W-004, W-005, W-009, W-012, W-013, W-028
 - Reach Agent Access from inside the panel (D7), not only the Extensions menu.
 - Token created screen: one client at a time (accordions), one default setup each, "Other ways to
@@ -85,7 +125,7 @@ agent-access · P2 · M · W-001, W-003, W-004, W-005, W-009, W-012, W-013, W-02
   yesterday, this week, this year); revoked tokens behind a toggle (Claude, W-009).
 - Keep: the New token form (W-002).
 
-**S-02 · Agent connection: the default Claude Code setup cannot reach GUI clients** ·
+**S-02 (#344) · Agent connection: the default Claude Code setup cannot reach GUI clients** ·
 enhancement, agent-access · P1 · M · W-006, W-007, W-008, W-011
 - The recommended `add-json` plus `export PH_COMPOSER_TOKEN` cannot work for the Claude desktop
   app or any client not started from a terminal.
@@ -96,14 +136,14 @@ enhancement, agent-access · P1 · M · W-006, W-007, W-008, W-011
   the extension shelling out.
 - Acceptance: a fresh Claude desktop session connects from the dialog's default path alone.
 
-**S-03 · A token bound to "This Model only" stops working after Save As, silently** · bug,
+**S-03 (#345) · A token bound to "This Model only" stops working after Save As, silently** · bug,
 agent-access · P1 · S · W-055 (Claude)
 - Binding is by file path; Save As (a normal stage-copy habit) cuts the agent off and `discover`
   returns no sessions with no reason.
 - Expected: `discover` says why ("bound to 02_Working.skp; open Model is 03_Spaces.skp"), and
   either the binding follows the document or the dialog warns at issue time.
 
-**S-04 · Export approval for agents is hidden and can approve an invalid file** · bug,
+**S-04 (#346) · Export approval for agents is hidden and can approve an invalid file** · bug,
 agent-access · P1 · M · W-114, W-115, W-116
 - Ed: fix for future agent work. The only entry is Extensions > PH-Composer > Libraries > Approve
   Export Destination; the Export tab's "Choose destination" approves nothing for agents.
@@ -114,7 +154,7 @@ agent-access · P1 · M · W-114, W-115, W-116
   `start_export` refuses. Fix the extension in the dialog and make preflight report it.
 - Hide or prune unavailable and development-era locations (Claude, W-114).
 
-**S-05 · Agent schema and diagnostics gaps** · bug, agent-access · P3 · S · W-010, W-112 (Claude)
+**S-05 (#347) · Agent schema and diagnostics gaps** · bug, agent-access · P3 · S · W-010, W-112 (Claude)
 - `assemblies.create` schema gives layer and segment ids as plain strings; the validator wants
   `lyr_`/`seg_` plus 12 hex. State the pattern, or mint ids when absent.
 - Log when the listener stops after the last revoke.
@@ -122,14 +162,14 @@ agent-access · P1 · M · W-114, W-115, W-116
 
 ### SketchUp-side behaviour
 
-**S-06 · Show outcomes and refusals in SketchUp, not only in the panel** · enhancement · P2 · M ·
+**S-06 (#348) · Show outcomes and refusals in SketchUp, not only in the panel** · enhancement · P2 · M ·
 W-027, W-030, W-035, W-040 (toast part), W-094 (refusal part)
 - Solve adjacencies (Ed: "a small modal notification ... that it worked"), Create Space refusals
   (Ed: "a note/warning/modal"), Place refusals: show what happened or why not in SketchUp.
 - Panel failure toasts carry the reason and the incident id (Claude).
 - If D1 lets Spaces be created outside a Zone, the Create Space refusal changes with it.
 
-**S-07 · Context menu: split Classify faces, show current values, one PH-Composer home** ·
+**S-07 (#349) · Context menu: split Classify faces, show current values, one PH-Composer home** ·
 enhancement · P2 · M · W-021, W-076, W-077, W-106
 - Ed: Set Face Type, Set Face Exposure, Set Face Assembly as three items, and a check mark on each
   current value (rule for mixed selections, Claude).
@@ -139,20 +179,20 @@ enhancement · P2 · M · W-021, W-076, W-077, W-106
 
 ### Viewport overlay
 
-**S-08 · Colour-by overlay ignores SketchUp's view state** · bug · P2 · L · W-031, W-032, W-078
+**S-08 (#350) · Colour-by overlay ignores SketchUp's view state** · bug · P2 · L · W-031, W-032, W-078
 - Section planes do not cut the overlay, so interior Faces cannot be seen (W-031, high).
 - Hide Rest of Model does not hide the overlay for hidden geometry (W-078).
 - Filtered-out Faces draw opaque white; offer see-through or hide while filtered (W-032).
 - Keep: hidden Faces hide their overlay (W-033).
 
-**S-09 · Thermal Bridges have no Colour-by entry; add by Group** · enhancement · P2 · S · W-107
+**S-09 (#351) · Thermal Bridges have no Colour-by entry; add by Group** · enhancement · P2 · S · W-107
 - Ed: Colour by Name and Group, and a way to enter that view. The by-Type mode exists but is
   reachable only as a side effect of Assign by clicking. Add palette icons on the Types table and
   the Schedule; add a by-Group mode.
 
 ### Spaces
 
-**S-10 · Space creation, editing and visibility: design packet** · enhancement · P1 · L · packet ·
+**S-10 (#352) · Space creation, editing and visibility: design packet** · enhancement · P1 · L · packet ·
 W-036, W-038, W-039, W-042, W-046, W-052
 - Inside an open Zone the Zone's Faces hide the plan, its tag cannot be hidden, and both
   workarounds break good practice; drawing there risks auto-splitting Zone geometry (W-036, blocker).
@@ -167,14 +207,14 @@ W-036, W-038, W-039, W-042, W-046, W-052
 - Decide D1. Parts exist: Spaces outside every Zone are allowed and Move to Zone re-hosts.
 - Keep: flat floor outline Create Space works (W-044).
 
-**S-11 · Create Space on a solid registers walls as floors and double-counts iCFA** · bug · P1 ·
+**S-11 (#353) · Create Space on a solid registers walls as floors and double-counts iCFA** · bug · P1 ·
 M · W-037, W-045
 - All faces of a drawn solid become Floor Segments: six vertical ones with `floor_projected`, top
   and bottom both counted (9.75 m2 for a 4.88 m2 room, Claude W-045). Height ignores the solid.
 - Expected: take the bottom faces and the solid's height (as height-from-solid does), or refuse
   vertical and upward faces with a reason. Never count a floor twice.
 
-**S-12 · Delete Space fails while its Zone is open** · bug · P1 · S · W-040, W-041, W-043
+**S-12 (#354) · Delete Space fails while its Zone is open** · bug · P1 · S · W-040, W-041, W-043
 - `spaces.delete` raises `ArgumentError` in `DeleteSpaceStep#apply` (`erase_entities`) with the
   Zone open; works with it closed (Ed found this). Create needs the Zone open. Ed: delete must work
   in both states.
@@ -182,7 +222,7 @@ M · W-037, W-045
   yet tested.
 - Dialog copy (Ed, W-041): title "Delete Space?", no Undo sentence.
 
-**S-13 · Spaces table: wording, Height placement, order, balance check** · enhancement · P3 · S ·
+**S-13 (#355) · Spaces table: wording, Height placement, order, balance check** · enhancement · P3 · S ·
 W-049, W-050, W-051, W-054
 - Ed: "Segment" row label becomes "Floor"; Height shows only on the Volume row where it is set.
 - Sort Spaces by number, and Window Types by name (Claude, W-051, W-100).
@@ -190,7 +230,7 @@ W-049, W-050, W-051, W-054
 
 ### Zones and Faces
 
-**S-14 · Zones view polish** · enhancement · P3 · S · W-016, W-017, W-018, W-020, W-022, W-024,
+**S-14 (#356) · Zones view polish** · enhancement · P3 · S · W-016, W-017, W-018, W-020, W-022, W-024,
 W-081, W-123
 - Ed: sub-tab Faces becomes Geometry; Ground depth hidden by default and explained; Building
   Segments modal polish (no full-width Add) and a custom colour picker (one exists but was not
@@ -201,20 +241,20 @@ W-081, W-123
 
 ### Assemblies and Materials
 
-**S-15 · Material entry: thermal input forms, colour, create from the Assembly page** ·
+**S-15 (#357) · Material entry: thermal input forms, colour, create from the Assembly page** ·
 enhancement · P2 · M · W-063, W-064, W-065, W-067
 - Ed: input-form dropdown beside thermal values (R per inch default in IP, conductivity, others),
   converted by the app (W-064, high); colour picker in New Material; "+ New Material" by the
   empty-state icon (every table).
 - (Claude) New Material from the Assembly sidebar (W-067).
 
-**S-16 · Material placeholders export as data** · bug · P1 · S · W-066, W-074, W-121 (Claude)
+**S-16 (#358) · Material placeholders export as data** · bug · P1 · S · W-066, W-074, W-121 (Claude)
 - New Material pre-fills density 1 lb/ft3, specific heat 1 Btu/(lb F), emissivity 1; every
   Material in the export carries 16.02 kg/m3 and 4186.8 J/kgK, Concrete included.
 - Expected: blank or visibly-default values, and a preflight finding when unset values would be
   written. Decide what the export writes when they are unset.
 
-**S-17 · Interior Surface pairs: Assembly rules and honeybee validity** · bug · P1 · M ·
+**S-17 (#359) · Interior Surface pairs: Assembly rules and honeybee validity** · bug · P1 · M ·
 W-084, W-113, W-118
 - Ed raised it (W-084). Export blocks on interior Faces without an Assembly; with two different
   Assemblies it warns, exports, and honeybee's `check_all` rejects the model (Claude, evidence
@@ -222,14 +262,14 @@ W-084, W-113, W-118
 - Decide D2. PHX already drops Surface Faces within one Building-Segment
   (`PHX/from_HBJSON/cleanup.py`). Verify honeybee validity of the chosen rule with a round trip.
 
-**S-31 · Assemblies: replace-and-delete, and two bugs** · bug · P2 · S · W-059, W-082, W-083
+**S-31 (#372) · Assemblies: replace-and-delete, and two bugs** · bug · P2 · S · W-059, W-082, W-083
 - Ed could not tell what the Replace action does (W-082, high). It moves Faces to a replacement
   and deletes the Assembly. Decide what it is, name it in one sentence, show Faces by Zone and
   name (not ids), disable with a reason when no replacement exists.
 - U-value popover repeats one message per Layer-Segment (W-059). Paint from the Assemblies table
   jumps to Zones > Faces (W-083).
 
-**S-18 · Assembly builder polish** · enhancement · P3 · M · W-057, W-058, W-060, W-061, W-073,
+**S-18 (#360) · Assembly builder polish** · enhancement · P3 · M · W-057, W-058, W-060, W-061, W-073,
 W-080
 - Ed: hover delay (100 to 200 ms), Layer tools popover polish (icons, consolidate), Paint in the
   Assembly detail view, ventilated cladding in the exterior dropdown (settled above).
@@ -237,41 +277,41 @@ W-080
 
 ### Library
 
-**S-19 · Library sidebar and tables polish** · enhancement · P3 · M · W-070, W-071, W-072, W-085,
+**S-19 (#361) · Library sidebar and tables polish** · enhancement · P3 · M · W-070, W-071, W-072, W-085,
 W-087, W-096
 - Ed: "Materials in this file" label and drop the note; gear icon for Library setup; chevron
   matching the collapse direction; the same on every kind's sidebar; choosers alphabetical.
 - (Claude) Frame chooser lists the slot's Position first; empty Actions column on Frames rows.
 - Relates to #332 (sidebar loading state).
 
-**S-20 · Frames: Brand field and an auto-name** · enhancement · P3 · S · W-086
+**S-20 (#362) · Frames: Brand field and an auto-name** · enhancement · P3 · S · W-086
 - Ed: add Brand; Group by Brand; optional name from `{manufacturer}-{brand}-{position}-{operation}`.
 
 ### Windows
 
-**S-21 · Draw a rectangle, convert it to a Window Type** · enhancement · P1 · L · packet · W-095
+**S-21 (#363) · Draw a rectangle, convert it to a Window Type** · enhancement · P1 · L · packet · W-095
 - P1 because Ed named it his biggest UX change, not because it blocks. In addition to
   build-then-Place. Selected rectangle(s) on a Zone Face become a Window Type sized from geometry
   (several become a mulled Type) and are replaced by a placed Unit. Open points in the log entry:
   host, sill rule, mulling refusal, reuse of an existing same-size Type, new-Type defaults.
 
-**S-22 · Place tool: snapping and a visible hint; guard against unhosted Units** · enhancement ·
+**S-22 (#364) · Place tool: snapping and a visible hint; guard against unhosted Units** · enhancement ·
 P2 · M · W-093, W-094, W-098
 - Ed: Place must snap so CAD can guide it (W-094, high); the sill/offset hint more prominent,
   for example a callout (W-093).
 - Ed: a pasted Unit must not end up outside its Zone (W-098, high); D6.
 
-**S-23 · Window Units: names and selection sync** · enhancement · P3 · M · W-099, W-100
+**S-23 (#365) · Window Units: names and selection sync** · enhancement · P3 · M · W-099, W-100
 - Ed: Unit name editable in PH-Composer and via Entity Info's Instance field; the Schedule
   indicates the Unit selected in SketchUp. (Claude) names unique model-wide.
 
-**S-24 · Window Type builder bugs** · bug · P2 · S · W-088, W-101, W-103
+**S-24 (#366) · Window Type builder bugs** · bug · P2 · S · W-088, W-101, W-103
 - Dimension format has no effect (Ed). Likely cause, not tested: the field declares `builder`
   where `units.profile` reads `scope`; Assemblies probably has the same. Test first, then fix.
 - Mulled paste refused over Psi-Installs: paste what fits, skip the rest, no error (Ed's decision).
 - Slide operation draws a swing triangle instead of an arrow (Ed).
 
-**S-25 · Notices, popovers, chips and tooltips** · bug · P2 · S · W-019, W-025, W-026, W-047,
+**S-25 (#367) · Notices, popovers, chips and tooltips** · bug · P2 · S · W-019, W-025, W-026, W-047,
 W-068, W-075, W-089, W-102
 - Undismissable warning toast (Ed, W-102, high). Popovers and validation messages clipped by table
   overflow (Ed, W-075, W-089).
@@ -281,26 +321,26 @@ W-068, W-075, W-089, W-102
 - Help tooltip changes width; header icon alignment and highlighted-icon padding inconsistent.
 - (Claude) a g-value of 37 could prompt "did you mean 0.37?".
 
-**S-26 · Psi-Install editor polish** · enhancement · P3 · S · W-090
+**S-26 (#368) · Psi-Install editor polish** · enhancement · P3 · S · W-090
 - Ed: Cancel and Save near the work, tab state while in the editor, centred drawing, highlight
   style, icon actions.
 
-**S-30 · Model default install psi-value** · enhancement · P2 · S · W-091
+**S-30 (#371) · Model default install psi-value** · enhancement · P2 · S · W-091
 - Ed: always apply 0.04 W/mK unless the user sets another; today "Model default: Missing". D3.
 
 ### Thermal Bridges
 
-**S-27 · De-duplicate thermal bridges on Edges shared by two Zones** · enhancement · P2 · M ·
+**S-27 (#369) · De-duplicate thermal bridges on Edges shared by two Zones** · enhancement · P2 · M ·
 W-108
 - Today `thermal_bridge.counted_twice` warns and both export. Implement D4. The both-Zones case
   was not exercised in the walkthrough; reproduce it in a test.
 
 ### Export
 
-**S-28 · Export report omits preflight warnings** · bug · P3 · S · W-119 (Claude)
+**S-28 (#370) · Export report omits preflight warnings** · bug · P3 · S · W-119 (Claude)
 - Report says "No findings" while preflight listed four warnings.
 
-**S-29 (PH-Tools/PHX) · No-People default path leaves occupancy references dangling** · bug ·
+**S-29 (PH-Tools/PHX#169) · No-People default path leaves occupancy references dangling** · bug ·
 P1 · S · W-120, W-122 (Claude)
 - A load-free HBJSON fails both WUFI XML and METr JSON identity validation (15 dangling
   `occupancy.schedule` references). With a zero People load added, WUFI XML converts cleanly
