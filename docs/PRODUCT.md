@@ -230,9 +230,10 @@ and its Floor Segments in one Undo step. Draw a room's floor outline just below 
 inset from its walls, so that it touches no envelope Face. An outline drawn with its edges on the
 walls splits them, and Create Space leaves it out, saying to Undo it and draw it below or inset.
 A Space is a floor outline plus a height, so a vertical Face is never a floor: Create Space, Mark floor
-and a new Volume all refuse it. A room drawn as a closed solid is left out whole, its walls as walls
-and its top and bottom as parts of the solid, so no floor is counted twice; the refusal says to draw
-the floor outline alone, or to group the solid and use Height from solid.
+and a new Volume all refuse it. A room drawn as a closed solid, with upright or sloped sides, is left
+out whole, its upright walls as walls and its other Faces as parts of the solid, so no floor is
+counted twice; a new Volume refuses one too. The refusal says to draw the floor outline alone, or to
+group the solid and use Height from solid.
 
 Colour by Space, Ventilation, Weighting factor and Height colour each Space's Floor Segments and the
 preview prism that its height draws over them, with a legend. Space labels and the totals of the

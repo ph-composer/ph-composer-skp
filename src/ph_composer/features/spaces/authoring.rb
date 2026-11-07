@@ -41,8 +41,8 @@ module PhComposer
       # it out; the way out is to draw it where it touches no other Face.
       SHARES_EDGE = "The Face shares an Edge with an unselected Face; grouping it would split that Face. Undo " \
                     "the outline, then draw it just below the floor or inset from the walls, touching no other Face."
-      # A solid's walls are left out as walls; its top and bottom then share Edges with them. Taking both
-      # would count the floor twice, so neither is taken.
+      # The Faces of a closed solid, whatever the slope of its sides: taking its top and bottom would count the
+      # floor twice, so none is taken. A vertical wall among them is left out as a wall.
       SOLID = "The Face is part of a solid. A Space is a floor outline plus a height: draw the floor outline " \
               "alone, touching no other Face, then set the height, or group the solid and use Height from solid."
 
@@ -316,23 +316,18 @@ module PhComposer
           end
         end
         located_zone = request.locate(ZONE_KIND, zone, :mutable => false)
-        eligible = without_edge_sharing(located_zone, candidates)
         walls = left_out.select { |row| row["reason"] == "vertical" }
                         .map { |row| Integer(row.dig("reference", "entity_path").last) }
+        solid = Steps.closed_shells(located_zone.entity.entities, candidates.map(&:face_id) + walls)
+        in_solid, candidates = candidates.partition { |face| solid.include?(face.face_id) }
+        left_out.concat(in_solid.map do |face|
+          { "reference" => face.reference, "reason" => "solid", "message" => SOLID }
+        end)
+        eligible = without_edge_sharing(located_zone, candidates)
         left_out.concat((candidates - eligible).map do |face|
-          solid = part_of_solid?(located_zone.entity.entities, face.face_id, walls)
-          reason = solid ? ["solid", SOLID] : ["shares_edge", SHARES_EDGE]
-          { "reference" => face.reference, "reason" => reason.first, "message" => reason.last }
+          { "reference" => face.reference, "reason" => "shares_edge", "message" => SHARES_EDGE }
         end)
         [eligible, left_out]
-      end
-
-      # Whether every Edge of the Face bounds one of the selected walls: the top or bottom of a drawn solid,
-      # not an outline that merely touches a wall.
-      def part_of_solid?(entities, face_id, walls)
-        face = entities.to_a.find { |entity| entity.persistent_id == face_id }
-        edges = Array(face&.edges)
-        !edges.empty? && edges.all? { |edge| Array(edge.faces).any? { |other| walls.include?(other.persistent_id) } }
       end
 
       # The candidates that share no Edge with a Face outside the set. Dropping a Face makes it an
@@ -380,6 +375,9 @@ module PhComposer
           face.persistent_id
         end.uniq.tap do |ids|
           entities = Occurrences.entity_at(model, occurrence.path).entities
+          unless Steps.closed_shells(entities, ids).empty?
+            raise CodedError.new("target.wrong_kind", "The Faces close a solid. #{SOLID}")
+          end
           unless Steps.sharing(entities, ids).empty?
             raise CodedError.new("space.shares_edge", "A Face shares an Edge with a Face that is not part of the " \
                                                       "new Volume; grouping it would split that Face. Nothing was " \
