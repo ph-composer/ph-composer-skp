@@ -106,7 +106,9 @@ test("Delete confirms in the shared dialog, naming what goes, and Cancel sends n
   p.receive(snapshot());
   p.click(p.action("Delete Bath"));
   var dialog = p.context.document.querySelector("dialog");
-  assert.match(dialog.querySelector("h2").textContent, /Delete Bath/);
+  assert.strictEqual(dialog.querySelector("h2").textContent, "Delete Space?");
+  assert.strictEqual(dialog.querySelector("p").textContent,
+    "Bath, its Volumes and their Floor Segments will be erased.");
   p.click(dialog.querySelectorAll("button").filter(function (node) { return node.textContent === "Cancel"; })[0]);
   assert.strictEqual(p.sent.length, 0);
   p.click(p.action("Delete Bath"));
@@ -272,7 +274,8 @@ test("a confirmation names a record with no name by its number and its Space", f
   expandAll(p);
   p.click(p.action("Delete Space 102"));
   var dialog = p.context.document.querySelector("dialog");
-  assert.strictEqual(dialog.querySelector("h2").textContent, "Delete Space 102");
+  assert.strictEqual(dialog.querySelector("h2").textContent, "Delete Space?");
+  assert.match(dialog.querySelector("p").textContent, /^Space 102, /);
   p.click(dialog.querySelectorAll("button").filter(function (node) { return node.textContent === "Cancel"; })[0]);
   p.click(p.action("Remove Volume 1 of Space 102"));
   assert.strictEqual(dialog.querySelector("h2").textContent, "Remove Volume 1 of Space 102");

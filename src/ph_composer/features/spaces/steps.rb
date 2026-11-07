@@ -221,8 +221,19 @@ module PhComposer
           raise CodedError.new("target.changed", "The Space changed after it was previewed. Nothing was written.")
         end
 
+        leave(model, space)
         parent = @path.length == 1 ? model.entities : Occurrences.entity_at(model, @path[0...-1]).entities
         parent.erase_entities(space)
+      end
+
+      private
+
+      # SketchUp refuses to erase a Group on the open edit path, so a Space open, or open below, closes to
+      # its parent first. The path change joins this operation: one Undo brings the Space back, open.
+      def leave(model, space)
+        open = EditContext.current(model)
+        index = open.index(space)
+        EditContext.enter(model, open[0...index]) if index
       end
     end
 

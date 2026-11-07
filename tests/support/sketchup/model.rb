@@ -6,7 +6,7 @@ require_relative "catalogs"
 
 module Sketchup
   class Model
-    attr_reader :entities, :operations, :operation_starts, :path, :selection, :observers, :overlays,
+    attr_reader :entities, :operations, :operation_starts, :nested_starts, :path, :selection, :observers, :overlays,
                 :active_view, :active_tool, :layers, :pages, :guid, :definitions, :materials
     attr_accessor :title, :shadow_info
 
@@ -26,6 +26,7 @@ module Sketchup
       @active_path = nil
       @operations = []
       @operation_starts = []
+      @nested_starts = []
       @undo_stack = []
       @redo_stack = []
       @current_operation = nil
@@ -86,8 +87,13 @@ module Sketchup
     # The operation start_operation opened, with the Model state commit or abort returns to.
     OpenOperation = Struct.new(:name, :disable_ui, :transparent, :snapshot, keyword_init: true)
 
+    # A start inside an open operation is refused here and recorded in `nested_starts`; on the host it splits
+    # the open operation's Undo step (context/SKETCHUP_HOST_BEHAVIOR.md).
     def start_operation(name, disable_ui = false, next_transparent = false, transparent = false)
-      return false if @current_operation
+      if @current_operation
+        @nested_starts << name
+        return false
+      end
 
       @operation_starts << [name, disable_ui, next_transparent, transparent]
       @current_operation = OpenOperation.new(:name => name, :disable_ui => disable_ui, :transparent => transparent,

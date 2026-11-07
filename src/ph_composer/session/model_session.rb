@@ -91,6 +91,11 @@ module PhComposer
       end
     end
 
+    # True inside #mutate: an extension operation is open on the Model, and work done now joins it.
+    def mutating?
+      @committing
+    end
+
     # Completes deferred Model work before something reads the Model as a whole.
     def settle
       @feature_state.each_value { |state| state.settle if state.respond_to?(:settle) }

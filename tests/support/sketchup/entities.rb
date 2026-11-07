@@ -754,7 +754,13 @@ module Sketchup
       instance
     end
 
+    # The host refuses to erase a Group or instance on the open edit path (context/SKETCHUP_HOST_BEHAVIOR.md).
     def erase_entities(*entities)
+      open = Array(Sketchup.active_model&.active_path)
+      if entities.flatten.any? { |entity| open.include?(entity) }
+        raise ArgumentError, "cannot remove an instance in the active editing path"
+      end
+
       entities.flatten.each { |entity| delete(entity) }
       true
     end
