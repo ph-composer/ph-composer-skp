@@ -39,6 +39,7 @@ class PhaseOneExportTest < PhComposerTestCase
   def test_two_zone_extraction_uses_one_snapshot_and_owns_the_golden
     zones = seed_two_boxes
     invoke("ph_composer.zones.solve_adjacency", "zones" => zones)
+    assign_interior_pair_from_zone_a
     names = contributor_names
     before = @model.entities.each_count
 
@@ -236,6 +237,18 @@ class PhaseOneExportTest < PhComposerTestCase
 
   def point(x, y, z)
     Geom::Point3d.new(x, y, z)
+  end
+
+  # The pair's Assembly is assigned once, from Zone A; Zone B's side holds it reversed.
+  def assign_interior_pair_from_zone_a
+    faces = PhComposer::API.query(:context => @context, :name => "ph_composer.zones.faces.all")
+                           .fetch("value").fetch("faces")
+    side = faces.find do |row|
+      row.dig("values", "boundary_condition") == "Surface" && row.dig("reference", "zone_path") == [1000]
+    end
+    target = { "reference" => side.fetch("reference"), "expected_values" => side.fetch("values") }
+    result = invoke("ph_composer.zones.faces.assign_assembly", "assembly_id" => @assembly_id, "targets" => [target])
+    assert_equal "completed", result.fetch("status"), result.inspect
   end
 
   def invoke(name, params)

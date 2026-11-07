@@ -135,8 +135,7 @@ module PhComposer
       end
 
       def retired(record)
-        after = DeepCopy.call(record)
-        after.delete("adjacency")
+        after = Faces::Schema.leave_pair!(DeepCopy.call(record))
         after.delete("boundary_condition")
         Faces::Schema.validate!(after)
       end

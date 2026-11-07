@@ -23,6 +23,9 @@ class TranslatedConstruction:
     construction: Any
     defaulted_material_ids: tuple[str, ...]
     membrane_names: tuple[str, ...]
+    # The same layers innermost first, for the counterpart of a Surface pair that names this Assembly
+    # reversed: honeybee needs the two sides of one interior element to hold mirrored layers.
+    reversed_construction: Any = None
 
 
 CONSTRUCTIONS = Requirement(CONSTRUCTION_SECTION_ID, TranslatedConstruction)
@@ -80,6 +83,7 @@ class ConstructionSection(Section[AssemblyRecord, TranslatedConstruction]):
             construction,
             tuple(sorted(defaulted)),
             tuple(dict.fromkeys(row["material"]["name"] for row in membranes)),
+            _reversed(record, construction, membranes),
         )
 
     def findings(self, objects: Mapping[str, TranslatedConstruction]) -> Sequence[Finding]:
@@ -155,6 +159,26 @@ def _layer(assembly: AssemblyRecord, layer: LayerRecord) -> Any:
     host.properties.ph.divisions = grid
     host.properties.ph.ph_color = base.properties.ph.ph_color
     return host
+
+
+def _reversed(record: AssemblyRecord, construction: Any, membranes: list[dict[str, Any]]) -> Any:
+    """The construction seen from the other side: the same material objects in the opposite order, so
+    honeybee's reversed-layer check on a Surface pair compares equal identities."""
+    last = len(record.layers) - 1
+    reversed_construction = stack.load("honeybee_energy.construction.opaque").OpaqueConstruction(
+        f"{construction.identifier}_reversed", list(reversed(construction.materials))
+    )
+    reversed_construction.display_name = f"{record.name} (reversed)"
+    reversed_construction.user_data = with_user_data(
+        {
+            "ph_composer": {
+                "assembly_id": record.id,
+                "membrane_layers": [{**row, "outside_index": last - row["outside_index"]} for row in membranes],
+            }
+        },
+        record.user_data,
+    )
+    return reversed_construction
 
 
 def _membrane(material: MaterialRecord) -> dict[str, JSONValue]:

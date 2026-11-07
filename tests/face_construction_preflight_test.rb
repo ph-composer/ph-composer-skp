@@ -99,6 +99,56 @@ class FaceConstructionPreflightTest < PhComposerTestCase
     refute pair_findings.any? { |row| row.fetch("blocks_export") }
   end
 
+  def test_an_unassigned_interior_pair_within_one_building_segment_needs_no_assembly
+    ids = surface_ids(assignment_pair(2100))
+    assert_empty findings.select { |row| ids.include?(row.fetch("object_id")) }
+  end
+
+  def test_an_unassigned_interior_pair_across_building_segments_blocks_on_both_sides
+    ids = surface_ids(assignment_pair(2200))
+    move_to_new_segment([2210])
+    rows = findings.select { |row| ids.include?(row.fetch("object_id")) }
+    assert_equal [["construction.missing", true]] * 2, rows.map { |row| row.values_at("code", "blocks_export") }
+    assert_equal "This interior Face joins two Building-Segments, so it needs an Assembly.", rows.first["message"]
+  end
+
+  def test_a_pair_that_does_not_hold_one_assembly_reversed_blocks
+    rows = assignment_pair(2300).select { |row| row.dig("values", "boundary_condition") == "Surface" }
+    id = assignment_assembly("Unfinished but present")
+    assignment_invoke("#{FACE_PREFIX}.assign_assembly", assignment_params([rows.first], id))
+    entity = @model.entities.to_a.find { |group| group.persistent_id == 2310 }.entities.to_a.first
+    STORE.write(entity, STORE.read(entity).tap { |row| row.delete("assembly_reversed") })
+    mismatch = findings.select { |row| row.fetch("code") == "face.assembly_pair_mismatch" }
+    assert_equal 2, mismatch.length
+    assert mismatch.all? { |row| row.fetch("blocks_export") }
+  end
+
+  def move_to_new_segment(zone_path)
+    all = assignment_query("ph_composer.zones.options.all")
+    before = all.fetch("building_segments").map do |row|
+      { "id" => row.fetch("id"), "name" => row.dig("values", "name"), "colour" => row.dig("values", "colour") }
+    end
+    default = all.fetch("default_segment_id")
+    added = assignment_invoke("ph_composer.zones.options.manage",
+                              "collection" => "building_segment", "expected_options" => before,
+                              "options" => before + [{ "id" => "new:annex", "name" => "Annex", "colour" => "#336699" }],
+                              "default_segment_id" => default, "expected_default_segment_id" => default,
+                              "replacements" => {})
+    assert_equal "completed", added.fetch("status"), added.inspect
+    zone = assignment_query("ph_composer.zones.list").fetch("zones").find do |row|
+      row.dig("reference", "zone_path") == zone_path
+    end
+    values = zone.fetch("values").merge("building_segment_id" => added.dig("value", "created_ids", "new:annex"))
+    moved = assignment_invoke("ph_composer.zones.update", "reference" => zone.fetch("reference"),
+                                                          "expected_values" => zone.fetch("values"), "values" => values)
+    assert_equal "completed", moved.fetch("status"), moved.inspect
+  end
+
+  def surface_ids(rows)
+    rows.select { |row| row.dig("values", "boundary_condition") == "Surface" }
+        .map { |row| row.dig("reference", "entity_id") }
+  end
+
   def test_complete_assembly_and_explicit_mismatch_are_nonblocking
     fixture = JSON.parse(File.read(File.join(TESTS_ROOT, "fixtures", "assemblies", "authoring.json")))
     fixture.fetch("materials").each { |row| PhComposer::Assemblies::Materials::Schema::KIND.store.write(@model, row) }

@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 15
+    MINOR = 16
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -75,7 +75,13 @@ module PhComposer
       { "minor" => 15, "date" => "2026-10-26",
         "change" => "The definition lists (ph_composer.assemblies.materials.list and assemblies.list, the Window " \
                     "product and Type lists, ph_composer.thermal_bridges.types.list) take fields, keeping kind, id " \
-                    "and schema_version on every row, and cut each page by size as well as by limit." }
+                    "and schema_version on every row, and cut each page by size as well as by limit." },
+      { "minor" => 16, "date" => "2026-11-07",
+        "change" => "A Face record gains assembly_reversed, true on the counterpart side of a Surface pair. " \
+                    "ph_composer.zones.faces.assign_assembly, and classify with an assembly_id intent, also write " \
+                    "the counterpart (its face_ids include it). face.assembly_pair_mismatch now blocks export; " \
+                    "construction.missing no longer applies to a Surface Face whose pair is within one " \
+                    "Building-Segment." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

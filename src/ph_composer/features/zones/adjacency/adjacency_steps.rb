@@ -149,7 +149,7 @@ module PhComposer
       def carried(before, id, side)
         record = DeepCopy.call(before).merge("id" => id)
         record["extension_data"] = DeepCopy.call(side.fetch("extension_copies").fetch(id)) if id != before.fetch("id")
-        record.delete("adjacency")
+        Faces::Schema.leave_pair!(record)
         record.delete("boundary_condition") if before["boundary_condition"] == "Surface"
         Faces::Schema.validate!(record)
       end
@@ -167,6 +167,8 @@ module PhComposer
           }
           Faces::Schema.validate!(record)
         end
+        Faces::AssemblyAssignment.settle_new_pair!(record_for(left, left.fetch(:shared)),
+                                                   record_for(right, right.fetch(:shared)))
       end
 
       def record_for(side, wanted)
@@ -330,6 +332,7 @@ module PhComposer
           }
           Faces::Schema.validate!(record)
         end
+        Faces::AssemblyAssignment.settle_new_pair!(record_for(left, left_piece), record_for(right, right_piece))
       end
 
       def region_endpoint(side, piece)

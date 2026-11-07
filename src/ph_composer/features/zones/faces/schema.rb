@@ -66,6 +66,10 @@ module PhComposer
           "attached_zone_id" => { "type" => %w[string null],
                                   "description" => "Id of an Attached zone record; only with AttachedZone." },
           "assembly_id" => { "type" => %w[string null], "description" => "Id of the Face's Assembly." },
+          "assembly_reversed" => { "type" => "boolean",
+                                   "description" => "True on the counterpart side of a Surface pair: the pair's " \
+                                                    "Assembly seen from the other Zone, layers reversed. Only " \
+                                                    "with Surface and an assembly_id." },
           "adjacency" => { "type" => "object",
                            "description" => "The Surface pair envelope Solve adjacencies writes; only with Surface." }
         }
@@ -91,6 +95,9 @@ module PhComposer
             found << "adjacency is only valid for Surface"
           end
           found.concat(Zones::Adjacency.validate_envelope(record["adjacency"])) if record["adjacency"].is_a?(Hash)
+          if record["assembly_reversed"] && !(record["boundary_condition"] == "Surface" && record["assembly_id"])
+            found << "assembly_reversed is only valid on a Surface Face with an Assembly"
+          end
           found.concat(metadata_problems(record))
           found
         end
@@ -101,6 +108,14 @@ module PhComposer
 
           raise CodedError.new("validation.failed", "Face #{record['id']} is not valid: #{found.first}.",
                                "findings" => found)
+        end
+
+        # A Face leaving its Surface pair loses what only the pair explains: the adjacency envelope and
+        # which side of the pair's Assembly it holds.
+        def leave_pair!(record)
+          record.delete("adjacency")
+          record.delete("assembly_reversed")
+          record
         end
 
         def values(record)
