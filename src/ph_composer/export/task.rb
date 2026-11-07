@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "securerandom"
+require_relative "privacy"
 
 module PhComposer
   module Export
@@ -23,6 +24,7 @@ module PhComposer
       }.freeze
       TRANSLATION_FAILED = "The export runtime could not translate this Model."
       UNRESPONSIVE = "The export runtime stopped responding, so the export was stopped. No files were written."
+      FINDING_FIELDS = Privacy::SHELL.fetch("findings").first.keys.freeze
 
       attr_reader :id, :finished_at, :owner
 
@@ -97,6 +99,8 @@ module PhComposer
 
         coherent!
         @stage = "reading"
+        # Read at the revision the run exports, so the report carries the warnings the preflight showed.
+        @warnings ||= Export.preflight_warnings(@session)
         if @builder.advance
           @extraction = @builder.extraction
           @builder = nil
@@ -131,6 +135,7 @@ module PhComposer
         result.fetch("findings").concat(@extraction.findings.map { |note| note.merge("blocks_export" => false) })
         passed = passed_user_data(result.dig("canonical_model", "hbjson"))
         result.fetch("findings") << passed if passed
+        result.fetch("findings").concat(unreported(@warnings, result.fetch("findings")))
         result.fetch("summary")["findings"] = result.fetch("findings").length
         result["state"] = "complete_with_findings" if result["state"] == "complete" && !result["findings"].empty?
         Privacy.validate!(result)
@@ -326,8 +331,17 @@ module PhComposer
         CoalescedTimer.stop(@watchdog)
         @watchdog = nil
         @runtime&.stop
-        @runtime = @builder = @extraction = @result = nil
+        @runtime = @builder = @extraction = @result = @warnings = nil
         @session.request_refresh if @session.valid?
+      end
+
+      # The preflight warnings no finding in `findings` already reports by code and object, in the result's
+      # finding fields. A contributor's note and its preflight row for one condition share both, so a
+      # condition the run noted is listed once.
+      def unreported(warnings, findings)
+        reported = findings.map { |finding| finding.values_at("code", "object_id") }
+        warnings.map { |warning| warning.slice(*FINDING_FIELDS) }
+                .reject { |warning| reported.include?(warning.values_at("code", "object_id")) }
       end
 
       # One finding counting the HBJSON objects that carry a user's passed-through user_data, or nil.

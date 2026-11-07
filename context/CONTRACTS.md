@@ -1019,6 +1019,11 @@ Building-Segment, and the paths of the containers it holds; the Faces section ea
 placed Window's world outline. A contributor discloses what it leaves out of its records, or warns about
 them, with `reader.note(code, object_id, message)`: a non-blocking finding that joins the result's findings
 and so the report. Such a finding carries no `locate`; the preflight row for the same condition does.
+The run reads every contributor's preflight once, at the revision it exports, and each warning (a
+non-blocking preflight finding) that no result finding already reports by code and object id joins
+the result's findings without its `locate`, so the report and `summary.findings` carry what the
+preflight showed. A preflight that cannot answer fails the run before translation, since a report
+without its warnings is the defect this rule prevents.
 Export contributors extend a composed privacy allowlist, one
 optional entry per section; the report embeds their results unchanged. Exporters consume only the HBJSON artifact plus explicit
 options. The HBJSON and report pair is replaced together: an injected failure leaves the previous
