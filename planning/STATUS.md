@@ -20,7 +20,7 @@ reconcile them at each packet's intake rather than treating the old reason as a 
 
 | Phase | Item | Kind | State | Issue | Pointer |
 | ----- | ---- | ---- | ----- | ----- | ------- |
-| none | Usability walkthrough of the tutorial house (2026-11) | workflow | In progress; walkthrough run 2026-11-07 (Stages 0 to 7 incl. agent export and PHX check, 121 raw entries), synthesis and issue intake next | none (local planning draft) | [usability-walkthrough-2026-11/](usability-walkthrough-2026-11/LOG.md) |
+| none | Usability walkthrough of the tutorial house (2026-11) | workflow | In progress; walkthrough run 2026-11-07 (123 raw entries); synthesis drafted (31 issue drafts, 7 decisions), awaiting Ed's review before issue intake | none (local planning draft) | [synthesis](usability-walkthrough-2026-11/SYNTHESIS.md), [raw log](usability-walkthrough-2026-11/LOG.md) |
 | none | GitHub organization and SketchUp repository migration | workflow | Implemented and native-verified 2026-10-25; merge tracked in PR #306 | [#305](https://github.com/ph-composer/ph-composer-skp/issues/305) | [migration plan](features/unscheduled/github-organization-migration.md) |
 | 4 | Mechanical, coordinating packet | phase | Scoped; planned 2026-10-21 as P4-01 to P4-15, D4-01 to D4-12 answered as recommended, none authorized | none (local planning draft) | [features/phase-04-mechanical/](features/phase-04-mechanical/README.md); tracked in its [ledger](features/phase-04-mechanical/STATUS.md) |
 | 4 | Hot water piping | feature | Requested, PRD drafted; re-baselined against `main` 2026-10-21 | none (local planning draft) | [features/phase-04-mechanical/hot-water-piping/](features/phase-04-mechanical/hot-water-piping/README.md) |
