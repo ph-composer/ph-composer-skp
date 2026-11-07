@@ -151,6 +151,19 @@ class ExportTasksTest < PhComposerTestCase
     assert_equal [reported], @tasks.status(task.fetch("task_id"), OWNER).dig("outcome", "value", "result", "findings")
   end
 
+  # A preflight lists a repeated condition once per part (one row per unassigned Layer-Segment of an
+  # Assembly); the report lists it once per code and object.
+  def test_repeated_preflight_warnings_for_one_object_are_listed_once
+    warning = { "code" => "assembly.segment_unassigned", "section" => "fixture", "object_id" => "asm_1",
+                "message" => "A Layer-Segment has no Material.", "blocks_export" => false }
+    task = start
+    PhComposer::Export.stub(:preflight_warnings, [warning, warning.dup]) { drain }
+    @runtime.success
+    drain
+
+    assert_equal [warning], @tasks.status(task.fetch("task_id"), OWNER).dig("outcome", "value", "result", "findings")
+  end
+
   # Leaving a preflight's warnings out is the defect above, so a preflight that cannot answer fails the run
   # before translation and nothing is written.
   def test_a_preflight_that_raises_fails_the_run_and_writes_nothing

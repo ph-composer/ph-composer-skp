@@ -1021,7 +1021,7 @@ them, with `reader.note(code, object_id, message)`: a non-blocking finding that 
 and so the report. Such a finding carries no `locate`; the preflight row for the same condition does.
 The run reads every contributor's preflight once, at the revision it exports, and each warning (a
 non-blocking preflight finding) that no result finding already reports by code and object id joins
-the result's findings without its `locate`, so the report and `summary.findings` carry what the
+the result's findings once, without its `locate`, so the report and `summary.findings` carry what the
 preflight showed. A preflight that cannot answer fails the run before translation, since a report
 without its warnings is the defect this rule prevents.
 Export contributors extend a composed privacy allowlist, one

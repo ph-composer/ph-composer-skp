@@ -335,13 +335,14 @@ module PhComposer
         @session.request_refresh if @session.valid?
       end
 
-      # The preflight warnings no finding in `findings` already reports by code and object, in the result's
-      # finding fields. A contributor's note and its preflight row for one condition share both, so a
-      # condition the run noted is listed once.
+      # The preflight warnings no finding in `findings` already reports by code and object, once each, in
+      # the result's finding fields. A contributor's note and its preflight row for one condition share
+      # both, as do a preflight's repeated rows for one object, so each condition is listed once.
       def unreported(warnings, findings)
-        reported = findings.map { |finding| finding.values_at("code", "object_id") }
-        warnings.map { |warning| warning.slice(*FINDING_FIELDS) }
-                .reject { |warning| reported.include?(warning.values_at("code", "object_id")) }
+        key = ->(finding) { finding.values_at("code", "object_id") }
+        reported = findings.map(&key)
+        warnings.reject { |warning| reported.include?(key.call(warning)) }.uniq(&key)
+                .map { |warning| warning.slice(*FINDING_FIELDS) }
       end
 
       # One finding counting the HBJSON objects that carry a user's passed-through user_data, or nil.
