@@ -160,3 +160,41 @@ test("a hosted catalog says it is loading, cancelled or stale, and keeps the las
       assert.strictEqual(o.sidebar.records.length, 1);
     });
 });
+test("rows a load left out are listed by record ID with the reason in PH-Composer's words", function () {
+  var o = setup(), notes = [
+    { code: "library.row_required_invalid", kind: "test_parts", library_id: "lib", record_id: "nameless-frame" },
+    { code: "library.row_optional_absent", kind: "test_parts", library_id: "lib", record_id: "r" }];
+  o.sidebar.store.page.warnings = notes;
+  o.sidebar.updateRows();
+  assert.match(o.sidebar.sourceStatus.textContent, /Some library records were normalized\. 1 record was not loaded:$/);
+  assert.strictEqual(o.sidebar.skipped.hidden, false);
+  assert.deepStrictEqual(o.sidebar.skipped.children.map(function (item) { return item.textContent; }),
+    ["Record nameless-frame: a required value, such as its name, is missing or not valid."]);
+  o.sidebar.store.page.warnings = Array.from({ length: 23 }, function (_, n) {
+    return { code: "library.row_label_invalid", kind: "test_parts", library_id: "lib", record_id: "x" + n };
+  });
+  o.sidebar.updateRows();
+  assert.strictEqual(o.sidebar.skipped.children.length, 21);
+  assert.strictEqual(o.sidebar.skipped.children[20].textContent, "And 3 more.");
+  o.sidebar.store.page.warnings = [];
+  o.sidebar.updateRows();
+  assert.strictEqual(o.sidebar.skipped.hidden, true);
+  assert.doesNotMatch(o.sidebar.sourceStatus.textContent, /not loaded/);
+});
+test("notes that name no skipped row are reported apart: kept rows as normalized, the rest as skipped", function () {
+  var o = setup(), cases = [
+    [[{ code: "library.row_optional_absent", kind: "test_parts", library_id: "lib", record_id: "r" }],
+      /Some library records were normalized\.$/],
+    [[{ code: "library.file_malformed", kind: "test_parts", library_id: "lib" }],
+      /Some library records or files were skipped\.$/],
+    [[{ code: "library.row_required_invalid", kind: "test_parts", library_id: "lib" },
+      { code: "example.provider_note", kind: "test_parts", library_id: "lib", record_id: "q" }],
+    /Some library records or files were skipped\.$/]];
+  cases.forEach(function (row) {
+    o.sidebar.store.page.warnings = row[0];
+    o.sidebar.updateRows();
+    assert.match(o.sidebar.sourceStatus.textContent, row[1]);
+    assert.doesNotMatch(o.sidebar.sourceStatus.textContent, /not loaded/);
+    assert.strictEqual(o.sidebar.skipped.hidden, true);
+  });
+});

@@ -90,6 +90,7 @@
 .phc-workspace .library-sidebar-root.is-collapsed .library-sidebar-toggle { writing-mode: vertical-rl; padding: 12px 8px; }
 .library-sidebar-root.is-collapsed .library-sidebar-toggle::after { display: none; }
 .library-sidebar-content { display: flex; flex-direction: column; gap: 9px; }
+.library-sidebar-skipped { margin: 0; padding-left: 16px; font-size: 12px; overflow-wrap: anywhere; }
 .library-sidebar-source { color: var(--muted); font-size: var(--text-sm); }
 .library-sidebar-content > input { width: 100%; box-sizing: border-box; text-overflow: ellipsis; }
 .library-sidebar-list { max-height: 70vh; overflow: auto; }
