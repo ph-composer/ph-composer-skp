@@ -49,14 +49,14 @@ class ExportTasksTest < PhComposerTestCase
     end
 
     def success
-      success_with("type" => "Model", "rooms" => [])
+      success_with({ "type" => "Model", "rooms" => [] })
     end
 
-    def success_with(model)
+    def success_with(model, findings: [])
       @callback.call("runtime.translation", "request_id" => @id, "result" => {
         "schema_version" => 1, "run_id" => @id, "state" => "complete",
-        "summary" => { "objects" => 0, "unavailable" => 0, "findings" => 0, "publishable" => true },
-        "sections" => [], "failure" => nil, "findings" => [],
+        "summary" => { "objects" => 0, "unavailable" => 0, "findings" => findings.length, "publishable" => true },
+        "sections" => [], "failure" => nil, "findings" => findings,
         "canonical_model" => { "hbjson" => JSON.generate(model),
                                "rooms" => 0, "faces" => 0, "surface_pairs" => 0 }
       })
@@ -118,6 +118,63 @@ class ExportTasksTest < PhComposerTestCase
     assert_equal initial + 1, @session.export_generation
     @session.host_event(:transaction_committed)
     assert_equal initial + 2, @session.export_generation
+  end
+
+  # A warning the preflight showed is in the report and the run summary's count too, once even when the
+  # translation reports the same condition on the same object (W-119: preflight listed four, the report none).
+  def test_preflight_warnings_reach_the_report_and_the_findings_count
+    context = PhComposer::API.connect(:session_id => @session.id, :capabilities => %w[read model_write export])
+    material = PhComposer::API.invoke(
+      :context => context, :name => "ph_composer.assemblies.materials.create",
+      :params => { "values" => { "name" => "Mineral wool", "conductivity_w_mk" => 0.035 } },
+      :request => { "sequence" => 1, "expected_revision" => @session.revision }
+    ).dig("value", "id")
+    warning = PhComposer::API.export_preflight(:context => context).dig("value", "findings").first
+    assert_equal ["material.thermal_mass_defaulted", material, false],
+                 warning.values_at("code", "object_id", "blocks_export")
+
+    task = start
+    drain
+    @runtime.success
+    drain
+    result = @tasks.status(task.fetch("task_id"), OWNER).dig("outcome", "value", "result")
+    assert_equal ["complete_with_findings", 1], [result.fetch("state"), result.dig("summary", "findings")]
+    assert_equal [warning.slice("code", "section", "object_id", "message", "blocks_export")], result.fetch("findings")
+    report = File.read(PhComposer::Export::ArtifactPair.report_path(@destination))
+    assert_includes report, PhComposer::Export::ReportHtml.h(warning.fetch("message"))
+
+    reported = warning.slice("code", "section", "object_id").merge("message" => "Translated.", "blocks_export" => false)
+    task = start(:replace => true)
+    drain
+    @runtime.success_with({ "type" => "Model", "rooms" => [] }, :findings => [reported])
+    drain
+    assert_equal [reported], @tasks.status(task.fetch("task_id"), OWNER).dig("outcome", "value", "result", "findings")
+  end
+
+  # A preflight lists a repeated condition once per part (one row per unassigned Layer-Segment of an
+  # Assembly); the report lists it once per code and object.
+  def test_repeated_preflight_warnings_for_one_object_are_listed_once
+    warning = { "code" => "assembly.segment_unassigned", "section" => "fixture", "object_id" => "asm_1",
+                "message" => "A Layer-Segment has no Material.", "blocks_export" => false }
+    task = start
+    PhComposer::Export.stub(:preflight_warnings, [warning, warning.dup]) { drain }
+    @runtime.success
+    drain
+
+    assert_equal [warning], @tasks.status(task.fetch("task_id"), OWNER).dig("outcome", "value", "result", "findings")
+  end
+
+  # Leaving a preflight's warnings out is the defect above, so a preflight that cannot answer fails the run
+  # before translation and nothing is written.
+  def test_a_preflight_that_raises_fails_the_run_and_writes_nothing
+    task = start
+    broken = ->(*) { raise PhComposer::InternalError, "Preflight broke." }
+    PhComposer::Export.stub(:preflight_warnings, broken) { drain }
+
+    outcome = @tasks.status(task.fetch("task_id"), OWNER).fetch("outcome")
+    assert_equal %w[failed export.failed], outcome.values_at("status", "code")
+    assert_nil @runtime
+    assert_empty Dir.children(@directory)
   end
 
   def test_blocking_results_keep_findings_and_write_no_pair
@@ -460,7 +517,7 @@ class ExportTasksTest < PhComposerTestCase
     refute @tasks.status(second.fetch("task_id"), OWNER).dig("outcome", "value").to_h.key?("artifacts")
     third = start(:replace => true)
     drain
-    @runtime.success_with("type" => "Model", "rooms" => [{ "identifier" => "Zone_A" }])
+    @runtime.success_with({ "type" => "Model", "rooms" => [{ "identifier" => "Zone_A" }] })
     drain
     after = @tasks.status(third.fetch("task_id"), OWNER).dig("outcome", "value", "artifacts", "hbjson", "sha256")
     refute_equal before, after

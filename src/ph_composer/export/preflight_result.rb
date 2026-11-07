@@ -39,5 +39,22 @@ module PhComposer
         }
       }
     }.freeze
+
+    # The warnings, the non-blocking findings, every export contributor's preflight gives for `session` as
+    # it is now. A started export (Task) reads them so its report carries what the preflight showed.
+    # Starting it was granted, so the read asks for no grant of its own, as a menu item's availability
+    # read does (Commands); a result outside PREFLIGHT_RESULT is an internal error.
+    def self.preflight_warnings(session, registry = Registry.current)
+      registry.export_contributors.values.sort_by(&:name).filter_map(&:preflight).flat_map do |name|
+        declaration = registry.queries.fetch(name)
+        value = declaration.handler.call(HandlerRequest.for(session, :owner => declaration.owner,
+                                                                     :name => name, :registry => registry))
+        unless JsonSchema.validate(value, PREFLIGHT_RESULT).empty?
+          raise InternalError, "#{name} returned a preflight outside its schema."
+        end
+
+        value.fetch("findings").reject { |finding| finding.fetch("blocks_export") }
+      end
+    end
   end
 end
