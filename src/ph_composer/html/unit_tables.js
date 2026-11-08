@@ -27,6 +27,12 @@ PhComposerUI.define("unit_tables", [], function () {
   var LENGTH_UNIT_LIST = "mm, cm, m, in or ft";
 
   function unit(id, label, aliases) { return { id: id, label: label, aliases: aliases || [] }; }
+  /* One way a datasheet states a quantity, offered by the input-form selector. A form with a `factor` or a
+     `reciprocal` is a unit of its own (form = base * factor, or reciprocal / base); one naming the quantity's
+     SI or IP unit converts as that unit does. */
+  function form(id, label, conversion, aliases) {
+    return Object.assign({ id: id, label: label, aliases: aliases || [] }, conversion);
+  }
 
   /* Conversion data per quantity. Lengths convert through LENGTH_UNITS; every other quantity's SI unit is
      its canonical unit, and IP = SI * factor + offset, or reciprocal / SI for the vapour pairs.
@@ -52,7 +58,15 @@ PhComposerUI.define("unit_tables", [], function () {
     thermal_resistance: { label: "thermal resistance", factor: 1 / U_FACTOR, precision: { SI: 2, IP: 2 },
     si: unit("m2k_w", "m² K/W"), ip: unit("h_ft2_f_btu", "h ft² °F/Btu") },
     conductivity: { label: "conductivity", factor: CONDUCTIVITY_FACTOR, precision: { SI: 3, IP: 3 },
-    si: unit("w_mk", "W/(m K)"), ip: unit("btu_h_ft_f", "Btu/(h ft °F)") },
+    si: unit("w_mk", "W/(m K)"), ip: unit("btu_h_ft_f", "Btu/(h ft °F)"),
+    defaultForm: { SI: "w_mk", IP: "r_per_in" },
+    forms: [
+      form("r_per_in", "R per inch", { reciprocal: METRES_PER_INCH / U_FACTOR },
+        ["r/in", "r/inch", "r per in", "r per inch", "h ft2 F/Btu in"]),
+      form("w_mk", "W/(m K)"),
+      form("btu_h_ft_f", "Btu/(h ft °F)"),
+      form("btu_in_h_ft2_f", "Btu in/(h ft² °F)", { factor: U_FACTOR / METRES_PER_INCH })
+    ] },
     linear_psi: { label: "psi-value", factor: CONDUCTIVITY_FACTOR, signed: true, precision: { SI: 3, IP: 3 },
     si: unit("w_mk", "W/(m K)"), ip: unit("btu_h_ft_f", "Btu/(h ft °F)") },
     heat_loss_rate: { label: "heat loss rate", factor: BTU_H_PER_W / F_PER_K, precision: { SI: 3, IP: 3 },
@@ -105,7 +119,7 @@ PhComposerUI.define("unit_tables", [], function () {
     var definition = QUANTITIES[id];
     definition.id = id;
     if (definition.length) return;
-    [definition.si, definition.ip].forEach(function (entry) {
+    [definition.si, definition.ip].concat(definition.forms || []).forEach(function (entry) {
       [entry.id, entry.label].concat(entry.aliases).forEach(function (alias) {
         register(alias, { quantity: id, unit: entry.id, label: definition.label });
       });

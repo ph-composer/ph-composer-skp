@@ -218,7 +218,10 @@ function (request, snapshot, tables, faceWords, ui, units, fields) {
       },
       disabled: Boolean(this.owner.guard()), actions: function (row) { return self.actions(row); },
       action: function (row, action, trigger) { self.act(row, action, trigger); },
-      empty: "Add a Window Type, then Place it in SketchUp." });
+      empty: "Add a Window Type, then Place it in SketchUp.",
+      emptyAction: { label: "+ New Window Type", disabled: Boolean(this.owner.guard()), run: function () {
+        self.owner.createType();
+      } } });
     tables.orientNarrow(this.mount);
     if (this.dialog) { this.apply.disabled = Boolean(this.edits.busy() || this.stale);
       this.cancel.disabled = this.edits.busy(); }

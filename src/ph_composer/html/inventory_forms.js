@@ -177,6 +177,47 @@ function (RecordForm, request, snapshot, ui) {
     return "#" + rgb.map(function (value) { return ("0" + Math.round((value +
       m) * 255).toString(16)).slice(-2); }).join("");
   }
+  var SWATCHES = [
+    ["White", "#ffffff"], ["Light gray", "#e0e0e0"], ["Gray", "#9e9e9e"], ["Charcoal", "#424242"],
+    ["Cream", "#fff2cc"], ["Sand", "#e6c99c"], ["Wood", "#c69c6d"], ["Brown", "#8d6e63"],
+    ["Light blue", "#bbdefb"], ["Blue", "#64a4d8"], ["Light green", "#c5e1a5"], ["Green", "#81a784"],
+    ["Yellow", "#ffe082"], ["Orange", "#ffb480"], ["Rose", "#e6a5a5"], ["Lavender", "#c5b4dc"]
+  ];
+  /* A colour chosen inside a form that commits it with the rest of its values: the Color form's swatches, then
+     the native picker at the end of the row. */
+  function ColorChoice(initial) {
+    var self = this;
+    this.root = ui.element("div", "phc-color-choice");
+    var palette = ui.element("div", "phc-color-palette");
+    palette.setAttribute("role", "group");
+    palette.setAttribute("aria-label", "Color swatches");
+    this.swatches = SWATCHES.map(function (entry) {
+      var button = ui.button("", function () { self.set(entry[1]); });
+      button.className = "phc-color-swatch";
+      button.style.backgroundColor = entry[1];
+      button.setAttribute("aria-label", entry[0] + " " + entry[1]);
+      ui.tooltip(button, entry[0]);
+      palette.appendChild(button);
+      return { button: button, color: entry[1] };
+    });
+    this.wheel = ui.element("input", "phc-color-wheel");
+    this.wheel.type = "color"; this.wheel.setAttribute("type", "color");
+    this.wheel.setAttribute("aria-label", "Custom color");
+    ui.tooltip(this.wheel, "Pick a custom color");
+    this.wheel.addEventListener("input", function () { self.set(self.wheel.value); });
+    this.root.appendChild(palette); this.root.appendChild(this.wheel);
+    this.set(initial);
+  }
+  ColorChoice.prototype.set = function (color) {
+    this.color = color; this.wheel.value = color;
+    this.swatches.forEach(function (swatch) {
+      swatch.button.setAttribute("aria-pressed", String(swatch.color === color));
+    });
+  };
+  ColorChoice.prototype.setDisabled = function (disabled) {
+    this.wheel.disabled = Boolean(disabled);
+    this.swatches.forEach(function (swatch) { swatch.button.disabled = Boolean(disabled); });
+  };
   function ColorForm(session, send, action, changed) {
     var self = this;
     this.action = action;
@@ -202,12 +243,7 @@ function (RecordForm, request, snapshot, ui) {
     this.palette.setAttribute("role", "group");
     this.palette.setAttribute("aria-label", "Color swatches");
     this.swatches = [];
-    [
-      ["White", "#ffffff"], ["Light gray", "#e0e0e0"], ["Gray", "#9e9e9e"], ["Charcoal", "#424242"],
-      ["Cream", "#fff2cc"], ["Sand", "#e6c99c"], ["Wood", "#c69c6d"], ["Brown", "#8d6e63"],
-      ["Light blue", "#bbdefb"], ["Blue", "#64a4d8"], ["Light green", "#c5e1a5"], ["Green", "#81a784"],
-      ["Yellow", "#ffe082"], ["Orange", "#ffb480"], ["Rose", "#e6a5a5"], ["Lavender", "#c5b4dc"]
-    ].forEach(function (entry) {
+    SWATCHES.forEach(function (entry) {
       var button = ui.button("", function () { self.hex.value = entry[1];
       self.paint(); });
       button.className = "phc-color-swatch";
@@ -409,7 +445,7 @@ function (RecordForm, request, snapshot, ui) {
     td._color.disabled = !form.enabled || form.requests.busy();
   }
   return { contributeUsage: contributeUsage, ReplacementForm: ReplacementForm,
-    DuplicateForm: DuplicateForm, ColorForm: ColorForm, colorCell: colorCell,
+    DuplicateForm: DuplicateForm, ColorForm: ColorForm, ColorChoice: ColorChoice, colorCell: colorCell,
     labelled: labelled, required: RecordForm.required,
     refreshForm: refreshForm };
 });

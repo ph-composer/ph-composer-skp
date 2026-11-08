@@ -70,6 +70,18 @@ test("Schedule counts occurrences independently of copied ids and shows host con
   assert.strictEqual(o.sent[0].payload.name, "ph_composer.windows.units.locate");
   assert.deepStrictEqual(JSON.parse(JSON.stringify(o.sent[0].payload.params.units[0].entity_path)), [10, 30]);
 });
+test("with no Window Types the Schedule and the Builder both offer to make the first", function () {
+  var o = setup(), types = o.state.sections["ph_composer.windows.types"].value;
+  types.records = []; o.state.sections["ph_composer.windows.units"].value.units = []; o.editor.render(o.state);
+  var button = o.editor.schedule.mount.querySelector(".phc-empty-action");
+  assert.strictEqual(button.hidden, false);
+  assert.strictEqual(button.textContent, "+ New Window Type");
+  click(button);
+  assert.strictEqual(o.sent[o.sent.length - 1].payload.name, "ph_composer.windows.types.create");
+  assert.strictEqual(o.editor.firstType.textContent, "+ New Window Type");
+  assert.strictEqual(o.editor.firstType.disabled, true, "held while that create is pending");
+});
+
 test("Schedule lists Window Types by name, numbers read as numbers, and an unknown Type last", function () {
   var o = setup(), section = o.state.sections["ph_composer.windows.types"].value, first = section.records[0];
   function named(id, name) {

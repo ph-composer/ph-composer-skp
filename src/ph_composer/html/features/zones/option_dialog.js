@@ -113,6 +113,7 @@ function (ui, requests, options) {
   OptionDialog.prototype.colourEditor = function (choice, label) {
     var self = this, root = ui.element("div", "phc-zone-option-colour"), picker = ui.element("input"),
       hex = ui.element("input");
+    picker.className = "phc-color-wheel";
     picker.type = "color"; picker.setAttribute("type", "color"); picker.value = choice.colour;
     picker.setAttribute("aria-label", label + " custom colour"); ui.tooltip(picker, "Pick a custom colour");
     hex.type = "text"; hex.setAttribute("type", "text"); hex.value = choice.colour; hex.maxLength = 7;

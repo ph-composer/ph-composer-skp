@@ -73,14 +73,6 @@
 .phc-zone-option-row > input, .phc-zone-option-row > select { min-width: 0; width: 100%; }
 .phc-zone-option-row > button { justify-self: end; }
 .phc-zone-option-colour { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; min-width: 0; }
-/* The custom picker reads as a colour wheel holding the current colour, beside the fixed swatches. */
-.phc-zone-option-colour input[type="color"] { flex: 0 0 auto; width: 22px; height: 22px; min-height: 22px; padding: 2px;
-  border: 0; border-radius: 50%; cursor: pointer;
-  background: conic-gradient(#e0483e, #e8b23a, #56936a, #3aa6c9, #5588bb, #a95c78, #e0483e); }
-.phc-zone-option-colour input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-.phc-zone-option-colour input[type="color"]::-webkit-color-swatch { border: 2px solid var(--surface); border-radius: 50%; }
-.phc-zone-option-colour input[type="color"]:disabled { opacity: .45; cursor: default; }
-.phc-zone-option-colour input[type="color"]:focus-visible { outline: 2px solid var(--interaction-highlight); outline-offset: 2px; }
 .phc-zone-option-colour input[type="text"] { width: 78px; min-width: 0; font-family: monospace; }
 .phc-zone-option-swatches { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; width: 100%; }
 .phc-zone-option-palette { display: flex; flex-wrap: wrap; gap: 4px; }

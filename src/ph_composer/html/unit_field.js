@@ -42,7 +42,9 @@ PhComposerUI.define("unit_field", ["unit_preferences", "units", "workspace"], fu
     this.input.setAttribute("autocomplete", "off");
     this.input.setAttribute("aria-describedby", this.error.id);
     if (this.field.label) this.input.setAttribute("aria-label", this.field.label);
-    this.root.appendChild(this.input); this.root.appendChild(this.unit); this.root.appendChild(this.error);
+    if (options.forms) this.buildFormChoice();
+    this.root.appendChild(this.input); this.root.appendChild(this.formChoice || this.unit);
+    this.root.appendChild(this.error);
     this.input.addEventListener("input", function () { self.begin(); self.clearError(); });
     this.input.addEventListener("paste", function () { self.begin(); });
     // Escape is the field's only while a draft is open; otherwise it reaches the dialog or bubble around it.
@@ -59,6 +61,32 @@ PhComposerUI.define("unit_field", ["unit_preferences", "units", "workspace"], fu
     this.repaint();
   }
 
+  /* The input-form selector, in the unit label's place: the number typed is read in the chosen form. Choosing
+     another form keeps the text and rereads it, so a value typed before the choice is not converted. Until the
+     user chooses, the form follows the unit system. The field holds its own copy of the descriptor, because
+     owners share theirs with a table. */
+  Field.prototype.buildFormChoice = function () {
+    var self = this;
+    this.field = Object.assign({}, this.field);
+    this.root.classList.add("has-input-form");
+    this.formChoice = ui.element("select", "phc-choice-pill phc-unit-form");
+    this.formChoice.setAttribute("aria-label", (this.field.label || "Value") + " input form");
+    units.inputForms(this.field).forEach(function (entry) {
+      self.formChoice.appendChild(ui.option(entry.id, entry.label));
+    });
+    this.formChoice.addEventListener("change", function () {
+      self.formChosen = true; self.field.inputForm = self.formChoice.value; self.clearError();
+      // The number on screen now means something else, so it is a draft even if it was committed a moment ago.
+      self.editing = false;
+      if (self.input.value !== "" || self.baseline !== null) self.begin();
+    });
+    this.followSystem();
+  };
+  Field.prototype.followSystem = function () {
+    if (!this.formChoice || this.formChosen) return;
+    this.field.inputForm = this.formChoice.value = units.defaultInputForm(this.field);
+  };
+
   Field.prototype.begin = function () {
     if (this.editing) return;
     this.editing = true; this.startProfile = cloneProfile(this.field);
@@ -72,6 +100,7 @@ PhComposerUI.define("unit_field", ["unit_preferences", "units", "workspace"], fu
 
   Field.prototype.repaint = function () {
     var current = cloneProfile(this.field);
+    this.followSystem();
     this.input.value = units.formatEdit(this.baseline, this.field, current);
     this.unit.textContent = units.displayUnit(this.field, current);
     this.seed = this.input.value; this.clearError();

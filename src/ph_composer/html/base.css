@@ -288,6 +288,15 @@ html { height: 100%; }
 .phc-form form { display: flex; flex-wrap: wrap; gap: 12px; }
 .phc-form label { display: flex; flex-direction: column; gap: 5px; max-width: 100%; }
 .phc-form input, .phc-form select { width: 160px; max-width: 100%; }
+.phc-form-row { display: flex; flex-direction: column; gap: 5px; }
+/* The custom colour picker reads as a colour wheel holding the current colour, beside the fixed swatches. */
+input[type="color"].phc-color-wheel { flex: 0 0 auto; width: 22px; height: 22px; min-height: 22px; padding: 2px;
+  border: 0; border-radius: 50%; cursor: pointer;
+  background: conic-gradient(#e0483e, #e8b23a, #56936a, #3aa6c9, #5588bb, #a95c78, #e0483e); }
+input[type="color"].phc-color-wheel::-webkit-color-swatch-wrapper { padding: 0; }
+input[type="color"].phc-color-wheel::-webkit-color-swatch { border: 2px solid var(--surface); border-radius: 50%; }
+input[type="color"].phc-color-wheel:disabled { opacity: .45; cursor: default; }
+input[type="color"].phc-color-wheel:focus-visible { outline: 2px solid var(--interaction-highlight); outline-offset: 2px; }
 .phc-unit-field {
   display: inline-grid;
   grid-template-columns: minmax(0, 160px) auto;

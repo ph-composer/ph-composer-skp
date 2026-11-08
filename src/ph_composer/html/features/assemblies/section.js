@@ -63,9 +63,8 @@ function (panel, snapshot, ui, AssemblyForm, forms, inventories, units, preferen
       root.appendChild(view.editor.root);
       view.editor.refresh(view.state, record.id);
     };
-    view.create = ui.button("+ New Assembly", function () {
-      if (allowed()) view.newAssembly.create(view.inventory.records);
-    });
+    function createAssembly() { if (allowed()) view.newAssembly.create(view.inventory.records); }
+    view.create = ui.button("+ New Assembly", createAssembly);
     view.header.setPrimary(view.create);
     view.inventory = new inventories.Inventory(view.listRoot, state.session, send, notice, changed, {
       tableId: SECTION, section: SECTION, action: SECTION + ".update", label: "Assembly", columns: columns,
@@ -110,6 +109,7 @@ function (panel, snapshot, ui, AssemblyForm, forms, inventories, units, preferen
           units.profile(quantities[field], preferences.current()), { showUnit: false });
         return true;
       } });
+    view.inventory.emptyAction = { label: "+ New Assembly", run: createAssembly };
     view.edits = view.inventory.edits;
     view.controls = view.inventory.controls;
     view.forms.forEach(function (form) { root.appendChild(form.root); });

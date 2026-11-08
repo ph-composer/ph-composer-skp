@@ -38,7 +38,10 @@
 }
 .phc-color-form h2 { font-size: 14px; overflow-wrap: anywhere; margin-bottom: 12px; }
 .phc-color-palette { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; margin: 4px 0 14px; }
-.phc-color-form .phc-color-swatch { width: 100%; height: 30px; min-height: 30px; padding: 0; border: 1px solid #8c989e; }
+.phc-color-choice { display: flex; align-items: center; gap: 8px; }
+.phc-color-choice .phc-color-palette { flex: 1 1 auto; margin: 0; }
+.phc-color-choice .phc-color-swatch { height: 24px; min-height: 24px; }
+.phc-color-form .phc-color-swatch, .phc-color-choice .phc-color-swatch { width: 100%; height: 30px; min-height: 30px; padding: 0; border: 1px solid #8c989e; }
 .phc-color-swatch[aria-pressed="true"], .phc-color-swatch:hover:enabled {
   outline: 2px solid var(--interaction-highlight); outline-offset: 2px;
 }

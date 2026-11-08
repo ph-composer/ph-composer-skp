@@ -254,6 +254,29 @@ test("every refusal reports its own code", function () {
   code("4000", { quantity: "length_mm", unit: "mm", label: "Width", min: 1, max: 3000 }, "mm", "out_of_range");
 });
 
+test("conductivity reads every datasheet form, by selector or by a typed unit", function () {
+  var valueField = field("conductivity", "w_mk");
+  function reads(text, unitId, expected) {
+    var parsed = parse(text, valueField, unitId);
+    assert.strictEqual(parsed.ok, true, text);
+    assert.ok(Math.abs(parsed.value - expected) < 0.000001, text + " read " + parsed.value);
+  }
+  reads("5", "r_per_in", 0.028846);
+  reads("1", "btu_in_h_ft2_f", 0.144228);
+  reads("5 R/in", "w_mk", 0.028846);
+  reads("5 R per inch", "btu_h_ft_f", 0.028846);
+  reads("5 h ft2 F/Btu in", "w_mk", 0.028846);
+  reads("1 Btu-in/hr-ft2-F", "w_mk", 0.144228);
+  reads("0.04 W/(m K)", "r_per_in", 0.04);
+  code("0", field("conductivity", "w_mk"), "r_per_in", "zero");
+  code("-4", field("conductivity", "w_mk"), "r_per_in", "negative");
+  assert.strictEqual(units.inputForms(valueField).map(function (entry) { return entry.id; }).join(),
+    "r_per_in,w_mk,btu_h_ft_f,btu_in_h_ft2_f");
+  assert.strictEqual(units.defaultInputForm(valueField, { system: "IP" }), "r_per_in");
+  assert.strictEqual(units.defaultInputForm(valueField, { system: "SI" }), "w_mk");
+  assert.strictEqual(units.inputForms(field("density", "kg_m3")).length, 0);
+});
+
 test("each quantity reads its SI and IP unit aliases", function () {
   [
     ["area", "m2", "2 m²", "2 sqft"], ["volume", "m3", "2 m³", "2 ft3"],

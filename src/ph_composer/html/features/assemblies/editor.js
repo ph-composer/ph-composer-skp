@@ -1,10 +1,10 @@
 /* One Assembly work surface. Every authored gesture sends one registered action and awaits its outcome. */
 PhComposerUI.define("features/assemblies/editor", ["features/assemblies/editor_shared", "features/assemblies/header",
   "features/assemblies/inspector", "features/assemblies/layer_drag", "features/assemblies/stage",
-  "features/assemblies/form", "fields", "inventory_forms", "library/sidebar", "record_edits", "request", "snapshot",
-  "unit_field", "workspace"],
-function (shared, header, inspector, layerDrag, stage, AssemblyForm, fields, forms, Sidebar, RecordEdits, request,
-  snapshot, unitFields, ui) {
+  "features/assemblies/form", "features/assemblies/material_form", "fields", "inventory_forms", "library/sidebar",
+  "record_edits", "request", "snapshot", "unit_field", "workspace"],
+function (shared, header, inspector, layerDrag, stage, AssemblyForm, MaterialForm, fields, forms, Sidebar, RecordEdits,
+  request, snapshot, unitFields, ui) {
   "use strict";
   // A Material, local or a library row, is labelled by its name.
   function materialName(row) { return row.display_label || row.values.name; }
@@ -39,8 +39,13 @@ function (shared, header, inspector, layerDrag, stage, AssemblyForm, fields, for
         if ((field === "type" || field === "exterior_condition") && !value) return null;
       } });
     this.color = new forms.ColorForm(session, send, SECTION + ".update", function () { self.repaint(); });
+    // New Material lives on the Library pane too; here it saves the trip. Refresh finishes a create's repaint.
+    this.newMaterial = new MaterialForm(session, send, function (created) {
+      if (created && created.id) self.createdMaterial = created.id; else self.repaint();
+    });
     this.sidebar = new Sidebar({ session: session, send: send, changed: function () { self.repaint();
     }, busy: function () { return self.busy() || Boolean(self.guard()); },
+      create: { label: "+ New Material", run: function () { self.newMaterial.open(); } },
       adapter: { title: "Material Library", wireKind: "materials", name: materialName, read: function (state) {
         var payload = snapshot.value(state, MATERIALS);
         return payload ? payload.records : [];
@@ -70,11 +75,12 @@ function (shared, header, inspector, layerDrag, stage, AssemblyForm, fields, for
     this.root.appendChild(this.main);
     this.root.appendChild(this.sidebar.root);
     this.root.appendChild(this.color.root);
+    this.root.appendChild(this.newMaterial.root);
     this.removal = ui.formDialog("", function () { self.removal.closeModal(); });
     this.root.appendChild(this.removal);
     this.root.addEventListener("keydown", function (event) {
       if (event.defaultPrevented || event.key !== "Escape" || self.busy() ||
-        !self.removal.hidden || !self.color.root.hidden) return;
+        !self.removal.hidden || !self.color.root.hidden || !self.newMaterial.root.hidden) return;
       var open = Object.keys(self.dimensions).filter(function (key) {
         return self.dimensions[key].inlineOpen;
       })[0];
@@ -87,7 +93,7 @@ function (shared, header, inspector, layerDrag, stage, AssemblyForm, fields, for
     });
   }
   Editor.prototype.busy = function () {
-    return this.requests.busy() || Boolean(this.edits.pending) || this.color.requests.busy();
+    return this.requests.busy() || Boolean(this.edits.pending) || this.color.requests.busy() || this.newMaterial.busy();
   };
   Editor.prototype.hasRecordDraft = function () {
     return Object.keys(this.edits.cells).some(function (key) {
@@ -106,6 +112,7 @@ function (shared, header, inspector, layerDrag, stage, AssemblyForm, fields, for
     if (this.layerDrag.active()) return "Finish moving the Layer first.";
     if (this.sidebar && this.sidebar.guard()) return this.sidebar.guard();
     if (this.busy()) return "Wait for the Assembly change to finish.";
+    if (!this.newMaterial.root.hidden) return "Finish or cancel the open form.";
     if (this.hasDimensionDraft() || this.hasRecordDraft() || !this.color.root.hidden || !this.removal.hidden) {
       return "Apply or cancel the Assembly draft before leaving.";
     }
@@ -370,6 +377,7 @@ function (shared, header, inspector, layerDrag, stage, AssemblyForm, fields, for
     var row = { key: id, record: record };
     this.edits.refresh([row], state);
     this.color.refresh(state, true, payload.records);
+    this.newMaterial.refresh(state);
     var materials = shared.lookup((snapshot.value(state, MATERIALS) || {}).records);
     if (this.selection && !shared.selected(record, this.selection)) this.selection = null;
     var oldScroll = this.main.querySelector(".assembly-stage-scroll");
@@ -402,6 +410,10 @@ function (shared, header, inspector, layerDrag, stage, AssemblyForm, fields, for
     }, this);
     this.sidebar.refresh(state, { record: record, selection: this.selection },
       Boolean(snapshot.value(state, MATERIALS)));
+    if (this.createdMaterial) {
+      this.sidebar.revealLocal(this.createdMaterial);
+      this.createdMaterial = null;
+    }
     this.paintPending();
     var scroll = this.main.querySelector(".assembly-stage-scroll");
     if (scroll && position) { scroll.scrollTop = position.top; scroll.scrollLeft = position.left; }
@@ -438,6 +450,7 @@ function (shared, header, inspector, layerDrag, stage, AssemblyForm, fields, for
     this.requests.reset();
     this.edits.dispose();
     this.color.dispose();
+    this.newMaterial.dispose();
     this.sidebar.dispose();
     this.removal.closeModal();
     Object.keys(this.dimensions).forEach(function (key) {
