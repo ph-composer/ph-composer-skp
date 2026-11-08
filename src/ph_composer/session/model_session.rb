@@ -47,7 +47,7 @@ module PhComposer
 
     # The observers attached to this session's Model, its selection and its tags, kept so detaching removes
     # exactly those.
-    Observers = Struct.new(:model, :selection, :layers, :view, keyword_init: true)
+    Observers = Struct.new(:model, :selection, :layers, :view, :rendering, keyword_init: true)
 
     def add_observers(observers)
       @observers = observers

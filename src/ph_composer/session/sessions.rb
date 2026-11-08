@@ -12,6 +12,7 @@ module PhComposer
     HOST_EVENTS = %i[
       session_created model_opened model_activated transaction_committed transaction_undone transaction_redone
       active_path_changed selection_changed camera_changed tags_changed pre_save post_save container_added
+      rendering_options_changed section_plane_changed
     ].freeze
 
     class << self
@@ -45,11 +46,15 @@ module PhComposer
         model.selection.add_observer(selection_observer) if model.selection.respond_to?(:add_observer)
         layers_observer = HostObservers::LayersObserver.new
         model.layers.add_observer(layers_observer) if model.layers.respond_to?(:add_observer)
+        rendering_options = model.respond_to?(:rendering_options) ? model.rendering_options : nil
+        rendering_observer = HostObservers::RenderingOptionsObserver.new(model)
+        rendering_options&.add_observer(rendering_observer)
         view = model.respond_to?(:active_view) ? model.active_view : nil
         view_observer = HostObservers::ViewObserver.new
         view.add_observer(view_observer) if view.respond_to?(:add_observer)
         session.add_observers(ModelSession::Observers.new(:model => model_observer, :selection => selection_observer,
-                                                          :layers => layers_observer, :view => view_observer))
+                                                          :layers => layers_observer, :view => view_observer,
+                                                          :rendering => [rendering_options, rendering_observer]))
         sessions[model.object_id] = session
         session.host_event(:session_created)
         session
@@ -121,6 +126,8 @@ module PhComposer
         layers.remove_observer(observers.layers) if observers.layers && layers.respond_to?(:remove_observer)
         view = model.respond_to?(:active_view) ? model.active_view : nil
         view.remove_observer(observers.view) if observers.view && view.respond_to?(:remove_observer)
+        rendering_options, rendering_observer = observers.rendering
+        rendering_options&.remove_observer(rendering_observer)
         session.detach
         true
       end

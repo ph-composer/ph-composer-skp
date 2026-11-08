@@ -5,9 +5,10 @@ module PhComposer
     # Visibility belongs to an occurrence, not to its leaf entity: two instances may share a Face
     # while only one is hidden. Cache parent paths and entity lookup for one drawing rebuild only.
     class OccurrenceVisibility
-      def initialize(model)
+      def initialize(model, view_state = ViewState.new(model))
         @resolved = { [] => [model, true] }
         @children = {}
+        @view_state = view_state
       end
 
       def visible?(path, entity)
@@ -15,7 +16,7 @@ module PhComposer
         return false unless path.is_a?(Array) && !path.empty?
 
         resolved, visible = resolve(path)
-        resolved.equal?(entity) && visible
+        resolved.equal?(entity) && visible && !edit_hidden?(path)
       end
 
       # Whether the occurrence a path names is drawn, for shapes or text with no entity of their own:
@@ -25,7 +26,12 @@ module PhComposer
         return false unless path.is_a?(Array) && !path.empty?
 
         resolved, visible = resolve(path)
-        !resolved.nil? && visible
+        !resolved.nil? && visible && !edit_hidden?(path)
+      end
+
+      # Whether View > Component Edit hides this occurrence; each Face is asked as well as its container.
+      def edit_hidden?(path)
+        !path.nil? && @view_state.hidden?(path, ->(prefix) { resolve(prefix).first })
       end
 
       private
@@ -66,27 +72,22 @@ module PhComposer
       module_function
 
       def call(entity, transform)
-        partition(entity, transform, nil) { true }.first(2)
+        partition(entity, transform, nil) { true }
       end
 
       # Partition at each Face, not at the projected container: one Group may contain both matching
-      # and muted geometry. Paths and transforms follow the particular occurrence throughout.
+      # and excluded geometry. Paths and transforms follow the particular occurrence throughout.
       # Legacy projections without a path keep nil; their full occurrence cannot be inferred here.
       def partition(entity, transform, path)
         triangles = []
         segments = []
-        muted = []
         transform ||= Geom::Transformation.new
-        return [triangles, segments, muted] if skipped?(entity)
+        return [triangles, segments] if skipped?(entity)
 
         each_face(entity, transform, path) do |face, world, leaf_path|
-          if yield(leaf_path)
-            add_face(face, world, triangles, segments)
-          else
-            add_face(face, world, muted, [])
-          end
+          add_face(face, world, triangles, segments) if yield(leaf_path)
         end
-        [triangles, segments, muted]
+        [triangles, segments]
       end
 
       # `transform` maps this entity's contents to world; a child container multiplies in its own.

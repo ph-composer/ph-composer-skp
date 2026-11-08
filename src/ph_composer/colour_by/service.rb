@@ -57,7 +57,7 @@ module PhComposer
     # visibility state is not verified; there is no general scene-change subscription here.
     class Service
       attr_reader :mode_name, :rows, :fills, :outlines, :unclassified_outlines, :unclassified_hatch, :isolated
-      attr_reader :wash_triangles, :lines, :readouts_on, :readout_drawings
+      attr_reader :lines, :readouts_on, :readout_drawings
       attr_reader :filter_paths
       # How many times the drawing has been rebuilt for this Model. The host walkthrough reads it to
       # tell an invalidating event that fired from one that did not.
@@ -125,8 +125,8 @@ module PhComposer
       # user action, so a rebuild at a revision already drawn is skipped; `force` is for what the
       # revision does not cover, such as a tag being hidden.
       def invalidate!(force: false)
-        rebuild if active? && (force || @built_revision != @session.revision)
-        rebuild_readouts if !@readouts_on.empty? && (force || @readouts_built != readout_key)
+        rebuild if active? && (force || @built_key != safely { build_key })
+        rebuild_readouts if !@readouts_on.empty? && (force || @readouts_built != safely { readout_key })
         self
       end
 
@@ -245,19 +245,19 @@ module PhComposer
         @outlines = {}
         @unclassified_outlines = []
         @unclassified_hatch = []
-        @wash_triangles = []
         @lines = {}
         @frames = {}
         @entities = {}
         @isolated = nil
-        @built_revision = nil
+        @built_key = nil
       end
 
       def rebuild
         declaration = mode
         return deactivate unless declaration
 
-        drawing = Drawing.new(:visibility => OccurrenceVisibility.new(@session.model),
+        view_state = ViewState.new(@session.model)
+        drawing = Drawing.new(:visibility => OccurrenceVisibility.new(@session.model, view_state),
                               :set_aside => method(:set_aside?), :in_filter => method(:matches_filter?))
         read = HandlerRequest.for(@session, :owner => declaration.owner, :name => declaration.name)
         painted = Array(declaration.projection.call(read)).map do |entry|
@@ -268,8 +268,8 @@ module PhComposer
         # so a row that is gone releases what it was holding.
         @isolated = nil unless painted.any? { |entry, state, _colour| [entry.value, state] == @isolated }
         painted.each { |entry, state, colour| drawing.add(entry, state, colour) }
-        publish(declaration, drawing)
-        @built_revision = @session.revision
+        publish(declaration, drawing, view_state)
+        @built_key = [@session.revision, view_state.key]
         @rebuilds += 1
         invalidate_view
       rescue StandardError => error
@@ -296,18 +296,29 @@ module PhComposer
 
       # Replaces the drawing the overlay reads with a completed one. The two steps that can still raise,
       # the mode's ordering and the hatch, run before anything is assigned.
-      def publish(declaration, drawing)
+      def publish(declaration, drawing, view_state)
         rows = order(declaration, drawing.rows)
-        hatch = Tessellation.hatch(drawing.unclassified_triangles)
+        hatch = Tessellation.hatch(view_state.clip_triangles(drawing.unclassified_triangles))
         @rows = rows
         @entities = drawing.entities
         @frames = drawing.frames
-        @fills = drawing.fills
-        @outlines = drawing.outlines
-        @lines = drawing.lines
-        @unclassified_outlines = drawing.unclassified_outlines
+        @fills = drawing.fills.transform_values { |points| view_state.clip_triangles(points) }
+        @outlines = drawing.outlines.transform_values { |points| view_state.clip_segments(points) }
+        @lines = drawing.lines.transform_values { |points| view_state.clip_segments(points) }
+        @unclassified_outlines = view_state.clip_segments(drawing.unclassified_outlines)
         @unclassified_hatch = hatch
-        @wash_triangles = drawing.wash_triangles
+      end
+
+      # A read of the view state that raises answers no key, so the rebuild's own failure path handles it.
+      def safely
+        yield
+      rescue StandardError => error
+        Diagnostics.exception("colour_by_view_state", error)
+        nil
+      end
+
+      def build_key
+        [@session.revision, ViewState.new(@session.model).key]
       end
 
       # Rebuilds `names`, every readout on by default, keeping the others' drawings. A readout that fails
@@ -321,7 +332,7 @@ module PhComposer
       end
 
       def readout_key
-        [@session.revision, @selection_generation]
+        [@session.revision, @selection_generation, ViewState.new(@session.model).key]
       end
 
       # One readout's anchors and HUD lines, with hidden and muted anchors left out. A readout that raises
@@ -331,10 +342,11 @@ module PhComposer
         read = HandlerRequest.for(@session, :owner => declaration.owner, :name => declaration.name,
                                             :selection => declaration.selection ? selected_paths : nil)
         result = ReadoutOutput.check!(declaration.projection.call(read))
-        visibility = OccurrenceVisibility.new(@session.model)
+        view_state = ViewState.new(@session.model)
+        visibility = OccurrenceVisibility.new(@session.model, view_state)
         anchors = Array(result.anchors).select do |anchor|
           masked = anchor.path.nil? ? !@filter_paths.nil? : !matches_filter?(anchor.path)
-          visibility.path_visible?(anchor.path) && !masked
+          visibility.path_visible?(anchor.path) && !masked && !view_state.cut?(anchor.point)
         end
         [anchors, Array(result.hud)]
       rescue StandardError => error

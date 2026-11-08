@@ -10,7 +10,7 @@ module PhComposer
     # `visibility` and `set_aside` are the service's occurrence rules for this rebuild: what the viewport
     # hides, and which rows isolation mutes. `in_filter` is the session's occurrence mask.
     class Drawing
-      attr_reader :unclassified_outlines, :unclassified_triangles, :wash_triangles
+      attr_reader :unclassified_outlines, :unclassified_triangles
 
       def initialize(visibility:, set_aside:, in_filter:)
         @visibility = visibility
@@ -24,7 +24,6 @@ module PhComposer
         @lines = batches
         @unclassified_outlines = []
         @unclassified_triangles = []
-        @wash_triangles = []
       end
 
       # Counts the entry in its legend row and adds what it draws: its entity's geometry, its derived
@@ -39,17 +38,12 @@ module PhComposer
         add_derived(entry, state, colour) if entry.derived
         return unless entry.entity && @visibility.visible?(entry.path, entry.entity)
 
-        # Set-aside geometry has its own wash pass, with no mode outline. A grey mode value and
-        # the unclassified hatch therefore keep their meaning during isolation.
-        if @set_aside.call(entry.value, state)
-          @wash_triangles.concat(Tessellation.call(entry.entity, entry.transform).first)
-          return
-        end
+        # A set-aside or filtered-out Face is left to SketchUp's own drawing: nothing is painted over it.
+        return if @set_aside.call(entry.value, state)
 
-        triangles, segments, muted = Tessellation.partition(entry.entity, entry.transform, entry.path) do |path|
-          @in_filter.call(path)
+        triangles, segments = Tessellation.partition(entry.entity, entry.transform, entry.path) do |path|
+          @in_filter.call(path) && !@visibility.edit_hidden?(path)
         end
-        @wash_triangles.concat(muted)
         if state == :unclassified
           @unclassified_outlines.concat(segments) unless entry.hatch_outline == false
           @unclassified_triangles.concat(triangles)
@@ -108,9 +102,7 @@ module PhComposer
                     @visibility.path_visible?(entry.path)
                   end
         return unless visible
-        if @set_aside.call(entry.value, state) || !@in_filter.call(entry.path)
-          return @wash_triangles.concat(triangles)
-        end
+        return if @set_aside.call(entry.value, state) || !@in_filter.call(entry.path)
 
         if state == :unclassified
           @unclassified_triangles.concat(triangles)

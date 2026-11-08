@@ -33,8 +33,8 @@ module PhComposer
     #
     # `model_activated` is deliberately absent. A Model that changed while it was inactive reported
     # that through its own observers at the time, so switching back to it has nothing to rebuild.
-    INVALIDATING_EVENTS = %i[transaction_committed transaction_undone transaction_redone
-                             active_path_changed].freeze
+    INVALIDATING_EVENTS = %i[transaction_committed transaction_undone transaction_redone active_path_changed
+                             rendering_options_changed section_plane_changed].freeze
 
     STATE_RESULT = {
       "type" => "object",

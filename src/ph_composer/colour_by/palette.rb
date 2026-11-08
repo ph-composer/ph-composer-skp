@@ -12,10 +12,6 @@ module PhComposer
       INCOMPLETE = [255, 176, 0].freeze
       # No record at all. Drawn as a hatch and solid boundary rather than a fill.
       UNCLASSIFIED = [130, 130, 130].freeze
-      # Isolation washes out the underlying geometry, without the outlines a mode colour carries.
-      # It is a separate rendering pass, never a substitute colour in a mode's palette.
-      ISOLATION_WASH = [255, 255, 255].freeze
-      ISOLATION_WASH_ALPHA = 205
       FILL_ALPHA = 110
       OUTLINE_ALPHA = 220
 

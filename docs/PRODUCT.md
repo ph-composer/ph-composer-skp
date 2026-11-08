@@ -124,11 +124,11 @@ or Window Type on the model without changing its materials. The Zones tab is one
 through views. Faces is the first: each Zone with its own fields as columns and its faces beneath, with
 Colour by, sorting and filters in the column headers. While more than one view is available, a row of
 view tabs above the heading switches between them; each keeps its own column filters and sort, and this
-computer remembers the view last shown. Each column's Show choices filter the table and fade excluded geometry to grey while
+computer remembers the view last shown. Each column's Show choices filter the table and leave excluded geometry in its plain SketchUp colour while
 Colour by is active. Filters combine across columns, and Clear filter restores that column's values.
 The active Colour-by column's choices include colour swatches. Text search remains table-only.
 Zone fields include all geometry in matching Zones. Face fields colour only matching Faces;
-detached Window units have no matching Face and fade under those filters.
+detached Window units have no matching Face and lose their colour under those filters. To see past excluded Faces, use a section cut.
 Filtering changes no geometry visibility, materials or saved Scenes. Faces checked in the table, or selected in SketchUp, are edited together from a bar
 under the table. Locate frames faces and outlines them without changing the selection.
 Assembly assignment is implemented with Assemblies on the Phase 2 branch. A face inside a repeated component is shared by every occurrence, and independent
