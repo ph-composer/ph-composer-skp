@@ -44,6 +44,8 @@ module PhComposer
         triangles, segments = Tessellation.partition(entry.entity, entry.transform, entry.path) do |path|
           @in_filter.call(path) && !@visibility.edit_hidden?(path)
         end
+        triangles = @visibility.clip_triangles(triangles, entry.path)
+        segments = @visibility.clip_segments(segments, entry.path)
         if state == :unclassified
           @unclassified_outlines.concat(segments) unless entry.hatch_outline == false
           @unclassified_triangles.concat(triangles)
@@ -104,6 +106,9 @@ module PhComposer
         return unless visible
         return if @set_aside.call(entry.value, state) || !@in_filter.call(entry.path)
 
+        triangles = @visibility.clip_triangles(triangles, entry.path)
+        outlines = @visibility.clip_segments(outlines, entry.path)
+        segments = @visibility.clip_segments(segments, entry.path)
         if state == :unclassified
           @unclassified_triangles.concat(triangles)
           @unclassified_outlines.concat(outlines + segments) unless entry.hatch_outline == false

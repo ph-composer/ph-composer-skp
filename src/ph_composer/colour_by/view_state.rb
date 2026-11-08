@@ -3,8 +3,9 @@
 module PhComposer
   module ColourBy
     # What SketchUp's view hides or cuts that the overlay has to follow by itself, read once per rebuild:
-    # View > Component Edit (Hide Rest of Model, Hide Similar Components) and the active section plane at the
-    # Model root. A Group's own active section plane is not followed. `key` says when a repaint is due.
+    # View > Component Edit (Hide Rest of Model, Hide Similar Components) and the active section planes, at
+    # the Model root and in each container along an occurrence's path. `key` says when a repaint is due; a
+    # plane activated in a container changes no key, so that event forces a rebuild.
     class ViewState
       NONE = {}.freeze
       PLANE_TOLERANCE = 1.0e-6
@@ -13,11 +14,12 @@ module PhComposer
         @options = model.respond_to?(:rendering_options) ? model.rendering_options : NONE
         @active = Array(model.active_path).map(&:persistent_id)
         @open = Array(model.active_path).last
-        @plane = section_plane(model)
+        @root_plane = section_plane(model)
       end
 
       def key
-        @active.empty? ? [@plane] : [@options["InactiveHidden"], @options["InstanceHidden"], @active, @plane]
+        cuts = [@options["DisplaySectionCuts"], @root_plane]
+        @active.empty? ? cuts : cuts + [@options["InactiveHidden"], @options["InstanceHidden"], @active]
       end
 
       # Whether Component Edit is hiding this occurrence. `entity_at` resolves a path prefix to its entity.
@@ -28,23 +30,41 @@ module PhComposer
         @options["InstanceHidden"] && similar_elsewhere?(path, entity_at)
       end
 
-      # Whether the section plane has cut away this point.
-      def cut?(point)
-        !@plane.nil? && side(point).positive?
+      # Whether a section plane cutting this occurrence has cut away this point.
+      def cut?(point, planes)
+        planes.any? { |plane| side(point, plane).positive? }
       end
 
-      # Triplets of points; a triangle crossing the plane is cut to the side SketchUp keeps.
-      def clip_triangles(points)
-        return points unless @plane
+      # Every active section plane cutting this occurrence, in world coordinates: the Model root's and each
+      # container's along its path. `entity_at` resolves a path prefix to its entity.
+      def planes(path, entity_at)
+        return [] if @options["DisplaySectionCuts"] == false
 
-        points.each_slice(3).flat_map { |triangle| fan(clip_polygon(triangle)) }
+        found = @root_plane ? [@root_plane] : []
+        transform = Geom::Transformation.new
+        Array(path).each_index do |index|
+          entity = entity_at.call(path[0..index])
+          break unless entity.respond_to?(:transformation)
+
+          transform *= entity.transformation
+          plane = container_plane(entity)
+          found << world_plane(plane, transform) if plane
+        end
+        found
+      end
+
+      # Triplets of points; a triangle crossing a plane is cut to the side SketchUp keeps.
+      def clip_triangles(points, planes)
+        planes.reduce(points) do |kept, plane|
+          kept.each_slice(3).flat_map { |triangle| fan(clip_polygon(triangle, plane)) }
+        end
       end
 
       # Pairs of points, cut the same way.
-      def clip_segments(points)
-        return points unless @plane
-
-        points.each_slice(2).flat_map { |first, last| clip_segment(first, last) }
+      def clip_segments(points, planes)
+        planes.reduce(points) do |kept, plane|
+          kept.each_slice(2).flat_map { |first, last| clip_segment(first, last, plane) }
+        end
       end
 
       private
@@ -59,9 +79,25 @@ module PhComposer
         plane&.get_plane
       end
 
+      def container_plane(entity)
+        entities = entity.respond_to?(:entities) ? entity.entities : entity.definition.entities
+        entities.respond_to?(:active_section_plane) ? entities.active_section_plane&.get_plane : nil
+      end
+
+      def world_plane(plane, transform)
+        a, b, c, d = plane
+        origin = Geom::Point3d.new(-d * a, -d * b, -d * c)
+        tip = Geom::Point3d.new(origin.x + a, origin.y + b, origin.z + c)
+        base = origin.transform(transform)
+        reached = tip.transform(transform)
+        x, y, z = [reached.x - base.x, reached.y - base.y, reached.z - base.z]
+        length = Math.sqrt((x**2) + (y**2) + (z**2))
+        [x / length, y / length, z / length, -(x * base.x + y * base.y + z * base.z) / length]
+      end
+
       # A coincident point counts as on the plane, so float noise cannot shred a Face in the cut's own plane.
-      def side(point)
-        a, b, c, d = @plane
+      def side(point, plane)
+        a, b, c, d = plane
         value = a * point.x + b * point.y + c * point.z + d
         value.abs < PLANE_TOLERANCE ? 0.0 : value
       end
@@ -77,11 +113,11 @@ module PhComposer
                           first.z + (last.z - first.z) * ratio)
       end
 
-      def clip_polygon(points)
+      def clip_polygon(points, plane)
         points.each_with_index.flat_map do |point, index|
           following = points[(index + 1) % points.length]
-          here = side(point)
-          there = side(following)
+          here = side(point, plane)
+          there = side(following, plane)
           kept = here <= 0 ? [point] : []
           (here <= 0) != (there <= 0) ? kept + [crossing(point, following, here, there)] : kept
         end
@@ -91,9 +127,9 @@ module PhComposer
         (1...(polygon.length - 1)).flat_map { |index| [polygon[0], polygon[index], polygon[index + 1]] }
       end
 
-      def clip_segment(first, last)
-        here = side(first)
-        there = side(last)
+      def clip_segment(first, last, plane)
+        here = side(first, plane)
+        there = side(last, plane)
         return [first, last] if here <= 0 && there <= 0
         return [] if here > 0 && there > 0
 

@@ -563,6 +563,30 @@ class ColourByTest < PhComposerTestCase
     refute_empty service.fills.values.flatten, "the part before the cut is"
   end
 
+  def test_a_section_plane_inside_a_group_cuts_only_that_group
+    cut_group = zone_group(903, %w[Wall])
+    kept_group = zone_group(904, %w[Wall])
+    service = activate("ph_composer.zones.faces.by_face_type")
+    full = service.fills.values.flatten.map(&:x).count { |x| x > 1.0 + 1e-9 }
+
+    cut_group.entities.active_section_plane = Sketchup::SectionPlane.new([1.0, 0.0, 0.0, -1.0])
+
+    past = service.fills.values.flatten.map(&:x).count { |x| x > 1.0 + 1e-9 }
+    assert_operator past, :<, full, "the cut Group loses what is past its plane"
+    assert_operator past, :>, 0, "the other Group is not cut"
+    refute_nil kept_group
+  end
+
+  def test_a_group_plane_is_applied_through_the_groups_transformation
+    group = zone_group(905, %w[Wall])
+    group.define_singleton_method(:transformation) { Geom::Transformation.translation([10, 0, 0]) }
+    group.entities.active_section_plane = Sketchup::SectionPlane.new([1.0, 0.0, 0.0, -1.0])
+    service = activate("ph_composer.zones.faces.by_face_type")
+
+    assert_operator service.fills.values.flatten.map(&:x).max, :<=, 11.0 + 1e-9
+    assert_operator service.fills.values.flatten.map(&:x).max, :>, 10.5
+  end
+
   def test_a_section_plane_with_section_cuts_off_does_not_clip
     zone_group(902, %w[Wall])
     service = activate("ph_composer.zones.faces.by_face_type")

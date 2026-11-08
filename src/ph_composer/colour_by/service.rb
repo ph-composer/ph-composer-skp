@@ -268,7 +268,7 @@ module PhComposer
         # so a row that is gone releases what it was holding.
         @isolated = nil unless painted.any? { |entry, state, _colour| [entry.value, state] == @isolated }
         painted.each { |entry, state, colour| drawing.add(entry, state, colour) }
-        publish(declaration, drawing, view_state)
+        publish(declaration, drawing)
         @built_key = [@session.revision, view_state.key]
         @rebuilds += 1
         invalidate_view
@@ -296,16 +296,16 @@ module PhComposer
 
       # Replaces the drawing the overlay reads with a completed one. The two steps that can still raise,
       # the mode's ordering and the hatch, run before anything is assigned.
-      def publish(declaration, drawing, view_state)
+      def publish(declaration, drawing)
         rows = order(declaration, drawing.rows)
-        hatch = Tessellation.hatch(view_state.clip_triangles(drawing.unclassified_triangles))
+        hatch = Tessellation.hatch(drawing.unclassified_triangles)
         @rows = rows
         @entities = drawing.entities
         @frames = drawing.frames
-        @fills = drawing.fills.transform_values { |points| view_state.clip_triangles(points) }
-        @outlines = drawing.outlines.transform_values { |points| view_state.clip_segments(points) }
-        @lines = drawing.lines.transform_values { |points| view_state.clip_segments(points) }
-        @unclassified_outlines = view_state.clip_segments(drawing.unclassified_outlines)
+        @fills = drawing.fills
+        @outlines = drawing.outlines
+        @lines = drawing.lines
+        @unclassified_outlines = drawing.unclassified_outlines
         @unclassified_hatch = hatch
       end
 
@@ -342,11 +342,10 @@ module PhComposer
         read = HandlerRequest.for(@session, :owner => declaration.owner, :name => declaration.name,
                                             :selection => declaration.selection ? selected_paths : nil)
         result = ReadoutOutput.check!(declaration.projection.call(read))
-        view_state = ViewState.new(@session.model)
-        visibility = OccurrenceVisibility.new(@session.model, view_state)
+        visibility = OccurrenceVisibility.new(@session.model)
         anchors = Array(result.anchors).select do |anchor|
           masked = anchor.path.nil? ? !@filter_paths.nil? : !matches_filter?(anchor.path)
-          visibility.path_visible?(anchor.path) && !masked && !view_state.cut?(anchor.point)
+          visibility.path_visible?(anchor.path) && !masked && !visibility.cut?(anchor.point, anchor.path)
         end
         [anchors, Array(result.hud)]
       rescue StandardError => error

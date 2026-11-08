@@ -29,12 +29,30 @@ module PhComposer
         !resolved.nil? && visible && !edit_hidden?(path)
       end
 
+      # An occurrence's triangles or segments, cut by the section planes that apply to it.
+      def clip_triangles(points, path)
+        @view_state.clip_triangles(points, section_planes(path))
+      end
+
+      def clip_segments(points, path)
+        @view_state.clip_segments(points, section_planes(path))
+      end
+
+      def cut?(point, path)
+        @view_state.cut?(point, section_planes(path))
+      end
+
       # Whether View > Component Edit hides this occurrence; each Face is asked as well as its container.
       def edit_hidden?(path)
         !path.nil? && @view_state.hidden?(path, ->(prefix) { resolve(prefix).first })
       end
 
       private
+
+      def section_planes(path)
+        @planes ||= {}
+        @planes[path] ||= @view_state.planes(path, ->(prefix) { resolve(prefix).first })
+      end
 
       def resolve(path)
         return @resolved[path] if @resolved.key?(path)

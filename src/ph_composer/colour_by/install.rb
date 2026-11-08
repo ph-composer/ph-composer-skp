@@ -34,7 +34,7 @@ module PhComposer
     # `model_activated` is deliberately absent. A Model that changed while it was inactive reported
     # that through its own observers at the time, so switching back to it has nothing to rebuild.
     INVALIDATING_EVENTS = %i[transaction_committed transaction_undone transaction_redone active_path_changed
-                             rendering_options_changed section_plane_changed].freeze
+                             rendering_options_changed].freeze
 
     STATE_RESULT = {
       "type" => "object",
@@ -172,6 +172,7 @@ module PhComposer
         feature.on_host_event(kind) { |session| self.for(session).invalidate! }
       end
       feature.on_host_event(:tags_changed) { |session| self.for(session).invalidate!(:force => true) }
+      feature.on_host_event(:section_plane_changed) { |session| self.for(session).invalidate!(:force => true) }
       feature.on_host_event(:selection_changed) { |session| self.for(session).selection_changed }
     end
     private_class_method :declare_views, :subscribe_to_invalidation
