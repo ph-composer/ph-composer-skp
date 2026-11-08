@@ -13,7 +13,7 @@ module PhComposer
     SNAPSHOT = "#{PREFIX}.approved"
     APPROVALS = {
       "approve_destination" => Declarations::Approval.new(:kind => "save_file", :title => "Approve export destination",
-                                                          :standing => true).freeze,
+                                                          :default_name => "export.hbjson", :standing => true).freeze,
       "approve_file" => Declarations::Approval.new(:kind => "open_file", :title => "Approve library file",
                                                    :filter => "*.json", :standing => true).freeze,
       "approve_folder" => Declarations::Approval.new(:kind => "open_folder", :title => "Approve library folder",
@@ -32,6 +32,12 @@ module PhComposer
     CHANGE_REFUSES = (STORE_REFUSES + %w[location.revoked location.unknown location.used]).freeze
     MENU_LABELS = { "approve_destination" => "Approve Export Destination…", "approve_file" => "Approve Library File…",
                     "approve_folder" => "Approve Library Folder…" }.freeze
+    # Where the user approves each kind of location, in the words a refusal gives an agent to pass on. An
+    # export destination is approved from the Export tab too; that one offers an HBJSON name.
+    WHERE = MENU_LABELS.to_h do |verb, label|
+      [APPROVALS.fetch(verb).kind, "Extensions > PH-Composer > Libraries > #{label}"]
+    end.freeze
+    EXPORT_TAB = "the Export tab's Allow agents to export here, or "
 
     extend SchemaShapes
 

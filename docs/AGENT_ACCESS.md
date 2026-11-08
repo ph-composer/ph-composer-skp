@@ -30,9 +30,11 @@ an automated test; the [API reference](API_REFERENCE.md) is generated from the r
 operations. A caller connects with only the grants it needs: `read`, `view`, `model_write`, `setup`
 and `export`. Exporting a library file or an HBJSON model and adding a library file or folder need
 a location only the user can choose. The user approves it once in the Libraries dialog or the
-Libraries menu, and a script then names it by id; a path never passes through the interface. The
-user sees, renames and revokes approved locations in the same dialog. A script that names no
-approved location is refused with `access.user_required`.
+Libraries menu, or, for an export destination, with Allow agents to export here in the Export tab,
+and a script then names it by id; a path never passes through the interface. A destination name that
+does not end in `.hbjson` or `.json` gets `.hbjson` added; a library export's `.json` name is kept. The user sees, renames and revokes approved
+locations, including ones no longer there, in the Libraries dialog. A script that names no approved
+location is refused with `access.user_required`, and the refusal says where the user approves one.
 
 ### Agent tokens
 

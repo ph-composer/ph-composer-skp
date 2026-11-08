@@ -54124,14 +54124,21 @@ Result value:
       "additionalProperties": false,
       "required": [
         "exists",
-        "state"
+        "state",
+        "problem"
       ],
-      "description": "With location: whether the pair exists and its state. Pass state as the location's expected_destination to replace it.",
+      "description": "With location: whether the pair exists and its state, and problem, why start_export refuses the destination itself (a name without .hbjson, or half of a prior pair), null when it does not. An existing pair is still replaced only with replace and this state as the location's expected_destination.",
       "properties": {
         "exists": {
           "type": "boolean"
         },
         "state": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "problem": {
           "type": [
             "string",
             "null"

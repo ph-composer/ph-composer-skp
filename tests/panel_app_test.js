@@ -532,6 +532,41 @@ function enterExport(p, findings) {
   p.sent.length = 0;
 }
 
+test("Export lets the user approve a destination for agents and says what the approval allows", function () {
+  var p = page();
+  p.receive("panel.snapshot", snapshot("session-a", 1));
+  enterExport(p, []);
+  var pane = p.query("[data-section='export']");
+  var allow = pane.querySelectorAll("button").find(function (button) {
+    return button.textContent === "Allow agents to export here…";
+  });
+  allow.listeners.click({}); allow.listeners.click({});
+  assert.deepStrictEqual(types(p.sent), ["setup.invoke"], "one approval at a time");
+  assert.strictEqual(p.sent[0].payload.name, "ph_composer.locations.approve_destination");
+  assert.deepStrictEqual(p.sent[0].payload.params, {});
+  p.receive("setup.result", { request_id: p.sent[0].payload.request_id, session: "session-a",
+    outcome: { status: "completed", value: { id: "location_AAAAAAAAAAAA", label: "Export destination 1" } } });
+  var status = p.query("[data-section='export']").querySelector(".phc-export-status").textContent;
+  assert.ok(status.indexOf("Approved Export destination 1.") === 0, status);
+  assert.ok(status.indexOf("location_") === -1, "the id is not shown");
+  assert.ok(status.indexOf("Extensions > PH-Composer > Libraries") > 0, "it says where to revoke it");
+  p.query("[data-section='export']").querySelectorAll("button").find(function (button) {
+    return button.textContent === "Allow agents to export here…";
+  }).listeners.click({});
+  p.receive("setup.result", { request_id: p.sent[1].payload.request_id, session: "session-a",
+    outcome: { status: "cancelled", message: "Cancelled. Nothing changed." } });
+  assert.ok(p.query("[data-section='export']").querySelector(".phc-export-status").textContent
+    .indexOf("Approved Export destination 1.") === 0, "a dismissed dialog changes nothing said");
+  p.query("[data-section='export']").querySelectorAll("button").find(function (button) {
+    return button.textContent === "Allow agents to export here…";
+  }).listeners.click({});
+  p.receive("setup.result", { request_id: p.sent[2].payload.request_id, session: "session-a",
+    outcome: { status: "refused", code: "location.setup_unreadable",
+      message: "This machine's approved locations cannot be read." } });
+  assert.strictEqual(p.query("[data-section='export']").querySelector(".phc-export-status").textContent,
+    "This machine's approved locations cannot be read.");
+});
+
 test("Export asks for one destination and retains a cancellation message", function () {
   var p = page();
   p.receive("panel.snapshot", snapshot("session-a", 4));

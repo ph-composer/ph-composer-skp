@@ -49,7 +49,7 @@ module PhComposer
     def export_preflight(context, location = nil)
       session, = resolve(context, "read", nil, nil)
       value = { "findings" => [], "repairs" => [] }
-      value["destination"] = ApprovedLocations.observe(location) { |path| Export::ArtifactPair.state(path) } if location
+      value["destination"] = Export.destination_report(location) if location
       @registry.export_contributors.values.sort_by(&:name).each do |contributor|
         next unless contributor.preflight
 

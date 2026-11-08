@@ -62,10 +62,24 @@ module PhComposer
       return [approval, params] if approval
       return [ApprovedLocations.grant(location, needed.kind), params] if location
 
-      raise CodedError.new("access.user_required", "#{declaration.name} needs the user to choose a " \
-                                                   "#{noun(needed)} in SketchUp, from the PH-Composer panel or " \
-                                                   "menu, or a location they approved, passed as location. No " \
-                                                   "dialog was opened.")
+      raise CodedError.new("access.user_required", user_required(declaration.name, needed))
+    end
+
+    # The refusal a caller without a native dialog gets, naming where the user approves the location so
+    # the caller can tell them.
+    def user_required(name, approval)
+      where = LocationCommands::WHERE.fetch(approval.kind)
+      if approval.standing
+        where = "#{LocationCommands::EXPORT_TAB}#{where}" if approval.kind == "save_file"
+        return "#{name} needs the user, so no dialog was opened. Ask them to approve one in SketchUp (#{where}), " \
+               "then find its id in ph_composer.locations.list."
+      end
+
+      named = File.extname(approval.default_name.to_s)
+      named = named.empty? ? "" : ", named with #{named}"
+      "#{name} needs the user to choose a #{noun(approval)} in SketchUp, from the PH-Composer panel or menu, or a " \
+        "location they approved, passed as location. No dialog was opened. They approve one in SketchUp " \
+        "(#{where}#{named})."
     end
 
     # The dispatch outcome, or a cancellation when the user dismissed a dialog. An unknown name or a
@@ -100,6 +114,8 @@ module PhComposer
       path = UI.savepanel(approval.title, directory, approval.default_name)
       return nil if path.nil?
 
+      path = with_extension(path, approval.default_name) if approval.standing
+
       return nil unless approval.standing || confirm_replace(path, "Replace the existing file?")
 
       Granted.new(:path => path, :replace => File.exist?(path))
@@ -115,6 +131,20 @@ module PhComposer
       UI.messagebox(question, MB_YESNO) == IDYES
     end
 
+    # A name that does not end in the extension the dialog offered takes it, so an approved export
+    # destination is never kept under a name its export would refuse; one ending in that extension or
+    # `.json` (a library export's destination), in any case, keeps it. A dot inside a name ("v1.2") is
+    # not an extension. Only for a standing approval, which writes nothing: after a Save dialog that
+    # writes now, the sheet's own replace question covered the name as typed, not the one with an
+    # extension added.
+    def with_extension(path, default_name)
+      extension = File.extname(default_name.to_s)
+      return path if extension.empty?
+
+      kept = [extension, ".json"].any? { |ending| path.downcase.end_with?(ending.downcase) }
+      kept ? path : "#{path.chomp('.')}#{extension}"
+    end
+
     def present(path)
       path && Granted.new(:path => path, :replace => false)
     end
@@ -122,6 +152,6 @@ module PhComposer
     def cancelled(session)
       Outcome.build("cancelled", "request.cancelled", "Cancelled. Nothing changed.", "none", session.revision)
     end
-    private_class_method :call, :ask, :save_destination, :present, :cancelled
+    private_class_method :call, :ask, :save_destination, :with_extension, :present, :cancelled
   end
 end

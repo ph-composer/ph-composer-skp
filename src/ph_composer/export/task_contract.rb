@@ -67,10 +67,13 @@ module PhComposer
           },
           "result" => PREFLIGHT_RESULT.merge("properties" => PREFLIGHT_RESULT.fetch("properties").merge(
             "destination" => {
-              "type" => "object", "additionalProperties" => false, "required" => %w[exists state],
-              "description" => "With location: whether the pair exists and its state. Pass state as the " \
-                               "location's expected_destination to replace it.",
-              "properties" => { "exists" => { "type" => "boolean" }, "state" => { "type" => %w[string null] } }
+              "type" => "object", "additionalProperties" => false, "required" => %w[exists state problem],
+              "description" => "With location: whether the pair exists and its state, and problem, why " \
+                               "start_export refuses the destination itself (a name without .hbjson, or half " \
+                               "of a prior pair), null when it does not. An existing pair is still replaced " \
+                               "only with replace and this state as the location's expected_destination.",
+              "properties" => { "exists" => { "type" => "boolean" }, "state" => { "type" => %w[string null] },
+                                "problem" => { "type" => %w[string null] } }
             }
           )),
           "description" => "Every export contributor's findings and the repairs it offers, before starting."

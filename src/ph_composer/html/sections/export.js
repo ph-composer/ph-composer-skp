@@ -1,12 +1,15 @@
 /* Export uses public preflight, native destination selection and Model-owned task handles.
    Closing this page stops polling; the host task continues and can be retrieved when reopened. */
-PhComposerUI.define("sections/export", ["panel", "workspace"], function (panel, ui) {
+PhComposerUI.define("sections/export", ["panel", "request", "workspace"], function (panel, requests, ui) {
   "use strict";
   var element = ui.element;
   var sequence = 0, session = null, revision = null, last = null, seen = null, timer = null;
   var pending = {}, checks = null, selected = {}, task = null, message = "", findings = [], retrieved = false;
   var blockedReport = null;
   var advisoriesOpen = false;
+  /* Approving a destination for agents is a setup command whose native Save dialog the host opens; the
+     destination is kept by id for an agent holding the export grant, never shown here as a path. */
+  var APPROVE = "ph_composer.locations.approve_destination", approvals = null;
   var stages = { queued: "Preparing export…", reading: "Reading Model…", translating: "Translating Model…",
     checking: "Checking export…", writing: "Writing HBJSON and report…" };
   var CHANNELS = { start: "export.start", preflight: "export.preflight", status: "export.status",
@@ -15,6 +18,17 @@ PhComposerUI.define("sections/export", ["panel", "workspace"], function (panel, 
   function active() { return task && !task.outcome; }
   function waiting(operation) {
     return Object.keys(pending).some(function (id) { return pending[id] === operation; });
+  }
+  function allowAgents() {
+    if (!approvals || approvals.busy()) return;
+    approvals.run(APPROVE, {});
+    repaint();
+  }
+  function approved(outcome) {
+    if (!outcome || outcome.status === "cancelled") return;
+    message = outcome.status === "completed" ? "Approved " + outcome.value.label + ". An agent with export " +
+      "access can now use it by its id, until you revoke it in Extensions > PH-Composer > Libraries." :
+      outcome.message || "The destination was not approved.";
   }
   function request(operation, payload) {
     var id = "export:" + String(sequence += 1);
@@ -222,16 +236,29 @@ PhComposerUI.define("sections/export", ["panel", "workspace"], function (panel, 
     if (reported.length) history.appendChild(findingList("From the last export", reported));
     var requestFindings = findings.filter(function (finding) { return !listed[cause(finding)]; });
     if (requestFindings.length) root.appendChild(findingList("From this request", requestFindings));
+    if (!active()) root.appendChild(agentsBlock());
+  }
+  /* An agent exports only to a destination the user approved; this is where the user approves one. */
+  function agentsBlock() {
+    var block = element("section", "phc-export-agents"), busy = !approvals || approvals.busy();
+    block.setAttribute("aria-label", "Exports by agents");
+    block.appendChild(element("p", "muted", "An agent with export access writes only to a destination you " +
+      "approve. Approved destinations are listed, renamed and revoked in Extensions > PH-Composer > Libraries."));
+    block.appendChild(ui.button(busy && approvals ? "Waiting for approval…" : "Allow agents to export here…",
+      allowAgents, busy));
+    return block;
   }
   function render(root, state, send) {
     last = { root: root, state: state, send: send };
     if (state.session !== session) {
       window.clearTimeout(timer); timer = null; session = state.session; revision = null; seen = null;
       pending = {}; checks = null; selected = {}; task = null; message = ""; findings = []; retrieved = false;
-      blockedReport = null;
+      blockedReport = null; approvals = state.session ? requests.channel(state.session, send, "export-approve",
+        "setup.invoke") : null;
       advisoriesOpen = false;
     }
     accept(state.ui.exportResult);
+    if (approvals) approved(approvals.consume(state));
     if (state.ui.activeTab === "export") {
       if (revision !== state.revision && !active() && !waiting("start") && !waiting("preflight")) {
         revision = state.revision; request("preflight");
@@ -240,7 +267,7 @@ PhComposerUI.define("sections/export", ["panel", "workspace"], function (panel, 
     }
     poll();
     ui.memoPaint(root, "export", [session, Boolean(waiting("start")), Boolean(waiting("cancel")),
-      checks, task, message, findings], function () { paint(root); });
+      Boolean(approvals && approvals.busy()), checks, task, message, findings], function () { paint(root); });
   }
   panel.navigationGuard("export", function () {
     return active() || waiting("start") ?
