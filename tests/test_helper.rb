@@ -58,6 +58,13 @@ class PhComposerTestCase < Minitest::Test
     PhComposer::Diagnostics.strict = true
     # Issuing a token starts the agent listener; no test binds its port unless it supplies a server.
     PhComposer::AgentAccess::Listener.server_factory = ->(port) { StubAgentServer.new(port) }
+    # Hermetic: a client's saved token and Codex's config go to a scratch folder, and no test runs a client.
+    @agent_home = Dir.mktmpdir("ph_composer_agent_home")
+    PhComposer::AgentAccess::Connections.directory = File.join(@agent_home, ".ph-composer")
+    PhComposer::AgentAccess::ClientSetup.codex_home = File.join(@agent_home, ".codex")
+    PhComposer::AgentAccess::ClientSetup.claude_settings = File.join(@agent_home, ".claude.json")
+    PhComposer::AgentAccess::ClientSetup.timeout = nil
+    PhComposer::AgentAccess::ClientSetup.runner = ->(argv) { raise "a test ran #{argv.first} without a runner" }
     # Hermetic: the real reader asks macOS `defaults`, which a test must not depend on.
     PhComposer::Preferences.apple_locale_reader = -> {}
     # Hermetic: no test reads or writes this machine's keychain or Credential Manager.
@@ -86,6 +93,7 @@ class PhComposerTestCase < Minitest::Test
   # incomplete list (context/CONTRACTS.md, "Outcomes and codes"). Declare the code; never suppress this.
   def after_teardown
     super
+    FileUtils.rm_rf(@agent_home) if @agent_home
     assert_empty Array(@undeclared_refusals), "Add each code to the operation's refuses:"
   end
 end

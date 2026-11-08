@@ -4,14 +4,12 @@ require "json"
 
 module PhComposer
   module AgentAccess
-    # What the Agent Access dialog shows a user to paste into each supported client, generated from the
-    # port and the token just issued. Pure text: nothing here reads or writes a client's configuration.
-    # The forms are the ones checked against Claude Code 2.1.300 and Codex 0.163.0
-    # (context/AGENT_INTERFACE.md, "User-controlled local access"); a flag a later client renames is a
-    # golden-test failure, not a silent edit.
+    # What the Agent Access dialog shows for each supported client, generated from the port and the token
+    # just issued. Pure text: ClientSetup is what writes a client's configuration. The forms are the ones
+    # checked against Claude Code 2.1.317 and Codex 0.167.0 (context/AGENT_INTERFACE.md, "User-controlled
+    # local access"); a flag a later client renames is a golden-test failure, not a silent edit.
     module ClientConfig
       SERVER_NAME = "ph-composer"
-      TOKEN_VARIABLE = "PH_COMPOSER_TOKEN"
 
       module_function
 
@@ -19,28 +17,28 @@ module PhComposer
         "http://127.0.0.1:#{port}/mcp"
       end
 
-      # One entry per client: its name, the setup forms (each a title and the text to paste), and the
-      # commands that check and remove the entry.
+      # One entry per client: its id and name, the setup forms (each a title and the text to paste), and the
+      # commands that check and remove the entry. The first form is what Connect sets up and names the file
+      # PH-Composer keeps the client's token in, never the token; the last carries the token itself.
       def for(port:, token:)
         [claude_code(port, token), codex(port, token)]
       end
 
-      # Each client leads with the form that keeps the token out of the client's settings and ends with the
-      # one that writes it there; each title says where the token is kept.
-      # The environment-variable form expands `${PH_COMPOSER_TOKEN}` when Claude Code connects, so the
-      # token stays out of ~/.claude.json (checked against 2.1.300: connected with the variable set, failed
-      # without it).
+      # The server as Claude Code's `add-json` takes it: its header comes from the helper, run each time
+      # Claude Code connects (2.1.317, checked from a session started with no terminal environment).
+      def claude_server(port)
+        { "type" => "http", "url" => url(port), "headersHelper" => Connections.helper("claude_code") }
+      end
+
       def claude_code(port, token)
-        server = JSON.generate("type" => "http", "url" => url(port),
-                               "headers" => { "Authorization" => "Bearer ${#{TOKEN_VARIABLE}}" })
-        { "client" => "Claude Code",
+        { "id" => "claude_code", "client" => "Claude Code",
           "forms" => [
-            { "title" => "Run in a terminal. This keeps the token out of Claude Code's settings; it reads the " \
-                         "variable set next.",
-              "text" => "claude mcp add-json --scope user #{SERVER_NAME} '#{server}'" },
-            export_form(token),
-            { "title" => "Or, one command, with the token kept in Claude Code's settings file and your " \
-                         "shell history.",
+            { "title" => "What Connect runs. If it cannot, run this in Terminal once. It names the file " \
+                         "PH-Composer keeps the token in, not the token.",
+              "text" => "claude mcp add-json --scope user #{SERVER_NAME} " \
+                        "#{single_quoted(JSON.generate(claude_server(port)))}" },
+            { "title" => "Or, one command with the token itself, kept in Claude Code's settings file and your " \
+                         "shell history. A new token then means running it again.",
               "text" => "claude mcp add --transport http --scope user #{SERVER_NAME} #{url(port)} " \
                         "--header \"Authorization: Bearer #{token}\"" }
           ],
@@ -48,29 +46,33 @@ module PhComposer
           "remove" => "claude mcp remove --scope user #{SERVER_NAME}" }
       end
 
-      # The variable both clients' environment forms read, set where the client will start. A shell profile
-      # would set it in every later terminal, at the cost of keeping the token in that file; the shell's
-      # history keeps the line either way.
-      def export_form(token)
-        { "title" => "Then set the variable in the terminal you start the client from. Your shell history " \
-                     "keeps the token, and so does your shell profile if you add the line there.",
-          "text" => "export #{TOKEN_VARIABLE}=#{token}" }
+      # The block Connect appends to ~/.codex/config.toml: its header comes from the helper (0.167.0, checked
+      # from a session started with no terminal environment).
+      def codex_block(port)
+        "#{codex_table(port)}http_headers_helper = #{JSON.generate(Connections.helper('codex'))}"
       end
 
-      # Pasted into the file by hand: `codex mcp add` and `codex mcp remove` rewrite the whole of
-      # ~/.codex/config.toml, dropping its comments and reordering its tables (observed on 0.163.0).
       def codex(port, token)
-        block = "[mcp_servers.#{SERVER_NAME}]\nurl = \"#{url(port)}\"\n"
-        { "client" => "Codex",
+        { "id" => "codex", "client" => "Codex",
           "forms" => [
-            { "title" => "Add to ~/.codex/config.toml. This names the variable, not the token.",
-              "text" => "#{block}bearer_token_env_var = \"#{TOKEN_VARIABLE}\"" },
-            export_form(token),
-            { "title" => "Or this block instead of both, with the token kept in ~/.codex/config.toml.",
-              "text" => "#{block}http_headers = { Authorization = \"Bearer #{token}\" }" }
+            { "title" => "What Connect adds to ~/.codex/config.toml. If it cannot, paste this there. It names " \
+                         "the file PH-Composer keeps the token in, not the token.",
+              "text" => codex_block(port) },
+            { "title" => "Or this block instead, with the token itself kept in ~/.codex/config.toml. A new " \
+                         "token then means editing it again.",
+              "text" => "#{codex_table(port)}http_headers = { Authorization = \"Bearer #{token}\" }" }
           ],
           "check" => "codex mcp get #{SERVER_NAME}",
           "remove" => "Delete the [mcp_servers.#{SERVER_NAME}] block from ~/.codex/config.toml" }
+      end
+
+      def codex_table(port)
+        "[mcp_servers.#{SERVER_NAME}]\nurl = \"#{url(port)}\"\n"
+      end
+
+      # One shell word, quoted for a terminal: a quote inside it closes, escapes and reopens the quoting.
+      def single_quoted(text)
+        "'#{text.gsub("'") { "'\\''" }}'"
       end
     end
   end

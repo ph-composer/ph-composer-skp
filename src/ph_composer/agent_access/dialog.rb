@@ -20,13 +20,15 @@ module PhComposer
         "access.issue" => %w[label capabilities model_only],
         "access.revoke" => %w[id],
         "access.reset" => [],
-        "access.port" => %w[port]
+        "access.port" => %w[port],
+        "access.connect" => %w[client token]
       }.freeze
       OUTBOUND = {
         "access.state" => %w[state tokens offered server model],
         "access.issued" => %w[token row clients],
         "access.failure" => %w[message],
-        "access.revoked" => %w[id summary]
+        "access.revoked" => %w[id summary],
+        "access.connected" => %w[client state message]
       }.freeze
 
       class << self
@@ -82,10 +84,14 @@ module PhComposer
           "PhComposerUI.get(\"agent_access/page\").receive(#{JSON.generate('type' => type, 'payload' => payload)})"
         end
 
-        # What the page shows: every token with its latest call since SketchUp started, and the listener.
+        # What the page shows: every token with its latest call since SketchUp started and the clients
+        # connected with it, and the listener.
         def state
           calls = Listener.last_calls
-          tokens = Tokens.list.map { |row| row.merge("last_call" => calls[row["id"]]) }
+          connected = connected_clients
+          tokens = Tokens.list.map do |row|
+            row.merge("last_call" => calls[row["id"]], "connected" => connected.fetch(row["id"], []))
+          end
           { "state" => Tokens.state, "tokens" => tokens, "offered" => Tokens::OFFERED,
             "server" => AgentAccess.server_status, "model" => active_model }
         end
@@ -96,6 +102,14 @@ module PhComposer
         def active_model
           path = Sketchup.active_model&.path.to_s
           path.empty? ? nil : { "name" => File.basename(path), "key" => model_key(path) }
+        end
+
+        # The names of the clients whose saved token is each live token, by token id.
+        def connected_clients
+          ids = Tokens.snapshot.transform_values { |row| row.fetch("id") }
+          Connections.digests.each_with_object({}) do |(client, digest), by_id|
+            (by_id[ids[digest]] ||= []) << Connections::CLIENTS.fetch(client) if ids.key?(digest)
+          end
         end
 
         def model_key(path)
@@ -139,6 +153,7 @@ module PhComposer
           when "access.port"
             Listener.port = payload["port"]
             refresh
+          when "access.connect" then connect(payload["client"], payload["token"])
           end
         end
 
@@ -169,6 +184,27 @@ module PhComposer
           refresh
           raise CodedError.new("agent_access.model_changed", "The open Model changed since this form showed it. " \
                                                              "Check This Model only again and create the token.")
+        end
+
+        # Saves the token the page holds for one client and sets the client up to read it. The page sends the
+        # token back because nothing in Ruby keeps it; only a live token is saved, and only while the
+        # listener runs, so the setup names a port something listens on.
+        def connect(client, token)
+          name = Connections::CLIENTS.fetch(client) do
+            raise UserError, "#{client.to_s[0, 40].inspect} is not a client."
+          end
+          unless token.is_a?(String) && Tokens.snapshot.key?(Tokens.digest(token))
+            raise CodedError.new("agent_access.token_unknown", "This token is no longer live. Create another " \
+                                                               "to connect #{name}.")
+          end
+          status = Listener.status
+          unless status["state"] == "listening"
+            raise CodedError.new("agent_access.not_listening", "PH-Composer is not listening, so #{name} could " \
+                                                               "not connect. #{status['message']}".strip)
+          end
+
+          publish("access.connected", ClientSetup.connect(client, token, status["port"]).merge("client" => client))
+          refresh
         end
 
         # The revoke takes effect here, on the main thread, before the next call is run; the page shows

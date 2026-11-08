@@ -50,6 +50,7 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
     function Page(post) {
       var self = this;
       this.post = post; this.tokens = []; this.offered = ["read"]; this.unreadable = false; this.pending = false;
+      this.connectButtons = []; this.connectStatus = {};
       this.model = null;
       this.revoking = null;
       this.root = el("div", "agent-access");
@@ -57,8 +58,9 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
       var layer = el("div", "phc-notice-layer"); layer.appendChild(this.notice); this.root.appendChild(layer);
       this.create = dom.button("New token", function () { self.openCreate(); });
       this.help = overlay.helpButton("Disconnecting an agent", "Revoke its token here; the agent can no longer " +
-        "connect. To remove it from a client as well, run claude mcp remove ph-composer, or delete the " +
-        "[mcp_servers.ph-composer] block from ~/.codex/config.toml.");
+        "connect, and the copy saved for a client is deleted. To remove PH-Composer from a client as well, run " +
+        "claude mcp remove --scope user ph-composer, or delete the [mcp_servers.ph-composer] block from " +
+        "~/.codex/config.toml.");
       this.header = header.pageHeader({ title: "Agent Access", actions: [this.help], primary: this.create });
       this.root.appendChild(this.header.root);
       this.server = el("p", "muted agent-access-server"); this.server.setAttribute("role", "status");
@@ -105,6 +107,8 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
       } else if (message.type === "access.issued") {
         this.pending = false; this.createDialog.closeModal();
         this.showIssued(payload.token, payload.row, payload.clients || []);
+      } else if (message.type === "access.connected") {
+        this.pending = false; this.connected(payload); this.paint();
       } else if (message.type === "access.revoked") {
         this.notice.show(revokedLine(payload.summary || {}), { tone: "success" });
       } else if (message.type === "access.failure") {
@@ -115,9 +119,14 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
     /* A refusal shows where the user is: inside the open dialog, whose modal backdrop would hide the page's
        notice and make its Dismiss unreachable, or as the page's notice when no dialog is open. */
     Page.prototype.fail = function (message) {
-      var open = [[this.createDialog, this.createError], [this.revokeDialog, this.revokeError]]
+      var open = [[this.createDialog, this.createError], [this.revokeDialog, this.revokeError],
+        [this.issuedDialog, this.copyStatus]]
         .filter(function (pair) { return !pair[0].hidden; })[0];
-      if (open) open[1].textContent = message;
+      // A refused Connect answers under that client's button, where "Connecting" was said.
+      if (open && open[0] === this.issuedDialog && this.connectStatus[this.connecting]) {
+        this.connectStatus[this.connecting].textContent = message;
+        this.connectStatus[this.connecting].setAttribute("data-state", "failed");
+      } else if (open) open[1].textContent = message;
       else this.notice.show(message, { tone: "warning" });
     };
     function inlineMessage(role) {
@@ -131,6 +140,7 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
       text.appendChild(el("span", "agent-access-row-label", token.label));
       var facts = [capabilityNames(token.capabilities), "created " + day(token.created_at)];
       if (token.model_name) facts.splice(1, 0, "only " + token.model_name);
+      if ((token.connected || []).length) facts.push("used by " + token.connected.join(" and "));
       if (token.revoked_at) facts.push("revoked " + day(token.revoked_at));
       else if (token.last_call) facts.push("last call " + time(token.last_call.at) + ", " + token.last_call.status);
       else facts.push("no calls since SketchUp started");
@@ -163,6 +173,7 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
       // A token issued while the port is taken would carry snippets for a port nothing listens on.
       this.create.disabled = this.pending || this.unreadable || server.state === "unavailable";
       this.createSubmit.disabled = this.pending;
+      this.connectButtons.forEach(function (button) { button.disabled = self.pending; });
     };
 
     /* New token: a label and the capabilities, each with what it allows. Read is always held. */
@@ -231,16 +242,17 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
       this.issuedDialog = overlay.formDialog("agent-access-issued-dialog", function () { self.closeIssued(); });
       this.issuedTitle = el("h2", "", "Token created");
       this.issuedDialog.appendChild(this.issuedTitle);
-      this.issuedDialog.appendChild(el("p", "", "Copy this token now and give it to the agent. It is not shown " +
-        "again; if it is lost, revoke it and create another."));
-      this.issuedDialog.appendChild(el("p", "muted", "Each setup says where the token is kept. Choose the first two " +
-        "unless your client cannot read an environment variable."));
+      this.issuedDialog.appendChild(el("p", "", "Connect your client with this token below, or copy it for another " +
+        "one. It is not shown again; if it is lost, revoke it and create another."));
+      this.issuedDialog.appendChild(el("p", "muted", "Connect saves the token in a file only your account can read " +
+        "and sets the client up, once, to read it there. Connecting it again later with a new token changes " +
+        "only that file."));
       var field = this.copyField("token", "input");
       this.secret = field.value; this.copy = field.copy;
       this.issuedDialog.appendChild(field.root);
       this.clients = el("div", "agent-access-clients"); this.issuedDialog.appendChild(this.clients);
       this.copyStatus = inlineMessage("status"); this.issuedDialog.appendChild(this.copyStatus);
-      var done = dom.button("I have copied it", function () { self.closeIssued(); });
+      var done = dom.button("Done", function () { self.closeIssued(); });
       done.className = "primary";
       var actions = el("div", "phc-dialog-actions"); actions.appendChild(done);
       this.issuedDialog.appendChild(actions);
@@ -257,13 +269,24 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
       root.appendChild(value); root.appendChild(copy);
       return { root: root, value: value, copy: copy };
     };
-    /* Each client's setup, the token already in it, with the command that checks it. */
+    /* Each client's Connect, the line that says what it did, and its setup to run or paste by hand, with
+       the command that checks it. */
     Page.prototype.showClients = function (clients) {
       var self = this;
-      this.clients.replaceChildren();
+      this.clients.replaceChildren(); this.connectButtons = []; this.connectStatus = {};
       clients.forEach(function (client) {
         var section = el("section", "agent-access-client");
         section.appendChild(el("h3", "", client.client));
+        var connect = dom.button("Connect " + client.client, function () {
+          if (self.pending) return;
+          self.connecting = client.id;
+          self.connectStatus[client.id].textContent = "Connecting " + client.client + "…";
+          self.send("access.connect", { client: client.id, token: self.secret.value });
+        });
+        connect.className = "agent-access-connect";
+        var status = el("p", "agent-access-connected"); status.setAttribute("role", "status");
+        self.connectButtons.push(connect); self.connectStatus[client.id] = status;
+        section.appendChild(connect); section.appendChild(status);
         client.forms.forEach(function (form) {
           section.appendChild(el("p", "muted", form.title));
           var field = self.copyField(client.client + " setup", "textarea");
@@ -272,6 +295,13 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
         section.appendChild(el("p", "muted", "Check it with " + client.check + "."));
         self.clients.appendChild(section);
       });
+    };
+    /* What Connect did, under that client's button: always ends with starting a new client session. */
+    Page.prototype.connected = function (payload) {
+      var status = this.connectStatus[payload.client];
+      if (!status) return;
+      status.textContent = payload.message;
+      status.setAttribute("data-state", payload.state);
     };
     Page.prototype.showIssued = function (token, row, clients) {
       this.issuedTitle.textContent = "Token created: " + row.label;
@@ -295,7 +325,8 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
     };
     /* Nothing that holds the token outlives this dialog. */
     Page.prototype.closeIssued = function () {
-      this.secret.value = ""; this.clients.replaceChildren(); this.issuedDialog.closeModal();
+      this.secret.value = ""; this.clients.replaceChildren(); this.connectButtons = []; this.connectStatus = {};
+      this.issuedDialog.closeModal();
     };
 
     /* Revoke confirms in the shared dialog, naming the token that goes. */

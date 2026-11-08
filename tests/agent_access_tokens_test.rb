@@ -182,7 +182,7 @@ class AgentAccessTokensTest < PhComposerTestCase
     dialog.fire(Dialog::CALLBACK, access_message("access.revoke", "id" => issued.dig("row", "id")))
 
     states = delivered(dialog, "access.state")
-    assert_equal [[], [issued.fetch("row").merge("last_call" => nil)]],
+    assert_equal [[], [issued.fetch("row").merge("last_call" => nil, "connected" => [])]],
                  states.first(2).map { |state| state.fetch("tokens") }
     refute_nil states.last.dig("tokens", 0, "revoked_at")
     assert_equal "listening", states[1].dig("server", "state")
