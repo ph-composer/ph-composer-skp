@@ -15,6 +15,24 @@ PhComposerUI.define("features/assemblies/header", ["features/assemblies/editor_s
       root.appendChild(shown);
       return root;
     }
+    /* Each thing the calculation reports, once, with how many times it applies. A finding repeats for every
+       Layer-Segment, a warning restates the finding that shares its code, and the withheld reason is usually those
+       warnings joined, already shown under the title. */
+    function notes(record, thermal, withheld) {
+      var findings = record.findings || [], warnings = thermal.warnings || [], flags = thermal.flags || [];
+      var messages = findings.map(function (finding) { return snapshot.message(finding, ""); });
+      var codes = findings.map(function (finding) { return finding.code; });
+      var lines = [], seen = Object.create(null);
+      function add(text) {
+        if (!text) return;
+        if (seen[text]) seen[text].count += 1;
+        else lines.push(seen[text] = { text: text, count: 1 });
+      }
+      if (withheld && withheld !== (warnings.length ? warnings : messages).join(" ")) add(withheld);
+      warnings.forEach(function (warning, index) { if (codes.indexOf(flags[index]) < 0) add(warning); });
+      messages.forEach(add);
+      return lines;
+    }
     /* How the U-values were reached, on request: the surface films used, the two results, and anything the
        calculation reported. Nothing here is editable. */
     function information(record, thermal, withheld) {
@@ -32,13 +50,12 @@ PhComposerUI.define("features/assemblies/header", ["features/assemblies/editor_s
             shared.format(item[1], shared.U_VALUE)));
           bubble.content.appendChild(row);
         });
-      var notes = (thermal.warnings || []).concat((record.findings || []).map(function (finding) {
-        return snapshot.message(finding, "");
-      })).filter(Boolean);
-      if (withheld) notes.unshift(withheld);
-      if (notes.length) {
+      var lines = notes(record, thermal, withheld);
+      if (lines.length) {
         var list = el("ul", "assembly-information-notes");
-        notes.forEach(function (note) { list.appendChild(el("li", "", note)); });
+        lines.forEach(function (line) {
+          list.appendChild(el("li", "", line.text + (line.count > 1 ? " × " + line.count : "")));
+        });
         bubble.content.appendChild(list);
       }
       bubble.root.classList.add("assembly-information");

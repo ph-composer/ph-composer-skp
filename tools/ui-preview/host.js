@@ -119,7 +119,7 @@
         ["ph_composer.zones.faces.usage"]: { status: "completed", value: {
           faces: this.faces.map(function (face) {
             var zone = this.zones.filter(function (candidate) { return candidate.id === face.reference.zone_id; })[0];
-            return Object.assign({ zone_name: zone ? zone.values.name : "Zone" }, face);
+            return Object.assign({}, face, { zone_name: zone ? zone.values.name : "Zone" });
           }, this), assembly_usage: this.usage() } },
         [LEGEND]: { status: "completed", code: "ok", revision: this.revision, value: this.legend() },
         [PALETTE]: { status: "completed", code: "ok", revision: this.revision,

@@ -62,6 +62,13 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 .phc-table .row-icon svg { display: block; }
 /* An action the row cannot take keeps its slot but draws nothing, so the icons line up down the column. */
 .phc-table .row-icon:disabled { visibility: hidden; }
+/* One held back for a stated reason stays on screen, in the same quiet ink, so its tooltip can give the reason. */
+.phc-workspace .phc-table .row-icon[aria-disabled="true"],
+.phc-workspace .phc-table .row-icon[aria-disabled="true"]:hover:enabled {
+  color: var(--muted-faint); background-color: transparent; border-color: transparent; cursor: not-allowed; }
+/* A row action that is on, as a running paint tool's is, takes the pressed icon button's fill. */
+.phc-workspace .phc-table .row-icon[aria-pressed="true"] { color: #fff; background: var(--interaction-highlight); }
+.phc-table.reveals-row-actions td .row-icon[aria-pressed="true"] { opacity: 1; }
 .phc-table .row-delete:hover:enabled, .phc-table .row-delete:focus-visible { color: var(--red); background: var(--error-surface); }
 .phc-table .row-icon:last-child { margin-right: 0; }
 /* The hairline sits in the gap the icons already have, so a group costs the column no width. */

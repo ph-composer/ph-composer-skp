@@ -1,8 +1,9 @@
 /* Zones owns Assembly assignment, its selection review, and the usage it contributes to other tables. */
 PhComposerUI.define("features/zones/assembly_assignment", ["panel", "snapshot", "request", "workspace", "units",
-  "fields", "inventory_forms"], function (panel, snapshot, requests, ui, units, fields, forms) {
+  "fields", "inventory_forms", "face_words"], function (panel, snapshot, requests, ui, units, fields, forms, words) {
   "use strict";
   var PREFIX = "ph_composer.zones.faces", TABLE = "ph_composer.assemblies.assemblies";
+  var FACES_NAMED = 20;
   var usageView = null, replacement = null, contributionSession = null;
   function clone(value) { return JSON.parse(JSON.stringify(value)); }
   function choices(state, types) {
@@ -153,17 +154,33 @@ PhComposerUI.define("features/zones/assembly_assignment", ["panel", "snapshot", 
     return rows.filter(function (row) { return row.assembly_id === id; })[0] ||
       { face_count: 0, gross_area_m2: 0, faces: [] };
   }
+  /* The Faces an Assembly is on, called what the Faces view calls them: a long list names its first and counts the
+     rest. */
   function useNames(state, id) {
-    var wanted = usage(state, id), faces = (snapshot.value(state, PREFIX + ".usage") || {}).faces || [];
-    var uses = wanted.faces.map(function (reference) {
-      var face = faces.filter(function (candidate) {
-        return JSON.stringify(candidate.reference) === JSON.stringify(reference);
-      })[0];
-      return { name: (face ? face.zone_name + " · " + (face.values.face_type || "Face") : "Face") +
-        " [" + reference.entity_path.join("/") + "]" };
+    var wanted = usage(state, id), read = (snapshot.value(state, PREFIX + ".usage") || {}).faces || [];
+    var byReference = Object.create(null), byZone = Object.create(null);
+    read.forEach(function (face) {
+      var zone = JSON.stringify(face.reference.zone_path);
+      byReference[JSON.stringify(face.reference)] = face;
+      (byZone[zone] = byZone[zone] || []).push(face);
     });
+    var names = wanted.faces.slice(0, FACES_NAMED).map(function (reference) {
+      var face = byReference[JSON.stringify(reference)];
+      return face ? face.zone_name + " · " + words.faceName(face, byZone[JSON.stringify(reference.zone_path)]) : "Face";
+    });
+    var more = wanted.face_count - names.length;
     return { count: wanted.face_count, description: wanted.face_count +
-      (wanted.face_count === 1 ? " Face: " : " Faces: ") + uses.map(function (use) { return use.name; }).join(", ") };
+      (wanted.face_count === 1 ? " Face: " : " Faces: ") + names.join(", ") +
+      (more > 0 ? ", and " + more + " more" : "") };
+  }
+  /* The Assembly the paint tool is on, or null when it is off or painting something else. */
+  function painting(state) {
+    var tool = snapshot.value(state, PREFIX + ".palette") || {};
+    return tool.active && tool.palette && tool.palette.assembly_id || null;
+  }
+  /* Whether the Assemblies table is what shows the paint tool at the moment: its row says which Assembly. */
+  function paintShown(state) {
+    return Boolean(state.ui && state.ui.activeTab === "assemblies" && painting(state));
   }
   function settleContributions(state) {
     var available = Boolean(snapshot.value(state, PREFIX + ".usage"));
@@ -179,6 +196,7 @@ PhComposerUI.define("features/zones/assembly_assignment", ["panel", "snapshot", 
     if (replacement) replacement.refresh(state);
     return available;
   }
+  forms.contributeUsage(TABLE, useNames);
   ui.contributeTable(TABLE, { id: PREFIX + ".assembly_usage", available: settleContributions,
     columns: [["face_usage", "Faces · Gross area"]],
     value: function (row, _field, state) { return usage(state, row.record.id); },
@@ -188,13 +206,18 @@ PhComposerUI.define("features/zones/assembly_assignment", ["panel", "snapshot", 
       td.setAttribute("aria-label", value.face_count + " Faces · gross area");
       return true;
     }, actions: function (row, state) {
-      var count = usage(state, row.record.id).face_count;
+      var count = usage(state, row.record.id).face_count, name = row.record.values.name;
+      var pressed = painting(state) === row.record.id;
+      var others = ((snapshot.value(state, TABLE) || {}).records || []).some(function (candidate) {
+        return candidate.id !== row.record.id;
+      });
       // These act on Faces in the Model, not on the Assembly record, so they start their own group.
       return [{ id: "select_assembly_faces", icon: "locate", disabled: !count, starts: true,
-        label: "Select faces using " + row.record.values.name },
-      { id: "paint_assembly", icon: "paint_bucket", label: "Paint " + row.record.values.name + " onto faces" },
-      { id: "replace_assembly", icon: "replace", disabled: !count,
-        label: "Replace " + row.record.values.name + " on assigned Faces" }];
+        label: "Select faces using " + name },
+      { id: "paint_assembly", icon: "paint_bucket", pressed: pressed,
+        label: pressed ? "Stop painting " + name : "Paint " + name + " onto faces" },
+      { id: "replace_assembly", icon: "replace", disabled: !count, label: "Replace and delete " + name,
+        unavailable: others ? null : name + " is the only Assembly, so there is nothing to replace it with." }];
     }, action: function (row, action, control, state, send) {
       var live = panel.state || state;
       if (live.session !== state.session || !snapshot.value(live, TABLE) || !snapshot.value(live, PREFIX + ".usage") ||
@@ -204,8 +227,7 @@ PhComposerUI.define("features/zones/assembly_assignment", ["panel", "snapshot", 
         if (replacement && !replacement.root.hidden) return;
         if (!replacement) {
           replacement = new forms.ReplacementForm(state.session, send, function () { panel.repaint(); },
-            { section: TABLE, label: "Assembly", replacement: true, allowClear: true,
-              usage: useNames });
+            { section: TABLE, label: "Assembly", replacement: true, allowClear: true, usedOn: "Face" });
           document.body.appendChild(replacement.root);
         }
         replacement.refresh(live);
@@ -224,15 +246,14 @@ PhComposerUI.define("features/zones/assembly_assignment", ["panel", "snapshot", 
           panel.navigate("overview", { view: "ph_composer.zones.faces", check: clone(references), locate: true });
         }
       } else if (action.id === "paint_assembly") {
-        // The tool's state shows in the Faces view's Assembly header, so that view is shown first.
-        var intent = { view: "ph_composer.zones.faces" };
-        if (!panel.navigate("overview", intent) || intent.viewShown !== true) return;
-        usageView.run(PREFIX + ".choose", { field: "assembly_id", value: id, reset: true });
+        // Painting happens in the viewport and the row shows it, so the panel stays where the tool was started.
+        if (painting(live) === id) usageView.run(PREFIX + ".stop_classifying", {});
+        else usageView.run(PREFIX + ".choose", { field: "assembly_id", value: id, reset: true });
       }
     }
   });
   panel.navigationGuard(PREFIX + ".replace_assembly", function () {
     return replacement && !replacement.root.hidden ? "Finish the Assembly replacement first." : null;
   }, panel.notify);
-  return { Picker: Picker, cell: cell, choices: choices, options: options, usage: usage };
+  return { Picker: Picker, cell: cell, choices: choices, options: options, usage: usage, paintShown: paintShown };
 });

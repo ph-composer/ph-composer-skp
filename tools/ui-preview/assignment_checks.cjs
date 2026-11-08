@@ -60,16 +60,28 @@ check({ name: "assignment", output }, async ({ newPage, step }) => {
     const beforePaint = await writes();
     await page.locator("[data-tab='assemblies']").click();
     await row.getByRole("button", { name: "Paint Incomplete roof onto faces", exact: true }).click();
-    step("painting keeps checked controls");
-    // Painting keeps checked controls and names its Assembly on the column header.
-    await page.getByRole("button", { name: "Paint Assembly: Incomplete roof. Click to stop painting", exact: true }).waitFor();
-    assert.equal(await picker.isVisible(), true);
+    step("painting stays on the Assemblies table");
+    // Painting happens in the viewport: the panel stays where Paint was pressed, and the row shows it is on.
+    const stop = row.getByRole("button", { name: "Stop painting Incomplete roof", exact: true });
+    await stop.waitFor();
+    assert.equal(await stop.getAttribute("aria-pressed"), "true");
+    assert.equal(await page.locator("[data-pane='assemblies']").isVisible(), true);
     assert.deepEqual(await page.evaluate(() => window.previewHost.palette.palette), { assembly_id: "asm_b" });
     assert.equal(await writes(), beforePaint);
+    // The Faces view keeps showing it, and the checked controls survive it.
+    await page.locator("[data-tab='overview']").click();
+    await page.getByRole("button", { name: "Paint Assembly: Incomplete roof. Click to stop painting", exact: true }).waitFor();
+    assert.equal(await picker.isVisible(), true);
     await page.locator("[data-tab='assemblies']").click();
-    await row.getByRole("button", { name: "Replace Incomplete roof on assigned Faces", exact: true }).click();
+    await stop.click();
+    await row.getByRole("button", { name: "Paint Incomplete roof onto faces", exact: true }).waitFor();
+    assert.equal(await page.evaluate(() => window.previewHost.palette.active), false);
+    step("replace and delete");
+    await row.getByRole("button", { name: "Replace and delete Incomplete roof", exact: true }).click();
     const dialog = page.getByRole("dialog", { name: "Replace and delete Incomplete roof", exact: true });
-    await dialog.getByText(/1 Face:/).waitFor();
+    await dialog.getByText("Moves every Face that uses Incomplete roof to the Assembly you choose, or leaves them with none, then deletes Incomplete roof.", { exact: true }).waitFor();
+    const listed = await dialog.getByText(/1 Face:/).textContent();
+    assert(/^1 Face: .+ · .+ \d+$/.test(listed) && !listed.includes("["), listed);
     assert(await dialog.getByRole("button", { name: /Replace and delete$/ }).isDisabled());
     await dialog.getByRole("combobox", { name: "Replacement assembly", exact: true }).selectOption("asm_a");
     await dialog.getByRole("button", { name: /Replace and delete$/ }).click();

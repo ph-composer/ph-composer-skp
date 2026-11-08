@@ -145,6 +145,28 @@ test("row actions are the caller's, and clicking one hands back its row", functi
   assert.deepStrictEqual(acted, [["a", "locate"]]);
 });
 
+test("an unavailable action stays on screen, says why and does nothing; a pressed one says so", function () {
+  var h = harness(), acted = [];
+  paint(h, {
+    actions: function () {
+      return [{ id: "swap", icon: "replace", label: "Swap", unavailable: "Nothing to swap with." },
+        { id: "paint", icon: "paint_bucket", label: "Stop painting", pressed: true },
+        { id: "open", icon: "document", label: "Open" }];
+    },
+    action: function (_row, item) { acted.push(item.id); }
+  });
+  var buttons = h.root.querySelectorAll("[data-row-action]");
+  assert.strictEqual(buttons[0].disabled, false, "a disabled row icon draws nothing, so it could not explain itself");
+  assert.strictEqual(buttons[0].getAttribute("aria-disabled"), "true");
+  assert.strictEqual(buttons[0].getAttribute("data-tooltip"), "Nothing to swap with.");
+  assert.strictEqual(buttons[0].getAttribute("aria-label"), "Swap. Nothing to swap with.");
+  buttons[0].listeners.click({ preventDefault: function () {} });
+  assert.deepStrictEqual(acted, []);
+  assert.strictEqual(buttons[1].getAttribute("aria-pressed"), "true");
+  assert.strictEqual(buttons[2].getAttribute("aria-pressed"), null);
+  assert.strictEqual(buttons[2].getAttribute("aria-disabled"), null);
+});
+
 test("a disabled table offers its actions but refuses them", function () {
   var h = harness();
   var acted = [];
