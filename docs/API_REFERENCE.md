@@ -164,7 +164,9 @@ Values:
                 ],
                 "properties": {
                   "id": {
-                    "type": "string"
+                    "type": "string",
+                    "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                    "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
                   },
                   "thickness_mm": {
                     "type": "number",
@@ -186,7 +188,9 @@ Values:
                       ],
                       "properties": {
                         "id": {
-                          "type": "string"
+                          "type": "string",
+                          "pattern": "^seg_[A-Za-z0-9]{12}$",
+                          "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                         },
                         "width_mm": {
                           "type": "number",
@@ -197,7 +201,9 @@ Values:
                           "type": [
                             "string",
                             "null"
-                          ]
+                          ],
+                          "pattern": "^mat_[A-Za-z0-9]{12}$",
+                          "description": "The Material's id, or null while none is assigned."
                         },
                         "is_continuous_insulation": {
                           "type": "boolean"
@@ -228,7 +234,9 @@ Values:
               ],
               "properties": {
                 "layer_id": {
-                  "type": "string"
+                  "type": "string",
+                  "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                  "description": "The Layer that carries the air barrier."
                 },
                 "face": {
                   "type": "string",
@@ -299,7 +307,9 @@ Values:
         ],
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^lyr_[A-Za-z0-9]{12}$",
+            "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
           },
           "thickness_mm": {
             "type": "number",
@@ -321,7 +331,9 @@ Values:
               ],
               "properties": {
                 "id": {
-                  "type": "string"
+                  "type": "string",
+                  "pattern": "^seg_[A-Za-z0-9]{12}$",
+                  "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                 },
                 "width_mm": {
                   "type": "number",
@@ -332,7 +344,9 @@ Values:
                   "type": [
                     "string",
                     "null"
-                  ]
+                  ],
+                  "pattern": "^mat_[A-Za-z0-9]{12}$",
+                  "description": "The Material's id, or null while none is assigned."
                 },
                 "is_continuous_insulation": {
                   "type": "boolean"
@@ -363,7 +377,9 @@ Values:
       ],
       "properties": {
         "layer_id": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^lyr_[A-Za-z0-9]{12}$",
+          "description": "The Layer that carries the air barrier."
         },
         "face": {
           "type": "string",
@@ -2616,7 +2632,9 @@ Result:
                           ],
                           "properties": {
                             "id": {
-                              "type": "string"
+                              "type": "string",
+                              "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                              "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
                             },
                             "thickness_mm": {
                               "type": "number",
@@ -2638,7 +2656,9 @@ Result:
                                 ],
                                 "properties": {
                                   "id": {
-                                    "type": "string"
+                                    "type": "string",
+                                    "pattern": "^seg_[A-Za-z0-9]{12}$",
+                                    "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                                   },
                                   "width_mm": {
                                     "type": "number",
@@ -2649,7 +2669,9 @@ Result:
                                     "type": [
                                       "string",
                                       "null"
-                                    ]
+                                    ],
+                                    "pattern": "^mat_[A-Za-z0-9]{12}$",
+                                    "description": "The Material's id, or null while none is assigned."
                                   },
                                   "is_continuous_insulation": {
                                     "type": "boolean"
@@ -2680,7 +2702,9 @@ Result:
                         ],
                         "properties": {
                           "layer_id": {
-                            "type": "string"
+                            "type": "string",
+                            "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                            "description": "The Layer that carries the air barrier."
                           },
                           "face": {
                             "type": "string",
@@ -2751,7 +2775,9 @@ Result:
                   ],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                      "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
                     },
                     "thickness_mm": {
                       "type": "number",
@@ -2773,7 +2799,9 @@ Result:
                         ],
                         "properties": {
                           "id": {
-                            "type": "string"
+                            "type": "string",
+                            "pattern": "^seg_[A-Za-z0-9]{12}$",
+                            "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                           },
                           "width_mm": {
                             "type": "number",
@@ -2784,7 +2812,9 @@ Result:
                             "type": [
                               "string",
                               "null"
-                            ]
+                            ],
+                            "pattern": "^mat_[A-Za-z0-9]{12}$",
+                            "description": "The Material's id, or null while none is assigned."
                           },
                           "is_continuous_insulation": {
                             "type": "boolean"
@@ -2815,7 +2845,9 @@ Result:
                 ],
                 "properties": {
                   "layer_id": {
-                    "type": "string"
+                    "type": "string",
+                    "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                    "description": "The Layer that carries the air barrier."
                   },
                   "face": {
                     "type": "string",
@@ -3285,7 +3317,9 @@ Result:
                           ],
                           "properties": {
                             "id": {
-                              "type": "string"
+                              "type": "string",
+                              "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                              "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
                             },
                             "thickness_mm": {
                               "type": "number",
@@ -3307,7 +3341,9 @@ Result:
                                 ],
                                 "properties": {
                                   "id": {
-                                    "type": "string"
+                                    "type": "string",
+                                    "pattern": "^seg_[A-Za-z0-9]{12}$",
+                                    "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                                   },
                                   "width_mm": {
                                     "type": "number",
@@ -3318,7 +3354,9 @@ Result:
                                     "type": [
                                       "string",
                                       "null"
-                                    ]
+                                    ],
+                                    "pattern": "^mat_[A-Za-z0-9]{12}$",
+                                    "description": "The Material's id, or null while none is assigned."
                                   },
                                   "is_continuous_insulation": {
                                     "type": "boolean"
@@ -3349,7 +3387,9 @@ Result:
                         ],
                         "properties": {
                           "layer_id": {
-                            "type": "string"
+                            "type": "string",
+                            "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                            "description": "The Layer that carries the air barrier."
                           },
                           "face": {
                             "type": "string",
@@ -3420,7 +3460,9 @@ Result:
                   ],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                      "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
                     },
                     "thickness_mm": {
                       "type": "number",
@@ -3442,7 +3484,9 @@ Result:
                         ],
                         "properties": {
                           "id": {
-                            "type": "string"
+                            "type": "string",
+                            "pattern": "^seg_[A-Za-z0-9]{12}$",
+                            "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                           },
                           "width_mm": {
                             "type": "number",
@@ -3453,7 +3497,9 @@ Result:
                             "type": [
                               "string",
                               "null"
-                            ]
+                            ],
+                            "pattern": "^mat_[A-Za-z0-9]{12}$",
+                            "description": "The Material's id, or null while none is assigned."
                           },
                           "is_continuous_insulation": {
                             "type": "boolean"
@@ -3484,7 +3530,9 @@ Result:
                 ],
                 "properties": {
                   "layer_id": {
-                    "type": "string"
+                    "type": "string",
+                    "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                    "description": "The Layer that carries the air barrier."
                   },
                   "face": {
                     "type": "string",
@@ -20933,7 +20981,9 @@ Params:
                     ],
                     "properties": {
                       "id": {
-                        "type": "string"
+                        "type": "string",
+                        "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                        "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
                       },
                       "thickness_mm": {
                         "type": "number",
@@ -20955,7 +21005,9 @@ Params:
                           ],
                           "properties": {
                             "id": {
-                              "type": "string"
+                              "type": "string",
+                              "pattern": "^seg_[A-Za-z0-9]{12}$",
+                              "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                             },
                             "width_mm": {
                               "type": "number",
@@ -20966,7 +21018,9 @@ Params:
                               "type": [
                                 "string",
                                 "null"
-                              ]
+                              ],
+                              "pattern": "^mat_[A-Za-z0-9]{12}$",
+                              "description": "The Material's id, or null while none is assigned."
                             },
                             "is_continuous_insulation": {
                               "type": "boolean"
@@ -20997,7 +21051,9 @@ Params:
                   ],
                   "properties": {
                     "layer_id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                      "description": "The Layer that carries the air barrier."
                     },
                     "face": {
                       "type": "string",
@@ -21068,7 +21124,9 @@ Params:
             ],
             "properties": {
               "id": {
-                "type": "string"
+                "type": "string",
+                "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
               },
               "thickness_mm": {
                 "type": "number",
@@ -21090,7 +21148,9 @@ Params:
                   ],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^seg_[A-Za-z0-9]{12}$",
+                      "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                     },
                     "width_mm": {
                       "type": "number",
@@ -21101,7 +21161,9 @@ Params:
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "pattern": "^mat_[A-Za-z0-9]{12}$",
+                      "description": "The Material's id, or null while none is assigned."
                     },
                     "is_continuous_insulation": {
                       "type": "boolean"
@@ -21132,7 +21194,9 @@ Params:
           ],
           "properties": {
             "layer_id": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^lyr_[A-Za-z0-9]{12}$",
+              "description": "The Layer that carries the air barrier."
             },
             "face": {
               "type": "string",
@@ -21342,7 +21406,9 @@ Params:
                     ],
                     "properties": {
                       "id": {
-                        "type": "string"
+                        "type": "string",
+                        "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                        "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
                       },
                       "thickness_mm": {
                         "type": "number",
@@ -21364,7 +21430,9 @@ Params:
                           ],
                           "properties": {
                             "id": {
-                              "type": "string"
+                              "type": "string",
+                              "pattern": "^seg_[A-Za-z0-9]{12}$",
+                              "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                             },
                             "width_mm": {
                               "type": "number",
@@ -21375,7 +21443,9 @@ Params:
                               "type": [
                                 "string",
                                 "null"
-                              ]
+                              ],
+                              "pattern": "^mat_[A-Za-z0-9]{12}$",
+                              "description": "The Material's id, or null while none is assigned."
                             },
                             "is_continuous_insulation": {
                               "type": "boolean"
@@ -21406,7 +21476,9 @@ Params:
                   ],
                   "properties": {
                     "layer_id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                      "description": "The Layer that carries the air barrier."
                     },
                     "face": {
                       "type": "string",
@@ -21498,7 +21570,9 @@ Params:
             ],
             "properties": {
               "id": {
-                "type": "string"
+                "type": "string",
+                "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
               },
               "thickness_mm": {
                 "type": "number",
@@ -21520,7 +21594,9 @@ Params:
                   ],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^seg_[A-Za-z0-9]{12}$",
+                      "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                     },
                     "width_mm": {
                       "type": "number",
@@ -21531,7 +21607,9 @@ Params:
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "pattern": "^mat_[A-Za-z0-9]{12}$",
+                      "description": "The Material's id, or null while none is assigned."
                     },
                     "is_continuous_insulation": {
                       "type": "boolean"
@@ -21562,7 +21640,9 @@ Params:
           ],
           "properties": {
             "layer_id": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^lyr_[A-Za-z0-9]{12}$",
+              "description": "The Layer that carries the air barrier."
             },
             "face": {
               "type": "string",
@@ -21830,7 +21910,9 @@ Params:
                     ],
                     "properties": {
                       "id": {
-                        "type": "string"
+                        "type": "string",
+                        "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                        "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
                       },
                       "thickness_mm": {
                         "type": "number",
@@ -21852,7 +21934,9 @@ Params:
                           ],
                           "properties": {
                             "id": {
-                              "type": "string"
+                              "type": "string",
+                              "pattern": "^seg_[A-Za-z0-9]{12}$",
+                              "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                             },
                             "width_mm": {
                               "type": "number",
@@ -21863,7 +21947,9 @@ Params:
                               "type": [
                                 "string",
                                 "null"
-                              ]
+                              ],
+                              "pattern": "^mat_[A-Za-z0-9]{12}$",
+                              "description": "The Material's id, or null while none is assigned."
                             },
                             "is_continuous_insulation": {
                               "type": "boolean"
@@ -21894,7 +21980,9 @@ Params:
                   ],
                   "properties": {
                     "layer_id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                      "description": "The Layer that carries the air barrier."
                     },
                     "face": {
                       "type": "string",
@@ -21986,7 +22074,9 @@ Params:
             ],
             "properties": {
               "id": {
-                "type": "string"
+                "type": "string",
+                "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
               },
               "thickness_mm": {
                 "type": "number",
@@ -22008,7 +22098,9 @@ Params:
                   ],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^seg_[A-Za-z0-9]{12}$",
+                      "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                     },
                     "width_mm": {
                       "type": "number",
@@ -22019,7 +22111,9 @@ Params:
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "pattern": "^mat_[A-Za-z0-9]{12}$",
+                      "description": "The Material's id, or null while none is assigned."
                     },
                     "is_continuous_insulation": {
                       "type": "boolean"
@@ -22050,7 +22144,9 @@ Params:
           ],
           "properties": {
             "layer_id": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^lyr_[A-Za-z0-9]{12}$",
+              "description": "The Layer that carries the air barrier."
             },
             "face": {
               "type": "string",
@@ -22284,7 +22380,9 @@ Params:
                     ],
                     "properties": {
                       "id": {
-                        "type": "string"
+                        "type": "string",
+                        "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                        "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
                       },
                       "thickness_mm": {
                         "type": "number",
@@ -22306,7 +22404,9 @@ Params:
                           ],
                           "properties": {
                             "id": {
-                              "type": "string"
+                              "type": "string",
+                              "pattern": "^seg_[A-Za-z0-9]{12}$",
+                              "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                             },
                             "width_mm": {
                               "type": "number",
@@ -22317,7 +22417,9 @@ Params:
                               "type": [
                                 "string",
                                 "null"
-                              ]
+                              ],
+                              "pattern": "^mat_[A-Za-z0-9]{12}$",
+                              "description": "The Material's id, or null while none is assigned."
                             },
                             "is_continuous_insulation": {
                               "type": "boolean"
@@ -22348,7 +22450,9 @@ Params:
                   ],
                   "properties": {
                     "layer_id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                      "description": "The Layer that carries the air barrier."
                     },
                     "face": {
                       "type": "string",
@@ -22440,7 +22544,9 @@ Params:
             ],
             "properties": {
               "id": {
-                "type": "string"
+                "type": "string",
+                "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
               },
               "thickness_mm": {
                 "type": "number",
@@ -22462,7 +22568,9 @@ Params:
                   ],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^seg_[A-Za-z0-9]{12}$",
+                      "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                     },
                     "width_mm": {
                       "type": "number",
@@ -22473,7 +22581,9 @@ Params:
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "pattern": "^mat_[A-Za-z0-9]{12}$",
+                      "description": "The Material's id, or null while none is assigned."
                     },
                     "is_continuous_insulation": {
                       "type": "boolean"
@@ -22504,7 +22614,9 @@ Params:
           ],
           "properties": {
             "layer_id": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^lyr_[A-Za-z0-9]{12}$",
+              "description": "The Layer that carries the air barrier."
             },
             "face": {
               "type": "string",
@@ -22713,7 +22825,9 @@ Params:
                     ],
                     "properties": {
                       "id": {
-                        "type": "string"
+                        "type": "string",
+                        "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                        "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
                       },
                       "thickness_mm": {
                         "type": "number",
@@ -22735,7 +22849,9 @@ Params:
                           ],
                           "properties": {
                             "id": {
-                              "type": "string"
+                              "type": "string",
+                              "pattern": "^seg_[A-Za-z0-9]{12}$",
+                              "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                             },
                             "width_mm": {
                               "type": "number",
@@ -22746,7 +22862,9 @@ Params:
                               "type": [
                                 "string",
                                 "null"
-                              ]
+                              ],
+                              "pattern": "^mat_[A-Za-z0-9]{12}$",
+                              "description": "The Material's id, or null while none is assigned."
                             },
                             "is_continuous_insulation": {
                               "type": "boolean"
@@ -22777,7 +22895,9 @@ Params:
                   ],
                   "properties": {
                     "layer_id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                      "description": "The Layer that carries the air barrier."
                     },
                     "face": {
                       "type": "string",
@@ -22869,7 +22989,9 @@ Params:
             ],
             "properties": {
               "id": {
-                "type": "string"
+                "type": "string",
+                "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
               },
               "thickness_mm": {
                 "type": "number",
@@ -22891,7 +23013,9 @@ Params:
                   ],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^seg_[A-Za-z0-9]{12}$",
+                      "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                     },
                     "width_mm": {
                       "type": "number",
@@ -22902,7 +23026,9 @@ Params:
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "pattern": "^mat_[A-Za-z0-9]{12}$",
+                      "description": "The Material's id, or null while none is assigned."
                     },
                     "is_continuous_insulation": {
                       "type": "boolean"
@@ -22933,7 +23059,9 @@ Params:
           ],
           "properties": {
             "layer_id": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^lyr_[A-Za-z0-9]{12}$",
+              "description": "The Layer that carries the air barrier."
             },
             "face": {
               "type": "string",
@@ -23144,7 +23272,9 @@ Params:
                     ],
                     "properties": {
                       "id": {
-                        "type": "string"
+                        "type": "string",
+                        "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                        "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
                       },
                       "thickness_mm": {
                         "type": "number",
@@ -23166,7 +23296,9 @@ Params:
                           ],
                           "properties": {
                             "id": {
-                              "type": "string"
+                              "type": "string",
+                              "pattern": "^seg_[A-Za-z0-9]{12}$",
+                              "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                             },
                             "width_mm": {
                               "type": "number",
@@ -23177,7 +23309,9 @@ Params:
                               "type": [
                                 "string",
                                 "null"
-                              ]
+                              ],
+                              "pattern": "^mat_[A-Za-z0-9]{12}$",
+                              "description": "The Material's id, or null while none is assigned."
                             },
                             "is_continuous_insulation": {
                               "type": "boolean"
@@ -23208,7 +23342,9 @@ Params:
                   ],
                   "properties": {
                     "layer_id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                      "description": "The Layer that carries the air barrier."
                     },
                     "face": {
                       "type": "string",
@@ -23300,7 +23436,9 @@ Params:
             ],
             "properties": {
               "id": {
-                "type": "string"
+                "type": "string",
+                "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
               },
               "thickness_mm": {
                 "type": "number",
@@ -23322,7 +23460,9 @@ Params:
                   ],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^seg_[A-Za-z0-9]{12}$",
+                      "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                     },
                     "width_mm": {
                       "type": "number",
@@ -23333,7 +23473,9 @@ Params:
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "pattern": "^mat_[A-Za-z0-9]{12}$",
+                      "description": "The Material's id, or null while none is assigned."
                     },
                     "is_continuous_insulation": {
                       "type": "boolean"
@@ -23364,7 +23506,9 @@ Params:
           ],
           "properties": {
             "layer_id": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^lyr_[A-Za-z0-9]{12}$",
+              "description": "The Layer that carries the air barrier."
             },
             "face": {
               "type": "string",
@@ -23589,7 +23733,9 @@ Params:
                     ],
                     "properties": {
                       "id": {
-                        "type": "string"
+                        "type": "string",
+                        "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                        "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
                       },
                       "thickness_mm": {
                         "type": "number",
@@ -23611,7 +23757,9 @@ Params:
                           ],
                           "properties": {
                             "id": {
-                              "type": "string"
+                              "type": "string",
+                              "pattern": "^seg_[A-Za-z0-9]{12}$",
+                              "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                             },
                             "width_mm": {
                               "type": "number",
@@ -23622,7 +23770,9 @@ Params:
                               "type": [
                                 "string",
                                 "null"
-                              ]
+                              ],
+                              "pattern": "^mat_[A-Za-z0-9]{12}$",
+                              "description": "The Material's id, or null while none is assigned."
                             },
                             "is_continuous_insulation": {
                               "type": "boolean"
@@ -23653,7 +23803,9 @@ Params:
                   ],
                   "properties": {
                     "layer_id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                      "description": "The Layer that carries the air barrier."
                     },
                     "face": {
                       "type": "string",
@@ -23745,7 +23897,9 @@ Params:
             ],
             "properties": {
               "id": {
-                "type": "string"
+                "type": "string",
+                "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
               },
               "thickness_mm": {
                 "type": "number",
@@ -23767,7 +23921,9 @@ Params:
                   ],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^seg_[A-Za-z0-9]{12}$",
+                      "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                     },
                     "width_mm": {
                       "type": "number",
@@ -23778,7 +23934,9 @@ Params:
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "pattern": "^mat_[A-Za-z0-9]{12}$",
+                      "description": "The Material's id, or null while none is assigned."
                     },
                     "is_continuous_insulation": {
                       "type": "boolean"
@@ -23809,7 +23967,9 @@ Params:
           ],
           "properties": {
             "layer_id": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^lyr_[A-Za-z0-9]{12}$",
+              "description": "The Layer that carries the air barrier."
             },
             "face": {
               "type": "string",
@@ -24026,7 +24186,9 @@ Params:
                     ],
                     "properties": {
                       "id": {
-                        "type": "string"
+                        "type": "string",
+                        "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                        "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
                       },
                       "thickness_mm": {
                         "type": "number",
@@ -24048,7 +24210,9 @@ Params:
                           ],
                           "properties": {
                             "id": {
-                              "type": "string"
+                              "type": "string",
+                              "pattern": "^seg_[A-Za-z0-9]{12}$",
+                              "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                             },
                             "width_mm": {
                               "type": "number",
@@ -24059,7 +24223,9 @@ Params:
                               "type": [
                                 "string",
                                 "null"
-                              ]
+                              ],
+                              "pattern": "^mat_[A-Za-z0-9]{12}$",
+                              "description": "The Material's id, or null while none is assigned."
                             },
                             "is_continuous_insulation": {
                               "type": "boolean"
@@ -24090,7 +24256,9 @@ Params:
                   ],
                   "properties": {
                     "layer_id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                      "description": "The Layer that carries the air barrier."
                     },
                     "face": {
                       "type": "string",
@@ -24182,7 +24350,9 @@ Params:
             ],
             "properties": {
               "id": {
-                "type": "string"
+                "type": "string",
+                "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
               },
               "thickness_mm": {
                 "type": "number",
@@ -24204,7 +24374,9 @@ Params:
                   ],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^seg_[A-Za-z0-9]{12}$",
+                      "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                     },
                     "width_mm": {
                       "type": "number",
@@ -24215,7 +24387,9 @@ Params:
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "pattern": "^mat_[A-Za-z0-9]{12}$",
+                      "description": "The Material's id, or null while none is assigned."
                     },
                     "is_continuous_insulation": {
                       "type": "boolean"
@@ -24246,7 +24420,9 @@ Params:
           ],
           "properties": {
             "layer_id": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^lyr_[A-Za-z0-9]{12}$",
+              "description": "The Layer that carries the air barrier."
             },
             "face": {
               "type": "string",
@@ -24468,7 +24644,9 @@ Params:
                     ],
                     "properties": {
                       "id": {
-                        "type": "string"
+                        "type": "string",
+                        "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                        "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
                       },
                       "thickness_mm": {
                         "type": "number",
@@ -24490,7 +24668,9 @@ Params:
                           ],
                           "properties": {
                             "id": {
-                              "type": "string"
+                              "type": "string",
+                              "pattern": "^seg_[A-Za-z0-9]{12}$",
+                              "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                             },
                             "width_mm": {
                               "type": "number",
@@ -24501,7 +24681,9 @@ Params:
                               "type": [
                                 "string",
                                 "null"
-                              ]
+                              ],
+                              "pattern": "^mat_[A-Za-z0-9]{12}$",
+                              "description": "The Material's id, or null while none is assigned."
                             },
                             "is_continuous_insulation": {
                               "type": "boolean"
@@ -24532,7 +24714,9 @@ Params:
                   ],
                   "properties": {
                     "layer_id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                      "description": "The Layer that carries the air barrier."
                     },
                     "face": {
                       "type": "string",
@@ -24624,7 +24808,9 @@ Params:
             ],
             "properties": {
               "id": {
-                "type": "string"
+                "type": "string",
+                "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
               },
               "thickness_mm": {
                 "type": "number",
@@ -24646,7 +24832,9 @@ Params:
                   ],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^seg_[A-Za-z0-9]{12}$",
+                      "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                     },
                     "width_mm": {
                       "type": "number",
@@ -24657,7 +24845,9 @@ Params:
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "pattern": "^mat_[A-Za-z0-9]{12}$",
+                      "description": "The Material's id, or null while none is assigned."
                     },
                     "is_continuous_insulation": {
                       "type": "boolean"
@@ -24688,7 +24878,9 @@ Params:
           ],
           "properties": {
             "layer_id": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^lyr_[A-Za-z0-9]{12}$",
+              "description": "The Layer that carries the air barrier."
             },
             "face": {
               "type": "string",
@@ -24917,7 +25109,9 @@ Params:
                     ],
                     "properties": {
                       "id": {
-                        "type": "string"
+                        "type": "string",
+                        "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                        "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
                       },
                       "thickness_mm": {
                         "type": "number",
@@ -24939,7 +25133,9 @@ Params:
                           ],
                           "properties": {
                             "id": {
-                              "type": "string"
+                              "type": "string",
+                              "pattern": "^seg_[A-Za-z0-9]{12}$",
+                              "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                             },
                             "width_mm": {
                               "type": "number",
@@ -24950,7 +25146,9 @@ Params:
                               "type": [
                                 "string",
                                 "null"
-                              ]
+                              ],
+                              "pattern": "^mat_[A-Za-z0-9]{12}$",
+                              "description": "The Material's id, or null while none is assigned."
                             },
                             "is_continuous_insulation": {
                               "type": "boolean"
@@ -24981,7 +25179,9 @@ Params:
                   ],
                   "properties": {
                     "layer_id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                      "description": "The Layer that carries the air barrier."
                     },
                     "face": {
                       "type": "string",
@@ -25073,7 +25273,9 @@ Params:
             ],
             "properties": {
               "id": {
-                "type": "string"
+                "type": "string",
+                "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
               },
               "thickness_mm": {
                 "type": "number",
@@ -25095,7 +25297,9 @@ Params:
                   ],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^seg_[A-Za-z0-9]{12}$",
+                      "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                     },
                     "width_mm": {
                       "type": "number",
@@ -25106,7 +25310,9 @@ Params:
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "pattern": "^mat_[A-Za-z0-9]{12}$",
+                      "description": "The Material's id, or null while none is assigned."
                     },
                     "is_continuous_insulation": {
                       "type": "boolean"
@@ -25137,7 +25343,9 @@ Params:
           ],
           "properties": {
             "layer_id": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^lyr_[A-Za-z0-9]{12}$",
+              "description": "The Layer that carries the air barrier."
             },
             "face": {
               "type": "string",
@@ -25360,7 +25568,9 @@ Params:
                     ],
                     "properties": {
                       "id": {
-                        "type": "string"
+                        "type": "string",
+                        "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                        "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
                       },
                       "thickness_mm": {
                         "type": "number",
@@ -25382,7 +25592,9 @@ Params:
                           ],
                           "properties": {
                             "id": {
-                              "type": "string"
+                              "type": "string",
+                              "pattern": "^seg_[A-Za-z0-9]{12}$",
+                              "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                             },
                             "width_mm": {
                               "type": "number",
@@ -25393,7 +25605,9 @@ Params:
                               "type": [
                                 "string",
                                 "null"
-                              ]
+                              ],
+                              "pattern": "^mat_[A-Za-z0-9]{12}$",
+                              "description": "The Material's id, or null while none is assigned."
                             },
                             "is_continuous_insulation": {
                               "type": "boolean"
@@ -25424,7 +25638,9 @@ Params:
                   ],
                   "properties": {
                     "layer_id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                      "description": "The Layer that carries the air barrier."
                     },
                     "face": {
                       "type": "string",
@@ -25516,7 +25732,9 @@ Params:
             ],
             "properties": {
               "id": {
-                "type": "string"
+                "type": "string",
+                "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
               },
               "thickness_mm": {
                 "type": "number",
@@ -25538,7 +25756,9 @@ Params:
                   ],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^seg_[A-Za-z0-9]{12}$",
+                      "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                     },
                     "width_mm": {
                       "type": "number",
@@ -25549,7 +25769,9 @@ Params:
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "pattern": "^mat_[A-Za-z0-9]{12}$",
+                      "description": "The Material's id, or null while none is assigned."
                     },
                     "is_continuous_insulation": {
                       "type": "boolean"
@@ -25580,7 +25802,9 @@ Params:
           ],
           "properties": {
             "layer_id": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^lyr_[A-Za-z0-9]{12}$",
+              "description": "The Layer that carries the air barrier."
             },
             "face": {
               "type": "string",
@@ -25806,7 +26030,9 @@ Params:
                     ],
                     "properties": {
                       "id": {
-                        "type": "string"
+                        "type": "string",
+                        "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                        "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
                       },
                       "thickness_mm": {
                         "type": "number",
@@ -25828,7 +26054,9 @@ Params:
                           ],
                           "properties": {
                             "id": {
-                              "type": "string"
+                              "type": "string",
+                              "pattern": "^seg_[A-Za-z0-9]{12}$",
+                              "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                             },
                             "width_mm": {
                               "type": "number",
@@ -25839,7 +26067,9 @@ Params:
                               "type": [
                                 "string",
                                 "null"
-                              ]
+                              ],
+                              "pattern": "^mat_[A-Za-z0-9]{12}$",
+                              "description": "The Material's id, or null while none is assigned."
                             },
                             "is_continuous_insulation": {
                               "type": "boolean"
@@ -25870,7 +26100,9 @@ Params:
                   ],
                   "properties": {
                     "layer_id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                      "description": "The Layer that carries the air barrier."
                     },
                     "face": {
                       "type": "string",
@@ -25962,7 +26194,9 @@ Params:
             ],
             "properties": {
               "id": {
-                "type": "string"
+                "type": "string",
+                "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
               },
               "thickness_mm": {
                 "type": "number",
@@ -25984,7 +26218,9 @@ Params:
                   ],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^seg_[A-Za-z0-9]{12}$",
+                      "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                     },
                     "width_mm": {
                       "type": "number",
@@ -25995,7 +26231,9 @@ Params:
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "pattern": "^mat_[A-Za-z0-9]{12}$",
+                      "description": "The Material's id, or null while none is assigned."
                     },
                     "is_continuous_insulation": {
                       "type": "boolean"
@@ -26026,7 +26264,9 @@ Params:
           ],
           "properties": {
             "layer_id": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^lyr_[A-Za-z0-9]{12}$",
+              "description": "The Layer that carries the air barrier."
             },
             "face": {
               "type": "string",
@@ -26237,7 +26477,9 @@ Params:
                     ],
                     "properties": {
                       "id": {
-                        "type": "string"
+                        "type": "string",
+                        "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                        "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
                       },
                       "thickness_mm": {
                         "type": "number",
@@ -26259,7 +26501,9 @@ Params:
                           ],
                           "properties": {
                             "id": {
-                              "type": "string"
+                              "type": "string",
+                              "pattern": "^seg_[A-Za-z0-9]{12}$",
+                              "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                             },
                             "width_mm": {
                               "type": "number",
@@ -26270,7 +26514,9 @@ Params:
                               "type": [
                                 "string",
                                 "null"
-                              ]
+                              ],
+                              "pattern": "^mat_[A-Za-z0-9]{12}$",
+                              "description": "The Material's id, or null while none is assigned."
                             },
                             "is_continuous_insulation": {
                               "type": "boolean"
@@ -26301,7 +26547,9 @@ Params:
                   ],
                   "properties": {
                     "layer_id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                      "description": "The Layer that carries the air barrier."
                     },
                     "face": {
                       "type": "string",
@@ -26393,7 +26641,9 @@ Params:
             ],
             "properties": {
               "id": {
-                "type": "string"
+                "type": "string",
+                "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
               },
               "thickness_mm": {
                 "type": "number",
@@ -26415,7 +26665,9 @@ Params:
                   ],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^seg_[A-Za-z0-9]{12}$",
+                      "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                     },
                     "width_mm": {
                       "type": "number",
@@ -26426,7 +26678,9 @@ Params:
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "pattern": "^mat_[A-Za-z0-9]{12}$",
+                      "description": "The Material's id, or null while none is assigned."
                     },
                     "is_continuous_insulation": {
                       "type": "boolean"
@@ -26457,7 +26711,9 @@ Params:
           ],
           "properties": {
             "layer_id": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^lyr_[A-Za-z0-9]{12}$",
+              "description": "The Layer that carries the air barrier."
             },
             "face": {
               "type": "string",
@@ -26681,7 +26937,9 @@ Params:
                     ],
                     "properties": {
                       "id": {
-                        "type": "string"
+                        "type": "string",
+                        "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                        "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
                       },
                       "thickness_mm": {
                         "type": "number",
@@ -26703,7 +26961,9 @@ Params:
                           ],
                           "properties": {
                             "id": {
-                              "type": "string"
+                              "type": "string",
+                              "pattern": "^seg_[A-Za-z0-9]{12}$",
+                              "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                             },
                             "width_mm": {
                               "type": "number",
@@ -26714,7 +26974,9 @@ Params:
                               "type": [
                                 "string",
                                 "null"
-                              ]
+                              ],
+                              "pattern": "^mat_[A-Za-z0-9]{12}$",
+                              "description": "The Material's id, or null while none is assigned."
                             },
                             "is_continuous_insulation": {
                               "type": "boolean"
@@ -26745,7 +27007,9 @@ Params:
                   ],
                   "properties": {
                     "layer_id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                      "description": "The Layer that carries the air barrier."
                     },
                     "face": {
                       "type": "string",
@@ -26837,7 +27101,9 @@ Params:
             ],
             "properties": {
               "id": {
-                "type": "string"
+                "type": "string",
+                "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
               },
               "thickness_mm": {
                 "type": "number",
@@ -26859,7 +27125,9 @@ Params:
                   ],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^seg_[A-Za-z0-9]{12}$",
+                      "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                     },
                     "width_mm": {
                       "type": "number",
@@ -26870,7 +27138,9 @@ Params:
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "pattern": "^mat_[A-Za-z0-9]{12}$",
+                      "description": "The Material's id, or null while none is assigned."
                     },
                     "is_continuous_insulation": {
                       "type": "boolean"
@@ -26901,7 +27171,9 @@ Params:
           ],
           "properties": {
             "layer_id": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^lyr_[A-Za-z0-9]{12}$",
+              "description": "The Layer that carries the air barrier."
             },
             "face": {
               "type": "string",
@@ -27134,7 +27406,9 @@ Params:
                     ],
                     "properties": {
                       "id": {
-                        "type": "string"
+                        "type": "string",
+                        "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                        "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
                       },
                       "thickness_mm": {
                         "type": "number",
@@ -27156,7 +27430,9 @@ Params:
                           ],
                           "properties": {
                             "id": {
-                              "type": "string"
+                              "type": "string",
+                              "pattern": "^seg_[A-Za-z0-9]{12}$",
+                              "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                             },
                             "width_mm": {
                               "type": "number",
@@ -27167,7 +27443,9 @@ Params:
                               "type": [
                                 "string",
                                 "null"
-                              ]
+                              ],
+                              "pattern": "^mat_[A-Za-z0-9]{12}$",
+                              "description": "The Material's id, or null while none is assigned."
                             },
                             "is_continuous_insulation": {
                               "type": "boolean"
@@ -27198,7 +27476,9 @@ Params:
                   ],
                   "properties": {
                     "layer_id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                      "description": "The Layer that carries the air barrier."
                     },
                     "face": {
                       "type": "string",
@@ -27290,7 +27570,9 @@ Params:
             ],
             "properties": {
               "id": {
-                "type": "string"
+                "type": "string",
+                "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
               },
               "thickness_mm": {
                 "type": "number",
@@ -27312,7 +27594,9 @@ Params:
                   ],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^seg_[A-Za-z0-9]{12}$",
+                      "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                     },
                     "width_mm": {
                       "type": "number",
@@ -27323,7 +27607,9 @@ Params:
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "pattern": "^mat_[A-Za-z0-9]{12}$",
+                      "description": "The Material's id, or null while none is assigned."
                     },
                     "is_continuous_insulation": {
                       "type": "boolean"
@@ -27354,7 +27640,9 @@ Params:
           ],
           "properties": {
             "layer_id": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^lyr_[A-Za-z0-9]{12}$",
+              "description": "The Layer that carries the air barrier."
             },
             "face": {
               "type": "string",
@@ -27554,7 +27842,9 @@ Params:
           ],
           "properties": {
             "layer_id": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^lyr_[A-Za-z0-9]{12}$",
+              "description": "The Layer that carries the air barrier."
             },
             "face": {
               "type": "string",
@@ -27703,7 +27993,9 @@ Params:
                     ],
                     "properties": {
                       "id": {
-                        "type": "string"
+                        "type": "string",
+                        "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                        "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
                       },
                       "thickness_mm": {
                         "type": "number",
@@ -27725,7 +28017,9 @@ Params:
                           ],
                           "properties": {
                             "id": {
-                              "type": "string"
+                              "type": "string",
+                              "pattern": "^seg_[A-Za-z0-9]{12}$",
+                              "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                             },
                             "width_mm": {
                               "type": "number",
@@ -27736,7 +28030,9 @@ Params:
                               "type": [
                                 "string",
                                 "null"
-                              ]
+                              ],
+                              "pattern": "^mat_[A-Za-z0-9]{12}$",
+                              "description": "The Material's id, or null while none is assigned."
                             },
                             "is_continuous_insulation": {
                               "type": "boolean"
@@ -27767,7 +28063,9 @@ Params:
                   ],
                   "properties": {
                     "layer_id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                      "description": "The Layer that carries the air barrier."
                     },
                     "face": {
                       "type": "string",
@@ -27859,7 +28157,9 @@ Params:
             ],
             "properties": {
               "id": {
-                "type": "string"
+                "type": "string",
+                "pattern": "^lyr_[A-Za-z0-9]{12}$",
+                "description": "This Layer's id, unique within its Assembly. For a new one, choose any id of this form; reads return it from then on."
               },
               "thickness_mm": {
                 "type": "number",
@@ -27881,7 +28181,9 @@ Params:
                   ],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^seg_[A-Za-z0-9]{12}$",
+                      "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
                     },
                     "width_mm": {
                       "type": "number",
@@ -27892,7 +28194,9 @@ Params:
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "pattern": "^mat_[A-Za-z0-9]{12}$",
+                      "description": "The Material's id, or null while none is assigned."
                     },
                     "is_continuous_insulation": {
                       "type": "boolean"
@@ -27923,7 +28227,9 @@ Params:
           ],
           "properties": {
             "layer_id": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^lyr_[A-Za-z0-9]{12}$",
+              "description": "The Layer that carries the air barrier."
             },
             "face": {
               "type": "string",

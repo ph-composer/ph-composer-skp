@@ -10,18 +10,23 @@ module PhComposer
         CONDITIONS = %w[Outdoors Ground AttachedZone Adiabatic].freeze
         ORIENTATIONS = %w[first_layer_outside last_layer_outside].freeze
         SEGMENT = SchemaShapes.object({
-          "id" => { "type" => "string" }, "width_mm" => Fields.number("mm"),
-          "material_id" => { "type" => %w[string null] },
+          "id" => SchemaShapes.id("seg", "This Layer-Segment's id, unique within its Layer. For a new one, choose " \
+                                         "any id of this form; reads return it from then on."),
+          "width_mm" => Fields.number("mm"),
+          "material_id" => SchemaShapes.id("mat", "The Material's id, or null while none is assigned.",
+                                           :nullable => true),
           "is_continuous_insulation" => { "type" => "boolean" },
           "steel_stud_spacing_mm" => Fields.number("mm", :nullable => true)
         })
         LAYER = SchemaShapes.object({
-          "id" => { "type" => "string" }, "thickness_mm" => Fields.number("mm"),
+          "id" => SchemaShapes.id("lyr", "This Layer's id, unique within its Assembly. For a new one, choose any " \
+                                         "id of this form; reads return it from then on."),
+          "thickness_mm" => Fields.number("mm"),
           "segments" => { "type" => "array", "minItems" => 1, "items" => SEGMENT }
         })
         LAYERS = { "type" => "array", "minItems" => 1, "items" => LAYER }.freeze
         AIR_BARRIER = SchemaShapes.object({
-          "layer_id" => { "type" => "string" },
+          "layer_id" => SchemaShapes.id("lyr", "The Layer that carries the air barrier."),
           "face" => { "type" => "string", "enum" => %w[interior exterior] }
         }).merge("type" => %w[object null])
         RAMP = %w[#a8c9ad #a5c5d7 #d5bea3 #cab6d4 #d5b1ad #b8c9cd].freeze

@@ -490,6 +490,20 @@ class AgentAccessServerTest < PhComposerTestCase
     assert_empty @session.model.operations
   end
 
+  def test_a_deferred_stop_is_logged_when_it_happens_and_not_when_a_new_token_cancels_it
+    stopped = -> { PhComposer::Diagnostics.tail.count { |line| line.include?('"agent_access_stopped"') } }
+    @server.stop_soon
+    @server.tokens = AgentAccess::Tokens.snapshot
+    @server.pump
+    assert_equal 0, stopped.call
+
+    @server.stop_soon
+    @server.pump
+
+    assert @server.stopped?
+    assert_equal 1, stopped.call
+  end
+
   def test_a_token_issued_before_the_pending_stop_keeps_the_listener_running
     @server.stop_soon
     @server.tokens = AgentAccess::Tokens.snapshot

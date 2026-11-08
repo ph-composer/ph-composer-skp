@@ -190,6 +190,39 @@ class AgentAccessTokensTest < PhComposerTestCase
     assert_equal 1, delivered(dialog, "access.issued").length
   end
 
+  def stopped_events
+    PhComposer::Diagnostics.tail.select { |line| line.include?('"agent_access_stopped"') }
+  end
+
+  def test_diagnostics_record_the_listener_stopping_after_the_last_revoke
+    first = Tokens.issue(:label => "First").fetch("row")
+    last = Tokens.issue(:label => "Last").fetch("row")
+
+    Tokens.revoke(first.fetch("id"))
+    assert_empty stopped_events, "a live token remains, so the listener keeps running"
+    Tokens.revoke(last.fetch("id"))
+    PhComposer::AgentAccess::Listener.refresh
+
+    assert_equal 1, stopped_events.length, "logged once, by the refresh that stopped a running listener"
+    assert_equal "no_live_token", JSON.parse(stopped_events.first).fetch("status")
+  end
+
+  # The last revoke answers a waiting call first and only asks the server to stop on its next tick; a new
+  # token can cancel that, so the server records the stop when it happens (AgentAccessServerTest).
+  def test_a_stop_a_waiting_call_defers_is_not_recorded_until_it_happens
+    waiting = StubAgentServer.new(46_110)
+    deferred = []
+    waiting.define_singleton_method(:refuse_revoked) { |_live| { "token" => 1 } }
+    waiting.define_singleton_method(:stop_soon) { deferred << :stop_soon }
+    PhComposer::AgentAccess::Listener.server_factory = ->(_port) { waiting }
+    row = Tokens.issue(:label => "Only").fetch("row")
+
+    Tokens.revoke(row.fetch("id"))
+
+    assert_equal [:stop_soon], deferred
+    assert_empty stopped_events
+  end
+
   def test_a_token_whose_listener_cannot_bind_is_not_kept_and_the_dialog_says_why
     taken = Struct.new(:port) do
       def start
