@@ -142,6 +142,17 @@ class WindowHostWatchTest < PhComposerTestCase
     assert_operator outline.map(&:last).min, :>=, 2.75 - 1e-5
   end
 
+  def test_a_window_lands_beside_a_hole_in_the_face
+    plan = Struct.new(:width_m, :height_m, :outer_polygon_m, :panes)
+                 .new(1.0, 1.0, [[0.0, -1.0, 0.0], [1.0, -1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 0.0]], [])
+    outer = [[0.0, 0.0, 0.0], [8.0, 0.0, 0.0], [8.0, 0.0, 6.0], [0.0, 0.0, 6.0]]
+    hole = [[3.0, 0.0, 2.0], [5.0, 0.0, 2.0], [5.0, 0.0, 4.0], [3.0, 0.0, 4.0]]
+    geometry = PhComposer::FaceGeometry::Snapshot.new(:loops_m => [outer, hole], :normal => [0.0, -1.0, 0.0])
+    away = [1.0, 0, 0, 0, 0, 0, 1.0, 0, 0, -1.0, 0, 0, 3.5 * M, 3.0 * M, 3.5 * M, 1]
+    matrix = W::Placement::Snap.on_face(geometry, plan, away, [])
+    assert W::Placement::Fit.check!(geometry, W::Units::WorldGeometry.map(plan, matrix).outer_polygon_m)
+  end
+
   def test_redo_after_the_return_keeps_it_and_runs_nothing_more
     paste(matrix_at(0.2, 3, 5))
     UI.run_timers

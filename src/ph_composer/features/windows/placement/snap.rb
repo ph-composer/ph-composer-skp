@@ -10,7 +10,7 @@ module PhComposer
       # Where a Window that has left its Face comes back to, from detached geometry alone. It moves as
       # little as possible: a Window already lying clear on a Face stays exactly where it is; otherwise its
       # outline is squared to the Face and brought just inside the Face's extent, or to the nearest spot
-      # clear of whichever Windows are in the way there, beside them or above and below.
+      # clear of whatever is in the way there: another Window, a hole, a notch in the Face.
       module Snap
         ANCHOR = "center"
 
@@ -28,7 +28,7 @@ module PhComposer
           start = [inside(x, extents[0], sizes[0]), inside(y, extents[1], sizes[1])]
           return unless start.all?
 
-          landings(plane, others_m, start, extents, sizes).each do |spot|
+          landings(plane, geometry, others_m, start, extents, sizes).each do |spot|
             mapped = plane.map(plan, :point_m => plane.world(*spot), :anchor => ANCHOR)
             return plane.instance_matrix(mapped) if fits?(geometry, mapped.outer_polygon_m, others_m)
           end
@@ -50,17 +50,16 @@ module PhComposer
           low <= high ? value.clamp(low, high) : nil
         end
 
-        # `start`, then every spot just clear of a Window on this plane along either axis, nearest first.
-        def landings(plane, others_m, start, extents, sizes)
+        # `start`, then every spot just clear of a corner of what is in the way on this Face (its own outline,
+        # its holes and the Windows on its plane) along either axis, nearest first.
+        def landings(plane, geometry, others_m, start, extents, sizes)
           on_plane = others_m.select do |polygon|
             polygon.all? { |point| plane.signed_distance_m(point).abs <= FaceGeometry::QUANTUM_M }
-          end.map { |polygon| polygon.map { |point| plane.project(point) } }
+          end
+          corners = (geometry.loops_m + on_plane).flatten(1).map { |point| plane.project(point) }
           across = [0, 1].map do |axis|
             clearance = sizes[axis] / 2.0 + FaceGeometry::QUANTUM_M
-            spots = on_plane.flat_map do |polygon|
-              values = polygon.map { |point| point[axis] }
-              [values.min - clearance, values.max + clearance]
-            end
+            spots = corners.flat_map { |corner| [corner[axis] - clearance, corner[axis] + clearance] }
             ([start[axis]] + spots.filter_map { |spot| inside(spot, extents[axis], sizes[axis]) }).uniq
           end
           across[0].product(across[1]).sort_by { |spot| spot.zip(start).sum { |value, from| (value - from)**2 } }
