@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 20
+    MINOR = 21
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -96,7 +96,10 @@ module PhComposer
       { "minor" => 20, "date" => "2026-11-08",
         "change" => "The thermal-bridge schedule and export count one Type on Edges two Zones of one " \
                     "Building-Segment share once. thermal_bridge.coincident_conflict replaces " \
-                    "thermal_bridge.counted_twice for coincident Edges that differ." }
+                    "thermal_bridge.counted_twice for coincident Edges that differ." },
+      { "minor" => 21, "date" => "2026-11-08",
+        "change" => "ph_composer.spaces.all no longer answers a Zone's imbalanced or findings, and " \
+                    "space.airflow_imbalance is gone: supply and extract balance per ventilator, not per Zone." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

@@ -132,13 +132,6 @@ module PhComposer
           repair = repair_row(finding, reference)
           repairs << repair if repair
         end
-        # A Zone row's finding (the airflow imbalance) names its Zone; Spaces registers no Zone locate.
-        read.fetch("zones").each do |zone|
-          Array(zone["findings"]).each do |finding|
-            named = finding.merge("message" => "#{zone['name'] || zone.fetch('zone_id')}: #{finding.fetch('message')}")
-            findings << finding_row(named, nil, zone.fetch("zone_id"))
-          end
-        end
         findings.concat(offset_findings(request.model))
         { "findings" => findings, "repairs" => repairs.uniq { |row| row.fetch("id") } }
       rescue CodedError => error

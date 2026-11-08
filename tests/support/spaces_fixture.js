@@ -54,12 +54,10 @@ function zoneSums(zonePath, name, spaces) {
   ["v_sup_m3h", "v_eta_m3h", "v_tran_m3h"].forEach(function (key) {
     flows[key] = inheriting ? null : own.reduce(function (sum, item) { return sum + item.airflows[key]; }, 0);
   });
-  var supply = flows.v_sup_m3h, extract = flows.v_eta_m3h, larger = Math.max(supply || 0, extract || 0);
   function sum(key) { return own.reduce(function (total, item) { return total + item.metrics[key]; }, 0); }
   return { zone_id: zonePath === ZONE_A ? "zon_a" : "zon_b", zone_path: zonePath, name: name,
     space_count: own.length, floor_area_m2: sum("floor_area_m2"), weighted_area_m2: sum("weighted_area_m2"),
-    net_volume_m3: sum("net_volume_m3"), airflows: flows, inheriting_count: inheriting,
-    imbalanced: !inheriting && larger > 0 && Math.abs(supply - extract) > 0.1 * larger };
+    net_volume_m3: sum("net_volume_m3"), airflows: flows, inheriting_count: inheriting };
 }
 
 function section(options) {

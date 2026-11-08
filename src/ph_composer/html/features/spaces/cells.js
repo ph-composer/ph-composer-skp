@@ -12,7 +12,7 @@ PhComposerUI.define("features/spaces/cells", ["record_edits", "inventory_grid", 
 function (RecordEdits, Grid, requests, snapshot, fields, ui) {
   "use strict";
   var UPDATE = "ph_composer.spaces.update", BATCH = "ph_composer.spaces.batch_update";
-  // Metres, as the column header and the Space row's average read; no per-editor dimension format.
+  // Metres, as the column header reads; no per-editor dimension format.
   var HEIGHT = fields.with(fields.LENGTH_M, { label: "Height", allowBlank: true, allowZero: false });
   var AIRFLOW = fields.with(fields.AIRFLOW_M3H, { label: "Airflow", allowBlank: true });
   var FACTOR = fields.with(fields.FRACTION, { label: "Factor" });

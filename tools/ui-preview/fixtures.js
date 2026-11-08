@@ -897,20 +897,16 @@
       ["v_sup_m3h", "v_eta_m3h", "v_tran_m3h"].forEach(function (key) {
         flows[key] = inheriting ? null : own.reduce(function (sum, space) { return sum + space.airflows[key]; }, 0);
       });
-      var larger = Math.max(flows.v_sup_m3h || 0, flows.v_eta_m3h || 0);
-      var imbalanced = !inheriting && larger > 0 && Math.abs(flows.v_sup_m3h - flows.v_eta_m3h) > 0.1 * larger;
       function sum(key) { return own.reduce(function (total, space) { return total + space.metrics[key]; }, 0); }
       return { zone_id: zone.id, zone_path: zone.reference.zone_path, name: zone.values.name, space_count: own.length,
         floor_area_m2: sum("floor_area_m2"), weighted_area_m2: sum("weighted_area_m2"),
-        net_volume_m3: sum("net_volume_m3"), airflows: flows, inheriting_count: inheriting, imbalanced: imbalanced,
-        findings: imbalanced ? [{ code: "space.airflow_imbalance", blocks_export: false, message: "Supply and " +
-          "extract differ by more than 10 percent of the larger sum. Review the airflows." }] : [] };
+        net_volume_m3: sum("net_volume_m3"), airflows: flows, inheriting_count: inheriting };
     });
     return { spaces: spaces, zones: zones, findings: [], units: { area: "m2", height: "m", volume: "m3",
       airflow: "m3/h" } };
   }
   var LIVING = "zon_Aa11Bb22Cc33", ATTIC = "zon_Dd44Ee55Ff66";
-  // The synthetic reference model's four Spaces (planning ACCEPTANCE): an imbalanced Zone and one inheriting.
+  // The synthetic reference model's four Spaces (planning ACCEPTANCE): one Zone with airflows set and one inheriting.
   var REFERENCE_SPACES = spacesSection([
     spaceRow([100, 501], LIVING, "101", "Living", { v_sup_m3h: 60 },
       [spaceVolume([100, 501, 1], 1, 2.5, [spaceSegment([100, 501, 1, 1], 12, 1)])]),

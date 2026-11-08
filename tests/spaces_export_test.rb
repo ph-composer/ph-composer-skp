@@ -108,9 +108,8 @@ class SpacesExportTest < PhComposerTestCase
     @model.entities << copy
     treat_duplicates_as_existing(@model)
     value = API.query(:context => @context, :name => X::PREFLIGHT).fetch("value")
-    imbalance = value.fetch("findings").find { |row| row["code"] == "space.airflow_imbalance" }
-    assert_equal "zon_AAAAAAAAAAAA", imbalance["object_id"]
-    assert_match(/\AZone A: /, imbalance["message"])
+    assert_nil value.fetch("findings").find { |row| row["code"] == "space.airflow_imbalance" },
+               "a Zone's supply and extract are not checked against each other"
     duplicate = value.fetch("findings").find { |row| row["code"] == "space.duplicate_identity" }
     assert_equal "vol_OOOOOOOOOOOO", duplicate["object_id"]
     assert(value.fetch("repairs").any? { |row| row["action"] == "ph_composer.spaces.make_independent" })

@@ -1,7 +1,7 @@
 "use strict";
 
 /* The Spaces view of the Zones tab: its rows three deep under each Zone, the No Zone group,
-   the read-only columns, the airflow cell states, the Zone sums and the imbalance marker, all read from the
+   the read-only columns, the airflow cell states and the Zone sums, all read from the
    `spaces` snapshot section. */
 
 var assert = require("assert");
@@ -104,35 +104,57 @@ test("a Space no Zone holds is listed under one group row after the Zones", func
 test("height and airflow cells read what the row sets, muted where it does not", function () {
   var p = page();
   p.panel.receive({ type: "panel.snapshot", payload: snapshot() });
+  expandAll(p);
   var rows = table(p, ["height_m", "net_volume_m3", "v_sup_m3h", "v_eta_m3h", "v_tran_m3h"]);
   assert.deepStrictEqual(rows.filter(function (row) { return row[0] !== "Volume" && row[0] !== "Segment"; }), [
     ["Zone", "Zone A", "", "59.6", "60", "40", "20"],
-    ["Space", "Living", "2.5", "30", "60", "0", "0"],
-    ["Space", "Bath", "2.4", "9.6", "0", "40", "0"],
-    ["Space", "Hall", "3.33", "20", "0", "0", "20"],
+    ["Space", "Living", "", "30", "60", "0", "0"],
+    ["Space", "Bath", "", "9.6", "0", "40", "0"],
+    ["Space", "Hall", "", "20", "0", "0", "20"],
     ["Zone", "Zone B", "", "36", "—", "—", "—"],
-    ["Space", "Loft", "3", "36", "Zone", "Zone", "Zone"]]);
+    ["Space", "Loft", "", "36", "Zone", "Zone", "Zone"]]);
+  var volumes = rows.filter(function (row) { return row[0] === "Volume"; });
+  assert.deepStrictEqual(volumes.map(function (row) { return row[2]; }), ["2.5", "2.4", "2.5", "5", "3"],
+    "Height shows on the Volume row, where it is set");
   var muted = shown(p).querySelectorAll("td").filter(function (td) { return td.classList.contains("is-muted"); });
   assert.ok(muted.some(function (td) { return text(td) === "Zone"; }), "an inheriting Space reads a muted Zone");
   assert.ok(muted.some(function (td) { return text(td) === "—"; }), "and its Zone a muted dash");
   assert.ok(muted.some(function (td) { return text(td) === "0"; }),
     "an unset rate beside a set one is a muted 0");
-  assert.ok(muted.some(function (td) { return text(td) === "3.33"; }), "a Space's height is a muted average");
 });
 
-test("a Zone whose supply and extract differ by more than the threshold carries the marker; one inheriting none",
+test("a Zone whose supply and extract differ carries no marker; one with an inheriting Space shows a dash",
   function () {
     var p = page();
     p.panel.receive({ type: "panel.snapshot", payload: snapshot() });
-    var markers = shown(p).querySelectorAll(".phc-row-marker");
-    assert.strictEqual(markers.length, 1, "Zone A only");
-    assert.match(markers[0].getAttribute("data-tooltip") || markers[0].getAttribute("aria-label") || "",
-      /supply 60 m³\/h, extract 40 m³\/h, difference 20 m³\/h/);
+    assert.strictEqual(shown(p).querySelectorAll(".phc-row-marker").filter(function (node) {
+      return !node.hidden;
+    }).length, 0, "Zone A sums 60 supply and 40 extract");
     var zoneB = shown(p).querySelectorAll("td").filter(function (td) {
       return td.classList.contains("col-v_sup_m3h") && text(td) === "—";
     })[0];
     assert.match(zoneB.getAttribute("data-tooltip"), /^1 Space in this Zone inherits/);
   });
+
+test("a Floor Segment's row reads Floor in the Hierarchy column", function () {
+  var p = page();
+  p.panel.receive({ type: "panel.snapshot", payload: snapshot() });
+  expandAll(p);
+  var deepest = shown(p).querySelectorAll("tr").filter(function (tr) {
+    return (tr.getAttribute("data-row-key") || "").indexOf("[\"Segment\"") === 0;
+  })[0];
+  assert.strictEqual(deepest.querySelector(".row-target").textContent, "Floor");
+});
+
+test("Spaces list by number, read as numbers, whatever order the host reads them in", function () {
+  var p = page(), state = snapshot(), spaces = state.sections["ph_composer.spaces.spaces"].value.spaces;
+  // Living, Bath and Hall arrive in path order, which is the order they were drawn.
+  spaces[0].values.number = "103"; spaces[1].values.number = "9"; spaces[2].values.number = "101";
+  p.panel.receive({ type: "panel.snapshot", payload: state });
+  expandAll(p);
+  assert.deepStrictEqual(table(p, ["number"]).filter(function (row) { return row[0] === "Space"; }).slice(0, 3),
+    [["Space", "Bath", "9"], ["Space", "Hall", "101"], ["Space", "Living", "103"]]);
+});
 
 test("Zone rows sort by the view's sums, and Spaces within each Zone by their own values", function () {
   var p = page();

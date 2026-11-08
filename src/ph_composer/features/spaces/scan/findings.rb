@@ -11,7 +11,7 @@ module PhComposer
         "space.nested" => true, "space.volume_nested" => true, "space.volume_orphan" => true,
         "space.segment_misplaced" => true, "space.volume_moved" => false,
         "space.volume_unprotected" => false, "space.duplicate_identity" => true,
-        "space.airflow_imbalance" => false, "space.offset_from_zone" => false
+        "space.offset_from_zone" => false
       }.freeze
 
       module_function
@@ -51,15 +51,6 @@ module PhComposer
           found << finding("space.height_missing", "#{name} needs an average clear ceiling height.")
         end
         found
-      end
-
-      # A Zone's supply and extract sums differ by more than the threshold (Metrics.imbalanced?). The panel
-      # states the sums in the user's units; the message names the condition.
-      def zone(imbalanced)
-        return [] unless imbalanced
-
-        [finding("space.airflow_imbalance",
-                 "Supply and extract differ by more than 10 percent of the larger sum. Review the airflows.")]
       end
 
       def segment(row)

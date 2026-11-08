@@ -7118,9 +7118,7 @@ Result:
           "weighted_area_m2",
           "net_volume_m3",
           "airflows",
-          "inheriting_count",
-          "imbalanced",
-          "findings"
+          "inheriting_count"
         ],
         "properties": {
           "zone_id": {
@@ -7195,41 +7193,6 @@ Result:
           "inheriting_count": {
             "type": "integer",
             "minimum": 0
-          },
-          "imbalanced": {
-            "type": "boolean",
-            "description": "Supply and extract differ by more than 10 percent of the larger."
-          },
-          "findings": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": [
-                "code",
-                "message",
-                "blocks_export"
-              ],
-              "properties": {
-                "code": {
-                  "type": "string"
-                },
-                "message": {
-                  "type": "string"
-                },
-                "blocks_export": {
-                  "type": "boolean"
-                },
-                "repair": {
-                  "type": "string",
-                  "enum": [
-                    "make_independent",
-                    "restore_position"
-                  ],
-                  "description": "The operation that repairs it, when one does."
-                }
-              }
-            }
           }
         }
       },
@@ -55460,7 +55423,6 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 
 | Code | Meaning |
 | --- | --- |
-| `space.airflow_imbalance` | A Zone's supply and extract sums differ by more than 10 percent of the larger. |
 | `space.context_open` | An edit context is open; close it to the root first. |
 | `space.context_required` | The edit context holding the Faces must be open to group them. |
 | `space.duplicate_identity` | Another occurrence carries this Space, Volume or Floor Segment's id: a copy. |
@@ -55629,3 +55591,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.18 | 2026-11-08 | ph_composer.windows.units.return_to_host is new. It puts a Window that has left its Face back on the nearest Face of its Zone, and adds window.no_host_face. |
 | 1.19 | 2026-11-08 | ph_composer.windows.settings gains default_psi_install_w_mk, 0.04 W/mK unless set: what an edge with no Psi-Install Type inherits when the Model has no default Type. |
 | 1.20 | 2026-11-08 | The thermal-bridge schedule and export count one Type on Edges two Zones of one Building-Segment share once. thermal_bridge.coincident_conflict replaces thermal_bridge.counted_twice for coincident Edges that differ. |
+| 1.21 | 2026-11-08 | ph_composer.spaces.all no longer answers a Zone's imbalanced or findings, and space.airflow_imbalance is gone: supply and extract balance per ventilator, not per Zone. |

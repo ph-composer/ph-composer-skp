@@ -44,13 +44,13 @@ check({ name: "spaces", output }, async ({ newPage, step }) => {
     page.setDefaultTimeout(5000);
 
     step("reference model");
-    // The reference model: Zone rows with sums, Spaces beneath, the imbalance marker on Living Zone.
+    // The reference model: Zone rows with sums, Spaces beneath, and no marker on Living Zone's differing sums.
     await open(page, "spaces");
     assert.equal(await page.locator(".phc-overview .phc-view-count").textContent(), "2 Zones · 4 Spaces");
     await page.getByRole("button", { name: "Expand all" }).click();
     assert.equal(await visibleRows(page).count(), 16, "2 Zones, 4 Spaces, 5 Volumes and 5 Floor Segments");
     const living = page.locator('.phc-zone-view:not([hidden]) tr[data-row-key=\'["Zone",[100]]\']');
-    assert.equal(await living.locator(".phc-row-marker:not([hidden])").count(), 1, "the imbalance marker");
+    assert.equal(await living.locator(".phc-row-marker:not([hidden])").count(), 0, "no supply and extract marker on a Zone");
     const loft = page.getByRole("textbox", { name: "Loft supply" });
     assert.equal(await loft.getAttribute("placeholder"), "Zone", "an inheriting Space reads Zone");
     step("Spaces at panel widths");
