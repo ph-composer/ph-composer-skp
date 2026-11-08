@@ -71,9 +71,9 @@
       "sha256": "b5aadfb3db2a47d54809adc47a7c7aada880f97598338cb75340bb61a32ed4b4"
     },
     "html/features/assemblies/form.js": {
-      "bytes": 5039,
+      "bytes": 5216,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "a744d57f6569894638a69613dd9dd1097fc4f14f517ec40b5b5e50a6bad752bf"
+      "sha256": "bcfd04af9c85f2ec125853dbd7690baf8106cdbbe332c258865ebda2861a7264"
     },
     "html/features/assemblies/header.js": {
       "bytes": 6364,

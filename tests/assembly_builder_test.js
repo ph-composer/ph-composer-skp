@@ -694,6 +694,9 @@ test("a table's fill writes Ventilated cladding as Outdoors plus the flag, and c
   assert.strictEqual(form.exteriorChoice({ exterior_condition: null, ventilated_cladding: true }),
     "Outdoors:ventilated", "a flag on an unset exterior still reads, so the dropdown can clear it");
   assert.strictEqual(form.exteriorChoice({ exterior_condition: "Ground", ventilated_cladding: true }), "Ground");
+  cell.row.record.values = { exterior_condition: "Outdoors" };
+  assert.strictEqual(edits.changeFor(cell, "Ground").expected_values.ventilated_cladding, null,
+    "an absent flag is expected absent, or the engine refuses the edit as changed");
 });
 
 test("Layer tools pairs Add and Move as arrows that run with the drawing", function () {

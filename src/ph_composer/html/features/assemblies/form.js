@@ -23,14 +23,16 @@ function (request, snapshot, words) {
   }
   /* The options a RecordEdits or a table's fill and paste need for the exterior dropdown, one control over two
      stored fields. Any choice writes both, so leaving Ventilated cladding clears the flag. */
+  // The engine compares expected values literally, so a field the record does not hold is expected absent.
+  function storedValue(values, key) { return values[key] === undefined ? null : values[key]; }
   function exteriorChange(cell, value) {
     var change = cell.owner.changeFor(cell, value), stored = cell.row.record.values;
     if (cell.field !== "exterior_condition") return change;
     var ventilated = value === VENTILATED;
     return { id: change.id, values: { exterior_condition: ventilated ? "Outdoors" : value,
       ventilated_cladding: ventilated },
-    expected_values: { exterior_condition: stored.exterior_condition === undefined ? null : stored.exterior_condition,
-      ventilated_cladding: Boolean(stored.ventilated_cladding) } };
+    expected_values: { exterior_condition: storedValue(stored, "exterior_condition"),
+      ventilated_cladding: storedValue(stored, "ventilated_cladding") } };
   }
   function exteriorEdits(action) {
     return { changeFor: exteriorChange, rawValue: function (row, field) {
