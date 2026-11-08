@@ -159,8 +159,8 @@ class ColourByDerivedTest < PhComposerTestCase
     assert_equal :warning, @notices.last.first
   end
 
-  # The mask and Show only this apply to the entry's path as a whole: polygons join the wash, segments go.
-  def test_a_masked_or_set_aside_entry_washes_its_polygons_and_drops_its_segments
+  # The mask and Show only this apply to the entry's path as a whole: its shapes are not drawn.
+  def test_a_masked_or_set_aside_entry_draws_neither_its_polygons_nor_its_segments
     shapes = ColourBy::Derived.new(:polygons => [square], :segments => [[point(0, 0), point(1, 1)]])
     service = install_mode { [entry(:path => [42], :derived => shapes)] }
     @model.entities << Sketchup::Group.new(42, Sketchup::Entities.new([]))
@@ -168,7 +168,6 @@ class ColourByDerivedTest < PhComposerTestCase
     service.filter([[7]])
     assert_empty service.fills
     assert_empty service.lines
-    assert_equal 6, service.wash_triangles.length
   end
 
   # An Edge contributes no Face geometry, so an entry carrying one draws only its derived

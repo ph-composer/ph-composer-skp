@@ -160,13 +160,11 @@ class ColourByTest < PhComposerTestCase
     assert_equal({ "value" => "Wall", "state" => "classified" }, on.dig("value", "isolated"))
     assert_equal [["Floor", false], ["Wall", true]],
                  on.dig("value", "rows").map { |row| row.values_at("label", "isolated") }
-    refute_empty service.wash_triangles
     assert_includes service.fills.keys, [230, 180, 60]
 
     off = PhComposer::API.view(:context => context, :name => "ph_composer.colour_by.isolate", :params => {})
 
     assert_nil off.dig("value", "isolated")
-    assert_empty service.wash_triangles
   end
 
   def test_turning_a_different_mode_on_shows_every_row_again
@@ -177,7 +175,6 @@ class ColourByTest < PhComposerTestCase
     activate("ph_composer.zones.by_zone")
 
     assert_nil service.isolated
-    assert_empty service.wash_triangles
   end
 
   # A row the user set aside can stop existing. Keeping the isolation then mutes everything and
@@ -186,7 +183,6 @@ class ColourByTest < PhComposerTestCase
     zone = zone_group(1_740, %w[Wall Floor])
     service = activate("ph_composer.zones.faces.by_face_type")
     service.isolate(["Wall", "classified"])
-    refute_empty service.wash_triangles
 
     wall = zone.entities.grep(Sketchup::Face).find do |face|
       PhComposer::Zones::Faces::FACE_STORE.read(face)["face_type"] == "Wall"
@@ -196,7 +192,6 @@ class ColourByTest < PhComposerTestCase
     service.invalidate!(:force => true)
 
     assert_nil service.isolated
-    assert_empty service.wash_triangles
     assert_equal [false], service.legend.fetch("rows").map { |row| row.fetch("isolated") }
   end
 
@@ -271,7 +266,6 @@ class ColourByTest < PhComposerTestCase
     assert_empty service.outlines
     assert_empty service.unclassified_outlines
     assert_empty service.unclassified_hatch
-    assert_equal 6, service.wash_triangles.length
 
     restored = PhComposer::API.view(:context => context, :name => "ph_composer.colour_by.filter",
                                     :params => { "paths" => nil })
@@ -279,7 +273,6 @@ class ColourByTest < PhComposerTestCase
     assert_nil restored.dig("value", "filter_paths")
     assert_equal 3, service.fills.values.flatten.length
     refute_empty service.unclassified_outlines
-    assert_empty service.wash_triangles
   end
 
   def test_combined_face_paths_partition_nested_zone_geometry_in_every_zone_mode
@@ -295,7 +288,6 @@ class ColourByTest < PhComposerTestCase
       service.activate(name)
 
       assert_equal 6, service.fills.values.flatten.length, name
-      assert_equal 6, service.wash_triangles.length, name
       assert_equal paths, service.filter_paths, name
       assert_equal [0.0, 1.0], service.fills.values.flatten.map(&:z).uniq.sort, name
     end
@@ -317,7 +309,6 @@ class ColourByTest < PhComposerTestCase
       service.activate(name)
 
       assert_equal 3, service.fills.values.flatten.length, name
-      assert_equal 9, service.wash_triangles.length, name
       assert service.fills.values.flatten.all? { |point| point.x >= 20 }, name
       assert_equal [path], service.filter_paths
     end
@@ -333,12 +324,10 @@ class ColourByTest < PhComposerTestCase
     service.activate("ph_composer.zones.faces.by_face_type")
 
     assert_equal 6, service.fills.values.flatten.length
-    assert_equal 3, service.wash_triangles.length
     service.deactivate
     assert_equal [[outer.persistent_id]], service.legend.fetch("filter_paths")
     service.activate("ph_composer.zones.by_zone")
     assert_equal 6, service.fills.values.flatten.length
-    assert_equal 3, service.wash_triangles.length
   end
 
   def test_a_filter_command_replaces_legacy_isolation_and_isolate_remains_available
@@ -353,10 +342,8 @@ class ColourByTest < PhComposerTestCase
     assert_equal [[128, 128, 128]], service.fills.keys, "only the selected Floor is coloured"
     service.isolate(["Wall", "classified"])
     assert_empty service.fills, "isolation still combines with an existing occurrence filter"
-    assert_equal 6, service.wash_triangles.length
     service.filter(nil)
     assert_nil service.isolated
-    assert_empty service.wash_triangles
     assert_equal 6, service.fills.values.flatten.length
   end
 
@@ -369,7 +356,6 @@ class ColourByTest < PhComposerTestCase
     PhComposer::Sessions.notify_host_event(@session, :tags_changed)
 
     assert_empty service.fills
-    assert_equal 3, service.wash_triangles.length
     assert_equal [path], service.filter_paths
     rebuilds = service.rebuilds
     ColourBy.state(@session)
@@ -527,7 +513,6 @@ class ColourByTest < PhComposerTestCase
 
     service.isolate([nil, :unclassified])
     refute_empty service.unclassified_hatch
-    refute_empty service.wash_triangles
     assert_empty service.fills
 
     zone.entities.grep(Sketchup::Face).last.hidden = true
@@ -547,18 +532,17 @@ class ColourByTest < PhComposerTestCase
     assert_equal ["Face type", "Wall (1)", "Unclassified (1)"], texts
   end
 
-  def test_isolation_washes_geometry_without_a_mode_outline_and_names_its_scope_in_the_hud
+  # Ed, 2026-11-08: a set-aside Face keeps its plain SketchUp colour; nothing washes over it.
+  def test_isolation_paints_nothing_over_set_aside_faces_and_names_its_scope_in_the_hud
     zone_group(710, ["Wall", nil])
     service = activate("ph_composer.zones.faces.by_face_type")
     service.isolate(["Wall", "classified"])
 
     @model.overlays.to_a.first.draw(@model.active_view)
 
-    wash, fill = @model.active_view.draws
-    assert_equal GL_TRIANGLES, wash.first
-    assert_equal [255, 255, 255, Palette::ISOLATION_WASH_ALPHA], wash[2].to_a
-    assert_equal Palette::FILL_ALPHA, fill[2].alpha
-    assert_equal 2, @model.active_view.draws.length, "classification paints fills without replacing native edges"
+    fills = @model.active_view.draws
+    assert_equal 1, fills.length, "only the kept row's fill is drawn"
+    assert_equal Palette::FILL_ALPHA, fills.first[2].alpha
     assert_empty service.unclassified_outlines, "the set-aside Face loses its unclassified styling"
     assert_empty service.unclassified_hatch
     assert_equal Palette::UNCLASSIFIED, service.rows.last.colour, "its legend keeps the original meaning"
@@ -566,21 +550,144 @@ class ColourByTest < PhComposerTestCase
                  @model.active_view.texts.map { |(_point, text, _options)| text }
   end
 
-  def test_isolating_a_real_grey_value_keeps_its_fill_distinct_from_the_wash_without_painting_edges
-    # Level "g" selects the real grey in the categorical ramp: alone, it takes its digest's slot, 7.
-    zone_group(720, ["Wall"], :level => "g")
-    zone_group(730, ["Wall"], :level => nil)
-    service = activate("ph_composer.zones.by_level")
-    service.isolate(["g", "classified"])
+  # W-031: an active section plane cuts the overlay as it cuts the Model.
+  def test_an_active_section_plane_clips_fills_and_outlines
+    zone_group(901, %w[Wall])
+    service = activate("ph_composer.zones.faces.by_face_type")
+    assert_operator service.fills.values.flatten.map(&:x).max, :>, 1.0
 
+    @model.entities.active_section_plane = Sketchup::SectionPlane.new([-1.0, 0.0, 0.0, 1.0])
+
+    assert_operator service.fills.values.flatten.map(&:x).max, :<=, 1.0 + 1e-9, "the part past the cut is not filled"
+    assert_operator service.outlines.values.flatten.map(&:x).max, :<=, 1.0 + 1e-9, "nor outlined"
+    refute_empty service.fills.values.flatten, "the part before the cut is"
+  end
+
+  def test_a_section_plane_inside_a_group_cuts_only_that_group
+    cut_group = zone_group(903, %w[Wall])
+    kept_group = zone_group(904, %w[Wall])
+    service = activate("ph_composer.zones.faces.by_face_type")
+    full = service.fills.values.flatten.map(&:x).count { |x| x > 1.0 + 1e-9 }
+
+    cut_group.entities.active_section_plane = Sketchup::SectionPlane.new([-1.0, 0.0, 0.0, 1.0])
+
+    past = service.fills.values.flatten.map(&:x).count { |x| x > 1.0 + 1e-9 }
+    assert_operator past, :<, full, "the cut Group loses what is past its plane"
+    assert_operator past, :>, 0, "the other Group is not cut"
+    refute_nil kept_group
+  end
+
+  def test_a_group_plane_is_applied_through_the_groups_transformation
+    group = zone_group(905, %w[Wall])
+    group.define_singleton_method(:transformation) { Geom::Transformation.translation([10, 0, 0]) }
+    group.entities.active_section_plane = Sketchup::SectionPlane.new([-1.0, 0.0, 0.0, 1.0])
+    service = activate("ph_composer.zones.faces.by_face_type")
+
+    assert_operator service.fills.values.flatten.map(&:x).max, :<=, 11.0 + 1e-9
+    assert_operator service.fills.values.flatten.map(&:x).max, :>, 10.5
+  end
+
+  def test_a_plane_inside_a_nested_group_cuts_a_whole_zone_mode_at_each_face
+    group = zone_group(906, [])
+    face = Sketchup::Face.new(907, {}, :points => [point(0, 0, 0), point(2, 0, 0), point(2, 2, 0)])
+    inner = Sketchup::Group.new(908, Sketchup::Entities.new([face]))
+    group.entities << inner
+    inner.entities.active_section_plane = Sketchup::SectionPlane.new([-1.0, 0.0, 0.0, 1.0])
+    service = activate("ph_composer.zones.by_zone")
+
+    assert_operator service.fills.values.flatten.map(&:x).max, :<=, 1.0 + 1e-9
+  end
+
+  # A section plane's normal through a non-uniform scale: SketchUp's plane is x/2 + y = 0, not 2x + y = 0.
+  def test_a_plane_under_a_non_uniform_scale_stays_the_right_plane
+    group = zone_group(909, [])
+    group.define_singleton_method(:transformation) { Geom::Transformation.scaling(2, 1, 1) }
+    half = Math.sqrt(0.5)
+    group.entities.active_section_plane = Sketchup::SectionPlane.new([half, half, 0.0, 0.0])
+    view_state = PhComposer::ColourBy::ViewState.new(@model)
+
+    a, b, c, d = view_state.planes([group.persistent_id], ->(_prefix) { group }).last
+
+    assert_in_delta 0.5, a / b, 1e-9, "the normal goes through the inverse transpose"
+    assert_in_delta 0.0, c, 1e-9
+    assert_in_delta 0.0, d, 1e-9
+  end
+
+  def test_a_section_plane_with_section_cuts_off_does_not_clip
+    zone_group(902, %w[Wall])
+    service = activate("ph_composer.zones.faces.by_face_type")
+    @model.rendering_options["DisplaySectionCuts"] = false
+    @model.entities.active_section_plane = Sketchup::SectionPlane.new([-1.0, 0.0, 0.0, 1.0])
+
+    assert_operator service.fills.values.flatten.map(&:x).max, :>, 1.0
+  end
+
+  # W-078: Hide Rest of Model hides everything outside the open context, and the overlay follows it.
+  def test_hide_rest_of_model_hides_the_overlay_outside_the_open_context_and_redraws_when_toggled
+    zone_group(911, %w[Wall])
+    open_group = zone_group(912, %w[Wall])
+    service = activate("ph_composer.zones.faces.by_face_type")
+    two = service.fills.values.flatten.length
+    @model.active_path = [open_group]
+
+    @model.rendering_options["InactiveHidden"] = true
+    assert_equal two / 2, service.fills.values.flatten.length, "the closed Zone's Face is hidden"
+
+    @model.rendering_options["InactiveHidden"] = false
+    assert_equal two, service.fills.values.flatten.length, "the toggle alone redraws it"
+  end
+
+  def test_hide_rest_redraws_when_the_open_context_changes
+    zone_group(921, %w[Wall])
+    open_group = zone_group(922, %w[Wall])
+    service = activate("ph_composer.zones.faces.by_face_type")
+    two = service.fills.values.flatten.length
+    @model.rendering_options["InactiveHidden"] = true
+    assert_equal two, service.fills.values.flatten.length, "nothing is hidden at the Model root"
+
+    @model.active_path = [open_group]
+
+    assert_equal two / 2, service.fills.values.flatten.length
+  end
+
+  def test_hide_similar_hides_other_instances_of_the_open_definition
+    definition = Sketchup::ComponentDefinition.new
+    zone_group(941, %w[Wall])
+    open_group = zone_group(942, %w[Wall])
+    other = @model.entities.grep(Sketchup::Group).find { |group| !group.equal?(open_group) }
+    # SketchUp hands back a new wrapper on each read of the same definition.
+    [open_group, other].each { |group| group.define_singleton_method(:definition) { definition.dup } }
+    service = activate("ph_composer.zones.faces.by_face_type")
+    two = service.fills.values.flatten.length
+    @model.active_path = [open_group]
+
+    @model.rendering_options["InstanceHidden"] = true
+
+    assert_equal two / 2, service.fills.values.flatten.length
+  end
+
+  def test_hide_rest_keeps_a_container_of_the_open_context_but_not_its_other_faces
+    group = zone_group(951, %w[Wall Floor])
+    open_inner = Sketchup::Group.new(980, Sketchup::Entities.new([]))
+    group.entities << open_inner
+    service = activate("ph_composer.zones.by_zone")
+    @model.active_path = [group, open_inner]
+
+    @model.rendering_options["InactiveHidden"] = true
+
+    assert_empty service.fills, "the open Group holds no Face, and the Zone's own Faces are hidden"
+  end
+
+  def test_filtered_out_faces_get_no_wash_and_the_kept_ones_keep_their_fill
+    group = zone_group(931, %w[Wall Wall])
+    service = activate("ph_composer.zones.faces.by_face_type")
+    kept = [group.persistent_id, group.entities.to_a.first.persistent_id]
+
+    service.filter([kept])
     @model.overlays.to_a.first.draw(@model.active_view)
 
-    assert_equal [[127, 127, 127]], service.fills.keys
-    assert_equal [[127, 127, 127]], service.outlines.keys
-    refute_empty service.wash_triangles
-    assert_equal [Palette::ISOLATION_WASH_ALPHA, Palette::FILL_ALPHA],
-                 @model.active_view.draws.map { |_mode, _points, colour, _width| colour.alpha }
-    assert @model.active_view.draws.all? { |mode, _points, _colour, _width| mode == GL_TRIANGLES }
+    assert_equal 3, service.fills.values.flatten.length
+    assert_equal 1, @model.active_view.draws.length, "the filtered Face is not painted over"
   end
 
   def test_hidden_geometry_and_a_hidden_tag_are_not_painted
@@ -911,7 +1018,7 @@ class ColourByTest < PhComposerTestCase
     group = zone_group(2020, %w[Wall Floor])
     service = activate("ph_composer.zones.faces.by_face_type")
     service.isolate(["Wall", "classified"])
-    group.entities.grep(Sketchup::Face).last.define_singleton_method(:mesh) { |*_args| raise "mesh failed" }
+    group.entities.grep(Sketchup::Face).first.define_singleton_method(:mesh) { |*_args| raise "mesh failed" }
     reached = []
     PhComposer::Sessions.on_host_event(:transaction_committed) { |_session| reached << :ran }
 
@@ -925,7 +1032,6 @@ class ColourByTest < PhComposerTestCase
     assert_empty service.outlines
     assert_empty service.unclassified_outlines
     assert_empty service.unclassified_hatch
-    assert_empty service.wash_triangles
     assert_empty @model.overlays.to_a
   end
 

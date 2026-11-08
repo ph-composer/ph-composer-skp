@@ -72,6 +72,35 @@ module Sketchup
       removed
     end
 
+    # The view options a user sets under View; `[]=` tells observers, as SketchUp does.
+    class RenderingOptions < Hash
+      attr_reader :observers
+
+      def initialize
+        super
+        @observers = []
+      end
+
+      def add_observer(observer)
+        @observers << observer
+        true
+      end
+
+      def remove_observer(observer)
+        @observers.delete(observer)
+        true
+      end
+
+      def []=(key, value)
+        super
+        @observers.each { |observer| observer.onRenderingOptionsChanged(self, 0) }
+      end
+    end
+
+    def rendering_options
+      @rendering_options ||= RenderingOptions.new
+    end
+
     def active_path
       @active_path
     end

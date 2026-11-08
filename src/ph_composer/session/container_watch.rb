@@ -23,6 +23,11 @@ module PhComposer
       def onElementAdded(_entities, entity)
         @watch.added(entity)
       end
+
+      # Activating a section plane raises no transaction, and this is the one observer on the Model's entities.
+      def onActiveSectionPlaneChanged(_entities)
+        @watch.section_changed
+      end
     end
 
     def self.for(session)
@@ -48,6 +53,10 @@ module PhComposer
       return discover if kind == :session_created
 
       @timer.schedule { discover } if REDISCOVER.include?(kind)
+    end
+
+    def section_changed
+      @session.host_event(:section_plane_changed)
     end
 
     def added(entity)

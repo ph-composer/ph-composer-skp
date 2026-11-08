@@ -5,9 +5,10 @@ module PhComposer
     # Visibility belongs to an occurrence, not to its leaf entity: two instances may share a Face
     # while only one is hidden. Cache parent paths and entity lookup for one drawing rebuild only.
     class OccurrenceVisibility
-      def initialize(model)
+      def initialize(model, view_state = ViewState.new(model))
         @resolved = { [] => [model, true] }
         @children = {}
+        @view_state = view_state
       end
 
       def visible?(path, entity)
@@ -15,7 +16,7 @@ module PhComposer
         return false unless path.is_a?(Array) && !path.empty?
 
         resolved, visible = resolve(path)
-        resolved.equal?(entity) && visible
+        resolved.equal?(entity) && visible && !edit_hidden?(path)
       end
 
       # Whether the occurrence a path names is drawn, for shapes or text with no entity of their own:
@@ -25,10 +26,33 @@ module PhComposer
         return false unless path.is_a?(Array) && !path.empty?
 
         resolved, visible = resolve(path)
-        !resolved.nil? && visible
+        !resolved.nil? && visible && !edit_hidden?(path)
+      end
+
+      # An occurrence's triangles or segments, cut by the section planes that apply to it.
+      def clip_triangles(points, path)
+        @view_state.clip_triangles(points, section_planes(path))
+      end
+
+      def clip_segments(points, path)
+        @view_state.clip_segments(points, section_planes(path))
+      end
+
+      def cut?(point, path)
+        @view_state.cut?(point, section_planes(path))
+      end
+
+      # Whether View > Component Edit hides this occurrence; each Face is asked as well as its container.
+      def edit_hidden?(path)
+        !path.nil? && @view_state.hidden?(path, ->(prefix) { resolve(prefix).first })
       end
 
       private
+
+      def section_planes(path)
+        @planes ||= {}
+        @planes[path] ||= @view_state.planes(path, ->(prefix) { resolve(prefix).first })
+      end
 
       def resolve(path)
         return @resolved[path] if @resolved.key?(path)
@@ -66,27 +90,29 @@ module PhComposer
       module_function
 
       def call(entity, transform)
-        partition(entity, transform, nil) { true }.first(2)
+        partition(entity, transform, nil) { true }
       end
 
       # Partition at each Face, not at the projected container: one Group may contain both matching
-      # and muted geometry. Paths and transforms follow the particular occurrence throughout.
+      # and excluded geometry. Paths and transforms follow the particular occurrence throughout.
       # Legacy projections without a path keep nil; their full occurrence cannot be inferred here.
-      def partition(entity, transform, path)
+      # `clip`, the rebuild's OccurrenceVisibility, cuts each Face by the section planes on its own path.
+      def partition(entity, transform, path, clip: nil)
         triangles = []
         segments = []
-        muted = []
         transform ||= Geom::Transformation.new
-        return [triangles, segments, muted] if skipped?(entity)
+        return [triangles, segments] if skipped?(entity)
 
         each_face(entity, transform, path) do |face, world, leaf_path|
-          if yield(leaf_path)
-            add_face(face, world, triangles, segments)
-          else
-            add_face(face, world, muted, [])
-          end
+          next unless yield(leaf_path)
+
+          face_triangles = []
+          face_segments = []
+          add_face(face, world, face_triangles, face_segments)
+          triangles.concat(clip ? clip.clip_triangles(face_triangles, leaf_path) : face_triangles)
+          segments.concat(clip ? clip.clip_segments(face_segments, leaf_path) : face_segments)
         end
-        [triangles, segments, muted]
+        [triangles, segments]
       end
 
       # `transform` maps this entity's contents to world; a child container multiplies in its own.

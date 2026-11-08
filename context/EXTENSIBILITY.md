@@ -662,8 +662,8 @@ ColourBy::Entry.new(path: volume.path, value: "2.50", label: "2.50 m",
   skipped. Without `path`, shapes are drawn whenever the mode is, and are muted under an explicit
   occurrence mask, as an entity entry without a path is.
 - **Mask and isolation.** The occurrence mask (`filter`) and Show only this apply to the entry's path
-  as a whole; shapes are not partitioned. A muted or set-aside entry's polygons join the wash and its
-  segments are not drawn.
+  as a whole; shapes are not partitioned. A muted or set-aside entry draws nothing: its Faces are left to SketchUp's
+  own drawing.
 - **Legend.** One entry counts once, whatever it carries. An entry with neither entity nor shapes
   draws nothing and still counts. Select and Locate act on entries with an entity; shapes alone frame
   the view but select nothing, so a row of shape-only entries is framed and answers that nothing was

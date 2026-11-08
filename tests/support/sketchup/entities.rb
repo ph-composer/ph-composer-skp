@@ -52,6 +52,21 @@ module Sketchup
   class ModelObserver; end
   class EntityObserver; end
   class EntitiesObserver; end
+  class RenderingOptionsObserver; end
+
+  # A section plane: `get_plane` answers [a, b, c, d]; SketchUp keeps the side where the sum is positive.
+  class SectionPlane
+    attr_reader :plane
+
+    def initialize(plane)
+      @plane = plane
+    end
+
+    def get_plane
+      @plane
+    end
+  end
+
   class SelectionObserver; end
   class ViewObserver; end
   class PagesObserver; end
@@ -622,6 +637,15 @@ module Sketchup
   end
 
   class Entities
+    attr_reader :active_section_plane
+
+    def active_section_plane=(plane)
+      @active_section_plane = plane
+      Array(@observers).each do |observer|
+        observer.onActiveSectionPlaneChanged(self) if observer.respond_to?(:onActiveSectionPlaneChanged)
+      end
+    end
+
     include Enumerable
 
     @next_persistent_id = 100_000

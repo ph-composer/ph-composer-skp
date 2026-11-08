@@ -92,6 +92,19 @@ module PhComposer
       end
     end
 
+    # View > Component Edit, section cuts and the like: what a viewport drawing may paint can change with
+    # them, without a transaction.
+    class RenderingOptionsObserver < Sketchup::RenderingOptionsObserver
+      def initialize(model)
+        super()
+        @model = model
+      end
+
+      def onRenderingOptionsChanged(_options, _type)
+        Sessions.for(@model)&.host_event(:rendering_options_changed)
+      end
+    end
+
     # The camera moved: the view generation advances, so a selection page or a capture read before it is
     # known to be of another view. No refresh: nothing the panel shows depends on the camera.
     class ViewObserver < Sketchup::ViewObserver

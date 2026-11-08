@@ -24,7 +24,6 @@ module PhComposer
       def draw(view)
         top = HUD_ORIGIN.last
         if @service.active?
-          draw_wash(view)
           @service.fills.each do |colour, points|
             next if points.empty?
 
@@ -39,14 +38,6 @@ module PhComposer
       end
 
       private
-
-      def draw_wash(view)
-        return if @service.wash_triangles.empty?
-
-        colour = Palette::ISOLATION_WASH
-        view.drawing_color = Sketchup::Color.new(*colour, Palette::ISOLATION_WASH_ALPHA)
-        view.draw(GL_TRIANGLES, Tessellation.lift(@service.wash_triangles, view))
-      end
 
       # Derived outlines and segments, in each entry's colour at the mode's stroke, else the outline weight.
       def draw_lines(view)
