@@ -38,6 +38,13 @@ class AssemblyRecordsThermalTest < PhComposerTestCase
     assert_equal ["assembly.no_thermal_layers"], block["flags"]
   end
 
+  def test_ventilated_cladding_applies_only_to_an_exterior_facing_outdoors
+    ground = fixture_assembly(reference_layers, "ventilated_cladding" => true, "exterior_condition" => "Ground")
+    outdoors = fixture_assembly(reference_layers, "ventilated_cladding" => true, "exterior_condition" => "Outdoors")
+    assert_equal 0.0, Assemblies::Thermal.preview(ground, fixture_materials)["rse_m2k_w"]
+    assert_equal 0.13, Assemblies::Thermal.preview(outdoors, fixture_materials)["rse_m2k_w"]
+  end
+
   def test_ventilated_cladding_changes_only_the_with_films_value
     base = Assemblies::Thermal.preview(fixture_assembly(reference_layers), fixture_materials)
     ventilated = Assemblies::Thermal.preview(fixture_assembly(reference_layers, "ventilated_cladding" => true),

@@ -317,3 +317,9 @@ test("fractions keep their canonical value in SI and IP without a unit suffix", 
   code("1.01", fraction, "1", "out_of_range");
   assert.strictEqual(parse("1.01", fraction, "1").message, "Emissivity must be between 0 and 1.");
 });
+
+test("IP U-values keep four decimals, enough to tell with-films from construction-only", function () {
+  var uValue = field("u_value", "w_m2k"), profile = { system: "IP", numberFormat: US };
+  assert.strictEqual(units.format(0.1192, uValue, profile), "0.021 Btu/(h ft² °F)");
+  assert.strictEqual(units.format(0.1217, uValue, profile), "0.0214 Btu/(h ft² °F)");
+});

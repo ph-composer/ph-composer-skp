@@ -44,8 +44,8 @@ check({ name: "builder", output }, async ({ newPage, step }) => {
     const baseline = await writes();
     await editor.locator("[data-segment-id='seg_stud_0'].assembly-hit-target").click();
     step("Escape cancels removal before changing drawing selection");
-    await editor.getByRole("button", { name: "Delete segment", exact: true }).click();
-    const removal = editor.getByRole("dialog", { name: "Delete segment", exact: true });
+    await editor.getByRole("button", { name: "Delete Layer-Segment", exact: true }).click();
+    const removal = editor.getByRole("dialog", { name: "Delete Layer-Segment", exact: true });
     await removal.waitFor();
     await page.keyboard.press("Escape");
     await removal.waitFor({ state: "hidden" });
@@ -117,13 +117,11 @@ check({ name: "builder", output }, async ({ newPage, step }) => {
     await editor.getByRole("button", { name: "More drawing actions", exact: true }).click();
     await editor.locator("[data-builder-action='layers.flip_orientation']").click();
     await page.waitForFunction(() => window.previewHost.assemblies.records[0].values.orientation === "last_layer_outside");
-    await editor.getByRole("button", { name: "Advanced", exact: true }).click();
-    const props = editor.getByRole("dialog", { name: "Assembly properties", exact: true });
-    await props.getByRole("checkbox", { name: "Ventilated cladding", exact: true }).check();
+    await editor.locator("select[data-record-field='exterior_condition']").selectOption("Outdoors:ventilated");
     await page.waitForFunction(() => window.previewHost.assemblies.records[0].values.ventilated_cladding === true);
     assert.equal(await page.evaluate(() => window.previewHost.assemblies.records[0].display.thermal.rse_m2k_w), 0.13);
     assert.equal(await page.evaluate(() => window.previewHost.assemblies.records[0].display.thermal.u_construction_w_m2k), 0.21);
-    await page.keyboard.press("Escape");
+    assert.equal(await page.evaluate(() => window.previewHost.assemblies.records[0].values.exterior_condition), "Outdoors");
     step("builder at panel widths");
     for (const width of [1600, 1280, 900, 420, 280]) {
       await page.setViewportSize({ width, height: 900 });

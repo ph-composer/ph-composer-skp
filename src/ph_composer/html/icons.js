@@ -28,6 +28,8 @@ PhComposerUI.define("icons", ["dom"], function (dom) {
     document: '<path d="M5 3h9l5 5v13H5ZM14 3v6h5M8 13h8M8 17h8"/>',
     search: '<circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/>',
     chevron: '<path d="m6 9 6 6 6-6"/>',
+    arrow_up: '<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>',
+    arrow_down: '<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>',
     material_in_file: '<path d="M5 3h9l5 5v13H5ZM14 3v6h5"/><rect x="9" y="12" width="6" height="6" rx="1" fill="currentColor" stroke="none"/>',
     check_circle: '<circle cx="12" cy="12" r="9"/><path d="m7 12 3 3 7-7"/>',
     /* Drawing toolbar glyphs from Lucide (https://lucide.dev), matching BLDGTYP's web application.

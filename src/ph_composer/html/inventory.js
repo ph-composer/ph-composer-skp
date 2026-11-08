@@ -56,6 +56,7 @@ function (request, snapshot, ui, tables, viewControls, RecordEdits, Grid, units,
     this.edits = new RecordEdits(session, send, notice, { action: config.action, fields: config.editable,
       quantities: config.quantities, selectFields: config.selectFields, requiredFields: ["name"],
       normalize: config.normalize, validate: config.validate, navigateOnCommit: false,
+      rawValue: config.rawValue, send: config.send,
       enabled: function (state) { return Boolean(snapshot.value(state, config.section)) &&
           !self.ranges.busy() && !self.externalBusy; },
       label: function (row, field) { return row.record.values.name + " " + self.columnLabel(field); },
@@ -74,7 +75,7 @@ function (request, snapshot, ui, tables, viewControls, RecordEdits, Grid, units,
     this.scroll = ui.element("div", "phc-table-scroll phc-inventory-table");
     this.grid = new Grid({ edits: this.edits, scroll: this.scroll, toolbarParent: this.controls.root,
       hiddenColumns: function () { return {}; }, isBusy: function () { return self.busy(); }, notify: notice,
-      submitBatch: function (changes) { self.ranges.submit(changes); } });
+      changeFor: config.changeFor, submitBatch: function (changes) { self.ranges.submit(changes); } });
     // A feature's tab settings (`config.settings`, nodes it owns) end the action bar after the view controls.
     if (config.settings && config.settings.length) {
       this.settingsRoot = ui.element("div", "phc-inventory-settings");

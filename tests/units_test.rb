@@ -26,7 +26,7 @@ class UnitsTest < PhComposerTestCase
       [25.4, "length_mm", "25.4 mm", "1 in"],
       [1, "area", "1 m²", "10.76 ft²"],
       [1, "volume", "1 m³", "35.31 ft³"],
-      [1, "u_value", "1 W/(m² K)", "0.176 Btu/(h ft² °F)"],
+      [1, "u_value", "1 W/(m² K)", "0.1761 Btu/(h ft² °F)"],
       [1, "thermal_resistance", "1 m² K/W", "5.68 h ft² °F/Btu"],
       [1, "conductivity", "1 W/(m K)", "0.578 Btu/(h ft °F)"],
       [0.1, "linear_psi", "0.1 W/(m K)", "0.058 Btu/(h ft °F)"],

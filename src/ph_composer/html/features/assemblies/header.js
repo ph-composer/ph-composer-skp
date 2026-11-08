@@ -40,7 +40,8 @@ PhComposerUI.define("features/assemblies/header", ["features/assemblies/editor_s
       var bubble = new ui.Bubble(trigger, "About this Assembly's U-value");
       var films = el("p", "", "Surface films (ISO 6946): Rsi " + shared.format(thermal.rsi_m2k_w, shared.R_VALUE) +
         " · Rse " + shared.format(thermal.rse_m2k_w, shared.R_VALUE) +
-        (thermal.direction ? " · " + thermal.direction + " heat flow" : "") + ".");
+        (thermal.direction ? " · " + thermal.direction + " heat flow" : "") + "." +
+        (record.values.ventilated_cladding ? " Ventilated cladding changes the exterior film only." : ""));
       bubble.content.appendChild(films);
       [["U-value with films", thermal.u_effective_w_m2k], ["U-value construction only", thermal.u_construction_w_m2k]]
         .forEach(function (item) {
@@ -86,21 +87,10 @@ PhComposerUI.define("features/assemblies/header", ["features/assemblies/editor_s
       color.style.backgroundColor = display.color || values.color || "#ffffff";
       color.setAttribute("aria-label", "Assembly color");
       hints.appendChild(color);
-      var advanced = ui.button("Advanced"), bubble = new ui.Bubble(advanced, "Assembly properties");
-      var ventilated = el("input");
-      ventilated.type = "checkbox";
-      ventilated.checked = Boolean(values.ventilated_cladding);
-      ventilated.setAttribute("aria-label", "Ventilated cladding");
-      ventilated.addEventListener("change", function () {
-        self.action("update", { values: { ventilated_cladding: ventilated.checked } },
-          { ventilated_cladding: Boolean(values.ventilated_cladding) });
-      });
-      bubble.content.appendChild(shared.field("Ventilated cladding", ventilated));
-      bubble.content.appendChild(el("p", "muted",
-        "The exterior film changes; construction resistance stays the same."));
+      var notesButton = ui.button("Notes"), bubble = new ui.Bubble(notesButton, "Notes");
       var notes = el("div");
       self.edits.render(notes, row, "notes");
-      bubble.content.appendChild(shared.field("Notes", notes));
+      bubble.content.appendChild(notes);
       hints.appendChild(bubble.root);
       identity.appendChild(hints);
       root.appendChild(identity);

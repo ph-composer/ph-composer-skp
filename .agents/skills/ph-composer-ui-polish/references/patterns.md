@@ -110,7 +110,8 @@ Paths under **Local** are in this repository at `src/ph_composer/html/`. The UI 
   crossing to a protruding icon beside a thin Layer. Hide the gear while an inline thickness field
   owns that space. The gear targets its explicit Layer without changing Layer-Segment selection.
   The drawing gear is the sole Layer tools entry point; keep the toolbar focused on segment actions.
-  Mount the feature-owned menu outside the scrollport, retain stable Layer identity
+  Add and Move are paired arrow icons on one row each; the arrows run with the drawing, so a turned
+  Assembly reverses them. Mount the feature-owned menu outside the scrollport, retain stable Layer identity
   across repaint/reordering, and return focus on Escape.
 - Assembly Layer drag (`features/assemblies/layer_drag.js`, `stage.js`, `assembly.css`): a six-dot
   grip sits beside the gear and shares its reveal and its hiding under an inline thickness field.

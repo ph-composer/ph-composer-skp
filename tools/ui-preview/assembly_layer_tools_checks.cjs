@@ -18,6 +18,11 @@ check({ name: "assembly_layer_tools", output }, async ({ newPage, step }) => {
     const gear = editor.locator("[data-layer-tools-trigger='lyr_board_0']");
     const label = editor.locator("[data-layer-thickness='lyr_board_0']");
     await target.click(); await page.mouse.move(20, 600);
+    step("the pointer's cue waits a beat");
+    const wool = await target.boundingBox();
+    await page.mouse.move(wool.x + wool.width / 2, wool.y + wool.height / 2);
+    assert.equal(await target.evaluate(node => getComputedStyle(node).transitionDelay), "0.12s");
+    await page.mouse.move(20, 600);
     assert.equal(await editor.locator(".assembly-toolbar").getByRole("button", { name: "Layer tools", exact: true }).count(), 0);
     assert.equal(await editor.locator(".assembly-toolbar").getByRole("button", { name: "Add Layer", exact: true }).count(), 0);
     const selection = () => editor.locator(".assembly-hit-target[aria-pressed='true']").getAttribute("data-segment-id");

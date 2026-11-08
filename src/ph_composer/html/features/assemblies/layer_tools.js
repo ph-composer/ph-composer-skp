@@ -15,20 +15,29 @@ PhComposerUI.define("features/assemblies/layer_tools", ["features/assemblies/edi
       trigger.addEventListener("keydown", function (event) {
         if (event.key === "ArrowDown" || event.key === "ArrowRight") { event.preventDefault(); open(); }
       });
-      [["Add outside", "outside"], ["Add inside", "inside"]].forEach(function (item) {
-        var button = ui.button(item[0], function () {
+      // The arrows run with the drawing: its top is the exterior unless the Assembly is turned.
+      var topIsExterior = record.values.orientation !== "last_layer_outside";
+      function arrow(outer) { return outer === topIsExterior ? "arrow_up" : "arrow_down"; }
+      function pair(label, action, items, run) {
+        var row = ui.element("div", "assembly-layer-tool-row");
+        var controls = ui.element("div", "assembly-layer-tool-pair");
+        row.appendChild(ui.element("small", "muted", label));
+        (topIsExterior ? items : items.slice().reverse()).forEach(function (item) {
+          var button = ui.iconButton(item[0], arrow(item[2]), function () { run(item[1]); });
+          button.setAttribute("data-builder-action", action);
+          controls.appendChild(button);
+        });
+        row.appendChild(controls);
+        bubble.content.appendChild(row);
+      }
+      pair("Add Layer", "layers.add", [["Add outside", "outside", true], ["Add inside", "inside", false]],
+        function (side) {
           bubble.close(false);
           owner.insert({ kind: "layer", action: "layers.add", params: { anchor_layer_id: layer.id,
-            side: item[1], thickness_mm: shared.newSize("layer") } });
+            side: side, thickness_mm: shared.newSize("layer") } });
         });
-        button.setAttribute("data-builder-action", "layers.add"); bubble.content.appendChild(button);
-      });
-      [["Move outward", "outward"], ["Move inward", "inward"]].forEach(function (item) {
-        var button = ui.button(item[0], function () {
-          owner.action("layers.move", { layer_id: layer.id, direction: item[1] });
-        });
-        button.setAttribute("data-builder-action", "layers.move"); bubble.content.appendChild(button);
-      });
+      pair("Move Layer", "layers.move", [["Move outward", "outward", true], ["Move inward", "inward", false]],
+        function (direction) { owner.action("layers.move", { layer_id: layer.id, direction: direction }); });
       var barrier = record.values.air_barrier, choices = ui.element("div", "assembly-bubble-choices");
       choices.appendChild(ui.element("small", "muted", "Air barrier"));
       [["none", "None"], ["exterior", "Exterior face"], ["interior", "Interior face"]].forEach(function (item) {

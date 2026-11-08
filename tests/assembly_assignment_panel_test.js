@@ -177,6 +177,8 @@ test("selection Clear is explicit and inventory Paint resets other fields", func
   var paint = inventory.tableOptions.actions(row).filter(function (action) {
     return action.id === "paint_assembly";
   })[0];
+  assert.strictEqual(inventory.tableOptions.actions(row).filter(function (action) { return action.detail; })
+    .map(function (action) { return action.id; }).join(), "paint_assembly", "only Paint is also in the Builder");
   inventory.tableOptions.action(row, paint);
   assert.strictEqual(o.sent.length, 1);
   assert.deepStrictEqual(o.sent[0].payload.params, { field: "assembly_id", value: "asm_a", reset: true });
@@ -380,4 +382,19 @@ test("the Assembly paint glyph stops the tool without sending a null assignment"
   assert.strictEqual(o.sent[0].type, "view.invoke");
   assert.strictEqual(o.sent[0].payload.name, "ph_composer.zones.faces.stop_classifying");
   assert.deepStrictEqual(o.sent[0].payload.params, {});
+});
+
+test("Paint is on the Assembly Builder too and runs Zones' paint action without leaving it", function () {
+  var o = setup(), view = o.query("[data-section='assemblies']")._view, record = view.inventory.records[0];
+  view.open(record);
+  o.paint();
+  var paint = view.editor.root.querySelector(".assembly-toolbar").querySelectorAll("button").filter(function (node) {
+    return node.getAttribute("aria-label") === "Paint Wall onto faces";
+  })[0];
+  assert.ok(paint, "Zones' Paint shows in the Builder's toolbar");
+  assert.strictEqual(paint.getAttribute("aria-pressed"), "false");
+  paint.listeners.click({ preventDefault: function () {} });
+  assert.strictEqual(o.sent[o.sent.length - 1].payload.name, PREFIX + ".choose");
+  assert.strictEqual(o.sent[o.sent.length - 1].payload.params.value, record.id);
+  assert.ok(view.editor, "the Builder stays open");
 });

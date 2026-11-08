@@ -53,7 +53,7 @@ PhComposerUI.define("unit_tables", [], function () {
       si: unit("m3", "m³", ["cum", "cubic meter", "cubic meters", "cubic metre", "cubic metres"]),
       ip: unit("ft3", "ft³", ["cuft", "cubic foot", "cubic feet"])
     },
-    u_value: { label: "U-value", factor: U_FACTOR, precision: { SI: 3, IP: 3 }, si: unit("w_m2k", "W/(m² K)"),
+    u_value: { label: "U-value", factor: U_FACTOR, precision: { SI: 3, IP: 4 }, si: unit("w_m2k", "W/(m² K)"),
     ip: unit("btu_h_ft2_f", "Btu/(h ft² °F)") },
     thermal_resistance: { label: "thermal resistance", factor: 1 / U_FACTOR, precision: { SI: 2, IP: 2 },
     si: unit("m2k_w", "m² K/W"), ip: unit("h_ft2_f_btu", "h ft² °F/Btu") },

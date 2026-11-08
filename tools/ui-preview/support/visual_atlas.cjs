@@ -183,7 +183,7 @@ check({ name: "visual_atlas", output }, async ({ newPage, step }) => {
       const editor = page.locator(".assembly-editor");
       await editor.locator("[data-segment-id='seg_stud_0'].assembly-hit-target").click();
       await shot("detail", "rich", "assembly-selection");
-      await editor.getByRole("button", { name: "Advanced", exact: true }).click();
+      await editor.getByRole("button", { name: "Notes", exact: true }).click();
       await shot("detail", "rich", "assembly-properties");
       await cancel();
 
@@ -320,9 +320,9 @@ check({ name: "visual_atlas", output }, async ({ newPage, step }) => {
         await page.getByRole("button", { name: "Open Wall", exact: true }).click();
         const assembly = page.locator(".assembly-editor");
         await assembly.locator(".assembly-hit-target[data-segment-id='seg_wool_0']").click();
-        await assembly.getByRole("button", { name: "Segment properties", exact: true }).click();
+        await assembly.getByRole("button", { name: "Layer-Segment properties", exact: true }).click();
         await shot("key-popup", "builder", "assembly-segment-properties"); await cancel();
-        await assembly.getByRole("button", { name: "Delete segment", exact: true }).click();
+        await assembly.getByRole("button", { name: "Delete Layer-Segment", exact: true }).click();
         await shot("key-popup", "builder", "assembly-segment-removal");
         await cancel();
         const label = assembly.locator("[data-layer-thickness='lyr_board_0']");

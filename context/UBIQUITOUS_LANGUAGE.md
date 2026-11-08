@@ -91,6 +91,7 @@ not coin a third vocabulary between SketchUp and honeybee. Faces belong to a Zon
 | Material category | A preset classification shown as a colored chip. Independent of display color. User-created categories are not supported |
 | Material variant | A separately named material with independent properties, created through Duplicate Material. Never created automatically by reuse |
 | Assembly | A reusable construction definition of ordered layers. METr's own screen word. Maps to honeybee `OpaqueConstruction` |
+| Ventilated cladding | An Assembly's exterior choice. It is stored as honeybee's Outdoors plus the Assembly's ventilated flag, which sets the exterior surface film; construction resistance does not change |
 | Layer | A position in an assembly owning thickness and containing one or more Layer-Segments. Exports as one honeybee `EnergyMaterial` |
 | Layer-Segment | One side-by-side strip of a Layer: a Material and a width. Always written with its qualifier, as Building-Segment is. Exports as one column of the layer's honeybee-ph `PhDivisionGrid` |
 | SD assembly | A placeholder assembly for early design: three real layers sized to a target U-value, after honeybee-grasshopper-ph's SD constructions. Planned, not in the first assemblies phase. PH-Composer has no assembly without layers |

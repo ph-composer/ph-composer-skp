@@ -1,8 +1,8 @@
 /* Crisp keyed cross-section, accessible hit targets, dimension lines on both axes, and the edge insert control.
    Each dimension edits in place using the shared UnitField. */
 PhComposerUI.define("features/assemblies/stage", ["features/assemblies/canvas", "features/assemblies/editor_shared",
-  "features/assemblies/layer_tools", "face_words", "workspace"],
-  function (canvas, shared, layerTools, words, ui) {
+  "features/assemblies/layer_tools", "features/assemblies/form", "workspace"],
+  function (canvas, shared, layerTools, AssemblyForm, ui) {
     "use strict";
     var el = ui.element;
     // How near an edge, in screen pixels, the pointer must be before its insert control shows.
@@ -12,7 +12,7 @@ PhComposerUI.define("features/assemblies/stage", ["features/assemblies/canvas", 
     // A width dimension narrower than this puts its label beside the line rather than over it.
     var NARROW_PX = 90;
     function boundary(thermal, exterior, values) {
-      var condition = exterior && values.exterior_condition ? words.boundary(values.exterior_condition) + " · " : "";
+      var condition = exterior && values.exterior_condition ? AssemblyForm.exteriorWords(values) + " · " : "";
       return el("div", "assembly-boundary", exterior ?
         "EXTERIOR · " + condition + "Rse " + shared.format(thermal.rse_m2k_w, shared.R_VALUE) :
         "INTERIOR · Rsi " + shared.format(thermal.rsi_m2k_w, shared.R_VALUE) +
