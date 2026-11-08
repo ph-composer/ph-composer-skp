@@ -199,9 +199,13 @@ module Sketchup
       end
     end
 
+    # Fires both save callbacks with the Model's own path unchanged (host evidence 2026-11-07).
     def save_copy(path)
       fire_pre_save
       Sketchup.store_model(path, self)
+      @observers.each do |observer|
+        observer.onSaveModel(self) if observer.respond_to?(:onSaveModel)
+      end
       true
     end
 

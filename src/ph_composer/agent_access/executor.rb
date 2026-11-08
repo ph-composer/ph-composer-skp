@@ -52,7 +52,8 @@ module PhComposer
         if tool.session
           session = Sessions.find(arguments["session"])
           unless session && Tokens.serves?(live, session)
-            return result(Outcome.refused("session.unknown", SESSION_UNKNOWN, :revision => nil))
+            bound = session && live["model_name"] ? " This token reaches only #{live['model_name']}." : ""
+            return result(Outcome.refused("session.unknown", SESSION_UNKNOWN + bound, :revision => nil))
           end
 
           binding = binding_for(live, session)
