@@ -61,9 +61,9 @@
       "sha256": "2211ddb5d6685650906da297a2aeda4d99b9f1e951450ad1753747dc007a4521"
     },
     "html/features/assemblies/editor.js": {
-      "bytes": 24871,
+      "bytes": 25234,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "b0babb99e3074404ce34c007fd8018f42fffe9d778e2f23b957d721602db52bf"
+      "sha256": "4f86562d352d6fb02d28de1b6917a4fef277afe77750dcf676cfe95c5b0b77f2"
     },
     "html/features/assemblies/editor_shared.js": {
       "bytes": 2734,

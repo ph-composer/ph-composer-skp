@@ -90,11 +90,17 @@ function (shared, header, inspector, layerDrag, stage, AssemblyForm, MaterialFor
         self.dimensions[open].field.cancel(); return;
       }
       if (self.hasDimensionDraft() || self.hasRecordDraft()) return;
-      if (self.selection) { event.preventDefault(); self.select(null); }
+      // A tool another feature has on is ended first, by that feature; the selection waits for the next Escape.
+      if (self.selection && !self.contributedToolOn()) { event.preventDefault(); self.select(null); }
     });
   }
   Editor.prototype.busy = function () {
     return this.requests.busy() || Boolean(this.edits.pending) || this.color.requests.busy() || this.newMaterial.busy();
+  };
+  Editor.prototype.contributedToolOn = function () {
+    return this.contributions.actions({ key: this.record.id, record: this.record }).some(function (action) {
+      return action.detail && action.pressed;
+    });
   };
   Editor.prototype.hasRecordDraft = function () {
     return Object.keys(this.edits.cells).some(function (key) {
