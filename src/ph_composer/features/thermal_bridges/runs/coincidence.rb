@@ -19,7 +19,7 @@ module PhComposer
         CELL_M = 1.0e-3
 
         # `facts` are the Edges that count, in the order given. `conflicts` maps the path of each of them that
-        # is in conflict to the facts it conflicts with.
+        # is in conflict, itself or through an Edge it stands for, to the facts it conflicts with.
         Resolved = Struct.new(:facts, :conflicts, keyword_init: true)
 
         module_function
@@ -39,7 +39,9 @@ module PhComposer
           end
           kept = facts.select { |fact| stands_for.key?(fact.path) }
           conflicts = kept.each_with_object({}) do |fact, found|
-            differing = others.fetch(fact.path).reject { |other| alike?(fact, other) }
+            differing = ([fact] + stands_for.fetch(fact.path)).flat_map do |one|
+              others.fetch(one.path).reject { |other| alike?(one, other) }
+            end.uniq
             found[fact.path] = differing unless differing.empty?
           end
           Resolved.new(:facts => kept.map { |fact| standing_for(fact, stands_for.fetch(fact.path)) },

@@ -209,6 +209,21 @@ class ThermalBridgeRunsTest < Minitest::Test
     end
   end
 
+  # The second and fourth Edges conflict and are each dropped against a keeper: the conflict moves to the keepers.
+  def test_a_conflict_held_by_edges_that_were_dropped_stays_on_the_edges_that_stand_for_them
+    zones = (1..4).map { |n| ZONE_B.merge("zone_id" => "zon_#{n}", "zone_path" => [n * 100], "name" => "Zone #{n}") }
+    line = lambda do |zone, offset, type|
+      fact(zone, type, [0, offset, 9], [1, offset, 9])
+    end
+    rows = schedule([line.call(zones[0], 0.0, PARAPET), line.call(zones[1], 0.00002, PARAPET),
+                     line.call(zones[2], 0.00006, "tbt_SLABEDGE0001"),
+                     line.call(zones[3], 0.00004, "tbt_SLABEDGE0001")]).fetch("runs")
+    assert_equal ["Zone 1", "Zone 3"], rows.map { |row| row.dig("zone", "name") }
+    assert_equal ["thermal_bridge.coincident_conflict"] * 2, rows.map { |row| row.dig("findings", 0, "code") }
+    assert_equal rows.map { |row| row.fetch("edge_paths") },
+                 rows.map { |row| row.dig("findings", 0, "locate", "edge_paths") }
+  end
+
   def conflict_rows(one, other)
     rows = schedule([one, other]).fetch("runs")
     assert_equal 2, rows.length, "a conflict counts both until the user clears one"
