@@ -296,6 +296,23 @@ class SelectionTest < PhComposerTestCase
     assert_equal MF_UNCHECKED, mark(menus.fetch(FACES::ClassifyMenu::BOUNDARY_MENU), "Ground")
   end
 
+  def test_a_selection_of_surface_faces_shows_a_greyed_mark_and_a_mixed_one_shows_none
+    inside_zone
+    select(*@groups.first.entities.to_a.first(2))
+    surface = { "targets" => [{ "expected_values" => { "boundary_condition" => "Surface" } },
+                              { "expected_values" => { "boundary_condition" => "Surface" } }] }
+    mixed = { "targets" => [{ "expected_values" => { "boundary_condition" => "Surface" } },
+                            { "expected_values" => { "boundary_condition" => "Outdoors" } }] }
+    entries = lambda do |value|
+      API.stub(:query, ->(**_args) { { "status" => "completed", "value" => value } }) do
+        FACES::Selection::Client.new(@session).surface_entries
+      end
+    end
+
+    assert_equal [MF_CHECKED | MF_GRAYED], entries.call(surface).map { |entry| entry.state.call(@session) }
+    assert_empty entries.call(mixed)
+  end
+
   def test_assignment_handoff_is_detached_revision_guarded_and_token_scoped
     inside_zone
     select(*@groups.first.entities.to_a.first(2))

@@ -102,7 +102,8 @@ the last valid name.
 
 The user selects Faces, then sets one face type, boundary or Assembly from the native context menu:
 PH-Composer > Set Face Type, Set Face Boundary or Set Face Assembly. Each list marks the value every
-selected Face holds; a selection with mixed values marks nothing.
+selected Face holds; a selection with mixed values marks nothing. Surface comes only from Solve
+adjacencies, so it shows greyed, for Faces that all hold it.
 Existing Attached zones appear there; New attached zone opens a form for the captured selection.
 The Classify tool also paints by click, drag or Shift-click across a connected plane, one Undo
 step per gesture. In the Faces view, Type, Boundary and Assembly column menus show visibility checkboxes

@@ -33,6 +33,9 @@ module PhComposer
                                                              :available => classifiable) do |read|
             Selection.client(read.session).attached_entries
           end
+          feature.menu_entries("#{PREFIX}.surface_marked", :menu => BOUNDARY_MENU, :available => classifiable) do |read|
+            Selection.client(read.session).surface_entries
+          end
           feature.menu_item("#{PREFIX}.new_attached_zone_menu", :label => "New attached zone…", :menu => BOUNDARY_MENU,
                                                                 :available => classifiable) do |session|
             Selection.client(session).open_assignment

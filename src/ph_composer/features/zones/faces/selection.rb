@@ -181,6 +181,15 @@ module PhComposer
             shared.fetch(field, :none) == value ? MF_CHECKED : MF_UNCHECKED
           end
 
+          # Solve adjacencies alone sets Surface, so it is no choice here; a selection that holds it still
+          # gets its mark, greyed, rather than reading as mixed.
+          def surface_entries
+            return [] unless shared["boundary_condition"] == "Surface"
+
+            [Declarations::MenuEntry.new(:label => "Surface (set by Solve adjacencies)", :handler => ->(_session) {},
+                                         :state => ->(_session) { MF_CHECKED | MF_GRAYED })]
+          end
+
           def assembly_entries
             read = API.query(:context => @context, :name => "#{PREFIX}.assembly_choices")
             return [] unless read["status"] == "completed"
