@@ -41,21 +41,27 @@ module PhComposer
                                               :available => ->(_read) { false }) { |_session| Dialog.show }
     end
 
-    SavedPath = Struct.new(:path)
+    # The path the session's Model has now, and the earlier paths whose tokens a failed save left behind.
+    SavedPath = Struct.new(:path, :unmoved)
 
     def saved_path(session)
-      session.feature_state("#{FEATURE_ID}.saved_path") { SavedPath.new(session.model.path.to_s) }
+      session.feature_state("#{FEATURE_ID}.saved_path") { SavedPath.new(session.model.path.to_s, []) }
     end
 
     # After a save: a Model saved under a new name (Save As, how a stage copy is made) keeps the tokens
     # bound to it. An autosave or a save in place keeps the path and writes nothing. It runs inside
-    # SketchUp's save, so a failure is logged, never raised, and the old path is kept so the next save
-    # tries again.
+    # SketchUp's save, so a failure is logged, never raised, and the paths it left behind are moved by
+    # the next save, with any token issued since at the path the Model then had.
     def saved(session)
       held = saved_path(session)
       to = session.model.path.to_s
-      Tokens.follow(held.path, to) unless held.path.empty? || held.path == to
+      held.unmoved |= [held.path] unless held.path.empty? || held.path == to
+      held.unmoved -= [to]
       held.path = to
+      return if held.unmoved.empty?
+
+      Tokens.follow(held.unmoved, to)
+      held.unmoved = []
     rescue StandardError => error
       fields = { "severity" => "warning", "error_class" => error.class.name }
       fields["code"] = error.code if error.is_a?(CodedError)

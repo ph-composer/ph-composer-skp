@@ -88,12 +88,12 @@ module PhComposer
         list
       end
 
-      # Moves every live token bound to `from` onto `to`: the Model saved there with Save As is the same
-      # document. Writes only when a token moved, so a save at the same path changes nothing.
+      # Moves every live token bound to one of the paths `from` onto `to`: the Model saved there with Save
+      # As is the same document. Writes only when a token moved, so a save at the same path changes nothing.
       def follow(from, to)
         current = writable
         moved = current.map do |row|
-          row["revoked_at"].nil? && row[MODEL_FILE] == from ? row.merge(MODEL_FILE => to) : row
+          row["revoked_at"].nil? && from.include?(row[MODEL_FILE]) ? row.merge(MODEL_FILE => to) : row
         end
         return if moved == current
 

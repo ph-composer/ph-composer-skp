@@ -303,6 +303,23 @@ class AgentAccessServerTest < PhComposerTestCase
     assert_equal "03_spaces.skp", AgentAccess::Tokens.snapshot.fetch(digest).fetch("model_name")
   end
 
+  # A failed move from A to B, a token issued at B, then Save As to C: both tokens reach C.
+  def test_a_token_issued_after_a_failed_follow_moves_with_the_next_save_as
+    model = Sketchup::Model.new
+    model.path = "/projects/a/02_working.skp"
+    PhComposer::Sessions.for(model)
+    first = AgentAccess::Tokens.digest(AgentAccess::Tokens.issue(:model_file => model.path).fetch("token"))
+    Sketchup.refuse_default_writes = true
+    model.save("/projects/a/03_spaces.skp")
+    Sketchup.refuse_default_writes = false
+    second = AgentAccess::Tokens.digest(AgentAccess::Tokens.issue(:model_file => model.path).fetch("token"))
+
+    model.save("/projects/a/04_windows.skp")
+
+    snapshot = AgentAccess::Tokens.snapshot
+    assert_equal ["04_windows.skp"] * 2, [first, second].map { |digest| snapshot.fetch(digest).fetch("model_name") }
+  end
+
   def test_discover_says_why_a_model_only_token_sees_no_session
     @session.model.path = "/projects/b/03_spaces.skp"
     issued = AgentAccess::Tokens.issue(:model_file => "/projects/a/02_working.skp")
