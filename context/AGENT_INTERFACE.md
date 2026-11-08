@@ -278,7 +278,10 @@ repeats every check after the dialog closes. A dismissed dialog returns `cancell
 
 **Once, as an approved location.** The user approves a save destination, a library file or a library
 folder in the Libraries dialog or the Libraries menu (`ph_composer.locations.approve_destination`,
-`.approve_file`, `.approve_folder`, which only those native clients can run). The store
+`.approve_file`, `.approve_folder`, which only those native clients can run); a save destination also
+from the Export tab's "Allow agents to export here…". Its Save dialog offers `export.hbjson`, and a
+name that does not end in `.hbjson` or `.json` (any case) is kept with `.hbjson` added; a library
+export's `.json` name keeps it. The store
 (`shell/approved_locations.rb`) keeps the path on this machine, in SketchUp's own defaults, behind an
 opaque id. `ph_composer.locations.list` (`read`) returns each location's id, label, kind, dates and
 whether it is still there; never a path or a file name. A label is the user's, or "Export
@@ -297,11 +300,14 @@ a store that cannot record it refuses with `location.setup_unavailable` and noth
 `location.revoked`, `location.used`, `location.kind_mismatch`, `location.unavailable` (no longer
 there as approved), `location.setup_unreadable`, `location.setup_unavailable`. A caller that passes
 neither a native answer nor a location is refused at once with `access.user_required`, and no
-dialog opens, so an unattended call cannot block SketchUp.
+dialog opens, so an unattended call cannot block SketchUp. The refusal names where the user approves
+that kind of location (`LocationCommands::WHERE`; the Export tab too for `approve_destination`, and
+the extension a file export needs), so an agent can tell them.
 
 Replacing what an approved destination holds is consent to what the caller reviewed. The preview
 (`ph_composer.library.export_preview` or `API.export_preflight`, each with `location`) reports
-`destination: { exists, state }`; `state` is a SHA-256 of what is there, so a `read` caller learns
+`destination: { exists, state }`, and `export_preflight` adds `problem`, the refusal `start_export` gives
+the destination itself (a name without `.hbjson`, or half of a prior pair) or null; `state` is a SHA-256 of what is there, so a `read` caller learns
 whether it changed but never its contents. A replacement needs `replace: true`, that `state` as
 `expected_destination` (dispatch refuses `replace` without it as `params.invalid`) and, for a library
 export, the preview's `projection_digest`. A library export writes only a `.json` file, so an

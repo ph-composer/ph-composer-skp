@@ -56,5 +56,16 @@ module PhComposer
         value.fetch("findings").reject { |finding| finding.fetch("blocks_export") }
       end
     end
+
+    # What an approved destination holds now and, as `problem`, why start_export would refuse it (the
+    # same check Tasks#start makes), or nil, so a caller learns before starting what the start refuses.
+    def self.destination_report(location)
+      problem = nil
+      held = ApprovedLocations.observe(location) do |path|
+        problem = ArtifactPair.destination_problem(path)
+        ArtifactPair.state(path)
+      end
+      held.merge("problem" => problem)
+    end
   end
 end

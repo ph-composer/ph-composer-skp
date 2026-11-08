@@ -72,3 +72,6 @@
 .live-panel .phc-export-readiness.is-blocked + .phc-export-group li:last-child { border-bottom: 0; }
 .live-panel .phc-export-readiness.is-blocked:not(:last-child) { border-radius: var(--radius-md) var(--radius-md) 0 0; }
 .phc-export-last { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
+/* Exports by agents close the tab, set apart as the last export is. */
+.phc-export-agents { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
+.phc-export-agents p { margin: 0 0 8px; }

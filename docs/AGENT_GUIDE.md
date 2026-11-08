@@ -145,8 +145,11 @@ feature's own list, such as `ph_composer.assemblies.assemblies.list`.
 
 ### Export
 
-`ph_composer.locations.list` shows the destinations the user approved; you cannot add one.
-`export_preflight` says what would block the export. `start_export` with a location's id, then
+`ph_composer.locations.list` shows the destinations the user approved; you cannot add one. If there
+is none, ask the user to approve one with Allow agents to export here in the Export tab.
+`export_preflight` says what would block the export; with `location`, `destination.problem` says why
+`start_export` refuses that destination itself (ask the user to approve another). A pair already there
+is replaced only with `replace` and the reported `state` as `expected_destination`. `start_export` with a location's id, then
 `export_status` until the outcome arrives. While `cancellable` is true, `cancel_export` with the
 task's `task_id` stops it and writes nothing; once writing has started it finishes, and polling shows
 its outcome. Cancelling or dropping your own request does not cancel the task. When it is `export.complete`, `artifacts` gives each
