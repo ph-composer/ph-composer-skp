@@ -234,9 +234,10 @@ PhComposerUI.define("features/windows/install_editor", ["features/windows/editor
       if (row) root.appendChild(ui.iconButton("Edit " + name, "pencil", function () { self.editProduct(row); }));
       self.list.appendChild(root);
     }
-    var defaultProduct = this.products.filter(function (row) {
-      return row.id === self.settings.default_psi_install_id; })[0];
-    choice(null, "Model default", defaultProduct && defaultProduct.values.psi_w_mk);
+    var defaultId = this.settings.default_psi_install_id, defaultProduct = this.products.filter(function (row) {
+      return row.id === defaultId; })[0];
+    choice(null, "Model default", defaultId ? defaultProduct && defaultProduct.values.psi_w_mk :
+      this.settings.default_psi_install_w_mk);
     this.products.forEach(function (row) { choice(row.id, row.values.name, row.values.psi_w_mk,
       row.libraryDraft ? null : row); });
     ui.tooltip(this.apply, "Apply " + chosen + " to every perimeter edge");
@@ -275,11 +276,14 @@ PhComposerUI.define("features/windows/install_editor", ["features/windows/editor
         var eligible = self.eligible(cell, side);
         var assigned = cell.installs[side], id = assigned || self.settings.default_psi_install_id;
         var product = self.products.filter(function (row) { return row.id === id; })[0];
-        var source = eligible ? product ? assigned ? "assigned" : "default" : "missing" : classification;
+        // No Type on the edge and none as the default: the edge takes the Model's own value.
+        var modelValue = !id, source = eligible ? product || modelValue ? assigned ? "assigned" : "default" :
+          "missing" : classification;
         var label = cell.name + " " + side + ": " + (!eligible ? classification === "shared" ?
           "Shared edge · derived zero" : classification === "unavailable" ? "Edge not read · cannot paint" :
             PARTIAL_LABEL : product ? product.values.name +
-            (!assigned ? " · Model default" : "") : assigned ? "Missing product" : "Missing default");
+            (!assigned ? " · Model default" : "") : modelValue ? "Model default" :
+            assigned ? "Missing product" : "Missing default");
         var points = { top: [x, y, x + w, y], right: [x + w, y, x + w, y + h],
           bottom: [x, y + h, x + w, y + h], left: [x, y, x, y + h] }[side];
         var ends = { x1: points[0], y1: points[1], x2: points[2], y2: points[3] };
@@ -302,7 +306,8 @@ PhComposerUI.define("features/windows/install_editor", ["features/windows/editor
         if (classification === "shared") {
           if (side === "right" || side === "bottom") value(middleX, middleY + 4, "middle", "0");
         } else if (eligible) {
-          var text = product ? shared.bare(product.values.psi_w_mk, fields.LINEAR_PSI) : "?";
+          var text = product ? shared.bare(product.values.psi_w_mk, fields.LINEAR_PSI) :
+            modelValue ? shared.bare(self.settings.default_psi_install_w_mk, fields.LINEAR_PSI) : "?";
           // Outside the Window Type where the edge is on its outline. An edge that faces an Empty element keeps
           // its value inside its own element, so two facing values never share the Empty element between them.
           var outer = { top: y < y0 + 1, bottom: y + h > y0 + height * scale - 1, left: x < x0 + 1,

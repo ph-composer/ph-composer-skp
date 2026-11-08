@@ -78,6 +78,22 @@ check({ name: "window_library", output: directory }, async ({ newPage, step }) =
       assert.ok(box.x >= 0 && box.x + box.width <= width && chevron.x + chevron.width <= box.x + box.width,
         "a default control and its chevron stay inside the panel at " + width + " px");
     }
+    // With no default Type the Model's own value appears, editable, and fits beside the other two.
+    await page.evaluate(() => {
+      previewHost.windows.settings.default_psi_install_id = null; previewHost.snapshot();
+    });
+    const valueDefault = settings.getByRole("button", { name: /^Default ψ-install: 0\.04/ });
+    await valueDefault.waitFor();
+    assert.match(await psiDefault.getAttribute("aria-label"), /Model value$/);
+    for (const control of [psiDefault, valueDefault, depthDefault]) {
+      const box = await control.boundingBox();
+      assert.ok(box.x >= 0 && box.x + box.width <= width, "a default control stays inside the panel at " + width + " px");
+    }
+    await page.screenshot({ path: path.join(directory, "psi-model-value-" + width + ".png") });
+    await page.evaluate(() => {
+      previewHost.windows.settings.default_psi_install_id = "psi_a"; previewHost.snapshot();
+    });
+    await valueDefault.waitFor({ state: "hidden" });
     if (width === 1280) {
       const filter = library.getByRole("searchbox", { name: "Filter Psi-Install Type", exact: true });
       const tops = [psiDefault, depthDefault, filter].map(async control => Math.round((await control.boundingBox()).y));

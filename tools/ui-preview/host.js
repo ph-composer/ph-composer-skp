@@ -139,7 +139,7 @@
           value: JSON.parse(JSON.stringify(this.windows.psi_install_types || { records: [] })) },
         ["ph_composer.windows.settings"]: { status: "completed",
           value: JSON.parse(JSON.stringify(this.windows.settings || {
-          default_psi_install_id: null, default_install_depth_m: 0 })) },
+          default_psi_install_id: null, default_psi_install_w_mk: 0.04, default_install_depth_m: 0 })) },
         ["ph_composer.spaces.spaces"]: { status: "completed", value: JSON.parse(JSON.stringify(this.spaces || {
           spaces: [], zones: [], findings: [], units: { area: "m2", height: "m", volume: "m3", airflow: "m3/h" } })) },
         ["ph_composer.spaces.mark_tool"]: { status: "completed", value: JSON.parse(JSON.stringify(this.markTool)) },

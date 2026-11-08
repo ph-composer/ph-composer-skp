@@ -76,6 +76,19 @@ class WindowExportTest < PhComposerTestCase
     assert_empty @model.operation_starts
   end
 
+  def test_the_model_value_exports_named_and_its_value_is_part_of_the_construction_identity
+    @settings = W::Settings::DEFAULTS.dup
+    first = assess
+    assert_empty first.findings
+    side = first.constructions.fetch(0).fetch("sides").fetch("top")
+    assert_equal [W::Settings::SLOT_ID, "Model default", 0.04],
+                 side.values_at("install_id", "install_name", "psi_install_w_mk")
+    @settings = @settings.merge("default_psi_install_w_mk" => 0.06)
+    second = assess.constructions.fetch(0)
+    assert_equal 0.06, second.dig("sides", "top", "psi_install_w_mk")
+    refute_equal first.constructions.fetch(0).fetch("id"), second.fetch("id")
+  end
+
   def test_native_snapshot_caches_detached_definition_facts_and_never_uses_face_area
     @face.define_singleton_method(:area) { raise "Face.area is not gross export geometry" }
     copy = @group.entities.add_instance(@definition, @unit.transformation)
@@ -409,6 +422,14 @@ class WindowExportTest < PhComposerTestCase
     assert_equal 0.04, rows.first.dig("sides", "top", "psi_install_w_mk")
   end
 
+  def test_a_file_saved_before_the_model_value_existed_still_exports_it
+    seed_export_records
+    W::Settings::SERVICE.store.write(@model, "default_psi_install_id" => nil, "default_install_depth_m" => 0.0)
+    extracted = PhComposer::Export::Collection.build(@model, :run_id => "older", :contributors => [X::CONSTRUCTIONS])
+    side = extracted.document.fetch("sections").fetch(X::CONSTRUCTIONS).fetch("records").first.dig("sides", "top")
+    assert_equal ["Model default", 0.04], side.values_at("install_name", "psi_install_w_mk")
+  end
+
   def test_report_uses_translated_counts_names_areas_and_explicit_schema_exceptions
     result = { "window_usage" => [{ "type_id" => @type["id"], "type_name" => "<Window>",
                                     "zone_id" => "Room", "unit_count" => 2, "aperture_count" => 4,
@@ -599,7 +620,7 @@ class WindowExportTest < PhComposerTestCase
     assert_includes codes, "window_type.dimensions_incomplete"
     assert_empty assess.apertures
     @type["rows_m"] = [1.5]
-    @settings["default_psi_install_id"] = nil
+    @settings["default_psi_install_id"] = "psi_GONE00000000"
     result = assess
     install = result.findings.find { |row| row["code"] == "window_type.install_unresolved" }
     assert_includes install["message"], "Psi-Install Type"

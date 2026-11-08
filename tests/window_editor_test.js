@@ -375,6 +375,15 @@ test("Installs validates and stages Psi products, then saves their frozen update
   assert.strictEqual(params.types[0].installs[0].sides.right, null, "shared edges stay derived");
   outcome(o, "completed"); assert.strictEqual(installs.root.hidden, true); assert.strictEqual(installs.guard(), null);
 });
+test("With no default Type the Installs editor shows the Model value on Model default edges", function () {
+  var o = setup(), installs = o.editor.installEditor;
+  o.state.sections["ph_composer.windows.settings"].value.default_psi_install_id = null;
+  o.state.sections["ph_composer.windows.settings"].value.default_psi_install_w_mk = 0.05;
+  o.editor.render(o.state); installs.open(o.editor.rawRecord());
+  assert.ok(/Model default\s+0\.05/.test(text(installs.list)));
+  assert.ok(!/Missing/.test(text(installs.list)));
+  assert.ok(installs.drawing.querySelector("[aria-label='Element 1 top: Model default']"));
+});
 test("Installs bulk paint and compatible copies stay local; missing defaults remain visible", function () {
   var o = setup(), installs = o.editor.installEditor, target = JSON.parse(JSON.stringify(o.editor.rawRecord()));
   target.id = "wnt_b"; target.values.name = "Compatible target";

@@ -63,8 +63,8 @@ module PhComposer
         products = Products::KINDS.to_h do |collection, kind|
           [collection, reader.records(kind.id).to_h { |row| [row.fetch("id"), row] }]
         end
-        settings = ExportGeometry.record(reader.snapshot.model_dictionaries, Settings::SERVICE.store) ||
-                   DeepCopy.call(Settings::DEFAULTS)
+        settings = Settings::SERVICE.effective(ExportGeometry.record(reader.snapshot.model_dictionaries,
+                                                                     Settings::SERVICE.store))
         Settings::SERVICE.validate!(settings)
         reader.snapshot.records(Units::STORE.dictionary).each do |_entry, record|
           Units.validate!(record)

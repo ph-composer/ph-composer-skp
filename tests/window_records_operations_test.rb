@@ -47,7 +47,17 @@ class WindowRecordsOperationsTest < PhComposerTestCase
     end
     sized = create("types", "name" => "Sized", "rows_m" => [1.524], "columns_m" => [1.016])
     assert_equal [[1.524], [1.016]], row("types", sized).fetch("values").values_at("rows_m", "columns_m")
-    assert_equal({ "default_psi_install_id" => nil, "default_install_depth_m" => 0.0 }, settings)
+    assert_equal({ "default_psi_install_id" => nil, "default_psi_install_w_mk" => 0.04,
+                   "default_install_depth_m" => 0.0 }, settings)
+  end
+
+  def test_a_new_models_default_install_psi_is_editable_and_undoes
+    assert_equal 0.04, settings.fetch("default_psi_install_w_mk")
+    before = settings
+    set_settings(before.merge("default_psi_install_w_mk" => 0.06))
+    assert_equal 0.06, settings.fetch("default_psi_install_w_mk")
+    @model.undo
+    assert_equal before, settings
   end
 
   def test_stale_update_noop_metadata_and_duplicate_nested_identity_rules
@@ -88,7 +98,8 @@ class WindowRecordsOperationsTest < PhComposerTestCase
       values["elements"][0]["installs"] = W::Types::SIDES.to_h { |side| [side, first] }
       create("types", values)
     end
-    set_settings("default_psi_install_id" => first, "default_install_depth_m" => 0.2)
+    set_settings("default_psi_install_id" => first, "default_psi_install_w_mk" => 0.04,
+                 "default_install_depth_m" => 0.2)
     originals = ids.map { |id| stored(W::Types::KIND, id) }
     assert_equal "reference.in_use", invoke("psi_install_types.delete", "id" => first)["code"]
     usage = row("psi_install_types", first)
@@ -233,7 +244,7 @@ class WindowRecordsOperationsTest < PhComposerTestCase
     id = create("types", "name" => "Override", "install_depth_m" => 0.1)
     psi = create("psi_install_types", "name" => "Zero", "psi_w_mk" => 0)
     before = settings
-    set_settings("default_psi_install_id" => psi, "default_install_depth_m" => 0.2)
+    set_settings("default_psi_install_id" => psi, "default_psi_install_w_mk" => 0.04, "default_install_depth_m" => 0.2)
     assert_equal 0.1, row("types", id).dig("display", "install_depth_m")
     result = invoke("settings.update", "values" => before, "expected_values" => before)
     assert_equal "target.changed", result["code"]
@@ -328,7 +339,7 @@ class WindowRecordsOperationsTest < PhComposerTestCase
                                     "expected_values" => before)
     assert_equal "committed", result["effect"]
     assert_equal "Other Model", kind.store.read(other, record["id"])["name"]
-    set_settings("default_psi_install_id" => nil, "default_install_depth_m" => 0.4)
+    set_settings("default_psi_install_id" => nil, "default_psi_install_w_mk" => 0.04, "default_install_depth_m" => 0.4)
     assert_equal 0.0, W::Settings.read(other)["default_install_depth_m"]
     assert_equal 0.4, settings["default_install_depth_m"]
   end

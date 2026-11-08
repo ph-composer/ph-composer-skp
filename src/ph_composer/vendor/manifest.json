@@ -211,14 +211,14 @@
       "sha256": "488c0e49900faac67e926ce347fbbc4e69b9876a04cf13802c887cbf1d6f0fe4"
     },
     "html/features/windows/install_editor.js": {
-      "bytes": 25435,
+      "bytes": 25794,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "eeeb81150ee0dc26b4a6555827b31e44f56083e8a271ff376c7938dd6a47f180"
+      "sha256": "0f5b1c5d80c17e37bac20a5d6ce3b6d455c3ed59377cffbcf346944908145ddc"
     },
     "html/features/windows/inventory.js": {
-      "bytes": 14651,
+      "bytes": 16544,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "9eab652807eba50503a991b453e8010dab437e13619110eb1743931105696c9d"
+      "sha256": "b2110ad403387ad614d92eeff97a580f60d67b8039c7cb0718c50802b8b8e686"
     },
     "html/features/windows/library.js": {
       "bytes": 3157,

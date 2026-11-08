@@ -63,7 +63,7 @@ function state() {
   sections[PREFIX + "psi_install_types"] = { status: "completed", value: { records: [record("psi_a", {
     name: "Insulated junction", notes: "", psi_w_mk: 0.04 })] } };
   sections[PREFIX + "settings"] = { status: "completed", value: { default_psi_install_id: "psi_a",
-    default_install_depth_m: 0.1 } };
+    default_psi_install_w_mk: 0.04, default_install_depth_m: 0.1 } };
   return { session: "session", revision: 1, sections: sections, ui: {} };
 }
 module.exports = { state: state, record: record, element: element, sides: sides, withTopology: withTopology };

@@ -790,6 +790,7 @@
   },
   "settings": {
     "default_psi_install_id": "psi_a",
+    "default_psi_install_w_mk": 0.04,
     "default_install_depth_m": 0.1
   }
 };

@@ -44,7 +44,8 @@ module PhComposer
       end
 
       def type(view, record, products, settings)
-        thermal = Thermal.calculate(record, products, settings.fetch("default_psi_install_id"))
+        thermal = Thermal.calculate(record, products, settings.fetch("default_psi_install_id"),
+                                    :default_psi_w_mk => settings.fetch("default_psi_install_w_mk"))
         findings = product_findings(record, products)
         findings.concat(thermal.fetch("findings"))
         thermal.fetch("elements").each do |element|
