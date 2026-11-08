@@ -157,6 +157,63 @@ test("new Frame parses authored width and thermal quantities and completion rele
     outcome: { status: "completed", value: { id: "frm_created" } } }; o.view.render(o.state);
   assert.ok(form.root.hidden); assert.strictEqual(o.view.guard(), null);
 });
+test("Frames group by Brand beside Manufacturer; a Frame with no Brand reads No brand (W-086)", function () {
+  var o = setup(), records = o.state.sections["ph_composer.windows.frames"].value.records;
+  var controls = o.view.inventory.controls;
+  records.push(fixtures.record("frm_b", { name: "Blank", manufacturer: "Synthetic", brand: "" }));
+  records.push(fixtures.record("frm_c", { name: "Saved before Brand", manufacturer: "Synthetic" }));
+  o.view.render(o.state);
+  assert.deepStrictEqual(controls.groupBy.children.map(function (node) { return node.textContent; }),
+    ["None", "Manufacturer", "Brand"]);
+  controls.groupBy.value = "brand"; o.view.render(o.state);
+  assert.strictEqual(controls.groups.map(function (group) { return group.label; }).sort().join(), "Line A,No brand");
+  controls.groupBy.value = "manufacturer"; o.view.render(o.state);
+  assert.strictEqual(controls.groups.map(function (group) { return group.label; }).join(), "Synthetic");
+  var glazings = setup("glazings").view.inventory.controls.groupBy;
+  assert.deepStrictEqual(glazings.children.map(function (node) { return node.textContent; }), ["None", "Manufacturer"]);
+});
+function typeInto(input, text) { input.value = text; input.listeners.input({}); }
+test("Auto-name builds a new Frame's Name from its fields, and unticking leaves it to edit (W-086)", function () {
+  var o = setup(), form = o.view.form; o.view.create();
+  assert.strictEqual(form.autoName.checked, false, "the auto-name is optional");
+  typeInto(form.fields.manufacturer, "Maker"); assert.strictEqual(form.fields.name.value, "");
+  form.autoName.checked = true; form.autoName.listeners.change({});
+  assert.strictEqual(form.fields.name.value, "Maker"); assert.strictEqual(form.fields.name.disabled, true);
+  assert.strictEqual(form.submitButton.disabled, false);
+  typeInto(form.fields.brand, " Line "); typeInto(form.fields.position, "Head");
+  typeInto(form.fields.operation, "Fixed");
+  assert.strictEqual(form.fields.name.value, "Maker-Line-Head-Fixed");
+  typeInto(form.fields.brand, "");
+  assert.strictEqual(form.fields.name.value, "Maker-Head-Fixed", "a blank field drops out");
+  form.autoName.checked = false; form.autoName.listeners.change({});
+  assert.strictEqual(form.fields.name.disabled, false); assert.strictEqual(form.fields.name.value, "Maker-Head-Fixed");
+  typeInto(form.fields.name, "By hand"); typeInto(form.fields.position, "Sill");
+  assert.strictEqual(form.fields.name.value, "By hand", "unticked, the fields no longer write the Name");
+  form.submit(); assert.strictEqual(o.sent[0].payload.params.values.name, "By hand");
+  assert.strictEqual(o.sent[0].payload.params.values.position, "Sill");
+});
+test("Auto-name waits for a field, and belongs to a new Frame only (W-086)", function () {
+  var o = setup(), form = o.view.form, record = o.view.records[0]; o.view.create();
+  form.autoName.checked = true; form.autoName.listeners.change({});
+  assert.strictEqual(form.submitButton.disabled, true);
+  assert.strictEqual(form.error.textContent, "Fill in a field the name is built from.");
+  typeInto(form.fields.position, "Jamb");
+  assert.strictEqual(form.submitButton.disabled, false); assert.strictEqual(form.error.textContent, "");
+  form.submit(); assert.strictEqual(o.sent[0].payload.params.values.name, "Jamb");
+  complete(o, "refused", "Give the record a unique, nonempty name.");
+  assert.strictEqual(form.fields.name.value, "Jamb", "a refused name stays on screen");
+  assert.strictEqual(form.autoName.checked, true); assert.strictEqual(form.submitButton.disabled, false);
+  form.autoName.checked = false; form.autoName.listeners.change({});
+  assert.strictEqual(form.fields.name.disabled, false, "unticking is the way to name it by hand");
+  form.autoName.checked = true; form.autoName.listeners.change({}); form.hide();
+  form.open("create", null, o.view.records);
+  assert.strictEqual(form.autoNameLabel.hidden, false); assert.strictEqual(form.autoName.checked, false);
+  assert.strictEqual(form.fields.name.disabled, false, "the next new Frame starts unticked");
+  form.autoName.checked = true; form.autoName.listeners.change({}); form.hide();
+  form.open("duplicate", record, o.view.records);
+  assert.strictEqual(form.autoNameLabel.hidden, true); assert.strictEqual(form.fields.name.disabled, false);
+  assert.strictEqual(setup("glazings").view.form.autoName, undefined);
+});
 test("new Glazing rejects an out-of-range g-value and preserves the draft for corrected Apply", function () {
   var o = setup("glazings"), form = o.view.form; o.view.create();
   form.fields.name.value = "New glazing"; form.fields.ug_w_m2k.value = "0.6"; form.fields.g_value.value = "1.2";

@@ -104,7 +104,7 @@ values refuse copying. Frame and Glazing colors use six-digit hexadecimal string
 
 | Kind | Quantity fields | Other fields and defaults |
 | --- | --- | --- |
-| `frames` | `width_m`: nonnegative m; `uf_w_m2k`: nonnegative W/m²K; `psi_g_w_mk`: signed W/mK | `manufacturer`, `product_code`, `position`, `operation`: empty strings; `color`: `#ffffff` |
+| `frames` | `width_m`: nonnegative m; `uf_w_m2k`: nonnegative W/m²K; `psi_g_w_mk`: signed W/mK | `manufacturer`, `brand`, `product_code`, `position`, `operation`: empty strings; `color`: `#ffffff` |
 | `glazings` | `ug_w_m2k`: nonnegative W/m²K; `g_value`: 0 through 1 | `manufacturer`, `product_code`, `description`: empty strings; `color`: `#ffffff` |
 | `psi_install_types` | `psi_w_mk`: signed W/mK | No manufacturer or color field |
 

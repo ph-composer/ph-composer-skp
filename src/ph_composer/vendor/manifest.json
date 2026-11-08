@@ -206,9 +206,9 @@
       "sha256": "d5c5b94ec12e8c24b9cc2e0c0d365d030baa196375ca361f16d739901a5c136f"
     },
     "html/features/windows/form.js": {
-      "bytes": 6918,
+      "bytes": 8778,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "ded3b97d4a904d4e655bbcb982c0c39b49ca36fa8766927ee41f3e663c5dbd10"
+      "sha256": "c82fa7cd8d86509a973701f641216edad947d868a468f87309386d407fa5d522"
     },
     "html/features/windows/install_editor.js": {
       "bytes": 25882,
@@ -216,14 +216,14 @@
       "sha256": "e753aef143eac5d04f629947d45fb8b441c891b3c410de5c7fcdedfa6993fc96"
     },
     "html/features/windows/inventory.js": {
-      "bytes": 16605,
+      "bytes": 16985,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "3f79b7dbbe3a72d21f8e3e79bb4c12da7b83f77bfde99c5222a82f189d1e8fec"
+      "sha256": "0a66038db0b7fbfb6681dcf1ea50576be23d630d9b2f7f43a359291c669d12a1"
     },
     "html/features/windows/library.js": {
-      "bytes": 3293,
+      "bytes": 3347,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "b6b76244bf656cbd8b02bae5148f6e60f7f42b06db281db274bc042bab1cd304"
+      "sha256": "1dd1b224d9b1493a613b49f0b2e13b629ec48b54618dcfc810b241197953b4c9"
     },
     "html/features/windows/library_stage.js": {
       "bytes": 1468,
@@ -251,9 +251,9 @@
       "sha256": "f9bdafe79d3675118c31feff05ad4a5c82ada872c75110c636b411239ff6ae2d"
     },
     "html/features/windows/windows.css": {
-      "bytes": 35539,
+      "bytes": 35712,
       "mime": "text/css; charset=utf-8",
-      "sha256": "46d6c5137ca00a4491e3fc04d17ee88977eb921e0ccd97f1cf284b23f3a74b30"
+      "sha256": "4906032b3cee540750dfa4674248c723e2f2cdac77daa942636866e8d83d0c34"
     },
     "html/features/zones/assembly_assignment.js": {
       "bytes": 14798,
