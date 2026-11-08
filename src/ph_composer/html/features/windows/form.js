@@ -23,13 +23,38 @@ PhComposerUI.define("features/windows/form", ["dom", "record_form", "snapshot", 
         RecordForm.required(label, input);
         input.addEventListener("input", function () { self.paintReady(); });
       }
+      if ((spec.autoName || []).indexOf(column[0]) >= 0) {
+        input.addEventListener("input", function () { self.paintAutoName(); });
+      }
       self.form.appendChild(label);
+      if (column[0] === "name" && spec.autoName) self.buildAutoName();
     });
     this.explanation = ui.element("p", "muted"); this.form.appendChild(this.explanation);
     this.replacement = ui.element("select"); this.replacement.setAttribute("aria-label", "Replacement product");
     this.form.appendChild(this.replacement); this.finish();
   }
   RecordForm.extend(Form);
+  /* An optional Name built from the fields a product kind declares, for a new record only. While ticked, the Name
+     follows those fields and cannot be typed in; unticking leaves the text there to edit. */
+  Form.prototype.buildAutoName = function () {
+    var self = this, label = ui.element("label", "window-auto-name");
+    this.autoName = ui.element("input"); this.autoName.type = "checkbox";
+    label.appendChild(this.autoName); label.appendChild(ui.element("span", "", "Auto-name"));
+    ui.tooltip(label, "Builds the Name from " + this.productSpec.autoName.map(function (key) {
+      return self.productSpec.columns.filter(function (column) { return column[0] === key; })[0][1];
+    }).join(", ") + ", leaving out any left blank.");
+    this.autoName.addEventListener("change", function () {
+      self.fields.name.disabled = self.autoName.checked; self.paintAutoName(); self.paintReady();
+    });
+    this.autoNameLabel = label; this.form.appendChild(label);
+  };
+  Form.prototype.paintAutoName = function () {
+    if (!this.autoName || !this.autoName.checked) return;
+    this.fields.name.value = this.productSpec.autoName.map(function (key) {
+      return this.fields[key].value.trim();
+    }, this).filter(Boolean).join("-");
+    this.paintReady();
+  };
   Form.prototype.open = function (method, record, records) {
     if (this.disposed || !this.enabled || this.busy()) return;
     this.method = method; this.record = record && shared.clone(record); this.records = (records || []).slice();
@@ -48,6 +73,9 @@ PhComposerUI.define("features/windows/form", ["dom", "record_form", "snapshot", 
       .forEach(function (row) { if (row.id !== (record && record.id)) {
         this.replacement.appendChild(ui.option(row.id, row.values.name));
       } }, this);
+    if (this.autoName) {
+      this.autoNameLabel.hidden = method !== "create"; this.autoName.checked = false; this.fields.name.disabled = false;
+    }
     Object.keys(this.fields).forEach(function (key) {
       this.fieldLabels[key].hidden = method === "delete" || method === "duplicate" && key !== "name";
       if (this.unitFields[key]) { this.unitFields[key].cancel(); this.unitFields[key].setValue(null); }
@@ -61,13 +89,15 @@ PhComposerUI.define("features/windows/form", ["dom", "record_form", "snapshot", 
   };
   /* Create and Duplicate wait for the required Name, and say so where the footer's hint goes, as the other
      record dialogs do. */
-  var NAME_HINT = "Enter a name.";
+  var NAME_HINT = "Enter a name.", AUTO_NAME_HINT = "Fill in a field the name is built from.";
+  function isNameHint(text) { return text === NAME_HINT || text === AUTO_NAME_HINT; }
   Form.prototype.paintReady = function () {
     if (this.method === "delete" || this.busy()) return;
     var missing = !String(this.fields.name.value || "").trim();
     this.submitButton.disabled = missing;
-    if (missing || this.error.textContent === NAME_HINT) this.error.textContent = missing ? NAME_HINT : "";
-    this.error.classList.toggle("phc-form-hint", this.error.textContent === NAME_HINT);
+    var hint = this.autoName && this.autoName.checked ? AUTO_NAME_HINT : NAME_HINT;
+    if (missing || isNameHint(this.error.textContent)) this.error.textContent = missing ? hint : "";
+    this.error.classList.toggle("phc-form-hint", isNameHint(this.error.textContent));
   };
   Form.prototype.copyName = function (record) {
     var base = record.values.name.trim(), candidate = base + " (copy)", n = 1;

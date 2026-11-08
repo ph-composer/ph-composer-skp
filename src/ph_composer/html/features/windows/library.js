@@ -4,7 +4,8 @@ PhComposerUI.define("features/windows/library", ["features/windows/editor_shared
   "use strict";
   var definitions = {
     frames: { title: "Frame Library", localLabel: "Frames in this file", wireKind: "frames",
-      properties: [["Manufacturer", "manufacturer"], ["Product code", "product_code"], ["Position", "position"],
+      properties: [["Manufacturer", "manufacturer"], ["Brand", "brand"], ["Product code", "product_code"],
+      ["Position", "position"],
       ["Operation", "operation"],
       ["Width", "width_m", fields.WIDTH_M_AS_MM], ["Uf", "uf_w_m2k", fields.U_VALUE],
       ["ψ-g", "psi_g_w_mk", fields.LINEAR_PSI]] },
@@ -26,7 +27,8 @@ PhComposerUI.define("features/windows/library", ["features/windows/editor_shared
           .filter(function (name) { if (seen[name]) return false; seen[name] = true; return true; })
           .map(function (name) { return { id: name, label: name === "manual" ? "Manual" : name }; });
       }, searchText: function (row) {
-        return [row.values.name, row.values.manufacturer, row.values.product_code, row.values.notes].join(" ");
+        return [row.values.name, row.values.manufacturer, row.values.brand, row.values.product_code,
+          row.values.notes].join(" ");
       }, decorate: function (node, row) {
         if (!row.values.color) return;
         // A Frame's swatch is drawn as a frame (its colour as a band round an open centre), so a pale frame

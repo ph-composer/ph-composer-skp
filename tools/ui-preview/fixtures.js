@@ -744,6 +744,7 @@
         "values": {
           "name": "Timber frame",
           "manufacturer": "Synthetic",
+          "brand": "Line A",
           "notes": "",
           "color": "#eeeeee",
           "width_m": 0.08,

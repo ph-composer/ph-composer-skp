@@ -57,7 +57,8 @@ function state() {
   var sections = {};
   sections[PREFIX + "types"] = { status: "completed", value: { records: [type], unreadable: [] } };
   sections[PREFIX + "frames"] = { status: "completed", value: { records: [record("frm_a", { name: "Timber frame",
-    manufacturer: "Synthetic", notes: "", color: "#eeeeee", width_m: 0.08, uf_w_m2k: 1.1, psi_g_w_mk: 0.03 })] } };
+    manufacturer: "Synthetic", brand: "Line A", notes: "", color: "#eeeeee", width_m: 0.08, uf_w_m2k: 1.1,
+    psi_g_w_mk: 0.03 })] } };
   sections[PREFIX + "glazings"] = { status: "completed", value: { records: [record("glz_a", { name: "Triple glazing",
     manufacturer: "Synthetic", notes: "", color: "#e8f4fa", ug_w_m2k: 0.6, g_value: 0.5 })] } };
   sections[PREFIX + "psi_install_types"] = { status: "completed", value: { records: [record("psi_a", {

@@ -45,7 +45,7 @@ module PhComposer
 
       # Each product kind's fields after the shared ones, by its collection name.
       OWN_FIELDS = {
-        "frames" => [text("manufacturer"), text("product_code"), text("position"), text("operation"),
+        "frames" => [text("manufacturer"), text("brand"), text("product_code"), text("position"), text("operation"),
                      number("width_m", "m", :minimum => 0), number("uf_w_m2k", "W/m2K", :minimum => 0),
                      number("psi_g_w_mk", "W/mK"), color],
         "glazings" => [text("manufacturer"), text("product_code"), text("description"),

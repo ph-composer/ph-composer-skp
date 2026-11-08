@@ -354,3 +354,5 @@
    and hairlines on its outer edge and round the opening. */
 .library-sidebar-swatch.is-frame { border-width: 4px; border-radius: 1px; background: var(--surface);
   box-shadow: 0 0 0 1px #3a4a51, inset 0 0 0 1px #3a4a51; }
+/* The New Frame dialog's Auto-name tick sits on one line under the Name. */
+.phc-form-dialog label.window-auto-name { flex-direction: row; align-items: center; gap: 6px; }

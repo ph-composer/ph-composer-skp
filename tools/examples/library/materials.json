@@ -32,6 +32,7 @@
         "id": "example-frame",
         "name": "Synthetic frame",
         "manufacturer": "Synthetic manufacturer",
+        "brand": "Synthetic line",
         "product_code": "S-FRAME",
         "position": "all",
         "operation": "fixed",

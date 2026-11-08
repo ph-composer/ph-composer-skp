@@ -15,12 +15,15 @@ function (panel, inventories, forms, Form, shared, fields, request, snapshot, un
   var common = [["name", "Name"], ["manufacturer", "Manufacturer"], ["product_code", "Product code"]];
   var definitions = {
     frames: { label: "Frame", title: "Frames", recordKind: "ph_composer.windows.frame",
-      columns: common.concat([["width_m", "Width"],
+      columns: common.slice(0, 2).concat([["brand", "Brand"]], common.slice(2), [["width_m", "Width"],
       ["uf_w_m2k", "Uf"], ["psi_g_w_mk", "ψ-g"], ["position", "Position"], ["operation", "Operation"],
-      ["color", "Color"], ["notes", "Notes"]]) },
+      ["color", "Color"], ["notes", "Notes"]]),
+      groups: [["manufacturer", "Manufacturer"], ["brand", "Brand"]],
+      autoName: ["manufacturer", "brand", "position", "operation"] },
     glazings: { label: "Glazing", title: "Glazings", recordKind: "ph_composer.windows.glazing",
       columns: common.concat([["ug_w_m2k", "Ug"],
-      ["g_value", "g-value"], ["description", "Description"], ["color", "Color"], ["notes", "Notes"]]) },
+      ["g_value", "g-value"], ["description", "Description"], ["color", "Color"], ["notes", "Notes"]]),
+      groups: [["manufacturer", "Manufacturer"]] },
     psi_install_types: { label: "Psi-Install Type", title: "Psi-Install Types",
       recordKind: "ph_composer.windows.psi_install_type", columns: [["name", "Name"],
       ["psi_w_mk", "ψ-install"], ["notes", "Notes"]] }
@@ -55,10 +58,13 @@ function (panel, inventories, forms, Form, shared, fields, request, snapshot, un
         }).filter(function (field) {
         return field !== "color";
       }), quantities: quantities,
-      // Psi-Install Types have no grouping, so the kit leaves out its Group by control.
-      groups: kind === "psi_install_types" ? undefined : [["manufacturer", "Manufacturer"]],
-      value: function (record, field) { return record.values[field]; },
-      group: function (record) { return { label: record.values.manufacturer || "Manual" }; },
+      // Psi-Install Types declare no groups, so the kit leaves out its Group by control.
+      groups: spec.groups,
+      // A Frame saved before Brand existed has none: it groups with those left blank, not apart from them.
+      value: function (record, field) { return field === "brand" ? record.values.brand || "" : record.values[field]; },
+      group: function (record, field) {
+        return { label: record.values[field] || (field === "brand" ? "No brand" : "Manual") };
+      },
       settings: this.defaults,
       actions: function (row) { return [{ id: "duplicate", icon: "duplicate", label: "Duplicate " +
         row.record.values.name },

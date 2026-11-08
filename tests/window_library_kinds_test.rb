@@ -86,6 +86,13 @@ class WindowLibraryKindsTest < PhComposerTestCase
     end
   end
 
+  def test_a_frame_row_without_a_brand_maps_to_an_empty_one
+    wire = @rows.fetch("frames").reject { |key, _| key == "brand" }
+    assert_equal "", adapter("frames").map.call(wire).fetch("brand")
+    assert_equal "Line", adapter("frames").map.call(wire.merge("brand" => "Line")).fetch("brand")
+    refute W::Products::KINDS.fetch("glazings").values_schema["properties"].key?("brand")
+  end
+
   def test_shared_copy_create_retry_source_reuse_and_reviewed_replacement_for_every_kind
     @rows.each_key do |collection|
       input = copy_params(collection)

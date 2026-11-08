@@ -1123,6 +1123,9 @@ Values:
             "manufacturer": {
               "type": "string"
             },
+            "brand": {
+              "type": "string"
+            },
             "product_code": {
               "type": "string"
             },
@@ -1173,6 +1176,9 @@ Values:
       }
     },
     "manufacturer": {
+      "type": "string"
+    },
+    "brand": {
       "type": "string"
     },
     "product_code": {
@@ -12080,6 +12086,9 @@ Result:
                       "manufacturer": {
                         "type": "string"
                       },
+                      "brand": {
+                        "type": "string"
+                      },
                       "product_code": {
                         "type": "string"
                       },
@@ -12130,6 +12139,9 @@ Result:
                 }
               },
               "manufacturer": {
+                "type": "string"
+              },
+              "brand": {
                 "type": "string"
               },
               "product_code": {
@@ -12450,6 +12462,9 @@ Result:
                       "manufacturer": {
                         "type": "string"
                       },
+                      "brand": {
+                        "type": "string"
+                      },
                       "product_code": {
                         "type": "string"
                       },
@@ -12500,6 +12515,9 @@ Result:
                 }
               },
               "manufacturer": {
+                "type": "string"
+              },
+              "brand": {
                 "type": "string"
               },
               "product_code": {
@@ -32368,6 +32386,9 @@ Params:
                 "manufacturer": {
                   "type": "string"
                 },
+                "brand": {
+                  "type": "string"
+                },
                 "product_code": {
                   "type": "string"
                 },
@@ -32418,6 +32439,9 @@ Params:
           }
         },
         "manufacturer": {
+          "type": "string"
+        },
+        "brand": {
           "type": "string"
         },
         "product_code": {
@@ -32611,6 +32635,9 @@ Params:
                 "manufacturer": {
                   "type": "string"
                 },
+                "brand": {
+                  "type": "string"
+                },
                 "product_code": {
                   "type": "string"
                 },
@@ -32661,6 +32688,12 @@ Params:
           }
         },
         "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "brand": {
           "type": [
             "string",
             "null"
@@ -32868,6 +32901,12 @@ Params:
             "null"
           ]
         },
+        "brand": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "product_code": {
           "type": [
             "string",
@@ -33013,6 +33052,9 @@ Params:
                 "manufacturer": {
                   "type": "string"
                 },
+                "brand": {
+                  "type": "string"
+                },
                 "product_code": {
                   "type": "string"
                 },
@@ -33063,6 +33105,12 @@ Params:
           }
         },
         "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "brand": {
           "type": [
             "string",
             "null"
@@ -55592,3 +55640,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.19 | 2026-11-08 | ph_composer.windows.settings gains default_psi_install_w_mk, 0.04 W/mK unless set: what an edge with no Psi-Install Type inherits when the Model has no default Type. |
 | 1.20 | 2026-11-08 | The thermal-bridge schedule and export count one Type on Edges two Zones of one Building-Segment share once. thermal_bridge.coincident_conflict replaces thermal_bridge.counted_twice for coincident Edges that differ. |
 | 1.21 | 2026-11-08 | ph_composer.spaces.all no longer answers a Zone's imbalanced or findings, and space.airflow_imbalance is gone: supply and extract balance per ventilator, not per Zone. |
+| 1.22 | 2026-11-08 | A Frame gains brand, an optional text field, in ph_composer.windows.frames and the frames library kind. |

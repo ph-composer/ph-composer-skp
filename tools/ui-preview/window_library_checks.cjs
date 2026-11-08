@@ -44,6 +44,31 @@ check({ name: "frames_row_actions", output: directory }, async ({ newPage, step 
   await foldedTitleFits(windows.locator(".window-install-editor .library-sidebar-root"), "Installs");
   await narrow.close();
 });
+check({ name: "new_frame_auto_name", output: directory }, async ({ newPage, step }) => {
+  for (const width of [1280, 420, 360]) {
+    step(`New Frame auto-name: ${width}px`);
+    const page = await newPage({ viewport: { width, height: 760 } });
+    await page.goto(`http://127.0.0.1:${port}/tools/ui-preview/?fixture=windows`);
+    await page.locator("[data-tab='library']").click();
+    const library = page.locator("[data-section='library']");
+    await library.getByRole("tab", { name: "Frames", exact: true }).click();
+    await library.getByRole("button", { name: "+ New Frame", exact: true }).click();
+    const dialog = page.locator("dialog[open]");
+    await dialog.getByLabel("Auto-name").check();
+    const name = dialog.getByRole("textbox", { name: "Name", exact: true });
+    await dialog.getByRole("textbox", { name: "Manufacturer", exact: true }).fill("Maker");
+    await dialog.getByRole("textbox", { name: "Brand", exact: true }).fill("Line");
+    await dialog.getByRole("textbox", { name: "Position", exact: true }).fill("Head");
+    await dialog.getByRole("textbox", { name: "Operation", exact: true }).fill("Fixed");
+    assert.strictEqual(await name.inputValue(), "Maker-Line-Head-Fixed");
+    assert.strictEqual(await name.isDisabled(), true);
+    const box = await dialog.getByLabel("Auto-name").boundingBox();
+    const text = await dialog.locator(".window-auto-name span").boundingBox();
+    assert.ok(Math.abs((box.y + box.height / 2) - (text.y + text.height / 2)) < 6, "the tick and its word share a line");
+    await page.screenshot({ path: path.join(directory, `new-frame-auto-name-${width}.png`) });
+    await page.close();
+  }
+});
 check({ name: "window_library", output: directory }, async ({ newPage, step }) => {
   for (const width of [1280, 900, 420, 280]) {
     const page = await newPage({ viewport: { width, height: 900 } });
