@@ -32,7 +32,7 @@ module PhComposer
           items << Declarations::MenuEntry.new(:label => CLEAR,
                                                :handler => ->(session) { Assignment::Selection.client(session).clear })
         end
-        # The edge tool's "Assign by clicking…" follows in the same submenu whenever there is a type.
+        # The edge tool's "Assign by clicking Edges…" follows in the same submenu whenever there is a type.
         items.last.separator_after = true unless types.empty?
         items
       end

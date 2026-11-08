@@ -7,7 +7,7 @@ module PhComposer
       # honeybee's face types and boundary conditions, and a record's name where the palette holds its
       # id. The status bar is on screen, so a record id never reaches it.
       module ClassifyGuidance
-        NOUNS = { "face_type" => "face type", "boundary_condition" => "boundary condition",
+        NOUNS = { "face_type" => "face type", "boundary_condition" => "boundary",
                   "attached_zone_id" => "Attached zone", "assembly_id" => "Assembly" }.freeze
         LABELS = { "face_type" => ColourModes::FACE_TYPE_LABELS,
                    "boundary_condition" => ColourModes::BOUNDARY_LABELS }.freeze

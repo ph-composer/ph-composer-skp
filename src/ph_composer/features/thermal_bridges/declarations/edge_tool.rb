@@ -8,8 +8,8 @@ module PhComposer
     module EdgeToolRegistration
       PREFIX = "#{FEATURE_ID}.edge_tool".freeze
       CHOOSE_REFUSES = %w[record.unreadable target.not_found validation.failed].freeze
-      ARM_LABEL = "Assign by clicking…"
-      STOP_LABEL = "Stop assigning by clicking"
+      ARM_LABEL = "Assign by clicking Edges…"
+      STOP_LABEL = "Stop assigning Edges by clicking"
       QUANTITY = { "type" => "number", "exclusiveMinimum" => 0 }.freeze
       STATE = Shapes.object({
         "active" => { "type" => "boolean", "description" => "Whether the edge tool has the viewport." },
@@ -106,7 +106,7 @@ module PhComposer
         choices = choice_labels(rows)
         chosen = choices.key(rows.find { |row| row.fetch("id") == tool.thermal_bridge_type_id }) || choices.keys.first
         answer = UI.inputbox(["Thermal Bridge Type", "Quantity"], [chosen, tool.quantity.to_s],
-                             [choices.keys.join("|"), ""], "Assign by clicking")
+                             [choices.keys.join("|"), ""], "Assign by clicking Edges")
         return unless answer
 
         selected = choices[answer.first]

@@ -100,7 +100,10 @@ the last valid name.
 
 ## Envelope
 
-The user selects Faces, then sets one face type or boundary condition from the native context menu.
+The user selects Faces, then sets one face type, boundary or Assembly from the native context menu:
+PH-Composer > Set Face Type, Set Face Boundary or Set Face Assembly. Each list marks the value every
+selected Face holds; a selection with mixed values marks nothing. Surface comes only from Solve
+adjacencies, so it shows greyed, for Faces that all hold it.
 Existing Attached zones appear there; New attached zone opens a form for the captured selection.
 The Classify tool also paints by click, drag or Shift-click across a connected plane, one Undo
 step per gesture. In the Faces view, Type, Boundary and Assembly column menus show visibility checkboxes
@@ -136,7 +139,7 @@ Thermal bridges are identified on the model as edges, assigned a type carrying a
 exported with their measured length. A Thermal Bridge Type holds one psi-value, its group (Ambient,
 Perimeter or Basement floor) and links to its calculation report; a second value is a second type.
 Edges inside a Zone take a type from the Thermal Bridges tab's assign bar, from the right-click
-"Thermal bridge" menu, or by clicking them with Assign by clicking; each gesture is one Undo step, and
+"Thermal bridge" menu, or by clicking them with Assign by clicking Edges; each gesture is one Undo step, and
 the assignment lives on the edge, so a copy or a split carries it. Connected edges of one type,
 quantity and Zone form one run, named by its type and a counter. The Schedule lists each run's
 length, psi-value, quantity and heat loss with totals by type and by group, and Colour by shows

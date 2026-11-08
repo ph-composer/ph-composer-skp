@@ -1042,6 +1042,10 @@ module Sketchup
       @observers = []
     end
 
+    def length
+      @values.length
+    end
+
     def each(&block)
       @values.each(&block)
     end

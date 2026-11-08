@@ -829,18 +829,20 @@ something that changed nothing. A feature declares them as menu items instead:
 
 ```ruby
 feature.menu_item("ph_composer.zones.faces.classify_face_type_wall",
-                  label: "Wall", menu: "Classify faces",
+                  label: "Wall", menu: "Set Face Type",
                   state: ->(session) { ... MF_CHECKED or MF_UNCHECKED }) do |session|
   Zones::Faces.classify_tool(session).choose("face_type", "Wall")
 end
 ```
 
 `menu` is the submenu's label and is open prose; items are grouped under it in registration order,
-and `separator_after` closes a group. The handler receives the current `ModelSession`. `state` is
+and `separator_after` closes a group. A `menu` equal to `EXTENSION_NAME` makes no submenu: its items sit
+directly in the extension's own menu. The handler receives the current `ModelSession`. `state` is
 optional and is what makes an item show whether its choice is the current one.
 
 `shell/` builds the Extensions submenu and the viewport context menu from whatever is registered,
-so an outside feature reaches both without a line added to it. Nothing in `shell/` or `session/`
+so an outside feature reaches both without a line added to it. On a right-click everything sits under
+one PH-Composer submenu, which appears only when something in it applies. Nothing in `shell/` or `session/`
 names a menu item, a mode or a feature, and no feature's words appear there: a label comes from the
 declaring feature, which is also where `context/UBIQUITOUS_LANGUAGE.md`'s glossary words live.
 

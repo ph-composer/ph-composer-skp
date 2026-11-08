@@ -57,7 +57,7 @@ class ClassifyToolTest < PhComposerTestCase
                 "boundary_condition" => { "mode" => "set", "value" => "Adiabatic" },
                 "assembly_id" => { "mode" => "set", "value" => "asm_Missing00001" } }
 
-    assert_equal ["face type Roof or ceiling", "boundary condition To neighbour", "Assembly not found"],
+    assert_equal ["face type Roof or ceiling", "boundary To neighbour", "Assembly not found"],
                  guidance.describe(@context, palette)
   end
 
@@ -506,19 +506,19 @@ class ClassifyToolTest < PhComposerTestCase
     @model.active_path = [@zone_group]
     @model.selection.add(@faces.fetch(0))
     PhComposer::Commands.install
-    menu = UI.build_context_menu.entries.find do |entry|
-      entry.is_a?(UI::Menu) && entry.name == PhComposer::Zones::Faces::ClassifyMenu::MENU
-    end
+    home = extension_menu(UI.build_context_menu)
+    types = submenu(home, PhComposer::Zones::Faces::ClassifyMenu::TYPE_MENU)
+    boundaries = submenu(home, PhComposer::Zones::Faces::ClassifyMenu::BOUNDARY_MENU)
 
-    item(menu, "Wall").call
-    item(menu, "Ground").call
+    item(types, "Wall").call
+    item(boundaries, "Ground").call
 
     assert_equal "Wall", values("face_type").first
     assert_equal "Ground", values("boundary_condition").first
     assert_empty tool.palette
     refute tool.active?
     assert_nil @model.active_tool
-    has_exit = menu.entries.any? do |entry|
+    has_exit = home.entries.any? do |entry|
       entry.is_a?(Array) && entry.first == PhComposer::Zones::Faces::ClassifyMenu::OFF
     end
     refute has_exit
@@ -537,13 +537,14 @@ class ClassifyToolTest < PhComposerTestCase
     # not what the user is reaching for there.
     @model.selection.add(@zone_group)
 
-    refute_includes submenu_names(UI.build_context_menu), PhComposer::Zones::Faces::ClassifyMenu::MENU
+    type_menu = PhComposer::Zones::Faces::ClassifyMenu::TYPE_MENU
+    refute_includes submenu_names(extension_menu(UI.build_context_menu)), type_menu
 
     @model.selection.clear
     @model.active_path = [@zone_group]
     @model.selection.add(@faces.fetch(0))
 
-    assert_includes submenu_names(UI.build_context_menu), PhComposer::Zones::Faces::ClassifyMenu::MENU
+    assert_includes submenu_names(extension_menu(UI.build_context_menu)), type_menu
   end
 
   # While the tool is running, Exit remains reachable regardless of what is under the pointer.
@@ -557,10 +558,9 @@ class ClassifyToolTest < PhComposerTestCase
     tool.getMenu(over_face, 0, 10, 10, @view)
     tool.getMenu(over_nothing, 0, 99, 99, @view)
 
-    assert_includes submenu_names(over_face), PhComposer::Zones::Faces::ClassifyMenu::MENU
-    assert_includes submenu_names(over_nothing), PhComposer::Zones::Faces::ClassifyMenu::MENU
-    menu = over_nothing.entries.find { |entry| entry.is_a?(UI::Menu) }
-    item(menu, PhComposer::Zones::Faces::ClassifyMenu::OFF).call
+    assert_includes entry_labels(extension_menu(over_face)), PhComposer::Zones::Faces::ClassifyMenu::OFF
+    assert_includes entry_labels(extension_menu(over_nothing)), PhComposer::Zones::Faces::ClassifyMenu::OFF
+    item(extension_menu(over_nothing), PhComposer::Zones::Faces::ClassifyMenu::OFF).call
     refute tool.active?
   end
 
@@ -568,8 +568,10 @@ class ClassifyToolTest < PhComposerTestCase
   # legend reads rather than a second copy inside `shell/`.
   def test_the_menu_shows_honeybee_values_by_their_glossary_words
     PhComposer::Commands.install
-    labels = PhComposer::Commands.feature_menus.fetch(PhComposer::Zones::Faces::ClassifyMenu::MENU)
-                                 .entries.select { |entry| entry.is_a?(Array) }.map(&:first)
+    menu_names = PhComposer::Zones::Faces::ClassifyMenu
+    labels = [menu_names::TYPE_MENU, menu_names::BOUNDARY_MENU].flat_map do |name|
+      PhComposer::Commands.feature_menus.fetch(name).entries.select { |entry| entry.is_a?(Array) }.map(&:first)
+    end
 
     assert_includes labels, "Roof or ceiling"
     assert_includes labels, "To neighbour"
@@ -903,6 +905,18 @@ class ClassifyToolTest < PhComposerTestCase
 
   def submenu_names(menu)
     menu.entries.grep(UI::Menu).map(&:name)
+  end
+
+  def submenu(menu, name)
+    menu.entries.grep(UI::Menu).find { |entry| entry.name == name }
+  end
+
+  def extension_menu(menu)
+    submenu(menu, PhComposer::EXTENSION_NAME)
+  end
+
+  def entry_labels(menu)
+    menu.entries.grep(Array).map(&:first)
   end
 
   def checked(menu, label)

@@ -1,4 +1,4 @@
-/* The edge tool's two controls in the assign bar. "Assign by clicking" arms the tool in SketchUp with the bar's
+/* The edge tool's two controls in the assign bar. "Assign by clicking Edges" arms the tool in SketchUp with the bar's
    type and quantity and stays pressed while the tool has the viewport, when a second click stops it; Stop shows
    only then. The tool's state comes from the `edge_tool` snapshot section, so a tool ended in SketchUp (Escape,
    another tool) releases both. The panel sends only the two view commands; each gesture the tool completes is
@@ -15,11 +15,11 @@ PhComposerUI.define("features/thermal_bridges/edge_tool", ["request", "snapshot"
     this.channel = request.channel(session, send, "thermal-bridge-edge-tool", "view.invoke");
     this.arm = ui.button("");
     this.arm.className = "tb-edge-tool-arm";
-    this.arm.setAttribute("aria-label", "Assign by clicking");
+    this.arm.setAttribute("aria-label", "Assign by clicking Edges");
     this.arm.appendChild(ui.glyph("paint_bucket"));
-    this.arm.appendChild(ui.element("span", "tb-edge-tool-label", "Assign by clicking"));
+    this.arm.appendChild(ui.element("span", "tb-edge-tool-label", "Assign by clicking Edges"));
     this.stop = ui.button("Stop", function () { self.stopTool(); });
-    this.stop.setAttribute("aria-label", "Stop assigning by clicking");
+    this.stop.setAttribute("aria-label", "Stop assigning Edges by clicking");
     this.state = { active: false };
   }
   /* Whether the tool has the viewport, as the last snapshot said. */

@@ -2,7 +2,7 @@
    and a type, a quantity, Assign and Clear for them. It always shows, so selecting never moves the table; with
    nothing to assign, Assign is disabled and its reason sits beside it. Each press is one public action and one
    Undo step over the Edges as the selection read them, so an Edge changed since refuses rather than writing.
-   The same type and quantity arm the edge tool, the secondary route, with "Assign by clicking"; while the tool
+   The same type and quantity arm the edge tool, the secondary route, with "Assign by clicking Edges"; while the tool
    runs they show what it assigns, and changing them re-arms it. */
 PhComposerUI.define("features/thermal_bridges/assign_bar", ["request", "snapshot", "workspace",
   "features/thermal_bridges/shared", "features/thermal_bridges/edge_tool"], function (request, snapshot, ui, shared,
