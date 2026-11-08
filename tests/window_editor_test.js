@@ -79,6 +79,16 @@ test("dimension unit draft survives a unit switch and navigation is guarded", fu
   assert.strictEqual(field.input.value, "500 mm"); assert.ok(o.editor.guard());
   field.cancel(); assert.strictEqual(o.sent.length, 0);
 });
+test("Installs lists Model default, then Psi-Install Types by name, a staged one among them (W-096)", function () {
+  var o = setup(), installs = o.editor.installEditor, records = o.state.sections[
+    "ph_composer.windows.psi_install_types"].value.records;
+  records.unshift(fixtures.record("psi_z", { name: "Zinc", psi_w_mk: 0.01 }));
+  records.push(fixtures.record("psi_b", { name: "Birch", psi_w_mk: 0.02 }));
+  o.editor.render(o.state); installs.open(o.editor.rawRecord());
+  installs.products.push({ id: "staged", values: { name: "Karri", psi_w_mk: 0.03 } }); installs.paint();
+  assert.deepStrictEqual(installs.list.querySelectorAll(".window-install-choice-name").map(function (node) {
+    return node.textContent; }), ["Model default", "Birch", "Insulated junction", "Karri", "Zinc"]);
+});
 test("Installs stage locally, exclude shared edge, Save once and Cancel never writes", function () {
   var o = setup(), installs = o.editor.installEditor; installs.open(o.editor.rawRecord()); installs.selected = "psi_a";
   assert.strictEqual(installs.paintEdge("wel_a", "right"), false); assert.strictEqual(o.sent.length, 0);
