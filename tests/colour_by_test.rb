@@ -587,6 +587,32 @@ class ColourByTest < PhComposerTestCase
     assert_operator service.fills.values.flatten.map(&:x).max, :>, 10.5
   end
 
+  def test_a_plane_inside_a_nested_group_cuts_a_whole_zone_mode_at_each_face
+    group = zone_group(906, [])
+    face = Sketchup::Face.new(907, {}, :points => [point(0, 0, 0), point(2, 0, 0), point(2, 2, 0)])
+    inner = Sketchup::Group.new(908, Sketchup::Entities.new([face]))
+    group.entities << inner
+    inner.entities.active_section_plane = Sketchup::SectionPlane.new([1.0, 0.0, 0.0, -1.0])
+    service = activate("ph_composer.zones.by_zone")
+
+    assert_operator service.fills.values.flatten.map(&:x).max, :<=, 1.0 + 1e-9
+  end
+
+  # A section plane's normal through a non-uniform scale: SketchUp's plane is x/2 + y = 0, not 2x + y = 0.
+  def test_a_plane_under_a_non_uniform_scale_stays_the_right_plane
+    group = zone_group(909, [])
+    group.define_singleton_method(:transformation) { Geom::Transformation.scaling(2, 1, 1) }
+    half = Math.sqrt(0.5)
+    group.entities.active_section_plane = Sketchup::SectionPlane.new([half, half, 0.0, 0.0])
+    view_state = PhComposer::ColourBy::ViewState.new(@model)
+
+    a, b, c, d = view_state.planes([group.persistent_id], ->(_prefix) { group }).last
+
+    assert_in_delta 0.5, a / b, 1e-9, "the normal goes through the inverse transpose"
+    assert_in_delta 0.0, c, 1e-9
+    assert_in_delta 0.0, d, 1e-9
+  end
+
   def test_a_section_plane_with_section_cuts_off_does_not_clip
     zone_group(902, %w[Wall])
     service = activate("ph_composer.zones.faces.by_face_type")

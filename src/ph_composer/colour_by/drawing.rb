@@ -41,11 +41,10 @@ module PhComposer
         # A set-aside or filtered-out Face is left to SketchUp's own drawing: nothing is painted over it.
         return if @set_aside.call(entry.value, state)
 
-        triangles, segments = Tessellation.partition(entry.entity, entry.transform, entry.path) do |path|
+        triangles, segments = Tessellation.partition(entry.entity, entry.transform, entry.path,
+                                                     :clip => @visibility) do |path|
           @in_filter.call(path) && !@visibility.edit_hidden?(path)
         end
-        triangles = @visibility.clip_triangles(triangles, entry.path)
-        segments = @visibility.clip_segments(segments, entry.path)
         if state == :unclassified
           @unclassified_outlines.concat(segments) unless entry.hatch_outline == false
           @unclassified_triangles.concat(triangles)

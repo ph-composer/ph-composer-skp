@@ -84,15 +84,15 @@ module PhComposer
         entities.respond_to?(:active_section_plane) ? entities.active_section_plane&.get_plane : nil
       end
 
+      # A plane is a row of coefficients, so it maps through the inverse: this stays right under scaling.
       def world_plane(plane, transform)
         a, b, c, d = plane
-        origin = Geom::Point3d.new(-d * a, -d * b, -d * c)
-        tip = Geom::Point3d.new(origin.x + a, origin.y + b, origin.z + c)
-        base = origin.transform(transform)
-        reached = tip.transform(transform)
-        x, y, z = [reached.x - base.x, reached.y - base.y, reached.z - base.z]
-        length = Math.sqrt((x**2) + (y**2) + (z**2))
-        [x / length, y / length, z / length, -(x * base.x + y * base.y + z * base.z) / length]
+        m = transform.inverse.to_a
+        coefficients = [0, 4, 8, 12].map do |column|
+          (a * m[column]) + (b * m[column + 1]) + (c * m[column + 2]) + (d * m[column + 3])
+        end
+        length = Math.sqrt(coefficients.first(3).sum { |value| value**2 })
+        coefficients.map { |value| value / length }
       end
 
       # A coincident point counts as on the plane, so float noise cannot shred a Face in the cut's own plane.

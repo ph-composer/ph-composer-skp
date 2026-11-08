@@ -96,14 +96,21 @@ module PhComposer
       # Partition at each Face, not at the projected container: one Group may contain both matching
       # and excluded geometry. Paths and transforms follow the particular occurrence throughout.
       # Legacy projections without a path keep nil; their full occurrence cannot be inferred here.
-      def partition(entity, transform, path)
+      # `clip`, the rebuild's OccurrenceVisibility, cuts each Face by the section planes on its own path.
+      def partition(entity, transform, path, clip: nil)
         triangles = []
         segments = []
         transform ||= Geom::Transformation.new
         return [triangles, segments] if skipped?(entity)
 
         each_face(entity, transform, path) do |face, world, leaf_path|
-          add_face(face, world, triangles, segments) if yield(leaf_path)
+          next unless yield(leaf_path)
+
+          face_triangles = []
+          face_segments = []
+          add_face(face, world, face_triangles, face_segments)
+          triangles.concat(clip ? clip.clip_triangles(face_triangles, leaf_path) : face_triangles)
+          segments.concat(clip ? clip.clip_segments(face_segments, leaf_path) : face_segments)
         end
         [triangles, segments]
       end
