@@ -207,9 +207,9 @@ class AgentAccessTokensTest < PhComposerTestCase
     assert_equal "no_live_token", JSON.parse(stopped_events.first).fetch("status")
   end
 
-  # The last revoke answers a waiting call first; the server then stops itself on its next tick, without
-  # passing through Listener.stop, and the log still says so.
-  def test_diagnostics_record_the_stop_when_a_waiting_call_defers_it
+  # The last revoke answers a waiting call first and only asks the server to stop on its next tick; a new
+  # token can cancel that, so the server records the stop when it happens (AgentAccessServerTest).
+  def test_a_stop_a_waiting_call_defers_is_not_recorded_until_it_happens
     waiting = StubAgentServer.new(46_110)
     deferred = []
     waiting.define_singleton_method(:refuse_revoked) { |_live| { "token" => 1 } }
@@ -220,7 +220,7 @@ class AgentAccessTokensTest < PhComposerTestCase
     Tokens.revoke(row.fetch("id"))
 
     assert_equal [:stop_soon], deferred
-    assert_equal 1, stopped_events.length
+    assert_empty stopped_events
   end
 
   def test_a_token_whose_listener_cannot_bind_is_not_kept_and_the_dialog_says_why

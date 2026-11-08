@@ -156,7 +156,7 @@ module PhComposer
       # Entries are taken one at a time, so those not yet run stay queued and count against their token's
       # pending limit while an earlier one runs.
       def pump
-        return stop if @lock.synchronize { @stop_requested }
+        return Listener.finish_stop(self) if @lock.synchronize { @stop_requested }
 
         @lock.synchronize { @last_tick = @clock.call }
         ran = 0

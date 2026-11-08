@@ -29,9 +29,7 @@ module PhComposer
           answered = @server ? @server.refuse_revoked(live) : {}
           AgentAccess.drop_bindings(live)
           if snapshot.empty?
-            running = !@server.nil?
-            answered.empty? ? stop : @server.stop_soon
-            Diagnostics.log("agent_access_stopped", "status" => "no_live_token") if running
+            answered.empty? ? stop_with_no_live_token : @server.stop_soon
             return answered
           end
 
@@ -44,6 +42,12 @@ module PhComposer
           @server&.stop
           @server = nil
           @failure = nil
+        end
+
+        # The stop the last revoke deferred, from the server's next tick. It is logged here, not when asked
+        # for, because a token issued in between cancels it.
+        def finish_stop(server)
+          log_no_live_token if server.stop
         end
 
         # Stops the listener and forgets every token's latest call: a fresh process.
@@ -108,6 +112,17 @@ module PhComposer
         end
 
         private
+
+        def stop_with_no_live_token
+          running = !@server.nil?
+          stop
+          log_no_live_token if running
+        end
+
+        # Why an agent's connection is refused from here on: the last live token was revoked.
+        def log_no_live_token
+          Diagnostics.log("agent_access_stopped", "status" => "no_live_token")
+        end
 
         def port_free?
           TCPServer.new("127.0.0.1", port).close
