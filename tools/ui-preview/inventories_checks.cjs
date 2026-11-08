@@ -61,11 +61,15 @@ check({ name: "inventories", output }, async ({ newPage, step }) => {
         assert.equal(await materialForm.getByRole("textbox", { name, exact: true }).inputValue(), "",
           `${name} opens blank in ${system}`);
       }
+      assert.equal(await materialForm.getByRole("combobox", { name: "Conductivity input form", exact: true }).inputValue(),
+        system === "IP" ? "r_per_in" : "w_mk", `the input form follows ${system}`);
       if (system === "IP") {
         await page.keyboard.press("Escape");
         await materialForm.waitFor({ state: "hidden" });
       }
     }
+    await materialForm.getByRole("button", { name: "Wood #c69c6d", exact: true }).click();
+    await page.screenshot({ path: path.join(output, "new-material-form.png") });
     await materialForm.getByRole("textbox", { name: "Name", exact: true }).fill("New board");
     await materialForm.getByRole("combobox", { name: "Category", exact: true }).selectOption("woods");
     await materialForm.getByRole("textbox", { name: "Conductivity", exact: true }).fill("0.05 W/(m K)");
@@ -74,6 +78,7 @@ check({ name: "inventories", output }, async ({ newPage, step }) => {
     assert.equal(await page.evaluate(() => window.previewHost.materials.records[2].values.conductivity_w_mk), 0.05);
     const created = await page.evaluate(() => window.previewHost.sent.filter(message => message.type === "action.invoke" &&
       message.payload.name === "ph_composer.assemblies.materials.create").slice(-1)[0].payload.params.values);
+    assert.equal(created.color, "#c69c6d");
     assert.deepEqual([created.density_kg_m3, created.specific_heat_j_kgk, created.emissivity], [null, null, null],
       "unset thermal properties are sent as null, never a placeholder");
     const stored = await page.evaluate(() => window.previewHost.materials.records[2].values);

@@ -161,11 +161,61 @@ test("new Material converts IP entries and a refused create retains its fields",
   assert.strictEqual(form.cancel.disabled, false);
 });
 
+test("new Material reads a bare number in the chosen input form and stores W/(m K)", function () {
+  var o = setup(), form = materials(o).newMaterial, field = form.unitFields.conductivity_w_mk;
+  o.modules.unit_preferences.set("unit_system", "IP");
+  assert.strictEqual(field.formChoice.value, "r_per_in", "R per inch first in IP");
+  form.open();
+  form.fields.name.value = "Mineral wool";
+  form.fields.conductivity_w_mk.value = "4";
+  form.fields.conductivity_w_mk.listeners.input({});
+  // Choosing a form rereads what is typed; it does not convert it.
+  field.formChoice.value = "btu_in_h_ft2_f";
+  field.formChoice.listeners.change({});
+  assert.strictEqual(form.fields.conductivity_w_mk.value, "4");
+  field.formChoice.value = "r_per_in";
+  field.formChoice.listeners.change({});
+  form.submit();
+  assert.ok(Math.abs(o.sent[0].payload.params.values.conductivity_w_mk - 0.036057) < 0.000001);
+});
+
+test("the shared table quantity keeps its own unit while the form shows R per inch", function () {
+  var o = setup(), form = materials(o).newMaterial;
+  o.modules.unit_preferences.set("unit_system", "IP");
+  o.paint();
+  assert.strictEqual(form.unitFields.conductivity_w_mk.field.inputForm, "r_per_in");
+  assert.strictEqual(materials(o).inventory.edits.quantities.conductivity_w_mk.inputForm, undefined);
+});
+
+test("new Material sends the chosen color and starts the next one white", function () {
+  var o = setup(), form = materials(o).newMaterial;
+  form.open();
+  form.fields.name.value = "Painted panel";
+  form.color.swatches[9].button.listeners.click({ preventDefault: function () {} });
+  assert.strictEqual(form.color.swatches[9].button.getAttribute("aria-pressed"), "true");
+  form.submit();
+  assert.strictEqual(o.sent[0].payload.params.values.color, form.color.swatches[9].color);
+  result(o, 0, "completed");
+  assert.strictEqual(form.color.color, "#ffffff");
+});
+
+test("an empty inventory offers the pane's create action and runs its guard", function () {
+  var o = setup(), section = o.state.sections["ph_composer.assemblies.materials"];
+  section.value.records = [];
+  o.paint();
+  var button = o.roots.library._view.surface("materials").inventory.scroll.querySelector(".phc-empty-action");
+  assert.strictEqual(button.textContent, "+ New Material");
+  button.listeners.click({ preventDefault: function () {} });
+  assert.strictEqual(materials(o).newMaterial.root.hidden, false);
+  button.listeners.click({ preventDefault: function () {} });
+  assert.strictEqual(o.notices[o.notices.length - 1], "Finish or cancel the open form.");
+});
+
 test("an inventory with no records names the next step; a filter that hides them all says so instead", function () {
   var o = setup(), section = o.state.sections["ph_composer.assemblies.assemblies"], kept = section.value.records;
   section.value.records = [];
   o.paint();
-  assert.ok(text(o.roots.assemblies).includes("No Assembly records yet. Choose + New Assembly."));
+  assert.ok(text(o.roots.assemblies).includes("No Assembly records yet."));
   section.value.records = kept;
   o.paint();
   var filter = o.roots.assemblies.querySelectorAll("input").filter(function (node) {

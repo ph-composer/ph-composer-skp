@@ -203,4 +203,25 @@ test.describe("a field the page takes away", function () {
     assert.strictEqual(prevented, 1);
     assert.strictEqual(control.input.value, "1200");
   });
+  test("a field with an input form reads and rewrites a number in the chosen form", function () {
+    var control = new modules.unit_field.UnitField({ forms: true, field: { quantity: "conductivity", unit: "w_mk",
+      label: "Conductivity", allowBlank: true } }), changes = 0;
+    modules.unit_preferences.set("unit_system", "IP");
+    assert.strictEqual(control.formChoice.value, "r_per_in");
+    assert.strictEqual(control.field.inputForm, "r_per_in");
+    control.input.value = "4.006"; control.input.listeners.input({});
+    control.onCommit = function () { changes += 1; };
+    control.input.listeners.keydown({ key: "Enter", preventDefault: function () {} });
+    assert.strictEqual(changes, 1);
+    assert.ok(Math.abs(control.baseline - 0.036003) < 0.000001);
+    assert.strictEqual(control.input.value, "4.006", "the Enter route leaves the number in the chosen form");
+    var parsed = control.parse();
+    assert.ok(Math.abs(parsed.value - control.baseline) < 0.000001, "and a later read gives the same value");
+    control.formChoice.value = "w_mk";
+    control.formChoice.listeners.change({});
+    modules.unit_preferences.set("unit_system", "SI");
+    control.setValue(null);
+    modules.unit_preferences.set("unit_system", "IP");
+    assert.strictEqual(control.formChoice.value, "w_mk", "the user's choice outlives a unit switch");
+  });
 });

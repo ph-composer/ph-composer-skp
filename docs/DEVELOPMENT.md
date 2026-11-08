@@ -306,7 +306,7 @@ in [`planning/archive/phase-01-faces-and-zones/evidence/p1-a-geometry.md`](../pl
 The panel-closed walkthroughs are in
 [`tools/examples/authoring/`](../tools/examples/authoring/README.md): P1-B's Zone and Face
 authoring, P1-C's adjacency, P1-D's Zone repairs, P1-D's adjacency cut, P1-D's Colour-by overlay,
-P1-D's Classify tool, P1-D's Zones / Faces screen, P1-D's split identity repair, the gesture cost
+P1-D's Classify tool, P1-D's Zones / Geometry screen, P1-D's split identity repair, the gesture cost
 measurement, and a panel-closed client that repeats the API quickstart against a real Model. The
 Classify tool's walkthrough ran on 2026-09-20 with an operator at the mouse,
 because SketchUp delivers pointer events to the active tool and the Ruby API synthesizes none; it
@@ -318,7 +318,7 @@ Accepted current-host results are in
 [`p1-d-repairs-and-cut.md`](../planning/archive/phase-01-faces-and-zones/evidence/p1-d-repairs-and-cut.md) and
 [`p1-d-classify-tool.md`](../planning/archive/phase-01-faces-and-zones/evidence/p1-d-classify-tool.md).
 
-The Zones / Faces screen's eight handoff questions were completed with native computer use on
+The Zones / Geometry screen's eight handoff questions were completed with native computer use on
 2026-09-26. The [evidence](../planning/archive/phase-01-faces-and-zones/evidence/p1-d-overview.md) records the fixes,
 fresh-process checks and remaining acceptance boundaries. Its walkthrough builds the Model and
 reads back what the panel's commands did; native controls drive the HtmlDialog interactions.

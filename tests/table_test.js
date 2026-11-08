@@ -111,6 +111,22 @@ test("an empty table says so, in the caller's words", function () {
   assert.strictEqual(empty.textContent, "Nothing here.");
 });
 
+test("an empty table offers its create action under the message, and no other table does", function () {
+  var h = harness(), made = 0;
+  var offered = { emptyAction: { label: "+ New Part", run: function () { made += 1; } } };
+  paint(h, Object.assign({ rows: [] }, offered));
+
+  var button = h.root.querySelector(".phc-empty-action");
+  assert.strictEqual(button.hidden, false);
+  assert.strictEqual(button.textContent, "+ New Part");
+  assert.strictEqual(h.root.querySelector(".phc-empty").textContent, "Nothing here.");
+  button.listeners.click({});
+  assert.strictEqual(made, 1);
+
+  paint(h, offered);
+  assert.strictEqual(button.hidden, true, "a table with rows does not offer it");
+});
+
 test("a value the caller has none for reads as unavailable rather than blank", function () {
   var h = harness();
   paint(h, { value: function (row, field) { return field === "size" ? null : row.record[field]; } });

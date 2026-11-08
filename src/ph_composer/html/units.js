@@ -27,6 +27,16 @@ PhComposerUI.define("units", ["length_expression", "unit_numbers", "unit_tables"
     return (unitId === definition.ip.id ? definition.ip : definition.si).label;
   }
 
+  function inputForm(definition, unitId) {
+    return (definition.forms || []).filter(function (entry) { return entry.id === unitId; })[0];
+  }
+
+  function formValue(form, definition, base) {
+    if (form.reciprocal) return form.reciprocal / base;
+    if (form.factor) return base * form.factor;
+    return baseToUnit(base, definition, form.id === definition.ip.id ? "IP" : "SI");
+  }
+
   function validate(value, field, definition, settings) {
     var label = String(field.label || titleCase(definition.label));
     var min = field.min !== undefined ? field.min : definition.min;
@@ -55,6 +65,7 @@ PhComposerUI.define("units", ["length_expression", "unit_numbers", "unit_tables"
     var unitId = settings.defaultUnit || definition.si.id;
     var info;
     var system;
+    var converting;
     if (!parsed.ok && parsed.code !== "malformed") return codeError(parsed.code, definition, settings);
     if (unitText) unitId = unitText;
     if (unitText || (unitId !== definition.si.id && unitId !== definition.ip.id)) {
@@ -63,6 +74,13 @@ PhComposerUI.define("units", ["length_expression", "unit_numbers", "unit_tables"
       unitId = info.unit;
     }
     if (!parsed.ok) return codeError("malformed", definition, settings);
+    converting = inputForm(definition, unitId);
+    if (converting && (converting.reciprocal || converting.factor)) {
+      if (converting.reciprocal && parsed.value === 0) return errorResult("zero",
+        titleCase(field.label || definition.label) + " must be greater than zero.");
+      return validate(converting.reciprocal ? converting.reciprocal / parsed.value : parsed.value / converting.factor,
+        field, definition, settings);
+    }
     system = unitId === definition.ip.id && unitId !== definition.si.id ? "IP" : "SI";
     if (definition.reciprocal && system === "IP" && parsed.value === 0) return errorResult("zero",
       titleCase(definition.label) + " must be greater than zero.");
@@ -154,6 +172,8 @@ PhComposerUI.define("units", ["length_expression", "unit_numbers", "unit_tables"
     var base;
     var converted;
     var text;
+    var form;
+    var digits;
     if (value === null || value === undefined || value === "") return "";
     base = toBase(Number(value), field, definition);
     if (dimension && dimension.architectural) return architectural(base / METRES_PER_INCH, dimension.id, edit, format);
@@ -162,10 +182,11 @@ PhComposerUI.define("units", ["length_expression", "unit_numbers", "unit_tables"
         edit ? dimension.editDigits : dimension.displayDigits, format, false) +
         (edit || opts.showUnit === false ? "" : " " + dimension.id);
     }
-    converted = baseToUnit(base, definition, system);
-    text = converted === Infinity ? "∞" :
-      roundedText(converted, opts.precision === undefined ? definition.precision[system] : opts.precision, format,
-      !edit && opts.useGrouping !== false);
+    form = field.inputForm && inputForm(definition, field.inputForm);
+    converted = form ? formValue(form, definition, base) : baseToUnit(base, definition, system);
+    // A value shown in a chosen form is read back in it, so it keeps more digits than a display does.
+    digits = opts.precision !== undefined ? opts.precision : (form ? 6 : definition.precision[system]);
+    text = converted === Infinity ? "∞" : roundedText(converted, digits, format, !edit && opts.useGrouping !== false);
     var label = (system === "IP" ? definition.ip : definition.si).label;
     return edit || opts.showUnit === false || !label ? text : text + " " + label;
   }
@@ -205,9 +226,22 @@ PhComposerUI.define("units", ["length_expression", "unit_numbers", "unit_tables"
     var definition = QUANTITIES[field.quantity];
     var resolved = profile(field, settings);
     return {
-      defaultUnit: resolved.dimensionFormat || (resolved.system === "IP" ? definition.ip.id : definition.si.id),
+      // A field with an input-form selector reads a bare number in the form it shows.
+      defaultUnit: field.inputForm || resolved.dimensionFormat ||
+        (resolved.system === "IP" ? definition.ip.id : definition.si.id),
       numberFormat: resolved.numberFormat
     };
+  }
+
+  /* The datasheet forms a quantity can be entered in, in menu order, and the one offered first in a unit
+     system. A quantity with one reading of its numbers has none. */
+  function inputForms(field) {
+    var definition = QUANTITIES[field.quantity];
+    return definition && definition.forms ? definition.forms.slice() : [];
+  }
+  function defaultInputForm(field, settings) {
+    var definition = QUANTITIES[field.quantity];
+    return definition && definition.defaultForm ? definition.defaultForm[profile(field, settings).system] : null;
   }
 
   function header(label, field, settings) {
@@ -241,6 +275,8 @@ PhComposerUI.define("units", ["length_expression", "unit_numbers", "unit_tables"
     profile: profile,
     displayUnit: displayUnit,
     parseContext: parseContext,
+    inputForms: inputForms,
+    defaultInputForm: defaultInputForm,
     header: header,
     formatParts: formatParts
   };

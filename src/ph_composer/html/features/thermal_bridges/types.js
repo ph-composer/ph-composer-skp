@@ -89,7 +89,8 @@ function (panel, snapshot, ui, fields, units, preferences, unitFields, RecordFor
       replacement: true, allowClear: true, usage: function (state, id) { return self.usage(state, id); } });
     this.color = new forms.ColorForm(session, send, shared.TYPES + ".update", changed);
     this.forms = [this.newType, this.duplicate, this.replacement, this.color];
-    this.create = ui.button("+ New " + LABEL, function () { if (allowed()) self.newType.open(); });
+    function create() { if (allowed()) self.newType.open(); }
+    this.create = ui.button("+ New " + LABEL, create);
     this.bar = new bars.AssignBar(session, send, function () { return self.assignGuard(); }, function (reason) {
       panel.notify(reason, "warning");
     }, panel.notify);
@@ -123,6 +124,7 @@ function (panel, snapshot, ui, fields, units, preferences, unitFields, RecordFor
         if (field === "datasheet") { self.datasheetCell(td, row.record); return true; }
         return false;
       } });
+    this.inventory.emptyAction = { label: "+ New " + LABEL, run: create };
     this.forms.forEach(function (form) { root.appendChild(form.root); });
   }
   /* The Edges using a type, from a read of the Model as it is now. Unknown after an edit since the last read, or

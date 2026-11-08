@@ -113,7 +113,7 @@ later EnergyPlus exporter; the HBJSON artifact and METr accept an open Zone and 
   listed separately. Runtime internals remain in diagnostics.
 - Preflight shows blocking findings before opening a destination dialog and gives Locate or the
   feature's named repair. It does not invent automatic fixes.
-- The zones packet's **Solve stale adjacencies before export** is a checked preflight action already
+- The zones packet's **Re-solve adjacencies before export** is a checked preflight action already
   accepted by that packet. The UI names the Model change and Undo boundary, runs it
   before the snapshot and revalidates. Export itself remains read-only.
 - Preflight passes an explicit all-Zone mutation set to the zones feature's public solve operation,

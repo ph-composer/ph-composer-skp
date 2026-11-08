@@ -198,7 +198,12 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
       rows: Object.create(null), columns: tableColumns, columnWidths: options.columnWidths || {},
       stickyWidths: stickyWidths,
       defaultWidths: Object.assign({}, stickyWidths, options.defaultWidths || {}),
-      groups: Object.create(null), empty: element("p", "phc-empty") };
+      groups: Object.create(null), empty: element("p", "phc-empty"), emptyAction: element("button") };
+    cache.emptyAction.className = "primary phc-empty-action"; cache.emptyAction.type = "button";
+    cache.emptyAction.hidden = true;
+    cache.emptyAction.addEventListener("click", function () {
+      if (cache.options.emptyAction) cache.options.emptyAction.run();
+    });
     tableColumns.forEach(function (column) { attachColumnResize(cache, column); });
     cache.resetColumnWidths = function () {
       Object.keys(cache.columnWidths).forEach(function (field) { delete cache.columnWidths[field]; });
@@ -211,7 +216,7 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
     };
     cache.root = root; watchOverflow(cache);
     root.addEventListener("scroll", function () { markClippedHeaders(cache); });
-    node.appendChild(cache.body); root.replaceChildren(node, cache.empty); root._table = cache;
+    node.appendChild(cache.body); root.replaceChildren(node, cache.empty, cache.emptyAction); root._table = cache;
     overlay.attachTooltip(root);
     return cache;
   }
@@ -525,6 +530,10 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
     // An empty table draws no scroll shade: there is nothing beyond its edge to read.
     root.classList.toggle("is-empty-table", !cache.empty.hidden);
     cache.empty.textContent = options.empty || "No records.";
+    // An empty table's next step is to make its first record, so the button is here, under the message.
+    var create = !cache.empty.hidden && options.emptyAction;
+    cache.emptyAction.hidden = !create;
+    if (create) { cache.emptyAction.textContent = create.label; cache.emptyAction.disabled = Boolean(create.disabled); }
     rows.forEach(function (row) {
       var group = options.group ? options.group(row) : null;
       position = paintGroups(cache, group, retainedGroups, position);

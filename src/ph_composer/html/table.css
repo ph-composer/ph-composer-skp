@@ -217,6 +217,8 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 .phc-empty::before { content: ""; display: block; width: 24px; height: 24px; margin: 0 auto 10px; background: var(--muted-faint);
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 12h-6l-2 3h-4l-2-3H2'/%3E%3Cpath d='M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'/%3E%3C/svg%3E") center / contain no-repeat; }
 .phc-empty:empty { display: none; }
+.phc-empty-action { display: block; margin: -16px auto 32px; }
+.phc-empty .phc-empty-action { margin: 12px auto 0; }
 
 /* Every table sits on one surface: a hairline frame with the panel's card radius. */
 .phc-inventory-table, .phc-table-mount, .tb-schedule-table, .tb-totals-table { border: 1px solid var(--line);

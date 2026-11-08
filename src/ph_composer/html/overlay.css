@@ -303,10 +303,14 @@
   color: var(--muted);
   font-size: 12px;
 }
-.phc-form-dialog input:not([type=checkbox]), .phc-form-dialog select { width: 100%; color: var(--ink); font-size: var(--text-md); }
+.phc-form-dialog input:not([type=checkbox]):not([type=color]), .phc-form-dialog select { width: 100%; color: var(--ink); font-size: var(--text-md); }
 /* A unit sits inside its field at the right, so every field in a form keeps the same width. */
 .phc-form-dialog .phc-unit-field { display: block; position: relative; width: 100%; }
 .phc-form-dialog .phc-unit-field input { padding-right: 78px; }
+.phc-form-dialog .phc-unit-field.has-input-form { display: flex; flex-wrap: wrap; gap: 6px; }
+.phc-form-dialog .phc-unit-field.has-input-form input { flex: 1 1 60px; width: auto; min-width: 0; padding-right: 10px; }
+.phc-form-dialog .phc-unit-field.has-input-form select { flex: 0 1 auto; width: auto; max-width: 62%; }
+.phc-form-dialog .phc-unit-field.has-input-form .phc-unit-error { flex-basis: 100%; }
 .phc-form-dialog .phc-unit-field .phc-unit-label { position: absolute; top: 0; right: 10px; line-height: var(--control-height);
   pointer-events: none; }
 .phc-form-dialog p { margin: 0; }

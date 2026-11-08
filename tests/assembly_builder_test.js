@@ -85,6 +85,24 @@ test("both canonical U-values and films are shown, withheld values show reasons 
   assert.ok(text(o.editor.root).includes("Choose a Material for Layer 2"));
   assert.strictEqual(o.sent.length, 0);
 });
+test("sidebar New Material opens the shared form, holds the Builder, and shows the new record", function () {
+  var o = setup(), editor = o.editor, form = editor.newMaterial;
+  editor.select({ layerId: "layer_studs", segmentId: "seg_steel" });
+  click(editor.sidebar.createButton);
+  assert.strictEqual(form.root.hidden, false);
+  assert.ok(editor.guard(), "an open form holds the Builder");
+  editor.root.listeners.keydown({ key: "Escape", preventDefault: function () {} });
+  assert.ok(editor.selection, "Escape in the form is the form's");
+  form.fields.name.value = "New foam";
+  form.submit();
+  assert.strictEqual(o.sent[0].payload.name, "ph_composer.assemblies.materials.create");
+  o.state.ui.actionResult = { session: "session", request_id: o.sent[0].payload.request_id,
+    outcome: { status: "completed", value: { id: "mat_a" } } };
+  editor.refresh(o.state, o.record.id);
+  assert.strictEqual(form.root.hidden, true);
+  assert.strictEqual(editor.sidebar.detail, editor.sidebar.entries.mat_a, "the Material is shown, not assigned");
+});
+
 test("sidebar reads details and search without writes; Use and valid drops assign one explicit segment", function () {
   var o = setup(), sidebar = o.editor.sidebar;
   sidebar.openDetails(sidebar.entries.mat_a);

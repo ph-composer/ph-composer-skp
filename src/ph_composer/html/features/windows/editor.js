@@ -99,8 +99,10 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
     var self = this;
     this.main = el("div", "window-main"); this.layout.appendChild(this.main);
     // Shown in the Builder's place while there is no Window Type to build.
-    this.emptyPrompt = el("p", "phc-empty window-empty-prompt",
-      "No Window Types yet. Choose + in the Window Types list."); this.layout.appendChild(this.emptyPrompt);
+    this.emptyPrompt = el("p", "phc-empty window-empty-prompt", "No Window Types yet.");
+    this.firstType = ui.button("+ New Window Type", function () { self.createType(); });
+    this.firstType.className = "primary phc-empty-action"; this.emptyPrompt.appendChild(this.firstType);
+    this.layout.appendChild(this.emptyPrompt);
     this.heading = el("div", "window-heading"); this.main.appendChild(this.heading);
     this.identity = el("div", "window-identity"); this.heading.appendChild(this.identity);
     this.title = ui.button("Select a Window Type", function () { self.renameInline(); });
@@ -315,7 +317,7 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
   };
   View.prototype.paintPending = function () {
     var disabled = !this.enabled || this.requests.busy() || !this.installEditor.root.hidden;
-    [this.addType, this.installButton, this.merge, this.flip].forEach(function (button) {
+    [this.addType, this.firstType, this.installButton, this.merge, this.flip].forEach(function (button) {
       button.disabled = disabled; });
     if (this.dimensionField) this.dimensionField.setDisabled(this.requests.busy());
   };

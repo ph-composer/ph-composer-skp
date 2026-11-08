@@ -3,7 +3,8 @@
  * `config.columnMenus` ({ sort: [field], filter: [field] }), when given, sorts and filters from each named
  * column's menu (column_menu.js) in place of Order by; a filter offers the column's values as shown, its
  * declared choices included. `config.headerActions(field, state)`, when given, adds a feature's own actions to
- * a column's header, before its menu; each is a `{ node, persistent }` (table.js). */
+ * a column's header, before its menu; each is a `{ node, persistent }` (table.js). An owner with a create action
+ * sets `emptyAction` ({ label, run }) to offer it in the empty state of a table with no records. */
 PhComposerUI.define("inventory", ["request", "snapshot", "workspace", "table", "view_controls", "record_edits",
   "inventory_grid", "units", "unit_preferences", "column_menu"],
 function (request, snapshot, ui, tables, viewControls, RecordEdits, Grid, units, preferences, columnMenus) {
@@ -196,8 +197,10 @@ function (request, snapshot, ui, tables, viewControls, RecordEdits, Grid, units,
         return true;
       // With no records at all the next step is to make one; a filter that hides them all says that instead.
       }, empty: payload ? (this.records.length ? "No " + config.label + " records match this view." :
-        "No " + config.label + " records yet. Choose + New " + config.label + ".") :
-        snapshot.message(snapshot.section(state, config.section) || {}, config.label + " records are unavailable.") };
+        "No " + config.label + " records yet.") :
+        snapshot.message(snapshot.section(state, config.section) || {}, config.label + " records are unavailable."),
+      emptyAction: payload && !this.records.length && this.emptyAction ?
+        Object.assign({ disabled: this.busy() }, this.emptyAction) : null };
     if (config.columnMenus || config.headerActions) {
       var labels = Object.create(null), spec = config.columnMenus || {};
       columns.forEach(function (column) { labels[column[0]] = column[1]; });

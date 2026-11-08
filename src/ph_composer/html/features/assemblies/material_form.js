@@ -1,7 +1,8 @@
-/* New Material uses the same field descriptors as the inventory, so typing units and validation agree. */
+/* New Material uses the same field descriptors as the inventory, so typing units and validation agree. The
+   conductivity adds a selector for the form its datasheet states it in; the Model stores W/(m K) either way. */
 PhComposerUI.define("features/assemblies/material_form", ["record_form", "snapshot", "unit_field", "fields",
-  "workspace"],
-function (RecordForm, snapshot, unitFields, fields, ui) {
+  "inventory_forms", "workspace"],
+function (RecordForm, snapshot, unitFields, fields, forms, ui) {
   "use strict";
   var SECTION = "ph_composer.assemblies.materials";
   var quantities = {
@@ -12,6 +13,7 @@ function (RecordForm, snapshot, unitFields, fields, ui) {
     emissivity: fields.with(fields.FRACTION, { label: "Emissivity", max: 1, allowBlank: true })
   };
   var NAME_HINT = "Enter a name.";
+  var DEFAULT_COLOR = "#ffffff";
   function choices(select, catalog, value) {
     select.replaceChildren(ui.option("", "None"));
     catalog.forEach(function (entry) { select.appendChild(ui.option(entry.id, entry.label)); });
@@ -26,15 +28,25 @@ function (RecordForm, snapshot, unitFields, fields, ui) {
     this.unitFields = {};
     this.allowed = false;
     this.disposed = false;
-    [["name", "Name"], ["category", "Category"], ["conductivity_w_mk", "Conductivity"],
+    this.color = new forms.ColorChoice(DEFAULT_COLOR);
+    [["name", "Name"], ["category", "Category"], ["color", "Color"], ["conductivity_w_mk", "Conductivity"],
       ["density_kg_m3", "Density"], ["specific_heat_j_kgk", "Specific heat"], ["emissivity", "Emissivity"],
       ["notes", "Notes"]].forEach(function (entry) {
+      if (entry[0] === "color") {
+        // Not a label: a label around the swatches would press the first swatch when its text is clicked.
+        var row = ui.element("div", "phc-form-row");
+        row.appendChild(ui.element("span", "", entry[1]));
+        row.appendChild(self.color.root);
+        self.form.appendChild(row);
+        return;
+      }
       var input = ui.element(entry[0] === "category" ? "select" : "input");
       var label = ui.element("label", "", entry[1]);
       input.setAttribute("aria-label", entry[1]);
       input.setAttribute("data-material-create-field", entry[0]);
       if (quantities[entry[0]]) {
-        self.unitFields[entry[0]] = new unitFields.UnitField({ input: input, field: quantities[entry[0]] });
+        self.unitFields[entry[0]] = new unitFields.UnitField({ input: input, field: quantities[entry[0]],
+          forms: entry[0] === "conductivity_w_mk" });
         label.appendChild(self.unitFields[entry[0]].root);
       } else label.appendChild(input);
       self.fields[entry[0]] = input;
@@ -91,6 +103,7 @@ function (RecordForm, snapshot, unitFields, fields, ui) {
       } else values[key] = this.fields[key].value.trim();
     }, this);
     if (invalid) { this.error.textContent = invalid; return; }
+    values.color = this.color.color;
     this.run({ values: values });
     this.updateButton();
   };
@@ -108,9 +121,13 @@ function (RecordForm, snapshot, unitFields, fields, ui) {
         this.unitFields[key].setValue(null); }
         else this.fields[key].value = "";
       }, this);
+      this.color.set(DEFAULT_COLOR);
       this.hide(outcome.value);
     }
     Object.keys(this.fields).forEach(function (key) { this.fields[key].disabled = !payload || this.busy(); }, this);
+    this.color.setDisabled(!payload || this.busy());
+    var conductivity = this.unitFields.conductivity_w_mk;
+    if (conductivity.formChoice) conductivity.formChoice.disabled = !payload || this.busy();
     this.updateButton();
   };
   Form.prototype.dispose = function () {

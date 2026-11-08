@@ -87,6 +87,7 @@ not coin a third vocabulary between SketchUp and honeybee. Faces belong to a Zon
 | Geometry view | The Zones screen's view of each Zone's Faces and the Zone's own Building Segment and Level, under the tab labelled Geometry |
 | Faces table | The panel inventory of face records with editable type, boundary condition and assembly cells, area, state and Locate |
 | Material | Physical and product properties used by assembly layers. METr's own screen word. Maps to honeybee `EnergyMaterial`. Distinct from SketchUp display materials |
+| Input form | One way a datasheet states a value, chosen beside the field that takes it: R per inch or a conductivity unit for a Material's conductivity. The Model stores W/(m K) whichever form is entered |
 | Material category | A preset classification shown as a colored chip. Independent of display color. User-created categories are not supported |
 | Material variant | A separately named material with independent properties, created through Duplicate Material. Never created automatically by reuse |
 | Assembly | A reusable construction definition of ordered layers. METr's own screen word. Maps to honeybee `OpaqueConstruction` |

@@ -52,7 +52,13 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
       this.skipped.hidden = true; this.content.appendChild(this.skipped);
       this.refreshButton = ui.button("Refresh", function () { if (!self.busy()) self.store.refresh(); });
       this.setupButton = ui.button("Library setup…", function () { if (!self.busy()) self.setup.open(); });
-      var controls = el("div", "library-source-controls"); controls.appendChild(this.refreshButton);
+      var controls = el("div", "library-source-controls");
+      // A work surface that needs a record the library lacks makes one here without leaving (options.create).
+      if (options.create) {
+        this.createButton = ui.button(options.create.label, function () { if (!self.busy()) options.create.run(); });
+        controls.appendChild(this.createButton);
+      }
+      controls.appendChild(this.refreshButton);
       controls.appendChild(this.setupButton); this.content.appendChild(controls);
       if (options.localOnly) { this.source.hidden = true; controls.hidden = true; }
       this.search = el("input");
@@ -149,6 +155,12 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
       this.renderList();
       this.openDetails(this.entries[id]);
     };
+    /* Shows a record just made in this file: its source selected, and its details open as Reveal opens them. */
+    Sidebar.prototype.revealLocal = function (id) {
+      if (this.disposed) return;
+      if (this.store && this.store.selected) { this.closeDetails(); this.store.select(""); this.updateRows(); }
+      this.reveal(id);
+    };
     Sidebar.prototype.dispose = function () {
       this.disposed = true;
       this.enabled = false;
@@ -175,6 +187,7 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
       this.refreshButton.hidden = !this.store || !this.store.selected;
       this.refreshButton.disabled = this.busy() || Boolean(this.store && this.store.busy());
       this.setupButton.disabled = !this.setup || !this.setup.enabled || this.busy();
+      if (this.createButton) this.createButton.disabled = !this.enabled || this.busy();
       // Before any library is set up, the button says what the user came to do.
       this.setupButton.textContent = this.store && this.store.providers.length ? "Library setup…" :
         "Add a library…";
