@@ -259,6 +259,12 @@ and ERV ducting reuse these rules.
   plus the vertex id, so two placements of one component never join; a run ends at a free end or a
   vertex where the count of joining Edges is not two. The same function serves the live read and the
   export, which feeds it the snapshot's `edge` entries.
+- Each Zone holds its own Edge at a junction two Zones share, so coincidence is resolved before Edges
+  chain (`runs/coincidence.rb`), for whole Edges across Zone occurrences within the 0.0254 mm tolerance.
+  Edges alike in Building-Segment, type and quantity are one bridge: the Zone with the smallest path
+  keeps its Edge, reading the Faces of the Edges it stands for, and no finding is raised. Edges that
+  differ in any of those raise the non-blocking `thermal_bridge.coincident_conflict`, and both count
+  until the user clears one.
 - An Edge carries at most one assignment of each kind; a thermal bridge Edge is envelope geometry
   and a pipe or duct is a loose line in its own Group, so the two never share an Edge.
 

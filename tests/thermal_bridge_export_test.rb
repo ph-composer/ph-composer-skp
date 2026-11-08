@@ -253,17 +253,52 @@ class ThermalBridgeExportTest < PhComposerTestCase
     reference
     @zone_a.entities << line("A", [1, 1, 1], [2, 1, 1], 9100)
     assign("A", BALCONY, [[1, 1, 1], [2, 1, 1]])
-    assign("B", PARAPET, [[5, 0, 3], [5, 4, 3]])
+    assign("B", SLAB_EDGE, [[5, 0, 3], [5, 4, 3]])
     assign("A", PARAPET, [[5, 0, 3], [5, 4, 3]])
     extraction = extract
 
     codes = extraction.findings.map { |row| row.fetch("code") }.sort
-    assert_equal %w[thermal_bridge.counted_twice thermal_bridge.counted_twice thermal_bridge.no_envelope_face], codes
-    assert_equal 6, runs(extraction).length
+    assert_equal %w[thermal_bridge.coincident_conflict thermal_bridge.coincident_conflict
+                    thermal_bridge.no_envelope_face], codes
+    assert_equal 7, runs(extraction).length
     assert(extraction.findings.all? { |row| row.fetch("object_id").start_with?("tb_") })
     preflight = query(X::PREFLIGHT).fetch("findings")
     assert_equal codes, preflight.map { |row| row.fetch("code") }.sort
     assert(preflight.none? { |row| row.fetch("blocks_export") })
+  end
+
+  # Through the real extraction: each Zone holds its own Edge at the shared junction.
+  def test_one_type_on_an_edge_two_zones_share_in_one_building_segment_exports_one_bridge_of_its_length
+    @zone_a = box(1000, 0, 5, "A")
+    @zone_b = box(2000, 5, 9, "B")
+    @model.entities << @zone_a << @zone_b
+    assign("A", PARAPET, [[5, 0, 3], [5, 4, 3]])
+    assign("B", PARAPET, [[5, 0, 3], [5, 4, 3]])
+    extraction = extract
+
+    assert_empty extraction.findings
+    assert_empty query(X::PREFLIGHT).fetch("findings")
+    record = runs(extraction).first
+    assert_equal 1, runs(extraction).length
+    assert_equal "zon_AAAAAAAAAAAA", record.fetch("zone_id")
+    assert_in_delta 4.0, length(record), 0.001
+  end
+
+  def test_the_same_edge_in_two_building_segments_exports_both_with_a_finding
+    @zone_a = box(1000, 0, 5, "A")
+    @zone_b = box(2000, 5, 9, "B")
+    @model.entities << @zone_a << @zone_b
+    zone = PhComposer::Zones::ZONE_STORE.read(@zone_b)
+    PhComposer::Zones::ZONE_STORE.write(@zone_b, zone.merge("building_segment" => "Annex"))
+    assign("A", PARAPET, [[5, 0, 3], [5, 4, 3]])
+    assign("B", PARAPET, [[5, 0, 3], [5, 4, 3]])
+    extraction = extract
+
+    assert_equal 2, runs(extraction).length
+    assert_equal ["thermal_bridge.coincident_conflict"] * 2, extraction.findings.map { |row| row.fetch("code") }
+    preflight = query(X::PREFLIGHT).fetch("findings")
+    assert_equal [["thermal_bridge.coincident_conflict", false]] * 2,
+                 preflight.map { |row| row.values_at("code", "blocks_export") }
   end
 
   def test_the_metadata_guard_admits_the_declared_type_id_and_refuses_an_undeclared_key

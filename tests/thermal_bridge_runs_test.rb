@@ -147,23 +147,124 @@ class ThermalBridgeRunsTest < Minitest::Test
     refute_equal first.to_h { |name, id, _| [name, id] }.fetch("Balcony 1"), ids.fetch("Balcony 1")
   end
 
-  # ACCEPTANCE's case: each roof Edge at x = 5 m bounds its Zone's Outdoors roof as well as the shared wall,
-  # so it is counted twice but is no interior junction, which needs every Zone Face interior.
-  def test_closing_the_shared_wall_makes_closed_runs_counted_twice
+  # ACCEPTANCE's case: each roof Edge at x = 5 m bounds its Zone's Outdoors roof as well as the shared wall.
+  # One Type on it in both Zones of one Building-Segment counts once, in the Zone with the smaller path, so that
+  # Zone's ring closes and the other's stays open, four metres shorter than two closed rings.
+  def test_closing_the_shared_wall_counts_the_shared_edge_once_and_leaves_the_other_run_open
     shared_wall = [{ "face_type" => "RoofCeiling", "boundary_condition" => "Outdoors" }, SURFACE]
     facts = reference + [fact(ZONE_A, PARAPET, [5, 4, 3], [5, 0, 3], :faces => shared_wall),
                          fact(ZONE_B, PARAPET, [5, 0, 3], [5, 4, 3], :faces => shared_wall)]
-    runs = schedule(facts).fetch("runs").to_h { |row| [row.fetch("display_name"), row] }
-    assert_equal [true, true], runs.values_at("Parapet 1", "Parapet 2").map { |row| row.fetch("closed") }
+    result = schedule(facts)
+    runs = result.fetch("runs").to_h { |row| [row.fetch("display_name"), row] }
+    assert_equal [true, false], runs.values_at("Parapet 1", "Parapet 2").map { |row| row.fetch("closed") }
     assert_in_delta 18.0, runs.fetch("Parapet 1").fetch("length_m"), 0.001
-    assert_in_delta 16.0, runs.fetch("Parapet 2").fetch("length_m"), 0.001
-    %w[Parapet\ 1 Parapet\ 2].each do |name|
-      findings = runs.fetch(name).fetch("findings")
-      assert_equal %w[thermal_bridge.counted_twice], findings.map { |finding| finding.fetch("code") }, name
-      assert_equal 1, findings.first.dig("locate", "edge_paths").length
+    assert_in_delta 12.0, runs.fetch("Parapet 2").fetch("length_m"), 0.001
+    assert(runs.values.all? { |row| row.fetch("findings").empty? })
+    parapet = result.dig("totals", "by_type").find { |row| row.fetch("type_id") == PARAPET }
+    assert_equal [30.0, 1.5], parapet.values_at("length_m", "heat_loss_w_k").map { |value| value.round(3) }
+  end
+
+  # The intermediate floor-to-exterior-wall junction, where Floor-01 and Floor-02 each have their own Edge.
+  def test_one_type_on_the_floor_edge_of_two_zones_in_one_segment_is_one_run_of_the_edges_length_with_no_finding
+    facts = [fact(ZONE_A, PARAPET, [0, 0, 3], [4, 0, 3]), fact(ZONE_B, PARAPET, [4, 0, 3], [0, 0, 3])]
+    reads = [facts, facts.reverse].map { |order| schedule(order) }
+    reads.each do |result|
+      rows = result.fetch("runs")
+      assert_equal 1, rows.length
+      row = rows.first
+      assert_equal ["Zone A", 1, []], [row.dig("zone", "name"), row.fetch("edge_paths").length, row.fetch("findings")]
+      assert_in_delta 4.0, row.fetch("length_m"), 1e-9
+      assert_in_delta 0.2, result.dig("totals", "heat_loss_w_k"), 1e-9
     end
-    others = runs.reject { |name, _| name.start_with?("Parapet") }
-    assert(others.values.all? { |row| row.fetch("findings").empty? })
+    assert_equal reads.first.dig("runs", 0, "identifier"), reads.last.dig("runs", 0, "identifier")
+  end
+
+  # The kept Edge speaks for every Zone it stands for: a junction is interior only if it is interior in each.
+  def test_the_edge_kept_is_read_with_the_faces_of_the_edges_it_stands_for
+    interior = [{ "face_type" => "Wall", "boundary_condition" => "Adiabatic" }, SURFACE]
+    outdoors = [fact(ZONE_A, PARAPET, [0, 0, 9], [1, 0, 9], :faces => interior),
+                fact(ZONE_B, PARAPET, [0, 0, 9], [1, 0, 9])]
+    assert_equal [], schedule(outdoors).dig("runs", 0, "findings")
+
+    setup
+    both = [fact(ZONE_A, PARAPET, [0, 0, 9], [1, 0, 9], :faces => interior),
+            fact(ZONE_B, PARAPET, [0, 0, 9], [1, 0, 9], :faces => interior)]
+    assert_equal %w[thermal_bridge.interior_junction],
+                 schedule(both).dig("runs", 0, "findings").map { |finding| finding.fetch("code") }
+  end
+
+  # Zones A to B and B to C are within the tolerance and A to C is not. B is dropped against A, and C, which only
+  # B coincides with, stays: an Edge is dropped only against one that is kept.
+  def test_a_chain_of_near_misses_at_the_tolerance_drops_only_what_a_kept_edge_stands_for
+    zone_c = ZONE_B.merge("zone_id" => "zon_CCCCCCCCCCCC", "zone_path" => [300], "name" => "Zone C")
+    interior = [{ "face_type" => "Wall", "boundary_condition" => "Adiabatic" }, SURFACE]
+    line = ->(zone, offset, faces) { fact(zone, PARAPET, [0, offset, 9], [1, offset, 9], :faces => faces) }
+    facts = [line.call(ZONE_A, 0.0, interior), line.call(ZONE_B, 0.00002, OUTDOOR),
+             line.call(zone_c, 0.00004, interior)]
+    reads = [facts, facts.reverse].map { |order| schedule(order).fetch("runs") }
+    reads.each do |rows|
+      assert_equal ["Zone A", "Zone C"], rows.map { |row| row.dig("zone", "name") }
+      assert_equal [[], %w[thermal_bridge.interior_junction]],
+                   rows.map { |row| row.fetch("findings").map { |finding| finding.fetch("code") } }
+    end
+  end
+
+  # The second and fourth Edges conflict and are each dropped against a keeper: the conflict moves to the keepers.
+  def test_a_conflict_held_by_edges_that_were_dropped_stays_on_the_edges_that_stand_for_them
+    zones = (1..4).map { |n| ZONE_B.merge("zone_id" => "zon_#{n}", "zone_path" => [n * 100], "name" => "Zone #{n}") }
+    line = lambda do |zone, offset, type|
+      fact(zone, type, [0, offset, 9], [1, offset, 9])
+    end
+    rows = schedule([line.call(zones[0], 0.0, PARAPET), line.call(zones[1], 0.00002, PARAPET),
+                     line.call(zones[2], 0.00006, "tbt_SLABEDGE0001"),
+                     line.call(zones[3], 0.00004, "tbt_SLABEDGE0001")]).fetch("runs")
+    assert_equal ["Zone 1", "Zone 3"], rows.map { |row| row.dig("zone", "name") }
+    assert_equal ["thermal_bridge.coincident_conflict"] * 2, rows.map { |row| row.dig("findings", 0, "code") }
+    assert_equal rows.map { |row| row.fetch("edge_paths") },
+                 rows.map { |row| row.dig("findings", 0, "locate", "edge_paths") }
+  end
+
+  def conflict_rows(one, other)
+    rows = schedule([one, other]).fetch("runs")
+    assert_equal 2, rows.length, "a conflict counts both until the user clears one"
+    rows.each do |row|
+      finding = row.fetch("findings").first
+      assert_equal ["thermal_bridge.coincident_conflict", false, row.fetch("edge_paths")],
+                   [finding.fetch("code"), finding.fetch("blocks_export"), finding.dig("locate", "edge_paths")]
+      assert_equal 1, row.fetch("findings").length
+    end
+    rows.map { |row| row.fetch("findings").first.fetch("message") }
+  end
+
+  def test_coincident_edges_that_differ_in_type_quantity_or_building_segment_are_a_conflict_and_both_count
+    other_segment = ZONE_B.merge("building_segment" => "Annex")
+    points = [[0, 0, 9], [1, 0, 9]]
+
+    message = conflict_rows(fact(ZONE_A, PARAPET, *points), fact(ZONE_B, "tbt_SLABEDGE0001", *points)).first
+    assert_includes message, "also assigned in Zone B with a different Thermal Bridge Type"
+
+    setup
+    message = conflict_rows(fact(ZONE_A, PARAPET, *points), fact(other_segment, PARAPET, *points)).first
+    assert_includes message, "with a different Building-Segment"
+
+    setup
+    message = conflict_rows(fact(ZONE_A, PARAPET, *points), fact(ZONE_B, PARAPET, *points, :quantity => 2)).first
+    assert_includes message, "with a different quantity"
+
+    setup
+    message = conflict_rows(fact(ZONE_A, PARAPET, *points), fact(other_segment, "tbt_SLABEDGE0001", *points)).first
+    assert_includes message, "with a different Thermal Bridge Type and Building-Segment"
+  end
+
+  def test_two_zones_agreeing_count_once_beside_a_third_that_differs
+    zone_c = ZONE_B.merge("zone_id" => "zon_CCCCCCCCCCCC", "zone_path" => [300], "name" => "Zone C")
+    points = [[0, 0, 9], [1, 0, 9]]
+    rows = schedule([fact(ZONE_A, PARAPET, *points), fact(ZONE_B, PARAPET, *points),
+                     fact(zone_c, "tbt_SLABEDGE0001", *points)]).fetch("runs")
+    assert_equal [["Parapet 1", "Zone A"], ["Slab edge 1", "Zone C"]],
+                 rows.map { |row| [row.fetch("display_name"), row.dig("zone", "name")] }
+    assert_equal ["thermal_bridge.coincident_conflict"] * 2, rows.map { |row| row.dig("findings", 0, "code") }
+    assert_includes rows.last.dig("findings", 0, "message"), "Zone A, Zone B"
   end
 
   def test_each_finding_fires_on_its_case_and_no_other
@@ -174,8 +275,8 @@ class ThermalBridgeRunsTest < Minitest::Test
       "thermal_bridge.interior_junction" => [fact(ZONE_A, PARAPET, [0, 0, 9], [1, 0, 9],
                                                   :faces => [{ "boundary_condition" => "Adiabatic" }, SURFACE])],
       "thermal_bridge.shared_definition" => [fact(ZONE_A, PARAPET, [0, 0, 9], [1, 0, 9], :shared => true)],
-      "thermal_bridge.counted_twice" => [fact(ZONE_A, PARAPET, [0, 0, 9], [1, 0, 9]),
-                                         fact(ZONE_B, PARAPET, [1, 0, 9 + 0.00002], [0, 0, 9])]
+      "thermal_bridge.coincident_conflict" => [fact(ZONE_A, PARAPET, [0, 0, 9], [1, 0, 9]),
+                                               fact(ZONE_B, "tbt_BALCONY00001", [1, 0, 9 + 0.00002], [0, 0, 9])]
     }
     cases.each do |code, facts|
       setup
@@ -239,10 +340,10 @@ class ThermalBridgeRunsTest < Minitest::Test
 
   def test_coincidence_is_found_across_a_lookup_cell_boundary_and_not_past_the_tolerance
     edge = ->(zone, offset) { fact(zone, PARAPET, [0.002 - offset, 0, 9], [1, 0, 9]) }
-    across = schedule([edge.call(ZONE_A, 0.0), edge.call(ZONE_B, 0.00002)]).fetch("runs")
-    assert(across.all? { |row| row.fetch("findings").map { |f| f.fetch("code") } == %w[thermal_bridge.counted_twice] })
+    assert_equal 1, schedule([edge.call(ZONE_A, 0.0), edge.call(ZONE_B, 0.00002)]).fetch("runs").length
     setup
     apart = schedule([edge.call(ZONE_A, 0.0), edge.call(ZONE_B, 0.00003)]).fetch("runs")
+    assert_equal 2, apart.length
     assert(apart.all? { |row| row.fetch("findings").empty? })
   end
 
