@@ -148,6 +148,15 @@ def test_signature_includes_size_dependent_uw_and_ignores_presentation() -> None
     assert first.materials[0].u_factor > large.materials[0].u_factor
 
 
+def test_the_model_default_value_exports_its_psi_and_lists_by_name() -> None:
+    value = document()
+    source = value["sections"][WINDOW_CONSTRUCTION_SECTION_ID]["records"][0]["sides"]["top"]
+    source.update(install_id="wst_ModelDefaults", install_name="Model default", psi_install_w_mk=0.04)
+    output = result(value)
+    names = {name for row in output[APERTURE_SECTION_ID]["window_usage"] for name in row["install_names"]}
+    assert "Model default" in names
+
+
 def test_shared_edge_zero_and_mulled_unit_count_without_empty_aperture() -> None:
     value = document()
     source = value["sections"][WINDOW_CONSTRUCTION_SECTION_ID]["records"][0]["sides"]["right"]

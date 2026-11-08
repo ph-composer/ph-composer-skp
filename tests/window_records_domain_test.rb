@@ -186,4 +186,20 @@ class WindowRecordsDomainTest < PhComposerTestCase
     refute_nil missing["uw_w_m2k"]
     refute missing.fetch("complete")
   end
+
+  def test_an_unassigned_edge_takes_the_model_value_only_when_no_type_is_the_default
+    record, input = thermal_proof
+    record["elements"].each { |cell| cell["installs"].transform_values! { nil } }
+    by_value = W::Thermal.calculate(record, input, nil, :default_psi_w_mk => 0.05)
+    install = by_value.fetch("elements").first.fetch("edges").first.fetch("install")
+    assert_equal({ "source" => "default", "id" => nil, "psi_w_mk" => 0.05 }, install)
+    assert by_value.fetch("complete")
+    named = input.fetch("default_install_id")
+    by_type = W::Thermal.calculate(record, input, named, :default_psi_w_mk => 0.05)
+    assert_equal named, by_type.fetch("elements").first.fetch("edges").first.fetch("install").fetch("id")
+    refute_in_delta 0.05, by_type.fetch("elements").first.fetch("edges").first.fetch("install").fetch("psi_w_mk"), 1e-9
+    dangling = W::Thermal.calculate(record, input, "psi_GONE00000000", :default_psi_w_mk => 0.05)
+    assert_nil dangling.fetch("elements").first.fetch("edges").first.fetch("install").fetch("psi_w_mk")
+    refute dangling.fetch("complete")
+  end
 end

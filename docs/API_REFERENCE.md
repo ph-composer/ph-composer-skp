@@ -1516,6 +1516,7 @@ Values:
   "additionalProperties": false,
   "required": [
     "default_psi_install_id",
+    "default_psi_install_w_mk",
     "default_install_depth_m"
   ],
   "properties": {
@@ -1524,6 +1525,10 @@ Values:
         "string",
         "null"
       ]
+    },
+    "default_psi_install_w_mk": {
+      "type": "number",
+      "x-unit": "W/mK"
     },
     "default_install_depth_m": {
       "type": "number",
@@ -14167,6 +14172,7 @@ Result:
   "additionalProperties": false,
   "required": [
     "default_psi_install_id",
+    "default_psi_install_w_mk",
     "default_install_depth_m"
   ],
   "properties": {
@@ -14175,6 +14181,10 @@ Result:
         "string",
         "null"
       ]
+    },
+    "default_psi_install_w_mk": {
+      "type": "number",
+      "x-unit": "W/mK"
     },
     "default_install_depth_m": {
       "type": "number",
@@ -34660,6 +34670,7 @@ Params:
       "additionalProperties": false,
       "required": [
         "default_psi_install_id",
+        "default_psi_install_w_mk",
         "default_install_depth_m"
       ],
       "properties": {
@@ -34668,6 +34679,10 @@ Params:
             "string",
             "null"
           ]
+        },
+        "default_psi_install_w_mk": {
+          "type": "number",
+          "x-unit": "W/mK"
         },
         "default_install_depth_m": {
           "type": "number",
@@ -34682,6 +34697,7 @@ Params:
       "additionalProperties": false,
       "required": [
         "default_psi_install_id",
+        "default_psi_install_w_mk",
         "default_install_depth_m"
       ],
       "properties": {
@@ -34690,6 +34706,10 @@ Params:
             "string",
             "null"
           ]
+        },
+        "default_psi_install_w_mk": {
+          "type": "number",
+          "x-unit": "W/mK"
         },
         "default_install_depth_m": {
           "type": "number",
@@ -34711,6 +34731,7 @@ Result:
   "additionalProperties": false,
   "required": [
     "default_psi_install_id",
+    "default_psi_install_w_mk",
     "default_install_depth_m"
   ],
   "properties": {
@@ -34719,6 +34740,10 @@ Result:
         "string",
         "null"
       ]
+    },
+    "default_psi_install_w_mk": {
+      "type": "number",
+      "x-unit": "W/mK"
     },
     "default_install_depth_m": {
       "type": "number",
@@ -34735,10 +34760,12 @@ Example params:
 {
   "values": {
     "default_psi_install_id": null,
+    "default_psi_install_w_mk": 0.04,
     "default_install_depth_m": 0.0
   },
   "expected_values": {
     "default_psi_install_id": null,
+    "default_psi_install_w_mk": 0.04,
     "default_install_depth_m": 0.0
   }
 }
@@ -44129,6 +44156,7 @@ Params:
       "additionalProperties": false,
       "required": [
         "default_psi_install_id",
+        "default_psi_install_w_mk",
         "default_install_depth_m"
       ],
       "properties": {
@@ -44137,6 +44165,10 @@ Params:
             "string",
             "null"
           ]
+        },
+        "default_psi_install_w_mk": {
+          "type": "number",
+          "x-unit": "W/mK"
         },
         "default_install_depth_m": {
           "type": "number",
@@ -44256,6 +44288,7 @@ Example params:
   },
   "expected_settings": {
     "default_psi_install_id": null,
+    "default_psi_install_w_mk": 0.04,
     "default_install_depth_m": 0.0
   }
 }
@@ -55594,3 +55627,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.16 | 2026-11-07 | A Face record gains assembly_reversed, true on the counterpart side of a Surface pair. ph_composer.zones.faces.assign_assembly, and classify with an assembly_id intent, also write the counterpart (its face_ids include it). face.assembly_pair_mismatch now blocks export; construction.missing no longer applies to a Surface Face whose pair is within one Building-Segment. |
 | 1.17 | 2026-11-08 | An unexpected failure's detail gains error_class beside incident. ph_composer.zones.solve_adjacency's result gains already_paired. An Assembly's Layer, Layer-Segment and air-barrier ids and its Material references state their pattern in every schema that names them. |
 | 1.18 | 2026-11-08 | ph_composer.windows.units.return_to_host is new. It puts a Window that has left its Face back on the nearest Face of its Zone, and adds window.no_host_face. |
+| 1.19 | 2026-11-08 | ph_composer.windows.settings gains default_psi_install_w_mk, 0.04 W/mK unless set: what an edge with no Psi-Install Type inherits when the Model has no default Type. |

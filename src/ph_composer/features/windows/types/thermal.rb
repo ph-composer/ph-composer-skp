@@ -27,7 +27,9 @@ module PhComposer
         side ? row.merge("side" => side) : row
       end
 
-      def calculate(record, products, default_id)
+      # `default_id` is the Model's default Psi-Install Type; `default_psi_w_mk` is what an edge inherits when
+      # there is none. A default Type no longer in the Model resolves to nothing, never to that value.
+      def calculate(record, products, default_id, default_psi_w_mk: nil)
         unless (record.fetch("rows_m") + record.fetch("columns_m")).all? { |n| number(n, :positive => true) }
           return { "elements" => [],
                    "findings" => [finding("window_type.dimensions_incomplete", "Enter all grid dimensions.")],
@@ -35,7 +37,7 @@ module PhComposer
                    "u_effective_w_m2k" => nil, "complete" => false }
         end
         layout = Grid.new(record)
-        input = products.merge("default_install_id" => default_id)
+        input = products.merge("default_install_id" => default_id, "default_psi_w_mk" => default_psi_w_mk)
         details = record.fetch("elements").reject { |cell| cell.fetch("kind") == "empty" }.map do |cell|
           width = layout.side_length(cell, 0)
           height = layout.side_length(cell, 1)
@@ -114,9 +116,8 @@ module PhComposer
 
         resolution = EdgeResolution.resolve(cell, side, :perimeter, input["default_install_id"])
         id = resolution.effective_id
-        record = input.fetch("psi_install_types")[id]
-        { "source" => resolution.source.to_s, "id" => id,
-          "psi_w_mk" => record && number(record["psi_w_mk"], :signed => true) }
+        psi = id ? input.fetch("psi_install_types")[id]&.fetch("psi_w_mk", nil) : input["default_psi_w_mk"]
+        { "source" => resolution.source.to_s, "id" => id, "psi_w_mk" => number(psi, :signed => true) }
       end
 
       def element(input, cell, width, height, shared)

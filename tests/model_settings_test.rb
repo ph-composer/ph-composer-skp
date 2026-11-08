@@ -70,6 +70,20 @@ class ModelSettingsTest < PhComposerTestCase
     end
   end
 
+  def test_a_field_added_since_the_settings_were_saved_reads_its_default_and_writes_guarded
+    @settings.store.write(@model, DEFAULTS.reject { |key, _| key == "upper" }.merge("lower" => 12.0))
+    effective = DEFAULTS.merge("lower" => 12.0)
+    assert_equal effective, @settings.read(@model)
+    assert_equal "completed", update(effective.merge("upper" => 30.0), effective).fetch("status")
+    assert_equal effective.merge("upper" => 30.0), @settings.read(@model)
+  end
+
+  def test_stored_settings_that_are_not_an_object_refuse_a_read_as_unreadable
+    @settings.store.stub(:read, [1, 2]) do
+      assert_equal "record.unreadable", assert_raises(PhComposer::CodedError) { @settings.read(@model) }.code
+    end
+  end
+
   def test_invalid_stored_settings_refuse_a_read_as_unreadable_without_the_mutation_sentence
     @settings.store.write(@model, DEFAULTS.merge("lower" => 30))
     error = assert_raises(PhComposer::CodedError) { @settings.read(@model) }

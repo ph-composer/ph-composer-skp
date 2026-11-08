@@ -406,7 +406,10 @@ Reference targets and retarget operations remain with the feature. Zones retains
 `ph_composer.zones_settings` dictionary and public settings declarations; Windows uses its own
 dictionary and target, so introducing the primitive does not migrate saved Zone settings. The
 Windows dictionary is `ph_composer.windows_settings`, holding `default_psi_install_id` (a core
-reference to `ph_composer.windows.psi_install_type`, or null) and `default_install_depth_m`.
+reference to `ph_composer.windows.psi_install_type`, or null), `default_psi_install_w_mk` and
+`default_install_depth_m`. An edge with no assignment takes the default Type when one is chosen and
+otherwise `default_psi_install_w_mk`; a default Type no longer in the Model resolves to nothing, never
+to that value. A field the stored dictionary does not hold reads its default, without a write.
 
 ## Geometry records and occurrence references
 

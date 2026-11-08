@@ -19,11 +19,19 @@ module PhComposer
 
     # Stored settings that fail validation are unreadable: a read refuses rather than repairs them.
     def read(model)
-      values = store.read(model) || DeepCopy.call(defaults)
+      values = effective(store.read(model))
       problem = problems(values).first
       raise CodedError.new("record.unreadable", "#{label} settings cannot be used: #{problem}.") if problem
 
       values
+    end
+
+    # A field the stored dictionary does not hold takes its default, so a field added later needs no migration.
+    # Anything but an object passes through for validation to refuse.
+    def effective(stored)
+      return DeepCopy.call(defaults) if stored.nil?
+
+      stored.is_a?(Hash) ? DeepCopy.call(defaults).merge(stored) : stored
     end
 
     def validate!(values)

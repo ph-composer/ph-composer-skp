@@ -101,7 +101,8 @@ module PhComposer
         validate_transform(entry, record, reference)
         face = host(entry)
         validate_host(entry, face, record, reference)
-        thermal = Thermal.calculate(type, @products, @settings["default_psi_install_id"])
+        thermal = Thermal.calculate(type, @products, @settings["default_psi_install_id"],
+                                    :default_psi_w_mk => @settings["default_psi_install_w_mk"])
         validate_product_availability(type, thermal, record, reference)
         report_thermal_conditions(type, thermal, record, reference)
         validate_uw_limit(thermal, record, reference)
@@ -278,9 +279,9 @@ module PhComposer
         sides = Types::SIDES.to_h do |side|
           frame = @products.fetch("frames").fetch(cell.fetch("frames").fetch(side))
           edge = detail.fetch("edges").find { |item| item["side"] == side }
+          install_id, install_name = install_identity(edge.fetch("install"))
           [side, { "frame" => frame.slice("id", "name", "width_m", "uf_w_m2k", "psi_g_w_mk"),
-                   "install_id" => edge.fetch("install")["id"],
-                   "install_name" => @products.fetch("psi_install_types")[edge.fetch("install")["id"]]&.fetch("name"),
+                   "install_id" => install_id, "install_name" => install_name,
                    "psi_install_w_mk" => edge.fetch("install").fetch("psi_w_mk") }]
         end
         row = { "name" => glazing.fetch("name"), "uw_w_m2k" => detail.fetch("uw_w_m2k"),
@@ -295,6 +296,14 @@ module PhComposer
                      }
         )
         row.merge("id" => "wwc_#{CanonicalJson.digest(signature)}")
+      end
+
+      # The Model's default value is no Psi-Install Type: it exports under the settings record that holds it.
+      def install_identity(install)
+        id = install["id"]
+        return [Settings::SLOT_ID, Settings::DEFAULT_VALUE_NAME] if id.nil? && install.fetch("source") == "default"
+
+        [id, @products.fetch("psi_install_types")[id]&.fetch("name")]
       end
 
       # Whether the pane polygon winds against the host Face's normal.

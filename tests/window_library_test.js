@@ -91,7 +91,7 @@ test("Psi inventory Use freezes the complete Model defaults instead of assigning
   sidebar.use(row); var params = o.sent[o.sent.length - 1].payload.params;
   assert.strictEqual(params.assignment.mode, "model_default");
   assert.deepStrictEqual(plain(params.assignment.expected_settings), { default_psi_install_id: "psi_a",
-    default_install_depth_m: 0.1 });
+    default_psi_install_w_mk: 0.04, default_install_depth_m: 0.1 });
   assert.strictEqual(params.assignment.element_id, undefined);
   delete o.state.sections["ph_composer.windows.settings"]; o.view.render(o.state);
   assert.strictEqual(sidebar.use(row), false);

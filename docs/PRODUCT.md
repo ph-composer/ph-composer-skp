@@ -24,8 +24,9 @@ piping and ducting workflows, model validation and Export. The predecessor shipp
 Builder, the Library, Window Types and the Spaces table; those transplant. Face assignment, window
 placement and thermal bridges are new.
 
-The Library is the one home for Materials and for Frames, Glazings and Psi-Install Types,
-with an explicit model default for Psi-Install Types. The Assembly Builder opens inside the
+The Library is the one home for Materials and for Frames, Glazings and Psi-Install Types.
+Every model has a default install psi-value, 0.04 W/mK until the user changes it, and the user
+can choose a Psi-Install Type as the model default in its place. The Assembly Builder opens inside the
 Assemblies tab. The accepted Space hierarchy is Space, then Volume, then Floor Segment.
 
 ## Local definitions and optional reuse
@@ -199,7 +200,8 @@ the net value until repaired. The Faces view and assembly usage retain gross are
 Export maps each glazed element to an Aperture on its gross parent Face. Construction identity
 includes product references and translated thermal values, including the element's size-dependent
 U-w and resolved Psi-Install values. Shared internal edges carry Psi-Install 0; perimeter edges
-use the assigned or model-default Psi-Install Type. The report lists installs by name and
+use the assigned Psi-Install Type, the model-default Psi-Install Type, or the model's default
+value when no Type is chosen. The report lists installs by name, the default value as "Model default", and
 gross, glazed and net host areas.
 
 Exact g-values of 0 and 1 are preserved. The pinned honeybee-energy runtime accepts these

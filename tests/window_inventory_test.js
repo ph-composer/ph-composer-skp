@@ -31,21 +31,43 @@ function complete(o, status, message) {
 }
 test("choosing a default Psi-Install Type applies at once with both settings and their expected values", function () {
   var o = setup("psi_install_types"), menu = o.view.defaultPsi;
-  assert.strictEqual(o.view.inventory.settingsRoot.children.length, 2, "both defaults sit in the action bar");
+  assert.strictEqual(o.view.inventory.settingsRoot.children.length, 3, "the defaults sit in the action bar");
   assert.strictEqual(menu.trigger.getAttribute("aria-label"), "Default Psi-Install: Insulated junction");
   var choices = menu.content.children;
   assert.strictEqual(choices.map(function (choice) {
     return choice.textContent + "=" + choice.getAttribute("aria-pressed"); }).join(),
-    "None=false,Insulated junction=true");
+    "Model value=false,Insulated junction=true");
   menu.open(); choices[0].listeners.click({}); assert.strictEqual(menu.panel.hidden, true);
   assert.strictEqual(o.sent.length, 1); var params = o.sent[0].payload.params;
   assert.strictEqual(o.sent[0].payload.name, "ph_composer.windows.settings.update");
   assert.strictEqual(params.values.default_psi_install_id, null);
+  assert.strictEqual(params.values.default_psi_install_w_mk, 0.04);
   assert.strictEqual(params.values.default_install_depth_m, 0.1);
   assert.strictEqual(params.expected_values.default_psi_install_id, "psi_a");
   assert.strictEqual(o.view.guard(), "Wait for the defaults edit.");
   complete(o, "completed"); assert.strictEqual(o.view.guard(), null);
-  o.view.dispose(); o.view.saveDefaults(null, 0.1); assert.strictEqual(o.sent.length, 1);
+  o.view.dispose(); o.view.saveDefaults({ default_install_depth_m: 0.1 }); assert.strictEqual(o.sent.length, 1);
+});
+test("with no default Type the Model value shows and edits; a chosen Type hides it", function () {
+  var o = setup("psi_install_types"), bubble = o.view.psiValueBubble, field = o.view.psiValue;
+  assert.strictEqual(bubble.root.hidden, true, "the Type's own value applies");
+  o.state.sections["ph_composer.windows.settings"].value.default_psi_install_id = null; o.view.render(o.state);
+  assert.strictEqual(bubble.root.hidden, false);
+  assert.strictEqual(o.view.defaultPsi.trigger.getAttribute("aria-label"), "Default Psi-Install: Model value");
+  assert.ok(/0\.04/.test(bubble.trigger.getAttribute("aria-label")));
+  bubble.open(); type(field, "0.06"); key(field.input, "Enter");
+  assert.strictEqual(o.sent.length, 1); var values = o.sent[0].payload.params.values;
+  assert.strictEqual(values.default_psi_install_w_mk, 0.06);
+  assert.strictEqual(values.default_psi_install_id, null);
+  assert.strictEqual(values.default_install_depth_m, 0.1);
+  assert.strictEqual(o.sent[0].payload.params.expected_values.default_psi_install_w_mk, 0.04);
+  complete(o, "completed"); assert.strictEqual(bubble.panel.hidden, true);
+});
+test("a default Type no longer in the Model reads Missing, not the Model value", function () {
+  var o = setup("psi_install_types");
+  o.state.sections["ph_composer.windows.settings"].value.default_psi_install_id = "gone"; o.view.render(o.state);
+  assert.strictEqual(o.view.defaultPsi.trigger.getAttribute("aria-label"), "Default Psi-Install: Missing");
+  assert.strictEqual(o.view.psiValueBubble.root.hidden, true);
 });
 test("install depth applies on Enter and on leaving, restores on Escape, keeps an invalid entry", function () {
   var o = setup("psi_install_types"), bubble = o.view.depthBubble, field = o.view.depth;

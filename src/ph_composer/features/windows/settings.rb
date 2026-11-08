@@ -4,11 +4,16 @@ require_relative "../../core/model_settings"
 
 module PhComposer
   module Windows
-    # Two SKP-owned defaults, using the same guarded Model dictionary service as other features.
+    # SKP-owned installation defaults, using the same guarded Model dictionary service as other features.
+    # An edge with no Psi-Install Type inherits the default Type when one is chosen, and otherwise the Model's
+    # own value. That value is a setting, not a shipped record, so no library provider is privileged.
     module Settings
       KIND = "#{FEATURE_ID}.settings_record"
-      DEFAULTS = { "default_psi_install_id" => nil, "default_install_depth_m" => 0.0 }.freeze
+      DEFAULT_VALUE_NAME = "Model default"
+      DEFAULTS = { "default_psi_install_id" => nil, "default_psi_install_w_mk" => 0.04,
+                   "default_install_depth_m" => 0.0 }.freeze
       VALUES = SchemaShapes.object({ "default_psi_install_id" => { "type" => %w[string null] },
+                                     "default_psi_install_w_mk" => { "type" => "number", "x-unit" => "W/mK" },
                                      "default_install_depth_m" => { "type" => "number", "minimum" => 0,
                                                                     "x-unit" => "m" } }).freeze
       SERVICE = ModelSettings.new(:dictionary => "ph_composer.windows_settings", :defaults => DEFAULTS,
