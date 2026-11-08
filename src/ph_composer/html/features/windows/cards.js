@@ -165,7 +165,8 @@ PhComposerUI.define("features/windows/cards", ["panel", "unit_field", "units", "
     var manufacturer = field("Manufacturer", el("select")); manufacturer.appendChild(ui.option("",
       "All manufacturers"));
     records.forEach(function (r) { if (r.manufacturer &&
-      makers.indexOf(r.manufacturer) < 0) makers.push(r.manufacturer); }); makers.sort().forEach(function (name) {
+      makers.indexOf(r.manufacturer) < 0) makers.push(r.manufacturer); });
+    makers.sort(ui.compareText).forEach(function (name) {
       manufacturer.appendChild(ui.option(name, name)); });
     var filters = [manufacturer];
     if (kind === "frames") ["Position", "Operation"].forEach(function (label) { var input = field(label,
@@ -211,8 +212,14 @@ PhComposerUI.define("features/windows/cards", ["panel", "unit_field", "units", "
       if (selected) choices.appendChild(choice(selected, true));
       else if (current) choices.appendChild(el("p", "window-picker-missing", "The assigned " +
         (kind === "frames" ? "frame" : "glazing") + " is no longer in this model. Choose a replacement."));
-      var shown = records.filter(function (r) { return r.id !== current && matches(r); });
-      shown.forEach(function (r) { choices.appendChild(choice(r, false)); });
+      var shown = records.filter(function (r) { return r.id !== current && matches(r); }).sort(function (a, b) {
+        return ui.compareText(a.name, b.name) || ui.compareText(a.id, b.id); });
+      // A Frame slot lists the Frames made for it first; the rest stay in reach beneath, each run in name order.
+      function fits(r) { return kind === "frames" && shared.framePositionFits(side, r.position); }
+      var fitting = shown.filter(fits), others = shown.filter(function (r) { return !fits(r); });
+      fitting.forEach(function (r) { choices.appendChild(choice(r, false)); });
+      if (fitting.length && others.length) choices.appendChild(el("p", "window-picker-group", "Other positions"));
+      others.forEach(function (r) { choices.appendChild(choice(r, false)); });
       if (!records.length) choices.appendChild(el("p", "", "No " + noun + " in this model yet. Add them in Library."));
       else if (!shown.length && !(selected && matches(selected))) choices.appendChild(el("p", "", "No matching " +
         noun + "."));

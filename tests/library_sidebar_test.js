@@ -126,8 +126,35 @@ test("a library's row says its click adds it; beside a table the local list give
   assert.strictEqual(o.sidebar.search.hidden, false, "a chosen library is listed as before");
   o.sidebar.store.select(""); o.sidebar.updateRows(); o.sidebar.renderList();
   assert.strictEqual(o.sidebar.search.hidden, true);
-  assert.ok(o.sidebar.list.children[0].textContent.indexOf("These records are in the table") === 0);
-  assert.strictEqual(o.sidebar.list.querySelectorAll("button").length, 0);
+  assert.strictEqual(o.sidebar.list.children.length, 0, "beside its table the local choice adds no list and no note");
+});
+function plainSidebar(options) {
+  var context = { document: dom.buildDocument(""), Intl: Intl, innerWidth: 1280, innerHeight: 800,
+    setTimeout: setTimeout, clearTimeout: clearTimeout };
+  context.window = context; dom.attachEvents(context);
+  var Sidebar = source.start(context, ["library/sidebar"])["library/sidebar"];
+  var sidebar = new Sidebar(Object.assign({ session: "session", send: function () {}, adapter: {
+    title: "Material Library", localLabel: "Materials in this file", wireKind: "materials",
+    read: function () { return []; }, properties: [] } },
+  options));
+  context.document.body.appendChild(sidebar.root);
+  sidebar.refresh({ session: "session", revision: 1, ui: { queryResults: {}, setupResults: {} }, sections: {} }, {},
+    true);
+  return sidebar;
+}
+test("the source choice names this file's records by kind (W-070)", function () {
+  assert.strictEqual(plainSidebar().source.children[0].textContent, "Materials in this file");
+});
+test("Library setup is an icon on the title row, beside the title and not inside it (W-071)", function () {
+  var sidebar = plainSidebar(), gear = sidebar.setupButton;
+  assert.strictEqual(gear.getAttribute("data-icon"), "settings");
+  assert.strictEqual(gear.parentNode, sidebar.toggleButton.parentNode);
+  assert.strictEqual(gear.getAttribute("aria-label"), "Add a library…", "before any library it says what it is for");
+  assert.strictEqual(sidebar.controls.hidden, true, "no empty row is left where the link was");
+  var o = setup();
+  assert.strictEqual(o.sidebar.setupButton.getAttribute("aria-label"), "Library setup…");
+  assert.strictEqual(o.sidebar.controls.hidden, false, "a chosen library keeps Refresh");
+  assert.strictEqual(plainSidebar({ localOnly: true }).setupButton.parentNode, null, "a local-only list has no setup");
 });
 test("a long list starts with its groups folded, a search opens them, and a fold the user chose stays", function () {
   var o = setup(), template = JSON.stringify(o.sidebar.records[0]);

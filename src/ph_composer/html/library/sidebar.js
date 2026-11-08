@@ -36,6 +36,12 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
       this.toggleButton = ui.button(this.adapter.title, function () { self.toggle(); });
       this.toggleButton.className = "library-sidebar-toggle";
       this.toggleButton.setAttribute("data-editor-local", "");
+      this.setupButton = ui.iconButton("Library setup…", "settings", function () {
+        if (!self.busy()) self.setup.open();
+      });
+      this.setupButton.classList.add("library-sidebar-setup");
+      var heading = el("div", "library-sidebar-heading"); heading.appendChild(this.toggleButton);
+      if (!options.localOnly) heading.appendChild(this.setupButton);
       this.content = el("div", "library-sidebar-content");
       this.source = el("select", "library-sidebar-source");
       this.source.setAttribute("aria-label", "Library source");
@@ -51,16 +57,15 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
       this.skipped = el("ul", "library-sidebar-skipped"); this.skipped.setAttribute("aria-label", "Records not loaded");
       this.skipped.hidden = true; this.content.appendChild(this.skipped);
       this.refreshButton = ui.button("Refresh", function () { if (!self.busy()) self.store.refresh(); });
-      this.setupButton = ui.button("Library setup…", function () { if (!self.busy()) self.setup.open(); });
-      var controls = el("div", "library-source-controls");
+      var controls = this.controls = el("div", "library-source-controls");
       // A work surface that needs a record the library lacks makes one here without leaving (options.create).
       if (options.create) {
         this.createButton = ui.button(options.create.label, function () { if (!self.busy()) options.create.run(); });
         controls.appendChild(this.createButton);
       }
-      controls.appendChild(this.refreshButton);
-      controls.appendChild(this.setupButton); this.content.appendChild(controls);
-      if (options.localOnly) { this.source.hidden = true; controls.hidden = true; }
+      controls.appendChild(this.refreshButton); this.content.appendChild(controls);
+      this.localOnly = Boolean(options.localOnly);
+      if (this.localOnly) this.source.hidden = true;
       this.search = el("input");
       this.search.type = "search";
       this.search.placeholder = "Search name, category or notes";
@@ -82,7 +87,7 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
       this.content.appendChild(this.narrowing);
       this.content.appendChild(this.count);
       this.content.appendChild(this.list);
-      this.root.appendChild(this.toggleButton);
+      this.root.appendChild(heading);
       this.root.appendChild(this.content);
       if (!options.localOnly && options.session && options.send && this.adapter.wireKind) {
         this.store = new Store(options.session, options.send, this.adapter.wireKind, this.changed);
@@ -182,19 +187,20 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
     };
     Sidebar.prototype.updateRows = function () {
       this.records = this.store && this.store.selected ? this.store.rows : this.adapter.read(this.state);
-      this.source.replaceChildren(el("option", "", "In this file")); this.source.children[0].value = "";
+      this.source.replaceChildren(el("option", "", this.adapter.localLabel)); this.source.children[0].value = "";
       if (this.store) this.store.providers.forEach(function (provider) {
         var option = el("option", "", provider.label); option.value = provider.id; this.source.appendChild(option);
       }, this);
       this.source.value = this.store ? this.store.selected : "";
       this.source.disabled = !this.store || !this.store.available || this.busy() || Boolean(this.guard());
       this.refreshButton.hidden = !this.store || !this.store.selected;
+      this.controls.hidden = this.localOnly || (this.refreshButton.hidden && !this.createButton);
       this.refreshButton.disabled = this.busy() || Boolean(this.store && this.store.busy());
       this.setupButton.disabled = !this.setup || !this.setup.enabled || this.busy();
       if (this.createButton) this.createButton.disabled = !this.enabled || this.busy();
       // Before any library is set up, the button says what the user came to do.
-      this.setupButton.textContent = this.store && this.store.providers.length ? "Library setup…" :
-        "Add a library…";
+      ui.paintIconButton(this.setupButton, this.store && this.store.providers.length ? "Library setup…" :
+        "Add a library…", "settings");
       this.more.hidden = !this.store || !this.store.page || !this.store.page.next_cursor;
       this.more.disabled = this.busy() || Boolean(this.store && this.store.busy());
       var page = this.store && this.store.selected && this.store.page;

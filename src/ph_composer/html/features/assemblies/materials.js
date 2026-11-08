@@ -32,7 +32,8 @@ function (panel, snapshot, ui, fields, inventories, forms, Sidebar, library, Mat
     }
     this.sidebar = new Sidebar({ session: state.session, send: send, changed: changed, besideTable: true,
       busy: function () { return Boolean(self.inventory && self.inventory.guard()); },
-      adapter: { title: "Material Library", wireKind: "materials", name: materialName, read: function (live) {
+      adapter: { title: "Material Library", localLabel: "Materials in this file", wireKind: "materials",
+        name: materialName, read: function (live) {
         return (snapshot.value(live, MATERIALS) || {}).records || [];
       }, categories: function () { return self.categories; }, properties: [
         ["Conductivity", "conductivity_w_mk", fields.CONDUCTIVITY], ["Density", "density_kg_m3", fields.DENSITY],

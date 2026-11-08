@@ -158,7 +158,7 @@ function (panel, inventories, forms, Form, shared, fields, request, snapshot, un
     trigger.valueText.textContent = name; trigger.valueText.classList.toggle("muted", !chosen);
     trigger.setAttribute("aria-label", "Default Psi-Install: " + name); ui.tooltip(trigger, name);
     var choices = [[null, "Model value"]].concat(this.records.map(function (row) {
-      return [row.id, row.values.name]; }));
+      return [row.id, row.values.name]; }).sort(function (a, b) { return ui.compareText(a[1], b[1]); }));
     var key = JSON.stringify([current, choices]);
     if (key !== this.choicesKey) {
       this.choicesKey = key;
