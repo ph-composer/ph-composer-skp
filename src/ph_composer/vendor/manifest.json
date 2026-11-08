@@ -66,9 +66,9 @@
       "sha256": "1848ec9a45ed5bf8c21b3a0af2331061c7275590b562d0ebbfa4b399584f1ca7"
     },
     "html/features/assemblies/editor_shared.js": {
-      "bytes": 2713,
+      "bytes": 2734,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "8e026ff148b866ac0adf127b296a6cd459866bfc2ad72910233fdaa5d383a4ff"
+      "sha256": "b5aadfb3db2a47d54809adc47a7c7aada880f97598338cb75340bb61a32ed4b4"
     },
     "html/features/assemblies/form.js": {
       "bytes": 3083,
@@ -81,9 +81,9 @@
       "sha256": "87da6825d148cf56474a531edd040e394a46c8247d98822906aa68a0cfa71306"
     },
     "html/features/assemblies/inspector.js": {
-      "bytes": 7129,
+      "bytes": 7139,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "f483a55750d605a6bfbcb4b8d1f4740c3031bc3e4f91633cd032b01fd5247cbc"
+      "sha256": "884bca9506e354729a88aae17bfa6fa1abd731beb218b5ac8f38dfef11c4e8c6"
     },
     "html/features/assemblies/layer_drag.js": {
       "bytes": 7785,
@@ -106,9 +106,9 @@
       "sha256": "6c7f85815ca8e79bb6feaded016f87a9308a2deb689908d39268f690b25819d5"
     },
     "html/features/assemblies/section.js": {
-      "bytes": 8152,
+      "bytes": 8209,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "90594517a600e0e3e0eefdea286c026e4ad953c8e1271f9b0ddc52b4b983e717"
+      "sha256": "cb47d8ff06ed89c598262963bb8cc744f84dbe396be970b0598d2e67f5c9ecd6"
     },
     "html/features/assemblies/stage.js": {
       "bytes": 19096,
@@ -186,9 +186,9 @@
       "sha256": "d6c98c3311317838308f5788c5db8526ef1eac0d047c03cdb2e10151d470b56e"
     },
     "html/features/windows/canvas.js": {
-      "bytes": 18076,
+      "bytes": 19120,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "3c1e4123e68b07c5ef5f5c32d0f63160e36732c4dbb0ef5805e985b3be6881de"
+      "sha256": "ba335dce67337d7ebd8c04e837de15e2d178133c1d87a8ac7695a4b9579fb1cc"
     },
     "html/features/windows/cards.js": {
       "bytes": 27545,
@@ -201,9 +201,9 @@
       "sha256": "0289f5bab5791255a88978531fc25526e6364c743a72da3a62104ca8717bd91a"
     },
     "html/features/windows/editor_shared.js": {
-      "bytes": 2035,
+      "bytes": 2033,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "508381b6dc06b14f1bf5402cd9ffc3f4a80047f0d4a6fc2b9839791728778c64"
+      "sha256": "a2d5a68f1056c989996bf446ff7fc04860580958f32587111b5bc6728fbf95de"
     },
     "html/features/windows/form.js": {
       "bytes": 6820,

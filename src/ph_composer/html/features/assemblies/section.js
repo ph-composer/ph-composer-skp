@@ -1,7 +1,8 @@
 /* Assembly inventory and its one open Builder use model-owned definition snapshots. */
 PhComposerUI.define("features/assemblies/section", ["panel", "snapshot", "workspace", "features/assemblies/form",
-  "inventory_forms", "inventory", "units", "unit_preferences", "fields", "features/assemblies/editor"],
-function (panel, snapshot, ui, AssemblyForm, forms, inventories, units, preferences, fields, builder) {
+  "inventory_forms", "inventory", "units", "unit_preferences", "fields", "features/assemblies/editor",
+  "features/assemblies/editor_shared"],
+function (panel, snapshot, ui, AssemblyForm, forms, inventories, units, preferences, fields, builder, shared) {
   "use strict";
   var SECTION = "ph_composer.assemblies.assemblies";
   var current;
@@ -55,7 +56,7 @@ function (panel, snapshot, ui, AssemblyForm, forms, inventories, units, preferen
         if (message) notice(message);
         changed();
       }, function (format, system) {
-        panel.setPreference("dimension_format", format, { scope: "assemblies", system: system });
+        panel.setPreference("dimension_format", format, { scope: shared.DIMENSION.scope, system: system });
       });
       view.listRoot.hidden = true;
       root.appendChild(view.editor.root);

@@ -3,7 +3,7 @@ PhComposerUI.define("features/windows/editor_shared", ["fields", "snapshot", "un
   units) {
   "use strict";
   var PREFIX = "ph_composer.windows.";
-  var DIMENSION = fields.with(fields.LENGTH_M, { builder: "ph_composer.windows.types", label: "Dimension",
+  var DIMENSION = fields.with(fields.LENGTH_M, { scope: "ph_composer.windows.types", label: "Dimension",
     allowBlank: true, allowZero: false });
   function records(state, kind) { return (snapshot.value(state, PREFIX + kind) || {}).records || []; }
   function flat(record) { return Object.assign({ id: record.id }, record.values); }

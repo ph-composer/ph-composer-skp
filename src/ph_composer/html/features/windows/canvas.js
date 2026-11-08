@@ -9,6 +9,23 @@ PhComposerUI.define("features/windows/canvas", ["workspace"], function (ui) {
       if (e.key === "Enter" || e.key === " ") { e.preventDefault(); callback(e); } }); return node;
   }
   function sum(values) { return values.reduce(function (a, b) { return a + (b || 1); }, 0); }
+  /* A swing draws a triangle: the two glass corners away from `direction` meet at the midpoint of that side. */
+  function swingLines(glass, direction) {
+    var x = glass.x, y = glass.y, w = glass.width, h = glass.height;
+    return [{ dash: "4 3", points: { left: [[x + w, y], [x, y + h / 2], [x + w, y + h]],
+      right: [[x, y], [x + w, y + h / 2], [x, y + h]], up: [[x, y + h], [x + w / 2, y], [x + w, y + h]],
+      down: [[x, y], [x + w / 2, y + h], [x + w, y]] }[direction] }];
+  }
+  /* A slide draws one arrow across the glass, sight line to sight line, pointing in `direction`: a fine dashed
+     shaft like every operation line, with a solid head, because dashes break up a head this small. */
+  function slideLines(glass, direction, barb) {
+    var axis = { left: [-1, 0], right: [1, 0], up: [0, -1], down: [0, 1] }[direction];
+    var x = glass.x + glass.width / 2, y = glass.y + glass.height / 2;
+    var reachX = axis[0] * glass.width / 2, reachY = axis[1] * glass.height / 2;
+    var tip = [x + reachX, y + reachY], backX = tip[0] - axis[0] * barb, backY = tip[1] - axis[1] * barb;
+    return [{ dash: "2 3", points: [[x - reachX, y - reachY], tip] }, { dash: "none", points: [[backX - axis[1] * barb,
+      backY - axis[0] * barb], tip, [backX + axis[1] * barb, backY + axis[0] * barb]] }];
+  }
   function Canvas(view) { this.view = view; this.root = svg("svg", { role: "group",
     "aria-label": "Window Type drawing" }); }
   Canvas.prototype.render = function (record, options) {
@@ -78,19 +95,16 @@ PhComposerUI.define("features/windows/canvas", ["workspace"], function (ui) {
           ui.tooltip(frame, side + " frame"); action(frame, "Select " + cell.name + " " + side +
             " frame", function (e) { view.select(cell.id, e); }); group.appendChild(frame);
         });
-        // Operation lines are secondary: they run from the glass corners, touching the frame sight lines, to the
-    // opposite midpoint.
+        // Operation lines are secondary and anchored to the frame sight lines.
         var gx = x + l, gy = y + t, gw = cw - l - r, gh = ch - t - b;
         if (cell.operation && gw > 0 && gh > 0) cell.operation.directions.forEach(function (direction) {
           if (view.interior) direction = { left: "right", right: "left" }[direction] || direction;
-          var points;
-          if (direction === "left") points = [[gx + gw, gy], [gx, gy + gh / 2], [gx + gw, gy + gh]];
-          if (direction === "right") points = [[gx, gy], [gx + gw, gy + gh / 2], [gx, gy + gh]];
-          if (direction === "up") points = [[gx, gy + gh], [gx + gw / 2, gy], [gx + gw, gy + gh]];
-          if (direction === "down") points = [[gx, gy], [gx + gw / 2, gy + gh], [gx + gw, gy]];
-          if (points) group.appendChild(svg("polyline", { points: points.map(function (p) { return p.join(",");
-            }).join(" "), "class": "window-operation",
-            "stroke-dasharray": cell.operation.type === "slide" ? "2 3" : "4 3" }));
+          var glass = { x: gx, y: gy, width: gw, height: gh };
+          (cell.operation.type === "slide" ? slideLines(glass, direction, Math.min(10 * type, gw / 4, gh / 4)) :
+            swingLines(glass, direction)).forEach(function (line) {
+            group.appendChild(svg("polyline", { points: line.points.map(function (p) { return p.join(",");
+              }).join(" "), "class": "window-operation", "stroke-dasharray": line.dash }));
+          });
         });
         // The element profile draws over its light frame lines at a medium weight.
         group.appendChild(svg("rect", { x: x, y: y, width: cw, height: ch, "class": "window-element-outline" }));

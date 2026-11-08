@@ -32,7 +32,7 @@ PhComposerUI.define("features/assemblies/inspector", ["features/assemblies/edito
         button.setAttribute("data-editor-local", "");
         view.appendChild(button);
       });
-      view.appendChild(unitFields.DimensionFormatControl("assemblies", this.chooseDimensionFormat).root);
+      view.appendChild(unitFields.DimensionFormatControl(shared.DIMENSION.scope, this.chooseDimensionFormat).root);
       root.appendChild(view);
       var tools = el("div", "assembly-tool-group");
       var more = new ui.ActionMenu("More drawing actions");

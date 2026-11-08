@@ -3,7 +3,7 @@ PhComposerUI.define("features/assemblies/editor_shared", ["fields", "snapshot", 
   "workspace"],
   function (fields, snapshot, units, preferences, ui) {
     "use strict";
-    var DIMENSION = fields.with(fields.LENGTH_MM, { builder: "assemblies", label: "Dimension",
+    var DIMENSION = fields.with(fields.LENGTH_MM, { scope: "ph_composer.assemblies.assemblies", label: "Dimension",
       allowBlank: false, allowZero: false });
     var OPTIONAL_DIMENSION = fields.with(DIMENSION, { allowBlank: true });
     function lookup(records) {

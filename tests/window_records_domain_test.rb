@@ -108,22 +108,65 @@ class WindowRecordsDomainTest < PhComposerTestCase
     assert_empty W::Types::KIND.problems(copy.merge("id" => "wnt_AAAAAAAAAAAA", "schema_version" => 1))
   end
 
-  def test_paste_installs_requires_matching_topology_and_empty_clears_all_assignments
-    record = window_values
-    added = W::GridOperations.insert(record, { "axis" => "columns_m", "index" => 1, "value" => 1 },
+  def side_by_side_elements
+    added = W::GridOperations.insert(window_values, { "axis" => "columns_m", "index" => 1, "value" => 1 },
                                      window_allocator)
-    added["elements"][0].merge!("glazing_id" => "glz_AAAAAAAAAAAA",
-                                "operation" => { "type" => "fixed", "directions" => [] })
-    copied = W::GridOperations.paste(added, { "source_id" => added["elements"][0]["id"],
-                                              "ids" => [added["elements"][1]["id"]] })
-    assert_equal "glz_AAAAAAAAAAAA", copied["elements"][1]["glazing_id"]
-    copied["elements"][0]["installs"]["left"] = "psi_AAAAAAAAAAAA"
-    assert_raises(PhComposer::CodedError) do
-      W::GridOperations.paste(copied, { "source_id" => copied["elements"][0]["id"],
-                                        "ids" => [copied["elements"][1]["id"]] })
-    end
-    empty = W::GridOperations.kind(copied, { "ids" => [copied["elements"][0]["id"]], "kind" => "empty" })
-    cell = empty["elements"][0]
+    source, target = added["elements"].sort_by { |cell| cell["column_span"] }
+    source.merge!("glazing_id" => "glz_AAAAAAAAAAAA", "operation" => { "type" => "slide", "directions" => ["right"] })
+    source["frames"]["top"] = "frm_AAAAAAAAAAAA"
+    [added, source, target]
+  end
+
+  def paste(record, source, target)
+    pasted = W::GridOperations.paste(record, { "source_id" => source["id"], "ids" => [target["id"]] })
+    pasted["elements"].find { |cell| cell["id"] == target["id"] }
+  end
+
+  def test_paste_between_mulled_elements_copies_installs_only_to_edges_outer_on_both
+    record, source, target = side_by_side_elements
+    source["installs"].merge!("top" => "psi_AAAAAAAAAAAA", "bottom" => "psi_BBBBBBBBBBBB", "left" => "psi_CCCCCCCCCCCC")
+    target["installs"]["right"] = "psi_DDDDDDDDDDDD"
+
+    pasted = paste(record, source, target)
+
+    assert_equal source["glazing_id"], pasted["glazing_id"]
+    assert_equal source["frames"], pasted["frames"]
+    assert_equal source["operation"], pasted["operation"]
+    assert_equal({ "top" => "psi_AAAAAAAAAAAA", "right" => "psi_DDDDDDDDDDDD", "bottom" => "psi_BBBBBBBBBBBB",
+                   "left" => nil }, pasted["installs"])
+  end
+
+  def test_paste_clears_a_matching_outer_edge_the_source_leaves_unassigned
+    record, source, target = side_by_side_elements
+    target["installs"]["top"] = "psi_DDDDDDDDDDDD"
+
+    assert_nil paste(record, source, target)["installs"]["top"]
+  end
+
+  def test_paste_leaves_a_partly_shared_edge_alone
+    wide = W::GridOperations.insert(window_values, { "axis" => "columns_m", "index" => 1, "value" => 1 },
+                                    window_allocator)
+    grid = W::GridOperations.insert(wide, { "axis" => "rows_m", "index" => 1, "value" => 1 }, window_allocator)
+    left = grid["elements"].select { |cell| cell["column_span"] == [0, 0] }.map { |cell| cell["id"] }
+    merged = W::GridOperations.merge(grid, { "ids" => left }, window_allocator)
+    lower_right = merged["elements"].find { |cell| cell["row_span"] == [1, 1] && cell["column_span"] == [1, 1] }
+    shaped = W::GridOperations.kind(merged, { "ids" => [lower_right["id"]], "kind" => "empty" })
+    tall = shaped["elements"].find { |cell| cell["row_span"] == [0, 1] }
+    source = shaped["elements"].find { |cell| cell["row_span"] == [0, 0] && cell["column_span"] == [1, 1] }
+    source["installs"].merge!("top" => "psi_AAAAAAAAAAAA", "right" => "psi_BBBBBBBBBBBB")
+    assert_equal :partial, W::Grid.new(shaped).classify(tall)[1]
+
+    pasted = paste(shaped, source, tall)
+
+    assert_equal "psi_AAAAAAAAAAAA", pasted["installs"]["top"]
+    assert_nil pasted["installs"]["right"]
+  end
+
+  def test_setting_an_element_empty_clears_all_its_assignments
+    record, source, = side_by_side_elements
+    source["installs"]["left"] = "psi_AAAAAAAAAAAA"
+    empty = W::GridOperations.kind(record, { "ids" => [source["id"]], "kind" => "empty" })
+    cell = empty["elements"].find { |entry| entry["id"] == source["id"] }
     assert_nil cell["glazing_id"]
     assert_nil cell["operation"]
     assert cell["frames"].values.none?

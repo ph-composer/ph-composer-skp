@@ -18,6 +18,51 @@ test("drawing renders explicit three elements including Empty and canonical U he
   o.state.sections["ph_composer.windows.types"].value.records[0].display.thermal.uw_w_m2k = null;
   o.editor.render(o.state); assert.strictEqual(o.editor.uwMetric.textContent, "—");
 });
+function overallSize(o) { return o.editor.canvas.root.querySelector(".window-overall-dimension").textContent; }
+test("each Dimension format changes the drawing's labels", function () {
+  var o = setup(), preferences = o.modules.unit_preferences;
+  var scope = o.editor.root.querySelector("[data-dimension-format-scope]")
+    .getAttribute("data-dimension-format-scope");
+  var seen = {}, units = o.modules.units, field = o.modules.fields.LENGTH_M;
+  units.dimensionFormats.forEach(function (entry) {
+    preferences.set("unit_system", entry.system);
+    preferences.set("dimension_format", entry.id, { scope: scope, system: entry.system }); o.editor.render(o.state);
+    var profile = units.profile({ scope: scope }), side = units.format(1.5, field, profile);
+    assert.strictEqual(profile.dimensionFormat, entry.id);
+    assert.strictEqual(overallSize(o), side + " × " + side, entry.id);
+    assert.ok(!seen[overallSize(o)], entry.id + " reads differently from the other formats");
+    seen[overallSize(o)] = true;
+  });
+});
+function operationLines(o, operation, interior) {
+  o.state.sections["ph_composer.windows.types"].value.records[0].values.elements[0].operation = operation;
+  o.editor.interior = Boolean(interior); o.editor.render(o.state);
+  return o.editor.canvas.root.querySelector("[data-window-element='wel_a']").querySelectorAll(".window-operation")
+    .map(function (line) { return line.getAttribute("points").split(" ").map(function (point) {
+      return point.split(",").map(Number); }); });
+}
+test("a Slide operation draws an arrow in its direction, in either view", function () {
+  var o = setup();
+  [["right", 0, 1, false], ["left", 0, -1, false], ["down", 1, 1, false], ["up", 1, -1, false],
+    ["right", 0, -1, true], ["left", 0, 1, true]].forEach(function (entry) {
+    var lines = operationLines(o, { type: "slide", directions: [entry[0]] }, entry[3]);
+    assert.strictEqual(lines.length, 2, "a shaft and a head");
+    var shaft = lines[0], head = lines[1], axis = entry[1], across = 1 - axis, tail = shaft[0], tip = shaft[1];
+    assert.strictEqual(shaft.length, 2);
+    assert.ok((tip[axis] - tail[axis]) * entry[2] > 0, entry[0] + " points its own way");
+    assert.strictEqual(tip[across], tail[across], entry[0] + " is a straight shaft");
+    assert.strictEqual(head.length, 3);
+    assert.deepStrictEqual(head[1], tip, "both barbs leave the tip");
+    [head[0], head[2]].forEach(function (barb) {
+      assert.ok((barb[axis] - tip[axis]) * entry[2] < 0, "barbs sweep back"); });
+    assert.ok(Math.abs((head[0][across] + head[2][across]) / 2 - tip[across]) < 1e-9, "barbs are symmetric");
+  });
+});
+test("a Swing operation keeps its triangle to the hinge side", function () {
+  var line = operationLines(setup(), { type: "swing", directions: ["right"] })[0];
+  assert.strictEqual(line.length, 3);
+  assert.ok(line[1][0] > line[0][0] && line[1][0] > line[2][0]);
+});
 test("toolbar sends one named grid action with explicit IDs and raw expected values", function () {
   var o = setup(); o.editor.select("wel_a"); o.editor.select("wel_b", { shiftKey: true });
   click(o.editor.root.querySelector("[data-window-action='merge']"));
