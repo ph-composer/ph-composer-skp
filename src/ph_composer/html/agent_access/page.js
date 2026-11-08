@@ -2,8 +2,8 @@
    connects with. It is its own window and talks only to its own callback, `ph_composer_agent_access`; it is
    not the panel and sends no panel message. A token is shown once, in the dialog that created it, and never
    again: the host keeps only its digest. */
-PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_header"],
-  function (dom, icons, overlay, header) {
+PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_header", "subtabs"],
+  function (dom, icons, overlay, header, Subtabs) {
     "use strict";
     var el = dom.element;
     /* What each capability lets a holder do, in the words the New token form shows beside its checkbox. */
@@ -39,6 +39,18 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
       return line;
     }
 
+    /* Live tokens by when they were issued, newest first: the windows a user remembers a token by. */
+    var PERIODS = ["Today", "Yesterday", "This week", "This year", "Earlier"];
+    function period(iso, now) {
+      // Calendar days, so a daylight-saving change never moves a boundary; the week starts on Monday.
+      var at = new Date(iso), y = now.getFullYear(), m = now.getMonth(), d = now.getDate();
+      if (at >= new Date(y, m, d)) return PERIODS[0];
+      if (at >= new Date(y, m, d - 1)) return PERIODS[1];
+      if (at >= new Date(y, m, d - (now.getDay() + 6) % 7)) return PERIODS[2];
+      if (at.getFullYear() === now.getFullYear()) return PERIODS[3];
+      return PERIODS[4];
+    }
+
     function day(iso) { return iso ? new Date(iso).toLocaleDateString() : ""; }
     function time(iso) { return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); }
     function capabilityNames(list) {
@@ -47,8 +59,11 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
       }).join(", ");
     }
 
-    function Page(post) {
+    /* `options.now`, a clock for the token list's time groups; the real one when absent. */
+    function Page(post, options) {
       var self = this;
+      this.now = (options && options.now) || function () { return new Date(); };
+      this.showRevoked = false; this.issuedState = { client: null };
       this.post = post; this.tokens = []; this.offered = ["read"]; this.unreadable = false; this.pending = false;
       this.connectButtons = []; this.connectStatus = {};
       this.model = null;
@@ -80,9 +95,19 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
       this.reset = dom.button("Reset agent tokens", function () { self.send("access.reset", {}); });
       this.unreadableNotice.appendChild(this.reset);
       this.root.appendChild(this.unreadableNotice);
-      this.list = el("div", "agent-access-list"); this.list.setAttribute("role", "list");
-      this.list.setAttribute("aria-label", "Agent tokens");
-      this.root.appendChild(this.list);
+      // New token is the page's one job; the tokens already issued are folded away until asked for.
+      this.tokensBox = el("details", "agent-access-tokens");
+      this.tokensSummary = el("summary");
+      this.tokensBox.appendChild(this.tokensSummary);
+      this.list = el("div", "agent-access-list");
+      this.tokensBox.appendChild(this.list);
+      this.revokedToggle = dom.button("", function () { self.showRevoked = !self.showRevoked; self.paint(); });
+      this.revokedToggle.className = "agent-access-revoked-toggle";
+      this.tokensBox.appendChild(this.revokedToggle);
+      this.root.appendChild(this.tokensBox);
+      this.empty = el("p", "muted agent-access-empty", "No agent tokens. A token lets one agent, such as " +
+        "Claude Code or Codex, connect to PH-Composer with the access you choose.");
+      this.root.appendChild(this.empty);
       this.buildCreateDialog(); this.buildIssuedDialog(); this.buildRevokeDialog();
       overlay.attachTooltip(this.root);
       this.paint();
@@ -162,18 +187,45 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
       this.portRow.hidden = server.state !== "unavailable";
       if (this.portRow.hidden || document.activeElement !== this.portInput) this.portInput.value = server.port || "";
       this.portApply.disabled = this.pending;
-      this.list.replaceChildren();
-      this.tokens.forEach(function (token) { self.list.appendChild(self.row(token)); });
-      if (!this.tokens.length && !this.unreadable) {
-        this.list.appendChild(el("p", "muted agent-access-empty", "No agent tokens. A token lets one agent, such as " +
-          "Claude Code or Codex, connect to PH-Composer with the access you choose."));
-      }
+      this.paintTokens();
       this.unreadableNotice.hidden = !this.unreadable;
       this.reset.disabled = this.pending;
       // A token issued while the port is taken would carry snippets for a port nothing listens on.
       this.create.disabled = this.pending || this.unreadable || server.state === "unavailable";
       this.createSubmit.disabled = this.pending;
       this.connectButtons.forEach(function (button) { button.disabled = self.pending; });
+    };
+
+    /* The folded token list: live tokens under the period they were issued in, then, only when asked for,
+       the revoked ones under their own heading. */
+    Page.prototype.paintTokens = function () {
+      var self = this, now = this.now(), groups = [], byPeriod = {};
+      var live = this.tokens.filter(function (token) { return !token.revoked_at; });
+      var revoked = this.tokens.filter(function (token) { return token.revoked_at; });
+      function group(label) {
+        var root = el("section", "agent-access-group"), items = el("div", "agent-access-items");
+        items.setAttribute("role", "list"); items.setAttribute("aria-label", label + " tokens");
+        root.appendChild(el("h3", "", label)); root.appendChild(items);
+        return { root: root, items: items };
+      }
+      live.forEach(function (token) {
+        var label = period(token.created_at, now);
+        if (!byPeriod[label]) { byPeriod[label] = group(label); groups.push(byPeriod[label]); }
+        byPeriod[label].items.appendChild(self.row(token));
+      });
+      if (this.showRevoked && revoked.length) {
+        var gone = group("Revoked");
+        revoked.forEach(function (token) { gone.items.appendChild(self.row(token)); });
+        groups.push(gone);
+      }
+      this.list.replaceChildren.apply(this.list, groups.map(function (item) { return item.root; }));
+      this.tokensSummary.textContent = "Tokens · " + (live.length ? live.length + " live" : "none live");
+      this.tokensBox.hidden = !this.tokens.length;
+      this.revokedToggle.hidden = !revoked.length;
+      this.revokedToggle.textContent = this.showRevoked ? "Hide revoked tokens" :
+        "Show revoked tokens (" + revoked.length + ")";
+      this.revokedToggle.setAttribute("aria-pressed", String(this.showRevoked));
+      this.empty.hidden = Boolean(this.tokens.length) || this.unreadable;
     };
 
     /* New token: a label and the capabilities, each with what it allows. Read is always held. */
@@ -243,11 +295,8 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
       this.issuedDialog = overlay.formDialog("agent-access-issued-dialog", function () { self.closeIssued(); });
       this.issuedTitle = el("h2", "", "Token created");
       this.issuedDialog.appendChild(this.issuedTitle);
-      this.issuedDialog.appendChild(el("p", "", "Connect your client with this token below, or copy it for another " +
-        "one. It is not shown again; if it is lost, revoke it and create another."));
-      this.issuedDialog.appendChild(el("p", "muted", "Connect saves the token in a file only your account can read " +
-        "and sets the client up, once, to read it there. Connecting it again later with a new token changes " +
-        "only that file."));
+      this.issuedDialog.appendChild(el("p", "", "Connect your client below. The token is not shown again; if it " +
+        "is lost, revoke it and create another."));
       var field = this.copyField("token", "input");
       this.secret = field.value; this.copy = field.copy;
       this.issuedDialog.appendChild(field.root);
@@ -270,32 +319,42 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
       root.appendChild(value); root.appendChild(copy);
       return { root: root, value: value, copy: copy };
     };
-    /* Each client's Connect, the line that says what it did, and its setup to run or paste by hand, with
-       the command that checks it. */
+    /* One client at a time, each its own tab: Connect, the line that says what it did, and, behind "Other ways
+       to connect", its setup to run or paste by hand and the command that checks it. */
     Page.prototype.showClients = function (clients) {
-      var self = this;
+      var self = this, tabs = [];
       this.clients.replaceChildren(); this.connectButtons = []; this.connectStatus = {};
       clients.forEach(function (client) {
         var section = el("section", "agent-access-client");
-        section.appendChild(el("h3", "", client.client));
         var connect = dom.button("Connect " + client.client, function () {
           if (self.pending) return;
           self.connecting = client.id;
           self.connectStatus[client.id].textContent = "Connecting " + client.client + "…";
           self.send("access.connect", { client: client.id, token: self.secret.value });
         });
-        connect.className = "agent-access-connect";
+        connect.className = "agent-access-connect primary";
         var status = el("p", "agent-access-connected"); status.setAttribute("role", "status");
         self.connectButtons.push(connect); self.connectStatus[client.id] = status;
         section.appendChild(connect); section.appendChild(status);
+        section.appendChild(el("p", "muted", "Connect saves the token in a file only your account can read and " +
+          "sets " + client.client + " up, once, to read it there. Connecting again later with a new token " +
+          "changes only that file."));
+        var other = el("details", "agent-access-other");
+        other.appendChild(el("summary", "", "Other ways to connect"));
         client.forms.forEach(function (form) {
-          section.appendChild(el("p", "muted", form.title));
+          other.appendChild(el("p", "muted", form.title));
           var field = self.copyField(client.client + " setup", "textarea");
-          field.value.value = form.text; section.appendChild(field.root);
+          field.value.value = form.text; other.appendChild(field.root);
         });
-        section.appendChild(el("p", "muted", "Check it with " + client.check + "."));
-        self.clients.appendChild(section);
+        other.appendChild(el("p", "muted", "Check it with " + client.check + "."));
+        section.appendChild(other);
+        tabs.push({ id: client.id, label: client.client, surface: section });
       });
+      if (!tabs.length) return;
+      this.clientTabs = new Subtabs({ label: "Client", state: this.issuedState, stateKey: "client",
+        tabs: tabs });
+      this.clients.appendChild(this.clientTabs.root);
+      tabs.forEach(function (tab) { self.clients.appendChild(tab.surface); });
     };
     /* What Connect did, under that client's button: always ends with starting a new client session. */
     Page.prototype.connected = function (payload) {
@@ -326,6 +385,7 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
     };
     /* Nothing that holds the token outlives this dialog. */
     Page.prototype.closeIssued = function () {
+      if (this.clientTabs) { this.clientTabs.dispose(); this.clientTabs = null; }
       this.secret.value = ""; this.clients.replaceChildren(); this.connectButtons = []; this.connectStatus = {};
       this.issuedDialog.closeModal();
     };

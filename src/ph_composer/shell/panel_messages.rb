@@ -18,6 +18,9 @@ module PhComposer
       "panel.redo" => %w[session],
       # The panel's window gained focus, so the host can bring it to the active Model, or to none.
       "panel.focus" => [],
+      # The Setup view's entries, and running one by name (SetupEntries). Neither is an API operation.
+      "panel.setup_entries" => [],
+      "panel.setup_open" => %w[name],
       # `session` names the Model session the panel showed; `expected_revision` the revision it rendered.
       "action.invoke" => %w[request_id session name params expected_revision],
       # What became of an earlier action.invoke whose result the page never received. It never runs the
@@ -51,6 +54,7 @@ module PhComposer
       "preferences.result" => %w[request_id status message preferences],
       "export.result" => %w[request_id session outcome],
       "panel.notice" => %w[session message tone],
+      "panel.setup" => %w[entries],
       "panel.failure" => %w[message]
     }.freeze
 

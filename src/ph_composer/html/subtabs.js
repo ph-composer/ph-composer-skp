@@ -83,6 +83,8 @@ PhComposerUI.define("subtabs", ["dom", "icons"], function (ui, icons) {
     var active = this.tabs.filter(function (tab) { return tab.id === this.active; }, this)[0];
     if (!focused || !active || !active.surface.contains(focused)) return false;
     if (/^input$/i.test(focused.tagName) && /^(search|checkbox|radio)$/i.test(focused.type || "")) return false;
+    // A read-only field (a setup to copy) holds no edit, so focus in it never holds the tab.
+    if (focused.readOnly) return false;
     return /^(input|select|textarea)$/i.test(focused.tagName) || Boolean(focused.isContentEditable);
   };
   Subtabs.prototype.select = function (id) {

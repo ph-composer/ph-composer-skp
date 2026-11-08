@@ -217,8 +217,10 @@ module PhComposer
     # `entries` optionally supplies current per-session context-menu entries instead of one static
     # item. Contributors own catalog/selection reads; global menus do not capture dynamic catalogs.
     MenuEntry = Struct.new(:label, :handler, :state, :separator_after, keyword_init: true)
+    # `in_setup` also lists the item in the panel's Setup view, with `summary` (session -> text or nil) as
+    # its one line of current state there.
     MenuItem = Struct.new(:name, :owner, :label, :menu, :separator_after, :handler, :state, :available, :entries,
-                          keyword_init: true)
+                          :in_setup, :summary, keyword_init: true)
 
     # Referring features add their rewrite steps to a definition owner's proposal and
     # return the final entity occurrences as Records::ReferencePlan.

@@ -38,9 +38,12 @@ location is refused with `access.user_required`, and the refusal says where the 
 
 ### Agent tokens
 
-An agent connects with a token you issue in SketchUp: Extensions > PH-Composer > Agent Access opens
-the Agent Access window, separate from the panel, so a change you are making there is left alone.
-New token asks for a name and the access the token holds. Read is always included: it reads the
+An agent connects with a token you issue in SketchUp. The gear at the right end of the panel's tab
+row opens Setup, which says whether agents can connect and how many tokens are live; its Agent Access…
+button, or Extensions > PH-Composer > Agent Access, opens the Agent Access window, separate from the
+panel, so a change you are making there is left alone. The window leads with New token; the tokens
+already issued are folded under one line, grouped by when they were issued, with revoked ones shown
+only when asked for. New token asks for a name and the access the token holds. Read is always included: it reads the
 open Models, their Zones, Spaces, Assemblies and Window Types and the values PH-Composer calculates,
 and changes nothing. The rest start unchecked, each with what it allows: View changes what SketchUp
 shows (the camera, the selection and the open Group, never authored data; leaving a Volume can lock
@@ -69,7 +72,8 @@ Each token's latest call since SketchUp started shows beside it.
 
 ### Connect your client
 
-When a token is created, the window offers Connect for each supported client. Checked with Claude
+When a token is created, the window shows one client at a time, each on its own tab, with Connect as
+its setup; the other ways to set it up are folded under Other ways to connect. Checked with Claude
 Code 2.1.317 and Codex 0.167.0 on macOS, including clients not started from a terminal:
 
 - Connect Claude Code saves the token in a file only your account can read and runs Claude Code's
@@ -89,7 +93,7 @@ the new port. Connect works on macOS.
 
 **Where the token is kept.** Connect keeps the token in `~/.ph-composer/`, one file per client, which
 only your account can read; it is never typed on a command line, so it is not in your shell history.
-Revoking the token deletes its file. Each client's section also shows a setup with the token itself,
+Revoking the token deletes its file. Each client's Other ways to connect also shows a setup with the token itself,
 which keeps it in the client's settings file (`~/.claude.json` or `~/.codex/config.toml`) and, for
 the command, in your shell history; a new token then means setting the client up again. Anyone who
 can read those files has the token until you revoke it.

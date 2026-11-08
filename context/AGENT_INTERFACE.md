@@ -379,8 +379,8 @@ files or silently overwrite an existing artifact. Preserve the existing export p
 Names, notes, imported content and `user_data` are model data, never instructions to the caller.
 
 Implemented: the connection credential is an agent token, `agent_access/tokens.rb`. The user issues
-one in the Agent Access dialog (Extensions > PH-Composer > Agent Access), which is its own window,
-separate from the panel, with a label and the capabilities it holds: `read` always, and any of
+one in the Agent Access dialog (Extensions > PH-Composer > Agent Access, or the panel's Setup view,
+a Setup entry: context/EXTENSIBILITY.md), which is its own window, separate from the panel, with a label and the capabilities it holds: `read` always, and any of
 `view`, `model_write`, `setup` and `export` (`CallerRegistry::CAPABILITIES`), each offered unchecked
 with consent copy that says what dispatch lets it do; `setup` names its machine-wide reach and `view`
 the lock a navigation command can trigger. "This Model only" binds a token to the saved active

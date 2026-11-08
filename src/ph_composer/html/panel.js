@@ -36,7 +36,8 @@ PhComposerUI.define("panel", ["unit_preferences", "workspace", "table_views", "r
     "preferences.result": reducePreferenceResult,
     "panel.notice": reduceNotice,
     "panel.failure": reduceFailure,
-    "export.result": reduceExportResult
+    "export.result": reduceExportResult,
+    "panel.setup": reduceSetupEntries
   };
 
   function initialState() {
@@ -127,6 +128,11 @@ PhComposerUI.define("panel", ["unit_preferences", "workspace", "table_views", "r
   function reduceFileExportResult(previous, payload) {
     if (payload.session !== previous.session) return previous;
     return withUI(previous, { fileExportResults: recentResults(previous.ui.fileExportResults, payload) });
+  }
+
+  /* The Setup view's entries (sections/setup.js): machine setup, the same whichever Model is shown. */
+  function reduceSetupEntries(previous, payload) {
+    return withUI(previous, { setupEntries: payload.entries || [] });
   }
 
   /* The Export pane reads it; Export writes nothing to the Model, so no notice is raised. */

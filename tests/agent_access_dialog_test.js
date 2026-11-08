@@ -14,11 +14,12 @@ function context() {
   page.window = page; dom.attachEvents(page);
   return page;
 }
+var NOW = new Date(2026, 9, 18, 15, 0, 0);
 function setup(state) {
   var page = context(), modules = source.start(page, ["agent_access/page"]), sent = [];
   var view = new modules["agent_access/page"].Page(function (type, payload) {
     sent.push({ type: type, payload: payload });
-  });
+  }, { now: function () { return NOW; } });
   page.document.body.appendChild(view.root);
   view.receive({ type: "access.state", payload: Object.assign({ state: "readable", tokens: [TOKEN, REVOKED],
     offered: ["read"], server: { state: "stopped" } }, state || {}) });
@@ -38,6 +39,10 @@ function named(root, label) {
 test("tokens list by label and access, revoked ones dated and without a Revoke", function () {
   var o = setup(), text = allText(o.view.list);
   assert.ok(text.includes("Claude Code") && text.includes("Read") && text.includes("no calls since SketchUp started"));
+  assert.ok(!text.includes("Old Codex"), "revoked tokens wait behind their toggle");
+  assert.strictEqual(o.view.revokedToggle.textContent, "Show revoked tokens (1)");
+  o.view.revokedToggle.dispatchEvent({ type: "click" });
+  text = allText(o.view.list);
   assert.ok(text.includes("Old Codex") && text.includes("revoked"));
   assert.ok(named(o.view.list, "Revoke Claude Code"));
   assert.strictEqual(named(o.view.list, "Revoke Old Codex"), undefined);
@@ -53,6 +58,45 @@ test("tokens list by label and access, revoked ones dated and without a Revoke",
   o.view.portInput.value = "47001";
   o.view.portApply.dispatchEvent({ type: "click" });
   assert.deepStrictEqual(JSON.parse(JSON.stringify(o.sent)), [{ type: "access.port", payload: { port: 47001 } }]);
+});
+
+test("the window leads with New token; the tokens are folded, live ones grouped by when they were issued",
+  function () {
+    var at = function (days) { return new Date(NOW.getTime() - days * 86400000).toISOString(); };
+    var tokens = [0, 1, 3, 40, 400].map(function (days, index) {
+      return Object.assign({}, TOKEN, { id: "token_AAAAAAAAAAA" + index, label: "T" + index, created_at: at(days) });
+    });
+    var o = setup({ tokens: tokens.concat([REVOKED]) });
+    assert.ok(/(^| )primary( |$)/.test(o.view.create.className), "New token is the page's primary action");
+    assert.strictEqual(o.view.tokensBox.tagName, "details");
+    assert.ok(!o.view.tokensBox.open, "the list starts folded");
+    assert.strictEqual(o.view.tokensSummary.textContent, "Tokens · 5 live");
+    var headings = o.view.list.querySelectorAll("h3").map(function (node) { return node.textContent; });
+    assert.deepStrictEqual(headings, ["Today", "Yesterday", "This week", "This year", "Earlier"]);
+    assert.strictEqual(o.view.empty.hidden, true);
+    o.view.revokedToggle.dispatchEvent({ type: "click" });
+    headings = o.view.list.querySelectorAll("h3").map(function (node) { return node.textContent; });
+    assert.strictEqual(headings[headings.length - 1], "Revoked");
+    assert.strictEqual(o.view.revokedToggle.getAttribute("aria-pressed"), "true");
+    o.view.receive({ type: "access.state", payload: { state: "readable", tokens: [], offered: ["read"],
+      server: { state: "stopped" } } });
+    assert.strictEqual(o.view.tokensBox.hidden, true);
+    assert.strictEqual(o.view.empty.hidden, false);
+  });
+
+test("on a Monday the week has only begun: Sunday is Yesterday, Saturday is This year", function () {
+  var monday = new Date(2026, 9, 19, 9, 0, 0), page = context(), sent = [];
+  var modules = source.start(page, ["agent_access/page"]);
+  var view = new modules["agent_access/page"].Page(function (type, payload) { sent.push(type, payload); },
+    { now: function () { return monday; } });
+  var made = function (date, label) {
+    return Object.assign({}, TOKEN, { id: "token_" + label + "AAAAAAAAA", label: label,
+      created_at: date.toISOString() });
+  };
+  view.receive({ type: "access.state", payload: { state: "readable", offered: ["read"], server: { state: "stopped" },
+    tokens: [made(new Date(2026, 9, 18, 23, 30), "Sun"), made(new Date(2026, 9, 17, 12, 0), "Sat")] } });
+  var headings = view.list.querySelectorAll("h3").map(function (node) { return node.textContent; });
+  assert.deepStrictEqual(headings, ["Yesterday", "This year"]);
 });
 
 test("a token's latest call shows its time and how it ended", function () {
@@ -84,6 +128,25 @@ test("the created token comes with each client's Connect and setup to copy, and 
     named(o.view.issuedDialog, "Done").dispatchEvent({ type: "click" });
     assert.ok(!allText(o.view.root).includes("ab".repeat(24)));
   });
+
+test("the created token shows one client at a time: Connect first, other setups only when asked for", function () {
+  var o = setup(), form = function (title) { return [{ title: title, text: title + " text" }]; };
+  o.view.receive({ type: "access.issued", payload: { token: "ab".repeat(24), row: TOKEN, clients: [
+    { id: "claude_code", client: "Claude Code", forms: form("Claude setup"), check: "claude mcp get ph-composer" },
+    { id: "codex", client: "Codex", forms: form("Codex setup"), check: "codex mcp get ph-composer" }] } });
+  var tabs = o.view.clients.querySelector("nav");
+  assert.strictEqual(tabs.getAttribute("aria-label"), "Client");
+  var sections = o.view.clients.querySelectorAll(".agent-access-client");
+  assert.deepStrictEqual(sections.map(function (node) { return node.hidden; }), [false, true]);
+  var claude = sections[0];
+  assert.ok(/(^| )primary( |$)/.test(named(claude, "Connect Claude Code").className), "Connect is the default");
+  var other = claude.querySelector("details");
+  assert.strictEqual(other.querySelector("summary").textContent, "Other ways to connect");
+  assert.ok(!other.open, "the other setups start folded");
+  assert.ok(allText(other).includes("Claude setup") && allText(other).includes("claude mcp get ph-composer"));
+  named(tabs, "Codex").dispatchEvent({ type: "click" });
+  assert.deepStrictEqual(sections.map(function (node) { return node.hidden; }), [true, false]);
+});
 
 test("Connect sends the client and the token once, says what it did and what to do next", function () {
   var o = setup();

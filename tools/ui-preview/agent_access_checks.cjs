@@ -12,6 +12,11 @@ fs.mkdirSync(output, { recursive: true });
 const STATE = { type: "access.state", payload: { state: "readable", tokens: [],
   offered: ["read", "view", "model_write", "setup", "export", "capture"], server: { state: "stopped" },
   model: { key: "model_1", name: "Reference.skp" } } };
+const CLIENTS = [
+  { id: "claude_code", client: "Claude Code", check: "claude mcp get ph-composer",
+    forms: [{ title: "What Connect runs. If it cannot, run this in Terminal once.", text: "claude mcp add-json ..." }] },
+  { id: "codex", client: "Codex", check: "codex mcp get ph-composer",
+    forms: [{ title: "What Connect adds to ~/.codex/config.toml.", text: "[mcp_servers.ph-composer]" }] }];
 check({ name: "agent_access", output }, async ({ newPage, step }) => {
   const page = await newPage({ viewport: { width: 560, height: 700 } });
   step("open the Agent Access page with every capability offered");
@@ -48,10 +53,12 @@ check({ name: "agent_access", output }, async ({ newPage, step }) => {
   for (const [width, height] of [[420, 732], [360, 520]]) {
     await page.setViewportSize({ width, height });
     await receive("access.state", { ...STATE.payload, tokens: [token], server: { state: "listening", port: 52761 } });
+    const folded = page.locator("details.agent-access-tokens");
+    if (!(await folded.evaluate(node => node.open))) await folded.locator("summary").click();
     await page.getByRole("button", { name: "Revoke Synthetic review agent", exact: true }).click();
     for (const kind of ["revoke", "issued"]) {
       if (kind === "issued") await receive("access.issued", {
-        token: "SYNTHETIC-NOT-A-CREDENTIAL", row: token, clients: [] });
+        token: "SYNTHETIC-NOT-A-CREDENTIAL", row: token, clients: CLIENTS });
       const modal = page.locator("dialog[open]");
       assert(await modal.evaluate(node => {
         const box = node.getBoundingClientRect();
@@ -59,7 +66,15 @@ check({ name: "agent_access", output }, async ({ newPage, step }) => {
         return box.left >= 15 && box.right <= innerWidth - 15 && box.top >= 0 && box.bottom <= innerHeight &&
           actions.left >= box.left && actions.right <= box.right && actions.bottom <= innerHeight;
       }), `${kind}: dialog and footer fit ${width} x ${height}`);
+      if (kind === "issued") {
+        assert.equal(await modal.locator(".agent-access-client:not([hidden])").count(), 1, "one client at a time");
+        assert(await modal.evaluate(node => node.scrollWidth <= node.clientWidth + 1), `issued: no sideways scroll ${width}`);
+      }
       await page.screenshot({ path: path.join(output, `${kind}-${width}x${height}.png`) });
+      if (kind === "issued") {
+        await modal.locator(".agent-access-client:not([hidden]) details summary").click();
+        await page.screenshot({ path: path.join(output, `issued-other-ways-${width}x${height}.png`) });
+      }
       await page.keyboard.press("Escape");
     }
   }

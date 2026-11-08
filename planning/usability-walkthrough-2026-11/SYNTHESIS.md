@@ -41,7 +41,7 @@ PHI/Phius question and D5's per-client verification remain open inside their iss
 | D4 | Thermal bridges on Edges shared by two Zones | Ed proposed de-duplicating. Count once per Building-Segment, Type and Edge geometry; flag only conflicting Types or different Building-Segments. | S-27 |
 | D5 | Agent client connection | PH-Composer writes the live token to an owner-only file; a one-time client config reads it, so rotation touches no client settings. A "Connect Claude Code / Codex" button writes that config (Ed asked whether the app can run the setup). Verify per client first. | S-02 |
 | D6 | Unhosted Window Units | Ed asked for a control. Detect, and snap a pasted Unit back to the nearest Face of its Zone; never undo from an observer. | S-22 |
-| D7 | App-level settings | Ed proposed a gear at the top right opening a Setup view (Agent Access, approved locations, library setup). Placement to decide, distinct from the per-page gear (Claude, W-028). | S-01 |
+| D7 | App-level settings | Ed proposed a gear at the top right opening a Setup view (Agent Access, approved locations, library setup). Placement to decide, distinct from the per-page gear (Claude, W-028). **Placed by Ed 2026-11-07 (WT-12):** the gear closes the app's tab row, right of IP/SI, and swaps the panes for the Setup view; Setup shows Agent Access as a line of state and a button that opens its own window, where the token is still shown; this stage moves only Agent Access, with approved locations and library setup left for later stages. | S-01 |
 
 ## Settled while synthesising
 

@@ -43,6 +43,14 @@ test("switching never hides or moves a focused input", function () {
   assert.strictEqual(prevented, true);
 });
 
+test("focus in a read-only field holds no edit and never holds the tab", function () {
+  var o = setup();
+  o.input.readOnly = true;
+  o.input.focus();
+  assert.strictEqual(o.tabs.select("second"), true);
+  assert.deepStrictEqual([o.first.hidden, o.second.hidden], [true, false]);
+});
+
 test("a page draft guard prevents switching after input focus leaves", function () {
   var notices = [];
   var o = setup({}, { guard: function () { return "Save or Cancel first."; },
