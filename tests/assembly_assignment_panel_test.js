@@ -230,7 +230,7 @@ test("Replace and delete says what it does and lists Faces by Zone and Face name
   assert.ok(shown.includes("Replace and delete Wall"));
   assert.ok(shown.includes("Moves every Face that uses Wall to the Assembly you choose, or leaves them with none, " +
     "then deletes Wall."), shown);
-  assert.ok(shown.includes("2 Faces: Zone 1 · Wall 2, Zone 1 · Wall 3"), shown);
+  assert.ok(shown.includes("2 Faces: Zone 1 · Wall 1, Zone 1 · Wall 2"), shown);
   assert.ok(!/\[|10[123]|fac_/.test(shown), "no internal id reaches the dialog: " + shown);
 });
 test("the row's Delete lists the same Faces, and an Assembly on no Face is not told its Faces will move", function () {

@@ -84,6 +84,24 @@ test("a tree marks its table for group headings, and a chevron does not repeat t
   assert.strictEqual(h.root.querySelector(".phc-table").classList.contains("is-tree"), false);
 });
 
+test("a heading the held columns cut through fades until its column is back in view", function () {
+  var h = harness();
+  h.context.getComputedStyle = dom.getComputedStyle;
+  h.root.scrollWidth = 900; h.root.clientWidth = 300; h.root.rect = { left: 0, right: 300 };
+  h.tables.table(h.root, rows(), options());
+  function heading(field) { return h.root._table.headers[field]; }
+  function label(field) { return heading(field)._label; }
+  heading("name").computedStyle = { left: "0px" }; heading("name").rect = { left: 0, right: 140 };
+
+  label("size").rect = { left: 120, right: 170 };
+  dom.dispatch(h.root, { type: "scroll" });
+  assert.ok(heading("size").classList.contains("is-clipped"), "the held Name covers its first letters");
+  label("size").rect = { left: 150, right: 200 };
+  dom.dispatch(h.root, { type: "scroll" });
+  assert.ok(!heading("size").classList.contains("is-clipped"));
+  assert.ok(!heading("name").classList.contains("is-clipped"), "a held heading is never cut");
+});
+
 test("an empty table says so, in the caller's words", function () {
   var h = harness();
   paint(h, { rows: [] });

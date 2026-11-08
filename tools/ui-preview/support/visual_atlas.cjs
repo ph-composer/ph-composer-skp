@@ -75,7 +75,7 @@ function saveManifest() {
     escapeHtml(item)}</li>`).join("")}</ul></details>${gallery}</html>`);
 }
 const routes = [
-  ["overview", "Faces"], ["overview", "Spaces"], ["assemblies"],
+  ["overview", "Geometry"], ["overview", "Spaces"], ["assemblies"],
   ["windows", "Types"], ["windows", "U-Values"], ["windows", "Schedule"],
   ["thermal_bridges", "Types"], ["thermal_bridges", "Schedule"],
   ...["Materials", "Attached zones", "Frames", "Glazings", "Psi-Install Types"].map(tab => ["library", tab]),
@@ -247,7 +247,7 @@ check({ name: "visual_atlas", output }, async ({ newPage, step }) => {
       await pane("thermal_bridges").getByRole("button", { name: "+ New Thermal Bridge Type", exact: true }).click();
       await shot("detail", "rich", "new-thermal-bridge-type");
 
-      await open("rich", "overview", "Faces");
+      await open("rich", "overview", "Geometry");
       await page.getByRole("button", { name: "Faces settings", exact: true }).click();
       await shot("detail", "rich", "faces-settings"); await cancel();
       await page.getByRole("checkbox", { name: "Check Living Zone", exact: true }).check();
@@ -256,7 +256,7 @@ check({ name: "visual_atlas", output }, async ({ newPage, step }) => {
       await shot("detail", "rich", "zones-selection");
       await page.locator(".phc-selection-bar:not([hidden])").scrollIntoViewIfNeeded();
       await shot("detail", "rich", "zones-selection-controls", { note: "Scrolled to the checked-Zone controls when docked below the table." });
-      await open("zoneoptions", "overview", "Faces");
+      await open("zoneoptions", "overview", "Geometry");
       const segmentMenu = page.getByRole("button", { name: "Building-Segment column menu", exact: true });
       // Narrow tables scroll to the header first: their scroll listener closes an already-open bubble.
       await segmentMenu.scrollIntoViewIfNeeded(); await settle(page); await segmentMenu.click();
@@ -285,7 +285,7 @@ check({ name: "visual_atlas", output }, async ({ newPage, step }) => {
         await page.getByRole("button", { name: "Table options", exact: true }).click();
         await shot("key-popup", "spaces", "spaces-table-options");
 
-        await open("rich", "overview", "Faces");
+        await open("rich", "overview", "Geometry");
         await page.getByRole("combobox", { name: "Wall 1 boundary", exact: true }).first().selectOption("AttachedZone");
         await page.getByRole("dialog", { name: "Attached zone", exact: true }).waitFor();
         await shot("key-popup", "rich", "face-attached-zone-assignment");

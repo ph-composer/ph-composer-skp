@@ -102,7 +102,7 @@ check({ name: "notices", output }, async ({ newPage, step }) => {
   step("column-header icons line up whatever the column holds, with room under the label");
   await page.goto(`${BASE}?fixture=authoring`);
   const heading = page.locator(".phc-overview table.has-header-action-row").first();
-  const layout = await heading.locator("th.has-header-actions").evaluateAll(cells => cells.map(cell => {
+  const layout = await heading.locator("th.has-header-actions:not([hidden])").evaluateAll(cells => cells.map(cell => {
     const band = cell.querySelector(".phc-header-actions");
     const action = Array.from(band.querySelectorAll("button")).find(node =>
       !node.closest(".phc-bubble") && node.getBoundingClientRect().width);

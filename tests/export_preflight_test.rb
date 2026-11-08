@@ -32,6 +32,7 @@ class ExportPreflightTest < PhComposerTestCase
     assert_equal [100], reference.fetch("zone_path")
     assert_equal [101], reference.fetch("entity_path")
     repair = outcome.dig("value", "repairs").first
+    assert_equal "Re-solve adjacencies before export", repair.fetch("label")
     assert_equal true, repair.fetch("checked")
     assert_equal "ph_composer.zones.solve_adjacency", repair.fetch("action")
     assert_equal [{ "zone_id" => "zon_#{'A' * 12}", "zone_path" => [100] }], repair.dig("params", "zones")

@@ -155,7 +155,7 @@ check({ name: "thermal_bridges", output }, async ({ newPage, step }) => {
   await page.waitForFunction(() => JSON.stringify(window.previewHost.locatedEdges) === "[[100,311],[100,312]]");
   await schedule.getByRole("button", { name: "1 finding for Parapet 2", exact: true }).click();
   const finding = page.getByRole("dialog", { name: "Findings" });
-  await finding.getByText(/counted twice/).waitFor();
+  await finding.getByText(/also assigned in Attic/).waitFor();
   await page.screenshot({ path: path.join(output, "schedule-finding.png") });
   await finding.getByRole("button", { name: "Locate", exact: true }).click();
   await page.waitForFunction(() => JSON.stringify(window.previewHost.locatedEdges) === "[[200,401]]");

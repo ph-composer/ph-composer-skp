@@ -85,6 +85,7 @@ function (ui, requests, options) {
         self.fill();
         var names = self.list.querySelectorAll("[data-option-name]"); names[names.length - 1].focus();
       });
+      this.add.classList.add("phc-zone-option-add");
       this.dialog.appendChild(this.add);
       if (this.collection === "building_segment") {
         var row = ui.element("label", "phc-zone-option-default", "Default Building Segment");
@@ -113,7 +114,7 @@ function (ui, requests, options) {
     var self = this, root = ui.element("div", "phc-zone-option-colour"), picker = ui.element("input"),
       hex = ui.element("input");
     picker.type = "color"; picker.setAttribute("type", "color"); picker.value = choice.colour;
-    picker.setAttribute("aria-label", label + " colour");
+    picker.setAttribute("aria-label", label + " custom colour"); ui.tooltip(picker, "Pick a custom colour");
     hex.type = "text"; hex.setAttribute("type", "text"); hex.value = choice.colour; hex.maxLength = 7;
     hex.setAttribute("aria-label", label + " hex colour");
     function set(value) {
@@ -124,15 +125,19 @@ function (ui, requests, options) {
     }
     picker.addEventListener("input", function () { set(picker.value); });
     hex.addEventListener("input", function () { set(hex.value); });
-    root.appendChild(picker); root.appendChild(hex);
-    var palette = ui.element("div", "phc-zone-option-palette"); palette.setAttribute("role", "group");
+    root.appendChild(hex);
+    var swatches = ui.element("div", "phc-zone-option-swatches");
+    var palette = ui.element("div", "phc-zone-option-palette");
+    palette.setAttribute("role", "group");
     palette.setAttribute("aria-label", label + " colour palette");
     PALETTE.forEach(function (colour) {
       var swatch = ui.button("", function () { set(colour); });
       swatch.style.backgroundColor = colour; swatch.setAttribute("aria-label", label + " colour " + colour);
       ui.tooltip(swatch, colour); palette.appendChild(swatch);
     });
-    root.appendChild(palette); return root;
+    // The custom picker ends the row of swatches, as one more way to choose.
+    swatches.appendChild(palette); swatches.appendChild(picker);
+    root.appendChild(swatches); return root;
   };
   OptionDialog.prototype.fill = function () {
     var self = this; this.list.replaceChildren();

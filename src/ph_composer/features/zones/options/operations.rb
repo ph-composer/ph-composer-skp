@@ -60,7 +60,7 @@ module PhComposer
           refuse("zone.options_adoption_required", "Adopt existing Zone choices before making another Zone")
         end
 
-        id = create_choice(request, proposal, "building_segment", Occurrences.default_segment(request.model), "#1F7478")
+        id = create_choice(request, proposal, "building_segment", Occurrences::DEFAULT_SEGMENT, "#1F7478")
         set_settings(request, proposal, id)
         request.engine.find(SEGMENT_KIND, id, :change_set => proposal.record_changes)
       end

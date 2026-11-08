@@ -38,6 +38,11 @@ check({ name: "zone_options", output }, async ({ newPage, step }) => {
     await page.screenshot({ path: path.join(output, `management-${width}.png`) });
   }
   await page.setViewportSize({ width: 900, height: 650 });
+  const add = await dialog.getByRole("button", { name: "Add", exact: true }).boundingBox();
+  assert(add.width < 120, "Add is a small button, not a full-width bar");
+  await dialog.getByRole("textbox", { name: "House hex colour", exact: true }).waitFor();
+  assert.equal(await dialog.getByRole("group", { name: "House colour palette", exact: true })
+    .evaluate(node => node.nextElementSibling.getAttribute("aria-label")), "House custom colour");
   await dialog.getByRole("button", { name: "Add", exact: true }).click();
   assert(await page.evaluate(() => document.activeElement.getAttribute("data-option-name").startsWith("new:")));
   await page.getByRole("textbox", { name: "Building Segment name", exact: true }).fill("Future phase");

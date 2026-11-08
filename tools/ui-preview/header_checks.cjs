@@ -60,10 +60,15 @@ check({ name: "header", output }, async ({ newPage, step }) => {
     assert.equal(await menu.evaluate(node => getComputedStyle(node.closest(".phc-header-action")).opacity), "1",
       "active filter remains visible at rest");
     await page.screenshot({ path: path.join(output, "headers-active.png") });
+    step("Ground depth starts hidden, and says what it does once shown");
+    assert.equal(await table.locator("th.col-ground_depth_mm").isHidden(), true);
+    await page.getByRole("button", { name: "Table options", exact: true }).click();
+    await page.getByRole("button", { name: "Ground depth column", exact: true }).click();
+    await page.keyboard.press("Escape");
     await page.locator("[data-unit-system='IP']").click();
     assert.equal(await table.locator("th.col-ground_depth_mm .phc-th-label").innerText(), "Ground depth in");
-    assert.equal(await table.locator("th.col-ground_depth_mm .phc-th-label").getAttribute("data-tooltip"),
-      "Ground depth in");
+    assert.match(await table.locator("th.col-ground_depth_mm .phc-th-label").getAttribute("data-tooltip"),
+      /Suggest classification sets a Face to Ground/);
     const resize = table.getByRole("separator", { name: "Resize Building-Segment column", exact: true });
     await resize.focus();
     step("resize by keyboard");
@@ -75,6 +80,29 @@ check({ name: "header", output }, async ({ newPage, step }) => {
     assert(actionsFit, "resizing keeps both buttons inside their column");
     await resize.press("Enter");
     const mount = page.locator(".phc-overview .phc-zone-view:not([hidden]) .phc-table-mount");
+    step("no heading shows a piece of itself as the table scrolls");
+    await page.setViewportSize({ width: 800, height: 900 });
+    for (const left of [40, 90, 150, 230]) {
+      const cut = await mount.evaluate(async (node, scrollTo) => {
+        node.scrollLeft = scrollTo;
+        await new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done)));
+        let covered = node.getBoundingClientRect().left;
+        const shown = [];
+        const pieces = [...node.querySelectorAll("th")].filter(h => !h.hidden).flatMap(h => {
+          if (getComputedStyle(h).left !== "auto") { covered = Math.max(covered, h.getBoundingClientRect().right); return []; }
+          const label = h.querySelector(".phc-th-label");
+          if (getComputedStyle(label).opacity === "0") return [];
+          shown.push(label.textContent);
+          return label.getBoundingClientRect().left < covered - 0.5 ? [label.textContent] : [];
+        });
+        return { pieces, shown };
+      }, left);
+      assert.deepEqual(cut.pieces, [], `no cut heading at scrollLeft ${left}`);
+      assert(cut.shown.length > 0, `whole headings still show at scrollLeft ${left}`);
+    }
+    await page.screenshot({ path: path.join(output, "headers-scrolled.png") });
+    await mount.evaluate(node => { node.scrollLeft = 0; });
+    await page.setViewportSize({ width: 1280, height: 900 });
     const before = await table.locator("th.col-name").boundingBox();
     await mount.evaluate(node => { node.style.maxHeight = "100px"; node.scrollTop = 100; });
     const after = await table.locator("th.col-name").boundingBox();

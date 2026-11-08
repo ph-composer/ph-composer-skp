@@ -87,7 +87,27 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
   var overflowTables = [], overflowWatched = false;
   function markOverflow(cache) {
     var root = cache.root;
-    if (root) root.classList.toggle("is-overflowing", root.scrollWidth - root.clientWidth > 8);
+    if (!root) return;
+    root.classList.toggle("is-overflowing", root.scrollWidth - root.clientWidth > 8);
+    markClippedHeaders(cache);
+  }
+  /* A heading that scrolls under a held identity column, or off the left edge, fades until its column is back in
+     view, so no piece of a word ("evel") reads as a heading. Columns are walked in table order: a held column
+     covers only what follows it. The right edge is left alone: a word cut there is the cue that more follows, and
+     a narrow panel may never have room for the whole of a long heading. */
+  function markClippedHeaders(cache) {
+    var root = cache.root, overflowing = root.classList.contains("is-overflowing");
+    var covered = overflowing ? root.getBoundingClientRect().left : null;
+    cache.columns.forEach(function (column) {
+      var th = cache.headers[column[0]], clipped = false;
+      if (overflowing && !th.hidden) {
+        var left = window.getComputedStyle(th).getPropertyValue("left");
+        var held = Boolean(left) && left !== "auto";
+        if (held) covered = Math.max(covered, th.getBoundingClientRect().right);
+        else clipped = th._label.getBoundingClientRect().left < covered - 0.5;
+      }
+      th.classList.toggle("is-clipped", clipped);
+    });
   }
   function watchOverflow(cache) {
     overflowTables.push(cache);
@@ -190,6 +210,7 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
       if (cache.options.columnResizeEnd) cache.options.columnResizeEnd(null, null);
     };
     cache.root = root; watchOverflow(cache);
+    root.addEventListener("scroll", function () { markClippedHeaders(cache); });
     node.appendChild(cache.body); root.replaceChildren(node, cache.empty); root._table = cache;
     overlay.attachTooltip(root);
     return cache;

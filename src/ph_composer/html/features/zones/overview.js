@@ -827,6 +827,9 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
       },
       marker: function (row) { return marker(own, row); }, actions: function (row) { return actions(own, row); },
       rowHidden: hidden, hiddenColumns: own.hiddenColumns, revealRowActions: true, actionSlots: own.view.actionSlots,
+      header: function (th, field) {
+        if (field === "ground_depth_mm") ui.tooltip(th.querySelector(".phc-th-label"), ZoneCells.GROUND_DEPTH_HELP);
+      },
       check: check || undefined,
       headerActions: function (field) { return headerActions(state, own, field, labels[field]); },
       inspect: function (row) { call(own, "inspect", [row]); },

@@ -104,8 +104,8 @@ test("one listed view hides the view row; a second shows it, Faces first", funct
   assert.strictEqual(viewRow(q).hidden, false);
   assert.strictEqual(viewRow(q).querySelector("nav").getAttribute("aria-label"), "Zone views");
   assert.deepStrictEqual(viewRow(q).querySelectorAll("button").map(function (node) { return node.textContent; }),
-    ["Faces", "Areas"]);
-  assert.strictEqual(tab(q, "Faces").getAttribute("aria-selected"), "true");
+    ["Geometry", "Areas"]);
+  assert.strictEqual(tab(q, "Geometry").getAttribute("aria-selected"), "true");
   var faceless = snapshot();
   delete faceless.sections["ph_composer.zones.faces.faces"];
   q.panel.receive({ type: "panel.snapshot", payload: faceless });
@@ -136,7 +136,7 @@ test("switching shows the other view's columns and rows, sends nothing to the Mo
   assert.deepStrictEqual(JSON.parse(JSON.stringify(p.sent[0].payload)), { request_id: p.sent[0].payload.request_id,
     key: "table_view", value: AREAS, scope: HOST });
   assert.strictEqual(p.modules.unit_preferences.tableView(HOST), AREAS);
-  click(tab(p, "Faces"));
+  click(tab(p, "Geometry"));
   assert.deepStrictEqual(rowKinds(p), ["Zone", "Face", "Unclassified", "Face"], "Faces keeps its rows and expansion");
 });
 
@@ -161,7 +161,7 @@ test("the view last shown on this computer is the one a new session opens on", f
   assert.deepStrictEqual(rowKinds(p), ["Zone"]);
   var q = page();
   q.panel.receive({ type: "panel.snapshot", payload: snapshot("example.zones.retired") });
-  assert.strictEqual(tab(q, "Faces").getAttribute("aria-selected"), "true", "a remembered view no longer listed");
+  assert.strictEqual(tab(q, "Geometry").getAttribute("aria-selected"), "true", "a remembered view no longer listed");
 });
 
 test("each view keeps its own column filters and sort; the Zone filters stay across a switch", function () {
@@ -180,7 +180,7 @@ test("each view keeps its own column filters and sort; the Zone filters stay acr
     "a Face filter is the Faces view's and leaves with it");
   var text = byLabel(p, "Filter Zones");
   text.value = "Zone"; text.listeners.input({});
-  click(tab(p, "Faces"));
+  click(tab(p, "Geometry"));
   assert.strictEqual(p.section().querySelector(".phc-view-count").textContent, "1 Zone · 1 filter",
     "and comes back with it");
   assert.strictEqual(byLabel(p, "Filter Zones").value, "Zone", "the text filter is the host's and stays");
@@ -202,7 +202,7 @@ test("the checked set and Locate's outline outlast a switch; Escape in the other
   var escape = dom.dispatch(p.context.document.body, { type: "keydown", key: "Escape" });
   assert.strictEqual(escape.defaultPrevented, true);
   assert.strictEqual(names()[names().length - 1], "ph_composer.zones.faces.clear_locate");
-  click(tab(p, "Faces"));
+  click(tab(p, "Geometry"));
   assert.ok(byLabel(p, "Uncheck Wall 1").checked, "Faces' checked set came back with it");
 });
 
@@ -224,7 +224,7 @@ test("a navigation intent that names its view switches to it before checking row
   p.panel.receive({ type: "panel.snapshot", payload: state });
   var reference = state.sections["ph_composer.zones.faces.faces"].value.faces[0].reference;
   assert.strictEqual(p.panel.navigate("overview", { view: "ph_composer.zones.faces", check: [reference] }), true);
-  assert.strictEqual(tab(p, "Faces").getAttribute("aria-selected"), "true");
+  assert.strictEqual(tab(p, "Geometry").getAttribute("aria-selected"), "true");
   var box = byLabel(p, "Uncheck Wall 1");
   assert.ok(box && box.checked, "the named Face is checked in the view that was switched to");
 });
@@ -295,7 +295,7 @@ test("a native assignment handoff reaches Faces while another view is shown and 
   } };
   p.panel.receive({ type: "panel.snapshot", payload: handoff });
   assert.strictEqual(p.panel.state.ui.activeTab, "overview");
-  assert.strictEqual(tab(p, "Faces").getAttribute("aria-selected"), "true");
+  assert.strictEqual(tab(p, "Geometry").getAttribute("aria-selected"), "true");
   assert.ok(p.context.document.querySelector("dialog"), "the assignment dialog opens");
 });
 
@@ -305,7 +305,7 @@ test("an intent that names a view without checking rows shows it and says whethe
   var intent = { view: "ph_composer.zones.faces" };
   assert.strictEqual(p.panel.navigate("overview", intent), true);
   assert.strictEqual(intent.viewShown, true);
-  assert.strictEqual(tab(p, "Faces").getAttribute("aria-selected"), "true");
+  assert.strictEqual(tab(p, "Geometry").getAttribute("aria-selected"), "true");
 });
 
 test("with no view listed the Zone rows show alone", function () {
@@ -402,7 +402,7 @@ test("an invalid Faces settings entry holds the switch", function () {
   roof.value = "170"; roof.listeners.change({});
   roof.blur();
   click(tab(p, "Areas"));
-  assert.strictEqual(tab(p, "Faces").getAttribute("aria-selected"), "true");
+  assert.strictEqual(tab(p, "Geometry").getAttribute("aria-selected"), "true");
   roof.listeners.keydown({ key: "Escape" });
   click(tab(p, "Areas"));
   assert.strictEqual(tab(p, "Areas").getAttribute("aria-selected"), "true", "Escape restores and releases it");
@@ -462,7 +462,7 @@ test("a Zone filter on a column the next view does not show leaves with the view
   p.context.document.activeElement.blur();
   click(tab(p, "Areas"));
   assert.strictEqual(p.section().querySelector(".phc-view-count").textContent, "1 Zone");
-  click(tab(p, "Faces"));
+  click(tab(p, "Geometry"));
   assert.strictEqual(p.section().querySelector(".phc-view-count").textContent, "0 of 1 Zone · 1 filter");
 });
 
@@ -524,7 +524,7 @@ test("a Zone filter set while its column was shown elsewhere replaces an older o
   })[0]);
   keep("annex");
   assert.strictEqual(count(), "1 of 2 Zones · 1 filter");
-  click(tab(p, "Faces"));
+  click(tab(p, "Geometry"));
   var names = p.section().querySelectorAll(".phc-zone-view").filter(function (node) { return !node.hidden; })[0]
     .querySelectorAll("[data-row-key]").filter(function (node) { return !node.hidden; })
     .map(function (node) { return JSON.parse(node.getAttribute("data-row-key")); })

@@ -84,7 +84,7 @@ async function escape(page, n = 2) { for (let i = 0; i < n; i++) { await page.ke
           const n = page.getByRole("button", { name: /New Thermal Bridge Type/ }).filter({ visible: true }).first();
           if (await n.count()) { await n.click(); await settle(page); await shot(page, "rich--modal--new_tb_type"); await escape(page); }
         }
-        if (tab === "overview" && sub === "Faces") {
+        if (tab === "overview" && sub === "Geometry") {
           const opts = page.locator("[data-pane]:not([hidden]) button[aria-label*='ptions'], [data-pane]:not([hidden]) button[title*='ptions']").filter({ visible: true }).first();
           if (await opts.count()) { await opts.click(); await settle(page); await shot(page, "rich--bubble--table_options"); await escape(page); }
           const gear = page.locator("[data-pane]:not([hidden]) .phc-heading button.phc-icon-button").filter({ visible: true }).last();
@@ -112,7 +112,7 @@ async function escape(page, n = 2) { for (let i = 0; i < n; i++) { await page.ke
         if (await more.count()) { await more.click(); await settle(page); await shot(page, "rich--menu--window_type_more"); await escape(page, 1); }
       }
       if (fixture === "rich" && tab === "overview") {
-        await page.locator("[data-pane]:not([hidden]) [role=tab]", { hasText: "Faces" }).first().click();
+        await page.locator("[data-pane]:not([hidden]) [role=tab]", { hasText: "Geometry" }).first().click();
         await settle(page);
         const th = page.locator("[data-pane]:not([hidden]) th").filter({ hasText: "Type" }).first();
         if (await th.count()) {

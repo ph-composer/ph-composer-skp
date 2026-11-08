@@ -54,7 +54,7 @@ module PhComposer
                         "object_id" => finding.dig("reference", "zone_id"), "message" => finding.fetch("message"),
                         "blocks_export" => true }
         end
-        repair = { "id" => "#{FEATURE_ID}.solve_all", "label" => "Solve stale adjacencies before export",
+        repair = { "id" => "#{FEATURE_ID}.solve_all", "label" => "Re-solve adjacencies before export",
                    "checked" => true, "action" => "#{FEATURE_ID}.solve_adjacency",
                    "params" => { "zones" => zones.map(&:reference) } }
         { "findings" => findings, "repairs" => zones.empty? ? [] : [repair] }

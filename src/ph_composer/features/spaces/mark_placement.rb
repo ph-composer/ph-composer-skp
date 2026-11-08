@@ -12,7 +12,7 @@ module PhComposer
       HOST_CONTEXT = "ph_composer.zones.faces.host_context"
       OUTSIDE_ZONE = "That Face is in no Zone. Make it a Zone first, then mark floors in its Spaces."
       OUTSIDE_SPACE = "That Face's Volume is in no Space. Move it into a Space, then mark its floors."
-      ZONE_FACE = "That Face is one of its Zone's own Faces, classified in the Faces view. Mark floor takes " \
+      ZONE_FACE = "That Face is one of its Zone's own Faces, classified in the Geometry view. Mark floor takes " \
                   "Faces inside a Space."
       NESTED = "That Face is inside a Group within its Zone. Create Space takes Faces drawn in the Zone's own " \
                "context; move it out of the Group first."

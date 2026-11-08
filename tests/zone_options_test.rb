@@ -122,6 +122,14 @@ class ZoneOptionsTest < PhComposerTestCase
     assert_equal ["zon_BBBBBBBBBBBB"], findings.map { |row| row.fetch("object_id") }
   end
 
+  def test_first_make_names_the_default_segment_neutrally_not_after_the_file
+    @model.path = "/projects/02_Working.skp"
+    @model.entities << Sketchup::Group.new(100)
+    result = invoke("#{Z::FEATURE_ID}.make", "parent_path" => [], "entity_ids" => [100])
+    assert_equal "completed", result.fetch("status"), result.inspect
+    assert_equal ["Building"], query.fetch("building_segments").map { |choice| choice.dig("values", "name") }
+  end
+
   def test_first_make_seeds_default_and_nullable_level_in_one_undo
     group = Sketchup::Group.new(100)
     @model.entities << group

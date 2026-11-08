@@ -45,12 +45,14 @@ PhComposerUI.define("face_words", [], function () {
     else node.style.removeProperty("--category-fill");
   }
 
-  /* A Face is named by what it is and where it sits among `all`, every Face of its Zone, counting the ones with no
-     record. Numbering the recorded ones alone would renumber and rekey a Face the user never touched as soon as a
-     neighbour was classified, which takes that row's selection and any edit in progress with it. */
+  /* A Face is named by what it is and its number among the Faces of that type in `all`, every Face of its Zone:
+     Wall 1, Wall 2, Floor 1. Faces with no type yet number among themselves. The name is words on a row and keys
+     nothing, so a neighbour's change of type may renumber it without touching a selection or an edit in progress. */
   function faceName(face, all) {
-    var type = face.values.face_type;
-    return (type ? label(FACE_TYPES, type) : "Face") + " " + (all.indexOf(face) + 1);
+    function typeOf(one) { return (one.values || {}).face_type || ""; }
+    var type = typeOf(face);
+    var number = all.slice(0, all.indexOf(face) + 1).filter(function (other) { return typeOf(other) === type; }).length;
+    return (type ? label(FACE_TYPES, type) : "Face") + " " + number;
   }
 
   return {

@@ -124,7 +124,7 @@ class SpacesMarkToolTest < PhComposerTestCase
     point(:stray, [@stray])
     operations = @model.operations.length
     click(:wall)
-    assert_match(/Faces view.*Nothing was written\.\z/, Sketchup.status_texts.last)
+    assert_match(/Geometry view.*Nothing was written\.\z/, Sketchup.status_texts.last)
     click(:stray)
     assert_match(/in no Zone.*Nothing was written\.\z/, Sketchup.status_texts.last)
     assert_match(/Nothing was written\.\z/, @notices.last.first)
