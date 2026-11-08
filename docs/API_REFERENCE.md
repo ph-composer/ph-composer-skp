@@ -48861,6 +48861,7 @@ Result:
   "additionalProperties": false,
   "required": [
     "pair_ids",
+    "already_paired",
     "reported"
   ],
   "properties": {
@@ -48870,6 +48871,11 @@ Result:
         "type": "string"
       },
       "description": "Every Surface pair current after the Solve."
+    },
+    "already_paired": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "How many of those pairs were already current, so this Solve wrote nothing for them."
     },
     "reported": {
       "type": "integer",
@@ -55507,3 +55513,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.14 | 2026-10-26 | ph_composer.windows.units.outlines (bounded) is new: each placed Window's world outline. ph_composer.thermal_bridges.export_preflight is new, with the ph_composer.thermal_bridges.export.thermal_bridges export section and the thermal_bridge.on_window_perimeter code. |
 | 1.15 | 2026-10-26 | The definition lists (ph_composer.assemblies.materials.list and assemblies.list, the Window product and Type lists, ph_composer.thermal_bridges.types.list) take fields, keeping kind, id and schema_version on every row, and cut each page by size as well as by limit. |
 | 1.16 | 2026-11-07 | A Face record gains assembly_reversed, true on the counterpart side of a Surface pair. ph_composer.zones.faces.assign_assembly, and classify with an assembly_id intent, also write the counterpart (its face_ids include it). face.assembly_pair_mismatch now blocks export; construction.missing no longer applies to a Surface Face whose pair is within one Building-Segment. |
+| 1.17 | 2026-11-08 | An unexpected failure's detail gains error_class beside incident. ph_composer.zones.solve_adjacency's result gains already_paired. An Assembly's Layer, Layer-Segment and air-barrier ids and its Material references state their pattern in every schema that names them. |

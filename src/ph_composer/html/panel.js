@@ -85,10 +85,21 @@ PhComposerUI.define("panel", ["unit_preferences", "workspace", "table_views", "r
     var changes = { actionResult: payload };
     if (payload.session !== previous.session) return previous;
     if (outcome.status !== "completed") {
-      changes.notice = { message: outcomeWords(payload) || outcome.message || "The change was not applied.",
+      changes.notice = { message: failureWords(outcome,
+        outcomeWords(payload) || outcome.message || "The change was not applied."),
         tone: outcome.status === "failed" ? "error" : "warning", action: helpFor(outcome) };
     }
     return withUI(previous, changes);
+  }
+
+  /* A failure's notice names the kind of error and the log's reference, so it can be quoted. The error's
+     own message stays in the log. */
+  function failureWords(outcome, words) {
+    var detail = outcome.detail || {}, text = words;
+    if (outcome.status !== "failed") return text;
+    if (typeof detail.error_class === "string") text += " Error: " + detail.error_class + ".";
+    if (typeof detail.incident === "string") text += " Incident " + detail.incident + ".";
+    return text;
   }
 
   /* An unexpected failure carries the log's incident reference; Get help opens Help & Diagnostics at it. */
@@ -107,7 +118,7 @@ PhComposerUI.define("panel", ["unit_preferences", "workspace", "table_views", "r
     var changes = { viewResults: recentResults(previous.ui.viewResults, payload) };
     if (payload.session !== previous.session) return previous;
     if (outcome.status !== "completed") {
-      changes.notice = { message: outcome.message || "The viewport did not change.",
+      changes.notice = { message: failureWords(outcome, outcome.message || "The viewport did not change."),
         tone: outcome.status === "failed" ? "error" : "warning", action: helpFor(outcome) };
     }
     return withUI(previous, changes);
@@ -193,7 +204,8 @@ PhComposerUI.define("panel", ["unit_preferences", "workspace", "table_views", "r
     var outcome = payload.outcome, action;
     if (!outcome || outcome.status !== "failed" || payload.session !== state.session) return;
     if (state.ui.notice !== before.ui.notice || !(action = helpFor(outcome))) return;
-    state = withUI(state, { notice: { message: outcome.message || "PH-Composer could not complete that request.",
+    state = withUI(state, { notice: { message: failureWords(outcome,
+      outcome.message || "PH-Composer could not complete that request."),
       tone: "error", action: action } });
   }
 

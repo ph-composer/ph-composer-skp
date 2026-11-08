@@ -28,7 +28,7 @@ class ApiTest < PhComposerTestCase
   def test_discovery_lists_the_session_and_every_registration_by_name
     found = API.discover
 
-    assert_equal({ "major" => 1, "minor" => 16 }, found.fetch("api"))
+    assert_equal({ "major" => 1, "minor" => 17 }, found.fetch("api"))
     assert_equal [@session.id], found.fetch("sessions").map { |session| session.fetch("id") }
     assert_includes found.fetch("actions").map { |action| action.fetch("name") }, "test.fixture.update_parts"
     assert_includes found.fetch("queries").map { |query| query.fetch("name") }, "ph_composer.records.list"
@@ -208,8 +208,8 @@ class ApiTest < PhComposerTestCase
 
     assert_equal %w[failed operation.failed rolled_back], failed.values_at("status", "code", "effect")
     assert_equal PhComposer::Outcome::ROLLED_BACK, failed.fetch("message")
-    assert_equal ["incident"], failed.fetch("detail").keys,
-                 "unexpected exceptions disclose only the log's incident reference, never their messages"
+    assert_equal %w[incident error_class], failed.fetch("detail").keys,
+                 "unexpected exceptions disclose the log's reference and their class, never their messages"
     logged = JSON.parse(PhComposer::Diagnostics.tail.last)
     assert_equal [failed.dig("detail", "incident"), "operation_failed", "rolled_back"],
                  logged.values_at("incident", "event", "effect")

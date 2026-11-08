@@ -254,6 +254,7 @@ class WindowPlaceToolTest < PhComposerTestCase
     up
     assert_empty units
     assert_includes @notices.last.first, "leaves its host"
+    assert_includes UI.notifications.last.message, "leaves its host", "the refused placement shows in SketchUp"
     @picked[:path] = [Sketchup::Face.new(9999)]
     down
     up
@@ -353,6 +354,9 @@ class WindowPlaceToolTest < PhComposerTestCase
     assert_empty units
     assert_equal before, @model.operations.length
     assert_includes @notices.last.first, "Nothing was written"
+    assert_match(/Error: RuntimeError\. Incident PHC-\h{6}\.\z/, UI.notifications.last.message)
+    assert_equal :error, @notices.last.last
+    refute_includes @notices.last.first, "Synthetic"
   end
 
   def test_post_commit_refresh_failure_reports_actual_placement

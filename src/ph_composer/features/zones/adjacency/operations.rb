@@ -14,16 +14,18 @@ module PhComposer
         proposal.add_step(FaceRecordStep.new(:updates => plan.retirements, :change => "retired"),
                           :scopes => record_scopes(plan.retirements))
       end
+      unchanged = []
       pair_ids = Adjacency.components(plan.matches).flat_map do |group|
         if group.length > 1
           partition_matches(request, proposal, group, plan.partitions)
         elsif group.first.fetch(:overlap).kind == :full
-          [pair_match(proposal, group.first)]
+          [pair_match(proposal, group.first, unchanged)]
         else
           [split_match(request, proposal, group.first)]
         end
       end
-      { "pair_ids" => pair_ids.compact.sort, "reported" => proposal.findings.length }
+      { "pair_ids" => pair_ids.compact.sort, "already_paired" => unchanged.length,
+        "reported" => proposal.findings.length }
     end
 
     def partition_matches(request, proposal, group, partitions)
@@ -156,11 +158,14 @@ module PhComposer
         "remainder_count" => remainders.length, "extension_copies" => copies }
     end
 
-    def pair_match(proposal, match)
+    def pair_match(proposal, match, unchanged)
       left = match.fetch(:left)
       right = match.fetch(:right)
       left_after, right_after, pair_id = Adjacency.pair(left, right)
-      return pair_id if left_after == left.fetch(:record) && right_after == right.fetch(:record)
+      if left_after == left.fetch(:record) && right_after == right.fetch(:record)
+        unchanged << pair_id
+        return pair_id
+      end
 
       updates = [left, right].zip([left_after, right_after]).map do |side, after|
         record = side.fetch(:record)

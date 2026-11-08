@@ -139,11 +139,58 @@ class SelectionTest < PhComposerTestCase
     invocation = nil
     API.stub(:invoke, lambda { |**args|
       invocation = args
-      { "status" => "completed", "message" => "Solved." }
+      { "status" => "completed", "message" => "Solved.", "value" => { "pair_ids" => [], "already_paired" => 0 } }
     }) { ZONES::Selection.client(@session).solve }
     assert_equal "ph_composer.zones.solve_adjacency", invocation.fetch(:name)
     assert_equal read.dig("value", "zones").map { |row| row.fetch("reference") }, invocation.dig(:params, "zones")
     assert_equal read.fetch("revision"), invocation.dig(:request, "expected_revision")
+  end
+
+  def test_solve_from_the_menu_says_in_sketchup_what_changed
+    solved = lambda do |pairs, affected, already = 0|
+      outcome = { "status" => "completed", "message" => "Done: Solve Zone Adjacency.",
+                  "value" => { "pair_ids" => pairs, "already_paired" => already }, "affected" => affected }
+      API.stub(:invoke, ->(**_args) { outcome }) { ZONES::Selection.client(@session).solve }
+      UI.notifications.last.message
+    end
+    retired = [{ "kind" => "face", "id" => "fac_1", "change" => "retired" }]
+
+    assert_equal "Solve adjacencies: 2 Faces paired as Surface.", solved.call(%w[pair_1], [])
+    assert_equal "Solve adjacencies: 4 Faces paired as Surface. 1 Face retired from out-of-date pairs.",
+                 solved.call(%w[pair_1 pair_2], retired)
+    assert_equal "Solve adjacencies: no Faces to pair. Nothing changed.", solved.call([], [])
+    assert_equal "Solve adjacencies: nothing to change. 2 Faces already paired.",
+                 solved.call(%w[pair_1], [], 1), "a second Solve must not claim it paired them"
+    assert_equal "Solve adjacencies: 2 Faces paired as Surface. 2 Faces already paired.",
+                 solved.call(%w[pair_1 pair_2], [], 1), "only the pair this Solve wrote counts as paired"
+  end
+
+  def test_solve_refused_from_the_menu_shows_the_reason_in_sketchup
+    refused = { "status" => "refused", "message" => "The Model changed. Nothing was written." }
+    API.stub(:invoke, ->(**_args) { refused }) { ZONES::Selection.client(@session).solve }
+
+    assert_equal ["The Model changed. Nothing was written."], UI.notifications.map(&:message)
+  end
+
+  def test_a_solve_whose_selection_read_fails_shows_it_in_sketchup
+    failed = { "status" => "failed", "message" => "The request could not be answered.",
+               "detail" => { "incident" => "PHC-AAAAAA", "error_class" => "TypeError" } }
+    API.stub(:query, ->(**_args) { failed }) { ZONES::Selection.client(@session).solve }
+
+    assert_equal ["The request could not be answered. Error: TypeError. Incident PHC-AAAAAA."],
+                 UI.notifications.map(&:message)
+  end
+
+  def test_a_solve_that_fails_from_the_menu_names_the_error_and_incident_in_sketchup
+    failed = { "status" => "failed", "message" => "The change could not be completed.",
+               "detail" => { "incident" => "PHC-7CDF84", "error_class" => "ArgumentError" } }
+    notices = []
+    PhComposer::Sessions.on_notice { |_session, message, tone| notices << [message, tone] }
+    API.stub(:invoke, ->(**_args) { failed }) { ZONES::Selection.client(@session).solve }
+
+    words = "The change could not be completed. Error: ArgumentError. Incident PHC-7CDF84."
+    assert_equal [words], UI.notifications.map(&:message)
+    assert_equal [words, :error], notices.last
   end
 
   def test_selected_faces_immediately_classify_one_attribute_without_starting_tool

@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 16
+    MINOR = 17
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -81,7 +81,12 @@ module PhComposer
                     "ph_composer.zones.faces.assign_assembly, and classify with an assembly_id intent, also write " \
                     "the counterpart (its face_ids include it). face.assembly_pair_mismatch now blocks export; " \
                     "construction.missing no longer applies to a Surface Face whose pair is within one " \
-                    "Building-Segment." }
+                    "Building-Segment." },
+      { "minor" => 17, "date" => "2026-11-08",
+        "change" => "An unexpected failure's detail gains error_class beside incident. " \
+                    "ph_composer.zones.solve_adjacency's result gains already_paired. An Assembly's Layer, " \
+                    "Layer-Segment and air-barrier ids and its Material references state their pattern in every " \
+                    "schema that names them." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

@@ -9,6 +9,7 @@ module PhComposer
     class PlaceTool
       ACTION = "#{FEATURE_ID}.units.place"
       DEFAULT_ANCHOR = "sill_center"
+      UNEXPECTED = "The Place tool could not complete that. Nothing was written."
       GUIDANCE = "Place Window: click a Zone Face; sill=<length> sets the opening sill; " \
                  "offset=<length> insets the chosen anchor from the nearest outer edge. Escape stops."
 
@@ -134,10 +135,10 @@ module PhComposer
         @sequence += 1
         result = API.invoke(:context => @context, :name => ACTION, :params => gesture.fetch("params"),
                             :request => { "sequence" => @sequence, "expected_revision" => gesture.fetch("revision") })
-        message = result.fetch("status") == "completed" ? "Placed Window." : result.fetch("message")
-        announce(message, result.fetch("status") == "completed" ? :info : :warning)
+        completed = result.fetch("status") == "completed"
+        announce(completed ? "Placed Window." : HostNotice.words(result), completed ? :info : HostNotice.tone(result))
         @hover = nil
-        refresh_after_placement if result.fetch("status") == "completed"
+        refresh_after_placement if completed
         view.invalidate
       rescue StandardError => error
         failure(error, view, :notice => true)
@@ -204,7 +205,10 @@ module PhComposer
         @hover = nil
       end
 
+      # A refusal also shows in SketchUp's own notification; "Placed Window." repeats with every click.
       def announce(message, tone)
+        return HostNotice.show(@session, message, :tone => tone) unless tone == :info
+
         Sketchup.status_text = message
         @session.notice(message, :tone => tone)
       end
@@ -220,12 +224,23 @@ module PhComposer
       def failure(error, view, notice: false)
         pending = notice || !@gesture.nil?
         cancel
-        message = error.is_a?(UserError) ? error.message :
-          "The Place tool could not complete that. Nothing was written."
-        Diagnostics.exception("place_tool", error) unless error.is_a?(UserError)
-        Sketchup.status_text = message
-        @session.notice(message, :tone => :warning) if pending
+        message = failure_words(error, pending)
+        if pending
+          announce(message, error.is_a?(UserError) ? :warning : :error)
+        else
+          Sketchup.status_text = message
+        end
         view.invalidate
+      end
+
+      # A gesture that failed gets the error and incident a user can quote; a hover that fails only logs and
+      # keeps the plain line, because it recurs with the pointer.
+      def failure_words(error, pending)
+        return error.message if error.is_a?(UserError)
+        return UNEXPECTED.tap { Diagnostics.exception("place_tool", error) } unless pending
+
+        HostNotice.words("status" => "failed", "message" => UNEXPECTED,
+                         "detail" => Outcome.failure_detail(Diagnostics.incident("place_tool", error), error))
       end
     end
 

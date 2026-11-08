@@ -14,6 +14,8 @@ module PhComposer
       }).freeze
       SOLVE_RESULT = Shapes.object({
         "pair_ids" => Shapes.list(Shapes::ID, :description => "Every Surface pair current after the Solve."),
+        "already_paired" => Shapes::COUNT.merge("description" => "How many of those pairs were already current, " \
+                                                                 "so this Solve wrote nothing for them."),
         "reported" => Shapes::COUNT.merge("description" => "Findings reported instead of paired, as outcome findings.")
       }).freeze
       RETIRE_PARAMS = Shapes.object({
