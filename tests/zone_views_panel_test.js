@@ -270,6 +270,20 @@ test("a paint tool that turns on after Faces was left is stopped by the next sna
     "a choose that lands after the switch does not leave the tool painting a hidden view");
 });
 
+test("Assembly paint runs while the Assemblies table shows it, and stops when Zones shows another view", function () {
+  var p = page(), state = snapshot(AREAS), palette = state.sections["ph_composer.zones.faces.palette"].value;
+  p.panel.receive({ type: "panel.snapshot", payload: state });
+  p.panel.showTab("assemblies");
+  palette.active = true;
+  palette.palette = { assembly_id: "asm_a" };
+  p.panel.receive({ type: "panel.snapshot", payload: state });
+  assert.strictEqual(sentNames(p).indexOf("ph_composer.zones.faces.stop_classifying"), -1,
+    "the Assemblies table shows it, whatever view Zones last held");
+  p.panel.showTab("overview");
+  p.panel.receive({ type: "panel.snapshot", payload: state });
+  assert.ok(sentNames(p).indexOf("ph_composer.zones.faces.stop_classifying") >= 0);
+});
+
 test("a native assignment handoff reaches Faces while another view is shown and shows Faces", function () {
   var p = page();
   p.panel.receive({ type: "panel.snapshot", payload: snapshot(AREAS) });

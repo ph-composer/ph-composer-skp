@@ -18,7 +18,7 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
       keep[item.id] = true;
       if (!control) {
         control = { node: button("", function () {
-          if (!control.node.disabled && cache.options.action) {
+          if (!control.node.disabled && !control.item.unavailable && cache.options.action) {
             cache.options.action(entry.row, control.item, control.node);
           }
         }) };
@@ -32,9 +32,15 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
       control.item = item;
       // An action that starts a group (a contributor's, acting on something other than the record) is set apart.
       control.node.classList.toggle("row-icon-starts", Boolean(item.starts));
-      control.node.setAttribute("aria-label", item.label);
-      control.node.setAttribute("data-tooltip", item.label);
+      control.node.setAttribute("aria-label", item.unavailable ? item.label + ". " + item.unavailable : item.label);
+      control.node.setAttribute("data-tooltip", item.unavailable || item.label);
       control.node.disabled = Boolean(cache.options.disabled || item.disabled);
+      // `unavailable` is the reason this row cannot take the action now. A disabled row icon draws nothing, so one
+      // that has something to say stays on screen and does nothing.
+      if (item.unavailable) control.node.setAttribute("aria-disabled", "true");
+      else control.node.removeAttribute("aria-disabled");
+      if (item.pressed === undefined) control.node.removeAttribute("aria-pressed");
+      else control.node.setAttribute("aria-pressed", String(Boolean(item.pressed)));
     });
     Object.keys(entry.controls).forEach(function (id) {
       if (!keep[id]) { entry.cells.actions.removeChild(entry.controls[id].node); delete entry.controls[id]; }

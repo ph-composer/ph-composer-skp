@@ -181,6 +181,86 @@ test("selection Clear is explicit and inventory Paint resets other fields", func
   assert.strictEqual(o.sent.length, 1);
   assert.deepStrictEqual(o.sent[0].payload.params, { field: "assembly_id", value: "asm_a", reset: true });
 });
+function rowAction(inventory, row, id) {
+  return inventory.tableOptions.actions(row).filter(function (action) { return action.id === id; })[0];
+}
+function settle(o, message, active, palette) {
+  o.state.sections[PREFIX + ".palette"].value.active = active;
+  o.state.sections[PREFIX + ".palette"].value.palette = palette;
+  o.panel.receive({ type: "view.result", payload: { request_id: message.payload.request_id,
+    session: message.payload.session, outcome: { status: "completed" } } });
+  o.paint();
+}
+function stops(o) {
+  return o.sent.filter(function (message) { return message.payload.name === PREFIX + ".stop_classifying"; });
+}
+test("Paint from the Assemblies table stays there, shows what is painting and stops on a second press", function () {
+  var o = setup(), inventory = o.query("[data-section='assemblies']")._view.inventory;
+  var row = { record: inventory.records[0] };
+  o.panel.showTab("assemblies");
+  inventory.tableOptions.action(row, rowAction(inventory, row, "paint_assembly"));
+  assert.strictEqual(o.panel.state.ui.activeTab, "assemblies", "the panel stays where Paint was pressed");
+  assert.strictEqual(o.sent[0].payload.name, PREFIX + ".choose");
+  settle(o, o.sent[0], true, { assembly_id: "asm_a" });
+  assert.strictEqual(stops(o).length, 0, "the snapshot that reports the tool on does not stop it");
+  var pressed = rowAction(inventory, row, "paint_assembly");
+  assert.strictEqual(pressed.pressed, true);
+  assert.strictEqual(pressed.label, "Stop painting Wall");
+  assert.strictEqual(rowAction(inventory, { record: inventory.records[1] }, "paint_assembly").pressed, false);
+  inventory.tableOptions.action(row, pressed);
+  assert.strictEqual(o.sent[o.sent.length - 1].payload.name, PREFIX + ".stop_classifying");
+  assert.strictEqual(o.panel.state.ui.activeTab, "assemblies");
+});
+test("Replace and delete says what it does and lists Faces by Zone and Face name, never by id", function () {
+  var o = setup(), inventory = o.query("[data-section='assemblies']")._view.inventory;
+  var row = { record: inventory.records[0] };
+  var usage = o.state.sections[PREFIX + ".usage"].value, second = JSON.parse(JSON.stringify(usage.faces[0]));
+  second.reference.entity_path = [102]; second.reference.entity_id = "fac_c";
+  usage.faces.unshift(Object.assign({}, second, { state: "unclassified", values: {} }));
+  usage.faces.push(Object.assign({}, second, {
+    reference: Object.assign({}, second.reference, { entity_path: [103] }) }));
+  usage.assembly_usage[0].face_count = 2;
+  usage.assembly_usage[0].faces.push(usage.faces[2].reference);
+  o.paint();
+  var replace = rowAction(inventory, row, "replace_assembly");
+  assert.strictEqual(replace.label, "Replace and delete Wall");
+  inventory.tableOptions.action(row, replace);
+  var dialog = o.document.querySelectorAll("dialog").filter(function (node) { return !node.hidden; })[0];
+  var shown = text(dialog);
+  assert.ok(shown.includes("Replace and delete Wall"));
+  assert.ok(shown.includes("Moves every Face that uses Wall to the Assembly you choose, or leaves them with none, " +
+    "then deletes Wall."), shown);
+  assert.ok(shown.includes("2 Faces: Zone 1 · Wall 2, Zone 1 · Wall 3"), shown);
+  assert.ok(!/\[|10[123]|fac_/.test(shown), "no internal id reaches the dialog: " + shown);
+});
+test("a long Face list in Replace and delete names the first Faces and counts the rest", function () {
+  var o = setup(), inventory = o.query("[data-section='assemblies']")._view.inventory;
+  var row = { record: inventory.records[0] };
+  var usage = o.state.sections[PREFIX + ".usage"].value, base = usage.faces[0];
+  usage.faces = []; usage.assembly_usage[0].faces = [];
+  for (var n = 0; n < 25; n += 1) {
+    var face = JSON.parse(JSON.stringify(base));
+    face.reference.entity_path = [200 + n];
+    usage.faces.push(face);
+    usage.assembly_usage[0].faces.push(face.reference);
+  }
+  usage.assembly_usage[0].face_count = 25;
+  o.paint();
+  inventory.tableOptions.action(row, rowAction(inventory, row, "replace_assembly"));
+  var shown = text(o.document.querySelectorAll("dialog").filter(function (node) { return !node.hidden; })[0]);
+  assert.ok(shown.includes("25 Faces: Zone 1 · Wall 1"), shown);
+  assert.ok(shown.includes("and 5 more"), shown);
+  assert.ok(!shown.includes("Wall 21"), shown);
+});
+test("Replace and delete is unavailable, with a reason, when no other Assembly exists", function () {
+  var o = setup(), inventory = o.query("[data-section='assemblies']")._view.inventory;
+  var records = o.state.sections["ph_composer.assemblies.assemblies"].value.records;
+  records.splice(1, 1);
+  o.paint();
+  var row = { record: inventory.records[0] }, replace = rowAction(inventory, row, "replace_assembly");
+  assert.strictEqual(replace.disabled, false, "the control stays on screen to say why");
+  assert.strictEqual(replace.unavailable, "Wall is the only Assembly, so there is nothing to replace it with.");
+});
 test("withdrawal forgets a pending selection request and restores navigation without a late result", function () {
   var o = setup(), picker = byLabel(o.document.body, "Assembly for selected Faces");
   picker.value = "asm_a"; picker.listeners.change({});

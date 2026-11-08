@@ -43,7 +43,8 @@ function (panel, snapshot, ui, AssemblyForm, forms, inventories, units, preferen
     view.listRoot.appendChild(view.header.root);
     view.newAssembly = new AssemblyForm(state.session, send, changed);
     view.replacement = new forms.ReplacementForm(state.session, send, changed,
-      { section: SECTION, label: "Assembly", replacement: true, allowClear: true, alwaysReplacement: true });
+      { section: SECTION, label: "Assembly", replacement: true, allowClear: true, alwaysReplacement: true,
+        usedOn: "Face" });
     view.color = new forms.ColorForm(state.session, send, SECTION + ".update", changed);
     view.forms = [view.replacement, view.color];
     view.open = function (record) {

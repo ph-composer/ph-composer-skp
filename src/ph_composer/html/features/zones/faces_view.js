@@ -79,8 +79,9 @@ function (panel, ui, snapshot, units, fields, words, tableViews, attachedAssignm
      the checked set, and the host has already cleared Locate's outline. */
   function consume(vs, state, send) {
     classify.refresh(state, send);
-    // The paint tool runs only while this view is shown: a choose that lands after a switch away is stopped.
-    if (vs.host.activeView() !== VIEW.id) classify.stop();
+    // The paint tool runs only while this view or the Assemblies table shows it: a choose that lands after a switch
+    // away is stopped.
+    if (vs.host.activeView() !== VIEW.id && !assemblies.paintShown(state)) classify.stop();
     var tool = snapshot.value(state, "ph_composer.zones.faces.palette") || {};
     vs.faces = (snapshot.value(state, "ph_composer.zones.faces.faces") || { faces: [] }).faces;
     vs.assemblyEnabled = Boolean(snapshot.value(state, "ph_composer.zones.faces.assemblies") &&
@@ -123,7 +124,7 @@ function (panel, ui, snapshot, units, fields, words, tableViews, attachedAssignm
     function faceRow(face, parent, depth) {
       return { key: JSON.stringify(["Face", zone.reference.zone_path, face.reference.entity_path]),
         parent: parent, tier: "Face", depth: depth,
-        record: { id: face.reference.entity_id, name: faceName(face, own), place: own.indexOf(face) + 1,
+        record: { id: face.reference.entity_id, name: words.faceName(face, own), place: own.indexOf(face) + 1,
           face: face, gated: ZoneCells.gated(zone) } };
     }
     row.record.faces.forEach(function (face) { rows.push(faceRow(face, key, 1)); });
@@ -154,14 +155,6 @@ function (panel, ui, snapshot, units, fields, words, tableViews, attachedAssignm
 
   function occurrence(path) {
     return JSON.stringify(path || []);
-  }
-
-  /* A Face is named by what it is and where it sits among every Face of its Zone, counting the ones with no
-     record. Numbering the recorded ones alone would renumber and rekey a Face the user never touched as soon
-     as a neighbour was classified, which takes that row's selection and any edit in progress with it. */
-  function faceName(face, all) {
-    var place = all.indexOf(face) + 1;
-    return (face.values.face_type ? words.faceType(face.values.face_type) : "Face") + " " + place;
   }
 
   function columns(vs, profile) {

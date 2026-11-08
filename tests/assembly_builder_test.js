@@ -480,6 +480,27 @@ test("the segment bubble shows its Material's values read only, and the header e
   assert.ok(text(about).includes("Surface films (ISO 6946)"));
   assert.ok(text(about).includes("Rse"));
 });
+test("the U-value popover shows each message once, with a count, whichever source repeats it", function () {
+  var o = setup(), unassigned = { code: "assembly.segment_unassigned", message: "A Layer-Segment has no Material." };
+  o.record.findings = [unassigned, unassigned, unassigned, unassigned,
+    { code: "assembly.thermal_layer_limit", message: "Too many Layers." }];
+  o.record.display.thermal = { complete: false, u_effective_w_m2k: null, u_construction_w_m2k: null, rsi_m2k_w: 0.13,
+    rse_m2k_w: 0.04, direction: "horizontal", flags: ["assembly.geometry_invalid", "assembly.segment_unassigned"],
+    warnings: ["Layer thickness is invalid.", "One or more segments do not have a material assignment."] };
+  o.editor.refresh(o.state, o.record.id);
+  var notes = o.editor.root.querySelector(".assembly-information-notes");
+  assert.deepStrictEqual(notes.children.map(function (item) { return text(item).replace(/\s+/g, " ").trim(); }), [
+    "Layer thickness is invalid.", "A Layer-Segment has no Material. × 4", "Too many Layers."]);
+});
+test("the U-value popover keeps a withheld reason that says something the list does not", function () {
+  var o = setup();
+  o.record.display.thermal = { complete: false, u_effective_w_m2k: null, u_construction_w_m2k: null, rsi_m2k_w: 0.13,
+    rse_m2k_w: 0.04, flags: [], warnings: [],
+    message_parts: [[{ type: "text", text: "Layer 2 is too thin." }]] };
+  o.editor.refresh(o.state, o.record.id);
+  var notes = o.editor.root.querySelector(".assembly-information-notes");
+  assert.deepStrictEqual(notes.children.map(text), ["Layer 2 is too thin."]);
+});
 test("dimensions edit in place; Escape restores and closes without changing selection", function () {
   var o = setup(), entry = o.editor.dimensions["thickness:layer_studs"];
   o.editor.select({ layerId: "layer_studs", segmentId: "seg_wool" });

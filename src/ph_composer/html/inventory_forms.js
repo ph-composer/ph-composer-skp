@@ -25,6 +25,8 @@ function (RecordForm, request, snapshot, ui) {
     RecordForm.call(this, session, send, { title: "Delete " + this.options.label,
       action: this.options.section + ".delete", label: "delete-record", submitLabel: "Delete",
       pendingText: "Deleting...", failureText: "The record was not deleted.", destructive: true, changed: changed });
+    this.explanation = ui.element("p");
+    this.root.appendChild(this.explanation);
     this.uses = ui.element("p");
     this.root.appendChild(this.uses);
     this.select = labelled(this.form, "Replacement " + this.options.label.toLowerCase(), ui.element("select"));
@@ -42,6 +44,10 @@ function (RecordForm, request, snapshot, ui) {
     this.inUse = Boolean(this.options.replacement && (this.options.alwaysReplacement ||
       (usage ? usage.count : record.use_count)));
     this.title.textContent = (this.inUse ? "Replace and delete " : "Delete ") + record.values.name;
+    this.explanation.hidden = !(this.inUse && this.options.usedOn);
+    this.explanation.textContent = this.explanation.hidden ? "" : "Moves every " + this.options.usedOn + " that uses " +
+      record.values.name + " to the " + this.options.label + " you choose" +
+      (this.options.allowClear ? ", or leaves them with none," : ",") + " then deletes " + record.values.name + ".";
     var uses = (record.uses || []).map(function (use) { return use.name; }).join(", ");
     this.uses.textContent = this.inUse ? (usage ? usage.description : uses ? "Used by: " + uses :
       "Choose a replacement or clear existing uses.") :

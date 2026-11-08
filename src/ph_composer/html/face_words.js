@@ -45,9 +45,18 @@ PhComposerUI.define("face_words", [], function () {
     else node.style.removeProperty("--category-fill");
   }
 
+  /* A Face is named by what it is and where it sits among `all`, every Face of its Zone, counting the ones with no
+     record. Numbering the recorded ones alone would renumber and rekey a Face the user never touched as soon as a
+     neighbour was classified, which takes that row's selection and any edit in progress with it. */
+  function faceName(face, all) {
+    var type = face.values.face_type;
+    return (type ? label(FACE_TYPES, type) : "Face") + " " + (all.indexOf(face) + 1);
+  }
+
   return {
     FACE_TYPES: FACE_TYPES, BOUNDARIES: BOUNDARIES, UNCHOOSABLE: UNCHOOSABLE, HUES: HUES,
     faceType: function (value) { return label(FACE_TYPES, value); },
+    faceName: faceName,
     boundary: function (value) { return label(BOUNDARIES, value); },
     fill: fill, paintFill: paintFill
   };
