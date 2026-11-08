@@ -128,6 +128,33 @@ test("a Window selected in SketchUp has its row marked and scrolled to, once, un
   assert.deepStrictEqual(scrolled, ["[10,31]", "[10,30]"]);
   assert.strictEqual(unitRow(o, "[10,30]").node.classList.contains("host-selected"), true);
 });
+test("a Window selected while another tab shows is scrolled to when the Schedule opens (W-100)", function () {
+  var o = setup(), scrolled = [];
+  unitRow(o, "[10,31]").node.scrollIntoView = function () { scrolled.push("[10,31]"); };
+  selectUnits(o, [[10, 31]]);
+  assert.deepStrictEqual(scrolled, [], "a hidden tab cannot scroll");
+  o.editor.tabs.select("schedule");
+  assert.deepStrictEqual(scrolled, ["[10,31]"]);
+  o.editor.render(o.state);
+  assert.strictEqual(scrolled.length, 1, "and only once");
+});
+test("a refused name keeps its draft and holds the tabs until it is cancelled (W-099)", function () {
+  var o = setup(); o.editor.tabs.select("schedule");
+  o.state.sections["ph_composer.windows.units"].value.units[0].name = ""; o.editor.render(o.state);
+  typeName(o, "[10,30]", "W-101");
+  var call = o.sent[o.sent.length - 1].payload;
+  o.state.ui.actionResult = { session: o.state.session, request_id: call.request_id,
+    outcome: { status: "refused", code: "target.locked", message: "The Window is locked." } };
+  o.editor.render(o.state);
+  assert.strictEqual(nameInput(o, "[10,30]").value, "W-101");
+  assert.strictEqual(o.editor.schedule.guard(), "Finish or cancel the Window name first.");
+  assert.strictEqual(o.editor.tabs.select("builder"), false);
+  assert.strictEqual(o.editor.tabs.active, "schedule");
+  click(unitRow(o, "[10,30]").cells.name.children[1]);
+  assert.strictEqual(nameInput(o, "[10,30]").value, "");
+  assert.strictEqual(o.editor.schedule.guard(), null);
+  assert.strictEqual(o.editor.tabs.select("builder"), true);
+});
 test("with no Window Types the Schedule and the Builder both offer to make the first", function () {
   var o = setup(), types = o.state.sections["ph_composer.windows.types"].value;
   types.records = []; o.state.sections["ph_composer.windows.units"].value.units = []; o.editor.render(o.state);

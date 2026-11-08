@@ -41,7 +41,13 @@ function (request, snapshot, tables, faceWords, ui, units, fields, RecordEdits) 
   }
   Schedule.prototype.guard = function () {
     return this.edits.busy() || this.views.busy() || this.names.pending ? "Wait for the Window command." :
-      this.dialog ? "Apply or cancel the Window repair." : null;
+      this.dialog ? "Apply or cancel the Window repair." :
+      this.nameDrafted() ? "Finish or cancel the Window name first." : null;
+  };
+  Schedule.prototype.nameDrafted = function () {
+    return Object.keys(this.names.cells).some(function (key) {
+      return this.names.cells[key].status !== "clean";
+    }, this);
   };
   Schedule.prototype.zone = function (unit) {
     var path = unit.host ? unit.host.zone_path : unit.reference.entity_path;
@@ -221,21 +227,28 @@ function (request, snapshot, tables, faceWords, ui, units, fields, RecordEdits) 
     var rows = this.rows(); this.names.refresh(rows, state);
     this.edits.consume(state); this.views.consume(state); this.paint(rows);
   };
-  /* The Window rows SketchUp's selection has just reached, each under an open Type so it can be seen. */
+  /* Opens the Type of each Window row SketchUp's selection has just reached, and notes the first to scroll to. */
   Schedule.prototype.follow = function (rows) {
     var previous = this.followed || {}, fresh = rows.filter(function (row) {
       return row.record.unit && this.selected[row.key] && !previous[row.key];
     }, this);
     this.followed = this.selected;
     fresh.forEach(function (row) { this.expanded[row.parent] = true; }, this);
-    return fresh[0];
+    if (fresh.length) this.scrollTo = fresh[0].key;
+  };
+  /* A hidden tab cannot scroll, so the row waits for the Schedule to be shown, unless it has been deselected. */
+  Schedule.prototype.scrollToFollowed = function () {
+    if (!this.scrollTo || this.owner.scheduleSurface.hidden) return;
+    var row = this.selected[this.scrollTo] && this.mount._table.rows[this.scrollTo];
+    this.scrollTo = null;
+    if (row && row.node.scrollIntoView) row.node.scrollIntoView({ block: "nearest" });
   };
   Schedule.prototype.paint = function (built) {
     if (this.disposed || !this.units) return;
     var self = this, rows = built || this.rows();
     this.summary.textContent = this.enabled ? this.units.length + " Window" + (this.units.length === 1 ? "" : "s") :
       "Window occurrences are unavailable.";
-    var reached = this.follow(rows);
+    this.follow(rows);
     tables.table(this.mount, this.units, { rows: rows, expanded: this.expanded, tree: true,
       defaultWidths: { count: 84 },
       columns: [["actions", "Actions"], ["hierarchy", "Hierarchy"], ["name", "Window Type / Unit"], ["count", "Count"],
@@ -263,9 +276,7 @@ function (request, snapshot, tables, faceWords, ui, units, fields, RecordEdits) 
         self.owner.createType();
       } } });
     tables.orientNarrow(this.mount);
-    if (reached && this.mount._table.rows[reached.key].node.scrollIntoView) {
-      this.mount._table.rows[reached.key].node.scrollIntoView({ block: "nearest" });
-    }
+    this.scrollToFollowed();
     if (this.dialog) { this.apply.disabled = Boolean(this.edits.busy() || this.stale);
       this.cancel.disabled = this.edits.busy(); }
   };
