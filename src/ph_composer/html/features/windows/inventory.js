@@ -131,7 +131,7 @@ function (panel, inventories, forms, Form, shared, fields, request, snapshot, un
       active: function () { return !self.disposed && self.enabled && Boolean(self.settings); },
       apply: function (value) { var change = {}; change[key] = value; return self.saveDefaults(change); },
       onCancel: function () { self.settingsExpected = null; },
-      onClose: function () { self.settingsExpected = null; } });
+      onClose: function () { self.settingsExpected = null; self.syncPsiValue(); } });
     editor.field.input.addEventListener("input", function () { self.captureSettings(); });
     return editor;
   };
@@ -175,8 +175,15 @@ function (panel, inventories, forms, Form, shared, fields, request, snapshot, un
     }
     paintValue(this.psiValueEditor, "Default ψ-install", PSI_VALUE, this.settings.default_psi_install_w_mk);
     paintValue(this.depthEditor, "Default install depth", DEPTH, this.settings.default_install_depth_m);
-    if (current) this.closeEditor(this.psiValueBubble, false);
-    this.psiValueBubble.root.hidden = Boolean(current);
+    this.syncPsiValue();
+  };
+  /* The Model's value applies only while no Type is the default. An unfinished draft keeps its editor on screen,
+     unwritten, until the user corrects or cancels it, because guard() holds the panel for it. */
+  Inventory.prototype.syncPsiValue = function () {
+    if (!this.settings || !this.psiValueBubble) return;
+    var hide = Boolean(this.settings.default_psi_install_id) && !this.psiValue.editing;
+    if (hide) this.closeEditor(this.psiValueBubble, false);
+    this.psiValueBubble.root.hidden = hide;
   };
   Inventory.prototype.captureSettings = function () {
     if (!this.settingsExpected) this.settingsExpected = shared.clone(this.settings);
@@ -214,11 +221,11 @@ function (panel, inventories, forms, Form, shared, fields, request, snapshot, un
     var shown = Boolean(payload && this.settings);
     this.defaultPsi.root.hidden = !shown; this.depthBubble.root.hidden = !shown;
     if (!shown) {
-      this.psiValueBubble.root.hidden = true;
       this.requests.reset(); this.settingsExpected = null;
       [this.depth, this.psiValue].forEach(function (field) { field.editing = false; field.repaint(); });
       this.defaultPsi.close(false); this.closeEditor(this.depthBubble, false);
-      this.closeEditor(this.psiValueBubble, false); renderInventory(); return;
+      this.closeEditor(this.psiValueBubble, false); this.psiValueBubble.root.hidden = true;
+      renderInventory(); return;
     }
     var outcome = this.requests.consume(state);
     if (outcome) this.settingsExpected = null;

@@ -63,6 +63,18 @@ test("with no default Type the Model value shows and edits; a chosen Type hides 
   assert.strictEqual(o.sent[0].payload.params.expected_values.default_psi_install_w_mk, 0.04);
   complete(o, "completed"); assert.strictEqual(bubble.panel.hidden, true);
 });
+test("an unfinished Model value stays on screen when a default Type arrives, and goes once cancelled", function () {
+  var o = setup("psi_install_types"), bubble = o.view.psiValueBubble, field = o.view.psiValue;
+  var settings = o.state.sections["ph_composer.windows.settings"].value;
+  settings.default_psi_install_id = null; o.view.render(o.state);
+  bubble.open(); type(field, "abc"); key(field.input, "Enter"); assert.ok(field.error.textContent);
+  settings.default_psi_install_id = "psi_a"; o.view.render(o.state);
+  assert.strictEqual(bubble.root.hidden, false, "the guard's draft stays reachable");
+  assert.strictEqual(bubble.panel.hidden, false); assert.strictEqual(o.sent.length, 0);
+  key(field.input, "Escape");
+  assert.strictEqual(bubble.panel.hidden, true); assert.strictEqual(bubble.root.hidden, true);
+  assert.strictEqual(o.view.guard(), null); assert.strictEqual(o.sent.length, 0);
+});
 test("a default Type no longer in the Model reads Missing, not the Model value", function () {
   var o = setup("psi_install_types");
   o.state.sections["ph_composer.windows.settings"].value.default_psi_install_id = "gone"; o.view.render(o.state);
