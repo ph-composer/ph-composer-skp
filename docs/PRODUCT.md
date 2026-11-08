@@ -176,7 +176,16 @@ Place starts with the chosen Window Type from the Builder, Type browser or Sched
 an outline on a host Face and stays active for repeated placements. Nine anchors are available.
 In SketchUp's measurement box, `sill=<length>` sets the opening bottom above the host's minimum
 up extent; `offset=<length>` sets the chosen anchor's inward distance from the nearest outer
-host edge. Stop or Escape ends the tool.
+host edge. Stop or Escape ends the tool. The cursor infers and snaps as native tools do, to
+endpoints, midpoints, edges and guides, so CAD linework can guide the anchor in one step; a point
+off the host's plane, such as linework in front of the wall, lands square onto it. While placing,
+the panel shows the two measurements as a callout and SketchUp labels its measurement box.
+
+A Window pasted or moved off its Face goes back to the nearest Face of its Zone, in the same Undo
+step, and says so in SketchUp: it keeps its position if it already lies clear on a Face, and
+otherwise is squared to the Face and brought just inside its edge. A Window with no Face beside it
+in its own container, or no room on one, stays where it is, says why, and keeps its Unhosted
+finding in the Schedule.
 
 The Schedule counts Unit occurrences by Type, including detached definitions, and shows Zone,
 host Face, Level and Locate. Differing or unhosted Units retain their state and offer explicit

@@ -86,6 +86,12 @@ module PhComposer
           MappedPlan.new(:outer_polygon_m => polygon.call(plan.outer_polygon_m), :panes => panes).freeze
         end
 
+        # The world matrix of an instance drawn as `mapped`: this plane's axes, its native origin in inches.
+        def instance_matrix(mapped)
+          origin = mapped.outer_polygon_m.last.map { |value| value / FaceGeometry::INCH_TO_M }
+          x_axis + [0] + y_axis + [0] + normal + [0] + origin + [1]
+        end
+
         private
 
         def numeric?(value)

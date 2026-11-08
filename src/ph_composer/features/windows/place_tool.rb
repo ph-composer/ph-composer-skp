@@ -2,6 +2,7 @@
 
 require_relative "placement/tool_target"
 require_relative "placement/tool_measurements"
+require_relative "placement/tool_inference"
 
 module PhComposer
   module Windows
@@ -12,10 +13,12 @@ module PhComposer
       UNEXPECTED = "The Place tool could not complete that. Nothing was written."
       GUIDANCE = "Place Window: click a Zone Face; sill=<length> sets the opening sill; " \
                  "offset=<length> insets the chosen anchor from the nearest outer edge. Escape stops."
+      MEASUREMENTS_LABEL = "sill= or offset="
 
       def initialize(session)
         @session = session
         @measurements = Placement::ToolMeasurements.new
+        @inference = Placement::ToolInference.new
         @sequence = 0
         @anchor = DEFAULT_ANCHOR
         @active = false
@@ -32,7 +35,7 @@ module PhComposer
         @type_id, @anchor, @host = type_id.dup, anchor.dup, DeepCopy.call(host)
         @plan = plan
         @session.model.select_tool(self) unless active?
-        Sketchup.status_text = GUIDANCE
+        show_guidance
         @session.request_refresh
         state
       end
@@ -62,13 +65,14 @@ module PhComposer
         @suspended = false
         @measurements.clear
         cancel
-        Sketchup.status_text = GUIDANCE
+        show_guidance
         @session.request_refresh
       end
 
       def deactivate(view)
         @active = false
         cancel
+        Sketchup.set_status_text("", SB_VCB_LABEL)
         view.invalidate
         @session.request_refresh
       end
@@ -81,6 +85,7 @@ module PhComposer
 
       def resume(view)
         @suspended = false
+        show_guidance
         view.invalidate
       end
 
@@ -101,8 +106,8 @@ module PhComposer
         cancel if @gesture && @gesture.fetch("edit_path") != edit_path
         return unless @target.current?
 
-        @hover = hover(Pick.face_point(view, x, y))
-        view.tooltip = GUIDANCE if view.respond_to?(:tooltip=)
+        @hover = hover(Pick.face_point(view, x, y), view, x, y)
+        view.tooltip = @inference.tooltip || GUIDANCE if view.respond_to?(:tooltip=)
         view.invalidate
       rescue StandardError => error
         failure(error, view)
@@ -113,7 +118,7 @@ module PhComposer
         return unless available?
 
         @plan = @target.refresh(@type_id)
-        chosen = hover(Pick.face_point(view, x, y))
+        chosen = hover(Pick.face_point(view, x, y), view, x, y)
         return unless chosen
 
         @gesture = { "params" => { "host" => chosen.fetch(:host).reference, "type_id" => @type_id,
@@ -166,6 +171,7 @@ module PhComposer
         segments = polygon.each_with_index.flat_map { |point, index| [point, polygon[(index + 1) % polygon.length]] }
         view.drawing_color = Sketchup::Color.new(47, 143, 131)
         view.draw(GL_LINES, segments)
+        @inference.draw(view)
       rescue StandardError => error
         failure(error, view)
       end
@@ -189,12 +195,17 @@ module PhComposer
         Array(@session.model.active_path).map(&:persistent_id)
       end
 
-      def hover(picked)
+      # The picked Face is the host; SketchUp's inference says where on it. An inferred point off the
+      # host's plane, such as CAD linework in front of the wall, lands square onto the plane.
+      def hover(picked, view, x, y)
         host = @target.resolve(picked, @host)
-        return unless host
+        unless host
+          @inference.clear
+          return
+        end
 
         point = picked.fetch(:point)
-        metres = [point.x, point.y, point.z].map { |value| value.to_f * INCH_TO_M }
+        metres = @inference.point_m(view, x, y) || [point.x, point.y, point.z].map { |value| value.to_f * INCH_TO_M }
         metres = @measurements.point(host.geometry, metres, @plan, @anchor)
         outline = Placement::Plane.new(host.geometry).map(@plan, :point_m => metres, :anchor => @anchor).outer_polygon_m
         { :host => host, :point => metres, :outline => outline }
@@ -203,6 +214,12 @@ module PhComposer
       def cancel
         @gesture = nil
         @hover = nil
+        @inference.clear
+      end
+
+      def show_guidance
+        Sketchup.status_text = GUIDANCE
+        Sketchup.set_status_text(MEASUREMENTS_LABEL, SB_VCB_LABEL)
       end
 
       # A refusal also shows in SketchUp's own notification; "Placed Window." repeats with every click.

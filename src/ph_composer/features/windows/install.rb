@@ -30,6 +30,7 @@ require_relative "declarations/viewport"
 require_relative "colour_modes"
 require_relative "export"
 require_relative "units/areas"
+require_relative "units/host_watch"
 require_relative "codes"
 require_relative "refuses"
 
@@ -54,6 +55,7 @@ module PhComposer
       ExportProjection.install(feature)
       Units::Areas.install(feature, registry)
       Units::ZoneCopy.install(feature)
+      Units::HostWatch.install(feature)
       Codes.install(feature)
     end
   end

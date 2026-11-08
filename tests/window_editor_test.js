@@ -476,6 +476,8 @@ test("the Place anchor is one setting beside Place; its row shows only while the
   assert.strictEqual(o.sent.length, 0, "an idle tool is not started by choosing its anchor");
   o.state.sections[tool].value = { active: true, type_id: o.editor.active, anchor: "head_right" };
   o.editor.render(o.state); assert.strictEqual(placement.root.hidden, false);
+  assert.deepStrictEqual(placement.hint.querySelectorAll("code").map(function (node) { return node.textContent; }),
+    ["sill=", "offset="], "the measurements the tool takes are a callout while it runs");
   click(placement.anchors.center);
   assert.strictEqual(o.sent.length, 1);
   assert.strictEqual(o.sent[0].payload.params.anchor, "center", "a placing tool is re-armed with the new anchor");

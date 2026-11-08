@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 17
+    MINOR = 18
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -86,7 +86,10 @@ module PhComposer
         "change" => "An unexpected failure's detail gains error_class beside incident. " \
                     "ph_composer.zones.solve_adjacency's result gains already_paired. An Assembly's Layer, " \
                     "Layer-Segment and air-barrier ids and its Material references state their pattern in every " \
-                    "schema that names them." }
+                    "schema that names them." },
+      { "minor" => 18, "date" => "2026-11-08",
+        "change" => "ph_composer.windows.units.return_to_host is new. It puts a Window that has left its Face back " \
+                    "on the nearest Face of its Zone, and adds window.no_host_face." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

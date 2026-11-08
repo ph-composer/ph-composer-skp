@@ -202,6 +202,36 @@ module Sketchup
     end
   end
 
+  # The host's inference engine: `view.inferences[[x, y]]` is what it finds at that pixel, as
+  # `{ :position => Point3d, :tooltip => "Endpoint" }`. Unset, the host found nothing to infer from.
+  class InputPoint
+    attr_reader :position, :tooltip
+
+    def pick(view, x_value, y_value)
+      found = view.inferences[[x_value, y_value]]
+      @position = found && found.fetch(:position)
+      @tooltip = found ? found.fetch(:tooltip) : ""
+      valid?
+    end
+
+    def valid?
+      !position.nil?
+    end
+
+    def display?
+      valid?
+    end
+
+    def draw(view)
+      view.note_input_draw
+    end
+
+    def clear
+      @position = nil
+      @tooltip = ""
+    end
+  end
+
   # The host's Camera, with the stub's defaults: looking down from the eye, perspective, 35 degrees.
   Camera = Struct.new(:eye, :target, :up, :perspective, :fov, :height) do
     def initialize(eye, target = nil, up = nil, perspective = true, fov = 35.0, height = 0.0)
@@ -237,7 +267,7 @@ module Sketchup
     attr_accessor :line_width, :drawing_color, :pick_result, :line_stipple, :tooltip
     attr_accessor :model_units_per_pixel
     attr_reader :camera
-    attr_reader :model, :draws, :screen_draws, :texts, :invalidations, :zoomed, :picks
+    attr_reader :model, :draws, :screen_draws, :texts, :invalidations, :zoomed, :picks, :inferences, :input_draws
 
     def initialize(model)
       @model = model
@@ -247,10 +277,16 @@ module Sketchup
       @invalidations = 0
       @zoomed = []
       @picks = {}
+      @inferences = {}
+      @input_draws = 0
       # Far enough above the fixtures that a lift toward it is a clean +z, and one model unit a
       # pixel, so a test can state the lift it expects.
       @camera = Camera.new(Geom::Point3d.new(0, 0, 1_000_000))
       @model_units_per_pixel = 1.0
+    end
+
+    def note_input_draw
+      @input_draws += 1
     end
 
     # The viewport's size in pixels, and the images write_image wrote: a small placeholder file whose bytes
@@ -414,6 +450,12 @@ module Sketchup
     attr_reader :persistent_id
     attr_accessor :layer, :parent_entities
     attr_writer :hidden
+
+    # The host answers the Model or ComponentDefinition; what a caller reads from either is `entities`.
+    def parent
+      Parent.new(parent_entities)
+    end
+    Parent = Struct.new(:entities)
 
     # The host's type name: "Group", "Face", "ComponentInstance".
     def typename

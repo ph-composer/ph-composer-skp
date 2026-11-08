@@ -41,8 +41,9 @@ module PhComposer
     end
 
     # The same single native pick, plus the camera ray's intersection with that Face's world
-    # plane. Unlike InputPoint, this does not perform a second pick that could choose a nearby
-    # edge or another occurrence. The point remains in native inches, like every SDK Point3d.
+    # plane. This answers which Face the pointer is over; an InputPoint does a second pick that can
+    # choose a nearby edge or another occurrence, so a tool that wants inference takes only the point
+    # from one (Windows' Place). The point remains in native inches, like every SDK Point3d.
     def face_point(view, x, y)
       path = face_path(view, x, y)
       return nil unless path && view.respond_to?(:pickray)

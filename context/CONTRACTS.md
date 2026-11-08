@@ -673,7 +673,10 @@ copied on its own (its `CopyWatch`): the Space is made independent through Make 
 next free number; a copy inside a component keeps its finding with one notice, and a copied plain
 Group holding a Space is left to its finding, since it may be a Zone whose copy Zones handles. The
 Spaces and Zones watchers hear the copy through the session's `container_added` host event, which
-reports each Group or ComponentInstance added to any container.
+reports each Group or ComponentInstance added to any container. Windows' `HostWatch` hears a pasted
+Unit the same way and a moved one through `instance_modified`, and returns a Unit that has left its
+Face (`units.return_to_host`, D6 of the usability walkthrough) as a follow-up joined to the gesture;
+one it cannot return gets a notice in SketchUp and keeps its finding.
 
 **Host follow-ups.** `HostFollowUp.run(session, action, params_list)` is internal; nothing registers
 it where the panel or the API can reach it. It runs the registered action's handler once per params

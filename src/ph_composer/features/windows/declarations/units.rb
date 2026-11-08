@@ -5,6 +5,7 @@ require_relative "../units/host_extent"
 require_relative "../units/outlines"
 require_relative "../units/repairs"
 require_relative "../units/update_step"
+require_relative "../units/return_to_host"
 
 module PhComposer
   module Windows
@@ -44,9 +45,25 @@ module PhComposer
         metadata(feature, reference)
         flip_repair(feature, reference)
         restore_repair(feature, face)
+        return_to_host(feature, reference)
         place(feature, face)
         host_extent(feature, face, reference)
         outlines(feature, face, reference)
+      end
+
+      def return_to_host(feature, reference)
+        feature.action(Units::HostWatch::ACTION,
+                       :description => "Put a Window that has left its Face back on the nearest Face of its Zone. " \
+                                       "A Window still on its Face is left alone.",
+                       :refuses => Refuses::RETURN_TO_HOST,
+                       :params => Shapes.object({ "unit" => unit(reference, "The Window occurrence to return.") }),
+                       :result => Shapes.object({ "unit_id" => Shapes::TEXT, "returned" => { "type" => "boolean" } }),
+                       :undo_name => "Return Window to its Face",
+                       :side_effects => "Moves and glues the instance; writes no record. A copy keeps its shared " \
+                                        "identity for the next Windows action to repair.",
+                       :examples => [{ "unit" => EXAMPLE_UNIT }]) do |request, proposal|
+          Units::ReturnToHost.call(request, proposal, :unit => request.params.fetch("unit"))
+        end
       end
 
       def reads(feature, face, reference)
