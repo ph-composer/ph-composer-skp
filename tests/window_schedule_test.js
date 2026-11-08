@@ -138,6 +138,15 @@ test("a Window selected while another tab shows is scrolled to when the Schedule
   o.editor.render(o.state);
   assert.strictEqual(scrolled.length, 1, "and only once");
 });
+test("a Window selected while the panel shows another primary tab is scrolled to on return (W-100)", function () {
+  var o = setup(), scrolled = []; o.editor.tabs.select("schedule");
+  unitRow(o, "[10,31]").node.scrollIntoView = function () { scrolled.push("[10,31]"); };
+  o.document.body.hidden = true;
+  selectUnits(o, [[10, 31]]);
+  assert.deepStrictEqual(scrolled, []);
+  o.document.body.hidden = false; o.editor.render(o.state);
+  assert.deepStrictEqual(scrolled, ["[10,31]"]);
+});
 test("a refused name keeps its draft and holds the tabs until it is cancelled (W-099)", function () {
   var o = setup(); o.editor.tabs.select("schedule");
   o.state.sections["ph_composer.windows.units"].value.units[0].name = ""; o.editor.render(o.state);
@@ -150,6 +159,8 @@ test("a refused name keeps its draft and holds the tabs until it is cancelled (W
   assert.strictEqual(o.editor.schedule.guard(), "Finish or cancel the Window name first.");
   assert.strictEqual(o.editor.tabs.select("builder"), false);
   assert.strictEqual(o.editor.tabs.active, "schedule");
+  click(unitRow(o, "type:wnt_a").chevron);
+  assert.notStrictEqual(o.editor.schedule.expanded["type:wnt_a"], false, "its Type stays open");
   click(unitRow(o, "[10,30]").cells.name.children[1]);
   assert.strictEqual(nameInput(o, "[10,30]").value, "");
   assert.strictEqual(o.editor.schedule.guard(), null);

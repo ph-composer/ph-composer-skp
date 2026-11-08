@@ -44,9 +44,11 @@ function (request, snapshot, tables, faceWords, ui, units, fields, RecordEdits) 
       this.dialog ? "Apply or cancel the Window repair." :
       this.nameDrafted() ? "Finish or cancel the Window name first." : null;
   };
-  Schedule.prototype.nameDrafted = function () {
+  /* Whether a name edit needs finishing, under one Type row or anywhere. */
+  Schedule.prototype.nameDrafted = function (typeKey) {
     return Object.keys(this.names.cells).some(function (key) {
-      return this.names.cells[key].status !== "clean";
+      var cell = this.names.cells[key];
+      return cell.status !== "clean" && (!typeKey || cell.row.parent === typeKey);
     }, this);
   };
   Schedule.prototype.zone = function (unit) {
@@ -236,9 +238,10 @@ function (request, snapshot, tables, faceWords, ui, units, fields, RecordEdits) 
     fresh.forEach(function (row) { this.expanded[row.parent] = true; }, this);
     if (fresh.length) this.scrollTo = fresh[0].key;
   };
-  /* A hidden tab cannot scroll, so the row waits for the Schedule to be shown, unless it has been deselected. */
+  /* A hidden tab, here or in the panel above, cannot scroll: the row waits to be shown, unless deselected. */
   Schedule.prototype.scrollToFollowed = function () {
-    if (!this.scrollTo || this.owner.scheduleSurface.hidden) return;
+    for (var node = this.root; node; node = node.parentNode) { if (node.hidden) return; }
+    if (!this.scrollTo) return;
     var row = this.selected[this.scrollTo] && this.mount._table.rows[this.scrollTo];
     this.scrollTo = null;
     if (row && row.node.scrollIntoView) row.node.scrollIntoView({ block: "nearest" });
@@ -257,6 +260,11 @@ function (request, snapshot, tables, faceWords, ui, units, fields, RecordEdits) 
         ["level", "Level"], ["state", "State"]],
       value: function (row, field) { return row.record[field] === undefined ? "" : row.record[field]; },
       selected: function (row) { return Boolean(row.record.unit && self.selected[row.key]); },
+      mayToggle: function (row, opening) {
+        if (opening || !self.nameDrafted(row.key)) return true;
+        self.owner.notice.show("Finish or cancel the Window name first.");
+        return false;
+      },
       cell: function (cell, row, field) {
         if (field !== "name" || !self.names.render(cell, row, field)) return false;
         ui.tooltip(cell, row.record.audit);

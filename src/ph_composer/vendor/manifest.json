@@ -236,9 +236,9 @@
       "sha256": "ece530290c6c2c7ff7bef585a110d4999d59d0389ae0a4007484791c258cb9ac"
     },
     "html/features/windows/schedule.js": {
-      "bytes": 18308,
+      "bytes": 18723,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "4d1e006605276b1d7ae05e8169fc21dac6e49112f6b2319590e966b76a0e962b"
+      "sha256": "29b1947907ec6bb7d57ed8bc18f428891acb534519848f4f2fd89949bc9c4c32"
     },
     "html/features/windows/section.js": {
       "bytes": 1943,
