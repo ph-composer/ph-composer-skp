@@ -112,6 +112,8 @@ test("the Setup gear opens the Setup view, which lists each entry under its menu
   entry.querySelector("button").listeners.click({});
   assert.deepStrictEqual(p.sent[p.sent.length - 1],
     { type: "panel.setup_open", payload: { name: "ph_composer.agent_access.open" } });
+  p.receive("panel.setup", { entries: [{ name: "x.open", menu: "constructor", label: "Open…", summary: null }] });
+  assert.strictEqual(view.querySelector("h2").textContent, "constructor", "a menu name is prose, never a key");
   p.context.listeners.focus({});
   assert.strictEqual(p.sent[p.sent.length - 1].type, "panel.setup_entries", "focus after the window reads again");
   var asked = types(p.sent).length;

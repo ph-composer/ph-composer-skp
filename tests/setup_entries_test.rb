@@ -71,7 +71,8 @@ class SetupEntriesTest < PhComposerTestCase
   end
 
   def test_a_summary_without_in_setup_or_an_entries_provider_in_setup_refuses_the_batch
-    [{ :summary => ->(_session) { "x" } }, { :in_setup => "yes" }].each do |options|
+    grayed = { :in_setup => true, :state => ->(_session) { MF_GRAYED } }
+    [{ :summary => ->(_session) { "x" } }, { :in_setup => "yes" }, grayed].each do |options|
       probe = feature do |registry|
         registry.feature("outside.probe", :contract_version => 1)
                 .menu_item("outside.probe.go", :label => "Go", :menu => "Probe", **options) { |_session| nil }

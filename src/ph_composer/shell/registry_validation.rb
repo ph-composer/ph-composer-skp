@@ -302,14 +302,15 @@ module PhComposer
 
           add("registration.schema_invalid", item.owner, item.name,
               "#{item.name} needs static content or an entries provider, a submenu name; state and available " \
-              "must be callable; a Setup entry is a static item, and only a Setup entry has a callable summary.")
+              "must be callable; a Setup entry is static with no state; only a Setup entry has a callable summary.")
         end
       end
 
       def setup_entry_valid?(item)
         return item.summary.nil? && [nil, false].include?(item.in_setup) unless item.in_setup
 
-        item.in_setup == true && !item.entries && (item.summary.nil? || item.summary.respond_to?(:call))
+        # A Setup entry is a button that opens something: no native check mark or greyed state to carry.
+        item.in_setup == true && !item.entries && !item.state && (!item.summary || item.summary.respond_to?(:call))
       end
 
       # A mode's stroke, in pixels: one is a hairline, and past ten a line hides the geometry it marks.

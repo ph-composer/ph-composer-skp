@@ -476,9 +476,9 @@
       "sha256": "3c0f0ade92bef5d126cf7a6b4bfeb604455075b328452d7d312dc30e1a1585de"
     },
     "html/sections/setup.js": {
-      "bytes": 2562,
+      "bytes": 2677,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "3cf2b25c6416ece1f6a9f508bf62e1fd275f18d7bbe16214db2361ee4d349356"
+      "sha256": "82ab3e36e2e71b20d8ace888a27bc0536cfac1b645899152a01eccc615032ac3"
     },
     "html/sections/shell.js": {
       "bytes": 1287,
@@ -501,9 +501,9 @@
       "sha256": "ebd42866e75a1c4ba916861e9dfef089f80463ad8ce7ef7184ba459cd3da4fd7"
     },
     "html/subtabs.js": {
-      "bytes": 6940,
+      "bytes": 7074,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "62fa94892c91b815d241904792d71ce1801e1ed924afb109360131cd34fbd7e2"
+      "sha256": "29c481a58f167e11f8119869a86f24fb841214ef3ace36ded056cdd5a88c14e7"
     },
     "html/support/index.html": {
       "bytes": 1144,

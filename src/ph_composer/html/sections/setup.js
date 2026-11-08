@@ -20,7 +20,8 @@ PhComposerUI.define("sections/setup", ["panel", "icons", "page_header", "workspa
     }
 
     function paint(root, entries) {
-      var page = header.pageHeader({ title: "Setup" }), groups = [], byMenu = {};
+      // Menu names are a feature's open prose, so the map has no inherited keys ("constructor").
+      var page = header.pageHeader({ title: "Setup" }), groups = [], byMenu = Object.create(null);
       (entries || []).forEach(function (entry) {
         var group = byMenu[entry.menu];
         if (!group) {

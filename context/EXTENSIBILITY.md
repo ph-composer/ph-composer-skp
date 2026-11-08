@@ -881,8 +881,8 @@ button labelled as the item, and the button runs the item's handler with the cur
 as the Extensions menu does (`shell/setup_entries.rb`, through the panel's `panel.setup_entries` and
 `panel.setup_open`). The panel asks for the entries each time the view opens and when its window
 regains focus, so a summary can be stale while another window is in front. A summary that raises or
-answers no text is logged and left out; the entry still shows. An entry is a static item: an entries
-provider cannot be one.
+answers no text is logged and left out; the entry still shows. An entry is a static item with no
+`state`: an entries provider cannot be one, and a check mark or greyed state has no button to carry it.
 
 It is not an operation. A menu item is already the user's own route, so the panel reaching it gives
 no one more, and nothing here is registered with `PhComposer::API`: no client can list or run a Setup
