@@ -114,8 +114,7 @@ module PhComposer
           plane = Placement::Plane.new(geometry)
           mapped = plane.map(@plan, :point_m => @point_m, :anchor => @record.fetch("anchor"))
           Placement::Fit.check!(geometry, mapped.outer_polygon_m, :existing_polygons_m => @existing_polygons)
-          origin = mapped.outer_polygon_m.last.map { |value| value / INCH_TO_M }
-          matrix = plane.x_axis + [0] + plane.y_axis + [0] + plane.normal + [0] + origin + [1]
+          matrix = plane.instance_matrix(mapped)
           WorldGeometry.transform_state(matrix)
           matrix.freeze
         end

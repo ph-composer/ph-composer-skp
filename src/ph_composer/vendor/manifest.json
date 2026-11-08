@@ -231,9 +231,9 @@
       "sha256": "5ce705127d3681c675ba4dabf25adae44e96d656c627995dd1573c2245764542"
     },
     "html/features/windows/placement.js": {
-      "bytes": 5288,
+      "bytes": 5665,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "86ac749af5b3e9264379861fd88a27683786488708c3cc7cc824777ee38419ec"
+      "sha256": "ece530290c6c2c7ff7bef585a110d4999d59d0389ae0a4007484791c258cb9ac"
     },
     "html/features/windows/schedule.js": {
       "bytes": 15069,
@@ -251,9 +251,9 @@
       "sha256": "f9bdafe79d3675118c31feff05ad4a5c82ada872c75110c636b411239ff6ae2d"
     },
     "html/features/windows/windows.css": {
-      "bytes": 34082,
+      "bytes": 34619,
       "mime": "text/css; charset=utf-8",
-      "sha256": "6de41dddb5dd6ec5a180d09335ead08401536b3a87419f903124063a8906e960"
+      "sha256": "c6eca7b096793ea15a24512f23d935e966298707641fd3108be65343b15cd520"
     },
     "html/features/zones/assembly_assignment.js": {
       "bytes": 14183,

@@ -83,6 +83,25 @@ module PhComposer
           Placement::Hosts.writable(@request, reference)
         end
 
+        # The Zone Faces beside a Unit in its own parent storage that could host it: writable, in a found
+        # Zone, and raising no Window condition. An unclassified Face is open to Place and to this.
+        # Read-only hosts, as a pick's are.
+        def sibling_hosts(item)
+          parent = item.path[0...-1]
+          faces = item.entity.parent.entities.to_a.grep(Sketchup::Face)
+          found = Placement::Hosts.context(@request, faces.map { |face| parent + [face.persistent_id] })
+          faces.filter_map do |face|
+            row = found[parent + [face.persistent_id]]
+            next unless row && !row["write_refusal"]
+
+            values = row.fetch("values")
+            next unless values.empty? || Placement::Hosts.conditions(values, :zoned => true).empty?
+
+            state = Placement::Hosts.zone_state(zone_states, row)
+            state == "found" ? Placement::Hosts.read(face, parent, item.parent_transform, row, state) : nil
+          end
+        end
+
         # The occurrence reference of the Zone Face a Unit is glued to, or nil.
         def glued_reference(item)
           path = glued_path(item)

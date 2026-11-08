@@ -27,6 +27,7 @@ module PhComposer
         "window.opening_area_exceeds_host" => "The Windows on a Face cover more than its gross area.",
         "window.outlines_required" => "The action needs every Window outline keyed by occurrence path.",
         "window.overhang" => "The Window extends past its host Face or into one of its holes.",
+        "window.no_host_face" => "No Face of a Zone beside the Window has room for it.",
         "window.overlap" => "The Window overlaps another Window on the same host.",
         "window.rehost_parent" => "A re-host Face must be in the Window's existing parent storage.",
         "window.restore_unavailable" => "The stamped panes do not uniquely match the Type's outline.",

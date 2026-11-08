@@ -28,6 +28,11 @@ module PhComposer
                        %w[window.mirrored window.unknown_type]).freeze
       RESTORE = (UNIT_GEOMETRY + %w[window.definition_changed window.definition_missing
                                     window.restore_unavailable]).freeze
+      RETURN_TO_HOST = %w[geometry.invalid record.unreadable target.ambiguous target.changed target.locked
+                          target.not_found target.shared_definition target.wrong_hierarchy target.wrong_kind
+                          target.wrong_zone validation.failed window.definition_changed window.mirrored
+                          window.no_host_face window.scaled window.sheared window.surface_host
+                          window.type_geometry_unknown window.unknown_type].freeze
       # Choosing a host Face for the Place tool resolves it as a Zones Face occurrence.
       PLACE_TOOL_CHOOSE = %w[record.unreadable target.ambiguous target.changed target.locked target.not_found
                              target.shared_definition target.wrong_hierarchy target.wrong_kind target.wrong_zone

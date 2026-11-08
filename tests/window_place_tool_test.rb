@@ -128,6 +128,45 @@ class WindowPlaceToolTest < PhComposerTestCase
     assert_equal "Placed Window.", @notices.last.first
   end
 
+  # The anchor lands where SketchUp inferred, square onto the plane of the Face under the pointer.
+  def test_an_inferred_point_places_the_window_on_the_picked_face
+    choose
+    point = Geom::Point3d.new(3 / 0.0254, 0.25 / 0.0254, 1.5 / 0.0254)
+    @view.inferences[[10, 10]] = { :position => point, :tooltip => "Endpoint" }
+    down
+    up
+    assert_equal @host, units.first.fetch("host"), "the host stays the picked Face"
+    expected = [3.0, 0.0, 1.5]
+    anchor_point(units.first).zip(expected).each { |actual, want| assert_in_delta want, actual, 1e-9 }
+  end
+
+  def test_hover_shows_the_inference_and_falls_back_to_the_pointer_without_one
+    choose
+    @view.inferences[[10, 10]] = { :position => Geom::Point3d.new(3 / 0.0254, 0, 2 / 0.0254), :tooltip => "On Edge" }
+    picked { @tool.onMouseMove(0, 10, 10, @view) }
+    @tool.draw(@view)
+    assert_equal "On Edge", @view.tooltip
+    assert_equal 1, @view.input_draws
+    @view.inferences.clear
+    picked { @tool.onMouseMove(0, 10, 10, @view) }
+    assert_includes @view.tooltip, "Place Window", "no inference, so the tool's guidance"
+    @view.inferences[[10, 10]] = { :position => Geom::Point3d.new(3 / 0.0254, 0, 2 / 0.0254), :tooltip => "" }
+    picked { @tool.onMouseMove(0, 10, 10, @view) }
+    assert_includes @view.tooltip, "Place Window", "an inference with no word keeps the tool's guidance"
+    @view.inferences[[10, 10]] = { :position => Geom::Point3d.new(3 / 0.0254, 0, 2 / 0.0254), :tooltip => "Endpoint" }
+    picked { @tool.onMouseMove(0, 10, 10, @view) }
+    assert_equal "Endpoint", @view.tooltip
+    PhComposer::Pick.stub(:face_point, nil) { @tool.onMouseMove(0, 10, 10, @view) }
+    assert_includes @view.tooltip, "Place Window", "off the Face no inference word outlasts its pick"
+  end
+
+  def test_the_measurements_box_is_labelled_while_placing
+    choose
+    assert_equal "sill= or offset=", Sketchup.status_slots[SB_VCB_LABEL]
+    @model.select_tool(nil)
+    assert_equal "", Sketchup.status_slots[SB_VCB_LABEL], "the next tool gets a clean label"
+  end
+
   def test_palette_and_measurement_changes_mid_gesture_do_not_change_frozen_intent
     choose("anchor" => "sill_left")
     down

@@ -5,10 +5,11 @@ module PhComposer
   # `container_added` host event, with the entity. A native copy arrives as such an addition after its
   # transaction commits, already carrying its instance dictionaries (context/SKETCHUP_HOST_BEHAVIOR.md,
   # "Observers and edit contexts"), so a feature that reconciles copies needs the addition, not only
-  # the commit. One EntitiesObserver sits on the Model's entities and on every Group's and definition's
-  # entities; the set is found again after each commit, Undo, Redo and activation, in one coalesced
-  # pass, and a container just added is observed at once. It names no feature and holds no Model work,
-  # so it never makes the session busy.
+  # the commit. A ComponentInstance changed in place, as by native Move, is `instance_modified`. One
+  # EntitiesObserver sits on the Model's entities and on every Group's and definition's entities; the set
+  # is found again after each commit, Undo, Redo and activation, in one coalesced pass, and a container
+  # just added is observed at once. It names no feature and holds no Model work, so it never makes the
+  # session busy.
   class ContainerWatch
     # The host events after which the set of containers may have changed.
     REDISCOVER = %i[session_created model_activated transaction_committed transaction_undone
@@ -22,6 +23,10 @@ module PhComposer
 
       def onElementAdded(_entities, entity)
         @watch.added(entity)
+      end
+
+      def onElementModified(_entities, entity)
+        @watch.modified(entity)
       end
 
       # Activating a section plane raises no transaction, and this is the one observer on the Model's entities.
@@ -69,6 +74,15 @@ module PhComposer
     rescue StandardError => error
       # An observer callback must not raise into SketchUp; a subscriber's failure is its own.
       Diagnostics.exception("container_added", error) unless self.class.deleted_reference?(error)
+    end
+
+    # Fires for every Edge and Face a gesture touches, so anything else is passed by before it costs a call.
+    def modified(entity)
+      return unless entity.is_a?(Sketchup::ComponentInstance)
+
+      @session.host_event(:instance_modified, entity)
+    rescue StandardError => error
+      Diagnostics.exception("instance_modified", error) unless self.class.deleted_reference?(error)
     end
 
     # Observes every container now in the Model and stops observing those gone. Each collection is keyed

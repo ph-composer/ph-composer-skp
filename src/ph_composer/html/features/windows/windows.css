@@ -70,7 +70,11 @@
 .window-anchor-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; }
 .phc-workspace .window-anchor-grid button { min-height:28px; padding:2px 6px; font-size:12px; white-space:nowrap; }
 .window-empty-mark { fill:var(--muted-strong); font-size:calc(12px * var(--window-type, 1)); letter-spacing:.06em; text-transform:uppercase; pointer-events:none; }
-.window-placement-hint { flex:1 1 280px; font-size:var(--text-sm); }
+/* The measurements an active Place tool takes: a callout, because the tool's other guidance is in SketchUp. */
+.window-placement-hint { flex:1 1 100%; display:flex; flex-wrap:wrap; gap:4px 16px; padding:6px 10px; border:1px solid var(--interaction-highlight-outline); border-radius:var(--radius-sm); background:var(--interaction-highlight-soft); font-size:var(--text-sm); }
+.window-placement-hint-label { font-weight:600; color:var(--interaction-highlight); }
+.window-placement-measure { display:inline-flex; gap:4px; }
+.window-placement-hint code { font-weight:600; color:var(--interaction-highlight); }
 .window-schedule { min-width:0; }
 .window-schedule > .muted { margin:8px 0; }
 .window-repair-dialog select { width:100%; min-width:0; }

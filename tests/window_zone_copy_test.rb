@@ -26,6 +26,8 @@ class WindowZoneCopyTest < PhComposerTestCase
     @notices = []
     PhComposer::Sessions.on_notice { |_session, message, tone| @notices << [message, tone] }
     @original = zone(300)
+    # The fixture builds its Units through the observed entities; that is no paste for HostWatch to answer.
+    U::HostWatch.state(@session).reset
   end
 
   def teardown

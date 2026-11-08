@@ -45832,6 +45832,84 @@ Example params:
 }
 ```
 
+### `ph_composer.windows.units.return_to_host`
+
+Put a Window that has left its Face back on the nearest Face of its Zone. A Window still on its Face is left alone. Owner: `ph_composer.windows`.
+
+Undo step: Return Window to its Face. Moves and glues the instance; writes no record. A copy keeps its shared identity for the next Windows action to repair.
+
+Refuses: `geometry.invalid`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_changed`, `window.mirrored`, `window.no_host_face`, `window.scaled`, `window.sheared`, `window.surface_host`, `window.type_geometry_unknown`, `window.unknown_type`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "unit"
+  ],
+  "properties": {
+    "unit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "unit_id",
+        "entity_path"
+      ],
+      "properties": {
+        "unit_id": {
+          "type": "string"
+        },
+        "entity_path": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "integer"
+          }
+        }
+      },
+      "description": "The Window occurrence to return."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "unit_id",
+    "returned"
+  ],
+  "properties": {
+    "unit_id": {
+      "type": "string"
+    },
+    "returned": {
+      "type": "boolean"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "unit": {
+    "unit_id": "wun_Ab12Cd34Ef56",
+    "entity_path": [
+      1201,
+      1203
+    ]
+  }
+}
+```
+
 ### `ph_composer.windows.units.swap_type`
 
 Swap explicit Windows, preserving their anchors. Owner: `ph_composer.windows`.
@@ -55416,6 +55494,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `window.host_zone_unresolved` | The host Face is not in one unambiguous authored Zone. |
 | `window.mirrored` | The Window is mirrored; make a new flipped Type. |
 | `window.nested_units` | A Window is nested inside another Window. |
+| `window.no_host_face` | No Face of a Zone beside the Window has room for it. |
 | `window.not_component` | A Window record is not on a native ComponentInstance. |
 | `window.not_mirrored` | The chosen Window is not mirrored. |
 | `window.off_host` | The Window does not lie in its host Face's plane. |
@@ -55514,3 +55593,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.15 | 2026-10-26 | The definition lists (ph_composer.assemblies.materials.list and assemblies.list, the Window product and Type lists, ph_composer.thermal_bridges.types.list) take fields, keeping kind, id and schema_version on every row, and cut each page by size as well as by limit. |
 | 1.16 | 2026-11-07 | A Face record gains assembly_reversed, true on the counterpart side of a Surface pair. ph_composer.zones.faces.assign_assembly, and classify with an assembly_id intent, also write the counterpart (its face_ids include it). face.assembly_pair_mismatch now blocks export; construction.missing no longer applies to a Surface Face whose pair is within one Building-Segment. |
 | 1.17 | 2026-11-08 | An unexpected failure's detail gains error_class beside incident. ph_composer.zones.solve_adjacency's result gains already_paired. An Assembly's Layer, Layer-Segment and air-barrier ids and its Material references state their pattern in every schema that names them. |
+| 1.18 | 2026-11-08 | ph_composer.windows.units.return_to_host is new. It puts a Window that has left its Face back on the nearest Face of its Zone, and adds window.no_host_face. |

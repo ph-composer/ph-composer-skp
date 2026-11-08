@@ -21,8 +21,14 @@ PhComposerUI.define("features/windows/placement", ["request", "snapshot", "works
       var choice = ui.button(ui.titleCase(id), function () { self.setAnchor(id); });
       choice.className = "phc-setting-choice"; self.anchors[id] = choice; grid.appendChild(choice);
     });
-    this.hint = ui.element("span", "muted window-placement-hint",
-      "Measurements: sill=opening bottom above host base; offset=anchor inset from nearest edge");
+    this.hint = ui.element("div", "window-placement-hint");
+    this.hint.appendChild(ui.element("span", "window-placement-hint-label", "Type in SketchUp's Measurements box"));
+    [["sill=", "opening bottom above the host base"], ["offset=", "anchor inset from the nearest edge"]]
+      .forEach(function (entry) {
+        var line = ui.element("span", "window-placement-measure");
+        line.appendChild(ui.element("code", "", entry[0])); line.appendChild(ui.element("span", "", entry[1]));
+        self.hint.appendChild(line);
+      });
     this.root.appendChild(this.hint);
     this.stop = ui.button("Stop placing", function () { self.run("place_tool.stop", {}); });
     this.root.appendChild(this.stop);

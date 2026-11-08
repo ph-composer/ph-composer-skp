@@ -384,6 +384,14 @@ module Sketchup
       value
     end
 
+    # The Measurements box's label and value are separate slots; only the prompt is the status bar.
+    attr_reader :status_slots
+
+    def set_status_text(text, slot = SB_PROMPT)
+      (@status_slots ||= {})[slot] = text
+      nil
+    end
+
     def add_observer(observer)
       (@observers ||= []) << observer
       true
@@ -434,6 +442,7 @@ module Sketchup
       @preserve_active_on_open = false
       @reuse_active_model_on_open = false
       @status_texts = []
+      @status_slots = {}
     end
   end
 end
