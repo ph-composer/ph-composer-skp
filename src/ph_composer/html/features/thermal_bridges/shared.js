@@ -53,5 +53,6 @@ PhComposerUI.define("features/thermal_bridges/shared", ["request", "snapshot"], 
   ScheduleRead.prototype.dispose = function () { this.requests.reset(); };
 
   return { PREFIX: PREFIX, TYPES: PREFIX + "types", SELECTED: PREFIX + "edges.selected", GROUPS: GROUPS,
+    BY_TYPE: { mode: PREFIX + "by_type" }, BY_GROUP: { mode: PREFIX + "by_group" },
     groupLabel: groupLabel, ScheduleRead: ScheduleRead };
 });

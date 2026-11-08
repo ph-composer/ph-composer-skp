@@ -50940,7 +50940,7 @@ Example params:
 
 Arm the edge tool with a Thermal Bridge Type and quantity and give it the viewport: each click or drag across Edges is one edges.assign. Owner: `ph_composer.thermal_bridges`.
 
-Side effects: Gives the viewport to the edge tool and turns on Colour by Thermal bridges until it stops; a choice while it runs re-arms it for the next gesture.
+Side effects: Gives the viewport to the edge tool and turns on Colour by Thermal Bridge Type until it stops; a choice while it runs re-arms it for the next gesture.
 
 Before calling: The Thermal Bridge Type exists and is readable.
 

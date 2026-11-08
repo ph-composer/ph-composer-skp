@@ -9,8 +9,11 @@ module PhComposer
     # The Thermal Bridge Type: a Model-owned definition holding one linear psi-value. It names no Edge,
     # Zone or run, so the rest of the feature depends on it and never the other way round.
     module Type
-      # honeybee-ph's group strings, stored as written; the panel shows them in METr's words.
-      GROUPS = %w[15-Ambient 16-Perimeter 17-FS/BC].freeze
+      # honeybee-ph's group strings, stored as written, and METr's words for them, which is what a person reads
+      # (context/UBIQUITOUS_LANGUAGE.md, "Thermal bridge group").
+      GROUP_WORDS = { "15-Ambient" => "Ambient", "16-Perimeter" => "Perimeter",
+                      "17-FS/BC" => "Basement floor" }.freeze
+      GROUPS = GROUP_WORDS.keys.freeze
       DEFAULT_GROUP = "15-Ambient"
       RAMP = %w[#d9a23b #c8553d #6a8eae #8a6fb0 #5b9a68 #b5677d].freeze
 

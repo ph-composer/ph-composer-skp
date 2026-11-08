@@ -22,9 +22,6 @@ module PhComposer
       RUN_FIELDS = %w[identifier display_name zone_id type_id type_name group psi_w_mk quantity length_m
                       heat_loss_w_k].freeze
       RESULT = { "thermal_bridge_runs" => [Export::Privacy.fields(RUN_FIELDS)] }.freeze
-      # METr's words for honeybee-ph's group strings (context/UBIQUITOUS_LANGUAGE.md, "Thermal bridge group").
-      GROUP_WORDS = { "15-Ambient" => "Ambient", "16-Perimeter" => "Perimeter",
-                      "17-FS/BC" => "Basement floor" }.freeze
 
       module_function
 
@@ -187,11 +184,12 @@ module PhComposer
         length = PhComposer::Units.label(:quantity => "length", :system => display_units)
         loss = PhComposer::Units.label(:quantity => "heat_loss_rate", :system => display_units)
         by_type = rows.group_by { |row| row.fetch("type_id") }.map do |_id, typed|
-          [typed.first.fetch("type_name"), GROUP_WORDS.fetch(typed.first.fetch("group"), typed.first.fetch("group")),
+          group = typed.first.fetch("group")
+          [typed.first.fetch("type_name"), Type::GROUP_WORDS.fetch(group, group),
            typed.length, figure(typed.sum { |row| row.fetch("length_m") }, "length", display_units),
            figure(typed.sum { |row| row.fetch("heat_loss_w_k") }, "heat_loss_rate", display_units)]
         end.sort_by(&:first)
-        by_group = GROUP_WORDS.map do |group, words|
+        by_group = Type::GROUP_WORDS.map do |group, words|
           [words, figure(rows.select { |row| row.fetch("group") == group }.sum { |row| row.fetch("heat_loss_w_k") },
                          "heat_loss_rate", display_units)]
         end

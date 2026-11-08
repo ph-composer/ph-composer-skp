@@ -23,7 +23,7 @@ marked "strong review" (export data contracts, serialization, agent security).
 ## Rules for every stage
 
 - One stage, one branch, one PR, one posted Codex review, one fix cycle (two at most), merge on
-  green CI. Start each stage (or pair) from a fresh session.
+  green CI. Stages now run one at a time, as background subagents of one conductor session.
 - Read `AGENTS.md` first; load `ph-composer-architecture-review` for code changes,
   `ph-composer-ruby-quality` for substantive Ruby, `ph-composer-ui-polish` for any HtmlDialog
   screen. Bugs: write the reproducing test first.
