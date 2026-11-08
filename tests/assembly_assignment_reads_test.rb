@@ -139,7 +139,7 @@ class AssemblyAssignmentReadsTest < PhComposerTestCase
     assert_equal assignment_faces.first.fetch("values"), selection.fetch("targets").first.fetch("expected_values")
     menu = PhComposer::Registry.current.menu_items.fetch("#{FACE_PREFIX}.assembly_menu")
     entries = menu.entries.call(read(menu))
-    assert_equal "Assembly: Z wall", entries.first.label
+    assert_equal "Z wall", entries.first.label
     entries.first.handler.call(@session)
     assert_equal wall, STORE.read(entities.first).fetch("assembly_id")
     assert_equal "Wall", STORE.read(entities.first).fetch("face_type")

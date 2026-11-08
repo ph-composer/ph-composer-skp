@@ -67,35 +67,51 @@ module PhComposer
         end
       end
 
-      # One submenu per declared `menu` name, its items in registration order. The submenu name and
-      # every label come from the declaring feature; this groups them and knows nothing else.
+      # One submenu per declared `menu` name, its items in registration order; a menu named EXTENSION_NAME
+      # is no submenu, its items sit directly in the extension's own menu. The right-click menu holds all of
+      # it under one PH-Composer submenu, which appears only when something in it applies. The submenu name
+      # and every label come from the declaring feature; this groups them and knows nothing else.
       def install_feature_menus(parent, contextual: false)
         session = Sessions.current
-        Registry.current.menu_items.each_value.group_by(&:menu).filter_map do |name, declarations|
+        groups = feature_groups(session, contextual)
+        return {} if groups.empty?
+
+        root = contextual ? parent.add_submenu(EXTENSION_NAME) : parent
+        groups.to_h do |name, entries|
+          menu = name == EXTENSION_NAME ? root : root.add_submenu(name)
+          add_menu_entries(menu, entries, session)
+          [name, menu]
+        end
+      end
+
+      # Items in the extension's own menu first, then each named submenu, in registration order.
+      def feature_groups(session, contextual)
+        groups = Registry.current.menu_items.each_value.group_by(&:menu).filter_map do |name, declarations|
           declarations = if contextual
                            declarations.select { |item| available?(item, session) }
                          else
                            declarations.reject(&:entries)
                          end
           entries = declarations.flat_map { |item| menu_entries(item, session) }
-          next if entries.empty?
+          [name, entries] unless entries.empty?
+        end
+        groups.partition { |name, _entries| name == EXTENSION_NAME }.flatten(1)
+      end
 
-          menu = parent.add_submenu(name)
-          entries.each do |declaration|
-            item = menu.add_item(declaration.label) do
-              with_session do |current|
-                if declaration.is_a?(Declarations::MenuEntry) && !current.equal?(session)
-                  raise CodedError.new("session.changed", "The active Model changed. Reopen the context menu.")
-                end
-
-                declaration.handler.call(current)
+      def add_menu_entries(menu, entries, session)
+        entries.each do |declaration|
+          item = menu.add_item(declaration.label) do
+            with_session do |current|
+              if declaration.is_a?(Declarations::MenuEntry) && !current.equal?(session)
+                raise CodedError.new("session.changed", "The active Model changed. Reopen the context menu.")
               end
+
+              declaration.handler.call(current)
             end
-            menu.set_validation_proc(item) { item_check(declaration) } if declaration.state
-            menu.add_separator if declaration.separator_after
           end
-          [name, menu]
-        end.to_h
+          menu.set_validation_proc(item) { item_check(declaration) } if declaration.state
+          menu.add_separator if declaration.separator_after
+        end
       end
 
       # Only the context menu carries entry providers, and it has already tested each one's `available`.

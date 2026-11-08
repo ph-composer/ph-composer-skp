@@ -41,7 +41,7 @@ module PhComposer
                                             :colours => ColourBy::Palette.fixed(FACE_TYPE_COLOURS)) do |read|
             entries(read.model, "face_type", FACE_TYPE_LABELS)
           end
-          feature.colour_mode(BY_BOUNDARY_CONDITION, :label => "Boundary condition", :entity_kind => "face",
+          feature.colour_mode(BY_BOUNDARY_CONDITION, :label => "Boundary", :entity_kind => "face",
                                                      :colours => ColourBy::Palette.fixed(BOUNDARY_COLOURS)) do |read|
             entries(read.model, "boundary_condition", BOUNDARY_LABELS)
           end

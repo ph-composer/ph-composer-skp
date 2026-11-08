@@ -29,7 +29,7 @@ module PhComposer
         FILL_ALPHA = 90
         OUTLINE_ALPHA = 230
         OUTSIDE_ZONE = "That Face is in no Zone. Make it a Zone first, then classify its Faces."
-        NOTHING_CHOSEN = "Choose an Assembly, face type or boundary condition before painting."
+        NOTHING_CHOSEN = "Choose an Assembly, face type or boundary before painting."
         CANCELLED = "The Classify gesture was cancelled. Nothing was written."
 
         attr_reader :palette, :collected

@@ -235,12 +235,12 @@ class SelectionTest < PhComposerTestCase
     select(@groups.first.entities.to_a.first)
     PhComposer::Commands.install
     menus = context_menus
-    labels = labels(menus.fetch(FACES::ClassifyMenu::MENU))
+    labels = labels(menus.fetch(FACES::ClassifyMenu::BOUNDARY_MENU))
     assert_includes labels, "New attached zone…"
     refute labels.any? { |label| label.include?("Keep") || label == FACES::ClassifyMenu::OFF }
     created = invoke("#{FACES::AttachedZone::KIND_ID}.save", { "values" => { "name" => "Garage", "kind" => "garage" } })
     assert_equal "completed", created.fetch("status")
-    menu = context_menus.fetch(FACES::ClassifyMenu::MENU)
+    menu = context_menus.fetch(FACES::ClassifyMenu::BOUNDARY_MENU)
     entry = menu.entries.find { |row| row.is_a?(Array) && row.first == "Attached zone: Garage" }
     assert entry
     entry.last.call
@@ -249,9 +249,51 @@ class SelectionTest < PhComposerTestCase
     assert_equal "AttachedZone", face.fetch("boundary_condition")
     FACES.classify_tool(@session).start
     select
-    assert_includes labels(context_menus.fetch(FACES::ClassifyMenu::MENU)), FACES::ClassifyMenu::OFF
+    assert_includes labels(context_menus.fetch(PhComposer::EXTENSION_NAME)), FACES::ClassifyMenu::OFF
     FACES.classify_tool(@session).stop
-    refute context_menus.key?(FACES::ClassifyMenu::MENU)
+    refute context_menus.key?(PhComposer::EXTENSION_NAME)
+  end
+
+  def test_the_right_click_menu_is_one_extension_submenu_with_one_list_per_attribute
+    inside_zone
+    select(@groups.first.entities.to_a.first)
+    PhComposer::Commands.install
+
+    built = UI.build_context_menu
+    assert_equal [PhComposer::EXTENSION_NAME], built.entries.grep(UI::Menu).map(&:name)
+    home = built.entries.grep(UI::Menu).first
+    assert_includes home.entries.grep(UI::Menu).map(&:name), FACES::ClassifyMenu::TYPE_MENU
+    assert_includes home.entries.grep(UI::Menu).map(&:name), FACES::ClassifyMenu::BOUNDARY_MENU
+    assert_includes home.entries.grep(UI::Menu).map(&:name), FACES::ClassifyMenu::ASSEMBLY_MENU
+    refute_includes home.entries.grep(UI::Menu).map(&:name), PhComposer::EXTENSION_NAME
+  end
+
+  def test_the_extensions_menu_holds_the_extensions_own_items_directly
+    PhComposer::Commands.install
+    extension = UI.menu("Extensions").entries.grep(UI::Menu).find { |menu| menu.name == PhComposer::EXTENSION_NAME }
+
+    assert_includes labels(extension), "Make Zone"
+    refute_includes extension.entries.grep(UI::Menu).map(&:name), PhComposer::EXTENSION_NAME
+  end
+
+  def test_each_list_marks_the_value_every_selected_face_shares_and_marks_nothing_when_mixed
+    inside_zone
+    faces = @groups.first.entities.to_a.first(2)
+    select(*faces)
+    FACES::Selection.client(@session).classify("face_type", "Wall")
+    FACES::Selection.client(@session).classify("boundary_condition", "Outdoors")
+    menus = context_menus
+    assert_equal MF_CHECKED, mark(menus.fetch(FACES::ClassifyMenu::TYPE_MENU), "Wall")
+    assert_equal MF_UNCHECKED, mark(menus.fetch(FACES::ClassifyMenu::TYPE_MENU), "Floor")
+    assert_equal MF_CHECKED, mark(menus.fetch(FACES::ClassifyMenu::BOUNDARY_MENU), "Outdoors")
+
+    select(faces.first)
+    FACES::Selection.client(@session).classify("boundary_condition", "Ground")
+    select(*faces)
+    menus = context_menus
+    assert_equal MF_CHECKED, mark(menus.fetch(FACES::ClassifyMenu::TYPE_MENU), "Wall"), "both Faces are still Walls"
+    assert_equal MF_UNCHECKED, mark(menus.fetch(FACES::ClassifyMenu::BOUNDARY_MENU), "Outdoors")
+    assert_equal MF_UNCHECKED, mark(menus.fetch(FACES::ClassifyMenu::BOUNDARY_MENU), "Ground")
   end
 
   def test_assignment_handoff_is_detached_revision_guarded_and_token_scoped
@@ -326,5 +368,10 @@ class SelectionTest < PhComposerTestCase
 
   def labels(menu)
     menu.entries.select { |entry| entry.is_a?(Array) }.map(&:first)
+  end
+
+  def mark(menu, label)
+    index = menu.entries.index { |entry| entry.is_a?(Array) && entry.first == label }
+    menu.validation_procs.fetch(index).call
   end
 end

@@ -175,6 +175,12 @@ module PhComposer
                             :request => { "sequence" => @sequence, "expected_revision" => read.fetch("revision") }))
           end
 
+          # MF_CHECKED when every selected Face holds `value` for `field`; a mixed selection marks nothing, so
+          # a check mark always means the whole selection has that value.
+          def check(field, value)
+            shared.fetch(field, :none) == value ? MF_CHECKED : MF_UNCHECKED
+          end
+
           def assembly_entries
             read = API.query(:context => @context, :name => "#{PREFIX}.assembly_choices")
             return [] unless read["status"] == "completed"
@@ -186,8 +192,9 @@ module PhComposer
             end
             entries = records.map do |row|
               id = row.fetch("id")
-              Declarations::MenuEntry.new(:label => "Assembly: #{row.fetch('name')}",
-                                          :handler => ->(session) { Selection.client(session).assembly(id) })
+              Declarations::MenuEntry.new(:label => row.fetch("name"),
+                                          :handler => ->(session) { Selection.client(session).assembly(id) },
+                                          :state => ->(session) { Selection.client(session).check("assembly_id", id) })
             end
             entries << Declarations::MenuEntry.new(:label => "Clear assembly",
                                                    :handler => ->(session) { Selection.client(session).assembly(nil) })
@@ -226,11 +233,27 @@ module PhComposer
               Declarations::MenuEntry.new(:label => "Attached zone: #{record.fetch('values').fetch('name')}",
                                           :handler => ->(session) do
                                             Selection.client(session).classify("attached_zone_id", id)
+                                          end,
+                                          :state => ->(session) do
+                                            Selection.client(session).check("attached_zone_id", id)
                                           end)
             end
           end
 
           private
+
+          # The value each field holds on every selected Face, read once per selection and revision: SketchUp
+          # asks each menu item in turn, and a read walks the Zones.
+          def shared
+            key = [@session.revision, Selection.generation(@session).value, @session.model.selection.length]
+            return @shared if @shared_key == key
+
+            @shared_key = key
+            read = API.query(:context => @context, :name => "#{PREFIX}.selection")
+            rows = Array(read.dig("value", "targets")).map { |row| row.fetch("expected_values") }
+            @shared = rows.flat_map(&:keys).uniq.select { |field| rows.map { |row| row[field] }.uniq.length == 1 }
+                          .to_h { |field| [field, rows.first[field]] }
+          end
 
           def show(result)
             @session.notice(result.fetch("message"), :tone => result["status"] == "completed" ? :success : :warning)
