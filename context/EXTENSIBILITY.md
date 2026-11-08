@@ -246,7 +246,8 @@ The other two seams add to a screen another module owns:
 `ui.contributeTable(tableId, contribution)` registers columns and row actions without retaining a
 snapshot. The owner calls `ui.composeTable(tableId, options, state, send)` for each paint.
 Callbacks receive the current row and snapshot; contributed actions invoke their own registered
-operation. Duplicate column or action ids refuse composition. The returned registration disposer
+operation. An action marked `detail: true` is also offered on the record's own page, where that page
+composes the same table (Paint on the Assembly Builder). Duplicate column or action ids refuse composition. The returned registration disposer
 removes the contribution. An absent contributor leaves the owner's table intact.
 
 Snapshot sections using the same query and equal parameters share one read within one build.

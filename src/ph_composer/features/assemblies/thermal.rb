@@ -12,16 +12,16 @@ module PhComposer
       # Why a thermal display value is withheld, by the same code Validation reports for the condition.
       PREVIEW_MESSAGES = {
         "assembly.membrane_in_mixed_layer" => "A membrane Layer must hold only one Layer-Segment.",
-        "assembly.segment_unassigned" => "One or more segments do not have a material assignment.",
+        "assembly.segment_unassigned" => "One or more Layer-Segments do not have a Material assignment.",
         "material.conductivity_missing" => "One or more assigned materials need conductivity before export.",
-        "assembly.geometry_invalid" => "Layer thickness, segment width, or steel-stud spacing is invalid.",
-        "assembly.material_dangling" => "One or more segments reference a missing project material.",
+        "assembly.geometry_invalid" => "Layer thickness, Layer-Segment width, or steel-stud spacing is invalid.",
+        "assembly.material_dangling" => "One or more Layer-Segments reference a missing project Material.",
         "assembly.no_thermal_layers" => "Every Layer is a membrane with no thermal resistance, so no U-value is " \
                                         "available.",
         "material.invalid" => "One or more referenced Materials cannot be read.",
         "assembly.calculation_limit" => "The exact thermal calculation exceeds its path budget; no value is available."
       }.freeze
-      UNCALCULABLE = "Thermal resistance could not be calculated from the assigned segments."
+      UNCALCULABLE = "Thermal resistance could not be calculated from the assigned Layer-Segments."
       # One way heat crosses a Layer: through one Layer-Segment's material, over that segment's share of
       # the Layer's width.
       Path = Struct.new(:resistance_m2k_w, :fraction, keyword_init: true)
@@ -127,7 +127,8 @@ module PhComposer
                 when "Outdoors", nil then 0.04
                 else r_in
                 end
-        r_out = r_in if assembly["ventilated_cladding"]
+        # Only an exterior that faces outdoors has a cladding to ventilate.
+        r_out = r_in if assembly["ventilated_cladding"] && [nil, "Outdoors"].include?(assembly["exterior_condition"])
         { "r_in" => r_in, "r_out" => r_out }
       end
 

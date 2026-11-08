@@ -424,11 +424,11 @@ test("the toolbar shows a selection's tools only while a Layer-Segment is select
   bar = o.editor.root.querySelector(".assembly-toolbar");
   assert.strictEqual(bar.querySelectorAll("[data-builder-action='segments.add']").length, 0,
     "segment insertion is offered on the drawing edge");
-  ["Delete segment", "Segment properties"].forEach(function (label) {
+  ["Delete Layer-Segment", "Layer-Segment properties"].forEach(function (label) {
     assert.ok(bar.querySelectorAll("button").some(function (node) {
       return node.getAttribute("aria-label") === label; }), label + " is an icon named for what it does");
   });
-  ["Delete segment"].forEach(function (label) {
+  ["Delete Layer-Segment"].forEach(function (label) {
     var button = bar.querySelectorAll("button").filter(function (node) {
       return node.getAttribute("aria-label") === label;
     })[0];
@@ -658,4 +658,78 @@ test("Layer tools refuse opening over a dimension draft and protect the last Lay
   o.editor.refresh(o.state, o.record.id);
   var menu = o.editor.main.querySelector("[data-layer-tools-key='drawing:layer_board']");
   assert.strictEqual(menu.querySelector("[data-builder-action='layers.remove']").disabled, true);
+});
+
+test("Ventilated cladding is an exterior choice stored as Outdoors plus the flag", function () {
+  var o = setup(), cell = o.editor.edits.cells[o.record.id + ":exterior_condition"], select = cell.input;
+  assert.strictEqual(select.value, "Outdoors");
+  assert.ok(select.children.some(function (option) { return option.value === "Outdoors:ventilated"; }));
+  select.value = "Outdoors:ventilated"; select.listeners.change({});
+  var params = o.sent[o.sent.length - 1].payload.params;
+  assert.strictEqual(o.sent[o.sent.length - 1].payload.name, ASSEMBLIES + ".update");
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(params.values)),
+    { exterior_condition: "Outdoors", ventilated_cladding: true });
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(params.expected_values)),
+    { exterior_condition: "Outdoors", ventilated_cladding: false });
+  o.record.values.ventilated_cladding = true;
+  result(o);
+  assert.strictEqual(cell.status, "clean", "the snapshot's Outdoors plus flag reads back as the choice made");
+  assert.strictEqual(select.value, "Outdoors:ventilated");
+  assert.ok(text(o.editor.main.querySelector(".assembly-boundary")).includes("Ventilated cladding"));
+  select.value = "Ground"; select.listeners.change({});
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(o.sent[o.sent.length - 1].payload.params.values)),
+    { exterior_condition: "Ground", ventilated_cladding: false }, "leaving the choice clears the flag");
+  assert.strictEqual(o.editor.main.querySelectorAll("input[type='checkbox']").length, 0, "one route, the dropdown");
+});
+
+test("a table's fill writes Ventilated cladding as Outdoors plus the flag, and clears it after", function () {
+  var o = setup(), form = o.modules["features/assemblies/form"], edits = form.exteriorEdits(ASSEMBLIES + ".update");
+  var cell = { owner: o.editor.edits, field: "exterior_condition", baseline: "Outdoors:ventilated",
+    row: { record: { id: "asm", values: { exterior_condition: "Outdoors", ventilated_cladding: true } } } };
+  assert.strictEqual(form.exteriorChoice(cell.row.record.values), "Outdoors:ventilated");
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(edits.changeFor(cell, "Ground"))), { id: "asm",
+    values: { exterior_condition: "Ground", ventilated_cladding: false },
+    expected_values: { exterior_condition: "Outdoors", ventilated_cladding: true } });
+  assert.strictEqual(edits.changeFor(cell, "Outdoors:ventilated").values.exterior_condition, "Outdoors");
+  assert.strictEqual(form.exteriorChoice({ exterior_condition: null, ventilated_cladding: true }),
+    "Outdoors:ventilated", "a flag on an unset exterior still reads, so the dropdown can clear it");
+  assert.strictEqual(form.exteriorChoice({ exterior_condition: "Ground", ventilated_cladding: true }), "Ground");
+  cell.row.record.values = { exterior_condition: "Outdoors" };
+  assert.strictEqual(edits.changeFor(cell, "Ground").expected_values.ventilated_cladding, null,
+    "an absent flag is expected absent, or the engine refuses the edit as changed");
+});
+
+test("Layer tools pairs Add and Move as arrows that run with the drawing", function () {
+  var o = setup();
+  function controls() {
+    return o.editor.main.querySelector("[data-layer-tools-key='drawing:layer_studs']")
+      .querySelectorAll("[data-builder-action='layers.add'], [data-builder-action='layers.move']");
+  }
+  var UP = 'd="m5 12 7-7 7 7"';
+  assert.deepStrictEqual(controls().map(function (node) { return node.getAttribute("aria-label"); }),
+    ["Add outside", "Add inside", "Move outward", "Move inward"]);
+  assert.ok(controls()[0].innerHTML.includes(UP), "with the first Layer outside, outside is up the drawing");
+  o.record.values.orientation = "last_layer_outside";
+  o.editor.refresh(o.state, o.record.id);
+  assert.deepStrictEqual(controls().map(function (node) { return node.getAttribute("aria-label"); }),
+    ["Add inside", "Add outside", "Move inward", "Move outward"]);
+  assert.ok(controls()[0].innerHTML.includes(UP), "the up arrow stays first and now means inside");
+});
+
+test("an action marked for the record's page shows in the toolbar and runs through its feature", function () {
+  var o = setup(), ui = o.modules.workspace, runs = [];
+  ui.contributeTable(ASSEMBLIES, { id: "contributor", actions: function (row) {
+    return [{ id: "paint", icon: "paint_bucket", label: "Paint " + row.record.values.name, pressed: true,
+      detail: true }, { id: "table_only", icon: "locate", label: "Table only" }];
+  }, action: function (row, action) { runs.push([row.record.id, action.id]); } });
+  o.editor.refresh(o.state, o.record.id);
+  var buttons = o.editor.root.querySelector(".assembly-toolbar").querySelectorAll("button");
+  function named(label) {
+    return buttons.filter(function (node) { return node.getAttribute("aria-label") === label; });
+  }
+  assert.strictEqual(named("Table only").length, 0);
+  var paint = named("Paint " + o.record.values.name)[0];
+  assert.strictEqual(paint.getAttribute("aria-pressed"), "true");
+  click(paint);
+  assert.deepStrictEqual(runs, [[o.record.id, "paint"]]);
 });

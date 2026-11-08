@@ -177,6 +177,8 @@ test("selection Clear is explicit and inventory Paint resets other fields", func
   var paint = inventory.tableOptions.actions(row).filter(function (action) {
     return action.id === "paint_assembly";
   })[0];
+  assert.strictEqual(inventory.tableOptions.actions(row).filter(function (action) { return action.detail; })
+    .map(function (action) { return action.id; }).join(), "paint_assembly", "only Paint is also in the Builder");
   inventory.tableOptions.action(row, paint);
   assert.strictEqual(o.sent.length, 1);
   assert.deepStrictEqual(o.sent[0].payload.params, { field: "assembly_id", value: "asm_a", reset: true });
@@ -380,4 +382,42 @@ test("the Assembly paint glyph stops the tool without sending a null assignment"
   assert.strictEqual(o.sent[0].type, "view.invoke");
   assert.strictEqual(o.sent[0].payload.name, "ph_composer.zones.faces.stop_classifying");
   assert.deepStrictEqual(o.sent[0].payload.params, {});
+});
+
+test("Paint is on the Assembly Builder too and runs Zones' paint action without leaving it", function () {
+  var o = setup(), view = o.query("[data-section='assemblies']")._view, record = view.inventory.records[0];
+  view.open(record);
+  o.paint();
+  var paint = view.editor.root.querySelector(".assembly-toolbar").querySelectorAll("button").filter(function (node) {
+    return node.getAttribute("aria-label") === "Paint Wall onto faces";
+  })[0];
+  assert.ok(paint, "Zones' Paint shows in the Builder's toolbar");
+  assert.strictEqual(paint.getAttribute("aria-pressed"), "false");
+  paint.listeners.click({ preventDefault: function () {} });
+  assert.strictEqual(o.sent[o.sent.length - 1].payload.name, PREFIX + ".choose");
+  assert.strictEqual(o.sent[o.sent.length - 1].payload.params.value, record.id);
+  assert.ok(view.editor, "the Builder stays open");
+});
+
+test("Escape in the Builder stops Paint before it lets go of the selected Layer-Segment", function () {
+  var o = setup(), view = o.query("[data-section='assemblies']")._view, record = view.inventory.records[0];
+  o.panel.showTab("assemblies");
+  record.values.orientation = "first_layer_outside";
+  record.values.layers = [{ id: "layer_a", thickness_mm: 100,
+    segments: [{ id: "seg_a", width_mm: 500, material_id: null }] }];
+  view.open(record);
+  o.paint();
+  var editor = view.editor;
+  editor.root.querySelector(".assembly-toolbar").querySelectorAll("button").filter(function (node) {
+    return node.getAttribute("aria-label") === "Paint Wall onto faces";
+  })[0].listeners.click({ preventDefault: function () {} });
+  settle(o, o.sent[o.sent.length - 1], true, { assembly_id: record.id });
+  editor.select({ layerId: "layer_a", segmentId: "seg_a" });
+  dom.dispatch(editor.main, { type: "keydown", key: "Escape", bubbles: true });
+  assert.strictEqual(stops(o).length, 1, "the first Escape ends the tool");
+  assert.ok(editor.selection, "and leaves the selection for the next one");
+  settle(o, stops(o)[0], false, {});
+  dom.dispatch(editor.main, { type: "keydown", key: "Escape", bubbles: true });
+  assert.strictEqual(editor.selection, null);
+  assert.strictEqual(stops(o).length, 1);
 });

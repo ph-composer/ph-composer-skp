@@ -25,7 +25,8 @@ function (shared, header, inspector, layerDrag, stage, AssemblyForm, MaterialFor
     this.enabled = false;
     this.svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     this.layerDrag = new layerDrag.LayerDrag(this);
-    this.edits = new RecordEdits(session, send, notice, { action: SECTION + ".update",
+    this.send = send;
+    this.edits = new RecordEdits(session, send, notice, Object.assign({ action: SECTION + ".update",
       fields: ["name", "type", "exterior_condition", "notes"], requiredFields: ["name"],
       selectFields: { type: AssemblyForm.types, exterior_condition: AssemblyForm.exteriors },
       recordLabel: "Assembly", presentation: "inline", navigateOnCommit: false,
@@ -37,7 +38,7 @@ function (shared, header, inspector, layerDrag, stage, AssemblyForm, MaterialFor
           (self.edits.pending && self.edits.pending !== cell) || self.hasDimensionDraft();
       }, normalize: function (field, value) {
         if ((field === "type" || field === "exterior_condition") && !value) return null;
-      } });
+      } }, AssemblyForm.exteriorEdits(SECTION + ".update")));
     this.color = new forms.ColorForm(session, send, SECTION + ".update", function () { self.repaint(); });
     // New Material lives on the Library pane too; here it saves the trip. Refresh finishes a create's repaint.
     this.newMaterial = new MaterialForm(session, send, function (created) {
@@ -89,11 +90,17 @@ function (shared, header, inspector, layerDrag, stage, AssemblyForm, MaterialFor
         self.dimensions[open].field.cancel(); return;
       }
       if (self.hasDimensionDraft() || self.hasRecordDraft()) return;
-      if (self.selection) { event.preventDefault(); self.select(null); }
+      // A tool another feature has on is ended first, by that feature; the selection waits for the next Escape.
+      if (self.selection && !self.contributedToolOn()) { event.preventDefault(); self.select(null); }
     });
   }
   Editor.prototype.busy = function () {
     return this.requests.busy() || Boolean(this.edits.pending) || this.color.requests.busy() || this.newMaterial.busy();
+  };
+  Editor.prototype.contributedToolOn = function () {
+    return this.contributions.actions({ key: this.record.id, record: this.record }).some(function (action) {
+      return action.detail && action.pressed;
+    });
   };
   Editor.prototype.hasRecordDraft = function () {
     return Object.keys(this.edits.cells).some(function (key) {
@@ -375,6 +382,8 @@ function (shared, header, inspector, layerDrag, stage, AssemblyForm, MaterialFor
     this.requests.consume(state);
     this.selectInserted(record);
     var row = { key: id, record: record };
+    // What other features offer on an Assembly's table row; the inspector shows those marked for its own page.
+    this.contributions = ui.composeTable(SECTION, { columns: [], value: function () {} }, state, this.send);
     this.edits.refresh([row], state);
     this.color.refresh(state, true, payload.records);
     this.newMaterial.refresh(state);

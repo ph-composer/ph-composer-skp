@@ -35,8 +35,18 @@ PhComposerUI.define("features/assemblies/inspector", ["features/assemblies/edito
       view.appendChild(unitFields.DimensionFormatControl(shared.DIMENSION.scope, this.chooseDimensionFormat).root);
       root.appendChild(view);
       var tools = el("div", "assembly-tool-group");
+      // An action another feature offers on this Assembly (painting it onto Faces); that feature runs it.
+      var row = { key: record.id, record: record };
+      this.contributions.actions(row).filter(function (action) { return action.detail; }).forEach(function (action) {
+        var button = ui.iconButton(action.label, action.icon, function () {
+          if (self.allowed()) self.contributions.action(row, action, button);
+        });
+        button.disabled = Boolean(action.disabled);
+        if (action.pressed !== undefined) button.setAttribute("aria-pressed", String(Boolean(action.pressed)));
+        tools.appendChild(button);
+      });
       var more = new ui.ActionMenu("More drawing actions");
-      [["Mirror segments", "segments.mirror"], ["Flip Layers", "layers.flip"],
+      [["Mirror Layer-Segments", "segments.mirror"], ["Flip Layers", "layers.flip"],
         ["Flip orientation", "layers.flip_orientation"]].forEach(function (item) {
         more.add(item[0], function () { self.action(item[1], {}); }).setAttribute("data-builder-action", item[1]);
       });
@@ -67,12 +77,12 @@ PhComposerUI.define("features/assemblies/inspector", ["features/assemblies/edito
       choose.setAttribute("data-editor-local", "");
       selection.appendChild(choose);
       var only = selected.layer.segments.length === 1;
-      var remove = control(this, selection, "Delete segment", "segments.remove",
+      var remove = control(this, selection, "Delete Layer-Segment", "segments.remove",
         { layer_id: selected.layer.id, segment_id: selected.segment.id }, only,
         selected.segment.material_id ? "Delete this Layer-Segment and its Material assignment?" : null, "delete");
       // An icon that cannot act says why, where its name would be.
       if (only) ui.tooltip(remove, "A Layer keeps at least one Layer-Segment");
-      var trigger = ui.iconButton("Segment properties", "settings");
+      var trigger = ui.iconButton("Layer-Segment properties", "settings");
       var spacingKey = "spacing:" + selected.layer.id + ":" + selected.segment.id;
       var bubble = new ui.Bubble(trigger, "Layer-Segment properties", { guard: function () {
         return self.painting ? null : self.settleDimension(spacingKey);

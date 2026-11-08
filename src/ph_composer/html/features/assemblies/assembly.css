@@ -66,6 +66,9 @@
 .assembly-dimension-error .phc-unit-error { margin: 0; color: var(--red); line-height: 1.45; }
 .assembly-bubble-choices { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 10px; }
 .assembly-bubble-choices > small { flex: 1 1 100%; }
+/* Add and Move are paired arrows on one row each. */
+.assembly-layer-tool-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.assembly-layer-tool-pair { display: flex; gap: 4px; }
 .assembly-canvas-block { margin-top: 18px; min-width: 0; }
 .assembly-boundary { color: var(--muted-strong); font-size: var(--text-sm); letter-spacing: .03em; padding: 8px 0; }
 .assembly-stage-scroll { overflow: auto; max-height: 55vh; padding: 5px 4px; }
@@ -100,6 +103,9 @@
   background: var(--drawing-highlight); transform: translateX(-50%); }
 .assembly-edge-highlight.is-horizontal { transform: translateY(-50%); }
 .assembly-edge-highlight.is-blocked { background: #8a979c; }
+@keyframes assembly-edge-cue { from { opacity: 0; } to { opacity: 1; } }
+.assembly-edge-highlight:not([hidden]), .phc-workspace .assembly-insert:not([hidden]) {
+  animation: assembly-edge-cue .1s ease 120ms both; }
 /* The type and exterior hints are the app's tinted pills, so an Assembly reads like its row in the table. */
 .assembly-hint select.phc-enum-cell { width: 100%; height: 28px; min-height: 28px; padding: 0 30px 0 10px; border: 0;
   border-radius: var(--radius-pill); font-size: var(--text-sm); background-color: var(--category-fill, #edf1f2); }
@@ -110,7 +116,13 @@
 .assembly-segment.is-membrane { stroke-width: 3; }
 .assembly-segment.is-air-barrier, .assembly-air-barrier { stroke: var(--drawing-highlight); stroke-width: 3; }
 .assembly-editor .assembly-hit-target { position: absolute; z-index: 1; min-height: 0; padding: 0;
-  border: 0; border-radius: 0; background: transparent; outline: none; }
+  border: 0; border-radius: 0; background: transparent; outline: 2px solid transparent; outline-offset: -1px;
+  transition: background-color .1s, outline-color .1s; }
+/* The pointer's cue waits a beat, so crossing the drawing does not strobe; it clears at once. Focus and a drop
+   target stay immediate. The edge cue below waits the same beat. */
+.assembly-hit-target:hover:not([data-hover-edge]):not(:focus-visible):not(.is-drop-target) { transition-delay: 120ms; }
+/* A click's selection shows at once. */
+.phc-workspace .assembly-editor button.assembly-hit-target[aria-pressed="true"] { transition: none; }
 .assembly-hit-target:hover:not([data-hover-edge]), .assembly-hit-target:focus-visible,
 .assembly-hit-target.is-drop-target {
   background: var(--drawing-highlight-halo); outline: 2px solid var(--drawing-highlight); outline-offset: -1px; }

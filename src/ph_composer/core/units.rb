@@ -38,7 +38,7 @@ module PhComposer
         :si_label => "m³", :ip_label => "ft³", :si_precision => 2, :ip_precision => 2, :factor => FT3_PER_M3
       },
       "u_value" => {
-        :si_label => "W/(m² K)", :ip_label => "Btu/(h ft² °F)", :si_precision => 3, :ip_precision => 3,
+        :si_label => "W/(m² K)", :ip_label => "Btu/(h ft² °F)", :si_precision => 3, :ip_precision => 4,
         :factor => U_FACTOR
       },
       "thermal_resistance" => {

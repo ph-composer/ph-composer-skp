@@ -66,7 +66,7 @@ function (panel, snapshot, ui, AssemblyForm, forms, inventories, units, preferen
     function createAssembly() { if (allowed()) view.newAssembly.create(view.inventory.records); }
     view.create = ui.button("+ New Assembly", createAssembly);
     view.header.setPrimary(view.create);
-    view.inventory = new inventories.Inventory(view.listRoot, state.session, send, notice, changed, {
+    view.inventory = new inventories.Inventory(view.listRoot, state.session, send, notice, changed, Object.assign({
       tableId: SECTION, section: SECTION, action: SECTION + ".update", label: "Assembly", columns: columns,
       editable: ["name", "type", "exterior_condition", "notes"], quantities: quantities,
       selectFields: { type: AssemblyForm.types, exterior_condition: AssemblyForm.exteriors },
@@ -77,10 +77,11 @@ function (panel, snapshot, ui, AssemblyForm, forms, inventories, units, preferen
       value: function (record, field) {
         if (field === "total_thickness_mm") return (record.display || {})[field];
         if (field === "u_effective_w_m2k") return ((record.display || {}).thermal || {})[field];
+        if (field === "exterior_condition") return AssemblyForm.exteriorChoice(record.values);
         return record.values[field];
       }, group: function (record, field) {
-        return { label: choiceLabel(field === "type" ? AssemblyForm.types : AssemblyForm.exteriors,
-          record.values[field]) };
+        return { label: field === "type" ? choiceLabel(AssemblyForm.types, record.values.type) :
+          choiceLabel(AssemblyForm.exteriors, AssemblyForm.exteriorChoice(record.values)) };
       }, actions: function (row) { return [
         { id: "open", icon: "document", label: "Open " + row.record.values.name },
         { id: "duplicate", icon: "duplicate", label: "Duplicate " + row.record.values.name },
@@ -108,7 +109,7 @@ function (panel, snapshot, ui, AssemblyForm, forms, inventories, units, preferen
         } else td.textContent = units.format(value, quantities[field],
           units.profile(quantities[field], preferences.current()), { showUnit: false });
         return true;
-      } });
+      } }, AssemblyForm.exteriorEdits(SECTION + ".update")));
     view.inventory.emptyAction = { label: "+ New Assembly", run: createAssembly };
     view.edits = view.inventory.edits;
     view.controls = view.inventory.controls;

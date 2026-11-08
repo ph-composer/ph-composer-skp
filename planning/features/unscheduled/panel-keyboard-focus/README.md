@@ -17,7 +17,7 @@ a surface that rebuilds its markup on every repaint and so drops the focused ele
 | K2 | Assembly Builder | The work surface is rebuilt on every repaint, so focus falls to the page after any toolbar action |
 | K3 | Window Types, anchor bubble | After an anchor choice re-arms a placing tool, focus falls to the page |
 | K4 | Assemblies, "+ New Assembly" | After a refused New Assembly, focus is not returned to the button |
-| K5 | Zones / Faces, "Show all" | Focus drops to the page |
+| K5 | Zones / Geometry, "Show all" | Focus drops to the page |
 | K6 | Inventory sort toggle | The state change is not announced to a screen reader |
 | K7 | Library | A surface that is not a kit `Inventory` shows, and so announces, no count |
 

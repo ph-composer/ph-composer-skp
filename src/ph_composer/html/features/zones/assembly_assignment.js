@@ -214,7 +214,7 @@ PhComposerUI.define("features/zones/assembly_assignment", ["panel", "snapshot", 
       // These act on Faces in the Model, not on the Assembly record, so they start their own group.
       return [{ id: "select_assembly_faces", icon: "locate", disabled: !count, starts: true,
         label: "Select faces using " + name },
-      { id: "paint_assembly", icon: "paint_bucket", pressed: pressed,
+      { id: "paint_assembly", icon: "paint_bucket", pressed: pressed, detail: true,
         label: pressed ? "Stop painting " + name : "Paint " + name + " onto faces" },
       { id: "replace_assembly", icon: "replace", disabled: !count, label: "Replace and delete " + name,
         unavailable: others ? null : name + " is the only Assembly, so there is nothing to replace it with." }];

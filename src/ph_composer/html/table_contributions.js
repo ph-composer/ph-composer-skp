@@ -1,5 +1,6 @@
 /* Named tables accept columns and actions from other composed modules. Callbacks receive the current
-   snapshot and row; registration retains neither a Model nor its draft state. */
+   snapshot and row; registration retains neither a Model nor its draft state. An action marked `detail` is
+   also offered on the record's own page, where that page composes the same table. */
 PhComposerUI.define("table_contributions", [], function () {
   "use strict";
   var tables = Object.create(null);
