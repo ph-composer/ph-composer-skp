@@ -317,6 +317,7 @@
   :is(.window-layout,.window-product-workspace,.window-install-body)>.library-sidebar-root .library-sidebar-toggle::after { transform:translateY(-30%) rotate(-135deg); }
   :is(.window-layout,.window-product-workspace,.window-install-body)>.library-sidebar-root.is-collapsed .library-sidebar-toggle::after { top:50%; right:6px; transform:translateY(-70%) rotate(45deg); }
   .phc-workspace :is(.window-layout,.window-product-workspace,.window-install-body)>.library-sidebar-root.is-collapsed .library-sidebar-toggle { writing-mode:horizontal-tb; padding:8px 0; }
+  :is(.window-layout,.window-install-body)>.library-sidebar-root.is-collapsed { width:auto; flex-basis:auto; }
 }
 .window-install-body { grid-template-columns:minmax(180px,1fr) minmax(180px,240px) 260px; }
 @media (max-width:900px) {

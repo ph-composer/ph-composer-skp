@@ -30,6 +30,18 @@ check({ name: "frames_row_actions", output: directory }, async ({ newPage, step 
   assert.strictEqual(await angle(), 90, "folded under the table it points down, the way it opens");
   await toggle.click();
   assert.strictEqual(await angle(), -90, "open under the table it points up, the way it folds");
+  step("folded titles on the stacked Window screens");
+  await narrow.getByRole("button", { name: "Window Types", exact: true }).click();
+  const windows = narrow.locator("[data-pane=windows]");
+  async function foldedTitleFits(sidebar, label) {
+    const title = sidebar.locator(".library-sidebar-toggle");
+    if (await sidebar.locator(".library-sidebar-content").isVisible()) await title.click();
+    const box = await title.boundingBox();
+    assert.ok(box.width > 200 && box.height < 40, `${label} folded title is one line across: ${JSON.stringify(box)}`);
+  }
+  await foldedTitleFits(windows.locator(".library-sidebar-root[aria-label='Frame Library']"), "Builder");
+  await windows.getByRole("button", { name: "Edit Window Type installs" }).click();
+  await foldedTitleFits(windows.locator(".window-install-editor .library-sidebar-root"), "Installs");
   await narrow.close();
 });
 check({ name: "window_library", output: directory }, async ({ newPage, step }) => {
