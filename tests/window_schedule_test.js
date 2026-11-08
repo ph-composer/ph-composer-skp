@@ -70,6 +70,17 @@ test("Schedule counts occurrences independently of copied ids and shows host con
   assert.strictEqual(o.sent[0].payload.name, "ph_composer.windows.units.locate");
   assert.deepStrictEqual(JSON.parse(JSON.stringify(o.sent[0].payload.params.units[0].entity_path)), [10, 30]);
 });
+test("Schedule lists Window Types by name, numbers read as numbers, and an unknown Type last", function () {
+  var o = setup(), section = o.state.sections["ph_composer.windows.types"].value, first = section.records[0];
+  function named(id, name) {
+    var type = JSON.parse(JSON.stringify(first)); type.id = id; type.values.name = name; return type;
+  }
+  section.records = [named("wnt_c", "Type-10"), named("wnt_b", "Door"), named("wnt_a", "Type-2")];
+  o.state.sections["ph_composer.windows.units"].value.units[1].values.window_type_id = "wnt_gone";
+  o.editor.render(o.state); o.editor.tabs.select("schedule");
+  assert.strictEqual(o.editor.schedule.rows().filter(function (row) { return row.tier === "Type"; })
+    .map(function (row) { return row.record.name; }).join(), "Door,Type-2,Type-10,Unknown Type");
+});
 test("Schedule repairs freeze occurrence targets and confirm consequences before the one mutation", function () {
   var o = setup(); o.editor.tabs.select("schedule");
   click(o.editor.schedule.root.querySelector("[data-row-action='reset_to_type']"));

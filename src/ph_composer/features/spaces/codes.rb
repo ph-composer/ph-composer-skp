@@ -5,7 +5,6 @@ module PhComposer
     # The codes Spaces reports under its own noun, published in docs/API_REFERENCE.md.
     module Codes
       ALL = {
-        "space.airflow_imbalance" => "A Zone's supply and extract sums differ by more than 10 percent of the larger.",
         "space.context_required" => "The edit context holding the Faces must be open to group them.",
         "space.context_open" => "An edit context is open; close it to the root first.",
         "space.duplicate_identity" => "Another occurrence carries this Space, Volume or Floor Segment's id: a copy.",

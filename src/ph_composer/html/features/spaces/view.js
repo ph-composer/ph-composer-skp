@@ -5,7 +5,7 @@
  *
  * Airflows follow the any-set rule: a set rate reads as typed, an unset rate on a user-specified Space reads
  * as a muted 0, and a Space with all three unset reads "Zone" (it inherits the Zone's ventilation load).
- * A Zone holding any inheriting Space shows a muted dash for its airflow sums and evaluates no imbalance.
+ * A Zone holding any inheriting Space shows a muted dash for its airflow sums.
  * Names, numbers, heights, factors and airflows edit in place (cells.js).
  */
 PhComposerUI.define("features/spaces/view", ["panel", "workspace", "snapshot", "units", "unit_preferences", "fields",
@@ -57,7 +57,10 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
   /* The Spaces under each Zone occurrence and each Zone's sums, by the path that names the occurrence. */
   function consume(vs, state) {
     var value = snapshot.value(state, SECTION) || { spaces: [], zones: [] };
-    vs.spaces = value.spaces || [];
+    // By number within each Zone, read as numbers (9 before 101); the host's order is the order drawn.
+    vs.spaces = (value.spaces || []).slice().sort(function (a, b) {
+      return ui.compareText(a.values.number, b.values.number);
+    });
     vs.byZone = Object.create(null);
     vs.outside = [];
     vs.spaces.forEach(function (space) {
@@ -101,7 +104,7 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
           record: { id: volume.id, name: volume.values.display_name, volume: volume, space: space } });
         (volume.floor_segments || []).forEach(function (segment) {
           rows.push({ key: JSON.stringify(["Segment", segment.reference.entity_path]), parent: volumeKey,
-            tier: "Segment", depth: 3,
+            tier: "Floor", depth: 3,
             record: { id: segment.id, name: segment.values.display_name, segment: segment, space: space } });
         });
       });
@@ -151,10 +154,6 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
 
   function spaceCell(space, field) {
     if (field === "number") return { text: space.values.number };
-    if (field === "height_m") {
-      return { value: space.metrics.average_height_m, muted: true,
-        tooltip: "The floor-area-weighted average of this Space's Volume heights. Edit a Volume's height." };
-    }
     if (AIRFLOW_FIELDS[field]) {
       if (space.airflow_mode === "inheriting") {
         return { text: "Zone", muted: true,
@@ -202,32 +201,17 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
     if (cell && cell.tooltip) ui.tooltip(td, cell.tooltip);
   }
 
-  /* A row's marker: on a Zone row, the airflow imbalance; on a Space, Volume or Floor Segment row, its
-     findings, those that block export named first. */
+  /* A Space, Volume or Floor Segment row's marker: its findings, those that block export named first. A Zone
+     row has none. */
   function marker(vs, row) {
     var record = row.record, target = record.segment || record.volume || record.space;
-    if (target) {
-      var findings = target.findings || [];
-      if (!findings.length) return null;
-      var blocking = findings.filter(function (finding) { return finding.blocks_export; });
-      var words = (blocking.length ? ["Blocks export."] : []).concat(blocking, findings.filter(function (finding) {
-        return !finding.blocks_export;
-      })).map(function (item) { return typeof item === "string" ? item : item.message; });
-      return { text: "", icon: "alert", tooltip: words.join(" ") };
-    }
-    return zoneMarker(vs, row);
-  }
-
-  /* The Zone row's marker when its supply and extract sums differ by more than the host's threshold. */
-  function zoneMarker(vs, row) {
-    var sums = row.record.sums;
-    if (!sums || !sums.imbalanced) return null;
-    var profile = units.profile(fields.AIRFLOW_M3H, preferences.current());
-    function flow(value) { return units.format(value, fields.AIRFLOW_M3H, profile); }
-    var supply = sums.airflows.v_sup_m3h, extract = sums.airflows.v_eta_m3h;
-    return { text: "", icon: "alert", tooltip: "Supply and extract differ by more than 10 percent of the larger: " +
-      "supply " + flow(supply) + ", extract " + flow(extract) + ", difference " + flow(Math.abs(supply - extract)) +
-      ". Review the airflows." };
+    var findings = target && target.findings || [];
+    if (!findings.length) return null;
+    var blocking = findings.filter(function (finding) { return finding.blocks_export; });
+    var words = (blocking.length ? ["Blocks export."] : []).concat(blocking, findings.filter(function (finding) {
+      return !finding.blocks_export;
+    })).map(function (item) { return typeof item === "string" ? item : item.message; });
+    return { text: "", icon: "alert", tooltip: words.join(" ") };
   }
 
   /* What a Zone row sorts by in this view's columns. */
@@ -238,7 +222,7 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
   }
 
   /* Rows under one parent in the sorted column's order, by the value they show; a row with none keeps its
-     place after the others. Name and the Zone fields leave the rows in path order. */
+     place after the others. Name and the Zone fields leave the rows in their listed order. */
   function sort(vs, list, field, direction) {
     if (SORTED.indexOf(field) < 0) return list;
     var sign = direction === "desc" ? -1 : 1;

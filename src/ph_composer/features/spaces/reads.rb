@@ -223,7 +223,6 @@ module PhComposer
           spaces = rows.select { |row| row["zone"] && row.dig("zone", "zone_path") == zone.fetch("zone_path") }
           sums = Metrics.zone(spaces)
           zone.merge("space_count" => spaces.length).merge(sums)
-              .merge("findings" => Findings.zone(sums["imbalanced"]))
         end
       end
 

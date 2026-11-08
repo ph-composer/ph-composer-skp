@@ -226,9 +226,9 @@ Spaces are read in the Spaces view of the Zones tab. Beneath each Zone are its S
 Space its Volumes, and beneath each Volume its Floor Segments, with their floor area, weighting
 factor, weighted area (iCFA), height, net volume and airflows. A Space outside every Zone is listed
 after the Zones. A text filter that matches a Zone's name, Building-Segment or Level lists all its
-Spaces; one that matches only a Space's number or name lists just the Spaces it matches. Each Zone row shows its Spaces' sums and marks a Zone whose supply and extract
-differ by more than 10 percent of the larger; while any Space in a Zone inherits its airflow from the
-Zone, the Zone shows a dash instead. Cells edit in place, and a range fill or a paste from a
+Spaces; one that matches only a Space's number or name lists just the Spaces it matches. Spaces list by number within their Zone, Floor Segments read Floor in the Hierarchy column, and Height
+shows on the Volume row, where it is set. Each Zone row shows its Spaces' sums; while any Space in a Zone
+inherits its airflow from the Zone, the Zone shows a dash instead. Cells edit in place, and a range fill or a paste from a
 spreadsheet is one Undo step. Checked rows edit together in the selection bar, and checked Zones
 stay checked when switching to the Faces view. Each row offers Locate and, where they apply, Open,
 Close, Enter, Delete, Remove Volume, Move to Zone and the repair its problem names. The Weighting

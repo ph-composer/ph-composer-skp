@@ -76,11 +76,7 @@ module PhComposer
           field.merge("description" => "Summed over user-specified Spaces; null while " \
                                        "any Space inherits.")
         end),
-        "inheriting_count" => Shapes::COUNT,
-        "imbalanced" => { "type" => "boolean",
-                          "description" => "Supply and extract differ by more than 10 " \
-                                           "percent of the larger." },
-        "findings" => FINDINGS
+        "inheriting_count" => Shapes::COUNT
       })
       TOTAL_PROPERTIES = {
         "floor_area_m2" => AREA, "weighted_area_m2" => Shapes.quantity("m2", "Summed weighted area (iCFA)."),

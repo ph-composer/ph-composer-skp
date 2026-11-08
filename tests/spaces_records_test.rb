@@ -56,13 +56,6 @@ class SpacesRecordsTest < PhComposerTestCase
     end
   end
 
-  def test_imbalance_is_measured_against_the_larger_sum
-    assert METRICS.imbalanced?(100.0, 89.0)
-    refute METRICS.imbalanced?(100.0, 90.0)
-    refute METRICS.imbalanced?(0.0, 0.0)
-    refute METRICS.imbalanced?(nil, 40.0)
-  end
-
   def test_the_height_setting_defaults_records_and_refuses_a_stale_write
     model = Sketchup.active_model
     session = PhComposer::Sessions.for(model)

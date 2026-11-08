@@ -10,8 +10,6 @@ module PhComposer
       HORIZONTAL_Z = 0.999999
       # A Face whose normal is within about 0.6 degrees of horizontal is a wall: it has no plan area to count.
       VERTICAL_Z = 0.01
-      # Supply and extract differ by more than this share of the larger sum.
-      IMBALANCE_SHARE = 0.1
       # The quantities a Zone, a Building-Segment and the Model sum.
       TOTALS = %w[floor_area_m2 weighted_area_m2 net_volume_m3].freeze
 
@@ -85,22 +83,14 @@ module PhComposer
       end
 
       # One Zone's sums over its Spaces' metrics and airflows. Airflow sums cover user-specified Spaces;
-      # while any Space inherits, the sums are not meaningful and the imbalance is not evaluated.
+      # while any Space inherits, the sums are not meaningful.
       def zone(spaces)
         totals = sums(spaces.map { |space| space.fetch("metrics") }, TOTALS)
         inheriting = spaces.count { |space| space.fetch("airflow_mode") == "inheriting" }
         flows = AIRFLOWS.to_h do |key|
           [key, inheriting.zero? ? spaces.sum { |space| space.fetch("airflows").fetch(key) } : nil]
         end
-        totals.merge("airflows" => flows, "inheriting_count" => inheriting,
-                     "imbalanced" => imbalanced?(flows["v_sup_m3h"], flows["v_eta_m3h"]))
-      end
-
-      def imbalanced?(supply, extract)
-        return false if supply.nil? || extract.nil?
-
-        larger = [supply, extract].max
-        larger.positive? && (supply - extract).abs > IMBALANCE_SHARE * larger
+        totals.merge("airflows" => flows, "inheriting_count" => inheriting)
       end
 
       def sums(rows, keys)

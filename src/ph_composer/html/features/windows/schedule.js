@@ -54,7 +54,8 @@ function (request, snapshot, tables, faceWords, ui, units, fields) {
       units.format(host.net_opaque_area_m2, fields.AREA_M2, units.profile(fields.AREA_M2), { showUnit: false });
   };
   Schedule.prototype.rows = function () {
-    var self = this, types = this.owner.entries.map(function (entry) { return entry.record; }), ids = {};
+    var self = this, ids = {}, types = this.owner.entries.map(function (entry) { return entry.record; })
+      .sort(function (a, b) { return ui.compareText(a.name, b.name); });
     types.forEach(function (type) { ids[type.id] = true; });
     this.units.forEach(function (unit) { var id = unit.values.window_type_id;
       if (!ids[id]) { ids[id] = true; types.push({ id: id, name: "Unknown Type", unknown: true }); } });

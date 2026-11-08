@@ -93,10 +93,10 @@ module PhComposer
         row.slice(*(fixed + (fields || (CANDIDATE_FIELDS - ["loops_m"]))))
       end
 
-      # Each finding with the reference of what it is about: a Space, Volume, Floor Segment or Zone, or a
+      # Each finding with the reference of what it is about: a Space, Volume or Floor Segment, or a
       # record outside the hierarchy that should hold it. Ordered by that reference's path, then code.
       def findings(request)
-        rows, zones, strays = Reads.assemble(request)
+        rows, _zones, strays = Reads.assemble(request)
         params = request.params
         if params.key?("space")
           space = located(rows, params["space"], "space_id", "Space")
@@ -104,7 +104,7 @@ module PhComposer
         else
           # An orphan Volume's stray finding is already among the strays; its own findings join it once.
           orphans = Reads.orphan_findings(request).reject { |finding| strays.include?(finding) }
-          found = rows.flat_map { |row| row_findings(row) } + zone_findings(zones) + strays + orphans
+          found = rows.flat_map { |row| row_findings(row) } + strays + orphans
         end
         found = found.select { |finding| params["codes"].include?(finding.fetch("code")) } if params.key?("codes")
         keyed = found.each_with_index.map { |finding, index| [finding_key(finding, index), finding] }.sort_by(&:first)
@@ -122,13 +122,6 @@ module PhComposer
         end
       end
 
-      def zone_findings(zones)
-        zones.flat_map do |zone|
-          with_reference(zone.fetch("findings"), "zone_id" => zone.fetch("zone_id"),
-                                                 "zone_path" => zone.fetch("zone_path"))
-        end
-      end
-
       def with_reference(findings, reference)
         findings.map { |finding| finding.merge("reference" => reference) }
       end
@@ -137,7 +130,7 @@ module PhComposer
       # findings were found in, which keeps two equal findings distinct.
       def finding_key(finding, index)
         reference = finding.fetch("reference")
-        path = reference["entity_path"] || reference["zone_path"] || []
+        path = reference["entity_path"] || []
         [path.map { |id| format("%012d", id) }.join("/"), finding.fetch("code"), format("%06d", index)].join("|")
       end
 
