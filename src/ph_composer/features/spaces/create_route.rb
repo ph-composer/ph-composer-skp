@@ -139,8 +139,7 @@ module PhComposer
         end
 
         def announce(message)
-          @session.notice(message, :tone => :warning)
-          Sketchup.status_text = message if Sketchup.respond_to?(:status_text=)
+          HostNotice.show(@session, message)
           nil
         end
       end

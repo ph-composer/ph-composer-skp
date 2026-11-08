@@ -149,8 +149,24 @@ module UI
   # A pending UI.start_timer callback; a repeating one runs again after each call.
   Timer = Struct.new(:id, :repeat, :block, keyword_init: true)
 
+  # Recorded when shown; real SketchUp draws a box beside the Model window, stacked with any still up.
+  class Notification
+    attr_reader :extension, :message
+
+    def initialize(extension, message = nil, _icon_name = nil, _icon_tooltip = nil)
+      @extension = extension
+      @message = message
+    end
+
+    def show
+      UI.notifications << self
+      true
+    end
+  end
+
   class << self
     attr_reader :opened_urls, :messages, :last_savepanel, :last_openpanel, :context_menu_handlers
+    attr_reader :notifications
     attr_writer :open_url_result, :messagebox_result
     attr_writer :inputbox_result
     attr_reader :inputboxes
@@ -275,6 +291,7 @@ module UI
       @opened_urls = []
       @open_url_result = true
       @messages = []
+      @notifications = []
       @messagebox_result = nil
       @timers = []
       @timer_intervals = {}

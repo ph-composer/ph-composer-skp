@@ -55,6 +55,7 @@ class SpacesCreateRouteTest < PhComposerTestCase
     assert_nil review.fetch("token")
     assert_equal [ROUTE::NO_ZONE, :warning], @notices.last
     assert_match(/open the Zone's edit context/, Sketchup.status_texts.last)
+    assert_equal [ROUTE::NO_ZONE], UI.notifications.map(&:message), "the refusal shows in SketchUp"
   end
 
   def test_inside_a_zone_it_reviews_the_selection_and_create_makes_the_space_in_one_undo_step

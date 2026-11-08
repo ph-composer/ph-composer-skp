@@ -204,7 +204,10 @@ module PhComposer
         @hover = nil
       end
 
+      # A refusal also shows in SketchUp's own notification; "Placed Window." repeats with every click.
       def announce(message, tone)
+        return HostNotice.show(@session, message, :tone => tone) unless tone == :info
+
         Sketchup.status_text = message
         @session.notice(message, :tone => tone)
       end
@@ -223,8 +226,11 @@ module PhComposer
         message = error.is_a?(UserError) ? error.message :
           "The Place tool could not complete that. Nothing was written."
         Diagnostics.exception("place_tool", error) unless error.is_a?(UserError)
-        Sketchup.status_text = message
-        @session.notice(message, :tone => :warning) if pending
+        if pending
+          announce(message, :warning)
+        else
+          Sketchup.status_text = message
+        end
         view.invalidate
       end
     end

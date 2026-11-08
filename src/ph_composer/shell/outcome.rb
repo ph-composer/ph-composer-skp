@@ -55,14 +55,21 @@ module PhComposer
       build(status, code, text, "none", revision, :findings => findings, :detail => detail)
     end
 
+    # What an unexpected failure may say about itself: the log's reference and the kind of error. The
+    # error's message stays in the log.
+    def failure_detail(incident, error)
+      { "incident" => incident, "error_class" => error.class.name }
+    end
+
     # `incident` is the log's reference for an unexpected failure (Diagnostics.incident).
-    def failed(effect:, revision:, reason: nil, incident: nil)
+    def failed(effect:, revision:, reason: nil, incident: nil, error: nil)
       message = effect == "rolled_back" ? ROLLED_BACK : UNVERIFIED
       code = effect == "rolled_back" ? "operation.failed" : "operation.rollback_unverified"
       # A declared domain failure remains actionable even when it arose during a native cut.
       # Keep rollback certainty separate; never expose an unexpected exception's message.
       detail = reason && { "cause" => reason.code, "detail" => DeepCopy.call(reason.detail) }
       detail = (detail || {}).merge("incident" => incident) if incident
+      detail = detail.merge("error_class" => error.class.name) if incident && error && !reason
       message = "#{reason.message} #{message}" if reason
       build("failed", code, message, effect, revision, :detail => detail)
     end

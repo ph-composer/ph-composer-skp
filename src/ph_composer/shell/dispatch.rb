@@ -373,10 +373,9 @@ module PhComposer
     rescue StandardError => error
       incident = Diagnostics.incident("operation_failed", error, "operation" => action.name,
                                                                  "code" => "operation.failed", "effect" => "none")
-      Outcome.refused("operation.failed", "The change could not be prepared.", :status => "failed",
-                                                                               :revision => session.revision,
-                                                                               :mutation => true,
-                                                                               :detail => { "incident" => incident })
+      Outcome.refused("operation.failed", "The change could not be prepared.",
+                      :status => "failed", :mutation => true, :revision => session.revision,
+                      :detail => Outcome.failure_detail(incident, error))
       # `failed` with effect `none`: the error came before any operation opened.
     end
 
@@ -396,7 +395,8 @@ module PhComposer
       reason = error.is_a?(CodedError) ? error : nil
       incident = Diagnostics.incident("operation_failed", error, "operation" => action.name, "effect" => effect,
                                                                  "code" => reason&.code || "operation.failed")
-      Outcome.failed(:effect => effect, :revision => session.revision, :reason => reason, :incident => incident)
+      Outcome.failed(:effect => effect, :revision => session.revision, :reason => reason, :incident => incident,
+                     :error => error)
     end
 
     def verified_unchanged?(model, engine, proposal)
@@ -412,9 +412,9 @@ module PhComposer
     def unexpected_outcome(error, session, name)
       incident = Diagnostics.incident("operation_failed", error, "operation" => name, "code" => "operation.failed",
                                                                  "effect" => "none")
-      Outcome.refused("operation.failed", "The request could not be answered.", :status => "failed",
-                                                                                :revision => session&.revision,
-                                                                                :detail => { "incident" => incident })
+      Outcome.refused("operation.failed", "The request could not be answered.",
+                      :status => "failed", :revision => session&.revision,
+                      :detail => Outcome.failure_detail(incident, error))
     end
 
     def coded_outcome(error, session, mutation: false)

@@ -149,7 +149,8 @@ unexpectedly answers `failed`, code `operation.failed`, effect `none`.
 Dispatch presents nothing: it returns the outcome, and the calling client shows the message.
 Internal diagnostic details go to the log; an unexpected exception's message is never returned.
 An unexpected failure's outcome carries `detail.incident`, a short reference (`PHC-` and six hex
-digits) naming its log record. It identifies evidence and grants nothing. A declared refusal's own
+digits) naming its log record, and `detail.error_class`, the error's class name. It identifies
+evidence and grants nothing. A declared refusal's own
 code and structured detail are never replaced by it.
 
 ## Diagnostic log

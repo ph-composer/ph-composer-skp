@@ -146,6 +146,30 @@ class SelectionTest < PhComposerTestCase
     assert_equal read.fetch("revision"), invocation.dig(:request, "expected_revision")
   end
 
+  def test_solve_from_the_menu_says_in_sketchup_what_changed
+    solved = lambda do |pairs, affected, effect = "committed"|
+      outcome = { "status" => "completed", "message" => "Done: Solve Zone Adjacency.", "effect" => effect,
+                  "value" => { "pair_ids" => pairs }, "affected" => affected }
+      API.stub(:invoke, ->(**_args) { outcome }) { ZONES::Selection.client(@session).solve }
+      UI.notifications.last.message
+    end
+    retired = [{ "kind" => "face", "id" => "fac_1", "change" => "retired" }]
+
+    assert_equal "Solve adjacencies: 2 Faces paired as Surface.", solved.call(%w[pair_1], [])
+    assert_equal "Solve adjacencies: 4 Faces paired as Surface. 1 Face retired from out-of-date pairs.",
+                 solved.call(%w[pair_1 pair_2], retired)
+    assert_equal "Solve adjacencies: no Faces to pair. Nothing changed.", solved.call([], [], "none")
+    assert_equal "Solve adjacencies: nothing to change. 2 Faces paired as Surface.",
+                 solved.call(%w[pair_1], [], "none"), "a second Solve must not claim it paired them"
+  end
+
+  def test_solve_refused_from_the_menu_shows_the_reason_in_sketchup
+    refused = { "status" => "refused", "message" => "The Model changed. Nothing was written." }
+    API.stub(:invoke, ->(**_args) { refused }) { ZONES::Selection.client(@session).solve }
+
+    assert_equal ["The Model changed. Nothing was written."], UI.notifications.map(&:message)
+  end
+
   def test_selected_faces_immediately_classify_one_attribute_without_starting_tool
     inside_zone
     selected = @groups.first.entities.to_a.first(2)

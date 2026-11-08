@@ -213,6 +213,26 @@ test("a refusal stays on screen as a warning and a failure as an error, until di
   assert.strictEqual(notice.hidden, true);
 });
 
+test("a failure notice names the error and the incident a user can quote", function () {
+  var p = page();
+  p.receive("panel.snapshot", snapshot("session-a", 4));
+  p.receive("action.result", { request_id: "r1", session: "session-a", outcome: {
+    status: "failed", code: "operation.failed", message: "The change could not be completed. No changes were retained.",
+    detail: { incident: "PHC-7CDF84", error_class: "ArgumentError" } } });
+  assert.strictEqual(p.notice().message.textContent,
+    "The change could not be completed. No changes were retained. Error: ArgumentError. Incident PHC-7CDF84.");
+  p.receive("action.result", { request_id: "r2", session: "session-a", outcome: {
+    status: "failed", code: "x.declared", message: "The roof is locked. No changes were retained.",
+    detail: { cause: "x.declared", incident: "PHC-AAAAAA" } } });
+  assert.strictEqual(p.notice().message.textContent,
+    "The roof is locked. No changes were retained. Incident PHC-AAAAAA.");
+  p.receive("action.result", { request_id: "r3", session: "session-a", outcome: {
+    status: "refused", code: "revision.stale", message: "The Model changed. Nothing was written.",
+    detail: { incident: "PHC-BBBBBB" } } });
+  assert.strictEqual(p.notice().message.textContent, "The Model changed. Nothing was written.",
+    "only a failure carries a reference");
+});
+
 function timedPage() {
   var p = page(), timers = [];
   p.context.setTimeout = function (run) { timers.push(run); return timers.length; };

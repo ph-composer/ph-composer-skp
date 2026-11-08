@@ -254,6 +254,7 @@ class WindowPlaceToolTest < PhComposerTestCase
     up
     assert_empty units
     assert_includes @notices.last.first, "leaves its host"
+    assert_includes UI.notifications.last.message, "leaves its host", "the refused placement shows in SketchUp"
     @picked[:path] = [Sketchup::Face.new(9999)]
     down
     up

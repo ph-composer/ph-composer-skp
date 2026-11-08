@@ -184,7 +184,7 @@ module PhComposer
         when *EXPORT_TYPES then export(type, payload)
         end
       rescue StandardError => error
-        detail = { "detail" => { "incident" => Diagnostics.incident("panel_message", error) } }
+        detail = { "detail" => Outcome.failure_detail(Diagnostics.incident("panel_message", error), error) }
         case type
         when "action.invoke", "action.status" then publish_result(payload, UNEXPECTED.merge(detail))
         when "view.invoke" then publish_view(payload, VIEW_FAILED.merge(detail))

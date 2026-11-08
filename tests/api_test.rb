@@ -208,8 +208,8 @@ class ApiTest < PhComposerTestCase
 
     assert_equal %w[failed operation.failed rolled_back], failed.values_at("status", "code", "effect")
     assert_equal PhComposer::Outcome::ROLLED_BACK, failed.fetch("message")
-    assert_equal ["incident"], failed.fetch("detail").keys,
-                 "unexpected exceptions disclose only the log's incident reference, never their messages"
+    assert_equal %w[incident error_class], failed.fetch("detail").keys,
+                 "unexpected exceptions disclose the log's reference and their class, never their messages"
     logged = JSON.parse(PhComposer::Diagnostics.tail.last)
     assert_equal [failed.dig("detail", "incident"), "operation_failed", "rolled_back"],
                  logged.values_at("incident", "event", "effect")

@@ -129,7 +129,7 @@ module PhComposer
                                     { "reference" => row.fetch("reference"),
                                       "expected_values" => row.fetch("values") }
                                   } }
-          invoke("#{FEATURE_ID}.update_field", params, read.fetch("revision"))
+          show(invoke("#{FEATURE_ID}.update_field", params, read.fetch("revision")))
         rescue ArgumentError, TypeError
           show("status" => "refused", "message" => "Enter a valid ground depth. Nothing was written.")
         end
@@ -138,9 +138,13 @@ module PhComposer
           read = API.query(:context => @context, :name => "#{FEATURE_ID}.selection")
           return show(read) unless read["status"] == "completed"
 
-          invoke("#{FEATURE_ID}.solve_adjacency",
-                 { "zones" => read.fetch("value").fetch("zones").map { |row| row.fetch("reference") } },
-                 read.fetch("revision"))
+          result = invoke("#{FEATURE_ID}.solve_adjacency",
+                          { "zones" => read.fetch("value").fetch("zones").map { |row| row.fetch("reference") } },
+                          read.fetch("revision"))
+          completed = result["status"] == "completed"
+          HostNotice.show(@session, completed ? solved(result) : result.fetch("message"),
+                          :tone => completed ? :success : :warning)
+          result
         end
 
         private
@@ -159,12 +163,24 @@ module PhComposer
 
         def invoke(name, params, revision)
           unless Sketchup.active_model.equal?(@session.model)
-            return show("status" => "refused", "message" => "The active Model changed. Nothing was written.")
+            return { "status" => "refused", "message" => "The active Model changed. Nothing was written." }
           end
 
           @sequence += 1
-          show(API.invoke(:context => @context, :name => name, :params => params,
-                          :request => { "sequence" => @sequence, "expected_revision" => revision }))
+          API.invoke(:context => @context, :name => name, :params => params,
+                     :request => { "sequence" => @sequence, "expected_revision" => revision })
+        end
+
+        # What Solve changed, for the notification: the panel's own confirmation names only the action.
+        def solved(result)
+          pairs = Array(result.dig("value", "pair_ids")).length
+          retired = Array(result["affected"]).count { |row| row["change"] == "retired" }
+          return "Solve adjacencies: no Faces to pair. Nothing changed." if pairs.zero? && retired.zero?
+
+          words = ["Solve adjacencies:", (result["effect"] == "committed" ? nil : "nothing to change."),
+                   "#{pairs * 2} Faces paired as Surface."].compact
+          words << "#{retired} #{retired == 1 ? 'Face' : 'Faces'} retired from out-of-date pairs." if retired.positive?
+          words.join(" ")
         end
 
         def show(result)
