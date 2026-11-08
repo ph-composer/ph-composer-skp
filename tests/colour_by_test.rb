@@ -556,7 +556,7 @@ class ColourByTest < PhComposerTestCase
     service = activate("ph_composer.zones.faces.by_face_type")
     assert_operator service.fills.values.flatten.map(&:x).max, :>, 1.0
 
-    @model.entities.active_section_plane = Sketchup::SectionPlane.new([1.0, 0.0, 0.0, -1.0])
+    @model.entities.active_section_plane = Sketchup::SectionPlane.new([-1.0, 0.0, 0.0, 1.0])
 
     assert_operator service.fills.values.flatten.map(&:x).max, :<=, 1.0 + 1e-9, "the part past the cut is not filled"
     assert_operator service.outlines.values.flatten.map(&:x).max, :<=, 1.0 + 1e-9, "nor outlined"
@@ -569,7 +569,7 @@ class ColourByTest < PhComposerTestCase
     service = activate("ph_composer.zones.faces.by_face_type")
     full = service.fills.values.flatten.map(&:x).count { |x| x > 1.0 + 1e-9 }
 
-    cut_group.entities.active_section_plane = Sketchup::SectionPlane.new([1.0, 0.0, 0.0, -1.0])
+    cut_group.entities.active_section_plane = Sketchup::SectionPlane.new([-1.0, 0.0, 0.0, 1.0])
 
     past = service.fills.values.flatten.map(&:x).count { |x| x > 1.0 + 1e-9 }
     assert_operator past, :<, full, "the cut Group loses what is past its plane"
@@ -580,7 +580,7 @@ class ColourByTest < PhComposerTestCase
   def test_a_group_plane_is_applied_through_the_groups_transformation
     group = zone_group(905, %w[Wall])
     group.define_singleton_method(:transformation) { Geom::Transformation.translation([10, 0, 0]) }
-    group.entities.active_section_plane = Sketchup::SectionPlane.new([1.0, 0.0, 0.0, -1.0])
+    group.entities.active_section_plane = Sketchup::SectionPlane.new([-1.0, 0.0, 0.0, 1.0])
     service = activate("ph_composer.zones.faces.by_face_type")
 
     assert_operator service.fills.values.flatten.map(&:x).max, :<=, 11.0 + 1e-9
@@ -592,7 +592,7 @@ class ColourByTest < PhComposerTestCase
     face = Sketchup::Face.new(907, {}, :points => [point(0, 0, 0), point(2, 0, 0), point(2, 2, 0)])
     inner = Sketchup::Group.new(908, Sketchup::Entities.new([face]))
     group.entities << inner
-    inner.entities.active_section_plane = Sketchup::SectionPlane.new([1.0, 0.0, 0.0, -1.0])
+    inner.entities.active_section_plane = Sketchup::SectionPlane.new([-1.0, 0.0, 0.0, 1.0])
     service = activate("ph_composer.zones.by_zone")
 
     assert_operator service.fills.values.flatten.map(&:x).max, :<=, 1.0 + 1e-9
@@ -617,7 +617,7 @@ class ColourByTest < PhComposerTestCase
     zone_group(902, %w[Wall])
     service = activate("ph_composer.zones.faces.by_face_type")
     @model.rendering_options["DisplaySectionCuts"] = false
-    @model.entities.active_section_plane = Sketchup::SectionPlane.new([1.0, 0.0, 0.0, -1.0])
+    @model.entities.active_section_plane = Sketchup::SectionPlane.new([-1.0, 0.0, 0.0, 1.0])
 
     assert_operator service.fills.values.flatten.map(&:x).max, :>, 1.0
   end

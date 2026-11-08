@@ -69,7 +69,7 @@ module PhComposer
 
       private
 
-      # SketchUp keeps the side of `get_plane` where a*x + b*y + c*z + d is not positive
+      # SketchUp keeps the side a plane's normal points to, where a*x + b*y + c*z + d is positive
       # (context/SKETCHUP_HOST_BEHAVIOR.md, "Overlays").
       def section_plane(model)
         return nil if @options["DisplaySectionCuts"] == false
@@ -95,11 +95,12 @@ module PhComposer
         coefficients.map { |value| value / length }
       end
 
-      # A coincident point counts as on the plane, so float noise cannot shred a Face in the cut's own plane.
+      # Positive past the cut (the side SketchUp removes). A coincident point counts as on the plane, so
+      # float noise cannot shred a Face in the cut's own plane.
       def side(point, plane)
         a, b, c, d = plane
         value = a * point.x + b * point.y + c * point.z + d
-        value.abs < PLANE_TOLERANCE ? 0.0 : value
+        value.abs < PLANE_TOLERANCE ? 0.0 : -value
       end
 
       # Inside the open context, or an ancestor of it (a Zone holding the open Group).

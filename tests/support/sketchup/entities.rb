@@ -54,7 +54,7 @@ module Sketchup
   class EntitiesObserver; end
   class RenderingOptionsObserver; end
 
-  # A section plane: `get_plane` answers [a, b, c, d]; SketchUp cuts away the side where the sum is positive.
+  # A section plane: `get_plane` answers [a, b, c, d]; SketchUp keeps the side where the sum is positive.
   class SectionPlane
     attr_reader :plane
 
