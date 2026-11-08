@@ -44,9 +44,10 @@ PhComposerUI.define("features/windows/form", ["dom", "record_form", "snapshot", 
     this.submitButton.disabled = false; this.cancel.disabled = false; this.error.textContent = "";
     this.replacement.hidden = method !== "delete" || !record.use_count;
     this.replacement.replaceChildren(ui.option("", "Choose a replacement"));
-    this.records.forEach(function (row) { if (row.id !== (record && record.id)) {
-      this.replacement.appendChild(ui.option(row.id, row.values.name));
-    } }, this);
+    this.records.slice().sort(function (a, b) { return ui.compareText(a.values.name, b.values.name); })
+      .forEach(function (row) { if (row.id !== (record && record.id)) {
+        this.replacement.appendChild(ui.option(row.id, row.values.name));
+      } }, this);
     Object.keys(this.fields).forEach(function (key) {
       this.fieldLabels[key].hidden = method === "delete" || method === "duplicate" && key !== "name";
       if (this.unitFields[key]) { this.unitFields[key].cancel(); this.unitFields[key].setValue(null); }

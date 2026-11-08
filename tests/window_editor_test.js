@@ -79,6 +79,16 @@ test("dimension unit draft survives a unit switch and navigation is guarded", fu
   assert.strictEqual(field.input.value, "500 mm"); assert.ok(o.editor.guard());
   field.cancel(); assert.strictEqual(o.sent.length, 0);
 });
+test("Installs lists Model default, then Psi-Install Types by name, a staged one among them (W-096)", function () {
+  var o = setup(), installs = o.editor.installEditor, records = o.state.sections[
+    "ph_composer.windows.psi_install_types"].value.records;
+  records.unshift(fixtures.record("psi_z", { name: "Zinc", psi_w_mk: 0.01 }));
+  records.push(fixtures.record("psi_b", { name: "Birch", psi_w_mk: 0.02 }));
+  o.editor.render(o.state); installs.open(o.editor.rawRecord());
+  installs.products.push({ id: "staged", values: { name: "Karri", psi_w_mk: 0.03 } }); installs.paint();
+  assert.deepStrictEqual(installs.list.querySelectorAll(".window-install-choice-name").map(function (node) {
+    return node.textContent; }), ["Model default", "Birch", "Insulated junction", "Karri", "Zinc"]);
+});
 test("Installs stage locally, exclude shared edge, Save once and Cancel never writes", function () {
   var o = setup(), installs = o.editor.installEditor; installs.open(o.editor.rawRecord()); installs.selected = "psi_a";
   assert.strictEqual(installs.paintEdge("wel_a", "right"), false); assert.strictEqual(o.sent.length, 0);
@@ -295,6 +305,26 @@ test("product picker filters replacements but keeps the current assignment and f
   outcome(o, "refused"); assert.strictEqual(bubble.panel.hidden, false);
   click(bubble.content.querySelector("[data-record-id='frm_b']")); assert.strictEqual(o.sent.length, 2);
   outcome(o, "completed"); assert.strictEqual(bubble.panel.hidden, true);
+});
+test("Frame picker lists the slot's Position first, each run by name; a jamb serves either side (W-096)", function () {
+  var o = setup(), records = o.state.sections["ph_composer.windows.frames"].value.records;
+  [["frm_z", "Zeta head", "Head"], ["frm_s", "Beta sill", "Sill"], ["frm_h", "Alpha head", "head"],
+    ["frm_j", "Delta jamb", "Jamb"], ["frm_n", "Gamma", ""]].forEach(function (row) {
+    records.push(fixtures.record(row[0], { name: row[1], position: row[2], width_m: 0.06, uf_w_m2k: 1.5,
+      psi_g_w_mk: 0.04 }));
+  });
+  o.editor.render(o.state);
+  function listed(side) {
+    o.editor.picker("wel_a", "frames", side, o.editor.cards.wel_a.rows[side].button);
+    var nodes = o.editor.bubble.panel.querySelector(".window-picker-list").children.filter(function (node) {
+      return node.getAttribute("aria-current") !== "true";
+    }).map(function (node) { return node.getAttribute("data-record-id") || text(node); });
+    o.editor.bubble.close(false);
+    return nodes;
+  }
+  assert.deepStrictEqual(listed("top"), ["frm_h", "frm_z", "Other positions", "frm_s", "frm_j", "frm_n"]);
+  assert.deepStrictEqual(listed("left"), ["frm_j", "Other positions", "frm_h", "frm_s", "frm_n", "frm_z"]);
+  assert.deepStrictEqual(listed("right"), listed("left"));
 });
 test("Glazing picker diagnoses a missing assignment and replacement or clear writes once", function () {
   var o = setup(); o.editor.rawRecord().values.elements[0].glazing_id = "glz_missing"; o.editor.render(o.state);

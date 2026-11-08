@@ -84,14 +84,20 @@
 .library-sidebar-root.is-collapsed { width: 42px; flex-basis: 42px; }
 /* The sidebar reads as a title, group captions and record rows. Each is a button for the keyboard, and only the
    kit's general button look is taken off, which needs the workspace prefix to outrank it. */
-.phc-workspace .library-sidebar-toggle { width: 100%; margin-bottom: 10px; padding: 4px 0; border: 0; border-radius: 0;
+.library-sidebar-heading { position: relative; margin-bottom: 10px; }
+.phc-workspace .library-sidebar-toggle { width: 100%; padding: 4px 46px 4px 0; border: 0; border-radius: 0;
   background: transparent; font-size: 13px; font-weight: 600; text-align: left; }
 .phc-workspace .library-sidebar-toggle { position: relative; }
-/* A chevron marks the title as the control that folds the sidebar away: it points at the list when open. */
+/* A chevron marks the title as the control that folds the sidebar: it points the way a click moves it, to the right
+   to fold away, to the left to come back. */
 .library-sidebar-toggle::after { content: ""; position: absolute; top: 50%; right: 6px; width: 5px; height: 5px;
-  border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: translateY(-70%) rotate(45deg); }
-.phc-workspace .library-sidebar-root.is-collapsed .library-sidebar-toggle { writing-mode: vertical-rl; padding: 12px 8px; }
-.library-sidebar-root.is-collapsed .library-sidebar-toggle::after { display: none; }
+  border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: translate(-30%, -50%) rotate(-45deg); }
+.phc-workspace .library-sidebar-root.is-collapsed .library-sidebar-toggle { writing-mode: vertical-rl; padding: 24px 8px 12px; }
+.library-sidebar-root.is-collapsed .library-sidebar-toggle::after { top: 10px; right: 50%; transform: translateX(30%) rotate(135deg); }
+/* Library setup is a settings icon on the title row; folded away, the title stands alone. */
+.phc-workspace .library-sidebar-setup { position: absolute; top: 50%; right: 18px; width: 22px; height: 22px; min-height: 22px;
+  padding: 2px; transform: translateY(-50%); }
+.library-sidebar-root.is-collapsed .library-sidebar-setup { display: none; }
 .library-sidebar-content { display: flex; flex-direction: column; gap: 9px; }
 .library-sidebar-skipped { margin: 0; padding-left: 16px; font-size: 12px; overflow-wrap: anywhere; }
 .library-sidebar-source { color: var(--muted); font-size: var(--text-sm); }
@@ -126,7 +132,7 @@
 .library-material-table { flex: 1; min-width: 0; }
 .library-sidebar-source { width: 100%; box-sizing: border-box; }
 .library-source-controls, .library-setup-adds, .library-review-choices { display: flex; flex-wrap: wrap; gap: 8px; }
-/* Library setup is a way into settings, not a field: a quiet text button in the sidebar. */
+/* What acts on the source (Refresh, a work surface's New) is a quiet text button in the sidebar. */
 .library-source-controls button { flex: 0 0 auto; font-size: var(--text-sm); white-space: nowrap; }
 .phc-workspace .library-source-controls button { padding: 0; min-height: 26px; border-color: transparent; background: transparent;
   color: var(--interaction-highlight); }
@@ -153,8 +159,9 @@
   .library-sidebar-root, .library-sidebar-root.is-collapsed { width: auto; flex-basis: auto; border-left: 0;
     border-top: 1px solid var(--line); padding: 10px 0 0; }
   .phc-workspace .library-sidebar-root.is-collapsed .library-sidebar-toggle { writing-mode: horizontal-tb; padding: 8px 0; }
-  /* Folded under the table, the title keeps its chevron so it still reads as the control that opens it. */
-  .library-sidebar-root.is-collapsed .library-sidebar-toggle::after { display: block; transform: translateY(-30%) rotate(-45deg); }
+  /* Stacked under the table the sidebar folds upward: the chevron still points the way a click moves it. */
+  .library-sidebar-toggle::after { transform: translateY(-30%) rotate(-135deg); }
+  .library-sidebar-root.is-collapsed .library-sidebar-toggle::after { top: 50%; right: 6px; transform: translateY(-70%) rotate(45deg); }
 
   .library-material-workspace { flex-direction: column; min-height: 0; }
   .library-material-table, .library-material-workspace > .library-sidebar-root { width: 100%; box-sizing: border-box; }

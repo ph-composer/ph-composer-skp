@@ -4,6 +4,46 @@ const { check } = require("./support/browser_evidence.cjs");
 const port = process.env.UI_PREVIEW_PORT || "8765";
 const directory = fs.mkdtempSync(path.join(os.tmpdir(), "phc-window-libraries-"));
 console.log("Evidence: " + directory);
+check({ name: "frames_row_actions", output: directory }, async ({ newPage, step }) => {
+  step("frames row actions");
+  const page = await newPage({ viewport: { width: 1280, height: 900 } });
+  await page.goto(`http://127.0.0.1:${port}/tools/ui-preview/?fixture=windows`);
+  await page.locator("[data-tab='library']").click();
+  const library = page.locator("[data-section='library']");
+  await library.getByRole("tab", { name: "Frames", exact: true }).click();
+  const row = library.getByRole("tabpanel", { name: "Frames", exact: true }).locator("tbody tr").filter({ has: page.locator(".row-icon") }).first();
+  const icon = row.locator(".row-icon[data-row-action=delete]");
+  await page.mouse.move(2, 2);
+  assert.strictEqual(await icon.evaluate(node => getComputedStyle(node).opacity), "0", "quiet at rest");
+  await row.hover();
+  assert.strictEqual(await icon.evaluate(node => getComputedStyle(node).opacity), "1", "the row shows its actions when reached");
+  await page.close();
+  step("stacked frames sidebar");
+  const narrow = await newPage({ viewport: { width: 800, height: 900 } });
+  await narrow.goto(`http://127.0.0.1:${port}/tools/ui-preview/?fixture=windows`);
+  await narrow.locator("[data-tab='library']").click();
+  const pane = narrow.locator("[data-section='library']");
+  await pane.getByRole("tab", { name: "Frames", exact: true }).click();
+  const toggle = pane.getByRole("tabpanel", { name: "Frames", exact: true }).locator(".library-sidebar-toggle");
+  const angle = () => toggle.evaluate(node => { const m = new DOMMatrix(getComputedStyle(node, "::after").transform);
+    return Math.round(Math.atan2(m.b, m.a) * 180 / Math.PI) + 45; });
+  assert.strictEqual(await angle(), 90, "folded under the table it points down, the way it opens");
+  await toggle.click();
+  assert.strictEqual(await angle(), -90, "open under the table it points up, the way it folds");
+  step("folded titles on the stacked Window screens");
+  await narrow.getByRole("button", { name: "Window Types", exact: true }).click();
+  const windows = narrow.locator("[data-pane=windows]");
+  async function foldedTitleFits(sidebar, label) {
+    const title = sidebar.locator(".library-sidebar-toggle");
+    if (await sidebar.locator(".library-sidebar-content").isVisible()) await title.click();
+    const box = await title.boundingBox();
+    assert.ok(box.width > 200 && box.height < 40, `${label} folded title is one line across: ${JSON.stringify(box)}`);
+  }
+  await foldedTitleFits(windows.locator(".library-sidebar-root[aria-label='Frame Library']"), "Builder");
+  await windows.getByRole("button", { name: "Edit Window Type installs" }).click();
+  await foldedTitleFits(windows.locator(".window-install-editor .library-sidebar-root"), "Installs");
+  await narrow.close();
+});
 check({ name: "window_library", output: directory }, async ({ newPage, step }) => {
   for (const width of [1280, 900, 420, 280]) {
     const page = await newPage({ viewport: { width, height: 900 } });

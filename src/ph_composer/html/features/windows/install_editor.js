@@ -238,8 +238,8 @@ PhComposerUI.define("features/windows/install_editor", ["features/windows/editor
       return row.id === defaultId; })[0];
     choice(null, "Model default", defaultId ? defaultProduct && defaultProduct.values.psi_w_mk :
       this.settings.default_psi_install_w_mk);
-    this.products.forEach(function (row) { choice(row.id, row.values.name, row.values.psi_w_mk,
-      row.libraryDraft ? null : row); });
+    this.products.slice().sort(function (a, b) { return ui.compareText(a.values.name, b.values.name); })
+      .forEach(function (row) { choice(row.id, row.values.name, row.values.psi_w_mk, row.libraryDraft ? null : row); });
     ui.tooltip(this.apply, "Apply " + chosen + " to every perimeter edge");
     if (held && this.current) this.current.focus();
     this.sidebar.refresh(this.state, {}, true);

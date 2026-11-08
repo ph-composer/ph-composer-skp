@@ -3,14 +3,17 @@ PhComposerUI.define("features/windows/library", ["features/windows/editor_shared
   function (shared, fields, ui) {
   "use strict";
   var definitions = {
-    frames: { title: "Frame Library", wireKind: "frames", properties: [["Manufacturer", "manufacturer"],
-      ["Product code", "product_code"], ["Position", "position"], ["Operation", "operation"],
+    frames: { title: "Frame Library", localLabel: "Frames in this file", wireKind: "frames",
+      properties: [["Manufacturer", "manufacturer"], ["Product code", "product_code"], ["Position", "position"],
+      ["Operation", "operation"],
       ["Width", "width_m", fields.WIDTH_M_AS_MM], ["Uf", "uf_w_m2k", fields.U_VALUE],
       ["ψ-g", "psi_g_w_mk", fields.LINEAR_PSI]] },
-    glazings: { title: "Glazing Library", wireKind: "glazings", properties: [["Manufacturer", "manufacturer"],
-      ["Product code", "product_code"], ["Ug", "ug_w_m2k", fields.U_VALUE],
+    glazings: { title: "Glazing Library", localLabel: "Glazings in this file", wireKind: "glazings",
+      properties: [["Manufacturer", "manufacturer"], ["Product code", "product_code"],
+      ["Ug", "ug_w_m2k", fields.U_VALUE],
       ["g-value", "g_value", fields.FRACTION], ["Description", "description"]] },
-    psi_install_types: { title: "Psi-Install Library", wireKind: "psi_install_types",
+    psi_install_types: { title: "Psi-Install Library", localLabel: "Psi-Install Types in this file",
+      wireKind: "psi_install_types",
       properties: [["ψ-install", "psi_w_mk", fields.LINEAR_PSI]] }
   };
   function adapter(kind, target) {

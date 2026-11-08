@@ -23,6 +23,21 @@ test("used product deletion freezes the complete guard and requires replacement"
   assert.strictEqual(o.sent.length, 1); assert.strictEqual(o.sent[0].payload.params.replacement_id, "frm_b");
   assert.strictEqual(o.sent[0].payload.params.expected_values.name, "Timber frame");
 });
+test("product choosers list by name: the delete replacement and the default Psi-Install (W-096)", function () {
+  var o = setup(), record = o.state.sections["ph_composer.windows.frames"].value.records[0];
+  record.use_count = 1;
+  o.view.form.open("delete", record, [record, fixtures.record("frm_z", { name: "Zinc" }),
+    fixtures.record("frm_b", { name: "Birch" })]);
+  assert.deepStrictEqual(o.view.form.replacement.children.map(function (node) { return node.textContent; }),
+    ["Choose a replacement", "Birch", "Zinc"]);
+  var psi = setup("psi_install_types");
+  var records = psi.state.sections["ph_composer.windows.psi_install_types"].value.records;
+  records.unshift(fixtures.record("psi_z", { name: "Zero edge" }));
+  records.push(fixtures.record("psi_a", { name: "Angle" }));
+  psi.view.render(psi.state);
+  assert.deepStrictEqual(psi.view.defaultPsi.content.children.map(function (node) { return node.textContent; }),
+    ["Model value", "Angle", "Insulated junction", "Zero edge"]);
+});
 function key(input, name) { input.listeners.keydown({ key: name, preventDefault: function () {} }); }
 function type(field, text) { field.input.value = text; field.input.listeners.input({}); }
 function complete(o, status, message) {

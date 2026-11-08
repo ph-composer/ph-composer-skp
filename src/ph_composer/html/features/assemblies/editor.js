@@ -47,7 +47,8 @@ function (shared, header, inspector, layerDrag, stage, AssemblyForm, MaterialFor
     this.sidebar = new Sidebar({ session: session, send: send, changed: function () { self.repaint();
     }, busy: function () { return self.busy() || Boolean(self.guard()); },
       create: { label: "+ New Material", run: function () { self.newMaterial.open(); } },
-      adapter: { title: "Material Library", wireKind: "materials", name: materialName, read: function (state) {
+      adapter: { title: "Material Library", localLabel: "Materials in this file", wireKind: "materials",
+        name: materialName, read: function (state) {
         var payload = snapshot.value(state, MATERIALS);
         return payload ? payload.records : [];
       }, categories: function (state) { return (snapshot.value(state, MATERIALS) || {}).categories || []; },

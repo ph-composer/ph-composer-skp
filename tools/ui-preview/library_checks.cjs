@@ -16,6 +16,38 @@ async function openRow(page, row) {
 async function writes(page) {
   return page.evaluate(() => previewHost.sent.filter(item => item.type === "action.invoke").length);
 }
+/* The screen angle of the title's chevron: right is 0, down 90, left 180, up -90 (its corner is drawn pointing down). */
+async function chevronAngle(toggle) {
+  return toggle.evaluate((node) => {
+    const style = getComputedStyle(node, "::after");
+    if (style.display === "none") return null;
+    const matrix = new DOMMatrix(style.transform);
+    return Math.round(Math.atan2(matrix.b, matrix.a) * 180 / Math.PI) + 45;
+  });
+}
+check({ name: "library_sidebar_title", output }, async ({ newPage, step }) => {
+  for (const [width, open, folded] of [[1280, 0, 180], [420, -90, 90]]) {
+    step(`sidebar title ${width}px`);
+    const page = await newPage({ viewport: { width, height: 900 } });
+    await page.goto(`http://127.0.0.1:${port}/tools/ui-preview/?fixture=libraries`);
+    await page.locator("[data-tab='library']").click();
+    const library = page.locator("[data-section='library']");
+    const sidebar = library.getByRole("tabpanel", { name: "Materials", exact: true }).locator(".library-sidebar-root");
+    const toggle = sidebar.getByRole("button", { name: "Material Library", exact: true });
+    if (width < 900) await toggle.click();
+    assert.equal(await chevronAngle(toggle), open, "open, the chevron points the way the sidebar folds");
+    const gear = sidebar.getByRole("button", { name: "Library setup…", exact: true });
+    const [titleBox, gearBox] = [await toggle.boundingBox(), await gear.boundingBox()];
+    assert.ok(gearBox.y >= titleBox.y && gearBox.y + gearBox.height <= titleBox.y + titleBox.height + 1, "the gear sits on the title row");
+    assert.equal(await sidebar.getByLabel("Library source", { exact: true }).locator("option").first().textContent(),
+      "Materials in this file");
+    assert.equal(await sidebar.getByText("These records are in the table", { exact: false }).count(), 0);
+    await toggle.click();
+    assert.equal(await chevronAngle(toggle), folded, "folded, it points the way the sidebar comes back");
+    assert.equal(await gear.isVisible(), false, "a folded sidebar is its title alone");
+    await page.close();
+  }
+});
 check({ name: "library", output }, async ({ newPage, step }) => {
     for (const width of (process.env.LIBRARY_WIDTHS || "1280,900,420,280").split(",").map(Number)) {
       step(`library ${width}px`);
