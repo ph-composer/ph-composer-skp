@@ -111,6 +111,26 @@ class WindowHostWatchTest < PhComposerTestCase
     assert_operator origin_x, :<=, 8.0
   end
 
+  # Through the session's own observers the commit can come first (context/SKETCHUP_HOST_BEHAVIOR.md).
+  def test_a_change_reported_after_its_commit_still_returns
+    entity = unit.entity
+    PhComposer::ModelOperation.perform(@model, "Move") do
+      entity.transformation = Geom::Transformation.new(matrix_at(7.9, 0, 3))
+      true
+    end
+    observer.onElementModified(@group.entities, entity)
+    UI.run_timers
+    assert_empty findings(units.first) & W::Units::ReturnToHost::LEFT
+  end
+
+  def test_a_change_with_no_commit_around_it_waits_for_one
+    entity = unit.entity
+    PhComposer::ModelOperation.perform(@model, "Paint") { true }
+    UI.run_timers
+    observer.onElementModified(@group.entities, entity)
+    refute W::Units::HostWatch.state(@session).pending?, "a drag's change has no commit yet"
+  end
+
   def test_a_window_still_on_its_face_writes_nothing_and_says_nothing
     entity = unit.entity
     starts = @model.operation_starts.length

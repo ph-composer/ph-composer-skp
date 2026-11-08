@@ -9,9 +9,10 @@ module PhComposer
       # user's gesture so one Undo takes back both. One that cannot says so in SketchUp and keeps its
       # finding. The reconciler follows "Observers report; deferred work mutates" (context/TECH_STACK.md).
       #
-      # A paste reports its addition after the commit, so an addition queues the pass. A Move reports the
-      # instance before the commit (measured with a Ruby transform; native Move is not measured), so a change
-      # is only remembered and the commit queues it: nothing runs while a gesture is still open.
+      # A paste reports its addition after the commit, so an addition queues the pass. A moved instance is
+      # reported on no fixed side of its commit (measured both ways with a Ruby transform; native Move is not
+      # measured), so a change is remembered and queued by the commit, or at once if its commit has just
+      # been delivered. A change with no commit around it, as a native tool's drag may be, only waits.
       #
       # An Undo or Redo reports the same changes before its own event, and drops them: a state Undo brought
       # back is the user's, and a write now would clear Redo. PH-Composer's own operations are ignored.
@@ -39,6 +40,8 @@ module PhComposer
             @work = DeferredWork.new { |jobs| run(jobs.fetch(:units)) }
             @moved = []
             @running = false
+            @just_committed = false
+            @commit_window = CoalescedTimer.new
           end
 
           def added(entity)
@@ -48,21 +51,27 @@ module PhComposer
           end
 
           def modified(entity)
-            @moved |= [entity.persistent_id] if watched?(entity)
+            return unless watched?(entity)
+
+            @moved |= [entity.persistent_id]
+            flush if @just_committed
           rescue StandardError => error
             log(error)
           end
 
+          # The window closes on the next idle pass, so only callbacks of this same gesture fall inside it.
           def committed
-            return if @moved.empty? || @running
+            return if @running
 
-            moved = @moved
-            @moved = []
-            queue(moved)
+            @just_committed = true
+            @commit_window.schedule { @just_committed = false }
+            flush
           end
 
           def reset
             @moved = []
+            @just_committed = false
+            @commit_window.cancel
             @work.cancel unless @running
           end
 
@@ -76,10 +85,19 @@ module PhComposer
 
           def detach
             @work.detach
+            @commit_window.cancel
             @moved = []
           end
 
           private
+
+          def flush
+            return if @moved.empty?
+
+            moved = @moved
+            @moved = []
+            queue(moved)
+          end
 
           def queue(ids)
             @work.queue(:units, ids) { |queued, more| queued | more }
