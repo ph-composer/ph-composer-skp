@@ -319,11 +319,11 @@ test("an unclassified Face is a row under its Zone's summary, and choosing a val
 
   var names = section.querySelectorAll(".col-name").filter(function (node) { return node.tagName === "td"; })
     .map(nameText);
-  assert.deepStrictEqual(names, ["Zone 1", "Wall 1", "1 unclassified Face", "Face 2"]);
+  assert.deepStrictEqual(names, ["Zone 1", "Wall 1", "1 unclassified Face", "Face 1"]);
   assert.strictEqual(section.querySelector(".phc-row-marker").textContent, "1", "the Zone still counts them");
 
-  var type = byLabel(section, "Set Face 2 type");
-  assert.strictEqual(byLabel(section, "Face 2 Assembly"), undefined, "no Assembly before there is a record");
+  var type = byLabel(section, "Set Face 1 type");
+  assert.strictEqual(byLabel(section, "Face 1 Assembly"), undefined, "no Assembly before there is a record");
   type.value = "Floor";
   type.listeners.change({});
   assert.strictEqual(p.sent[0].payload.name, "ph_composer.zones.faces.classify");
@@ -385,7 +385,7 @@ test("two Zone occurrences sharing one record id are two rows", function () {
 
   var names = section.querySelectorAll(".col-name").filter(function (node) { return node.tagName === "td"; })
     .map(nameText);
-  assert.deepStrictEqual(names, ["Zone 1", "Wall 1", "1 unclassified Face", "Face 2", "Zone 1 copy", "Floor 1"],
+  assert.deepStrictEqual(names, ["Zone 1", "Wall 1", "1 unclassified Face", "Face 1", "Zone 1 copy", "Floor 1"],
     "each occurrence keeps its own row and its own Faces");
   var markers = section.querySelectorAll(".phc-row-marker").filter(function (node) {
     return node.classList.contains("is-icon") && /same identity/.test(node.getAttribute("aria-label"));
@@ -417,8 +417,8 @@ test("classifying one Face leaves its neighbours' rows alone", function () {
   assert.strictEqual(after.length, before.length - 1, "only the emptied summary row goes");
   var names = section.querySelectorAll(".col-name").filter(function (node) { return node.tagName === "td"; })
     .map(nameText);
-  assert.deepStrictEqual(names, ["Zone 1", "Wall 1", "Floor 2"],
-    "and a Face is numbered among every Face of its Zone, not among the classified ones");
+  assert.deepStrictEqual(names, ["Zone 1", "Wall 1", "Floor 1"],
+    "and a Face numbers among the Faces of its own type");
 });
 
 /* A stored value no chip offers reads as what it is rather than vanishing from the control. */
@@ -1087,13 +1087,13 @@ test("column menus sort: a Zone field orders Zones, a Face field orders Faces wi
   assert.strictEqual(byLabel(section, "Sort descending").hidden, true);
   // By name, Faces keep their place numbers in order, so choosing a type never moves a row; the
   // unclassified summary stays last.
-  assert.deepStrictEqual(names(), ["Zone 1", "Wall 1", "Floor 3", "1 unclassified Face", "Face 2"]);
+  assert.deepStrictEqual(names(), ["Zone 1", "Wall 1", "Floor 1", "1 unclassified Face", "Face 1"]);
   menuItem(section, "Name column menu", "Sort Z to A");
-  assert.deepStrictEqual(names(), ["Zone 1", "Floor 3", "Wall 1", "1 unclassified Face", "Face 2"]);
+  assert.deepStrictEqual(names(), ["Zone 1", "Floor 1", "Wall 1", "1 unclassified Face", "Face 1"]);
   menuItem(section, "Gross area m² column menu", "Sort Z to A");
-  assert.deepStrictEqual(names(), ["Zone 1", "Floor 3", "Wall 1", "1 unclassified Face", "Face 2"], "largest first");
+  assert.deepStrictEqual(names(), ["Zone 1", "Floor 1", "Wall 1", "1 unclassified Face", "Face 1"], "largest first");
   menuItem(section, "Type column menu", "Sort A to Z");
-  assert.deepStrictEqual(names(), ["Zone 1", "Floor 3", "Wall 1", "1 unclassified Face", "Face 2"],
+  assert.deepStrictEqual(names(), ["Zone 1", "Floor 1", "Wall 1", "1 unclassified Face", "Face 1"],
     "Floor before Wall, within the Zone");
   var sorted = menuItem(section, "Type column menu");
   assert.strictEqual(sorted.filter(function (node) { return node.textContent === "Sort A to Z"; })[0]
@@ -1196,7 +1196,18 @@ test("Colour by lives in the column headers, Window Type in the Assembly's, the 
   click(options.parentNode.querySelectorAll(".phc-action-menu-item")[0]);
   assert.strictEqual(section.querySelectorAll(".col-ground_depth_mm").filter(function (node) {
     return node.tagName === "th";
-  })[0].hidden, true, "Ground depth hides from Table options");
+  })[0].hidden, false, "Ground depth shows from Table options");
+});
+
+test("Ground depth waits in Table options, and its heading says what it does", function () {
+  var p = page();
+  p.panel.receive({ type: "panel.snapshot", payload: snapshot() });
+  var section = p.query("[data-section='ph_composer.overview']");
+  var heading = section.querySelectorAll(".col-ground_depth_mm").filter(function (node) {
+    return node.tagName === "th";
+  })[0];
+  assert.strictEqual(heading.hidden, true);
+  assert.match(heading.querySelector(".phc-th-label").getAttribute("data-tooltip"), /Suggest classification.*Ground/);
 });
 
 /* Three Faces in one Zone, two of them recorded, so a Zone's box can read mixed. */
@@ -1231,7 +1242,7 @@ test("a Zone's box checks every Face under it and reads mixed when some are; the
   assert.deepStrictEqual([p.state("Zone 1"), p.header().getAttribute("aria-checked")], ["mixed", "mixed"]);
   assert.ok(p.section.querySelector(".phc-table").classList.contains("has-checked"), "every box shows now");
   click(p.box("Zone 1"));
-  assert.deepStrictEqual([p.state("Wall 1"), p.state("Wall 2"), p.state("Face 3"), p.state("Zone 1")],
+  assert.deepStrictEqual([p.state("Wall 1"), p.state("Wall 2"), p.state("Face 1"), p.state("Zone 1")],
     ["true", "true", "true", "true"], "and an unclassified Face can be checked");
   click(p.header());
   assert.strictEqual(p.state("Zone 1"), "false", "the header unchecks every row shown");
@@ -1241,8 +1252,8 @@ test("a Zone's box checks every Face under it and reads mixed when some are; the
 test("Shift-click checks the range between the last box clicked and this one", function () {
   var p = checkPage();
   click(p.box("Wall 1"));
-  p.box("Face 3").listeners.click({ shiftKey: true, preventDefault: function () {} });
-  assert.deepStrictEqual([p.state("Wall 1"), p.state("Wall 2"), p.state("Face 3")], ["true", "true", "true"]);
+  p.box("Face 1").listeners.click({ shiftKey: true, preventDefault: function () {} });
+  assert.deepStrictEqual([p.state("Wall 1"), p.state("Wall 2"), p.state("Face 1")], ["true", "true", "true"]);
 });
 
 test("a new SketchUp selection replaces the checked set; the same one leaves the user's checks", function () {
@@ -1298,7 +1309,7 @@ test("the bar edits every checked Face in one request, and says how many a filte
   var p = checkPage();
   assert.strictEqual(bar(p).hidden, true, "nothing checked, no bar");
   click(p.box("Wall 1"));
-  click(p.box("Face 3"));
+  click(p.box("Face 1"));
   assert.strictEqual(bar(p).hidden, false);
   click(byLabel(p.section, "Type column menu"));
   var wall = byLabel(p.section, "Type column menu").parentNode.querySelectorAll("input").filter(function (box) {
@@ -1609,6 +1620,6 @@ test("Table options will not hide a column while a Zone edit is held", function 
   })[0]);
   assert.strictEqual(section.querySelectorAll(".col-ground_depth_mm").filter(function (node) {
     return node.tagName === "th";
-  })[0].hidden, false, "the held edit keeps the table as it is");
+  })[0].hidden, true, "the held edit keeps the table as it is");
   assert.strictEqual(p.panel.state.ui.notice.message, "Finish or cancel the Zone edit first.");
 });

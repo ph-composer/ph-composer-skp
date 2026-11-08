@@ -64,6 +64,8 @@ PhComposerUI.define("features/zones/zone_cells", ["record_edits", "fields", "uni
     });
   };
   ZoneCells.GROUND_DEPTH = GROUND_DEPTH;
+  ZoneCells.GROUND_DEPTH_HELP = "Suggest classification sets a Face to Ground when all of it sits at or below " +
+    "this height, measured from the Model's z = 0.";
   ZoneCells.refusalText = refusalText;
   ZoneCells.gated = gated;
   ZoneCells.prototype.refresh = function (rows, state) {

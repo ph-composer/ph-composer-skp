@@ -22,7 +22,8 @@ check({ name: "selected_solve", output }, async ({ newPage, step }) => {
     assert.equal(await page.locator(".phc-checked-zone-count").innerText(), "1 Zone checked");
     await page.getByRole("checkbox", { name: "Check Attic Zone", exact: true }).check();
     assert.equal(await solve.isEnabled(), true);
-    await page.getByRole("checkbox", { name: "Uncheck Wall 1", exact: true }).uncheck();
+    await page.getByRole("row", { name: /Wall Outdoors 12/ }).getByRole("checkbox", { name: "Uncheck Wall 1", exact: true })
+      .uncheck();
     assert.equal(await solve.isEnabled(), false, "a mixed Zone does not qualify");
     await page.getByRole("checkbox", { name: "Check Living Zone", exact: true }).check();
     step("Solve bar at panel widths");

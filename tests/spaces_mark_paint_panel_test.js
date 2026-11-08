@@ -110,7 +110,7 @@ test("Escape and a switch to another view each stop a running tool", function ()
   assert.deepStrictEqual(p.commands(), [["ph_composer.spaces.mark_tool.stop", {}]]);
   var q = page();
   q.receive(snapshot({ active: true, weighting_factor: 1, gesture_limit: 250 }));
-  q.click(q.pane().querySelectorAll("button").filter(function (node) { return node.textContent === "Faces"; })[0]);
+  q.click(q.pane().querySelectorAll("button").filter(function (node) { return node.textContent === "Geometry"; })[0]);
   assert.deepStrictEqual(q.commands(), [["ph_composer.spaces.mark_tool.stop", {}]]);
 });
 
@@ -121,7 +121,7 @@ test("a start that lands after a switch to another view is stopped", function ()
   p.click(menu.parentNode.querySelectorAll("button").filter(function (node) {
     return /^Mark floor at weighting factor 1\./.test(node.getAttribute("aria-label") || "");
   })[0]);
-  p.click(p.pane().querySelectorAll("button").filter(function (node) { return node.textContent === "Faces"; })[0]);
+  p.click(p.pane().querySelectorAll("button").filter(function (node) { return node.textContent === "Geometry"; })[0]);
   p.receive(snapshot({ active: true, weighting_factor: 1, gesture_limit: 250 }));
   assert.deepStrictEqual(p.commands(), [["ph_composer.spaces.mark_tool.start", { weighting_factor: 1 }],
     ["ph_composer.spaces.mark_tool.stop", {}]]);

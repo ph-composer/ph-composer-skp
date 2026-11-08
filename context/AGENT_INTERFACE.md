@@ -571,7 +571,7 @@ records the implemented scope and remaining reference/solver boundaries.
 The `zones` feature exposes `ph_composer.zones.faces.attached_zone.create_and_assign` for one
 atomic definition-and-assignment operation. It takes explicit Face references and record values,
 with optional Face type intent and expected values, and returns the new record ID and assigned
-Face IDs. The Zones / Faces inline dialog uses that public operation; scripts can preview and invoke
+Face IDs. The Zones / Geometry inline dialog uses that public operation; scripts can preview and invoke
 it with the panel closed. [Current-host evidence](../planning/archive/phase-01-faces-and-zones/evidence/p1-d-attached-zone-atomic.md)
 records validation, exact rollback and persistence checks.
 

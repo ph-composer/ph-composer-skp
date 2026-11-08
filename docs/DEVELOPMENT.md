@@ -1,7 +1,7 @@
 # Development
 
 **DATE:** 2026-09-30 | **STATUS:** Partly implemented. The commands below exist unless marked
-"not yet". The extension has its foundation, the Zones screen with its Zone tree and Faces view,
+"not yet". The extension has its foundation, the Zones screen with its Zone tree and Geometry view,
 the Classify tool and its palette, the shared Colour-by service, the Python runtime payload and the
 HBJSON/report workflow with pinned translation wheels. The normal build refuses canonical export
 until an authored construction provider is available. Phase 1 acceptance uses a separately composed

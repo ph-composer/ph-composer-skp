@@ -84,6 +84,7 @@ not coin a third vocabulary between SketchUp and honeybee. Faces belong to a Zon
 | Colour-by mode | One registered way of colouring the model: a name, an entity kind (a face, a Zone, a Volume or another kind a feature names), a colour function, a label and optionally derived geometry such as the Volume preview. A readout, such as Space labels or Selection totals, registers separately and does not depend on the active mode. Face type, boundary condition and assembly come from face assignment; Zone, Building-Segment and Level from the zones packet |
 | HUD legend | The compact text legend the Colour-by overlay draws in the upper left of the viewport while a mode is active, so a screenshot carries its own key |
 | Classification overlay | The Colour-by overlay in its face modes: face type and boundary condition now, assembly when Assemblies arrive |
+| Geometry view | The Zones screen's view of each Zone's Faces and the Zone's own Building Segment and Level, under the tab labelled Geometry |
 | Faces table | The panel inventory of face records with editable type, boundary condition and assembly cells, area, state and Locate |
 | Material | Physical and product properties used by assembly layers. METr's own screen word. Maps to honeybee `EnergyMaterial`. Distinct from SketchUp display materials |
 | Material category | A preset classification shown as a colored chip. Independent of display color. User-created categories are not supported |

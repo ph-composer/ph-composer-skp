@@ -127,7 +127,7 @@ and final normal source-panel visual restoration passed. The addition merged thr
 The foundation merged through PR #1: records and public operations, sessions, panel/UI kit and
 shared units, the runtime shell and export infrastructure. Phase 1 merged on
 2026-09-30: Zones, Faces and the adjacency between them, the Classify tool, Auto-classify,
-Attached zones, Colour-by, the Zones / Faces screen, copy and split repairs, the public scripting
+Attached zones, Colour-by, the Zones / Geometry screen, copy and split repairs, the public scripting
 interface, and the export run to canonical HBJSON and its report. Export needs authored
 Assemblies. Phase 2 supplies authored Materials and Assemblies, file libraries, Window Types and
 placed Units on its feature branch, accepted on SketchUp 26.1.188/macOS. The normal packaged

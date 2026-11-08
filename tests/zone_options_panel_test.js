@@ -40,6 +40,9 @@ test("the same dialog manages either collection with palette/hex/usage and guard
   assert.strictEqual(p.dialog.dialog.querySelector("h2").textContent, "Manage Building Segments");
   assert.strictEqual(p.dialog.list.querySelector(".phc-zone-option-usage").textContent, "1 live Zone · 2 recoverable");
   assert.strictEqual(p.dialog.list.querySelector(".phc-zone-option-palette").children.length, 8);
+  var picker = p.find("House custom colour");
+  assert.strictEqual(picker.parentNode.className, "phc-zone-option-swatches", "the picker sits with the swatches");
+  assert.strictEqual(picker.getAttribute("data-tooltip"), "Pick a custom colour");
   type(p.find("House name"), "North House");
   type(p.find("House hex colour"), "#ffffff");
   p.dialog.dialog.listeners.keydown({ key: "Enter", target: p.find("House name"), preventDefault: function () {} });

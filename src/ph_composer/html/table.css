@@ -152,6 +152,7 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 .has-header-action-row .phc-th-label { min-width: 0; overflow: hidden; text-overflow: ellipsis;
   white-space: nowrap; }
 .has-header-action-row .phc-header-label-row .row-check { flex-shrink: 0; }
+.phc-table th.is-clipped .phc-th-label { opacity: 0; }
 /* Every column's icons start the band at its left edge, under whichever side its label sits, and clear the label,
    so a pressed fill never touches it. */
 .phc-header-actions { display: flex; align-items: center; justify-content: flex-start; gap: 4px; height: 26px;

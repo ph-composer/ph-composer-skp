@@ -142,7 +142,7 @@ test("Zones checked in one view read checked in the other after a switch", funct
   var p = page();
   p.receive(snapshot());
   p.click(p.byLabel("Check Zone B"));
-  p.click(p.pane().querySelectorAll("button").filter(function (node) { return node.textContent === "Faces"; })[0]);
+  p.click(p.pane().querySelectorAll("button").filter(function (node) { return node.textContent === "Geometry"; })[0]);
   assert.strictEqual(p.byLabel("Uncheck Zone B").checked, true, "Zone B's Faces are checked in Faces");
   p.click(p.byLabel("Uncheck Zone B"));
   p.click(p.byLabel("Check Zone A"));
@@ -211,7 +211,7 @@ test("a refused bar entry keeps its text and holds a view switch until it is can
     message: "Changed. Nothing was written." });
   p.receive(snapshot());
   assert.strictEqual(supply.value, "70", "the refused text stays");
-  p.click(p.pane().querySelectorAll("button").filter(function (node) { return node.textContent === "Faces"; })[0]);
+  p.click(p.pane().querySelectorAll("button").filter(function (node) { return node.textContent === "Geometry"; })[0]);
   assert.strictEqual(p.pane().querySelectorAll("button").filter(function (node) {
     return node.textContent === "Spaces";
   })[0].getAttribute("aria-selected"), "true", "the switch is held");

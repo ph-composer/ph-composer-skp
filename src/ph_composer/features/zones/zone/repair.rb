@@ -338,7 +338,7 @@ module PhComposer
 
         record = {
           "id" => zone_id, "schema_version" => 1, "name" => Zones.default_name(model),
-          "building_segment" => offer["building_segment"] || Occurrences.default_segment(model),
+          "building_segment" => offer["building_segment"] || Occurrences::DEFAULT_SEGMENT,
           "level" => offer["level"], "ground_depth_mm" => 0.0, "user_data" => {}, "extension_data" => {}
         }
         if offer["choice_record"]

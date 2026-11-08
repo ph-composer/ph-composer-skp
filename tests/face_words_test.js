@@ -25,6 +25,15 @@ function rubyHues(constant) {
   return hues;
 }
 
+test("a Face numbers among the Faces of its own type", function () {
+  var kit = words();
+  var faces = ["Floor", "Wall", "Wall", "RoofCeiling", "Wall", null, null].map(function (type) {
+    return { values: type ? { face_type: type } : {} };
+  });
+  assert.deepStrictEqual(faces.map(function (face) { return kit.faceName(face, faces); }),
+    ["Floor 1", "Wall 1", "Wall 2", "Roof or ceiling 1", "Wall 3", "Face 1", "Face 2"]);
+});
+
 test("a chip's hue is the one the viewport draws for the same value", function () {
   var kit = words();
   // Compared as JSON: the kit's objects come from the panel's own context.

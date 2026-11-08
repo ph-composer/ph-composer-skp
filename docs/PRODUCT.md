@@ -82,8 +82,8 @@ or the export scope.
 A Zone is one SketchUp Group, the geometry unit that becomes one honeybee Room. The user makes a
 Zone from a selected Group or from loose geometry, and tags it with a Building-Segment and an
 optional Level. Solve adjacencies pairs the faces two Zones share, cutting partial overlaps so only
-the shared region pairs, in one Undo step. It runs only when asked, and validation offers it again
-when a pairing goes stale. A copied Zone or a split face keeps its records. Copying a Zone in
+the shared region pairs, in one Undo step. It runs only when asked, and Export offers to run it
+again before the model is written. A copied Zone or a split face keeps its records. Copying a Zone in
 SketchUp makes the copy independent at once: it gets its own faces and identity, the Zone it was
 copied from stays as it was, and one Undo removes both the copy and that change. A duplicate that is
 already in a file, or a copy SketchUp keeps shared (inside a component or a copied parent group), is
@@ -92,7 +92,7 @@ menu. Ambiguity is refused rather than guessed.
 
 Make Zone and the Zone attributes are available from the selected geometry's native context menu.
 The Zones header has no Make Zone button; use the native context menu to create a Zone.
-The Faces view's selection bar offers Solve when at least two Zones are fully checked. A partially
+The Geometry view's selection bar offers Solve when at least two Zones are fully checked. A partially
 checked Zone is excluded; fully checked Zones remain included when hidden by a filter. Checking
 all Zones provides the whole-Model workflow. The native command solves selected Zones. A pairing
 that would change an unchecked neighbour is refused with a message naming that Zone.
@@ -107,7 +107,7 @@ selected Face holds; a selection with mixed values marks nothing. Surface comes 
 adjacencies, so it shows greyed, for Faces that all hold it.
 Existing Attached zones appear there; New attached zone opens a form for the captured selection.
 The Classify tool also paints by click, drag or Shift-click across a connected plane, one Undo
-step per gesture. In the Faces view, Type, Boundary and Assembly column menus show visibility checkboxes
+step per gesture. In the Geometry view, Type, Boundary and Assembly column menus show visibility checkboxes
 and separate paint icons beside their values. A paint icon starts that field only, including values
 not yet used in the Model. An active header paint icon names the value and stops painting when
 clicked. Starting paint switches Colour by to the matching field while painting; when painting
@@ -122,7 +122,7 @@ undone independently.
 An Attached zone, such as a garage or attic, is a named boundary condition with its temperature
 reduction factor. Colour by shows face type, boundary condition, Zone, Building-Segment, Level, Assembly
 or Window Type on the model without changing its materials. The Zones tab is one table of Zones read
-through views. Faces is the first: each Zone with its own fields as columns and its faces beneath, with
+through views. Geometry is the first: each Zone with its own fields as columns and its faces beneath, with
 Colour by, sorting and filters in the column headers. While more than one view is available, a row of
 view tabs above the heading switches between them; each keeps its own column filters and sort, and this
 computer remembers the view last shown. Each column's Show choices filter the table and leave excluded geometry in its plain SketchUp colour while
@@ -198,7 +198,7 @@ service and respects hidden geometry and tags.
 
 The Schedule shows net opaque host area: the gross host polygon minus the openings of glazed
 elements. Empty panels leave opaque area intact. Uncertain native Window geometry withholds
-the net value until repaired. The Faces view and assembly usage retain gross area.
+the net value until repaired. The Geometry view and assembly usage retain gross area.
 
 Export maps each glazed element to an Aperture on its gross parent Face. Construction identity
 includes product references and translated thermal values, including the element's size-dependent
@@ -230,7 +230,7 @@ Spaces; one that matches only a Space's number or name lists just the Spaces it 
 shows on the Volume row, where it is set. Each Zone row shows its Spaces' sums; while any Space in a Zone
 inherits its airflow from the Zone, the Zone shows a dash instead. Cells edit in place, and a range fill or a paste from a
 spreadsheet is one Undo step. Checked rows edit together in the selection bar, and checked Zones
-stay checked when switching to the Faces view. Each row offers Locate and, where they apply, Open,
+stay checked when switching to the Geometry view. Each row offers Locate and, where they apply, Open,
 Close, Enter, Delete, Remove Volume, Move to Zone and the repair its problem names. The Weighting
 factor column filters the table and colours the Model by factor. A Volume's height can be set from a closed solid the user draws, its volume over the Volume's net floor area, after a confirmation that shows both numbers. There is no Level rail and no
 separate balance view; column widths last for the session.

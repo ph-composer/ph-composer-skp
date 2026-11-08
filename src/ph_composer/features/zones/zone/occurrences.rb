@@ -37,6 +37,10 @@ module PhComposer
     # Bounded occurrence reads for Zone and Face public operations. Resolution follows every supplied
     # parent-child path and durable id. It never searches by name or geometry to repair a stale target.
     module Occurrences
+      # The Building Segment a Model's first Zone takes: neutral, since a file's name says where the Model is
+      # saved and not what the Building is.
+      DEFAULT_SEGMENT = "Building"
+
       module_function
 
       # An `index` is one walk of this Model, reused across a whole read phase (see index.rb). It is
@@ -396,12 +400,6 @@ module PhComposer
         zones(model).flat_map { |zone| faces(zone) }.select do |face|
           face_record(face.entity)&.fetch("id", nil) == id
         end
-      end
-
-      def default_segment(model)
-        path = model.path.to_s
-        name = path.empty? ? model.title.to_s : File.basename(path, File.extname(path))
-        name.empty? ? "Building" : name
       end
 
       def identity

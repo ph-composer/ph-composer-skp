@@ -138,7 +138,7 @@ source operation. Native clipboard copies are observed when their authored dicti
 Ruby `Group#copy` is not assumed to copy instance attributes. Evidence and current-host scope are in
 `planning/archive/phase-01-ux-followups/README.md`.
 
-Zones / Faces settings are Model records, reached through registered reads and actions. Automatic
+Zones / Geometry settings are Model records, reached through registered reads and actions. Automatic
 Suggest on Make defaults on, with roof/floor tilt thresholds of 60/130 degrees. Make and Suggest
 share one proposal, transaction and Undo step. A settings edit has its own named Undo step.
 
@@ -602,7 +602,7 @@ leaves, and `consume(state)` settles the action-result slot for that request onc
 refuses, for views that keep several requests in flight. Record forms are `record_form.js` specs,
 snapshot reads go through `snapshot.js`, and unit descriptors for stored fields are `fields.js`. The
 record table and inventory controls (`table.js`, `table.css`, `view_controls.js`) arrived with the
-Zones / Faces screen, ported from the predecessor and trimmed to what it uses; neither names a feature.
+Zones / Geometry screen, ported from the predecessor and trimmed to what it uses; neither names a feature.
 Inline cell drafts (the predecessor's `record_edits`) arrive with the first screen that edits
 record cells in place.
 
@@ -765,7 +765,7 @@ this foundation when their feature lands.
   something other than the row's record.
 - One work surface per pane. A pane may place an inspector beside it for what the current tool or
   selection needs (`panel.section` with `region: "inspector"`), or carry those controls in a selection
-  bar that floats over the bottom of the work surface (`selection_bar.js`), as Zones / Faces does. Do
+  bar that floats over the bottom of the work surface (`selection_bar.js`), as Zones / Geometry does. Do
   not stack a second job under the work surface.
 - A table column may declare header actions (`options.headerActions(field)`): a column menu
   (`column_menu.js`) for sort and value filters, and a Colour-by toggle (`sections/colour_by.js`

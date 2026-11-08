@@ -36,7 +36,7 @@ check({ name: "spaces", output }, async ({ newPage, step }) => {
     }), "Space names are in the initial viewport");
     await narrow.screenshot({ path: path.join(output, "spaces-narrow-identity.png") });
     await narrowTable.evaluate(node => { node.scrollLeft = 0; });
-    await narrow.getByRole("tab", { name: "Faces", exact: true }).click();
+    await narrow.getByRole("tab", { name: "Geometry", exact: true }).click();
     await narrow.getByRole("tab", { name: "Spaces", exact: true }).click();
     assert.equal(await narrowTable.evaluate(node => node.scrollLeft), 0, "returning preserves the user's pan");
     await narrow.close();

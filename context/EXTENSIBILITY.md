@@ -178,7 +178,7 @@ while it carries a draft the user must not lose sight of, so a tool started from
 cannot hide it. With nothing to show the column is away, unless the pane keeps an always-wanted
 `ambient` hint ranked last (`order: 1000`) so its work surface never changes width. A pane may
 instead have no inspector and carry its selection's controls in the kit's floating selection bar
-(`selection_bar.js`), as Zones / Faces does. If the section that had the focus is
+(`selection_bar.js`), as Zones / Geometry does. If the section that had the focus is
 hidden, the focus moves to the one now shown. A control that would open another inspector
 section asks `panel.inspectorHeld(pane)` first and says why it cannot.
 
@@ -192,7 +192,7 @@ tools, the ones that change the Model, for the page header's toolbar; the work s
 with `panel.region(pane, "actions")`. A pane that offers either must place it; until it does it
 leads the main region. A feature adds an inspector section, a tool or an action to a pane it does
 not own without naming that pane's owner, which is how Classify faces (an
-action, with its palette in the Zones / Faces selection bar) shares that pane. A pane whose sections all
+action, with its palette in the Zones / Geometry selection bar) shares that pane. A pane whose sections all
 use `main` is laid out as before.
 
 A feature that owns a tab says so once with `panel.workedOn(prefix, tab)`, where `prefix` is its
@@ -593,7 +593,7 @@ The mask is session state, retained through mode switches and while Colour by is
 supersedes row isolation and writes no records, visibility flags or Undo entries.
 
 A mode may also declare `group:`, a name several modes share, so a screen can offer them from one
-place without naming a mode another feature owns: the Zones / Faces Assembly column binds to
+place without naming a mode another feature owns: the Zones / Geometry Assembly column binds to
 group `"construction"`, which Zones' Assembly mode and Windows' Window Type mode declare. A group
 name is a public contract between the features that declare it; a feature that renames one changes
 what other screens offer. In the panel, `sections/colour_by.js` `HeaderToggle({ mode })` or

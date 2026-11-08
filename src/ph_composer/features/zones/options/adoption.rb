@@ -73,7 +73,7 @@ module PhComposer
           clusters = entries.group_by { |entry| [entry.fetch("collection"), Options.name_key(entry.fetch("name"))] }
                             .values.select { |cluster| cluster.length > 1 }
           { "required" => !entries.empty?, "sources" => shown,
-            "suggested_segment" => Occurrences.default_segment(request.model),
+            "suggested_segment" => Occurrences::DEFAULT_SEGMENT,
             "collision_clusters" => clusters.map { |cluster| cluster.map { |entry| entry.fetch("key") } } }
         end
 

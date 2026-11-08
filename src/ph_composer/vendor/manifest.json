@@ -46,9 +46,9 @@
       "sha256": "b0f45d7b4d034204ebd6848990483d3751c1bb3ced82351c0248d65cec097df6"
     },
     "html/face_words.js": {
-      "bytes": 3477,
+      "bytes": 3657,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "5627c9ac321c7b81b90e2c5c9737d9ab00633d3b21f87ae6f3bf17ea41e86f2f"
+      "sha256": "ff60186633781a02caf49e2f6ddbd7690837fd19f8a26d599bac0a630c1fea21"
     },
     "html/features/assemblies/assembly.css": {
       "bytes": 13763,
@@ -236,9 +236,9 @@
       "sha256": "ece530290c6c2c7ff7bef585a110d4999d59d0389ae0a4007484791c258cb9ac"
     },
     "html/features/windows/schedule.js": {
-      "bytes": 15141,
+      "bytes": 15063,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "8d1aed247f55ed3c22aef14408d963b2012110f79e224bd0d2d4ff251771db6a"
+      "sha256": "bb702acbffc950a900680d222160b234dd73206686abd3c97af2c029eec7c65b"
     },
     "html/features/windows/section.js": {
       "bytes": 1943,
@@ -286,19 +286,19 @@
       "sha256": "5cdfedd2c1f977aae1a40d6c6e7979cfb9e866b5c13550954b29d520fa981900"
     },
     "html/features/zones/faces_view.js": {
-      "bytes": 40654,
+      "bytes": 40798,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "9f1f42a161945e2546c5926182be9c343a8f7ebc8555eacb4e08c438cdaecc8e"
+      "sha256": "a57d9ba9ed8e7f98ad3c89445b67ff6c849710166ff3ae5c47e03ede7a8254c8"
     },
     "html/features/zones/option_dialog.js": {
-      "bytes": 17900,
+      "bytes": 18192,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "cae7b408c61d8dbcbcdcd660a432160eaca1902f456e989ecd923c976875ea1c"
+      "sha256": "4197fc44452fe1e4e7e0de58f04c42f4936b6d1d263e3b97494a8bd44ef3eb9a"
     },
     "html/features/zones/overview.js": {
-      "bytes": 52954,
+      "bytes": 53117,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "9c69a456d9e57a598aedc958fe9d74b098dd17c9e737ff8df2d3090500f4f0e4"
+      "sha256": "b96b8e1561b4110b18540cb4e35fb3b07c5bb43ad626841fa3071c35cc14b80f"
     },
     "html/features/zones/selection_assignment.js": {
       "bytes": 3325,
@@ -306,9 +306,9 @@
       "sha256": "a9f33843f372696ccb00b00b12265eb743e1b634abc21d16acdce5fb4f74ca81"
     },
     "html/features/zones/zone_cells.js": {
-      "bytes": 12938,
+      "bytes": 13105,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "257654b72f959683e7b1e7fb41943fc89d7dfb9f537c696603c5813236c5ea8a"
+      "sha256": "3507914a7b5c8eaea453c4c59e2a10762987865e3dec93fa3482641104d9f738"
     },
     "html/features/zones/zone_options.js": {
       "bytes": 2134,
@@ -321,9 +321,9 @@
       "sha256": "260284f4f31732e0639dda8579367b93bd13eaf7caa32dc984215663542b9f83"
     },
     "html/features/zones/zones.css": {
-      "bytes": 8353,
+      "bytes": 9294,
       "mime": "text/css; charset=utf-8",
-      "sha256": "fc66356e6af9183362e9f80798826949a665d017a1f77d867a2a710cf1735714"
+      "sha256": "89694f26e06e5fc851828c89c47a4b0cc1c6fd0eb94f668b1d73aeb8d6d86a2f"
     },
     "html/fields.js": {
       "bytes": 1833,
@@ -521,14 +521,14 @@
       "sha256": "61fa05fa4086b6022a5005a7fb9173b9bc6b85152507e8a4840783448895fc67"
     },
     "html/table.css": {
-      "bytes": 22104,
+      "bytes": 22159,
       "mime": "text/css; charset=utf-8",
-      "sha256": "1f059966039db057701922f3bf667788e853b346b0322c9047586279c34ad32f"
+      "sha256": "838c85ab001889cb38864f2fb03e2eaa1a9d698ea2c872dfc997cd1cb0731e36"
     },
     "html/table.js": {
-      "bytes": 32709,
+      "bytes": 33946,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "1756602aba7d5234cdb208e425630d65fd546ec942fc4b17552b8de22cef591b"
+      "sha256": "aad0a45d32a7ea121d95b71820f68744b87e58fe0784c47b6211709fd21fc8fa"
     },
     "html/table_contributions.js": {
       "bytes": 2905,

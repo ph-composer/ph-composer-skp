@@ -41,7 +41,7 @@ function (request, snapshot, tables, faceWords, ui, units, fields) {
     if (!found) return "Host Face";
     var own = this.faces.filter(function (face) { return JSON.stringify(face.reference.zone_path) ===
       JSON.stringify(reference.zone_path); });
-    return (faceWords.faceType((found.values || {}).face_type) || "Unclassified Face") + " " + (own.indexOf(found) + 1);
+    return faceWords.faceName(found, own);
   };
   Schedule.prototype.netArea = function (unit) {
     if (!unit.host) return "—";

@@ -71,12 +71,22 @@
 .phc-zone-option-row { display: grid; grid-template-columns: minmax(110px, 1fr) minmax(130px, 190px) auto auto;
   align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--line); }
 .phc-zone-option-row > input, .phc-zone-option-row > select { min-width: 0; width: 100%; }
+.phc-zone-option-row > button { justify-self: end; }
 .phc-zone-option-colour { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; min-width: 0; }
-.phc-zone-option-colour input[type="color"] { width: 28px; height: 28px; padding: 0; }
+/* The custom picker reads as a colour wheel holding the current colour, beside the fixed swatches. */
+.phc-zone-option-colour input[type="color"] { flex: 0 0 auto; width: 22px; height: 22px; min-height: 22px; padding: 2px;
+  border: 0; border-radius: 50%; cursor: pointer;
+  background: conic-gradient(#e0483e, #e8b23a, #56936a, #3aa6c9, #5588bb, #a95c78, #e0483e); }
+.phc-zone-option-colour input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+.phc-zone-option-colour input[type="color"]::-webkit-color-swatch { border: 2px solid var(--surface); border-radius: 50%; }
+.phc-zone-option-colour input[type="color"]:disabled { opacity: .45; cursor: default; }
+.phc-zone-option-colour input[type="color"]:focus-visible { outline: 2px solid var(--interaction-highlight); outline-offset: 2px; }
 .phc-zone-option-colour input[type="text"] { width: 78px; min-width: 0; font-family: monospace; }
-.phc-zone-option-palette { display: flex; gap: 4px; width: 100%; }
+.phc-zone-option-swatches { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; width: 100%; }
+.phc-zone-option-palette { display: flex; flex-wrap: wrap; gap: 4px; }
 .phc-zone-option-palette button { width: 16px; height: 16px; min-height: 16px; min-width: 0; padding: 0; border: 1px solid var(--line); border-radius: var(--radius-sm); }
 .phc-zone-option-palette button:focus-visible { outline: 2px solid var(--interaction-highlight); outline-offset: 2px; }
+.phc-zone-options-dialog > .phc-zone-option-add { align-self: flex-start; }
 .phc-zone-option-usage, .phc-zone-option-help { font-size: 12px; color: var(--muted); }
 .phc-zone-options-dialog .phc-zone-option-default { flex: 0 0 auto; flex-direction: row; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 12px 0; }
 .phc-zone-option-default select { min-width: 0; max-width: 55%; }
@@ -88,7 +98,7 @@
 .phc-zone-option-source { overflow-wrap: anywhere; }
 .phc-zone-adoption-row .phc-zone-option-colour { grid-column: 1 / -1; }
 @media (max-width: 580px) {
-  .phc-zone-option-row { grid-template-columns: minmax(90px, 1fr) minmax(130px, 1fr); }
+  .phc-zone-option-row { grid-template-columns: minmax(90px, 1fr) auto; }
   .phc-zone-option-default { flex-wrap: wrap; }
   .phc-zone-option-default select { max-width: 100%; width: 100%; }
 }

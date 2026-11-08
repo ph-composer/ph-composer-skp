@@ -41,7 +41,8 @@ check({ name: "assignment", output }, async ({ newPage, step }) => {
 
     step("table choice clears assembly");
     // A table choice clears only assembly_id and preserves the edited boundary and Face type.
-    await page.getByRole("combobox", { name: "Wall 1 Assembly", exact: true }).selectOption("");
+    await page.getByRole("row", { name: /^Uncheck Wall 1/ }).getByRole("combobox", { name: "Wall 1 Assembly", exact: true })
+      .selectOption("");
     assert.equal(await page.evaluate(() => window.previewHost.faces[0].values.assembly_id), undefined);
     assert.equal(await page.evaluate(() => window.previewHost.faces[0].values.boundary_condition), "Ground");
     await page.getByRole("searchbox", { name: "Filter Zones", exact: true }).fill("Incomplete roof");
