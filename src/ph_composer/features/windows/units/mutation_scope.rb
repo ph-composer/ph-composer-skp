@@ -150,7 +150,8 @@ module PhComposer
               attrs.fetch(STORE.dictionary)[STORE.key] = CanonicalJson.generate(record)
             end
             { "path" => occurrence.path, "record" => DeepCopy.call(record), "dictionaries" => attrs,
-              "transformation" => entity.transformation.to_a, "world_transform" => occurrence.transform.to_a,
+              "name" => entity.name, "transformation" => entity.transformation.to_a,
+              "world_transform" => occurrence.transform.to_a,
               "definition_id" => entity.definition.persistent_id, "glued_face_id" => entity.glued_to&.persistent_id }
           end.sort_by { |row| row.fetch("path") }
         end

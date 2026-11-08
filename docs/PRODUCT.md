@@ -196,6 +196,11 @@ host Face, Level and Locate. Differing or unhosted Units retain their state and 
 repair routes. Window Type Colour-by paints the generated panes through the shared drawing
 service and respects hidden geometry and tags.
 
+A Window's name is its SketchUp instance name. It can be typed in the Schedule or in Entity Info's
+Instance field, and each shows the other's. A Window with no name reads as its Type and a number in
+the Schedule, as a hint. Names need not be unique, as in SketchUp; each Window's row sits under its
+Type. Selecting Windows in SketchUp marks their rows in the Schedule and scrolls to them.
+
 The Schedule shows net opaque host area: the gross host polygon minus the openings of glazed
 elements. Empty panels leave opaque area intact. Uncertain native Window geometry withholds
 the net value until repaired. The Geometry view and assembly usage retain gross area.

@@ -129,6 +129,8 @@
           this.windows.unit_areas || { faces: [], unhosted_units: [] })) },
         ["ph_composer.windows.units"]: { status: "completed", value: JSON.parse(JSON.stringify(this.windows.units ||
           { units: [] })) },
+        ["ph_composer.windows.units.selected"]: { status: "completed", value: {
+          units: JSON.parse(JSON.stringify(this.selectedUnits || [])) } },
         ["ph_composer.windows.place_tool"]: { status: "completed", value: JSON.parse(JSON.stringify(
           this.windows.place_tool || { active: false, type_id: null, anchor: "sill_center", host: null })) },
         ["ph_composer.windows.frames"]: { status: "completed",
@@ -429,6 +431,15 @@
     function invalidate(record) {
       record.display = Object.assign({}, record.display, { thermal: { uw_w_m2k: null, u_effective_w_m2k: null,
         findings: ["Preview changed definition: canonical thermal results require the Ruby host."], elements: [] } });
+    }
+    if (name === "units.rename") {
+      var named = this.windows.units.units.filter(function (unit) {
+        return JSON.stringify(unit.reference) === JSON.stringify(params.unit);
+      })[0];
+      if (!named || (named.name || "") !== params.expected_name) {
+        return refused("target.changed", "This Window's name changed in the Model.", this.revision);
+      }
+      named.name = params.name; return completed({ unit_id: named.id, name: params.name });
     }
     if (name === "settings.update") {
       if (JSON.stringify(params.expected_values) !== JSON.stringify(this.windows.settings)) {

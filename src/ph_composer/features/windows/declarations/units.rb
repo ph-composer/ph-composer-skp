@@ -5,6 +5,7 @@ require_relative "../units/host_extent"
 require_relative "../units/outlines"
 require_relative "../units/repairs"
 require_relative "../units/update_step"
+require_relative "../units/naming"
 require_relative "../units/return_to_host"
 
 module PhComposer
@@ -43,6 +44,7 @@ module PhComposer
         batch_repairs(feature, reference)
         identity_repair(feature, reference)
         metadata(feature, reference)
+        rename(feature, reference)
         flip_repair(feature, reference)
         restore_repair(feature, face)
         return_to_host(feature, reference)
@@ -74,6 +76,9 @@ module PhComposer
         finding = Shapes.object({ "code" => Shapes::TEXT, "repair" => repair })
         view = Shapes.with(Units::RECORD_KIND.descriptor.view_schema,
                            "reference" => reference, "host" => face.merge("type" => %w[object null]),
+                           "name" => { "type" => "string",
+                                       "description" => "The native instance name, as Entity Info shows it; empty " \
+                                                        "when the Window has none. Not unique." },
                            "extension_status" => STATUS_MAP,
                            "findings" => Shapes.list(finding))
         prefix = "#{FEATURE_ID}.units"
@@ -186,6 +191,28 @@ module PhComposer
                        :side_effects => Shapes.side_effects("Rewrites only the named Windows' metadata."),
                        :examples => [METADATA_EXAMPLE]) do |request, proposal|
           Authoring.update_unit_metadata(request, proposal, :updates => request.params.fetch("updates"))
+        end
+      end
+
+      def rename(feature, reference)
+        text = { "type" => "string" }
+        feature.action("#{FEATURE_ID}.units.rename",
+                       :description => "Set a Window's native instance name, the Instance field of Entity Info. An " \
+                                       "empty name clears it.",
+                       :refuses => Refuses::EDIT,
+                       :params => Shapes.object({ "unit" => unit(reference, "The Window occurrence to name."),
+                                                  "name" => text.merge("description" => "The new name; it need not " \
+                                                                                        "be unique."),
+                                                  "expected_name" => Shapes.described(text, "The name last read; a " \
+                                                                                            "change refuses.") }),
+                       :result => Shapes.object({ "unit_id" => Shapes::TEXT, "name" => text }),
+                       :undo_name => "Rename Window",
+                       :side_effects => Shapes.side_effects("Sets only the instance name; writes no record."),
+                       :examples => [{ "unit" => EXAMPLE_UNIT, "name" => "W-101",
+                                       "expected_name" => "" }]) do |request, proposal|
+          Authoring.rename_unit(request, proposal, :unit => request.params.fetch("unit"),
+                                                   :name => request.params.fetch("name"),
+                                                   :expected_name => request.params.fetch("expected_name"))
         end
       end
 

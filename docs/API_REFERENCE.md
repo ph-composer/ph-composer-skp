@@ -16406,6 +16406,7 @@ Result:
           "extension_data",
           "reference",
           "host",
+          "name",
           "extension_status",
           "findings"
         ],
@@ -16506,6 +16507,10 @@ Result:
                 ]
               }
             }
+          },
+          "name": {
+            "type": "string",
+            "description": "The native instance name, as Entity Info shows it; empty when the Window has none. Not unique."
           },
           "extension_status": {
             "type": "object",
@@ -16981,6 +16986,7 @@ Result:
           "extension_data",
           "reference",
           "host",
+          "name",
           "extension_status",
           "findings"
         ],
@@ -17081,6 +17087,10 @@ Result:
                 ]
               }
             }
+          },
+          "name": {
+            "type": "string",
+            "description": "The native instance name, as Entity Info shows it; empty when the Window has none. Not unique."
           },
           "extension_status": {
             "type": "object",
@@ -17298,6 +17308,68 @@ Example params:
 {
   "limit": 20
 }
+```
+
+### `ph_composer.windows.units.selection`
+
+The Window occurrences selected in SketchUp, at the active edit path. Owner: `ph_composer.windows`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.windows.units.list` instead.
+
+Refuses: only the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "units"
+  ],
+  "properties": {
+    "units": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "unit_id",
+          "entity_path"
+        ],
+        "properties": {
+          "unit_id": {
+            "type": "string"
+          },
+          "entity_path": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
 ```
 
 ### `ph_composer.zones.all`
@@ -45570,6 +45642,96 @@ Example params:
 }
 ```
 
+### `ph_composer.windows.units.rename`
+
+Set a Window's native instance name, the Instance field of Entity Info. An empty name clears it. Owner: `ph_composer.windows`.
+
+Undo step: Rename Window. Sets only the instance name; writes no record. It first gives every copied Window Unit that still shares an identity a new one, in the same Undo step; ph_composer.windows.units.repair_copied_identities does only that.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "unit",
+    "name",
+    "expected_name"
+  ],
+  "properties": {
+    "unit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "unit_id",
+        "entity_path"
+      ],
+      "properties": {
+        "unit_id": {
+          "type": "string"
+        },
+        "entity_path": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "integer"
+          }
+        }
+      },
+      "description": "The Window occurrence to name."
+    },
+    "name": {
+      "type": "string",
+      "description": "The new name; it need not be unique."
+    },
+    "expected_name": {
+      "type": "string",
+      "description": "The name last read; a change refuses."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "unit_id",
+    "name"
+  ],
+  "properties": {
+    "unit_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "unit": {
+    "unit_id": "wun_Ab12Cd34Ef56",
+    "entity_path": [
+      1201,
+      1203
+    ]
+  },
+  "name": "W-101",
+  "expected_name": ""
+}
+```
+
 ### `ph_composer.windows.units.repair_copied_identities`
 
 Give the copies sharing each chosen Window's identity new identities. The first occurrence by entity path keeps the identity; a preview lists each old and new id. Owner: `ph_composer.windows`.
@@ -55641,3 +55803,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.20 | 2026-11-08 | The thermal-bridge schedule and export count one Type on Edges two Zones of one Building-Segment share once. thermal_bridge.coincident_conflict replaces thermal_bridge.counted_twice for coincident Edges that differ. |
 | 1.21 | 2026-11-08 | ph_composer.spaces.all no longer answers a Zone's imbalanced or findings, and space.airflow_imbalance is gone: supply and extract balance per ventilator, not per Zone. |
 | 1.22 | 2026-11-08 | A Frame gains brand, an optional text field, in ph_composer.windows.frames and the frames library kind. |
+| 1.23 | 2026-11-08 | A Window Unit reads its native name in ph_composer.windows.units.list and .all; ph_composer.windows.units.rename and ph_composer.windows.units.selection are new. |

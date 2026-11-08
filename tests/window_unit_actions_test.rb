@@ -239,6 +239,100 @@ class WindowUnitActionsTest < PhComposerTestCase
     assert_equal "params.invalid", refused.fetch("code")
   end
 
+  def rename(item, name, expected = "")
+    assignment_invoke("#{PREFIX}.units.rename", "unit" => item.reference, "name" => name, "expected_name" => expected)
+  end
+
+  def test_a_unit_reads_its_native_name_so_entity_info_and_the_schedule_are_one_value
+    place
+    assert_equal "", units.first.fetch("name"), "an unnamed Window has no name to show"
+    U::Occurrences.all(@model).first.entity.name = "From Entity Info"
+    assert_equal "From Entity Info", units.first.fetch("name")
+  end
+
+  def test_rename_writes_only_the_instance_name_in_one_undo
+    place
+    item = U::Occurrences.all(@model).first
+    record = item.record
+    before = U::MutationScope.new.capture(@model)
+    result = rename(item, "W-101")
+    assert_equal "completed", result.fetch("status"), result.inspect
+    assert_equal "W-101", item.entity.name
+    assert_equal record, U::Occurrences.all(@model).first.record, "the name is not stored on the Unit record"
+    @model.undo
+    assert_equal "", units.first.fetch("name")
+    assert_equal before, U::MutationScope.new.capture(@model)
+    @model.redo
+    assert_equal "W-101", units.first.fetch("name")
+  end
+
+  def test_rename_with_an_empty_name_clears_it_and_repeated_names_are_allowed
+    place(2.0)
+    place(7.0)
+    first, second = U::Occurrences.all(@model)
+    assert_equal "completed", rename(first, "Same").fetch("status")
+    assert_equal "completed", rename(second, "Same").fetch("status")
+    assert_equal %w[Same Same], units.map { |row| row.fetch("name") }
+    assert_equal "completed", rename(first, "", "Same").fetch("status")
+    assert_equal "", first.entity.name
+  end
+
+  def test_rename_refuses_a_name_that_changed_since_it_was_read_without_writing
+    place
+    item = U::Occurrences.all(@model).first
+    item.entity.name = "Changed"
+    operations = @model.operations.length
+    refused = rename(item, "W-101")
+    assert_equal "target.changed", refused.fetch("code"), refused.inspect
+    assert_equal "Changed", item.entity.name
+    assert_equal operations, @model.operations.length
+  end
+
+  def test_rename_refuses_a_locked_parent_without_writing
+    place
+    item = U::Occurrences.all(@model).first
+    @group.locked = true
+    assert_equal "target.locked", rename(item, "W-101").fetch("code")
+    assert_equal "", item.entity.name
+  end
+
+  def test_rename_of_a_copy_repairs_its_identity_and_names_only_that_occurrence
+    place(2.0)
+    original = U::Occurrences.all(@model).first
+    copy = place(7.0) && U::Occurrences.all(@model).last
+    U.write(copy.entity, copy.record.merge("id" => original.record.fetch("id")))
+    copied = U::Occurrences.all(@model).last
+    result = rename(copied, "The copy")
+    assert_equal "completed", result.fetch("status"), result.inspect
+    named, plain = U::Occurrences.all(@model).partition { |item| item.entity.name == "The copy" }
+    assert_equal [1, 1], [named.length, plain.length]
+    refute_equal plain.first.record.fetch("id"), named.first.record.fetch("id")
+  end
+
+  def test_selection_names_only_windows_selected_at_the_active_edit_path
+    place(2.0)
+    place(7.0)
+    first, second = U::Occurrences.all(@model)
+    assert_empty assignment_query("#{PREFIX}.units.selection").fetch("units")
+    @model.active_path = [@group]
+    @model.selection.add(first.entity)
+    assert_equal [first.reference], assignment_query("#{PREFIX}.units.selection").fetch("units")
+    @model.selection.add(second.entity)
+    assert_equal [first.reference, second.reference], assignment_query("#{PREFIX}.units.selection").fetch("units")
+    @model.selection.clear
+    @model.selection.add(@group.entities.grep(Sketchup::Face).first)
+    assert_empty assignment_query("#{PREFIX}.units.selection").fetch("units"), "a Face is not a Window"
+  end
+
+  def test_selection_passes_over_a_window_whose_record_cannot_be_read
+    place
+    item = U::Occurrences.all(@model).first
+    @model.active_path = [@group]
+    @model.selection.add(item.entity)
+    item.entity.set_attribute(U::STORE.dictionary, U::STORE.key, "not a record")
+    assert_empty assignment_query("#{PREFIX}.units.selection").fetch("units")
+  end
+
   def test_read_works_under_locked_parent_but_placement_refuses
     place
     @group.locked = true

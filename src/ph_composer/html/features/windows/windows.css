@@ -76,6 +76,8 @@
 .window-placement-measure { display:inline-flex; gap:4px; }
 .window-placement-hint code { font-weight:600; color:var(--interaction-highlight); }
 .window-schedule { min-width:0; }
+/* A row followed from SketchUp stops clear of the sticky header. */
+.window-schedule tr { scroll-margin-top:44px; }
 .window-schedule > .muted { margin:8px 0; }
 .window-repair-dialog select { width:100%; min-width:0; }
 /* One outlined group per job, spaced apart; buttons inside a group drop their own border, and a pressed tool keeps

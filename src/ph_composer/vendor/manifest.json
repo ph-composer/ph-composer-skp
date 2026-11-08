@@ -236,9 +236,9 @@
       "sha256": "ece530290c6c2c7ff7bef585a110d4999d59d0389ae0a4007484791c258cb9ac"
     },
     "html/features/windows/schedule.js": {
-      "bytes": 15214,
+      "bytes": 17725,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "419f32de4738ccce45816a2ff2980ee027e15cfc5bfb05388345648635d5cbb5"
+      "sha256": "fbf395dff4fdc077105ad172a1fb114c538a5aa9a712ae0a8436297dba3fd588"
     },
     "html/features/windows/section.js": {
       "bytes": 1943,
@@ -251,9 +251,9 @@
       "sha256": "f9bdafe79d3675118c31feff05ad4a5c82ada872c75110c636b411239ff6ae2d"
     },
     "html/features/windows/windows.css": {
-      "bytes": 35712,
+      "bytes": 35829,
       "mime": "text/css; charset=utf-8",
-      "sha256": "4906032b3cee540750dfa4674248c723e2f2cdac77daa942636866e8d83d0c34"
+      "sha256": "2eae4f2ec204df7d51b1fad18544cbdaf7c4cf238c92886192b22730e92dfe8a"
     },
     "html/features/zones/assembly_assignment.js": {
       "bytes": 14798,
@@ -441,9 +441,9 @@
       "sha256": "77298381d2f6e9e82425be56ddbb8af249cb31f4f2888d27ec454ba8318b59eb"
     },
     "html/record_edits.js": {
-      "bytes": 17970,
+      "bytes": 18177,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "b8c3dee8368e4f1e5c04955597f65acafada3ccf091c10b449a6134fe7460f8c"
+      "sha256": "89c8e33340958e9ad7824a231479446dc7f77a73d74e358267f0fab892fb37fa"
     },
     "html/record_form.js": {
       "bytes": 4728,

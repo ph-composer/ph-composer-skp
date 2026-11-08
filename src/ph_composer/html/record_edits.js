@@ -7,6 +7,7 @@
    send(cell) -> { action, params }, label(row, field, cell), recordLabel, fieldAttribute,
    presentation ("overlay" or "inline"), statusText(cell), textInputs, navigateOnCommit,
    cancelControl (a visible Cancel beside a draft that needs one, for mouse users),
+   placeholder(row, field) (what an empty input shows in place of a value),
    refusalText(outcome) (the user's words for a refused or failed outcome, or null for the host's).
    The default action params are { id, values, expected_values }; custom send owns its public action shape. */
 PhComposerUI.define("record_edits", ["request", "snapshot", "unit_preferences", "units", "workspace"],
@@ -33,6 +34,7 @@ PhComposerUI.define("record_edits", ["request", "snapshot", "unit_preferences", 
       this.textInputs = Boolean(options.textInputs);
       this.navigateOnCommit = options.navigateOnCommit !== false;
       this.cancelControl = Boolean(options.cancelControl);
+      this.placeholder = options.placeholder;
       this.refusalText = options.refusalText || function () { return null; };
       this.requiredFields = options.requiredFields || [];
       this.notice = notice || function () {};
@@ -329,6 +331,7 @@ PhComposerUI.define("record_edits", ["request", "snapshot", "unit_preferences", 
       // An empty number reads as the tables' missing-value dash, not a blank cell.
       var field_ = cell.input;
       if (numeric && field_.tagName.toLowerCase() === "input" && !field_.placeholder) field_.placeholder = "\u2014";
+      if (this.placeholder) field_.placeholder = this.placeholder(row, field) || "";
       cell.row = row;
       cell.input.setAttribute("aria-label", this.label ? this.label(row, field, cell) :
         ((row.record.values || {}).name || row.record.id) + " " + ui.titleCase(field));

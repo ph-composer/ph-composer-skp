@@ -83,6 +83,11 @@ module PhComposer
         Units::Metadata.update(request, proposal, :updates => updates)
       end
 
+      def rename_unit(request, proposal, unit:, name:, expected_name:)
+        Units::Mutation.prepare(request, proposal)
+        Units::Naming.rename(request, proposal, :unit => unit, :name => name, :expected_name => expected_name)
+      end
+
       # The placed Windows follow the Type as the proposal leaves it.
       def follow_type(request, proposal, before)
         id = before.fetch("id")

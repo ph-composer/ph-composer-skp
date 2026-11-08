@@ -2,6 +2,7 @@
 
 require_relative "../place_tool"
 require_relative "../units/locate"
+require_relative "../units/naming"
 
 module PhComposer
   module Windows
@@ -64,6 +65,18 @@ module PhComposer
                              :examples => [{ "units" => [UnitRegistration::EXAMPLE_UNIT] }]) do |request|
           Units::Locate.call(request.model, request.params.fetch("units"))
         end
+        selection(feature, reference)
+      end
+
+      # Never refuses, so a selection holding no Window reads as none rather than as a failure.
+      def selection(feature, reference)
+        feature.query("#{FEATURE_ID}.units.selection",
+                      :description => "The Window occurrences selected in SketchUp, at the active edit path.",
+                      :refuses => [], :params => Shapes::NONE,
+                      :result => Shapes.object({ "units" => Shapes.list(reference) }),
+                      :response => { "bounded" => false, "prefer" => "#{FEATURE_ID}.units.list" },
+                      :examples => [{}]) { |request| { "units" => Units::Naming.selected(request.model) } }
+        feature.snapshot_section("#{FEATURE_ID}.units.selected", :query => "#{FEATURE_ID}.units.selection")
       end
 
       def menus(feature)
