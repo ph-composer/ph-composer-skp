@@ -256,9 +256,9 @@
       "sha256": "c6eca7b096793ea15a24512f23d935e966298707641fd3108be65343b15cd520"
     },
     "html/features/zones/assembly_assignment.js": {
-      "bytes": 14773,
+      "bytes": 14784,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "d47083c5918542276a183712205c3660fdc2e2884ac64b62226bde7a147ebddf"
+      "sha256": "d13b9dd6851a6007bbd74306354508413b2ca281ac1f4646caf51c8708d43198"
     },
     "html/features/zones/attached_zone_assignment.js": {
       "bytes": 4211,
@@ -346,9 +346,9 @@
       "sha256": "4ae72e5b40aadf6814fd13a64aada90519aecd8a95c87b2168cbf0fed9a7787b"
     },
     "html/inventory_forms.js": {
-      "bytes": 20546,
+      "bytes": 21001,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "c5b0ca3b271b911332d39bad1c1b0470e2391129d55be00a6651d1512404fe7d"
+      "sha256": "9b2f22bbffe096ba3c774cc935408d107c61ea8b166dc332b0bbedc95f297454"
     },
     "html/inventory_grid.js": {
       "bytes": 16227,

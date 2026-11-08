@@ -196,6 +196,7 @@ PhComposerUI.define("features/zones/assembly_assignment", ["panel", "snapshot", 
     if (replacement) replacement.refresh(state);
     return available;
   }
+  forms.contributeUsage(TABLE, useNames);
   ui.contributeTable(TABLE, { id: PREFIX + ".assembly_usage", available: settleContributions,
     columns: [["face_usage", "Faces · Gross area"]],
     value: function (row, _field, state) { return usage(state, row.record.id); },
@@ -226,8 +227,7 @@ PhComposerUI.define("features/zones/assembly_assignment", ["panel", "snapshot", 
         if (replacement && !replacement.root.hidden) return;
         if (!replacement) {
           replacement = new forms.ReplacementForm(state.session, send, function () { panel.repaint(); },
-            { section: TABLE, label: "Assembly", replacement: true, allowClear: true, usedOn: "Face",
-              usage: useNames });
+            { section: TABLE, label: "Assembly", replacement: true, allowClear: true, usedOn: "Face" });
           document.body.appendChild(replacement.root);
         }
         replacement.refresh(live);

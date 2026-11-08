@@ -19,6 +19,10 @@ function (RecordForm, request, snapshot, ui) {
     }
     return form.settle(state);
   }
+  /* What another feature knows about the uses of a section's records: `usage(state, id)` answers
+     `{ count, description }`. Every way into that section's ReplacementForm then lists the same uses. */
+  var usageSources = Object.create(null);
+  function contributeUsage(section, usage) { usageSources[section] = usage; }
   function ReplacementForm(session, send, changed, options) {
     var self = this;
     this.options = options;
@@ -40,16 +44,17 @@ function (RecordForm, request, snapshot, ui) {
   };
   ReplacementForm.prototype.reconcile = function (record, records) {
     this.record = record;
-    var usage = this.options.usage ? this.options.usage(this.state, record.id) : null;
+    var source = this.options.usage || usageSources[this.options.section];
+    var usage = source ? source(this.state, record.id) : null;
     this.inUse = Boolean(this.options.replacement && (this.options.alwaysReplacement ||
       (usage ? usage.count : record.use_count)));
     this.title.textContent = (this.inUse ? "Replace and delete " : "Delete ") + record.values.name;
-    this.explanation.hidden = !(this.inUse && this.options.usedOn);
+    this.explanation.hidden = !(this.inUse && this.options.usedOn && (!usage || usage.count));
     this.explanation.textContent = this.explanation.hidden ? "" : "Moves every " + this.options.usedOn + " that uses " +
       record.values.name + " to the " + this.options.label + " you choose" +
       (this.options.allowClear ? ", or leaves them with none," : ",") + " then deletes " + record.values.name + ".";
     var uses = (record.uses || []).map(function (use) { return use.name; }).join(", ");
-    this.uses.textContent = this.inUse ? (usage ? usage.description : uses ? "Used by: " + uses :
+    this.uses.textContent = this.inUse ? (usage && usage.count ? usage.description : uses ? "Used by: " + uses :
       "Choose a replacement or clear existing uses.") :
       "Delete " + this.options.label + ' "' + record.values.name + '"?';
     this.select.parentNode.hidden = !this.inUse;
@@ -403,7 +408,8 @@ function (RecordForm, request, snapshot, ui) {
     td._color.setAttribute("aria-label", "Color for " + record.values.name + ": " + color);
     td._color.disabled = !form.enabled || form.requests.busy();
   }
-  return { ReplacementForm: ReplacementForm, DuplicateForm: DuplicateForm, ColorForm: ColorForm, colorCell: colorCell,
+  return { contributeUsage: contributeUsage, ReplacementForm: ReplacementForm,
+    DuplicateForm: DuplicateForm, ColorForm: ColorForm, colorCell: colorCell,
     labelled: labelled, required: RecordForm.required,
     refreshForm: refreshForm };
 });

@@ -233,6 +233,19 @@ test("Replace and delete says what it does and lists Faces by Zone and Face name
   assert.ok(shown.includes("2 Faces: Zone 1 · Wall 2, Zone 1 · Wall 3"), shown);
   assert.ok(!/\[|10[123]|fac_/.test(shown), "no internal id reaches the dialog: " + shown);
 });
+test("the row's Delete lists the same Faces, and an Assembly on no Face is not told its Faces will move", function () {
+  var o = setup(), inventory = o.query("[data-section='assemblies']")._view.inventory;
+  var used = { record: inventory.records[0] }, unused = { record: inventory.records[1] };
+  inventory.tableOptions.action(used, rowAction(inventory, used, "delete"));
+  var dialog = o.document.querySelectorAll("dialog").filter(function (node) { return !node.hidden; })[0];
+  assert.ok(text(dialog).includes("Moves every Face that uses Wall"), text(dialog));
+  assert.ok(text(dialog).includes("1 Face: Zone 1 · Wall 1"), text(dialog));
+  click(dialog.querySelectorAll("button").filter(function (button) { return button.textContent === "Cancel"; })[0]);
+  inventory.tableOptions.action(unused, rowAction(inventory, unused, "delete"));
+  dialog = o.document.querySelectorAll("dialog").filter(function (node) { return !node.hidden; })[0];
+  assert.ok(!text(dialog).includes("Moves every Face"), text(dialog));
+  assert.ok(text(dialog).includes("Choose a replacement or clear existing uses."), text(dialog));
+});
 test("a long Face list in Replace and delete names the first Faces and counts the rest", function () {
   var o = setup(), inventory = o.query("[data-section='assemblies']")._view.inventory;
   var row = { record: inventory.records[0] };
