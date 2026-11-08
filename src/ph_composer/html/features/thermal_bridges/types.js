@@ -3,9 +3,9 @@
    clearing, for the Edges using it. Used length comes from the last schedule read, since it walks the Model. */
 PhComposerUI.define("features/thermal_bridges/types", ["panel", "snapshot", "workspace", "fields", "units",
   "unit_preferences", "unit_field", "record_form", "inventory", "inventory_forms", "features/thermal_bridges/shared",
-  "features/thermal_bridges/assign_bar"],
+  "features/thermal_bridges/assign_bar", "sections/colour_by"],
 function (panel, snapshot, ui, fields, units, preferences, unitFields, RecordForm, inventories, forms, shared,
-  bars) {
+  bars, colourBy) {
   "use strict";
   var LABEL = "Thermal Bridge Type", NAME_HINT = "Enter a name to create the type.";
   var PSI = fields.with(fields.LINEAR_PSI, { label: "ψ-value", allowBlank: true });
@@ -95,12 +95,14 @@ function (panel, snapshot, ui, fields, units, preferences, unitFields, RecordFor
     }, panel.notify);
     root.appendChild(this.bar.root);
     var table = ui.element("div", "tb-types-table");
+    var toggles = new colourBy.HeaderToggles({ name: shared.BY_TYPE, group: shared.BY_GROUP });
     root.appendChild(table);
     this.inventory = new inventories.Inventory(table, session, send, panel.notify, changed, {
       tableId: shared.TYPES, section: shared.TYPES, action: shared.TYPES + ".update", label: LABEL,
       columns: columns, editable: ["name", "psi_w_mk", "group", "notes"], quantities: quantities,
       selectFields: { group: shared.GROUPS }, groups: [["group", "Group"]], notice: panel.notify,
       columnMenus: { sort: ["name", "psi_w_mk", "group", "length_m", "notes"], filter: ["group"] },
+      headerActions: function (field, state) { return toggles.actions(state, field); },
       value: function (record, field) {
         if (field === "length_m") { var totals = self.read.totals(record.id); return totals && totals.length_m; }
         if (field === "datasheet") return (record.values.datasheet_links || [])[0] || "";

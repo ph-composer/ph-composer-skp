@@ -2,7 +2,8 @@
  * section. The feature supplies every record value, label and action through `config`.
  * `config.columnMenus` ({ sort: [field], filter: [field] }), when given, sorts and filters from each named
  * column's menu (column_menu.js) in place of Order by; a filter offers the column's values as shown, its
- * declared choices included. */
+ * declared choices included. `config.headerActions(field, state)`, when given, adds a feature's own actions to
+ * a column's header, before its menu; each is a `{ node, persistent }` (table.js). */
 PhComposerUI.define("inventory", ["request", "snapshot", "workspace", "table", "view_controls", "record_edits",
   "inventory_grid", "units", "unit_preferences", "column_menu"],
 function (request, snapshot, ui, tables, viewControls, RecordEdits, Grid, units, preferences, columnMenus) {
@@ -197,13 +198,14 @@ function (request, snapshot, ui, tables, viewControls, RecordEdits, Grid, units,
       }, empty: payload ? (this.records.length ? "No " + config.label + " records match this view." :
         "No " + config.label + " records yet. Choose + New " + config.label + ".") :
         snapshot.message(snapshot.section(state, config.section) || {}, config.label + " records are unavailable.") };
-    if (config.columnMenus) {
-      var labels = Object.create(null), spec = config.columnMenus;
+    if (config.columnMenus || config.headerActions) {
+      var labels = Object.create(null), spec = config.columnMenus || {};
       columns.forEach(function (column) { labels[column[0]] = column[1]; });
       this.tableOptions.headerActions = function (field) {
-        if ((spec.sort || []).indexOf(field) < 0 && (spec.filter || []).indexOf(field) < 0) return [];
+        var own = config.headerActions ? config.headerActions(field, state) : [];
+        if ((spec.sort || []).indexOf(field) < 0 && (spec.filter || []).indexOf(field) < 0) return own;
         var menu = self.columnMenu(field, labels[field]);
-        return [{ node: menu.root, persistent: menu.filtered() }];
+        return own.concat([{ node: menu.root, persistent: menu.filtered() }]);
       };
     }
     if (config.tableId) this.tableOptions = ui.composeTable(config.tableId, this.tableOptions, state,

@@ -31,6 +31,23 @@ check({ name: "thermal_bridges", output }, async ({ newPage, step }) => {
     "Basement floor");
   await page.screenshot({ path: path.join(output, "types.png") });
 
+  step("Colour by from the Types table's Group header, and off again");
+  const mode = () => host("window.previewHost.colourBy.mode");
+  const groupHeader = types.locator("th.col-group");
+  await groupHeader.hover();
+  const byGroup = groupHeader.getByRole("button", { name: "Colour by Thermal bridge group", exact: true });
+  await byGroup.click();
+  await page.waitForFunction(() => window.previewHost.colourBy.mode === "ph_composer.thermal_bridges.by_group");
+  await page.waitForFunction(() =>
+    document.querySelector(".tb-types th.col-group [aria-pressed='true']:not(:disabled)"));
+  await page.screenshot({ path: path.join(output, "types-colour-by-group.png") });
+  await byGroup.click();
+  await page.waitForFunction(() => !window.previewHost.colourBy.mode);
+  assert.equal(await mode(), null);
+  await types.locator("th.col-name").hover();
+  await types.locator("th.col-name").getByRole("button", { name: "Colour by Thermal Bridge Type", exact: true })
+    .waitFor();
+
   step("edit a psi-value in place");
   const psi = types.locator("[data-row-key='tbt_Gg77Hh88Ii99'] [data-record-field='psi_w_mk']");
   await psi.dblclick();
@@ -49,7 +66,7 @@ check({ name: "thermal_bridges", output }, async ({ newPage, step }) => {
   assert.equal((await sent(TB + "edges.assign"))[0].payload.params.targets.length, 3);
 
   step("arm the edge tool from the bar, see it pressed with Stop beside it, and stop it");
-  await bar.getByRole("button", { name: "Assign by clicking", exact: true }).click();
+  await bar.getByRole("button", { name: "Assign by clicking Edges", exact: true }).click();
   await bar.getByRole("button", { name: "Assign by clicking", pressed: true }).waitFor();
   await page.locator("body").click({ position: { x: 5, y: 5 } }); // focus leaves the button, as it does for SketchUp
   assert.notEqual(await bar.getByRole("button", { name: "Assign by clicking" }).evaluate(node =>
@@ -64,9 +81,9 @@ check({ name: "thermal_bridges", output }, async ({ newPage, step }) => {
     await page.screenshot({ path: path.join(output, `edge-tool-armed-${width}x${height}.png`) });
   }
   await setPanelSize(page, 1280, 800);
-  await bar.getByRole("button", { name: "Stop assigning by clicking", exact: true }).click();
+  await bar.getByRole("button", { name: "Stop assigning Edges by clicking", exact: true }).click();
   await bar.getByRole("button", { name: "Assign by clicking", pressed: false }).waitFor();
-  await bar.getByRole("button", { name: "Stop assigning by clicking" }).waitFor({ state: "hidden" });
+  await bar.getByRole("button", { name: "Stop assigning Edges by clicking" }).waitFor({ state: "hidden" });
 
   step("create, duplicate and delete in the form dialog");
   await pane.getByRole("button", { name: "+ New Thermal Bridge Type", exact: true }).click();
@@ -122,6 +139,16 @@ check({ name: "thermal_bridges", output }, async ({ newPage, step }) => {
     m.payload.name === "ph_composer.thermal_bridges.schedule.all").length === 2);
   await schedule.locator("[data-row-key='tb_Aa11Bb22Cc33']").waitFor();
   assert.equal(await schedule.locator(".phc-view-count").textContent(), "3 runs");
+  // The stand-in host stays on by-Type once the edge tool stops, so Group is the toggle that is off.
+  const scheduleTable = schedule.locator(".tb-schedule-table");
+  const scheduleGroup = scheduleTable.locator("th.col-group");
+  await scheduleGroup.hover();
+  await scheduleGroup.getByRole("button", { name: "Colour by Thermal bridge group", exact: true }).click();
+  await page.waitForFunction(() => window.previewHost.colourBy.mode === "ph_composer.thermal_bridges.by_group");
+  await page.waitForFunction(() => document.querySelector(".tb-schedule-table th.col-group [aria-pressed='true']"));
+  await scheduleTable.locator("th.col-type_name").getByRole("button", { name: "Colour by Thermal Bridge Type",
+    exact: true, pressed: false }).waitFor({ state: "attached" });
+  await page.screenshot({ path: path.join(output, "schedule-colour-by-group.png") });
   await schedule.getByRole("button", { name: "Locate Parapet 1", exact: true }).click();
   await page.waitForFunction(() => (window.previewHost.locatedEdges || []).length === 4);
   await schedule.locator("[data-row-key='tb_Gg77Hh88Ii99'] .col-zone").click();

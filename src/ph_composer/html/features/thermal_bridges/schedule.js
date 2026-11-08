@@ -3,8 +3,8 @@
    Edges, or a finding's, and opens the context holding them. The read is the owner's (shared.ScheduleRead):
    this view shows it, says when the Model has changed since, and offers Refresh. */
 PhComposerUI.define("features/thermal_bridges/schedule", ["request", "workspace", "table", "view_controls",
-  "fields", "units", "unit_preferences", "features/thermal_bridges/shared"],
-function (request, ui, tables, viewControls, fields, units, preferences, shared) {
+  "fields", "units", "unit_preferences", "features/thermal_bridges/shared", "sections/colour_by"],
+function (request, ui, tables, viewControls, fields, units, preferences, shared, colourBy) {
   "use strict";
   var LOCATE = shared.PREFIX + "runs.locate";
   var PSI = fields.LINEAR_PSI, LENGTH = fields.LENGTH_M, HEAT = fields.HEAT_LOSS;
@@ -35,6 +35,7 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared)
     var self = this;
     this.read = read; this.runs = []; this.expanded = Object.create(null);
     this.locate = request.channel(session, send, "thermal-bridge-locate", "view.invoke");
+    this.toggles = new colourBy.HeaderToggles({ type_name: shared.BY_TYPE, group: shared.BY_GROUP });
     this.controls = new viewControls.ViewControls({ label: "thermal bridges", placeholder: "Name, Zone or type",
       fields: [["order", "Schedule order"]].concat(COLUMNS), initialOrder: "order",
       groups: [["zone", "Zone"], ["type_name", "Type"], ["group", "Group"], ["building_segment", "Building-Segment"]],
@@ -136,6 +137,7 @@ function (request, ui, tables, viewControls, fields, units, preferences, shared)
       columns: [["actions", "Actions"]].concat(COLUMNS.map(function (column) {
         return [column[0], header(column[1], column[0])];
       })),
+      headerActions: function (name) { return self.toggles.actions(state, name); },
       hiddenColumns: hidden, rowHidden: projected.hidden, group: projected.group,
       visibleCount: projected.visibleCount, toggleGroup: function (key) { self.controls.toggleGroup(key); },
       value: function (row, name) { return field(row.record, name); },

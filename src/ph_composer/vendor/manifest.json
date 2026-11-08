@@ -156,9 +156,9 @@
       "sha256": "f47f4fafc04aff52a85f2e4b7ced997d86a859ce024320d09c152aaa5bb35746"
     },
     "html/features/thermal_bridges/schedule.js": {
-      "bytes": 15166,
+      "bytes": 15384,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "cb11596bb6e184a9790e7c6572e4801942dac7df1f2028971dad19933aa90798"
+      "sha256": "2219701d2a00dbe15f25919f12e8b99e7c4b84bd8cf014443825a74efda54407"
     },
     "html/features/thermal_bridges/section.js": {
       "bytes": 3389,
@@ -166,9 +166,9 @@
       "sha256": "4184fa86571b9a4efd0f3403e1ab67eaa3a8e4a6ee2c52676d7364bb4b3d5d5f"
     },
     "html/features/thermal_bridges/shared.js": {
-      "bytes": 3192,
+      "bytes": 3276,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "e301a567441116407faf3ab58b3af96de39cf7642182bd191bf2f19b75886d76"
+      "sha256": "bb1601cc7864ae5a50a757e49d87d033de32b15f050abd9040fbdbb7050961a6"
     },
     "html/features/thermal_bridges/thermal_bridges.css": {
       "bytes": 4597,
@@ -176,9 +176,9 @@
       "sha256": "d278a9929057f801f6f2b34a4f6c0771c958fc559015c1634fcc9cb24bcca01a"
     },
     "html/features/thermal_bridges/types.js": {
-      "bytes": 11277,
+      "bytes": 11493,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "90f63e73801fa9d4a278285c00bbb603e14f516369a6b7b43cc41fbc448caba3"
+      "sha256": "f837167a37863a937f3af1702733ccb35a7844900e14a03788b39f7748b9b907"
     },
     "html/features/windows/audit.js": {
       "bytes": 5332,
@@ -341,9 +341,9 @@
       "sha256": "9e8cd53b0b8afaebd46b6c18d8ac263a683408047c459c4cb2d1b880ed84f874"
     },
     "html/inventory.js": {
-      "bytes": 12199,
+      "bytes": 12490,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "dbbe1848f98a31b36c23e3b700fbe05fbe8c8f2f53df874dc1211dd99e650582"
+      "sha256": "4ae72e5b40aadf6814fd13a64aada90519aecd8a95c87b2168cbf0fed9a7787b"
     },
     "html/inventory_forms.js": {
       "bytes": 20078,
@@ -466,9 +466,9 @@
       "sha256": "bef8b9354bd1daf4b522e432597e1576ac0ea6bff880a7239083b05b3c6438a0"
     },
     "html/sections/colour_by.js": {
-      "bytes": 7766,
+      "bytes": 8481,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "e5ebba5bd89e3f047ff07f61a082b67f716de16fdba7d882007927919a6efe37"
+      "sha256": "53c825755869f1a5f4f5bf3fbe49fca66094778fcd81ba509ea4c374df105c48"
     },
     "html/sections/export.js": {
       "bytes": 15957,

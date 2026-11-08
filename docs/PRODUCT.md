@@ -142,8 +142,9 @@ Edges inside a Zone take a type from the Thermal Bridges tab's assign bar, from 
 "Thermal bridge" menu, or by clicking them with Assign by clicking Edges; each gesture is one Undo step, and
 the assignment lives on the edge, so a copy or a split carries it. Connected edges of one type,
 quantity and Zone form one run, named by its type and a counter. The Schedule lists each run's
-length, psi-value, quantity and heat loss with totals by type and by group, and Colour by shows
-assigned edges in their type's colour. Export writes each run as one thermal bridge on its Zone's
+length, psi-value, quantity and heat loss with totals by type and by group. Colour by shows assigned
+edges in their type's colour or their group's, from the palette icons on the Name and Group columns of
+the Types table and the Type and Group columns of the Schedule, or from the Colour by menu. Export writes each run as one thermal bridge on its Zone's
 Building-Segment. A missing type or psi-value blocks export; an edge outside every Zone, a stray
 line, an interior junction, an edge counted in two Zones and an edge on a placed window's outline
 are warnings in the preflight and the report, and the rest export. Point bridges and chi-values

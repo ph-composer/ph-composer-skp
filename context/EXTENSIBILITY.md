@@ -604,7 +604,7 @@ occurrence mask through the public view command. The panel has no legend strip; 
 and isolation remain public view commands for scripts.
 
 A mode may declare `stroke:`, the width in pixels of the lines its derived shapes draw ("Colour-by
-derived geometry"). Thermal bridges' mode, which draws Edges, declares 5.
+derived geometry"). Thermal bridges' modes, which draw Edges, declare 5.
 
 The shared service owns registration, the one `Sketchup::Overlay` a Model gets, the viewport HUD
 legend and cache invalidation. It reads no record and knows no mode, and turning a mode on writes
@@ -641,11 +641,11 @@ ColourBy::Entry.new(path: volume.path, value: "2.50", label: "2.50 m",
   mode draws, polygon outlines included, and nothing else: unclassified outlines and the hatch keep
   their own weights. An entry with both an entity and shapes draws both.
 - **Edges.** An Edge contributes no Face geometry, so an entry whose `entity` is an Edge draws only its
-  shapes. Thermal bridges' mode gives each assigned Edge occurrence one world segment, so the Edge
+  shapes. Each Thermal bridge mode gives each assigned Edge occurrence one world segment, so the Edge
   still serves visibility along its path, select and Locate, and Show only this:
 
   ```ruby
-  feature.colour_mode("ph_composer.thermal_bridges.by_type", label: "Thermal bridges",
+  feature.colour_mode("ph_composer.thermal_bridges.by_type", label: "Thermal Bridge Type",
                       entity_kind: "edge", stroke: 5, colours: ->(_value) { nil }) do |read|
     Scan.walk(read.model).first.map do |edge|
       ends = [edge.edge.start, edge.edge.end].map { |vertex| vertex.position.transform(edge.transform) }

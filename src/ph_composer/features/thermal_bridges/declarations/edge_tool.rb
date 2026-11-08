@@ -45,7 +45,7 @@ module PhComposer
                              :refuses => CHOOSE_REFUSES, :params => CHOOSE_PARAMS, :result => STATE,
                              :preconditions => ["The Thermal Bridge Type exists and is readable."],
                              :side_effects => "Gives the viewport to the edge tool and turns on Colour by " \
-                                              "Thermal bridges until it stops; a choice while it runs re-arms it " \
+                                              "Thermal Bridge Type until it stops; a choice while it runs re-arms it " \
                                               "for the next gesture.",
                              :examples => [{ "thermal_bridge_type_id" => Shapes.example_id(Type::KIND) },
                                            { "thermal_bridge_type_id" => Shapes.example_id(Type::KIND),

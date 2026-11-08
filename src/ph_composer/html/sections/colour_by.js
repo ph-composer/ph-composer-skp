@@ -4,6 +4,8 @@
  *   binding names one mode (`{ mode }`) or a group of modes (`{ group }`), which a mode declares when it
  *   registers. One mode is on at a time: pressing an unpressed toggle turns its mode on and releases any
  *   other, and pressing the pressed one turns Colour by Off. A group with several modes opens a menu of them.
+ * - `HeaderToggles(bindings)`, one toggle per bound column for a table: `actions(state, field)` answers the
+ *   column's `headerActions` entries.
  * - `modes(state)` and `activate(state, name)`, so a screen can offer a mode no column binds (an options
  *   menu) through the same command.
  * - `readouts(state)` and `showReadout(state, name, on)`, so a screen can offer the readouts its feature
@@ -111,6 +113,18 @@ function (panel, ui, requests, snapshot) {
     if (this.pressed) item("Off", null);
   };
 
+  /* A table's toggles, field to binding. Each is kept across repaints, so a press keeps its focus. */
+  function HeaderToggles(bindings) {
+    this.bindings = bindings;
+    this.toggles = Object.create(null);
+  }
+  HeaderToggles.prototype.actions = function (state, field) {
+    var binding = this.bindings[field];
+    if (!binding) return [];
+    var toggle = this.toggles[field] || (this.toggles[field] = new HeaderToggle(binding));
+    return toggle.paint(state) ? [{ node: toggle.node, persistent: toggle.pressed }] : [];
+  };
+
   /* The active mode's key, disclosed alongside a matching column's Show choices. */
   function colour(state, binding, value) {
     if (!binding) return null;
@@ -150,6 +164,7 @@ function (panel, ui, requests, snapshot) {
     });
   }
 
-  return { HeaderToggle: HeaderToggle, modes: modes, activate: activate, colour: colour, filter: filter,
+  return { HeaderToggle: HeaderToggle, HeaderToggles: HeaderToggles, modes: modes, activate: activate,
+    colour: colour, filter: filter,
     readouts: readouts, showReadout: showReadout };
 });

@@ -10,7 +10,7 @@
 #   scan/           the live read: one walk for assigned Edges, Zones' answers for their paths, the schedule
 #   run_locate.rb   runs.locate, which selects a run's Edges through the foundation's context.open
 #   export.rb       the export section and its preflight, over the same runs as the schedule
-#   colour_modes.rb the Thermal bridges Colour-by mode, assigned Edges in their type's colour
+#   colour_modes.rb the Colour-by modes, assigned Edges in their type's colour or their group's
 #   edge_tool.rb    the edge tool, the pointer route to edges.assign; declarations/edge_tool.rb its commands
 #   codes.rb        the codes under the thermal_bridge noun
 #   declarations/   what thermal bridges register, the right-click menu among it

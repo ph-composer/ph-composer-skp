@@ -14,7 +14,7 @@ function setup(edges) {
   document.body.appendChild(root);
   function send(type, payload) { sent.push({ type: type, payload: payload }); }
   function paint() { Object.keys(sections).forEach(function (key) { sections[key](root, state, send); }); }
-  var panel = { section: function (name, render) { sections[name] = render; }, repaint: paint,
+  var panel = { state: state, send: send, section: function (name, render) { sections[name] = render; }, repaint: paint,
     navigationGuard: function () {}, workedOn: function () {},
     notify: function (message) { notices.push(message); } };
   var context = { document: document, Intl: Intl, innerWidth: 1280, innerHeight: 800,
@@ -36,6 +36,22 @@ function readSchedule(o) {
   answer(o, reads[reads.length - 1], { status: "completed", revision: o.state.revision,
     value: fixtures.schedule() });
 }
+function legend(o, mode) {
+  o.state.sections["ph_composer.colour_by.legend"] = { status: "completed", value: { mode: mode || null, rows: [],
+    modes: [{ name: PREFIX + "by_type", label: "Thermal Bridge Type", entity_kind: "edge", group: null },
+      { name: PREFIX + "by_group", label: "Thermal bridge group", entity_kind: "edge", group: null }] } };
+  o.paint();
+}
+function palettes(surface) {
+  return surface.querySelectorAll("button").filter(function (node) {
+    return /^Colour by /.test(node.getAttribute("aria-label") || "");
+  });
+}
+function headerOf(node) { return node.closest("th").className.match(/col-([a-z_]+)/)[1]; }
+function activated(o) {
+  return named(o, "ph_composer.colour_by.activate").map(function (message) { return message.payload.params.mode; });
+}
+function press(node) { node.listeners.click({ preventDefault: function () {} }); }
 function cell(o, key) { return o.view.types.inventory.edits.cells[key]; }
 function key(input, name) {
   input.listeners.keydown({ key: name, preventDefault: function () {}, stopImmediatePropagation: function () {} });
@@ -348,4 +364,40 @@ test("New Thermal Bridge Type takes a negative psi-value and starts at the Ambie
   o.view.types.create.focus();
   assert.strictEqual(o.view.tabs.select("schedule"), true);
   assert.ok(o.view.header.root.querySelector(".primary") === null, "Schedule has no New");
+});
+
+test("the Types table's Name and Group headers enter Colour by without starting the tool", function () {
+  [["name", "by_type"], ["group", "by_group"]].forEach(function (expected, index) {
+    var o = setup();
+    legend(o);
+    var toggles = palettes(o.root.querySelector(".tb-types"));
+    assert.deepStrictEqual(toggles.map(headerOf), ["name", "group"]);
+    assert.strictEqual(toggles[index].closest("th").querySelectorAll(".phc-header-action").length, 2,
+      "beside the column's sort and filter menu");
+    o.paint();
+    assert.strictEqual(palettes(o.root.querySelector(".tb-types"))[index] === toggles[index], true,
+      "a repaint keeps the button, and so its focus");
+    press(toggles[index]);
+    assert.deepStrictEqual(activated(o), [PREFIX + expected[1]], expected[0]);
+    assert.strictEqual(named(o, PREFIX + "edge_tool.choose").length, 0, "Assign by clicking is not started");
+  });
+});
+
+test("the Schedule's Type and Group headers offer the same modes and show which is on", function () {
+  var o = setup();
+  legend(o, PREFIX + "by_group");
+  readSchedule(o);
+  o.view.tabs.select("schedule");
+  var toggles = palettes(o.root.querySelector(".tb-schedule"));
+  assert.deepStrictEqual(toggles.map(headerOf), ["type_name", "group"]);
+  assert.strictEqual(toggles[0].getAttribute("aria-label"), "Colour by Thermal Bridge Type");
+  assert.deepStrictEqual(toggles.map(function (node) { return node.getAttribute("aria-pressed"); }),
+    ["false", "true"]);
+  press(toggles[1]);
+  assert.deepStrictEqual(activated(o), [null], "pressing the mode that is on turns Colour by off");
+});
+
+test("a header offers no palette while its mode is not registered", function () {
+  var o = setup();
+  assert.strictEqual(palettes(o.root.querySelector(".tb-types")).length, 0);
 });

@@ -11,6 +11,7 @@ class ThermalBridgeColourModeTest < PhComposerTestCase
   TB = PhComposer::ThermalBridges
   STORE = TB::Assignment::STORE
   MODE = "ph_composer.thermal_bridges.by_type"
+  BY_GROUP = "ph_composer.thermal_bridges.by_group"
   INCHES = 1 / 0.0254
   PARAPET = [17, 34, 51].freeze
 
@@ -56,7 +57,7 @@ class ThermalBridgeColourModeTest < PhComposerTestCase
     assert_equal 8, service.lines.values.sum(&:length), "the unassigned Edge draws nothing"
 
     mode = PhComposer::Registry.current.colour_modes.fetch(MODE)
-    assert_equal ["Thermal bridges", "edge"], [mode.label, mode.entity_kind]
+    assert_equal ["Thermal Bridge Type", "edge"], [mode.label, mode.entity_kind]
     assert_operator mode.stroke, :>, ColourBy::Overlay::LINE_WIDTH, "thick, so it reads over SketchUp's own Edges"
     view = @model.active_view
     @model.overlays.to_a.first.draw(view)
@@ -85,7 +86,7 @@ class ThermalBridgeColourModeTest < PhComposerTestCase
     assert_equal [["Parapet", 3, "14 m"], ["Balcony", 1, "4 m"]], rows
     @model.overlays.to_a.first.draw(@model.active_view)
     texts = @model.active_view.texts.map { |(_point, text, _options)| text }
-    assert_equal ["Thermal bridges", "Parapet (3) 14 m", "Balcony (1) 4 m"], texts
+    assert_equal ["Thermal Bridge Type", "Parapet (3) 14 m", "Balcony (1) 4 m"], texts
 
     PhComposer::Preferences.set("unit_system", "IP")
     panel = service.legend.fetch("rows").first.fetch("figure")
@@ -108,6 +109,33 @@ class ThermalBridgeColourModeTest < PhComposerTestCase
     assert_includes rows, [@parapet, "Parapet", :classified, 1], "the invalid assignment is not counted"
     assert_equal 6, service.lines.values.sum(&:length), "the missing type, Parapet and Balcony; not the invalid one"
     assert_equal ColourBy::Palette::INCOMPLETE, service.rows.find { |row| row.value == missing }.colour
+  end
+
+  # A group is a closed list, so its rows keep the list's order whatever the counts, and its colour is the
+  # group's own. Types named in one group add up; an Edge whose type is gone has no group and is one amber row.
+  def test_the_by_group_mode_sums_each_group_in_its_own_colour_and_in_the_groups_order
+    slab = create_type("Slab edge", "group" => "17-FS/BC")
+    footing = create_type("Footing", "group" => "17-FS/BC")
+    ambient = chain([[0, 0, 0], [2, 0, 0]], @parapet)
+    basement = chain([[0, 3, 0], [3, 3, 0], [3, 5, 0]], slab) + chain([[0, 7, 0], [1, 7, 0]], footing)
+    missing = %w[tbt_ZZZZZZZZZZZZ tbt_YYYYYYYYYYYY].each_with_index.map do |id, index|
+      chain([[5, index, 0], [6, index, 0]], id).first
+    end
+    (ambient + basement + missing).each { |edge| @model.entities << edge }
+
+    service = activate(BY_GROUP)
+    assert_equal [["15-Ambient", "Ambient", :classified, 1, 2.0], ["17-FS/BC", "Basement floor", :classified, 3, 6.0],
+                  ["Missing type", "Missing type", :incomplete, 2, 2.0]],
+                 service.rows.map { |row| [row.value, row.label, row.state, row.count, row.figure.first.last.round(9)] }
+    assert_equal TB::Type::GROUPS, TB::ColourModes::GROUP_COLOURS.keys, "every group has its own colour"
+    assert_equal TB::ColourModes::GROUP_COLOURS.fetch("17-FS/BC"), service.rows[1].colour
+    assert_equal ColourBy::Palette::INCOMPLETE, service.rows.last.colour
+    assert_equal 12, service.lines.values.sum(&:length), "six Edges, two points each"
+
+    mode = PhComposer::Registry.current.colour_modes.fetch(BY_GROUP)
+    assert_equal ["Thermal bridge group", "edge", TB::ColourModes::STROKE], [mode.label, mode.entity_kind, mode.stroke]
+    assert_equal 3, service.select_row("17-FS/BC", "classified")
+    assert_equal basement, @model.selection.to_a
   end
 
   def test_a_hidden_tag_a_hidden_tag_folder_or_a_hidden_ancestor_hides_the_drawing_and_keeps_the_count
@@ -149,9 +177,9 @@ class ThermalBridgeColourModeTest < PhComposerTestCase
 
   private
 
-  def activate
+  def activate(mode = MODE)
     service = ColourBy.for(@session)
-    service.activate(MODE)
+    service.activate(mode)
     assert service.active?, @session.inspect
     service
   end
