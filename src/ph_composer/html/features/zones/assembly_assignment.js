@@ -110,20 +110,8 @@ PhComposerUI.define("features/zones/assembly_assignment", ["panel", "snapshot", 
     this.requests.reset(); this.paint();
   };
   /* An assigned chip takes its Assembly's colour, the swatch the Assemblies table shows; None and a
-     missing Assembly keep the neutral pill. A dark colour switches the name to white so it stays legible. */
-  function paintColor(chip, record) {
-    var hex = /^#([0-9a-f]{6})$/i.exec(record && record.color || "");
-    chip.style.removeProperty("--choice-chevron");
-    if (!hex) { chip.style.removeProperty("--category-fill"); chip.style.removeProperty("--category-ink"); return; }
-    var value = parseInt(hex[1], 16);
-    var luma = 0.299 * (value >> 16) + 0.587 * ((value >> 8) & 255) + 0.114 * (value & 255);
-    chip.style.setProperty("--category-fill", "#" + hex[1]);
-    if (luma < 140) {
-      chip.style.setProperty("--category-ink", "#fff");
-      chip.style.setProperty("--choice-chevron", "var(--choice-chevron-light)");
-    }
-    else chip.style.removeProperty("--category-ink");
-  }
+     missing Assembly keep the neutral pill. */
+  function paintColor(chip, record) { ui.paintChip(chip, record && record.color); }
   function cell(td, row, state, guard, refused) {
     var face = row.record.face;
     if (!face) return false;

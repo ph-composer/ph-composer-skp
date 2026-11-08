@@ -201,15 +201,17 @@ html { height: 100%; }
 .phc-grid-tool-group.is-idle { visibility: hidden; }
 .phc-editable-cell { position: relative; }
 .phc-editable-cell select.phc-cell-input { width: 100%; min-width: 0; }
+/* The message is placed by overlay.js (placeCellError) over the table, clear of its scroller. */
 .phc-editable-cell .cell-error {
-  position: absolute; z-index: 8; top: 100%; left: 0; padding: 6px 10px;
+  position: fixed; z-index: 8; top: 0; left: 0; box-sizing: border-box; width: max-content; padding: 6px 10px;
   background: var(--error-surface); color: var(--red); border: 1px solid var(--red);
   border-radius: var(--radius-sm); white-space: normal; min-width: 180px; max-width: 280px; visibility: hidden;
 }
 .phc-editable-cell:hover .cell-error, .phc-editable-cell:focus-within .cell-error { visibility: visible; }
-/* A cell showing its error sits above later rows, whose sticky cells would otherwise cover the bubble,
-   and below the sticky header. */
+/* A cell showing its error sits below the sticky header at rest and, while its message is showing, above
+   later rows, whose sticky cells would otherwise cover the bubble. */
 .live-panel .phc-table td.has-cell-error { overflow: visible; z-index: 2; }
+.live-panel .phc-table td.has-cell-error:hover, .live-panel .phc-table td.has-cell-error:focus-within { z-index: 30; }
 /* A held or refused draft's Cancel sits inside the cell's right edge, so the row never grows for it. */
 .phc-workspace .phc-icon-button.phc-cell-cancel {
   position: absolute; z-index: 2; top: 50%; right: 2px; transform: translateY(-50%);

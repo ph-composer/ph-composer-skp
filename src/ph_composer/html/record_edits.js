@@ -147,7 +147,10 @@ PhComposerUI.define("record_edits", ["request", "snapshot", "unit_preferences", 
         cell.cancelButton.hidden = !stranded || owner.disposed || Boolean(cell.disposed);
       }
       var td = cell.input.parentNode;
-      if (td) td.classList.toggle("has-cell-error", !cell.error.hidden);
+      if (td) {
+        td.classList.toggle("has-cell-error", !cell.error.hidden);
+        if (!cell.error.hidden) ui.placeCellError(td);
+      }
     }
     Controller.prototype.cancel = function (cell) {
       if (this.disposed || cell.disposed || cell.status === "pending") return;

@@ -171,7 +171,10 @@ PhComposerUI.define("features/zones/zone_cells", ["record_edits", "fields", "uni
     cell.cancel.hidden = !cell.held || this.pending === cell;
     var selected = options.find(this.options, cell.field, cell.input.value);
     options.paint(cell.input, selected && selected.values.colour);
-    if (cell.td) cell.td.classList.toggle("has-cell-error", Boolean(cell.error));
+    if (cell.td) {
+      cell.td.classList.toggle("has-cell-error", Boolean(cell.error));
+      if (cell.error) ui.placeCellError(cell.td);
+    }
   };
   /* Drops a held choice or a diagnostic and shows the Model's value. A sent request is not retracted. */
   ZoneCells.prototype.cancel = function (cell) {

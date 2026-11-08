@@ -136,6 +136,55 @@ test("a warning notice stays until dismissed; an information notice fades on the
   notice.dispose();
 });
 
+test("Escape closes a warning, one layer at a time: a bubble or a dialog that is open takes it first", function () {
+  var owner = dom.element("div"), prevented = 0;
+  dom.attachEvents(owner);
+  context.document.body.appendChild(owner);
+  var notice = ui.floatingNotice(owner);
+  owner.appendChild(notice);
+  function escape() {
+    owner.dispatchEvent({ type: "keydown", key: "Escape", target: owner,
+      preventDefault: function () { prevented += 1; } });
+  }
+  notice.show("Nothing was written.", { tone: "warning", persistent: true });
+  var trigger = dom.element("button"); owner.appendChild(trigger);
+  var bubble = new ui.Bubble(trigger, "Open"); owner.appendChild(bubble.root);
+  bubble.open(false);
+  escape();
+  assert.strictEqual(notice.hidden, false, "the open bubble takes Escape; the warning stays");
+  assert.strictEqual(prevented, 0, "and the key still reaches the bubble");
+  bubble.close(false);
+  escape();
+  assert.strictEqual(notice.hidden, true, "with nothing else open, Escape closes the warning");
+  assert.strictEqual(prevented, 1, "the warning used the key, so a tool beneath it keeps going");
+
+  notice.show("Nothing was written.", { tone: "warning", persistent: true });
+  var field = dom.element("input"); owner.appendChild(field);
+  owner.dispatchEvent({ type: "keydown", key: "Escape", target: field,
+    preventDefault: function () { prevented += 1; } });
+  assert.strictEqual(notice.hidden, true, "pressed in a field, it closes the warning");
+  assert.strictEqual(prevented, 1, "and a field keeps its own Escape");
+
+  notice.show("Saved.");
+  bubble.open(false);
+  escape();
+  bubble.close(false);
+  assert.strictEqual(notice.classList.contains("is-dismissing"), true, "information fades on Escape, bubble or not");
+  assert.strictEqual(prevented, 1, "and leaves the key to the tool it describes");
+  notice.dispose();
+});
+
+test("a bubble opened from a table cell lifts that cell above the rows after it", function () {
+  var td = dom.element("td"), trigger = dom.element("button");
+  context.document.body.appendChild(td);
+  var bubble = new ui.Bubble(trigger, "Used by Assemblies");
+  td.appendChild(bubble.root);
+  bubble.open(false);
+  assert.strictEqual(td.classList.contains("has-open-bubble"), true);
+  bubble.close(false);
+  assert.strictEqual(td.classList.contains("has-open-bubble"), false);
+});
+
 test("a success notice fades by itself, unless the pointer holds it, and a newer message replaces it", function () {
   var owner = dom.element("div"), timers = [], saved = [context.setTimeout, context.clearTimeout];
   dom.attachEvents(owner);

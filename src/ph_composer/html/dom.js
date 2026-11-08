@@ -94,7 +94,36 @@ PhComposerUI.define("dom", [], function () {
     return true;
   }
 
+  /* A filled chip's label: whichever of white and the near-black ink has the higher WCAG contrast against the
+     fill, so no fill can carry dark text where white reads better. The two inks cross at relative luminance
+     0.19, where each is about 4.3:1, so every colour a chip can take meets that floor; the palette the Zone
+     options dialog offers sits at 4.5:1 or better. */
+  var CHIP_INK = { light: "#FFFFFF", dark: "#111111" };
+  function relativeLuminance(hex) {
+    var channels = [1, 3, 5].map(function (start) {
+      var value = parseInt(hex.slice(start, start + 2), 16) / 255;
+      return value <= 0.04045 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
+    });
+    return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+  }
+  function contrastRatio(a, b) {
+    var first = relativeLuminance(a) + 0.05, second = relativeLuminance(b) + 0.05;
+    return Math.max(first, second) / Math.min(first, second);
+  }
+  function chipInk(hex) {
+    return contrastRatio(hex, CHIP_INK.light) >= contrastRatio(hex, CHIP_INK.dark) ? CHIP_INK.light : CHIP_INK.dark;
+  }
+  /* Colours a chip from a stored `#rrggbb`: the fill, its label and its choice chevron. Anything else leaves
+     the neutral pill. */
+  function paintChip(node, hex) {
+    var valid = /^#[0-9a-f]{6}$/i.test(hex || ""), ink = valid ? chipInk(hex) : null;
+    if (!valid) { node.style.removeProperty("--category-fill"); node.style.removeProperty("--category-ink"); }
+    else { node.style.setProperty("--category-fill", hex); node.style.setProperty("--category-ink", ink); }
+    if (ink === CHIP_INK.light) node.style.setProperty("--choice-chevron", "var(--choice-chevron-light)");
+    else node.style.removeProperty("--choice-chevron");
+  }
+
   return { element: element, svg: svg, button: button, option: option, titleCase: titleCase,
     number: number, blank: blank, compareText: compareText, propertyRow: propertyRow, memoPaint: memoPaint,
-    pulse: pulse, tooltip: tooltip, symbolText: symbolText };
+    pulse: pulse, tooltip: tooltip, symbolText: symbolText, chipInk: chipInk, paintChip: paintChip };
 });

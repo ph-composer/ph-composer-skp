@@ -69,6 +69,8 @@ PhComposerUI.define("library/rows", ["units", "workspace"], function (units, ui)
         var entry = self.entries[row.id];
         if (!entry) entry = self.entries[row.id] = self.makeRow(row);
         entry.row = row;
+        entry.decoration.replaceChildren();
+        adapter.decorate(entry.decoration, row);
         if (entry.badge) entry.badge.remove();
         if (row.resolution && row.resolution.candidates.length) {
           entry.badge = el("small", "library-local-badge", "In this file"); entry.button.appendChild(entry.badge);
@@ -112,7 +114,9 @@ PhComposerUI.define("library/rows", ["units", "workspace"], function (units, ui)
     });
     entry.button.className = "library-sidebar-row-button";
     entry.button.setAttribute("data-library-row", row.id);
-    this.adapter.decorate(entry.button, row);
+    // A row is reused across repaints, so its decoration (a Material's swatch) is redrawn from each new record.
+    entry.decoration = el("span", "library-sidebar-decoration");
+    entry.button.appendChild(entry.decoration);
     entry.name = el("span", "library-sidebar-name", this.adapter.name(row));
     entry.button.appendChild(entry.name);
     entry.button.addEventListener("mousedown", function (event) { self.drag.start(entry, event); });

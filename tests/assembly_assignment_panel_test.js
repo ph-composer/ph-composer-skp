@@ -77,12 +77,16 @@ test("the table Assembly chip takes its Assembly's colour and follows it; None s
   o.face.values.assembly_id = "asm_a";
   o.paint();
   assert.strictEqual(chip.style["--category-fill"], "#c5e1a5");
-  assert.strictEqual(chip.style["--category-ink"], undefined);
+  assert.strictEqual(chip.style["--category-ink"], "#111111");
   assert.strictEqual(chip.style["--choice-chevron"], undefined);
   o.state.sections[PREFIX + ".assemblies"].value.assemblies[1].color = "#263238";
   o.paint();
-  assert.deepStrictEqual([chip.style["--category-fill"], chip.style["--category-ink"]], ["#263238", "#fff"]);
+  assert.deepStrictEqual([chip.style["--category-fill"], chip.style["--category-ink"]], ["#263238", "#FFFFFF"]);
   assert.strictEqual(chip.style["--choice-chevron"], "var(--choice-chevron-light)");
+  o.state.sections[PREFIX + ".assemblies"].value.assemblies[1].color = "#808080";
+  o.paint();
+  assert.strictEqual(chip.style["--category-ink"], "#111111", "a mid grey reads better with dark text than white");
+  assert.strictEqual(chip.style["--choice-chevron"], undefined);
   o.face.values.assembly_id = null;
   o.paint();
   assert.deepStrictEqual([chip.style["--category-fill"], chip.style["--category-ink"]], [undefined, undefined]);
