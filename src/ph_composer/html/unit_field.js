@@ -76,6 +76,9 @@ PhComposerUI.define("unit_field", ["unit_preferences", "units", "workspace"], fu
     });
     this.formChoice.addEventListener("change", function () {
       self.formChosen = true; self.field.inputForm = self.formChoice.value; self.clearError();
+      // The number on screen now means something else, so it is a draft even if it was committed a moment ago.
+      self.editing = false;
+      if (self.input.value !== "" || self.baseline !== null) self.begin();
     });
     this.followSystem();
   };

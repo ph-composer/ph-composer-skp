@@ -219,6 +219,9 @@ test.describe("a field the page takes away", function () {
     assert.ok(Math.abs(parsed.value - control.baseline) < 0.000001, "and a later read gives the same value");
     control.formChoice.value = "w_mk";
     control.formChoice.listeners.change({});
+    assert.strictEqual(control.input.value, "4.006", "choosing a form rereads the number on screen");
+    control.input.listeners.keydown({ key: "Enter", preventDefault: function () {} });
+    assert.strictEqual(control.baseline, 4.006, "and Enter commits it in the new form");
     modules.unit_preferences.set("unit_system", "SI");
     control.setValue(null);
     modules.unit_preferences.set("unit_system", "IP");

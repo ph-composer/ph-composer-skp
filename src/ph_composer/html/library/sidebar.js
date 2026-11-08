@@ -151,7 +151,11 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
       this.paint();
       if (!id) { this.search.focus(); return; }
       this.search.value = "";
+      // Nothing that narrows the list may hide the record asked for: not a category, not a folded group.
+      this.category.value = "";
       this.expanded = Object.create(null);
+      var row = this.records.filter(function (candidate) { return candidate.id === id; })[0];
+      if (row) this.expanded[this.adapter.category(row)] = true;
       this.renderList();
       this.openDetails(this.entries[id]);
     };

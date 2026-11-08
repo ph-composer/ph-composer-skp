@@ -88,6 +88,8 @@ test("both canonical U-values and films are shown, withheld values show reasons 
 test("sidebar New Material opens the shared form, holds the Builder, and shows the new record", function () {
   var o = setup(), editor = o.editor, form = editor.newMaterial;
   editor.select({ layerId: "layer_studs", segmentId: "seg_steel" });
+  editor.sidebar.category.value = "woods";
+  editor.sidebar.expanded.insulation = false;
   click(editor.sidebar.createButton);
   assert.strictEqual(form.root.hidden, false);
   assert.ok(editor.guard(), "an open form holds the Builder");
@@ -101,6 +103,8 @@ test("sidebar New Material opens the shared form, holds the Builder, and shows t
   editor.refresh(o.state, o.record.id);
   assert.strictEqual(form.root.hidden, true);
   assert.strictEqual(editor.sidebar.detail, editor.sidebar.entries.mat_a, "the Material is shown, not assigned");
+  assert.strictEqual(editor.sidebar.category.value, "", "a category filter does not hide it");
+  assert.strictEqual(editor.sidebar.expanded.insulation, true, "nor does a folded group, however long the list");
 });
 
 test("sidebar reads details and search without writes; Use and valid drops assign one explicit segment", function () {
