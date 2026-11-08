@@ -174,8 +174,12 @@ class AgentAccessConnectionsTest < PhComposerTestCase
       assert_equal "manual", ClientSetup.connect("codex", token, 46_110).fetch("state"), form
       assert_equal form, File.binread(config)
     end
-    File.binwrite(config, "[projects.\"/Users/someone/ph-composer\"]\ntrust_level = \"trusted\"\n")
+    # Another table's own mcp_servers, as a plugin's, is not the root table the block extends.
+    nested = "[projects.\"/Users/someone/ph-composer\"]\ntrust_level = \"trusted\"\n\n" \
+             "[plugins.\"playwright@market\".mcp_servers.playwright]\nenabled = true\n\n[tools]\nmcp_servers = 1\n"
+    File.binwrite(config, nested)
     assert_equal "configured", ClientSetup.connect("codex", token, 46_110).fetch("state")
+    assert_equal "#{nested}\n#{ClientConfig.codex_block(46_110)}\n", File.binread(config)
   end
 
   def test_connect_codex_without_codex_saves_the_token_and_creates_no_codex_folder

@@ -142,16 +142,29 @@ module PhComposer
         end
 
         # Whether a new `[mcp_servers.ph-composer]` table can follow what the file has: no key or header
-        # holds an escape, which could spell mcp_servers or the server's name unseen, and every line that
-        # mentions mcp_servers is a plain header of another server's table. An inline or dotted mcp_servers
-        # or an `[mcp_servers]` table cannot be extended this way, so the user adds the block instead.
+        # holds an escape, which could spell mcp_servers or the server's name unseen, and the root
+        # mcp_servers table, if any, is opened only by plain headers of other servers' tables. An inline or
+        # dotted root mcp_servers or an `[mcp_servers]` table cannot be extended this way, so the user adds
+        # the block instead. Another table's own mcp_servers, as a plugin's, is not the root one.
         def appendable?(lines)
+          table = nil
           lines.none? do |line|
-            next false if line.lstrip.start_with?("#")
+            text = line.lstrip
+            next false if text.empty? || text.start_with?("#")
 
-            key = line.lstrip.start_with?("[") ? line : line.split("=", 2).first
-            key.include?("\\") || (line.include?("mcp_servers") && !line.match?(SERVER_TABLE_HEADER))
+            if text.start_with?("[")
+              table = text
+              text.include?("\\") || (root_servers?(text.sub(/\A\[+/, "")) && !text.match?(SERVER_TABLE_HEADER))
+            else
+              key = text.split("=", 2).first
+              key.include?("\\") || (table.nil? && root_servers?(key))
+            end
           end
+        end
+
+        # Whether a key path starts at the root mcp_servers table.
+        def root_servers?(path)
+          path.lstrip.match?(/\A["']?mcp_servers["']?\s*(?:[.=\]]|\z)/)
         end
 
         # The settings lines of the server's tables, without blank lines and comments; nil when it has none.
