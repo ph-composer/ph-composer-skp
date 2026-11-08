@@ -64,6 +64,19 @@ class ZoneSolveScopeTest < PhComposerTestCase
     assert_equal originals, @model.entities.to_a.map { |group| group.entities.to_a.grep(Sketchup::Face).first }
   end
 
+  def test_a_repeat_solve_counts_every_pair_as_already_paired
+    wall(103, 0, 0, 4, 0, 3, :east)
+    wall(104, 0, 0, 4, 0, 3, :west)
+    author
+    first = solve(all_references)
+    second = solve(all_references)
+
+    assert_equal 1, first.dig("value", "pair_ids").length
+    assert_equal 0, first.dig("value", "already_paired")
+    assert_equal 1, second.dig("value", "already_paired")
+    assert_equal "none", second.fetch("effect")
+  end
+
   def test_wholly_covered_glued_face_is_not_cut_while_its_larger_counterpart_splits
     wall(105, 0, 0, 4, 0, 3, :east)
     wall(106, 0, 1, 3, 0, 3, :west)

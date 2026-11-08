@@ -9,6 +9,7 @@ module PhComposer
     class PlaceTool
       ACTION = "#{FEATURE_ID}.units.place"
       DEFAULT_ANCHOR = "sill_center"
+      UNEXPECTED = "The Place tool could not complete that. Nothing was written."
       GUIDANCE = "Place Window: click a Zone Face; sill=<length> sets the opening sill; " \
                  "offset=<length> insets the chosen anchor from the nearest outer edge. Escape stops."
 
@@ -223,15 +224,23 @@ module PhComposer
       def failure(error, view, notice: false)
         pending = notice || !@gesture.nil?
         cancel
-        message = error.is_a?(UserError) ? error.message :
-          "The Place tool could not complete that. Nothing was written."
-        Diagnostics.exception("place_tool", error) unless error.is_a?(UserError)
+        message = failure_words(error, pending)
         if pending
-          announce(message, :warning)
+          announce(message, error.is_a?(UserError) ? :warning : :error)
         else
           Sketchup.status_text = message
         end
         view.invalidate
+      end
+
+      # A gesture that failed gets the error and incident a user can quote; a hover that fails only logs and
+      # keeps the plain line, because it recurs with the pointer.
+      def failure_words(error, pending)
+        return error.message if error.is_a?(UserError)
+        return UNEXPECTED.tap { Diagnostics.exception("place_tool", error) } unless pending
+
+        HostNotice.words("status" => "failed", "message" => UNEXPECTED,
+                         "detail" => Outcome.failure_detail(Diagnostics.incident("place_tool", error), error))
       end
     end
 

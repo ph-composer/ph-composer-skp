@@ -354,6 +354,9 @@ class WindowPlaceToolTest < PhComposerTestCase
     assert_empty units
     assert_equal before, @model.operations.length
     assert_includes @notices.last.first, "Nothing was written"
+    assert_match(/Error: RuntimeError\. Incident PHC-\h{6}\.\z/, UI.notifications.last.message)
+    assert_equal :error, @notices.last.last
+    refute_includes @notices.last.first, "Synthetic"
   end
 
   def test_post_commit_refresh_failure_reports_actual_placement

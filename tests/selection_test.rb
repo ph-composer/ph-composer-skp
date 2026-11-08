@@ -172,6 +172,15 @@ class SelectionTest < PhComposerTestCase
     assert_equal ["The Model changed. Nothing was written."], UI.notifications.map(&:message)
   end
 
+  def test_a_solve_whose_selection_read_fails_shows_it_in_sketchup
+    failed = { "status" => "failed", "message" => "The request could not be answered.",
+               "detail" => { "incident" => "PHC-AAAAAA", "error_class" => "TypeError" } }
+    API.stub(:query, ->(**_args) { failed }) { ZONES::Selection.client(@session).solve }
+
+    assert_equal ["The request could not be answered. Error: TypeError. Incident PHC-AAAAAA."],
+                 UI.notifications.map(&:message)
+  end
+
   def test_a_solve_that_fails_from_the_menu_names_the_error_and_incident_in_sketchup
     failed = { "status" => "failed", "message" => "The change could not be completed.",
                "detail" => { "incident" => "PHC-7CDF84", "error_class" => "ArgumentError" } }

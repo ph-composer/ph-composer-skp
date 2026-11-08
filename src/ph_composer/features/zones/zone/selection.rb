@@ -136,14 +136,14 @@ module PhComposer
 
         def solve
           read = API.query(:context => @context, :name => "#{FEATURE_ID}.selection")
-          return show(read) unless read["status"] == "completed"
+          return refuse(read) unless read["status"] == "completed"
 
           result = invoke("#{FEATURE_ID}.solve_adjacency",
                           { "zones" => read.fetch("value").fetch("zones").map { |row| row.fetch("reference") } },
                           read.fetch("revision"))
-          completed = result["status"] == "completed"
-          HostNotice.show(@session, completed ? solved(result) : HostNotice.words(result),
-                          :tone => completed ? :success : HostNotice.tone(result))
+          return refuse(result) unless result["status"] == "completed"
+
+          HostNotice.show(@session, solved(result), :tone => :success)
           result
         end
 
@@ -169,6 +169,11 @@ module PhComposer
           @sequence += 1
           API.invoke(:context => @context, :name => name, :params => params,
                      :request => { "sequence" => @sequence, "expected_revision" => revision })
+        end
+
+        def refuse(outcome)
+          HostNotice.show(@session, HostNotice.words(outcome), :tone => HostNotice.tone(outcome))
+          outcome
         end
 
         # What Solve changed, for the notification: the panel's own confirmation names only the action.
