@@ -19,9 +19,12 @@ check({ name: "assembly_layer_tools", output }, async ({ newPage, step }) => {
     const label = editor.locator("[data-layer-thickness='lyr_board_0']");
     await target.click(); await page.mouse.move(20, 600);
     step("the pointer's cue waits a beat");
-    const wool = await target.boundingBox();
-    await page.mouse.move(wool.x + wool.width / 2, wool.y + wool.height / 2);
-    assert.equal(await target.evaluate(node => getComputedStyle(node).transitionDelay), "0.12s");
+    assert.equal(await target.evaluate(node => getComputedStyle(node).transitionProperty), "none",
+      "a click's selection shows at once");
+    const other = editor.locator(".assembly-hit-target:not([aria-pressed='true'])").first();
+    const box0 = await other.boundingBox();
+    await page.mouse.move(box0.x + box0.width / 2, box0.y + box0.height / 2);
+    assert.equal(await other.evaluate(node => getComputedStyle(node).transitionDelay), "0.12s");
     await page.mouse.move(20, 600);
     assert.equal(await editor.locator(".assembly-toolbar").getByRole("button", { name: "Layer tools", exact: true }).count(), 0);
     assert.equal(await editor.locator(".assembly-toolbar").getByRole("button", { name: "Add Layer", exact: true }).count(), 0);
