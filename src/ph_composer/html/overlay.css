@@ -75,6 +75,8 @@
 .row-tooltip {
   position: fixed;
   z-index: 1100;
+  /* A fixed box otherwise shrinks against the viewport edge, so the width would follow the last `left`. */
+  width: max-content;
   max-width: min(320px, calc(100vw - 16px));
   padding: 7px 10px;
   background: #233c43;

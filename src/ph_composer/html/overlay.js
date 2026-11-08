@@ -79,8 +79,8 @@ PhComposerUI.define("overlay", ["dom", "icons"], function (dom, icons) {
     if (!this.options.parent && activeBubble && activeBubble !== this && activeBubble.close(false) === false) return;
     if (!this.options.parent) activeBubble = this;
     this.panel.hidden = false;
-    var header = this.root.closest("th");
-    if (header) header.classList.add("has-open-bubble");
+    var cell = this.root.closest("th, td");
+    if (cell) cell.classList.add("has-open-bubble");
     this.trigger.setAttribute("aria-expanded", "true");
     this.position();
     // An owner's onOpen can tell a deliberate open (click, keyboard) from a hover or a repaint's reopen.
@@ -178,10 +178,10 @@ PhComposerUI.define("overlay", ["dom", "icons"], function (dom, icons) {
     this.cancelHover();
     this.children.forEach(function (child) { child.close(false); });
     this.panel.hidden = true; this.trigger.setAttribute("aria-expanded", "false");
-    var header = this.root.closest("th");
-    if (header && !Array.from(header.querySelectorAll(".phc-bubble")).some(function (bubble) {
+    var cell = this.root.closest("th, td");
+    if (cell && !Array.from(cell.querySelectorAll(".phc-bubble")).some(function (bubble) {
       return !bubble.hidden;
-    })) header.classList.remove("has-open-bubble");
+    })) cell.classList.remove("has-open-bubble");
     if (activeBubble === this) activeBubble = null;
     if (focus) this.trigger.focus({ preventScroll: true });
     if (wasOpen && this.options.onClose) this.options.onClose(this);
@@ -198,6 +198,23 @@ PhComposerUI.define("overlay", ["dom", "icons"], function (dom, icons) {
   Bubble.closeActive = function (owner) {
     if (activeBubble && (!owner || owner.contains(activeBubble.root))) activeBubble.close(false);
   };
+  /* A table cell's validation message is drawn over the table, so a scroller cannot clip it and a last row can
+     show it: under the cell, or above it when there is no room below. `cell` is the td carrying `has-cell-error`. */
+  var CELL_ERROR = { GAP: 2, MARGIN: 8 };
+  function placeCellError(cell) {
+    var message = cell.querySelector(".cell-error");
+    if (!message || message.hidden) return;
+    var spot = placeNear(cell.getBoundingClientRect(), message.getBoundingClientRect(), CELL_ERROR.GAP,
+      CELL_ERROR.MARGIN);
+    message.style.left = spot.left + "px"; message.style.top = spot.top + "px";
+  }
+  function placeCellErrors() {
+    Array.prototype.forEach.call(document.querySelectorAll(".has-cell-error"), placeCellError);
+  }
+  function placeCellErrorFrom(event) {
+    var cell = event.target && event.target.closest && event.target.closest(".has-cell-error");
+    if (cell) placeCellError(cell);
+  }
   if (document.addEventListener) {
     document.addEventListener("mousedown", function (event) {
       if (activeBubble && !activeBubble.root.contains(event.target) &&
@@ -205,10 +222,14 @@ PhComposerUI.define("overlay", ["dom", "icons"], function (dom, icons) {
     });
     document.addEventListener("scroll", function (event) {
       if (activeBubble && !activeBubble.panel.contains(event.target)) activeBubble.close(false);
+      placeCellErrors();
     }, true);
+    document.addEventListener("mouseover", placeCellErrorFrom);
+    document.addEventListener("focusin", placeCellErrorFrom);
   }
   if (window.addEventListener) window.addEventListener("resize", function () {
     if (activeBubble) activeBubble.position();
+    placeCellErrors();
   });
   /* One notice at a time; a newer message replaces an older one. Tones: `success` is a disposable
      confirmation that fades by itself after SUCCESS_MS (longer for a long message, up to SUCCESS_MAX_MS),
@@ -282,7 +303,18 @@ PhComposerUI.define("overlay", ["dom", "icons"], function (dom, icons) {
     };
     function pointerdown(event) { if (!root.contains(event.target)) root.fade(); }
     function keydown(event) {
+      if (event.key === "Escape" && !root.hidden) { escape(event); return; }
       if (!root.contains(event.target) && !/^(Shift|Control|Alt|Meta)$/.test(event.key || "")) root.fade();
+    }
+    /* A notice that fades leaves the key to whatever it describes. One that stays until dismissed (a warning, an
+       error) waits for an open bubble or dialog to take Escape first, then closes; it uses the key, so a tool
+       beneath it keeps going, unless the key was pressed in a field, which keeps its own Escape. */
+    function escape(event) {
+      if (!persistent) { root.fade(); return; }
+      if (activeBubble || Array.prototype.some.call(document.querySelectorAll("dialog"), function (node) {
+        return node.open; })) return;
+      root.clear();
+      if (!/^(input|select|textarea)$/i.test(event.target && event.target.tagName || "")) event.preventDefault();
     }
     if (owner) {
       owner.addEventListener("pointerdown", pointerdown, true);
@@ -443,5 +475,5 @@ PhComposerUI.define("overlay", ["dom", "icons"], function (dom, icons) {
   return { Bubble: Bubble, ActionMenu: ActionMenu, floatingNotice: floatingNotice, actionRow: actionRow,
     formDialog: formDialog, onModalChange: onModalChange,
     helpButton: helpButton, reasonButton: reasonButton, attachTooltip: attachTooltip,
-    placeNear: placeNear, BUBBLE: BUBBLE, SUCCESS_MS: SUCCESS_MS };
+    placeNear: placeNear, placeCellError: placeCellError, BUBBLE: BUBBLE, SUCCESS_MS: SUCCESS_MS };
 });

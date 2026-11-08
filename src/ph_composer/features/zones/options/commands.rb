@@ -106,7 +106,7 @@ module PhComposer
           values = Shapes.object({ "name" => NAME, "colour" => COLOUR })
           create = Shapes.object({ "collection" => Registration::COLLECTION, "values" => values,
                                    "user_data" => { "type" => "object" } }, :optional => ["user_data"])
-          example_create = { "collection" => "level", "values" => { "name" => "Level 1", "colour" => "#268589" } }
+          example_create = { "collection" => "level", "values" => { "name" => "Level 1", "colour" => "#1F7478" } }
           action(feature, "create", create, Shapes.object({ "id" => Shapes::ID }),
                  [example_create]) do |request, proposal|
             Commands.create(request, proposal, request.params.fetch("collection"), request.params.fetch("values"),
@@ -114,9 +114,9 @@ module PhComposer
           end
           update = Shapes.with(identity, "values" => values, "expected_values" => values)
           action(feature, "update", update, Shapes.object({ "id" => Shapes::ID }),
-                 [example.merge("values" => { "name" => "Level 1", "colour" => "#268589" },
+                 [example.merge("values" => { "name" => "Level 1", "colour" => "#1F7478" },
                                 "expected_values" => { "name" => "Level 1",
-                                                       "colour" => "#268589" })]) do |request, proposal|
+                                                       "colour" => "#1F7478" })]) do |request, proposal|
             Commands.update(request, proposal, request.params.fetch("collection"), request.params.fetch("id"),
                             request.params.fetch("values"), request.params.fetch("expected_values"))
           end

@@ -25,6 +25,28 @@ function setup() {
   sidebar.refresh(state, {}, true);
   return { sidebar: sidebar, sent: sent, state: state, target: target };
 }
+test("a row's swatch follows its record: a colour set after the row was first drawn shows (W-068)", function () {
+  var context = { document: dom.buildDocument(""), Intl: Intl, innerWidth: 1280, innerHeight: 800,
+    setTimeout: setTimeout, clearTimeout: clearTimeout };
+  context.window = context; dom.attachEvents(context);
+  var Sidebar = source.start(context, ["library/sidebar"])["library/sidebar"];
+  var record = { id: "mat_a", values: { name: "Plywood", color: "#ffffff" } };
+  var sidebar = new Sidebar({ session: "session", send: function () {}, adapter: { title: "Material Library",
+    wireKind: "materials", read: function () { return [record]; }, name: function (row) { return row.values.name; },
+    properties: [], decorate: function (node, row) {
+      var swatch = dom.element("span"); swatch.className = "library-sidebar-swatch";
+      swatch.style.backgroundColor = row.values.color; node.appendChild(swatch);
+    } } });
+  context.document.body.appendChild(sidebar.root);
+  var state = { session: "session", revision: 1, ui: { queryResults: {}, setupResults: {} }, sections: {} };
+  sidebar.refresh(state, {}, true);
+  function swatches() { return sidebar.root.querySelectorAll(".library-sidebar-swatch"); }
+  assert.strictEqual(swatches()[0].style.backgroundColor, "#ffffff");
+  record = { id: "mat_a", values: { name: "Plywood", color: "#e6c99c" } };
+  sidebar.refresh(state, {}, true);
+  assert.strictEqual(swatches().length, 1, "one swatch, redrawn, not one more");
+  assert.strictEqual(swatches()[0].style.backgroundColor, "#e6c99c");
+});
 test("Details never writes; Add and selected-target Use each dispatch one coordinator action", function () {
   var o = setup(), row = o.sidebar.records[0]; o.sidebar.openDetails(o.sidebar.entries[row.id]);
   assert.deepStrictEqual(o.sent.map(function (item) { return item.type; }), ["query.invoke"]);

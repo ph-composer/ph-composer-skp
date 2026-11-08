@@ -47847,7 +47847,7 @@ Example params:
   "collection": "level",
   "values": {
     "name": "Level 1",
-    "colour": "#268589"
+    "colour": "#1F7478"
   }
 }
 ```
@@ -48276,11 +48276,11 @@ Example params:
   "id": "lvl_Ab12Cd34Ef56",
   "values": {
     "name": "Level 1",
-    "colour": "#268589"
+    "colour": "#1F7478"
   },
   "expected_values": {
     "name": "Level 1",
-    "colour": "#268589"
+    "colour": "#1F7478"
   }
 }
 ```

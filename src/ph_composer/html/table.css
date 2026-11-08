@@ -134,20 +134,21 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
    stays at rest. Opacity, not visibility, keeps them reachable by keyboard. */
 /* Two visual rows inside each column header keep its label, actions, resize handle and sticky position
    together. Every column reserves both bands, even one without actions. Narrowed labels elide, not wrap. */
-.phc-table.has-header-action-row th { height: 50px; padding: 0; text-align: left; vertical-align: top; }
+.phc-table.has-header-action-row th { height: 52px; padding: 0; text-align: left; vertical-align: top; }
 /* Numbers read from the right, words and chips from the left, and the heading with them (table.js alignColumns). */
 .phc-table th:not(.is-end) { text-align: left; }
 .phc-table td.is-start { text-align: left; }
-.phc-table.has-header-action-row th.is-end .phc-header-label-row,
-.phc-table.has-header-action-row th.is-end .phc-header-actions { justify-content: flex-end; }
+.phc-table.has-header-action-row th.is-end .phc-header-label-row { justify-content: flex-end; }
 .phc-table.has-header-action-row th.has-header-actions { min-width: 72px; }
 .has-header-action-row .phc-header-label-row { display: flex; align-items: flex-end; height: 26px; padding: 0 8px 1px;
   box-sizing: border-box; }
 .has-header-action-row .phc-th-label { min-width: 0; overflow: hidden; text-overflow: ellipsis;
   white-space: nowrap; }
 .has-header-action-row .phc-header-label-row .row-check { flex-shrink: 0; }
-.phc-header-actions { display: flex; align-items: center; gap: 4px; height: 24px; padding: 0 8px;
-  box-sizing: border-box; white-space: nowrap; }
+/* Every column's icons start the band at its left edge, under whichever side its label sits, and clear the label,
+   so a pressed fill never touches it. */
+.phc-header-actions { display: flex; align-items: center; justify-content: flex-start; gap: 4px; height: 26px;
+  padding: 2px 8px 0; box-sizing: border-box; white-space: nowrap; }
 .phc-table:not(.has-header-action-row) .phc-header-actions { display: none; }
 .phc-header-actions .phc-bubble-anchor { vertical-align: middle; }
 .phc-workspace .phc-table .phc-header-action .phc-icon-button,
@@ -200,7 +201,9 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 .phc-column-value-row > button { flex: 0 0 auto; }
 .phc-column-filter-value > span:last-child { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
 /* A fixed bubble still belongs to its sticky header's stacking context. Keep it above floating bars. */
-.phc-table th.has-open-bubble { z-index: 30; }
+/* A sticky cell is its own stacking context, so a bubble inside it would rank only as high as the cell: the
+   next row's sticky cells paint over it unless the cell that holds an open bubble rises above them. */
+.phc-table th.has-open-bubble, .phc-table td.has-open-bubble { z-index: 30; }
 /* A table with no rows says so once, centred in the space the rows would take, under a quiet mark. */
 .phc-empty { margin: 0; padding: 36px 16px 32px; color: var(--muted); text-align: center; line-height: 1.5; }
 .phc-empty::before { content: ""; display: block; width: 24px; height: 24px; margin: 0 auto 10px; background: var(--muted-faint);

@@ -101,6 +101,8 @@
   min-height: 28px; padding: 4px; border: 0; border-radius: 0; background: transparent; font-size: 12px; font-weight: 400; }
 .phc-workspace .library-sidebar-row-button:hover:enabled, .phc-workspace .library-sidebar-row-button:focus-visible {
   background: var(--interaction-highlight-tint); }
+/* Its children take the row's flex gap directly. */
+.library-sidebar-decoration { display: contents; }
 .library-sidebar-swatch { display: inline-block; width: 14px; min-width: 14px; height: 14px; border: 1px solid #10242c59;
   border-radius: var(--radius-sm); }
 .library-sidebar-name { overflow: hidden; text-overflow: ellipsis; }

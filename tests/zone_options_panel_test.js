@@ -178,3 +178,41 @@ test("each collection's merge note offers what that collection allows", function
   assert.strictEqual(note("level"),
     "Ground: 1 live Zone · 1 recoverable. Choose a survivor to merge, or clear the Level assignment.");
 });
+
+function chipModules() {
+  var context = { document: dom.buildDocument(""), Object: Object, Array: Array, Math: Math, setTimeout: setTimeout,
+    clearTimeout: clearTimeout };
+  context.window = context; dom.attachEvents(context);
+  return panelSource.start(context, ["features/zones/zone_options", "features/zones/option_dialog"]);
+}
+function luminance(hex) {
+  var channels = [1, 3, 5].map(function (start) {
+    var value = parseInt(hex.slice(start, start + 2), 16) / 255;
+    return value <= 0.04045 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+}
+function contrast(a, b) {
+  var lighter = Math.max(luminance(a), luminance(b)), darker = Math.min(luminance(a), luminance(b));
+  return (lighter + 0.05) / (darker + 0.05);
+}
+function inkOn(options, hex) {
+  var node = dom.element("span");
+  options.paint(node, hex);
+  return node.style["--category-ink"];
+}
+test("a chip's text is the ink that reads best, so a mid teal never carries dark text (W-019)", function () {
+  var options = chipModules()["features/zones/zone_options"];
+  assert.strictEqual(inkOn(options, "#268589"), "#FFFFFF");
+});
+test("every colour a chip can take meets the contrast floor, and the dialog's palette sits clear of it", function () {
+  var options = chipModules()["features/zones/zone_options"], steps = [0, 51, 102, 119, 136, 153, 204, 255];
+  steps.forEach(function (red) { steps.forEach(function (green) { steps.forEach(function (blue) {
+    var hex = "#" + [red, green, blue].map(function (value) { return (value + 256).toString(16).slice(1); }).join("");
+    assert.ok(contrast(hex, inkOn(options, hex)) >= 4.3, hex);
+  }); }); });
+  assert.ok(options.PALETTE.length >= 8);
+  options.PALETTE.forEach(function (hex) {
+    assert.ok(contrast(hex, inkOn(options, hex)) >= 4.5, "palette colour " + hex + " is clear of the cut-off");
+  });
+});

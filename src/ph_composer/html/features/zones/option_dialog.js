@@ -3,7 +3,7 @@
 PhComposerUI.define("features/zones/option_dialog", ["workspace", "request", "features/zones/zone_options"],
 function (ui, requests, options) {
   "use strict";
-  var serial = 0, PALETTE = ["#268589", "#5588BB", "#9977AA", "#CB7854", "#A49C42", "#56936A", "#A95C78", "#727C88"];
+  var serial = 0, PALETTE = options.PALETTE;
   function copy(value) { return JSON.parse(JSON.stringify(value)); }
   function choiceView(choice) { return { id: choice.id, name: choice.values.name, colour: choice.values.colour }; }
   function usage(choice) {

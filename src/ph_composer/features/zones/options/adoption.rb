@@ -25,7 +25,7 @@ module PhComposer
             return nil if name.nil?
 
             portable = { "id" => Records::Identity.derived(collection == "level" ? "lvl" : "bsg", "name" => name),
-                         "schema_version" => 1, "name" => name, "colour" => "#268589" }
+                         "schema_version" => 1, "name" => name, "colour" => "#1F7478" }
             portable["export_identifier"] = Options.export_identifier(name) if collection == "building_segment"
             key = "legacy:#{collection}:#{CanonicalJson.digest(name)}"
           else

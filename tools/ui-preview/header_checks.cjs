@@ -28,7 +28,7 @@ check({ name: "header", output }, async ({ newPage, step }) => {
           clipped: label.scrollWidth > label.clientWidth };
       }));
       assert(geometry.every(h => Math.abs(h.top - geometry[0].top) < 1), `aligned labels at ${width}`);
-      assert(geometry.every(h => h.actionsTop >= h.bottom && h.actionsHeight === 24), `separate actions at ${width}`);
+      assert(geometry.every(h => h.actionsTop >= h.bottom && h.actionsHeight === 26), `separate actions at ${width}`);
       if (width >= 1280) assert(geometry.every(h => !h.clipped), `complete default labels at ${width}`);
       assert(await page.evaluate(() => document.body.scrollWidth <= innerWidth), `no page overflow at ${width}`);
       await page.screenshot({ path: path.join(output, `headers-${width}.png`) });
