@@ -165,15 +165,17 @@ class AgentAccessConnectionsTest < PhComposerTestCase
   def test_connect_codex_never_appends_beside_another_form_of_the_server_and_ignores_paths_with_its_name
     Dir.mkdir(ClientSetup.codex_home)
     config = File.join(ClientSetup.codex_home, "config.toml")
+    token = Tokens.issue.fetch("token")
     ["mcp_servers.ph-composer.url = \"x\"\n", "mcp_servers = { 'ph-composer' = { url = \"x\" } }\n",
      "[mcp_servers.\"ph-composer\".tools]\nx = 1\n", "mcp_servers = {}\n", "mcp_servers.other.url = \"x\"\n",
-     "[mcp_servers.\"ph\\u002dcomposer\"]\nurl = \"x\"\n", "[mcp_servers]\nother = { url = \"x\" }\n"].each do |form|
+     "[mcp_servers.\"ph\\u002dcomposer\"]\nurl = \"x\"\n", "[mcp_servers]\nother = { url = \"x\" }\n",
+     "\"mcp_\\u0073ervers\" = {}\n"].each do |form|
       File.binwrite(config, form)
-      assert_equal "manual", ClientSetup.connect("codex", Tokens.issue.fetch("token"), 46_110).fetch("state"), form
+      assert_equal "manual", ClientSetup.connect("codex", token, 46_110).fetch("state"), form
       assert_equal form, File.binread(config)
     end
     File.binwrite(config, "[projects.\"/Users/someone/ph-composer\"]\ntrust_level = \"trusted\"\n")
-    assert_equal "configured", ClientSetup.connect("codex", Tokens.issue.fetch("token"), 46_110).fetch("state")
+    assert_equal "configured", ClientSetup.connect("codex", token, 46_110).fetch("state")
   end
 
   def test_connect_codex_without_codex_saves_the_token_and_creates_no_codex_folder

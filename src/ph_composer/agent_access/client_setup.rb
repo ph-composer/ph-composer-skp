@@ -141,14 +141,16 @@ module PhComposer
           lines.any? { |line| !line.lstrip.start_with?("#") && line.match?(SERVER_KEY) }
         end
 
-        # Whether a new `[mcp_servers.ph-composer]` table can follow what the file has: every line that
-        # mentions mcp_servers is a plain header of another server's table. An inline or dotted mcp_servers,
-        # an `[mcp_servers]` table or an escaped key cannot be extended this way, or could hide the name, so
-        # the user adds the block instead.
+        # Whether a new `[mcp_servers.ph-composer]` table can follow what the file has: no key or header
+        # holds an escape, which could spell mcp_servers or the server's name unseen, and every line that
+        # mentions mcp_servers is a plain header of another server's table. An inline or dotted mcp_servers
+        # or an `[mcp_servers]` table cannot be extended this way, so the user adds the block instead.
         def appendable?(lines)
           lines.none? do |line|
-            !line.lstrip.start_with?("#") && line.include?("mcp_servers") &&
-              (line.include?("\\") || !line.match?(SERVER_TABLE_HEADER))
+            next false if line.lstrip.start_with?("#")
+
+            key = line.lstrip.start_with?("[") ? line : line.split("=", 2).first
+            key.include?("\\") || (line.include?("mcp_servers") && !line.match?(SERVER_TABLE_HEADER))
           end
         end
 

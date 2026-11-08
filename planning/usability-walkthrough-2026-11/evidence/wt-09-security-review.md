@@ -41,10 +41,11 @@ The issue's premise that Codex reads only an environment variable or an inline t
    earlier entry was removed and gives the command.
 3. **The extension edits Codex's config.** Append only, after a blank line, existing bytes untouched;
    never when any non-comment line has `ph-composer` as a key in any TOML form (a duplicate would
-   invalidate the whole file); project paths holding the name do not count; only when every line that
-   mentions `mcp_servers` is a plain `[mcp_servers.<other>]` header without an escape (an inline or
-   dotted `mcp_servers`, an `[mcp_servers]` table or a `\u` escape goes to the manual path: Codex
-   gpt-6-astra review, PR #383); never creates `~/.codex`.
+   invalidate the whole file); project paths holding the name do not count; only when no key or header
+   holds an escape and every line that mentions `mcp_servers` is a plain `[mcp_servers.<other>]` header
+   (an inline or dotted `mcp_servers`, an `[mcp_servers]` table, or an escape such as
+   `"mcp_\u0073ervers"` goes to the manual path: Codex gpt-6-astra review, PR #383, both passes);
+   never creates `~/.codex`.
 5. **Platform.** Connect refuses on Windows (`/bin/cat` helper); Windows support has its own gate.
 4. **The helper command** is `/bin/cat` plus `Shellwords.escape(path)`, built in Ruby from the folder
    constant; no page, agent or file content reaches it.

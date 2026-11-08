@@ -469,10 +469,10 @@ its digest is live and the listener is listening, then sets the client up:
   line outside a comment has `ph-composer` as a key (a table, a dotted key, an inline table) is left
   untouched, since a second definition would invalidate the whole file: the same block answers
   configured, another form asks the user to set its `url` and `http_headers_helper`. A path that only
-  contains the name, such as a project folder, is not a key. The block is appended only when every
-  line that mentions `mcp_servers` is a plain `[mcp_servers.<other>]` header without an escape; an
-  inline or dotted `mcp_servers`, an `[mcp_servers]` table or an escaped key cannot be extended this way
-  or could hide the name, so the user adds the block. No `~/.codex` folder means Codex is not set up
+  contains the name, such as a project folder, is not a key. The block is appended only when no key or
+  header holds an escape (one could spell either name unseen) and every line that mentions
+  `mcp_servers` is a plain `[mcp_servers.<other>]` header; an inline or dotted `mcp_servers` or an
+  `[mcp_servers]` table cannot be extended this way, so the user adds the block. No `~/.codex` folder means Codex is not set up
   and nothing is created.
 
 Either way the answer ends with the step the user takes: start a new session of that client, since a
