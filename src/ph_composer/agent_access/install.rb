@@ -28,6 +28,12 @@ module PhComposer
     def install(registry)
       feature = registry.feature(FEATURE_ID, :contract_version => Declarations::CONTRACT_VERSION)
       CODES.each { |code, description| feature.code(code, :description => description) }
+      # The path each session's Model was last known by, so a save can tell a Save As from a save in place.
+      # A file opened into the Model starts afresh: nothing a failed save left behind moves onto it.
+      %i[session_created model_opened].each do |event|
+        feature.on_host_event(event) { |session| saved_path(session).opened(session.model.path.to_s) }
+      end
+      feature.on_host_event(:post_save) { |session| saved(session) }
       # Kept out of the viewport's right-click menu: managing tokens has nothing to do with what is under
       # the pointer.
       # The form shows which Model "This Model only" binds, so it follows activation and Save As.
@@ -50,6 +56,39 @@ module PhComposer
       when "unavailable" then "Not listening: #{status['message']}"
       else "Not listening · #{tokens}"
       end
+    end
+
+    # The path the session's Model has now, and the ids of the tokens a failed save left behind.
+    SavedPath = Struct.new(:path, :unmoved) do
+      # A file opened into the Model: its path, and nothing left to move.
+      def opened(path)
+        self.path = path
+        self.unmoved = []
+      end
+    end
+
+    def saved_path(session)
+      session.feature_state("#{FEATURE_ID}.saved_path") { SavedPath.new(session.model.path.to_s, []) }
+    end
+
+    # After a save: a Model saved under a new name (Save As, how a stage copy is made) keeps the tokens
+    # bound to it. An autosave or a save in place keeps the path and writes nothing. It runs inside
+    # SketchUp's save, so a failure is logged, never raised, and the tokens it left behind, by id, are
+    # moved by the next save; a token issued later for the original file, reopened, is never taken.
+    def saved(session)
+      held = saved_path(session)
+      to = session.model.path.to_s
+      from = held.path
+      held.path = to
+      held.unmoved |= Tokens.bound_to(from) unless from.empty? || from == to
+      return if held.unmoved.empty?
+
+      Tokens.follow(held.unmoved, to)
+      held.unmoved = []
+    rescue StandardError => error
+      fields = { "severity" => "warning", "error_class" => error.class.name }
+      fields["code"] = error.code if error.is_a?(CodedError)
+      Diagnostics.log("agent_access_follow_failed", fields)
     end
 
     # Called after every token store write, a revoke or a reset alike: the caller handles of every token

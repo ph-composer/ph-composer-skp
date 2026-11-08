@@ -223,7 +223,8 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
       // The Model this form names, kept until it is submitted: a later state cannot change what it binds.
       this.formModel = this.model;
       this.modelOnly.checked = false; this.modelOnly.disabled = !this.model;
-      this.modelOnlyText.textContent = this.model ? "Reaches " + this.model.name + " and no other Model." :
+      this.modelOnlyText.textContent = this.model ? "Reaches " + this.model.name +
+        " and no other Model. Save As keeps it on the renamed file." :
         "Save this Model first to limit a token to it.";
       this.createDialog.openModal(); this.labelInput.focus();
     };

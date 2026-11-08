@@ -35,7 +35,10 @@ module PhComposer
       # owner's full entries. The whole discovery document is larger than one tool result may be.
       def discover(arguments, token)
         document = API.discover
-        document = document.merge("sessions" => served(document.fetch("sessions"), token))
+        sessions = served(document.fetch("sessions"), token)
+        document = document.merge("sessions" => sessions)
+        connection = token.slice("id", "label", "capabilities", "model_name")
+        connection["reason"] = unserved(token) if sessions.empty? && token["model_name"]
         page = if (owner = arguments["owner"])
                  owned(document, owner)
                else
@@ -44,12 +47,25 @@ module PhComposer
                                                              "descriptions, then describe one operation by name " \
                                                              "for its params and result.")
                end
-        page.merge("connection" => token.slice("id", "label", "capabilities", "model_name"))
+        page.merge("connection" => connection)
       end
 
       # The sessions a token may act on: a Model-only token sees only its own Model's.
       def served(sessions, token)
         sessions.select { |row| (session = Sessions.find(row["id"])) && Tokens.serves?(token, session) }
+      end
+
+      # Why a Model-only token reaches no open session, by file names only: its own, and the open ones.
+      def unserved(token)
+        bound = token["model_name"]
+        names = Sessions.all.map { |session| File.basename(session.model.path.to_s) }.map do |name|
+          next "an unsaved Model" if name.empty?
+
+          name == bound ? "#{name} (in another folder)" : name
+        end
+        open = names.empty? ? "no Model is open" : "open now: #{names.join(', ')}"
+        "This token is bound to #{token['model_name']}, which is not open; #{open}. Open #{token['model_name']} " \
+          "in SketchUp, or ask the user for a token for this Model."
       end
 
       def index(document)
