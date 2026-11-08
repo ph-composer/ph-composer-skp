@@ -128,6 +128,20 @@ class WindowHostWatchTest < PhComposerTestCase
     assert_empty findings(row) & (W::Units::ReturnToHost::LEFT + ["window.overlap"])
   end
 
+  # A narrow Face has no room beside the other Window, only above it.
+  def test_a_window_lands_above_another_when_no_room_is_beside_it
+    plan = Struct.new(:width_m, :height_m, :outer_polygon_m, :panes)
+                 .new(1.5, 1.5, [[0.0, -1.5, 0.0], [1.5, -1.5, 0.0], [1.5, 0.0, 0.0], [0.0, 0.0, 0.0]], [])
+    loop_m = [[0.0, 0.0, 0.0], [2.0, 0.0, 0.0], [2.0, 0.0, 6.0], [0.0, 0.0, 6.0]]
+    geometry = PhComposer::FaceGeometry::Snapshot.new(:loops_m => [loop_m], :normal => [0.0, -1.0, 0.0])
+    other = [[0.25, 0.0, 1.25], [1.75, 0.0, 1.25], [1.75, 0.0, 2.75], [0.25, 0.0, 2.75]]
+    away = [1.0, 0, 0, 0, 0, 0, 1.0, 0, 0, -1.0, 0, 0, 0.25 * M, 3.0 * M, 2.75 * M, 1]
+    matrix = W::Placement::Snap.on_face(geometry, plan, away, [other])
+    outline = W::Units::WorldGeometry.map(plan, matrix).outer_polygon_m
+    assert W::Placement::Fit.check!(geometry, outline, :existing_polygons_m => [other])
+    assert_operator outline.map(&:last).min, :>=, 2.75 - 1e-5
+  end
+
   def test_redo_after_the_return_keeps_it_and_runs_nothing_more
     paste(matrix_at(0.2, 3, 5))
     UI.run_timers

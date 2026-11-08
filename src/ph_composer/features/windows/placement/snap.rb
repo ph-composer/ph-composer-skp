@@ -10,7 +10,7 @@ module PhComposer
       # Where a Window that has left its Face comes back to, from detached geometry alone. It moves as
       # little as possible: a Window already lying clear on a Face stays exactly where it is; otherwise its
       # outline is squared to the Face and brought just inside the Face's extent, or to the nearest spot
-      # beside whichever Windows are in the way there.
+      # clear of whichever Windows are in the way there, beside them or above and below.
       module Snap
         ANCHOR = "center"
 
@@ -23,13 +23,13 @@ module PhComposer
           plane = Plane.new(geometry)
           boundary = geometry.outer_loop.map { |point| plane.project(point) }
           x, y = plane.project(centre_m(plan, matrix))
-          xs = boundary.map(&:first)
-          x = inside(x, xs, plan.width_m)
-          y = inside(y, boundary.map(&:last), plan.height_m)
-          return unless x && y
+          extents = [boundary.map(&:first), boundary.map(&:last)]
+          sizes = [plan.width_m, plan.height_m]
+          start = [inside(x, extents[0], sizes[0]), inside(y, extents[1], sizes[1])]
+          return unless start.all?
 
-          beside(plane, others_m, x, plan.width_m).each do |candidate|
-            mapped = plane.map(plan, :point_m => plane.world(inside(candidate, xs, plan.width_m), y), :anchor => ANCHOR)
+          landings(plane, others_m, start, extents, sizes).each do |spot|
+            mapped = plane.map(plan, :point_m => plane.world(*spot), :anchor => ANCHOR)
             return plane.instance_matrix(mapped) if fits?(geometry, mapped.outer_polygon_m, others_m)
           end
           nil
@@ -50,17 +50,20 @@ module PhComposer
           low <= high ? value.clamp(low, high) : nil
         end
 
-        # `x` first, then the spots just clear of each Window on this plane, nearest first.
-        def beside(plane, others_m, x, width)
+        # `start`, then every spot just clear of a Window on this plane along either axis, nearest first.
+        def landings(plane, others_m, start, extents, sizes)
           on_plane = others_m.select do |polygon|
             polygon.all? { |point| plane.signed_distance_m(point).abs <= FaceGeometry::QUANTUM_M }
+          end.map { |polygon| polygon.map { |point| plane.project(point) } }
+          across = [0, 1].map do |axis|
+            clearance = sizes[axis] / 2.0 + FaceGeometry::QUANTUM_M
+            spots = on_plane.flat_map do |polygon|
+              values = polygon.map { |point| point[axis] }
+              [values.min - clearance, values.max + clearance]
+            end
+            ([start[axis]] + spots.filter_map { |spot| inside(spot, extents[axis], sizes[axis]) }).uniq
           end
-          clearance = width / 2.0 + FaceGeometry::QUANTUM_M
-          spots = on_plane.flat_map do |polygon|
-            extent = polygon.map { |point| plane.project(point).first }
-            [extent.min - clearance, extent.max + clearance]
-          end
-          [x] + spots.sort_by { |spot| (spot - x).abs }
+          across[0].product(across[1]).sort_by { |spot| spot.zip(start).sum { |value, from| (value - from)**2 } }
         end
 
         def fits?(geometry, polygon_m, others_m)
@@ -68,7 +71,7 @@ module PhComposer
         rescue CodedError
           false
         end
-        private_class_method :inside, :beside, :fits?
+        private_class_method :inside, :landings, :fits?
       end
     end
   end
