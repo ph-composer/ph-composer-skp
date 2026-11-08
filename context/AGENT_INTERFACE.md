@@ -443,21 +443,45 @@ instead of showing it, and Codex 0.163.0 kept about 10,000 tokens of a larger on
 recent calls (tool, operation name, session, status, code, time; no params, value, path or token)
 is flushed to the diagnostics log.
 
-Implemented: client configuration, `agent_access/client_config.rb`. When a token is issued the
-dialog shows three forms per client, with the token in them, ordered so the first keeps the token out
-of the client's settings, the second sets the variable it reads and the last writes the token into the
-client's settings; each title says where the token is kept. Claude Code: a `claude mcp add-json` form whose header reads `${PH_COMPOSER_TOKEN}`, expanded
-when it connects (2.1.300: connected with the variable set, failed without), then the `export` line,
-then `claude mcp add --transport http --scope user ph-composer <url> --header "Authorization: Bearer
-<token>"`. Codex: a `[mcp_servers.ph-composer]` block for `~/.codex/config.toml` with
-`bearer_token_env_var = "PH_COMPOSER_TOKEN"`, then the `export` line, then the same block with the
-token inline in `http_headers`. Codex's own `codex mcp
-add` and `remove` rewrite the whole config file, dropping comments and reordering tables (0.163.0),
-so the block is pasted by hand. Both clients connected from these snippets alone and ran a
-`discover` and a `query` headless (`claude -p`, `codex exec`) on the proving host. The
-`agent_access.port` preference changes from the dialog when the port is taken, which a stopped
-listener checks as well, and New token waits for a free port; each token's latest call since launch
-is kept per token, apart from the recent-call ring, and shown beside it as calls finish.
+Implemented: client connection, `agent_access/connections.rb`, `client_setup.rb` and
+`client_config.rb`. The token a client uses is saved in that client's own file,
+`~/.ph-composer/claude_code.json` or `codex.json`, holding the request header
+(`{"Authorization": "Bearer <token>"}`), and the client's configuration names the file once through
+its header helper, `/bin/cat <path>`, which the client runs in a shell each time it connects. A new
+token for a client changes only its file; changing the port changes the URL and needs Connect again
+(from a new token's dialog: the secret exists only there). macOS only.
+Both clients connected this way from a process started with only `HOME`, `PATH=/usr/bin:/bin` and
+`USER` in its environment, as a GUI-launched client is (Claude Code 2.1.317 `headersHelper`, user scope,
+no trust prompt; Codex 0.167.0 `http_headers_helper`, a string, shelled, so a quoted path with a space
+works). When a token is issued, the dialog offers Connect per client, then two forms to paste: the
+setup Connect makes, which names the file and not the token, and an inline form that carries the token
+in the client's settings. Connect sends the token the page holds back to Ruby, which saves it only when
+its digest is live and the listener is listening, then sets the client up:
+
+- Claude Code: nothing runs when `~/.claude.json` (read, never written) already holds the same
+  `ph-composer` entry, so a new token touches no client setting. Otherwise `claude mcp add-json --scope
+  user ph-composer <json>`, the binary taken from a fixed list of absolute paths (`~/.local/bin`,
+  `/opt/homebrew/bin`, `/usr/local/bin`, `~/.claude/local`), a regular executable file owned by the user
+  or root and not world-writable. On "already exists" (an entry of another form), `claude mcp remove
+  --scope user ph-composer` and the add once more; any other failure removes nothing.
+- Codex: has no command that sets a helper, and `codex mcp add` rewrites the whole config, so the block
+  is appended to `~/.codex/config.toml` after a blank line, every existing byte kept. A config where any
+  line outside a comment has `ph-composer` as a key (a table, a dotted key, an inline table) is left
+  untouched, since a second definition would invalidate the whole file: the same block answers
+  configured, another form asks the user to set its `url` and `http_headers_helper`. A path that only
+  contains the name, such as a project folder, is not a key. The block is appended only when no key or
+  header holds an escape (one could spell either name unseen) and the root `mcp_servers` table is
+  opened only by plain `[mcp_servers.<other>]` headers; an inline or dotted root `mcp_servers` or an
+  `[mcp_servers]` table cannot be extended this way, so the user adds the block. Another table's own
+  `mcp_servers`, such as a plugin's `[plugins."<name>".mcp_servers.<server>]`, is not the root one. No `~/.codex` folder means Codex is not set up
+  and nothing is created.
+
+Either way the answer ends with the step the user takes: start a new session of that client, since a
+running one never sees a newly added server; SketchUp needs no restart. When a step cannot be done the
+token is still saved and the answer says what to run or paste. The token list shows which clients use
+each token. The `agent_access.port` preference changes from the dialog when the port is taken, which a
+stopped listener checks as well, and New token waits for a free port; each token's latest call since
+launch is kept per token, apart from the recent-call ring, and shown beside it as calls finish.
 
 Keep a bounded operation history with caller identity, action, target references, outcome and
 revision for diagnosis. Avoid full payload or secret logging. Exact retention and user-visible
@@ -475,6 +499,21 @@ Decided and implemented; a change to any of these is a security decision, not a 
 - The store keeps only each token's SHA-256. PH-Composer shows the secret once, in the issuing
   dialog; a copy the user makes for a client is the user's. Tokens do not expire; revocation is
   explicit, and the most recently revoked tokens stay listed with their dates.
+- A token the user connects to a client is also kept in that client's file under `~/.ph-composer/`
+  (folder 0700, file 0600, refused when the folder is a link or another account's), written to a
+  temporary file and renamed so a client never reads half of one, the temporary file removed whatever
+  stops the write. At every store write, a revoke or a reset, any client file that does not hold a live
+  token is deleted, one that cannot be read included; a failure there is logged and never stops the
+  revoke. Another process of the same user racing the folder checks is outside this posture. Anything running as the user can read it, as it can the
+  client's own settings, where the inline forms keep a token.
+- Connect runs one program, Claude Code's `claude`, from a fixed list of absolute paths, never through a
+  shell and never with a path from the page: argv only, closed input, an environment of `HOME`, `USER`
+  and a `PATH` of the binary's folder and the system folders, its own process group, 20 s for the whole
+  Connect (SketchUp waits on it), then TERM to the group and, 2 s later, KILL to whatever of it is left. No argument carries the
+  token, so it never reaches a command line or shell history; the output is kept to its first 4 KiB as
+  valid text, read only for "already exists" and its first line shown to the user, never logged. The Codex setup is
+  a file append, not a program. The client then runs the helper, `/bin/cat` and the path escaped for
+  the shell, which PH-Composer writes and no page or agent can change.
 - The port is fixed per preference. On a computer with several accounts, another account can bind it
   while SketchUp is not listening and receive the token from an agent that connects then. The user
   documentation tells users of such a computer to revoke tokens when they finish. Binding a grant to

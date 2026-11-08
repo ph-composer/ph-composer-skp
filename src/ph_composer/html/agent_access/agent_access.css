@@ -62,3 +62,7 @@
   margin-bottom: 0; }
 /* The scope is not a seventh permission: a 16 px step sets it apart from the Access group. */
 .phc-form-dialog.agent-access-create-dialog .agent-access-capabilities + .agent-access-capability { margin-top: 8px; }
+/* Connect leads each client's section; what it did is said beneath it, ending with the step the user takes. */
+.agent-access-client .agent-access-connect { margin: 0 0 8px; }
+.agent-access-connected { margin: 0 0 12px; color: var(--ink); }
+.agent-access-connected:empty { display: none; }

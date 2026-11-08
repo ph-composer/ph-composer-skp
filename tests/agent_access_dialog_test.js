@@ -61,28 +61,51 @@ test("a token's latest call shows its time and how it ended", function () {
   assert.ok(allText(o.view.list).includes("last call") && allText(o.view.list).includes("refused"));
 });
 
-test("the created token comes with each client's setup to copy, and none of it outlives the dialog", function () {
-  var o = setup(), commands = [];
-  o.page.document.execCommand = function (name) { commands.push(name); return true; };
-  var clients = [{ client: "Claude Code",
-    forms: [{ title: "Run in a terminal", text: "claude mcp add-json ..." },
-      { title: "Then set the variable", text: "export PH_COMPOSER_TOKEN=" + "ab".repeat(24) },
-      { title: "Or, one command", text: "claude mcp add ... " + "ab".repeat(24) }],
-    check: "claude mcp get ph-composer", remove: "claude mcp remove ph-composer" }];
-  o.view.receive({ type: "access.issued", payload: { token: "ab".repeat(24), row: TOKEN, clients: clients } });
-  var fields = o.view.clients.querySelectorAll("textarea");
-  assert.deepStrictEqual(Array.prototype.map.call(fields, function (field) { return field.value; }),
-    clients[0].forms.map(function (form) { return form.text; }));
-  var text = allText(o.view.clients), at = clients[0].forms.map(function (form) { return text.indexOf(form.title); });
-  assert.ok(at[0] >= 0 && at[0] < at[1] && at[1] < at[2], "the titles show in the forms' order");
-  assert.ok(allText(o.view.clients).includes("claude mcp get ph-composer"));
-  assert.ok(allText(o.view.issuedDialog).includes("Each setup says where the token is kept. Choose the first two " +
-    "unless your client cannot read an environment variable."));
-  named(o.view.clients, "Copy Claude Code setup").dispatchEvent({ type: "click" });
-  assert.deepStrictEqual(commands, ["copy"]);
-  assert.strictEqual(o.view.copyStatus.textContent, "Claude Code setup copied.");
-  named(o.view.issuedDialog, "I have copied it").dispatchEvent({ type: "click" });
-  assert.ok(!allText(o.view.root).includes("ab".repeat(24)));
+test("the created token comes with each client's Connect and setup to copy, and none of it outlives the dialog",
+  function () {
+    var o = setup(), commands = [];
+    o.page.document.execCommand = function (name) { commands.push(name); return true; };
+    var clients = [{ id: "claude_code", client: "Claude Code",
+      forms: [{ title: "What Connect runs", text: "claude mcp add-json ..." },
+        { title: "Or, one command", text: "claude mcp add ... " + "ab".repeat(24) }],
+      check: "claude mcp get ph-composer", remove: "claude mcp remove ph-composer" }];
+    o.view.receive({ type: "access.issued", payload: { token: "ab".repeat(24), row: TOKEN, clients: clients } });
+    var fields = o.view.clients.querySelectorAll("textarea");
+    assert.deepStrictEqual(Array.prototype.map.call(fields, function (field) { return field.value; }),
+      clients[0].forms.map(function (form) { return form.text; }));
+    var text = allText(o.view.clients), at = clients[0].forms.map(function (form) { return text.indexOf(form.title); });
+    assert.ok(at[0] >= 0 && at[0] < at[1], "the titles show in the forms' order");
+    assert.ok(text.indexOf("Connect Claude Code") < at[0], "Connect leads the client's section");
+    assert.ok(allText(o.view.clients).includes("claude mcp get ph-composer"));
+    assert.ok(allText(o.view.issuedDialog).includes("Connect saves the token in a file only your account can read"));
+    named(o.view.clients, "Copy Claude Code setup").dispatchEvent({ type: "click" });
+    assert.deepStrictEqual(commands, ["copy"]);
+    assert.strictEqual(o.view.copyStatus.textContent, "Claude Code setup copied.");
+    named(o.view.issuedDialog, "Done").dispatchEvent({ type: "click" });
+    assert.ok(!allText(o.view.root).includes("ab".repeat(24)));
+  });
+
+test("Connect sends the client and the token once, says what it did and what to do next", function () {
+  var o = setup();
+  o.view.receive({ type: "access.issued", payload: { token: "ab".repeat(24), row: TOKEN, clients: [
+    { id: "codex", client: "Codex", forms: [{ title: "What Connect adds", text: "[mcp_servers.ph-composer]" }],
+      check: "codex mcp get ph-composer", remove: "" }] } });
+  var connect = named(o.view.clients, "Connect Codex");
+  connect.dispatchEvent({ type: "click" }); connect.dispatchEvent({ type: "click" });
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(o.sent)),
+    [{ type: "access.connect", payload: { client: "codex", token: "ab".repeat(24) } }]);
+  assert.ok(connect.disabled, "one Connect at a time");
+  o.view.receive({ type: "access.connected", payload: { client: "codex", state: "configured",
+    message: "Codex is set up to read its token from PH-Composer. Then start a new Codex session to connect." } });
+  assert.ok(allText(o.view.clients).includes("start a new Codex session"));
+  assert.strictEqual(connect.disabled, false);
+  connect.dispatchEvent({ type: "click" });
+  o.view.receive({ type: "access.failure", payload: { message: "This token is no longer live." } });
+  assert.ok(allText(o.view.clients).includes("This token is no longer live."), "the refusal replaces Connecting");
+  assert.ok(!allText(o.view.clients).includes("Connecting Codex"));
+  o.view.receive({ type: "access.state", payload: { state: "readable", offered: ["read"],
+    server: { state: "listening", port: 46110 }, tokens: [Object.assign({}, TOKEN, { connected: ["Codex"] })] } });
+  assert.ok(allText(o.view.list).includes("used by Codex"));
 });
 
 test("New token offers Read fixed and sends the label and capabilities once", function () {
@@ -122,7 +145,7 @@ test("every capability is offered unchecked beside Read, with its consent, and T
       payload: { label: null, capabilities: ["read", "model_write"], model_only: "k1" } });
   });
 
-test("the issued token shows once and is gone after I have copied it", function () {
+test("the issued token shows once and is gone after Done", function () {
   var o = setup();
   named(o.view.root, "New token").dispatchEvent({ type: "click" });
   o.view.submitCreate();
@@ -130,7 +153,7 @@ test("the issued token shows once and is gone after I have copied it", function 
   assert.strictEqual(o.view.createDialog.hidden, true);
   assert.strictEqual(o.view.issuedDialog.hidden, false);
   assert.strictEqual(o.view.secret.value, "ab".repeat(24));
-  named(o.view.issuedDialog, "I have copied it").dispatchEvent({ type: "click" });
+  named(o.view.issuedDialog, "Done").dispatchEvent({ type: "click" });
   assert.strictEqual(o.view.issuedDialog.hidden, true);
   assert.strictEqual(o.view.secret.value, "");
   assert.ok(!allText(o.view.root).includes("ab".repeat(24)));

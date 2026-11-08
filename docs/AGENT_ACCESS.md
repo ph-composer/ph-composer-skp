@@ -2,7 +2,8 @@
 
 DATE: 2026-10-18
 STATUS: Agent tokens, the local connection, client setup and the agent scenarios are implemented and
-checked with Claude Code 2.1.300 and Codex 0.163.0 on SketchUp 2026 for macOS. This is a development build, not a released or supported
+checked with Claude Code 2.1.300 and Codex 0.163.0 on SketchUp 2026 for macOS; Connect with Claude
+Code 2.1.317 and Codex 0.167.0. This is a development build, not a released or supported
 product.
 
 PH-Composer lets users' agents inspect and edit building models through documented public
@@ -66,28 +67,30 @@ Each token's latest call since SketchUp started shows beside it.
 
 ### Connect your client
 
-When a token is created, the window shows what to paste for each supported client, with the token
-already in it. Checked with Claude Code 2.1.300 and Codex 0.163.0 on macOS:
+When a token is created, the window offers Connect for each supported client. Checked with Claude
+Code 2.1.317 and Codex 0.167.0 on macOS, including clients not started from a terminal:
 
-- Claude Code: run the `claude mcp add-json --scope user ph-composer ...` command it shows first,
-  which reads the token from `PH_COMPOSER_TOKEN`, then run the `export PH_COMPOSER_TOKEN=...` line in
-  the terminal you start Claude Code from. The other setup, the one-command
-  `claude mcp add --transport http ...`, writes the token into Claude Code's settings file,
-  `~/.claude.json`, and your shell history. Check it with `claude mcp get ph-composer`, which should
-  say Connected.
-- Codex: paste the first `[mcp_servers.ph-composer]` block it shows into `~/.codex/config.toml`, which
-  names the variable rather than the token, then run the `export PH_COMPOSER_TOKEN=...` line in the
-  terminal you start Codex from. The other block carries the token itself and keeps it in
-  `~/.codex/config.toml`; paste it instead of both if you prefer. Check it with
-  `codex mcp get ph-composer`. Edit the file by hand rather than with `codex mcp add`, which
-  rewrites the whole file and drops its comments.
+- Connect Claude Code saves the token in a file only your account can read and runs Claude Code's
+  own `claude mcp add-json --scope user ph-composer ...` once, which tells Claude Code to read the token
+  from that file each time it connects. If PH-Composer cannot find the `claude` command, the window
+  shows that command for you to run in Terminal once. Check it with `claude mcp get ph-composer`,
+  which should say Connected.
+- Connect Codex saves the token the same way and adds a `[mcp_servers.ph-composer]` block to
+  `~/.codex/config.toml`, leaving the rest of the file as it was. If the file already has a
+  `[mcp_servers.ph-composer]` block from an earlier setup, it is left alone and the window shows the
+  block to put in its place. Check it with `codex mcp get ph-composer`.
 
-**Where the token is kept.** The environment-variable setup keeps the token out of the client's
-settings: the client reads it from the terminal's environment. Running the `export` line leaves it in
-your shell history, as any command you type does. Putting that line in your shell profile, such as
-`~/.zshrc`, also keeps it in that file and sets it in every terminal opened afterwards. The
-one-command and inline setups keep it in the client's settings file and, for a command, in your shell
-history. Anyone who can read those files has the token until you revoke it.
+Then start a new session of your client: a session already open does not see a newly added server.
+SketchUp does not need a restart. A new token later only needs Connect in its window; the client's
+settings stay as they are. If you change the port, create a token and press Connect so the client uses
+the new port. Connect works on macOS.
+
+**Where the token is kept.** Connect keeps the token in `~/.ph-composer/`, one file per client, which
+only your account can read; it is never typed on a command line, so it is not in your shell history.
+Revoking the token deletes its file. Each client's section also shows a setup with the token itself,
+which keeps it in the client's settings file (`~/.claude.json` or `~/.codex/config.toml`) and, for
+the command, in your shell history; a new token then means setting the client up again. Anyone who
+can read those files has the token until you revoke it.
 
 **Shared computers.** PH-Composer listens on one port on this computer. On a computer with several
 user accounts, another account could run a program on that port while SketchUp is not listening
@@ -95,7 +98,7 @@ and receive the token from an agent that connects then. On such a computer, revo
 you finish and issue a new one when you start.
 
 To disconnect an agent, revoke its token in the Agent Access window. To remove the entry from a
-client as well, run `claude mcp remove ph-composer`, or delete the `[mcp_servers.ph-composer]`
+client as well, run `claude mcp remove --scope user ph-composer`, or delete the `[mcp_servers.ph-composer]`
 block from `~/.codex/config.toml`. PH-Composer itself is removed with SketchUp's Extension Manager.
 
 ## Working with an agent

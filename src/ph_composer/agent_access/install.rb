@@ -18,7 +18,9 @@ module PhComposer
       "agent_access.store_unreadable" => "The stored agent tokens cannot be read; reset them before issuing another.",
       "agent_access.store_unavailable" => "The agent tokens could not be read or saved on this machine.",
       "agent_access.model_unsaved" => "A token can be bound only to a Model that has been saved to a file.",
-      "agent_access.model_changed" => "The open Model changed since the form showed it; nothing was issued."
+      "agent_access.model_changed" => "The open Model changed since the form showed it; nothing was issued.",
+      "agent_access.connection_unavailable" => "The token could not be saved for the client in its owner-only file.",
+      "agent_access.not_listening" => "PH-Composer is not listening, so no client was set up."
     }.freeze
 
     module_function
@@ -35,10 +37,13 @@ module PhComposer
     end
 
     # Called after every token store write, a revoke or a reset alike: the caller handles of every token
-    # that is no longer live end at once, its waiting calls are answered as revoked, the listener takes
-    # the new snapshot (stopping after the last token), and the dialog shows the new list.
+    # that is no longer live end at once, its waiting calls are answered as revoked, a client's saved copy
+    # of it is deleted, the listener takes the new snapshot (stopping after the last token), and the dialog
+    # shows the new list.
     def tokens_changed
-      live = Tokens.snapshot.values.map { |row| row.fetch("id") }
+      snapshot = Tokens.snapshot
+      Connections.prune(snapshot.keys)
+      live = snapshot.values.map { |row| row.fetch("id") }
       ended = (handles.keys - live).to_h { |token_id| [token_id, revoke_callers(token_id)] }
       refused = Listener.refresh || {}
       (ended.keys | refused.keys).each do |token_id|
