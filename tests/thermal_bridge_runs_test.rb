@@ -193,6 +193,22 @@ class ThermalBridgeRunsTest < Minitest::Test
                  schedule(both).dig("runs", 0, "findings").map { |finding| finding.fetch("code") }
   end
 
+  # Zones A to B and B to C are within the tolerance and A to C is not. B is dropped against A, and C, which only
+  # B coincides with, stays: an Edge is dropped only against one that is kept.
+  def test_a_chain_of_near_misses_at_the_tolerance_drops_only_what_a_kept_edge_stands_for
+    zone_c = ZONE_B.merge("zone_id" => "zon_CCCCCCCCCCCC", "zone_path" => [300], "name" => "Zone C")
+    interior = [{ "face_type" => "Wall", "boundary_condition" => "Adiabatic" }, SURFACE]
+    line = ->(zone, offset, faces) { fact(zone, PARAPET, [0, offset, 9], [1, offset, 9], :faces => faces) }
+    facts = [line.call(ZONE_A, 0.0, interior), line.call(ZONE_B, 0.00002, OUTDOOR),
+             line.call(zone_c, 0.00004, interior)]
+    reads = [facts, facts.reverse].map { |order| schedule(order).fetch("runs") }
+    reads.each do |rows|
+      assert_equal ["Zone A", "Zone C"], rows.map { |row| row.dig("zone", "name") }
+      assert_equal [[], %w[thermal_bridge.interior_junction]],
+                   rows.map { |row| row.fetch("findings").map { |finding| finding.fetch("code") } }
+    end
+  end
+
   def conflict_rows(one, other)
     rows = schedule([one, other]).fetch("runs")
     assert_equal 2, rows.length, "a conflict counts both until the user clears one"

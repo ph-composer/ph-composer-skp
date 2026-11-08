@@ -26,17 +26,23 @@ module PhComposer
 
         # Of Edges alike, the one in the Zone with the smallest path stands for them, whatever order they
         # arrive in and whatever the Zones are called, so a run's identifier survives a rename and a rescan.
-        # It takes their Faces too: the junction is interior only if it is interior from every Zone.
+        # An Edge is dropped only against one that is kept, so a chain of near misses at the tolerance loses
+        # no Edge that nothing stands for. The Edge kept takes the Faces of those it stands for: the junction
+        # is interior only if it is interior from every Zone.
         def resolve(facts)
           others = coinciding(facts)
-          kept = facts.reject do |fact|
-            others.fetch(fact.path).any? { |other| alike?(fact, other) && first?(other, fact) }
+          stands_for = {}
+          facts.sort_by { |fact| rank(fact) }.each do |fact|
+            keeper = others.fetch(fact.path).select { |other| stands_for.key?(other.path) && alike?(fact, other) }
+                           .min_by { |other| rank(other) }
+            keeper ? stands_for[keeper.path] << fact : stands_for[fact.path] = []
           end
+          kept = facts.select { |fact| stands_for.key?(fact.path) }
           conflicts = kept.each_with_object({}) do |fact, found|
             differing = others.fetch(fact.path).reject { |other| alike?(fact, other) }
             found[fact.path] = differing unless differing.empty?
           end
-          Resolved.new(:facts => kept.map { |fact| standing_for(fact, others.fetch(fact.path)) },
+          Resolved.new(:facts => kept.map { |fact| standing_for(fact, stands_for.fetch(fact.path)) },
                        :conflicts => conflicts)
         end
 
@@ -79,15 +85,14 @@ module PhComposer
           words
         end
 
-        def first?(one, other)
-          (one.zone.fetch("zone_path") <=> other.zone.fetch("zone_path")).negative?
+        def rank(fact)
+          [fact.zone.fetch("zone_path"), fact.path]
         end
 
-        def standing_for(fact, others)
-          alike = others.select { |other| alike?(fact, other) }
-          return fact if alike.empty?
+        def standing_for(fact, represented)
+          return fact if represented.empty?
 
-          fact.dup.tap { |kept| kept.faces = fact.faces + alike.flat_map(&:faces) }
+          fact.dup.tap { |kept| kept.faces = fact.faces + represented.flat_map(&:faces) }
         end
 
         def cell(point)
