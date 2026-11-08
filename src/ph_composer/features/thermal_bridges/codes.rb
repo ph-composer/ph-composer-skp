@@ -13,8 +13,9 @@ module PhComposer
                                              "stray line.",
         "thermal_bridge.interior_junction" => "An assigned Edge lies only between interior Faces (Surface or To " \
                                               "neighbour).",
-        "thermal_bridge.counted_twice" => "An assigned Edge coincides with an assigned Edge in another Zone, so the " \
-                                          "bridge is counted twice.",
+        "thermal_bridge.coincident_conflict" => "An assigned Edge coincides with one in another Zone that differs " \
+                                                "in Thermal Bridge Type, quantity or Building-Segment, so both are " \
+                                                "counted until one is cleared.",
         "thermal_bridge.shared_definition" => "An assigned Edge is in shared component storage and counts once per " \
                                               "placement.",
         "thermal_bridge.on_window_perimeter" => "An assigned Edge lies on a placed Window's outline; its install " \

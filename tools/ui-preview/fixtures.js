@@ -204,8 +204,9 @@
     runs: [tbRun("tb_Aa11Bb22Cc33", "Parapet 1", LIVING, "tbt_Aa11Bb22Cc33", 18,
       [[100, 301], [100, 302], [100, 303], [100, 304]]),
     tbRun("tb_Dd44Ee55Ff66", "Parapet 2", ATTIC, "tbt_Aa11Bb22Cc33", 16, [[200, 401], [200, 402]],
-      [{ code: "thermal_bridge.counted_twice", blocks_export: false,
-        message: "1 Edge also assigned in another Zone, so the bridge is counted twice; clear one.",
+      [{ code: "thermal_bridge.coincident_conflict", blocks_export: false,
+        message: "1 Edge is also assigned in Attic with a different Thermal Bridge Type, " +
+          "so both are counted; clear one.",
         locate: { edge_paths: [[200, 401]] } }]),
     tbRun("tb_Gg77Hh88Ii99", "Slab edge 1", LIVING, "tbt_Dd44Ee55Ff66", 18, [[100, 311], [100, 312]])],
     edgeFindings: [{ path: [5], code: "thermal_bridge.outside_zone", blocks_export: false,

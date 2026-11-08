@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 19
+    MINOR = 20
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -92,7 +92,11 @@ module PhComposer
                     "on the nearest Face of its Zone, and adds window.no_host_face." },
       { "minor" => 19, "date" => "2026-11-08",
         "change" => "ph_composer.windows.settings gains default_psi_install_w_mk, 0.04 W/mK unless set: what an " \
-                    "edge with no Psi-Install Type inherits when the Model has no default Type." }
+                    "edge with no Psi-Install Type inherits when the Model has no default Type." },
+      { "minor" => 20, "date" => "2026-11-08",
+        "change" => "The thermal-bridge schedule and export count one Type on Edges two Zones of one " \
+                    "Building-Segment share once. thermal_bridge.coincident_conflict replaces " \
+                    "thermal_bridge.counted_twice for coincident Edges that differ." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

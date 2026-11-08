@@ -8,10 +8,10 @@ require_relative "thermal_bridge_reference_model"
 # each line in its own bridge call:
 #   ThermalBridgeScheduleWalkthrough.assign_reference   the five runs of ACCEPTANCE's hand calculation
 #   ThermalBridgeScheduleWalkthrough.verify             the schedule against that calculation, each check named
-#   ThermalBridgeScheduleWalkthrough.counted_twice      Parapet on the roof Edge at x = 5 m in both Zones
+#   ThermalBridgeScheduleWalkthrough.coincident         Parapet on the roof Edge at x = 5 m in both Zones, counted once
 #   ThermalBridgeScheduleWalkthrough.outside_zone       the Balcony record copied onto the line at the Model root
 #   ThermalBridgeScheduleWalkthrough.locate_nested      Parapet on Zone W's roof, then runs.locate into it
-# `counted_twice` and `locate_nested` each write one Undo step; undo it before `verify` again.
+# `coincident` and `locate_nested` each write one Undo step; undo it before `verify` again.
 module ThermalBridgeScheduleWalkthrough
   PREFIX = "ph_composer.thermal_bridges"
   DICTIONARY = "ph_composer.thermal_bridge"
@@ -57,7 +57,7 @@ module ThermalBridgeScheduleWalkthrough
       "identifiers" => runs.transform_values { |row| row.fetch("identifier") } }
   end
 
-  def counted_twice
+  def coincident
     targets = %w[zone_a_roof_east zone_b_roof_west].flat_map { |name| targets(name) }
     written = client.invoke("#{PREFIX}.edges.assign", "targets" => targets,
                                                       "thermal_bridge_type_id" => type_id("Parapet"))

@@ -344,7 +344,7 @@ uv run tools/hostkit/host_bridge.py eval 'ThermalBridgeAssignmentWalkthrough.rep
 with every Edge named by path. `assign_reference` assigns ACCEPTANCE's five runs through
 `ph_composer.thermal_bridges.edges.assign`; `verify` reads `ph_composer.thermal_bridges.schedule.all`
 and checks every run, type total, group total and the Model total against the hand calculation to
-0.001. `counted_twice`, `outside_zone` and `locate_nested` add the T04 cases one at a time, the last
+0.001. `coincident`, `outside_zone` and `locate_nested` add the T04 cases one at a time, the last
 sending a run's `locate` params to `ph_composer.thermal_bridges.runs.locate` and reading the edit
 path and selection back.
 

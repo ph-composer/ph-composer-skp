@@ -8,20 +8,15 @@ module PhComposer
       # missing type and a missing psi-value block export. The window-perimeter finding needs Windows' outlines,
       # which the export preflight and contributor read and the schedule does not.
       module Findings
-        # SketchUp's merge tolerance (context/SKETCHUP_HOST_BEHAVIOR.md), used here only across Zones, where
-        # no vertex can be shared.
-        COINCIDENT_M = 0.0254e-3
-        # Coincidence is looked up on a grid this coarse, then checked exactly; a grid at the tolerance
-        # itself would miss two endpoints that straddle a cell boundary, so the lookup reads the
-        # neighbouring cells too.
-        CELL_M = 1.0e-3
+        COINCIDENT_M = Coincidence::COINCIDENT_M
         INTERIOR = %w[Surface Adiabatic].freeze
 
         module_function
 
-        # `types` maps a type id to its record, or has no key for a type that no longer exists. `outlines` are
-        # placed Windows' world outlines in metres, each a list of corner points; none when not read.
-        def for_run(run, types, coincident, outlines = [])
+        # `types` maps a type id to its record, or has no key for a type that no longer exists. `conflicts` is
+        # Coincidence's map of an Edge's path to the Edges it conflicts with. `outlines` are placed Windows'
+        # world outlines in metres, each a list of corner points; none when not read.
+        def for_run(run, types, conflicts, outlines = [])
           type = types[run.type_id]
           found = []
           if type.nil?
@@ -32,12 +27,7 @@ module PhComposer
                              run.edge_paths, true)
           end
           found.concat(face_findings(run))
-          twice = run.facts.select { |fact| coincident.key?(fact.path) }
-          unless twice.empty?
-            found << finding("thermal_bridge.counted_twice", "#{count(twice)} also assigned in another Zone, so the " \
-                                                             "bridge is counted twice; clear one.",
-                             twice.map(&:path), false)
-          end
+          found.concat(conflict(run, conflicts))
           shared = run.facts.select(&:shared)
           unless shared.empty?
             found << finding("thermal_bridge.shared_definition", "#{count(shared)} inside shared component " \
@@ -45,6 +35,19 @@ module PhComposer
                              shared.map(&:path), false)
           end
           found.concat(perimeter(run, outlines))
+        end
+
+        # A run's Edges that coincide with an Edge another Zone assigns differently: which Zones, and what differs.
+        def conflict(run, conflicts)
+          facts = run.facts.select { |fact| conflicts.key?(fact.path) }
+          return [] if facts.empty?
+
+          others = facts.flat_map { |fact| conflicts.fetch(fact.path) }
+          zones = others.map { |other| other.zone["name"].to_s }.uniq.sort.join(", ")
+          words = others.flat_map { |other| Coincidence.differences(facts.first, other) }.uniq.join(" and ")
+          [finding("thermal_bridge.coincident_conflict", "#{count(facts)} also assigned in #{zones} with a different " \
+                                                         "#{words}, so both are counted; clear one.",
+                   facts.map(&:path), false)]
         end
 
         # An Edge lying on a placed Window's outline, both its ends within the merge tolerance of one side of it.
@@ -114,40 +117,6 @@ module PhComposer
           finding("thermal_bridge.outside_zone", "An assigned Edge is not in a Zone (#{fact.reason.tr('_', ' ')}), " \
                                                  "so it is not exported. Move it into a Zone, or clear it.",
                   [fact.path], false).merge("path" => fact.path)
-        end
-
-        # The paths, as Hash keys, of Zone-held facts coincident, within the tolerance and either way round,
-        # with a fact in another Zone occurrence, of any type. Only whole Edges compare: an Edge one Zone
-        # splits where the other does not is not found.
-        def coincident(facts)
-          cells = Hash.new { |hash, cell| hash[cell] = [] }
-          facts.each { |fact| fact.points_m.each { |point| cells[cell(point)] << fact } }
-          facts.each_with_object([]) do |fact, found|
-            candidates = neighbours(cell(fact.points_m.first)).flat_map { |key| cells.fetch(key, []) }.uniq
-            other = candidates.find do |candidate|
-              candidate.zone.fetch("zone_path") != fact.zone.fetch("zone_path") && same_segment?(fact, candidate)
-            end
-            found << fact.path if other
-          end.to_h { |path| [path, true] }
-        end
-
-        def same_segment?(one, other)
-          a, b = one.points_m
-          c, d = other.points_m
-          (near?(a, c) && near?(b, d)) || (near?(a, d) && near?(b, c))
-        end
-
-        def near?(one, other)
-          Chains.distance(one, other) <= COINCIDENT_M
-        end
-
-        def cell(point)
-          point.map { |value| (value / CELL_M).floor }
-        end
-
-        def neighbours(cell)
-          offsets = [-1, 0, 1]
-          offsets.product(offsets, offsets).map { |delta| cell.zip(delta).map(&:sum) }
         end
 
         def count(facts)

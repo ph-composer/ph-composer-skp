@@ -55491,7 +55491,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 
 | Code | Meaning |
 | --- | --- |
-| `thermal_bridge.counted_twice` | An assigned Edge coincides with an assigned Edge in another Zone, so the bridge is counted twice. |
+| `thermal_bridge.coincident_conflict` | An assigned Edge coincides with one in another Zone that differs in Thermal Bridge Type, quantity or Building-Segment, so both are counted until one is cleared. |
 | `thermal_bridge.hidden` | An Edge to locate, or a Group holding it, is hidden or on a hidden tag. |
 | `thermal_bridge.interior_junction` | An assigned Edge lies only between interior Faces (Surface or To neighbour). |
 | `thermal_bridge.no_envelope_face` | An assigned Edge bounds no classified envelope Face; it is likely a stray line. |
@@ -55628,3 +55628,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.17 | 2026-11-08 | An unexpected failure's detail gains error_class beside incident. ph_composer.zones.solve_adjacency's result gains already_paired. An Assembly's Layer, Layer-Segment and air-barrier ids and its Material references state their pattern in every schema that names them. |
 | 1.18 | 2026-11-08 | ph_composer.windows.units.return_to_host is new. It puts a Window that has left its Face back on the nearest Face of its Zone, and adds window.no_host_face. |
 | 1.19 | 2026-11-08 | ph_composer.windows.settings gains default_psi_install_w_mk, 0.04 W/mK unless set: what an edge with no Psi-Install Type inherits when the Model has no default Type. |
+| 1.20 | 2026-11-08 | The thermal-bridge schedule and export count one Type on Edges two Zones of one Building-Segment share once. thermal_bridge.coincident_conflict replaces thermal_bridge.counted_twice for coincident Edges that differ. |
