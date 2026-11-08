@@ -206,7 +206,10 @@ module PhComposer
                                           :state => ->(session) { Selection.client(session).check("assembly_id", id) })
             end
             entries << Declarations::MenuEntry.new(:label => "Clear assembly",
-                                                   :handler => ->(session) { Selection.client(session).assembly(nil) })
+                                                   :handler => ->(session) { Selection.client(session).assembly(nil) },
+                                                   :state => ->(session) do
+                                                     Selection.client(session).check("assembly_id", nil)
+                                                   end)
             entries
           end
 
@@ -260,8 +263,10 @@ module PhComposer
             @shared_key = key
             read = API.query(:context => @context, :name => "#{PREFIX}.selection")
             rows = Array(read.dig("value", "targets")).map { |row| row.fetch("expected_values") }
-            @shared = rows.flat_map(&:keys).uniq.select { |field| rows.map { |row| row[field] }.uniq.length == 1 }
-                          .to_h { |field| [field, rows.first[field]] }
+            # `assembly_id` is listed even when no record has one, so "none assigned" is a shared value too.
+            fields = rows.flat_map(&:keys) | %w[assembly_id]
+            @shared = fields.select { |field| rows.map { |row| row[field] }.uniq.length == 1 }
+                            .to_h { |field| [field, rows.first[field]] }
           end
 
           def show(result)

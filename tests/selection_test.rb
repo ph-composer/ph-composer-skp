@@ -313,6 +313,21 @@ class SelectionTest < PhComposerTestCase
     assert_empty entries.call(mixed)
   end
 
+  def test_clear_assembly_is_marked_only_when_no_selected_face_has_one
+    inside_zone
+    select(*@groups.first.entities.to_a.first(2))
+    mark_clear = lambda do |rows|
+      value = { "targets" => rows.map { |row| { "expected_values" => row } } }
+      API.stub(:query, ->(**_args) { { "status" => "completed", "value" => value } }) do
+        FACES::Selection::Client.new(@session).check("assembly_id", nil)
+      end
+    end
+
+    assert_equal MF_CHECKED, mark_clear.call([{}, {}]), "a Face with no record has no Assembly"
+    assert_equal MF_CHECKED, mark_clear.call([{ "assembly_id" => nil }, {}])
+    assert_equal MF_UNCHECKED, mark_clear.call([{ "assembly_id" => "asm_A" }, {}])
+  end
+
   def test_assignment_handoff_is_detached_revision_guarded_and_token_scoped
     inside_zone
     select(*@groups.first.entities.to_a.first(2))
