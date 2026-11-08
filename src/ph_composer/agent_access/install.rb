@@ -30,10 +30,36 @@ module PhComposer
       CODES.each { |code, description| feature.code(code, :description => description) }
       # Kept out of the viewport's right-click menu: managing tokens has nothing to do with what is under
       # the pointer.
+      # The path each session's Model was last known by, so a save can tell a Save As from a save in place.
+      %i[session_created model_opened].each do |event|
+        feature.on_host_event(event) { |session| saved_path(session).path = session.model.path.to_s }
+      end
+      feature.on_host_event(:post_save) { |session| saved(session) }
       # The form shows which Model "This Model only" binds, so it follows activation and Save As.
       %i[model_activated post_save].each { |event| feature.on_host_event(event) { |_session| Dialog.refresh } }
       feature.menu_item("#{FEATURE_ID}.open", :label => "Agent Access…", :menu => MENU,
                                               :available => ->(_read) { false }) { |_session| Dialog.show }
+    end
+
+    SavedPath = Struct.new(:path)
+
+    def saved_path(session)
+      session.feature_state("#{FEATURE_ID}.saved_path") { SavedPath.new(session.model.path.to_s) }
+    end
+
+    # After a save: a Model saved under a new name (Save As, how a stage copy is made) keeps the tokens
+    # bound to it. An autosave or a save in place keeps the path and writes nothing. It runs inside
+    # SketchUp's save, so a failure is logged, never raised, and the old path is kept so the next save
+    # tries again.
+    def saved(session)
+      held = saved_path(session)
+      to = session.model.path.to_s
+      Tokens.follow(held.path, to) unless held.path.empty? || held.path == to
+      held.path = to
+    rescue StandardError => error
+      fields = { "severity" => "warning", "error_class" => error.class.name }
+      fields["code"] = error.code if error.is_a?(CodedError)
+      Diagnostics.log("agent_access_follow_failed", fields)
     end
 
     # Called after every token store write, a revoke or a reset alike: the caller handles of every token

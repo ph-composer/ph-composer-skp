@@ -50,7 +50,7 @@ Capture the view writes an image of the current view, geometry only, to a tempor
 reads. The agent also learns the open Model's file path from what it reads and, for an export it
 started, the paths of the files written; what the agent does with them is up to its client.
 This Model only limits the token to the Model open now, which must be saved: the agent then sees
-and reaches no other Model, not even one with the same file name in another folder. The list shows
+and reaches no other Model, not even one with the same file name in another folder. Save As keeps the token on the renamed file, so saving stage copies does not cut the agent off; a copy made with Save a Copy As, or in Finder, is not reached. When the token's Model is not open, the agent is told so, with the file names of the Models that are open, and nothing more about them. The list shows
 each token's access and, for such a token, the Model's file name. The token is shown once; copy it then, because it is not shown again. The
 token is the only secret: anyone holding it has its access until you revoke it in the same window.
 Revoking keeps the token in the list with the date it was revoked. Up to eight tokens can be live

@@ -386,7 +386,10 @@ with consent copy that says what dispatch lets it do; `setup` names its machine-
 the lock a navigation command can trigger. "This Model only" binds a token to the saved active
 Model's file path, kept plaintext in the store as approved locations are: the executor refuses any
 other session as unknown and `discover` lists only that Model's sessions, so an equal file name in
-another folder stays out. A public row and `discover`'s `connection` carry only the file name, as
+another folder stays out. Save As moves the binding with the Model (`AgentAccess.saved`, on
+`post_save` against the path the session last knew), so an autosave or a save in place writes nothing
+and a copy is never reached. A Model-only token that reaches no open session gets `connection.reason`
+from `discover`, naming its file and the open ones by file name. A public row and `discover`'s `connection` carry only the file name, as
 `model_name`; an unsaved Model cannot be bound (`agent_access.model_unsaved`). The token, 48 hex characters, is
 shown once in that dialog; the store, base64 JSON in SketchUp's defaults, keeps its SHA-256, at
 most 8 live tokens and the newest 32 revoked rows, with no expiry. Revoking keeps a dated row.

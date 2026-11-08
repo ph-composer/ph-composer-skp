@@ -253,6 +253,72 @@ class AgentAccessServerTest < PhComposerTestCase
     assert_equal 2, @executor.call(@row, "discover", {}).dig("structuredContent", "sessions").length
   end
 
+  # #345: Save As is how a stage copy is made, so the binding follows the Model to its new file; a save at
+  # the same path (an autosave) or a copy leaves the store untouched.
+  def test_a_model_only_token_follows_its_model_through_save_as
+    model = Sketchup::Model.new
+    model.path = "/projects/a/02_working.skp"
+    session = PhComposer::Sessions.for(model)
+    issued = AgentAccess::Tokens.issue(:model_file => "/projects/a/02_working.skp")
+    digest = AgentAccess::Tokens.digest(issued.fetch("token"))
+
+    model.save("/projects/a/03_spaces.skp")
+
+    row = AgentAccess::Tokens.snapshot.fetch(digest)
+    found = @executor.call(row, "discover", {}).fetch("structuredContent")
+    assert_equal [session.id], found.fetch("sessions").map { |served| served["id"] }
+    assert_equal "03_spaces.skp", found.dig("connection", "model_name")
+    assert_equal "completed", @executor.call(row, "context", "session" => session.id).dig("structuredContent", "status")
+  end
+
+  def test_a_same_path_save_or_a_copy_leaves_the_token_store_untouched
+    model = Sketchup::Model.new
+    model.path = "/projects/a/02_working.skp"
+    PhComposer::Sessions.for(model)
+    AgentAccess::Tokens.issue(:model_file => "/projects/a/02_working.skp")
+    Sketchup.clear_default_writes
+
+    model.save
+    model.save_copy("/projects/a/copy.skp")
+
+    assert_empty(Sketchup.default_writes.select { |section, _key, _value| section == AgentAccess::Tokens::SECTION })
+  end
+
+  # The follow runs inside SketchUp's save: a store it cannot write is logged, the save goes on, and the
+  # next save tries again.
+  def test_a_failed_follow_never_raises_into_the_save_and_is_retried
+    model = Sketchup::Model.new
+    model.path = "/projects/a/02_working.skp"
+    PhComposer::Sessions.for(model)
+    issued = AgentAccess::Tokens.issue(:model_file => "/projects/a/02_working.skp")
+    digest = AgentAccess::Tokens.digest(issued.fetch("token"))
+
+    Sketchup.refuse_default_writes = true
+    assert model.save("/projects/a/03_spaces.skp")
+    Sketchup.refuse_default_writes = false
+    logged = PhComposer::Diagnostics.tail.join
+    model.save
+
+    assert_includes logged, "agent_access_follow_failed"
+    assert_equal "03_spaces.skp", AgentAccess::Tokens.snapshot.fetch(digest).fetch("model_name")
+  end
+
+  def test_discover_says_why_a_model_only_token_sees_no_session
+    @session.model.path = "/projects/b/03_spaces.skp"
+    issued = AgentAccess::Tokens.issue(:model_file => "/projects/a/02_working.skp")
+    row = AgentAccess::Tokens.snapshot.fetch(AgentAccess::Tokens.digest(issued.fetch("token")))
+
+    found = @executor.call(row, "discover", {}).fetch("structuredContent")
+    refused = @executor.call(row, "context", "session" => @session.id).fetch("structuredContent")
+
+    assert_empty found.fetch("sessions")
+    reason = found.dig("connection", "reason")
+    assert_includes reason, "02_working.skp"
+    assert_includes reason, "03_spaces.skp"
+    assert_includes refused.fetch("message"), "02_working.skp"
+    refute_includes JSON.generate([found, refused]), "/projects/"
+  end
+
   def test_one_token_keeps_one_caller_per_session
     2.times { call_tool("query", "session" => @session.id, "name" => "test.fixture.total_length") }
 

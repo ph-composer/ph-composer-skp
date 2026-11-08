@@ -18,7 +18,8 @@ module PhComposer
     # A revoked token stays as a row with `revoked_at`, so the dialog can show when it was revoked.
     #
     # A token issued for "this Model only" also keeps the saved Model's file path, plaintext as approved
-    # locations keep theirs, and serves only a session of a Model at that path. The path never leaves the
+    # locations keep theirs, and serves only a session of a Model at that path; Save As moves it with the
+    # Model (AgentAccess.saved). The path never leaves the
     # store and the ingress: a public row carries only its file name, as `model_name`.
     module Tokens
       SECTION = "ph_composer.agent_access"
@@ -85,6 +86,19 @@ module PhComposer
         # Moved to the end, so revoked rows are stored in the order they were revoked.
         save(current.reject { |item| item.equal?(row) } + [row.merge("revoked_at" => now)])
         list
+      end
+
+      # Moves every live token bound to `from` onto `to`: the Model saved there with Save As is the same
+      # document. Writes only when a token moved, so a save at the same path changes nothing.
+      def follow(from, to)
+        current = writable
+        moved = current.map do |row|
+          row["revoked_at"].nil? && row[MODEL_FILE] == from ? row.merge(MODEL_FILE => to) : row
+        end
+        return if moved == current
+
+        checked_model_file(to)
+        save(moved)
       end
 
       # Replaces an unreadable store with an empty one; a readable store is left as it is.
