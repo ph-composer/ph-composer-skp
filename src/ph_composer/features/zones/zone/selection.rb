@@ -142,8 +142,8 @@ module PhComposer
                           { "zones" => read.fetch("value").fetch("zones").map { |row| row.fetch("reference") } },
                           read.fetch("revision"))
           completed = result["status"] == "completed"
-          HostNotice.show(@session, completed ? solved(result) : result.fetch("message"),
-                          :tone => completed ? :success : :warning)
+          HostNotice.show(@session, completed ? solved(result) : HostNotice.words(result),
+                          :tone => completed ? :success : HostNotice.tone(result))
           result
         end
 
@@ -173,14 +173,17 @@ module PhComposer
 
         # What Solve changed, for the notification: the panel's own confirmation names only the action.
         def solved(result)
-          pairs = Array(result.dig("value", "pair_ids")).length
+          value = result.fetch("value")
+          already = value.fetch("already_paired")
+          paired = value.fetch("pair_ids").length - already
           retired = Array(result["affected"]).count { |row| row["change"] == "retired" }
-          return "Solve adjacencies: no Faces to pair. Nothing changed." if pairs.zero? && retired.zero?
+          return "Solve adjacencies: no Faces to pair. Nothing changed." if (paired + already + retired).zero?
 
-          words = ["Solve adjacencies:", (result["effect"] == "committed" ? nil : "nothing to change."),
-                   "#{pairs * 2} Faces paired as Surface."].compact
-          words << "#{retired} #{retired == 1 ? 'Face' : 'Faces'} retired from out-of-date pairs." if retired.positive?
-          words.join(" ")
+          ["Solve adjacencies:", paired.positive? ? "#{paired * 2} Faces paired as Surface." : nil,
+           paired.zero? && retired.zero? ? "nothing to change." : nil,
+           already.positive? ? "#{already * 2} Faces already paired." : nil,
+           retired.positive? ? "#{retired} #{retired == 1 ? 'Face' : 'Faces'} retired from out-of-date pairs." : nil]
+            .compact.join(" ")
         end
 
         def show(result)

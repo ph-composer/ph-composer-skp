@@ -19,15 +19,30 @@ module PhComposer
         notify(session, message)
       end
 
+      # What an outcome that did not complete says in SketchUp: its message, and for a failure the error
+      # and incident the panel's failure notice also names (panel.js, failureWords).
+      def words(outcome)
+        return outcome.fetch("message") unless outcome["status"] == "failed"
+
+        detail = outcome["detail"] || {}
+        [outcome.fetch("message"), detail["error_class"] && "Error: #{detail['error_class']}.",
+         detail["incident"] && "Incident #{detail['incident']}."].compact.join(" ")
+      end
+
+      def tone(outcome)
+        outcome["status"] == "failed" ? :error : :warning
+      end
+
       private
 
       def notify(session, message)
-        last = session.feature_state(:host_notice) { {} }
+        shown = session.feature_state(:host_notice) { {} }
         now = (@clock || MONOTONIC).call
-        return if last[:message] == message && now - last[:at] < REPEAT_SECONDS
+        shown.delete_if { |_text, at| now - at >= REPEAT_SECONDS }
+        return if shown.key?(message)
 
         UI::Notification.new(EXTENSION, message).show
-        last.update(:message => message, :at => now)
+        shown[message] = now
       rescue StandardError => error
         Diagnostics.exception("host_notice", error)
       end

@@ -134,10 +134,10 @@ module PhComposer
         @sequence += 1
         result = API.invoke(:context => @context, :name => ACTION, :params => gesture.fetch("params"),
                             :request => { "sequence" => @sequence, "expected_revision" => gesture.fetch("revision") })
-        message = result.fetch("status") == "completed" ? "Placed Window." : result.fetch("message")
-        announce(message, result.fetch("status") == "completed" ? :info : :warning)
+        completed = result.fetch("status") == "completed"
+        announce(completed ? "Placed Window." : HostNotice.words(result), completed ? :info : HostNotice.tone(result))
         @hover = nil
-        refresh_after_placement if result.fetch("status") == "completed"
+        refresh_after_placement if completed
         view.invalidate
       rescue StandardError => error
         failure(error, view, :notice => true)

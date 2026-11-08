@@ -101,14 +101,14 @@ module PhComposer
           end
 
           rows = API.query(:context => @context, :name => HOST_CONTEXT, :params => { "paths" => paths })
-          return announce(rows.fetch("message")) unless rows.fetch("status") == "completed"
+          return refuse(rows) unless rows.fetch("status") == "completed"
 
           faces = rows.dig("value", "faces").map { |row| row.fetch("reference") }
           return announce(NO_FACES) if faces.empty?
 
           result = API.view(:context => @context, :name => "#{FEATURE_ID}.create_review.open",
                             :params => { "zone" => zone, "faces" => faces, "revision" => rows.fetch("revision") })
-          return announce(result.fetch("message")) unless result.fetch("status") == "completed"
+          return refuse(result) unless result.fetch("status") == "completed"
 
           Commands.open_panel.proc.call
           result
@@ -138,9 +138,13 @@ module PhComposer
           tool.active? ? tool.offered : []
         end
 
-        def announce(message)
-          HostNotice.show(@session, message)
+        def announce(message, tone = :warning)
+          HostNotice.show(@session, message, :tone => tone)
           nil
+        end
+
+        def refuse(outcome)
+          announce(HostNotice.words(outcome), HostNotice.tone(outcome))
         end
       end
     end

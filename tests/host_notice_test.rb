@@ -45,6 +45,12 @@ class HostNoticeTest < PhComposerTestCase
     assert_equal 3, @notices.length
   end
 
+  def test_a_repeat_stays_suppressed_across_an_intervening_message
+    %w[A. B. A.].each { |message| HostNotice.show(@session, message) }
+
+    assert_equal %w[A. B.], shown
+  end
+
   def test_a_different_message_shows_at_once
     HostNotice.show(@session, "One.")
     HostNotice.show(@session, "Two.")
