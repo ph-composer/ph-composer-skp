@@ -26,6 +26,7 @@ module PhComposer
                            "~/.claude/local/claude"].freeze
       # The server's own table or one below it, such as its tool settings.
       SERVER_KEY = /(?:\A|[\s.\[{,])["']?ph-composer["']?\s*[.=\]]/.freeze
+      SERVER_TABLE_HEADER = /\A\s*\[\s*mcp_servers\s*\.[^\[\]]+\]\s*(?:#.*)?\z/.freeze
       CODEX_TABLE = /\A\s*\[\s*mcp_servers\s*\.\s*(?:ph-composer|"ph-composer"|'ph-composer')\s*[\].]/.freeze
 
       class << self
@@ -117,7 +118,12 @@ module PhComposer
           text = File.file?(config) ? File.binread(config) : +""
           block = ClientConfig.codex_block(port)
           lines = text.dup.force_encoding(Encoding::UTF_8).scrub.lines
-          return append(config, text, block) unless names_server?(lines)
+          unless names_server?(lines)
+            return append(config, text, block) if appendable?(lines)
+
+            return manual("#{config} defines mcp_servers in a form PH-Composer does not add to. Add the first " \
+                          "block below to it by hand.", "Codex")
+          end
           return configured("Codex") if codex_table(lines) == block.lines.map(&:strip)
 
           manual("#{config} already names the #{SERVER} server. Set its url and http_headers_helper to the ones " \
@@ -133,6 +139,17 @@ module PhComposer
         # as a project folder, is not a key.
         def names_server?(lines)
           lines.any? { |line| !line.lstrip.start_with?("#") && line.match?(SERVER_KEY) }
+        end
+
+        # Whether a new `[mcp_servers.ph-composer]` table can follow what the file has: every line that
+        # mentions mcp_servers is a plain header of another server's table. An inline or dotted mcp_servers,
+        # an `[mcp_servers]` table or an escaped key cannot be extended this way, or could hide the name, so
+        # the user adds the block instead.
+        def appendable?(lines)
+          lines.none? do |line|
+            !line.lstrip.start_with?("#") && line.include?("mcp_servers") &&
+              (line.include?("\\") || !line.match?(SERVER_TABLE_HEADER))
+          end
         end
 
         # The settings lines of the server's tables, without blank lines and comments; nil when it has none.
@@ -217,10 +234,16 @@ module PhComposer
           text.byteslice(0, MAX_OUTPUT).force_encoding(Encoding::UTF_8).scrub
         end
 
-        # Asks the command and anything it started to stop, then ends them if they have not within 2 s.
+        # Asks the command and anything it started to stop, then, 2 s later, ends whatever of the group is
+        # left, whether or not the command itself has gone.
         def stop(waiter)
-          Process.kill("TERM", -waiter.pid)
-          Process.kill("KILL", -waiter.pid) unless waiter.join(2)
+          signal("TERM", waiter.pid)
+          waiter.join(2)
+          signal("KILL", waiter.pid)
+        end
+
+        def signal(name, group)
+          Process.kill(name, -group)
         rescue SystemCallError
           nil
         end

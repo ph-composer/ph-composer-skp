@@ -469,8 +469,11 @@ its digest is live and the listener is listening, then sets the client up:
   line outside a comment has `ph-composer` as a key (a table, a dotted key, an inline table) is left
   untouched, since a second definition would invalidate the whole file: the same block answers
   configured, another form asks the user to set its `url` and `http_headers_helper`. A path that only
-  contains the name, such as a project folder, is not a key. No `~/.codex` folder means Codex is not set
-  up and nothing is created.
+  contains the name, such as a project folder, is not a key. The block is appended only when every
+  line that mentions `mcp_servers` is a plain `[mcp_servers.<other>]` header without an escape; an
+  inline or dotted `mcp_servers`, an `[mcp_servers]` table or an escaped key cannot be extended this way
+  or could hide the name, so the user adds the block. No `~/.codex` folder means Codex is not set up
+  and nothing is created.
 
 Either way the answer ends with the step the user takes: start a new session of that client, since a
 running one never sees a newly added server; SketchUp needs no restart. When a step cannot be done the
@@ -505,7 +508,7 @@ Decided and implemented; a change to any of these is a security decision, not a 
 - Connect runs one program, Claude Code's `claude`, from a fixed list of absolute paths, never through a
   shell and never with a path from the page: argv only, closed input, an environment of `HOME`, `USER`
   and a `PATH` of the binary's folder and the system folders, its own process group, 20 s for the whole
-  Connect (SketchUp waits on it), then TERM and, 2 s later, KILL to the group. No argument carries the
+  Connect (SketchUp waits on it), then TERM to the group and, 2 s later, KILL to whatever of it is left. No argument carries the
   token, so it never reaches a command line or shell history; the output is kept to its first 4 KiB as
   valid text, read only for "already exists" and its first line shown to the user, never logged. The Codex setup is
   a file append, not a program. The client then runs the helper, `/bin/cat` and the path escaped for

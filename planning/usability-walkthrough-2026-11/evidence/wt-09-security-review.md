@@ -32,7 +32,8 @@ The issue's premise that Codex reads only an environment variable or an inline t
    `~/.claude.json` does not already hold the same entry (so rotating a token runs nothing).
    `Open3.popen2e` with an argv array (no shell), stdin closed, `unsetenv_others` with `HOME`, `USER`
    and a `PATH` of the binary's folder plus system folders, its own process group, one 20 s deadline
-   for the whole Connect, then TERM and KILL to the group. The page supplies a client id from a fixed
+   for the whole Connect, then TERM to the group and, 2 s later, KILL to any member left even when the
+   command itself has gone (a TERM-ignoring descendant is tested). The page supplies a client id from a fixed
    set and the token; neither reaches argv. The JSON argument holds the URL and the helper command only.
    Output is capped at 4 KiB of valid text, matched for "already exists" (the wording 2.1.317 prints,
    checked) and its first line (160 characters) shown in the dialog; it is not logged. `remove` runs
@@ -40,7 +41,10 @@ The issue's premise that Codex reads only an environment variable or an inline t
    earlier entry was removed and gives the command.
 3. **The extension edits Codex's config.** Append only, after a blank line, existing bytes untouched;
    never when any non-comment line has `ph-composer` as a key in any TOML form (a duplicate would
-   invalidate the whole file); project paths holding the name do not count; never creates `~/.codex`.
+   invalidate the whole file); project paths holding the name do not count; only when every line that
+   mentions `mcp_servers` is a plain `[mcp_servers.<other>]` header without an escape (an inline or
+   dotted `mcp_servers`, an `[mcp_servers]` table or a `\u` escape goes to the manual path: Codex
+   gpt-6-astra review, PR #383); never creates `~/.codex`.
 5. **Platform.** Connect refuses on Windows (`/bin/cat` helper); Windows support has its own gate.
 4. **The helper command** is `/bin/cat` plus `Shellwords.escape(path)`, built in Ruby from the folder
    constant; no page, agent or file content reaches it.

@@ -166,7 +166,8 @@ class AgentAccessConnectionsTest < PhComposerTestCase
     Dir.mkdir(ClientSetup.codex_home)
     config = File.join(ClientSetup.codex_home, "config.toml")
     ["mcp_servers.ph-composer.url = \"x\"\n", "mcp_servers = { 'ph-composer' = { url = \"x\" } }\n",
-     "[mcp_servers.\"ph-composer\".tools]\nx = 1\n"].each do |form|
+     "[mcp_servers.\"ph-composer\".tools]\nx = 1\n", "mcp_servers = {}\n", "mcp_servers.other.url = \"x\"\n",
+     "[mcp_servers.\"ph\\u002dcomposer\"]\nurl = \"x\"\n", "[mcp_servers]\nother = { url = \"x\" }\n"].each do |form|
       File.binwrite(config, form)
       assert_equal "manual", ClientSetup.connect("codex", Tokens.issue.fetch("token"), 46_110).fetch("state"), form
       assert_equal form, File.binread(config)
@@ -220,12 +221,16 @@ class AgentAccessConnectionsTest < PhComposerTestCase
     assert_equal ClientSetup::MAX_OUTPUT, printed.bytesize
     assert printed.valid_encoding?
 
-    File.write(script, "#!/bin/sh\nsleep 30\n")
+    # The command leaves on TERM; what it started ignores TERM and is ended with the group.
+    pid_file = File.join(@agent_home, "child.pid")
+    File.write(script, "#!/bin/sh\n(trap '' TERM; exec sleep 30) &\necho $! > '#{pid_file}'\nsleep 30\n")
     started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     done, printed = ClientSetup.send(:run, [script], deadline.call)
     refute done
     assert_includes printed, "did not answer"
     assert_operator Process.clock_gettime(Process::CLOCK_MONOTONIC) - started, :<, 5
+    child = File.read(pid_file).to_i
+    assert(20.times.any? { (Process.kill(0, child) && sleep(0.05) && false) rescue true }, "the child was left running")
   end
 
   private
