@@ -90,6 +90,36 @@ test("opening Export reads preflight and retained tasks without starting a write
   assert.deepStrictEqual(types(p.sent), ["export.preflight", "export.latest"]);
 });
 
+test("the Setup gear opens the Setup view, which lists each entry under its menu and runs it by name", function () {
+  var p = page(["sections/setup"]);
+  p.receive("panel.snapshot", snapshot("session-a", 1));
+  var gear = p.query("[data-tab='setup']");
+  assert.strictEqual(gear.getAttribute("aria-label"), "Setup");
+  assert.ok(gear.innerHTML.indexOf("<svg") === 0, "the gear is the settings glyph");
+  gear.listeners.click({});
+
+  assert.strictEqual(p.query("[data-pane='setup']").hidden, false);
+  assert.strictEqual(gear.getAttribute("aria-pressed"), "true");
+  assert.strictEqual(p.query("[data-tab='overview']").getAttribute("aria-pressed"), "false");
+  assert.deepStrictEqual(types(p.sent), ["panel.setup_entries"]);
+  p.receive("panel.setup", { entries: [{ name: "ph_composer.agent_access.open", menu: "Agent Access",
+    label: "Agent Access…", summary: "Listening on port 46110 · 1 live token" }] });
+  var view = p.query("[data-section='setup']");
+  assert.strictEqual(view.querySelector("h1").textContent, "Setup");
+  assert.strictEqual(view.querySelector("h2").textContent, "Agent Access");
+  var entry = view.querySelector(".phc-setup-entry");
+  assert.strictEqual(entry.querySelector("p").textContent, "Listening on port 46110 · 1 live token");
+  entry.querySelector("button").listeners.click({});
+  assert.deepStrictEqual(p.sent[p.sent.length - 1],
+    { type: "panel.setup_open", payload: { name: "ph_composer.agent_access.open" } });
+  p.context.listeners.focus({});
+  assert.strictEqual(p.sent[p.sent.length - 1].type, "panel.setup_entries", "focus after the window reads again");
+  var asked = types(p.sent).length;
+  p.receive("panel.snapshot", snapshot("session-b", 1));
+  assert.strictEqual(types(p.sent).slice(asked).indexOf("panel.setup_entries") >= 0, true,
+    "another Model shown under Setup reads the entries again");
+});
+
 test("an action names the shown session and the revision the panel last rendered", function () {
   var p = page();
   p.receive("panel.snapshot", snapshot("session-a", 7));

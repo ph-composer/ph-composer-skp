@@ -34,9 +34,9 @@ module PhComposer
       nil
     end
 
-    # Runs a Setup entry from the panel as the Extensions menu runs it: with the current session, and none
-    # when no Model is open. A refusal is that Model's notice, as from the menu. Answers the entries again,
-    # so their summaries show what it changed.
+    # Runs a Setup entry from the panel as the Extensions menu runs it: with the current session, and not at
+    # all when no Model is open. A refusal is that Model's notice, as from the menu. Answers the entries
+    # again, so their summaries show what it changed.
     def run(name)
       item = Registry.current.menu_items[name]
       unless item&.in_setup

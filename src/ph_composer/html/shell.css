@@ -31,6 +31,14 @@
   .live-panel .phc-tabs button:disabled { display: none; }
 }
 .live-panel .phc-tabs button:not([aria-pressed="true"]) { background: transparent; }
+/* The Setup view: one group per kind of setup, each entry a line of state and the button that opens it. */
+.live-panel .phc-setup-group { margin: 0 0 20px; }
+.live-panel .phc-setup-group h2 { margin: 0 0 8px; font-size: var(--text-md); }
+.live-panel .phc-setup-entry { display: flex; align-items: center; gap: 12px; padding: 8px 0;
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.live-panel .phc-setup-entry + .phc-setup-entry { border-top: 0; }
+.live-panel .phc-setup-entry p { flex: 1; min-width: 0; margin: 0; color: var(--muted); overflow-wrap: anywhere; }
+.live-panel .phc-setup-entry button { flex: none; width: auto; }
 /* In the flow under the tab row, zero height: a notice floats over the panes without moving them. */
 .live-panel > .phc-notice-layer { position: relative; flex-shrink: 0; }
 /* The Export pane: one command and the host's answer under it. */

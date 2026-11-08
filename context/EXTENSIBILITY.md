@@ -863,6 +863,31 @@ the rest of the context menu is still built. Providers run only while building a
 the Extensions menu is installed once. The shell validates the supplied entry shapes and remains
 independent of contributor vocabulary and record kinds.
 
+### Setup entries
+
+Implemented in WT-12 (#343). Setup for this computer that belongs to no page, such as agent access,
+has one place in the panel: the Setup view, behind the gear at the right end of the tab row. An entry
+there is a native menu item its feature marks `in_setup`, with an optional `summary`, one line of
+current state:
+
+```ruby
+feature.menu_item("ph_composer.agent_access.open", label: "Agent Access…", menu: "Agent Access",
+                  available: ->(_read) { false }, in_setup: true,
+                  summary: ->(_session) { AgentAccess.setup_summary }) { |_session| Dialog.show }
+```
+
+The view lists the entries under their `menu` name in registration order, each with its summary and a
+button labelled as the item, and the button runs the item's handler with the current session, exactly
+as the Extensions menu does (`shell/setup_entries.rb`, through the panel's `panel.setup_entries` and
+`panel.setup_open`). The panel asks for the entries each time the view opens and when its window
+regains focus, so a summary can be stale while another window is in front. A summary that raises or
+answers no text is logged and left out; the entry still shows. An entry is a static item: an entries
+provider cannot be one.
+
+It is not an operation. A menu item is already the user's own route, so the panel reaching it gives
+no one more, and nothing here is registered with `PhComposer::API`: no client can list or run a Setup
+entry. Setup a client should reach is a setup command.
+
 ### View commands
 
 Implemented in P1-D. A view command changes what the host shows and nothing else: the selection, the

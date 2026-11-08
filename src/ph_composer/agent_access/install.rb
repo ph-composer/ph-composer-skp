@@ -34,11 +34,10 @@ module PhComposer
         feature.on_host_event(event) { |session| saved_path(session).opened(session.model.path.to_s) }
       end
       feature.on_host_event(:post_save) { |session| saved(session) }
-      # Kept out of the viewport's right-click menu: managing tokens has nothing to do with what is under
-      # the pointer.
       # The form shows which Model "This Model only" binds, so it follows activation and Save As.
       %i[model_activated post_save].each { |event| feature.on_host_event(event) { |_session| Dialog.refresh } }
-      # Also the panel's Setup entry for agent access, with whether agents can connect now.
+      # Kept out of the viewport's right-click menu: managing tokens has nothing to do with what is under
+      # the pointer. Also the panel's Setup entry for agent access, with whether agents can connect now.
       feature.menu_item("#{FEATURE_ID}.open", :label => "Agent Access…", :menu => MENU,
                                               :available => ->(_read) { false }, :in_setup => true,
                                               :summary => ->(_session) { setup_summary }) { |_session| Dialog.show }

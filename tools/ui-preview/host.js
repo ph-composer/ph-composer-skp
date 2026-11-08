@@ -229,6 +229,11 @@
     });
     if (message.type === "view.invoke") this.viewCommand(message.payload);
     if (message.type === "setup.invoke") this.librarySetup(message.payload);
+    // The Setup view's entries (shell/setup_entries.rb); running one opens a native window the preview has not.
+    if (message.type === "panel.setup_entries" || message.type === "panel.setup_open") {
+      this.publish("panel.setup", { entries: [{ name: "ph_composer.agent_access.open", menu: "Agent Access",
+        label: "Agent Access…", summary: "Listening on port 46110 · 1 live token" }] });
+    }
     if (message.type === "preferences.set") this.setPreference(message.payload);
     if (message.type === "export.start") this.exportStart(message.payload);
     if (message.type === "export.preflight" || message.type === "export.latest") {

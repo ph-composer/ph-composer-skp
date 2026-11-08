@@ -30,9 +30,14 @@
         <button type="button" data-tab="export">Export</button>
         <button type="button" disabled data-tooltip="Planned" aria-label="Systems, planned">Systems</button>
       </nav>
+      <!-- The row's end: display units, then Setup for the whole app, apart from any page's own gear. -->
+      <div class="phc-app-tools">
       <div class="phc-unit-toggle" role="group" aria-label="Display units">
         <button type="button" data-unit-system="IP" aria-pressed="false" aria-label="Set display units to IP">IP</button>
         <button type="button" data-unit-system="SI" aria-pressed="true" aria-label="Set display units to SI">SI</button>
+      </div>
+      <button type="button" class="phc-icon-button phc-app-setup" data-tab="setup" aria-pressed="false"
+        aria-label="Setup" data-tooltip="Setup"></button>
       </div>
     </div>
     <div class="phc-notice-layer" data-notice-layer></div>
@@ -43,6 +48,7 @@
       <div data-pane="thermal_bridges" hidden></div>
       <div data-pane="library" hidden></div>
       <div data-pane="export" hidden></div>
+      <div data-pane="setup" hidden></div>
     </main>
     <footer class="phc-footer" data-section="footer"></footer>
 
@@ -140,6 +146,7 @@
     <script src="features/zones/option_dialog.js"></script>
     <script src="features/zones/overview.js"></script>
     <script src="sections/export.js"></script>
+    <script src="sections/setup.js"></script>
     <script src="sections/shell.js"></script>
     <!-- panel-modules:end -->
     <script src="boot.js"></script>

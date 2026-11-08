@@ -87,12 +87,38 @@ class SetupEntriesTest < PhComposerTestCase
   end
 
   def test_agent_access_is_a_setup_entry_saying_whether_agents_can_connect
-    entry = PhComposer::SetupEntries.list(@session).find { |item| item["name"] == "ph_composer.agent_access.open" }
-
-    assert_equal ["Agent Access", "Agent Access…"], entry.values_at("menu", "label")
-    assert_match(/\ANot listening · no live tokens\z|\ANot listening: /, entry["summary"])
+    listener = PhComposer::AgentAccess::Listener
+    stopped = { "state" => "stopped", "port" => 46_110 }
+    entry = listener.stub(:status, stopped) do
+      PhComposer::SetupEntries.list(@session).find { |item| item["name"] == "ph_composer.agent_access.open" }
+    end
+    assert_equal ["Agent Access", "Agent Access…", "Not listening · no live tokens"],
+                 entry.values_at("menu", "label", "summary")
     PhComposer::AgentAccess::Tokens.issue(:label => "One")
-    assert_match(/1 live token\z|\ANot listening: /, PhComposer::AgentAccess.setup_summary)
+    listening = listener.stub(:status, { "state" => "listening", "port" => 46_110 }) do
+      PhComposer::AgentAccess.setup_summary
+    end
+    assert_equal "Listening on port 46110 · 1 live token", listening
+    Sketchup.write_default(PhComposer::AgentAccess::Tokens::SECTION, PhComposer::AgentAccess::Tokens::KEY, "not-json")
+    assert_includes listener.stub(:status, stopped) { PhComposer::AgentAccess.setup_summary }, "cannot be read"
+  end
+
+  def test_a_refused_entry_is_the_models_notice_and_the_entries_come_again
+    Registry.install([feature do |registry|
+      registry.feature("outside.probe", :contract_version => 1)
+              .menu_item("outside.probe.refuse", :label => "Refuse…", :menu => "Probe", :in_setup => true) do |_session|
+        raise PhComposer::CodedError.new("probe.refused", "Not now.")
+      end
+    end])
+    dialog = Panel.show
+    notices = []
+
+    @session.stub(:notice, ->(message, tone:) { notices << [message, tone] }) do
+      dialog.fire("ph_composer_message", envelope("panel.setup_open", "name" => "outside.probe.refuse"))
+    end
+
+    assert_equal [["Not now.", :warning]], notices
+    assert_equal 1, messages(dialog, "panel.setup").length
   end
 
   private

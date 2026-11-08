@@ -9,7 +9,6 @@
 .agent-access-unreadable { margin-top: 0; margin-bottom: 12px; padding: 10px 12px; border: 1px solid var(--warning-border);
   border-radius: var(--radius-md); background: var(--warning-surface); color: var(--warning-ink); }
 .agent-access-unreadable p { margin: 0 0 8px; }
-.agent-access-list { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
 .agent-access-row { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 8px 0;
   border-bottom: 1px solid var(--line); }
 .agent-access-row-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
@@ -43,8 +42,13 @@
 .agent-access-row-text small { font-size: var(--text-sm); }
 /* The server state is a status line; the tokens are a framed list, as the Libraries dialog lists its libraries. */
 .agent-access-server { color: var(--muted); }
-/* Tokens are ruled rows, closed top and bottom, as Help & Diagnostics lists its records. */
-.agent-access-list { border: 0; border-top: 1px solid var(--line); border-radius: 0; }
+/* The issued tokens fold under one summary below the status line; New token, in the header, is the page's job.
+   Inside, each period is a heading over ruled rows, as Help & Diagnostics lists its records. */
+.agent-access-tokens > summary { padding: 8px 0; color: var(--ink); font-weight: 600; }
+.agent-access-group h3 { margin: 12px 0 4px; color: var(--muted); font-size: var(--text-sm); font-weight: 600; }
+.agent-access-items { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.agent-access .agent-access-revoked-toggle { margin-top: 12px; }
+.agent-access-revoked-toggle[hidden] { display: none; }
 .agent-access-row { padding: 8px 0; }
 /* In a window shorter than the form, the body scrolls under a footer that a hairline sets apart. */
 .phc-workspace .agent-access-create-dialog .phc-dialog-actions { border-top: 1px solid var(--line); }
@@ -66,3 +70,9 @@
 .agent-access-client .agent-access-connect { margin: 0 0 8px; }
 .agent-access-connected { margin: 0 0 12px; color: var(--ink); }
 .agent-access-connected:empty { display: none; }
+/* One client at a time under the Client tabs; its other setups fold under their own summary. */
+.agent-access-clients .phc-subtabs { margin: 0 0 12px; padding: 0; }
+.agent-access-client[hidden] { display: none; }
+.agent-access-other { margin: 0 0 4px; }
+.agent-access-other > summary { padding: 6px 0; color: var(--muted-strong); }
+.agent-access-other[open] > summary { margin-bottom: 4px; }
