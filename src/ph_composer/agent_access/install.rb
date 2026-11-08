@@ -28,21 +28,28 @@ module PhComposer
     def install(registry)
       feature = registry.feature(FEATURE_ID, :contract_version => Declarations::CONTRACT_VERSION)
       CODES.each { |code, description| feature.code(code, :description => description) }
-      # Kept out of the viewport's right-click menu: managing tokens has nothing to do with what is under
-      # the pointer.
       # The path each session's Model was last known by, so a save can tell a Save As from a save in place.
+      # A file opened into the Model starts afresh: nothing a failed save left behind moves onto it.
       %i[session_created model_opened].each do |event|
-        feature.on_host_event(event) { |session| saved_path(session).path = session.model.path.to_s }
+        feature.on_host_event(event) { |session| saved_path(session).opened(session.model.path.to_s) }
       end
       feature.on_host_event(:post_save) { |session| saved(session) }
+      # Kept out of the viewport's right-click menu: managing tokens has nothing to do with what is under
+      # the pointer.
       # The form shows which Model "This Model only" binds, so it follows activation and Save As.
       %i[model_activated post_save].each { |event| feature.on_host_event(event) { |_session| Dialog.refresh } }
       feature.menu_item("#{FEATURE_ID}.open", :label => "Agent Access…", :menu => MENU,
                                               :available => ->(_read) { false }) { |_session| Dialog.show }
     end
 
-    # The path the session's Model has now, and the earlier paths whose tokens a failed save left behind.
-    SavedPath = Struct.new(:path, :unmoved)
+    # The path the session's Model has now, and the ids of the tokens a failed save left behind.
+    SavedPath = Struct.new(:path, :unmoved) do
+      # A file opened into the Model: its path, and nothing left to move.
+      def opened(path)
+        self.path = path
+        self.unmoved = []
+      end
+    end
 
     def saved_path(session)
       session.feature_state("#{FEATURE_ID}.saved_path") { SavedPath.new(session.model.path.to_s, []) }
@@ -50,14 +57,14 @@ module PhComposer
 
     # After a save: a Model saved under a new name (Save As, how a stage copy is made) keeps the tokens
     # bound to it. An autosave or a save in place keeps the path and writes nothing. It runs inside
-    # SketchUp's save, so a failure is logged, never raised, and the paths it left behind are moved by
-    # the next save, with any token issued since at the path the Model then had.
+    # SketchUp's save, so a failure is logged, never raised, and the tokens it left behind, by id, are
+    # moved by the next save; a token issued later for the original file, reopened, is never taken.
     def saved(session)
       held = saved_path(session)
       to = session.model.path.to_s
-      held.unmoved |= [held.path] unless held.path.empty? || held.path == to
-      held.unmoved -= [to]
+      from = held.path
       held.path = to
+      held.unmoved |= Tokens.bound_to(from) unless from.empty? || from == to
       return if held.unmoved.empty?
 
       Tokens.follow(held.unmoved, to)

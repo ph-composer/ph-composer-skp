@@ -320,6 +320,46 @@ class AgentAccessServerTest < PhComposerTestCase
     assert_equal ["04_windows.skp"] * 2, [first, second].map { |digest| snapshot.fetch(digest).fetch("model_name") }
   end
 
+  # The retry moves only the tokens the failed move left behind: a token issued afterwards for the original
+  # file, reopened, stays on it.
+  def test_a_retried_follow_never_takes_a_token_issued_later_for_the_original_file
+    model = Sketchup::Model.new
+    model.path = "/projects/a/02_working.skp"
+    PhComposer::Sessions.for(model)
+    first = AgentAccess::Tokens.digest(AgentAccess::Tokens.issue(:model_file => model.path).fetch("token"))
+    Sketchup.refuse_default_writes = true
+    model.save("/projects/a/03_spaces.skp")
+    Sketchup.refuse_default_writes = false
+    original = Sketchup::Model.new
+    original.path = "/projects/a/02_working.skp"
+    PhComposer::Sessions.for(original)
+    later = AgentAccess::Tokens.digest(AgentAccess::Tokens.issue(:model_file => original.path).fetch("token"))
+
+    model.save
+
+    snapshot = AgentAccess::Tokens.snapshot
+    names = [first, later].map { |digest| snapshot.fetch(digest).fetch("model_name") }
+    assert_equal %w[03_spaces.skp 02_working.skp], names
+  end
+
+  # A file opened into the same Model (one window per document on Windows) starts afresh: a token a failed
+  # Save As left behind never moves onto it.
+  def test_a_file_opened_into_the_model_takes_no_token_a_failed_follow_left_behind
+    model = Sketchup::Model.new
+    model.path = "/projects/a/02_working.skp"
+    session = PhComposer::Sessions.for(model)
+    digest = AgentAccess::Tokens.digest(AgentAccess::Tokens.issue(:model_file => model.path).fetch("token"))
+    Sketchup.refuse_default_writes = true
+    model.save("/projects/a/03_spaces.skp")
+    Sketchup.refuse_default_writes = false
+    model.path = "/projects/other/house.skp"
+    session.host_event(:model_opened)
+
+    model.save
+
+    assert_equal "02_working.skp", AgentAccess::Tokens.snapshot.fetch(digest).fetch("model_name")
+  end
+
   def test_discover_says_why_a_model_only_token_sees_no_session
     @session.model.path = "/projects/b/03_spaces.skp"
     issued = AgentAccess::Tokens.issue(:model_file => "/projects/a/02_working.skp")
