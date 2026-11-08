@@ -159,6 +159,34 @@ class AssemblyRecordsOperationsTest < PhComposerTestCase
     refute assembly["findings"].any? { |row| row.key?("severity") }
   end
 
+  # W-112: `describe` gave layer and segment ids as plain strings while the validator wanted the
+  # prefix and twelve alphanumerics, so an agent's first layered create was refused.
+  def test_the_published_create_schema_is_enough_to_create_a_layered_assembly
+    values = API.describe(:name => "#{Assemblies::FEATURE_ID}.assemblies.create").dig("params", "properties", "values")
+    fields = values.fetch("properties")
+    layer = fields.dig("layers", "items", "properties")
+    segment = layer.dig("segments", "items", "properties")
+    published = { "lyr_Ab12Cd34Ef56" => layer.fetch("id"), "seg_Ab12Cd34Ef56" => segment.fetch("id"),
+                  material_id("board") => segment.fetch("material_id") }
+    published.each { |id, schema| assert_match PhComposer::JsonSchema.pattern(schema), id, schema.inspect }
+    published.each_value { |schema| refute_empty schema.fetch("description") }
+    assert_equal layer.fetch("id").fetch("pattern"),
+                 fields.dig("air_barrier", "properties", "layer_id", "pattern")
+
+    invalid = layered_values("name" => "Plain ids", "layer" => "layer-1", "segment" => "segment-1")
+    refused = invoke("assemblies.create", "values" => invalid)
+    assert_equal "params.invalid", refused["code"], refused.inspect
+    assert_includes refused["message"], layer.fetch("id").fetch("pattern")
+
+    create("materials", "name" => "Board", "conductivity_w_mk" => 0.038)
+    board = query("materials")["records"].first.fetch("id")
+    id = create("assemblies", layered_values("name" => "Agent wall", "layer" => "lyr_Ab12Cd34Ef56",
+                                             "segment" => "seg_Ab12Cd34Ef56", "material" => board))
+    stored = record(Assemblies::ASSEMBLY_KIND, id).fetch("layers").first
+    assert_equal ["lyr_Ab12Cd34Ef56", "seg_Ab12Cd34Ef56", board],
+                 [stored.fetch("id"), *stored.fetch("segments").first.values_at("id", "material_id")]
+  end
+
   def test_preview_digest_rebuilds_create_duplicate_and_each_new_nested_identity
     id = preview_invoke("assemblies.create", "values" => { "name" => "Preview wall" }).fetch("value").fetch("id")
     row = record(Assemblies::ASSEMBLY_KIND, id)
@@ -331,6 +359,14 @@ class AssemblyRecordsOperationsTest < PhComposerTestCase
   end
 
   private
+
+  def layered_values(options)
+    { "name" => options.fetch("name"), "orientation" => "first_layer_outside",
+      "layers" => [{ "id" => options.fetch("layer"), "thickness_mm" => 140,
+                     "segments" => [{ "id" => options.fetch("segment"), "width_mm" => 1000,
+                                      "material_id" => options["material"], "is_continuous_insulation" => false,
+                                      "steel_stud_spacing_mm" => nil }] }] }
+  end
 
   def preview_invoke(name, params)
     preview = API.preview(:context => @context, :name => "#{Assemblies::FEATURE_ID}.#{name}", :params => params)

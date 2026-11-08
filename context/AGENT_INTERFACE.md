@@ -399,8 +399,9 @@ against.
 
 Implemented: the external route is MCP served from Ruby inside SketchUp, `agent_access/server.rb`.
 It listens on `127.0.0.1` at the `agent_access.port` preference (default 46110) while at least one
-token is live, and stops after the last revoke; a port it cannot bind is shown in the dialog and
-nothing falls back to another port. One JSON-RPC 2.0 message per `POST /mcp`, `application/json`
+token is live, and stops after the last revoke (the diagnostics log records `agent_access_listening`
+at start and `agent_access_stopped` with status `no_live_token` at that stop); a port it cannot bind is
+shown in the dialog and nothing falls back to another port. One JSON-RPC 2.0 message per `POST /mcp`, `application/json`
 both ways, `Connection: close`; no SSE, batches or `GET` stream (405). In order, before anything
 runs: a request read within 5 s, headers at most 16 KiB and a body at most 1 MiB (413), `POST` to
 `/mcp` (405, 404), no `Origin` header and a `Host` of `127.0.0.1:<port>` or `localhost:<port>`

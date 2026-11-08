@@ -29,7 +29,9 @@ module PhComposer
           answered = @server ? @server.refuse_revoked(live) : {}
           AgentAccess.drop_bindings(live)
           if snapshot.empty?
+            running = !@server.nil?
             answered.empty? ? stop : @server.stop_soon
+            Diagnostics.log("agent_access_stopped", "status" => "no_live_token") if running
             return answered
           end
 
