@@ -172,6 +172,7 @@ module PhComposer
         when "panel.ready" then ready
         when "panel.diagnostic" then PanelDiagnostics.record(payload)
         when "panel.support" then SupportDialog.show(:incident => payload["incident"])
+        when *SetupEntries::MESSAGES then publish("panel.setup", "entries" => SetupEntries.answer(type, payload))
         when "panel.undo", "panel.redo" then PanelHistory.step(type, payload["session"])
         when "action.invoke" then invoke(payload)
         when "action.status" then status(payload)
@@ -191,8 +192,7 @@ module PhComposer
         when "query.invoke" then publish_query(payload, QUERY_FAILED.merge(detail))
         when "file_export.invoke" then publish_file_export(payload, EXPORT_FAILED.merge(detail))
         when *EXPORT_TYPES then publish_export(payload, EXPORT_FAILED.merge(detail))
-        when "preferences.set"
-          publish_preferences(payload, "failed", "The display preference could not be saved.")
+        when "preferences.set" then publish_preferences(payload, "failed", "The display preference could not be saved.")
         else publish("panel.failure", "message" => "The panel could not complete that request.")
         end
       end
