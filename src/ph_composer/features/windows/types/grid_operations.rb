@@ -226,17 +226,23 @@ module PhComposer
           refuse("Choose glazed targets other than the source.")
         end
         layout = Grid.new(record)
-        source_edges = layout.classify(source)
         targets.each do |target|
-          target_edges = layout.classify(target)
-          unless source.fetch("installs").values.all?(&:nil?) && target.fetch("installs").values.all?(&:nil?)
-            unless source_edges == target_edges && !source_edges.include?(:partial)
-              refuse("Installation topology differs. Use the staged Installs workflow to review the mapping.")
-            end
-          end
-          %w[glazing_id frames operation installs].each { |key| target[key] = DeepCopy.call(source[key]) }
+          %w[glazing_id frames operation].each { |key| target[key] = DeepCopy.call(source[key]) }
+          paste_installs(source, target, layout)
         end
         record
+      end
+
+      # A Psi-Install belongs to an outer edge, so it copies side by side only where that side is outer on
+      # both elements. Every other edge keeps what it has: paste never moves an install onto a shared edge.
+      def paste_installs(source, target, layout)
+        source_edges = layout.classify(source)
+        target_edges = layout.classify(target)
+        Types::SIDES.each_with_index do |side, i|
+          next unless source_edges[i] == :perimeter && target_edges[i] == :perimeter
+
+          target.fetch("installs")[side] = source.fetch("installs")[side]
+        end
       end
     end
   end

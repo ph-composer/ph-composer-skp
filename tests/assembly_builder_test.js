@@ -100,6 +100,22 @@ test("sidebar reads details and search without writes; Use and valid drops assig
   assert.strictEqual(o.sent[0].payload.params.segment_id, "seg_steel");
   assert.strictEqual(o.sent[0].payload.params.material_id, "mat_a");
 });
+test("each Dimension format changes the drawing's labels and its scope is one the host accepts", function () {
+  var o = setup(), preferences = o.modules.unit_preferences;
+  var scope = o.editor.root.querySelector("[data-dimension-format-scope]").getAttribute("data-dimension-format-scope");
+  // Registry::ID_PATTERN, which Preferences.set applies to a scope; a scope it refuses is rolled back by the panel.
+  assert.match(scope, /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/);
+  var units = o.modules.units, field = o.modules.fields.LENGTH_MM;
+  units.dimensionFormats.forEach(function (entry) {
+    preferences.set("unit_system", entry.system);
+    preferences.set("dimension_format", entry.id, { scope: scope, system: entry.system });
+    o.editor.refresh(o.state, o.record.id);
+    var profile = units.profile({ scope: scope });
+    assert.strictEqual(profile.dimensionFormat, entry.id);
+    assert.strictEqual(o.editor.root.querySelector("[data-layer-thickness='layer_studs']").textContent,
+      units.format(140, field, profile), entry.id);
+  });
+});
 test("dimension UnitField freezes SI/IP drafts across repaint, guards Back and retains refusal", function () {
   var o = setup(), field = o.editor.dimensions["thickness:layer_studs"].field;
   typed(field, "160");
