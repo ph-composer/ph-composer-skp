@@ -30,6 +30,12 @@ module PhComposer
             end
         end
 
+        # Whether a corner of either polygon lies on the other's boundary. Crossings are `contained?`'s question.
+        def contact?(left, right)
+          left.any? { |point| edges(right).any? { |a, b| on_edge?(point, a, b) } } ||
+            right.any? { |point| edges(left).any? { |a, b| on_edge?(point, a, b) } }
+        end
+
         def inside?(point, polygon, strict: false)
           return !strict if edges(polygon).any? { |a, b| on_edge?(point, a, b) }
 

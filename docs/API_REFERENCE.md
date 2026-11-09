@@ -16565,6 +16565,261 @@ Example params:
 {}
 ```
 
+### `ph_composer.windows.units.convert_review`
+
+Which drawn rectangles Convert to Window Type would take, grouped by shared Edges into Window Type layouts, and why it leaves each other Face out. Writes nothing. Sizes are the frame outer size. Owner: `ph_composer.windows`.
+
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "paths"
+  ],
+  "properties": {
+    "paths": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "minItems": 1,
+      "maxItems": 500,
+      "description": "Each candidate Face's entity path from the Model root."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "groups",
+    "left_out"
+  ],
+  "properties": {
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "host",
+          "columns_m",
+          "rows_m",
+          "layout_index",
+          "matching_types",
+          "preselected_type_id",
+          "sources"
+        ],
+        "properties": {
+          "host": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path",
+              "entity_path",
+              "entity_id"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "entity_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "entity_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "description": "The Zone Face the group lies on."
+          },
+          "columns_m": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "x-unit": "m"
+            },
+            "description": "Column widths, left to right as seen from outside."
+          },
+          "rows_m": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "x-unit": "m"
+            },
+            "description": "Row heights, top down."
+          },
+          "layout_index": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "The index in `groups` of the first group of this size and layout. Groups with one index share one new Window Type."
+          },
+          "matching_types": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "name"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Window Types of this size and layout within 1 mm, alphabetical. New Type is always offered besides these."
+          },
+          "preselected_type_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The first matching Type, or null when none matches."
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "path",
+                "row_span",
+                "column_span",
+                "digest",
+                "outline_m"
+              ],
+              "properties": {
+                "path": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "row_span": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "column_span": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "digest": {
+                  "type": "string",
+                  "description": "The Face's geometry digest as this review read it."
+                },
+                "outline_m": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "x-unit": "m"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "description": "The rectangle's four corners in world metres."
+                }
+              }
+            },
+            "description": "The rectangles, one per Window Type element."
+          }
+        }
+      }
+    },
+    "left_out": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "paths",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "paths": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "description": "The Faces this row leaves out; a group that cannot convert is one row."
+          },
+          "code": {
+            "type": "string",
+            "description": "Why, as a published code."
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "paths": [
+    [
+      1201,
+      1204
+    ]
+  ]
+}
+```
+
 ### `ph_composer.windows.units.glazed_area_by_face`
 
 Glazed opening and net opaque area; uncertain geometry withholds values. Owner: `ph_composer.windows`.
@@ -55685,6 +55940,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 
 | Code | Meaning |
 | --- | --- |
+| `window.convert_on_boundary` | The drawn rectangle touches its host Face's edge; draw it inset and move the Window after converting. |
 | `window.copy_id_pending` | A native copy shares this Window's identity until it is repaired. |
 | `window.definition_changed` | The Window's geometry differs from its Type; reset it first. |
 | `window.definition_detached` | The Window does not use its Type's primary definition. |
@@ -55692,16 +55948,20 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `window.definition_missing` | The Type's primary definition no longer matches the Type. |
 | `window.edited_geometry_replaced` | The Type edit replaces edited primary Window geometry. |
 | `window.geometry_differs` | The Window's generated geometry or cutting behaviour differs from its Type. |
+| `window.host_ambiguous` | The drawn rectangle lies on more than one coplanar Zone Face. |
 | `window.host_boundary_unsupported` | The host Face's boundary condition is not Outdoors. |
 | `window.host_required` | The action needs the matching host Face for this Window. |
 | `window.host_type_unsupported` | The host Face is neither a Wall nor a Roof/Ceiling. |
 | `window.host_unclassified` | The host Face has no Face type or owning Zone. |
 | `window.host_zone_unresolved` | The host Face is not in one unambiguous authored Zone. |
 | `window.mirrored` | The Window is mirrored; make a new flipped Type. |
+| `window.mull_not_rectangular` | Rectangles sharing Edges do not tile one rectangle exactly. |
 | `window.nested_units` | A Window is nested inside another Window. |
 | `window.no_host_face` | No Face of a Zone beside the Window has room for it. |
+| `window.not_aligned` | The drawn rectangle's sides are not parallel to its host Face's up and right. |
 | `window.not_component` | A Window record is not on a native ComponentInstance. |
 | `window.not_mirrored` | The chosen Window is not mirrored. |
+| `window.not_rectangle` | The Face is not a rectangle with four square corners and no hole. |
 | `window.off_host` | The Window does not lie in its host Face's plane. |
 | `window.opening_area_exceeds_host` | The Windows on a Face cover more than its gross area. |
 | `window.outlines_required` | The action needs every Window outline keyed by occurrence path. |
@@ -55804,3 +56064,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.21 | 2026-11-08 | ph_composer.spaces.all no longer answers a Zone's imbalanced or findings, and space.airflow_imbalance is gone: supply and extract balance per ventilator, not per Zone. |
 | 1.22 | 2026-11-08 | A Frame gains brand, an optional text field, in ph_composer.windows.frames and the frames library kind. |
 | 1.23 | 2026-11-08 | A Window Unit reads its native name in ph_composer.windows.units.list and .all; ph_composer.windows.units.rename and ph_composer.windows.units.selection are new. |
+| 1.24 | 2026-11-09 | ph_composer.windows.units.convert_review is new: which drawn rectangles Convert to Window Type would take, as Type layouts, and why it leaves the others out. |

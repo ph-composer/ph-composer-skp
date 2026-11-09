@@ -8,6 +8,8 @@ module PhComposer
     module Codes
       ALL = {
         "window.copy_id_pending" => "A native copy shares this Window's identity until it is repaired.",
+        "window.convert_on_boundary" => "The drawn rectangle touches its host Face's edge; draw it inset and move " \
+                                        "the Window after converting.",
         "window.definition_changed" => "The Window's geometry differs from its Type; reset it first.",
         "window.definition_detached" => "The Window does not use its Type's primary definition.",
         "window.definition_editing" => "The Window definition is open for editing; close it first.",
@@ -19,10 +21,14 @@ module PhComposer
         "window.host_type_unsupported" => "The host Face is neither a Wall nor a Roof/Ceiling.",
         "window.host_unclassified" => "The host Face has no Face type or owning Zone.",
         "window.host_zone_unresolved" => "The host Face is not in one unambiguous authored Zone.",
+        "window.host_ambiguous" => "The drawn rectangle lies on more than one coplanar Zone Face.",
         "window.mirrored" => "The Window is mirrored; make a new flipped Type.",
+        "window.mull_not_rectangular" => "Rectangles sharing Edges do not tile one rectangle exactly.",
         "window.nested_units" => "A Window is nested inside another Window.",
+        "window.not_aligned" => "The drawn rectangle's sides are not parallel to its host Face's up and right.",
         "window.not_component" => "A Window record is not on a native ComponentInstance.",
         "window.not_mirrored" => "The chosen Window is not mirrored.",
+        "window.not_rectangle" => "The Face is not a rectangle with four square corners and no hole.",
         "window.off_host" => "The Window does not lie in its host Face's plane.",
         "window.opening_area_exceeds_host" => "The Windows on a Face cover more than its gross area.",
         "window.outlines_required" => "The action needs every Window outline keyed by occurrence path.",
