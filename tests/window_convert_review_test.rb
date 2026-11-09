@@ -243,6 +243,40 @@ class WindowConvertReviewTest < PhComposerTestCase
     assert_equal 2, review([wall.persistent_id], [side.persistent_id]).fetch("left_out").length
   end
 
+  def translated(x_m)
+    Geom::Transformation.new([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x_m / 0.0254, 0, 0, 1])
+  end
+
+  def test_a_rectangle_outside_every_zone_finds_a_wall_in_a_nested_group
+    wall = Sketchup::Face.new(next_id, {}, :points => WALL.map { |point| inches(*point) })
+    nested = Sketchup::Group.new(next_id, Sketchup::Entities.new([wall]), :transformation => translated(10))
+    @group = Sketchup::Group.new(next_id, Sketchup::Entities.new([nested]))
+    @model.entities << @group
+    assignment_invoke("ph_composer.zones.make", "parent_path" => [], "entity_ids" => [@group.persistent_id])
+    group = review(loose_rectangle(13, 2, 1.2, 1.5)).fetch("groups").first
+    assert_equal [nested.persistent_id, wall.persistent_id], group.dig("host", "entity_path")
+  end
+
+  def test_every_page_of_zone_faces_is_searched
+    fillers = 500.times.map do |index|
+      Sketchup::Face.new(100_000 + index, {}, :points => ring(index, 20, 0.5, 0.5).map { |point| inches(*point) })
+    end
+    wall = Sketchup::Face.new(900_000, {}, :points => WALL.map { |point| inches(*point) })
+    @group = Sketchup::Group.new(next_id, Sketchup::Entities.new(fillers + [wall]))
+    @model.entities << @group
+    assignment_invoke("ph_composer.zones.make", "parent_path" => [], "entity_ids" => [@group.persistent_id])
+    assert_equal [900_000], review(loose_rectangle(3, 2, 1, 1)).fetch("groups").first.dig("host", "entity_path")
+  end
+
+  def test_a_rectangle_in_a_group_shared_with_a_copy_is_left_out
+    zone_with([ring(2, 1, 1, 1)])
+    face = Sketchup::Face.new(next_id, {}, :points => ring(5, 2, 1, 1).map { |point| inches(*point) })
+    shared = Sketchup::Entities.new([face])
+    original = Sketchup::Group.new(next_id, shared)
+    @model.entities << original << Sketchup::Group.new(next_id, shared)
+    assert_equal ["target.shared_definition"], left_out_codes(review([original.persistent_id, face.persistent_id]))
+  end
+
   def two_zone_faces
     left = Sketchup::Face.new(next_id, {}, :points => ring(0, 0, 4, 6).map { |point| inches(*point) })
     right = Sketchup::Face.new(next_id, {}, :points => ring(4, 0, 4, 6).map { |point| inches(*point) })

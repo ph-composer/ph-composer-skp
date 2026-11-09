@@ -13,10 +13,11 @@ module PhComposer
       # Inside a Zone the drawing has already cut the host: the rectangles' outer Edges are shared with
       # the Face around them, and the host's hole is the rectangles themselves. A drawn neighbour left
       # unselected counts as that Face's edge: Convert could not heal the host while it stays. Outside
-      # every Zone nothing is cut, so the host is found by geometry among every Zone's own Faces. Either
+      # every Zone nothing is cut, so the host is found by geometry among every Zone Face. Either
       # way a group that touches its host's edge is refused (W7-2), and a rectangle that is a Zone Face
       # with nothing around it is not drawn on one.
       class ConvertHosts
+        FACE_LIST = "ph_composer.zones.faces.list"
         ZoneFace = Struct.new(:face, :parent_path, :transform, :geometry, :keyword_init => true)
         TOLERANCE_M = ConvertRectangles::COORDINATE_TOLERANCE_M
 
@@ -89,23 +90,38 @@ module PhComposer
           end
         end
 
-        # Every Zone's own Faces. The native walk only collects geometry; `host_context` still says what each is.
+        # Every Zone Face occurrence, Zones' `faces.list` deciding which Faces those are, nested Groups included.
         def zone_faces
-          @zone_faces ||= zone_rows.flat_map do |zone|
-            entities, transform = storage(zone.dig("reference", "zone_path"))
-            entities.to_a.grep(Sketchup::Face).filter_map { |face| zone_face(face, zone, transform) }
+          @zone_faces ||= zone_face_paths.group_by { |path| path[0...-1] }.flat_map do |parent_path, paths|
+            entities, transform = storage(parent_path)
+            faces = entities.to_a.grep(Sketchup::Face).to_h { |face| [face.persistent_id, face] }
+            paths.filter_map { |path| zone_face(faces.fetch(path.last), parent_path, transform) }
+          end
+        end
+
+        def zone_face_paths
+          paths = []
+          params = { "fields" => ["face_type"], "limit" => Pages::MAXIMUM_LIMIT }
+          loop do
+            page = @request.query(FACE_LIST, params)
+            paths.concat(page.fetch("faces").map { |row| row.fetch("reference") }.map do |face|
+              face.fetch("zone_path") + face.fetch("entity_path")
+            end)
+            return paths unless page.fetch("next_cursor")
+
+            params = params.merge("cursor" => page.fetch("next_cursor"))
           end
         end
 
         # A degenerate Zone Face cannot host a Window; it must not refuse rectangles elsewhere.
-        def zone_face(face, zone, transform)
-          ZoneFace.new(:face => face, :parent_path => zone.dig("reference", "zone_path"), :transform => transform,
+        def zone_face(face, parent_path, transform)
+          ZoneFace.new(:face => face, :parent_path => parent_path, :transform => transform,
                        :geometry => FaceCapture.call(face, transform))
         rescue CodedError
           nil
         end
 
-        # A Zone may be a Component instance; its write refusal then comes from `host_context`.
+        # A Zone may sit in a Component instance; its write refusal then comes from `host_context`.
         def storage(path)
           collection = @request.model.entities
           transform = path.reduce(Geom::Transformation.new) do |carried, id|

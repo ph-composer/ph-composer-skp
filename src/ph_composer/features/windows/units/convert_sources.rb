@@ -60,6 +60,9 @@ module PhComposer
           scope.path.reduce(Geom::Transformation.new) do |transform, id|
             group = scope.find(collection, id)
             raise CodedError.new("target.locked", "The Group holding that Face is locked.") if group.locked?
+            if group.definition.instances.length > 1
+              raise CodedError.new("target.shared_definition", "The Group holding that Face is shared with a copy.")
+            end
 
             collection = group.entities
             transform * group.transformation
