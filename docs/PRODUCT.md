@@ -242,7 +242,7 @@ shows on the Volume row, where it is set. Each Zone row shows its Spaces' sums; 
 inherits its airflow from the Zone, the Zone shows a dash instead. Cells edit in place, and a range fill or a paste from a
 spreadsheet is one Undo step. Checked rows edit together in the selection bar, and checked Zones
 stay checked when switching to the Geometry view. Each row offers Locate and, where they apply, Open,
-Close, Enter, Delete, Remove Volume, Move to Zone and the repair its problem names. The Weighting
+Close, Enter, Delete, Remove, Remove Volume, Move to Zone and the repair its problem names. The Weighting
 factor column filters the table and colours the Model by factor. A Volume's height can be set from a closed solid the user draws, its volume over the Volume's net floor area, after a confirmation that shows both numbers. There is no Level rail and no
 separate balance view; column widths last for the session.
 
@@ -287,6 +287,8 @@ follows the copied Zone its original was hosted in; a Space whose Zone stayed be
 reference. A copied Volume or Floor Segment is marked as a duplicate until Make independent is run on
 its row. Move to Zone hosts a Space in another Zone where it stands, keeping its number and values.
 If its Zone is erased, the Space stays with a finding that blocks export and offers Remove from Zone.
+Remove on a Space's row takes away the Space and its Volumes and leaves their floor Faces where they
+are as plain geometry; Delete erases the Faces too. Each is one Undo step.
 
 ## Handoff
 

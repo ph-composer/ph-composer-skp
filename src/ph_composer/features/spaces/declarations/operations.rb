@@ -3,7 +3,7 @@
 module PhComposer
   module Spaces
     # The operations' public contract: Create Space and its preview, Volume and Floor Segment edits,
-    # update, batch, delete, metadata, Make independent and Move Space to Zone. The handlers are
+    # update, batch, delete, remove, metadata, Make independent and Move Space to Zone. The handlers are
     # Authoring module functions.
     module OperationRegistration
       ZONE = Shapes.object({ "zone_id" => Shapes::TEXT, "zone_path" => Shapes::ZONE_PATH },
@@ -154,6 +154,15 @@ module PhComposer
           :undo_name => "Delete Space", :side_effects => "Erases the Space Group.",
           :examples => [{ "space" => EXAMPLE_SPACE }]
         }, ->(request, proposal, params) { Authoring.delete(request, proposal, :space => params.fetch("space")) }],
+        ["remove", {
+          :description => "Remove one Space and keep its floors: the records of the Space, its Volumes and their " \
+                          "Floor Segments go, the Groups are exploded and the Faces stay where they are as plain " \
+                          "geometry.",
+          :refuses => REMOVAL, :params => Shapes.object({ "space" => SPACE_PARAM }),
+          :result => Shapes.object({ "space_id" => Shapes::TEXT }), :undo_name => "Remove Space",
+          :side_effects => "Explodes the Space and Volume Groups and removes their records.",
+          :examples => [{ "space" => EXAMPLE_SPACE }]
+        }, ->(request, proposal, params) { Authoring.remove(request, proposal, :space => params.fetch("space")) }],
         ["update_metadata", {
           :description => "Replace the user_data and installed extension payloads of explicit Spaces, Volumes and " \
                           "Floor Segments, guarded by the metadata last read.",

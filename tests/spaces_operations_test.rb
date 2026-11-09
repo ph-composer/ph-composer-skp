@@ -420,6 +420,113 @@ class SpacesOperationsTest < PhComposerTestCase
     end
   end
 
+  OFFSET = Geom::Transformation.new([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 10, 0, 0, 1])
+
+  # A Space Group at the Model root with two Volumes, moved off the origin.
+  def space_at_root(extra = [])
+    @first = floor_face(1111, rectangle(0, 0, 3, 4), segment_record("L"))
+    @second = floor_face(1121, rectangle(3, 0, 2, 2), segment_record("M"))
+    @space = space_group(1100, space_record("L", :number => "101"),
+                         [volume_group(1110, volume_record("L"), [@first]),
+                          volume_group(1120, volume_record("M", :number => 2), [@second]), *extra],
+                         :transformation => OFFSET)
+    @space.entities.to_a.find { |entity| entity.persistent_id == 1120 }.transformation = OFFSET
+    @model.entities << @space
+    spaces.first.fetch("reference")
+  end
+
+  def corners(face)
+    face.outer_loop.vertices.map { |vertex| [vertex.position.x, vertex.position.y, vertex.position.z] }
+  end
+
+  def test_remove_space_leaves_its_floors_where_they_stand_as_plain_geometry_in_one_undo_step
+    reference = space_at_root
+    expected = [[@first, 10], [@second, 20]].map { |face, shift| corners(face).map { |x, y, z| [x + shift, y, z] } }
+    before = @model.operations.length
+    removed = invoke("ph_composer.spaces.remove", "space" => reference)
+    assert_equal "completed", removed["status"], removed.inspect
+    assert_equal "spc_LLLLLLLLLLLL", removed.dig("value", "space_id")
+    assert_equal before + 1, @model.operations.length
+    assert_empty spaces
+    assert_equal [1111, 1121], @model.entities.to_a.map(&:persistent_id), "both Groups are exploded"
+    assert_equal expected, [@first, @second].map { |face| corners(face) }
+    assert([@first, @second].all? { |face| PhComposer::Spaces::FLOOR_SEGMENT_STORE.read(face).nil? })
+    Sketchup.undo
+    assert_equal [2], spaces.map { |row| row.fetch("volumes").length }
+    assert_equal [1100], @model.entities.to_a.map(&:persistent_id)
+  end
+
+  def test_remove_space_takes_every_record_below_it_and_keeps_what_is_not_the_spaces
+    plain_volume = volume_group(1130, volume_record("N", :number => 3),
+                                [floor_face(1131, rectangle(6, 0, 1, 1), segment_record("N"))])
+    plain = Sketchup::Group.new(1140, Sketchup::Entities.new([plain_volume]))
+    stray = floor_face(1150, rectangle(8, 0, 1, 1), segment_record("S"))
+    loose = floor_face(1160, rectangle(8, 3, 1, 1))
+    reference = space_at_root([plain, stray, loose])
+    assert_equal "completed", invoke("ph_composer.spaces.remove", "space" => reference)["status"]
+    assert_empty spaces
+    store = PhComposer::Spaces::FLOOR_SEGMENT_STORE
+    assert_nil store.read(stray), "a Floor Segment off its Volume does not ride out on a plain Face"
+    assert_nil store.read(plain.entities.to_a.first)
+    assert_equal [1111, 1121, 1140, 1150, 1160], @model.entities.to_a.map(&:persistent_id).sort
+    assert_equal [1131], plain.entities.to_a.map(&:persistent_id), "the plain Group stays, its Volume exploded"
+  end
+
+  def test_remove_space_works_from_any_edit_context_in_one_undo_step
+    zone_with_outlines
+    create([@living])
+    space_id, volume_id = spaces.first.dig("volumes", 0, "reference", "entity_path").last(2)
+    space_group = entity_path([90, space_id]).last
+    space_group.entities.to_a.find { |entity| entity.persistent_id == volume_id }.locked = false
+    [[], [90], [90, space_id], [90, space_id, volume_id]].each do |open|
+      @model.active_path = open.empty? ? nil : entity_path(open)
+      before = @model.operations.length
+      removed = invoke("ph_composer.spaces.remove", "space" => spaces.first.fetch("reference"))
+      assert_equal "completed", removed["status"], "open #{open}: #{removed.inspect}"
+      assert_equal before + 1, @model.operations.length
+      assert_empty @model.nested_starts, "Volume protection joins the Remove instead of splitting it"
+      assert_empty spaces
+      assert_equal open.first(1), Array(@model.active_path).map(&:persistent_id)
+      assert_includes @wrapper.entities.to_a, @living
+      Sketchup.undo
+      assert_equal 1, spaces.length
+    end
+  end
+
+  def test_remove_space_refuses_a_record_below_it_in_shared_storage_with_nothing_written
+    definition = Sketchup::ComponentDefinition.new(Sketchup::Entities.new([
+      volume_group(1131, volume_record("N", :number => 3),
+                   [floor_face(1132, rectangle(6, 0, 1, 1), segment_record("N"))])
+    ]))
+    reference = space_at_root([Sketchup::ComponentInstance.new(1130, definition)])
+    result = invoke("ph_composer.spaces.remove", "space" => reference)
+    assert_equal %w[refused target.shared_definition none], result.values_at("status", "code", "effect")
+    assert_equal [1100], @model.entities.to_a.map(&:persistent_id)
+    assert PhComposer::Spaces::FLOOR_SEGMENT_STORE.read(@first)
+  end
+
+  def test_remove_space_refuses_a_volume_whose_identity_a_copy_shares_with_nothing_written
+    reference = space_at_root
+    @model.entities << space_group(1200, space_record("C", :number => "102"),
+                                   [volume_group(1210, volume_record("L"), [floor_face(1211, rectangle(9, 0, 1, 1))])])
+    result = invoke("ph_composer.spaces.remove", "space" => reference)
+    assert_equal %w[refused target.ambiguous none], result.values_at("status", "code", "effect")
+    assert_equal [1100, 1200], @model.entities.to_a.map(&:persistent_id)
+  end
+
+  def test_remove_space_rechecks_every_record_when_it_applies
+    reference = space_at_root
+    path = reference.fetch("entity_path")
+    records = [[PhComposer::Spaces::SPACE_KIND, path, PhComposer::Spaces::SPACE_STORE.read(@space)],
+               [PhComposer::Spaces::FLOOR_SEGMENT_KIND, path + [1110, 1111], segment_record("X")]]
+    step = PhComposer::Spaces::RemoveSpaceStep.new(
+      :path => path, :records => records.map { |kind, at, before| { "kind" => kind, "path" => at, "before" => before } }
+    )
+    error = assert_raises(PhComposer::CodedError) { step.apply(@model, {}) }
+    assert_equal "target.changed", error.code
+    assert PhComposer::Spaces::SPACE_STORE.read(@space), "checked before anything is removed"
+  end
+
   def test_removing_an_identity_another_record_still_names_refuses_with_nothing_written
     zone_with_outlines
     create([@living])
@@ -437,6 +544,7 @@ class SpacesOperationsTest < PhComposerTestCase
     PhComposer::Spaces::SPACE_STORE.write(group, stored.merge("extension_data" => { "other.tool" => envelope }))
     [["ph_composer.spaces.floors.unmark", { "floor_segments" => [segment.fetch("reference")] }],
      ["ph_composer.spaces.volumes.remove", { "volume" => first.dig("volumes", 0, "reference") }],
+     ["ph_composer.spaces.remove", { "space" => first.fetch("reference") }],
      ["ph_composer.spaces.delete", { "space" => first.fetch("reference") }]].each do |name, params|
       result = invoke(name, params)
       assert_equal %w[refused reference.in_use none], result.values_at("status", "code", "effect"), name

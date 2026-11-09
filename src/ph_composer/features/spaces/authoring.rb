@@ -143,6 +143,23 @@ module PhComposer
         { "space_id" => occurrence.record.fetch("id") }
       end
 
+      # The Space stops being one and its Faces stay: every record at or below it goes, whatever the hierarchy
+      # holds it as, and no record may be one a copy or shared storage would also lose.
+      def remove(request, proposal, space:)
+        scan = Occurrences.scan(request.model)
+        occurrence = Resolve.occurrence(scan, space, :mutable => true)
+        removed = inside(scan, occurrence.path)
+        removed.each do |kind, found|
+          target = Resolve::TARGETS.fetch(kind)
+          Resolve.writable!(found, target.occurrences_in(scan), target.label)
+        end
+        check_removals!(request, proposal, removed)
+        records = removed.map { |kind, found| { "kind" => kind, "path" => found.path, "before" => found.record } }
+        proposal.add_step(RemoveSpaceStep.new(:path => occurrence.path, :records => records),
+                          :scopes => [Operations::EntityScope.new(occurrence.path[0...-1])])
+        { "space_id" => occurrence.record.fetch("id") }
+      end
+
       # The explicit repair of a copy: the named occurrence and everything inside it take new ids, in one
       # step. A Space takes the next free number in its Zone.
       def make_independent(request, proposal, reference:)

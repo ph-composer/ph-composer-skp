@@ -101,6 +101,25 @@ test("Enter unprotects a protected Volume, then opens it once that has completed
     { reference: { volume_id: "svl_100_101_1", entity_path: [100, 101, 1] } });
 });
 
+test("Remove confirms that the floors stay, beside a Delete that is unchanged, and Cancel sends nothing", function () {
+  var p = page();
+  p.receive(snapshot());
+  assert.ok(p.action("Delete Bath"));
+  p.click(p.action("Remove Bath, keep its floors"));
+  var dialog = p.context.document.querySelector("dialog");
+  assert.strictEqual(dialog.querySelector("h2").textContent, "Remove Space?");
+  assert.strictEqual(dialog.querySelector("p").textContent, "Bath and its Volumes will be removed. Their floor Faces " +
+    "stay where they are as plain geometry. One Undo brings the Space back.");
+  p.click(dialog.querySelectorAll("button").filter(function (node) { return node.textContent === "Cancel"; })[0]);
+  assert.strictEqual(p.sent.length, 0);
+  p.click(p.action("Remove Bath, keep its floors"));
+  p.click(dialog.querySelectorAll("button").filter(function (node) { return node.textContent === "Remove"; })[0]);
+  assert.strictEqual(last(p).payload.name, "ph_composer.spaces.remove");
+  assert.strictEqual(last(p).payload.expected_revision, 4);
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(last(p).payload.params)),
+    { space: { space_id: "spc_102", entity_path: [100, 102] } });
+});
+
 test("Delete confirms in the shared dialog, naming what goes, and Cancel sends nothing", function () {
   var p = page();
   p.receive(snapshot());

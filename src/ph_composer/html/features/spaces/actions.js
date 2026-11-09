@@ -1,6 +1,6 @@
 /* The Spaces view's row actions: Locate every row; Open or Close a Space; Enter a Volume;
- * Delete a Space and Remove a Volume, each after a confirmation naming what goes; Move a Space to another
- * Zone; and the repair a row's finding names (Restore position, Make independent).
+ * Delete a Space, Remove a Space keeping its floors and Remove a Volume, each after a confirmation naming what
+ * goes; Move a Space to another Zone; and the repair a row's finding names (Restore position, Make independent).
  *
  * Every Model change carries the revision the row was painted from, so a row from a stale snapshot refuses
  * rather than acting on what has changed. Context commands are view commands (they move the edit context and
@@ -111,6 +111,8 @@ function (panel, requests, ui, units, preferences, fields) {
       if (this.zones.length > 1 || !record.space.zone && this.zones.length) {
         items.push({ id: "spaces.move", icon: "assign", label: "Move " + name + " to another Zone", disabled: busy });
       }
+      items.push({ id: "spaces.remove", icon: "ungroup", label: "Remove " + name + ", keep its floors",
+        disabled: busy });
       items.push({ id: "spaces.delete", icon: "delete", label: "Delete " + name, disabled: busy });
     }
     if (record.volume && !record.segment) {
@@ -124,7 +126,8 @@ function (panel, requests, ui, units, preferences, fields) {
 
   // The actions that change records or the edit context's protection; a held cell draft must not be lost to one.
   var CHANGES = { "spaces.enter": true, "spaces.restore": true, "spaces.independent": true, "spaces.delete": true,
-    "spaces.remove_volume": true, "spaces.move": true, "spaces.unhost": true, "spaces.height_from_solid": true };
+    "spaces.remove": true, "spaces.remove_volume": true, "spaces.move": true, "spaces.unhost": true,
+    "spaces.height_from_solid": true };
 
   /* Runs one of this view's actions; false for an action it does not own. */
   SpaceActions.prototype.run = function (row, item) {
@@ -155,6 +158,12 @@ function (panel, requests, ui, units, preferences, fields) {
         this.askFirst("Delete Space?", describe(record) + ", its Volumes and their Floor Segments will be erased.",
           "Delete", function (revision) {
           self.runAt(revision, PREFIX + ".delete", { space: reference });
+        });
+        break;
+      case "spaces.remove":
+        this.askFirst("Remove Space?", describe(record) + " and its Volumes will be removed. Their floor Faces stay " +
+          "where they are as plain geometry. One Undo brings the Space back.", "Remove", function (revision) {
+          self.runAt(revision, PREFIX + ".remove", { space: reference });
         });
         break;
       case "spaces.remove_volume":
