@@ -92,14 +92,16 @@ module PhComposer
 
         def rows(built, types)
           ordered = built.sort_by { |item| item.fetch(:sources).first.path }
-          ordered.map do |item|
+          firsts = []
+          ordered.each_with_index.map do |item, index|
             layout = item.fetch(:layout)
-            shared = ordered.index do |other|
-              ConvertRectangles.same_layout?(layout, other.fetch(:layout), TYPE_MATCH_TOLERANCE_M)
+            shared = firsts.find do |first|
+              ConvertRectangles.same_layout?(layout, ordered[first].fetch(:layout), TYPE_MATCH_TOLERANCE_M)
             end
+            firsts << index unless shared
             matching = matching_types(layout, types)
             { "host" => item.fetch(:host).reference, "columns_m" => layout.columns_m, "rows_m" => layout.rows_m,
-              "layout_index" => shared, "matching_types" => matching,
+              "layout_index" => shared || index, "matching_types" => matching,
               "preselected_type_id" => matching.first&.fetch("id"),
               "sources" => sources(item.fetch(:sources), layout) }
           end

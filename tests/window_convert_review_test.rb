@@ -277,6 +277,13 @@ class WindowConvertReviewTest < PhComposerTestCase
     assert_equal ["target.shared_definition"], left_out_codes(review([original.persistent_id, face.persistent_id]))
   end
 
+  def test_a_rectangle_on_a_face_filling_a_hole_is_hosted_by_that_face_alone
+    zone_with([ring(2, 1, 3, 3)])
+    inner = @group.entities.to_a.grep(Sketchup::Face).find { |face| face != @host }
+    host = review(loose_rectangle(3, 2, 1, 1)).fetch("groups").first.fetch("host")
+    assert_equal [inner.persistent_id], host.fetch("entity_path")
+  end
+
   def two_zone_faces
     left = Sketchup::Face.new(next_id, {}, :points => ring(0, 0, 4, 6).map { |point| inches(*point) })
     right = Sketchup::Face.new(next_id, {}, :points => ring(4, 0, 4, 6).map { |point| inches(*point) })
@@ -314,6 +321,12 @@ class WindowConvertReviewTest < PhComposerTestCase
     assert_equal %w[alpha Zebra], groups.first.fetch("matching_types").map { |row| row.fetch("name") }
     assert_equal groups.first.fetch("matching_types").first.fetch("id"), groups.first.fetch("preselected_type_id")
     assert_empty groups.last.fetch("matching_types")
+  end
+
+  def test_near_matches_share_only_a_group_within_one_millimetre_of_the_first
+    faces = zone_with([ring(1, 1, 1.0, 1), ring(3, 1, 1.0008, 1), ring(5, 1, 1.0016, 1)], :holes => [])
+    groups = review(*faces.map { |face| path(face) }).fetch("groups")
+    assert_equal [0, 0, 2], groups.map { |group| group.fetch("layout_index") }
   end
 
   def test_a_mixed_selection_keeps_every_good_group_and_lists_the_rest

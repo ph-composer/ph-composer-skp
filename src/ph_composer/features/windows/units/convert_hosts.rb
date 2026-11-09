@@ -80,13 +80,18 @@ module PhComposer
           end
         end
 
-        # The Zone Faces coplanar with a rectangle that share area with it.
+        # The Zone Faces coplanar with a rectangle that share area with it: one wholly inside a Face's hole
+        # is not on that Face.
         def lying_under(source)
           zone_faces.select do |zone_face|
             next false unless on_plane?(zone_face.geometry, source.corners)
 
             plane = Placement::Plane.new(zone_face.geometry)
-            Placement::Polygons.overlap?(project(plane, source.corners), project(plane, zone_face.geometry.outer_loop))
+            rectangle = project(plane, source.corners)
+            Placement::Polygons.overlap?(rectangle, project(plane, zone_face.geometry.outer_loop)) &&
+              zone_face.geometry.holes.none? do |hole|
+                Placement::Polygons.contained?(rectangle, project(plane, hole))
+              end
           end
         end
 
