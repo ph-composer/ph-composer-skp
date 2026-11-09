@@ -50844,7 +50844,7 @@ Example params:
 
 ```json
 {
-  "readout": "ph_composer.spaces.labels",
+  "readout": "ph_composer.spaces.show",
   "on": true
 }
 ```
@@ -56894,3 +56894,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.26 | 2026-11-09 | ph_composer.windows.units.convert_review's groups gain default_name, and it leaves out rectangles overlapping across Groups as window.overlap; convert's groups take copy_from_type_id. ph_composer.windows.convert_dialog.open, close and state are new, with the convert_dialog snapshot section and the convert_menu menu item. |
 | 1.27 | 2026-11-09 | A Space's Zone is the record's zone_id, a core reference; ph_composer.spaces.move_to_zone is a record edit and no longer refuses space.context_open. ph_composer.spaces.unhost and the space.zone_missing finding are new; ph_composer.zones.make_independent takes copy_added and ph_composer.zones.isolate_copied_group is new, for a plain Group copied whole. |
 | 1.28 | 2026-11-09 | ph_composer.spaces.create and create_preview take faces as root-to-Face paths and work in any edit context; create takes an optional zone; create_preview answers zone and height_m, and left_out rows carry path. create_review.open takes faces and revision and the review carries zones and height_m. ph_composer.zones.stamp_container and the nested_container reason are gone; zones export rows lose container_paths. |
+| 1.29 | 2026-11-09 | The ph_composer.spaces.labels readout is now ph_composer.spaces.show, on by default in every Model session; it draws each Volume's prism outline with the Space labels. |

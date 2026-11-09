@@ -123,11 +123,9 @@ check({ name: "spaces", output }, async ({ newPage, step }) => {
     await page.locator(".phc-zone-view:not([hidden]) button[aria-label='Colour by Height'][aria-pressed='true']")
       .waitFor();
     await page.getByRole("button", { name: "Table options" }).click();
-    await page.locator(".phc-table-options .phc-action-menu-item", { hasText: "Space labels" }).click();
-    await page.getByRole("button", { name: "Table options" }).click();
     const options = page.locator(".phc-table-options .phc-action-menu-item:visible");
     await options.filter({ hasText: "Label net volume" }).waitFor();
-    assert.equal(await options.filter({ hasText: "Space labels" }).getAttribute("aria-pressed"), "true");
+    assert.equal(await options.filter({ hasText: "Show Spaces" }).getAttribute("aria-pressed"), "true");
     await page.evaluate(async () => {
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
       await Promise.all(document.getAnimations().map(animation => animation.finished));

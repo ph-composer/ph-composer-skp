@@ -19,6 +19,25 @@ class SpacesPrismTest < PhComposerTestCase
     assert_in_delta 30.0, PRISM.volume_m3([shape], 2.5), 1e-9
   end
 
+  def test_the_outline_is_each_floor_edge_each_top_edge_and_one_vertical_per_corner
+    shape = PRISM.call([[rectangle(0, 0, 4, 3)]], 2.5).first
+    lines = PRISM.outline([shape])
+    assert_equal 12, lines.length
+    floor, top, vertical = lines.first(3)
+    assert_equal [0.0, 0.0], floor.map { |point| point[2].round(9) }
+    assert_equal [2.5, 2.5], top.map { |point| point[2].round(9) }
+    assert_equal [0.0, 2.5], vertical.map { |point| point[2].round(9) }
+    assert_equal vertical.first[0, 2], vertical.last[0, 2]
+  end
+
+  def test_the_outline_rings_a_hole_and_shows_none_of_the_bases_cuts
+    outer = rectangle(0, 0, 4, 4)
+    hole = rectangle(1, 1, 2, 2)
+    shape = PRISM.call([[outer, hole]], 2.0).first
+    assert_operator shape.base.length, :>, 1, "the base is cut around the hole"
+    assert_equal 24, PRISM.outline([shape]).length, "three lines for each of the eight ring edges"
+  end
+
   def test_an_l_shape_has_one_side_per_edge_and_encloses_the_net_volume
     loop = [[0, 0, 0], [4, 0, 0], [4, 2, 0], [2, 2, 0], [2, 4, 0], [0, 4, 0]]
     shape = PRISM.call([[loop]], 3.0).first

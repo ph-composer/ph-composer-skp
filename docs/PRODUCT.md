@@ -269,9 +269,10 @@ counted twice; a new Volume refuses one too. The refusal says to draw the floor 
 group the solid and use Height from solid.
 
 Colour by Space, Ventilation, Weighting factor and Height colour each Space's Floor Segments and the
-preview prism that its height draws over them, with a legend. Space labels and the totals of the
-selected Spaces show in the viewport whether or not a mode is on, in the panel's units. None of this is
-saved in the model.
+preview prism that its height draws over them, with a legend. Show Spaces, on by default each time a
+Model is opened, draws every Space's prism outline and its label whether or not a mode is on, in the
+panel's units; turn it off from Table options in Zones > Spaces or the Colour by menu. Selection totals, the
+sums for the selected Spaces, are turned on in the same places. None of this is saved in the model.
 
 Copying a Space in SketchUp makes the copy independent at once, with the next free number in its Zone,
 and one Undo removes both. A copied Zone copies no Spaces outside it. A storey Group copied whole,

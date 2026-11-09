@@ -71,8 +71,13 @@ module PhComposer
       # Every Volume in a Space, with its Floor Segments' captured metrics and prisms, read once per rebuild.
       # `read` is the projection's read request; the Spaces read says which Volumes are blocked.
       def views(read)
-        blocked = blocked_paths(read)
-        Occurrences.scan(read.model).spaces.flat_map do |space|
+        volume_views(read.model, blocked_paths(read))
+      end
+
+      # `blocked` is the Volume paths to mark incomplete. A caller that draws no incomplete state leaves it
+      # out and is spared the whole Spaces read.
+      def volume_views(model, blocked = {})
+        Occurrences.scan(model).spaces.flat_map do |space|
           space.volumes.map do |volume|
             height = volume.record["avg_ceiling_height_m"]
             segments = volume.segments.map do |segment|

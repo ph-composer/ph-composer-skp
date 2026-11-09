@@ -2,7 +2,7 @@
 
 module PhComposer
   module ColourBy
-    # The one `Sketchup::Overlay` a Model gets while a Colour-by mode is active. It draws what the
+    # The one `Sketchup::Overlay` a Model gets while a Colour-by mode or a readout is on. It draws what the
     # service already cached and nothing else: no Model read, no record read and no repair, so the
     # cost of a frame is Ruby marshalling (context/SKETCHUP_HOST_BEHAVIOR.md, "Overlays").
     #
@@ -11,17 +11,19 @@ module PhComposer
     class Overlay < Sketchup::Overlay
       OVERLAY_ID = "#{EXTENSION_ID}.colour_by"
       LINE_WIDTH = 2
+      READOUT_LINE_WIDTH = 1
       # The HUD sits in the upper left of the viewport.
       HUD_ORIGIN = [12, 12].freeze
       HUD_ROW_HEIGHT = 18
       HUD_SWATCH = 12
 
       def initialize(service)
-        super(OVERLAY_ID, "PH-Composer Colour by", :description => "Colours the Model by the active mode.")
+        super(OVERLAY_ID, "PH-Composer Colour by", :description => "Draws the active Colour-by mode and the readouts.")
         @service = service
       end
 
       def draw(view)
+        draw_readout_lines(view)
         top = HUD_ORIGIN.last
         if @service.active?
           @service.fills.each do |colour, points|
@@ -53,11 +55,21 @@ module PhComposer
         end
       end
 
+      # Readout outlines go under the mode's fills and lines, so a mode's colours win where they coincide.
+      def draw_readout_lines(view)
+        view.line_width = READOUT_LINE_WIDTH
+        view.line_stipple = "" if view.respond_to?(:line_stipple=)
+        view.drawing_color = outline_colour(Palette::READOUT_LINE)
+        @service.readout_drawings.each_value do |_anchors, lines, _hud|
+          view.draw(GL_LINES, Tessellation.lift(lines, view)) unless lines.empty?
+        end
+      end
+
       # Each readout's anchors at their points' screen positions, skipping any behind the camera, and its
       # HUD lines under the legend, or at its place when no mode is on. Text is not depth-tested.
       def draw_readouts(view, top)
         system = Preferences.unit_system
-        @service.readout_drawings.each_value do |anchors, hud|
+        @service.readout_drawings.each_value do |anchors, _lines, hud|
           anchors.each do |anchor|
             next if behind_camera?(view, anchor.point)
 

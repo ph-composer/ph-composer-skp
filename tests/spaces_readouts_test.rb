@@ -3,13 +3,13 @@
 require_relative "test_helper"
 require_relative "support/space_fixtures"
 
-# The Spaces readouts on the reference model: Space labels with their default and optional lines, and the
+# The Spaces readouts on the reference model: Show Spaces with its default and optional lines, and the
 # selection totals, each Space counted once (context/EXTENSIBILITY.md, "Colour-by readouts").
 class SpacesReadoutsTest < PhComposerTestCase
   include SpaceFixtures
 
   API = PhComposer::API
-  LABELS = "ph_composer.spaces.labels"
+  LABELS = "ph_composer.spaces.show"
   TOTALS = "ph_composer.spaces.selection_totals"
   INCHES = 1.0 / 0.0254
 
@@ -20,6 +20,49 @@ class SpacesReadoutsTest < PhComposerTestCase
     @context = API.connect(:session_id => @session.id)
     reference_model
     @service = PhComposer::ColourBy.for(@session)
+  end
+
+  # W-046: labels and prisms show in a new session, with no Colour-by mode on and no one turning them on.
+  def test_show_spaces_is_on_in_a_new_session_and_draws_labels_and_prisms_with_no_mode
+    model = Sketchup.active_model
+    PhComposer::Sessions.detach(model)
+    service = PhComposer::ColourBy.for(PhComposer::Sessions.for(model))
+    assert_includes service.readouts_on, LABELS
+    refute service.active?
+    assert_equal 1, model.overlays.count { |overlay| overlay.is_a?(PhComposer::ColourBy::Overlay) }
+    view = model.active_view
+    model.overlays.to_a.first.draw(view)
+    assert_includes view.texts.map { |_point, text, _options| text }, "101 Living"
+    assert_operator view.draws.count { |mode, *| mode == GL_LINES }, :>=, 1
+  end
+
+  def test_show_spaces_draws_the_floor_ring_at_the_floor_and_at_height_and_the_verticals
+    @service.invalidate!(:force => true)
+    anchors, lines = @service.readout_drawings.fetch(LABELS)
+    refute_empty anchors
+    zs = lines.map { |point| (point.z / INCHES).round(6) }.uniq.sort
+    assert_includes zs, 0.0, "the floor ring"
+    assert_includes zs, 2.5, "the ring at the Volume's height"
+    verticals = lines.each_slice(2).count { |first, last| first.x == last.x && first.y == last.y && first.z != last.z }
+    assert_operator verticals, :>, 0
+  end
+
+  def test_a_volume_with_no_height_keeps_its_label_and_draws_no_outline
+    @model.entities.to_a.first.entities << space_group(
+      1500, space_record("N", :number => "105", :name => "Attic"),
+      [volume_group(1510, volume_record("N", :height => nil),
+                    [floor_face(1511, rectangle(20, 20, 2, 2), segment_record("N"))])]
+    )
+    @service.invalidate!(:force => true)
+    anchors, lines = @service.readout_drawings.fetch(LABELS)
+    assert(anchors.any? { |anchor| anchor.parts.first == "105 Attic" })
+    refute(lines.any? { |point| (point.x / INCHES) >= 20 }, "no height, no prism to outline")
+  end
+
+  def test_turning_show_spaces_off_takes_its_outlines_and_labels_away
+    @service.invalidate!(:force => true)
+    @service.readout(LABELS, :on => false)
+    refute @service.readout_drawings.key?(LABELS)
   end
 
   def test_labels_name_each_space_at_its_largest_segments_centroid

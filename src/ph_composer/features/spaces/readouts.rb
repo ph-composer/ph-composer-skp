@@ -5,29 +5,31 @@ module PhComposer
     # The Spaces readouts, through the shared service (context/EXTENSIBILITY.md, "Colour-by readouts"), shown
     # with any mode or none and writing nothing.
     #
-    # - Space labels: one line per Space at its reference point, the centroid of its largest Floor Segment
-    #   projected to that segment's mean height: number and name, then weighted area, net volume and supply
-    #   and extract when those options are on. A Space with no Floor Segment has no label. The text is drawn
-    #   at that point's screen position and is not depth-tested.
+    # - Show Spaces, on by default in every Model session: each Volume's prism outline, and one line per Space
+    #   at its reference point, the centroid of its largest Floor Segment projected to that segment's mean
+    #   height: number and name, then weighted area, net volume and supply and extract when those options are
+    #   on. A Space with no Floor Segment has no label and a Volume with no height no outline. The text is
+    #   drawn at that point's screen position and is not depth-tested.
     # - Selection totals: with Spaces, Volumes or Floor Segments selected, HUD lines summing weighted area,
     #   net volume, supply and extract over the Spaces they belong to, each Space once.
     #
     # The label options are this Model session's, set by a view command or the native Space labels menu.
     module Readouts
-      LABELS = "#{FEATURE_ID}.labels"
+      SHOW = "#{FEATURE_ID}.show"
       SELECTION_TOTALS = "#{FEATURE_ID}.selection_totals"
       OPTIONS = {
         "weighted_area" => "Weighted area (iCFA)", "net_volume" => "Net volume", "airflows" => "Supply and extract"
       }.freeze
       MENU = "Space labels"
 
-      # What one Space contributes: its record, its summed metrics, and its label point in world metres.
-      SpaceTotals = Struct.new(:space, :weighted_area_m2, :net_volume_m3, :point_m, keyword_init: true)
+      # What one Space contributes: its record, its summed metrics, its label point in world metres, and its
+      # Volumes' views.
+      SpaceTotals = Struct.new(:space, :weighted_area_m2, :net_volume_m3, :point_m, :volumes, keyword_init: true)
 
       module_function
 
       def install(feature)
-        feature.colour_readout(LABELS, :label => "Space labels") { |read| labels(read) }
+        feature.colour_readout(SHOW, :label => "Show Spaces", :on_by_default => true) { |read| show(read) }
         feature.colour_readout(SELECTION_TOTALS, :label => "Spaces selection totals", :selection => true) do |read|
           selection_totals(read)
         end
@@ -52,11 +54,13 @@ module PhComposer
           set_options(request.session, request.params)
         end
         OPTIONS.each do |key, label|
-          # Offered while the labels are on, the only time a line choice shows anything.
+          # Offered while the labels are on, the only time a line choice shows anything; the viewport menu
+          # offers them over a selection, not on every right-click.
           feature.menu_item("#{FEATURE_ID}.labels_#{key}_menu", :label => label, :menu => MENU,
                                                                 :available => lambda { |read|
-                                                                  ColourBy.for(read.session).readouts_on
-                                                                          .include?(LABELS)
+                                                                  !read.model.selection.empty? &&
+                                                                    ColourBy.for(read.session).readouts_on
+                                                                            .include?(SHOW)
                                                                 },
                                                                 :state => lambda { |session|
                                                                   options(session)[key] ? MF_CHECKED : MF_UNCHECKED
@@ -78,15 +82,24 @@ module PhComposer
         options(session).dup
       end
 
-      def labels(read)
+      def show(read)
         chosen = options(read.session)
-        anchors = totals(read).filter_map do |row|
+        rows = totals(read)
+        anchors = rows.filter_map do |row|
           next unless row.point_m
 
           ColourBy::Anchor.new(:point => point(row.point_m), :path => row.space.path,
                                :parts => label_parts(row, chosen))
         end
-        ColourBy::Readout.new(:anchors => anchors, :hud => [])
+        ColourBy::Readout.new(:anchors => anchors, :hud => [], :outlines => rows.flat_map { |row| outlines(row) })
+      end
+
+      # One outline per Volume, so hiding a Volume hides its own lines.
+      def outlines(row)
+        row.volumes.map do |view|
+          pairs = Prism.outline(view.segments.flat_map(&:prism))
+          ColourBy::Outline.new(:path => view.volume.path, :points => pairs.flatten(1).map { |corner| point(corner) })
+        end
       end
 
       def label_parts(row, chosen)
@@ -129,14 +142,14 @@ module PhComposer
       # Every Space occurrence, summed from the same Volume views the modes draw from; a Space with no Volume
       # counts with no area, no volume and no label point.
       def totals(read)
-        views = ColourModes.views(read).group_by { |view| view.space.path }
+        views = ColourModes.volume_views(read.model).group_by { |view| view.space.path }
         Occurrences.scan(read.model).spaces.map do |space|
           own = views.fetch(space.path, [])
           largest = own.flat_map(&:segments).max_by { |segment| segment.metrics.fetch("floor_area_m2") }
           SpaceTotals.new(:space => space,
                           :weighted_area_m2 => own.sum { |view| view.metrics.fetch("weighted_area_m2") },
                           :net_volume_m3 => own.sum { |view| view.metrics.fetch("net_volume_m3") || 0.0 },
-                          :point_m => largest && centroid(largest))
+                          :point_m => largest && centroid(largest), :volumes => own)
         end
       end
 

@@ -29,7 +29,7 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
     weighting_factor: { mode: "ph_composer.spaces.by_weighting_factor" },
     height_m: { mode: "ph_composer.spaces.by_height" },
     v_sup_m3h: { group: "ventilation" }, v_eta_m3h: { group: "ventilation" }, v_tran_m3h: { group: "ventilation" } };
-  var READOUT_LABELS = { "ph_composer.spaces.labels": "Space labels",
+  var READOUT_LABELS = { "ph_composer.spaces.show": "Show Spaces",
     "ph_composer.spaces.selection_totals": "Selection totals" };
   var LABEL_LINES = [["weighted_area", "Weighted area (iCFA)"], ["net_volume", "Net volume"],
     ["airflows", "Supply and extract"]];
@@ -312,7 +312,7 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
     return vs.cells.draftReason() || vs.selection.draftReason();
   }
 
-  /* Table options: the Spaces readouts, and the label lines while Space labels are on. Each is a view command;
+  /* Table options: the Spaces readouts, and the label lines while Show Spaces is on. Each is a view command;
      none writes to the Model. */
   function tableOptions(vs, toggle) {
     var shown = colourBy.readouts(panel.state).filter(function (readout) { return READOUT_LABELS[readout.name]; });
@@ -321,7 +321,7 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
         colourBy.showReadout(panel.state, readout.name, !readout.on);
       });
     });
-    var labels = shown.filter(function (readout) { return readout.name === "ph_composer.spaces.labels"; })[0];
+    var labels = shown.filter(function (readout) { return readout.name === "ph_composer.spaces.show"; })[0];
     if (!labels || !labels.on) return;
     var options = snapshot.value(panel.state, "ph_composer.spaces.label_options") || {};
     LABEL_LINES.forEach(function (line) {

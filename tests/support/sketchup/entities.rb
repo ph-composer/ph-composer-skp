@@ -162,6 +162,15 @@ module Sketchup
       @values = []
     end
 
+    # Overlays do not persist in the SKP, so a saved and reopened Model has none.
+    def marshal_dump
+      []
+    end
+
+    def marshal_load(_values)
+      @values = []
+    end
+
     def add(overlay)
       return false if @values.any? { |value| value.overlay_id == overlay.overlay_id }
 

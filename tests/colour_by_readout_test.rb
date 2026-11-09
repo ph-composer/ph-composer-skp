@@ -70,7 +70,7 @@ class ColourByReadoutTest < PhComposerTestCase
     ColourBy.for(@session).activate("ph_composer.zones.faces.by_face_type")
     assert_includes drawn_texts, "Total 30 m²"
     off = toggle(READOUT, false)
-    refute(off.dig("value", "readouts").any? { |row| row["on"] })
+    refute(off.dig("value", "readouts").any? { |row| row["name"] == READOUT && row["on"] })
     refute_includes drawn_texts, "Total 30 m²"
   end
 
@@ -79,6 +79,66 @@ class ColourByReadoutTest < PhComposerTestCase
     PhComposer::Preferences.set("unit_system", "IP")
     toggle(READOUT, true)
     assert_includes drawn_texts, "Area 134.55 ft²"
+  end
+
+  def install_default_readout(outlines)
+    probe = Module.new do
+      define_singleton_method(:install) do |registry|
+        registry.feature("outside.default", :contract_version => 1)
+                .colour_readout("outside.default.show", :label => "Show", :on_by_default => true) do |_read|
+          ColourBy::Readout.new(:anchors => [], :hud => [], :outlines => outlines)
+        end
+      end
+    end
+    Registry.install([probe])
+  end
+
+  def new_session_service
+    model = Sketchup::Model.new
+    [model, ColourBy.for(PhComposer::Sessions.for(model))]
+  end
+
+  def line_points(overlay_model)
+    view = overlay_model.active_view
+    overlay_model.overlays.to_a.each { |overlay| overlay.draw(view) }
+    view.draws.select { |mode, *| mode == GL_LINES }.map { |_mode, points, *| points }
+  end
+
+  def test_a_readout_on_by_default_starts_on_in_a_new_session_and_draws_its_outline_with_no_mode
+    from = Geom::Point3d.new(0, 0, 0)
+    to = Geom::Point3d.new(10, 0, 0)
+    install_default_readout([ColourBy::Outline.new(:points => [from, to])])
+    model, service = new_session_service
+    assert_includes service.readouts_on, "outside.default.show"
+    refute service.active?
+    assert_equal 1, model.overlays.to_a.length, "an outline to draw needs the overlay, with no mode on"
+    assert model.overlays.to_a.first.enabled?
+    assert_equal 1, line_points(model).length
+  end
+
+  def test_a_readout_on_by_default_with_nothing_to_draw_adds_no_overlay
+    install_default_readout([])
+    model, service = new_session_service
+    assert_includes service.readouts_on, "outside.default.show"
+    assert_empty model.overlays.to_a
+  end
+
+  def test_an_outline_on_a_hidden_occurrence_is_not_drawn
+    hidden = Sketchup::Group.new(110, Sketchup::Entities.new([]))
+    hidden.hidden = true
+    points = [Geom::Point3d.new(0, 0, 0), Geom::Point3d.new(1, 0, 0)]
+    install_default_readout([ColourBy::Outline.new(:points => points, :path => [110])])
+    @model.entities << hidden
+    service = ColourBy.for(@session)
+    service.readout("outside.default.show", :on => true)
+    assert_equal [], service.readout_drawings.fetch("outside.default.show")[1]
+  end
+
+  def test_an_outline_with_an_odd_point_count_turns_the_readout_off
+    install_default_readout([ColourBy::Outline.new(:points => [Geom::Point3d.new(0, 0, 0)])])
+    service = ColourBy.for(@session)
+    service.readout("outside.default.show", :on => true)
+    refute_includes service.readouts_on, "outside.default.show"
   end
 
   def test_turning_the_last_readout_off_with_no_mode_removes_the_overlay
@@ -162,7 +222,7 @@ class ColourByReadoutTest < PhComposerTestCase
     assert_equal 1, @model.overlays.to_a.length
     failing[0] = true
     ColourBy.for(@session).invalidate!(:force => true)
-    assert_empty ColourBy.for(@session).readouts_on
+    refute_includes ColourBy.for(@session).readouts_on, "outside.later.text"
     assert_empty @model.overlays.to_a
   end
 

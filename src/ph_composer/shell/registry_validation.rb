@@ -337,10 +337,10 @@ module PhComposer
       def check_colour_readouts
         @staging.declared_colour_readouts.each do |readout|
           next if text?(readout.label) && [true, false].include?(readout.selection) &&
-                  readout.projection.respond_to?(:call)
+                  [true, false].include?(readout.on_by_default) && readout.projection.respond_to?(:call)
 
           add("registration.schema_invalid", readout.owner, readout.name,
-              "#{readout.name} needs a label, a true or false selection flag and a projection block.")
+              "#{readout.name} needs a label, true or false selection and on_by_default flags and a projection block.")
         end
       end
 

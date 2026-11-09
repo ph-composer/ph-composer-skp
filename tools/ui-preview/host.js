@@ -46,7 +46,7 @@
     // The Spaces read: the fixture's, or empty (the section is always published, as the host does).
     this.spaces = settings.spaces ? JSON.parse(JSON.stringify(settings.spaces)) : null;
     this.markTool = { active: false, weighting_factor: 1, gesture_limit: 250 };
-    this.readoutsOn = [];
+    this.readoutsOn = ["ph_composer.spaces.show"];
     this.labelOptions = { weighted_area: false, net_volume: false, airflows: false };
     this.createReview = settings.createReview ? JSON.parse(JSON.stringify(settings.createReview)) : null;
     this.selectedFaces = JSON.parse(JSON.stringify(settings.selectedFaces || []));
@@ -214,7 +214,7 @@
         { name: "ph_composer.thermal_bridges.by_type", label: "Thermal Bridge Type", entity_kind: "edge", group: null },
         { name: "ph_composer.thermal_bridges.by_group", label: "Thermal bridge group", entity_kind: "edge",
           group: null }],
-      readouts: [["ph_composer.spaces.labels", "Space labels", false],
+      readouts: [["ph_composer.spaces.show", "Show Spaces", false],
         ["ph_composer.spaces.selection_totals", "Spaces selection totals", true]].map(function (readout) {
         return { name: readout[0], label: readout[1], selection: readout[2],
           on: this.readoutsOn.indexOf(readout[0]) >= 0 };

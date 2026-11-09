@@ -91,6 +91,15 @@ module PhComposer
         (first[0] - second[0]).abs < COINCIDENT_M && (first[1] - second[1]).abs < COINCIDENT_M
       end
 
+      # The prisms' outline as `[from, to]` pairs of world points in metres: each ring's edges at the floor and
+      # at the height, and one vertical per corner. Taken from the sides, so a base cut into trapezoids around a
+      # hole shows none of its cuts.
+      def outline(shapes)
+        shapes.flat_map(&:sides).flat_map do |floor_from, floor_to, top_to, top_from|
+          [[floor_from, floor_to], [top_from, top_to], [floor_from, top_from]]
+        end
+      end
+
       # The prisms' enclosed volume in m3: each base piece's plan area times the height.
       def volume_m3(shapes, height_m)
         shapes.sum do |shape|

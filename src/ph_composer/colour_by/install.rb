@@ -161,7 +161,7 @@ module PhComposer
       feature.view_command("#{FEATURE_ID}.readout",
                            :description => "Show or hide one readout's viewport text, with any mode or none.",
                            :refuses => %w[validation.failed], :params => READOUT_PARAMS, :result => STATE_RESULT,
-                           :examples => [{ "readout" => "ph_composer.spaces.labels", "on" => true }]) do |request|
+                           :examples => [{ "readout" => "ph_composer.spaces.show", "on" => true }]) do |request|
         self.for(request.session).readout(request.params.fetch("readout"), :on => request.params.fetch("on"))
         state(request.session)
       end
@@ -174,10 +174,14 @@ module PhComposer
       feature.on_host_event(:tags_changed) { |session| self.for(session).invalidate!(:force => true) }
       feature.on_host_event(:section_plane_changed) { |session| self.for(session).invalidate!(:force => true) }
       feature.on_host_event(:selection_changed) { |session| self.for(session).selection_changed }
+      # The host can create a session before its file has loaded (Sessions), so an opened file draws again.
+      %i[session_created model_opened].each do |kind|
+        feature.on_host_event(kind) { |session| self.for(session).open_session }
+      end
     end
     private_class_method :declare_views, :subscribe_to_invalidation
 
-    # This Model's Colour-by state, created inert on first reach. Nothing draws until a mode is on.
+    # This Model's Colour-by state, created on first reach. No mode draws until one is turned on.
     def for(session)
       session.feature_state(:colour_by) { Service.new(session) }
     end

@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 28
+    MINOR = 29
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -127,7 +127,10 @@ module PhComposer
                     "edit context; create takes an optional zone; create_preview answers zone and height_m, and " \
                     "left_out rows carry path. create_review.open takes faces and revision and the review carries " \
                     "zones and height_m. ph_composer.zones.stamp_container and the nested_container reason are gone; " \
-                    "zones export rows lose container_paths." }
+                    "zones export rows lose container_paths." },
+      { "minor" => 29, "date" => "2026-11-09",
+        "change" => "The ph_composer.spaces.labels readout is now ph_composer.spaces.show, on by default in every " \
+                    "Model session; it draws each Volume's prism outline with the Space labels." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {
