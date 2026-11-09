@@ -116,6 +116,24 @@ class ColourByReadoutTest < PhComposerTestCase
     assert_equal 1, line_points(model).length
   end
 
+  # A tag hiding every Space empties the drawing and takes the overlay away; showing it again must not
+  # undo the user's untick in SketchUp's Overlays panel. Turning a readout on is a choice to see it.
+  def test_an_unticked_overlay_stays_unticked_when_the_drawing_empties_and_refills
+    outlines = [ColourBy::Outline.new(:points => [Geom::Point3d.new(0, 0, 0), Geom::Point3d.new(1, 0, 0)])]
+    install_default_readout(outlines)
+    model, service = new_session_service
+    model.overlays.to_a.first.enabled = false
+    held = outlines.dup
+    outlines.clear
+    service.invalidate!(:force => true)
+    assert_empty model.overlays.to_a
+    outlines.concat(held)
+    service.invalidate!(:force => true)
+    refute model.overlays.to_a.first.enabled?, "a rebuild is not the user's choice"
+    service.readout("outside.default.show", :on => true)
+    assert model.overlays.to_a.first.enabled?, "turning the readout on is"
+  end
+
   def test_a_readout_on_by_default_with_nothing_to_draw_adds_no_overlay
     install_default_readout([])
     model, service = new_session_service

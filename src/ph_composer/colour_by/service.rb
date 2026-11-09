@@ -350,11 +350,17 @@ module PhComposer
       end
 
       # Adds the overlay when a rebuild first has something for it, and removes it when nothing is left to
-      # draw. One already there stays as the user set it in SketchUp's Overlays panel.
+      # draw, as when a tag hides every Space. The tick the user set in SketchUp's Overlays panel survives
+      # that: only a mode or readout they turn on enables it again.
       def sync_overlay
-        return detach_overlay unless drawing?
+        return set_overlay_aside unless drawing?
 
-        attach_overlay if @overlay.nil?
+        attach_overlay(:enabled => !@overlay_unticked) if @overlay.nil?
+      end
+
+      def set_overlay_aside
+        @overlay_unticked = !@overlay.enabled? if @overlay.respond_to?(:enabled?)
+        detach_overlay
       end
 
       def readout_key
@@ -431,12 +437,13 @@ module PhComposer
       # Enabling it here is right because it is added when a mode is turned on and removed when the
       # mode goes off, so this never overrides a choice the user made about an overlay of ours that
       # is sitting there. A mode or readout the user turns on enables it again, since that choice has to draw.
-      def attach_overlay
+      def attach_overlay(enabled: true)
         return unless live_model
 
         @overlay ||= Overlay.new(self)
         live_model.overlays.add(@overlay)
-        @overlay.enabled = true if @overlay.respond_to?(:enabled=)
+        @overlay.enabled = enabled if @overlay.respond_to?(:enabled=)
+        @overlay_unticked = !enabled
       end
 
       # A closed Model still answers `respond_to?(:overlays)`, and reading them raises. The session
