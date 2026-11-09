@@ -7,8 +7,8 @@ ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/363
 
 ## Request
 
-The 2026-11 walkthrough ([SYNTHESIS.md](../../../archive/usability-walkthrough-2026-11/SYNTHESIS.md) S-21;
-[LOG.md](../../../archive/usability-walkthrough-2026-11/LOG.md) W-095, Ed: "the biggest UX change I want to
+The 2026-11 walkthrough ([SYNTHESIS.md](../usability-walkthrough-2026-11/SYNTHESIS.md) S-21;
+[LOG.md](../usability-walkthrough-2026-11/LOG.md) W-095, Ed: "the biggest UX change I want to
 include"): draw the opening as a rectangle with native SketchUp tools, snapping to CAD, select it,
 right-click Convert to Window Type. The new Type takes its size from the geometry, several selected
 rectangles become one mulled Type, and the Faces are replaced by a placed Window Unit of that Type.
@@ -35,7 +35,7 @@ snap) for the first placement of each opening.
 ## The hole problem
 
 A rectangle drawn wholly inside a Zone Face leaves that Face with a hole and the rectangle as a second
-Face ([SKETCHUP_HOST_BEHAVIOR.md](../../../../context/SKETCHUP_HOST_BEHAVIOR.md), the row on drawing a
+Face ([SKETCHUP_HOST_BEHAVIOR.md](../../../context/SKETCHUP_HOST_BEHAVIOR.md), the row on drawing a
 coplanar outline onto a Face). `Fit` refuses an outline that overlaps a hole, so erasing only the
 rectangle Face and placing would be refused as `window.overhang`. Convert must also erase the
 rectangle's Edges, so the host Face is whole again, before the Unit is placed, all in one operation.
@@ -78,7 +78,7 @@ record. These are spike H1 and H3 below, run before S21-2 is built.
    runs through an action (`ph_composer.windows.units.convert`), so an agent converts with the panel
    closed. The source rectangles are named by root-to-Face persistent-id paths, as Restore's
    `pane_paths` are, because a rectangle outside every Zone has no Zone Face reference
-   ([CONTRACTS.md](../../../../context/CONTRACTS.md), the Face target shape). The host is resolved
+   ([CONTRACTS.md](../../../context/CONTRACTS.md), the Face target shape). The host is resolved
    separately and reported as a Zone Face reference. The review returns each source's geometry, and
    Convert refuses with `target.changed` when a source no longer matches it, as Restore refuses
    changed panes. A rectangle lying on two coplanar Zone Faces is left out as `window.host_ambiguous`.
@@ -95,7 +95,7 @@ record. These are spike H1 and H3 below, run before S21-2 is built.
 | W7-6 | Same-size Types | Preselect a matching Type (bands and spans within 1 mm, alphabetical when several match), with New Type always offered; same-size groups in one Convert share one new Type | Always a new Type; the user swaps Types after |
 | W7-7 | What does a new Type hold besides size? | Blank elements (no glazing, frames, installs or operation), with an optional "Copy from" Type picker in the review, default none. Copying takes the source's first glazed element's glazing, frames, installs and operation for every element | Copy from the last Type the user placed. Needs a new remembered setting, and the copy is invisible until export blocks or does not |
 | W7-8 | The new Type's name | Its size in display units, `Window 1200 x 1500` (mm) or `Window 47.2 x 59.1` (in), with ` (2)` added when taken; editable in the review | The panel's next free `Window Type N`, moved to Ruby so the agent route gives the same name |
-| W7-9 | Undo and Redo | One Undo step restores the rectangles and leaves no Type or Unit; Redo converts again | Types kept on Undo: not recommended, a native Undo that leaves records behind breaks the transaction rules ([TECH_STACK.md](../../../../context/TECH_STACK.md)) |
+| W7-9 | Undo and Redo | One Undo step restores the rectangles and leaves no Type or Unit; Redo converts again | Types kept on Undo: not recommended, a native Undo that leaves records behind breaks the transaction rules ([TECH_STACK.md](../../../context/TECH_STACK.md)) |
 | W7-10 | What Convert leaves when the host is not exportable yet | Converts anyway: the host needs a Zone but no Face record (archived Q4), so windows can be drawn before classification, as Place allows | Refuse until the host Face is classified Outdoors |
 
 ## Host facts to measure first (spike, part of S21-2)

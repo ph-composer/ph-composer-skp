@@ -1,7 +1,7 @@
 # Windows: draw a rectangle, convert it to a Window Type
 
 DATE: 2026-11-07
-STATUS: All stages delivered; Complete when [#408](https://github.com/ph-composer/ph-composer-skp/pull/408) merges. Ledger in [STATUS.md](STATUS.md).
+STATUS: Complete. Delivered in #406, #407 and #408.
 AUTHOR: Ed May, BLDGTYP; Claude
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/363
 
@@ -10,8 +10,8 @@ Convert route, the decisions for Ed, the host facts to measure first, and the st
 his go.
 
 Origin: the 2026-11 usability walkthrough, synthesis item S-21, raw entry W-095
-([SYNTHESIS.md](../../../archive/usability-walkthrough-2026-11/SYNTHESIS.md)). Delivery runs through the
-walkthrough plan ([PLAN.md](../../../archive/usability-walkthrough-2026-11/PLAN.md)): its implementation
+([SYNTHESIS.md](../usability-walkthrough-2026-11/SYNTHESIS.md)). Delivery runs through the
+walkthrough plan ([PLAN.md](../usability-walkthrough-2026-11/PLAN.md)): its implementation
 stages are in this packet's [PLAN.md](PLAN.md).
 
 Decided by Ed, 2026-11-09 (W7-1 to W7-10), in the table of `PRD.md`:

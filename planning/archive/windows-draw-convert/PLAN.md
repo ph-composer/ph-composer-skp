@@ -1,7 +1,7 @@
 # Windows draw-then-convert: delivery plan
 
 DATE: 2026-11-09
-STATUS: All stages delivered; Complete when [#408](https://github.com/ph-composer/ph-composer-skp/pull/408) merges. Decisions W7-1 to W7-10 are recorded; ledger in STATUS.md.
+STATUS: Complete.
 AUTHOR: Ed May, BLDGTYP; Claude
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/363
 
