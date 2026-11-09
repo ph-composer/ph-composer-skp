@@ -198,5 +198,15 @@ check({ name: "windows", output: directory }, async ({ newPage, step }) => {
   }), "Save stays visible while choosing products at 360 x 520");
   await minimum.mouse.move(0, 0);
   await minimum.screenshot({ path: path.join(directory, "installs-minimum-scrolled.png") });
+  step("Installs drawing is centred at the panel's default width");
+  const standard = await newPage({ viewport: { width: 1030, height: 855 } });
+  await standard.goto(`http://127.0.0.1:${port}/tools/ui-preview/?fixture=windows`);
+  await standard.locator("[data-tab=windows]").click();
+  await standard.getByRole("button", { name: "Edit Window Type installs", exact: true }).click();
+  const room = await standard.locator(".window-install-drawing").evaluate(node => {
+    const svg = node.querySelector("svg").getBoundingClientRect(), frame = node.getBoundingClientRect();
+    return { left: svg.left - frame.left, right: frame.right - svg.right, overflow: node.scrollWidth - node.clientWidth };
+  });
+  assert.ok(room.overflow <= 0 && Math.abs(room.left - room.right) <= 1, "centred at 1030: " + JSON.stringify(room));
   return "Evidence: " + directory;
 });
