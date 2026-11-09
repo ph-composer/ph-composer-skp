@@ -30,12 +30,12 @@ Keep: a flat floor outline makes a Space in one step (W-044).
 ## Where the current model comes from
 
 Membership is the parent Group: "A Space is in a Zone when its group is inside the Zone group"
-([archived PRD](../../../archive/phase-03a-spaces/PRD.md), Q2). Everything below follows from it:
+([archived PRD](../phase-03a-spaces/PRD.md), Q2). Everything below follows from it:
 
 | Consequence | Where it is stated or built |
 | --- | --- |
 | Create Space needs the Zone's edit context open | `src/ph_composer/features/spaces/create_route.rb` (`NO_ZONE`) |
-| Spaces carry a Zone stamp so Zones' walk skips them | [D3a-1](../../../archive/phase-03a-spaces/DECISIONS.md); `context/CONTRACTS.md`, "Zone membership stamp" |
+| Spaces carry a Zone stamp so Zones' walk skips them | [D3a-1](../phase-03a-spaces/DECISIONS.md); `context/CONTRACTS.md`, "Zone membership stamp" |
 | Move to Zone re-places the Space Group in another Zone Group | `src/ph_composer/features/spaces/move/plan.rb` |
 | A copied Zone carries its Spaces; Spaces join its independence transition | `src/ph_composer/features/spaces/zone_copy.rb`; D3a-3 |
 | Export attaches each Space to the Room whose Group holds it | `context/CONTRACTS.md`, Spaces export section; `src/ph_composer/features/spaces/export.rb` |
