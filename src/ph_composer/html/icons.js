@@ -7,6 +7,7 @@ PhComposerUI.define("icons", ["dom"], function (dom) {
   var ICONS = {
     add: '<path d="M12 4v16M4 12h16"/>',
     group_add: '<path d="M3 6h7l2 2h9v11H3Z"/><path d="M12 11v6m-3-3h6"/>',
+    ungroup: '<rect width="8" height="6" x="5" y="4" rx="1"/><rect width="8" height="6" x="11" y="14" rx="1"/>',
     sort: '<path d="M8 6h12M8 12h8M8 18h4M4 5v14m-2-2 2 2 2-2"/>',
     sort_ascending: '<path d="m3 8 4-4 4 4M7 4v16M11 12h4M11 16h7M11 20h10"/>',
     sort_descending: '<path d="m3 16 4 4 4-4M7 20V4M11 4h10M11 8h7M11 12h4"/>',

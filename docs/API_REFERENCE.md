@@ -30767,6 +30767,81 @@ Example params:
 }
 ```
 
+### `ph_composer.spaces.remove`
+
+Remove one Space and keep its floors: the records of the Space, its Volumes and their Floor Segments go, the Groups are exploded and the Faces stay where they are as plain geometry. Owner: `ph_composer.spaces`.
+
+Undo step: Remove Space. Explodes the Space and Volume Groups and removes their records.
+
+Refuses: `copy.rule_missing`, `record.unreadable`, `reference.in_use`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "space"
+  ],
+  "properties": {
+    "space": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "space_id",
+        "entity_path"
+      ],
+      "properties": {
+        "space_id": {
+          "type": "string"
+        },
+        "entity_path": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "description": "The root-to-entity persistent-id path."
+        }
+      },
+      "description": "The Space, as list returns it."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "space_id"
+  ],
+  "properties": {
+    "space_id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "space": {
+    "space_id": "spc_Ab12Cd34Ef56",
+    "entity_path": [
+      1201,
+      1300
+    ]
+  }
+}
+```
+
 ### `ph_composer.spaces.settings.update`
 
 Set the Model's last-entered height, guarded by the value last read. Owner: `ph_composer.spaces`.
@@ -56895,3 +56970,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.27 | 2026-11-09 | A Space's Zone is the record's zone_id, a core reference; ph_composer.spaces.move_to_zone is a record edit and no longer refuses space.context_open. ph_composer.spaces.unhost and the space.zone_missing finding are new; ph_composer.zones.make_independent takes copy_added and ph_composer.zones.isolate_copied_group is new, for a plain Group copied whole. |
 | 1.28 | 2026-11-09 | ph_composer.spaces.create and create_preview take faces as root-to-Face paths and work in any edit context; create takes an optional zone; create_preview answers zone and height_m, and left_out rows carry path. create_review.open takes faces and revision and the review carries zones and height_m. ph_composer.zones.stamp_container and the nested_container reason are gone; zones export rows lose container_paths. |
 | 1.29 | 2026-11-09 | The ph_composer.spaces.labels readout is now ph_composer.spaces.show, on by default in every Model session; it draws each Volume's prism outline with the Space labels. |
+| 1.30 | 2026-11-09 | ph_composer.spaces.remove is new: a Space's records go and its floor Faces stay as plain geometry, in one Undo step. |

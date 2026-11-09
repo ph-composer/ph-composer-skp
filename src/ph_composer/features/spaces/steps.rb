@@ -263,6 +263,50 @@ module PhComposer
       end
     end
 
+    # Removes one Space's structure, RemoveVolumeStep one level up: every Spaces record at or below it goes,
+    # its Volume and Space Groups are exploded innermost first, and the Faces stay where they are as plain
+    # geometry. `records` holds each record's kind, path and pre-image, the Space's own among them.
+    class RemoveSpaceStep
+      attr_reader :affected
+
+      def initialize(path:, records:)
+        @path = path.dup.freeze
+        @records = DeepCopy.frozen(records.sort_by { |row| -row.fetch("path").length })
+        @affected = @records.map do |row|
+          id = row.fetch("before").fetch("id")
+          { "kind" => row.fetch("kind"), "id" => id, "change" => "deleted",
+            "reference" => { Resolve::TARGETS.fetch(row.fetch("kind")).id_key => id,
+                             "entity_path" => row.fetch("path") } }
+        end
+      end
+
+      def descriptor
+        { "name" => "remove_space", "path" => @path, "records" => @records }
+      end
+
+      def apply(model, _slots)
+        found = @records.map { |row| [row, Occurrences.entity_at(model, row.fetch("path"))] }
+        unless found.all? { |row, entity| unchanged?(row, entity) }
+          raise CodedError.new("target.changed", "The Space changed after it was previewed. Nothing was written.")
+        end
+
+        Steps.leave_open_group(model, Occurrences.entity_at(model, @path))
+        found.each do |row, entity|
+          STORES.fetch(row.fetch("kind")).delete(entity)
+          next if row.fetch("kind") == FLOOR_SEGMENT_KIND
+
+          entity.locked = false
+          entity.explode
+        end
+      end
+
+      private
+
+      def unchanged?(row, entity)
+        entity && STORES.fetch(row.fetch("kind")).read(entity) == row.fetch("before")
+      end
+    end
+
     # Erases one Space Group and everything in it.
     class DeleteSpaceStep
       attr_reader :affected
@@ -284,24 +328,22 @@ module PhComposer
           raise CodedError.new("target.changed", "The Space changed after it was previewed. Nothing was written.")
         end
 
-        leave(model, space)
+        Steps.leave_open_group(model, space)
         parent = @path.length == 1 ? model.entities : Occurrences.entity_at(model, @path[0...-1]).entities
         parent.erase_entities(space)
-      end
-
-      private
-
-      # SketchUp refuses to erase a Group on the open edit path, so a Space open, or open below, closes to
-      # its parent first. The path change joins this operation: one Undo brings the Space back, open.
-      def leave(model, space)
-        open = EditContext.current(model)
-        index = open.index(space)
-        EditContext.enter(model, open[0...index]) if index
       end
     end
 
     module Steps
       module_function
+
+      # SketchUp refuses to erase a Group on the open edit path, so a Group open, or open below, closes to
+      # its parent first. The path change joins the operation: one Undo brings the Group back, open.
+      def leave_open_group(model, group)
+        open = EditContext.current(model)
+        index = open.index(group)
+        EditContext.enter(model, open[0...index]) if index
+      end
 
       # The ids among `face_ids` bounded by an Edge another Face in `entities` uses that is not among
       # them: grouping such a Face would carry the Edge away and split its neighbour.
