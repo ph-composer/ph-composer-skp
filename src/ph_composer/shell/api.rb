@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 25
+    MINOR = 26
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -111,7 +111,12 @@ module PhComposer
                     "would take, as Type layouts, and why it leaves the others out." },
       { "minor" => 25, "date" => "2026-11-09",
         "change" => "ph_composer.windows.units.convert is new: reviewed drawn rectangles become Window Types and " \
-                    "placed Windows in one Undo step." }
+                    "placed Windows in one Undo step." },
+      { "minor" => 26, "date" => "2026-11-09",
+        "change" => "ph_composer.windows.units.convert_review's groups gain default_name, and it leaves out " \
+                    "rectangles overlapping across Groups as window.overlap; convert's groups take " \
+                    "copy_from_type_id. ph_composer.windows.convert_dialog.open, close and state are new, with " \
+                    "the convert_dialog snapshot section and the convert_menu menu item." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

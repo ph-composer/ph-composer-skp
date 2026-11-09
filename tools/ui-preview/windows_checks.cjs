@@ -5,6 +5,31 @@ const port = process.env.UI_PREVIEW_PORT || "8765";
 const directory = fs.mkdtempSync(path.join(os.tmpdir(), "phc-windows-"));
 console.log("Evidence: " + directory);
 check({ name: "windows", output: directory }, async ({ newPage, step }) => {
+  for (const width of [1280, 420]) {
+    const page = await newPage({ viewport: { width: width, height: 900 } });
+    step(`convert review: ${width}px`);
+    await page.goto(`http://127.0.0.1:${port}/tools/ui-preview/?fixture=windowsconvert`);
+    const review = page.locator("dialog.phc-convert-window");
+    await review.waitFor();
+    assert.match(await review.textContent(), /5 rectangles become 3 Windows\./);
+    assert.match(await review.textContent(), /1 Face: The Face is not a rectangle/);
+    assert.strictEqual(await page.locator("[data-pane=windows]").isVisible(), true, "the review shows the Windows tab");
+    assert(await page.evaluate(() => document.body.scrollWidth <= innerWidth), `no page overflow at ${width}`);
+    await page.screenshot({ path: path.join(directory, `convert-review-${width}.png`), fullPage: true });
+    if (width === 1280) {
+      const names = review.getByRole("textbox", { name: "Name", exact: true });
+      assert.strictEqual(await names.first().inputValue(), "Window 1200 x 1500");
+      assert.strictEqual(await names.nth(1).isVisible(), false, "a preselected existing Type takes no name");
+      await names.first().fill("W-1");
+      await names.first().press("Enter");
+      await review.waitFor({ state: "hidden" });
+      await page.getByText("Converted to Window Type.").waitFor();
+      const sent = await page.evaluate(() => previewHost.sent.filter(message => message.type === "action.invoke")
+        .map(message => message.payload.params)[0]);
+      assert.deepStrictEqual(sent.groups.map(group => group.name || group.type_id), ["W-1", "W-1", "wnt_a"]);
+    }
+    await page.close();
+  }
   for (const width of [1280, 900, 420, 280]) {
     const page = await newPage({ viewport: { width: width, height: 900 } });
     step(`windows: ${width}px`);

@@ -15,6 +15,8 @@ module PhComposer
       # writes the new Types and hands one ConvertStep the rest. Each group becomes one Unit; groups of one
       # size that all want a new Type share it (W7-6).
       module Convert
+        COPIED_PROPERTIES = %w[glazing_id frames installs operation].freeze
+
         module_function
 
         def run(request, proposal, groups:)
@@ -89,7 +91,9 @@ module PhComposer
           group = entry.fetch(:request)
           row = entry.fetch(:row)
           existing = group["type_id"]
-          raise CodedError.new("params.invalid", "A chosen Window Type takes no new name.") if existing && group["name"]
+          if existing && (group["name"] || group["copy_from_type_id"])
+            raise CodedError.new("params.invalid", "A chosen Window Type takes no new name or Copy from.")
+          end
 
           return existing_type(request, existing, row) if existing
 
@@ -105,47 +109,51 @@ module PhComposer
         end
 
         def new_type(request, proposal, entry, rows, identity, matched, index)
-          name = new_name(entry, rows, matched, index)
+          name = new_name(entry, matched, index)
           Records::Names.unique!(name, rows)
           layout = entry.fetch(:built).fetch(:layout)
+          copied = copied_properties(request, matched, index)
           values = { "name" => name, "columns_m" => layout.columns_m, "rows_m" => layout.rows_m,
-                     "elements" => elements(layout, identity) }
+                     "elements" => elements(layout, identity, copied) }
           id = Types::Operations.create(request, proposal, :values => values).fetch("id")
           rows << { "id" => id, "name" => name }
           proposal.find(TYPE_KIND, id).after
         end
 
-        # The name the shared group gave, or the size in display units with " (2)" when it is taken (W7-8).
-        def new_name(entry, rows, matched, index)
-          given = matched.select { |item| item.fetch(:row).fetch("layout_index") == index }
-                         .filter_map { |item| item.fetch(:request)["name"]&.strip }.uniq
-          raise CodedError.new("params.invalid", "Groups sharing a new Window Type take one name.") if given.length > 1
-
-          given.first || default_name(entry.fetch(:built).fetch(:layout), rows)
+        # The name the shared group gave, or the review's default for its size (W7-8).
+        def new_name(entry, matched, index)
+          choice(matched, index, "name", "name") { |name| name.strip } || entry.fetch(:row).fetch("default_name")
         end
 
-        def default_name(layout, rows)
-          system = Preferences.unit_system
-          width = layout.columns_m.sum
-          height = layout.rows_m.sum
-          stem = if system == "SI"
-                   "Window #{(width * 1000).round} x #{(height * 1000).round}"
-                 else
-                   format("Window %<w>.1f x %<h>.1f", :w => width / 0.0254, :h => height / 0.0254)
-                 end
-          taken = rows.map { |row| row.fetch("name").strip.downcase }
-          return stem unless taken.include?(stem.downcase)
+        # What the shared group's Copy from Type gives every element: its first glazed element's properties
+        # (W7-7). Nothing when the group names none.
+        def copied_properties(request, matched, index)
+          source_id = choice(matched, index, "copy_from_type_id", "Copy from Type") { |id| id }
+          return {} unless source_id
 
-          (2..).each do |index|
-            name = "#{stem} (#{index})"
-            return name unless taken.include?(name.downcase)
+          element = request.engine.find(TYPE_KIND, source_id).fetch("elements").find do |cell|
+            cell.fetch("kind") == "glazed"
           end
+          raise CodedError.new("validation.failed", "That Window Type has no glazed element to copy.") unless element
+
+          DeepCopy.call(element.slice(*COPIED_PROPERTIES))
         end
 
-        def elements(layout, identity)
+        # The one value the groups sharing a new Window Type give for `key`, or nil when none does.
+        def choice(matched, index, key, words)
+          given = matched.select { |item| item.fetch(:row).fetch("layout_index") == index }
+                         .filter_map { |item| item.fetch(:request)[key] && yield(item.fetch(:request)[key]) }.uniq
+          if given.length > 1
+            raise CodedError.new("params.invalid", "Groups sharing a new Window Type take one #{words}.")
+          end
+
+          given.first
+        end
+
+        def elements(layout, identity, copied)
           layout.spans.map do |row_span, column_span|
             Types.blank(row_span.first, column_span.first, :identity => identity)
-                 .merge("row_span" => row_span, "column_span" => column_span)
+                 .merge("row_span" => row_span, "column_span" => column_span).merge(DeepCopy.call(copied))
           end
         end
 
@@ -158,7 +166,8 @@ module PhComposer
           raise CodedError.new("target.changed", "A drawn rectangle changed since it was reviewed. Review it again.")
         end
         private_class_method :checked_sources, :raise_unread, :built_groups, :match, :with_types, :chosen_type,
-                             :existing_type, :new_type, :new_name, :default_name, :elements, :record, :changed!
+                             :existing_type, :new_type, :new_name, :copied_properties, :choice, :elements, :record,
+                             :changed!
       end
     end
   end

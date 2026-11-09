@@ -942,6 +942,26 @@
       { reference: looseFace(102), reason: "target.changed", message: "The Face is one of the Zone's own Faces." },
       { reference: looseFace(903), reason: "shares_edge",
         message: "The Face shares an Edge with an unselected Face; grouping it would split that Face." }] } });
+  // Convert to Window Type's review as SketchUp's menus hand it over: two Windows of one size, one of a size an
+  // existing Type matches, and two rectangles left out.
+  function convertSource(path, column) { return { path: [100, path], row_span: [0, 0], column_span: [column, column],
+    digest: "sha256:preview" + path, outline_m: [] }; }
+  function convertGroup(index, columns, rows, sources, matches, name) {
+    return { host: { zone_id: "zon_Aa11Bb22Cc33", zone_path: [100], entity_path: [101], entity_id: null },
+      columns_m: columns, rows_m: rows, layout_index: index, matching_types: matches,
+      preselected_type_id: matches.length ? matches[0].id : null, default_name: name, sources: sources };
+  }
+  FIXTURES.windowsconvert = JSON.parse(JSON.stringify(FIXTURES.windows));
+  FIXTURES.windowsconvert.windows.convert_dialog = { token: "preview-convert", revision: 1,
+    groups: [convertGroup(0, [1.2], [1.5], [convertSource(901, 0)], [], "Window 1200 x 1500"),
+      convertGroup(0, [1.2], [1.5], [convertSource(902, 0)], [], "Window 1200 x 1500"),
+      convertGroup(2, [0.5, 0.5, 0.5], [1.5], [convertSource(903, 0), convertSource(904, 1), convertSource(905, 2)],
+        [{ id: "wnt_a", name: "Three elements" }], "Window 1500 x 1500")],
+    left_out: [
+      { paths: [[100, 906]], code: "window.not_rectangle",
+        message: "The Face is not a rectangle: it needs four square corners and no hole." },
+      { paths: [[100, 907]], code: "window.convert_on_boundary",
+        message: "The rectangle touches its host Face's edge. Draw it inset, convert it, then move the Window." }] };
   FIXTURES.spaceslarge = Object.assign(JSON.parse(JSON.stringify(FIXTURES.authoring)), { spaces: LARGE_SPACES });
 
   /* ------------------------------------------- Whole-app Models: every tab with something to show */

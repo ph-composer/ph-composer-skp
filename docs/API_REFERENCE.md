@@ -11823,6 +11823,258 @@ Example params:
 }
 ```
 
+### `ph_composer.windows.convert_dialog.state`
+
+The open Convert to Window Type review, if any. Owner: `ph_composer.windows`.
+
+Refuses: only the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "token",
+    "revision",
+    "groups",
+    "left_out"
+  ],
+  "properties": {
+    "token": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "One per review opened; null when none is open."
+    },
+    "revision": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "The revision convert must be applied at."
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "host",
+          "columns_m",
+          "rows_m",
+          "layout_index",
+          "matching_types",
+          "preselected_type_id",
+          "default_name",
+          "sources"
+        ],
+        "properties": {
+          "host": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path",
+              "entity_path",
+              "entity_id"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "entity_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "entity_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "description": "The Zone Face the group lies on."
+          },
+          "columns_m": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "x-unit": "m"
+            },
+            "description": "Column widths, left to right as seen from outside."
+          },
+          "rows_m": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "x-unit": "m"
+            },
+            "description": "Row heights, top down."
+          },
+          "layout_index": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "The index in `groups` of the first group of this size and layout. Groups with one index share one new Window Type."
+          },
+          "matching_types": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "name"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Window Types of this size and layout within 1 mm, alphabetical. New Type is always offered besides these."
+          },
+          "preselected_type_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The first matching Type, or null when none matches."
+          },
+          "default_name": {
+            "type": "string",
+            "description": "The name a new Type of this size takes unless given one."
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "path",
+                "row_span",
+                "column_span",
+                "digest",
+                "outline_m"
+              ],
+              "properties": {
+                "path": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "row_span": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "column_span": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "digest": {
+                  "type": "string",
+                  "description": "The Face's geometry digest as this review read it."
+                },
+                "outline_m": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "x-unit": "m"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "description": "The rectangle's four corners in world metres."
+                }
+              }
+            },
+            "description": "The rectangles, one per Window Type element."
+          }
+        }
+      }
+    },
+    "left_out": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "paths",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "paths": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "description": "The Faces this row leaves out; a group that cannot convert is one row."
+          },
+          "code": {
+            "type": "string",
+            "description": "Why, as a published code."
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
 ### `ph_composer.windows.export_preflight`
 
 Placed Window geometry, hosts and thermal readiness for export. Owner: `ph_composer.windows`.
@@ -16622,6 +16874,7 @@ Result:
           "layout_index",
           "matching_types",
           "preselected_type_id",
+          "default_name",
           "sources"
         ],
         "properties": {
@@ -16706,6 +16959,10 @@ Result:
               "null"
             ],
             "description": "The first matching Type, or null when none matches."
+          },
+          "default_name": {
+            "type": "string",
+            "description": "The name a new Type of this size takes unless given one."
           },
           "sources": {
             "type": "array",
@@ -45531,6 +45788,11 @@ Params:
           "name": {
             "type": "string",
             "description": "The new Type's name. Default: its size in display units, with \" (2)\" added when taken."
+          },
+          "copy_from_type_id": {
+            "type": "string",
+            "pattern": "^wnt_[A-Za-z0-9]{12}$",
+            "description": "Copies this Type's first glazed element's glazing, frames, installs and operation into every element of the new Type. Default: blank elements."
           }
         }
       },
@@ -51939,6 +52201,543 @@ Example params:
 }
 ```
 
+### `ph_composer.windows.convert_dialog.close`
+
+Close the Convert to Window Type review. Owner: `ph_composer.windows`.
+
+Refuses: only the `view_command` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "token"
+  ],
+  "properties": {
+    "token": {
+      "type": "string",
+      "description": "The token the review opened with; another leaves it open."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "token",
+    "revision",
+    "groups",
+    "left_out"
+  ],
+  "properties": {
+    "token": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "One per review opened; null when none is open."
+    },
+    "revision": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "The revision convert must be applied at."
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "host",
+          "columns_m",
+          "rows_m",
+          "layout_index",
+          "matching_types",
+          "preselected_type_id",
+          "default_name",
+          "sources"
+        ],
+        "properties": {
+          "host": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path",
+              "entity_path",
+              "entity_id"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "entity_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "entity_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "description": "The Zone Face the group lies on."
+          },
+          "columns_m": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "x-unit": "m"
+            },
+            "description": "Column widths, left to right as seen from outside."
+          },
+          "rows_m": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "x-unit": "m"
+            },
+            "description": "Row heights, top down."
+          },
+          "layout_index": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "The index in `groups` of the first group of this size and layout. Groups with one index share one new Window Type."
+          },
+          "matching_types": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "name"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Window Types of this size and layout within 1 mm, alphabetical. New Type is always offered besides these."
+          },
+          "preselected_type_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The first matching Type, or null when none matches."
+          },
+          "default_name": {
+            "type": "string",
+            "description": "The name a new Type of this size takes unless given one."
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "path",
+                "row_span",
+                "column_span",
+                "digest",
+                "outline_m"
+              ],
+              "properties": {
+                "path": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "row_span": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "column_span": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "digest": {
+                  "type": "string",
+                  "description": "The Face's geometry digest as this review read it."
+                },
+                "outline_m": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "x-unit": "m"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "description": "The rectangle's four corners in world metres."
+                }
+              }
+            },
+            "description": "The rectangles, one per Window Type element."
+          }
+        }
+      }
+    },
+    "left_out": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "paths",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "paths": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "description": "The Faces this row leaves out; a group that cannot convert is one row."
+          },
+          "code": {
+            "type": "string",
+            "description": "Why, as a published code."
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "token": "example-review-token"
+}
+```
+
+### `ph_composer.windows.convert_dialog.open`
+
+Review which drawn rectangles Convert to Window Type would take and why it leaves each other Face out, for the panel to confirm. Owner: `ph_composer.windows`.
+
+Refuses: `geometry.invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `view_command` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "paths"
+  ],
+  "properties": {
+    "paths": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "minItems": 1,
+      "maxItems": 500,
+      "description": "Each candidate Face's entity path from the Model root."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "token",
+    "revision",
+    "groups",
+    "left_out"
+  ],
+  "properties": {
+    "token": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "One per review opened; null when none is open."
+    },
+    "revision": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "The revision convert must be applied at."
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "host",
+          "columns_m",
+          "rows_m",
+          "layout_index",
+          "matching_types",
+          "preselected_type_id",
+          "default_name",
+          "sources"
+        ],
+        "properties": {
+          "host": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path",
+              "entity_path",
+              "entity_id"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "entity_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "entity_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "description": "The Zone Face the group lies on."
+          },
+          "columns_m": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "x-unit": "m"
+            },
+            "description": "Column widths, left to right as seen from outside."
+          },
+          "rows_m": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "x-unit": "m"
+            },
+            "description": "Row heights, top down."
+          },
+          "layout_index": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "The index in `groups` of the first group of this size and layout. Groups with one index share one new Window Type."
+          },
+          "matching_types": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "name"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Window Types of this size and layout within 1 mm, alphabetical. New Type is always offered besides these."
+          },
+          "preselected_type_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The first matching Type, or null when none matches."
+          },
+          "default_name": {
+            "type": "string",
+            "description": "The name a new Type of this size takes unless given one."
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "path",
+                "row_span",
+                "column_span",
+                "digest",
+                "outline_m"
+              ],
+              "properties": {
+                "path": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "row_span": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "column_span": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "digest": {
+                  "type": "string",
+                  "description": "The Face's geometry digest as this review read it."
+                },
+                "outline_m": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "x-unit": "m"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "description": "The rectangle's four corners in world metres."
+                }
+              }
+            },
+            "description": "The rectangles, one per Window Type element."
+          }
+        }
+      }
+    },
+    "left_out": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "paths",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "paths": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "description": "The Faces this row leaves out; a group that cannot convert is one row."
+          },
+          "code": {
+            "type": "string",
+            "description": "Why, as a published code."
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "paths": [
+    [
+      1201,
+      1204
+    ]
+  ]
+}
+```
+
 ### `ph_composer.windows.place_tool.choose`
 
 Choose a Type and anchor, then start Place. Owner: `ph_composer.windows`.
@@ -56199,3 +56998,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.23 | 2026-11-08 | A Window Unit reads its native name in ph_composer.windows.units.list and .all; ph_composer.windows.units.rename and ph_composer.windows.units.selection are new. |
 | 1.24 | 2026-11-09 | ph_composer.windows.units.convert_review is new: which drawn rectangles Convert to Window Type would take, as Type layouts, and why it leaves the others out. |
 | 1.25 | 2026-11-09 | ph_composer.windows.units.convert is new: reviewed drawn rectangles become Window Types and placed Windows in one Undo step. |
+| 1.26 | 2026-11-09 | ph_composer.windows.units.convert_review's groups gain default_name, and it leaves out rectangles overlapping across Groups as window.overlap; convert's groups take copy_from_type_id. ph_composer.windows.convert_dialog.open, close and state are new, with the convert_dialog snapshot section and the convert_menu menu item. |
