@@ -220,13 +220,41 @@ class SpacesSetHeightToolTest < PhComposerTestCase
     assert_match(/Click a Space's prism first/, Sketchup.status_texts.last)
   end
 
+  # A Volume above Living, then a section plane keeping what is below `z` metres.
+  def upper_storey_and_section_below(z_value)
+    floor = floor_face(1191, rectangle(0, 0, 3, 4, 3), segment_record("U"))
+    zone.entities << space_group(1180, space_record("U", :number => "201"),
+                                 [volume_group(1190, volume_record("U"), [floor])])
+    @model.entities.active_section_plane = Sketchup::SectionPlane.new([0.0, 0.0, -1.0, z_value * INCHES])
+  end
+
+  def test_a_section_cut_passes_over_a_volume_it_has_cut_away
+    upper_storey_and_section_below(2.9)
+    press(aim(0, 0, *FROM_ABOVE))
+    release
+    typed({ "3m" => 3 * INCHES }, "3m")
+    assert_in_delta 3.0, height, 1e-9, "the storey the section leaves showing"
+  end
+
+  def test_a_prism_cut_part_way_is_picked_below_the_cut_and_drawn_clipped
+    upper_storey_and_section_below(1.0)
+    press(aim(0, 0, *FROM_ABOVE))
+    release
+    @view.draws.clear
+    tool.draw(@view)
+    _mode, points = @view.draws.last
+    assert_operator points.map(&:z).max, :<=, (1.0 * INCHES) + 3.1, "the 2.5 m top is cut away; 3 inches of lift"
+    typed({ "3m" => 3 * INCHES }, "3m")
+    assert_in_delta 3.0, height, 1e-9
+  end
+
   def test_the_nearest_prism_face_answers_and_a_ray_missing_every_face_does_not
     floor = [[0.0, 0.0, 0.0], [3.0, 0.0, 0.0], [3.0, 4.0, 0.0], [0.0, 4.0, 0.0]]
     shapes = PhComposer::Spaces::Prism.call([[floor]], 2.5)
-    assert_in_delta 17.5, PICK.distance(shapes, [1.0, 1.0, 20.0], [0.0, 0.0, -1.0]), 1e-9, "the top, not the floor"
-    assert_in_delta 10.0, PICK.distance(shapes, [1.0, -10.0, 1.0], [0.0, 1.0, 0.0]), 1e-9, "the near side"
-    assert_nil PICK.distance(shapes, [9.0, 9.0, 20.0], [0.0, 0.0, -1.0])
-    assert_nil PICK.distance(shapes, [1.0, 1.0, 20.0], [0.0, 0.0, 1.0]), "behind the eye"
+    assert_in_delta 17.5, PICK.distances(shapes, [1.0, 1.0, 20.0], [0.0, 0.0, -1.0]).first, 1e-9, "the top first"
+    assert_in_delta 10.0, PICK.distances(shapes, [1.0, -10.0, 1.0], [0.0, 1.0, 0.0]).first, 1e-9, "the near side"
+    assert_empty PICK.distances(shapes, [9.0, 9.0, 20.0], [0.0, 0.0, -1.0])
+    assert_empty PICK.distances(shapes, [1.0, 1.0, 20.0], [0.0, 0.0, 1.0]), "behind the eye"
   end
 
   def test_a_ray_down_the_vertical_line_says_nothing_about_a_height

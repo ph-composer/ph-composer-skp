@@ -7,8 +7,9 @@ module PhComposer
     # an abandoned drag writes nothing and one entry is one Undo step, the Model's last height included.
     #
     # A prism is drawn, not modelled, so the pointer is tested against each visible Volume's prism (PrismPick)
-    # rather than through the host's pick. The prisms are read once per revision, and afresh on a press, never
-    # per pointer move. A Volume with no height is a flat prism on its floor, so it can be picked and given one.
+    # rather than through the host's pick, skipping whatever an active section plane has cut away. The prisms are
+    # read once per revision, and afresh on a press, never per pointer move. A Volume with no height is a flat
+    # prism on its floor, so it can be picked and given one.
     #
     # A press picks the Volume and freezes its height and the revision. Moving past DRAG_PIXELS makes it a drag,
     # whose top follows the pointer from where it was grabbed; a press released in place leaves the Volume picked
@@ -181,9 +182,9 @@ module PhComposer
         candidate, height, colour = shown
         return unless candidate && view.respond_to?(:draw)
 
-        points = Prism.outline(candidate.prism_at(height)).flatten(1).map do |corner|
-          Geom::Point3d.new(*corner.map { |value| value / INCH_TO_M })
-        end
+        points = @visibility.clip_segments(Prism.outline(candidate.prism_at(height)).flatten(1).map do |corner|
+          inches(corner)
+        end, candidate.path)
         return if points.empty?
 
         view.drawing_color = Sketchup::Color.new(*colour) if view.respond_to?(:drawing_color=)
@@ -242,9 +243,9 @@ module PhComposer
       end
 
       def read_candidates
-        visibility = ColourBy::OccurrenceVisibility.new(@session.model)
+        @visibility = ColourBy::OccurrenceVisibility.new(@session.model)
         Occurrences.scan(@session.model).spaces.flat_map(&:volumes).filter_map do |volume|
-          next unless visibility.path_visible?(volume.path)
+          next unless @visibility.path_visible?(volume.path)
 
           loops = volume.segments.map { |segment| FaceCapture.call(segment.entity, segment.transform).loops_m }
           candidate = Candidate.new(:volume => volume, :loops => loops)
@@ -264,12 +265,20 @@ module PhComposer
         best = candidates.filter_map do |candidate|
           next unless candidate.bounds && PrismPick.crosses?(candidate.bounds, origin, direction)
 
-          distance = PrismPick.distance(candidate.prism, origin, direction)
+          distance = PrismPick.distances(candidate.prism, origin, direction).find do |along|
+            !@visibility.cut?(inches(at(origin, direction, along)), candidate.path)
+          end
           [candidate, distance] if distance
         end.min_by(&:last)
-        return nil unless best
+        best && [best.first, at(origin, direction, best.last)]
+      end
 
-        [best.first, origin.zip(direction).map { |start, step| start + (step * best.last) }]
+      def at(origin, direction, distance)
+        origin.zip(direction).map { |start, step| start + (step * distance) }
+      end
+
+      def inches(point_m)
+        Geom::Point3d.new(*point_m.map { |value| value / INCH_TO_M })
       end
 
       def ray(view, x, y)

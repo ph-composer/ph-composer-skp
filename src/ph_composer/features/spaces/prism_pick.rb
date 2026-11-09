@@ -12,9 +12,10 @@ module PhComposer
 
       module_function
 
-      # The ray distance to the nearest face of `shapes` in front of `origin`, or nil.
-      def distance(shapes, origin, direction)
-        shapes.flat_map(&:polygons).filter_map { |polygon| along(polygon, origin, direction) }.min
+      # The ray distance to every face of `shapes` in front of `origin`, nearest first, so a caller can pass over
+      # a face a section plane has cut away.
+      def distances(shapes, origin, direction)
+        shapes.flat_map(&:polygons).filter_map { |polygon| along(polygon, origin, direction) }.sort
       end
 
       # Each axis's [low, high] over `shapes`, or nil for no shape: what `crosses?` tests first, so a pointer move
