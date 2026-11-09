@@ -9,7 +9,7 @@ Plan: [PLAN.md](PLAN.md). States: `Scoped` · `In progress` · `Implemented on b
 
 | Stage | State | PR | Evidence |
 | --- | --- | --- | --- |
-| S10-1 | Scoped | | |
+| S10-1 | Implemented on branch | | Offline gate and host check are recorded on the PR. W6-9 is the `space.zone_missing` finding with the `unhost` repair: Zones have no delete action, a Zone is erased natively. Create Space keeps nesting and stamping until S10-2 |
 | S10-2 | Scoped | | |
 | S10-3 | Scoped | | |
 | S10-4 | Scoped | | |

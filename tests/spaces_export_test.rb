@@ -60,6 +60,31 @@ class SpacesExportTest < PhComposerTestCase
     assert_raises(PhComposer::Export::Blocked) { records }
   end
 
+  def host(group, zone_id)
+    PhComposer::Spaces::SPACE_STORE.write(group, space_record("R", :number => "1").merge("zone_id" => zone_id))
+  end
+
+  def test_a_space_at_the_root_exports_in_the_zone_its_record_names
+    @model.entities << zone_group(1000, "A", [])
+    @model.entities << zone_group(2000, "B", [])
+    root = space_group(3000, space_record("R", :number => "1"),
+                       [volume_group(3010, volume_record("R"), [floor_face(3011, rectangle(0, 0, 2, 2),
+                                                                           segment_record("R"))])])
+    host(root, "zon_AAAAAAAAAAAA")
+    @model.entities << root
+    assert_equal "zon_AAAAAAAAAAAA", records.find { |row| row["id"] == "spc_RRRRRRRRRRRR" }["zone_id"]
+
+    host(root, "zon_BBBBBBBBBBBB")
+    assert_equal "zon_BBBBBBBBBBBB", records.find { |row| row["id"] == "spc_RRRRRRRRRRRR" }["zone_id"]
+  end
+
+  def test_a_space_whose_zone_is_gone_blocks_the_section_with_its_own_code
+    @model.entities << zone_group(1000, "A", [])
+    root = space_group(3000, space_record("R", :number => "1").merge("zone_id" => "zon_GONEGONEGONE"), [])
+    @model.entities << root
+    assert_equal "space.zone_missing", assert_raises(PhComposer::Export::Blocked) { records }.code
+  end
+
   def test_a_space_outside_every_zone_a_missing_height_and_a_copy_each_refuse_the_section
     @model.entities << space_group(1100, space_record("L", :number => "101"),
                                    [volume_group(1110, volume_record("L"), [floor_face(1111, rectangle(0, 0, 1, 1),

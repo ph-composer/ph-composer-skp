@@ -101,6 +101,13 @@ module PhComposer
         matches.first
       end
 
+      # The snapshot Zone a record id names, as [entry, record]; the first in path order for a repeated
+      # one, which carries its own finding. Nil when no occurrence holds the id.
+      def zone_entry(snapshot, zone_id)
+        snapshot.records(ZONE_DICTIONARY, :kind => "group").select { |_entry, record| record["id"] == zone_id }
+                .min_by { |entry, _record| entry.path }
+      end
+
       def in_container?(snapshot, zone_entry, entry)
         containers(snapshot, zone_entry).any? { |group| snapshot.contains?(group, entry) }
       end

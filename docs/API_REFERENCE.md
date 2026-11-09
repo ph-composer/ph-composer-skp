@@ -664,6 +664,8 @@ Occurrence reference:
 
 Space, a entity kind owned by `ph_composer.spaces`, schema version 1.
 
+References: `zone_id` names one `ph_composer.zones.zone`.
+
 Values:
 
 ```json
@@ -692,6 +694,10 @@ Values:
     "next_volume_sequence": {
       "type": "integer",
       "minimum": 1
+    },
+    "zone_id": {
+      "type": "string",
+      "description": "Id of a ph_composer.zones.zone record."
     },
     "v_sup_m3h": {
       "type": "number",
@@ -6571,6 +6577,10 @@ Result:
                 "type": "integer",
                 "minimum": 1
               },
+              "zone_id": {
+                "type": "string",
+                "description": "Id of a ph_composer.zones.zone record."
+              },
               "v_sup_m3h": {
                 "type": "number",
                 "minimum": 0,
@@ -6765,7 +6775,8 @@ Result:
                   "type": "string",
                   "enum": [
                     "make_independent",
-                    "restore_position"
+                    "restore_position",
+                    "unhost"
                   ],
                   "description": "The operation that repairs it, when one does."
                 }
@@ -6945,7 +6956,8 @@ Result:
                         "type": "string",
                         "enum": [
                           "make_independent",
-                          "restore_position"
+                          "restore_position",
+                          "unhost"
                         ],
                         "description": "The operation that repairs it, when one does."
                       }
@@ -7089,7 +7101,8 @@ Result:
                               "type": "string",
                               "enum": [
                                 "make_independent",
-                                "restore_position"
+                                "restore_position",
+                                "unhost"
                               ],
                               "description": "The operation that repairs it, when one does."
                             }
@@ -7302,7 +7315,8 @@ Result:
             "type": "string",
             "enum": [
               "make_independent",
-              "restore_position"
+              "restore_position",
+              "unhost"
             ],
             "description": "The operation that repairs it, when one does."
           },
@@ -8221,7 +8235,8 @@ Result:
             "type": "string",
             "enum": [
               "make_independent",
-              "restore_position"
+              "restore_position",
+              "unhost"
             ],
             "description": "The operation that repairs it, when one does."
           },
@@ -8493,7 +8508,8 @@ Result:
                   "type": "string",
                   "enum": [
                     "make_independent",
-                    "restore_position"
+                    "restore_position",
+                    "unhost"
                   ],
                   "description": "The operation that repairs it, when one does."
                 }
@@ -8754,6 +8770,10 @@ Result:
               "next_volume_sequence": {
                 "type": "integer",
                 "minimum": 1
+              },
+              "zone_id": {
+                "type": "string",
+                "description": "Id of a ph_composer.zones.zone record."
               },
               "v_sup_m3h": {
                 "type": "number",
@@ -9647,7 +9667,8 @@ Result:
                   "type": "string",
                   "enum": [
                     "make_independent",
-                    "restore_position"
+                    "restore_position",
+                    "unhost"
                   ],
                   "description": "The operation that repairs it, when one does."
                 }
@@ -30756,13 +30777,11 @@ Example params:
 
 ### `ph_composer.spaces.move_to_zone`
 
-Move one Space, with its Volumes and Floor Segments, into another Zone where it stands. Ids, numbers and values are kept; the edit context must be closed. Owner: `ph_composer.spaces`.
+Host one Space in another Zone: its record names the Zone, and its Group stays where it stands. Ids, numbers and values are kept; any edit context may be open. Owner: `ph_composer.spaces`.
 
-Undo step: Move Space to Zone. Places the Space Group in the target Zone, stamps it and erases the original.
+Undo step: Move Space to Zone. Writes the target Zone's id on the Space record; no geometry changes.
 
-Calls: `ph_composer.zones.stamp_container`.
-
-Refuses: `operation.participant_cycle`, `operation.proposal_required`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `space.context_open`, `space.same_zone`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+Refuses: `record.unreadable`, `space.same_zone`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -30955,6 +30974,81 @@ Example params:
   },
   "expected_values": {
     "last_height_m": null
+  }
+}
+```
+
+### `ph_composer.spaces.unhost`
+
+Take one Space out of its Zone, the repair for a Space whose Zone is gone. Its Group stays where it stands and its finding becomes space.outside_zone. Owner: `ph_composer.spaces`.
+
+Undo step: Remove Space from Zone. Removes the Zone id from the Space record; no geometry changes.
+
+Refuses: `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "space"
+  ],
+  "properties": {
+    "space": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "space_id",
+        "entity_path"
+      ],
+      "properties": {
+        "space_id": {
+          "type": "string"
+        },
+        "entity_path": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "description": "The root-to-entity persistent-id path."
+        }
+      },
+      "description": "The Space, as list returns it."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "space_id"
+  ],
+  "properties": {
+    "space_id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "space": {
+    "space_id": "spc_Ab12Cd34Ef56",
+    "entity_path": [
+      1201,
+      1300
+    ]
   }
 }
 ```
@@ -48384,6 +48478,63 @@ Example params:
 }
 ```
 
+### `ph_composer.zones.isolate_copied_group`
+
+Give a plain Group copied whole, such as a storey Group holding Zones and Spaces, storage of its own so its Zones and Spaces can be made independent. Owner: `ph_composer.zones`.
+
+Undo step: Make Copied Group Unique. Makes the Group, and any Group in it still sharing its contents, unique; no record changes.
+
+Refuses: `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_kind`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "group_path"
+  ],
+  "properties": {
+    "group_path": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "description": "The root-to-Group path of the copied plain Group."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "isolated"
+  ],
+  "properties": {
+    "isolated": {
+      "type": "boolean",
+      "description": "Whether the Group still shared its contents."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "group_path": [
+    1401
+  ]
+}
+```
+
 ### `ph_composer.zones.make`
 
 Make one Zone from explicit entities in one edit context. Owner: `ph_composer.zones`.
@@ -48479,6 +48630,13 @@ Params:
         "type": "integer"
       },
       "description": "The root-to-Zone path of the copy to reidentify, as list returns it."
+    },
+    "copy_added": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "description": "The containers one native copy added, by persistent id, so records outside the Zone that came in the same copy can follow it."
     }
   }
 }
@@ -56820,7 +56978,6 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 
 | Code | Meaning |
 | --- | --- |
-| `space.context_open` | An edit context is open; close it to the root first. |
 | `space.context_required` | The edit context holding the Faces must be open to group them. |
 | `space.duplicate_identity` | Another occurrence carries this Space, Volume or Floor Segment's id: a copy. |
 | `space.empty` | A Space has no Volume. |
@@ -56832,7 +56989,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `space.nothing_to_create` | None of the Faces given can become a Space. |
 | `space.number_duplicate` | Two Spaces in one Zone share a number. |
 | `space.offset_from_zone` | A Space's Floor Segments lie outside its Zone's extents; it exports as drawn. |
-| `space.outside_zone` | A Space is in no Zone. |
+| `space.outside_zone` | A Space is hosted in no Zone. |
 | `space.position_unknown` | The Volume has no stored position to restore. |
 | `space.same_zone` | The Space is already in that Zone. |
 | `space.segment_misplaced` | A Floor Segment record is on a Face that is not directly inside a Volume. |
@@ -56845,6 +57002,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `space.volume_orphan` | A Volume record is on a Group outside every Space. |
 | `space.volume_protected` | The Volume is protected; unprotect it before opening it. |
 | `space.volume_unprotected` | A closed Volume is unlocked, so its Faces can be edited from the Space. |
+| `space.zone_missing` | A Space names a Zone that is no longer in the Model. |
 
 ### `ph_composer.thermal_bridges`
 
@@ -56999,3 +57157,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.24 | 2026-11-09 | ph_composer.windows.units.convert_review is new: which drawn rectangles Convert to Window Type would take, as Type layouts, and why it leaves the others out. |
 | 1.25 | 2026-11-09 | ph_composer.windows.units.convert is new: reviewed drawn rectangles become Window Types and placed Windows in one Undo step. |
 | 1.26 | 2026-11-09 | ph_composer.windows.units.convert_review's groups gain default_name, and it leaves out rectangles overlapping across Groups as window.overlap; convert's groups take copy_from_type_id. ph_composer.windows.convert_dialog.open, close and state are new, with the convert_dialog snapshot section and the convert_menu menu item. |
+| 1.27 | 2026-11-09 | A Space's Zone is the record's zone_id, a core reference; ph_composer.spaces.move_to_zone is a record edit and no longer refuses space.context_open. ph_composer.spaces.unhost and the space.zone_missing finding are new; ph_composer.zones.make_independent takes copy_added and ph_composer.zones.isolate_copied_group is new, for a plain Group copied whole. |

@@ -53,7 +53,18 @@ module SpaceFixtures
     ZONES::ZONE_STORE.write(group, { "id" => "zon_#{letter * 12}", "schema_version" => 1, "name" => "Zone #{letter}",
                                      "building_segment" => "Main Building", "level" => "L1",
                                      "ground_depth_mm" => 0.0 })
+    host_children(children, "zon_#{letter * 12}")
     group
+  end
+
+  # The Spaces a fixture draws inside a Zone Group are hosted in it, as Create Space leaves them, through
+  # any Group between.
+  def host_children(children, zone_id)
+    children.grep(Sketchup::Group).each do |child|
+      record = SPACES::SPACE_STORE.read(child)
+      SPACES::SPACE_STORE.write(child, record.merge("zone_id" => zone_id)) if record && !record.key?("zone_id")
+      host_children(child.entities.to_a, zone_id)
+    end
   end
 
   # The reference model of the Spaces acceptance register: Zone A with 101 Living, 102 Bath and 103 Hall

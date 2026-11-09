@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# One feature owns Spaces: the rooms inside a Zone, their Volumes and the Floor Segment Faces marked
+# One feature owns Spaces: the rooms of a Zone, their Volumes and the Floor Segment Faces marked
 # in them. It requires Zones and nothing else, and no Zones file names it.
 #
 #   schema.rb       the three entity-owned records and their stores
@@ -9,7 +9,6 @@
 #   authoring.rb    the operations' handlers; steps.rb their native steps; scan/resolve.rb strict targets
 #   context/        Volume protection, the reconciler and the edit-context commands
 #   identity/       Make independent: the pure plan and its step
-#   move/           Move Space to Zone: the pure plan and its step
 #   copy_watch.rb   makes a native Space copy independent in the copy's own Undo step
 #   zone_copy.rb    Spaces' part of a copied Zone becoming independent
 #   settings.rb     the Model's last-entered height
@@ -18,6 +17,7 @@
 #   declarations/   what Spaces registers
 require_relative "schema"
 require_relative "scan/occurrences"
+require_relative "scan/membership"
 require_relative "scan/metrics"
 require_relative "prism"
 require_relative "scan/findings"
@@ -33,8 +33,6 @@ require_relative "context/navigation"
 require_relative "context/reconciler"
 require_relative "identity/plan"
 require_relative "identity/step"
-require_relative "move/plan"
-require_relative "move/step"
 require_relative "copy_watch"
 require_relative "zone_copy"
 require_relative "authoring"

@@ -53,9 +53,9 @@ module PhComposer
       end
     end
 
-    # Bounded reads of the Space hierarchy. Membership is the parent Group only: a Space is in the Zone
-    # whose Group holds it, wherever its Faces are drawn. The walk reads only Spaces' own records and
-    # includes every placement of shared storage and every orphan, so a copied identity stays visible.
+    # Bounded reads of the Space hierarchy. A Space's Zone is the `zone_id` on its record, not where its
+    # Group sits (Membership); the walk reads only Spaces' own records and includes every placement of
+    # shared storage and every orphan, so a copied identity stays visible.
     module Occurrences
       module_function
 
@@ -165,14 +165,6 @@ module PhComposer
           entities = entity.is_a?(Sketchup::Group) || entity.is_a?(Sketchup::ComponentInstance) ? contents(entity) : nil
         end
         entity
-      end
-
-      # The Zone occurrence a Space is in: the Zone whose Group is the Space's nearest Zone ancestor, as
-      # `zone_paths` (root-to-Zone paths from the Zones read) name them. Nil outside every Zone.
-      def zone_path(space_path, zone_paths)
-        zone_paths.select do |zone_path|
-          zone_path.length < space_path.length && space_path[0, zone_path.length] == zone_path
-        end.max_by(&:length)
       end
 
       private_class_method :walk, :face, :container, :contents

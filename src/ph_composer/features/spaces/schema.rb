@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 module PhComposer
-  # Spaces: the rooms inside a Zone. A Space Group holds Volume Groups; a Volume holds the Faces the
+  # Spaces: the rooms of a Zone. A Space Group holds Volume Groups; a Volume holds the Faces the
   # user marked as Floor Segments. Each of the three stores its record on its own entity, so the
   # durable identity travels with the geometry (context/CONTRACTS.md, "Geometry records and occurrence
-  # references"). The Space Floor is logical: one per Volume, named by the Volume's `floor_id`.
+  # references"). A Space's Zone is the `zone_id` on its record, wherever its Group sits. The Space Floor
+  # is logical: one per Volume, named by the Volume's `floor_id`.
   module Spaces
     FEATURE_ID = "ph_composer.spaces"
+    ZONE_KIND = "ph_composer.zones.zone"
     SPACE_KIND = "#{FEATURE_ID}.space"
     VOLUME_KIND = "#{FEATURE_ID}.volume"
     FLOOR_SEGMENT_KIND = "#{FEATURE_ID}.floor_segment"
@@ -58,6 +60,7 @@ module PhComposer
                    :required => true),
       Schema.field("next_volume_sequence", { "type" => "integer", "minimum" => 1 },
                    :required => true),
+      Records::Reference.new(:key => "zone_id", :target_kind => ZONE_KIND, :cardinality => "one"),
       Schema.field("v_sup_m3h", Schema.airflow("Supply airflow.")),
       Schema.field("v_eta_m3h", Schema.airflow("Extract airflow.")),
       Schema.field("v_tran_m3h", Schema.airflow("Transfer airflow."))

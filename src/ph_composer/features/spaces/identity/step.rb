@@ -15,12 +15,11 @@ module PhComposer
       # One entity's state before apply wrote it: its store, the record there (nil when none) and its name.
       Captured = Struct.new(:store, :entity, :record, :name, keyword_init: true)
 
-      attr_reader :affected, :number, :planned, :zone_path
+      attr_reader :affected, :number, :planned, :zone_id
 
-      # `zone_path` is the Zone occurrence a target is in, nil outside every Zone: where its number is
-      # reserved.
-      def initialize(plan:, target: nil, scope_path: target.path, zone_path: nil)
-        @zone_path = zone_path&.dup&.freeze
+      # `zone_id` is the Zone a target is hosted in, nil for one in no Zone: where its number is reserved.
+      def initialize(plan:, target: nil, scope_path: target.path, zone_id: nil)
+        @zone_id = zone_id&.dup&.freeze
         @path = scope_path.dup.freeze
         @kind = target && Resolve.kind_of(target.reference)
         @record = target && DeepCopy.frozen(target.record)

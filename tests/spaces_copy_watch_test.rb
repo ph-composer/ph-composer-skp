@@ -188,14 +188,4 @@ class SpacesCopyWatchTest < PhComposerTestCase
              "directly."
     assert_equal [[:warning, notice]], @notices
   end
-
-  # A copied plain Group holding a Space may be a Zone, whose copy Zones handles: no pass, no notice.
-  def test_a_copied_plain_group_holding_a_space_is_left_to_its_finding
-    wrapper = Sketchup::Group.new(150, Sketchup::Entities.new([]))
-    @zone.entities.delete(@space)
-    wrapper.entities << @space
-    @zone.entities << wrapper
-    copy_natively(wrapper, 151)
-    refute watcher.pending?
-  end
 end

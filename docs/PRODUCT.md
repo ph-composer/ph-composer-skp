@@ -270,9 +270,12 @@ selected Spaces show in the viewport whether or not a mode is on, in the panel's
 saved in the model.
 
 Copying a Space in SketchUp makes the copy independent at once, with the next free number in its Zone,
-and one Undo removes both; a copied Zone brings independent copies of its Spaces. A copied Volume or
-Floor Segment is marked as a duplicate until Make independent is run on its row. Move to Zone puts a
-Space in another Zone where it stands, keeping its number and values.
+and one Undo removes both. A copied Zone copies no Spaces outside it. A storey Group copied whole,
+with Zones and Spaces inside it, gives every copied Space its own identity, and each copied Space
+follows the copied Zone its original was hosted in; a Space whose Zone stayed behind keeps its
+reference. A copied Volume or Floor Segment is marked as a duplicate until Make independent is run on
+its row. Move to Zone hosts a Space in another Zone where it stands, keeping its number and values.
+If its Zone is erased, the Space stays with a finding that blocks export and offers Remove from Zone.
 
 ## Handoff
 

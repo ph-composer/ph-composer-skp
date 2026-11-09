@@ -73,6 +73,47 @@ module PhComposer
       end
     end
 
+    # Rewrites one Space record's `zone_id` when its Zone becomes independent in the same copy gesture
+    # (Spaces::ZoneCopy). The Space's own copied identity is left for its own repair, so this binds by
+    # path and pre-image rather than through Resolve. Restorable: the Zone copy watcher's follow-up cannot
+    # abort.
+    class ZoneReferenceStep
+      attr_reader :affected
+
+      def initialize(path:, before:, after:)
+        @path = path.dup.freeze
+        @before = DeepCopy.frozen(before)
+        @after = DeepCopy.frozen(after)
+        @affected = [{ "kind" => SPACE_KIND, "id" => after.fetch("id"), "change" => "updated",
+                       "reference" => { "space_id" => after.fetch("id"), "entity_path" => @path } }]
+        @entity = nil
+      end
+
+      def descriptor
+        { "name" => "space_zone_reference", "path" => @path, "before" => @before, "after" => @after }
+      end
+
+      # Ownership holds at apply as at planning: a Space below shared storage or locked is not written.
+      def apply(model, _slots)
+        space = Occurrences.scan(model, :strict => @path).spaces.find { |candidate| candidate.path == @path }
+        unless space && space.record == @before
+          raise CodedError.new("target.changed", "The copied Space changed after it was previewed.")
+        end
+        raise CodedError.new("target.locked", "A Group above the copied Space is locked.") if space.locked
+        if space.shared_above
+          raise CodedError.new("target.shared_definition",
+                               "Storage above the copied Space is still shared with another placement.")
+        end
+
+        SPACE_STORE.write(space.entity, @after)
+        @entity = space.entity
+      end
+
+      def restore
+        SPACE_STORE.write(@entity, @before) if @entity
+      end
+    end
+
     # Groups explicit loose Faces of one open context into a new Volume inside a new Space (or, with no
     # `space`, into a new Volume inside the open Space) and writes their records. SketchUp groups only
     # what is in the active edit context reliably, so the context must be open where the Faces are; the

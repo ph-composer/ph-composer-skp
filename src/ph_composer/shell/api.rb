@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 26
+    MINOR = 27
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -116,7 +116,12 @@ module PhComposer
         "change" => "ph_composer.windows.units.convert_review's groups gain default_name, and it leaves out " \
                     "rectangles overlapping across Groups as window.overlap; convert's groups take " \
                     "copy_from_type_id. ph_composer.windows.convert_dialog.open, close and state are new, with " \
-                    "the convert_dialog snapshot section and the convert_menu menu item." }
+                    "the convert_dialog snapshot section and the convert_menu menu item." },
+      { "minor" => 27, "date" => "2026-11-09",
+        "change" => "A Space's Zone is the record's zone_id, a core reference; ph_composer.spaces.move_to_zone is a " \
+                    "record edit and no longer refuses space.context_open. ph_composer.spaces.unhost and the " \
+                    "space.zone_missing finding are new; ph_composer.zones.make_independent takes copy_added and " \
+                    "ph_composer.zones.isolate_copied_group is new, for a plain Group copied whole." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

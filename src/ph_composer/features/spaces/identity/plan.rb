@@ -23,7 +23,8 @@ module PhComposer
 
       # `scope` is the path whose records are rewritten: the named target's own, or a copied Zone's. With
       # no target (a Zone copy), numbers are kept and `parent` carries the Zone's `mapping` of old to new
-      # ids and its `references` (Records::ReferenceEntry rows), so payloads follow the Zone's ids too.
+      # ids and its `references` (Records::ReferenceEntry rows), so payloads and a Space's `zone_id` follow
+      # the Zone's ids too.
       def build(scan, target, number:, allocate:, catalog:, engine:, scope: target.path, parent: nil)
         refuse!(scan, Resolve.kind_of(target.reference), target) if target
         inside = Authoring.inside(scan, scope).sort_by { |_kind, occurrence| occurrence.path }
@@ -41,6 +42,8 @@ module PhComposer
           before = occurrence.record
           ordinal = ordinals[[row_kind, before.fetch("id")]] += 1
           after = DeepCopy.call(before)
+          zone_id = after["zone_id"]
+          after["zone_id"] = parent.fetch(:mapping).fetch(zone_id, zone_id) if parent && zone_id
           unless keepers.any? { |keeper| keeper.equal?(occurrence) }
             after["id"] = fresh(allocate, KINDS.fetch(row_kind).id_prefix, taken)
             after["floor_id"] = fresh(allocate, FLOOR_PREFIX, taken) if row_kind == VOLUME_KIND

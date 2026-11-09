@@ -157,7 +157,11 @@ module PhComposer
           return if paths.empty?
 
           @running = true
-          result = HostFollowUp.run(@session, ACTION, paths.map { |path| { "zone_path" => path } })
+          paths = copies(added) if CopiedGroups.isolate(@session, paths, added)
+          return if paths.empty?
+
+          params = paths.map { |path| { "zone_path" => path, "copy_added" => added } }
+          result = HostFollowUp.run(@session, ACTION, params)
           @session.changed(:zones, :copy_watch) if result.fetch("status") != "refused"
           remember(paths, result)
           announce(paths, result)

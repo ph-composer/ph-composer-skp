@@ -3,14 +3,13 @@
 require_relative "test_helper"
 require_relative "support/space_fixtures"
 
-# Move Space to Zone: the Space Group is placed again in the target Zone where it stands, and the
-# original erased, in one Undo step (context/SKETCHUP_HOST_BEHAVIOR.md, "Re-placing a Group's definition").
+# Move Space to Zone is a record edit: the Space's `zone_id` names the Zone, the Group stays where it
+# stands, one Undo step (context/CONTRACTS.md, "Space membership").
 class SpacesMoveTest < PhComposerTestCase
   include SpaceFixtures
 
   API = PhComposer::API
-  # Zone B sits under a wrapper turned a quarter turn and shifted; Zone A under none.
-  WRAPPER = Geom::Transformation.new([0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1, 0, 200, 50, 0, 1])
+  ROOT_ZONE_B = "zon_BBBBBBBBBBBB"
 
   def setup
     super
@@ -22,108 +21,91 @@ class SpacesMoveTest < PhComposerTestCase
     @space = space_group(110, space_record("S", :number => "7", :name => "Hall"), [@volume],
                          :transformation => Geom::Transformation.translation([10, 20, 0]))
     @space.name = "7 Hall"
-    @zone_a = zone_group(100, "A", [@space])
-    @zone_b = zone_group(200, "B", [space_group(210, space_record("T", :number => "7"), [])],
-                         :transformation => Geom::Transformation.translation([5, 0, 0]))
-    @wrapper = Sketchup::Group.new(190, Sketchup::Entities.new([@zone_b]), :transformation => WRAPPER)
-    @model.entities << @zone_a << @wrapper
-    [@zone_a].each { |zone| ZONES::STAMP_STORE.write(@space, ZONES::Schema.stamp(ZONES::ZONE_STORE.read(zone))) }
+    @zone_a = zone_group(100, "A", [])
+    @zone_b = zone_group(200, "B", [space_group(210, space_record("T", :number => "7"), [])])
+    @model.entities << @zone_a << @zone_b << @space
+    SPACES::SPACE_STORE.write(@space, space_record("S", :number => "7", :name => "Hall")
+                                                  .merge("zone_id" => "zon_AAAAAAAAAAAA"))
   end
 
-  def move(space_path = [100, 110], zone_path = [190, 200])
+  def invoke(name, params)
     @sequence += 1
-    API.invoke(:context => @context, :name => "ph_composer.spaces.move_to_zone",
-               :params => { "space" => { "space_id" => "spc_SSSSSSSSSSSS", "entity_path" => space_path },
-                            "zone" => { "zone_id" => ZONES::ZONE_STORE.read(zone_at(zone_path))["id"],
-                                        "zone_path" => zone_path } },
+    API.invoke(:context => @context, :name => "ph_composer.spaces.#{name}", :params => params,
                :request => { "sequence" => @sequence, "expected_revision" => @session.revision })
+  end
+
+  def move(zone_path = [200])
+    invoke("move_to_zone", "space" => { "space_id" => "spc_SSSSSSSSSSSS", "entity_path" => [110] },
+                           "zone" => { "zone_id" => ZONES::ZONE_STORE.read(zone_at(zone_path))["id"],
+                                       "zone_path" => zone_path })
   end
 
   def zone_at(path)
     SPACES::Occurrences.entity_at(@model, path)
   end
 
-  def hall
-    SPACES::Occurrences.scan(@model).spaces.find { |space| space.record["id"] == "spc_SSSSSSSSSSSS" }
-  end
-
-  def world_loop
-    segment = hall.volumes.first.segments.first
-    segment.entity.outer_loop.vertices.map do |vertex|
-      point = vertex.position.transform(segment.transform)
-      [point.x, point.y, point.z]
-    end
-  end
-
-  def spaces
+  def row
     API.query(:context => @context, :name => "ph_composer.spaces.all").fetch("value").fetch("spaces")
+       .find { |space| space["id"] == "spc_SSSSSSSSSSSS" }
   end
 
-  def test_move_under_a_rotated_wrapper_keeps_world_geometry_ids_and_values_in_one_step
-    loop_before = world_loop
-    records = [hall.record, hall.volumes.first.record, hall.volumes.first.segments.first.record]
+  def test_move_writes_the_zone_on_the_record_and_leaves_the_group_where_it_stands
+    records = SPACES::SPACE_STORE.read(@space)
     before = @model.operations.length
     result = move
     assert_equal "completed", result["status"], result.inspect
     assert_equal before + 1, @model.operations.length
-    moved = hall
-    assert_equal [190, 200], moved.path[0, 2]
-    loop_before.zip(world_loop).each do |expected, actual|
-      expected.zip(actual).each { |e, a| assert_in_delta e, a, 1e-9 }
-    end
-    assert_equal records, [moved.record, moved.volumes.first.record, moved.volumes.first.segments.first.record]
-    assert_equal ZONES::Schema.stamp(ZONES::ZONE_STORE.read(@zone_b)), ZONES::STAMP_STORE.read(moved.entity)
-    assert_equal "7 Hall", moved.entity.name
-    assert moved.volumes.first.entity.locked?
-    row = spaces.find { |space| space["id"] == "spc_SSSSSSSSSSSS" }
-    refute row.dig("volumes", 0, "moved"), "home_transform still holds: the Volume did not move in its Space"
-    assert_empty @zone_a.entities.to_a
+    assert_equal({ "zone_id" => ROOT_ZONE_B, "zone_path" => [200] }, row["zone"])
+    assert_equal [110], row.dig("reference", "entity_path")
+    assert_equal @volume.entities.to_a, zone_at([110, 111]).entities.to_a
+    assert_equal records.merge("zone_id" => ROOT_ZONE_B), SPACES::SPACE_STORE.read(@space)
+    assert_equal "7 Hall", @space.name
   end
 
   def test_a_moved_space_keeps_its_number_and_flags_the_collision
     move
-    hall_row = spaces.find { |space| space["id"] == "spc_SSSSSSSSSSSS" }
-    assert_equal "7", hall_row.dig("values", "number")
-    assert_includes hall_row.fetch("findings").map { |finding| finding["code"] }, "space.number_duplicate"
+    assert_equal "7", row.dig("values", "number")
+    assert_includes row.fetch("findings").map { |finding| finding["code"] }, "space.number_duplicate"
   end
 
-  def test_one_undo_restores_the_original_and_redo_moves_it_again
+  def test_one_undo_restores_the_zone_and_redo_moves_it_again
     move
     @model.undo
-    assert_equal [100, 110], hall.path
+    assert_equal({ "zone_id" => "zon_AAAAAAAAAAAA", "zone_path" => [100] }, row["zone"])
     @model.redo
-    assert_equal [190, 200], hall.path[0, 2]
+    assert_equal [200], row.dig("zone", "zone_path")
   end
 
-  def test_a_hidden_space_stays_hidden_through_move_undo_and_redo
-    @space.hidden = true
-    move
-    assert hall.entity.hidden?
-    @model.undo
-    assert hall.entity.hidden?
-    @model.redo
-    assert hall.entity.hidden?
+  def test_move_refuses_the_current_zone
+    assert_equal %w[refused space.same_zone], move([100]).values_at("status", "code")
   end
 
-  def test_move_refuses_with_an_edit_context_open_and_writes_nothing
-    @model.active_path = [@zone_a, @space]
-    before = @model.operations.length
-    assert_equal %w[refused space.context_open], move.values_at("status", "code")
-    assert_equal before, @model.operations.length
-    assert_equal [100, 110], hall.path
+  def test_move_works_with_an_edit_context_open_because_no_geometry_moves
+    @model.active_path = [@zone_a]
+    assert_equal "completed", move["status"]
+    assert_equal [200], row.dig("zone", "zone_path")
   end
 
-  def test_move_refuses_the_current_zone_and_a_locked_target
-    assert_equal %w[refused space.same_zone], move([100, 110], [100]).values_at("status", "code")
+  def test_a_locked_target_zone_is_only_named_and_does_not_refuse
     @zone_b.locked = true
-    assert_equal %w[refused target.locked], move.values_at("status", "code")
+    assert_equal "completed", move["status"]
   end
 
-  def test_a_failure_at_the_erase_leaves_the_original_and_no_new_group
-    parent = @zone_a.entities
-    result = parent.stub(:erase_entities, ->(*) { raise "injected" }) { move }
-    assert_equal %w[failed rolled_back], result.values_at("status", "effect")
-    assert_equal [100, 110], hall.path
-    assert_equal [210], SPACES::Occurrences.entity_at(@model, [190, 200]).entities.to_a.map(&:persistent_id)
+  def test_a_space_whose_zone_is_gone_reads_zone_missing_and_unhost_clears_it
+    @model.entities.delete(@zone_a)
+    UI.run_timers
+    finding = row.fetch("findings").find { |item| item["code"] == "space.zone_missing" }
+    assert_equal "unhost", finding["repair"]
+    assert finding["blocks_export"]
+    assert_nil row["zone"]
+
+    result = invoke("unhost", "space" => { "space_id" => "spc_SSSSSSSSSSSS", "entity_path" => [110] })
+    assert_equal "completed", result["status"], result.inspect
+    refute SPACES::SPACE_STORE.read(@space).key?("zone_id")
+    codes = row.fetch("findings").map { |item| item["code"] }
+    assert_includes codes, "space.outside_zone"
+    refute_includes codes, "space.zone_missing"
+    @model.undo
+    assert_equal "zon_AAAAAAAAAAAA", row.dig("values", "zone_id")
   end
 end

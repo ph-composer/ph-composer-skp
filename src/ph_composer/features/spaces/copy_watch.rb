@@ -9,9 +9,11 @@ module PhComposer
     # `container_added` event queues a deferred pass. In the pass every Space occurrence whose path holds
     # none of the added Groups is an original; an id held by exactly one original and by added occurrences
     # has copies, which are those added occurrences. Two originals sharing an id are left for the explicit
-    # Make independent, as is anything in a file as it opens. A copy inside a component keeps its finding
-    # and gets one notice. The rest run as one gesture through `HostFollowUp` and Make independent: all or
-    # nothing, one notice.
+    # Make independent, as is anything in a file as it opens. A plain Group copied whole is first given its
+    # own storage (Zones::CopiedGroups), so a storey Group's Spaces repair like any others (the
+    # collection-copy contract, context/CONTRACTS.md, "Space membership"). A Space inside a copied Zone is
+    # left to that Zone's repair, and a copy inside a component keeps its finding and gets one notice. The
+    # rest run as one gesture through `HostFollowUp` and Make independent: all or nothing, one notice.
     #
     # Undo and Redo drop a pending pass and never repair: an array count (`5x`) undoes the first copy and
     # commits every copy in one transaction, and Redo restores a repaired copy without an addition.
@@ -42,12 +44,10 @@ module PhComposer
           @repaired = {}
         end
 
-        # Only an added Space Group, or an added component holding one, whose Space id another occurrence
-        # already holds can be a copy, so nothing else makes the session wait. The check is a read inside
-        # the callback. A copied plain Group holding a Space is left to the finding: that Group may be a
-        # Zone, whose copy Zones makes independent together with its Spaces.
+        # Only an added container holding a Space whose id another occurrence already holds can be a copy,
+        # so nothing else makes the session wait. The check is a read inside the callback.
         def added(entity)
-          ids = if entity.is_a?(Sketchup::Group) then [stored_id(entity)].compact
+          ids = if entity.is_a?(Sketchup::Group) then ids_inside([entity])
                 elsif entity.is_a?(Sketchup::ComponentInstance) then ids_inside(entity.definition.entities)
                 else []
                 end
@@ -131,8 +131,11 @@ module PhComposer
         end
 
         def run(added)
-          copies = copies(added)
-          shared, repairable = copies.partition(&:shared_above)
+          # The Zones pass first, so a copied Space follows its copied Zone before it takes that Zone's next number.
+          Zones::CopyWatch.state(@session).settle
+          zones = zone_paths
+          Zones::CopiedGroups.isolate(@session, own_copies(added, zones).map(&:path), added)
+          shared, repairable = own_copies(added, zones).partition(&:shared_above)
           announce_shared(shared) unless shared.empty?
           return if repairable.empty?
 
@@ -144,6 +147,23 @@ module PhComposer
           Diagnostics.exception("space_copy_watch", error)
           @session.notice("The copied Space could not be made independent. Use Make independent on its row.",
                           :tone => :warning)
+        end
+
+        # The copies this watcher repairs. A Space below a Zone the same gesture copied is that Zone's to
+        # repair, in its `occurrence_independent` transition; one copied alone inside a Zone is this watcher's.
+        def own_copies(added, zones)
+          copies(added).reject do |space|
+            zones.any? do |path|
+              (path & added).any? && path.length < space.path.length && space.path[0, path.length] == path
+            end
+          end
+        end
+
+        def zone_paths
+          Zones::Occurrences.zones(@session.model).map(&:path)
+        rescue CodedError => error
+          Diagnostics.log("space_copy_watch", "code" => error.code)
+          []
         end
 
         # Each repaired copy's path and the id it took, to tell on Undo whether the copy outlived its repair.

@@ -24,7 +24,7 @@ module PhComposer
       end
 
       def refresh
-        @zone_paths = query(ZONES).fetch("zones").map { |zone| zone.dig("reference", "zone_path") }
+        @zone_ids = query(ZONES).fetch("zones").map { |zone| zone.dig("reference", "zone_id") }
         @rows = {}
         @read_at = read_at
       end
@@ -34,19 +34,19 @@ module PhComposer
       end
 
       # `[place, target]`: `:mark`; `:volume` with its Space's reference; `:offer`; or `:refuse` with the
-      # reason. Every route needs a Zone above the Face.
+      # reason. A Face in a Space needs the Space hosted in a Zone; a loose Face, a Zone above it.
       def place(entities)
         ids = entities.map(&:persistent_id)
         parent = entities[-2]
         if parent && Occurrences.read(VOLUME_STORE, VOLUME, parent)
           space_index = entities[0...-2].rindex { |entity| Occurrences.read(SPACE_STORE, SPACE, entity) }
           return [:refuse, OUTSIDE_SPACE] unless space_index
-          return [:refuse, OUTSIDE_ZONE] unless in_zone?(ids[0..space_index])
+          return [:refuse, OUTSIDE_ZONE] unless hosted?(Occurrences.read(SPACE_STORE, SPACE, entities[space_index]))
 
           return [:mark, nil]
         end
         if parent && (space = Occurrences.read(SPACE_STORE, SPACE, parent))
-          return [:refuse, OUTSIDE_ZONE] unless in_zone?(ids[0...-1])
+          return [:refuse, OUTSIDE_ZONE] unless hosted?(space)
 
           return [:volume, { "space_id" => space.fetch("id"), "entity_path" => ids[0...-1] }]
         end
@@ -71,8 +71,8 @@ module PhComposer
         [:offer, nil]
       end
 
-      def in_zone?(space_path)
-        !Occurrences.zone_path(space_path, @zone_paths).nil?
+      def hosted?(space)
+        @zone_ids.include?(space["zone_id"])
       end
 
       def host_row(ids)

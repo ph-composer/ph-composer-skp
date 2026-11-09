@@ -97,6 +97,10 @@ function (panel, requests, ui, units, preferences, fields) {
     if (record.volume && fixes.indexOf("restore_position") >= 0) {
       items.push({ id: "spaces.restore", icon: "repair", label: "Restore the position of " + name, disabled: busy });
     }
+    if (fixes.indexOf("unhost") >= 0) {
+      items.push({ id: "spaces.unhost", icon: "repair", label: "Remove " + name + " from its missing Zone",
+        disabled: busy });
+    }
     if (fixes.indexOf("make_independent") >= 0) {
       items.push({ id: "spaces.independent", icon: "repair", label: "Make " + name + " independent", disabled: busy });
     }
@@ -120,7 +124,7 @@ function (panel, requests, ui, units, preferences, fields) {
 
   // The actions that change records or the edit context's protection; a held cell draft must not be lost to one.
   var CHANGES = { "spaces.enter": true, "spaces.restore": true, "spaces.independent": true, "spaces.delete": true,
-    "spaces.remove_volume": true, "spaces.move": true, "spaces.height_from_solid": true };
+    "spaces.remove_volume": true, "spaces.move": true, "spaces.unhost": true, "spaces.height_from_solid": true };
 
   /* Runs one of this view's actions; false for an action it does not own. */
   SpaceActions.prototype.run = function (row, item) {
@@ -132,6 +136,7 @@ function (panel, requests, ui, units, preferences, fields) {
     var reference = copy(target.reference), self = this;
     switch (item.id) {
       case "spaces.locate": this.context.run(PREFIX + ".locate", { reference: reference }); break;
+      case "spaces.unhost": this.edits.run(PREFIX + ".unhost", { space: reference }); break;
       case "spaces.open": this.context.run(PREFIX + ".context.open", { reference: reference }); break;
       case "spaces.close":
         this.closing = copy(reference.entity_path);
@@ -199,8 +204,8 @@ function (panel, requests, ui, units, preferences, fields) {
     var cancel = ui.button("Cancel", function () { dialog.closeModal(); }), self = this;
     var revision = this.host.revision;
     dialog.replaceChildren(ui.element("h2", "", "Move " + describe(record) + " to another Zone"),
-      ui.element("p", "", "The Space moves where it stands, with its Volumes and Floor Segments; its number and " +
-        "values are kept. Close any open Space or Volume first."), select,
+      ui.element("p", "", "The Space is hosted in the Zone you pick. It stays where it stands, with its Volumes and " +
+        "Floor Segments; its number and values are kept."), select,
       ui.actionRow(cancel, ui.button("Move", function () {
         var zone = choices[Number(select.value)];
         dialog.closeModal();

@@ -27,6 +27,8 @@ module PhComposer
       # preflight ticks it by default, and its label.
       Repair = Struct.new(:action, :param, :checked, :label, keyword_init: true)
       REPAIRS = {
+        "unhost" => Repair.new(:action => "#{FEATURE_ID}.unhost", :param => "space", :checked => false,
+                               :label => "Remove the Space from its missing Zone"),
         "make_independent" => Repair.new(:action => "#{FEATURE_ID}.make_independent", :param => "reference",
                                          :checked => false, :label => "Make the copy independent"),
         "restore_position" => Repair.new(:action => "#{FEATURE_ID}.volumes.restore_position", :param => "volume",
@@ -152,8 +154,7 @@ module PhComposer
         spaces = Occurrences.scan(model, :strict => false).spaces
         space_paths = spaces.map(&:path)
         spaces.filter_map do |space|
-          zone = zones.select { |candidate| space.path[0, candidate.path.length] == candidate.path }
-                      .max_by { |candidate| candidate.path.length }
+          zone = zones.select { |candidate| candidate.record.fetch("id") == space.record["zone_id"] }.min_by(&:path)
           next unless zone
 
           # The Zone's own Faces: none inside a Space, whether or not the Space carries the Zone's stamp.
@@ -199,9 +200,7 @@ module PhComposer
         structure!(spaces, volumes, segments)
         spaces.map do |entry, record|
           Spaces.validate!(SPACE, record)
-          zone = Zones::ExportProjection.enclosing_zone(snapshot, entry)
-          raise Export::Blocked.new("space.outside_zone", "Space #{record.fetch('id')} is in no Zone.") unless zone
-
+          zone = hosting_zone(snapshot, record)
           own = volumes.select { |volume, _| volume.path[0...-1] == entry.path }
           reader.entity_record(record, :fields => %w[name number] + AIRFLOWS, :target_kind => SPACE_KIND,
                                        :path => entry.path, :user_data => true)
@@ -210,6 +209,18 @@ module PhComposer
                        "volumes" => own.map { |volume| volume_record(reader, volume, segments) }
                                        .sort_by { |row| row.fetch("id") })
         end.sort_by { |row| row.fetch("id") }
+      end
+
+      # The snapshot Zone the record names. Blocked when it names none, or one that is gone.
+      def hosting_zone(snapshot, record)
+        zone_id = record["zone_id"]
+        raise Export::Blocked.new("space.outside_zone", "Space #{record.fetch('id')} is in no Zone.") unless zone_id
+
+        found = Zones::ExportProjection.zone_entry(snapshot, zone_id)
+        return found if found
+
+        raise Export::Blocked.new("space.zone_missing",
+                                  "Space #{record.fetch('id')} names a Zone that is no longer in the Model.")
       end
 
       # The same rule as the preflight's, from the snapshot: the Space's Floor Segments against the Zone's own Faces.
@@ -267,8 +278,7 @@ module PhComposer
         entries
       end
 
-      # Membership is the parent Group only: a Volume directly in a Space, a Floor Segment directly in a Volume,
-      # and no Space inside another.
+      # A Volume sits directly in a Space, a Floor Segment directly in a Volume, and no Space inside another.
       def structure!(spaces, volumes, segments)
         space_paths = spaces.map { |entry, _| entry.path }
         nested = space_paths.any? do |inner|

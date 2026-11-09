@@ -421,7 +421,7 @@ access and never fall back to selection, display name, proximity or the active M
 | Owner | Dictionary | Entity | Durable identity |
 | --- | --- | --- | --- |
 | Zone | `ph_composer.zone` | Zone Group | `zon_` id |
-| Zone membership stamp | `ph_composer.zone_stamp` | Classified Face, and a nested container Group such as a Space | Zone id plus Building-Segment and Level, as recovery data. Only Zones writes it; a feature that creates a container in a Zone has Zones stamp it through the participant below |
+| Zone membership stamp | `ph_composer.zone_stamp` | Classified Face, and a nested container Group a feature creates in a Zone | Zone id plus Building-Segment and Level, as recovery data. Only Zones writes it; a feature that creates a container in a Zone has Zones stamp it through the participant below. Spaces stamps only the Group Create Space nests in an open Zone, until placement outside the Zone lands; it is never read as membership |
 | Face assignment | `ph_composer.face_assignment` | Face | `fac_` id |
 | Attached zone | `ph_composer.records.ph_composer.face_assignment.attached_zone` (a legacy name, kept so saved Models still read) | Model | `atz_` id through the record engine |
 | Thermal bridge assignment | `ph_composer.thermal_bridge` | The `Sketchup::Edge`, inside a Zone | `tbe_` id; values `thermal_bridge_type_id` (a required core reference to `ph_composer.thermal_bridges.type`) and `quantity` (above 0, default 1). A split or copy carries the id, which reads mark `copied` and nothing re-issues |
@@ -509,10 +509,28 @@ placement of shared storage, so a pasted orphan or a repeated parent still makes
 visible.
 
 A Space, Volume or Floor Segment target is reached from the Model root too, as `{ "space_id" |
-"volume_id" | "floor_segment_id", "entity_path" }`: a Space may sit outside every Zone, and its Zone
-is whichever Zone Group its path passes through last, read from the Zones read, never from its stamp.
+"volume_id" | "floor_segment_id", "entity_path" }`: a Space may sit outside every Zone. See "Space membership".
 The Spaces inventories include every placement of shared storage and every record found where the
 hierarchy does not put it (a Volume outside a Space, a Floor Segment not directly in a Volume).
+
+**Space membership.** A Space's Zone is the `zone_id` core reference on its record
+(`ph_composer.zones.zone`), wherever its Group sits; nothing derives it from the Group's parent or a stamp.
+Reads resolve it against the Zones read (the first occurrence in path order for a repeated id, which carries
+its own finding). A record with no `zone_id` reads `space.outside_zone`; one whose `zone_id` names no Zone
+occurrence reads `space.zone_missing`, blocking export, with the repair `ph_composer.spaces.unhost`, which clears
+the reference. Zones have no delete operation: a Zone is erased natively, so the Space survives it and the finding
+offers the repair, in a later step of its own (W6-9 of the Spaces packet). `ph_composer.spaces.move_to_zone` is a
+record edit in any edit context. Export keys each Space by `zone_id`. Create Space still nests its Group in the open
+Zone until the placement stage lands, carrying the reference and the stamp.
+
+Copies follow one contract (W6-10). A copied Space, alone or inside a copied plain Group, takes a new id and keeps
+its `zone_id`. A plain Group copied whole is first given its own storage through
+`ph_composer.zones.isolate_copied_group`, by whichever copy watcher runs first (`Zones::CopiedGroups`, idempotent).
+The Zones watcher passes the gesture's added containers as `copy_added` to `ph_composer.zones.make_independent`,
+and the Spaces contributor rewrites `zone_id` to the new Zone id on every Space under the Zone's own added container
+that named the old Zone, in the same Undo step; a Space whose Zone stayed behind keeps its reference. A multi-select
+copy with no wrapping Group adds separate containers, so its Spaces keep their references. Neither watcher depends on
+running before the other: each binds by record and path at apply.
 
 **Stamping a container.** `ph_composer.zones.stamp_container` is a proposal participant: an action
 of a feature requiring Zones whose own earlier step creates a Group inside a Zone occurrence leaves
@@ -604,7 +622,7 @@ still shares. Restore Zone recovers a stamped container as a member, regrouping 
 Zone's stamped Faces; a Group whose stamp does not read stays opaque and is not offered, a live Zone
 is never a member whatever stamp it still carries, and a locked member or one holding a live Zone
 refuses the restore.
-Spaces is the first feature to stamp one.
+Spaces is the feature that stamps one today: only the Group Create Space nests inside an open Zone.
 
 Solve reports `adjacency.glued_instances` when a proposed partial match would cut a Face with
 glued instances. A full match still pairs. A wholly covered glued side may pair while its larger
@@ -671,10 +689,11 @@ host follow-up joined to the copy (D-1). A copy is an occurrence the gesture add
 original holds; a duplicate already in the Model, a copy whose path crosses a ComponentInstance and
 anything Undo or Redo restores are left alone. The repair joins the latest transaction; if an
 unrelated operation committed before the deferred pass, undoing it takes the repair back with it, and
-the watcher tells the user the copy is read only again. Spaces follows the same rule for a Space Group
-copied on its own (its `CopyWatch`): the Space is made independent through Make independent with the
-next free number; a copy inside a component keeps its finding with one notice, and a copied plain
-Group holding a Space is left to its finding, since it may be a Zone whose copy Zones handles. The
+the watcher tells the user the copy is read only again. A plain Group copied whole is first isolated
+through `ph_composer.zones.isolate_copied_group`, joined to the copy ("Space membership"). Spaces follows the
+same rule for a Space Group copied alone or inside a copied plain Group (its `CopyWatch`): the Space is made
+independent through Make independent with the next free number; a copy inside a component keeps its finding with
+one notice, and a Space below a Zone the same gesture copied is left to that Zone's transition. The
 Spaces and Zones watchers hear the copy through the session's `container_added` host event, which
 reports each Group or ComponentInstance added to any container. Windows' `HostWatch` hears a pasted
 Unit the same way and a moved one through `instance_modified`, and returns a Unit that has left its
@@ -826,7 +845,8 @@ apply, as the paragraph above describes.
 `ph_composer.zones.occurrence_independent` is emitted by `ph_composer.zones.make_independent`, for
 the explicit action and for the copy watcher's follow-up, after storage is isolated. Its description
 is `zone_path`, `old_zone_id`, `new_zone_id`, `mapping` (every old Zone and Face id to its new one),
-`revision` and `references`, the Zone's and Faces' new records as typed `{kind, key, record}` entries
+`revision`, `copy_added` (the containers one native copy added, by persistent id; empty for an explicit call)
+and `references`, the Zone's and Faces' new records as typed `{kind, key, record}` entries
 for remapping a child's own references. Windows contributes `ph_composer.windows.units.follow_zone_copy`:
 every Unit inside the occurrence whose id another occurrence holds gets a new id, and copied payloads
 are remapped across the copy.
