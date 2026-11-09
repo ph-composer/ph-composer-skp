@@ -56791,6 +56791,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `space.context_required` | The edit context holding the Faces must be open to group them. |
 | `space.duplicate_identity` | Another occurrence carries this Space, Volume or Floor Segment's id: a copy. |
 | `space.empty` | A Space has no Volume. |
+| `space.floor_overlap` | Two Floor Segments of one Volume overlap in plan, so their shared area counts twice. |
 | `space.floor_projected` | A Floor Segment is not horizontal; its plan area is used. |
 | `space.height_missing` | A Volume has no average clear ceiling height. |
 | `space.identity_unique` | The occurrence already has an identity of its own; there is nothing to repair. |
@@ -56971,3 +56972,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.28 | 2026-11-09 | ph_composer.spaces.create and create_preview take faces as root-to-Face paths and work in any edit context; create takes an optional zone; create_preview answers zone and height_m, and left_out rows carry path. create_review.open takes faces and revision and the review carries zones and height_m. ph_composer.zones.stamp_container and the nested_container reason are gone; zones export rows lose container_paths. |
 | 1.29 | 2026-11-09 | The ph_composer.spaces.labels readout is now ph_composer.spaces.show, on by default in every Model session; it draws each Volume's prism outline with the Space labels. |
 | 1.30 | 2026-11-09 | ph_composer.spaces.remove is new: a Space's records go and its floor Faces stay as plain geometry, in one Undo step. |
+| 1.31 | 2026-11-09 | A Volume whose Floor Segments overlap in plan reads the space.floor_overlap finding, a warning that does not block export. |

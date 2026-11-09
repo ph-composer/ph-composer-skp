@@ -149,9 +149,12 @@ module PhComposer
       end
 
       def volume_row(volume, catalog, model, counts, repeated)
-        segments = volume.segments.sort_by(&:path).map do |segment|
-          segment_row(segment, catalog, counts, repeated, :copied_volume => !repeated && !volume.shared_above &&
-                                                                          segment.shared_above)
+        captured = volume.segments.sort_by(&:path).map do |segment|
+          [segment, FaceCapture.call(segment.entity, segment.transform)]
+        end
+        segments = captured.map do |segment, geometry|
+          segment_row(segment, geometry, catalog, counts, repeated,
+                      :copied_volume => !repeated && !volume.shared_above && segment.shared_above)
         end
         row = Spaces.view(volume.record).merge(
           "extension_status" => Records::Metadata.status_map(volume.record, catalog),
@@ -162,13 +165,14 @@ module PhComposer
           "metrics" => Metrics.volume(volume.record, segments.map { |segment| segment.fetch("metrics") }),
           "floor_segments" => segments
         )
-        row.merge("findings" => Findings.volume(row) + duplicate(counts, VOLUME_KIND, volume.record, repeated,
-                                                                 :ancestor => volume.shared_above && "Space"))
+        overlap = FloorOverlap.any?(captured.map { |_segment, geometry| geometry.loops_m })
+        row.merge("findings" => Findings.volume(row, :floor_overlap => overlap) +
+                                 duplicate(counts, VOLUME_KIND, volume.record, repeated,
+                                           :ancestor => volume.shared_above && "Space"))
       end
 
       # `copied_volume` says the Face is shared because its Volume was copied: the Volume is the repair.
-      def segment_row(segment, catalog, counts, repeated, copied_volume: false)
-        geometry = FaceCapture.call(segment.entity, segment.transform)
+      def segment_row(segment, geometry, catalog, counts, repeated, copied_volume: false)
         row = Spaces.view(segment.record).merge(
           "extension_status" => Records::Metadata.status_map(segment.record, catalog),
           "reference" => segment.reference,

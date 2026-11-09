@@ -8,6 +8,7 @@ module PhComposer
         "space.context_required" => "The edit context holding the Faces must be open to group them.",
         "space.duplicate_identity" => "Another occurrence carries this Space, Volume or Floor Segment's id: a copy.",
         "space.empty" => "A Space has no Volume.",
+        "space.floor_overlap" => "Two Floor Segments of one Volume overlap in plan, so their shared area counts twice.",
         "space.floor_projected" => "A Floor Segment is not horizontal; its plan area is used.",
         "space.height_missing" => "A Volume has no average clear ceiling height.",
         "space.identity_unique" => "The occurrence already has an identity of its own; there is nothing to repair.",

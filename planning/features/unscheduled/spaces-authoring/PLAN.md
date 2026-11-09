@@ -1,7 +1,7 @@
 # Spaces: delivery plan
 
 DATE: 2026-11-09
-STATUS: Planned. Decisions W6-1 to W6-11 are recorded; implementation waits for Ed's go.
+STATUS: Complete. Stages S10-1 to S10-6 delivered; see [STATUS.md](STATUS.md).
 AUTHOR: Ed May, BLDGTYP; Claude
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/352
 
@@ -11,7 +11,6 @@ The behaviour contract is [PRD.md](PRD.md); this plan is the order of work. Stag
 
 One stage, one branch, one PR, through the `pr-loop` protocol, with a real-host check on the head that merges.
 Reviewer `gpt-6.1-sol`, except S10-1, which is a change of membership and export keying: `gpt-6-astra`.
-Code changes start only on Ed's go.
 
 ## Stages
 

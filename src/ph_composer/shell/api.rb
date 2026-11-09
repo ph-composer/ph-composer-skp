@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 30
+    MINOR = 31
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -133,7 +133,10 @@ module PhComposer
                     "Model session; it draws each Volume's prism outline with the Space labels." },
       { "minor" => 30, "date" => "2026-11-09",
         "change" => "ph_composer.spaces.remove is new: a Space's records go and its floor Faces stay as plain " \
-                    "geometry, in one Undo step." }
+                    "geometry, in one Undo step." },
+      { "minor" => 31, "date" => "2026-11-09",
+        "change" => "A Volume whose Floor Segments overlap in plan reads the space.floor_overlap finding, a warning " \
+                    "that does not block export." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {
