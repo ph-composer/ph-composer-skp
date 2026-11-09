@@ -14,4 +14,9 @@ Origin: the 2026-11 usability walkthrough, synthesis item S-10, decision D1
 walkthrough plan ([PLAN.md](../../../archive/usability-walkthrough-2026-11/PLAN.md)): its implementation
 stages are added there when Ed approves this packet.
 
-Next step: Ed answers W6-1 to W6-11 (W6-1 first; most of the rest depend on it).
+Decided by Ed, 2026-11-09 (W6-1 to W6-11), in the table of `PRD.md`:
+
+- As recommended: W6-1 by reference; W6-2 a Space placed outside the Zone and hosted in it; W6-3 the preselected Zone picker; W6-5 Show Spaces draws prism and label; W6-6 the Set height tool; W6-8 a separate Remove Space; W6-9 offer to unhost; W6-10 a copied Zone copies no Spaces.
+- Different from the recommendation: **W6-4** Space Groups stay Untagged; **W6-7** keep WT-05's refusal, Create Space does not accept a closed solid; **W6-11** two Floor Segments overlapping in one Volume get a warning that does not block export.
+
+Next step: implementation waits for Ed's go on stages S10-1 to S10-7, which need revising for those three.
