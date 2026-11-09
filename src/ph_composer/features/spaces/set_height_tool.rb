@@ -47,7 +47,8 @@ module PhComposer
         end
       end
 
-      Drag = Struct.new(:candidate, :anchor, :x, :y, :revision, :height, :moved, keyword_init: true)
+      # `moved` is past DRAG_PIXELS; `adjusted` is that a ray has given a height, which a straight-down view never does.
+      Drag = Struct.new(:candidate, :anchor, :x, :y, :revision, :height, :moved, :adjusted, keyword_init: true)
 
       def self.install(feature)
         feature.menu_item("#{FEATURE_ID}.set_height_menu", :label => "Set height", :menu => EXTENSION_NAME,
@@ -149,7 +150,7 @@ module PhComposer
 
         if !Sketchup.active_model.equal?(@session.model) || @edit_path != edit_path
           announce(CANCELLED, :warning)
-        elsif drag.moved
+        elsif drag.adjusted
           finish(drag)
         end
         view.invalidate if view.respond_to?(:invalidate)
@@ -182,9 +183,10 @@ module PhComposer
         candidate, height, colour = shown
         return unless candidate && view.respond_to?(:draw)
 
-        points = @visibility.clip_segments(Prism.outline(candidate.prism_at(height)).flatten(1).map do |corner|
-          inches(corner)
-        end, candidate.path)
+        # Read for this frame: toggling section cuts moves no revision.
+        points = ColourBy::OccurrenceVisibility.new(@session.model).clip_segments(
+          Prism.outline(candidate.prism_at(height)).flatten(1).map { |corner| inches(corner) }, candidate.path
+        )
         return if points.empty?
 
         view.drawing_color = Sketchup::Color.new(*colour) if view.respond_to?(:drawing_color=)
@@ -302,6 +304,7 @@ module PhComposer
         rise = PrismPick.rise(drag.anchor, *ray(view, x, y))
         return unless rise
 
+        drag.adjusted = true
         drag.height = [drag.candidate.height.to_f + rise, 0.0].max
         show_measurement(drag.height)
       end

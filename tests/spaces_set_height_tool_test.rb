@@ -196,6 +196,27 @@ class SpacesSetHeightToolTest < PhComposerTestCase
     assert_match(/above its floor/, Sketchup.status_texts.last)
   end
 
+  def test_a_drag_in_a_view_that_gives_no_height_writes_nothing
+    store = PhComposer::Spaces::VOLUME_STORE
+    store.write(volume, store.read(volume).merge(KEY => 2.5004))
+    press(aim(0, 0, *FROM_ABOVE))
+    operations = @model.operations.length
+    drag_to(aim(100, 0, *FROM_ABOVE))
+    release
+    assert_equal operations, @model.operations.length
+    assert_equal 2.5004, height, "not even rounded to the millimetre"
+  end
+
+  def test_the_highlight_follows_a_section_cut_turned_off_after_the_pick
+    upper_storey_and_section_below(1.0)
+    press(aim(0, 0, *FROM_ABOVE))
+    release
+    @model.entities.active_section_plane = nil
+    @view.draws.clear
+    tool.draw(@view)
+    assert_operator @view.draws.last[1].map(&:z).max, :>, 2.4 * INCHES, "no revision moved, and the top is back"
+  end
+
   def test_a_press_on_nothing_picks_nothing
     press(aim(0, 0, [50.0, 50.0, 20.0], [0.0, 0.0, -1.0]))
     release
