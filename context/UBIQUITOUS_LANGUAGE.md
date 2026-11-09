@@ -127,14 +127,15 @@ not coin a third vocabulary between SketchUp and honeybee. Faces belong to a Zon
 | Space | One unique SketchUp Group hosted in a Zone through the Zone reference on its record, containing one or more Volumes and Space-level data: iCFA, ventilation airflows, occupancy. Maps to a honeybee-ph `Space` on its Zone's Room. Do not call it Room in product copy, and do not confuse it with honeybee's Room, which is a Zone |
 | Volume | A protected structural Group directly inside a Space, holding one logical Space Floor |
 | Space Floor | Logical grouping of Floor Segments in a Volume; not another SketchUp Group |
+| Floor surface | The Face or Faces drawn to define a Space's floor. Create Space turns each one into a Floor Segment. Do not call it an outline in product copy |
 | Floor Segment | A face inside a Volume that the user has marked as floor area, carrying PH-Composer identity, a weighting factor and a net area factor. In the predecessor this identity sat on a designPH TFA face; here PH-Composer owns the classification. Maps to honeybee-ph `SpaceFloorSegment` |
 | Weighting factor | The share of a Floor Segment's area that counts toward iCFA, a number from 0 to 1 (honeybee-ph's `weighting_factor`): 1 counts it whole, 0 not at all. What counts is the user's to decide from the Phius rule; nothing enforces it |
 | Net area factor | The share of a Floor Segment's area that counts toward net volume, default 1 |
 | Average clear ceiling height | The one height a Volume carries. Net volume is net floor area times this height, as honeybee-ph's `SpaceVolume` computes it |
 | Volume preview | The overlay extrusion of a Volume's Floor Segments by its height. Drawn, never modeled |
 | Height from solid | The helper that sets a Volume's height from a closed group the user drew: the group's volume divided by the Volume's net floor area |
-| Set height | The viewport tool that sets one Volume's height: click its prism, then drag the top or type a value in the measurements box |
-| Edit outline | The context-menu item that opens a selected Volume, or a Space's one Volume, unprotected, as Enter does in the Spaces view |
+| Set Height | The viewport tool that sets one Volume's height: click its prism, then drag the top or type a value in the measurements box |
+| Edit Floor Surface | The context-menu item that opens a selected Volume, or a Space's one Volume, unprotected, as Enter does in the Spaces view |
 | Space label | Viewport text at a Space's reference point: number, name, iCFA, net volume, airflows |
 | Selection totals | The HUD readout of summed iCFA, net volume and airflows for the selected Spaces |
 | Airflow balance | Each Zone row of the Spaces view: its Spaces' supply, extract and transfer sums. A Zone holding a Space that inherits its airflow shows a dash. Nothing compares supply with extract per Zone: balance is per ventilator, and that check belongs to the planned Zones / Ventilation view |

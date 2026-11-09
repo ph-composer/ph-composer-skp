@@ -2,27 +2,26 @@
 
 module PhComposer
   module Spaces
-    # The native route to a Space's outline: on one selected Volume, or a Space with one Volume, it does what the
+    # The native route to a Space's floor surface: on one selected Volume, or a Space with one Volume, it does what the
     # panel's Enter does, `volumes.unprotect` when the Volume is protected and then `context.open`. Leaving the
     # Volume protects it again, as on every other route.
-    module EditOutlineMenu
-      LABEL = "Edit outline"
+    module EditFloorSurfaceMenu
+      LABEL = "Edit Floor Surface"
       UNPROTECT = "#{FEATURE_ID}.volumes.unprotect"
       OPEN = "#{FEATURE_ID}.context.open"
-      SELECT_ONE = "Select one Space or Volume, then choose Edit outline."
-      SEVERAL_VOLUMES = "This Space has several Volumes. Open the Space, select the Volume whose outline you want, " \
-                        "then choose Edit outline."
+      SELECT_ONE = "Select one Space or Volume, then choose Edit Floor Surface."
+      SEVERAL_VOLUMES = "This Space has several Volumes. Open the Space, select the Volume whose floor surface you " \
+                        "want, then choose Edit Floor Surface."
       NO_VOLUME = "This Space has no Volume to edit."
       UNPROTECTED = "The Volume was left unprotected; Undo protects it again."
 
       module_function
 
       def install(feature)
-        feature.menu_item("#{FEATURE_ID}.edit_outline_menu", :label => LABEL, :menu => EXTENSION_NAME,
-                                                             :available => lambda { |read|
-                                                               !selected(read.session).nil?
-                                                             }) do |session|
-          session.feature_state(:spaces_edit_outline_menu) { Client.new(session) }.run
+        feature.menu_item("#{FEATURE_ID}.edit_floor_surface_menu",
+                          :label => LABEL, :menu => EXTENSION_NAME,
+                          :available => ->(read) { !selected(read.session).nil? }) do |session|
+          session.feature_state(:spaces_edit_floor_surface_menu) { Client.new(session) }.run
         end
       end
 
@@ -51,11 +50,11 @@ module PhComposer
         end
 
         def run
-          entity = EditOutlineMenu.selected(@session)
+          entity = EditFloorSurfaceMenu.selected(@session)
           return say(SELECT_ONE) unless entity
 
           path = Array(@session.model.active_path).map(&:persistent_id) + [entity.persistent_id]
-          volume = Protection.volume?(entity) ? entity : EditOutlineMenu.volume_in(entity)
+          volume = Protection.volume?(entity) ? entity : EditFloorSurfaceMenu.volume_in(entity)
           return say(volume) if volume.is_a?(String)
 
           path += [volume.persistent_id] unless volume.equal?(entity)

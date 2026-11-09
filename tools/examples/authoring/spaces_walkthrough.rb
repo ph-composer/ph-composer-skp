@@ -3,11 +3,11 @@
 # Panel-closed public API example for Spaces, on any Model with two Zones:
 #   SpacesWalkthrough.run
 # Two kinds of step, kept apart. Native fixture setup (the `fixture_` methods) does what a user does with
-# SketchUp's own tools: it draws three 1 m floor outlines loose in the first Zone, 0.5 m above its origin,
+# SketchUp's own tools: it draws three 1 m floor surfaces loose in the first Zone, 0.5 m above its origin,
 # a fourth in the new Space, and later copies a Volume as a native copy leaves it. Everything else is the
 # client, through PhComposer::API alone: it moves the edit path only with `ph_composer.context.open` and
 # `.root`, finds the loose Face with `spaces.candidate_faces.list`, and never assigns a path or walks
-# geometry. The client creates the Space from the three outlines, a second Volume, one Floor Segment
+# geometry. The client creates the Space from the three floor surfaces, a second Volume, one Floor Segment
 # marked as not counting, a height, two airflows and one cleared, reads back, recovers from a stale edit,
 # reads the copy's duplicate identity and makes it independent, and moves the Space into the second
 # Zone. Each write is one Undo step; navigation adds no operation of its own, though SketchUp records

@@ -24,13 +24,14 @@ module PhComposer
       FLOOR_SEGMENT = ["floor_segment", "The Face is already a Floor Segment."].freeze
       IN_SPACE = ["in_space", "The Face is inside a Space. To add it to that Space, use Mark floor at the Space's " \
                               "root; to make a new Space, draw it outside this one."].freeze
-      # A floor outline drawn on the Zone's walls splits them and shares their Edges, so Create Space leaves
+      # A floor surface drawn on the Zone's walls splits them and shares their Edges, so Create Space leaves
       # it out; the way out is to draw it where it touches no other Face.
       SHARES_EDGE = "The Face shares an Edge with an unselected Face; grouping it would split that Face. Undo " \
-                    "the outline, then draw it just below the floor or inset from the walls, touching no other Face."
+                    "the floor surface, then draw it just below the floor or inset from the walls, touching no " \
+                    "other Face."
       # The Faces of a closed solid, whatever the slope of its sides: taking its top and bottom would count the
       # floor twice, so none is taken. A vertical wall among them is left out as a wall.
-      SOLID = "The Face is part of a solid. A Space is a floor outline plus a height: draw the floor outline " \
+      SOLID = "The Face is part of a solid. A Space is a floor surface plus a height: draw the floor surface " \
               "alone, touching no other Face, then set the height, or group the solid and use Height from solid."
 
       # A Face Create Space would take: its root-to-Face path and its persistent id.

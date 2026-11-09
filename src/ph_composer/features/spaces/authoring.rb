@@ -37,14 +37,14 @@ module PhComposer
       def create(request, proposal, faces:, zone: nil, name: nil, number: nil, weighting_factor: 1.0)
         context = Resolve.integer_path(faces.first)[0...-1]
         context_open!(request.model, context,
-                      "A Space is a floor outline plus a height: open the edit context holding the outline to " \
-                      "create a Space from it.")
+                      "A Space is a floor surface plus a height: open the edit context holding its Faces to " \
+                      "create a Space from them.")
         found = CreateFaces.read(request, faces)
         face_ids = found.eligible.map(&:face_id)
         if face_ids.empty?
           raise CodedError.new("space.nothing_to_create",
-                               "None of those Faces can become a Space. A Space is a floor outline plus a height: " \
-                               "select the floor outline alone. Nothing was written.")
+                               "None of those Faces can become a Space. A Space is a floor surface plus a height: " \
+                               "select only the floor surface's Faces. Nothing was written.")
         end
 
         zone_id = zone && host_zone_id(request, zone)

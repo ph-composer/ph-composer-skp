@@ -2,7 +2,7 @@
 
 module PhComposer
   module Spaces
-    # Pure: which Zone a floor outline drawn outside every Zone belongs in, for Create Space's review to
+    # Pure: which Zone a floor surface drawn outside every Zone belongs in, for Create Space's review to
     # preselect. A Zone holds the outline when the outline's plan centroid is inside the plan projection of one
     # of the Zone's Faces and every outline point is inside the Zone's height range. Walls project to nothing,
     # so an L-shaped Zone's notch holds nothing. The first Zone in the order given wins; the user can change it.

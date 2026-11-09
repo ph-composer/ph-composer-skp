@@ -10,7 +10,7 @@ Plan: [PLAN.md](PLAN.md). States: `Scoped` · `In progress` · `Implemented on b
 
 | Stage | Issues | State | PR | Evidence |
 | --- | --- | --- | --- | --- |
-| SUI-01 | #416 | Scoped | | |
+| SUI-01 | #416 | Implemented on branch | | `make ci` exit 0 (Ruby 2527 runs, 0 failures; JS 856 pass; Python 264 passed; fixtures up to date; RBZ verified). `make ui-checks UI_CHECKS=tools/ui-preview/spaces_checks.cjs` passed. Host check recorded in the PR |
 | SUI-02 | #417 | Scoped | | |
 | SUI-03 | #419, #421 | Scoped | | |
 | SUI-04 | #422 | Scoped | | |
