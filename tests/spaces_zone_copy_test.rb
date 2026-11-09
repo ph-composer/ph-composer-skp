@@ -29,8 +29,6 @@ class SpacesZoneCopyTest < PhComposerTestCase
                                                                                          segment_record("C"))])])
     @zone = zone_group(100, "Z", [@living, @hall])
     @model.entities << @zone
-    stamp = ZONES::Schema.stamp(ZONES::ZONE_STORE.read(@zone))
-    [@living, @hall].each { |space| ZONES::STAMP_STORE.write(space, stamp) }
   end
 
   def copy_zone(persistent_id, natively: false)
@@ -77,8 +75,6 @@ class SpacesZoneCopyTest < PhComposerTestCase
     assert_empty ids(copied) & before
     assert_equal ids(copied).uniq, ids(copied)
     assert_equal %w[1 2], copied.map { |row| row.dig("values", "number") }
-    new_zone_id = ZONES::ZONE_STORE.read(copy).fetch("id")
-    copy.entities.to_a.each { |space| assert_equal new_zone_id, ZONES::STAMP_STORE.read(space).fetch("zone_id") }
     (rows_under(@zone) + copied).each do |row|
       refute_includes row.fetch("findings").map { |finding| finding["code"] }, "space.duplicate_identity"
     end

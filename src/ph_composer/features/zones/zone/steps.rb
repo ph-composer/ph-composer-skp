@@ -5,8 +5,7 @@ module PhComposer
     class MakeZoneStep
       attr_reader :affected
 
-      # `regroup` always groups the members anew, as Restore does: they may include a stamped Group, which
-      # is a member and never the Zone's own Group.
+      # `regroup` always groups the members anew, as Restore does.
       def initialize(parent_path:, entity_ids:, record:, regroup: false)
         @parent_path = parent_path.freeze
         @entity_ids = entity_ids.freeze
@@ -83,8 +82,7 @@ module PhComposer
         occurrence.entity.name = @after.fetch("name") if occurrence.entity.respond_to?(:name=)
         Names.track(model, occurrence.entity)
         stamp = Schema.stamp(@after)
-        stamped = Occurrences.faces(occurrence).map(&:entity) + Occurrences.containers(occurrence).map(&:first)
-        stamped.each do |entity|
+        Occurrences.faces(occurrence).map(&:entity).each do |entity|
           existing = STAMP_STORE.read(entity)
           STAMP_STORE.write(entity, stamp) if existing && existing["zone_id"] == @after.fetch("id")
         end
@@ -115,77 +113,9 @@ module PhComposer
       def restore; end
     end
 
-    # Stamps a Group the calling feature's own earlier step created in this proposal, making it a nested
-    # container of the Zone (context/CONTRACTS.md, "Zones geometry rules"). That step leaves the Group's
-    # root-to-Group path in `slots[slot]` as `{ "entity_path" => [...] }`; Zones writes the stamp, so the
-    # stamp stays Zones' to write wherever it is stored.
-    class StampContainerStep
-      attr_reader :affected
-
-      def initialize(zone:, slot:)
-        @zone = DeepCopy.call(zone).freeze
-        @slot = slot.dup.freeze
-        @affected = []
-        @written = nil
-      end
-
-      def descriptor
-        { "name" => "stamp_container", "zone" => @zone, "slot" => @slot }
-      end
-
-      def apply(model, slots)
-        zone = Occurrences.resolve_zone(model, @zone, :mutable => true)
-        raise CodedError.new("target.locked", "The Zone is locked.") if zone.entity.locked?
-
-        path = Array(slots.fetch(@slot) { raise InternalError, "No step filled the container slot #{@slot}." }
-                          .fetch("entity_path"))
-        group = container_at(zone, path)
-        @written = [group, STAMP_STORE.read(group)]
-        STAMP_STORE.write(group, Schema.stamp(zone.record))
-      end
-
-      def restore(_model)
-        return unless @written
-
-        group, before = @written
-        before ? STAMP_STORE.write(group, before) : STAMP_STORE.delete(group)
-      end
-
-      private
-
-      # The Group must lie inside this Zone occurrence through plain Groups only, as `containers` finds it.
-      def container_at(zone, path)
-        inside = path[zone.path.length..-1]
-        unless path[0, zone.path.length] == zone.path && inside && !inside.empty?
-          raise CodedError.new("target.wrong_hierarchy", "The container is not inside that Zone.")
-        end
-
-        entities = zone.entity.entities
-        group = nil
-        inside.each_with_index do |persistent_id, index|
-          group = Occurrences.unique_entity(entities, persistent_id)
-          unless group.is_a?(Sketchup::Group) && !ZONE_STORE.read(group)
-            raise CodedError.new("target.wrong_kind", "A container is a Group inside the Zone, through Groups only.")
-          end
-          raise CodedError.new("target.locked", "A Group on the container's path is locked.") if group.locked?
-          if Occurrences.shared_storage?(group)
-            raise CodedError.new("target.shared_definition", "The container's path runs through shared storage.")
-          end
-          # A container inside another is not one of the Zone's containers, so its stamp would go stale.
-          if index < inside.length - 1 && !group.get_attribute(STAMP_DICTIONARY, STAMP_STORE.key).nil?
-            raise CodedError.new("target.wrong_hierarchy", "The container would be inside another container.")
-          end
-
-          entities = group.entities
-        end
-        group
-      end
-    end
-
     # Gives one copied Zone occurrence an identity of its own. Every write lands inside that
     # occurrence's path, so the Zone it was copied from and that Zone's pairs are left exactly as
-    # they were. The copy's own pairs go: a copied adjacency envelope was never a relationship. Its
-    # nested containers' stamps name the new identity, as its Faces' do.
+    # they were. The copy's own pairs go: a copied adjacency envelope was never a relationship.
     class RepairIdentityStep
       attr_reader :affected
 
@@ -221,7 +151,6 @@ module PhComposer
           Faces::FACE_STORE.write(occurrence.entity, after) if after
           STAMP_STORE.write(occurrence.entity, face.fetch(:stamp))
         end
-        Occurrences.containers(zone).each { |group, _path| STAMP_STORE.write(group, Schema.stamp(@record)) }
       end
 
       private
@@ -270,7 +199,6 @@ module PhComposer
         @contents = MakeIndependentStep.contents(plan).freeze
         @catalog = catalog
         @captured = nil
-        @stamps = []
         new_id = @record.fetch("id")
         @affected = [{ "kind" => "zone", "id" => new_id, "change" => "updated",
                        "reference" => @reference.merge("zone_id" => new_id) }]
@@ -335,13 +263,10 @@ module PhComposer
       def restore
         return 0 unless @captured
 
-        @stamps.each do |group, raw|
-          raw.nil? ? STAMP_STORE.delete(group) : group.set_attribute(STAMP_DICTIONARY, STAMP_STORE.key, raw)
-        end
         @captured.each do |captured|
           store = captured.store
           captured.record ? store.write(captured.entity, captured.record) : store.delete(captured.entity)
-        end.length + @stamps.length
+        end.length
       end
 
       private
@@ -354,17 +279,12 @@ module PhComposer
         resolved.each do |occurrence, _face|
           @captured << capture(Faces::FACE_STORE, occurrence.entity) << capture(STAMP_STORE, occurrence.entity)
         end
-        containers = Occurrences.containers(zone).map(&:first)
-        # A container's stamp attribute is captured as stored: its presence makes the Group a container
-        # whatever its value reads as, and restore must not turn its Faces into the Zone's.
-        @stamps = containers.map { |group| [group, group.get_attribute(STAMP_DICTIONARY, STAMP_STORE.key)] }
         ZONE_STORE.write(zone.entity, @record)
         resolved.each do |occurrence, face|
           after = face.fetch(:after)
           Faces::FACE_STORE.write(occurrence.entity, after) if after
           STAMP_STORE.write(occurrence.entity, face.fetch(:stamp))
         end
-        containers.each { |group| STAMP_STORE.write(group, Schema.stamp(@record)) }
         @affected = @affected.take(1) + resolved.filter_map { |_occurrence, face| face_affected(face) }
       end
 

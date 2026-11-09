@@ -8,9 +8,9 @@ module PhComposer
     # gesture writes nothing, and one completed gesture is one invoke and one Undo step.
     #
     # What a pick means: a Face directly inside a Volume is marked with the weighting factor; a Face at a
-    # Space's root becomes that Space's next Volume; a Face directly in a Zone and in no Space is offered
-    # Create Space, and nothing is written on the click; a classified Zone Face, or a Face in no Zone,
-    # refuses with the reason. One gesture works in one place, so a drag mixing those refuses whole.
+    # Space's root becomes that Space's next Volume; a Face loose in the open context and in no Space is
+    # offered Create Space, and nothing is written on the click; a classified Zone Face, or a Face inside a
+    # closed Group, refuses with the reason. One gesture works in one place, so a drag mixing those refuses whole.
     #
     # The weighting factor is this Model's choice, set when the tool starts; a gesture freezes it, and the
     # revision, at button-down, so a factor chosen mid-drag cannot change what the drag writes.
@@ -25,7 +25,7 @@ module PhComposer
       OUTLINE_ALPHA = 230
       MIXED = "One gesture marks Faces in one place: inside Volumes, or at one Space's root. Nothing was written."
       CANCELLED = "The Mark floor gesture was cancelled. Nothing was written."
-      OFFER = "That Face is in a Zone and in no Space. Right-click it and choose Create Space to make one from it."
+      OFFER = "That Face is in no Space. Right-click it and choose Create Space to make one from it."
 
       attr_reader :weighting_factor, :offered
 

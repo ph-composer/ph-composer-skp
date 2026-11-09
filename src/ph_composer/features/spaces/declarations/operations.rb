@@ -8,11 +8,7 @@ module PhComposer
     module OperationRegistration
       ZONE = Shapes.object({ "zone_id" => Shapes::TEXT, "zone_path" => Shapes::ZONE_PATH },
                            :description => "The Zone occurrence, as ph_composer.zones.list returns it.")
-      FACE = Shapes.object({ "zone_id" => Shapes::TEXT, "zone_path" => Shapes::ZONE_PATH,
-                             "entity_path" => Shapes::ZONE_PATH, "entity_id" => { "type" => %w[string null] } },
-                           :description => "A Zone Face, as ph_composer.zones.faces.list returns it.")
-      FACES = Shapes.list(FACE).merge("minItems" => 1, "maxItems" => Pages::MAXIMUM_LIMIT,
-                                      "description" => "Loose Faces of the Zone, as its Face list returns them.")
+      OPTIONAL_ZONE = ZONE.merge("type" => %w[object null])
       PATHS = Shapes.list(PATH).merge("minItems" => 1, "maxItems" => Pages::MAXIMUM_LIMIT,
                                       "description" => "Root-to-Face persistent-id paths.")
       # Any one of the three references: the id key it carries says which.
@@ -52,8 +48,17 @@ module PhComposer
                                                 "expects the value absent." }
       })
       IDS = Shapes.object({ "ids" => Shapes.list(Shapes::TEXT) })
-      LEFT_OUT = Shapes.object({ "reference" => FACE, "reason" => Shapes::TEXT, "message" => Shapes::TEXT })
-      PREVIEW = Shapes.object({ "accepted" => Shapes.list(FACE), "left_out" => Shapes.list(LEFT_OUT) })
+      LEFT_OUT = Shapes.object({ "path" => PATH, "reason" => Shapes::TEXT, "message" => Shapes::TEXT })
+      PREVIEW = Shapes.object({
+        "accepted" => Shapes.list(PATH), "left_out" => Shapes.list(LEFT_OUT),
+        "zone" => OPTIONAL_ZONE.merge("description" => "The open Zone, or else the Zone whose plan footprint holds " \
+                                                       "the outlines' centroid and whose height range holds them; " \
+                                                       "null when none does."),
+        "height_m" => { "type" => "number", "x-unit" => "m", "description" => "The height the new Space takes." },
+        "height_source" => { "type" => "string", "enum" => %w[last_height default],
+                             "description" => "Where the height comes from: the Model's last height, or the " \
+                                              "default until one is entered." }
+      })
       CREATED = Shapes.object({ "space_id" => Shapes::TEXT, "volume_id" => Shapes::TEXT,
                                 "floor_segment_ids" => Shapes.list(Shapes::TEXT) })
       TARGET = %w[record.unreadable target.ambiguous target.changed target.locked target.not_found
@@ -65,30 +70,33 @@ module PhComposer
       ZONE_TARGET = %w[record.unreadable target.ambiguous target.changed target.locked target.not_found
                        target.shared_definition target.wrong_hierarchy target.wrong_kind validation.failed].freeze
       EXAMPLE_ZONE = { "zone_id" => "zon_Ab12Cd34Ef56", "zone_path" => [1201] }.freeze
-      EXAMPLE_FACE = EXAMPLE_ZONE.merge("entity_path" => [1202], "entity_id" => nil).freeze
       EXAMPLE_SPACE = { "space_id" => "spc_Ab12Cd34Ef56", "entity_path" => [1201, 1300] }.freeze
       EXAMPLE_VOLUME = { "volume_id" => "vol_Ab12Cd34Ef56", "entity_path" => [1201, 1300, 1310] }.freeze
 
-      CREATE_PARAMS = Shapes.object({ "zone" => ZONE, "faces" => FACES })
+      PREVIEW_PARAMS = Shapes.object({ "faces" => PATHS })
       DEFAULT_FACTOR = 1.0
       # Each action as [name, declaration, handler]; a handler takes the request, the proposal and the params.
       ACTIONS = [
         ["create", {
-          :description => "Group explicit loose Faces of an open Zone into one new Space with one Volume, each " \
-                          "Face a Floor Segment. The Zone's edit context must be open.",
-          :refuses => (ZONE_TARGET + %w[space.context_required space.nothing_to_create]).uniq,
-          :params => Shapes.object(CREATE_PARAMS.fetch("properties").merge(
+          :description => "Make one new Space with one Volume from a floor outline: explicit Faces loose in the open " \
+                          "edit context, each becoming a Floor Segment. Works at the root, in a plain Group and in " \
+                          "an open Zone, whose Space Group is placed outside the Zone at the same world position.",
+          :refuses => (ZONE_TARGET + %w[space.context_required space.nothing_to_create target.edit_path_changed]).uniq,
+          :params => Shapes.object(PREVIEW_PARAMS.fetch("properties").merge(
+            "zone" => OPTIONAL_ZONE.merge("description" => "The Zone that hosts the new Space; absent or null for no " \
+                                                           "Zone. ph_composer.spaces.create_preview names the one " \
+                                                           "the review preselects."),
             "name" => Shapes::TEXT.merge("description" => "The new Space's name; empty when absent."),
             "number" => Shapes::TEXT.merge("description" => "The new Space's number; the " \
-                                                            "next free one in the Zone " \
-                                                            "when absent."),
+                                                            "next free one in its Zone, or among Spaces " \
+                                                            "in no Zone, when absent."),
             "weighting_factor" => FACTOR
-          ), :optional => %w[name number weighting_factor]),
-          :result => CREATED, :undo_name => "Create Space", :participants => [Authoring::STAMP],
-          :side_effects => "Groups the Faces and writes the Space, Volume, Floor Segment and Zone stamp.",
-          :examples => [{ "zone" => EXAMPLE_ZONE, "faces" => [EXAMPLE_FACE], "name" => "Living" }]
+          ), :optional => %w[zone name number weighting_factor]),
+          :result => CREATED, :undo_name => "Create Space",
+          :side_effects => "Groups the Faces and writes the Space, Volume and Floor Segment records.",
+          :examples => [{ "zone" => EXAMPLE_ZONE, "faces" => [[1202]], "name" => "Living" }]
         }, lambda { |request, proposal, params|
-          Authoring.create(request, proposal, :zone => params.fetch("zone"), :faces => params.fetch("faces"),
+          Authoring.create(request, proposal, :zone => params["zone"], :faces => params.fetch("faces"),
                                               :name => params["name"], :number => params["number"],
                                               :weighting_factor => params.fetch("weighting_factor", DEFAULT_FACTOR))
         }],
@@ -230,12 +238,13 @@ module PhComposer
 
       def install(feature)
         feature.query("#{FEATURE_ID}.create_preview",
-                      :description => "Which explicit Faces Create Space would take into a new Space, and why it " \
-                                      "leaves each other one out. Writes nothing.",
-                      :refuses => ZONE_TARGET, :params => CREATE_PARAMS, :result => PREVIEW,
-                      :examples => [{ "zone" => EXAMPLE_ZONE, "faces" => [EXAMPLE_FACE] }]) do |request|
-          Authoring.create_preview(request, :zone => request.params.fetch("zone"),
-                                            :faces => request.params.fetch("faces"))
+                      :description => "Which explicit Faces, loose in the open edit context, Create Space would take " \
+                                      "into a new Space, why it leaves each other one out, the Zone it preselects " \
+                                      "and the height the Space takes. Writes nothing.",
+                      :refuses => (ZONE_TARGET + %w[geometry.invalid]).uniq, :params => PREVIEW_PARAMS,
+                      :result => PREVIEW,
+                      :examples => [{ "faces" => [[1202]] }]) do |request|
+          Authoring.create_preview(request, :faces => request.params.fetch("faces"))
         end
         ACTIONS.each do |name, declaration, handler|
           feature.action("#{FEATURE_ID}.#{name}", **declaration) do |request, proposal|

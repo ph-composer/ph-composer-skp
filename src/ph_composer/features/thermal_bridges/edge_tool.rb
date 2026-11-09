@@ -28,8 +28,7 @@ module PhComposer
       REFUSED_COLOUR = [184, 59, 59].freeze
       REASONS = { "outside_zone" => "it is not inside a Zone", "not_found" => "it could not be found in the Model",
                   "not_a_drawing_element" => "it is not a drawing element",
-                  "cutting_instance" => "a cutting component holds it",
-                  "nested_container" => "a Group or component inside its Zone holds it" }.freeze
+                  "cutting_instance" => "a cutting component holds it" }.freeze
       CANCELLED = "The edge tool gesture was cancelled. Nothing was written."
       MISSING_TYPE = "That Thermal Bridge Type no longer exists. Choose another to assign by clicking."
 

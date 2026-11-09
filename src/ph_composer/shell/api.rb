@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 27
+    MINOR = 28
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -121,7 +121,13 @@ module PhComposer
         "change" => "A Space's Zone is the record's zone_id, a core reference; ph_composer.spaces.move_to_zone is a " \
                     "record edit and no longer refuses space.context_open. ph_composer.spaces.unhost and the " \
                     "space.zone_missing finding are new; ph_composer.zones.make_independent takes copy_added and " \
-                    "ph_composer.zones.isolate_copied_group is new, for a plain Group copied whole." }
+                    "ph_composer.zones.isolate_copied_group is new, for a plain Group copied whole." },
+      { "minor" => 28, "date" => "2026-11-09",
+        "change" => "ph_composer.spaces.create and create_preview take faces as root-to-Face paths and work in any " \
+                    "edit context; create takes an optional zone; create_preview answers zone and height_m, and " \
+                    "left_out rows carry path. create_review.open takes faces and revision and the review carries " \
+                    "zones and height_m. ph_composer.zones.stamp_container and the nested_container reason are gone; " \
+                    "zones export rows lose container_paths." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

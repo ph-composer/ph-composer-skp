@@ -1,11 +1,13 @@
 /* Create Space's review: SketchUp's context menu hands the panel what `create_preview` accepts and leaves out
  * (the `ph_composer.spaces.create_review` snapshot section), and this shows it in the shared form dialog with
- * an optional number and name. Create sends `create` with the accepted Faces at the revision the review was
- * read at, so a Model changed since refuses; Cancel, Escape and the close control change nothing. Either way
- * the review is closed by its token, so a newer review is never closed by an older dialog.
+ * a Zone choice, preselected by `create_preview`, and an optional number and name. Create sends `create` with
+ * the accepted Faces and the chosen Zone at the revision the review was read at, so a Model changed since
+ * refuses; Cancel, Escape and the close control change nothing. Either way the review is closed by its token,
+ * so a newer review is never closed by an older dialog.
  */
-PhComposerUI.define("features/spaces/create_review", ["panel", "request", "snapshot", "workspace"],
-function (panel, requests, snapshot, ui) {
+PhComposerUI.define("features/spaces/create_review", ["panel", "request", "snapshot", "workspace", "units",
+  "unit_preferences", "fields"],
+function (panel, requests, snapshot, ui, units, preferences, fields) {
   "use strict";
   var SECTION = "ph_composer.spaces.create_review", PREFIX = "ph_composer.spaces";
 
@@ -65,14 +67,18 @@ function (panel, requests, snapshot, ui) {
     var self = this, review = this.review, accepted = review.accepted.length;
     var dialog = this.dialog || (this.dialog = ui.formDialog("phc-create-space", function () { self.cancel(); }));
     if (!dialog.parentNode) document.body.appendChild(dialog);
-    var zone = review.zone_name || "the Zone";
-    var summary = accepted ? faces(accepted) + " in " + zone + (accepted === 1 ? " becomes" : " become") +
-      " one Space with one Volume, each Face a Floor Segment." :
-      "None of the selected Faces can become a Space in " + zone + ".";
-    // The shared form layout spaces the text and sets the two fields side by side.
+    var summary = accepted ? "A Space is a floor outline plus a height. " + faces(accepted) +
+      (accepted === 1 ? " becomes" : " become") + " one Space with one Volume, each Face a Floor Segment." :
+      "A Space is a floor outline plus a height. None of the selected Faces can become one.";
+    // The shared form layout spaces the text and sets the fields side by side.
     var form = ui.element("form");
     form.addEventListener("submit", function (event) { event.preventDefault(); self.submit(); });
     form.appendChild(ui.element("p", "", summary));
+    if (accepted) {
+      form.appendChild(ui.element("p", "", "Height " +
+        units.format(review.height_m, fields.LENGTH_M, units.profile(fields.LENGTH_M, preferences.current())) +
+        (review.height_source === "last_height" ? ", the Model's last height." : ", the default height.")));
+    }
     if (review.left_out.length) {
       var reasons = Object.create(null), order = [];
       review.left_out.forEach(function (row) {
@@ -88,6 +94,7 @@ function (panel, requests, snapshot, ui) {
       leftOut.appendChild(list);
       form.appendChild(leftOut);
     }
+    this.zone = this.zonePicker(review);
     this.number = this.field("Number", "Next free");
     this.name = this.field("Name", "");
     // The shared form dialog's error line, as record forms use it.
@@ -96,12 +103,27 @@ function (panel, requests, snapshot, ui) {
     this.cancelButton = ui.button("Cancel", function () { self.cancel(); });
     this.createButton = ui.button("Create", function () { self.submit(); });
     this.createButton.disabled = !accepted;
+    form.appendChild(this.zone.label);
     form.appendChild(this.number.label);
     form.appendChild(this.name.label);
-    dialog.replaceChildren(ui.element("h2", "", "Create Space"), form, this.error,
+    dialog.replaceChildren(ui.element("h2", "", "Create Space from floor outline"), form, this.error,
       ui.actionRow(this.cancelButton, this.createButton));
     dialog.openModal();
     (accepted ? this.number.input : this.cancelButton).focus();
+  };
+
+  /* The Zone that hosts the new Space: No Zone, then each Zone, opened on the one `create_preview` preselects. */
+  CreateReview.prototype.zonePicker = function (review) {
+    var label = ui.element("label", "", "Zone"), select = ui.element("select");
+    var chosen = review.zone && JSON.stringify(review.zone.zone_path);
+    select.setAttribute("aria-label", "Zone");
+    select.appendChild(ui.option("", "No Zone"));
+    review.zones.forEach(function (zone, index) { select.appendChild(ui.option(String(index), zone.name || "Zone")); });
+    review.zones.forEach(function (zone, index) {
+      if (JSON.stringify(zone.zone_path) === chosen) select.value = String(index);
+    });
+    label.appendChild(select);
+    return { label: label, input: select };
   };
 
   /* One labelled text field; Enter in it creates, as the Create button does. */
@@ -120,8 +142,9 @@ function (panel, requests, snapshot, ui) {
 
   CreateReview.prototype.submit = function () {
     if (!this.review || !this.review.accepted.length || this.creating.busy()) return;
-    var params = { zone: copy(this.review.zone), faces: copy(this.review.accepted),
-      name: this.name.input.value.trim() };
+    var picked = this.review.zones[this.zone.input.value];
+    var params = { zone: picked ? { zone_id: picked.zone_id, zone_path: copy(picked.zone_path) } : null,
+      faces: copy(this.review.accepted), name: this.name.input.value.trim() };
     var number = this.number.input.value.trim();
     if (number) params.number = number;
     this.error.textContent = "";

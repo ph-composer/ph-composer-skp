@@ -7638,9 +7638,9 @@ Example params:
 
 ### `ph_composer.spaces.create_preview`
 
-Which explicit Faces Create Space would take into a new Space, and why it leaves each other one out. Writes nothing. Owner: `ph_composer.spaces`.
+Which explicit Faces, loose in the open edit context, Create Space would take into a new Space, why it leaves each other one out, the Zone it preselects and the height the Space takes. Writes nothing. Owner: `ph_composer.spaces`.
 
-Refuses: `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+Refuses: `geometry.invalid`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -7649,12 +7649,85 @@ Params:
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "zone",
     "faces"
   ],
   "properties": {
+    "faces": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        },
+        "minItems": 1,
+        "description": "The root-to-entity persistent-id path."
+      },
+      "minItems": 1,
+      "maxItems": 500,
+      "description": "Root-to-Face persistent-id paths."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accepted",
+    "left_out",
+    "zone",
+    "height_m",
+    "height_source"
+  ],
+  "properties": {
+    "accepted": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        },
+        "minItems": 1,
+        "description": "The root-to-entity persistent-id path."
+      }
+    },
+    "left_out": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "reason",
+          "message"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 1,
+            "description": "The root-to-entity persistent-id path."
+          },
+          "reason": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "zone": {
-      "type": "object",
+      "type": [
+        "object",
+        "null"
+      ],
       "additionalProperties": false,
       "required": [
         "zone_id",
@@ -7671,153 +7744,20 @@ Params:
           }
         }
       },
-      "description": "The Zone occurrence, as ph_composer.zones.list returns it."
+      "description": "The open Zone, or else the Zone whose plan footprint holds the outlines' centroid and whose height range holds them; null when none does."
     },
-    "faces": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "zone_id",
-          "zone_path",
-          "entity_path",
-          "entity_id"
-        ],
-        "properties": {
-          "zone_id": {
-            "type": "string"
-          },
-          "zone_path": {
-            "type": "array",
-            "items": {
-              "type": "integer"
-            }
-          },
-          "entity_path": {
-            "type": "array",
-            "items": {
-              "type": "integer"
-            }
-          },
-          "entity_id": {
-            "type": [
-              "string",
-              "null"
-            ]
-          }
-        },
-        "description": "A Zone Face, as ph_composer.zones.faces.list returns it."
-      },
-      "minItems": 1,
-      "maxItems": 500,
-      "description": "Loose Faces of the Zone, as its Face list returns them."
-    }
-  }
-}
-```
-
-Result:
-
-```json
-{
-  "type": "object",
-  "additionalProperties": false,
-  "required": [
-    "accepted",
-    "left_out"
-  ],
-  "properties": {
-    "accepted": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "zone_id",
-          "zone_path",
-          "entity_path",
-          "entity_id"
-        ],
-        "properties": {
-          "zone_id": {
-            "type": "string"
-          },
-          "zone_path": {
-            "type": "array",
-            "items": {
-              "type": "integer"
-            }
-          },
-          "entity_path": {
-            "type": "array",
-            "items": {
-              "type": "integer"
-            }
-          },
-          "entity_id": {
-            "type": [
-              "string",
-              "null"
-            ]
-          }
-        },
-        "description": "A Zone Face, as ph_composer.zones.faces.list returns it."
-      }
+    "height_m": {
+      "type": "number",
+      "x-unit": "m",
+      "description": "The height the new Space takes."
     },
-    "left_out": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "reference",
-          "reason",
-          "message"
-        ],
-        "properties": {
-          "reference": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "zone_id",
-              "zone_path",
-              "entity_path",
-              "entity_id"
-            ],
-            "properties": {
-              "zone_id": {
-                "type": "string"
-              },
-              "zone_path": {
-                "type": "array",
-                "items": {
-                  "type": "integer"
-                }
-              },
-              "entity_path": {
-                "type": "array",
-                "items": {
-                  "type": "integer"
-                }
-              },
-              "entity_id": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            },
-            "description": "A Zone Face, as ph_composer.zones.faces.list returns it."
-          },
-          "reason": {
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      }
+    "height_source": {
+      "type": "string",
+      "enum": [
+        "last_height",
+        "default"
+      ],
+      "description": "Where the height comes from: the Model's last height, or the default until one is entered."
     }
   }
 }
@@ -7827,23 +7767,10 @@ Example params:
 
 ```json
 {
-  "zone": {
-    "zone_id": "zon_Ab12Cd34Ef56",
-    "zone_path": [
-      1201
-    ]
-  },
   "faces": [
-    {
-      "zone_id": "zon_Ab12Cd34Ef56",
-      "zone_path": [
-        1201
-      ],
-      "entity_path": [
-        1202
-      ],
-      "entity_id": null
-    }
+    [
+      1202
+    ]
   ]
 }
 ```
@@ -7875,9 +7802,11 @@ Result:
     "token",
     "revision",
     "zone",
-    "zone_name",
+    "zones",
     "accepted",
-    "left_out"
+    "left_out",
+    "height_m",
+    "height_source"
   ],
   "properties": {
     "token": {
@@ -7915,12 +7844,9 @@ Result:
           }
         }
       },
-      "description": "The Zone occurrence, as ph_composer.zones.list returns it."
+      "description": "The Zone preselected; null for none."
     },
-    "zone_name": {
-      "type": "string"
-    },
-    "accepted": {
+    "zones": {
       "type": "array",
       "items": {
         "type": "object",
@@ -7928,8 +7854,7 @@ Result:
         "required": [
           "zone_id",
           "zone_path",
-          "entity_path",
-          "entity_id"
+          "name"
         ],
         "properties": {
           "zone_id": {
@@ -7941,20 +7866,21 @@ Result:
               "type": "integer"
             }
           },
-          "entity_path": {
-            "type": "array",
-            "items": {
-              "type": "integer"
-            }
-          },
-          "entity_id": {
-            "type": [
-              "string",
-              "null"
-            ]
+          "name": {
+            "type": "string"
           }
+        }
+      }
+    },
+    "accepted": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "integer"
         },
-        "description": "A Zone Face, as ph_composer.zones.faces.list returns it."
+        "minItems": 1,
+        "description": "The root-to-entity persistent-id path."
       }
     },
     "left_out": {
@@ -7963,44 +7889,18 @@ Result:
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "reference",
+          "path",
           "reason",
           "message"
         ],
         "properties": {
-          "reference": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "zone_id",
-              "zone_path",
-              "entity_path",
-              "entity_id"
-            ],
-            "properties": {
-              "zone_id": {
-                "type": "string"
-              },
-              "zone_path": {
-                "type": "array",
-                "items": {
-                  "type": "integer"
-                }
-              },
-              "entity_path": {
-                "type": "array",
-                "items": {
-                  "type": "integer"
-                }
-              },
-              "entity_id": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
             },
-            "description": "A Zone Face, as ph_composer.zones.faces.list returns it."
+            "minItems": 1,
+            "description": "The root-to-entity persistent-id path."
           },
           "reason": {
             "type": "string"
@@ -8010,6 +7910,26 @@ Result:
           }
         }
       }
+    },
+    "height_m": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-unit": "m",
+      "description": "The height the new Space takes."
+    },
+    "height_source": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        null,
+        "last_height",
+        "default"
+      ],
+      "description": "Where the height comes from."
     }
   }
 }
@@ -18441,10 +18361,9 @@ Result:
               "not_found",
               "not_a_drawing_element",
               "cutting_instance",
-              "outside_zone",
-              "nested_container"
+              "outside_zone"
             ],
-            "description": "Why no Zone holds it: a step missing or repeated, not a drawing element, under a cutting component, outside every Zone, or inside a nested container. Null with a Zone."
+            "description": "Why no Zone holds it: a step missing or repeated, not a drawing element, under a cutting component, or outside every Zone. Null with a Zone."
           },
           "write_refusal": {
             "type": [
@@ -30284,13 +30203,11 @@ Example params:
 
 ### `ph_composer.spaces.create`
 
-Group explicit loose Faces of an open Zone into one new Space with one Volume, each Face a Floor Segment. The Zone's edit context must be open. Owner: `ph_composer.spaces`.
+Make one new Space with one Volume from a floor outline: explicit Faces loose in the open edit context, each becoming a Floor Segment. Works at the root, in a plain Group and in an open Zone, whose Space Group is placed outside the Zone at the same world position. Owner: `ph_composer.spaces`.
 
-Undo step: Create Space. Groups the Faces and writes the Space, Volume, Floor Segment and Zone stamp.
+Undo step: Create Space. Groups the Faces and writes the Space, Volume and Floor Segment records.
 
-Calls: `ph_composer.zones.stamp_container`.
-
-Refuses: `operation.participant_cycle`, `operation.proposal_required`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `space.context_required`, `space.nothing_to_create`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+Refuses: `record.unreadable`, `space.context_required`, `space.nothing_to_create`, `target.ambiguous`, `target.changed`, `target.edit_path_changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -30299,12 +30216,28 @@ Params:
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "zone",
     "faces"
   ],
   "properties": {
+    "faces": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        },
+        "minItems": 1,
+        "description": "The root-to-entity persistent-id path."
+      },
+      "minItems": 1,
+      "maxItems": 500,
+      "description": "Root-to-Face persistent-id paths."
+    },
     "zone": {
-      "type": "object",
+      "type": [
+        "object",
+        "null"
+      ],
       "additionalProperties": false,
       "required": [
         "zone_id",
@@ -30321,47 +30254,7 @@ Params:
           }
         }
       },
-      "description": "The Zone occurrence, as ph_composer.zones.list returns it."
-    },
-    "faces": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "zone_id",
-          "zone_path",
-          "entity_path",
-          "entity_id"
-        ],
-        "properties": {
-          "zone_id": {
-            "type": "string"
-          },
-          "zone_path": {
-            "type": "array",
-            "items": {
-              "type": "integer"
-            }
-          },
-          "entity_path": {
-            "type": "array",
-            "items": {
-              "type": "integer"
-            }
-          },
-          "entity_id": {
-            "type": [
-              "string",
-              "null"
-            ]
-          }
-        },
-        "description": "A Zone Face, as ph_composer.zones.faces.list returns it."
-      },
-      "minItems": 1,
-      "maxItems": 500,
-      "description": "Loose Faces of the Zone, as its Face list returns them."
+      "description": "The Zone that hosts the new Space; absent or null for no Zone. ph_composer.spaces.create_preview names the one the review preselects."
     },
     "name": {
       "type": "string",
@@ -30369,7 +30262,7 @@ Params:
     },
     "number": {
       "type": "string",
-      "description": "The new Space's number; the next free one in the Zone when absent."
+      "description": "The new Space's number; the next free one in its Zone, or among Spaces in no Zone, when absent."
     },
     "weighting_factor": {
       "type": "number",
@@ -30420,16 +30313,9 @@ Example params:
     ]
   },
   "faces": [
-    {
-      "zone_id": "zon_Ab12Cd34Ef56",
-      "zone_path": [
-        1201
-      ],
-      "entity_path": [
-        1202
-      ],
-      "entity_id": null
-    }
+    [
+      1202
+    ]
   ],
   "name": "Living"
 }
@@ -51349,9 +51235,11 @@ Result:
     "token",
     "revision",
     "zone",
-    "zone_name",
+    "zones",
     "accepted",
-    "left_out"
+    "left_out",
+    "height_m",
+    "height_source"
   ],
   "properties": {
     "token": {
@@ -51389,12 +51277,9 @@ Result:
           }
         }
       },
-      "description": "The Zone occurrence, as ph_composer.zones.list returns it."
+      "description": "The Zone preselected; null for none."
     },
-    "zone_name": {
-      "type": "string"
-    },
-    "accepted": {
+    "zones": {
       "type": "array",
       "items": {
         "type": "object",
@@ -51402,8 +51287,7 @@ Result:
         "required": [
           "zone_id",
           "zone_path",
-          "entity_path",
-          "entity_id"
+          "name"
         ],
         "properties": {
           "zone_id": {
@@ -51415,20 +51299,21 @@ Result:
               "type": "integer"
             }
           },
-          "entity_path": {
-            "type": "array",
-            "items": {
-              "type": "integer"
-            }
-          },
-          "entity_id": {
-            "type": [
-              "string",
-              "null"
-            ]
+          "name": {
+            "type": "string"
           }
+        }
+      }
+    },
+    "accepted": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "integer"
         },
-        "description": "A Zone Face, as ph_composer.zones.faces.list returns it."
+        "minItems": 1,
+        "description": "The root-to-entity persistent-id path."
       }
     },
     "left_out": {
@@ -51437,44 +51322,18 @@ Result:
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "reference",
+          "path",
           "reason",
           "message"
         ],
         "properties": {
-          "reference": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "zone_id",
-              "zone_path",
-              "entity_path",
-              "entity_id"
-            ],
-            "properties": {
-              "zone_id": {
-                "type": "string"
-              },
-              "zone_path": {
-                "type": "array",
-                "items": {
-                  "type": "integer"
-                }
-              },
-              "entity_path": {
-                "type": "array",
-                "items": {
-                  "type": "integer"
-                }
-              },
-              "entity_id": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
             },
-            "description": "A Zone Face, as ph_composer.zones.faces.list returns it."
+            "minItems": 1,
+            "description": "The root-to-entity persistent-id path."
           },
           "reason": {
             "type": "string"
@@ -51484,6 +51343,26 @@ Result:
           }
         }
       }
+    },
+    "height_m": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-unit": "m",
+      "description": "The height the new Space takes."
+    },
+    "height_source": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        null,
+        "last_height",
+        "default"
+      ],
+      "description": "Where the height comes from."
     }
   }
 }
@@ -51499,9 +51378,9 @@ Example params:
 
 ### `ph_composer.spaces.create_review.open`
 
-Review which explicit Faces Create Space would take into a new Space and why it leaves each other one out, for the panel to confirm. Owner: `ph_composer.spaces`.
+Review which explicit Faces Create Space would take into a new Space, why it leaves each other one out, and which Zone hosts it, for the panel to confirm. Owner: `ph_composer.spaces`.
 
-Refuses: `record.unreadable`, `revision.stale`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `view_command` common set.
+Refuses: `geometry.invalid`, `record.unreadable`, `revision.stale`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `view_command` common set.
 
 Params:
 
@@ -51510,70 +51389,23 @@ Params:
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "zone",
     "faces",
     "revision"
   ],
   "properties": {
-    "zone": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "zone_id",
-        "zone_path"
-      ],
-      "properties": {
-        "zone_id": {
-          "type": "string"
-        },
-        "zone_path": {
-          "type": "array",
-          "items": {
-            "type": "integer"
-          }
-        }
-      },
-      "description": "The Zone occurrence, as ph_composer.zones.list returns it."
-    },
     "faces": {
       "type": "array",
       "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "zone_id",
-          "zone_path",
-          "entity_path",
-          "entity_id"
-        ],
-        "properties": {
-          "zone_id": {
-            "type": "string"
-          },
-          "zone_path": {
-            "type": "array",
-            "items": {
-              "type": "integer"
-            }
-          },
-          "entity_path": {
-            "type": "array",
-            "items": {
-              "type": "integer"
-            }
-          },
-          "entity_id": {
-            "type": [
-              "string",
-              "null"
-            ]
-          }
+        "type": "array",
+        "items": {
+          "type": "integer"
         },
-        "description": "A Zone Face, as ph_composer.zones.faces.list returns it."
+        "minItems": 1,
+        "description": "The root-to-entity persistent-id path."
       },
       "minItems": 1,
       "maxItems": 500,
-      "description": "Loose Faces of the Zone, as its Face list returns them."
+      "description": "Root-to-Face persistent-id paths."
     },
     "revision": {
       "type": "integer",
@@ -51593,9 +51425,11 @@ Result:
     "token",
     "revision",
     "zone",
-    "zone_name",
+    "zones",
     "accepted",
-    "left_out"
+    "left_out",
+    "height_m",
+    "height_source"
   ],
   "properties": {
     "token": {
@@ -51633,12 +51467,9 @@ Result:
           }
         }
       },
-      "description": "The Zone occurrence, as ph_composer.zones.list returns it."
+      "description": "The Zone preselected; null for none."
     },
-    "zone_name": {
-      "type": "string"
-    },
-    "accepted": {
+    "zones": {
       "type": "array",
       "items": {
         "type": "object",
@@ -51646,8 +51477,7 @@ Result:
         "required": [
           "zone_id",
           "zone_path",
-          "entity_path",
-          "entity_id"
+          "name"
         ],
         "properties": {
           "zone_id": {
@@ -51659,20 +51489,21 @@ Result:
               "type": "integer"
             }
           },
-          "entity_path": {
-            "type": "array",
-            "items": {
-              "type": "integer"
-            }
-          },
-          "entity_id": {
-            "type": [
-              "string",
-              "null"
-            ]
+          "name": {
+            "type": "string"
           }
+        }
+      }
+    },
+    "accepted": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "integer"
         },
-        "description": "A Zone Face, as ph_composer.zones.faces.list returns it."
+        "minItems": 1,
+        "description": "The root-to-entity persistent-id path."
       }
     },
     "left_out": {
@@ -51681,44 +51512,18 @@ Result:
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "reference",
+          "path",
           "reason",
           "message"
         ],
         "properties": {
-          "reference": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "zone_id",
-              "zone_path",
-              "entity_path",
-              "entity_id"
-            ],
-            "properties": {
-              "zone_id": {
-                "type": "string"
-              },
-              "zone_path": {
-                "type": "array",
-                "items": {
-                  "type": "integer"
-                }
-              },
-              "entity_path": {
-                "type": "array",
-                "items": {
-                  "type": "integer"
-                }
-              },
-              "entity_id": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
             },
-            "description": "A Zone Face, as ph_composer.zones.faces.list returns it."
+            "minItems": 1,
+            "description": "The root-to-entity persistent-id path."
           },
           "reason": {
             "type": "string"
@@ -51728,6 +51533,26 @@ Result:
           }
         }
       }
+    },
+    "height_m": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-unit": "m",
+      "description": "The height the new Space takes."
+    },
+    "height_source": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        null,
+        "last_height",
+        "default"
+      ],
+      "description": "Where the height comes from."
     }
   }
 }
@@ -51737,23 +51562,10 @@ Example params:
 
 ```json
 {
-  "zone": {
-    "zone_id": "zon_Ab12Cd34Ef56",
-    "zone_path": [
-      1201
-    ]
-  },
   "faces": [
-    {
-      "zone_id": "zon_Ab12Cd34Ef56",
-      "zone_path": [
-        1201
-      ],
-      "entity_path": [
-        1202
-      ],
-      "entity_id": null
-    }
+    [
+      1202
+    ]
   ],
   "revision": 1
 }
@@ -55864,83 +55676,6 @@ Example params:
 }
 ```
 
-### `ph_composer.zones.stamp_container`
-
-Stamp a Group the calling action's own earlier step creates inside a Zone occurrence, making it a nested container of that Zone. The step leaves the Group's root-to-Group path in its slot as entity_path. Owner: `ph_composer.zones`.
-
-Refuses: `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `participant` common set.
-
-Params:
-
-```json
-{
-  "type": "object",
-  "additionalProperties": false,
-  "required": [
-    "zone",
-    "slot"
-  ],
-  "properties": {
-    "zone": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "zone_id",
-        "zone_path"
-      ],
-      "properties": {
-        "zone_id": {
-          "type": "string"
-        },
-        "zone_path": {
-          "type": "array",
-          "items": {
-            "type": "integer"
-          }
-        }
-      },
-      "description": "The Zone occurrence the container is inside."
-    },
-    "slot": {
-      "type": "string",
-      "minLength": 1,
-      "description": "The proposal slot the calling step fills with the new Group's entity_path."
-    }
-  }
-}
-```
-
-Result:
-
-```json
-{
-  "type": "object",
-  "additionalProperties": false,
-  "required": [
-    "zone_id"
-  ],
-  "properties": {
-    "zone_id": {
-      "type": "string"
-    }
-  }
-}
-```
-
-Example params:
-
-```json
-{
-  "zone": {
-    "zone_id": "zon_Ab12Cd34Ef56",
-    "zone_path": [
-      1201
-    ]
-  },
-  "slot": "spc_Ab12Cd34Ef56"
-}
-```
-
 ## Export tasks
 
 HBJSON runtime exports use retained task methods. Each params key is the method's keyword argument.
@@ -57158,3 +56893,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.25 | 2026-11-09 | ph_composer.windows.units.convert is new: reviewed drawn rectangles become Window Types and placed Windows in one Undo step. |
 | 1.26 | 2026-11-09 | ph_composer.windows.units.convert_review's groups gain default_name, and it leaves out rectangles overlapping across Groups as window.overlap; convert's groups take copy_from_type_id. ph_composer.windows.convert_dialog.open, close and state are new, with the convert_dialog snapshot section and the convert_menu menu item. |
 | 1.27 | 2026-11-09 | A Space's Zone is the record's zone_id, a core reference; ph_composer.spaces.move_to_zone is a record edit and no longer refuses space.context_open. ph_composer.spaces.unhost and the space.zone_missing finding are new; ph_composer.zones.make_independent takes copy_added and ph_composer.zones.isolate_copied_group is new, for a plain Group copied whole. |
+| 1.28 | 2026-11-09 | ph_composer.spaces.create and create_preview take faces as root-to-Face paths and work in any edit context; create takes an optional zone; create_preview answers zone and height_m, and left_out rows carry path. create_review.open takes faces and revision and the review carries zones and height_m. ph_composer.zones.stamp_container and the nested_container reason are gone; zones export rows lose container_paths. |

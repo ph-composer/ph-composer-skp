@@ -131,11 +131,27 @@ module Sketchup
 
   # SketchUp's tag collection. It knows its Model, so an observer can reach the session.
   class Layers < ObservableCollection
+    include Enumerable
+
     attr_reader :model
 
+    # A Model always holds Untagged first; the host calls it Layer0 here.
     def initialize(model)
       super()
       @model = model
+      @values = [Tag.new("Layer0", true)]
+    end
+
+    def [](index)
+      @values[index]
+    end
+
+    def each(&block)
+      @values.each(&block)
+    end
+
+    def add(name)
+      Tag.new(name, true).tap { |tag| @values << tag }
     end
   end
 
@@ -793,6 +809,8 @@ module Sketchup
       members.each { |entity| delete(entity) }
       group = Group.new(self.class.allocate_persistent_id, Entities.new(members))
       self << group
+      group.reads_world_while_open = true
+      group.layer = Sketchup.active_model.active_layer if Sketchup.active_model&.active_layer
       group
     end
 
@@ -814,6 +832,7 @@ module Sketchup
     # instance dictionaries or name (measured on 26.1.188, 2026-10-15: context/SKETCHUP_HOST_BEHAVIOR.md,
     # "Re-placing a Group's definition").
     def add_instance(definition, transformation)
+      transformation = relative_to_outer_open_owner(transformation)
       persistent_id = self.class.allocate_persistent_id
       if definition.is_a?(GroupDefinition)
         group = Group.new(persistent_id, definition.entities, {}, :transformation => transformation)
@@ -824,6 +843,18 @@ module Sketchup
       instance = ComponentInstance.new(persistent_id, definition, {}, :transformation => transformation)
       self << instance
       instance
+    end
+
+    # `add_instance` into a collection on the open edit path above the innermost open Group takes world
+    # coordinates (measured on 26.1.188, 2026-11-09: context/SKETCHUP_HOST_BEHAVIOR.md, "Re-placing a Group's
+    # definition"), so the stub stores what that transform is relative to its owner.
+    def relative_to_outer_open_owner(transformation)
+      open = Array(Sketchup.active_model&.active_path)
+      index = open.index { |entity| entity.respond_to?(:entities) && entity.entities.equal?(self) }
+      return transformation unless index && index < open.length - 1
+
+      owner = open[0..index].reduce(Geom::Transformation.new) { |carried, entity| carried * entity.transformation }
+      owner.inverse * transformation
     end
 
     # The host refuses to erase a Group or instance on the open edit path (context/SKETCHUP_HOST_BEHAVIOR.md).
@@ -1027,7 +1058,7 @@ module Sketchup
     include SolidVolume
 
     attr_reader :entities
-    attr_accessor :transformation
+    attr_writer :transformation, :reads_world_while_open
     attr_reader :name
 
     def initialize(persistent_id, entities = Entities.new, dictionaries = {},
@@ -1038,6 +1069,18 @@ module Sketchup
       @name = name
       @locked = locked
       @entities.register_group(self) if @entities.respond_to?(:register_group)
+    end
+
+    # The host reports a child of the innermost open Group in world coordinates. The stub models that for a Group
+    # `Entities#add_group` makes there, and every other Group reads relative to its parent, as closed Groups do.
+    def transformation
+      return @transformation unless @reads_world_while_open
+
+      open = Array(Sketchup.active_model&.active_path)
+      return @transformation unless !open.empty? && open.last.respond_to?(:entities) &&
+                                    open.last.entities.equal?(parent_entities)
+
+      Sketchup.active_model.edit_transform * @transformation
     end
 
     def locked?

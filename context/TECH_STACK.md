@@ -210,13 +210,8 @@ constraints:
   parent uniqueness, and PH-Composer never makes a parent unique automatically.
 - Back faces, coplanar overlaps and faces inside nested edit contexts are the cases a happy path
   at Model root does not cover. Test them before claiming face assignment works.
-- A Group inside a Zone that carries a Zone stamp is a nested authoring container. The feature
-  that stamped it owns what it holds, so none of its Faces is a Zone Face: the Face walk, Suggest,
-  the Shift-click flood, Solve and the Zone's export ownership all skip it, and a Face path through
-  one refuses as `target.wrong_hierarchy`. Zones reads only the stamp it owns and names no feature.
-  A stamped Face is still a classified Zone Face; the rule applies to Groups only. A Space's Zone is
-  the `zone_id` on its record, never a stamp or a parent (`CONTRACTS.md`, "Space membership"). Rule
-  and reasoning: `CONTRACTS.md`, "Zones geometry rules".
+- A Space's Zone is the `zone_id` on its record, never a stamp or a parent, and a Space Group is
+  never kept inside a Zone Group (`CONTRACTS.md`, "Space membership").
 - Floor Segments are floor faces the user classifies as iCFA. There is no reduction factor.
 - Face occurrence resolution walks the Model. A read phase with no write before its last resolve
   (a query, target resolution before a proposal, `ClassifyStep`) shares one `Zones::Index`, which

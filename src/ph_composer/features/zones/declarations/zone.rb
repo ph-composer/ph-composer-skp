@@ -108,11 +108,6 @@ module PhComposer
         )
       ).freeze
       ZONE_ID_RESULT = Shapes.object({ "zone_id" => Shapes::ID }).freeze
-      STAMP_PARAMS = Shapes.object({
-        "zone" => ZONE_REFERENCE.merge("description" => "The Zone occurrence the container is inside."),
-        "slot" => { "type" => "string", "minLength" => 1,
-                    "description" => "The proposal slot the calling step fills with the new Group's entity_path." }
-      }).freeze
 
       module_function
 
@@ -198,11 +193,10 @@ module PhComposer
                                       "description" => "The path from inside the Zone to the entity; null " \
                                                        "with no Zone."),
           "reason" => { "type" => %w[string null],
-                        "enum" => [nil, "not_found", "not_a_drawing_element", "cutting_instance", "outside_zone",
-                                   "nested_container"],
+                        "enum" => [nil, "not_found", "not_a_drawing_element", "cutting_instance", "outside_zone"],
                         "description" => "Why no Zone holds it: a step missing or repeated, not a drawing " \
-                                         "element, under a cutting component, outside every Zone, or inside a " \
-                                         "nested container. Null with a Zone." },
+                                         "element, under a cutting component, or outside every Zone. Null with " \
+                                         "a Zone." },
           "write_refusal" => REFUSAL.merge("description" => "The refusal a write through this path meets from " \
                                                             "the path alone (a shared, nested or locked Zone, " \
                                                             "locked or shared storage), or null. A duplicated " \
@@ -227,18 +221,6 @@ module PhComposer
                      :entity_ids => request.params.fetch("entity_ids"), :name => request.params["name"])
         end
         declare_edits(feature)
-        feature.proposal_participant("#{FEATURE_ID}.stamp_container",
-                                     :description => "Stamp a Group the calling action's own earlier step " \
-                                                     "creates inside a Zone occurrence, making it a nested " \
-                                                     "container of that Zone. The step leaves the Group's " \
-                                                     "root-to-Group path in its slot as entity_path.",
-                                     :refuses => Refuses::ZONE_TARGET, :params => STAMP_PARAMS,
-                                     :result => ZONE_ID_RESULT,
-                                     :examples => [{ "zone" => EXAMPLE_REFERENCE,
-                                                     "slot" => "spc_Ab12Cd34Ef56" }]) do |request, proposal|
-          Zones.stamp_container(request, proposal, :zone => request.params.fetch("zone"),
-                                                   :slot => request.params.fetch("slot"))
-        end
         feature.snapshot_section("#{FEATURE_ID}.overview", :query => "#{FEATURE_ID}.all")
         feature.on_host_event(:selection_changed) { |session| session.request_refresh }
       end

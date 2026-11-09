@@ -8,7 +8,7 @@ module Sketchup
   class Model
     attr_reader :entities, :operations, :operation_starts, :nested_starts, :path, :selection, :observers, :overlays,
                 :active_view, :active_tool, :layers, :pages, :guid, :definitions, :materials
-    attr_accessor :title, :shadow_info
+    attr_accessor :title, :shadow_info, :active_layer
 
     def initialize(dictionaries = {}, entities: Entities.new)
       @dictionaries = dictionaries.each_with_object({}) do |(name, values), result|

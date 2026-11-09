@@ -157,7 +157,7 @@ module PhComposer
           zone = zones.select { |candidate| candidate.record.fetch("id") == space.record["zone_id"] }.min_by(&:path)
           next unless zone
 
-          # The Zone's own Faces: none inside a Space, whether or not the Space carries the Zone's stamp.
+          # The Zone's own Faces: none inside a Space, should one be put in a Zone Group natively.
           own = Zones::Occurrences.faces(zone).reject do |face|
             full = zone.path + face.path
             space_paths.any? { |path| full[0, path.length] == path }

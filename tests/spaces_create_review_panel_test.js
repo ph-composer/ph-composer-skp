@@ -12,7 +12,10 @@ var fixture = require("./support/spaces_fixture");
 
 var ZONE = { zone_id: "zon_AAAAAAAAAAAA", zone_path: [100] };
 
-function face(id) { return { zone_id: ZONE.zone_id, zone_path: [100], entity_path: [id], entity_id: null }; }
+var ZONES = [{ zone_id: ZONE.zone_id, zone_path: [100], name: "Living Zone" },
+  { zone_id: "zon_BBBBBBBBBBBB", zone_path: [200], name: "Attic Zone" }];
+
+function face(id) { return [100, id]; }
 
 function page() {
   var sent = [];
@@ -70,17 +73,17 @@ function snapshot(review) {
         units: {} } },
       "ph_composer.spaces.spaces": { status: "completed", value: fixture.section() },
       "ph_composer.spaces.create_review": { status: "completed", value: review || { token: null, revision: null,
-        zone: null, zone_name: "", accepted: [], left_out: [] } }
+        zone: null, zones: [], accepted: [], left_out: [], height_m: null, height_source: null } }
     }
   };
 }
 
 function review(accepted) {
-  return { token: "review-1", revision: 5, zone: ZONE, zone_name: "Living Zone",
+  return { token: "review-1", revision: 5, zone: ZONE, zones: ZONES, height_m: 2.5, height_source: "last_height",
     accepted: accepted === undefined ? [face(1200), face(1210)] : accepted,
-    left_out: [{ reference: face(1300), reason: "target.changed", message: "The Face is one of the Zone's own." },
-      { reference: face(1301), reason: "target.changed", message: "The Face is one of the Zone's own." },
-      { reference: face(1400), reason: "shares_edge", message: "The Face shares an Edge with an unselected Face." }] };
+    left_out: [{ path: face(1300), reason: "classified", message: "The Face is one of the Zone's own." },
+      { path: face(1301), reason: "classified", message: "The Face is one of the Zone's own." },
+      { path: face(1400), reason: "shares_edge", message: "The Face shares an Edge with an unselected Face." }] };
 }
 
 test("a review opens in the shared dialog, saying what is accepted and why each other Face is left out", function () {
@@ -88,9 +91,10 @@ test("a review opens in the shared dialog, saying what is accepted and why each 
   p.receive(snapshot(review()));
   var dialog = p.dialog();
   assert.ok(dialog && !dialog.hidden);
-  assert.strictEqual(dialog.querySelector("h2").textContent, "Create Space");
+  assert.strictEqual(dialog.querySelector("h2").textContent, "Create Space from floor outline");
   var text = p.text();
-  assert.match(text, /2 Faces in Living Zone become one Space with one Volume/);
+  assert.match(text, /A Space is a floor outline plus a height\. 2 Faces become one Space with one Volume/);
+  assert.match(text, /Height 2\.5 m, the Model's last height\./);
   assert.match(text, /2 Faces: The Face is one of the Zone's own\./);
   assert.match(text, /1 Face: The Face shares an Edge/);
   assert.strictEqual(p.input("Number").getAttribute("placeholder"), "Next free");
@@ -99,7 +103,7 @@ test("a review opens in the shared dialog, saying what is accepted and why each 
 test("one accepted Face becomes one Space, in the singular", function () {
   var p = page();
   p.receive(snapshot(review([face(1200)])));
-  assert.match(p.text(), /1 Face in Living Zone becomes one Space with one Volume/);
+  assert.match(p.text(), /1 Face becomes one Space with one Volume/);
 });
 
 test("Create sends create with the accepted Faces at the review's revision, and Enter does the same", function () {
@@ -113,6 +117,41 @@ test("Create sends create with the accepted Faces at the review's revision, and 
   assert.deepStrictEqual(JSON.parse(JSON.stringify(sent[0].payload.params)),
     { zone: ZONE, faces: [face(1200), face(1210)], name: "Living" });
   assert.strictEqual(sent[0].payload.expected_revision, 5);
+});
+
+test("the Zone picker opens preselected, and No Zone or another Zone is what Create sends", function () {
+  var p = page();
+  p.receive(snapshot(review()));
+  var select = p.dialog().querySelector("select");
+  assert.strictEqual(select.value, "0");
+  select.value = "";
+  p.click(p.button("Create"));
+  assert.strictEqual(JSON.parse(JSON.stringify(p.messages("action.invoke")[0].payload.params)).zone, null);
+});
+
+test("a review with no Zone preselected opens on No Zone, and another Zone is what Create sends", function () {
+  var p = page();
+  p.receive(snapshot(Object.assign(review(), { zone: null })));
+  var select = p.dialog().querySelector("select");
+  assert.strictEqual(select.value, "");
+  select.value = "1";
+  p.click(p.button("Create"));
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(p.messages("action.invoke")[0].payload.params)).zone,
+    { zone_id: "zon_BBBBBBBBBBBB", zone_path: [200] });
+});
+
+test("the height says it is the default until one is entered", function () {
+  var p = page();
+  p.receive(snapshot(Object.assign(review(), { height_source: "default" })));
+  assert.match(p.text(), /Height 2\.5 m, the default height\./);
+});
+
+test("Create sends once while one is in flight", function () {
+  var p = page();
+  p.receive(snapshot(review()));
+  p.click(p.button("Create"));
+  var sent = p.messages("action.invoke");
+  assert.strictEqual(sent.length, 1);
   p.click(p.button("Create"));
   assert.strictEqual(p.messages("action.invoke").length, 1, "one create in flight");
 });
@@ -139,7 +178,7 @@ test("a refused create stays in the dialog; a completed one closes it and the re
 test("Cancel writes nothing and closes the review; with nothing accepted Create is unavailable", function () {
   var p = page();
   p.receive(snapshot(review([])));
-  assert.match(p.text(), /None of the selected Faces can become a Space/);
+  assert.match(p.text(), /None of the selected Faces can become one/);
   assert.strictEqual(p.button("Create").disabled, true);
   p.click(p.button("Cancel"));
   assert.ok(p.dialog().hidden);
@@ -161,15 +200,15 @@ test("a newer review waits for a submitted one, whose result closes only its own
   var p = page();
   p.receive(snapshot(review()));
   p.click(p.button("Create"));
-  var newer = Object.assign(review(), { token: "review-2", zone_name: "Attic Zone" });
+  var newer = Object.assign(review([face(1200)]), { token: "review-2" });
   p.receive(snapshot(newer));
   assert.ok(!p.dialog().hidden, "the submitted review stays");
-  assert.match(p.text(), /Living Zone/);
+  assert.match(p.text(), /2 Faces become/);
   p.result(p.messages("action.invoke")[0], { status: "completed", message: "Created Space 104." });
   assert.deepStrictEqual(closes(p), ["review-1"]);
   p.receive(snapshot(newer));
   assert.ok(!p.dialog().hidden);
-  assert.match(p.text(), /Attic Zone/, "then the newer review opens");
+  assert.match(p.text(), /1 Face becomes/, "then the newer review opens");
 });
 
 test("a review closed elsewhere closes its dialog, and Create then sends nothing", function () {

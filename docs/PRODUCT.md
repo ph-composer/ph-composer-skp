@@ -251,11 +251,15 @@ turns it on with that factor, and a pressed paint glyph in the column header sto
 Colour by weighting factor shows while it runs, and the Colour by view from before comes back when
 it stops.
 In the viewport, a click or a drag over Faces inside a Volume marks them as Floor Segments in one Undo
-step; a click on a Face at a Space's root adds the next Volume. A Face in a Zone and in no Space is
-offered Create Space, and a classified Zone Face or a Face in no Zone is refused with the reason.
-Create Space is in SketchUp's context menu on a Face selection, inside an open Zone: it shows which
-Faces become the new Space and why it leaves out the others, and Create makes the Space, its Volume
-and its Floor Segments in one Undo step. Draw a room's floor outline just below the Zone's floor, or
+step; a click on a Face at a Space's root adds the next Volume. A Face loose in the open context and in no
+Space is offered Create Space, and a classified Zone Face or a Face inside a closed Group is refused with the reason.
+Create Space is in SketchUp's Extensions and context menus on a Face selection, in any open context: at the
+Model root, in a plain Group such as a storey, or in an open Zone, where the Space is placed outside the Zone at the
+same world position, so Zone Faces are never touched. The review shows which Faces become the new Space and why it
+leaves out the others, the height the Space takes from the Model's last height, and a Zone choice, set to the
+open Zone or the Zone whose plan footprint and height range hold the outline, which you can change, or No Zone.
+Create makes the Space, its Volume and its Floor Segments in one Undo step. Space Groups stay Untagged; apply a tag of
+your own to show or hide them. Draw a room's floor outline just below the Zone's floor, or
 inset from its walls, so that it touches no envelope Face. An outline drawn with its edges on the
 walls splits them, and Create Space leaves it out, saying to Undo it and draw it below or inset.
 A Space is a floor outline plus a height, so a vertical Face is never a floor: Create Space, Mark floor

@@ -347,8 +347,7 @@ re-enumerates at apply, refuses drift with `target.changed`, and restores what i
 references are remapped with the description's `mapping` and typed `references`. Windows is the
 first example (`features/windows/units/zone_copy.rb`); Spaces the second (`features/spaces/zone_copy.rb`),
 which reuses the plan and step of its own Make independent over the Zone's path, and rewrites `zone_id`
-on Spaces outside the Zone that came in the same copy (`copy_added`). A Zone stamp on a container a child keeps is
-Zones' to rewrite, never the child's. A test-only second child built from public contracts
+on Spaces outside the Zone that came in the same copy (`copy_added`). A test-only second child built from public contracts
 alone is in `tests/support/zone_child_fixture.rb`. The accepted pattern and why containment and
 implementation ownership stay separate are in
 [ZONE_CHILD_PATTERN.md](../planning/archive/code-review-refactoring/ZONE_CHILD_PATTERN.md).

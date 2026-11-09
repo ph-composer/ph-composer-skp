@@ -97,7 +97,7 @@ class WindowZoneCopyTest < PhComposerTestCase
   end
 
   # Spaces and Window Units follow one copied Zone in its one step: each child's ids are new in the copy,
-  # the Units keep their Types, the Space keeps its number and takes the new Zone's stamp, and the
+  # the Units keep their Types, the Space keeps its number, and the
   # original keeps everything. One Undo takes back all of it and Redo repeats it.
   def test_spaces_and_units_follow_one_copied_zone_together
     space_in(@original)
@@ -110,7 +110,6 @@ class WindowZoneCopyTest < PhComposerTestCase
     assert_empty space_ids(copy) & space_ids(@original)
     assert_empty units_under(copy).map { |row| row["id"] } & units.map { |row| row["id"] }
     assert_equal(units.map { |row| row["window_type_id"] }, units_under(copy).map { |row| row["window_type_id"] })
-    assert_equal ZONE_STORE.read(copy).fetch("id"), PhComposer::Zones::STAMP_STORE.read(space_of(copy))["zone_id"]
     repaired = space_ids(copy)
     assert @model.undo
     assert_equal space_ids(@original), space_ids(zone_groups.last)
@@ -129,7 +128,6 @@ class WindowZoneCopyTest < PhComposerTestCase
     zone_id = ZONE_STORE.read(@original).fetch("id")
     assert_equal zone_id, ZONE_STORE.read(copy).fetch("id")
     assert_equal space_ids(@original), space_ids(copy)
-    assert_equal zone_id, PhComposer::Zones::STAMP_STORE.read(space_of(copy))["zone_id"]
     assert_equal units_under(@original).map { |row| row["id"] }, units_under(copy).map { |row| row["id"] }
     assert_equal :warning, @notices.last.last
   end
@@ -325,12 +323,11 @@ class WindowZoneCopyTest < PhComposerTestCase
     group
   end
 
-  # A Space with one Volume and one Floor Segment, stamped by Zones as its nested container.
+  # A Space with one Volume and one Floor Segment, put inside the Zone Group natively.
   def space_in(group)
     volume = volume_group(group.persistent_id + 40, volume_record("A"),
                           [floor_face(group.persistent_id + 41, rectangle(0, 0, 1, 1), segment_record("A"))])
     space = space_group(group.persistent_id + 42, space_record("S", :number => "1"), [volume])
-    PhComposer::Zones::STAMP_STORE.write(space, PhComposer::Zones::Schema.stamp(ZONE_STORE.read(group)))
     group.entities << space
     treat_duplicates_as_existing(@model)
   end

@@ -85,11 +85,10 @@ class ZonesContainmentTest < PhComposerTestCase
     @model.entities << held
     @model.entities << edge(5)
     @model.entities << Sketchup::Group.new(6, Sketchup::Entities.new([edge(7)]))
-    Z::STAMP_STORE.write(container, Z::Schema.stamp(Z::ZONE_STORE.read(held)))
 
-    rows = containment([100, 201, 203], [100, 120, 122], [5], [6, 7], [100, 999], [100, 125])
+    rows = containment([100, 201, 203], [5], [6, 7], [100, 999], [100, 125])
 
-    assert_equal %w[cutting_instance nested_container outside_zone outside_zone not_found not_a_drawing_element],
+    assert_equal %w[cutting_instance outside_zone outside_zone not_found not_a_drawing_element],
                  rows.map { |row| row.fetch("reason") }
     assert(rows.all? { |row| row["zone"].nil? && row["entity_path"].nil? && row["write_refusal"].nil? })
   end

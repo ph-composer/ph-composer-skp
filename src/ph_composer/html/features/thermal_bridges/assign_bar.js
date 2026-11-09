@@ -9,8 +9,7 @@ PhComposerUI.define("features/thermal_bridges/assign_bar", ["request", "snapshot
   edgeTool) {
   "use strict";
   var REASONS = { outside_zone: "it is not inside a Zone", not_found: "it could not be found in the Model",
-    not_a_drawing_element: "it is not a drawing element", cutting_instance: "a cutting component holds it",
-    nested_container: "a Group or component inside its Zone holds it" };
+    not_a_drawing_element: "it is not a drawing element", cutting_instance: "a cutting component holds it" };
   function clone(value) { return JSON.parse(JSON.stringify(value)); }
   /* The same rule the right-click menu applies (Assignment::Selection.assignable?). */
   function assignable(row) { return Boolean(row.reference) && !row.write_refusal; }

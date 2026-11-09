@@ -157,27 +157,6 @@ class PhaseOneExportTest < PhComposerTestCase
     assert_equal "adjacency.unresolved", omitted.first.dig("omission", "code")
   end
 
-  def test_a_surface_face_whose_counterpart_moved_into_a_container_exports_as_unresolved
-    zones = seed_two_boxes
-    right = @model.entities.to_a.find { |entity| entity.persistent_id == 2000 }
-    wall = right.entities.to_a.find { |entity| entity.persistent_id == 2003 }
-    container = right.entities.add_group([wall])
-    result = invoke("ph_composer.zones.solve_adjacency", "zones" => zones)
-    assert_equal "completed", result["status"], result.inspect
-    paired = PhComposer::Zones::Faces::FACE_STORE.read(wall)
-    assert_equal "Surface", paired["boundary_condition"]
-    PhComposer::Zones::STAMP_STORE.write(container,
-                                         PhComposer::Zones::Schema.stamp(PhComposer::Zones::ZONE_STORE.read(right)))
-
-    extraction = PhComposer::Export::Collection.build(@model, :run_id => "run-container-counterpart",
-                                                              :contributors => contributor_names)
-
-    faces = extraction.document.dig("sections", PhComposer::Zones::Faces::ExportProjection::SECTION, "records")
-    assert_equal 11, faces.length
-    assert_equal ["adjacency.unresolved"], faces.select { |face| face["boundary_condition"] == "Surface" }
-                                                .map { |face| face.dig("omission", "code") }
-  end
-
   private
 
   def contributor_names

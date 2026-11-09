@@ -150,7 +150,7 @@
         ["ph_composer.spaces.label_options"]: { status: "completed",
           value: JSON.parse(JSON.stringify(this.labelOptions)) },
         ["ph_composer.spaces.create_review"]: { status: "completed", value: JSON.parse(JSON.stringify(
-          this.createReview || { token: null, revision: null, zone: null, zone_name: "", accepted: [],
+          this.createReview || { token: null, revision: null, zone: null, zones: [], accepted: [],
             left_out: [] })) },
         [MATERIALS]: { status: "completed", value: JSON.parse(JSON.stringify(this.materials)) },
         [ASSEMBLIES]: { status: "completed", value: JSON.parse(JSON.stringify(this.assemblies)) },

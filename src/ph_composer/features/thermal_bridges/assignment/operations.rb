@@ -13,9 +13,8 @@ module PhComposer
           "outside_zone" => "move it into a Zone, or erase it",
           "target.shared_definition" => "open its shared Group with Edit Group and close it, or explode its component",
           "target.locked" => "unlock its Group or Zone",
-          "nested_container" => "move it out of the nested container, or erase it",
           "cutting_instance" => "erase it from the cutting component",
-          "target.wrong_hierarchy" => "move it out of the nested Zone or container, or erase it"
+          "target.wrong_hierarchy" => "move it out of the nested Zone, or erase it"
         }.freeze
         # A refusal names this many stranded Edges in its detail and counts the rest.
         STRANDED_DETAIL = 20
