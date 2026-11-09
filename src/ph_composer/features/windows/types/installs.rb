@@ -60,6 +60,15 @@ module PhComposer
         validate(copy)
       end
 
+      # `record` with every assignment off a perimeter edge cleared, for values set on all four sides at once.
+      def perimeter_only(record)
+        copy = DeepCopy.call(record)
+        each_edge(copy) do |element, side, classification|
+          element.fetch("installs")[side] = nil unless classification == :perimeter
+        end
+        validate(copy)
+      end
+
       # The grid bands and each element's kind, spans and edge classifications, in span order: what two
       # Types must share for `copy`. Its digest is the panel's `copy_key`, so its shape stays as it is.
       def topology(record)

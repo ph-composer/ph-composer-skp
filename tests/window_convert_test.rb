@@ -358,11 +358,33 @@ class WindowConvertTest < PhComposerTestCase
     elements = type(value.fetch("units").first.fetch("type_id")).fetch("elements")
     assert_equal 2, elements.length
     elements.each do |element|
-      assert_equal properties, element.slice(*properties.keys)
+      copied = properties.reject { |key, _value| key == "installs" }
+      assert_equal copied, element.slice(*copied.keys)
       assert_equal "glazed", element.fetch("kind")
     end
     assert_equal elements.map { |element| element.fetch("id") }.uniq, elements.map { |element| element.fetch("id") }
     assert_equal before, type(source), "Copy from leaves its source as it was"
+  end
+
+  # A mull's sides interior to the group are not installs, across both a mullion and a transom.
+  def test_copy_from_puts_installs_on_a_mulls_perimeter_sides_only
+    sides = W::Types::SIDES
+    installs = sides.to_h { |side| [side, product("psi_install_types", "Install #{side}")] }
+    frames = sides.to_h { |side| [side, product("frames", "Frame #{side}")] }
+    source = template_type("glazing_id" => product("glazings", "Triple"), "frames" => frames, "installs" => installs)
+    faces = zone_with([[[1, 1], [2, 1], [2, 2], [2, 3], [1, 3]], ring(2, 1, 0.5, 1), ring(2, 2, 0.5, 1)],
+                      :holes => [ring(1, 1, 1.5, 2)])
+    value = converted(groups_from(review(*faces.map { |face| path(face) }), "copy_from_type_id" => source))
+    elements = type(value.fetch("units").first.fetch("type_id")).fetch("elements")
+    perimeter = { [[0, 1], [0, 0]] => %w[top bottom left], [[0, 0], [1, 1]] => %w[top right],
+                  [[1, 1], [1, 1]] => %w[right bottom] }
+    assert_equal perimeter.keys.sort, elements.map { |element| element.values_at("row_span", "column_span") }.sort
+    elements.each do |element|
+      kept = perimeter.fetch(element.values_at("row_span", "column_span"))
+      assert_equal sides.to_h { |side| [side, kept.include?(side) ? installs.fetch(side) : nil] },
+                   element.fetch("installs")
+      assert_equal frames, element.fetch("frames"), "frames still copy to every side"
+    end
   end
 
   def test_copy_from_without_a_glazed_element_or_beside_a_chosen_type_is_refused

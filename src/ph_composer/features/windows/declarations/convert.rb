@@ -55,8 +55,9 @@ module PhComposer
         type_id = Shapes.id("wnt", "A Window Type of this size; a new one when absent.")
         name = Shapes.described(Shapes::TEXT, "The new Type's name. Default: its size in display units, with " \
                                               "\" (2)\" added when taken.")
-        copy_from = Shapes.id("wnt", "Copies this Type's first glazed element's glazing, frames, installs and " \
-                                     "operation into every element of the new Type. Default: blank elements.")
+        copy_from = Shapes.id("wnt", "Copies this Type's first glazed element's glazing, frames and operation " \
+                                     "into every element of the new Type, and its installs onto the sides on " \
+                                     "the Type's perimeter. Default: blank elements.")
         sources = Shapes.list(source).merge("minItems" => 1, "maxItems" => Pages::MAXIMUM_LIMIT)
         group = Shapes.object({ "sources" => sources, "type_id" => type_id, "name" => name,
                                 "copy_from_type_id" => copy_from },

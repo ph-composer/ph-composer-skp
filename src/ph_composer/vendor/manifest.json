@@ -196,9 +196,9 @@
       "sha256": "2e4aa19e6f14ec4b16258cb3f71ff5103e67d8f2b330264abeafc86f0d54b09c"
     },
     "html/features/windows/convert_review.js": {
-      "bytes": 11992,
+      "bytes": 12025,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "1141f583e49d95bbc6e346887f998de6e6b9bb8d3f2a6c317910be1f8edc4657"
+      "sha256": "ee52b3c0ed54d9f773964737737757a004d56805efb2026c7b9ccc149642771c"
     },
     "html/features/windows/editor.js": {
       "bytes": 31097,
