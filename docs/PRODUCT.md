@@ -268,6 +268,12 @@ out whole, its upright walls as walls and its other Faces as parts of the solid,
 counted twice; a new Volume refuses one too. The refusal says to draw the floor outline alone, or to
 group the solid and use Height from solid.
 
+Set height, in SketchUp's Extensions menu and in the context menu on a Space or Volume, is a viewport tool for one
+Volume's height: click the Space's prism, then drag its top or type a value in the measurements box. Each entry
+is one Undo step, and the value also becomes the Model's last height. Edit outline, in the same menus, opens the
+Volume of a selected Volume or a one-Volume Space, unprotected, for ordinary SketchUp edits to its outline; leaving
+it protects the Volume again.
+
 Colour by Space, Ventilation, Weighting factor and Height colour each Space's Floor Segments and the
 preview prism that its height draws over them, with a legend. Show Spaces, on by default each time a
 Model is opened, draws every Space's prism outline and its label whether or not a mode is on, in the

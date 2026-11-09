@@ -11,7 +11,7 @@ Plan: [PLAN.md](PLAN.md). States: `Scoped` · `In progress` · `Implemented on b
 | --- | --- | --- | --- |
 | S10-1 | Merged to main | [#410](https://github.com/ph-composer/ph-composer-skp/pull/410) | Offline gate and host check are recorded on the PR. W6-9 is the `space.zone_missing` finding with the `unhost` repair: Zones have no delete action, a Zone is erased natively |
 | S10-2 | Merged to main | [#411](https://github.com/ph-composer/ph-composer-skp/pull/411) | Offline gate and host check are recorded on the PR. No Space nests: `test_no_route_leaves_a_space_inside_a_zone`. Nested Spaces and the Zone stamp on Groups are gone; `stamp_container` is removed |
-| S10-3 | Implemented on branch | | The W-046 defect is readouts off by default: Show Spaces (`ph_composer.spaces.show`, Zones > Spaces Table options) starts on in every Model session and draws each Volume's prism outline and each Space's label with or without a mode. Offline gate and host check are recorded on the PR |
-| S10-4 | Scoped | | |
+| S10-3 | Merged to main | [#412](https://github.com/ph-composer/ph-composer-skp/pull/412) | The W-046 defect is readouts off by default: Show Spaces (`ph_composer.spaces.show`, Zones > Spaces Table options) starts on in every Model session and draws each Volume's prism outline and each Space's label with or without a mode. Offline gate and host check are recorded on the PR |
+| S10-4 | Implemented on branch | | Set height: `features/spaces/set_height_tool.rb` picks a Volume's prism by pointer ray (`PrismPick`, every visible Volume's prism read once per revision), a drag or a typed value is one `update`. Edit outline: `edit_outline_menu.rb`, unprotect then `context.open`, as the panel's Enter. A Space with several Volumes refuses and says to select one. Offline gate and host check are recorded on the PR |
 | S10-5 | Scoped | | |
 | S10-6 | Scoped | | |
