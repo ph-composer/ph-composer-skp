@@ -362,3 +362,16 @@ P1 · S · W-120, W-122 (Claude)
 Every W-entry is in an issue above, in "Settled", or in the "Keep" list. `STATUS.md` keeps one row
 for this walkthrough until the issues are posted; each issue then links back to this file and its
 W-ids.
+
+## Decisions after delivery (Ed, 2026-11-09)
+
+Each stage's open point, settled once WT-01 to WT-31 had merged. All keep what shipped.
+
+- **WT-18, Unit pasted at the Model root:** keep the notice; the Unit stays where it is pasted, unhosted.
+- **WT-22, PHI and Phius starting values:** one starting value, 0.04 W/mK, editable per Model.
+- **WT-23, conflicting thermal bridges on one Edge:** a warning, not a block; both still export.
+- **WT-27, "Layer-Segment":** keep the term.
+- **WT-28, Frames Actions column:** keep Duplicate and Delete hover-revealed, as on every inventory.
+- **WT-29, Frames auto-name:** New Frame only, not a live rule.
+
+Filtered and Isolated Faces (WT-16, 2026-11-08): no white wash; a section cut is the way inside.
