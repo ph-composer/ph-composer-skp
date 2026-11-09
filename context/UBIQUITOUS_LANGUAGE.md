@@ -133,6 +133,8 @@ not coin a third vocabulary between SketchUp and honeybee. Faces belong to a Zon
 | Average clear ceiling height | The one height a Volume carries. Net volume is net floor area times this height, as honeybee-ph's `SpaceVolume` computes it |
 | Volume preview | The overlay extrusion of a Volume's Floor Segments by its height. Drawn, never modeled |
 | Height from solid | The helper that sets a Volume's height from a closed group the user drew: the group's volume divided by the Volume's net floor area |
+| Set height | The viewport tool that sets one Volume's height: click its prism, then drag the top or type a value in the measurements box |
+| Edit outline | The context-menu item that opens a selected Volume, or a Space's one Volume, unprotected, as Enter does in the Spaces view |
 | Space label | Viewport text at a Space's reference point: number, name, iCFA, net volume, airflows |
 | Selection totals | The HUD readout of summed iCFA, net volume and airflows for the selected Spaces |
 | Airflow balance | Each Zone row of the Spaces view: its Spaces' supply, extract and transfer sums. A Zone holding a Space that inherits its airflow shows a dash. Nothing compares supply with extract per Zone: balance is per ventilator, and that check belongs to the planned Zones / Ventilation view |
