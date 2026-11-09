@@ -5,17 +5,22 @@ module PhComposer
     # Create Space's native route: the context-menu item, and the review it hands the panel with the two
     # view commands that open and close it. The review writes nothing; the panel's confirmation is `create`.
     module CreateRouteRegistration
+      ZONE_CHOICE = Shapes.object({ "zone_id" => Shapes::TEXT, "zone_path" => Shapes::ZONE_PATH,
+                                    "name" => Shapes::TEXT }).freeze
       REVIEW = Shapes.object({
         "token" => { "type" => %w[string null], "description" => "One per review opened; null when none is open." },
         "revision" => { "type" => %w[integer null], "description" => "The revision create must be applied at." },
-        "zone" => OperationRegistration::ZONE.merge("type" => %w[object null]),
-        "zone_name" => Shapes::TEXT,
-        "accepted" => Shapes.list(OperationRegistration::FACE),
-        "left_out" => Shapes.list(OperationRegistration::LEFT_OUT)
+        "zone" => OperationRegistration::OPTIONAL_ZONE.merge("description" => "The Zone preselected; null for none."),
+        "zones" => Shapes.list(ZONE_CHOICE),
+        "accepted" => Shapes.list(PATH),
+        "left_out" => Shapes.list(OperationRegistration::LEFT_OUT),
+        "height_m" => { "type" => %w[number null], "x-unit" => "m",
+                        "description" => "The height the new Space takes." },
+        "height_source" => { "type" => %w[string null], "enum" => [nil, "last_height", "default"],
+                             "description" => "Where the height comes from." }
       }).freeze
       OPEN_PARAMS = Shapes.object({
-        "zone" => OperationRegistration::ZONE,
-        "faces" => OperationRegistration::FACES,
+        "faces" => OperationRegistration::PATHS,
         "revision" => { "type" => "integer", "description" => "The revision the Faces were read at; a later one " \
                                                               "refuses." }
       }).freeze
@@ -36,14 +41,14 @@ module PhComposer
         end
         feature.snapshot_section("#{FEATURE_ID}.create_review", :query => "#{FEATURE_ID}.create_review.state")
         feature.view_command("#{FEATURE_ID}.create_review.open",
-                             :description => "Review which explicit Faces Create Space would take into a new Space " \
-                                             "and why it leaves each other one out, for the panel to confirm.",
-                             :refuses => (OperationRegistration::ZONE_TARGET + %w[revision.stale]).uniq,
+                             :description => "Review which explicit Faces Create Space would take into a new Space, " \
+                                             "why it leaves each other one out, and which Zone hosts it, for the " \
+                                             "panel to confirm.",
+                             :refuses => (OperationRegistration::ZONE_TARGET +
+                                          %w[geometry.invalid revision.stale]).uniq,
                              :params => OPEN_PARAMS, :result => REVIEW,
-                             :examples => [{ "zone" => OperationRegistration::EXAMPLE_ZONE,
-                                             "faces" => [OperationRegistration::EXAMPLE_FACE],
-                                             "revision" => 1 }]) do |request|
-          CreateRoute.open(request, :zone => request.params.fetch("zone"), :faces => request.params.fetch("faces"),
+                             :examples => [{ "faces" => [[1202]], "revision" => 1 }]) do |request|
+          CreateRoute.open(request, :faces => request.params.fetch("faces"),
                                     :revision => request.params.fetch("revision"))
         end
         feature.view_command("#{FEATURE_ID}.create_review.close",

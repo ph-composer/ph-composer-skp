@@ -91,15 +91,6 @@ module PhComposer
       { "isolated" => true }
     end
 
-    # The stamp-container participant: refuses now what the step would, then stamps at apply the Group
-    # the caller's earlier step left in `slot`.
-    def stamp_container(request, proposal, zone:, slot:)
-      located = Occurrences.locate_zone(request.model, zone, :mutable => true)
-      proposal.add_step(StampContainerStep.new(:zone => located.reference, :slot => slot),
-                        :scopes => [Operations::EntityScope.new(located.parent_path)])
-      { "zone_id" => located.reference.fetch("zone_id") }
-    end
-
     def plan_refusal(request, zone)
       Repair.identity_plan(request.model, zone, request.revision, request.registry.catalog, request.engine,
                            :isolating => true)

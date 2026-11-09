@@ -7,6 +7,7 @@
 #   scan/           the walk, pure metrics (projected area, the any-set airflow rule, Zone sums) and findings
 #   reads.rb        the list and panel reads
 #   authoring.rb    the operations' handlers; steps.rb their native steps; scan/resolve.rb strict targets
+#   create_faces.rb which Faces Create Space takes, from the open edit context
 #   context/        Volume protection, the reconciler and the edit-context commands
 #   identity/       Make independent: the pure plan and its step
 #   copy_watch.rb   makes a native Space copy independent in the copy's own Undo step
@@ -22,6 +23,7 @@ require_relative "scan/metrics"
 require_relative "prism"
 require_relative "scan/findings"
 require_relative "scan/extents"
+require_relative "scan/zone_inference"
 require_relative "scan/resolve"
 require_relative "reads"
 require_relative "summaries"
@@ -35,6 +37,7 @@ require_relative "identity/plan"
 require_relative "identity/step"
 require_relative "copy_watch"
 require_relative "zone_copy"
+require_relative "create_faces"
 require_relative "authoring"
 require_relative "declarations/shapes"
 require_relative "settings"

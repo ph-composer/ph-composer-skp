@@ -28,12 +28,12 @@ class SpacesOperationsTest < PhComposerTestCase
     @model.active_path = [@wrapper, @zone_group]
   end
 
-  def face_reference(face)
-    @zone.merge("entity_path" => [face.persistent_id], "entity_id" => nil)
+  def face_path(face)
+    @zone.fetch("zone_path") + [face.persistent_id]
   end
 
   def create(faces, **extra)
-    invoke("ph_composer.spaces.create", { "zone" => @zone, "faces" => faces.map { |face| face_reference(face) } }
+    invoke("ph_composer.spaces.create", { "zone" => @zone, "faces" => faces.map { |face| face_path(face) } }
       .merge(extra))
   end
 
@@ -55,15 +55,188 @@ class SpacesOperationsTest < PhComposerTestCase
     assert_in_delta 30.0, row.dig("metrics", "net_volume_m3"), 1e-9
     segment = row.dig("volumes", 0, "floor_segments", 0)
     assert_equal 101, segment.dig("reference", "entity_path").last
-    space_group = @zone_group.entities.to_a.find { |entity| PhComposer::Spaces::SPACE_STORE.read(entity) }
-    zone_record = PhComposer::Zones::ZONE_STORE.read(@zone_group)
-    assert_equal PhComposer::Zones::Schema.stamp(zone_record), PhComposer::Zones::STAMP_STORE.read(space_group)
+    space_group = space_groups_in(@wrapper).first
+    assert_nil PhComposer::Zones::STAMP_STORE.read(space_group), "hosted by its record alone"
     assert_equal "1 Living", space_group.name
     faces = query("ph_composer.zones.faces.list").fetch("faces").map { |face| face.dig("reference", "entity_path") }
     assert_equal [[102]], faces, "the Floor Segment is no longer a Zone Face"
     second = create([@bath])
     assert_equal "completed", second["status"], second.inspect
     assert_equal %w[1 2], spaces.map { |space| space.dig("values", "number") }
+  end
+
+  def space_groups_in(container)
+    container.entities.to_a.select { |entity| PhComposer::Spaces::SPACE_STORE.read(entity) }
+  end
+
+  # W6-2: at the same world position, in the Zone's parent, one Undo step, the Zone's other Faces untouched.
+  def test_create_in_an_open_zone_places_the_space_outside_it_at_the_same_world_position
+    zone_with_outlines
+    @zone_group.transformation = Geom::Transformation.translation([2, 3, 4])
+    operations = @model.operations.length
+    result = create([@living])
+    assert_equal "completed", result["status"], result.inspect
+    assert_equal operations + 1, @model.operations.length
+    assert_empty space_groups_in(@zone_group), "nothing nests"
+    placed = space_groups_in(@wrapper).first
+    assert_equal @zone_group.transformation.to_a, placed.transformation.to_a
+    row = spaces.first
+    assert_equal [90, placed.persistent_id], row.dig("reference", "entity_path")
+    assert_equal({ "zone_id" => "zon_ZZZZZZZZZZZZ", "zone_path" => [90, 100] }, row["zone"])
+    assert_equal [102], @zone_group.entities.to_a.grep(Sketchup::Face).map(&:persistent_id), "the other Face stays"
+    assert_equal [90, 100], Array(@model.active_path).map(&:persistent_id), "the Zone stays open"
+    assert @model.undo
+    assert_empty spaces, "one Undo takes the Space back"
+    faces = query("ph_composer.zones.faces.list").fetch("faces").map { |face| face.dig("reference", "entity_path") }
+    assert_equal [[101], [102]], faces.sort, "and the outline is a loose Face of the Zone again"
+  end
+
+  # The open Zone is only preselected: the Space stands outside it whichever Zone, or none, the review picks.
+  def test_create_in_an_open_zone_hosts_the_space_in_whichever_zone_is_named
+    zone_with_outlines
+    @wrapper.entities << zone_group(200, "O", [])
+    other = { "zone_id" => "zon_OOOOOOOOOOOO", "zone_path" => [90, 200] }
+    assert_equal "completed", create([@living], "zone" => other)["status"]
+    assert_equal "completed", create([@bath], "zone" => nil)["status"]
+    assert_equal [other, nil], spaces.map { |row| row["zone"] }
+    assert_equal 2, space_groups_in(@wrapper).length
+  end
+
+  def test_create_at_the_root_stays_at_the_root_hosted_in_the_zone_named_or_in_none
+    zone_with_outlines
+    @model.active_path = nil
+    root_face = floor_face(801, rectangle(20, 0, 2, 2))
+    other_face = floor_face(802, rectangle(30, 0, 2, 2))
+    @model.entities << root_face << other_face
+    hosted = invoke("ph_composer.spaces.create", "faces" => [[801]], "zone" => @zone)
+    assert_equal "completed", hosted["status"], hosted.inspect
+    unhosted = invoke("ph_composer.spaces.create", "faces" => [[802]], "zone" => nil)
+    assert_equal "completed", unhosted["status"], unhosted.inspect
+    rows = spaces.sort_by { |row| row.dig("reference", "entity_path") }
+    assert(rows.all? { |row| row.dig("reference", "entity_path").length == 1 }, "both at the root")
+    assert_equal [{ "zone_id" => "zon_ZZZZZZZZZZZZ", "zone_path" => [90, 100] }, nil], rows.map { |row| row["zone"] }
+    assert_equal %w[1 1], rows.map { |row| row.dig("values", "number") }, "numbered within each host"
+  end
+
+  def test_create_in_an_open_plain_group_stays_in_that_group
+    storey_face = floor_face(801, rectangle(0, 0, 2, 2))
+    storey = Sketchup::Group.new(700, Sketchup::Entities.new([storey_face]))
+    @model.entities << storey
+    @model.active_path = [storey]
+    result = invoke("ph_composer.spaces.create", "faces" => [[700, 801]])
+    assert_equal "completed", result["status"], result.inspect
+    assert_equal 1, space_groups_in(storey).length
+    assert_nil spaces.first["zone"]
+  end
+
+  # W6-4: the user's active tag and the Model's tags are not Create Space's business.
+  def test_a_new_space_and_its_volume_are_untagged_and_no_tag_is_created
+    zone_with_outlines
+    @model.active_layer = @model.layers.add("01_GEOM")
+    count = @model.layers.count
+    assert_equal "completed", create([@living])["status"]
+    space = space_groups_in(@wrapper).first
+    assert_equal "Layer0", space.layer.name
+    assert_equal ["Layer0"], space.entities.to_a.map { |volume| volume.layer.name }
+    assert_equal count, @model.layers.count
+  end
+
+  # Every route that makes or moves a Space leaves its Group outside every Zone Group.
+  def test_no_route_leaves_a_space_inside_a_zone
+    zone_with_outlines
+    other = zone_group(200, "O", [])
+    @wrapper.entities << other
+    assert_equal "completed", create([@living])["status"]
+    moved = invoke("ph_composer.spaces.move_to_zone",
+                   "space" => spaces.first.fetch("reference"),
+                   "zone" => { "zone_id" => "zon_OOOOOOOOOOOO", "zone_path" => [90, 200] })
+    assert_equal "completed", moved["status"], moved.inspect
+    assert_empty space_groups_in(@zone_group)
+    assert_empty space_groups_in(other)
+    plain = Sketchup::Group.new(104, Sketchup::Entities.new([floor_face(105, rectangle(0, 7, 1, 1))]))
+    @zone_group.entities << plain
+    @model.active_path = [@wrapper, @zone_group, plain]
+    result = invoke("ph_composer.spaces.create", "faces" => [[90, 100, 104, 105]])
+    assert_equal %w[refused space.nothing_to_create], result.values_at("status", "code"), "a Group within a Zone"
+    zones = query("ph_composer.zones.list").fetch("zones").map { |row| row.dig("reference", "zone_path") }
+    spaces.each do |row|
+      path = row.dig("reference", "entity_path")
+      refute(zones.any? { |zone_path| path[0, zone_path.length] == zone_path }, "#{path} is inside a Zone")
+    end
+  end
+
+  def test_create_refuses_inside_a_space_and_through_a_lock_or_shared_storage
+    zone_with_outlines
+    assert_equal "completed", create([@living])["status"]
+    space = space_groups_in(@wrapper).first
+    loose = floor_face(801, rectangle(9, 9, 1, 1))
+    space.entities << loose
+    @model.active_path = [@wrapper, space]
+    preview = query("ph_composer.spaces.create_preview", "faces" => [[90, space.persistent_id, 801]])
+    assert_equal %w[in_space], preview.fetch("left_out").map { |row| row["reason"] }
+    @model.active_path = [@wrapper]
+    @wrapper.locked = true
+    loose_here = floor_face(802, rectangle(9, 9, 1, 1))
+    @wrapper.entities << loose_here
+    preview = query("ph_composer.spaces.create_preview", "faces" => [[90, 802]])
+    assert_equal %w[locked], preview.fetch("left_out").map { |row| row["reason"] }
+  end
+
+  def test_create_in_a_zone_at_the_root_places_the_space_at_the_root
+    @model.entities << zone_group(100, "Z", [floor_face(101, rectangle(0, 0, 2, 2)),
+                                             floor_face(102, rectangle(3, 0, 1, 1))])
+    zone = @model.entities.to_a.first
+    zone.transformation = Geom::Transformation.translation([2, 3, 4])
+    @model.active_path = [zone]
+    result = invoke("ph_composer.spaces.create", "faces" => [[100, 101]],
+                                                 "zone" => { "zone_id" => "zon_ZZZZZZZZZZZZ", "zone_path" => [100] })
+    assert_equal "completed", result["status"], result.inspect
+    placed = space_groups_in(@model).first
+    assert_equal zone.transformation.to_a, placed.transformation.to_a
+    assert_empty space_groups_in(zone)
+  end
+
+  def test_create_preview_preselects_through_a_rotated_parent_and_a_translated_zone
+    faces = [floor_face(101, rectangle(0, 0, 4, 4)), floor_face(102, rectangle(0, 0, 4, 4, 3))]
+    zone = zone_group(100, "Z", faces, :transformation => Geom::Transformation.translation([1, 0, 0]))
+    wrapper = Sketchup::Group.new(90, Sketchup::Entities.new([zone]), :transformation => ROTATION)
+    # ROTATION turns plan (x, y) to (-y, x), so this Zone stands at about x -4 to 0 and y 0 to 4 in world metres.
+    inside = floor_face(801, rectangle(-3, 2, 1, 1, 1))
+    outside = floor_face(802, rectangle(2, 2, 1, 1, 1))
+    @model.entities << wrapper << inside << outside
+    zone_reference = { "zone_id" => "zon_ZZZZZZZZZZZZ", "zone_path" => [90, 100] }
+    assert_equal zone_reference, query("ph_composer.spaces.create_preview", "faces" => [[801]]).fetch("zone")
+    assert_nil query("ph_composer.spaces.create_preview", "faces" => [[802]]).fetch("zone")
+  end
+
+  # A Zone's envelope may stand in a plain component; a cutting component's geometry is not the Zone's.
+  def test_create_preview_reads_a_zones_faces_inside_a_component_but_not_a_cutting_one
+    envelope = Sketchup::ComponentDefinition.new(Sketchup::Entities.new([floor_face(111, rectangle(0, 0, 10, 10)),
+                                                                         floor_face(112, rectangle(0, 0, 10, 10, 3))]))
+    cutting = Sketchup::ComponentDefinition.new(Sketchup::Entities.new([floor_face(121, rectangle(40, 0, 10, 10))]))
+    cutting.behavior.cuts_opening = true
+    @model.entities << zone_group(100, "Z", [Sketchup::ComponentInstance.new(110, envelope),
+                                             Sketchup::ComponentInstance.new(120, cutting)])
+    held = floor_face(801, rectangle(2, 2, 2, 2, 1))
+    over_the_cutter = floor_face(802, rectangle(42, 2, 2, 2, 1))
+    @model.entities << held << over_the_cutter
+    assert_equal({ "zone_id" => "zon_ZZZZZZZZZZZZ", "zone_path" => [100] },
+                 query("ph_composer.spaces.create_preview", "faces" => [[801]]).fetch("zone"))
+    assert_nil query("ph_composer.spaces.create_preview", "faces" => [[802]]).fetch("zone")
+  end
+
+  # W6-3: the footprint under the outline's centroid and the height range around it decide; nothing else does.
+  def test_create_preview_preselects_the_zone_holding_the_outline_or_none
+    @model.entities << zone_group(100, "Z", [floor_face(101, rectangle(0, 0, 10, 10)),
+                                             floor_face(102, rectangle(0, 0, 10, 10, 3))])
+    inside = floor_face(801, rectangle(2, 2, 2, 2, 1))
+    beside = floor_face(802, rectangle(20, 2, 2, 2, 1))
+    above = floor_face(803, rectangle(2, 2, 2, 2, 5))
+    @model.entities << inside << beside << above
+    zone = { "zone_id" => "zon_ZZZZZZZZZZZZ", "zone_path" => [100] }
+    assert_equal zone, query("ph_composer.spaces.create_preview", "faces" => [[801]]).fetch("zone")
+    assert_nil query("ph_composer.spaces.create_preview", "faces" => [[802]]).fetch("zone")
+    assert_nil query("ph_composer.spaces.create_preview", "faces" => [[803]]).fetch("zone")
   end
 
   def test_create_preview_names_each_left_out_face_and_writes_nothing
@@ -79,16 +252,13 @@ class SpacesOperationsTest < PhComposerTestCase
     end
     @zone_group.entities << classified << Sketchup::Group.new(104, Sketchup::Entities.new([nested])) << left << right
     before = @model.operations.length
-    params = { "zone" => @zone,
-               "faces" => [face_reference(@living), face_reference(left),
-                           face_reference(classified).merge("entity_id" => "fac_CCCCCCCCCCCC"),
-                           @zone.merge("entity_path" => [104, 105], "entity_id" => nil),
-                           { "zone_id" => "zon_OTHER0000001", "zone_path" => [1], "entity_path" => [1],
-                             "entity_id" => nil }] }
+    params = { "faces" => [face_path(@living), face_path(left), face_path(classified), [90, 100, 104, 105], [1]] }
     preview = query("ph_composer.spaces.create_preview", params)
-    assert_equal [[101]], preview.fetch("accepted").map { |face| face["entity_path"] }
-    assert_equal %w[shares_edge classified not_in_zone_context other_zone].sort,
+    assert_equal [[90, 100, 101]], preview.fetch("accepted")
+    assert_equal %w[classified not_loose not_loose shares_edge],
                  preview.fetch("left_out").map { |row| row["reason"] }.sort
+    assert_equal @zone, preview.fetch("zone"), "the open Zone is preselected"
+    assert_in_delta 2.5, preview.fetch("height_m"), 1e-9
     assert_equal before, @model.operations.length
     assert_empty spaces
   end
@@ -107,10 +277,10 @@ class SpacesOperationsTest < PhComposerTestCase
   def test_a_second_volume_adds_its_net_volume_and_the_space_counts_on
     zone_with_outlines
     create([@living])
-    space_group = @zone_group.entities.to_a.find { |entity| PhComposer::Spaces::SPACE_STORE.read(entity) }
+    space_group = @wrapper.entities.to_a.find { |entity| PhComposer::Spaces::SPACE_STORE.read(entity) }
     hall = floor_face(109, rectangle(0, 4, 1, 2))
     space_group.entities << hall
-    @model.active_path = [@wrapper, @zone_group, space_group]
+    @model.active_path = [@wrapper, space_group]
     space = spaces.first.fetch("reference")
     result = invoke("ph_composer.spaces.volumes.create",
                     "space" => space, "faces" => [space.fetch("entity_path") + [109]], "weighting_factor" => 0.0)
@@ -169,8 +339,8 @@ class SpacesOperationsTest < PhComposerTestCase
     create([@living])
     volume = spaces.first.dig("volumes", 0)
     extra = floor_face(111, rectangle(0, 4, 1, 1))
-    volume_group = @zone_group.entities.to_a.find { |entity| PhComposer::Spaces::SPACE_STORE.read(entity) }
-                              .entities.to_a.first
+    volume_group = @wrapper.entities.to_a.find { |entity| PhComposer::Spaces::SPACE_STORE.read(entity) }
+                           .entities.to_a.first
     volume_group.entities << extra
     path = volume.dig("reference", "entity_path") + [111]
     marked = invoke("ph_composer.spaces.floors.mark", "faces" => [path], "weighting_factor" => 0.6)
@@ -198,7 +368,7 @@ class SpacesOperationsTest < PhComposerTestCase
       "expected_metadata" => { "user_data" => {}, "extension_data" => {} }
     }])
     assert_equal "completed", written["status"], written.inspect
-    space_group = @zone_group.entities.to_a.find { |entity| PhComposer::Spaces::SPACE_STORE.read(entity) }
+    space_group = @wrapper.entities.to_a.find { |entity| PhComposer::Spaces::SPACE_STORE.read(entity) }
     stored = PhComposer::Spaces::SPACE_STORE.read(space_group)
     unavailable = { "schema_version" => 3, "payload" => { "kept" => true }, "export_relevance" => "local_only" }
     PhComposer::Spaces::SPACE_STORE.write(space_group,
@@ -234,9 +404,9 @@ class SpacesOperationsTest < PhComposerTestCase
     zone_with_outlines
     create([@living])
     space_id, volume_id = spaces.first.dig("volumes", 0, "reference", "entity_path").last(2)
-    space_group = entity_path([90, 100, space_id]).last
+    space_group = entity_path([90, space_id]).last
     space_group.entities.to_a.find { |entity| entity.persistent_id == volume_id }.locked = false
-    [[], [90, 100], [90, 100, space_id], [90, 100, space_id, volume_id]].each do |open|
+    [[], [90], [90, space_id], [90, space_id, volume_id]].each do |open|
       @model.active_path = open.empty? ? nil : entity_path(open)
       before = @model.operations.length
       deleted = invoke("ph_composer.spaces.delete", "space" => spaces.first.fetch("reference"))
@@ -244,7 +414,7 @@ class SpacesOperationsTest < PhComposerTestCase
       assert_equal before + 1, @model.operations.length
       assert_empty @model.nested_starts, "Volume protection joins the Delete instead of splitting it"
       assert_empty spaces
-      assert_equal open.first(2), Array(@model.active_path).map(&:persistent_id)
+      assert_equal open.first(1), Array(@model.active_path).map(&:persistent_id)
       Sketchup.undo
       assert_equal 1, spaces.length
     end
@@ -256,7 +426,7 @@ class SpacesOperationsTest < PhComposerTestCase
     create([@bath])
     first, second = spaces
     segment = first.dig("volumes", 0, "floor_segments", 0)
-    group = @zone_group.entities.to_a.find do |entity|
+    group = @wrapper.entities.to_a.find do |entity|
       PhComposer::Spaces::SPACE_STORE.read(entity)&.fetch("id") == second.fetch("id")
     end
     stored = PhComposer::Spaces::SPACE_STORE.read(group)
@@ -282,8 +452,7 @@ class SpacesOperationsTest < PhComposerTestCase
       Sketchup::Face.new(id, {}, :points => points, :edges => face_edges)
     end
     @zone_group.entities << a << b << c
-    preview = query("ph_composer.spaces.create_preview", "zone" => @zone,
-                                                         "faces" => [face_reference(a), face_reference(b)])
+    preview = query("ph_composer.spaces.create_preview", "faces" => [face_path(a), face_path(b)])
     assert_empty preview.fetch("accepted")
     assert_equal %w[shares_edge shares_edge], preview.fetch("left_out").map { |row| row["reason"] }
     assert_match(/Undo the outline, then draw it just below the floor or inset from the walls/,
@@ -332,11 +501,11 @@ class SpacesOperationsTest < PhComposerTestCase
     sloped = sloped_solid(@zone_group.entities).flatten
     downward = floor_face(170, rectangle(6, 10, 1, 1).reverse)
     @zone_group.entities << downward
-    faces = [bottom, top, *walls, *sloped, downward].map { |face| face_reference(face) }
-    preview = query("ph_composer.spaces.create_preview", "zone" => @zone, "faces" => faces)
-    assert_equal [[170]], preview.fetch("accepted").map { |face| face["entity_path"] },
+    faces = [bottom, top, *walls, *sloped, downward].map { |face| face_path(face) }
+    preview = query("ph_composer.spaces.create_preview", "faces" => faces)
+    assert_equal [[90, 100, 170]], preview.fetch("accepted"),
                  "a solid's walls are not floors and its top is not a second floor; a flat outline facing down is"
-    reasons = preview.fetch("left_out").to_h { |row| [row.dig("reference", "entity_path").last, row] }
+    reasons = preview.fetch("left_out").to_h { |row| [row.fetch("path").last, row] }
     assert_equal %w[vertical] * 6, walls.map { |wall| reasons.dig(wall.persistent_id, "reason") }
     assert_equal %w[solid solid], [bottom, top].map { |face| reasons.dig(face.persistent_id, "reason") }
     assert_equal %w[solid] * 6, sloped.map { |face| reasons.dig(face.persistent_id, "reason") },
@@ -353,8 +522,8 @@ class SpacesOperationsTest < PhComposerTestCase
   def test_a_new_volume_refuses_a_closed_solid
     zone_with_outlines
     create([@living])
-    space_group = @zone_group.entities.to_a.find { |entity| PhComposer::Spaces::SPACE_STORE.read(entity) }
-    @model.active_path = [@wrapper, @zone_group, space_group]
+    space_group = @wrapper.entities.to_a.find { |entity| PhComposer::Spaces::SPACE_STORE.read(entity) }
+    @model.active_path = [@wrapper, space_group]
     space = spaces.first.fetch("reference")
     faces = sloped_solid(space_group.entities).flatten.map { |face| space.fetch("entity_path") + [face.persistent_id] }
     result = invoke("ph_composer.spaces.volumes.create", "space" => space, "faces" => faces)
@@ -365,7 +534,7 @@ class SpacesOperationsTest < PhComposerTestCase
   def test_a_vertical_face_is_never_a_floor_candidate_a_marked_floor_or_a_new_volume
     zone_with_outlines
     create([@living])
-    space_group = @zone_group.entities.to_a.find { |entity| PhComposer::Spaces::SPACE_STORE.read(entity) }
+    space_group = @wrapper.entities.to_a.find { |entity| PhComposer::Spaces::SPACE_STORE.read(entity) }
     wall = floor_face(140, [[0, 0, 0], [1, 0, 0], [1, 0, 1], [0, 0, 1]])
     space_group.entities << wall
     space = spaces.first.fetch("reference")
@@ -377,7 +546,7 @@ class SpacesOperationsTest < PhComposerTestCase
     marked = invoke("ph_composer.spaces.floors.mark", "faces" => [volume.fetch("entity_path") + [141]],
                                                       "weighting_factor" => 1.0)
     assert_equal %w[refused target.wrong_kind], marked.values_at("status", "code")
-    @model.active_path = [@wrapper, @zone_group, space_group]
+    @model.active_path = [@wrapper, space_group]
     result = invoke("ph_composer.spaces.volumes.create", "space" => space,
                                                          "faces" => [space.fetch("entity_path") + [140]])
     assert_equal %w[refused target.wrong_kind], result.values_at("status", "code")
@@ -386,14 +555,14 @@ class SpacesOperationsTest < PhComposerTestCase
   def test_a_new_volume_refuses_faces_that_share_an_edge_with_an_unselected_face
     zone_with_outlines
     create([@living])
-    space_group = @zone_group.entities.to_a.find { |entity| PhComposer::Spaces::SPACE_STORE.read(entity) }
+    space_group = @wrapper.entities.to_a.find { |entity| PhComposer::Spaces::SPACE_STORE.read(entity) }
     edge = Sketchup::Edge.new(300, Geom::Point3d.new(0, 0, 0), Geom::Point3d.new(0, INCHES, 0))
     left, right = [130, 131].map do |id|
       points = rectangle(id - 125, 0, 1, 1).map { |x, y, z| Geom::Point3d.new(x * INCHES, y * INCHES, z * INCHES) }
       Sketchup::Face.new(id, {}, :points => points, :edges => [edge])
     end
     space_group.entities << left << right
-    @model.active_path = [@wrapper, @zone_group, space_group]
+    @model.active_path = [@wrapper, space_group]
     space = spaces.first.fetch("reference")
     result = invoke("ph_composer.spaces.volumes.create", "space" => space,
                                                          "faces" => [space.fetch("entity_path") + [130]])
@@ -404,8 +573,8 @@ class SpacesOperationsTest < PhComposerTestCase
     zone_with_outlines
     create([@living])
     volume = spaces.first.dig("volumes", 0)
-    volume_group = @zone_group.entities.to_a.find { |entity| PhComposer::Spaces::SPACE_STORE.read(entity) }
-                              .entities.to_a.first
+    volume_group = @wrapper.entities.to_a.find { |entity| PhComposer::Spaces::SPACE_STORE.read(entity) }
+                           .entities.to_a.first
     copied = floor_face(140, rectangle(0, 4, 1, 1), PhComposer::Spaces::FLOOR_SEGMENT_STORE.read(@living))
     volume_group.entities << copied
     result = invoke("ph_composer.spaces.floors.mark", "faces" => [volume.dig("reference", "entity_path") + [101]],
@@ -418,7 +587,7 @@ class SpacesOperationsTest < PhComposerTestCase
     create([@living])
     create([@bath])
     first, second = spaces
-    first_group, second_group = @zone_group.entities.to_a.select { |entity|
+    first_group, second_group = @wrapper.entities.to_a.select { |entity|
       PhComposer::Spaces::SPACE_STORE.read(entity)
     }
     misplaced = floor_face(150, rectangle(0, 9, 1, 1), segment_record("M"))
@@ -438,7 +607,7 @@ class SpacesOperationsTest < PhComposerTestCase
     zone_with_outlines
     create([@living])
     row = spaces.first
-    space_group = @zone_group.entities.to_a.find { |entity| PhComposer::Spaces::SPACE_STORE.read(entity) }
+    space_group = @wrapper.entities.to_a.find { |entity| PhComposer::Spaces::SPACE_STORE.read(entity) }
     step = PhComposer::Spaces::RecordStep.new(:kind => PhComposer::Spaces::SPACE_KIND,
                                               :path => row.dig("reference", "entity_path"),
                                               :before => PhComposer::Spaces::SPACE_STORE.read(space_group),
@@ -454,7 +623,7 @@ class SpacesOperationsTest < PhComposerTestCase
     zone_with_outlines
     create([@living])
     volume = spaces.first.dig("volumes", 0)
-    copy = volume_group(160, PhComposer::Spaces::VOLUME_STORE.read(@zone_group.entities.to_a.find do |entity|
+    copy = volume_group(160, PhComposer::Spaces::VOLUME_STORE.read(@wrapper.entities.to_a.find do |entity|
       PhComposer::Spaces::SPACE_STORE.read(entity)
     end.entities.to_a.first), [])
     @model.entities << copy
@@ -466,8 +635,8 @@ class SpacesOperationsTest < PhComposerTestCase
   def test_repeated_floor_targets_count_once
     zone_with_outlines
     create([@living])
-    volume_group = @zone_group.entities.to_a.find { |entity| PhComposer::Spaces::SPACE_STORE.read(entity) }
-                              .entities.to_a.first
+    volume_group = @wrapper.entities.to_a.find { |entity| PhComposer::Spaces::SPACE_STORE.read(entity) }
+                           .entities.to_a.first
     volume_group.entities << floor_face(170, rectangle(0, 4, 1, 1))
     path = spaces.first.dig("volumes", 0, "reference", "entity_path") + [170]
     marked = invoke("ph_composer.spaces.floors.mark", "faces" => [path, path], "weighting_factor" => 1.0)

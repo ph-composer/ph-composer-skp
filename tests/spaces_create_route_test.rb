@@ -3,9 +3,9 @@
 require_relative "test_helper"
 require_relative "support/space_fixtures"
 
-# Create Space from SketchUp's context menu: offered on a Face selection or on Mark floor's offer, refusing
-# with the reason outside a Zone's edit context, and handing the panel a review of what `create_preview`
-# accepts and leaves out, which the panel confirms with `create` at the review's revision.
+# Create Space from SketchUp's context menu: offered on a Face selection or on Mark floor's offer, in any edit
+# context, and handing the panel a review of what `create_preview` accepts and leaves out and which Zone it
+# preselects, which the panel confirms with `create` at the review's revision.
 class SpacesCreateRouteTest < PhComposerTestCase
   include SpaceFixtures
 
@@ -35,7 +35,8 @@ class SpacesCreateRouteTest < PhComposerTestCase
     @model.selection.clear
     tool = PhComposer::Spaces.mark_tool(@session)
     tool.start(1.0)
-    @model.active_view.picks[[100, 100]] = [@zone, @loose]
+    @model.active_path = [@zone]
+    @model.active_view.picks[[100, 100]] = [@loose]
     tool.onLButtonDown(0, 100, 100, @model.active_view)
     tool.onLButtonUp(0, 100, 100, @model.active_view)
     assert ROUTE.available?(@session), "the tool's offer"
@@ -45,17 +46,32 @@ class SpacesCreateRouteTest < PhComposerTestCase
     assert_empty tool.offered, "the next gesture drops the offer"
   end
 
-  def test_outside_a_zones_edit_context_it_says_why_and_writes_nothing
-    @model.selection.add(@loose)
+  def test_with_no_faces_it_says_a_space_is_a_floor_outline_and_writes_nothing
     operations = @model.operations.length
 
     assert_nil ROUTE.client(@session).run
 
     assert_equal operations, @model.operations.length
     assert_nil review.fetch("token")
-    assert_equal [ROUTE::NO_ZONE, :warning], @notices.last
-    assert_match(/open the Zone's edit context/, Sketchup.status_texts.last)
-    assert_equal [ROUTE::NO_ZONE], UI.notifications.map(&:message), "the refusal shows in SketchUp"
+    assert_equal [ROUTE::NO_FACES, :warning], @notices.last
+    assert_match(/floor outline plus a height/, Sketchup.status_texts.last)
+    assert_equal [ROUTE::NO_FACES], UI.notifications.map(&:message), "the refusal shows in SketchUp"
+  end
+
+  def test_at_the_root_it_reviews_a_loose_outline_preselecting_the_zone_that_holds_it
+    outline = floor_face(1500, rectangle(0.5, 0.5, 1, 1))
+    @model.entities << outline
+    @model.selection.add(outline)
+    panel = Struct.new(:proc).new(-> {})
+
+    result = PhComposer::Commands.stub(:open_panel, -> { panel }) { ROUTE.client(@session).run }
+
+    assert_equal "completed", result.fetch("status"), result.inspect
+    pending = review
+    assert_equal [[1500]], pending.fetch("accepted")
+    assert_equal ZONE, pending.fetch("zone")
+    assert_equal [ZONE.merge("name" => "Zone A")], pending.fetch("zones")
+    assert_in_delta 2.5, pending.fetch("height_m"), 1e-9
   end
 
   def test_inside_a_zone_it_reviews_the_selection_and_create_makes_the_space_in_one_undo_step
@@ -71,9 +87,8 @@ class SpacesCreateRouteTest < PhComposerTestCase
     assert_equal 1, opened, "the panel opens on the review"
     pending = review
     assert_equal ZONE, pending.fetch("zone")
-    assert_equal "Zone A", pending.fetch("zone_name")
-    assert_equal [[1200]], pending.fetch("accepted").map { |face| face.fetch("entity_path") }
-    assert_equal [[1300]], pending.fetch("left_out").map { |row| row.dig("reference", "entity_path") }
+    assert_equal [[1000, 1200]], pending.fetch("accepted")
+    assert_equal [[1000, 1300]], pending.fetch("left_out").map { |row| row.fetch("path") }
     assert_equal operations, @model.operations.length, "the review writes nothing"
 
     created = API.invoke(:context => @context, :name => "ph_composer.spaces.create",
@@ -86,20 +101,20 @@ class SpacesCreateRouteTest < PhComposerTestCase
 
   def test_a_stale_revision_refuses_and_only_the_reviews_own_token_closes_it
     @model.active_path = [@zone]
-    faces = [ZONE.merge("entity_path" => [1200], "entity_id" => nil)]
-    stale = view("open", "zone" => ZONE, "faces" => faces, "revision" => @session.revision - 1)
+    faces = [[1000, 1200]]
+    stale = view("open", "faces" => faces, "revision" => @session.revision - 1)
     assert_equal %w[refused revision.stale], stale.values_at("status", "code")
 
-    token = view("open", "zone" => ZONE, "faces" => faces, "revision" => @session.revision).dig("value", "token")
+    token = view("open", "faces" => faces, "revision" => @session.revision).dig("value", "token")
     refute_nil view("close", "token" => "another").dig("value", "token")
     assert_nil view("close", "token" => token).dig("value", "token")
   end
 
   def test_a_new_review_replaces_one_still_open
     @model.active_path = [@zone]
-    faces = [ZONE.merge("entity_path" => [1200], "entity_id" => nil)]
-    first = view("open", "zone" => ZONE, "faces" => faces, "revision" => @session.revision).dig("value", "token")
-    second = view("open", "zone" => ZONE, "faces" => faces, "revision" => @session.revision).dig("value", "token")
+    faces = [[1000, 1200]]
+    first = view("open", "faces" => faces, "revision" => @session.revision).dig("value", "token")
+    second = view("open", "faces" => faces, "revision" => @session.revision).dig("value", "token")
     refute_equal first, second
     assert_equal second, review.fetch("token")
   end

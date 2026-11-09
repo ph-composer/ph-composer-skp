@@ -109,8 +109,9 @@ class SpacesMarkToolTest < PhComposerTestCase
   end
 
   def test_a_face_in_a_zone_outside_any_space_is_offered_create_space_and_nothing_is_written
+    @model.active_path = [@zone]
     tool.start(1.0)
-    point(:loose, [@zone, @loose])
+    point(:loose, [@loose])
     operations = @model.operations.length
     click(:loose)
     assert_equal operations, @model.operations.length
@@ -118,15 +119,17 @@ class SpacesMarkToolTest < PhComposerTestCase
     assert_equal [[1000, 1200]], tool.offered
   end
 
-  def test_a_classified_zone_face_and_a_face_in_no_zone_refuse_at_the_status_bar_and_the_notice
+  def test_a_classified_zone_face_and_a_face_in_a_closed_group_refuse_at_the_status_bar_and_the_notice
+    closed = Sketchup::Group.new(9100, Sketchup::Entities.new([floor_face(9101, rectangle(30, 0, 1, 1))]))
+    @model.entities << closed
     tool.start(1.0)
     point(:wall, [@zone, @wall])
-    point(:stray, [@stray])
+    point(:closed, [closed, closed.entities.to_a.first])
     operations = @model.operations.length
     click(:wall)
     assert_match(/Geometry view.*Nothing was written\.\z/, Sketchup.status_texts.last)
-    click(:stray)
-    assert_match(/in no Zone.*Nothing was written\.\z/, Sketchup.status_texts.last)
+    click(:closed)
+    assert_match(/closed Group.*Nothing was written\.\z/, Sketchup.status_texts.last)
     assert_match(/Nothing was written\.\z/, @notices.last.first)
     assert_equal operations, @model.operations.length
     assert_equal :warning, @notices.last.last
@@ -216,7 +219,8 @@ class SpacesMarkToolTest < PhComposerTestCase
     assert_empty segments_on(@inside[0, 2]).compact
   end
 
-  def test_a_face_in_a_space_hosted_in_no_zone_refuses
+  # No Zone is a choice in Create Space's review, so a Space hosted in none takes floors like any other.
+  def test_a_face_in_a_space_hosted_in_no_zone_is_marked
     @zone.entities.delete(@space)
     @model.entities << @space
     SPACES::SPACE_STORE.write(@space, SPACES::SPACE_STORE.read(@space).reject { |key, _value| key == "zone_id" })
@@ -224,8 +228,23 @@ class SpacesMarkToolTest < PhComposerTestCase
     point(:in, [@space, @volume, @inside[0]])
     operations = @model.operations.length
     click(:in)
-    assert_equal operations, @model.operations.length
-    assert_match(/in no Zone/, Sketchup.status_texts.last)
+    assert_equal operations + 1, @model.operations.length
+  end
+
+  def test_a_face_in_a_closed_zone_is_not_offered
+    tool.start(1.0)
+    point(:loose, [@zone, @loose])
+    click(:loose)
+    assert_empty tool.offered
+    assert_match(/closed Group or Zone/, Sketchup.status_texts.last)
+  end
+
+  def test_a_loose_face_in_no_zone_is_offered_create_space
+    tool.start(1.0)
+    point(:stray, [@stray])
+    click(:stray)
+    assert_equal [[9000]], tool.offered
+    assert_match(/Create Space/, Sketchup.status_texts.last)
   end
 
   def test_hovering_places_each_pick_from_its_path_without_walking_the_model

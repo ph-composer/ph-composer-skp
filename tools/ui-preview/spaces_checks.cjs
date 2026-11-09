@@ -154,7 +154,10 @@ check({ name: "spaces", output }, async ({ newPage, step }) => {
       await page.goto(`http://127.0.0.1:${port}/tools/ui-preview/?fixture=spacescreate`);
       const review = page.locator("dialog.phc-create-space");
       await review.waitFor();
-      assert.match(await review.textContent(), /2 Faces in Living Zone become one Space with one Volume/);
+      assert.match(await review.textContent(), /2 Faces become one Space with one Volume/);
+      assert.match(await review.textContent(), /A Space is a floor outline plus a height/);
+      assert.equal(await review.getByRole("combobox", { name: "Zone" }).inputValue(), "0",
+        "the preselected Zone is the first choice");
       assert.match(await review.textContent(), /2 Faces: The Face is one of the Zone's own Faces\./);
       assert(await page.evaluate(() => document.body.scrollWidth <= innerWidth), `no page overflow at ${width}`);
       await page.screenshot({ path: path.join(output, `spaces-create-${width}.png`) });

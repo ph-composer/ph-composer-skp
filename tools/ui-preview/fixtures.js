@@ -932,15 +932,15 @@
   FIXTURES.spacesempty = { parts: [], zones: [], faces: [], spaces: { spaces: [], zones: [], findings: [],
     units: { area: "m2", height: "m", volume: "m3", airflow: "m3/h" } } };
   // Create Space's review as SketchUp's context menu hands it over: two Faces accepted, three left out.
-  function looseFace(path) { return { zone_id: "zon_Aa11Bb22Cc33", zone_path: [100], entity_path: [path],
-    entity_id: null }; }
   FIXTURES.spacescreate = Object.assign(JSON.parse(JSON.stringify(FIXTURES.spaces)), { createReview: {
     token: "preview-review", revision: 1, zone: { zone_id: "zon_Aa11Bb22Cc33", zone_path: [100] },
-    zone_name: "Living Zone", accepted: [looseFace(901), looseFace(902)],
+    zones: [{ zone_id: "zon_Aa11Bb22Cc33", zone_path: [100], name: "Living Zone" },
+      { zone_id: "zon_Dd44Ee55Ff66", zone_path: [200], name: "Second Floor" }],
+    accepted: [[901], [902]], height_m: 2.5, height_source: "last_height",
     left_out: [
-      { reference: looseFace(101), reason: "target.changed", message: "The Face is one of the Zone's own Faces." },
-      { reference: looseFace(102), reason: "target.changed", message: "The Face is one of the Zone's own Faces." },
-      { reference: looseFace(903), reason: "shares_edge",
+      { path: [101], reason: "classified", message: "The Face is one of the Zone's own Faces." },
+      { path: [102], reason: "classified", message: "The Face is one of the Zone's own Faces." },
+      { path: [903], reason: "shares_edge",
         message: "The Face shares an Edge with an unselected Face; grouping it would split that Face." }] } });
   // Convert to Window Type's review as SketchUp's menus hand it over: two Windows of one size, one of a size an
   // existing Type matches, and two rectangles left out.

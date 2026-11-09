@@ -294,6 +294,22 @@ class ZoneRepairTest < PhComposerTestCase
     assert_empty @model.entities.to_a.select { |entity| entity.is_a?(Sketchup::Group) }
   end
 
+  # Offering them would make Restore build a Zone inside the live one.
+  def test_stamped_faces_moved_into_a_live_zone_are_not_offered_for_restore
+    _group, zone_id = exploded_zone
+    live = box_group(700, 3)
+    @model.entities << live
+    make_zone(live)
+    @model.entities.to_a.grep(Sketchup::Face).each do |face|
+      @model.entities.delete(face)
+      live.entities << face
+    end
+
+    offers = restorable.map { |offer| offer.fetch("zone_id") }
+
+    refute_includes offers, zone_id
+  end
+
   def test_restore_refuses_stamped_members_spread_across_parent_contexts
     _group, zone_id = exploded_zone
     face = @model.entities.to_a.find { |entity| entity.is_a?(Sketchup::Face) }

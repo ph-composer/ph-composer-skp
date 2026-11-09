@@ -145,8 +145,8 @@ module PhComposer
       end
 
       # The Zone occurrence that owns an Edge at `path`, as `{zone_id, zone_path, name, building_segment}`, or nil
-      # and why: `outside_zone`, or `nested_container` inside a container the Zone holds. Zones' own rule, read
-      # from its projection; a Zone inside a Zone refuses, as the Zones section does.
+      # and why: `outside_zone`. Zones' own rule, read from its projection; a Zone inside a Zone refuses, as the
+      # Zones section does.
       def owner(zones, path)
         holding = zones.select { |zone| inside?(zone.fetch("zone_path"), path) }
         if holding.length > 1
@@ -154,10 +154,7 @@ module PhComposer
         end
         return [nil, "outside_zone"] if holding.empty?
 
-        zone = holding.first
-        return [nil, "nested_container"] if zone.fetch("container_paths").any? { |container| inside?(container, path) }
-
-        [zone.slice("zone_id", "zone_path", "name", "building_segment"), nil]
+        [holding.first.slice("zone_id", "zone_path", "name", "building_segment"), nil]
       end
 
       def inside?(parent, path)

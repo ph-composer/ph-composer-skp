@@ -421,7 +421,7 @@ access and never fall back to selection, display name, proximity or the active M
 | Owner | Dictionary | Entity | Durable identity |
 | --- | --- | --- | --- |
 | Zone | `ph_composer.zone` | Zone Group | `zon_` id |
-| Zone membership stamp | `ph_composer.zone_stamp` | Classified Face, and a nested container Group a feature creates in a Zone | Zone id plus Building-Segment and Level, as recovery data. Only Zones writes it; a feature that creates a container in a Zone has Zones stamp it through the participant below. Spaces stamps only the Group Create Space nests in an open Zone, until placement outside the Zone lands; it is never read as membership |
+| Zone membership stamp | `ph_composer.zone_stamp` | Classified Face | Zone id plus Building-Segment and Level, as recovery data. Only Zones writes it; it is never read as Space membership |
 | Face assignment | `ph_composer.face_assignment` | Face | `fac_` id |
 | Attached zone | `ph_composer.records.ph_composer.face_assignment.attached_zone` (a legacy name, kept so saved Models still read) | Model | `atz_` id through the record engine |
 | Thermal bridge assignment | `ph_composer.thermal_bridge` | The `Sketchup::Edge`, inside a Zone | `tbe_` id; values `thermal_bridge_type_id` (a required core reference to `ph_composer.thermal_bridges.type`) and `quantity` (above 0, default 1). A split or copy carries the id, which reads mark `copied` and nothing re-issues |
@@ -486,7 +486,7 @@ alone. One read over many paths, here and in `faces.host_context`, scans each co
 into once (`Zones::ChildLookup`), so its cost grows with the paths asked, not with paths times
 siblings. The Zone is the innermost one above the element, by the rule Face picking applies; with no
 Zone, `reason` says why: `not_found` (a step missing or repeated), `not_a_drawing_element`,
-`cutting_instance`, `outside_zone` or `nested_container`. `faces.host_context` stays Face-only over
+`cutting_instance` or `outside_zone`. `faces.host_context` stays Face-only over
 the same code. A feature whose reference target stores records on other elements inside Zones
 resolves its Face-shaped reference with `Zones::Occurrences.resolve_element(model, reference, noun:,
 mutable:, index:)` from its `locate:`, which has no request: Zones resolves the Zone and every step and
@@ -520,8 +520,14 @@ its own finding). A record with no `zone_id` reads `space.outside_zone`; one who
 occurrence reads `space.zone_missing`, blocking export, with the repair `ph_composer.spaces.unhost`, which clears
 the reference. Zones have no delete operation: a Zone is erased natively, so the Space survives it and the finding
 offers the repair, in a later step of its own (W6-9 of the Spaces packet). `ph_composer.spaces.move_to_zone` is a
-record edit in any edit context. Export keys each Space by `zone_id`. Create Space still nests its Group in the open
-Zone until the placement stage lands, carrying the reference and the stamp.
+record edit in any edit context. Export keys each Space by `zone_id`.
+
+Create Space takes Faces loose in the open edit context: the root, a plain Group or a Zone's own context
+(`Spaces::CreateFaces`). It never nests: from an open Zone the Space Group is placed in the Zone's parent at the same
+world position (W6-2), and a Face in a Group within a Zone is left out. `create_preview` names the Zone to preselect: the open
+Zone, otherwise the first whose plan footprint holds the outlines' centroid and whose height range holds them
+(`Spaces::ZoneInference`), otherwise none. `create` takes a `zone` or none. Space and Volume Groups are Untagged and no
+tag is created (W6-4). A closed solid is refused (W6-7).
 
 Copies follow one contract (W6-10). A copied Space, alone or inside a copied plain Group, takes a new id and keeps
 its `zone_id`. A plain Group copied whole is first given its own storage through
@@ -531,12 +537,6 @@ and the Spaces contributor rewrites `zone_id` to the new Zone id on every Space 
 that named the old Zone, in the same Undo step; a Space whose Zone stayed behind keeps its reference. A multi-select
 copy with no wrapping Group adds separate containers, so its Spaces keep their references. Neither watcher depends on
 running before the other: each binds by record and path at apply.
-
-**Stamping a container.** `ph_composer.zones.stamp_container` is a proposal participant: an action
-of a feature requiring Zones whose own earlier step creates a Group inside a Zone occurrence leaves
-the Group's root-to-Group path in a proposal slot as `{ "entity_path" => [...] }` and names the slot
-and the Zone; Zones' step stamps the Group in the same Undo step, refusing with the Zone's `target.*`
-codes, a lock or shared storage on the Group's path, and a Group inside another container. A Zone edit rewrites the stamps of its containers as it does its Faces'.
 
 **Copied Unit identities.** A native copy duplicates the Unit record, so several occurrences can
 carry one `wun_` id. Reads report the copy and never repair it. The next Windows action repairs
@@ -603,26 +603,6 @@ including nested instances, but excludes all descendant Faces from Zone geometry
 Window export to account for Units inside foreign cutting components and refuse invalid hosts
 instead of silently omitting them. Definition facts are detached once per definition and captured
 in resumable work units; a contributor never walks the live Model again.
-
-**Nested containers.** A Group inside a Zone that carries a Zone stamp (`ph_composer.zone_stamp`)
-is a nested authoring container: whatever stamped it owns its contents, and none of its Faces is a
-Zone Face. Zone discovery, Face inventories, Suggest, the Shift-click flood, Solve, viewport picks
-and explicit Face resolution skip it, and a Face path through one refuses as
-`target.wrong_hierarchy`. Presence of the stamp decides, whichever Zone it names and whether or not
-it reads, so a mismatched stamp is the stamping feature's finding and not Zones'. Only Groups
-qualify: a stamped Face is a classified Zone Face, a Zone nested in a Zone keeps its own refusal and
-cutting components keep theirs. The shared export snapshot still captures the container's Faces,
-for the feature that stamped it; the Zones export leaves them out of the Zone's Faces, gives them no
-owning Zone, reads nothing stored on them and does not export a Face record left on one; a Surface
-pair whose counterpart sits in a container exports as unresolved. Zones reads only the stamp it owns and never learns what the container is.
-Zones keeps the stamp current as it keeps its Faces' stamps: editing the Zone, Make Zone independent
-and repairing a copied Zone's identity rewrite every container's stamp, and refuse first when a
-container is locked or sits below a component, a locked Group or, for the repair, a Group the copy
-still shares. Restore Zone recovers a stamped container as a member, regrouping it whole with the
-Zone's stamped Faces; a Group whose stamp does not read stays opaque and is not offered, a live Zone
-is never a member whatever stamp it still carries, and a locked member or one holding a live Zone
-refuses the restore.
-Spaces is the feature that stamps one today: only the Group Create Space nests inside an open Zone.
 
 Solve reports `adjacency.glued_instances` when a proposed partial match would cut a Face with
 glued instances. A full match still pairs. A wholly covered glued side may pair while its larger

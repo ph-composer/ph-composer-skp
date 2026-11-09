@@ -196,7 +196,6 @@ module PhComposer
           "invalid"
         end
 
-        # A Face in a nested container is not a Zone Face, so a record left on one is not read or exported.
         def records(reader)
           zone_faces(reader.snapshot).filter_map do |entry|
             record = entry.record(FACE_DICTIONARY)
@@ -225,12 +224,8 @@ module PhComposer
           end.sort_by { |record| record.fetch("id") }
         end
 
-        # Every snapshot Face that can be a Zone Face: those in a nested container are left out before
-        # anything stored on them is read (context/CONTRACTS.md, "Zones geometry rules").
         def zone_faces(snapshot)
-          snapshot.entries.select do |entry|
-            entry.kind == "face" && !Zones::ExportProjection.contained?(snapshot, entry)
-          end
+          snapshot.entries.select { |entry| entry.kind == "face" }
         end
 
         def omission_reason(snapshot, entry, record)
@@ -242,7 +237,6 @@ module PhComposer
           endpoint = record.dig("adjacency", "counterpart")
           path = Array(endpoint&.fetch("zone_path", nil)) + Array(endpoint&.fetch("entity_path", nil))
           counterpart = snapshot.entry_at(path, :kind => "face")
-          counterpart = nil if counterpart && Zones::ExportProjection.contained?(snapshot, counterpart)
           other = counterpart&.record(FACE_DICTIONARY)
           unless counterpart && other
             return ["adjacency.unresolved", "Face has no reciprocal Surface endpoint."]

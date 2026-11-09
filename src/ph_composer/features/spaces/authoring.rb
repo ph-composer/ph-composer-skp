@@ -6,28 +6,12 @@ module PhComposer
     # target is an explicit reference; a Zone and its loose Faces are reached through the Zones
     # targets' public locate, never through Zones internals.
     module Authoring
-      FACE_KIND = "ph_composer.zones.faces.face"
-      STAMP = "ph_composer.zones.stamp_container"
       # What an edit may change, per kind; identity, structure and metadata have their own actions.
       EDITABLE = {
         SPACE_KIND => %w[name number default_height_m] + AIRFLOWS,
         VOLUME_KIND => %w[display_name avg_ceiling_height_m],
         FLOOR_SEGMENT_KIND => %w[display_name weighting_factor net_area_factor]
       }.freeze
-      # Why Create Space leaves a selected Face out, by the refusal Zones' locate gave it.
-      LEFT_OUT = {
-        "target.not_found" => ["not_found", "That Face no longer exists."],
-        "target.wrong_kind" => ["not_a_face", "Only Faces become Floor Segments."],
-        "target.wrong_hierarchy" => ["in_container", "The Face is inside another container, not loose in the Zone."],
-        "target.shared_definition" => ["shared_storage", "The Face is in storage another copy shares."],
-        "target.locked" => ["locked", "The Face or a Group above it is locked."],
-        "target.changed" => ["classified", "The Face is an envelope Face with a classification."],
-        "target.ambiguous" => ["classified", "The Face is an envelope Face with a classification."]
-      }.freeze
-
-      # A Face Create Space would take: the reference the caller named and the Face's persistent id.
-      EligibleFace = Struct.new(:reference, :face_id, keyword_init: true)
-
       # One checked edit of a Space, Volume or Floor Segment record: the occurrence it targets, the record
       # as read and the validated record proposed. `update`, `batch_update` and Height from solid share it.
       RecordEdit = Struct.new(:kind, :occurrence, :before, :after, keyword_init: true) do
@@ -36,49 +20,47 @@ module PhComposer
         end
       end
 
-      # A floor outline drawn on the Zone's walls splits them and shares their Edges, so Create Space leaves
-      # it out; the way out is to draw it where it touches no other Face.
-      SHARES_EDGE = "The Face shares an Edge with an unselected Face; grouping it would split that Face. Undo " \
-                    "the outline, then draw it just below the floor or inset from the walls, touching no other Face."
-      # The Faces of a closed solid, whatever the slope of its sides: taking its top and bottom would count the
-      # floor twice, so none is taken. A vertical wall among them is left out as a wall.
-      SOLID = "The Face is part of a solid. A Space is a floor outline plus a height: draw the floor outline " \
-              "alone, touching no other Face, then set the height, or group the solid and use Height from solid."
-
       module_function
 
-      # Which Faces Create Space would take and which it leaves out, and why. Writes nothing.
-      def create_preview(request, zone:, faces:)
-        request.locate(ZONE_KIND, zone_reference(zone), :mutable => true)
-        eligible, left_out = partition_faces(request, zone_reference(zone), faces)
-        { "accepted" => eligible.map(&:reference), "left_out" => left_out }
+      # Which Faces Create Space would take from the open edit context, which it leaves out and why, the Zone
+      # the review preselects and the height the Space will take. Writes nothing.
+      def create_preview(request, faces:)
+        found = CreateFaces.read(request, faces)
+        { "accepted" => found.eligible.map(&:path), "left_out" => found.left_out,
+          "zone" => CreateFaces.preselected_zone(request, found),
+          "height_m" => Settings.default_height_m(request.model),
+          "height_source" => Settings.read(request.model).fetch("last_height_m") ? "last_height" : "default" }
       end
 
-      def create(request, proposal, zone:, faces:, name: nil, number: nil, weighting_factor: 1.0)
-        zone = zone_reference(zone)
-        request.locate(ZONE_KIND, zone, :mutable => true)
-        context_open!(request.model, zone.fetch("zone_path"), "Open the Zone's edit context to create a Space in it.")
-        eligible, = partition_faces(request, zone, faces)
-        face_ids = eligible.map(&:face_id)
+      # Makes one Space from Faces loose in the open edit context, hosted in `zone`, or in no Zone when it is nil.
+      # The Space Group stands where the Faces were drawn, except that it never stays inside a Zone.
+      def create(request, proposal, faces:, zone: nil, name: nil, number: nil, weighting_factor: 1.0)
+        context = Resolve.integer_path(faces.first)[0...-1]
+        context_open!(request.model, context,
+                      "A Space is a floor outline plus a height: open the edit context holding the outline to " \
+                      "create a Space from it.")
+        found = CreateFaces.read(request, faces)
+        face_ids = found.eligible.map(&:face_id)
         if face_ids.empty?
           raise CodedError.new("space.nothing_to_create",
-                               "None of those Faces can become a Space. Nothing was written.")
+                               "None of those Faces can become a Space. A Space is a floor outline plus a height: " \
+                               "select the floor outline alone. Nothing was written.")
         end
 
+        zone_id = zone && host_zone_id(request, zone)
         scan = Occurrences.scan(request.model)
         allocate = Records::Identity.allocator(request, request.params)
         height = Settings.default_height_m(request.model)
         space = { "id" => allocate.call("spc"), "schema_version" => 1, "name" => name.to_s,
-                  "number" => number || next_number(scan, zone.fetch("zone_id")), "default_height_m" => height,
-                  "next_volume_sequence" => 2, "zone_id" => zone.fetch("zone_id") }
+                  "number" => number || next_number(scan, zone_id), "default_height_m" => height,
+                  "next_volume_sequence" => 2 }
+        space["zone_id"] = zone_id if zone_id
         volume = new_volume(allocate, 1, height)
         segments = segments_for(allocate, face_ids, weighting_factor)
         [[SPACE, space], [VOLUME, volume]].each { |kind, record| Spaces.validate!(kind, record) }
-        proposal.add_step(GroupStep.new(:context_path => zone.fetch("zone_path"), :face_ids => face_ids,
-                                        :space => space, :volume => volume, :segments => segments,
-                                        :slot => space.fetch("id")),
-                          :scopes => [Operations::EntityScope.new(zone.fetch("zone_path"))])
-        request.participate(STAMP, "zone" => zone, "slot" => space.fetch("id"))
+        proposal.add_step(GroupStep.new(:context_path => context, :face_ids => face_ids, :space => space,
+                                        :volume => volume, :segments => segments, :place_in => found.outside),
+                          :scopes => [context, found.outside].compact.map { |path| Operations::EntityScope.new(path) })
         { "space_id" => space.fetch("id"), "volume_id" => volume.fetch("id"),
           "floor_segment_ids" => segments.values.map { |record| record.fetch("id") } }
       end
@@ -301,64 +283,6 @@ module PhComposer
         end }
       end
 
-      # Splits the selected Faces into the EligibleFaces Create Space would take and a left-out row,
-      # with its reason, for each of the rest.
-      def partition_faces(request, zone, faces)
-        index = request.locate_index(FACE_KIND)
-        candidates = []
-        left_out = []
-        faces.uniq.each do |reference|
-          reason = face_refusal(request, zone, reference, index)
-          if reason
-            left_out << { "reference" => reference, "reason" => reason.first, "message" => reason.last }
-          else
-            candidates << EligibleFace.new(:reference => reference,
-                                           :face_id => Integer(reference.fetch("entity_path").last))
-          end
-        end
-        located_zone = request.locate(ZONE_KIND, zone, :mutable => false)
-        walls = left_out.select { |row| row["reason"] == "vertical" }
-                        .map { |row| Integer(row.dig("reference", "entity_path").last) }
-        solid = Steps.closed_shells(located_zone.entity.entities, candidates.map(&:face_id) + walls)
-        in_solid, candidates = candidates.partition { |face| solid.include?(face.face_id) }
-        left_out.concat(in_solid.map do |face|
-          { "reference" => face.reference, "reason" => "solid", "message" => SOLID }
-        end)
-        eligible = without_edge_sharing(located_zone, candidates)
-        left_out.concat((candidates - eligible).map do |face|
-          { "reference" => face.reference, "reason" => "shares_edge", "message" => SHARES_EDGE }
-        end)
-        [eligible, left_out]
-      end
-
-      # The candidates that share no Edge with a Face outside the set. Dropping a Face makes it an
-      # outside neighbour of the Faces beside it, so the check repeats until nothing more drops.
-      def without_edge_sharing(located_zone, candidates)
-        kept = candidates
-        loop do
-          sharing_ids = Steps.sharing(located_zone.entity.entities, kept.map(&:face_id))
-          return kept if sharing_ids.empty?
-
-          kept = kept.reject { |face| sharing_ids.include?(face.face_id) }
-        end
-      end
-
-      def face_refusal(request, zone, reference, index)
-        return ["other_zone", "The Face is in another Zone."] unless reference.slice("zone_id", "zone_path") == zone
-        return LEFT_OUT.fetch("target.changed") if reference["entity_id"]
-        unless reference.fetch("entity_path").length == 1
-          return ["not_in_zone_context", "The Face is not loose in the Zone's own edit context."]
-        end
-
-        located = request.locate(FACE_KIND, reference, :mutable => true, :index => index)
-        return ["floor_segment", "The Face is already a Floor Segment."] if FLOOR_SEGMENT_STORE.read(located.entity)
-        return ["vertical", Eligibility::WALL] if Eligibility.wall?(located.entity, located.transform)
-
-        nil
-      rescue CodedError => error
-        LEFT_OUT.fetch(error.code) { raise }
-      end
-
       def space_root_faces(model, occurrence, faces)
         faces.map do |path|
           path = Resolve.integer_path(path)
@@ -377,7 +301,7 @@ module PhComposer
         end.uniq.tap do |ids|
           entities = Occurrences.entity_at(model, occurrence.path).entities
           unless Steps.closed_shells(entities, ids).empty?
-            raise CodedError.new("target.wrong_kind", "The Faces close a solid. #{SOLID}")
+            raise CodedError.new("target.wrong_kind", "The Faces close a solid. #{CreateFaces::SOLID}")
           end
           unless Steps.sharing(entities, ids).empty?
             raise CodedError.new("space.shares_edge", "A Face shares an Edge with a Face that is not part of the " \
@@ -481,6 +405,13 @@ module PhComposer
       # plans every copy against one Model state, so a later repair must not reuse them.
       def reserved_numbers(proposal, zone_id)
         proposal.steps.grep(IdentityStep).select { |step| step.zone_id == zone_id }.filter_map(&:number)
+      end
+
+      # The id of a Zone a Space is hosted in. Nothing inside the Zone is written, so it need not be writable.
+      def host_zone_id(request, zone)
+        reference = zone_reference(zone)
+        request.locate(ZONE_KIND, reference, :mutable => false)
+        reference.fetch("zone_id")
       end
 
       def zone_reference(zone)

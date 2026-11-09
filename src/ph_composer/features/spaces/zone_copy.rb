@@ -9,9 +9,8 @@ module PhComposer
     # Numbers and values are kept. Payloads and a copied Space's `zone_id` are remapped to the Zone's new
     # ids (the collection-copy contract, context/CONTRACTS.md, "Space membership"): a Space outside the
     # Zone under the same added container (`copy_added`) follows it to the new id, and one whose Zone
-    # stayed behind keeps its reference. The Zone stamps on the Space Groups are Zones' to rewrite. The
-    # steps bind logically and add only restorable writes, because the Zone copy watcher's follow-up cannot
-    # abort.
+    # stayed behind keeps its reference. The steps bind logically and add only restorable writes, because the
+    # Zone copy watcher's follow-up cannot abort.
     module ZoneCopy
       NAME = "#{FEATURE_ID}.follow_zone_copy"
       TRANSITION = "ph_composer.zones.occurrence_independent"

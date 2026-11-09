@@ -79,20 +79,8 @@ module PhComposer
       end
 
       # The one Zone occurrence containing a snapshot entry, as [entry, record], or nil. Two means a
-      # Zone nested in a Zone, which export refuses. An entry inside a nested container has no owner.
+      # Zone nested in a Zone, which export refuses.
       def zone_owner(snapshot, entry)
-        owner = enclosing_zone(snapshot, entry)
-        owner unless owner && in_container?(snapshot, owner.first, entry)
-      end
-
-      # Whether a snapshot entry lies in a nested container of the Zone holding it: not a Zone Face,
-      # so no Zones section exports it.
-      def contained?(snapshot, entry)
-        owner = enclosing_zone(snapshot, entry)
-        !owner.nil? && in_container?(snapshot, owner.first, entry)
-      end
-
-      def enclosing_zone(snapshot, entry)
         matches = snapshot.records(ZONE_DICTIONARY, :kind => "group").select do |zone_entry, _record|
           snapshot.contains?(zone_entry, entry)
         end
@@ -108,31 +96,14 @@ module PhComposer
                 .min_by { |entry, _record| entry.path }
       end
 
-      def in_container?(snapshot, zone_entry, entry)
-        containers(snapshot, zone_entry).any? { |group| snapshot.contains?(group, entry) }
-      end
-
-      # The snapshot Faces a Zone occurrence owns: every Face inside it except those in a nested
-      # container, the rule `Occurrences` applies to the live Model. The snapshot keeps those Faces
-      # for the feature that stamped the container.
+      # The snapshot Faces a Zone occurrence owns.
       def zone_faces(snapshot, zone_entry)
-        nested = containers(snapshot, zone_entry)
-        snapshot.descendants(zone_entry, :kind => "face").reject do |face|
-          nested.any? { |group| snapshot.contains?(group, face) }
-        end
-      end
-
-      # The Groups inside a Zone occurrence that carry a Zone stamp (context/CONTRACTS.md, "Zones geometry rules").
-      def containers(snapshot, zone_entry)
-        snapshot.descendants(zone_entry, :kind => "group").select do |group|
-          !group.dictionaries.fetch(STAMP_DICTIONARY, {})[STAMP_STORE.key].nil?
-        end
+        snapshot.descendants(zone_entry, :kind => "face")
       end
 
       # The section's registered projection, for a contributor that places its own snapshot entries in a Zone
       # (`reader.section(SECTION)`): one row per Zone occurrence with its id, path, name and Building-Segment
-      # name, as zones.containment names them live, and the paths of the containers it holds, whose contents
-      # are not the Zone's (context/CONTRACTS.md, "Zones geometry rules"). It writes no finding; the section
+      # name, as zones.containment names them live. It writes no finding; the section
       # contract validates the same records and refuses a choice it cannot export.
       def occurrences(reader)
         reader.snapshot.records(ZONE_DICTIONARY, :kind => "group").map do |entry, record|
@@ -143,8 +114,7 @@ module PhComposer
                       record["building_segment"]
                     end
           { "zone_id" => record.fetch("id"), "zone_path" => entry.path, "name" => record.fetch("name"),
-            "building_segment" => segment,
-            "container_paths" => containers(reader.snapshot, entry).map(&:path) }
+            "building_segment" => segment }
         end
       end
 

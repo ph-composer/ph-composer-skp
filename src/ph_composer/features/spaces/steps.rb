@@ -118,23 +118,27 @@ module PhComposer
     # `space`, into a new Volume inside the open Space) and writes their records. SketchUp groups only
     # what is in the active edit context reliably, so the context must be open where the Faces are; the
     # host keeps each grouped Face's persistent id and dictionaries (context/SKETCHUP_HOST_BEHAVIOR.md,
-    # "Zone grouping and face topology"). `slot` names where the new Space's path goes for the Zone stamp.
+    # "Zone grouping and face topology"). `place_in`, set when the Faces were loose in an open Zone, is the path
+    # the new Space Group moves to at the same world position, so that no Space stays inside a Zone
+    # (context/SKETCHUP_HOST_BEHAVIOR.md, "Re-placing a Group's definition"). Both Groups stay Untagged: the
+    # user's active tag is not a Spaces setting (W6-4).
     class GroupStep
       attr_reader :affected
 
-      def initialize(context_path:, face_ids:, volume:, segments:, space: nil, slot: nil)
+      def initialize(context_path:, face_ids:, volume:, segments:, space: nil, place_in: nil)
         @context_path = context_path.dup.freeze
         @face_ids = face_ids.dup.freeze
         @volume = DeepCopy.frozen(volume)
         @segments = DeepCopy.frozen(segments)
         @space = DeepCopy.frozen(space)
-        @slot = slot
+        @place_in = place_in&.dup&.freeze
         @affected = []
       end
 
       def descriptor
         { "name" => @space ? "create_space" : "create_volume", "context_path" => @context_path,
-          "face_ids" => @face_ids, "space" => @space, "volume" => @volume, "segments" => @segments }
+          "face_ids" => @face_ids, "space" => @space, "volume" => @volume, "segments" => @segments,
+          "place_in" => @place_in }
       end
 
       def temporary_ids
@@ -142,7 +146,7 @@ module PhComposer
          *@segments.values.map { |record| record.fetch("id") }].compact
       end
 
-      def apply(model, slots)
+      def apply(model, _slots)
         unless Array(model.active_path).map(&:persistent_id) == @context_path
           raise CodedError.new("target.edit_path_changed", "The open edit context changed. Nothing was written.")
         end
@@ -154,23 +158,41 @@ module PhComposer
         end
 
         volume = entities.add_group(faces + faces.flat_map { |face| Array(face.edges) }.uniq)
+        untag(model, volume)
         space = nil
         if @space
           volume_id = volume.persistent_id
           space = entities.add_group([volume])
+          space = place_outside(model, entities, space) if @place_in
+          untag(model, space)
           # Grouping moves the Volume; find it again inside the Space rather than trust the old reference.
           volume = space.entities.to_a.find { |entity| entity.persistent_id == volume_id }
           SPACE_STORE.write(space, @space)
           space.name = Names.space(@space) if space.respond_to?(:name=)
         end
-        space_path = space ? @context_path + [space.persistent_id] : @context_path
+        space_path = space ? (@place_in || @context_path) + [space.persistent_id] : @context_path
         write_volume(volume, model, space_path)
         volume.locked = true
-        slots[@slot] = { "entity_path" => space_path } if @slot
         record_affected(space_path, volume, space && { "space_id" => @space.fetch("id") })
       end
 
       private
+
+      # The Group the new Space becomes outside the open Zone. With a Zone open, a child of it reads its
+      # transform in world coordinates and an `add_instance` into a collection on the open path above it takes
+      # world coordinates, so the transform passes straight through (context/SKETCHUP_HOST_BEHAVIOR.md).
+      def place_outside(model, entities, space)
+        placed = Operations::EntityScope.new(@place_in).resolve(model).add_instance(space.definition,
+                                                                                    space.transformation)
+        entities.erase_entities(space)
+        placed
+      end
+
+      # SketchUp's Untagged, which every Model holds first. An API-made entity otherwise takes the active tag
+      # (context/SKETCHUP_HOST_BEHAVIOR.md, "Re-placing a Group's definition").
+      def untag(model, group)
+        group.layer = model.layers[0]
+      end
 
       def loose_face(entities, id)
         matches = entities.to_a.select { |entity| entity.persistent_id == id }

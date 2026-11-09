@@ -126,9 +126,9 @@
       "sha256": "6e9226fcb9dc4ed88b085ed9698b99e8b8c7630b111fa7fb6bd22b855144d224"
     },
     "html/features/spaces/create_review.js": {
-      "bytes": 7943,
+      "bytes": 9369,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "83edb8f27f09bd77fee757c0ea36600e48080a0306dabe05d132d671c5415744"
+      "sha256": "65d77b78277974df0361d8fc96ae6fe91b87cd6cc60aaaed879e003fc3f80927"
     },
     "html/features/spaces/mark_paint.js": {
       "bytes": 4087,
@@ -146,9 +146,9 @@
       "sha256": "150bbd1c52e0265122b73db5a584e6c3f957e2afc68fb7ffbd4710343ff61868"
     },
     "html/features/thermal_bridges/assign_bar.js": {
-      "bytes": 11984,
+      "bytes": 11913,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "ea5007ad24e9a233664fc469d5aa800afdcddc185680a304441c0bb7dcaf0671"
+      "sha256": "422babeb518e590abe6e06aed251971a5b8cb96f203f16c20af57ce49c0ab3db"
     },
     "html/features/thermal_bridges/edge_tool.js": {
       "bytes": 3473,
