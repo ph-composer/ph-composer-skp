@@ -139,6 +139,8 @@
           value: JSON.parse(JSON.stringify(this.windows.glazings || { records: [] })) },
         ["ph_composer.windows.psi_install_types"]: { status: "completed",
           value: JSON.parse(JSON.stringify(this.windows.psi_install_types || { records: [] })) },
+        ["ph_composer.windows.convert_dialog"]: { status: "completed", value: JSON.parse(JSON.stringify(
+          this.windows.convert_dialog || { token: null, revision: null, groups: [], left_out: [] })) },
         ["ph_composer.windows.settings"]: { status: "completed",
           value: JSON.parse(JSON.stringify(this.windows.settings || {
           default_psi_install_id: null, default_psi_install_w_mk: 0.04, default_install_depth_m: 0 })) },
@@ -323,6 +325,8 @@
       if (payload.name === "ph_composer.spaces.labels.set_options") {
         Object.assign(this.labelOptions, payload.params);
       }
+      if (payload.name === "ph_composer.windows.convert_dialog.close" && this.windows.convert_dialog &&
+        this.windows.convert_dialog.token === payload.params.token) this.windows.convert_dialog = null;
       if (payload.name === "ph_composer.spaces.create_review.close" && this.createReview &&
         this.createReview.token === payload.params.token) this.createReview = null;
       outcome = { status: "completed", code: "ok", message: "Done.", effect: "none", revision: this.revision,
@@ -432,6 +436,9 @@
       record.display = Object.assign({}, record.display, { thermal: { uw_w_m2k: null, u_effective_w_m2k: null,
         findings: ["Preview changed definition: canonical thermal results require the Ruby host."], elements: [] } });
     }
+    // Convert answers that it ran; the synthetic Types and Units are not changed.
+    if (name === "units.convert") return Object.assign(completed({ units: [], created_type_ids: [] }),
+      { code: "ok", message: "Converted to Window Type.", affected: [], findings: [], detail: null });
     if (name === "units.rename") {
       var named = this.windows.units.units.filter(function (unit) {
         return JSON.stringify(unit.reference) === JSON.stringify(params.unit);

@@ -17,6 +17,7 @@ module PhComposer
         # Two layouts of one size within this are the same Type (W7-6).
         TYPE_MATCH_TOLERANCE_M = 0.001
         OUTLINE_DIGITS = 6
+        METRES_PER_INCH = 0.0254
 
         module_function
 
@@ -40,7 +41,10 @@ module PhComposer
           rescue CodedError => error
             left_out << left_out(cluster.map(&:path), error)
           end
-          [built.sort_by { |item| item.fetch(:sources).first.path }, left_out]
+          crossing = crossing_indices(built)
+          clear, refused = built.partition.with_index { |_item, index| !crossing.include?(index) }
+          left_out.concat(refused.map { |item| left_out(item.fetch(:sources).map(&:path), crossing_error) })
+          [clear.sort_by { |item| item.fetch(:sources).first.path }, left_out]
         end
 
         def types(request)
@@ -88,20 +92,44 @@ module PhComposer
 
         # An existing Window on the plane would refuse the placement, so the review says so first.
         def check_clear!(sources, plane, outlines)
-          near = outlines.select do |outline|
-            outline.all? { |point| plane.signed_distance_m(point).abs <= FaceGeometry::QUANTUM_M }
-          end
-          taken = near.map { |outline| outline.map { |point| plane.project(point) } }
-          return unless sources.any? do |source|
-            rectangle = source.corners.map { |point| plane.project(point) }
-            taken.any? { |outline| Placement::Polygons.overlap?(rectangle, outline) }
-          end
+          return unless overlaps?(sources, plane, outlines)
 
           raise CodedError.new("window.overlap", "The rectangle overlaps a Window already on this Face's plane.")
         end
 
+        def overlaps?(sources, plane, outlines)
+          near = outlines.select do |outline|
+            outline.all? { |point| plane.signed_distance_m(point).abs <= FaceGeometry::QUANTUM_M }
+          end
+          taken = near.map { |outline| outline.map { |point| plane.project(point) } }
+          sources.any? do |source|
+            rectangle = source.corners.map { |point| plane.project(point) }
+            taken.any? { |outline| Placement::Polygons.overlap?(rectangle, outline) }
+          end
+        end
+
+        # Rectangles in separate Groups share no Edge, so they can overlap as separate groups. Neither is
+        # the one to keep, so both are left out.
+        def crossing_indices(built)
+          built.each_index.with_object([]) do |left, crossing|
+            plane = Placement::Plane.new(built[left].fetch(:host).geometry)
+            sources = built[left].fetch(:sources)
+            ((left + 1)...built.length).each do |right|
+              others = built[right].fetch(:sources).map(&:corners)
+              crossing.push(left, right) if overlaps?(sources, plane, others)
+            end
+          end.uniq
+        end
+
+        def crossing_error
+          CodedError.new("window.overlap", "The rectangle overlaps another selected rectangle in a separate Group. " \
+                                           "Select one of them.")
+        end
+
         def rows(built, types)
           firsts = []
+          names = {}
+          taken = types.map { |type| type.fetch("name").strip.downcase }
           built.each_with_index.map do |item, index|
             layout = item.fetch(:layout)
             shared = firsts.find do |first|
@@ -109,10 +137,33 @@ module PhComposer
             end
             firsts << index unless shared
             matching = matching_types(layout, types)
+            names[shared || index] ||= default_name(layout, taken)
             { "host" => item.fetch(:host).reference, "columns_m" => layout.columns_m, "rows_m" => layout.rows_m,
               "layout_index" => shared || index, "matching_types" => matching,
+              "default_name" => names.fetch(shared || index),
               "preselected_type_id" => matching.first&.fetch("id"),
               "sources" => sources(item.fetch(:sources), layout) }
+          end
+        end
+
+        # The size in display units, with " (2)" when it is taken (W7-8); recorded as taken for the next layout.
+        def default_name(layout, taken)
+          stem = size_name(layout.columns_m.sum, layout.rows_m.sum)
+          name = taken.include?(stem.downcase) ? numbered(stem, taken) : stem
+          taken << name.downcase
+          name
+        end
+
+        def size_name(width, height)
+          return "Window #{(width * 1000).round} x #{(height * 1000).round}" if Preferences.unit_system == "SI"
+
+          format("Window %<w>.1f x %<h>.1f", :w => width / METRES_PER_INCH, :h => height / METRES_PER_INCH)
+        end
+
+        def numbered(stem, taken)
+          (2..).each do |index|
+            name = "#{stem} (#{index})"
+            return name unless taken.include?(name.downcase)
           end
         end
 
@@ -137,7 +188,8 @@ module PhComposer
           end
           rows.sort_by { |row| [row.fetch("row_span").first, row.fetch("column_span").first] }
         end
-        private_class_method :clusters, :group, :check_size!, :check_clear!, :matching_types, :sources
+        private_class_method :clusters, :group, :check_size!, :check_clear!, :overlaps?, :crossing_indices,
+                             :crossing_error, :default_name, :size_name, :numbered, :matching_types, :sources
       end
     end
   end

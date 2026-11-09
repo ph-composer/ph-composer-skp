@@ -276,13 +276,142 @@ class WindowConvertTest < PhComposerTestCase
     zone_with([], :holes => [])
     paths = [overlapping_group(2), overlapping_group(3)]
     result = review(*paths)
-    assert_empty result.fetch("left_out")
-    assert_equal 2, result.fetch("groups").length
+    assert_empty result.fetch("groups"), "neither overlapping rectangle is offered"
+    assert_equal [["window.overlap", [paths[0]]], ["window.overlap", [paths[1]]]],
+                 result.fetch("left_out").map { |row| row.values_at("code", "paths") }
     before = @model.operations.length
-    assert_equal "window.overlap", convert(groups_from(result)).fetch("code")
+    assert_equal "window.overlap", convert(paths.flat_map { |one| groups_from(review(one)) }).fetch("code")
     assert_equal before, @model.operations.length
     assert_empty units
     assert_empty types
+  end
+
+  def test_review_offers_each_size_a_default_name_and_gives_the_same_size_one
+    rings = [ring(1, 1, 1.2, 1.5), ring(3, 1, 1.2, 1.5), ring(5, 1, 0.6, 1.5)]
+    faces = zone_with(rings, :holes => rings)
+    names = review(*faces.map { |face| path(face) }).fetch("groups").map { |group| group.fetch("default_name") }
+    assert_equal ["Window 1200 x 1500", "Window 1200 x 1500", "Window 600 x 1500"], names
+  end
+
+  def test_a_second_layout_of_one_size_is_named_with_a_suffix_and_converts_under_it
+    tiled = [ring(1, 1, 0.6, 1.5), ring(1.6, 1, 0.6, 1.5)]
+    rings = tiled + [ring(4, 1, 1.2, 1.5)]
+    faces = zone_with(rings, :holes => [ring(1, 1, 1.2, 1.5), ring(4, 1, 1.2, 1.5)])
+    result = review(*faces.map { |face| path(face) })
+    assert_equal ["Window 1200 x 1500", "Window 1200 x 1500 (2)"],
+                 result.fetch("groups").map { |group| group.fetch("default_name") }
+    names = converted(groups_from(result)).fetch("units").map { |row| type(row.fetch("type_id")).fetch("name") }
+    assert_equal ["Window 1200 x 1500", "Window 1200 x 1500 (2)"], names
+  end
+
+  # A clear group keeps its place beside an overlapping pair; a rectangle on a parallel plane overlaps nothing.
+  def test_only_the_overlapping_groups_are_left_out
+    zone_with([], :holes => [])
+    crossing = [overlapping_group(2), overlapping_group(3)]
+    clear = overlapping_group(6)
+    result = review(*crossing, clear)
+    assert_equal [[clear]],
+                 result.fetch("groups").map { |group| group.fetch("sources").map { |row| row.fetch("path") } }
+    assert_equal crossing.map { |one| [one] }, result.fetch("left_out").map { |row| row.fetch("paths") }
+  end
+
+  # A stored Window Type to Copy from: its one element's kind and operation as given.
+  def copy_type(name, kind: "glazed", operation: nil)
+    id = assignment_invoke("ph_composer.windows.types.create", "values" => { "name" => name })
+         .fetch("value").fetch("id")
+    return id if kind == "glazed" && operation.nil?
+
+    update_type(id, "elements" => [type(id).fetch("elements").first.merge("kind" => kind, "operation" => operation)])
+    id
+  end
+
+  def update_type(id, values)
+    updated = assignment_invoke("ph_composer.windows.types.update", "id" => id, "values" => values,
+                                                                    "expected_values" => type(id))
+    assert_equal "completed", updated.fetch("status"), updated.inspect
+  end
+
+  def product(kind, name)
+    assignment_invoke("ph_composer.windows.#{kind}.create", "values" => { "name" => name }).fetch("value").fetch("id")
+  end
+
+  # A Type of two columns, the first element empty and the second glazed with `properties`.
+  def template_type(properties)
+    id = assignment_invoke("ph_composer.windows.types.create", "values" => { "name" => "Template" })
+         .fetch("value").fetch("id")
+    first = type(id).fetch("elements").first.merge("kind" => "empty")
+    second = W::Types.blank(0, 1).merge(properties)
+    update_type(id, "columns_m" => [0.5, 0.5], "elements" => [first, second])
+    id
+  end
+
+  def test_copy_from_gives_every_element_the_first_glazed_elements_properties
+    sides = W::Types::SIDES
+    properties = { "glazing_id" => product("glazings", "Triple"),
+                   "frames" => sides.to_h { |side| [side, product("frames", "Frame #{side}")] },
+                   "installs" => sides.to_h { |side| [side, product("psi_install_types", "Install #{side}")] },
+                   "operation" => { "type" => "swing", "directions" => ["left"] } }
+    source = template_type(properties)
+    before = type(source)
+    faces = zone_with([ring(1, 1, 0.6, 1.5), ring(1.6, 1, 0.6, 1.5)], :holes => [ring(1, 1, 1.2, 1.5)])
+    value = converted(groups_from(review(*faces.map { |face| path(face) }), "copy_from_type_id" => source))
+    elements = type(value.fetch("units").first.fetch("type_id")).fetch("elements")
+    assert_equal 2, elements.length
+    elements.each do |element|
+      assert_equal properties, element.slice(*properties.keys)
+      assert_equal "glazed", element.fetch("kind")
+    end
+    assert_equal elements.map { |element| element.fetch("id") }.uniq, elements.map { |element| element.fetch("id") }
+    assert_equal before, type(source), "Copy from leaves its source as it was"
+  end
+
+  def test_copy_from_without_a_glazed_element_or_beside_a_chosen_type_is_refused
+    empty = copy_type("Empty", :kind => "empty")
+    face = zone_with([ring(2, 1, 1.2, 1.5)]).first
+    groups = groups_from(review(path(face)), "copy_from_type_id" => empty)
+    assert_equal "validation.failed", convert(groups).fetch("code")
+    glazed = copy_type("Glazed", :operation => nil)
+    groups = groups_from(review(path(face)), "copy_from_type_id" => glazed, "type_id" => glazed)
+    assert_equal "params.invalid", convert(groups).fetch("code")
+    assert_equal "target.not_found",
+                 convert(groups_from(review(path(face)), "copy_from_type_id" => "wnt_#{"Z" * 12}")).fetch("code")
+  end
+
+  def test_groups_sharing_a_new_type_take_one_copy_from
+    first = copy_type("First", :operation => nil)
+    second = copy_type("Second", :operation => nil)
+    rings = [ring(1, 1, 1.2, 1.5), ring(3, 1, 1.2, 1.5)]
+    faces = zone_with(rings, :holes => rings)
+    groups = groups_from(review(*faces.map { |face| path(face) }))
+    groups[0]["copy_from_type_id"] = first
+    groups[1]["copy_from_type_id"] = second
+    assert_equal "params.invalid", convert(groups).fetch("code")
+  end
+
+  # A failure after the rectangles are erased: the operation aborts, so nothing of the conversion remains.
+  def test_a_failure_between_erase_and_placement_aborts_and_leaves_the_model_as_it_was
+    rings = [ring(1, 1, 1.2, 1.5), ring(3, 1, 1.2, 1.5)]
+    faces = zone_with(rings, :holes => rings)
+    result = review(*faces.map { |face| path(face) })
+    placed = 0
+    add_glued = W::Units::NativeUnit.method(:add_glued!)
+    failing = lambda do |*args|
+      placed += 1
+      raise PhComposer::CodedError.new("geometry.failed", "The Window could not be placed.") if placed == 2
+
+      add_glued.call(*args)
+    end
+    outcome = W::Units::NativeUnit.stub(:add_glued!, failing) { convert(groups_from(result)) }
+    assert_equal "rolled_back", outcome.fetch("effect"), outcome.inspect
+    assert_equal "geometry.failed", outcome.dig("detail", "cause")
+    assert_equal 2, placed, "it fails on the second placement, after the erase and a first Unit"
+    assert_equal :aborted, @model.operations.last[2]
+    assert_equal faces.map(&:persistent_id).sort, (live_faces.map(&:persistent_id) - [@host.persistent_id]).sort
+    assert_equal 3, live_host.loops.length
+    assert_empty units
+    assert_empty types
+    assert_empty(@model.definitions.to_a.select { |item| item.name.start_with?("PhComposer_Window_") })
+    assert_empty W::Units::DefinitionIndex.read(@model)
   end
 
   def test_one_native_undo_restores_every_rectangle_and_removes_each_new_type_and_unit_then_redo_converts_again

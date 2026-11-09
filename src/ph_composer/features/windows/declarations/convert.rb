@@ -2,6 +2,7 @@
 
 require_relative "../units/convert_review"
 require_relative "../units/convert"
+require_relative "convert_route"
 
 module PhComposer
   module Windows
@@ -16,14 +17,15 @@ module PhComposer
 
       def install(feature, registry)
         face = DeepCopy.call(registry.record_descriptor("ph_composer.zones.faces.face").occurrence_schema)
+        review_result = Shapes.object({ "groups" => Shapes.list(group_shape(face)),
+                                        "left_out" => Shapes.list(left_out_shape) })
         feature.query("#{FEATURE_ID}.units.convert_review",
                       :description => "Which drawn rectangles Convert to Window Type would take, grouped by shared " \
                                       "Edges into Window Type layouts, and why it leaves each other Face out. Writes " \
                                       "nothing. Sizes are the frame outer size.",
                       :refuses => Refuses::CONVERT_REVIEW,
                       :params => Shapes.object({ "paths" => paths_param }),
-                      :result => Shapes.object({ "groups" => Shapes.list(group_shape(face)),
-                                                 "left_out" => Shapes.list(left_out_shape) }),
+                      :result => review_result,
                       :examples => [{ "paths" => [[1201, 1204]] }]) do |request|
           Units::ConvertReview.read(request, request.params.fetch("paths"))
         end
@@ -44,6 +46,7 @@ module PhComposer
                        :examples => [{ "groups" => [{ "sources" => [EXAMPLE_SOURCE] }] }]) do |request, proposal|
           Units::Convert.run(request, proposal, :groups => request.params.fetch("groups"))
         end
+        ConvertRouteRegistration.install(feature, review_result, paths_param)
       end
 
       def groups_param
@@ -52,9 +55,12 @@ module PhComposer
         type_id = Shapes.id("wnt", "A Window Type of this size; a new one when absent.")
         name = Shapes.described(Shapes::TEXT, "The new Type's name. Default: its size in display units, with " \
                                               "\" (2)\" added when taken.")
+        copy_from = Shapes.id("wnt", "Copies this Type's first glazed element's glazing, frames, installs and " \
+                                     "operation into every element of the new Type. Default: blank elements.")
         sources = Shapes.list(source).merge("minItems" => 1, "maxItems" => Pages::MAXIMUM_LIMIT)
-        group = Shapes.object({ "sources" => sources, "type_id" => type_id, "name" => name },
-                              :optional => %w[type_id name])
+        group = Shapes.object({ "sources" => sources, "type_id" => type_id, "name" => name,
+                                "copy_from_type_id" => copy_from },
+                              :optional => %w[type_id name copy_from_type_id])
         Shapes.list(group).merge("minItems" => 1, "maxItems" => Pages::MAXIMUM_LIMIT,
                                  "description" => "Each group a review listed, with its rectangles and digests.")
       end
@@ -78,6 +84,7 @@ module PhComposer
                                                           "alphabetical. New Type is always offered besides these."),
           "preselected_type_id" => { "type" => %w[string null],
                                      "description" => "The first matching Type, or null when none matches." },
+          "default_name" => Shapes.described(Shapes::TEXT, "The name a new Type of this size takes unless given one."),
           "sources" => Shapes.list(source_shape, :description => "The rectangles, one per Window Type element.")
         })
       end

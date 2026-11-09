@@ -2,9 +2,9 @@
 PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", "subtabs", "unit_field", "units",
   "features/windows/audit", "features/windows/canvas", "features/windows/cards", "features/windows/editor_shared",
   "features/windows/install_editor", "features/windows/type_list", "library/sidebar", "features/windows/library",
-  "features/windows/placement", "features/windows/schedule", "fields", "workspace"], function (panel, request,
-  snapshot, Subtabs, unitFields, units, audit, Canvas, cards, shared, InstallEditor, typeList, Sidebar, library,
-  Placement, Schedule, fields, ui) {
+  "features/windows/placement", "features/windows/schedule", "features/windows/convert_review", "fields",
+  "workspace"], function (panel, request, snapshot, Subtabs, unitFields, units, audit, Canvas, cards, shared,
+  InstallEditor, typeList, Sidebar, library, Placement, Schedule, ConvertReview, fields, ui) {
   "use strict";
   var el = ui.element, clone = shared.clone, WINDOW_DIMENSION = shared.WINDOW_DIMENSION,
     VIEW_SIDES = shared.VIEW_SIDES;
@@ -43,6 +43,7 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
     this.placement = new Placement.Controls(this); root.insertBefore(this.placement.root, this.layout);
     this.typeTools.insertBefore(this.placement.anchorRoot, this.readinessButton);
     this.schedule = new Schedule.Schedule(this); this.scheduleSurface.appendChild(this.schedule.root);
+    this.convertReview = new ConvertReview(this);
   }
   View.prototype.rawRecord = function (id) {
     return shared.records(this.state, "types").filter(function (row) { return row.id === (id || this.active); },
@@ -64,6 +65,8 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
   View.prototype.length = function (value) { return shared.format(value, WINDOW_DIMENSION); };
   View.prototype.guard = function () {
     if (this.disposed) return null;
+    // An open Convert to Window Type review holds the screen as a draft does, so nothing covers it.
+    if (this.convertReview && this.convertReview.active()) return "Finish the Convert to Window Type review first.";
     if (this.requests.busy()) return "Wait for the Window Type edit.";
     if (this.dimensionField && this.dimensionField.editing) return "Apply or cancel the dimension draft.";
     if (this.renameDraft) return "Finish or cancel the name edit.";
@@ -425,8 +428,10 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
     }
     if (!this.record()) this.active = this.entries.length ? this.entries[0].record.id : null;
     this.requests.consume(state); this.installEditor.render(state); this.placement.render(state);
-    this.schedule.render(state); this.paint();
+    this.schedule.render(state); this.convertReview.consume(state); this.paint();
   };
+  /* After Convert: the Types tab on the first Type it made or used, whose products are the next step. */
+  View.prototype.showConverted = function (id) { this.tabs.select("builder"); this.active = id; this.selected = []; };
   View.prototype.openUse = function (use) {
     if (this.guard()) return;
     this.tabs.select("builder"); this.choose(use.type_id); this.selected = use.element_id ? [use.element_id] : [];
@@ -437,7 +442,7 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
     if (this.cancelRename) this.cancelRename();
     if (this.formDraft) this.formDraft.cancel(false);
     this.installEditor.dispose(); if (this.valueEditor) this.valueEditor.dispose();
-    this.placement.dispose(); this.schedule.dispose();
+    this.placement.dispose(); this.schedule.dispose(); this.convertReview.dispose();
     if (this.bubble) this.bubble.close(false);
     Object.keys(this.sidebars).forEach(function (kind) { this.sidebars[kind].dispose(); }, this);
     this.root.removeEventListener("keydown", this.onKeydown); document.removeEventListener("keydown", this.documentKey);

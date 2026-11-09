@@ -4,6 +4,11 @@
 /* Installs scrolls with the panel, so its sticky commit header follows that same scroller. */
 .window-workspace.is-installing { overflow:visible; }
 .live-panel section.window-workspace { margin:0 calc(-1 * var(--page-gutter)); padding:0 var(--page-gutter); }
+/* Convert to Window Type's review: one size per row, the fields side by side where the dialog is wide enough. */
+.phc-convert-window-groups { display:flex; flex-direction:column; gap:12px; }
+.phc-convert-window-group { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:8px; }
+.phc-convert-window-group > p { grid-column:1 / -1; margin:0; font-weight:600; }
+.phc-convert-window-left-out { margin:4px 0 0; padding-left:18px; }
 .window-heading,.window-card-heading { display:flex; align-items:center; flex-wrap:wrap; gap:6px; }
 .window-toolbar button[aria-pressed=true] { background:var(--interaction-highlight); color:#fff; }
 .window-layout { display:grid; grid-template-columns:210px minmax(0,1fr); min-height:0; flex:1; }

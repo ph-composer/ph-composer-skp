@@ -185,6 +185,12 @@ endpoints, midpoints, edges and guides, so CAD linework can guide the anchor in 
 off the host's plane, such as linework in front of the wall, lands square onto it. While placing,
 the panel shows the two measurements as a callout and SketchUp labels its measurement box.
 
+Draw-then-convert is the other route. Draw the opening as a rectangle with SketchUp's own tools on a Zone Face, or
+coplanar with one outside every Zone, select it and choose Convert to Window Type from the context menu or the
+Extensions menu. The panel lists what becomes a Window Type and why anything else is left out. Rectangles sharing an
+Edge become one mulled Type, and same-size rectangles share one. Each new Type is named by its size and blank unless
+you choose Copy from. One Undo restores the drawn rectangles.
+
 A Window pasted or moved off its Face goes back to the nearest Face of its Zone, in the same Undo
 step, and says so in SketchUp: it keeps its position if it already lies clear on a Face, and
 otherwise is squared to the Face and brought just inside its edge. A Window with no Face beside it
