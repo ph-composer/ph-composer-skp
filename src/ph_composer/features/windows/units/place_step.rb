@@ -93,15 +93,7 @@ module PhComposer
           local_transform = transform.inverse * Geom::Transformation.new(@world_matrix)
           WorldGeometry.transform_state(local_transform.to_a)
           definition ||= create_definition(model)
-          instance = entities.add_instance(definition, local_transform)
-          raise CodedError.new("geometry.failed", "The native Window instance could not be created.") unless instance
-
-          instance.glued_to = face
-          unless instance.glued_to == face
-            raise CodedError.new("geometry.failed", "The native Window instance could not glue to its host Face.")
-          end
-
-          Units.write(instance, @record)
+          instance = NativeUnit.add_glued!(entities, definition, local_transform, face, @record)
           reference = { "unit_id" => @record.fetch("id"), "entity_path" => @parent_path + [instance.persistent_id] }
           slots[@record.fetch("id")] = reference
           @affected = [{ "kind" => REFERENCE_KIND, "id" => @record.fetch("id"), "change" => "placed",
@@ -136,13 +128,7 @@ module PhComposer
         end
 
         def check_definition!(definition)
-          return unless definition
-          return if DefinitionWriter.configured?(definition.behavior) &&
-                    DefinitionGeometry.matches?(definition, :type_id => @type.fetch("id"), :plan => @plan)
-
-          raise CodedError.new("window.definition_changed",
-                               "The canonical Window definition geometry or behavior differs from its Type. " \
-                               "Nothing was written.")
+          NativeUnit.check_primary!(definition, :type_id => @type.fetch("id"), :plan => @plan) if definition
         end
 
         def create_definition(model)

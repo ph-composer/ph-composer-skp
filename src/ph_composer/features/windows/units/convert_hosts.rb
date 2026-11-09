@@ -46,6 +46,8 @@ module PhComposer
             zone_face if on_plane?(zone_face.geometry, sources.flat_map(&:corners))
           end
           no_host! if candidates.empty?
+          # An Edge a Face off the plane also uses would stay, so the host could not heal.
+          boundary! if candidates.length < around.length
           boundary! if candidates.any? { |candidate| touches?(candidate, sources, [candidate.geometry.outer_loop]) }
           ambiguous! if candidates.length > 1
           candidates.first

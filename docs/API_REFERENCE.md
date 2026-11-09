@@ -45469,6 +45469,139 @@ Example params:
 }
 ```
 
+### `ph_composer.windows.units.convert`
+
+Replace reviewed drawn rectangles with placed Windows, one per group: a new Window Type sized from the geometry or a Type of that size. Sizes are the frame outer size. Owner: `ph_composer.windows`.
+
+Undo step: Convert to Window Type. Erases the rectangles and the Edges only they use, healing the host Face, writes the new Window Types, and places one Unit per group, in one Undo step. It first gives every copied Window Unit that still shares an identity a new one, in the same Undo step; ph_composer.windows.units.repair_copied_identities does only that.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.convert_on_boundary`, `window.definition_changed`, `window.definition_missing`, `window.host_ambiguous`, `window.mull_not_rectangular`, `window.not_aligned`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "groups"
+  ],
+  "properties": {
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sources"
+        ],
+        "properties": {
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "path",
+                "digest"
+              ],
+              "properties": {
+                "path": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "digest": {
+                  "type": "string",
+                  "description": "The Face's geometry digest from the review."
+                }
+              }
+            },
+            "minItems": 1,
+            "maxItems": 500
+          },
+          "type_id": {
+            "type": "string",
+            "pattern": "^wnt_[A-Za-z0-9]{12}$",
+            "description": "A Window Type of this size; a new one when absent."
+          },
+          "name": {
+            "type": "string",
+            "description": "The new Type's name. Default: its size in display units, with \" (2)\" added when taken."
+          }
+        }
+      },
+      "minItems": 1,
+      "maxItems": 500,
+      "description": "Each group a review listed, with its rectangles and digests."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "units",
+    "created_type_ids"
+  ],
+  "properties": {
+    "units": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "unit_id",
+          "type_id"
+        ],
+        "properties": {
+          "unit_id": {
+            "type": "string"
+          },
+          "type_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "created_type_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "groups": [
+    {
+      "sources": [
+        {
+          "path": [
+            1201,
+            1204
+          ],
+          "digest": "sha256:0a1b"
+        }
+      ]
+    }
+  ]
+}
+```
+
 ### `ph_composer.windows.units.new_flipped_type`
 
 Create a horizontally flipped Type for one mirrored Window. Owner: `ph_composer.windows`.
@@ -56065,3 +56198,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.22 | 2026-11-08 | A Frame gains brand, an optional text field, in ph_composer.windows.frames and the frames library kind. |
 | 1.23 | 2026-11-08 | A Window Unit reads its native name in ph_composer.windows.units.list and .all; ph_composer.windows.units.rename and ph_composer.windows.units.selection are new. |
 | 1.24 | 2026-11-09 | ph_composer.windows.units.convert_review is new: which drawn rectangles Convert to Window Type would take, as Type layouts, and why it leaves the others out. |
+| 1.25 | 2026-11-09 | ph_composer.windows.units.convert is new: reviewed drawn rectangles become Window Types and placed Windows in one Undo step. |

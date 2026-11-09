@@ -627,6 +627,12 @@ module Sketchup
       self
     end
 
+    # Used by `Entities#erase_entities`: the Edges of a hole are gone, so the hole is.
+    def remove_hole!(loop)
+      @loops.delete(loop)
+      self
+    end
+
     # The host triangulates a Face, holes and concavity included, and hands back a PolygonMesh. This
     # stub fans the outer loop instead, which is only right for a convex outline: it exists so the
     # Colour-by cache can be tested for what it batches and counts, never as evidence about how
@@ -827,9 +833,33 @@ module Sketchup
         raise ArgumentError, "cannot remove an instance in the active editing path"
       end
 
-      entities.flatten.each { |entity| delete(entity) }
+      erased = entities.flatten
+      erased.each { |entity| delete(entity) }
+      heal_holes(erased.grep(Edge))
       true
     end
+
+    # Erasing the Edges of a rectangle drawn inside a Face leaves that Face whole: a hole goes once as
+    # many of its Edges as it has sides are erased and every corner is on one, the Face keeping its
+    # persistent id and dictionaries (context/SKETCHUP_HOST_BEHAVIOR.md, Convert to Window Type's H1).
+    def heal_holes(erased_edges)
+      corners = erased_edges.flat_map { |edge| [edge.start.position, edge.end.position] }
+      to_a.grep(Face).each do |face|
+        face.loops.drop(1).each do |loop|
+          ends = loop.vertices.map(&:position)
+          next unless erased_edges.length >= ends.length &&
+                      ends.all? { |point| corners.any? { |corner| same_point?(point, corner) } }
+
+          face.remove_hole!(loop)
+        end
+      end
+    end
+    private :heal_holes
+
+    def same_point?(left, right)
+      (left - right).length < 0.001
+    end
+    private :same_point?
 
     def clear!
       erase_entities(to_a)

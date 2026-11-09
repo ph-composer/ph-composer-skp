@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "../units/convert_review"
+require_relative "../units/convert"
 
 module PhComposer
   module Windows
@@ -9,6 +10,7 @@ module PhComposer
       PATH = { "type" => "array", "minItems" => 1, "items" => { "type" => "integer", "minimum" => 1 } }.freeze
       METRES = { "type" => "number", "x-unit" => "m" }.freeze
       SPAN = Types::SPAN
+      EXAMPLE_SOURCE = { "path" => [1201, 1204], "digest" => "sha256:0a1b" }.freeze
 
       module_function
 
@@ -25,6 +27,36 @@ module PhComposer
                       :examples => [{ "paths" => [[1201, 1204]] }]) do |request|
           Units::ConvertReview.read(request, request.params.fetch("paths"))
         end
+        feature.action("#{FEATURE_ID}.units.convert",
+                       :description => "Replace reviewed drawn rectangles with placed Windows, one per group: a new " \
+                                       "Window Type sized from the geometry or a Type of that size. Sizes are the " \
+                                       "frame outer size.",
+                       :refuses => Refuses::CONVERT,
+                       :params => Shapes.object({ "groups" => groups_param }),
+                       :result => Shapes.object({ "units" => Shapes.list(Shapes.object({ "unit_id" => Shapes::TEXT,
+                                                                                         "type_id" => Shapes::TEXT })),
+                                                  "created_type_ids" => Shapes.list(Shapes::TEXT) }),
+                       :undo_name => "Convert to Window Type",
+                       :side_effects => Shapes.side_effects(
+                         "Erases the rectangles and the Edges only they use, healing the host Face, writes the new " \
+                         "Window Types, and places one Unit per group, in one Undo step."
+                       ),
+                       :examples => [{ "groups" => [{ "sources" => [EXAMPLE_SOURCE] }] }]) do |request, proposal|
+          Units::Convert.run(request, proposal, :groups => request.params.fetch("groups"))
+        end
+      end
+
+      def groups_param
+        digest = Shapes.described(Shapes::TEXT, "The Face's geometry digest from the review.")
+        source = Shapes.object({ "path" => PATH, "digest" => digest })
+        type_id = Shapes.id("wnt", "A Window Type of this size; a new one when absent.")
+        name = Shapes.described(Shapes::TEXT, "The new Type's name. Default: its size in display units, with " \
+                                              "\" (2)\" added when taken.")
+        sources = Shapes.list(source).merge("minItems" => 1, "maxItems" => Pages::MAXIMUM_LIMIT)
+        group = Shapes.object({ "sources" => sources, "type_id" => type_id, "name" => name },
+                              :optional => %w[type_id name])
+        Shapes.list(group).merge("minItems" => 1, "maxItems" => Pages::MAXIMUM_LIMIT,
+                                 "description" => "Each group a review listed, with its rectangles and digests.")
       end
 
       def paths_param
@@ -65,7 +97,7 @@ module PhComposer
                         "code" => Shapes.described(Shapes::TEXT, "Why, as a published code."),
                         "message" => Shapes::TEXT })
       end
-      private_class_method :paths_param, :group_shape, :source_shape, :left_out_shape
+      private_class_method :groups_param, :paths_param, :group_shape, :source_shape, :left_out_shape
     end
   end
 end
