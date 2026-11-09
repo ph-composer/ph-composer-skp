@@ -93,6 +93,46 @@ class SpacesReadsTest < PhComposerTestCase
     assert_in_delta 6.0, row.dig("metrics", "floor_area_m2"), 1e-9
   end
 
+  def overlap_codes(row)
+    row.fetch("findings").map { |finding| finding["code"] }.grep("space.floor_overlap")
+  end
+
+  def test_two_floor_segments_stacked_in_one_volume_warn_on_the_volume_without_blocking
+    upper = floor_face(112, rectangle(0, 0, 3, 3, 2.5), segment_record("U"))
+    lower = floor_face(113, rectangle(1, 1, 3, 3), segment_record("W"))
+    @model.entities << zone_group(100, "Z", [space_group(110, space_record("R", :number => "1"),
+                                                         [volume_group(111, volume_record("R"), [upper, lower])])])
+    volume = all.fetch("spaces").first.fetch("volumes").first
+    found = volume.fetch("findings").find { |finding| finding["code"] == "space.floor_overlap" }
+    assert_equal "Volume 1 has Floor Segments that overlap in plan, so the area they share counts twice.",
+                 found["message"]
+    assert_equal false, found["blocks_export"]
+    assert(volume.fetch("floor_segments").all? { |segment| overlap_codes(segment).empty? })
+  end
+
+  def test_floor_segments_tiled_edge_to_edge_in_one_volume_do_not_warn
+    faces = [floor_face(112, rectangle(0, 0, 3, 3), segment_record("U")),
+             floor_face(113, rectangle(3, 0, 3, 3), segment_record("W"))]
+    @model.entities << zone_group(100, "Z", [space_group(110, space_record("R", :number => "1"),
+                                                         [volume_group(111, volume_record("R"), faces)])])
+    assert_empty overlap_codes(all.fetch("spaces").first.fetch("volumes").first)
+  end
+
+  # Two storeys of one Zone overlap in plan, legitimately: separate Volumes are never compared.
+  def test_floor_segments_overlapping_across_volumes_or_spaces_do_not_warn
+    lower = volume_group(111, volume_record("L"), [floor_face(112, rectangle(0, 0, 3, 3), segment_record("L"))])
+    upper = volume_group(121, volume_record("M", :number => 2),
+                         [floor_face(122, rectangle(0, 0, 3, 3, 3), segment_record("M"))])
+    other = space_group(130, space_record("O", :number => "2"),
+                        [volume_group(131, volume_record("O"),
+                                      [floor_face(132, rectangle(0, 0, 3, 3, 6), segment_record("O"))])])
+    room = space_group(110, space_record("R", :number => "1"), [lower, upper])
+    @model.entities << zone_group(100, "Z", [room, other])
+    volumes = all.fetch("spaces").flat_map { |row| row.fetch("volumes") }
+    assert_equal 3, volumes.length
+    assert(volumes.all? { |volume| overlap_codes(volume).empty? })
+  end
+
   def test_each_structural_finding_from_a_minimal_fixture
     empty = space_group(110, space_record("E", :number => "1"), [])
     no_floor = space_group(120, space_record("N", :number => "1"),

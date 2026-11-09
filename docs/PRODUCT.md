@@ -287,6 +287,8 @@ follows the copied Zone its original was hosted in; a Space whose Zone stayed be
 reference. A copied Volume or Floor Segment is marked as a duplicate until Make independent is run on
 its row. Move to Zone hosts a Space in another Zone where it stands, keeping its number and values.
 If its Zone is erased, the Space stays with a finding that blocks export and offers Remove from Zone.
+Two Floor Segments of one Volume that overlap in plan raise a warning, since the area they share counts
+twice; export still runs. Separate Volumes are not compared, so two storeys of one Zone overlap freely.
 Remove on a Space's row takes away the Space and its Volumes and leaves their floor Faces where they
 are as plain geometry; Delete erases the Faces too. Each is one Undo step.
 
