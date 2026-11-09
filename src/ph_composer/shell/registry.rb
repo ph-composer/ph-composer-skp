@@ -200,7 +200,7 @@ module PhComposer
       Declarations::ExportContributor => %i[name owner section_version result preflight user_data_keys requires
                                             entity_projections],
       Declarations::ColourMode => %i[name owner label entity_kind group stroke],
-      Declarations::ColourReadout => %i[name owner label selection],
+      Declarations::ColourReadout => %i[name owner label selection on_by_default],
       Declarations::MenuItem => %i[name owner label menu separator_after],
       Declarations::ReferenceRetargeter => %i[name owner target_kind],
       Declarations::TransitionContributor => %i[name owner transition refuses],
@@ -457,10 +457,12 @@ module PhComposer
 
       # One Colour-by readout: a pure projection returning ColourBy::Readout text for the viewport, on or
       # off per Model session and shown with any mode or none. `selection: true` gives the projection
-      # `read.selection` and rebuilds it when the selection changes.
-      def colour_readout(name, label:, selection: false, &projection)
+      # `read.selection` and rebuilds it when the selection changes. `on_by_default: true` starts it on in
+      # every Model session.
+      def colour_readout(name, label:, selection: false, on_by_default: false, &projection)
         declaration = Declarations::ColourReadout.new(:name => name, :owner => id, :label => label,
-                                                      :selection => selection, :projection => projection)
+                                                      :selection => selection, :on_by_default => on_by_default,
+                                                      :projection => projection)
         @staging.add(:declared_colour_readouts, id, name, declaration)
       end
 

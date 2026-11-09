@@ -1,7 +1,7 @@
 "use strict";
 
 /* The Spaces view's Colour by: the Name, airflow, Weighting factor and Height headers offer the Spaces modes,
-   and Table options lists the Spaces readouts and, while Space labels are on, their lines. Every control is a
+   and Table options lists the Spaces readouts and, while Show Spaces is on, their lines. Every control is a
    view command. */
 
 var assert = require("assert");
@@ -55,7 +55,7 @@ function snapshot(readouts, options) {
       "ph_composer.spaces.spaces": { status: "completed", value: fixture.section() },
       "ph_composer.colour_by.legend": { status: "completed", value: { mode: null, modes: MODES, rows: [],
         filter_paths: null, readouts: readouts || [
-          { name: "ph_composer.spaces.labels", label: "Space labels", selection: false, on: false },
+          { name: "ph_composer.spaces.show", label: "Show Spaces", selection: false, on: false },
           { name: "ph_composer.spaces.selection_totals", label: "Spaces selection totals", selection: true,
             on: false }] } },
       "ph_composer.spaces.label_options": { status: "completed", value: options || { weighted_area: false,
@@ -86,17 +86,17 @@ test("Table options turns each Spaces readout on", function () {
   var p = page();
   p.receive(snapshot());
   var items = openOptions(p);
-  assert.strictEqual(item(items, "Space labels").getAttribute("aria-pressed"), "false");
+  assert.strictEqual(item(items, "Show Spaces").getAttribute("aria-pressed"), "false");
   assert.ok(item(items, "Selection totals"));
   assert.strictEqual(item(items, "Label net volume"), undefined, "no label lines while the labels are off");
-  p.click(item(items, "Space labels"));
+  p.click(item(items, "Show Spaces"));
   assert.deepStrictEqual(p.views().pop(), ["ph_composer.colour_by.readout",
-    { readout: "ph_composer.spaces.labels", on: true }]);
+    { readout: "ph_composer.spaces.show", on: true }]);
 });
 
-test("while Space labels are on, Table options lists each line and toggles it", function () {
+test("while Show Spaces is on, Table options lists each line and toggles it", function () {
   var p = page();
-  p.receive(snapshot([{ name: "ph_composer.spaces.labels", label: "Space labels", selection: false, on: true }],
+  p.receive(snapshot([{ name: "ph_composer.spaces.show", label: "Show Spaces", selection: false, on: true }],
     { weighted_area: true, net_volume: false, airflows: false }));
   var items = openOptions(p);
   assert.strictEqual(item(items, "Label weighted area (iCFA)").getAttribute("aria-pressed"), "true");

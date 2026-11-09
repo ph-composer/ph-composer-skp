@@ -19,6 +19,8 @@ class OccurrenceIndexTest < PhComposerTestCase
     @model = Sketchup.active_model
     @session = PhComposer::Sessions.for(@model)
     @context = API.connect(:session_id => @session.id)
+    # Show Spaces walks the Model once per commit of its own; these tests hold the gesture's walks.
+    PhComposer::ColourBy.for(@session).readout(PhComposer::Spaces::Readouts::SHOW, :on => false)
     @sequence = 0
     @next_id = 1_000
   end

@@ -683,7 +683,7 @@ ColourBy::Entry.new(path: volume.path, value: "2.50", label: "2.50 m",
   By weighting factor, By height) each carry the Volume preview prism (`features/spaces/prism.rb`, pure,
   in world metres, the same value the export writes) as their entries' `derived`, so the prisms show
   while one of those modes is on and never otherwise, with no preview switch of their own. Its two
-  readouts (`features/spaces/readouts.rb`) are the readout example: Space labels anchor each Space at its
+  readouts (`features/spaces/readouts.rb`) are the readout example: Show Spaces outlines each Volume's prism and anchors each Space at its
   reference point, the plan centroid of its largest Floor Segment at that segment's mean height, with
   optional lines set per Model session by a view command and a native menu, which force a readout
   rebuild because the revision does not change; selection totals sum the Spaces a selection touches, each
@@ -692,10 +692,10 @@ ColourBy::Entry.new(path: volume.path, value: "2.50", label: "2.50 m",
 ### Colour-by readouts
 
 Implemented in P3a-05. A readout is a separately registered pure projection that returns viewport
-text, shown with any mode and with none:
+text and lines, shown with any mode and with none:
 
 ```ruby
-feature.colour_readout("ph_composer.spaces.labels", label: "Space labels", selection: false) do |read|
+feature.colour_readout("ph_composer.spaces.show", label: "Show Spaces", on_by_default: true) do |read|
   ColourBy::Readout.new(anchors: [ColourBy::Anchor.new(point: centre, parts: ["101 ", ["area", 12.4]])],
                         hud: [])
 end
@@ -712,10 +712,14 @@ end
   without it, it is drawn whenever the readout is on. `hud` is lines of parts drawn under the legend,
   or at the legend's place when no mode is on. A part is plain text or `[quantity, si_value]`; the
   overlay formats quantities with `PhComposer::Units.format` in the session's display units
-  (`context/TECH_STACK.md`, "Display units"), so a readout never formats a unit-bearing number.
+  (`context/TECH_STACK.md`, "Display units"), so a readout never formats a unit-bearing number. `outlines`,
+  optional, are `ColourBy::Outline`s: `points` holds two world points (inches) per line, drawn thin in the one
+  readout colour and depth-tested, under the mode's fills and lines; `path` hides and mutes them as on an
+  anchor, and section planes cut them.
 - **State.** Readouts are on or off per Model session, independently of the active mode, and are not
-  remembered across sessions as the last mode is. The overlay is attached while a mode or any readout
-  is on. `ph_composer.colour_by.state` lists the registered
+  remembered across sessions as the last mode is. A readout registered with `on_by_default: true` starts
+  on in every Model session, drawn when the session is created and again when its file has loaded. The
+  overlay is attached while a mode is on or a readout has something to draw. `ph_composer.colour_by.state` lists the registered
   readouts and which are on; the view command `ph_composer.colour_by.readout` turns one on or off; the
   native Colour by menu lists them under the modes. A readout that raises is turned off with a notice,
   as a mode is.
@@ -766,7 +770,7 @@ so `tools/examples/zones/example_zone_view.js`, two columns and `value`, is a co
 | `create`, `dispose`, `consume(state, send)` | The view's state for one Model, and what it reads from each snapshot before rows are built. Every listed view consumes, shown or not, so work that arrives for a hidden view (a native handoff, a tool that turned on late) still reaches it |
 | `zoneRecord(record)`, `children(row)`, `initiallyOpen(row)`, `extraRows()`, `tiers` | What a Zone row carries for the view, the rows beneath it (none by default), whether a row the view adds opens by default (`null`: the host's rule), top-level group rows after the Zones (records outside every Zone; `record.zone` is null; they follow the Zones in any sort, count as no Zone, and show while the text filter and the view's filters pass them), and how many tree levels open (2 by default; Spaces, four deep, gives 3) |
 | `columns`, `leadingColumns`, `value`, `cell(td, row, field)`, `decorate`, `zoneMarker(row)` (asked of every row, the host's Zone states first), `widths`, `hiddenColumns`, `optionalColumns` | The view's columns (`leadingColumns` sit before Name), their text or in-place control, a cell's flag, the Zone row's marker after the host's own, default widths, the columns hidden at first, and the `[field, label]` pairs Table options shows or hides |
-| `tableOptions(toggle)` | The view's own Table options choices after its columns, each through `toggle(text, pressed, run)` (Spaces adds its readouts and, while Space labels are on, their lines; `sections/colour_by.js` `readouts(state)` and `showReadout(state, name, on)` reach any feature's readouts without naming one) |
+| `tableOptions(toggle)` | The view's own Table options choices after its columns, each through `toggle(text, pressed, run)` (Spaces adds its readouts and, while Show Spaces is on, their lines; `sections/colour_by.js` `readouts(state)` and `showReadout(state, name, on)` reach any feature's readouts without naming one) |
 | `colourBy`, `sorted`, `filteredFields`, `filterValues`, `filterLabel`, `headerAction`, `menuValueAction`, `menuExtra` | The view's columns' Colour-by bindings, sort and value filters, and anything its column header and menu add (Faces adds the Classify paint, Spaces the Mark floor paint); the host closes the menu once a value action has run |
 | `zoneMatch`, `rowMatch`, `search`, `queryMatch(row, query, zone)`, `sortValue(record, field)`, `sort(list, field, direction)`, `viewportPaths` | How the view's filters and sort reach Zone rows (`sortValue` gives a Zone row's value in the view's sorted columns), its own rows and the viewport mask (by default each Zone that passes `zoneMatch`, whole). When the text filter matches a Zone only through the view's `search` text, `queryMatch` says which of the view's rows still show (by default all) |
 | `actions(row)`, `zoneActions(row)`, `action(row, item, control)`, `inspect`, `locate(row)`, `clearLocate`, `selected(row)` | Row actions (`control` is the pressed button, to anchor what it opens), the Zone row's actions after Make independent, Locate (`clearLocate` answers whether it cleared anything), and which rows paint as selected (Spaces: the row open in the edit context) |

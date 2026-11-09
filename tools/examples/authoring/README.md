@@ -291,8 +291,8 @@ step.
 ## Spaces: Colour-by modes and readouts with the panel closed
 
 `spaces_colour_by_walkthrough.rb` turns each Spaces mode on through `ph_composer.colour_by.activate`,
-reads its legend (labels, counts and summed figures) back from `ph_composer.colour_by.state`, shows the
-Space labels with every optional line and the selection totals, and turns everything off. It writes
+reads its legend (labels, counts and summed figures) back from `ph_composer.colour_by.state`, shows
+Show Spaces with every optional line and the selection totals, and puts the readouts back as it found them. It writes
 nothing; `revision_moved` says so. `tests/spaces_colour_by_walkthrough_test.rb` runs it on the reference
 model.
 

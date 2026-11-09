@@ -31,12 +31,16 @@ module PhComposer
 
     # What a readout's projection returns: `anchors`, text placed at world points, and `hud`, lines drawn
     # under the legend. A line is a list of parts: plain text, or `[quantity, si_value]`, which the overlay
-    # formats in the session's display units.
-    Readout = Struct.new(:anchors, :hud, keyword_init: true)
+    # formats in the session's display units. `outlines`, when supplied, are lines drawn with the text.
+    Readout = Struct.new(:anchors, :hud, :outlines, keyword_init: true)
 
     # One line of viewport text at a world `point` (inches). `path`, when given, hides it with that
     # occurrence and mutes it under the occurrence mask, as an entry's shapes are.
     Anchor = Struct.new(:point, :parts, :path, keyword_init: true)
+
+    # Lines a readout draws in the world, in the one readout colour: `points` holds two points (inches) per
+    # line. `path`, as on an anchor, hides them with that occurrence and mutes them under the mask.
+    Outline = Struct.new(:points, :path, keyword_init: true)
 
     # One legend row: a colour, what it means (text or parts), how many entities carry it, which of the
     # three states it is in (`classified`, `incomplete` or `unclassified`), and its entries' summed `figure`, a
@@ -70,7 +74,8 @@ module PhComposer
         @session = session
         @rebuilds = 0
         @filter_paths = nil
-        @readouts_on = []
+        # A readout declared on by default starts on in every Model session; #open_session draws it.
+        @readouts_on = Registry.current.colour_readouts.values.select(&:on_by_default).map(&:name)
         @readout_drawings = {}
         @selection_generation = 0
         @switches = 0
@@ -115,7 +120,7 @@ module PhComposer
       def deactivate
         @switches += 1
         clear
-        detach_overlay if @readouts_on.empty?
+        sync_overlay
         invalidate_view
         self
       end
@@ -130,6 +135,13 @@ module PhComposer
         self
       end
 
+      # The Model's session exists, or its file has just loaded: draws the readouts that start on. Colour by
+      # itself stays off at rest.
+      def open_session
+        rebuild_readouts unless @readouts_on.empty?
+        self
+      end
+
       # Turns a readout on or off for this Model session, whatever mode is on. Nothing is remembered
       # across sessions and nothing about the Model changes.
       def readout(name, on:)
@@ -139,7 +151,7 @@ module PhComposer
         @readouts_on = on ? (@readouts_on | [name]) : (@readouts_on - [name])
         @readout_drawings = @readout_drawings.slice(*@readouts_on)
         rebuild_readouts
-        @readouts_on.empty? && !active? ? detach_overlay : attach_overlay
+        attach_overlay if on && drawing?
         invalidate_view
         self
       end
@@ -327,27 +339,51 @@ module PhComposer
         @readouts_built = readout_key if names.equal?(@readouts_on)
         rebuilt = names.to_h { |name| [name, readout_drawing(name)] }
         @readout_drawings = @readout_drawings.merge(rebuilt).slice(*@readouts_on).compact
-        detach_overlay if @readouts_on.empty? && !active?
+        sync_overlay
         invalidate_view
+      end
+
+      # Whether the overlay has anything to draw: a Model with no Spaces carries no overlay for a readout
+      # that starts on.
+      def drawing?
+        active? || @readout_drawings.values.any? { |parts| parts.any? { |part| !part.empty? } }
+      end
+
+      # Adds the overlay when a rebuild first has something for it, and removes it when nothing is left to
+      # draw, as when a tag hides every Space. The tick the user set in SketchUp's Overlays panel survives
+      # that: only a mode or readout they turn on enables it again.
+      def sync_overlay
+        return set_overlay_aside unless drawing?
+
+        attach_overlay(:enabled => !@overlay_unticked) if @overlay.nil?
+      end
+
+      def set_overlay_aside
+        @overlay_unticked = !@overlay.enabled? if @overlay.respond_to?(:enabled?)
+        detach_overlay
       end
 
       def readout_key
         [@session.revision, @selection_generation, ViewState.new(@session.model).key]
       end
 
-      # One readout's anchors and HUD lines, with hidden and muted anchors left out. A readout that raises
-      # is turned off with a notice, as a mode is; the rest keep drawing.
+      # One readout's anchors, outline points and HUD lines, with hidden and muted shapes left out and outlines
+      # cut by the section planes. A readout that raises is turned off with a notice, as a mode is; the rest
+      # keep drawing.
       def readout_drawing(name)
         declaration = Registry.current.colour_readouts.fetch(name)
         read = HandlerRequest.for(@session, :owner => declaration.owner, :name => declaration.name,
                                             :selection => declaration.selection ? selected_paths : nil)
         result = ReadoutOutput.check!(declaration.projection.call(read))
         visibility = OccurrenceVisibility.new(@session.model)
+        shown = ->(path) { visibility.path_visible?(path) && (path.nil? ? @filter_paths.nil? : matches_filter?(path)) }
         anchors = Array(result.anchors).select do |anchor|
-          masked = anchor.path.nil? ? !@filter_paths.nil? : !matches_filter?(anchor.path)
-          visibility.path_visible?(anchor.path) && !masked && !visibility.cut?(anchor.point, anchor.path)
+          shown.call(anchor.path) && !visibility.cut?(anchor.point, anchor.path)
         end
-        [anchors, Array(result.hud)]
+        lines = Array(result.outlines).select { |outline| shown.call(outline.path) }.flat_map do |outline|
+          visibility.clip_segments(Array(outline.points), outline.path)
+        end
+        [anchors, lines, Array(result.hud)]
       rescue StandardError => error
         Diagnostics.log("colour_readout_failed", "operation" => name, "error_class" => error.class.name)
         @readouts_on -= [name]
@@ -400,13 +436,14 @@ module PhComposer
       # mode turned on drew nothing at all until this was measured on 26.1.188, 2026-09-20.
       # Enabling it here is right because it is added when a mode is turned on and removed when the
       # mode goes off, so this never overrides a choice the user made about an overlay of ours that
-      # is sitting there.
-      def attach_overlay
+      # is sitting there. A mode or readout the user turns on enables it again, since that choice has to draw.
+      def attach_overlay(enabled: true)
         return unless live_model
 
         @overlay ||= Overlay.new(self)
         live_model.overlays.add(@overlay)
-        @overlay.enabled = true if @overlay.respond_to?(:enabled=)
+        @overlay.enabled = enabled if @overlay.respond_to?(:enabled=)
+        @overlay_unticked = !enabled
       end
 
       # A closed Model still answers `respond_to?(:overlays)`, and reading them raises. The session

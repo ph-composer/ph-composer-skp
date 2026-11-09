@@ -12,6 +12,8 @@ module PhComposer
       INCOMPLETE = [255, 176, 0].freeze
       # No record at all. Drawn as a hatch and solid boundary rather than a fill.
       UNCLASSIFIED = [130, 130, 130].freeze
+      # The lines a readout draws, one colour whichever readout draws them.
+      READOUT_LINE = [38, 96, 150].freeze
       FILL_ALPHA = 110
       OUTLINE_ALPHA = 220
 
