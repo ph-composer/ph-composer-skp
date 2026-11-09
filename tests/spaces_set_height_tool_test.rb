@@ -3,8 +3,8 @@
 require_relative "test_helper"
 require_relative "support/space_fixtures"
 
-# The Set height tool, the gesture rather than the operation: what a drag and a typed value write, one Undo step
-# each, every ending that writes nothing, and what the pointer can pick. Then Edit outline, the menu item.
+# The Set Height tool, the gesture rather than the operation: what a drag and a typed value write, one Undo step
+# each, every ending that writes nothing, and what the pointer can pick. Then Edit Floor Surface, the menu item.
 class SpacesSetHeightToolTest < PhComposerTestCase
   include SpaceFixtures
 
@@ -292,10 +292,17 @@ class SpacesSetHeightToolTest < PhComposerTestCase
     refute PICK.crosses?(bounds, [1.0, 1.0, 20.0], [0.0, 0.0, 1.0]), "behind the eye"
   end
 
-  # Edit outline, the menu item.
+  def test_the_three_menu_items_are_labelled_as_the_glossary_names_them
+    labels = %w[create_menu set_height_menu edit_floor_surface_menu].map do |name|
+      PhComposer::Registry.current.menu_items.fetch("#{PhComposer::Spaces::FEATURE_ID}.#{name}").label
+    end
+    assert_equal ["Create Space from Floor Surface…", "Set Height", "Edit Floor Surface"], labels
+  end
+
+  # Edit Floor Surface, the menu item.
 
   def menu
-    PhComposer::Spaces::EditOutlineMenu
+    PhComposer::Spaces::EditFloorSurfaceMenu
   end
 
   def run_menu

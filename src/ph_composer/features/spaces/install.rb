@@ -15,8 +15,8 @@
 #   settings.rb     the Model's last-entered height
 #   colour_modes.rb the Spaces view's Colour-by modes
 #   mark_tool.rb    the Mark floor viewport tool; declarations/mark_tool.rb its state and commands
-#   set_height_tool.rb, prism_pick.rb  the Set height viewport tool and its pure pointer maths
-#   edit_outline_menu.rb  the native route into a Volume's outline
+#   set_height_tool.rb, prism_pick.rb  the Set Height viewport tool and its pure pointer maths
+#   edit_floor_surface_menu.rb  the native route into a Volume's floor surface
 #   declarations/   what Spaces registers
 require_relative "schema"
 require_relative "scan/occurrences"
@@ -60,7 +60,7 @@ require_relative "declarations/height_from_solid"
 require_relative "height_from_solid_menu"
 require_relative "prism_pick"
 require_relative "set_height_tool"
-require_relative "edit_outline_menu"
+require_relative "edit_floor_surface_menu"
 require_relative "declarations/create_route"
 
 module PhComposer
@@ -84,7 +84,7 @@ module PhComposer
       HeightFromSolidRegistration.install(feature)
       HeightFromSolidMenu.install(feature)
       SetHeightTool.install(feature)
-      EditOutlineMenu.install(feature)
+      EditFloorSurfaceMenu.install(feature)
     end
   end
 end

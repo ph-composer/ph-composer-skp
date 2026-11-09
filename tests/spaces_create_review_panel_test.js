@@ -10,6 +10,9 @@ var dom = require("./support/dom_stub");
 var panelSource = require("./support/panel_source");
 var fixture = require("./support/spaces_fixture");
 
+var DEFINITION = "A 'Space' represents a bounded area within a 'Zone'. A Space is defined by its floor surface plus " +
+  "a height. A Space may have more than one 'Volume' (ie: a bedroom with a main area plus a separate closet).";
+
 var ZONE = { zone_id: "zon_AAAAAAAAAAAA", zone_path: [100] };
 
 var ZONES = [{ zone_id: ZONE.zone_id, zone_path: [100], name: "Living Zone" },
@@ -91,19 +94,24 @@ test("a review opens in the shared dialog, saying what is accepted and why each 
   p.receive(snapshot(review()));
   var dialog = p.dialog();
   assert.ok(dialog && !dialog.hidden);
-  assert.strictEqual(dialog.querySelector("h2").textContent, "Create Space from floor outline");
+  assert.strictEqual(dialog.querySelector("h2").textContent, "Create Space from floor surface");
   var text = p.text();
-  assert.match(text, /A Space is a floor outline plus a height\. 2 Faces become one Space with one Volume/);
-  assert.match(text, /Height 2\.5 m, the Model's last height\./);
+  assert.ok(text.includes(DEFINITION));
+  assert.doesNotMatch(text, /floor outline|Height 2\.5 m|become one Space/);
   assert.match(text, /2 Faces: The Face is one of the Zone's own\./);
   assert.match(text, /1 Face: The Face shares an Edge/);
   assert.strictEqual(p.input("Number").getAttribute("placeholder"), "Next free");
 });
 
-test("one accepted Face becomes one Space, in the singular", function () {
-  var p = page();
-  p.receive(snapshot(review([face(1200)])));
-  assert.match(p.text(), /1 Face becomes one Space with one Volume/);
+test("several accepted Faces add no line of their own, and the body is the same for one", function () {
+  var one = page(), several = page();
+  one.receive(snapshot(review([face(1200)])));
+  several.receive(snapshot(review()));
+  [one, several].forEach(function (p) {
+    var paragraphs = p.dialog().querySelector("form").children.filter(function (node) { return node.tagName === "p"; });
+    assert.strictEqual(paragraphs.length, 1);
+    assert.strictEqual(paragraphs[0].textContent, DEFINITION);
+  });
 });
 
 test("Create sends create with the accepted Faces at the review's revision, and Enter does the same", function () {
@@ -140,12 +148,6 @@ test("a review with no Zone preselected opens on No Zone, and another Zone is wh
     { zone_id: "zon_BBBBBBBBBBBB", zone_path: [200] });
 });
 
-test("the height says it is the default until one is entered", function () {
-  var p = page();
-  p.receive(snapshot(Object.assign(review(), { height_source: "default" })));
-  assert.match(p.text(), /Height 2\.5 m, the default height\./);
-});
-
 test("Create sends once while one is in flight", function () {
   var p = page();
   p.receive(snapshot(review()));
@@ -178,7 +180,7 @@ test("a refused create stays in the dialog; a completed one closes it and the re
 test("Cancel writes nothing and closes the review; with nothing accepted Create is unavailable", function () {
   var p = page();
   p.receive(snapshot(review([])));
-  assert.match(p.text(), /None of the selected Faces can become one/);
+  assert.ok(p.text().includes(DEFINITION + "\nNone of the selected Faces can become a Space."));
   assert.strictEqual(p.button("Create").disabled, true);
   p.click(p.button("Cancel"));
   assert.ok(p.dialog().hidden);
@@ -200,15 +202,16 @@ test("a newer review waits for a submitted one, whose result closes only its own
   var p = page();
   p.receive(snapshot(review()));
   p.click(p.button("Create"));
-  var newer = Object.assign(review([face(1200)]), { token: "review-2" });
+  var newer = Object.assign(review([face(1200)]), { token: "review-2",
+    left_out: [{ path: face(1500), reason: "classified", message: "The newer review's reason." }] });
   p.receive(snapshot(newer));
   assert.ok(!p.dialog().hidden, "the submitted review stays");
-  assert.match(p.text(), /2 Faces become/);
+  assert.doesNotMatch(p.text(), /The newer review's reason/);
   p.result(p.messages("action.invoke")[0], { status: "completed", message: "Created Space 104." });
   assert.deepStrictEqual(closes(p), ["review-1"]);
   p.receive(snapshot(newer));
   assert.ok(!p.dialog().hidden);
-  assert.match(p.text(), /1 Face becomes/, "then the newer review opens");
+  assert.match(p.text(), /The newer review's reason/, "then the newer review opens");
 });
 
 test("a review closed elsewhere closes its dialog, and Create then sends nothing", function () {

@@ -8,7 +8,7 @@ module PhComposer
     module Eligibility
       MARK = "#{FEATURE_ID}.floors.mark"
       CREATE_VOLUME = "#{FEATURE_ID}.volumes.create"
-      WALL = "The Face is vertical, a wall. A Space is a floor outline plus a height: select only the floor."
+      WALL = "The Face is vertical, a wall. A Space is a floor surface plus a height: select only the floor Faces."
 
       module_function
 

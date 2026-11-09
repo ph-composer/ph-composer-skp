@@ -2,7 +2,7 @@
 
 module PhComposer
   module Spaces
-    # The Set height tool (context/EXTENSIBILITY.md, "Viewport tools"): click a Volume's prism, drag it or type a
+    # The Set Height tool (context/EXTENSIBILITY.md, "Viewport tools"): click a Volume's prism, drag it or type a
     # value in the measurements box. It calls `update` like any other client and opens no operation of its own:
     # an abandoned drag writes nothing and one entry is one Undo step, the Model's last height included.
     #
@@ -20,9 +20,9 @@ module PhComposer
       DRAG_PIXELS = 3
       HOVER_COLOUR = [184, 59, 59].freeze
       PICKED_COLOUR = [47, 143, 131].freeze
-      INSTRUCTIONS = "Set height: click a Space's prism, then drag its top or type a height."
+      INSTRUCTIONS = "Set Height: click a Space's prism, then drag its top or type a height."
       PICKED = "Drag the top, or type a height and press Enter."
-      CANCELLED = "The Set height drag was cancelled. Nothing was written."
+      CANCELLED = "The Set Height drag was cancelled. Nothing was written."
       NOTHING_PICKED = "Click a Space's prism first, then type its height."
       BAD_ENTRY = "Type a height above zero, such as 2.5m or 8'."
       TOO_LOW = "A Volume's height must be above its floor."
@@ -51,9 +51,9 @@ module PhComposer
       Drag = Struct.new(:candidate, :anchor, :x, :y, :revision, :height, :moved, :adjusted, keyword_init: true)
 
       def self.install(feature)
-        feature.menu_item("#{FEATURE_ID}.set_height_menu", :label => "Set height", :menu => EXTENSION_NAME,
+        feature.menu_item("#{FEATURE_ID}.set_height_menu", :label => "Set Height", :menu => EXTENSION_NAME,
                                                            :available => lambda { |read|
-                                                             !EditOutlineMenu.selected(read.session).nil?
+                                                             !EditFloorSurfaceMenu.selected(read.session).nil?
                                                            }) do |session|
           Spaces.set_height_tool(session).start
         end
@@ -393,7 +393,7 @@ module PhComposer
         @drag = nil
         @hover = nil
         Diagnostics.exception("set_height_tool", error)
-        message = "The Set height tool could not complete that. #{Outcome::NOTHING_WRITTEN}"
+        message = "The Set Height tool could not complete that. #{Outcome::NOTHING_WRITTEN}"
         announce(message, :error) if pending || notify
 
         view.invalidate if view.respond_to?(:invalidate)
@@ -402,7 +402,7 @@ module PhComposer
 
     module_function
 
-    # This Model's Set height tool, held as session feature state, so a Model closing takes it with it.
+    # This Model's Set Height tool, held as session feature state, so a Model closing takes it with it.
     def set_height_tool(session)
       session.feature_state(:spaces_set_height_tool) { SetHeightTool.new(session) }
     end

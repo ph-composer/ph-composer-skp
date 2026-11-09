@@ -7744,7 +7744,7 @@ Result:
           }
         }
       },
-      "description": "The open Zone, or else the Zone whose plan footprint holds the outlines' centroid and whose height range holds them; null when none does."
+      "description": "The open Zone, or else the Zone whose plan footprint holds the floor surface's centroid and whose height range holds it; null when none does."
     },
     "height_m": {
       "type": "number",
@@ -30203,7 +30203,7 @@ Example params:
 
 ### `ph_composer.spaces.create`
 
-Make one new Space with one Volume from a floor outline: explicit Faces loose in the open edit context, each becoming a Floor Segment. Works at the root, in a plain Group and in an open Zone, whose Space Group is placed outside the Zone at the same world position. Owner: `ph_composer.spaces`.
+Make one new Space with one Volume from a floor surface: explicit Faces loose in the open edit context, each becoming a Floor Segment. Works at the root, in a plain Group and in an open Zone, whose Space Group is placed outside the Zone at the same world position. Owner: `ph_composer.spaces`.
 
 Undo step: Create Space. Groups the Faces and writes the Space, Volume and Floor Segment records.
 

@@ -57,14 +57,14 @@ last read; if the Model holds something else now, the edit is refused and nothin
 ### Spaces from loose Faces
 
 A new Space or Volume is made from floor Faces a person draws in SketchUp; the connection does not
-draw geometry. Ask the user to draw the outlines first, then:
+draw geometry. Ask the user to draw the floor surfaces first, then:
 
-1. `context`, then `ph_composer.context.open` with the path holding the outlines and `expected_path`. The
+1. `context`, then `ph_composer.context.open` with the path holding the floor surfaces and `expected_path`. The
    root, a plain Group or a Zone's own context all work.
 2. `ph_composer.spaces.create_preview` with the Faces' root-to-Face paths says what would be taken and which Zone to
    host the Space in. `ph_composer.spaces.create` from those Faces, with that `zone` or none. They become the new
    Space's first Volume and its Floor Segments; no loose Face is left over. The Space Group stands outside every Zone.
-3. For another Volume, `ph_composer.context.open` the new Space and ask the user to draw its outline
+3. For another Volume, `ph_composer.context.open` the new Space and ask the user to draw its floor surface
    there. `ph_composer.spaces.candidate_faces.list` for the Space then lists it, with the operation it
    is for and the refusal it would meet now. Faces that share an Edge go together.
 4. `ph_composer.spaces.volumes.create` from those Faces, `ph_composer.spaces.floors.mark` for a Face in

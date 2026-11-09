@@ -355,7 +355,7 @@ module PhComposer
       end
 
       # The ids among `face_ids` that make up a closed shell: four or more Faces of `entities` joined by Edges,
-      # every Edge of every one bounding exactly two Faces of the set. A floor outline, sloped or not, is never one.
+      # every Edge of every one bounding exactly two Faces of the set. A floor surface, sloped or not, is never one.
       def closed_shells(entities, face_ids)
         faces = entities.to_a.grep(Sketchup::Face).select { |face| face_ids.include?(face.persistent_id) }
         ids = faces.map(&:persistent_id)

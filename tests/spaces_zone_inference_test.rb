@@ -2,7 +2,7 @@
 
 require_relative "test_helper"
 
-# Which Zone a floor outline drawn outside every Zone belongs in: its plan centroid over a Zone Face and all of it
+# Which Zone a floor surface drawn outside every Zone belongs in: its plan centroid over a Zone Face and all of it
 # inside the Zone's height range (W6-3).
 class SpacesZoneInferenceTest < Minitest::Test
   INFER = PhComposer::Spaces::ZoneInference

@@ -3,7 +3,7 @@
 module PhComposer
   module Spaces
     # Pure: what a pointer ray means for a Volume's prism, in world metres. A prism is drawn, not modelled, so the
-    # host's pick cannot find it; Set height asks here instead.
+    # host's pick cannot find it; Set Height asks here instead.
     module PrismPick
       # Below this (the squared sine of the angle between the ray and the vertical, about 6 degrees) a ray looks
       # too nearly along a vertical line for a pointer move to mean a sensible height along it.

@@ -5,11 +5,12 @@
  * refuses; Cancel, Escape and the close control change nothing. Either way the review is closed by its token,
  * so a newer review is never closed by an older dialog.
  */
-PhComposerUI.define("features/spaces/create_review", ["panel", "request", "snapshot", "workspace", "units",
-  "unit_preferences", "fields"],
-function (panel, requests, snapshot, ui, units, preferences, fields) {
+PhComposerUI.define("features/spaces/create_review", ["panel", "request", "snapshot", "workspace"],
+function (panel, requests, snapshot, ui) {
   "use strict";
   var SECTION = "ph_composer.spaces.create_review", PREFIX = "ph_composer.spaces";
+  var DEFINITION = "A 'Space' represents a bounded area within a 'Zone'. A Space is defined by its floor surface " +
+    "plus a height. A Space may have more than one 'Volume' (ie: a bedroom with a main area plus a separate closet).";
 
   function copy(value) { return JSON.parse(JSON.stringify(value)); }
 
@@ -67,18 +68,11 @@ function (panel, requests, snapshot, ui, units, preferences, fields) {
     var self = this, review = this.review, accepted = review.accepted.length;
     var dialog = this.dialog || (this.dialog = ui.formDialog("phc-create-space", function () { self.cancel(); }));
     if (!dialog.parentNode) document.body.appendChild(dialog);
-    var summary = accepted ? "A Space is a floor outline plus a height. " + faces(accepted) +
-      (accepted === 1 ? " becomes" : " become") + " one Space with one Volume, each Face a Floor Segment." :
-      "A Space is a floor outline plus a height. None of the selected Faces can become one.";
     // The shared form layout spaces the text and sets the fields side by side.
     var form = ui.element("form");
     form.addEventListener("submit", function (event) { event.preventDefault(); self.submit(); });
-    form.appendChild(ui.element("p", "", summary));
-    if (accepted) {
-      form.appendChild(ui.element("p", "", "Height " +
-        units.format(review.height_m, fields.LENGTH_M, units.profile(fields.LENGTH_M, preferences.current())) +
-        (review.height_source === "last_height" ? ", the Model's last height." : ", the default height.")));
-    }
+    form.appendChild(ui.element("p", "", DEFINITION));
+    if (!accepted) form.appendChild(ui.element("p", "", "None of the selected Faces can become a Space."));
     if (review.left_out.length) {
       var reasons = Object.create(null), order = [];
       review.left_out.forEach(function (row) {
@@ -106,7 +100,7 @@ function (panel, requests, snapshot, ui, units, preferences, fields) {
     form.appendChild(this.zone.label);
     form.appendChild(this.number.label);
     form.appendChild(this.name.label);
-    dialog.replaceChildren(ui.element("h2", "", "Create Space from floor outline"), form, this.error,
+    dialog.replaceChildren(ui.element("h2", "", "Create Space from floor surface"), form, this.error,
       ui.actionRow(this.cancelButton, this.createButton));
     dialog.openModal();
     (accepted ? this.number.input : this.cancelButton).focus();

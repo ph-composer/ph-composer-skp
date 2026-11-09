@@ -52,8 +52,8 @@ module PhComposer
       PREVIEW = Shapes.object({
         "accepted" => Shapes.list(PATH), "left_out" => Shapes.list(LEFT_OUT),
         "zone" => OPTIONAL_ZONE.merge("description" => "The open Zone, or else the Zone whose plan footprint holds " \
-                                                       "the outlines' centroid and whose height range holds them; " \
-                                                       "null when none does."),
+                                                       "the floor surface's centroid and whose height range holds " \
+                                                       "it; null when none does."),
         "height_m" => { "type" => "number", "x-unit" => "m", "description" => "The height the new Space takes." },
         "height_source" => { "type" => "string", "enum" => %w[last_height default],
                              "description" => "Where the height comes from: the Model's last height, or the " \
@@ -78,7 +78,7 @@ module PhComposer
       # Each action as [name, declaration, handler]; a handler takes the request, the proposal and the params.
       ACTIONS = [
         ["create", {
-          :description => "Make one new Space with one Volume from a floor outline: explicit Faces loose in the open " \
+          :description => "Make one new Space with one Volume from a floor surface: explicit Faces loose in the open " \
                           "edit context, each becoming a Floor Segment. Works at the root, in a plain Group and in " \
                           "an open Zone, whose Space Group is placed outside the Zone at the same world position.",
           :refuses => (ZONE_TARGET + %w[space.context_required space.nothing_to_create target.edit_path_changed]).uniq,

@@ -9,8 +9,8 @@ module PhComposer
     # holds no rule of its own about where a Space may be made.
     module CreateRoute
       ZONES = "ph_composer.zones.all"
-      LABEL = "Create Space from Floor Outline…"
-      NO_FACES = "A Space is a floor outline plus a height: select the floor outline as Faces in the open context, " \
+      LABEL = "Create Space from Floor Surface…"
+      NO_FACES = "A Space is a floor surface plus a height: select the floor surface as Faces in the open context, " \
                  "then choose Create Space. #{Outcome::NOTHING_WRITTEN}".freeze
 
       module_function

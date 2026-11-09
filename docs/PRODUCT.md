@@ -255,23 +255,23 @@ step; a click on a Face at a Space's root adds the next Volume. A Face loose in 
 Space is offered Create Space, and a classified Zone Face or a Face inside a closed Group is refused with the reason.
 Create Space is in SketchUp's Extensions and context menus on a Face selection, in any open context: at the
 Model root, in a plain Group such as a storey, or in an open Zone, where the Space is placed outside the Zone at the
-same world position, so Zone Faces are never touched. The review shows which Faces become the new Space and why it
-leaves out the others, the height the Space takes from the Model's last height, and a Zone choice, set to the
-open Zone or the Zone whose plan footprint and height range hold the outline, which you can change, or No Zone.
+same world position, so Zone Faces are never touched. The review says what a Space is and why it
+leaves out any Faces, and offers a Zone choice, set to the
+open Zone or the Zone whose plan footprint and height range hold the floor surface, which you can change, or No Zone. The new Space takes the Model's last height.
 Create makes the Space, its Volume and its Floor Segments in one Undo step. Space Groups stay Untagged; apply a tag of
-your own to show or hide them. Draw a room's floor outline just below the Zone's floor, or
-inset from its walls, so that it touches no envelope Face. An outline drawn with its edges on the
+your own to show or hide them. Draw a room's floor surface just below the Zone's floor, or
+inset from its walls, so that it touches no envelope Face. A floor surface drawn with its edges on the
 walls splits them, and Create Space leaves it out, saying to Undo it and draw it below or inset.
-A Space is a floor outline plus a height, so a vertical Face is never a floor: Create Space, Mark floor
+A Space is a floor surface plus a height, so a vertical Face is never a floor: Create Space, Mark floor
 and a new Volume all refuse it. A room drawn as a closed solid, with upright or sloped sides, is left
 out whole, its upright walls as walls and its other Faces as parts of the solid, so no floor is
-counted twice; a new Volume refuses one too. The refusal says to draw the floor outline alone, or to
+counted twice; a new Volume refuses one too. The refusal says to draw the floor surface alone, or to
 group the solid and use Height from solid.
 
-Set height, in SketchUp's Extensions menu and in the context menu on a Space or Volume, is a viewport tool for one
+Set Height, in SketchUp's Extensions menu and in the context menu on a Space or Volume, is a viewport tool for one
 Volume's height: click the Space's prism, then drag its top or type a value in the measurements box. Each entry
-is one Undo step, and the value also becomes the Model's last height. Edit outline, in the same menus, opens the
-Volume of a selected Volume or a one-Volume Space, unprotected, for ordinary SketchUp edits to its outline; leaving
+is one Undo step, and the value also becomes the Model's last height. Edit Floor Surface, in the same menus, opens the
+Volume of a selected Volume or a one-Volume Space, unprotected, for ordinary SketchUp edits to its floor surface; leaving
 it protects the Volume again.
 
 Colour by Space, Ventilation, Weighting factor and Height colour each Space's Floor Segments and the

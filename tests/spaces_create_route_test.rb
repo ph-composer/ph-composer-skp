@@ -46,7 +46,7 @@ class SpacesCreateRouteTest < PhComposerTestCase
     assert_empty tool.offered, "the next gesture drops the offer"
   end
 
-  def test_with_no_faces_it_says_a_space_is_a_floor_outline_and_writes_nothing
+  def test_with_no_faces_it_says_a_space_is_a_floor_surface_and_writes_nothing
     operations = @model.operations.length
 
     assert_nil ROUTE.client(@session).run
@@ -54,7 +54,7 @@ class SpacesCreateRouteTest < PhComposerTestCase
     assert_equal operations, @model.operations.length
     assert_nil review.fetch("token")
     assert_equal [ROUTE::NO_FACES, :warning], @notices.last
-    assert_match(/floor outline plus a height/, Sketchup.status_texts.last)
+    assert_match(/floor surface plus a height: select the floor surface as Faces/, Sketchup.status_texts.last)
     assert_equal [ROUTE::NO_FACES], UI.notifications.map(&:message), "the refusal shows in SketchUp"
   end
 

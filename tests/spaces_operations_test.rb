@@ -17,7 +17,7 @@ class SpacesOperationsTest < PhComposerTestCase
     @sequence = 0
   end
 
-  # Zone Z under a rotated wrapper, holding two loose floor outlines and one classified wall.
+  # Zone Z under a rotated wrapper, holding two loose floor surfaces and one classified wall.
   def zone_with_outlines
     @living = floor_face(101, rectangle(0, 0, 3, 4))
     @bath = floor_face(102, rectangle(3, 0, 2, 2))
@@ -563,7 +563,7 @@ class SpacesOperationsTest < PhComposerTestCase
     preview = query("ph_composer.spaces.create_preview", "faces" => [face_path(a), face_path(b)])
     assert_empty preview.fetch("accepted")
     assert_equal %w[shares_edge shares_edge], preview.fetch("left_out").map { |row| row["reason"] }
-    assert_match(/Undo the outline, then draw it just below the floor or inset from the walls/,
+    assert_match(/Undo the floor surface, then draw it just below the floor or inset from the walls/,
                  preview.dig("left_out", 0, "message"), "the refusal says how to recover")
   end
 
@@ -619,10 +619,12 @@ class SpacesOperationsTest < PhComposerTestCase
     assert_equal %w[solid] * 6, sloped.map { |face| reasons.dig(face.persistent_id, "reason") },
                  "a solid with sloped sides is refused whole, not counted top and bottom"
     message = reasons.dig(bottom.persistent_id, "message")
-    assert_match(/A Space is a floor outline plus a height/, message)
+    assert_match(/A Space is a floor surface plus a height/, message)
     assert_match(/Height from solid/, message)
     before = @model.operations.length
-    assert_equal %w[refused space.nothing_to_create], create([bottom, top, *walls]).values_at("status", "code")
+    refused = create([bottom, top, *walls])
+    assert_equal %w[refused space.nothing_to_create], refused.values_at("status", "code")
+    assert_match(/select only the floor surface's Faces/, refused.fetch("message"))
     assert_equal before, @model.operations.length
     assert_empty spaces
   end
@@ -636,7 +638,7 @@ class SpacesOperationsTest < PhComposerTestCase
     faces = sloped_solid(space_group.entities).flatten.map { |face| space.fetch("entity_path") + [face.persistent_id] }
     result = invoke("ph_composer.spaces.volumes.create", "space" => space, "faces" => faces)
     assert_equal %w[refused target.wrong_kind], result.values_at("status", "code")
-    assert_match(/A Space is a floor outline plus a height/, result.fetch("message"))
+    assert_match(/A Space is a floor surface plus a height/, result.fetch("message"))
   end
 
   def test_a_vertical_face_is_never_a_floor_candidate_a_marked_floor_or_a_new_volume
