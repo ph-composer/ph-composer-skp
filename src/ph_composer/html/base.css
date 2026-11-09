@@ -240,9 +240,6 @@ html { height: 100%; }
 .phc-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; min-height: 60px; padding: 14px 0 10px; }
 .phc-heading h1 { margin: 0; font-size: var(--text-xl); font-weight: 600; letter-spacing: -0.01em; }
 .phc-heading-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-left: auto; }
-/* A staged editor keeps its commit and cancellation in reach while its work surface scrolls. */
-.phc-sticky-heading { position: sticky; top: 0; z-index: 15; background: var(--surface);
-  border-bottom: 1px solid var(--line); }
 /* A record editor supplies the visible title when a short panel cannot afford a second context title. */
 @media (max-width: 500px) and (max-height: 600px) {
   .phc-heading { min-height: 48px; padding: 8px 0 6px; }

@@ -7,6 +7,7 @@ PhComposerUI.define("features/windows/install_editor", ["features/windows/editor
   var el = ui.element, clone = shared.clone, sides = shared.sides;
   // Drawing units an edge needs before its value is written beside it: along the edge, and across a line of text.
   var VALUE_ROOM = 44, LINE_ROOM = 40, INSIDE_ROOM = 96;
+  var VIEW_WIDTH = 600, VIEW_HEIGHT = 430;
   // Which edges take an installation and which Types accept a copy are the host's facts, read with each Type
   // (display.install_topology); the editor never classifies an edge itself. Staging changes no topology, so the
   // facts read with a draft's baseline hold for the session.
@@ -15,14 +16,22 @@ PhComposerUI.define("features/windows/install_editor", ["features/windows/editor
   // ("shared", "partial") or "unavailable" when the facts were not read. Only a glazed element is offered, so
   // any other element's edge reads as one that cannot be painted.
   var PARTIAL_LABEL = "Partly shared edge · cannot paint";
-  function Editor(session, send, close) {
+  function Editor(session, send, close, leave) {
     var self = this; this.requests = request.channel(session, send, "window-installs"); this.close = close;
     this.root = el("section", "window-install-editor"); this.root.hidden = true;
     this.cancel = ui.button("Cancel", function () { self.cancelSession(); });
     this.save = ui.button("Save Installs", function () { self.saveAction(); });
     this.save.setAttribute("aria-label", "Save Installs"); this.cancel.setAttribute("aria-label", "Cancel Installs");
-    this.header = ui.pageHeader({ title: "Window Type Installs", actions: [this.cancel], primary: this.save });
-    this.header.root.classList.add("phc-sticky-heading");
+    // The session covers the Types tab's work surface, so its heading says where it is. Types is that tab's own
+    // way out of the session: the owning view refuses it over an open edit and asks before discarding staged work.
+    this.back = ui.button("Types", leave);
+    this.back.className = "window-install-back"; ui.tooltip(this.back, "Leave Installs and return to the Window Type");
+    this.typeName = el("span", "window-install-type");
+    function step() { var mark = el("span", "", "\u203a"); mark.setAttribute("aria-hidden", "true"); return mark; }
+    this.trail = el("nav", "window-install-trail"); this.trail.setAttribute("aria-label", "Location");
+    [this.back, step(), this.typeName, step()].forEach(function (node) { self.trail.appendChild(node); });
+    this.header = ui.pageHeader({ title: "Installs" });
+    this.header.root.insertBefore(this.trail, this.header.root.firstChild);
     this.root.appendChild(this.header.root);
     this.notice = el("p", "muted"); this.notice.setAttribute("role", "status"); this.root.appendChild(this.notice);
     this.body = el("div", "window-install-body"); this.root.appendChild(this.body);
@@ -34,12 +43,11 @@ PhComposerUI.define("features/windows/install_editor", ["features/windows/editor
       "to paint them. Click a painted edge again to return it to the Model default."));
     this.unit = el("small", "muted"); heading.appendChild(this.unit);
     this.list = el("div", "window-install-list"); this.panel.appendChild(this.list);
-    this.add = ui.button("+ New Psi-Install Type", function () { self.editProduct(); });
-      this.panel.appendChild(this.add);
-    this.apply = ui.button("Apply to perimeter edges", function () { self.applyAll(); });
-      this.panel.appendChild(this.apply);
-    this.copyButton = ui.button("Copy to other Window Types", function () { self.showCopy(); });
-      this.panel.appendChild(this.copyButton);
+    this.add = ui.iconButton("New Psi-Install Type", "add", function () { self.editProduct(); });
+    this.apply = ui.iconButton("Apply to perimeter edges", "paint_bucket", function () { self.applyAll(); });
+    this.copyButton = ui.iconButton("Copy to other Window Types", "duplicate", function () { self.showCopy(); });
+    var tools = el("div", "phc-toolbar window-install-tools"); this.panel.appendChild(tools);
+    [this.add, this.apply, this.copyButton].forEach(function (button) { tools.appendChild(button); });
     this.form = el("form", "window-install-form"); this.form.hidden = true; this.panel.appendChild(this.form);
     this.sidebar = new Sidebar({ session: session, send: send, changed: function () { self.paint(); },
       busy: function () { return self.requests.busy() || !self.form.hidden || Boolean(self.sidebar.guard()); },
@@ -58,6 +66,9 @@ PhComposerUI.define("features/windows/install_editor", ["features/windows/editor
     };
     this.copyForm = el("div", "window-install-copy"); this.copyForm.hidden = true;
       this.panel.appendChild(this.copyForm);
+    // Beside the choices the session is made of; the row holds to the bottom of the view while the panel is in it.
+    var actions = ui.actionRow(this.cancel, this.save); actions.classList.add("window-install-actions");
+      this.panel.appendChild(actions);
     this.confirm = ui.formDialog("", function () { self.confirm.closeModal(); }); this.root.appendChild(this.confirm);
     // The owning view also sends its own Escape here, so the key works from the subtabs and from the page body,
     // where a repaint of the drawing or the list leaves focus.
@@ -218,7 +229,7 @@ PhComposerUI.define("features/windows/install_editor", ["features/windows/editor
   };
   Editor.prototype.paint = function () {
     if (this.root.hidden || this.disposed) return;
-    var self = this, record = this.drafts[this.active]; this.header.setTitle(record.name + " Installs");
+    var self = this, record = this.drafts[this.active]; this.typeName.textContent = record.name;
     var held = this.list.contains(document.activeElement), chosen = "Model default";
     this.list.replaceChildren(); this.current = null;
     this.unit.textContent = units.displayUnit(fields.LINEAR_PSI, units.profile(fields.LINEAR_PSI));
@@ -244,17 +255,20 @@ PhComposerUI.define("features/windows/install_editor", ["features/windows/editor
     if (held && this.current) this.current.focus();
     this.sidebar.refresh(this.state, {}, true);
     this.paintDrawing(record);
-    [this.save, this.cancel, this.apply, this.copyButton, this.add].forEach(function (button) {
+    [this.save, this.cancel, this.back, this.apply, this.copyButton, this.add].forEach(function (button) {
       button.disabled = self.requests.busy();
     });
   };
-  // Layers, back to front: element fills and names, edge targets, edge strokes, value labels.
+  // Layers, back to front: element fills and names, edge strokes, value labels, then each edge's transparent target
+  // and the hover line CSS lights from it, so the highlight lies over everything else.
   Editor.prototype.paintDrawing = function (record) {
     var self = this, svg = ui.svg, targets = [], strokes = [], labels = [];
     function sum(bands) { return bands.reduce(function (total, value) { return total + (value || 1); }, 0); }
     var width = sum(record.columns_m), height = sum(record.rows_m);
-    var drawing = svg("svg", { viewBox: "0 0 600 430", role: "group", "aria-label": "Window installation edges" });
-    var scale = Math.min(480 / width, 340 / height), x0 = 60, y0 = 40;
+    var drawing = svg("svg", { viewBox: "0 0 " + VIEW_WIDTH + " " + VIEW_HEIGHT, role: "group",
+      "aria-label": "Window installation edges" });
+    var scale = Math.min(480 / width, 340 / height);
+    var x0 = (VIEW_WIDTH - width * scale) / 2, y0 = (VIEW_HEIGHT - height * scale) / 2;
     function value(x, y, anchor, text) {
       labels.push(svg("text", { x: x, y: y, "text-anchor": anchor, "class": "window-install-edge-label" }, text));
     }
@@ -298,7 +312,7 @@ PhComposerUI.define("features/windows/install_editor", ["features/windows/editor
         target.addEventListener("click", paint);
         target.addEventListener("keydown", function (event) {
           if (event.key === "Enter" || event.key === " ") { event.preventDefault(); paint(); }
-        }); targets.push(target);
+        }); targets.push(target, svg("line", Object.assign({ "class": "window-install-hover" }, ends)));
         var across = side === "top" || side === "bottom", middleX = (points[0] + points[2]) / 2,
           middleY = (points[1] + points[3]) / 2;
         // A value is drawn only where its edge has room for it; the edge's tooltip always carries it.
@@ -321,7 +335,7 @@ PhComposerUI.define("features/windows/install_editor", ["features/windows/editor
         }
       });
     });
-    targets.concat(strokes, labels).forEach(function (node) { drawing.appendChild(node); });
+    strokes.concat(labels, targets).forEach(function (node) { drawing.appendChild(node); });
     this.drawing.replaceChildren(drawing);
   };
   Editor.prototype.saveAction = function () {
