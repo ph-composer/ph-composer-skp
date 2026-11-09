@@ -107,6 +107,33 @@ class SpacesCollectionCopyTest < PhComposerTestCase
     assert_equal 3, spaces_under(1000).length, "a copied Zone copies no Space outside it"
   end
 
+  def test_a_space_in_a_component_in_the_copy_keeps_its_reference_and_the_original_is_untouched
+    definition = Sketchup::ComponentDefinition.new(Sketchup::Entities.new([space("Q", 1600, "zon_AAAAAAAAAAAA")]))
+    @storey.entities << Sketchup::ComponentInstance.new(1650, definition)
+    treat_duplicates_as_existing(@model)
+    copy_natively(@storey, 5000)
+    UI.run_timers
+
+    held = spaces_under(5000).select { |row| row["id"] == "spc_QQQQQQQQQQQQ" }
+    assert_equal ["zon_AAAAAAAAAAAA"], held.map { |row| row.dig("values", "zone_id") }
+    original = spaces_under(1000).find { |row| row["id"] == "spc_QQQQQQQQQQQQ" }
+    assert_equal "zon_AAAAAAAAAAAA", original.dig("values", "zone_id")
+  end
+
+  def test_a_space_inside_one_copied_zone_naming_another_does_not_stop_the_batch
+    nested = space("N", 1120, "zon_BBBBBBBBBBBB", :name => "Nested")
+    @zone_a.entities << nested
+    ZONES::STAMP_STORE.write(nested, ZONES::Schema.stamp(ZONES::ZONE_STORE.read(@zone_a)))
+    treat_duplicates_as_existing(@model)
+    copy = copy_natively(@storey, 5000)
+    UI.run_timers
+
+    refute_equal "zon_AAAAAAAAAAAA", zone_id_at(copy, 0)
+    refute_equal "zon_BBBBBBBBBBBB", zone_id_at(copy, 1)
+    hall = spaces_under(5000).find { |row| row.dig("values", "name") == "Hall" }
+    assert_equal zone_id_at(copy, 0), hall.dig("values", "zone_id")
+  end
+
   def test_a_copied_plain_group_of_spaces_alone_keeps_each_reference
     plain = Sketchup::Group.new(2000, Sketchup::Entities.new([space("N", 2100, "zon_AAAAAAAAAAAA")]))
     @model.entities << plain

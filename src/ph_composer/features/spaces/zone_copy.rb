@@ -42,7 +42,7 @@ module PhComposer
                                              :catalog => request.registry.catalog, :engine => request.engine,
                                              :scope => zone_path, :parent => parent)
         planned = plan.rows.empty? ? [] : identity_step(proposal, plan, zone_path)
-        planned + follow_in_copy(proposal, scan, description)
+        planned + follow_in_copy(proposal, scan, description, request.model)
       end
 
       def identity_step(proposal, plan, zone_path)
@@ -51,15 +51,19 @@ module PhComposer
         step.planned
       end
 
-      # Each Space outside the copied Zone, carried by the same added container, whose record names the
-      # Zone. An array copy adds one container per copy: a Space follows only the Zone in its own.
-      def follow_in_copy(proposal, scan, description)
-        zone_path = description.fetch("zone_path")
-        added = description.fetch("copy_added")
-        root = (zone_path & added).first
+      # Each Space carried by the same added container as the Zone, and outside every Zone, whose record
+      # names it. An array copy adds one container per copy: a Space follows only the Zone in its own. A
+      # Space inside any Zone is that Zone's to rewrite; one still shared, in a component, or locked stays
+      # as copied with its finding.
+      def follow_in_copy(proposal, scan, description, model)
+        root = (description.fetch("zone_path") & description.fetch("copy_added")).first
+        return [] unless root
+
+        zones = Zones::Occurrences.zones(model).map(&:path)
         scan.spaces.select do |space|
-          !root.nil? && (space.path & added).first == root && space.path[0, zone_path.length] != zone_path &&
-            space.record["zone_id"] == description.fetch("old_zone_id")
+          (space.path & description.fetch("copy_added")).first == root && !space.shared && !space.locked &&
+            space.record["zone_id"] == description.fetch("old_zone_id") &&
+            zones.none? { |path| path.length < space.path.length && space.path[0, path.length] == path }
         end.map do |space|
           after = space.record.merge("zone_id" => description.fetch("new_zone_id"))
           Spaces.validate!(SPACE, after)

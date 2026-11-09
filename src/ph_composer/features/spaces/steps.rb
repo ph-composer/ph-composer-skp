@@ -93,14 +93,20 @@ module PhComposer
         { "name" => "space_zone_reference", "path" => @path, "before" => @before, "after" => @after }
       end
 
+      # Ownership holds at apply as at planning: a Space still shared or locked is not written.
       def apply(model, _slots)
-        entity = Occurrences.entity_at(model, @path)
-        unless entity && SPACE_STORE.read(entity) == @before
+        space = Occurrences.scan(model, :strict => @path).spaces.find { |candidate| candidate.path == @path }
+        unless space && space.record == @before
           raise CodedError.new("target.changed", "The copied Space changed after it was previewed.")
         end
+        raise CodedError.new("target.locked", "A Group above the copied Space is locked.") if space.locked
+        if space.shared
+          raise CodedError.new("target.shared_definition",
+                               "The copied Space still shares storage with another placement.")
+        end
 
-        SPACE_STORE.write(entity, @after)
-        @entity = entity
+        SPACE_STORE.write(space.entity, @after)
+        @entity = space.entity
       end
 
       def restore
