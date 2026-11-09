@@ -293,10 +293,13 @@ module PhComposer
         [record, offer]
       end
 
-      # A stamped Face is a member; a Group is walked for the Faces inside it.
+      # A stamped Face is a member; a Group is walked for the Faces inside it, but a live Zone's Faces are
+      # that Zone's, and offering them would build a Zone inside it.
       def walk_orphans(entities, path, live, found)
         entities.each do |entity|
           if entity.is_a?(Sketchup::Group)
+            next unless entity.get_attribute(ZONE_STORE.dictionary, ZONE_STORE.key).nil?
+
             walk_orphans(entity.entities, path + [entity.persistent_id], live, found)
             next
           end

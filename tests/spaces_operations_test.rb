@@ -209,6 +209,22 @@ class SpacesOperationsTest < PhComposerTestCase
     assert_nil query("ph_composer.spaces.create_preview", "faces" => [[802]]).fetch("zone")
   end
 
+  # A Zone's envelope may stand in a plain component; a cutting component's geometry is not the Zone's.
+  def test_create_preview_reads_a_zones_faces_inside_a_component_but_not_a_cutting_one
+    envelope = Sketchup::ComponentDefinition.new(Sketchup::Entities.new([floor_face(111, rectangle(0, 0, 10, 10)),
+                                                                         floor_face(112, rectangle(0, 0, 10, 10, 3))]))
+    cutting = Sketchup::ComponentDefinition.new(Sketchup::Entities.new([floor_face(121, rectangle(40, 0, 10, 10))]))
+    cutting.behavior.cuts_opening = true
+    @model.entities << zone_group(100, "Z", [Sketchup::ComponentInstance.new(110, envelope),
+                                             Sketchup::ComponentInstance.new(120, cutting)])
+    held = floor_face(801, rectangle(2, 2, 2, 2, 1))
+    over_the_cutter = floor_face(802, rectangle(42, 2, 2, 2, 1))
+    @model.entities << held << over_the_cutter
+    assert_equal({ "zone_id" => "zon_ZZZZZZZZZZZZ", "zone_path" => [100] },
+                 query("ph_composer.spaces.create_preview", "faces" => [[801]]).fetch("zone"))
+    assert_nil query("ph_composer.spaces.create_preview", "faces" => [[802]]).fetch("zone")
+  end
+
   # W6-3: the footprint under the outline's centroid and the height range around it decide; nothing else does.
   def test_create_preview_preselects_the_zone_holding_the_outline_or_none
     @model.entities << zone_group(100, "Z", [floor_face(101, rectangle(0, 0, 10, 10)),

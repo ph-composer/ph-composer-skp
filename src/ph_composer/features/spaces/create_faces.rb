@@ -171,12 +171,16 @@ module PhComposer
         nil
       end
 
+      # Every Face a Zone can own, through Groups and plain components; a cutting component's geometry is not
+      # the Zone's (context/CONTRACTS.md, "Zones geometry rules").
       def zone_faces(entities, transform)
         entities.to_a.flat_map do |entity|
           if entity.is_a?(Sketchup::Face)
             [FaceCapture.call(entity, transform).loops_m]
           elsif entity.is_a?(Sketchup::Group)
             zone_faces(entity.entities, transform * entity.transformation)
+          elsif entity.is_a?(Sketchup::ComponentInstance) && !entity.definition.behavior.cuts_opening?
+            zone_faces(entity.definition.entities, transform * entity.transformation)
           else
             []
           end
