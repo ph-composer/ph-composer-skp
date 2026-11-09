@@ -11,8 +11,8 @@ Convert route, the decisions for Ed, the host facts to measure first, and the st
 his go.
 
 Origin: the 2026-11 usability walkthrough, synthesis item S-21, raw entry W-095
-([SYNTHESIS.md](../../../usability-walkthrough-2026-11/SYNTHESIS.md)). Delivery runs through the
-walkthrough plan ([PLAN.md](../../../usability-walkthrough-2026-11/PLAN.md)): its implementation
+([SYNTHESIS.md](../../../archive/usability-walkthrough-2026-11/SYNTHESIS.md)). Delivery runs through the
+walkthrough plan ([PLAN.md](../../../archive/usability-walkthrough-2026-11/PLAN.md)): its implementation
 stages are added there when Ed approves this packet.
 
 Next step: Ed answers W7-1 to W7-10 (W7-1 and W7-4 first; the grouping and reuse rules follow

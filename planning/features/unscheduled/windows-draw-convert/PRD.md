@@ -7,8 +7,8 @@ ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/363
 
 ## Request
 
-The 2026-11 walkthrough ([SYNTHESIS.md](../../../usability-walkthrough-2026-11/SYNTHESIS.md) S-21;
-[LOG.md](../../../usability-walkthrough-2026-11/LOG.md) W-095, Ed: "the biggest UX change I want to
+The 2026-11 walkthrough ([SYNTHESIS.md](../../../archive/usability-walkthrough-2026-11/SYNTHESIS.md) S-21;
+[LOG.md](../../../archive/usability-walkthrough-2026-11/LOG.md) W-095, Ed: "the biggest UX change I want to
 include"): draw the opening as a rectangle with native SketchUp tools, snapping to CAD, select it,
 right-click Convert to Window Type. The new Type takes its size from the geometry, several selected
 rectangles become one mulled Type, and the Faces are replaced by a placed Window Unit of that Type.

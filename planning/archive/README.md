@@ -1,6 +1,6 @@
 # Planning archive
 
-DATE: 2026-11-04
+DATE: 2026-11-09
 STATUS: Index of completed and superseded planning work, newest first.
 AUTHOR: Ed May, BLDGTYP
 
@@ -9,6 +9,7 @@ reached.
 
 | Slug | Date | Outcome | Issue or PR |
 | --- | --- | --- | --- |
+| [usability-walkthrough-2026-11](usability-walkthrough-2026-11/PLAN.md) | 2026-11-09 | Complete: the tutorial-house walkthrough's 30 issues delivered as stages WT-01 to WT-31, one PR each, through review and a host check on every SketchUp-visible change; two design packets, WT-06 and WT-07, remain open for decisions | [#373](https://github.com/ph-composer/ph-composer-skp/issues/373) |
 | [ui-design-polish](ui-design-polish.md) | 2026-11-04 | Complete: shared UI polish across all 14 routes and key containers; 296 captures, four independent council rounds with final design minima above 9, offline/browser gates and SketchUp 2026 inspection passed; delivery through PR #339 | [#338](https://github.com/ph-composer/ph-composer-skp/issues/338); [PR #339](https://github.com/ph-composer/ph-composer-skp/pull/339) |
 | [phase-03b-thermal-bridges](phase-03b-thermal-bridges/README.md) | 2026-10-26 | Thermal bridges: Thermal Bridge Types, assignments stored on Edges inside Zones, runs and the schedule, the Thermal Bridges tab, Colour by thermal bridges, the edge tool and the HBJSON export as the first optional section. Nine stages through PRs #302 and #308 to #315; T01 to T09 pass with ledger results, T09 the integrated run under native control. The edge tagging rules are in `context/TECH_STACK.md` for piping and ducting; the footprint baseline reset to 24,541,739 bytes (D3b-24). Phase 3 is complete | [#301](https://github.com/ph-composer/ph-composer-skp/issues/301); PRs [#302](https://github.com/ph-composer/ph-composer-skp/pull/302), [#308](https://github.com/ph-composer/ph-composer-skp/pull/308) to [#315](https://github.com/ph-composer/ph-composer-skp/pull/315) |
 | [geometry-contribution-contracts](geometry-contribution-contracts/STATUS.md) | 2026-10-26 | Edge entries in the export snapshot (G-02, PR 119); the line primitive superseded by Phase 3a's `derived` segments (G-03); the Edge facts and the thermal-bridge adopter's drawing, export and measurement closed through Phase 3b (G-01, G-04) | [#118](https://github.com/ph-composer/ph-composer-skp/issues/118) |

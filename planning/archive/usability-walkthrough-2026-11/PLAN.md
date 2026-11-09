@@ -1,7 +1,7 @@
 # Usability walkthrough fixes: delivery plan
 
 DATE: 2026-11-07
-STATUS: In progress. Stage ledger in [STATUS.md](STATUS.md).
+STATUS: Complete. Stage ledger in [STATUS.md](STATUS.md).
 AUTHOR: Ed May, BLDGTYP; Claude
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/373 (tracking)
 

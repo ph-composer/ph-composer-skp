@@ -7,8 +7,8 @@ ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/352
 
 ## Problem
 
-The 2026-11 walkthrough ([SYNTHESIS.md](../../../usability-walkthrough-2026-11/SYNTHESIS.md) S-10;
-[LOG.md](../../../usability-walkthrough-2026-11/LOG.md) W-036 to W-052) found that a Space is hard
+The 2026-11 walkthrough ([SYNTHESIS.md](../../../archive/usability-walkthrough-2026-11/SYNTHESIS.md) S-10;
+[LOG.md](../../../archive/usability-walkthrough-2026-11/LOG.md) W-036 to W-052) found that a Space is hard
 to draw, hard to see and hard to change:
 
 - Create Space works only inside an open Zone. There the Zone's own Faces cover the plan, its tag
