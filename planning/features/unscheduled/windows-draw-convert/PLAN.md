@@ -1,7 +1,7 @@
 # Windows draw-then-convert: delivery plan
 
 DATE: 2026-11-09
-STATUS: Planned. Decisions W7-1 to W7-10 are recorded; implementation waits for Ed's go.
+STATUS: In progress. Decisions W7-1 to W7-10 are recorded; stages run through the ledger in STATUS.md.
 AUTHOR: Ed May, BLDGTYP; Claude
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/363
 

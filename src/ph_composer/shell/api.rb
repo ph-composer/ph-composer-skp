@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 23
+    MINOR = 24
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -105,7 +105,10 @@ module PhComposer
                     "library kind." },
       { "minor" => 23, "date" => "2026-11-08",
         "change" => "A Window Unit reads its native name in ph_composer.windows.units.list and .all; " \
-                    "ph_composer.windows.units.rename and ph_composer.windows.units.selection are new." }
+                    "ph_composer.windows.units.rename and ph_composer.windows.units.selection are new." },
+      { "minor" => 24, "date" => "2026-11-09",
+        "change" => "ph_composer.windows.units.convert_review is new: which drawn rectangles Convert to Window Type " \
+                    "would take, as Type layouts, and why it leaves the others out." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {
