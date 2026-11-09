@@ -6,7 +6,6 @@ module PhComposer
     # target is an explicit reference; a Zone and its loose Faces are reached through the Zones
     # targets' public locate, never through Zones internals.
     module Authoring
-      ZONE_KIND = "ph_composer.zones.zone"
       FACE_KIND = "ph_composer.zones.faces.face"
       STAMP = "ph_composer.zones.stamp_container"
       # What an edit may change, per kind; identity, structure and metadata have their own actions.
@@ -70,8 +69,8 @@ module PhComposer
         allocate = Records::Identity.allocator(request, request.params)
         height = Settings.default_height_m(request.model)
         space = { "id" => allocate.call("spc"), "schema_version" => 1, "name" => name.to_s,
-                  "number" => number || next_number(scan, zone.fetch("zone_path")), "default_height_m" => height,
-                  "next_volume_sequence" => 2 }
+                  "number" => number || next_number(scan, zone.fetch("zone_id")), "default_height_m" => height,
+                  "next_volume_sequence" => 2, "zone_id" => zone.fetch("zone_id") }
         volume = new_volume(allocate, 1, height)
         segments = segments_for(allocate, face_ids, weighting_factor)
         [[SPACE, space], [VOLUME, volume]].each { |kind, record| Spaces.validate!(kind, record) }
@@ -168,39 +167,41 @@ module PhComposer
         scan = Occurrences.scan(request.model)
         kind = Resolve.kind_of(reference)
         target = Resolve.occurrence(scan, reference, :mutable => false)
-        zone = zone_of(request, target.path)
-        if kind == SPACE_KIND
-          number = next_number(scan, zone, zone_paths(request), reserved_numbers(proposal, zone))
-        end
+        zone = target.record["zone_id"]
+        number = next_number(scan, zone, reserved_numbers(proposal, zone)) if kind == SPACE_KIND
         plan = IdentityPlan.build(scan, target, :number => number,
                                                 :allocate => Records::Identity.allocator(request, request.params),
                                                 :catalog => request.registry.catalog, :engine => request.engine)
         scope = kind == FLOOR_SEGMENT_KIND ? target.path[0...-2] : target.path[0...-1]
-        proposal.add_step(IdentityStep.new(:plan => plan, :target => target, :zone_path => zone),
+        proposal.add_step(IdentityStep.new(:plan => plan, :target => target, :zone_id => zone),
                           :scopes => [Operations::EntityScope.new(scope)])
         renamed = plan.rows.reject { |row| row.after["id"] == row.before["id"] }
         ids = renamed.map { |row| { "kind" => row.kind, "before" => row.before["id"], "after" => row.after["id"] } }
         { "ids" => ids }
       end
 
-      # Moves a Space Group, with everything in it, into another Zone where it stands; the new Group takes
-      # the target Zone's stamp. Loose geometry beside the Space stays where it is.
+      # Hosts a Space in another Zone: its record names the Zone, and its Group stays where it stands.
       def move_to_zone(request, proposal, space:, zone:)
-        scan = Occurrences.scan(request.model)
-        source = Resolve.occurrence(scan, space, :mutable => true)
+        source = Resolve.occurrence(Occurrences.scan(request.model), space, :mutable => true)
         zone = zone_reference(zone)
-        located = request.locate(ZONE_KIND, zone, :mutable => true)
-        MovePlan.refuse!(:space => source, :current_zone_path => zone_of(request, source.path),
-                         :target_zone_path => zone.fetch("zone_path"),
-                         :open_path => EditContext.current_ids(request.model))
-        transform = MovePlan.transform(source.transform, located.transform * located.entity.transformation)
-        slot = "#{source.record.fetch('id')}.moved"
-        proposal.add_step(MoveStep.new(:source => source, :target_zone_path => zone.fetch("zone_path"),
-                                       :transform => transform, :slot => slot),
-                          :scopes => [Operations::EntityScope.new(source.path[0...-1]),
-                                      Operations::EntityScope.new(zone.fetch("zone_path"))])
-        request.participate(STAMP, "zone" => zone, "slot" => slot)
+        request.locate(ZONE_KIND, zone, :mutable => false)
+        if source.record["zone_id"] == zone.fetch("zone_id")
+          raise CodedError.new("space.same_zone", "The Space is already in that Zone. Nothing was written.")
+        end
+
+        record_step(proposal, SPACE_KIND, source.path, source.record,
+                    source.record.merge("zone_id" => zone.fetch("zone_id")))
         { "space_id" => source.record.fetch("id"), "zone_id" => zone.fetch("zone_id") }
+      end
+
+      # Takes a Space out of its Zone, the repair for one whose Zone is gone: the record names no Zone
+      # and the Group stays where it stands. A Space already in no Zone adds no step.
+      def unhost(request, proposal, space:)
+        occurrence = Resolve.occurrence(Occurrences.scan(request.model), space, :mutable => true)
+        before = occurrence.record
+        record_step(proposal, SPACE_KIND, occurrence.path, before, before.reject { |key, _value| key == "zone_id" }) if
+          before.key?("zone_id")
+        { "space_id" => before.fetch("id") }
       end
 
       # Marks explicit Faces directly inside Volumes as Floor Segments with one weighting factor; a Face
@@ -467,28 +468,19 @@ module PhComposer
         end
       end
 
-      # The next free whole number among the Spaces already in this Zone, or outside every Zone when
-      # `zone_path` is nil, and the `reserved` numbers; `zone_paths` are every Zone's, so a Space in a
-      # nested Zone counts only there.
-      def next_number(scan, zone_path, zone_paths = [zone_path], reserved = [])
-        numbers = scan.spaces.select { |space| Occurrences.zone_path(space.path, zone_paths.compact) == zone_path }
+      # The next free whole number among the Spaces hosted in this Zone, or in no Zone when `zone_id` is
+      # nil, and the `reserved` numbers.
+      def next_number(scan, zone_id, reserved = [])
+        numbers = scan.spaces.select { |space| space.record["zone_id"] == zone_id }
                       .map { |space| space.record.fetch("number") }
         numbers = (numbers + reserved).filter_map { |number| Integer(number, 10, :exception => false) }
         ((numbers.max || 0) + 1).to_s
       end
 
-      # The Space numbers earlier repairs in this proposal give in the Zone at `zone_path`. A host
-      # follow-up plans every copy against one Model state, so a later repair must not reuse them.
-      def reserved_numbers(proposal, zone_path)
-        proposal.steps.grep(IdentityStep).select { |step| step.zone_path == zone_path }.filter_map(&:number)
-      end
-
-      def zone_paths(request)
-        request.query(Reads::ZONES_READ).fetch("zones").map { |zone| zone.dig("reference", "zone_path") }
-      end
-
-      def zone_of(request, path)
-        Occurrences.zone_path(path, zone_paths(request))
+      # The Space numbers earlier repairs in this proposal give in the Zone `zone_id`. A host follow-up
+      # plans every copy against one Model state, so a later repair must not reuse them.
+      def reserved_numbers(proposal, zone_id)
+        proposal.steps.grep(IdentityStep).select { |step| step.zone_id == zone_id }.filter_map(&:number)
       end
 
       def zone_reference(zone)

@@ -203,9 +203,11 @@ class SpacesPagedReadsTest < PhComposerTestCase
                                       "name" => "Zone #{'Z' * 1500} #{index}",
                                       "building_segment" => "Segment #{'B' * 1500} #{index}", "level" => "L1",
                                       "ground_depth_mm" => 0.0 })
+      SPACES::SPACE_STORE.write(space, SPACES::SPACE_STORE.read(space).merge("zone_id" => format("zon_%012d", index)))
       zone
     end
     zones.each { |zone| @model.entities << zone }
+    treat_duplicates_as_existing(@model)
     pages = walk("list", { "limit" => 500 }, "spaces")
     largest = pages.map { |value| JSON.generate(query("list", { "limit" => 500 }).merge("value" => value)).bytesize }
 

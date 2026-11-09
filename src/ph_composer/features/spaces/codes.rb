@@ -6,7 +6,6 @@ module PhComposer
     module Codes
       ALL = {
         "space.context_required" => "The edit context holding the Faces must be open to group them.",
-        "space.context_open" => "An edit context is open; close it to the root first.",
         "space.duplicate_identity" => "Another occurrence carries this Space, Volume or Floor Segment's id: a copy.",
         "space.empty" => "A Space has no Volume.",
         "space.floor_projected" => "A Floor Segment is not horizontal; its plan area is used.",
@@ -17,7 +16,8 @@ module PhComposer
         "space.offset_from_zone" => "A Space's Floor Segments lie outside its Zone's extents; it exports as drawn.",
         "space.nothing_to_create" => "None of the Faces given can become a Space.",
         "space.number_duplicate" => "Two Spaces in one Zone share a number.",
-        "space.outside_zone" => "A Space is in no Zone.",
+        "space.outside_zone" => "A Space is hosted in no Zone.",
+        "space.zone_missing" => "A Space names a Zone that is no longer in the Model.",
         "space.same_zone" => "The Space is already in that Zone.",
         "space.solid_invalid" => "The chosen Group or component is not a closed solid, or encloses no volume.",
         "space.shares_edge" => "A Face shares an Edge with a Face outside the set being grouped.",

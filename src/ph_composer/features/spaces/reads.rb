@@ -130,14 +130,13 @@ module PhComposer
       end
 
       def space_row(space, zones, ids, catalog, model, counts)
-        zone_path = Occurrences.zone_path(space.path, zones.map { |zone| zone.fetch("zone_path") })
-        zone = zone_path && zones.find { |row| row.fetch("zone_path") == zone_path }
+        zone = Membership.zone_row(space.record, zones)
         repeated = space.shared_above
         volumes = space.volumes.sort_by(&:path).map { |volume| volume_row(volume, catalog, model, counts, repeated) }
         record = space.record
         row = Spaces.view(record).merge(
           "extension_status" => Records::Metadata.status_map(record, catalog), "reference" => space.reference,
-          "zone" => zone && { "zone_id" => zone.fetch("zone_id"), "zone_path" => zone_path },
+          "zone" => zone && { "zone_id" => zone.fetch("zone_id"), "zone_path" => zone.fetch("zone_path") },
           "state" => state(space, ids), "nested" => !space.outer.nil?,
           "metrics" => Metrics.space(volumes.map do |volume|
             [volume.fetch("metrics"), volume.dig("values", "avg_ceiling_height_m")]

@@ -214,8 +214,9 @@ constraints:
   that stamped it owns what it holds, so none of its Faces is a Zone Face: the Face walk, Suggest,
   the Shift-click flood, Solve and the Zone's export ownership all skip it, and a Face path through
   one refuses as `target.wrong_hierarchy`. Zones reads only the stamp it owns and names no feature.
-  A stamped Face is still a classified Zone Face; the rule applies to Groups only. Rule and
-  reasoning: `CONTRACTS.md`, "Zones geometry rules".
+  A stamped Face is still a classified Zone Face; the rule applies to Groups only. A Space's Zone is
+  the `zone_id` on its record, never a stamp or a parent (`CONTRACTS.md`, "Space membership"). Rule
+  and reasoning: `CONTRACTS.md`, "Zones geometry rules".
 - Floor Segments are floor faces the user classifies as iCFA. There is no reduction factor.
 - Face occurrence resolution walks the Model. A read phase with no write before its last resolve
   (a query, target resolution before a proposal, `ClassifyStep`) shares one `Zones::Index`, which

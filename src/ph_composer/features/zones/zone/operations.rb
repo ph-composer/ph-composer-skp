@@ -50,7 +50,7 @@ module PhComposer
 
     # The explicit route out of a copied Zone: storage of its own, then a new identity, as one step.
     # The original keeps its id, Faces and pairs; the copy's Surface pairs are retired.
-    def make_independent(request, proposal, zone_path:)
+    def make_independent(request, proposal, zone_path:, copy_added: [])
       zone = Repair.occurrence_at(request.model, zone_path)
       refusal = Repair.independence_refusal(request.model, zone)
       raise refusal if refusal
@@ -64,11 +64,31 @@ module PhComposer
       request.contribute_transition(TRANSITION, "zone_path" => zone.path, "old_zone_id" => zone.record.fetch("id"),
                                                 "new_zone_id" => plan.fetch(:record).fetch("id"),
                                                 "mapping" => plan.fetch(:mapping), "revision" => request.revision,
+                                                "copy_added" => copy_added,
                                                 "references" => plan.fetch(:reference_plan).entries.map do |entry|
                                                   { "kind" => entry.kind, "key" => entry.key, "record" => entry.record }
                                                 end)
       { "zone_id" => plan.fetch(:record).fetch("id"), "retired_pairs" => retired_pairs(plan),
         "storage_isolated" => MakeIndependentStep.shared_storage?(zone.entity) }
+    end
+
+    # One plain Group a native copy added whole, given storage of its own (CopiedGroups). A Group with
+    # nothing to isolate proposes nothing. Only the outermost shared Group can be isolated without
+    # touching the original's contents.
+    def isolate_copied_group(request, proposal, group_path:)
+      path = Occurrences.integer_path(group_path)
+      entities = Repair.path_entities(request.model, path)
+      group = entities.last
+      raise CodedError.new("target.wrong_kind", "That is not a Group.") unless group.is_a?(Sketchup::Group)
+      if entities[0...-1].any? { |entity| Occurrences.shared_storage?(entity) }
+        raise CodedError.new("target.shared_definition", "A container above that Group shares its contents.")
+      end
+      raise CodedError.new("target.locked", "That Group or one above it is locked.") if entities.any?(&:locked?)
+      return { "isolated" => false } unless Occurrences.shared_storage?(group)
+
+      proposal.add_step(IsolateCopiedGroupStep.new(:path => path),
+                        :scopes => [Operations::EntityScope.new(path[0...-1])])
+      { "isolated" => true }
     end
 
     # The stamp-container participant: refuses now what the step would, then stamps at apply the Group

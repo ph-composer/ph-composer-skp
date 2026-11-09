@@ -6,7 +6,8 @@ module PhComposer
     # so a row and the export preflight cannot disagree about it.
     module Findings
       BLOCKS_EXPORT = {
-        "space.outside_zone" => true, "space.empty" => false, "space.volume_empty" => false,
+        "space.outside_zone" => true, "space.zone_missing" => true, "space.empty" => false,
+        "space.volume_empty" => false,
         "space.height_missing" => true, "space.number_duplicate" => false, "space.floor_projected" => false,
         "space.nested" => true, "space.volume_nested" => true, "space.volume_orphan" => true,
         "space.segment_misplaced" => true, "space.volume_moved" => false,
@@ -26,12 +27,20 @@ module PhComposer
       def space(row, duplicate:)
         label = label(row)
         found = []
-        found << finding("space.outside_zone", "#{label} is in no Zone. Move it into a Zone.") unless row["zone"]
+        found << unhosted(label, row.dig("values", "zone_id")) unless row["zone"]
         found << finding("space.nested", "#{label} is inside another Space.") if row["nested"]
         found << finding("space.empty", "#{label} has no Volume.") if row.fetch("volumes").empty?
         found << finding("space.number_duplicate",
                          "Another Space in this Zone is also number #{row.dig('values', 'number')}.") if duplicate
         found
+      end
+
+      # `zone_id` is the id the record still names, when it names a Zone that is gone.
+      def unhosted(label, zone_id)
+        return finding("space.outside_zone", "#{label} is in no Zone. Move it to a Zone.") unless zone_id
+
+        finding("space.zone_missing", "#{label} is hosted in a Zone that is no longer in the Model. Move it to a " \
+                                      "Zone, or remove it from the missing Zone.", :repair => "unhost")
       end
 
       def volume(row)

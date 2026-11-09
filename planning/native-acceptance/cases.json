@@ -3829,7 +3829,7 @@
       "paths": [
         "src/ph_composer/session/container_watch.rb",
         "src/ph_composer/features/spaces/identity/*",
-        "src/ph_composer/features/spaces/move/*",
+        "src/ph_composer/features/spaces/authoring.rb",
         "src/ph_composer/features/spaces/copy_watch.rb",
         "src/ph_composer/features/spaces/zone_copy.rb",
         "src/ph_composer/features/zones/zone/repair.rb",

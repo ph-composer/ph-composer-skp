@@ -67,8 +67,8 @@ draw geometry. Ask the user to draw the outlines first, then:
    is for and the refusal it would meet now. Faces that share an Edge go together.
 4. `ph_composer.spaces.volumes.create` from those Faces, `ph_composer.spaces.floors.mark` for a Face in
    a Volume, then `ph_composer.spaces.update` for heights and airflows.
-5. `ph_composer.context.root`, then `ph_composer.spaces.move_to_zone` if the Space belongs in another
-   Zone. Read every changed reference back.
+5. `ph_composer.spaces.move_to_zone` if the Space belongs in another Zone; it writes the Zone on the
+   Space's record and moves no geometry. Read every changed reference back.
 
 Leaving a Volume locks it again; the navigation commands say so in `side_effects`.
 

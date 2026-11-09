@@ -91,6 +91,30 @@ module PhComposer
       end
     end
 
+    # Gives a copied plain Group storage of its own: Make Unique, then each Group inside still sharing its
+    # contents, except Zones, whose own repair isolates them. Restorable for a host follow-up: isolated
+    # storage stays isolated, which is consistent.
+    class IsolateCopiedGroupStep
+      attr_reader :affected
+
+      def initialize(path:)
+        @path = path.dup.freeze
+        @affected = []
+      end
+
+      def descriptor
+        { "name" => "isolate_copied_group", "path" => @path }
+      end
+
+      def apply(model, _slots)
+        group = Repair.path_entities(model, @path).last
+        group.make_unique if Occurrences.shared_storage?(group)
+        MakeIndependentStep.isolate_groups(group.entities)
+      end
+
+      def restore; end
+    end
+
     # Stamps a Group the calling feature's own earlier step created in this proposal, making it a nested
     # container of the Zone (context/CONTRACTS.md, "Zones geometry rules"). That step leaves the Group's
     # root-to-Group path in `slots[slot]` as `{ "entity_path" => [...] }`; Zones writes the stamp, so the

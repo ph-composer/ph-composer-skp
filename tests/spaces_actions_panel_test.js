@@ -361,3 +361,16 @@ test("a Height from solid preview that lands after leaving the Spaces view opens
   var dialog = p.context.document.querySelector("dialog");
   assert.ok(!dialog || dialog.hidden, "no confirmation over another tab");
 });
+
+test("a Space whose Zone is gone offers Remove from its missing Zone", function () {
+  var p = page();
+  p.receive(snapshot(function (section) {
+    section.spaces[0].zone = null;
+    section.spaces[0].findings = [{ code: "space.zone_missing", blocks_export: true,
+      message: "Space 101 Living is hosted in a Zone that is no longer in the Model.", repair: "unhost" }];
+  }));
+  p.click(p.action("Remove Living from its missing Zone"));
+  assert.strictEqual(last(p).payload.name, "ph_composer.spaces.unhost");
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(last(p).payload.params)), {
+    space: { space_id: "spc_101", entity_path: [100, 101] } });
+});

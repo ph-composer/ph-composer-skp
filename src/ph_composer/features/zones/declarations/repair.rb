@@ -10,6 +10,18 @@ module PhComposer
         "zone_path" => PATH.merge("description" => "The root-to-Zone path of the copy to reidentify, as list " \
                                                    "returns it.")
       }).freeze
+      INDEPENDENT_PARAMS = Shapes.object({
+        "zone_path" => REPAIR_PARAMS.dig("properties", "zone_path"),
+        "copy_added" => { "type" => "array", "items" => { "type" => "integer" },
+                          "description" => "The containers one native copy added, by persistent id, so records " \
+                                           "outside the Zone that came in the same copy can follow it." }
+      }, :optional => ["copy_added"]).freeze
+      ISOLATE_PARAMS = Shapes.object({
+        "group_path" => PATH.merge("description" => "The root-to-Group path of the copied plain Group.")
+      }).freeze
+      ISOLATE_RESULT = Shapes.object({
+        "isolated" => { "type" => "boolean", "description" => "Whether the Group still shared its contents." }
+      }).freeze
       REPAIR_RESULT = Shapes.object({
         "zone_id" => Shapes::ID.merge("description" => "The copy's new Zone id."),
         "retired_pairs" => Shapes::COUNT.merge("description" => "Surface pairs the copy's Faces left behind.")
@@ -93,12 +105,23 @@ module PhComposer
                        :description => "Give a copied Zone occurrence its own Faces and identity, leaving the " \
                                        "occurrence it shares them with untouched.",
                        :refuses => Refuses::MAKE_INDEPENDENT, :transitions => [TRANSITION],
-                       :params => REPAIR_PARAMS, :result => INDEPENDENT_RESULT, :undo_name => "Make Zone Independent",
-                       :examples => [{ "zone_path" => [1401] }],
+                       :params => INDEPENDENT_PARAMS, :result => INDEPENDENT_RESULT,
+                       :undo_name => "Make Zone Independent", :examples => [{ "zone_path" => [1401] }],
                        :side_effects => "Makes the occurrence's Group unique when it shares its Faces, then " \
                                         "reidentifies it and its Faces and retires their Surface " \
                                         "pairs.") do |request, proposal|
-          Zones.make_independent(request, proposal, :zone_path => request.params.fetch("zone_path"))
+          Zones.make_independent(request, proposal, :zone_path => request.params.fetch("zone_path"),
+                                                    :copy_added => request.params.fetch("copy_added", []))
+        end
+        feature.action(CopiedGroups::ACTION,
+                       :description => "Give a plain Group copied whole, such as a storey Group holding Zones and " \
+                                       "Spaces, storage of its own so its Zones and Spaces can be made independent.",
+                       :refuses => %w[target.locked target.not_found target.shared_definition target.wrong_kind],
+                       :params => ISOLATE_PARAMS, :result => ISOLATE_RESULT, :undo_name => "Make Copied Group Unique",
+                       :examples => [{ "group_path" => [1401] }],
+                       :side_effects => "Makes the Group, and any Group in it still sharing its contents, unique; " \
+                                        "no record changes.") do |request, proposal|
+          Zones.isolate_copied_group(request, proposal, :group_path => request.params.fetch("group_path"))
         end
       end
     end

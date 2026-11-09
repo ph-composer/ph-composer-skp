@@ -177,16 +177,28 @@ module PhComposer
           Authoring.make_independent(request, proposal, :reference => params.fetch("reference"))
         }],
         ["move_to_zone", {
-          :description => "Move one Space, with its Volumes and Floor Segments, into another Zone where it stands. " \
-                          "Ids, numbers and values are kept; the edit context must be closed.",
-          :refuses => (ZONE_TARGET + %w[space.context_open space.same_zone]).uniq,
+          :description => "Host one Space in another Zone: its record names the Zone, and its Group stays where it " \
+                          "stands. Ids, numbers and values are kept; any edit context may be open.",
+          :refuses => (ZONE_TARGET + %w[space.same_zone]).uniq,
           :params => Shapes.object({ "space" => SPACE_PARAM, "zone" => ZONE }),
           :result => Shapes.object({ "space_id" => Shapes::TEXT, "zone_id" => Shapes::TEXT }),
-          :undo_name => "Move Space to Zone", :participants => [Authoring::STAMP],
-          :side_effects => "Places the Space Group in the target Zone, stamps it and erases the original.",
+          :undo_name => "Move Space to Zone",
+          :side_effects => "Writes the target Zone's id on the Space record; no geometry changes.",
           :examples => [{ "space" => EXAMPLE_SPACE, "zone" => EXAMPLE_ZONE }]
         }, lambda { |request, proposal, params|
           Authoring.move_to_zone(request, proposal, :space => params.fetch("space"), :zone => params.fetch("zone"))
+        }],
+        ["unhost", {
+          :description => "Take one Space out of its Zone, the repair for a Space whose Zone is gone. Its Group " \
+                          "stays where it stands and its finding becomes space.outside_zone.",
+          :refuses => TARGET,
+          :params => Shapes.object({ "space" => SPACE_PARAM }),
+          :result => Shapes.object({ "space_id" => Shapes::TEXT }),
+          :undo_name => "Remove Space from Zone",
+          :side_effects => "Removes the Zone id from the Space record; no geometry changes.",
+          :examples => [{ "space" => EXAMPLE_SPACE }]
+        }, lambda { |request, proposal, params|
+          Authoring.unhost(request, proposal, :space => params.fetch("space"))
         }],
         ["floors.mark", {
           :description => "Mark explicit Faces directly inside Volumes as Floor Segments with one weighting factor; " \

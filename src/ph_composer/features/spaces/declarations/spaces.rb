@@ -7,7 +7,8 @@ module PhComposer
       AREA = Shapes.quantity("m2", "Plan area, projected onto the horizontal plane.")
       FINDING = Shapes.object({ "code" => Shapes::TEXT, "message" => Shapes::TEXT,
                                 "blocks_export" => { "type" => "boolean" },
-                                "repair" => { "type" => "string", "enum" => %w[make_independent restore_position],
+                                "repair" => { "type" => "string",
+                                              "enum" => %w[make_independent restore_position unhost],
                                               "description" => "The operation that repairs it, when one does." } },
                               :optional => %w[repair])
       FINDINGS = Shapes.list(FINDING)

@@ -384,7 +384,7 @@ module PhComposer
         path.empty? ? model.entities.to_a : path_entities(model, path).last.entities.to_a
       end
       private_class_method :orphan_group, :readable_stamp, :holds_zone?, :entities_at, :path_inside, :orphan_refusal,
-                           :shared_edge?, :walk_orphans, :repaired_face, :face_plans, :member_entries, :path_entities,
+                           :shared_edge?, :walk_orphans, :repaired_face, :face_plans, :member_entries,
                            :member_containers
     end
   end

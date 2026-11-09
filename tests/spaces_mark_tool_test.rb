@@ -216,9 +216,10 @@ class SpacesMarkToolTest < PhComposerTestCase
     assert_empty segments_on(@inside[0, 2]).compact
   end
 
-  def test_a_face_in_a_space_outside_every_zone_refuses
+  def test_a_face_in_a_space_hosted_in_no_zone_refuses
     @zone.entities.delete(@space)
     @model.entities << @space
+    SPACES::SPACE_STORE.write(@space, SPACES::SPACE_STORE.read(@space).reject { |key, _value| key == "zone_id" })
     tool.start(1.0)
     point(:in, [@space, @volume, @inside[0]])
     operations = @model.operations.length

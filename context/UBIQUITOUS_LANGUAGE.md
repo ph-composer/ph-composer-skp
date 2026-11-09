@@ -124,7 +124,7 @@ not coin a third vocabulary between SketchUp and honeybee. Faces belong to a Zon
 
 | Term | Meaning |
 | --- | --- |
-| Space | One unique SketchUp Group inside a Zone, containing one or more Volumes and Space-level data: iCFA, ventilation airflows, occupancy. Maps to a honeybee-ph `Space` on its Zone's Room. Do not call it Room in product copy, and do not confuse it with honeybee's Room, which is a Zone |
+| Space | One unique SketchUp Group hosted in a Zone through the Zone reference on its record, containing one or more Volumes and Space-level data: iCFA, ventilation airflows, occupancy. Maps to a honeybee-ph `Space` on its Zone's Room. Do not call it Room in product copy, and do not confuse it with honeybee's Room, which is a Zone |
 | Volume | A protected structural Group directly inside a Space, holding one logical Space Floor |
 | Space Floor | Logical grouping of Floor Segments in a Volume; not another SketchUp Group |
 | Floor Segment | A face inside a Volume that the user has marked as floor area, carrying PH-Composer identity, a weighting factor and a net area factor. In the predecessor this identity sat on a designPH TFA face; here PH-Composer owns the classification. Maps to honeybee-ph `SpaceFloorSegment` |
@@ -136,7 +136,7 @@ not coin a third vocabulary between SketchUp and honeybee. Faces belong to a Zon
 | Space label | Viewport text at a Space's reference point: number, name, iCFA, net volume, airflows |
 | Selection totals | The HUD readout of summed iCFA, net volume and airflows for the selected Spaces |
 | Airflow balance | Each Zone row of the Spaces view: its Spaces' supply, extract and transfer sums. A Zone holding a Space that inherits its airflow shows a dash. Nothing compares supply with extract per Zone: balance is per ventilator, and that check belongs to the planned Zones / Ventilation view |
-| Move Space to Zone | The action that relocates one whole Space group into another Zone group, keeping world position and records |
+| Move Space to Zone | The action that hosts one Space in another Zone by writing the Zone's id on the Space record. The Space Group stays where it stands |
 | Mark floor | The Spaces tool that marks a face inside a Volume as a Floor Segment with a weighting factor, started from the Weighting factor column menu. A separate tool beside Classify, not a mode of it |
 | Make independent | The repair for a copied Space, Volume or Floor Segment: the copy and everything inside it receive new identities, as one Undo step. Until it runs, the shared identity blocks export |
 | iCFA | Interior conditioned floor area, Phius's reference floor area: drywall-to-drywall of the thermal boundary, including interior walls and stairs, at least 7 ft clear height, open-to-below excluded (guidebook 4.4.1.4). It replaces the predecessor's TFA and carries no PHI reduction factors |
@@ -200,10 +200,9 @@ not coin a third vocabulary between SketchUp and honeybee. Faces belong to a Zon
 
 ## Relationships to preserve
 
-A Zone contains Spaces and envelope faces; a Space contains Volumes; each Volume directly contains
-Floor Segments. Group containment is authoritative: a Space is in a Zone because its group is
-inside the Zone group, wherever its floors are drawn in the scene, and nothing tests geometric
-containment. A Space cannot span Zones. A Floor Segment is never the same face as an envelope
+A Zone hosts Spaces and contains envelope faces; a Space contains Volumes; each Volume directly contains
+Floor Segments. A Space is in a Zone because its record names that Zone, wherever its Group or its floors
+sit in the scene, and nothing tests geometric containment. A Space cannot span Zones. A Floor Segment is never the same face as an envelope
 Floor. A valid Space has at least one Volume and a valid Volume at least one Floor
 Segment. Empty structures are visible recovery states.
 
