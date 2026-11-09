@@ -3,6 +3,7 @@
 require_relative "records"
 require_relative "occurrences"
 require_relative "definition_geometry"
+require_relative "definition_writer"
 
 module PhComposer
   module Windows
@@ -62,6 +63,31 @@ module PhComposer
 
           raise CodedError.new("geometry.failed",
                                "The Window definition, transform or glue could not be preserved.")
+        end
+
+        # A primary definition must still match its Type's generated geometry and behaviour before a Unit
+        # is placed from it.
+        def check_primary!(definition, type_id:, plan:)
+          return if DefinitionWriter.configured?(definition.behavior) &&
+                    DefinitionGeometry.matches?(definition, :type_id => type_id, :plan => plan)
+
+          raise CodedError.new("window.definition_changed",
+                               "The canonical Window definition geometry or behavior differs from its Type. " \
+                               "Nothing was written.")
+        end
+
+        # One new instance of `definition` in `entities`, glued to `face` and carrying `record`.
+        def add_glued!(entities, definition, local_transform, face, record)
+          instance = entities.add_instance(definition, local_transform)
+          raise CodedError.new("geometry.failed", "The native Window instance could not be created.") unless instance
+
+          instance.glued_to = face
+          unless instance.glued_to == face
+            raise CodedError.new("geometry.failed", "The native Window instance could not glue to its host Face.")
+          end
+
+          Units.write(instance, record)
+          instance
         end
 
         def changed!(message)

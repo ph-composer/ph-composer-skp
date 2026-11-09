@@ -3,13 +3,14 @@
 require_relative "test_helper"
 require_relative "support/window_record_fixtures"
 require_relative "support/assembly_assignment_fixtures"
+require_relative "support/window_convert_fixtures"
 
 class WindowConvertReviewTest < PhComposerTestCase
   include WindowRecordFixtures
   include AssemblyAssignmentFixtures
+  include WindowConvertFixtures
 
   QUERY = "ph_composer.windows.units.convert_review"
-  WALL = [[0, 0], [8, 0], [8, 6], [0, 6]].freeze
 
   def setup
     super
@@ -18,72 +19,12 @@ class WindowConvertReviewTest < PhComposerTestCase
     @next_id = 5000
   end
 
-  def inches(x, z, y = 0)
-    Geom::Point3d.new(x / 0.0254, y / 0.0254, z / 0.0254)
-  end
-
-  def ring(left, bottom, width, height)
-    [[left, bottom], [left + width, bottom], [left + width, bottom + height], [left, bottom + height]]
-  end
-
-  def next_id
-    @next_id += 1
-  end
-
-  def edges_of(rings, shared)
-    rings.map do |points|
-      points.each_with_index.map do |point, index|
-        following = points[(index + 1) % points.length]
-        key = [point, following].sort
-        shared[key] ||= Sketchup::Edge.new(next_id, inches(*point), inches(*following))
-      end
-    end
-  end
-
-  # A wall with holes in a new Zone; the holes' Edges are shared with the rectangles drawn in them.
-  def zone_with(rectangles, outer: WALL, holes: nil)
-    shared = {}
-    rectangle_edges = edges_of(rectangles, shared)
-    host = Sketchup::Face.new(next_id, {}, :points => outer.map { |point| inches(*point) },
-                                           :holes => (holes || hole_rings(rectangles)).map { |ring|
-                                             ring.map { |point| inches(*point) }
-                                           },
-                                           :edges => outer_edges(rectangles, rectangle_edges))
-    faces = rectangles.zip(rectangle_edges).map do |points, edges|
-      Sketchup::Face.new(next_id, {}, :points => points.map { |point| inches(*point) }, :edges => edges)
-    end
-    @group = Sketchup::Group.new(next_id, Sketchup::Entities.new([host] + faces + rectangle_edges.flatten.uniq))
-    @model.entities << @group
-    result = assignment_invoke("ph_composer.zones.make", "parent_path" => [], "entity_ids" => [@group.persistent_id])
-    assert_equal "completed", result.fetch("status"), result.inspect
-    @host = host
-    faces
-  end
-
-  # The Edges not shared by two rectangles: those the host's hole holds.
-  def outer_edges(_rectangles, rectangle_edges)
-    all = rectangle_edges.flatten
-    all.select { |edge| all.count(edge) == 1 }
-  end
-
-  def hole_rings(rectangles)
-    rectangles.length == 1 ? rectangles : []
-  end
-
-  def path(face)
-    [@group.persistent_id, face.persistent_id]
-  end
-
   def review(*paths)
     assignment_query(QUERY, "paths" => paths)
   end
 
   def left_out_codes(result)
     result.fetch("left_out").map { |row| row.fetch("code") }
-  end
-
-  def host_reference
-    assignment_faces.find { |row| row.dig("reference", "entity_path") == [@host.persistent_id] }.fetch("reference")
   end
 
   def test_one_rectangle_on_a_zone_wall_reads_its_size_host_and_geometry_and_writes_nothing

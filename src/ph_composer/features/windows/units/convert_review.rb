@@ -22,19 +22,29 @@ module PhComposer
 
         def read(request, paths)
           sources, left_out = ConvertSources.read(request.model, paths)
+          built, unbuilt = assess(request, sources)
+          { "groups" => rows(built, types(request)),
+            "left_out" => (left_out + unbuilt).sort_by { |row| row.fetch("paths").first } }
+        end
+
+        # The groups the rectangles form, first path first, and a left-out row for each that cannot convert.
+        def assess(request, sources)
           hosts = ConvertHosts.new(request, sources)
           outlines = ReadContext.new(request)
           outlines = outlines.occurrences.filter_map { |item| outlines.read_polygon(item) }
-          types = request.engine.ids(TYPE_KIND).map { |id| request.engine.find(TYPE_KIND, id) }
           built = []
+          left_out = []
           clusters(sources).each do |indices|
             cluster = sources.values_at(*indices)
             built << group(hosts, cluster, outlines)
           rescue CodedError => error
             left_out << left_out(cluster.map(&:path), error)
           end
-          { "groups" => rows(built, types),
-            "left_out" => left_out.sort_by { |row| row.fetch("paths").first } }
+          [built.sort_by { |item| item.fetch(:sources).first.path }, left_out]
+        end
+
+        def types(request)
+          request.engine.ids(TYPE_KIND).map { |id| request.engine.find(TYPE_KIND, id) }
         end
 
         def clusters(sources)
@@ -91,12 +101,11 @@ module PhComposer
         end
 
         def rows(built, types)
-          ordered = built.sort_by { |item| item.fetch(:sources).first.path }
           firsts = []
-          ordered.each_with_index.map do |item, index|
+          built.each_with_index.map do |item, index|
             layout = item.fetch(:layout)
             shared = firsts.find do |first|
-              ConvertRectangles.same_layout?(layout, ordered[first].fetch(:layout), TYPE_MATCH_TOLERANCE_M)
+              ConvertRectangles.same_layout?(layout, built[first].fetch(:layout), TYPE_MATCH_TOLERANCE_M)
             end
             firsts << index unless shared
             matching = matching_types(layout, types)
@@ -128,7 +137,7 @@ module PhComposer
           end
           rows.sort_by { |row| [row.fetch("row_span").first, row.fetch("column_span").first] }
         end
-        private_class_method :clusters, :group, :check_size!, :check_clear!, :rows, :matching_types, :sources
+        private_class_method :clusters, :group, :check_size!, :check_clear!, :matching_types, :sources
       end
     end
   end

@@ -41,6 +41,9 @@ module PhComposer
       HOST_EXTENT = (PLACE_TOOL_CHOOSE + %w[geometry.invalid]).freeze
       # A left-out rectangle is a row of the review, not a refusal, so the read refuses only what reading Units does.
       CONVERT_REVIEW = UNIT_READ
+      # Converting rereads what the review read and refuses with the same code the review would leave it out for.
+      CONVERT = (UNIT_GEOMETRY + %w[window.convert_on_boundary window.definition_changed window.definition_missing
+                                    window.host_ambiguous window.mull_not_rectangular window.not_aligned]).freeze
 
       # Copying library rows into the Model through the library's copy participant.
       # The library copy participant's own codes reach the Installs save through its `participants`
