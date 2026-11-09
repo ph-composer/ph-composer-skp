@@ -242,6 +242,49 @@ class WindowConvertTest < PhComposerTestCase
     assert_equal "completed", outcome.fetch("status"), outcome.inspect
   end
 
+  # H3: a rectangle drawn on an assigned Face carries a copy of the host's Face record.
+  def copy_host_record_onto(*faces)
+    record = { "id" => "fac_000000000099", "schema_version" => 1, "face_type" => "Wall",
+               "boundary_condition" => "Outdoors", "user_data" => {}, "extension_data" => {} }
+    ([@host] + faces).each { |face| AssemblyAssignmentFixtures::STORE.write(face, record) }
+  end
+
+  def test_converting_one_of_two_rectangles_each_with_the_hosts_copied_record_succeeds
+    faces = zone_with([ring(1, 1, 1, 1), ring(4, 1, 1, 1)], :holes => [ring(1, 1, 1, 1), ring(4, 1, 1, 1)])
+    copy_host_record_onto(*faces)
+    value = converted(groups_from(review(path(faces.first))))
+    assert_equal 1, value.fetch("units").length
+    assert_equal 2, live_host.loops.length
+    assert_includes live_faces.map(&:persistent_id), faces.last.persistent_id
+    refute_includes live_faces.map(&:persistent_id), faces.first.persistent_id
+    assert_equal host_reference, units.first.fetch("host")
+  end
+
+  # Faces in different Groups share no Edge, so two overlapping rectangles stay separate groups.
+  def overlapping_group(left)
+    points = ring(left, 1, 1.5, 1).map { |point| inches(*point) }
+    edges = points.each_with_index.map do |point, index|
+      Sketchup::Edge.new(next_id, point, points[(index + 1) % points.length])
+    end
+    face = Sketchup::Face.new(next_id, {}, :points => points, :edges => edges)
+    group = Sketchup::Group.new(next_id, Sketchup::Entities.new([face] + edges))
+    @model.entities << group
+    [group.persistent_id, face.persistent_id]
+  end
+
+  def test_overlapping_rectangles_in_separate_groups_are_refused_and_nothing_changes
+    zone_with([], :holes => [])
+    paths = [overlapping_group(2), overlapping_group(3)]
+    result = review(*paths)
+    assert_empty result.fetch("left_out")
+    assert_equal 2, result.fetch("groups").length
+    before = @model.operations.length
+    assert_equal "window.overlap", convert(groups_from(result)).fetch("code")
+    assert_equal before, @model.operations.length
+    assert_empty units
+    assert_empty types
+  end
+
   def test_one_native_undo_restores_every_rectangle_and_removes_each_new_type_and_unit_then_redo_converts_again
     face = zone_with([ring(2, 1, 1.2, 1.5)]).first
     converted(groups_from(review(path(face))))

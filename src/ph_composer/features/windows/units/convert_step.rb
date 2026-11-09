@@ -20,25 +20,30 @@ module PhComposer
       # to write and is not stored yet when this runs, as FlipStep's is not, so it is taken as a value here.
       #
       # While a drawn rectangle exists, its Face carries a copy of its host's Face record and the Zones
-      # locator refuses that record as `target.ambiguous` (context/SKETCHUP_HOST_BEHAVIOR.md). The host
-      # is located only after every rectangle is gone; the plan is read beforehand from the geometry the
-      # host will have then.
+      # locator refuses that record as `target.ambiguous` (context/SKETCHUP_HOST_BEHAVIOR.md), and a drawn
+      # rectangle left unselected keeps that copy after this step. So the host is found by the path
+      # Zones' `host_context` already judged writable at preview, and the plan is read from the geometry
+      # the host will have once its rectangles are gone.
       class ConvertStep
         attr_reader :affected, :definition_ids, :scopes
 
         # One Unit to place: its record, the Type it uses and the host it lands on.
-        UnitPlan = Struct.new(:record, :type, :plan, :host_key, :matrix, :keyword_init => true)
+        UnitPlan = Struct.new(:record, :type, :plan, :host_key, :matrix, :outline_m, :keyword_init => true)
+        HealedHost = Struct.new(:entities, :entity, :transform, :keyword_init => true)
 
         # `groups` are ConvertReview's built groups, each with the `:type` and `:record` it becomes.
         # `new_type_ids` are the Types the caller is writing in this proposal.
-        def initialize(model:, groups:, new_type_ids:, locator:, existing_polygons_m:)
-          @locator = locator
+        def initialize(model:, groups:, new_type_ids:, existing_polygons_m:)
           @new_type_ids = new_type_ids.dup.freeze
           @index = DeepCopy.call(DefinitionIndex.read(model))
           @index.each_key { |id| DefinitionIndex.resolve(model, id) }
           @hosts = hosts_of(groups)
           @rectangles = groups.flat_map { |group| group.fetch(:sources).map { |source| rectangle(source) } }
-          @placements = groups.map { |group| placement(group, existing_polygons_m) }
+          # Rectangles in separate Groups share no Edge and may overlap, so each outline is checked against
+          # those already planned as well.
+          @placements = groups.each_with_object([]) do |group, planned|
+            planned << placement(group, existing_polygons_m + planned.map(&:outline_m))
+          end
           @types = @placements.map(&:type).uniq { |type| type.fetch("id") }
           @definitions_before = existing_definitions(model)
           @definition_ids = @definitions_before.values.map { |row| row.fetch("id") }.freeze
@@ -144,7 +149,8 @@ module PhComposer
           matrix = plane.instance_matrix(mapped).freeze
           WorldGeometry.transform_state(matrix)
           UnitPlan.new(:record => DeepCopy.call(Units.validate!(group.fetch(:record))), :type => type, :plan => plan,
-                       :host_key => host_key(group.fetch(:host)), :matrix => matrix)
+                       :host_key => host_key(group.fetch(:host)), :matrix => matrix,
+                       :outline_m => mapped.outer_polygon_m)
         end
 
         def sill_center(group, plane)
@@ -233,14 +239,16 @@ module PhComposer
           end
         end
 
-        # The host found through Zones now that no copied record remains, and proved to be the healed Face.
+        # The host once its rectangles are gone, proved to be the healed Face.
         def healed_host(model, host)
-          located = @locator.call(model, host.fetch(:host).reference, :mutable => true)
-          unless FaceCapture.call(located.entity, located.transform).digest == host.fetch(:healed).digest
+          entities = PhComposer::Operations::EntityScope.new(host.fetch(:parent_path)).resolve(model)
+          face = entities.to_a.find { |entity| entity.persistent_id == host.fetch(:face_id) }
+          transform = Geom::Transformation.new(host.fetch(:transform))
+          unless face.is_a?(Sketchup::Face) && FaceCapture.call(face, transform).digest == host.fetch(:healed).digest
             raise CodedError.new("geometry.failed", "The host Face did not heal when its rectangles were erased.")
           end
 
-          located
+          HealedHost.new(:entities => entities, :entity => face, :transform => transform)
         end
 
         def definition_for(model, item, index)

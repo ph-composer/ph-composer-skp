@@ -25,7 +25,6 @@ module PhComposer
           matched = match(groups, built, ConvertReview.rows(built, ConvertReview.types(request)))
           planned, created_ids = with_types(request, proposal, matched, identity)
           step = ConvertStep.new(:model => request.model, :groups => planned, :new_type_ids => created_ids,
-                                 :locator => request.locator(Placement::Hosts::FACE_KIND),
                                  :existing_polygons_m => ReadContext.new(request).other_polygons)
           proposal.add_step(step, :scopes => step.scopes)
           units = planned.map do |item|
