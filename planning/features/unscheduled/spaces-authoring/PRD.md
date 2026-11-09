@@ -79,12 +79,13 @@ Rows are #352's. Each names the decision it waits on.
    picker (W6-3). Inside an open Zone it keeps working (W6-2).
 3. **Say that a Space is a floor outline plus a height.** The menu item, the review header and
    every refusal say it; WT-05's refusal text is the first. The review shows the height the Space
-   will take and where it comes from (the Model's last height, or the solid). Accepting a solid is
-   W6-7.
+   will take and where it comes from (the Model's last height). Create Space keeps refusing a closed
+   solid, with WT-05's sentence (W6-7).
 4. **Edit height and outline in the viewport.** Height from solid stays. A Set height tool (W6-6) and an Edit outline
    context-menu item on a Space or Volume selection, which opens the Volume unprotected as the
    panel's Open does now.
-5. **Visible by default, toggled by tag.** Space Groups go on one Spaces tag (W6-4). A Show Spaces
+5. **Visible by default, toggled by the user's tag.** Space Groups stay Untagged (W6-4): a user who wants
+   tag toggling applies a tag to them, which works because Spaces now sit outside the Zone Groups. A Show Spaces
    overlay, on by default, draws each Space's prism outline and its label with or without a
    Colour-by mode (W6-5). Zone Faces still hide Spaces drawn inside the building from outside; the
    user hides the Zones' tag, cuts a section or uses X-ray, as SketchUp users do now.
@@ -113,22 +114,22 @@ One PR each, through the walkthrough plan's rules, host check on each. Order is 
 | Stage | Scope | Depends on |
 | --- | --- | --- |
 | S10-1 | Membership by reference: Zone reference on the Space record, scan, findings, export keying, Move to Zone as a record edit, Zone deletion (W6-9), the collection-copy contract (W6-10), stamp removal, contract and context updates | W6-1 |
-| S10-2 | Create Space outside a Zone: review Zone picker and inference, placement inside an open Zone (W6-2), Spaces tag (W6-4), wording (row 3) | S10-1 |
+| S10-2 | Create Space outside a Zone: review Zone picker and inference, placement inside an open Zone (W6-2), Space Groups Untagged (W6-4), wording (row 3) | S10-1 |
 | S10-3 | Show Spaces overlay and the label defect | S10-1 |
 | S10-4 | Set height tool and Edit outline | S10-1 |
 | S10-5 | Remove Space, keep floors | none |
-| S10-6 | Solid conversion | S10-2; W6-7 yes |
-| S10-7 | Floor overlap finding | none |
+| S10-6 | Floor overlap finding, a warning that does not block export (W6-11) | none |
 
 ## Acceptance checks for implementation
 
 - A Space drawn at the root and hosted in Floor-01 exports in Floor-01's Room, and the same model
   with that Space's Zone reference changed exports it in Floor-02's.
-- With every Zone closed, every Space is visible; hiding the Spaces tag hides all of them and no
-  Zone; hiding the Zones' tag hides no Space.
+- With every Zone closed, every Space is visible. Hiding the Zones' tag hides no Space; a tag the user
+  applies to Space Groups hides them and no Zone.
 - Drawing an outline for Create Space never changes a Zone Face's persistent id or Edge count.
 - Copying a storey Group that holds two Zones and their Spaces gives the copied Spaces new ids,
   each hosted in the copied Zone its original was hosted in; the originals are unchanged.
-- The walkthrough's L-shaped solid (4.88 m2) becomes one Space of 4.88 m2 whose height is the
-  solid's (W6-7 yes), or is refused as today (W6-7 no). No floor counts twice either way.
+- The walkthrough's L-shaped solid is refused as today (W6-7), and no floor counts twice.
+- Two Floor Segments overlapping in plan in one Volume raise `space.floor_overlap` as a warning; export
+  still runs (W6-11).
 - Set height and Remove Space are each one native Undo step on the host.

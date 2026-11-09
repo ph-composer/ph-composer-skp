@@ -40,10 +40,10 @@ coplanar outline onto a Face). `Fit` refuses an outline that overlaps a hole, so
 rectangle Face and placing would be refused as `window.overhang`. Convert must also erase the
 rectangle's Edges, so the host Face is whole again, before the Unit is placed, all in one operation.
 A rectangle that shares part of the host's boundary (a door on the floor line) splits the host into
-separate Faces instead, and erasing the shared Edges must merge them. Neither sequence has been
-measured on the host: what survives the merge, which `persistent_id` the healed Face keeps, and
-whether the Zones Faces scan has already given the rectangle piece a Face record. These are spike H1
-to H3 below, run before S21-2 is built.
+separate Faces instead; Convert refuses those (W7-2), so the user draws them inset and moves the Unit
+after. The interior-rectangle sequence has not been measured on the host: which `persistent_id` the
+healed Face keeps, and whether the Zones Faces scan has already given the rectangle piece a Face
+record. These are spike H1 and H3 below, run before S21-2 is built.
 
 ## Proposal
 
@@ -105,10 +105,7 @@ Each on SketchUp 26.1 through the development bridge, recorded in `context/SKETC
 - **H1.** A rectangle drawn wholly inside a Zone Face, then its Face and four Edges erased in one
   operation: the host has no hole, keeps its `persistent_id` and dictionaries, and its Face record
   (if any) is unchanged after the Zones scan settles.
-- **H2.** A rectangle sharing one side with the host's outer loop: erasing the rectangle Face and its
-  three inner Edges leaves one Face. Which of the two pieces' ids and dictionaries survives, and
-  whether a Face record was given to the piece in between.
-- **H3.** The rectangle piece of H1 and H2 before Convert: does the Zones Faces scan or a Classify
+- **H3.** The rectangle piece of H1 before Convert: does the Zones Faces scan or a Classify
   deferred pass give it a Face record or a classification, which Convert must then remove in the same
   operation.
 
@@ -118,8 +115,8 @@ One PR each, through the walkthrough plan's rules. Order is dependency order.
 
 | Stage | Scope | Depends on |
 | --- | --- | --- |
-| S21-1 | Rectangle reading and grouping, pure: Faces in, groups with bands, spans and refusal rows out (W7-3, W7-5); `convert_review` query with host resolution and Type matching (W7-6); offline tests | W7-1, W7-3, W7-4, W7-5 |
-| S21-2 | Spike H1 to H3, then `ConvertStep` (new Types written in the proposal, as FlipStep does; rectangles erased and the host healed; Units placed through the PlaceStep checks) and the `convert` action, one Undo step; host check | S21-1; W7-2, W7-9 |
+| S21-1 | Rectangle reading and grouping, pure: Faces in, groups with bands, spans and refusal rows out (W7-3, W7-5), and a rectangle touching its host Face's boundary left out as `window.convert_on_boundary` (W7-2); `convert_review` query with host resolution and Type matching (W7-6); offline tests | W7-1, W7-2, W7-3, W7-4, W7-5 |
+| S21-2 | Spike H1 and H3, then `ConvertStep` (new Types written in the proposal, as FlipStep does; rectangles erased and the host healed; Units placed through the PlaceStep checks) and the `convert` action, one Undo step; host check | S21-1; W7-9 |
 | S21-3 | Context and Extensions menu item and the panel review (UI polish skill): groups, left-out rows, Type choice, name, Copy from (W7-7, W7-8); host check | S21-2 |
 
 ## Acceptance checks for implementation
@@ -136,8 +133,9 @@ One PR each, through the walkthrough plan's rules. Order is dependency order.
   the same call after the rectangle was moved is refused with `target.changed` and writes nothing.
 - Four separate same-size rectangles give one new Type and four Units, or four Units of an existing
   Type of that size when the review keeps its preselection.
-- A rectangle at an angle to the host's up axis is left out as `window.not_aligned` (W7-3 as
-  recommended).
+- A rectangle at an angle to the host's up axis is left out as `window.not_aligned` (W7-3).
+- A rectangle touching its host Face's edge is left out as `window.convert_on_boundary`, with a message
+  saying to draw it inset and move the Window after, and nothing changes (W7-2).
 - One native Undo restores every rectangle and removes every new Type and Unit; Redo converts again.
 - The same conversion through `convert` with the panel closed gives the same records.
 - Build-then-Place behaves as before: the existing Place tests and the Window Types host walkthrough
