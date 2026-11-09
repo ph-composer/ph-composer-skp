@@ -114,6 +114,18 @@ check({ name: "windows", output: directory }, async ({ newPage, step }) => {
       return boxes.filter((a, index) => boxes.slice(index + 1).some(b => a.left < b.right && b.left < a.right &&
         a.top < b.bottom && b.top < a.bottom)).length;
     }), 0, "no two drawing labels overlap at " + width);
+    const gaps = await installs.locator(".window-install-drawing").evaluate(node => {
+      const svg = node.querySelector("svg").getBoundingClientRect(), frame = node.getBoundingClientRect();
+      return { left: svg.left - frame.left, right: frame.right - svg.right, overflow: node.scrollWidth - node.clientWidth };
+    });
+    if (gaps.overflow <= 0) assert.ok(Math.abs(gaps.left - gaps.right) <= 1, "the drawing is centred at " + width + ": " + JSON.stringify(gaps));
+    const lit = () => installs.locator(".window-install-hover").evaluateAll(lines =>
+      lines.filter(line => getComputedStyle(line).visibility === "visible").map(line => getComputedStyle(line).strokeLinecap));
+    await page.mouse.move(0, 0);
+    assert.deepStrictEqual(await lit(), [], "no edge is lit at rest");
+    const hovered = await edge.boundingBox();
+    await page.mouse.move(hovered.x + hovered.width / 2, hovered.y + hovered.height / 2);
+    assert.deepStrictEqual(await lit(), ["round"], "only the edge under the pointer lights, with round ends");
     await page.keyboard.press("Escape");
     await installs.getByRole("button", { name: "Keep editing" }).click();
     assert.strictEqual(await page.evaluate(() => previewHost.sent.filter(message => message.type === "action.invoke").length), before);

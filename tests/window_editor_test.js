@@ -469,13 +469,15 @@ function escape(node, target) {
   node.dispatchEvent({ type: "keydown", key: "Escape", target: target || node,
     preventDefault: function () { this.defaultPrevented = true; } });
 }
-test("Installs opens focused, with Save and Cancel in its header, and Escape unwinds one layer", function () {
+test("Installs opens focused, with Save and Cancel in its panel, and Escape unwinds one layer", function () {
   var o = setup(), installs = o.editor.installEditor; installs.open(o.editor.rawRecord());
   assert.ok(installs.list.contains(o.document.activeElement), "focus moves to the chosen Psi-Install Type");
   assert.strictEqual(o.document.activeElement.getAttribute("aria-pressed"), "true");
   var header = installs.root.querySelector(".phc-heading");
-  assert.ok(text(header).includes("Three elements Installs"));
-  assert.ok(header.contains(installs.save) && header.contains(installs.cancel));
+  assert.ok(!header.contains(installs.save) && !header.contains(installs.cancel), "not at the far corner of the page");
+  assert.ok(installs.panel.contains(installs.save) && installs.panel.contains(installs.cancel));
+  assert.strictEqual(installs.save.getAttribute("aria-label"), "Save Installs");
+  assert.strictEqual(installs.cancel.getAttribute("aria-label"), "Cancel Installs");
   installs.editProduct(); assert.strictEqual(installs.form.hidden, false);
   escape(installs.root); assert.strictEqual(installs.form.hidden, true);
     assert.strictEqual(installs.root.hidden, false);
@@ -489,6 +491,69 @@ test("Installs opens focused, with Save and Cancel in its header, and Escape unw
   // The page body holds focus after a repaint; Escape still reaches the session.
   escape(o.document, o.document.body);
     assert.strictEqual(installs.root.hidden, true); assert.strictEqual(o.sent.length, 0);
+});
+test("the Installs heading says where it is, and its Types step leaves as the Types tab does", function () {
+  var o = setup(), installs = o.editor.installEditor, notices = []; installs.open(o.editor.rawRecord());
+  o.modules.panel.notify = function (message, tone) { notices.push((tone || "info") + ": " + message); };
+  var trail = installs.root.querySelector(".window-install-trail");
+  assert.strictEqual(trail.getAttribute("aria-label"), "Location");
+  assert.ok(text(trail).includes("Types") && text(trail).includes("Three elements"));
+  assert.strictEqual(installs.root.querySelector(".phc-heading").children.filter(function (node) {
+    return node.tagName === "h1"; })[0].textContent, "Installs");
+  installs.editProduct(); click(installs.back);
+  assert.strictEqual(installs.form.hidden, false, "an open Psi-Install edit is never dropped by leaving");
+  assert.strictEqual(notices[notices.length - 1], "warning: Accept or cancel the Psi-Install Type edit first.");
+  installs.dismissForm();
+  installs.selected = "psi_a"; installs.paintEdge("wel_a", "top"); click(installs.back);
+  assert.strictEqual(installs.confirm.hidden, false, "a staged change is asked about first");
+  assert.strictEqual(installs.root.hidden, false); installs.confirm.closeModal(); installs.cancelSession(true);
+  installs.open(o.editor.rawRecord()); click(installs.back);
+  assert.strictEqual(installs.root.hidden, true, "a clean session leaves at once");
+  assert.strictEqual(o.sent.length, 0);
+});
+test("the Installs drawing sits in the middle of its canvas", function () {
+  var o = setup(), installs = o.editor.installEditor; installs.open(o.editor.rawRecord());
+  var box = installs.drawing.querySelector("svg").getAttribute("viewBox").split(" ").map(Number);
+  var rects = installs.drawing.querySelector("svg").children.filter(function (node) { return node.tagName === "rect"; })
+    .map(function (rect) { return ["x", "y", "width", "height"].map(function (name) {
+      return Number(rect.getAttribute(name)); }); });
+  function extent(start, size) { return [Math.min.apply(null, rects.map(function (rect) { return rect[start]; })),
+    Math.max.apply(null, rects.map(function (rect) { return rect[start] + rect[size]; }))]; }
+  var across = extent(0, 2), down = extent(1, 3);
+  assert.ok(Math.abs(across[0] - (box[2] - across[1])) < 1e-6, "equal room left and right: " + across);
+  assert.ok(Math.abs(down[0] - (box[3] - down[1])) < 1e-6, "equal room above and below: " + down);
+});
+test("each Installs edge carries its own hover line, drawn above the strokes and values", function () {
+  var o = setup(), installs = o.editor.installEditor; installs.open(o.editor.rawRecord());
+  var nodes = installs.drawing.querySelector("svg").children;
+  function classes(node) { return node.getAttribute("class") || ""; }
+  var lastStroke = -1, lastLabel = -1, firstTarget = -1;
+  nodes.forEach(function (node, index) {
+    if (classes(node).includes("window-install-edge-label")) lastLabel = index;
+    else if (classes(node).includes("window-install-edge")) lastStroke = index;
+    else if (classes(node).includes("window-install-target") && firstTarget < 0) firstTarget = index;
+    if (classes(node).includes("window-install-target")) {
+      var hover = nodes[index + 1];
+      assert.ok(classes(hover).includes("window-install-hover"), "the line that lights with this target follows it");
+      ["x1", "y1", "x2", "y2"].forEach(function (name) {
+        assert.strictEqual(hover.getAttribute(name), node.getAttribute(name)); });
+    }
+  });
+  assert.ok(firstTarget > lastStroke && firstTarget > lastLabel, "above every stroke and value");
+});
+test("Installs tools are named icons in one toolbar and still act", function () {
+  var o = setup(), installs = o.editor.installEditor; installs.open(o.editor.rawRecord());
+  var toolbar = installs.panel.querySelector(".phc-toolbar");
+  [[installs.add, "New Psi-Install Type", "add"], [installs.apply, "Apply to perimeter edges", "paint_bucket"],
+    [installs.copyButton, "Copy to other Window Types", "duplicate"]].forEach(function (entry) {
+    assert.ok(toolbar.contains(entry[0]), entry[1] + " is in the toolbar");
+    assert.strictEqual(entry[0].getAttribute("aria-label"), entry[1]);
+    assert.strictEqual(entry[0].getAttribute("data-icon"), entry[2]);
+  });
+  installs.selected = "psi_a"; click(installs.apply);
+  assert.ok(installs.dirty, "Apply still stages the chosen Type"); assert.strictEqual(o.sent.length, 0);
+  click(installs.copyButton); assert.strictEqual(installs.copyForm.hidden, false);
+  click(installs.add); assert.strictEqual(installs.form.hidden, false);
 });
 test("a subtab chosen over Installs leaves a clean session and asks before discarding a staged one", function () {
   var o = setup(), installs = o.editor.installEditor, notices = []; installs.open(o.editor.rawRecord());

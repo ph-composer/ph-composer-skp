@@ -16,9 +16,9 @@
       "sha256": "c5bd5bac72640039240d109caea530dedf1fff25064549cc68eed7283f2a06bd"
     },
     "html/base.css": {
-      "bytes": 21253,
+      "bytes": 21025,
       "mime": "text/css; charset=utf-8",
-      "sha256": "e8c8f98413844ab423e4f8db750451cf621dfd994fb3191319e9006947beba9d"
+      "sha256": "c0e63bd0bfaaf02a0c3b0a67792630b71f1e91e461309bffecae317ecc7fd8c4"
     },
     "html/boot.js": {
       "bytes": 369,
@@ -196,9 +196,9 @@
       "sha256": "2e4aa19e6f14ec4b16258cb3f71ff5103e67d8f2b330264abeafc86f0d54b09c"
     },
     "html/features/windows/editor.js": {
-      "bytes": 30441,
+      "bytes": 30489,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "6baea6d532801bab65f9cbc3b1b605da7d74764960261b34289d207d69f186c1"
+      "sha256": "e6bc1141913623b22e1e88a7bf8e44c6532b055c2387f11f032086b550cc7d00"
     },
     "html/features/windows/editor_shared.js": {
       "bytes": 2526,
@@ -211,9 +211,9 @@
       "sha256": "c82fa7cd8d86509a973701f641216edad947d868a468f87309386d407fa5d522"
     },
     "html/features/windows/install_editor.js": {
-      "bytes": 25882,
+      "bytes": 27327,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "e753aef143eac5d04f629947d45fb8b441c891b3c410de5c7fcdedfa6993fc96"
+      "sha256": "404904de1e0b03022fc26e7e13ee09f936c4d5b9b01a9b391f03886af0e9e5f9"
     },
     "html/features/windows/inventory.js": {
       "bytes": 16985,
@@ -251,9 +251,9 @@
       "sha256": "f9bdafe79d3675118c31feff05ad4a5c82ada872c75110c636b411239ff6ae2d"
     },
     "html/features/windows/windows.css": {
-      "bytes": 35829,
+      "bytes": 36617,
       "mime": "text/css; charset=utf-8",
-      "sha256": "2eae4f2ec204df7d51b1fad18544cbdaf7c4cf238c92886192b22730e92dfe8a"
+      "sha256": "a29586e67ac95c97f925365ba1e6a231552da0a54d1ada10d3940517f1480922"
     },
     "html/features/zones/assembly_assignment.js": {
       "bytes": 14798,

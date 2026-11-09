@@ -38,7 +38,7 @@ PhComposerUI.define("features/windows/editor", ["panel", "request", "snapshot", 
     this.installEditor = new InstallEditor(session, send, function (message) {
       self.layout.hidden = self.tabs.active !== "builder"; self.notice.show(message); self.paint();
       self.installButton.focus();
-    }); root.appendChild(this.installEditor.root);
+    }, function () { self.leaveInstalls("builder"); }); root.appendChild(this.installEditor.root);
     this.buildRail(); this.buildHeading(); this.buildWorkspace(); this.buildSidebar(); this.buildKeyboard();
     this.placement = new Placement.Controls(this); root.insertBefore(this.placement.root, this.layout);
     this.typeTools.insertBefore(this.placement.anchorRoot, this.readinessButton);
