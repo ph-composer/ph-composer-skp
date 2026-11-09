@@ -21,4 +21,3 @@ Decided by Ed, 2026-11-09 (W7-1 to W7-10), in the table of `PRD.md`:
 - Different from the recommendation: **W7-2** a rectangle touching its host Face's boundary is always refused; the user draws it inset and moves the Unit after.
 
 Next step: implementation waits for Ed's go on stages S21-1 to S21-3 and host spike H1 to H3, with W7-2's refusal in place of spike H2.
-from them).
