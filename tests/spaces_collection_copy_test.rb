@@ -107,6 +107,27 @@ class SpacesCollectionCopyTest < PhComposerTestCase
     assert_equal 3, spaces_under(1000).length, "a copied Zone copies no Space outside it"
   end
 
+  # What a copied Group is after it was opened and closed: storage of its own, its children still sharing.
+  def test_a_unique_copy_whose_spaces_still_share_definitions_follows_its_zones
+    children = [@zone_a, @hall].map do |group|
+      child = Sketchup::Group.new(group.persistent_id + 4000, group.entities)
+      Array(group.attribute_dictionaries).each do |dictionary|
+        dictionary.each { |key, value| child.set_attribute(dictionary.name, key, value) }
+      end
+      child
+    end
+    copy = Sketchup::Group.new(5000, Sketchup::Entities.new(children))
+    @model.start_operation("Copy")
+    @model.entities << copy
+    @model.commit_operation
+    UI.run_timers
+
+    hosted = spaces_under(5000).find { |row| row.dig("values", "name") == "Hall" }
+    refute_equal "spc_HHHHHHHHHHHH", hosted["id"]
+    assert_equal zone_id_at(copy, 0), hosted.dig("values", "zone_id")
+    refute_equal "zon_AAAAAAAAAAAA", hosted.dig("values", "zone_id")
+  end
+
   def test_a_space_in_a_component_in_the_copy_keeps_its_reference_and_the_original_is_untouched
     definition = Sketchup::ComponentDefinition.new(Sketchup::Entities.new([space("Q", 1600, "zon_AAAAAAAAAAAA")]))
     @storey.entities << Sketchup::ComponentInstance.new(1650, definition)

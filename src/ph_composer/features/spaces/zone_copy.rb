@@ -53,15 +53,16 @@ module PhComposer
 
       # Each Space carried by the same added container as the Zone, and outside every Zone, whose record
       # names it. An array copy adds one container per copy: a Space follows only the Zone in its own. A
-      # Space inside any Zone is that Zone's to rewrite; one still shared, in a component, or locked stays
-      # as copied with its finding.
+      # Space inside any Zone is that Zone's to rewrite; one below shared storage, such as a component, or
+      # locked stays as copied with its finding. The Space's own definition may still be shared: its record
+      # is on its own instance.
       def follow_in_copy(proposal, scan, description, model)
         root = (description.fetch("zone_path") & description.fetch("copy_added")).first
         return [] unless root
 
         zones = Zones::Occurrences.zones(model).map(&:path)
         scan.spaces.select do |space|
-          (space.path & description.fetch("copy_added")).first == root && !space.shared && !space.locked &&
+          (space.path & description.fetch("copy_added")).first == root && !space.shared_above && !space.locked &&
             space.record["zone_id"] == description.fetch("old_zone_id") &&
             zones.none? { |path| path.length < space.path.length && space.path[0, path.length] == path }
         end.map do |space|
