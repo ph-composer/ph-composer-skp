@@ -800,18 +800,18 @@
   FIXTURES.windows.zones = JSON.parse(JSON.stringify(AUTHORING.zones));
   FIXTURES.windows.faces = JSON.parse(JSON.stringify(AUTHORING.faces));
   FIXTURES.windows.windows.units = { units: [
-    { id: "wun_a", reference: { unit_id: "wun_a", entity_path: [100, 300] },
+    { id: "wun_a", reference: { unit_id: "wun_a", entity_path: [100, 300] }, name: "",
       values: { window_type_id: "wnt_a", anchor: "sill_center" },
       host: JSON.parse(JSON.stringify(AUTHORING.faces[0].reference)),
       findings: [{ code: "window.definition_detached", repair: { name: "ph_composer.windows.units.reset_to_type",
         params: { units: [{ unit_id: "wun_a", entity_path: [100, 300] }] } } }] },
-    { id: "wun_a", reference: { unit_id: "wun_a", entity_path: [100, 301] },
+    { id: "wun_a", reference: { unit_id: "wun_a", entity_path: [100, 301] }, name: "",
       values: { window_type_id: "wnt_a", anchor: "head_right" }, host: null,
       findings: [{ code: "window.copy_id_pending", repair: { name: "ph_composer.windows.units.repair_copied_identities",
         params: { units: [{ unit_id: "wun_a", entity_path: [100, 301] }] } } },
         { code: "window.unhosted", repair: { name: "ph_composer.windows.units.rehost",
         params: { unit: { unit_id: "wun_a", entity_path: [100, 301] } } } }] },
-    { id: "wun_c", reference: { unit_id: "wun_c", entity_path: [200, 302] },
+    { id: "wun_c", reference: { unit_id: "wun_c", entity_path: [200, 302] }, name: "W-101",
       values: { window_type_id: "wnt_a", anchor: "sill_left" },
       host: JSON.parse(JSON.stringify(AUTHORING.faces[4].reference)),
       findings: [{ code: "window.mirrored", repair: { name: "ph_composer.windows.units.new_flipped_type",

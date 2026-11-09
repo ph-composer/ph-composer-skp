@@ -1,7 +1,7 @@
 /* A Schedule counts authored occurrences, including detached definitions and copied identities. */
 PhComposerUI.define("features/windows/schedule", ["request", "snapshot", "table", "face_words",
-  "workspace", "units", "fields"],
-function (request, snapshot, tables, faceWords, ui, units, fields) {
+  "workspace", "units", "fields", "record_edits"],
+function (request, snapshot, tables, faceWords, ui, units, fields, RecordEdits) {
   "use strict";
   var PREFIX = "ph_composer.windows.", clone = function (value) { return JSON.parse(JSON.stringify(value)); };
   var STATES = { "window.definition_detached": "Detached definition", "window.geometry_differs": "Geometry differs",
@@ -22,10 +22,34 @@ function (request, snapshot, tables, faceWords, ui, units, fields) {
     this.root.appendChild(this.mount);
     this.edits = request.channel(owner.session, owner.send, "window-schedule");
     this.views = request.channel(owner.session, owner.send, "window-schedule-locate", "view.invoke");
+    this.selected = {};
+    var self = this;
+    this.names = new RecordEdits(owner.session, owner.send, function (text) { owner.notice.show(text); }, {
+      action: PREFIX + "units.rename", fields: ["name"], recordLabel: "Window", navigateOnCommit: false,
+      cancelControl: true, enabled: function () { return self.enabled && self.owner.enabled; },
+      eligible: function (row) { return Boolean(row.record.unit); },
+      readOnly: function () { return self.edits.busy(); },
+      rawValue: function (row) { return row.record.unit ? row.record.unit.name : ""; },
+      placeholder: function (row) { return row.record.defaultName; },
+      label: function (row) { return row.record.defaultName + " name"; },
+      send: function (cell) {
+        var unit = cell.row.record.unit;
+        return { action: PREFIX + "units.rename", params: { unit: clone(unit.reference), name: cell.submitted,
+          expected_name: unit.name } };
+      }
+    });
   }
   Schedule.prototype.guard = function () {
-    return this.edits.busy() || this.views.busy() ? "Wait for the Window command." :
-      this.dialog ? "Apply or cancel the Window repair." : null;
+    return this.edits.busy() || this.views.busy() || this.names.pending ? "Wait for the Window command." :
+      this.dialog ? "Apply or cancel the Window repair." :
+      this.nameDrafted() ? "Finish or cancel the Window name first." : null;
+  };
+  /* Whether a name edit needs finishing, under one Type row or anywhere. */
+  Schedule.prototype.nameDrafted = function (typeKey) {
+    return Object.keys(this.names.cells).some(function (key) {
+      var cell = this.names.cells[key];
+      return cell.status !== "clean" && (!typeKey || cell.row.parent === typeKey);
+    }, this);
   };
   Schedule.prototype.zone = function (unit) {
     var path = unit.host ? unit.host.zone_path : unit.reference.entity_path;
@@ -68,8 +92,11 @@ function (request, snapshot, tables, faceWords, ui, units, fields) {
       units.forEach(function (unit, index) {
         var zone = self.zone(unit);
         rows.push({ key: JSON.stringify(unit.reference.entity_path), parent: key, depth: 2, tier: "Unit",
-          record: { name: "Window " + (index + 1), unit: unit, zone: zone ? zone.values.name : "—",
-            audit: "Unit id: " + unit.id + "; occurrence path: " + unit.reference.entity_path.join(" / "),
+          // Numbered per Type, so the Type in the name keeps two Types' first Windows apart.
+          record: { name: unit.name || type.name + " " + (index + 1), defaultName: type.name + " " + (index + 1),
+            unit: unit, zone: zone ? zone.values.name : "—",
+            audit: "Window Type: " + type.name + "; Unit id: " + unit.id + "; occurrence path: " +
+              unit.reference.entity_path.join(" / "),
             level: zone && zone.values.level !== null && zone.values.level !== undefined ? zone.values.level : "—",
             host: unit.host ? self.faceName(unit.host) : "Unhosted", net_area: self.netArea(unit),
             state: (unit.findings || []).map(function (finding) {
@@ -195,20 +222,54 @@ function (request, snapshot, tables, faceWords, ui, units, fields) {
         this.error.hidden = false;
       }
     }
-    this.edits.consume(state); this.views.consume(state); this.paint();
+    this.selected = {};
+    ((snapshot.value(state, PREFIX + "units.selected") || {}).units || []).forEach(function (reference) {
+      this.selected[JSON.stringify(reference.entity_path)] = true;
+    }, this);
+    var rows = this.rows(); this.names.refresh(rows, state);
+    this.edits.consume(state); this.views.consume(state); this.paint(rows);
   };
-  Schedule.prototype.paint = function () {
+  /* Opens the Type of each Window row SketchUp's selection has just reached, and notes the first to scroll to. */
+  Schedule.prototype.follow = function (rows) {
+    var previous = this.followed || {}, fresh = rows.filter(function (row) {
+      return row.record.unit && this.selected[row.key] && !previous[row.key];
+    }, this);
+    this.followed = this.selected;
+    fresh.forEach(function (row) { this.expanded[row.parent] = true; }, this);
+    if (fresh.length) this.scrollTo = fresh[0].key;
+  };
+  /* A hidden tab, here or in the panel above, cannot scroll: the row waits to be shown, unless deselected. */
+  Schedule.prototype.scrollToFollowed = function () {
+    for (var node = this.root; node; node = node.parentNode) { if (node.hidden) return; }
+    if (!this.scrollTo) return;
+    var row = this.selected[this.scrollTo] && this.mount._table.rows[this.scrollTo];
+    this.scrollTo = null;
+    if (row && row.node.scrollIntoView) row.node.scrollIntoView({ block: "nearest" });
+  };
+  Schedule.prototype.paint = function (built) {
     if (this.disposed || !this.units) return;
-    var self = this;
+    var self = this, rows = built || this.rows();
     this.summary.textContent = this.enabled ? this.units.length + " Window" + (this.units.length === 1 ? "" : "s") :
       "Window occurrences are unavailable.";
-    tables.table(this.mount, this.units, { rows: this.rows(), expanded: this.expanded, tree: true,
+    this.follow(rows);
+    tables.table(this.mount, this.units, { rows: rows, expanded: this.expanded, tree: true,
       defaultWidths: { count: 84 },
       columns: [["actions", "Actions"], ["hierarchy", "Hierarchy"], ["name", "Window Type / Unit"], ["count", "Count"],
         ["zone", "Zone"], ["host", "Host Face"],
         ["net_area", units.header("Net opaque host area", fields.AREA_M2, units.profile(fields.AREA_M2))],
         ["level", "Level"], ["state", "State"]],
       value: function (row, field) { return row.record[field] === undefined ? "" : row.record[field]; },
+      selected: function (row) { return Boolean(row.record.unit && self.selected[row.key]); },
+      mayToggle: function (row, opening) {
+        if (opening || !self.nameDrafted(row.key)) return true;
+        self.owner.notice.show("Finish or cancel the Window name first.");
+        return false;
+      },
+      cell: function (cell, row, field) {
+        if (field !== "name" || !self.names.render(cell, row, field)) return false;
+        ui.tooltip(cell, row.record.audit);
+        return true;
+      },
       decorate: function (cell, row, field) {
         if (field === "name") {
           ui.tooltip(cell, row.record.audit || row.record.name);
@@ -223,11 +284,13 @@ function (request, snapshot, tables, faceWords, ui, units, fields) {
         self.owner.createType();
       } } });
     tables.orientNarrow(this.mount);
+    this.scrollToFollowed();
     if (this.dialog) { this.apply.disabled = Boolean(this.edits.busy() || this.stale);
       this.cancel.disabled = this.edits.busy(); }
   };
   Schedule.prototype.dispose = function () {
     this.disposed = true; this.enabled = false; this.edits.reset(); this.views.reset(); this.close();
+    this.names.dispose();
   };
   return { Schedule: Schedule };
 });

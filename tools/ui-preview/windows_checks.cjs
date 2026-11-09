@@ -50,6 +50,30 @@ check({ name: "windows", output: directory }, async ({ newPage, step }) => {
     await schedule.getByText("Detached definition", { exact: true }).waitFor();
     await schedule.getByRole("button", { name: "Locate Window", exact: true }).first().click();
     assert.deepStrictEqual(await page.evaluate(() => previewHost.selectedUnits[0].entity_path), [100, 300]);
+    const located = schedule.locator("[data-row-key='[100,300]']");
+    await schedule.locator("tr.host-selected[data-row-key='[100,300]']").waitFor();
+    const named = located.getByRole("textbox", { name: /name$/ });
+    assert.strictEqual(await named.inputValue(), "", "an unnamed Window has an empty name");
+    assert.match(await named.getAttribute("placeholder"), / 1$/);
+    const named302 = schedule.locator("[data-row-key='[200,302]'] input");
+    assert.strictEqual(await named302.inputValue(), "W-101");
+    // A short window puts the last row out of view; selecting it in SketchUp brings it back, clear of the header.
+    const fullSize = page.viewportSize();
+    await page.setViewportSize({ width: fullSize.width, height: 360 });
+    const farRow = schedule.locator("[data-row-key='[200,302]']");
+    const farRowFrame = () => farRow.evaluate(node => {
+      const box = node.getBoundingClientRect(), header = node.closest("table").querySelector("thead").getBoundingClientRect();
+      let host = node.parentElement;
+      while (host && !["auto", "scroll"].includes(getComputedStyle(host).overflowY)) host = host.parentElement;
+      const frame = host.getBoundingClientRect();
+      return { clear: box.top >= header.bottom - 1, inside: box.bottom <= frame.bottom + 1 };
+    });
+    await page.evaluate(() => { previewHost.selectedUnits = [{ unit_id: "wun_c", entity_path: [200, 302] }];
+      previewHost.snapshot(); });
+    await schedule.locator("tr.host-selected[data-row-key='[200,302]']").waitFor();
+    assert.deepStrictEqual(await farRowFrame(), { clear: true, inside: true },
+      "the row selected in SketchUp comes into view at " + width);
+    await page.setViewportSize(fullSize);
     await schedule.getByRole("button", { name: "Reset to Type", exact: true }).first().click();
     const repair = page.getByRole("dialog", { name: "Reset to Type", exact: true });
     await repair.getByRole("button", { name: "Cancel", exact: true }).click();

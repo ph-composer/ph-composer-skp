@@ -70,6 +70,102 @@ test("Schedule counts occurrences independently of copied ids and shows host con
   assert.strictEqual(o.sent[0].payload.name, "ph_composer.windows.units.locate");
   assert.deepStrictEqual(JSON.parse(JSON.stringify(o.sent[0].payload.params.units[0].entity_path)), [10, 30]);
 });
+function unitRow(o, key) { return o.editor.schedule.mount._table.rows[key]; }
+function nameInput(o, key) { return unitRow(o, key).cells.name.children[0]; }
+function selectUnits(o, paths) {
+  o.state.sections["ph_composer.windows.units.selected"] = { status: "completed", value: { units: paths.map(
+    function (path) { return { unit_id: "wun_a", entity_path: path }; }) } };
+  o.editor.render(o.state);
+}
+function typeName(o, key, value) {
+  var input = nameInput(o, key); input.value = value;
+  input.listeners.input({}); input.listeners.keydown({ key: "Enter", preventDefault: function () {} });
+}
+test("an unnamed Window shows its Type and number as a hint, and its name when it has one (W-099)", function () {
+  var o = setup(); o.editor.tabs.select("schedule");
+  o.state.sections["ph_composer.windows.units"].value.units[0].name = "W-101";
+  o.state.sections["ph_composer.windows.units"].value.units[1].name = ""; o.editor.render(o.state);
+  assert.strictEqual(nameInput(o, "[10,30]").value, "W-101");
+  assert.strictEqual(nameInput(o, "[10,31]").value, "");
+  var type = o.state.sections["ph_composer.windows.types"].value.records[0].values.name;
+  assert.strictEqual(nameInput(o, "[10,31]").placeholder, type + " 2");
+  assert.strictEqual(unitRow(o, "type:wnt_a").cells.name.textContent, type, "a Type row stays text");
+});
+test("a name typed in the Schedule writes the instance name, guarded by the name last read (W-099)", function () {
+  var o = setup(); o.editor.tabs.select("schedule");
+  o.state.sections["ph_composer.windows.units"].value.units[0].name = "Old"; o.editor.render(o.state);
+  typeName(o, "[10,30]", " W-101 ");
+  var call = o.sent[o.sent.length - 1];
+  assert.strictEqual(call.type, "action.invoke");
+  assert.strictEqual(call.payload.name, "ph_composer.windows.units.rename");
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(call.payload.params)), {
+    unit: { unit_id: "wun_a", entity_path: [10, 30] }, name: "W-101", expected_name: "Old" });
+  assert.strictEqual(o.editor.schedule.guard(), "Wait for the Window command.", "the row actions wait for it");
+});
+test("a name changed in Entity Info reaches an idle cell (W-099)", function () {
+  var o = setup(); o.editor.tabs.select("schedule");
+  o.state.sections["ph_composer.windows.units"].value.units[0].name = "Before"; o.editor.render(o.state);
+  o.state.sections["ph_composer.windows.units"].value.units[0].name = "From Entity Info"; o.editor.render(o.state);
+  assert.strictEqual(nameInput(o, "[10,30]").value, "From Entity Info");
+});
+test("a Window selected in SketchUp has its row marked and scrolled to, once, under an open Type (W-100)", function () {
+  var o = setup(), scrolled = []; o.editor.tabs.select("schedule");
+  ["[10,30]", "[10,31]"].forEach(function (key) {
+    unitRow(o, key).node.scrollIntoView = function () { scrolled.push(key); };
+  });
+  assert.strictEqual(unitRow(o, "[10,31]").node.classList.contains("host-selected"), false);
+  selectUnits(o, [[10, 31]]);
+  assert.strictEqual(unitRow(o, "[10,31]").node.classList.contains("host-selected"), true);
+  assert.strictEqual(unitRow(o, "[10,30]").node.classList.contains("host-selected"), false);
+  assert.deepStrictEqual(scrolled, ["[10,31]"]);
+  o.editor.render(o.state);
+  assert.strictEqual(scrolled.length, 1, "a repaint of the same selection leaves the scroll alone");
+  o.editor.schedule.expanded["type:wnt_a"] = false; o.editor.schedule.paint();
+  selectUnits(o, []);
+  assert.strictEqual(o.editor.schedule.expanded["type:wnt_a"], false, "clearing the selection opens nothing");
+  selectUnits(o, [[10, 30]]);
+  assert.strictEqual(o.editor.schedule.expanded["type:wnt_a"], true, "a selected Window's Type opens");
+  assert.deepStrictEqual(scrolled, ["[10,31]", "[10,30]"]);
+  assert.strictEqual(unitRow(o, "[10,30]").node.classList.contains("host-selected"), true);
+});
+test("a Window selected while another tab shows is scrolled to when the Schedule opens (W-100)", function () {
+  var o = setup(), scrolled = [];
+  unitRow(o, "[10,31]").node.scrollIntoView = function () { scrolled.push("[10,31]"); };
+  selectUnits(o, [[10, 31]]);
+  assert.deepStrictEqual(scrolled, [], "a hidden tab cannot scroll");
+  o.editor.tabs.select("schedule");
+  assert.deepStrictEqual(scrolled, ["[10,31]"]);
+  o.editor.render(o.state);
+  assert.strictEqual(scrolled.length, 1, "and only once");
+});
+test("a Window selected while the panel shows another primary tab is scrolled to on return (W-100)", function () {
+  var o = setup(), scrolled = []; o.editor.tabs.select("schedule");
+  unitRow(o, "[10,31]").node.scrollIntoView = function () { scrolled.push("[10,31]"); };
+  o.document.body.hidden = true;
+  selectUnits(o, [[10, 31]]);
+  assert.deepStrictEqual(scrolled, []);
+  o.document.body.hidden = false; o.editor.render(o.state);
+  assert.deepStrictEqual(scrolled, ["[10,31]"]);
+});
+test("a refused name keeps its draft and holds the tabs until it is cancelled (W-099)", function () {
+  var o = setup(); o.editor.tabs.select("schedule");
+  o.state.sections["ph_composer.windows.units"].value.units[0].name = ""; o.editor.render(o.state);
+  typeName(o, "[10,30]", "W-101");
+  var call = o.sent[o.sent.length - 1].payload;
+  o.state.ui.actionResult = { session: o.state.session, request_id: call.request_id,
+    outcome: { status: "refused", code: "target.locked", message: "The Window is locked." } };
+  o.editor.render(o.state);
+  assert.strictEqual(nameInput(o, "[10,30]").value, "W-101");
+  assert.strictEqual(o.editor.schedule.guard(), "Finish or cancel the Window name first.");
+  assert.strictEqual(o.editor.tabs.select("builder"), false);
+  assert.strictEqual(o.editor.tabs.active, "schedule");
+  click(unitRow(o, "type:wnt_a").chevron);
+  assert.notStrictEqual(o.editor.schedule.expanded["type:wnt_a"], false, "its Type stays open");
+  click(unitRow(o, "[10,30]").cells.name.children[1]);
+  assert.strictEqual(nameInput(o, "[10,30]").value, "");
+  assert.strictEqual(o.editor.schedule.guard(), null);
+  assert.strictEqual(o.editor.tabs.select("builder"), true);
+});
 test("with no Window Types the Schedule and the Builder both offer to make the first", function () {
   var o = setup(), types = o.state.sections["ph_composer.windows.types"].value;
   types.records = []; o.state.sections["ph_composer.windows.units"].value.units = []; o.editor.render(o.state);
@@ -225,8 +321,9 @@ test("Schedule shows distinct occurrence words, friendly Face labels and identit
   var o = setup(); o.state.sections["ph_composer.zones.faces.faces"].value.faces[0].values.face_type = "RoofCeiling";
   o.editor.render(o.state); o.editor.tabs.select("schedule");
   var rows = o.editor.schedule.mount._table.rows, first = rows["[10,30]"], second = rows["[10,31]"];
-  assert.strictEqual(first.cells.name.textContent, "Window 1");
-  assert.strictEqual(second.cells.name.textContent, "Window 2");
+  var type = o.state.sections["ph_composer.windows.types"].value.records[0].values.name;
+  assert.strictEqual(first.cells.name.children[0].placeholder, type + " 1");
+  assert.strictEqual(second.cells.name.children[0].placeholder, type + " 2");
   assert.strictEqual(first.cells.host.textContent, "Roof or ceiling 1");
   assert.ok(first.cells.name.getAttribute("data-tooltip").includes("wun_a"));
   assert.ok(first.cells.name.getAttribute("data-tooltip").includes("10 / 30"));

@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 22
+    MINOR = 23
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -102,7 +102,10 @@ module PhComposer
                     "space.airflow_imbalance is gone: supply and extract balance per ventilator, not per Zone." },
       { "minor" => 22, "date" => "2026-11-08",
         "change" => "A Frame gains brand, an optional text field, in ph_composer.windows.frames and the frames " \
-                    "library kind." }
+                    "library kind." },
+      { "minor" => 23, "date" => "2026-11-08",
+        "change" => "A Window Unit reads its native name in ph_composer.windows.units.list and .all; " \
+                    "ph_composer.windows.units.rename and ph_composer.windows.units.selection are new." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {
