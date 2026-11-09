@@ -113,8 +113,8 @@ module PhComposer
           Records::Names.unique!(name, rows)
           layout = entry.fetch(:built).fetch(:layout)
           copied = copied_properties(request, matched, index)
-          values = { "name" => name, "columns_m" => layout.columns_m, "rows_m" => layout.rows_m,
-                     "elements" => elements(layout, identity, copied) }
+          values = Installs.perimeter_only("name" => name, "columns_m" => layout.columns_m, "rows_m" => layout.rows_m,
+                                           "elements" => elements(layout, identity, copied))
           id = Types::Operations.create(request, proposal, :values => values).fetch("id")
           rows << { "id" => id, "name" => name }
           proposal.find(TYPE_KIND, id).after
@@ -126,7 +126,7 @@ module PhComposer
         end
 
         # What the shared group's Copy from Type gives every element: its first glazed element's properties
-        # (W7-7). Nothing when the group names none.
+        # (W7-7), its installs then kept on perimeter sides only. Nothing when the group names none.
         def copied_properties(request, matched, index)
           source_id = choice(matched, index, "copy_from_type_id", "Copy from Type") { |id| id }
           return {} unless source_id

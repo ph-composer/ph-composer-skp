@@ -138,8 +138,8 @@ PhComposerUI.define("features/windows/convert_review", ["panel", "request", "sna
     row.copy = this.select("Copy from", [[NEW_TYPE, "None"]].concat(sources.map(function (record) {
       return [record.id, record.values.name];
     })));
-    ui.tooltip(row.copy, "Copies the glazing, frames, installs and operation of that Type's first glazed element " +
-      "into each element. None leaves them to set afterwards.");
+    ui.tooltip(row.copy, "Copies the glazing, frames and operation of that Type's first glazed element into each " +
+      "element, and its installs onto the perimeter sides. None leaves them to set afterwards.");
     function paint() {
       row.name.parentNode.hidden = row.copy.parentNode.hidden = row.type.value !== NEW_TYPE;
     }

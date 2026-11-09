@@ -45792,7 +45792,7 @@ Params:
           "copy_from_type_id": {
             "type": "string",
             "pattern": "^wnt_[A-Za-z0-9]{12}$",
-            "description": "Copies this Type's first glazed element's glazing, frames, installs and operation into every element of the new Type. Default: blank elements."
+            "description": "Copies this Type's first glazed element's glazing, frames and operation into every element of the new Type, and its installs onto the sides on the Type's perimeter. Default: blank elements."
           }
         }
       },
