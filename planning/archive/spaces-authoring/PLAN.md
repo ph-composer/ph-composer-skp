@@ -1,7 +1,7 @@
 # Spaces: delivery plan
 
 DATE: 2026-11-09
-STATUS: Complete. Stages S10-1 to S10-6 delivered; see [STATUS.md](STATUS.md).
+STATUS: Complete. Delivered in #410 to #415.
 AUTHOR: Ed May, BLDGTYP; Claude
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/352
 

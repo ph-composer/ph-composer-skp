@@ -7,8 +7,8 @@ ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/352
 
 ## Problem
 
-The 2026-11 walkthrough ([SYNTHESIS.md](../../../archive/usability-walkthrough-2026-11/SYNTHESIS.md) S-10;
-[LOG.md](../../../archive/usability-walkthrough-2026-11/LOG.md) W-036 to W-052) found that a Space is hard
+The 2026-11 walkthrough ([SYNTHESIS.md](../usability-walkthrough-2026-11/SYNTHESIS.md) S-10;
+[LOG.md](../usability-walkthrough-2026-11/LOG.md) W-036 to W-052) found that a Space is hard
 to draw, hard to see and hard to change:
 
 - Create Space works only inside an open Zone. There the Zone's own Faces cover the plan, its tag
@@ -96,11 +96,11 @@ Rows are #352's. Each names the decision it waits on.
 | ID | Question | Recommendation | Alternative |
 | --- | --- | --- | --- |
 | W6-1 | How is a Space hosted in a Zone? | A2: by reference, the Space Group outside every Zone Group | A1: re-parent into the Zone Group. Meets row 2 (draw outside, then move in); row 5 stays unmet, since a hosted Space is again behind its Zone's Faces and under its tag |
-| W6-2 | Under A2, what does Create Space inside an open Zone make? | A Space placed outside the Zone at the same world position, hosted in it: one rule, nothing nests. Placement uses the measured re-placing route Move to Zone uses ([SKETCHUP_HOST_BEHAVIOR.md](../../../../context/SKETCHUP_HOST_BEHAVIOR.md), "Re-placing a Group's definition") | A nested Space as today, so two membership rules |
+| W6-2 | Under A2, what does Create Space inside an open Zone make? | A Space placed outside the Zone at the same world position, hosted in it: one rule, nothing nests. Placement uses the measured re-placing route Move to Zone uses ([SKETCHUP_HOST_BEHAVIOR.md](../../../context/SKETCHUP_HOST_BEHAVIOR.md), "Re-placing a Group's definition") | A nested Space as today, so two membership rules |
 | W6-3 | How does a Space drawn outside pick its Zone? | The review's Zone picker, preselected with the Zone whose plan footprint holds the outline's centroid and whose height range holds the outline; "No Zone" when none does. The user can change it before Create | No picker: the Space is created unhosted and Move to Zone hosts it |
 | W6-4 | Which tag holds Space Groups? | One tag, named by a Spaces setting that starts as `02_SPACES` (Ed's convention beside `01_GEOM`), created on first use. Raw Faces inside stay Untagged | Untagged Space Groups; the user tags them |
 | W6-5 | What does Show Spaces draw? | A check in Zones > Spaces, on by default, per Model session: each Space's prism outline (floor loops at floor and at height, and the verticals) and its label, with any Colour-by mode or none. Fix the W-046 label defect in the same stage | Labels only; the prism stays a Colour-by preview |
-| W6-6 | How is height edited in the viewport? | A Set height tool: click a Space's prism, drag the top or type a value in the measurements box, one Undo step through `update` | Height derived from a solid the user keeps editing. Not recommended: a deferred pass ([TECH_STACK.md](../../../../context/TECH_STACK.md), "Observers report; deferred work mutates") would rewrite the height after every geometry edit, a write the user never asked for, and the geometry becomes a solid again, against outline plus height |
+| W6-6 | How is height edited in the viewport? | A Set height tool: click a Space's prism, drag the top or type a value in the measurements box, one Undo step through `update` | Height derived from a solid the user keeps editing. Not recommended: a deferred pass ([TECH_STACK.md](../../../context/TECH_STACK.md), "Observers report; deferred work mutates") would rewrite the height after every geometry edit, a write the user never asked for, and the geometry becomes a solid again, against outline plus height |
 | W6-7 | Does Create Space accept a closed solid? | Yes, as a conversion: on a selected closed Group or closed shell of loose Faces, the downward Faces become the floor outline, the solid's volume over that area becomes the height (as Height from solid computes it), and the walls and top are erased. One Undo restores the solid. The review says so before Create | No: keep WT-05's refusal, which tells the user to draw the outline alone |
 | W6-8 | How is a Space removed while keeping its floors? | Remove Space: the Space's and its Volumes' records go, both Groups are exploded, the floor Faces stay where they are as plain geometry, one Undo step. This is `RemoveVolumeStep` one level up | Delete Space with a "Keep floor outlines" check |
 | W6-9 | What happens to a Space whose Zone is deleted? | Deleting the Zone offers to unhost its Spaces (they stay, with no Zone, and the `space.outside_zone` finding) in the same Undo step | Refuse the delete with `reference.in_use` until the Spaces are moved |

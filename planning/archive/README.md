@@ -9,6 +9,7 @@ reached.
 
 | Slug | Date | Outcome | Issue or PR |
 | --- | --- | --- | --- |
+| [spaces-authoring](spaces-authoring/README.md) | 2026-11-09 | Complete: Spaces belong to Zones by reference and are drawn outside them, with Show Spaces, Set height, Edit outline, Remove Space and an overlap warning (W6-1 to W6-11), stages S10-1 to S10-6 | [#352](https://github.com/ph-composer/ph-composer-skp/issues/352) |
 | [windows-draw-convert](windows-draw-convert/README.md) | 2026-11-09 | Complete: drawn rectangles convert to Window Types with one Undo step, through a menu item and a panel review (W7-1 to W7-10), stages S21-1 to S21-3 | [#363](https://github.com/ph-composer/ph-composer-skp/issues/363) |
 | [usability-walkthrough-2026-11](usability-walkthrough-2026-11/PLAN.md) | 2026-11-09 | Complete: the tutorial-house walkthrough's 30 issues delivered as stages WT-01 to WT-31, one PR each, through review and a host check on every SketchUp-visible change; two design packets, WT-06 and WT-07, remain open for decisions | [#373](https://github.com/ph-composer/ph-composer-skp/issues/373) |
 | [ui-design-polish](ui-design-polish.md) | 2026-11-04 | Complete: shared UI polish across all 14 routes and key containers; 296 captures, four independent council rounds with final design minima above 9, offline/browser gates and SketchUp 2026 inspection passed; delivery through PR #339 | [#338](https://github.com/ph-composer/ph-composer-skp/issues/338); [PR #339](https://github.com/ph-composer/ph-composer-skp/pull/339) |
