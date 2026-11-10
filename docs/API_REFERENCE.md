@@ -31582,6 +31582,82 @@ Example params:
 }
 ```
 
+### `ph_composer.spaces.volumes.delete`
+
+Erase one Volume and its floor Faces, as SketchUp's Delete would. Deleting a Space's only Volume leaves the Space empty, which reads space.empty; the menu item and the panel offer ph_composer.spaces.delete instead. Owner: `ph_composer.spaces`.
+
+Undo step: Delete Volume. Erases the Volume Group, its Faces and their records.
+
+Refuses: `copy.rule_missing`, `record.unreadable`, `reference.in_use`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "volume"
+  ],
+  "properties": {
+    "volume": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "volume_id",
+        "entity_path"
+      ],
+      "properties": {
+        "volume_id": {
+          "type": "string"
+        },
+        "entity_path": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "description": "The root-to-entity persistent-id path."
+        }
+      },
+      "description": "The Volume, as list returns it."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "volume_id"
+  ],
+  "properties": {
+    "volume_id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "volume": {
+    "volume_id": "vol_Ab12Cd34Ef56",
+    "entity_path": [
+      1201,
+      1300,
+      1310
+    ]
+  }
+}
+```
+
 ### `ph_composer.spaces.volumes.height_from_solid`
 
 Set a Volume's average clear ceiling height from a closed solid: its volume over the Volume's net floor area. The solid is left as it was. Owner: `ph_composer.spaces`.
@@ -57001,3 +57077,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.30 | 2026-11-09 | ph_composer.spaces.remove is new: a Space's records go and its floor Faces stay as plain geometry, in one Undo step. |
 | 1.31 | 2026-11-09 | A Volume whose Floor Segments overlap in plan reads the space.floor_overlap finding, a warning that does not block export. |
 | 1.32 | 2026-11-09 | ph_composer.spaces.create and volumes.create make one Volume per set of Faces joined by shared Edges and answer volumes, a list of volume_id and floor_segment_ids, in place of volume_id and floor_segment_ids. A Volume whose Floor Segments are not all joined reads the space.floor_disconnected finding, a warning that does not block export. The add_volume_menu menu item is new, and create_menu is no longer offered inside a Space. |
+| 1.33 | 2026-11-10 | ph_composer.spaces.volumes.delete is new: it erases one Volume and its floor Faces in one Undo step, where volumes.remove keeps the Faces. The delete_volume_menu menu item is new. |

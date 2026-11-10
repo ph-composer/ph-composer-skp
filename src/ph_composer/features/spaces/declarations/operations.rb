@@ -156,6 +156,17 @@ module PhComposer
         }, lambda { |request, proposal, params|
           Authoring.remove_volume(request, proposal, :volume => params.fetch("volume"))
         }],
+        ["volumes.delete", {
+          :description => "Erase one Volume and its floor Faces, as SketchUp's Delete would. Deleting a Space's " \
+                          "only Volume leaves the Space empty, which reads space.empty; the menu item and the " \
+                          "panel offer ph_composer.spaces.delete instead.",
+          :refuses => REMOVAL, :params => Shapes.object({ "volume" => VOLUME_PARAM }),
+          :result => Shapes.object({ "volume_id" => Shapes::TEXT }), :undo_name => "Delete Volume",
+          :side_effects => "Erases the Volume Group, its Faces and their records.",
+          :examples => [{ "volume" => EXAMPLE_VOLUME }]
+        }, lambda { |request, proposal, params|
+          Authoring.delete_volume(request, proposal, :volume => params.fetch("volume"))
+        }],
         ["delete", {
           :description => "Erase one Space and everything in it.", :refuses => REMOVAL,
           :params => Shapes.object({ "space" => SPACE_PARAM }),

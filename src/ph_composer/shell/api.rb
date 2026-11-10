@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 32
+    MINOR = 33
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -142,7 +142,10 @@ module PhComposer
                     "Edges and answer volumes, a list of volume_id and floor_segment_ids, in place of volume_id and " \
                     "floor_segment_ids. A Volume whose Floor Segments are not all joined reads the " \
                     "space.floor_disconnected finding, a warning that does not block export. The add_volume_menu " \
-                    "menu item is new, and create_menu is no longer offered inside a Space." }
+                    "menu item is new, and create_menu is no longer offered inside a Space." },
+      { "minor" => 33, "date" => "2026-11-10",
+        "change" => "ph_composer.spaces.volumes.delete is new: it erases one Volume and its floor Faces in one Undo " \
+                    "step, where volumes.remove keeps the Faces. The delete_volume_menu menu item is new." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

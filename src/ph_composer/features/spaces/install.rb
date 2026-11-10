@@ -20,6 +20,7 @@
 #   add_volume_menu.rb  Add New Volume to Space, the native route to volumes.create
 #   weighting_factor_menu.rb  Set Weighting Factor on Floor Segments, Volumes and Spaces, through floors.mark
 #   space_edit_menu.rb  Move to Zone, Set Number…, Set Name… and Set Airflows… on selected Spaces
+#   delete_volume_menu.rb  Delete Volume on a selected Volume, through volumes.delete, or delete for a Space's only one
 #   declarations/   what Spaces registers
 require_relative "schema"
 require_relative "scan/occurrences"
@@ -67,6 +68,7 @@ require_relative "edit_floor_surface_menu"
 require_relative "add_volume_menu"
 require_relative "weighting_factor_menu"
 require_relative "space_edit_menu"
+require_relative "delete_volume_menu"
 require_relative "declarations/create_route"
 
 module PhComposer
@@ -94,6 +96,7 @@ module PhComposer
       AddVolumeMenu.install(feature)
       WeightingFactorMenu.install(feature)
       SpaceEditMenu.install(feature)
+      DeleteVolumeMenu.install(feature)
     end
   end
 end

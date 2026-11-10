@@ -296,8 +296,66 @@ test("a confirmation names a record with no name by its number and its Space", f
   assert.strictEqual(dialog.querySelector("h2").textContent, "Delete Space?");
   assert.match(dialog.querySelector("p").textContent, /^Space 102, /);
   p.click(dialog.querySelectorAll("button").filter(function (node) { return node.textContent === "Cancel"; })[0]);
-  p.click(p.action("Remove Volume 1 of Space 102"));
-  assert.strictEqual(dialog.querySelector("h2").textContent, "Remove Volume 1 of Space 102");
+  p.click(p.action("Delete Volume 1 of Space 102"));
+  assert.strictEqual(dialog.querySelector("h2").textContent, "Delete Space?");
+  assert.match(dialog.querySelector("p").textContent, /^Volume 1 is the only Volume of Space 102, /);
+});
+
+test("a Volume's trash icon confirms, then erases it with its floor Faces through volumes.delete", function () {
+  var p = page();
+  p.receive(snapshot());
+  expandAll(p);
+  p.click(p.action("Delete Volume 2"));
+  var dialog = p.context.document.querySelector("dialog");
+  assert.strictEqual(dialog.querySelector("h2").textContent, "Delete Volume?");
+  assert.strictEqual(dialog.querySelector("p").textContent,
+    "Volume 2 of Hall and its floor Faces will be erased. One Undo brings them back.");
+  p.click(dialog.querySelectorAll("button").filter(function (node) { return node.textContent === "Cancel"; })[0]);
+  assert.strictEqual(p.sent.length, 0);
+  p.click(p.action("Delete Volume 2"));
+  p.click(dialog.querySelectorAll("button").filter(function (node) { return node.textContent === "Delete"; })[0]);
+  assert.strictEqual(last(p).payload.name, "ph_composer.spaces.volumes.delete");
+  assert.strictEqual(last(p).payload.expected_revision, 4);
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(last(p).payload.params)),
+    { volume: { volume_id: "svl_100_103_2", entity_path: [100, 103, 2] } });
+});
+
+test("a Space's only Volume offers Delete Space instead, so the panel never empties a Space", function () {
+  var p = page();
+  p.receive(snapshot());
+  expandAll(p);
+  p.click(p.action("Delete Volume 1"));
+  var dialog = p.context.document.querySelector("dialog");
+  assert.strictEqual(dialog.querySelector("h2").textContent, "Delete Space?");
+  assert.strictEqual(dialog.querySelector("p").textContent, "Volume 1 is the only Volume of Living, so the Space " +
+    "goes with it: Living and everything in it will be erased. One Undo brings it back.");
+  p.click(dialog.querySelectorAll("button").filter(function (node) { return node.textContent === "Delete Space"; })[0]);
+  assert.strictEqual(last(p).payload.name, "ph_composer.spaces.delete");
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(last(p).payload.params)),
+    { space: { space_id: "spc_101", entity_path: [100, 101] } });
+});
+
+test("only a Volume left outside the deleted one keeps the Space: one nested inside it goes with it", function () {
+  var p = page();
+  p.receive(snapshot(function (section) {
+    // Hall's Volume 2 nested inside its Volume 1; a sibling of Living's Volume 1 in a plain Group.
+    section.spaces[2].volumes[1].reference.entity_path = [100, 103, 1, 2];
+    var sibling = JSON.parse(JSON.stringify(section.spaces[2].volumes[0]));
+    sibling.reference.entity_path = [100, 101, 9, 1];
+    sibling.values.display_name = "Volume 9";
+    section.spaces[0].volumes.push(sibling);
+  }));
+  expandAll(p);
+  var dialog;
+  p.click(p.action("Delete Volume 1"));
+  dialog = p.context.document.querySelector("dialog");
+  assert.strictEqual(dialog.querySelector("h2").textContent, "Delete Volume?", "Living keeps its nested sibling");
+  p.click(dialog.querySelectorAll("button").filter(function (node) { return node.textContent === "Cancel"; })[0]);
+  var hall = p.section().querySelectorAll("[data-row-action]").filter(function (node) {
+    return node.getAttribute("aria-label") === "Delete Volume 1";
+  })[2];
+  p.click(hall);
+  assert.strictEqual(dialog.querySelector("h2").textContent, "Delete Space?", "Hall's Volume 2 goes with Volume 1");
 });
 
 test("Height from solid reads the selected solid, previews, and writes only once confirmed", function () {
