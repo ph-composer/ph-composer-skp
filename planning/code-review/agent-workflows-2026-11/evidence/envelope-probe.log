@@ -1,0 +1,34 @@
+Run options: --seed 57593
+
+# Running:
+
+ph_composer.records.list | kind,ids,limit,fields | api=ok:30469 | mcp=request.response_too_large | The result is 30469 bytes, over the 24576-byte limit. Ask for less: a smaller page, fewer fields or one owner's operations.
+ph_composer.assemblies.materials.list | ids,limit,fields | api=ok:1243 | mcp=ok | Done.
+.export_status | api=152946B/240 findings | mcp=export.blocked | findings=nil | report=nil
+latest_export | api=152946B/240 findings | mcp=export.blocked | findings=nil | report=nil
+.ph_composer.windows.types.list | ids,limit,fields | api=ok:26041 | mcp=request.response_too_large | The result is 26041 bytes, over the 24576-byte limit. Ask for less: a smaller page, fewer fields or one owner's operations.
+ph_composer.windows.types.list | ids,limit,fields | api=ok:106013 | mcp=request.response_too_large | The result is 106013 bytes, over the 24576-byte limit. Ask for less: a smaller page, fewer fields or one owner's operations.
+ph_composer.records.list | kind,ids,limit,fields | api=ok:25912 | mcp=request.response_too_large | The result is 25912 bytes, over the 24576-byte limit. Ask for less: a smaller page, fewer fields or one owner's operations.
+ph_composer.records.list | kind,ids,limit,fields | api=ok:433 | mcp=ok | Done.
+.ph_composer.windows.units.host_extent | host,limit | api=ok:27160 | mcp=request.response_too_large | The result is 27160 bytes, over the 24576-byte limit. Ask for less: a smaller page, fewer fields or one owner's operations.
+.export_preflight | findings=180 | api=ok:59074 | mcp=request.response_too_large | The result is 59074 bytes, over the 24576-byte limit. Ask for less: a smaller page, fewer fields or one owner's operations.
+ph_composer.zones.faces.export_preflight |  | api=ok:58862 | mcp=request.response_too_large | The result is 58862 bytes, over the 24576-byte limit. Ask for less: a smaller page, fewer fields or one owner's operations.
+ph_composer.windows.units.glazed_area_by_face |  | api=ok:36366 | mcp=request.response_too_large | The result is 36366 bytes, over the 24576-byte limit. Ask for less: a smaller page, fewer fields or one owner's operations.
+ph_composer.zones.faces.export_preflight | limit | api=params.invalid:290 | mcp=params.invalid | The request is not valid: $.limit is not a known field.
+ph_composer.windows.units.glazed_area_by_face | limit | api=params.invalid:290 | mcp=params.invalid | The request is not valid: $.limit is not a known field.
+.ph_composer.library.catalog | provider_id,kind,limit | api=ok:30968 | mcp=request.response_too_large | The result is 30968 bytes, over the 24576-byte limit. Ask for less: a smaller page, fewer fields or one owner's operations.
+ph_composer.library.in_file | provider_id,kind,limit | api=ok:31018 | mcp=request.response_too_large | The result is 31018 bytes, over the 24576-byte limit. Ask for less: a smaller page, fewer fields or one owner's operations.
+.assembly reserved user_data | export_preflight=["assembly.segment_unassigned", "zone.none"] | task=["failed", "export.blocked", "asm_jCwdjXF3II9B has user_data under the reserved key ph_composer, which an exporter writes itself. Rename that key. Nothing was written."]
+.ph_composer.library.export_preview | location | api=ok:31963 | mcp=request.response_too_large | The result is 31963 bytes, over the 24576-byte limit. Ask for less: a smaller page, fewer fields or one owner's operations.
+ph_composer.library.export_preview | location,limit | api=params.invalid:290 | mcp=params.invalid | The request is not valid: $.limit is not a known field.
+.ph_composer.library.load | mcp=completed:ok | Done. The full result was over the reply limit; read back what it changed. | {"omitted"=>["value", "affected", "findings"]}
+ph_composer.library.catalog | provider_id,kind,limit | api=ok:35885 | mcp=request.response_too_large | The result is 35886 bytes, over the 24576-byte limit. Ask for less: a smaller page, fewer fields or one owner's operations.
+ph_composer.library.in_file | provider_id,kind,limit | api=ok:35936 | mcp=request.response_too_large | The result is 35935 bytes, over the 24576-byte limit. Ask for less: a smaller page, fewer fields or one owner's operations.
+.ph_composer.windows.units.list | limit,ids | api=ok:30585 | mcp=request.response_too_large | The result is 30585 bytes, over the 24576-byte limit. Ask for less: a smaller page, fewer fields or one owner's operations.
+ph_composer.windows.units.list | limit,ids,fields | api=params.invalid:293 | mcp=params.invalid | The request is not valid: $.fields is not a known field.
+ph_composer.windows.units.outlines | limit | api=ok:447 | mcp=ok | Done.
+.
+
+Finished in 1.406923s, 7.1077 runs/s, 59.7048 assertions/s.
+
+10 runs, 84 assertions, 0 failures, 0 errors, 0 skips

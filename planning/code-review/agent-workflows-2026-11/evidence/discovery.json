@@ -1,0 +1,3093 @@
+{
+  "baseline": "f65ccee62b0a3994a46001d55f7aefd1a69f0faf",
+  "ruby": "3.2.2",
+  "api": {
+    "major": 1,
+    "minor": 31
+  },
+  "counts": {
+    "queries": 77,
+    "actions": 114,
+    "view_commands": 31,
+    "setup_commands": 17,
+    "file_exports": 1,
+    "participants": 1
+  },
+  "by_owner": {
+    "queries": {
+      "ph_composer.records": 1,
+      "ph_composer.context": 1,
+      "ph_composer.colour_by": 1,
+      "ph_composer.library": 6,
+      "ph_composer.locations": 1,
+      "ph_composer.assemblies": 5,
+      "ph_composer.zones": 21,
+      "ph_composer.windows": 19,
+      "ph_composer.spaces": 14,
+      "ph_composer.thermal_bridges": 8
+    },
+    "actions": {
+      "ph_composer.library": 1,
+      "ph_composer.assemblies": 21,
+      "ph_composer.zones": 27,
+      "ph_composer.windows": 42,
+      "ph_composer.spaces": 17,
+      "ph_composer.thermal_bridges": 6
+    },
+    "view_commands": {
+      "ph_composer.context": 2,
+      "ph_composer.view": 1,
+      "ph_composer.colour_by": 5,
+      "ph_composer.zones": 7,
+      "ph_composer.windows": 5,
+      "ph_composer.spaces": 8,
+      "ph_composer.thermal_bridges": 3
+    },
+    "setup_commands": {
+      "ph_composer.library": 11,
+      "ph_composer.locations": 6
+    },
+    "file_exports": {
+      "ph_composer.library": 1
+    },
+    "participants": {
+      "ph_composer.library": 1
+    }
+  },
+  "in_process_keys": [
+    "api",
+    "schemas",
+    "extension",
+    "contract_versions",
+    "capabilities",
+    "common_refusals",
+    "refusal_documentation",
+    "tasks",
+    "sessions",
+    "features",
+    "queries",
+    "view_commands",
+    "setup_commands",
+    "file_exports",
+    "actions",
+    "participants",
+    "record_kinds",
+    "reference_targets",
+    "extensions",
+    "snapshot_sections"
+  ],
+  "external_keys": [
+    "api",
+    "extension",
+    "capabilities",
+    "sessions",
+    "features",
+    "schemas",
+    "operations",
+    "next",
+    "connection"
+  ],
+  "missing_external_keys": [
+    "contract_versions",
+    "common_refusals",
+    "refusal_documentation",
+    "tasks",
+    "queries",
+    "view_commands",
+    "setup_commands",
+    "file_exports",
+    "actions",
+    "participants",
+    "record_kinds",
+    "reference_targets",
+    "extensions",
+    "snapshot_sections"
+  ],
+  "record_kinds": [
+    {
+      "id": "ph_composer.assemblies.material",
+      "owner": "ph_composer.assemblies",
+      "label": "Material",
+      "schema_version": 1
+    },
+    {
+      "id": "ph_composer.assemblies.assembly",
+      "owner": "ph_composer.assemblies",
+      "label": "Assembly",
+      "schema_version": 1
+    },
+    {
+      "id": "ph_composer.zones.building_segment",
+      "owner": "ph_composer.zones",
+      "label": "Building Segment",
+      "schema_version": 1
+    },
+    {
+      "id": "ph_composer.zones.level",
+      "owner": "ph_composer.zones",
+      "label": "Level",
+      "schema_version": 1
+    },
+    {
+      "id": "ph_composer.zones.option_settings",
+      "owner": "ph_composer.zones",
+      "label": "Zone option settings",
+      "schema_version": 1
+    },
+    {
+      "id": "ph_composer.zones.faces.attached_zone",
+      "owner": "ph_composer.zones",
+      "label": "Attached zone",
+      "schema_version": 1
+    },
+    {
+      "id": "ph_composer.windows.frame",
+      "owner": "ph_composer.windows",
+      "label": "Frame",
+      "schema_version": 1
+    },
+    {
+      "id": "ph_composer.windows.glazing",
+      "owner": "ph_composer.windows",
+      "label": "Glazing",
+      "schema_version": 1
+    },
+    {
+      "id": "ph_composer.windows.psi_install_type",
+      "owner": "ph_composer.windows",
+      "label": "Psi-Install Type",
+      "schema_version": 1
+    },
+    {
+      "id": "ph_composer.windows.window_type",
+      "owner": "ph_composer.windows",
+      "label": "Window Type",
+      "schema_version": 1
+    },
+    {
+      "id": "ph_composer.thermal_bridges.type",
+      "owner": "ph_composer.thermal_bridges",
+      "label": "Thermal Bridge Type",
+      "schema_version": 1
+    }
+  ],
+  "reference_targets": [
+    {
+      "id": "ph_composer.zones.membership_stamp",
+      "owner": "ph_composer.zones",
+      "label": "Zone membership stamp"
+    },
+    {
+      "id": "ph_composer.zones.zone",
+      "owner": "ph_composer.zones",
+      "label": "Zone"
+    },
+    {
+      "id": "ph_composer.zones.faces.face",
+      "owner": "ph_composer.zones",
+      "label": "Face"
+    },
+    {
+      "id": "ph_composer.windows.settings_record",
+      "owner": "ph_composer.windows",
+      "label": "Window defaults"
+    },
+    {
+      "id": "ph_composer.windows.unit",
+      "owner": "ph_composer.windows",
+      "label": "Window unit"
+    },
+    {
+      "id": "ph_composer.spaces.space",
+      "owner": "ph_composer.spaces",
+      "label": "Space"
+    },
+    {
+      "id": "ph_composer.spaces.volume",
+      "owner": "ph_composer.spaces",
+      "label": "Volume"
+    },
+    {
+      "id": "ph_composer.spaces.floor_segment",
+      "owner": "ph_composer.spaces",
+      "label": "Floor Segment"
+    },
+    {
+      "id": "ph_composer.thermal_bridges.edge",
+      "owner": "ph_composer.thermal_bridges",
+      "label": "Thermal bridge Edge"
+    }
+  ],
+  "operations": {
+    "queries": [
+      {
+        "name": "ph_composer.records.list",
+        "owner": "ph_composer.records",
+        "description": "Stored records of one kind, in id order, a page at a time."
+      },
+      {
+        "name": "ph_composer.context.read",
+        "owner": "ph_composer.context",
+        "description": "Where this Model session stands: the Model's file name and path, its revision and view generation, whether it is busy and why, the edit path from the root, and the selection in pages. Reads only."
+      },
+      {
+        "name": "ph_composer.colour_by.state",
+        "owner": "ph_composer.colour_by",
+        "description": "The active Colour-by mode, every registered mode and the legend."
+      },
+      {
+        "name": "ph_composer.library.providers",
+        "owner": "ph_composer.library",
+        "description": "Configured libraries without transport addresses."
+      },
+      {
+        "name": "ph_composer.library.providers.setup_state",
+        "owner": "ph_composer.library",
+        "description": "Whether this machine's stored library setup can be read. When it is unreadable, adding or removing a library is refused until reset clears it."
+      },
+      {
+        "name": "ph_composer.library.connections",
+        "owner": "ph_composer.library",
+        "description": "Hosted library connections: each one's label, state and the actions it offers. No credential or address."
+      },
+      {
+        "name": "ph_composer.library.export_preview",
+        "owner": "ph_composer.library",
+        "description": "Review local library export counts and omissions."
+      },
+      {
+        "name": "ph_composer.library.catalog",
+        "owner": "ph_composer.library",
+        "description": "A bounded page of one immutable library catalog."
+      },
+      {
+        "name": "ph_composer.library.in_file",
+        "owner": "ph_composer.library",
+        "description": "Resolve catalog rows against local definitions."
+      },
+      {
+        "name": "ph_composer.locations.list",
+        "owner": "ph_composer.locations",
+        "description": "The locations the user approved on this machine, by id and label, and whether each is still there. Never carries a path or a file name."
+      },
+      {
+        "name": "ph_composer.assemblies.materials.list",
+        "owner": "ph_composer.assemblies",
+        "description": "One bounded page of materials, with display findings."
+      },
+      {
+        "name": "ph_composer.assemblies.materials.all",
+        "owner": "ph_composer.assemblies",
+        "description": "The complete materials inventory for the panel snapshot."
+      },
+      {
+        "name": "ph_composer.assemblies.assemblies.list",
+        "owner": "ph_composer.assemblies",
+        "description": "One bounded page of assemblies, with display findings."
+      },
+      {
+        "name": "ph_composer.assemblies.assemblies.all",
+        "owner": "ph_composer.assemblies",
+        "description": "The complete assemblies inventory for the panel snapshot."
+      },
+      {
+        "name": "ph_composer.assemblies.export_preflight",
+        "owner": "ph_composer.assemblies",
+        "description": "Material and Assembly export conditions."
+      },
+      {
+        "name": "ph_composer.zones.options.all",
+        "owner": "ph_composer.zones",
+        "description": "Model-owned Segment/Level choices and adoption preview."
+      },
+      {
+        "name": "ph_composer.zones.options.adoption_preview",
+        "owner": "ph_composer.zones",
+        "description": "Read-only legacy/copied choice inventory."
+      },
+      {
+        "name": "ph_composer.zones.options.detail",
+        "owner": "ph_composer.zones",
+        "description": "One option's values, metadata and usage."
+      },
+      {
+        "name": "ph_composer.zones.options.usage",
+        "owner": "ph_composer.zones",
+        "description": "Live and recoverable Zone usage of one option."
+      },
+      {
+        "name": "ph_composer.zones.options.list",
+        "owner": "ph_composer.zones",
+        "description": "One page of model-owned option definitions."
+      },
+      {
+        "name": "ph_composer.zones.list",
+        "owner": "ph_composer.zones",
+        "description": "One page of Zone occurrences, filtered and projected, and the Make Zone target."
+      },
+      {
+        "name": "ph_composer.zones.all",
+        "owner": "ph_composer.zones",
+        "description": "Every Zone occurrence in one complete projection, for the panel. Scripts page ph_composer.zones.list instead."
+      },
+      {
+        "name": "ph_composer.zones.containment",
+        "owner": "ph_composer.zones",
+        "description": "The Zone occurrence holding the entity at each explicit native path, for a feature storing records on geometry inside Zones. Scans only each path, never the whole Model."
+      },
+      {
+        "name": "ph_composer.zones.selection",
+        "owner": "ph_composer.zones",
+        "description": "Valid selected Zone occurrences and current values."
+      },
+      {
+        "name": "ph_composer.zones.faces.selection",
+        "owner": "ph_composer.zones",
+        "description": "Validated selected Face occurrence references."
+      },
+      {
+        "name": "ph_composer.zones.faces.selection_generation",
+        "owner": "ph_composer.zones",
+        "description": "How many times SketchUp's selection has changed in this session."
+      },
+      {
+        "name": "ph_composer.zones.faces.attached_assignment",
+        "owner": "ph_composer.zones",
+        "description": "The pending native Face assignment handoff."
+      },
+      {
+        "name": "ph_composer.zones.faces.list",
+        "owner": "ph_composer.zones",
+        "description": "One page of path-qualified Face occurrences in authored Zones, filtered and projected."
+      },
+      {
+        "name": "ph_composer.zones.faces.all",
+        "owner": "ph_composer.zones",
+        "description": "Every Face occurrence in authored Zones in one complete projection, for the panel. Scripts page ph_composer.zones.faces.list instead."
+      },
+      {
+        "name": "ph_composer.zones.faces.host_context",
+        "owner": "ph_composer.zones",
+        "description": "The reference and values of the Faces at explicit native paths, for a feature that hosts objects on Faces. Scans only each path, never the whole Model; Zone state is in ph_composer.zones.all."
+      },
+      {
+        "name": "ph_composer.zones.faces.classify_tool",
+        "owner": "ph_composer.zones",
+        "description": "The Classify tool's palette and whether it runs."
+      },
+      {
+        "name": "ph_composer.zones.faces.export_preflight",
+        "owner": "ph_composer.zones",
+        "description": "Face classification and Assembly checks."
+      },
+      {
+        "name": "ph_composer.zones.faces.assembly_usage",
+        "owner": "ph_composer.zones",
+        "description": "Face counts and gross areas by Assembly."
+      },
+      {
+        "name": "ph_composer.zones.faces.assembly_choices",
+        "owner": "ph_composer.zones",
+        "description": "Current Assembly names, hints and colours."
+      },
+      {
+        "name": "ph_composer.zones.settings.get",
+        "owner": "ph_composer.zones",
+        "description": "This Model's classification settings."
+      },
+      {
+        "name": "ph_composer.zones.export_preflight",
+        "owner": "ph_composer.zones",
+        "description": "All-Zone export checks and adjacency repair."
+      },
+      {
+        "name": "ph_composer.windows.settings.get",
+        "owner": "ph_composer.windows",
+        "description": "The Model's installation defaults."
+      },
+      {
+        "name": "ph_composer.windows.frames.list",
+        "owner": "ph_composer.windows",
+        "description": "A bounded page of frames with display findings."
+      },
+      {
+        "name": "ph_composer.windows.frames.all",
+        "owner": "ph_composer.windows",
+        "description": "The complete frames inventory for the panel snapshot."
+      },
+      {
+        "name": "ph_composer.windows.glazings.list",
+        "owner": "ph_composer.windows",
+        "description": "A bounded page of glazings with display findings."
+      },
+      {
+        "name": "ph_composer.windows.glazings.all",
+        "owner": "ph_composer.windows",
+        "description": "The complete glazings inventory for the panel snapshot."
+      },
+      {
+        "name": "ph_composer.windows.psi_install_types.list",
+        "owner": "ph_composer.windows",
+        "description": "A bounded page of psi_install_types with display findings."
+      },
+      {
+        "name": "ph_composer.windows.psi_install_types.all",
+        "owner": "ph_composer.windows",
+        "description": "The complete psi_install_types inventory for the panel snapshot."
+      },
+      {
+        "name": "ph_composer.windows.types.list",
+        "owner": "ph_composer.windows",
+        "description": "A bounded page of types with display findings."
+      },
+      {
+        "name": "ph_composer.windows.types.all",
+        "owner": "ph_composer.windows",
+        "description": "The complete types inventory for the panel snapshot."
+      },
+      {
+        "name": "ph_composer.windows.units.list",
+        "owner": "ph_composer.windows",
+        "description": "Window occurrences and native findings, without writes."
+      },
+      {
+        "name": "ph_composer.windows.units.all",
+        "owner": "ph_composer.windows",
+        "description": "All Window occurrences and native findings for the snapshot."
+      },
+      {
+        "name": "ph_composer.windows.units.host_extent",
+        "owner": "ph_composer.windows",
+        "description": "A writable Zone Face's outline and bounding width and height in the frame units.place offsets use, with the holes and Window outlines on its plane to keep clear of."
+      },
+      {
+        "name": "ph_composer.windows.units.outlines",
+        "owner": "ph_composer.windows",
+        "description": "Each placed Window's world outline in metres, with the Zone Face it is glued to."
+      },
+      {
+        "name": "ph_composer.windows.units.convert_review",
+        "owner": "ph_composer.windows",
+        "description": "Which drawn rectangles Convert to Window Type would take, grouped by shared Edges into Window Type layouts, and why it leaves each other Face out. Writes nothing. Sizes are the frame outer size."
+      },
+      {
+        "name": "ph_composer.windows.convert_dialog.state",
+        "owner": "ph_composer.windows",
+        "description": "The open Convert to Window Type review, if any."
+      },
+      {
+        "name": "ph_composer.windows.place_tool.get",
+        "owner": "ph_composer.windows",
+        "description": "This Model's Place tool choice and active state."
+      },
+      {
+        "name": "ph_composer.windows.units.selection",
+        "owner": "ph_composer.windows",
+        "description": "The Window occurrences selected in SketchUp, at the active edit path."
+      },
+      {
+        "name": "ph_composer.windows.export_preflight",
+        "owner": "ph_composer.windows",
+        "description": "Placed Window geometry, hosts and thermal readiness for export."
+      },
+      {
+        "name": "ph_composer.windows.units.glazed_area_by_face",
+        "owner": "ph_composer.windows",
+        "description": "Glazed opening and net opaque area; uncertain geometry withholds values."
+      },
+      {
+        "name": "ph_composer.spaces.list",
+        "owner": "ph_composer.spaces",
+        "description": "One page of Space summaries in path order: values, SI metrics, Zone and Building-Segment, and counts of Volumes, Floor Segments and findings. The Model's sums cover every Space whatever the filter; the Zone and Building-Segment sums are those of this page's Spaces."
+      },
+      {
+        "name": "ph_composer.spaces.volumes.list",
+        "owner": "ph_composer.spaces",
+        "description": "One page of one Space's Volumes, each with its Floor Segment count."
+      },
+      {
+        "name": "ph_composer.spaces.floor_segments.list",
+        "owner": "ph_composer.spaces",
+        "description": "One page of the Floor Segments of one Space or one Volume: name exactly one."
+      },
+      {
+        "name": "ph_composer.spaces.candidate_faces.list",
+        "owner": "ph_composer.spaces",
+        "description": "One page of the Faces of one Space or one Volume that carry no record yet: Floor candidates inside a Volume (for floors.mark) and loose Faces at the Space's root (for volumes.create), each with the refusal its operation would give now. Name exactly one."
+      },
+      {
+        "name": "ph_composer.spaces.findings.list",
+        "owner": "ph_composer.spaces",
+        "description": "One page of the findings of the Model, or of one Space and its children, each with the reference of what it is about; optionally only some codes. The Model's include those of Volumes outside every Space and their Floor Segments."
+      },
+      {
+        "name": "ph_composer.spaces.all",
+        "owner": "ph_composer.spaces",
+        "description": "Every Space occurrence in one complete projection, for the panel. Scripts page ph_composer.spaces.list instead."
+      },
+      {
+        "name": "ph_composer.spaces.create_preview",
+        "owner": "ph_composer.spaces",
+        "description": "Which explicit Faces, loose in the open edit context, Create Space would take into a new Space, why it leaves each other one out, the Zone it preselects and the height the Space takes. Writes nothing."
+      },
+      {
+        "name": "ph_composer.spaces.settings.get",
+        "owner": "ph_composer.spaces",
+        "description": "The Model's last-entered height, which new Spaces take."
+      },
+      {
+        "name": "ph_composer.spaces.labels.options",
+        "owner": "ph_composer.spaces",
+        "description": "Which optional lines the Space labels show, for this Model session."
+      },
+      {
+        "name": "ph_composer.spaces.export_preflight",
+        "owner": "ph_composer.spaces",
+        "description": "Spaces export checks: every finding with where it is and its repair."
+      },
+      {
+        "name": "ph_composer.spaces.mark_tool.state",
+        "owner": "ph_composer.spaces",
+        "description": "The Mark floor tool: whether it is active and the factor it marks with."
+      },
+      {
+        "name": "ph_composer.spaces.create_review.state",
+        "owner": "ph_composer.spaces",
+        "description": "The open Create Space review, if any."
+      },
+      {
+        "name": "ph_composer.spaces.selected_solid",
+        "owner": "ph_composer.spaces",
+        "description": "The one selected Group or component that is not a Space or a Volume, as the solid Height from solid would measure."
+      },
+      {
+        "name": "ph_composer.spaces.volumes.height_from_solid_preview",
+        "owner": "ph_composer.spaces",
+        "description": "The height a solid would give a Volume: the solid's volume over the Volume's net floor area. Writes nothing."
+      },
+      {
+        "name": "ph_composer.thermal_bridges.types.list",
+        "owner": "ph_composer.thermal_bridges",
+        "description": "One bounded page of Thermal Bridge Types, with export readiness."
+      },
+      {
+        "name": "ph_composer.thermal_bridges.types.all",
+        "owner": "ph_composer.thermal_bridges",
+        "description": "Every Thermal Bridge Type, for the panel snapshot."
+      },
+      {
+        "name": "ph_composer.thermal_bridges.edges.selection",
+        "owner": "ph_composer.thermal_bridges",
+        "description": "One bounded page of the selected Edges under the active path, each with the Zone holding it, its assignment and the refusal a write meets; other entities are reported as ignored."
+      },
+      {
+        "name": "ph_composer.thermal_bridges.edges.selection_all",
+        "owner": "ph_composer.thermal_bridges",
+        "description": "Every selected Edge in one read, for the panel and the menu route."
+      },
+      {
+        "name": "ph_composer.thermal_bridges.schedule.list",
+        "owner": "ph_composer.thermal_bridges",
+        "description": "One bounded page of thermal-bridge runs, each with its Zone, type, length, psi-value, quantity, heat loss and findings, with totals over every run."
+      },
+      {
+        "name": "ph_composer.thermal_bridges.schedule.all",
+        "owner": "ph_composer.thermal_bridges",
+        "description": "The whole schedule in one read, for the panel's Schedule on open and Refresh."
+      },
+      {
+        "name": "ph_composer.thermal_bridges.edge_tool.state",
+        "owner": "ph_composer.thermal_bridges",
+        "description": "The edge tool: whether it has the viewport, and the type and quantity it assigns."
+      },
+      {
+        "name": "ph_composer.thermal_bridges.export_preflight",
+        "owner": "ph_composer.thermal_bridges",
+        "description": "Thermal-bridge export checks: each run's and assigned Edge's findings, with the Edges each one locates."
+      }
+    ],
+    "actions": [
+      {
+        "name": "ph_composer.library.copy",
+        "owner": "ph_composer.library",
+        "description": "Copy or reuse one library record with optional assignment."
+      },
+      {
+        "name": "ph_composer.assemblies.materials.create",
+        "owner": "ph_composer.assemblies",
+        "description": "Create one Material, with default authoring values."
+      },
+      {
+        "name": "ph_composer.assemblies.materials.update",
+        "owner": "ph_composer.assemblies",
+        "description": "Edit one Material; changed expected values refuse."
+      },
+      {
+        "name": "ph_composer.assemblies.materials.duplicate",
+        "owner": "ph_composer.assemblies",
+        "description": "Duplicate one Material with independent identity."
+      },
+      {
+        "name": "ph_composer.assemblies.materials.delete",
+        "owner": "ph_composer.assemblies",
+        "description": "Delete Material; remaining references refuse."
+      },
+      {
+        "name": "ph_composer.assemblies.assemblies.create",
+        "owner": "ph_composer.assemblies",
+        "description": "Create one Assembly, with default authoring values."
+      },
+      {
+        "name": "ph_composer.assemblies.assemblies.update",
+        "owner": "ph_composer.assemblies",
+        "description": "Edit one Assembly; changed expected values refuse."
+      },
+      {
+        "name": "ph_composer.assemblies.assemblies.duplicate",
+        "owner": "ph_composer.assemblies",
+        "description": "Duplicate one Assembly with independent identity."
+      },
+      {
+        "name": "ph_composer.assemblies.assemblies.delete",
+        "owner": "ph_composer.assemblies",
+        "description": "Delete Assembly; remaining references refuse."
+      },
+      {
+        "name": "ph_composer.assemblies.assemblies.layers.add",
+        "owner": "ph_composer.assemblies",
+        "description": "Add a Layer with one Layer-Segment of no Material. With no position it goes after the last Layer in the stored order; give index, or anchor_layer_id and side."
+      },
+      {
+        "name": "ph_composer.assemblies.assemblies.layers.remove",
+        "owner": "ph_composer.assemblies",
+        "description": "Remove one Layer. An Assembly keeps at least one Layer."
+      },
+      {
+        "name": "ph_composer.assemblies.assemblies.layers.update",
+        "owner": "ph_composer.assemblies",
+        "description": "Set one Layer's thickness."
+      },
+      {
+        "name": "ph_composer.assemblies.assemblies.layers.move",
+        "owner": "ph_composer.assemblies",
+        "description": "Move one Layer one place outward or inward. A Layer already at that end stays."
+      },
+      {
+        "name": "ph_composer.assemblies.assemblies.layers.reorder",
+        "owner": "ph_composer.assemblies",
+        "description": "Move one Layer to a position in the stored order, keeping the other Layers' relative order. Its current position changes nothing."
+      },
+      {
+        "name": "ph_composer.assemblies.assemblies.layers.flip",
+        "owner": "ph_composer.assemblies",
+        "description": "Reverse the stored order of the Layers and keep the orientation, so the outside Layer becomes the inside one."
+      },
+      {
+        "name": "ph_composer.assemblies.assemblies.layers.flip_orientation",
+        "owner": "ph_composer.assemblies",
+        "description": "Switch which end of the stored Layer order is the outside (first_layer_outside or last_layer_outside) and keep the order."
+      },
+      {
+        "name": "ph_composer.assemblies.assemblies.layers.set_air_barrier",
+        "owner": "ph_composer.assemblies",
+        "description": "Mark one face of one Layer as the Assembly's air barrier, or clear it."
+      },
+      {
+        "name": "ph_composer.assemblies.assemblies.segments.add",
+        "owner": "ph_composer.assemblies",
+        "description": "Add a Layer-Segment of no Material to one Layer. A membrane Layer holds one Layer-Segment."
+      },
+      {
+        "name": "ph_composer.assemblies.assemblies.segments.remove",
+        "owner": "ph_composer.assemblies",
+        "description": "Remove one Layer-Segment. A Layer keeps at least one."
+      },
+      {
+        "name": "ph_composer.assemblies.assemblies.segments.update",
+        "owner": "ph_composer.assemblies",
+        "description": "Set one Layer-Segment's width, continuous-insulation flag or steel stud spacing."
+      },
+      {
+        "name": "ph_composer.assemblies.assemblies.segments.set_material",
+        "owner": "ph_composer.assemblies",
+        "description": "Set or clear one Layer-Segment's Material. A membrane Material needs a Layer of one Layer-Segment, and a membrane Layer thicker than 25 mm is reset to 1 mm."
+      },
+      {
+        "name": "ph_composer.assemblies.assemblies.segments.mirror",
+        "owner": "ph_composer.assemblies",
+        "description": "Reverse the order of the Layer-Segments in every Layer of one Assembly."
+      },
+      {
+        "name": "ph_composer.zones.options.manage",
+        "owner": "ph_composer.zones",
+        "description": "Save one complete guarded collection draft atomically."
+      },
+      {
+        "name": "ph_composer.zones.options.adopt",
+        "owner": "ph_composer.zones",
+        "description": "Explicitly adopt legacy/copied Zone and stamp choices."
+      },
+      {
+        "name": "ph_composer.zones.options.create",
+        "owner": "ph_composer.zones",
+        "description": "Create a managed Zone option atomically."
+      },
+      {
+        "name": "ph_composer.zones.options.update",
+        "owner": "ph_composer.zones",
+        "description": "Update a managed Zone option atomically."
+      },
+      {
+        "name": "ph_composer.zones.options.remove",
+        "owner": "ph_composer.zones",
+        "description": "Remove a managed Zone option atomically."
+      },
+      {
+        "name": "ph_composer.zones.options.merge",
+        "owner": "ph_composer.zones",
+        "description": "Merge a managed Zone option atomically."
+      },
+      {
+        "name": "ph_composer.zones.make",
+        "owner": "ph_composer.zones",
+        "description": "Make one Zone from explicit entities in one edit context."
+      },
+      {
+        "name": "ph_composer.zones.update",
+        "owner": "ph_composer.zones",
+        "description": "Update one explicit Zone occurrence."
+      },
+      {
+        "name": "ph_composer.zones.update_metadata",
+        "owner": "ph_composer.zones",
+        "description": "Replace the user_data and installed extension payloads of explicit Zone occurrences, guarded by the metadata last read."
+      },
+      {
+        "name": "ph_composer.zones.update_field",
+        "owner": "ph_composer.zones",
+        "description": "Set one attribute on explicit Zone occurrences."
+      },
+      {
+        "name": "ph_composer.zones.faces.update_metadata",
+        "owner": "ph_composer.zones",
+        "description": "Replace the user_data and installed extension payloads of recorded Faces, guarded by the metadata last read."
+      },
+      {
+        "name": "ph_composer.zones.faces.classify",
+        "owner": "ph_composer.zones",
+        "description": "Apply explicit keep, set or clear intent to Faces."
+      },
+      {
+        "name": "ph_composer.zones.faces.auto_classify",
+        "owner": "ph_composer.zones",
+        "description": "Suggest a classification for every unrecorded Face in one Zone."
+      },
+      {
+        "name": "ph_composer.zones.faces.reverse",
+        "owner": "ph_composer.zones",
+        "description": "Reverse one Face and keep its assignment record."
+      },
+      {
+        "name": "ph_composer.zones.faces.attached_zone.save",
+        "owner": "ph_composer.zones",
+        "description": "Create or edit one Attached zone."
+      },
+      {
+        "name": "ph_composer.zones.faces.attached_zone.create_and_assign",
+        "owner": "ph_composer.zones",
+        "description": "Create one Attached zone and assign it to explicit Face occurrences."
+      },
+      {
+        "name": "ph_composer.zones.faces.attached_zone.duplicate",
+        "owner": "ph_composer.zones",
+        "description": "Copy Attached zones without reassigning any Face."
+      },
+      {
+        "name": "ph_composer.zones.faces.attached_zone.delete",
+        "owner": "ph_composer.zones",
+        "description": "Delete one Attached zone, moving every Face that names it in the same step."
+      },
+      {
+        "name": "ph_composer.zones.faces.assign_assembly",
+        "owner": "ph_composer.zones",
+        "description": "Set or clear only the Assembly of explicit Faces."
+      },
+      {
+        "name": "ph_composer.zones.settings.update",
+        "owner": "ph_composer.zones",
+        "description": "Set this Model's classification settings."
+      },
+      {
+        "name": "ph_composer.zones.solve_adjacency",
+        "owner": "ph_composer.zones",
+        "description": "Reconcile and pair shared Faces within an explicit Zone scope."
+      },
+      {
+        "name": "ph_composer.zones.retire_adjacency",
+        "owner": "ph_composer.zones",
+        "description": "Retire one reciprocal Surface pair."
+      },
+      {
+        "name": "ph_composer.zones.repair_split_face",
+        "owner": "ph_composer.zones",
+        "description": "Repair copied Face identities after a native split."
+      },
+      {
+        "name": "ph_composer.zones.repair_identity",
+        "owner": "ph_composer.zones",
+        "description": "Give one copied Zone occurrence an identity of its own."
+      },
+      {
+        "name": "ph_composer.zones.make_independent",
+        "owner": "ph_composer.zones",
+        "description": "Give a copied Zone occurrence its own Faces and identity, leaving the occurrence it shares them with untouched."
+      },
+      {
+        "name": "ph_composer.zones.isolate_copied_group",
+        "owner": "ph_composer.zones",
+        "description": "Give a plain Group copied whole, such as a storey Group holding Zones and Spaces, storage of its own so its Zones and Spaces can be made independent."
+      },
+      {
+        "name": "ph_composer.zones.restore",
+        "owner": "ph_composer.zones",
+        "description": "Regroup the stamped members of an exploded Zone, recovering only their stamp."
+      },
+      {
+        "name": "ph_composer.windows.settings.update",
+        "owner": "ph_composer.windows",
+        "description": "Set guarded installation defaults."
+      },
+      {
+        "name": "ph_composer.windows.frames.create",
+        "owner": "ph_composer.windows",
+        "description": "Create one Frame with local defaults."
+      },
+      {
+        "name": "ph_composer.windows.frames.update",
+        "owner": "ph_composer.windows",
+        "description": "Edit guarded authored values of one Frame."
+      },
+      {
+        "name": "ph_composer.windows.frames.duplicate",
+        "owner": "ph_composer.windows",
+        "description": "Duplicate a Frame with independent identity."
+      },
+      {
+        "name": "ph_composer.windows.frames.delete",
+        "owner": "ph_composer.windows",
+        "description": "Delete Frame; live references require replacement."
+      },
+      {
+        "name": "ph_composer.windows.glazings.create",
+        "owner": "ph_composer.windows",
+        "description": "Create one Glazing with local defaults."
+      },
+      {
+        "name": "ph_composer.windows.glazings.update",
+        "owner": "ph_composer.windows",
+        "description": "Edit guarded authored values of one Glazing."
+      },
+      {
+        "name": "ph_composer.windows.glazings.duplicate",
+        "owner": "ph_composer.windows",
+        "description": "Duplicate a Glazing with independent identity."
+      },
+      {
+        "name": "ph_composer.windows.glazings.delete",
+        "owner": "ph_composer.windows",
+        "description": "Delete Glazing; live references require replacement."
+      },
+      {
+        "name": "ph_composer.windows.psi_install_types.create",
+        "owner": "ph_composer.windows",
+        "description": "Create one Psi-Install Type with local defaults."
+      },
+      {
+        "name": "ph_composer.windows.psi_install_types.update",
+        "owner": "ph_composer.windows",
+        "description": "Edit guarded authored values of one Psi-Install Type."
+      },
+      {
+        "name": "ph_composer.windows.psi_install_types.duplicate",
+        "owner": "ph_composer.windows",
+        "description": "Duplicate a Psi-Install Type with independent identity."
+      },
+      {
+        "name": "ph_composer.windows.psi_install_types.delete",
+        "owner": "ph_composer.windows",
+        "description": "Delete Psi-Install Type; live references require replacement."
+      },
+      {
+        "name": "ph_composer.windows.types.create",
+        "owner": "ph_composer.windows",
+        "description": "Create one Window Type with one glazed element, 1.0 m wide by 1.5 m high unless values give columns_m and rows_m. The size does not follow the display unit system."
+      },
+      {
+        "name": "ph_composer.windows.types.update",
+        "owner": "ph_composer.windows",
+        "description": "Edit guarded authored values of one Window Type."
+      },
+      {
+        "name": "ph_composer.windows.types.duplicate",
+        "owner": "ph_composer.windows",
+        "description": "Duplicate a Window Type with independent identity."
+      },
+      {
+        "name": "ph_composer.windows.types.delete",
+        "owner": "ph_composer.windows",
+        "description": "Delete Window Type; live references require replacement."
+      },
+      {
+        "name": "ph_composer.windows.types.grid.insert",
+        "owner": "ph_composer.windows",
+        "description": "Insert a row or column band at a grid boundary, filled with new glazed elements. Elements spanning that boundary must be split first."
+      },
+      {
+        "name": "ph_composer.windows.types.grid.remove",
+        "owner": "ph_composer.windows",
+        "description": "Remove one row or column band and the elements only it held. Refused while the layout carries installation assignments, and for the last band."
+      },
+      {
+        "name": "ph_composer.windows.types.grid.merge",
+        "owner": "ph_composer.windows",
+        "description": "Merge two or more elements of one kind that cover one rectangle into a single element under a new id."
+      },
+      {
+        "name": "ph_composer.windows.types.grid.split",
+        "owner": "ph_composer.windows",
+        "description": "Split one merged element back into one element per grid cell, each under a new id."
+      },
+      {
+        "name": "ph_composer.windows.types.grid.kind",
+        "owner": "ph_composer.windows",
+        "description": "Make elements glazed or Empty. Empty is wall area: it clears the elements' Glazing, Frames, installs and operation."
+      },
+      {
+        "name": "ph_composer.windows.types.grid.flip",
+        "owner": "ph_composer.windows",
+        "description": "Mirror the layout left to right, swapping left and right Frames, installs and operation directions."
+      },
+      {
+        "name": "ph_composer.windows.types.grid.dimension",
+        "owner": "ph_composer.windows",
+        "description": "Set one row or column band's size."
+      },
+      {
+        "name": "ph_composer.windows.types.grid.paste",
+        "owner": "ph_composer.windows",
+        "description": "Copy one glazed element's Glazing, Frames, operation and installs onto other glazed elements. Installs copy only where the edges match."
+      },
+      {
+        "name": "ph_composer.windows.types.grid.set_element_name",
+        "owner": "ph_composer.windows",
+        "description": "Name one element."
+      },
+      {
+        "name": "ph_composer.windows.types.grid.set_element_glazing",
+        "owner": "ph_composer.windows",
+        "description": "Set or clear one glazed element's Glazing."
+      },
+      {
+        "name": "ph_composer.windows.types.grid.set_element_frame",
+        "owner": "ph_composer.windows",
+        "description": "Set or clear the Frame on one side of one glazed element; the other sides stay."
+      },
+      {
+        "name": "ph_composer.windows.types.grid.set_element_operation",
+        "owner": "ph_composer.windows",
+        "description": "Set or clear how one glazed element opens. A fixed element has no directions."
+      },
+      {
+        "name": "ph_composer.windows.types.installs.save",
+        "owner": "ph_composer.windows",
+        "description": "Assign Psi-Install Types to the edges of Window Type elements, in one Undo step, with any Psi-Install Types they need created, edited or copied from a library. Each listed element's four sides are replaced as given; null clears a side. A side may name a temporary client_id from psi_install_types.create or imports instead of a saved id. The panel's Installs session and the library assignment both use it; for one edge, list one Type with one element."
+      },
+      {
+        "name": "ph_composer.windows.units.remove",
+        "owner": "ph_composer.windows",
+        "description": "Remove explicit Window occurrences with reference guards."
+      },
+      {
+        "name": "ph_composer.windows.units.rehost",
+        "owner": "ph_composer.windows",
+        "description": "Glue an unmoved Window to an explicit same-storage Face."
+      },
+      {
+        "name": "ph_composer.windows.units.swap_type",
+        "owner": "ph_composer.windows",
+        "description": "Swap explicit Windows, preserving their anchors."
+      },
+      {
+        "name": "ph_composer.windows.units.reset_to_type",
+        "owner": "ph_composer.windows",
+        "description": "Reset explicit Windows of one Type to its authored geometry."
+      },
+      {
+        "name": "ph_composer.windows.units.repair_copied_identities",
+        "owner": "ph_composer.windows",
+        "description": "Give the copies sharing each chosen Window's identity new identities. The first occurrence by entity path keeps the identity; a preview lists each old and new id."
+      },
+      {
+        "name": "ph_composer.windows.units.update_metadata",
+        "owner": "ph_composer.windows",
+        "description": "Replace the user_data and installed extension payloads of explicit Window occurrences, guarded by the metadata last read."
+      },
+      {
+        "name": "ph_composer.windows.units.rename",
+        "owner": "ph_composer.windows",
+        "description": "Set a Window's native instance name, the Instance field of Entity Info. An empty name clears it."
+      },
+      {
+        "name": "ph_composer.windows.units.new_flipped_type",
+        "owner": "ph_composer.windows",
+        "description": "Create a horizontally flipped Type for one mirrored Window."
+      },
+      {
+        "name": "ph_composer.windows.units.restore",
+        "owner": "ph_composer.windows",
+        "description": "Recover a Unit from exact stamped pane Faces."
+      },
+      {
+        "name": "ph_composer.windows.units.return_to_host",
+        "owner": "ph_composer.windows",
+        "description": "Put a Window that has left its Face back on the nearest Face of its Zone. A Window still on its Face is left alone."
+      },
+      {
+        "name": "ph_composer.windows.units.place",
+        "owner": "ph_composer.windows",
+        "description": "Place an anchored Window on an explicit writable Zone Face."
+      },
+      {
+        "name": "ph_composer.windows.units.convert",
+        "owner": "ph_composer.windows",
+        "description": "Replace reviewed drawn rectangles with placed Windows, one per group: a new Window Type sized from the geometry or a Type of that size. Sizes are the frame outer size."
+      },
+      {
+        "name": "ph_composer.spaces.create",
+        "owner": "ph_composer.spaces",
+        "description": "Make one new Space with one Volume from a floor surface: explicit Faces loose in the open edit context, each becoming a Floor Segment. Works at the root, in a plain Group and in an open Zone, whose Space Group is placed outside the Zone at the same world position."
+      },
+      {
+        "name": "ph_composer.spaces.volumes.create",
+        "owner": "ph_composer.spaces",
+        "description": "Group explicit loose Faces at an open Space's root into its next Volume."
+      },
+      {
+        "name": "ph_composer.spaces.update",
+        "owner": "ph_composer.spaces",
+        "description": "Change one Space, Volume or Floor Segment's values, guarded by the values last read."
+      },
+      {
+        "name": "ph_composer.spaces.batch_update",
+        "owner": "ph_composer.spaces",
+        "description": "Change many Spaces, Volumes and Floor Segments in one all-or-nothing step."
+      },
+      {
+        "name": "ph_composer.spaces.volumes.remove",
+        "owner": "ph_composer.spaces",
+        "description": "Remove one Volume's structure: its Floor Segment records go and its Faces stay loose in the Space."
+      },
+      {
+        "name": "ph_composer.spaces.delete",
+        "owner": "ph_composer.spaces",
+        "description": "Erase one Space and everything in it."
+      },
+      {
+        "name": "ph_composer.spaces.remove",
+        "owner": "ph_composer.spaces",
+        "description": "Remove one Space and keep its floors: the records of the Space, its Volumes and their Floor Segments go, the Groups are exploded and the Faces stay where they are as plain geometry."
+      },
+      {
+        "name": "ph_composer.spaces.update_metadata",
+        "owner": "ph_composer.spaces",
+        "description": "Replace the user_data and installed extension payloads of explicit Spaces, Volumes and Floor Segments, guarded by the metadata last read."
+      },
+      {
+        "name": "ph_composer.spaces.make_independent",
+        "owner": "ph_composer.spaces",
+        "description": "Give the named copy of a Space, Volume or Floor Segment, and every record inside it, new ids in one step. The named occurrence is the one rewritten; a Space takes the next free number in its Zone."
+      },
+      {
+        "name": "ph_composer.spaces.move_to_zone",
+        "owner": "ph_composer.spaces",
+        "description": "Host one Space in another Zone: its record names the Zone, and its Group stays where it stands. Ids, numbers and values are kept; any edit context may be open."
+      },
+      {
+        "name": "ph_composer.spaces.unhost",
+        "owner": "ph_composer.spaces",
+        "description": "Take one Space out of its Zone, the repair for a Space whose Zone is gone. Its Group stays where it stands and its finding becomes space.outside_zone."
+      },
+      {
+        "name": "ph_composer.spaces.floors.mark",
+        "owner": "ph_composer.spaces",
+        "description": "Mark explicit Faces directly inside Volumes as Floor Segments with one weighting factor; a marked Face takes the factor."
+      },
+      {
+        "name": "ph_composer.spaces.floors.unmark",
+        "owner": "ph_composer.spaces",
+        "description": "Remove explicit Floor Segment records; the Faces stay."
+      },
+      {
+        "name": "ph_composer.spaces.volumes.unprotect",
+        "owner": "ph_composer.spaces",
+        "description": "Unlock a protected Volume so context.open can open it. The edit context does not move; leaving the Volume later protects it again."
+      },
+      {
+        "name": "ph_composer.spaces.volumes.restore_position",
+        "owner": "ph_composer.spaces",
+        "description": "Put a moved Volume back where it was last left, and protect it."
+      },
+      {
+        "name": "ph_composer.spaces.settings.update",
+        "owner": "ph_composer.spaces",
+        "description": "Set the Model's last-entered height, guarded by the value last read."
+      },
+      {
+        "name": "ph_composer.spaces.volumes.height_from_solid",
+        "owner": "ph_composer.spaces",
+        "description": "Set a Volume's average clear ceiling height from a closed solid: its volume over the Volume's net floor area. The solid is left as it was."
+      },
+      {
+        "name": "ph_composer.thermal_bridges.types.create",
+        "owner": "ph_composer.thermal_bridges",
+        "description": "Create one Thermal Bridge Type. The group starts at 15-Ambient and the psi-value empty unless values give them."
+      },
+      {
+        "name": "ph_composer.thermal_bridges.types.update",
+        "owner": "ph_composer.thermal_bridges",
+        "description": "Edit guarded values of one Thermal Bridge Type; a changed expected value refuses."
+      },
+      {
+        "name": "ph_composer.thermal_bridges.types.duplicate",
+        "owner": "ph_composer.thermal_bridges",
+        "description": "Duplicate one Thermal Bridge Type with a new id and source derived."
+      },
+      {
+        "name": "ph_composer.thermal_bridges.types.delete",
+        "owner": "ph_composer.thermal_bridges",
+        "description": "Delete one Thermal Bridge Type; a type still in use refuses unless a replacement, or null to clear, is given."
+      },
+      {
+        "name": "ph_composer.thermal_bridges.edges.assign",
+        "owner": "ph_composer.thermal_bridges",
+        "description": "Assign one Thermal Bridge Type and quantity to explicit Edges, or reassign them; a stale or unwritable target refuses the whole command."
+      },
+      {
+        "name": "ph_composer.thermal_bridges.edges.clear",
+        "owner": "ph_composer.thermal_bridges",
+        "description": "Remove the thermal bridge assignment from explicit Edges."
+      }
+    ],
+    "view_commands": [
+      {
+        "name": "ph_composer.context.open",
+        "owner": "ph_composer.context",
+        "description": "Open the Group or Component at the end of path as the edit context, through every one above it. Refuses a locked or missing step."
+      },
+      {
+        "name": "ph_composer.context.root",
+        "owner": "ph_composer.context",
+        "description": "Close every open Group and Component, back to the Model's root."
+      },
+      {
+        "name": "ph_composer.view.capture",
+        "owner": "ph_composer.view",
+        "description": "Write a PNG of the current view at the current camera and answer its path, hash and what it shows. Geometry only."
+      },
+      {
+        "name": "ph_composer.colour_by.activate",
+        "owner": "ph_composer.colour_by",
+        "description": "Turn one Colour-by mode on, or turn Colour-by off."
+      },
+      {
+        "name": "ph_composer.colour_by.select_row",
+        "owner": "ph_composer.colour_by",
+        "description": "Select and zoom to the entities one legend row stands for."
+      },
+      {
+        "name": "ph_composer.colour_by.isolate",
+        "owner": "ph_composer.colour_by",
+        "description": "Show one legend row on its own, or show every row again."
+      },
+      {
+        "name": "ph_composer.colour_by.filter",
+        "owner": "ph_composer.colour_by",
+        "description": "Colour only matching occurrence paths and mute the remaining geometry."
+      },
+      {
+        "name": "ph_composer.colour_by.readout",
+        "owner": "ph_composer.colour_by",
+        "description": "Show or hide one readout's viewport text, with any mode or none."
+      },
+      {
+        "name": "ph_composer.zones.faces.open_attached_assignment",
+        "owner": "ph_composer.zones",
+        "description": "Review a new Attached zone assignment for explicit Faces."
+      },
+      {
+        "name": "ph_composer.zones.faces.close_attached_assignment",
+        "owner": "ph_composer.zones",
+        "description": "Close the native assignment handoff."
+      },
+      {
+        "name": "ph_composer.zones.faces.choose",
+        "owner": "ph_composer.zones",
+        "description": "Set one Classify palette field and give the tool the viewport."
+      },
+      {
+        "name": "ph_composer.zones.faces.stop_classifying",
+        "owner": "ph_composer.zones",
+        "description": "Give the viewport back to whatever tool the user had."
+      },
+      {
+        "name": "ph_composer.zones.faces.locate",
+        "owner": "ph_composer.zones",
+        "description": "Bring an explicit set of Faces into view and outline them, leaving the selection alone."
+      },
+      {
+        "name": "ph_composer.zones.faces.clear_locate",
+        "owner": "ph_composer.zones",
+        "description": "Remove the outline the last Locate left in the viewport."
+      },
+      {
+        "name": "ph_composer.zones.faces.select",
+        "owner": "ph_composer.zones",
+        "description": "Select an explicit set of Faces and bring them into view."
+      },
+      {
+        "name": "ph_composer.windows.convert_dialog.open",
+        "owner": "ph_composer.windows",
+        "description": "Review which drawn rectangles Convert to Window Type would take and why it leaves each other Face out, for the panel to confirm."
+      },
+      {
+        "name": "ph_composer.windows.convert_dialog.close",
+        "owner": "ph_composer.windows",
+        "description": "Close the Convert to Window Type review."
+      },
+      {
+        "name": "ph_composer.windows.place_tool.choose",
+        "owner": "ph_composer.windows",
+        "description": "Choose a Type and anchor, then start Place."
+      },
+      {
+        "name": "ph_composer.windows.place_tool.stop",
+        "owner": "ph_composer.windows",
+        "description": "Stop Place and abandon its pending gesture."
+      },
+      {
+        "name": "ph_composer.windows.units.locate",
+        "owner": "ph_composer.windows",
+        "description": "Select and zoom to explicit Window occurrences."
+      },
+      {
+        "name": "ph_composer.spaces.context.open",
+        "owner": "ph_composer.spaces",
+        "description": "Open a Space, or a Volume volumes.unprotect unlocked, as the edit context; a Volume being left is protected first."
+      },
+      {
+        "name": "ph_composer.spaces.context.close",
+        "owner": "ph_composer.spaces",
+        "description": "Leave the innermost open Space or Volume for its parent, protecting a Volume being left."
+      },
+      {
+        "name": "ph_composer.spaces.locate",
+        "owner": "ph_composer.spaces",
+        "description": "Select and frame one Space, Volume or Floor Segment. Nothing is unlocked: the path opens up to the first locked Group, such as a protected Volume, and that Group is selected instead."
+      },
+      {
+        "name": "ph_composer.spaces.labels.set_options",
+        "owner": "ph_composer.spaces",
+        "description": "Show or hide the Space labels' optional lines for this Model session."
+      },
+      {
+        "name": "ph_composer.spaces.mark_tool.start",
+        "owner": "ph_composer.spaces",
+        "description": "Give the viewport to the Mark floor tool with one weighting factor, and colour the Model by weighting factor."
+      },
+      {
+        "name": "ph_composer.spaces.mark_tool.stop",
+        "owner": "ph_composer.spaces",
+        "description": "Give the viewport back to whatever tool the user had."
+      },
+      {
+        "name": "ph_composer.spaces.create_review.open",
+        "owner": "ph_composer.spaces",
+        "description": "Review which explicit Faces Create Space would take into a new Space, why it leaves each other one out, and which Zone hosts it, for the panel to confirm."
+      },
+      {
+        "name": "ph_composer.spaces.create_review.close",
+        "owner": "ph_composer.spaces",
+        "description": "Close the Create Space review."
+      },
+      {
+        "name": "ph_composer.thermal_bridges.runs.locate",
+        "owner": "ph_composer.thermal_bridges",
+        "description": "Select the Edges of one run and bring them into view, opening the context that holds them."
+      },
+      {
+        "name": "ph_composer.thermal_bridges.edge_tool.choose",
+        "owner": "ph_composer.thermal_bridges",
+        "description": "Arm the edge tool with a Thermal Bridge Type and quantity and give it the viewport: each click or drag across Edges is one edges.assign."
+      },
+      {
+        "name": "ph_composer.thermal_bridges.edge_tool.stop",
+        "owner": "ph_composer.thermal_bridges",
+        "description": "Give the viewport back to whatever tool the user had."
+      }
+    ],
+    "setup_commands": [
+      {
+        "name": "ph_composer.library.providers.add_file",
+        "owner": "ph_composer.library",
+        "description": "Add a library file the user chooses in a native picker to this machine's libraries."
+      },
+      {
+        "name": "ph_composer.library.providers.add_folder",
+        "owner": "ph_composer.library",
+        "description": "Add a folder of library files the user chooses in a native picker to this machine's libraries."
+      },
+      {
+        "name": "ph_composer.library.providers.reset",
+        "owner": "ph_composer.library",
+        "description": "Clear this machine's library setup when setup_state reports it unreadable. A readable setup is left unchanged."
+      },
+      {
+        "name": "ph_composer.library.providers.remove",
+        "owner": "ph_composer.library",
+        "description": "Remove a configured library from this machine."
+      },
+      {
+        "name": "ph_composer.library.connections.connect",
+        "owner": "ph_composer.library",
+        "description": "Start signing in to a hosted library."
+      },
+      {
+        "name": "ph_composer.library.connections.reauthorize",
+        "owner": "ph_composer.library",
+        "description": "Sign in to a hosted library again, keeping its connection."
+      },
+      {
+        "name": "ph_composer.library.connections.disconnect",
+        "owner": "ph_composer.library",
+        "description": "Sign out of a hosted library and clear what it loaded. Local copies stay."
+      },
+      {
+        "name": "ph_composer.library.connections.settings",
+        "owner": "ph_composer.library",
+        "description": "Open a hosted library's own settings."
+      },
+      {
+        "name": "ph_composer.library.connections.remove",
+        "owner": "ph_composer.library",
+        "description": "Disconnect a hosted library and erase its stored credential. Local copies stay."
+      },
+      {
+        "name": "ph_composer.library.cancel_load",
+        "owner": "ph_composer.library",
+        "description": "Cancel a hosted library load that is still running. The catalog it would have replaced stays as it was."
+      },
+      {
+        "name": "ph_composer.library.load",
+        "owner": "ph_composer.library",
+        "description": "Read a configured library into session memory."
+      },
+      {
+        "name": "ph_composer.locations.approve_destination",
+        "owner": "ph_composer.locations",
+        "description": "Approve a save destination the user chooses in the native save dialog, so a caller with the export grant can export to it by location id until it is revoked."
+      },
+      {
+        "name": "ph_composer.locations.approve_file",
+        "owner": "ph_composer.locations",
+        "description": "Approve a library file the user chooses in a native picker, so a caller with the setup grant can add it once by location id."
+      },
+      {
+        "name": "ph_composer.locations.approve_folder",
+        "owner": "ph_composer.locations",
+        "description": "Approve a folder of library files the user chooses in a native picker, so a caller with the setup grant can add it once by location id."
+      },
+      {
+        "name": "ph_composer.locations.rename",
+        "owner": "ph_composer.locations",
+        "description": "Rename an approved location."
+      },
+      {
+        "name": "ph_composer.locations.revoke",
+        "owner": "ph_composer.locations",
+        "description": "Revoke an approved location. It stays refused as location.revoked."
+      },
+      {
+        "name": "ph_composer.locations.reset",
+        "owner": "ph_composer.locations",
+        "description": "Clear this machine's approved locations when list reports them unreadable. A readable store is left unchanged."
+      }
+    ],
+    "file_exports": [
+      {
+        "name": "ph_composer.library.export_file",
+        "owner": "ph_composer.library",
+        "description": "Write local definitions to a library file the user chooses in the native save dialog; export_preview shows what it will hold."
+      }
+    ],
+    "participants": [
+      {
+        "name": "ph_composer.library.copy_into_proposal",
+        "owner": "ph_composer.library",
+        "description": "Copy or reuse one library record, with optional assignment, inside the calling action's own proposal and Undo step."
+      }
+    ]
+  },
+  "compact_discovery_bytes": 13017,
+  "owner_discovery": [
+    {
+      "owner": "ph_composer.records",
+      "bytes": 391,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "owner": "ph_composer.context",
+      "bytes": 885,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "owner": "ph_composer.view",
+      "bytes": 440,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "owner": "ph_composer.colour_by",
+      "bytes": 1154,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "owner": "ph_composer.library",
+      "bytes": 3503,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "owner": "ph_composer.locations",
+      "bytes": 1653,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "owner": "ph_composer.agent_access",
+      "bytes": 256,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "owner": "ph_composer.assemblies",
+      "bytes": 6148,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "owner": "ph_composer.zones",
+      "bytes": 10744,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "owner": "ph_composer.windows",
+      "bytes": 21742,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "owner": "ph_composer.spaces",
+      "bytes": 9492,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "owner": "ph_composer.thermal_bridges",
+      "bytes": 4126,
+      "is_error": false,
+      "code": null
+    }
+  ],
+  "descriptions": [
+    {
+      "name": "ph_composer.windows.types.installs.save",
+      "bytes": 15392,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.all",
+      "bytes": 13116,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.types.list",
+      "bytes": 11138,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.types.all",
+      "bytes": 10269,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.types.update",
+      "bytes": 9925,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.assemblies.list",
+      "bytes": 8942,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.types.grid.set_element_operation",
+      "bytes": 8339,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.types.grid.insert",
+      "bytes": 8209,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.types.grid.set_element_frame",
+      "bytes": 8207,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.types.grid.paste",
+      "bytes": 8166,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.types.delete",
+      "bytes": 8163,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.types.grid.kind",
+      "bytes": 8084,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.assemblies.all",
+      "bytes": 8079,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.types.grid.dimension",
+      "bytes": 8078,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.types.grid.remove",
+      "bytes": 8039,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.types.grid.set_element_glazing",
+      "bytes": 8039,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.types.grid.merge",
+      "bytes": 7964,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.list",
+      "bytes": 7947,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.types.grid.set_element_name",
+      "bytes": 7925,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.types.grid.split",
+      "bytes": 7877,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.types.grid.flip",
+      "bytes": 7738,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.assemblies.update",
+      "bytes": 7179,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.library.copy",
+      "bytes": 7175,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.library.copy_into_proposal",
+      "bytes": 6927,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.assemblies.segments.update",
+      "bytes": 6838,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.assemblies.segments.set_material",
+      "bytes": 6702,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.assemblies.layers.add",
+      "bytes": 6671,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.list",
+      "bytes": 6585,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.assemblies.segments.add",
+      "bytes": 6458,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.assemblies.layers.reorder",
+      "bytes": 6422,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.assemblies.layers.move",
+      "bytes": 6376,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.assemblies.segments.remove",
+      "bytes": 6366,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.assemblies.layers.set_air_barrier",
+      "bytes": 6361,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.assemblies.delete",
+      "bytes": 6357,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.assemblies.layers.update",
+      "bytes": 6278,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.types.create",
+      "bytes": 6271,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.assemblies.layers.remove",
+      "bytes": 6229,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.assemblies.layers.flip_orientation",
+      "bytes": 6082,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.assemblies.layers.flip",
+      "bytes": 6054,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.assemblies.segments.mirror",
+      "bytes": 6037,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.thermal_bridges.schedule.list",
+      "bytes": 5862,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.assemblies.create",
+      "bytes": 5716,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.all",
+      "bytes": 5680,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.window_type",
+      "bytes": 5524,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.library.in_file",
+      "bytes": 5444,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.thermal_bridges.schedule.all",
+      "bytes": 5325,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.floor_segments.list",
+      "bytes": 5318,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.volumes.list",
+      "bytes": 5165,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.materials.list",
+      "bytes": 5078,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.library.export_file",
+      "bytes": 5004,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.list",
+      "bytes": 4967,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.assembly",
+      "bytes": 4929,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.units.convert",
+      "bytes": 4864,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.classify",
+      "bytes": 4787,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.batch_update",
+      "bytes": 4785,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.options.all",
+      "bytes": 4684,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.frames.update",
+      "bytes": 4637,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.frames.list",
+      "bytes": 4583,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.update",
+      "bytes": 4578,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.attached_zone.create_and_assign",
+      "bytes": 4521,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.all",
+      "bytes": 4513,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.candidate_faces.list",
+      "bytes": 4421,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.glazings.list",
+      "bytes": 4407,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.glazings.update",
+      "bytes": 4337,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.materials.update",
+      "bytes": 4326,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.repair_split_face",
+      "bytes": 4321,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.materials.all",
+      "bytes": 4214,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.units.place",
+      "bytes": 4134,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.thermal_bridges.types.list",
+      "bytes": 4059,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.library.catalog",
+      "bytes": 4033,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.psi_install_types.list",
+      "bytes": 3989,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.context.read",
+      "bytes": 3986,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.frames.delete",
+      "bytes": 3947,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.convert_dialog.open",
+      "bytes": 3938,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.units.host_extent",
+      "bytes": 3867,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.units.convert_review",
+      "bytes": 3796,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.thermal_bridges.edges.selection",
+      "bytes": 3783,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.glazings.delete",
+      "bytes": 3757,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.units.swap_type",
+      "bytes": 3735,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.frames.all",
+      "bytes": 3715,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.materials.delete",
+      "bytes": 3709,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.options.manage",
+      "bytes": 3697,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.units.restore",
+      "bytes": 3674,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.psi_install_types.update",
+      "bytes": 3638,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.update_metadata",
+      "bytes": 3619,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.library.export_preview",
+      "bytes": 3569,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.units.update_metadata",
+      "bytes": 3565,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.glazings.all",
+      "bytes": 3541,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.units.new_flipped_type",
+      "bytes": 3532,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.update_metadata",
+      "bytes": 3527,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.thermal_bridges.types.update",
+      "bytes": 3505,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.thermal_bridges.types.delete",
+      "bytes": 3496,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.frames.create",
+      "bytes": 3496,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.convert_dialog.close",
+      "bytes": 3485,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.units.reset_to_type",
+      "bytes": 3475,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.update",
+      "bytes": 3473,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.units.rehost",
+      "bytes": 3472,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.update_field",
+      "bytes": 3461,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.units.list",
+      "bytes": 3426,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.convert_dialog.state",
+      "bytes": 3360,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.glazings.create",
+      "bytes": 3324,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.psi_install_types.delete",
+      "bytes": 3321,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.update_metadata",
+      "bytes": 3300,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.options.list",
+      "bytes": 3288,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.assign_assembly",
+      "bytes": 3226,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.thermal_bridges.edges.selection_all",
+      "bytes": 3179,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.thermal_bridges.types.all",
+      "bytes": 3164,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.psi_install_types.all",
+      "bytes": 3132,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.create_review.open",
+      "bytes": 3114,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.thermal_bridges.edges.assign",
+      "bytes": 3068,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.options.update",
+      "bytes": 2982,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.create",
+      "bytes": 2953,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.psi_install_types.create",
+      "bytes": 2924,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.selection",
+      "bytes": 2910,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.units.return_to_host",
+      "bytes": 2893,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.export_preflight",
+      "bytes": 2882,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.library.load",
+      "bytes": 2873,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.materials.create",
+      "bytes": 2870,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.solve_adjacency",
+      "bytes": 2863,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.settings.update",
+      "bytes": 2839,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.host_context",
+      "bytes": 2828,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.volumes.height_from_solid",
+      "bytes": 2827,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.units.all",
+      "bytes": 2805,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.thermal_bridges.edges.clear",
+      "bytes": 2761,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.options.adopt",
+      "bytes": 2709,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.options.detail",
+      "bytes": 2705,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.options.adoption_preview",
+      "bytes": 2687,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.make_independent",
+      "bytes": 2683,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.place_tool.choose",
+      "bytes": 2654,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.options.merge",
+      "bytes": 2653,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.create_preview",
+      "bytes": 2644,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.options.create",
+      "bytes": 2634,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.options.remove",
+      "bytes": 2629,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.make",
+      "bytes": 2589,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.open_attached_assignment",
+      "bytes": 2552,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.thermal_bridges.types.create",
+      "bytes": 2528,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.findings.list",
+      "bytes": 2521,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.volumes.create",
+      "bytes": 2391,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.containment",
+      "bytes": 2359,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.volumes.height_from_solid_preview",
+      "bytes": 2356,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.make_independent",
+      "bytes": 2347,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.units.outlines",
+      "bytes": 2306,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.options.usage",
+      "bytes": 2286,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.units.repair_copied_identities",
+      "bytes": 2273,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.attached_zone.save",
+      "bytes": 2254,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.material",
+      "bytes": 2241,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.units.remove",
+      "bytes": 2227,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.units.rename",
+      "bytes": 2219,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.move_to_zone",
+      "bytes": 2210,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.retire_adjacency",
+      "bytes": 2091,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.restore",
+      "bytes": 2019,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.create_review.close",
+      "bytes": 1997,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.view.capture",
+      "bytes": 1956,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.locate",
+      "bytes": 1942,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.frame",
+      "bytes": 1931,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.types.duplicate",
+      "bytes": 1917,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.auto_classify",
+      "bytes": 1912,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.library.providers",
+      "bytes": 1912,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.floors.mark",
+      "bytes": 1906,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.context.open",
+      "bytes": 1892,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.psi_install_types.duplicate",
+      "bytes": 1883,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.settings.update",
+      "bytes": 1881,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.repair_identity",
+      "bytes": 1879,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.create_review.state",
+      "bytes": 1872,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.glazings.duplicate",
+      "bytes": 1856,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.frames.duplicate",
+      "bytes": 1850,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.thermal_bridges.edge_tool.choose",
+      "bytes": 1828,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.units.glazed_area_by_face",
+      "bytes": 1823,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.selection",
+      "bytes": 1816,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.volumes.restore_position",
+      "bytes": 1809,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.attached_zone.delete",
+      "bytes": 1796,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.thermal_bridges.runs.locate",
+      "bytes": 1757,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.glazing",
+      "bytes": 1755,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.colour_by.isolate",
+      "bytes": 1748,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.remove",
+      "bytes": 1742,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.floors.unmark",
+      "bytes": 1739,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.reverse",
+      "bytes": 1734,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.context.open",
+      "bytes": 1709,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.colour_by.filter",
+      "bytes": 1698,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.settings.update",
+      "bytes": 1669,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.volumes.remove",
+      "bytes": 1668,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.colour_by.readout",
+      "bytes": 1638,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.volumes.unprotect",
+      "bytes": 1630,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.locations.rename",
+      "bytes": 1627,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.library.providers.add_file",
+      "bytes": 1618,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.thermal_bridges.type",
+      "bytes": 1612,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.thermal_bridges.export_preflight",
+      "bytes": 1607,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.export_preflight",
+      "bytes": 1599,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.choose",
+      "bytes": 1591,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.unhost",
+      "bytes": 1574,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.library.connections.remove",
+      "bytes": 1572,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.delete",
+      "bytes": 1558,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.locations.approve_destination",
+      "bytes": 1555,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.library.providers.add_folder",
+      "bytes": 1549,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.records.list",
+      "bytes": 1541,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.colour_by.activate",
+      "bytes": 1527,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.locations.approve_file",
+      "bytes": 1496,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.locations.approve_folder",
+      "bytes": 1495,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.context.root",
+      "bytes": 1470,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.face",
+      "bytes": 1460,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.materials.duplicate",
+      "bytes": 1458,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.locations.revoke",
+      "bytes": 1445,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.export_preflight",
+      "bytes": 1417,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.export_preflight",
+      "bytes": 1414,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.thermal_bridges.types.duplicate",
+      "bytes": 1401,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.library.connections.disconnect",
+      "bytes": 1399,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.library.connections.reauthorize",
+      "bytes": 1385,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.export_preflight",
+      "bytes": 1383,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.locations.list",
+      "bytes": 1367,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.library.connections.settings",
+      "bytes": 1361,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.attached_zone.duplicate",
+      "bytes": 1360,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.library.connections.connect",
+      "bytes": 1360,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.colour_by.state",
+      "bytes": 1342,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.space",
+      "bytes": 1340,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.units.locate",
+      "bytes": 1340,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.locate",
+      "bytes": 1338,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.psi_install_type",
+      "bytes": 1337,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.assembly_usage",
+      "bytes": 1330,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.isolate_copied_group",
+      "bytes": 1244,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.assemblies.assemblies.duplicate",
+      "bytes": 1228,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.select",
+      "bytes": 1146,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.volume",
+      "bytes": 1081,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.mark_tool.start",
+      "bytes": 1081,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.locations.reset",
+      "bytes": 1077,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.thermal_bridges.edge_tool.stop",
+      "bytes": 1059,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.labels.set_options",
+      "bytes": 1044,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.close_attached_assignment",
+      "bytes": 1019,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.library.connections",
+      "bytes": 1011,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.place_tool.get",
+      "bytes": 996,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.stop_classifying",
+      "bytes": 989,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.place_tool.stop",
+      "bytes": 988,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.classify_tool",
+      "bytes": 985,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.thermal_bridges.edge",
+      "bytes": 984,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.thermal_bridges.edge_tool.state",
+      "bytes": 956,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.colour_by.select_row",
+      "bytes": 951,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.floor_segment",
+      "bytes": 927,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.zone",
+      "bytes": 916,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.context.close",
+      "bytes": 882,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.attached_assignment",
+      "bytes": 864,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.library.providers.remove",
+      "bytes": 861,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.library.cancel_load",
+      "bytes": 859,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.mark_tool.state",
+      "bytes": 815,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.mark_tool.stop",
+      "bytes": 792,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.unit",
+      "bytes": 778,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.library.providers.setup_state",
+      "bytes": 777,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.units.selection",
+      "bytes": 756,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.selected_solid",
+      "bytes": 753,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.labels.options",
+      "bytes": 752,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.settings.get",
+      "bytes": 736,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.library.providers.reset",
+      "bytes": 699,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.settings.get",
+      "bytes": 688,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.assembly_choices",
+      "bytes": 683,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.spaces.settings.get",
+      "bytes": 670,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.windows.settings_record",
+      "bytes": 660,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.attached_zone",
+      "bytes": 616,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.selection_generation",
+      "bytes": 585,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.option_settings",
+      "bytes": 585,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.building_segment",
+      "bytes": 507,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.faces.clear_locate",
+      "bytes": 430,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.membership_stamp",
+      "bytes": 423,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "name": "ph_composer.zones.level",
+      "bytes": 378,
+      "is_error": false,
+      "code": null
+    }
+  ],
+  "resources": {
+    "resources": [
+
+    ]
+  },
+  "prompts": {
+    "prompts": [
+
+    ]
+  }
+}
