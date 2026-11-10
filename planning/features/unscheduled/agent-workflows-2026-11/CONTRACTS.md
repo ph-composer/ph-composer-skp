@@ -26,8 +26,9 @@ The UI's intentional filtering stays explicit. Any new strict mode is additive a
 **Bound at AW-01 (API 1.34).** No new operation. New names:
 
 - `Records::EntityStore.claimed_within?(entities)`: the recursive claim check.
-- `Records::Engine#check_subtree_removal!(path, owned_kinds:)`, refusing the new foundation code
-  `target.foreign_records` with detail `total` and up to 20 `records` (`kind`, `path`).
+- `Records::EntityStore.check_subtree_removal!(entity, path, owned:)`, refusing the new foundation code
+  `target.foreign_records` with detail `total` and up to 20 `records` (`dictionary`, `key`, `path`). It reads
+  every registered entity store by presence, so stranded records (a Zone on a component) count.
 - Zones finding `zone.ownership_conflict` (reference `zone_id`, `entity_path`), in Zones overview findings
   and export preflight, `blocks_export: false`.
 - `ph_composer.spaces.create` result fields `accepted` and `left_out` (the preview's shapes), and `faces`

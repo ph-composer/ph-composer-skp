@@ -12,6 +12,8 @@ module PhComposer
         VOLUME_KIND => %w[display_name avg_ceiling_height_m],
         FLOOR_SEGMENT_KIND => %w[display_name weighting_factor net_area_factor]
       }.freeze
+      # The stores whose records Spaces structure owns; any other store's record below a Group blocks its removal.
+      OWNED_STORES = [SPACE_STORE, VOLUME_STORE, FLOOR_SEGMENT_STORE].freeze
       # One checked edit of a Space, Volume or Floor Segment record: the occurrence it targets, the record
       # as read and the validated record proposed. `update`, `batch_update` and Height from solid share it.
       RecordEdit = Struct.new(:kind, :occurrence, :before, :after, keyword_init: true) do
@@ -38,12 +40,16 @@ module PhComposer
       # others out; its result names both, so a caller sees exactly what it used. `expected_revision` binds a
       # reviewed set: sent at the revision the preview read, the same Faces are taken or the request refuses.
       def create(request, proposal, faces:, zone: nil, name: nil, number: nil, weighting_factor: 1.0)
-        context = Resolve.integer_path(faces.first)[0...-1]
-        context_open!(request.model, context,
-                      "A Space is a floor surface plus a height: open the edit context holding its Faces to " \
-                      "create a Space from them.")
+        # The open context is the one Faces are taken from; a named Face anywhere else is left out, as the preview
+        # leaves it, unless no named Face is in it at all.
+        context = Array(request.model.active_path).map(&:persistent_id)
         found = CreateFaces.read(request, faces)
         face_ids = found.eligible.map(&:face_id)
+        if faces.none? { |path| Resolve.integer_path(path)[0...-1] == context }
+          raise CodedError.new("space.context_required",
+                               "A Space is a floor surface plus a height: open the edit context holding its Faces " \
+                               "to create a Space from them. Nothing was written.")
+        end
         if face_ids.empty?
           raise CodedError.new("space.nothing_to_create",
                                "None of those Faces can become a Space. A Space is a floor surface plus a height: " \
@@ -129,7 +135,7 @@ module PhComposer
 
       def remove_volume(request, proposal, volume:)
         occurrence = Resolve.occurrence(Occurrences.scan(request.model), volume, :mutable => true)
-        check_subtree!(request, occurrence.path)
+        check_subtree!(occurrence)
         check_removals!(request, proposal, [[VOLUME_KIND, occurrence]] +
                                            occurrence.segments.map { |segment| [FLOOR_SEGMENT_KIND, segment] })
         proposal.add_step(RemoveVolumeStep.new(:path => occurrence.path, :before => occurrence.record,
@@ -143,7 +149,7 @@ module PhComposer
       def delete_volume(request, proposal, volume:)
         scan = Occurrences.scan(request.model)
         occurrence = Resolve.occurrence(scan, volume, :mutable => true)
-        check_subtree!(request, occurrence.path)
+        check_subtree!(occurrence)
         removed = inside(scan, occurrence.path)
         check_removals!(request, proposal, removed)
         records = removed.map do |kind, found|
@@ -178,7 +184,7 @@ module PhComposer
       def delete(request, proposal, space:)
         scan = Occurrences.scan(request.model)
         occurrence = Resolve.occurrence(scan, space, :mutable => true)
-        check_subtree!(request, occurrence.path)
+        check_subtree!(occurrence)
         check_removals!(request, proposal, inside(scan, occurrence.path))
         proposal.add_step(DeleteSpaceStep.new(:path => occurrence.path, :before => occurrence.record),
                           :scopes => [Operations::EntityScope.new(occurrence.path[0...-1])])
@@ -190,7 +196,7 @@ module PhComposer
       def remove(request, proposal, space:)
         scan = Occurrences.scan(request.model)
         occurrence = Resolve.occurrence(scan, space, :mutable => true)
-        check_subtree!(request, occurrence.path)
+        check_subtree!(occurrence)
         removed = inside(scan, occurrence.path)
         removed.each do |kind, found|
           target = Resolve::TARGETS.fetch(kind)
@@ -310,12 +316,12 @@ module PhComposer
         end
       end
 
-      # Refuses `target.foreign_records` when another feature's record sits on the Group at `path` or inside it:
+      # Refuses `target.foreign_records` when another feature's record sits on the occurrence's Group or inside it:
       # erasing or exploding Spaces structure must not take a Zone, an envelope Face or any other owner's data
       # with it. Exploding keeps the Faces, but a record on an exploded Group goes, and the paths every record
       # below it is reached by change, so remove refuses by the same rule as delete.
-      def check_subtree!(request, path)
-        request.engine.check_subtree_removal!(path, :owned_kinds => KINDS.keys)
+      def check_subtree!(occurrence)
+        Records::EntityStore.check_subtree_removal!(occurrence.entity, occurrence.path, :owned => OWNED_STORES)
       end
 
       # Refuses `reference.in_use` when any record, a readable unavailable extension's included, would

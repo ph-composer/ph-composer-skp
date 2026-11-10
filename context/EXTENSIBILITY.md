@@ -1148,12 +1148,12 @@ retaining split piece, before copied payloads are accepted. A remap applies only
 target kind and objects included in that copy. A list of newly allocated UUID strings alone is
 not evidence that their reference targets exist.
 
-An entity-owned target keys each occurrence by its root-to-entity persistent-id path; a target with one
-Model-wide slot keys it otherwise. A feature that erases or explodes one of its own Groups calls
-`request.engine.check_subtree_removal!(path, owned_kinds:)` first: any registered target's record on that
-Group or below it, of a kind the caller does not own, refuses `target.foreign_records`, naming the kinds
-and up to 20 paths. Removing what is only the caller's own stays its own business, through its
-`check_identity_removal!` references.
+A feature that erases or explodes one of its own Groups calls
+`Records::EntityStore.check_subtree_removal!(entity, path, owned:)` first, naming its own stores: a record of
+any other `Records::EntityStore` on that Group or below it, valid or not (a Zone record on a component
+counts), refuses `target.foreign_records`, naming the dictionaries and up to 20 paths. Every entity store
+registers itself when constructed, so the check names no feature. Incoming references to the caller's own
+identities stay with `check_identity_removal!`.
 
 Incoming references outside a copied collection remain unchanged. After explicit split repair
 they name the piece retaining the old UUID. If a solver cut retains no original native Face,

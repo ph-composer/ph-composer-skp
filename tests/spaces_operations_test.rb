@@ -492,12 +492,33 @@ class SpacesOperationsTest < PhComposerTestCase
       [API.preview(:context => @context, :name => name, :params => { "space" => reference }),
        invoke(name, "space" => reference)].each do |result|
         assert_equal %w[refused target.foreign_records none], result.values_at("status", "code", "effect"), name
-        assert_equal [{ "kind" => "ph_composer.zones.zone", "path" => [1100] }], result.dig("detail", "records")
+        assert_equal [{ "dictionary" => "ph_composer.zone", "key" => "record", "path" => [1100] }],
+                     result.dig("detail", "records")
       end
     end
     assert_equal before, @model.operations.length
     assert_equal LEGACY_ZONE, PhComposer::Zones::ZONE_STORE.read(@space)
     assert_equal [1100], @model.entities.to_a.map(&:persistent_id)
+  end
+
+  # A record no read takes as valid still counts: a Zone record on a component, as Make Component leaves it,
+  # inside a Space blocks erasing or exploding the Space.
+  def test_a_zone_record_on_a_component_inside_a_space_blocks_its_removal
+    definition = Sketchup::ComponentDefinition.new(Sketchup::Entities.new([floor_face(1171, rectangle(9, 0, 1, 1))]))
+    component = Sketchup::ComponentInstance.new(1170, definition)
+    PhComposer::Zones::ZONE_STORE.write(component, LEGACY_ZONE)
+    reference = space_at_root([component])
+    before = @model.operations.length
+
+    %w[ph_composer.spaces.delete ph_composer.spaces.remove].each do |name|
+      [API.preview(:context => @context, :name => name, :params => { "space" => reference }),
+       invoke(name, "space" => reference)].each do |result|
+        assert_equal %w[refused target.foreign_records none], result.values_at("status", "code", "effect"), name
+        assert_equal [[1100, 1170]], result.dig("detail", "records").map { |row| row.fetch("path") }
+      end
+    end
+    assert_equal before, @model.operations.length
+    assert_equal LEGACY_ZONE, PhComposer::Zones::ZONE_STORE.read(component)
   end
 
   # Another owner's record below a Volume, a classified envelope Face on its floor, blocks erasing or exploding
@@ -565,6 +586,20 @@ class SpacesOperationsTest < PhComposerTestCase
                           :request => { "sequence" => @sequence, "expected_revision" => @session.revision - 1 })
     assert_equal "refused", stale.fetch("status"), "the Face is a Floor Segment now"
     assert_equal %w[refused revision.stale none], reviewed.values_at("status", "code", "effect")
+  end
+
+  # Faces outside the open context are left out whichever order they are named in, as the preview leaves them.
+  def test_create_takes_the_open_contexts_faces_whatever_the_order_named
+    zone_with_outlines
+    outside = floor_face(301, rectangle(9, 9, 1, 1))
+    @model.entities << outside
+    [[face_path(@living), [301]], [[301], face_path(@bath)]].each do |named|
+      preview = query("ph_composer.spaces.create_preview", "faces" => named)
+      result = invoke("ph_composer.spaces.create", "zone" => @zone, "faces" => named)
+      assert_equal %w[completed committed], result.values_at("status", "effect"), named.inspect
+      assert_equal preview.fetch("accepted"), result.dig("value", "accepted")
+      assert_equal [[[301], "not_loose"]], result.dig("value", "left_out").map { |row| row.values_at("path", "reason") }
+    end
   end
 
   # A Volume of several joined Faces names them in floor_segment_ids order; a locked context takes nothing.

@@ -74,7 +74,7 @@ module PhComposer
 
       # A Zone record on a Group another feature claims, or inside one, as a Model made before Make Zone refused
       # that can still hold. The Zone stays readable and this names it, read only: it repairs nothing, and an
-      # erase of the claimant's Group refuses while the Zone is there (Records::Engine#check_subtree_removal!)
+      # erase of the claimant's Group refuses while the Zone is there (Records::EntityStore.check_subtree_removal!)
       # rather than taking the Zone along.
       def ownership_findings(model, index: nil)
         zones(model, :index => index).filter_map do |zone|

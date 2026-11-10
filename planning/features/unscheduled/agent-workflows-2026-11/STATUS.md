@@ -24,7 +24,7 @@ evidence/rationale, not a competing implementation tracker.
 
 | Stage | State | Required cases | Implementation/review/offline/native/client evidence |
 | --- | --- | --- | --- |
-| AW-01 | Implemented on branch `feat/agent-workflows-aw-01` | A01-A04 | Recheck above. Offline: `make ci` exit 0 (Ruby 2615 runs, 0 failures; JS 863 pass; Python 264 passed; RuboCop 704 files clean; fixtures, manifests, runtime and RBZ verified). New tests in `zone_face`, `zone_menu`, `zone_repair`, `entity_store_claims`, `spaces_operations`. Pre-gate Sonnet read: 13 items, fixed (own lock moved out of export preflight, Restore wording, apply-time and order tests), rest answered in DECISIONS. Native A01-A04 open until the host run on the merge head |
+| AW-01 | Implemented on branch `feat/agent-workflows-aw-01` | A01-A04 | Recheck above. Offline: `make ci` exit 0 (Ruby 2615 runs, 0 failures; JS 863 pass; Python 264 passed; RuboCop 704 files clean; fixtures, manifests, runtime and RBZ verified). New tests in `zone_face`, `zone_menu`, `zone_repair`, `entity_store_claims`, `spaces_operations`. Pre-gate Sonnet read: 13 items, fixed (own lock moved out of export preflight, Restore wording, apply-time and order tests), rest answered in DECISIONS. Codex review 1 (gpt-6-astra, PR #440): P1 stranded Zone record on a component escaped the removal guard, fixed by reading every entity store by presence; P2 create took its context from the first named path, fixed to the open context. Native A01-A04 open until the host run on the merge head; ledger case `AW01` added |
 | AW-02 | Scoped | A05/A12/A15 descriptor | None |
 | AW-03 | Scoped | A06 | None |
 | AW-04 | Scoped | A07a | None |

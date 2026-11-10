@@ -533,10 +533,12 @@ Volume in it (and in `volumes.create`) names the `faces` it was made from, in `f
 review sends only the accepted Faces at the revision it read, so a changed Model refuses `revision.stale` rather than
 taking a different set; a caller binds a reviewed set the same way. No strict all-or-nothing mode exists.
 
-Erasing or exploding Spaces structure (`delete`, `remove`, `volumes.delete`, `volumes.remove`) first asks the engine
-whether another owner's entity-owned record sits on the Group or below it (`Records::Engine#check_subtree_removal!`)
-and refuses `target.foreign_records` with the kinds and paths if one does, so a Zone record on a Space Group, a
-classified envelope Face or a thermal-bridge Edge inside it is never erased with it.
+Erasing or exploding Spaces structure (`delete`, `remove`, `volumes.delete`, `volumes.remove`) first checks whether
+another store's record sits on the Group or below it (`Records::EntityStore.check_subtree_removal!`) and refuses
+`target.foreign_records` with the dictionaries and paths if one does, so a Zone record on a Space Group or on a
+component inside it, a classified envelope Face or a thermal-bridge Edge is never erased with it. `create` takes
+Faces from the open edit context whatever order they are named in; it refuses `space.context_required` only when
+no named Face is in that context.
 
 Copies follow one contract (W6-10). A copied Space, alone or inside a copied plain Group, takes a new id and keeps
 its `zone_id`. A plain Group copied whole is first given its own storage through
