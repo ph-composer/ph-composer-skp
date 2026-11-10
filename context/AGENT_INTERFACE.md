@@ -613,7 +613,10 @@ old token stays live until revoked. Then the client is set up:
   or root and not world-writable. On "already exists" (an entry of another form), `claude mcp remove
   --scope user <entry>` and the add once more, by that entry's name only; any other failure removes nothing.
 - Codex: has no command that sets a helper (0.167.0 `codex mcp add` takes `--url` and
-  `--bearer-token-env-var` only), and it rewrites the whole config, so `CodexConfig` edits the text. With
+  `--bearer-token-env-var` only), and it rewrites the whole config, so `CodexConfig` edits the text. It
+  reads each line in its TOML context: a header or key counts only on a line that starts outside every
+  string, array and inline table, so table-like text in another setting's multi-line string or array is
+  never taken for a table, and a file whose strings or brackets do not close is never edited. With
   no entry for the profile the block is appended to `~/.codex/config.toml` after a blank line, every
   existing byte kept. With the plain `[mcp_servers.<entry>]` table present, only its `url` line and its
   token line (`http_headers_helper`, or `http_headers` holding exactly one inline `Authorization` bearer)
@@ -646,7 +649,10 @@ whether its Model is open) and three states kept apart: set up (what the client'
 read and never written: set up, absent, outdated, inline, set up another way, client not set up,
 unreadable), contacted (a client sent `initialize` with that token since SketchUp started, with the
 `clientInfo` name and version it gave, cut to 60 characters) and verified (that token's latest
-`discover` or `context` completed, was not refused and carried no `connection.reason`). Contacted and
+`discover` or `context` completed: an Outcome with status `completed`, or discover's page, never a busy,
+failed or refused answer, and no `connection.reason`). A profile's token is the one the client uses: the
+token its entry carries inline while it does, otherwise the saved file's; a saved token the entry does
+not read yet is shown as waiting for Repair. Contacted and
 verified belong to the token, so profiles sharing one share them. No test write and no client process
 verifies a connection; the user starts a client session. A profile whose file holds a live token and
 whose entry is not set up offers Repair (`access.repair`), which reruns the client setup against the

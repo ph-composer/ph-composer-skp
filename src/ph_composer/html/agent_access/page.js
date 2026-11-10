@@ -253,6 +253,9 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
           (token.model_open === false ? " (not open)" : "") : "";
         facts.push("uses " + token.label + scope);
       } else facts.push("no live token: create a token and connect it to this profile");
+      var saved = connection.saved_token;
+      // A token saved for the profile that its settings do not read yet, as after a refused edit.
+      if (saved && (!token || saved.id !== token.id)) facts.push(saved.label + " is saved for it and waits for Repair");
       facts.push(ENTRY[connection.entry] || connection.entry);
       if (token) {
         facts.push(connection.contacted ? "token contacted by " + (connection.contacted.client || "a client") +
@@ -271,8 +274,8 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
         text.appendChild(manual);
       }
       row.appendChild(text);
-      // Repair needs the token its file holds: an inline token or none is replaced by Connect with a new one.
-      if (token && connection.source === "file" && connection.entry !== "configured") {
+      // Repair sets the client up with the live token saved for the profile, which never comes to the page.
+      if (saved && connection.entry !== "configured") {
         var repair = dom.button("Repair", function () {
           if (self.pending) return;
           self.repairing = connection.client + ":" + connection.profile;

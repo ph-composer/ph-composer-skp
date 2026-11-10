@@ -321,7 +321,8 @@ var CONNECTIONS = [
     setup: "claude mcp add-json --scope user ph-composer '{}'" },
   { client: "codex", client_name: "Codex", profile: "house-b", server: "ph-composer-house-b",
     token: { id: "token_CCCCCCCCCCCC", label: "House B", capabilities: ["read"], model_name: "b.skp",
-      model_open: false }, source: "file", entry: "outdated", contacted: null, verified_at: null,
+      model_open: false }, source: "file", saved_token: { id: "token_CCCCCCCCCCCC", label: "House B" },
+    entry: "outdated", contacted: null, verified_at: null,
     setup: "[mcp_servers.ph-composer-house-b]\nurl = \"http://127.0.0.1:47001/mcp\"" },
   { client: "codex", client_name: "Codex", profile: "default", server: "ph-composer", token: null, source: null,
     entry: "inline", contacted: null, verified_at: null, setup: "[mcp_servers.ph-composer]" }];

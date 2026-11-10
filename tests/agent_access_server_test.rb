@@ -635,6 +635,7 @@ class AgentAccessServerTest < PhComposerTestCase
 
     assert_equal "busy", AgentAccess::Listener.last_calls.dig(@row.fetch("id"), "status")
     assert_equal [@row.fetch("id")], AgentAccess::Listener.last_calls.keys
+    assert_nil AgentAccess::Listener.verified[@row.fetch("id")], "a discover that never ran verifies nothing"
   end
 
   def test_a_taken_port_shows_before_any_token_is_issued

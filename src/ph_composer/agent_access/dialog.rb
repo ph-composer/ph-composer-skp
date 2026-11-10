@@ -109,16 +109,13 @@ module PhComposer
           contacts = Listener.contacts
           verified = Listener.verified
           profiles.map do |client, profile|
-            entry = ClientSetup.entry(client, port, profile)
-            file = Connections.digest(client, profile)
-            source = if live.key?(file) then "file"
-                     elsif live.key?(entry["inline_digest"]) then "inline"
-                     end
-            token = source && live.fetch(source == "file" ? file : entry["inline_digest"])
+            entry, source, digest = bound(client, profile, port, live)
+            token = digest && live.fetch(digest)
+            saved = live[Connections.digest(client, profile)]
             { "client" => client, "client_name" => Connections::CLIENTS.fetch(client), "profile" => profile,
               "server" => ClientConfig.server_name(profile), "token" => token && bound_token(token),
-              "source" => source, "entry" => entry["setup"], "contacted" => token && contacts[token["id"]],
-              "verified_at" => token && verified[token["id"]],
+              "source" => source, "saved_token" => saved && bound_token(saved), "entry" => entry["setup"],
+              "contacted" => token && contacts[token["id"]], "verified_at" => token && verified[token["id"]],
               "setup" => ClientConfig.setup_text(client, port, profile) }
           end
         end
@@ -287,9 +284,21 @@ module PhComposer
         # itself, as its public row; nil when none is live.
         def binding(client, profile, port)
           live = Tokens.snapshot
-          digest = [Connections.digest(client, profile), ClientSetup.entry(client, port, profile)["inline_digest"]]
-                   .find { |candidate| live.key?(candidate) }
+          digest = bound(client, profile, port, live).last
           digest && Tokens.public_row(live.fetch(digest))
+        end
+
+        # The client entry's state, and the live token the client uses for the profile: the one its entry
+        # carries inline while it does, since a token saved for the profile is then only waiting for its
+        # setup; otherwise the saved file's. Answers `[entry, source, digest]`, source and digest nil when
+        # no live token is bound.
+        def bound(client, profile, port, live)
+          entry = ClientSetup.entry(client, port, profile)
+          inline = entry["inline_digest"]
+          return [entry, "inline", inline] if entry["setup"] == "inline" && live.key?(inline)
+
+          file = Connections.digest(client, profile)
+          live.key?(file) ? [entry, "file", file] : [entry, nil, nil]
         end
 
         def client_name(client)

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "test_helper"
+require "open3"
 
 # Client profiles (context/AGENT_INTERFACE.md, "User-controlled local access"): one client entry and header
 # file per profile, the existing entry read as the default, replacement shown before a binding changes,
@@ -117,6 +118,7 @@ class AgentAccessProfilesTest < PhComposerTestCase
     assert_equal before.sub("#{ClientConfig.codex_url_line(46_110)}  # old", ClientConfig.codex_url_line(47_001)),
                  File.binread(@config)
     assert_equal before, File.binread("#{@config}#{ClientSetup::BACKUP_SUFFIX}")
+    assert_valid_toml File.binread(@config)
     assert_equal 0o600, File.stat("#{@config}#{ClientSetup::BACKUP_SUFFIX}").mode & 0o777
     assert_empty @runs
   end
@@ -175,6 +177,27 @@ class AgentAccessProfilesTest < PhComposerTestCase
     assert_no_secret(dialog, fresh["token"], old["token"])
   end
 
+  # A refused migration leaves the client on its inline token: the row names that token, and the new one as
+  # saved and waiting, so Revoke and Replace speak of what the client really uses (review of PR #448).
+  def test_a_refused_inline_migration_keeps_the_inline_token_as_the_binding
+    old = Tokens.issue(:label => "Inline")
+    File.binwrite(@config, "[mcp_servers.ph-composer]\n#{ClientConfig.codex_url_line(46_110)}\n" \
+                           "http_headers = { Authorization = \"Bearer #{old['token']}\" }\n")
+    File.chmod(0o400, @config)
+    dialog = Dialog.show
+    fresh = issue(dialog, "Fresh")
+
+    connect(dialog, fresh["token"], "replace" => old.dig("row", "id"))
+
+    assert_includes delivered(dialog, "access.connected").last["message"], "is read-only"
+    row = Dialog.connections(46_110).find { |item| item["client"] == "codex" }
+    assert_equal %w[inline Inline Fresh], [row["source"], row.dig("token", "label"), row.dig("saved_token", "label")]
+    connect(dialog, fresh["token"])
+    assert_equal "Inline", delivered(dialog, "access.replacement").last.dig("token", "label")
+  ensure
+    File.chmod(0o600, @config) if File.exist?(@config)
+  end
+
   def test_a_codex_file_changed_meanwhile_read_only_or_linked_is_never_clobbered
     token = Tokens.issue.fetch("token")
     stale = "[mcp_servers.ph-composer]\n#{ClientConfig.codex_url_line(46_110)}\n#{ClientConfig.codex_helper_line}\n"
@@ -202,6 +225,25 @@ class AgentAccessProfilesTest < PhComposerTestCase
     assert_equal "configured", ClientSetup.connect("codex", token, 47_001).fetch("state")
     assert File.symlink?(@config), "a linked config stays a link"
     assert_includes File.binread(real), ClientConfig.codex_url_line(47_001)
+  end
+
+  # Table-like text inside another setting's multi-line string or array is not a table (review of PR #448);
+  # each result is checked by an independent TOML parser.
+  def test_text_inside_strings_and_arrays_is_never_taken_for_the_entry
+    token = Tokens.issue.fetch("token")
+    prompt = "developer_instructions = \"\"\"\n[mcp_servers.ph-composer]\nurl = \"http://elsewhere\"\n\"\"\"\n"
+    File.binwrite(@config, prompt)
+    assert_equal "absent", ClientSetup.entry("codex", 46_110, "default")["setup"]
+    assert_equal "configured", ClientSetup.connect("codex", token, 46_110).fetch("state")
+    assert_equal "#{prompt}\n#{ClientConfig.codex_block(46_110)}\n", File.binread(@config)
+    assert_valid_toml File.binread(@config)
+
+    nested = "[mcp_servers.ph-composer]\ncustom = [ # comment\n  [1, 2],\n]\nurl = \"x\"\n"
+    File.binwrite(@config, nested)
+    assert_equal "manual", ClientSetup.connect("codex", token, 46_110).fetch("state")
+    assert_equal nested, File.binread(@config)
+    File.binwrite(@config, "x = \"unclosed\n[mcp_servers.ph-composer]\n")
+    assert_equal "other", ClientSetup.entry("codex", 46_110, "default")["setup"]
   end
 
   def test_forms_codex_cannot_be_edited_for_certain_answer_manual_with_the_token_free_block
@@ -289,7 +331,9 @@ class AgentAccessProfilesTest < PhComposerTestCase
     log.contact(row, "clientInfo" => { "name" => "codex-mcp-client", "version" => "0.167.0" })
     log.add(row, "invoke", {}, { "structuredContent" => { "status" => "completed" } }, 3)
     log.add(row, "discover", {}, { "structuredContent" => { "connection" => { "reason" => "not open" } } }, 3)
-    assert_equal [false, false], log.take_unread.map { |call| call["verifies"] }
+    log.add(row, "discover", {}, { "structuredContent" => { "status" => "busy", "code" => "session.busy" } }, 3)
+    log.add(row, "context", {}, { "structuredContent" => { "status" => "failed" }, "isError" => false }, 3)
+    assert_equal [false, false, false, false], log.take_unread.map { |call| call["verifies"] }
     Listener.calls_made([], log.take_contacts)
     assert_equal "codex-mcp-client 0.167.0", Listener.contacts.dig(id, "client")
     assert_empty Listener.verified
@@ -321,6 +365,15 @@ class AgentAccessProfilesTest < PhComposerTestCase
       message = JSON.parse(script[/receive\((.*)\)\z/m, 1])
       message.fetch("payload") if message.fetch("type") == type
     end
+  end
+
+  # Python's own TOML parser reads the file, so a check never shares the scanner it checks. Skipped where
+  # python3 has no tomllib (before 3.11).
+  def assert_valid_toml(text)
+    output, status = Open3.capture2e("python3", "-c", "import sys, tomllib; tomllib.loads(sys.stdin.read())",
+                                     :stdin_data => text)
+    skip "python3 has no tomllib" if output.include?("No module named 'tomllib'")
+    assert status.success?, output
   end
 
   # Only the issuing reply carries a secret; no state, replacement, answer or failure does.

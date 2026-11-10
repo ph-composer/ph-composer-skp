@@ -4565,6 +4565,24 @@
         "src/ph_composer/agent_access/tools.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "AW08",
+      "label": "Agent-workflows AW-08 client profiles on the installed RBZ: two Models open, a Model-only token per Model connected through the native Agent Access dialog to the Default and a named profile of both Claude Code and Codex (client files in a scratch home, never the user's own); fresh GUI-environment sessions of both clients reach each Model only through its own profile; the replacement line, a manual fallback, a stale binding refusal and the Revoke effects show in the dialog; revoking one profile's token leaves the other profile working; the dialog at standard and narrow widths; exact host, OS and client versions",
+      "mode": "mixed",
+      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/agent_access/client_config.rb",
+        "src/ph_composer/agent_access/client_setup.rb",
+        "src/ph_composer/agent_access/codex_config.rb",
+        "src/ph_composer/agent_access/connections.rb",
+        "src/ph_composer/agent_access/dialog.rb",
+        "src/ph_composer/agent_access/listener.rb",
+        "src/ph_composer/agent_access/call_log.rb",
+        "src/ph_composer/html/agent_access/page.js",
+        "src/ph_composer/html/agent_access/agent_access.css"
+      ],
+      "native_control_required": true
     }
   ]
 }

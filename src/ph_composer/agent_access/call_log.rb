@@ -59,9 +59,11 @@ module PhComposer
 
       private
 
-      # A discover or context that completed, was not refused and reached the Models the token serves.
+      # A discover or context that completed and reached the Models the token serves. An Outcome must say
+      # `completed`; discover answers a page with no status. A busy, failed or refused answer never verifies.
       def verifies?(tool, result, outcome)
-        VERIFYING_TOOLS.include?(tool) && result["isError"] != true && outcome["status"] != "refused" &&
+        VERIFYING_TOOLS.include?(tool) && result["isError"] != true &&
+          (outcome.key?("status") ? outcome["status"] == "completed" : tool == "discover") &&
           !(outcome["connection"].is_a?(Hash) && outcome["connection"]["reason"])
       end
 
