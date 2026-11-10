@@ -7,9 +7,10 @@ module PhComposer
     #
     # - Show Spaces, on by default in every Model session: each Volume's prism outline, and one line per Space
     #   at its reference point, the centroid of its largest Floor Segment projected to that segment's mean
-    #   height: number and name, then weighted area, net volume and supply and extract when those options are
-    #   on. A Space with no Floor Segment has no label and a Volume with no height no outline. The text is
-    #   drawn at that point's screen position and is not depth-tested.
+    #   height: `101 Living | iCFA 2,083 ft² | Vol: 20,831 ft³`, then ` | Sup … / Ext …`. Each section after the
+    #   number and name follows its option, and the values are whole numbers. A Space with no Floor Segment
+    #   has no label and a Volume with no height no outline. The text is drawn at that point's screen position
+    #   and is not depth-tested.
     # - Selection totals: with Spaces, Volumes or Floor Segments selected, HUD lines summing weighted area,
     #   net volume, supply and extract over the Spaces they belong to, each Space once.
     #
@@ -20,7 +21,12 @@ module PhComposer
       OPTIONS = {
         "weighted_area" => "Weighted area (iCFA)", "net_volume" => "Net volume", "airflows" => "Supply and extract"
       }.freeze
+      # What a new session shows; supply and extract wait to be asked for.
+      ON_BY_DEFAULT = %w[weighted_area net_volume].freeze
       MENU = "Space labels"
+      SEPARATOR = " | "
+      # A label's values are whole numbers grouped from a thousand; the selection totals keep the quantity's format.
+      WHOLE = { :precision => 0, :group_from => 1_000 }.freeze
 
       # What one Space contributes: its record, its summed metrics, its label point in world metres, and its
       # Volumes' views.
@@ -78,7 +84,7 @@ module PhComposer
       end
 
       def options(session)
-        session.feature_state(:spaces_label_options) { OPTIONS.keys.to_h { |key| [key, false] } }
+        session.feature_state(:spaces_label_options) { OPTIONS.keys.to_h { |key| [key, ON_BY_DEFAULT.include?(key)] } }
       end
 
       # Merges the given options and redraws the labels, which the revision alone would not rebuild.
@@ -110,14 +116,24 @@ module PhComposer
       end
 
       def label_parts(row, chosen)
-        record = row.space.record
-        parts = [[record.fetch("number"), record.fetch("name")].map(&:to_s).reject(&:empty?).join(" ")]
-        parts.push("  ", ["area", row.weighted_area_m2]) if chosen["weighted_area"]
-        parts.push("  ", ["volume", row.net_volume_m3]) if chosen["net_volume"]
-        if chosen["airflows"] && (flows = Metrics.airflows(record)).values.none?(&:nil?)
-          parts.push("  ", ["airflow", flows.fetch("v_sup_m3h")], " / ", ["airflow", flows.fetch("v_eta_m3h")])
+        label_sections(row, chosen).flat_map.with_index do |section, index|
+          index.zero? ? section : [SEPARATOR, *section]
         end
-        parts
+      end
+
+      # The sections present on this label, so the separators fall only between them.
+      def label_sections(row, chosen)
+        record = row.space.record
+        identity = [record.fetch("number"), record.fetch("name")].map(&:to_s).reject(&:empty?).join(" ")
+        flows = Metrics.airflows(record)
+        [identity.empty? ? nil : [identity],
+         chosen["weighted_area"] ? ["iCFA ", ["area", row.weighted_area_m2, WHOLE]] : nil,
+         chosen["net_volume"] ? ["Vol: ", ["volume", row.net_volume_m3, WHOLE]] : nil,
+         chosen["airflows"] && flows.values.none?(&:nil?) ? airflow_section(flows) : nil].compact
+      end
+
+      def airflow_section(flows)
+        ["Sup ", ["airflow", flows.fetch("v_sup_m3h"), WHOLE], " / Ext ", ["airflow", flows.fetch("v_eta_m3h"), WHOLE]]
       end
 
       def selection_totals(read)

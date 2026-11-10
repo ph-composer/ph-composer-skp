@@ -136,7 +136,7 @@ not coin a third vocabulary between SketchUp and honeybee. Faces belong to a Zon
 | Height from solid | The helper that sets a Volume's height from a closed group the user drew: the group's volume divided by the Volume's net floor area |
 | Set Height | The viewport tool that sets one Volume's height: click its prism, then drag the top or type a value in the measurements box |
 | Edit Floor Surface | The context-menu item that opens a selected Volume, or a Space's one Volume, unprotected, as Enter does in the Spaces view |
-| Space label | Viewport text at a Space's reference point: number, name, iCFA, net volume, airflows |
+| Space label | Viewport text at a Space's reference point, as `101 Living \| iCFA 2,083 ft² \| Vol: 20,831 ft³`. Its values are whole numbers. iCFA and net volume show unless turned off; supply and extract, shown on request, follow as `\| Sup 60 cfm / Ext 60 cfm` |
 | Selection totals | The HUD readout of summed iCFA, net volume and airflows for the selected Spaces |
 | Airflow balance | Each Zone row of the Spaces view: its Spaces' supply, extract and transfer sums. A Zone holding a Space that inherits its airflow shows a dash. Nothing compares supply with extract per Zone: balance is per ventilator, and that check belongs to the planned Zones / Ventilation view |
 | Move Space to Zone | The action that hosts one Space in another Zone by writing the Zone's id on the Space record. The Space Group stays where it stands |

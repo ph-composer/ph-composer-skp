@@ -20,6 +20,35 @@ class UnitsTest < PhComposerTestCase
     end
   end
 
+  def test_from_display_inverts_to_display_for_every_quantity
+    vectors.select { |row| Units::DEFINITIONS.key?(row.fetch("quantity")) }.each do |row|
+      quantity, canonical = row.values_at("quantity", "canonical_value")
+      %w[IP SI].each do |system|
+        shown = Units.to_display(canonical, :quantity => quantity, :system => system)
+        assert_in_delta canonical, Units.from_display(shown, :quantity => quantity, :system => system), 1e-9,
+                        "#{quantity} #{system}"
+      end
+    end
+  end
+
+  def test_from_display_reads_the_display_unit_into_the_canonical_one
+    assert_in_delta 304.8, Units.from_display("12", :quantity => "length_mm", :system => "IP"), 1e-9
+    assert_equal 125.0, Units.from_display("125", :quantity => "length_mm", :system => "SI")
+    assert_in_delta 0.3048, Units.from_display(12, :quantity => "length_mm", :system => "IP", :unit => "m"), 1e-12
+    assert_in_delta 100.0, Units.from_display(58.857777869, :quantity => "airflow", :system => "IP"), 1e-6
+    assert_raises(ArgumentError) { Units.from_display("twelve", :quantity => "length_mm", :system => "IP") }
+    assert_raises(TypeError) { Units.from_display(nil, :quantity => "length_mm", :system => "IP") }
+  end
+
+  def test_a_caller_can_move_or_turn_off_the_grouping
+    assert_equal "2,083 m²", Units.format(2083.4, :quantity => "area", :system => "SI", :precision => 0,
+                                                  :group_from => 1_000)
+    assert_equal "999 m²", Units.format(999.4, :quantity => "area", :system => "SI", :precision => 0,
+                                               :group_from => 1_000)
+    assert_equal "12345.7", Units.format(12_345.67, :quantity => "length_mm", :system => "SI", :show_unit => false,
+                                                    :group_from => nil)
+  end
+
   def test_formats_export_quantities_in_both_systems
     [
       [0.5, "length", "0.5 m", "1.64 ft"],

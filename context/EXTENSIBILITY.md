@@ -712,7 +712,9 @@ end
   without it, it is drawn whenever the readout is on. `hud` is lines of parts drawn under the legend,
   or at the legend's place when no mode is on. A part is plain text or `[quantity, si_value]`; the
   overlay formats quantities with `PhComposer::Units.format` in the session's display units
-  (`context/TECH_STACK.md`, "Display units"), so a readout never formats a unit-bearing number. `outlines`,
+  (`context/TECH_STACK.md`, "Display units"), so a readout never formats a unit-bearing number. A third
+  element, `{ precision:, group_from: }`, overrides the quantity's format for that part alone, as the Space
+  label's whole numbers do. `outlines`,
   optional, are `ColourBy::Outline`s: `points` holds two world points (inches) per line, drawn thin in the one
   readout colour and depth-tested, under the mode's fills and lines; `path` hides and mutes them as on an
   anchor, and section planes cut them.

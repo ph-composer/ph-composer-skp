@@ -18,7 +18,7 @@ module PhComposer
     # Omission preserves the solid unclassified boundary used by other modes.
     # `derived`, when supplied, is a Derived: world-space shapes drawn in the entry's colour and state, with
     # or without an entity (context/EXTENSIBILITY.md, "Colour-by derived geometry").
-    # `label` may also be a list of parts, as a readout line is (plain text or `[quantity, si_value]`), so a
+    # `label` may also be a list of parts, as a readout line is (plain text or a `[quantity, si_value]` part), so a
     # unit-bearing label is formatted in the display units wherever it is shown. `figure`, when supplied, is
     # one `[quantity, si_value]` the legend sums per row and shows beside the count (an area, a volume), or a
     # list of them summed position by position (supply and extract).

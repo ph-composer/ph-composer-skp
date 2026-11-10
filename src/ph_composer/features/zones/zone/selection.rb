@@ -5,7 +5,9 @@ module PhComposer
     # Current native selection is a read; writes retain explicit occurrence references and values.
     module Selection
       FIELDS = { "name" => "Name", "building_segment" => "Building-Segment", "level" => "Level",
-                 "ground_depth_mm" => "Ground depth (mm)" }.freeze
+                 "ground_depth_mm" => "Ground depth" }.freeze
+      # The fields shown and entered in the display units, each with its quantity in core/units.rb.
+      MEASURED_FIELDS = { "ground_depth_mm" => "length_mm" }.freeze
 
       module_function
 
@@ -95,6 +97,9 @@ module PhComposer
       class Client
         # The fields whose value is one of the Model's Zone options rather than free text.
         OPTION_FIELDS = %w[building_segment level].freeze
+        # Widens a measured field's label; UI.inputbox on macOS otherwise wraps the unit out of sight
+        # (context/SKETCHUP_HOST_BEHAVIOR.md, "Saving, dialogs and the panel").
+        PROMPT_PADDING = " " * 16
 
         def initialize(session)
           @session = session
@@ -106,6 +111,7 @@ module PhComposer
           read = API.query(:context => @context, :name => "#{FEATURE_ID}.selection")
           return show(read) unless read["status"] == "completed"
 
+          system = Preferences.unit_system
           rows = read.fetch("value").fetch("zones")
           # Building-Segment and Level are chosen from the Model's options; the other fields are free.
           options = API.query(:context => @context, :name => "#{Options::PREFIX}.all") if OPTION_FIELDS.include?(field)
@@ -116,15 +122,15 @@ module PhComposer
 
           choices = options && option_rows(options, field).map { |choice| choice.dig("values", "name") }.sort
           values = rows.map { |row| current_value(row.fetch("values"), field, options) }.uniq
-          defaults = [values.length == 1 ? values.first.to_s : ""]
-          entered = choices ? UI.inputbox([FIELDS.fetch(field)], defaults, [choices.join("|")], "Selected Zones") :
-                              UI.inputbox([FIELDS.fetch(field)], defaults, "Selected Zones")
+          defaults = [values.length == 1 ? shown_value(field, values.first, system) : ""]
+          prompts = [prompt(field, system)]
+          entered = choices ? UI.inputbox(prompts, defaults, [choices.join("|")], "Selected Zones") :
+                              UI.inputbox(prompts, defaults, "Selected Zones")
           return unless entered
+          # The shown text is rounded, so accepting it unchanged must not write the rounded value back.
+          return if MEASURED_FIELDS.key?(field) && entered == defaults
 
-          value = entered.first
-          value = Float(value) if field == "ground_depth_mm"
-          value = nil if field == "level" && value.to_s.empty?
-          params = { "field" => field, "value" => value,
+          params = { "field" => field, "value" => entered_value(field, entered.first, system),
                      "targets" => rows.map { |row|
                                     { "reference" => row.fetch("reference"),
                                       "expected_values" => row.fetch("values") }
@@ -148,6 +154,31 @@ module PhComposer
         end
 
         private
+
+        def prompt(field, system)
+          quantity = MEASURED_FIELDS[field]
+          return FIELDS.fetch(field) unless quantity
+
+          "#{FIELDS.fetch(field)} (#{Units.label(:quantity => quantity, :system => system)})#{PROMPT_PADDING}"
+        end
+
+        # Never grouped: the dialog hands this text back to be read as a number.
+        def shown_value(field, value, system)
+          quantity = MEASURED_FIELDS[field]
+          return value.to_s unless quantity && value
+
+          Units.format(value, :quantity => quantity, :system => system, :show_unit => false, :group_from => nil)
+        end
+
+        def entered_value(field, text, system)
+          quantity = MEASURED_FIELDS[field]
+          return field == "level" && text.to_s.empty? ? nil : text unless quantity
+
+          value = Units.from_display(text, :quantity => quantity, :system => system)
+          raise ArgumentError, "Not a finite number." unless value.finite?
+
+          value
+        end
 
         def option_rows(options, field)
           options.dig("value", field == "level" ? "levels" : "building_segments")

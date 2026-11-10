@@ -74,6 +74,17 @@ class ColourByReadoutTest < PhComposerTestCase
     refute_includes drawn_texts, "Total 30 m²"
   end
 
+  def test_a_part_can_carry_its_own_format_and_a_bad_one_is_refused
+    text = PhComposer::ColourBy::ReadoutOutput
+    formatted = ["area", 2083.456, { :precision => 0, :group_from => 1_000 }]
+    assert_equal "2,083 m²", text.text(text.parts!([formatted]), "SI")
+    assert_equal "2083.46 m²", text.text(text.parts!([["area", 2083.456]]), "SI")
+    [["area", 1, 0], ["area", 1, { :precision => -1 }], ["area", 1, { :precision => 1.5 }],
+     ["area", 1, { :unit => "mm" }], ["area", 1, {}, 2]].each do |part|
+      assert_raises(ArgumentError, part.inspect) { text.parts!([part]) }
+    end
+  end
+
   def test_the_display_units_format_the_quantities
     install_readouts
     PhComposer::Preferences.set("unit_system", "IP")

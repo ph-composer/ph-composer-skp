@@ -8,6 +8,8 @@ module PhComposer
   # Display conversions for human-readable reports. html/units.js is the panel's counterpart;
   # tests/support/units_vectors.json keeps the two in step.
   module Units
+    # The value from which a formatted number is grouped, unless a caller names another.
+    GROUP_FROM = 10_000
     METRES_PER_FOOT = 0.3048
     JOULES_PER_BTU = 1055.05585262
     F_PER_K = 1.8
@@ -69,6 +71,17 @@ module PhComposer
       metres / LENGTH_METRES.fetch(label(:quantity => quantity, :system => system))
     end
 
+    # The inverse of to_display: a number read in the display unit, back in the canonical one. Refuses what
+    # Float refuses, so a caller reading typed text handles ArgumentError and TypeError.
+    def from_display(value, quantity:, system:, unit: nil)
+      definition = fetch_definition(quantity)
+      number = Float(value)
+      return (ip?(system) ? number / definition.fetch(:factor) : number) unless definition[:length]
+
+      metres = number * LENGTH_METRES.fetch(label(:quantity => quantity, :system => system))
+      metres / LENGTH_METRES.fetch(unit || definition.fetch(:canonical))
+    end
+
     def label(quantity:, system:)
       fetch_definition(quantity).fetch(ip?(system) ? :ip_label : :si_label)
     end
@@ -77,20 +90,20 @@ module PhComposer
       fetch_definition(quantity).fetch(ip?(system) ? :ip_precision : :si_precision)
     end
 
-    def format(value, quantity:, system:, unit: nil, precision: nil, show_unit: true)
+    def format(value, quantity:, system:, unit: nil, precision: nil, show_unit: true, group_from: GROUP_FROM)
       number = to_display(value, :quantity => quantity, :system => system, :unit => unit)
       digits = precision.nil? ? self.precision(:quantity => quantity, :system => system) : Integer(precision)
-      text = format_number(number, digits)
+      text = format_number(number, digits, :group_from => group_from)
       show_unit ? "#{text} #{label(:quantity => quantity, :system => system)}" : text
     end
 
-    # Fixed places with trailing zeros dropped; values of 10,000 or more are grouped.
-    def format_number(value, precision)
+    # Fixed places with trailing zeros dropped; values of `group_from` or more are grouped, and nil never groups.
+    def format_number(value, precision, group_from: GROUP_FROM)
       rounded = Kernel.format("%.#{precision}f", value).sub(/\.0+\z/, "").sub(/(\.\d*?)0+\z/, "\\1")
       integer, fraction = rounded.split(".", 2)
       sign = integer.start_with?("-") ? "-" : ""
       digits = integer.delete_prefix("-")
-      digits = digits.reverse.scan(/.{1,3}/).join(",").reverse if digits.to_i >= 10_000
+      digits = digits.reverse.scan(/.{1,3}/).join(",").reverse if group_from && digits.to_i >= group_from
       sign + digits + (fraction ? ".#{fraction}" : "")
     end
 
