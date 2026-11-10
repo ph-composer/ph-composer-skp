@@ -651,7 +651,7 @@ unreadable), contacted (a client sent `initialize` with that token since SketchU
 `clientInfo` name and version it gave, cut to 60 characters) and verified (that token's latest
 `discover` or `context` completed: an Outcome with status `completed`, or discover's page, never a busy,
 failed or refused answer, and no `connection.reason`). A profile's token is the one the client uses: the
-token its entry carries inline while it does, otherwise the saved file's; a saved token the entry does
+token its entry carries inline while it does (none once that token is revoked), otherwise the saved file's; a saved token the entry does
 not read yet is shown as waiting for Repair. Contacted and
 verified belong to the token, so profiles sharing one share them. No test write and no client process
 verifies a connection; the user starts a client session. A profile whose file holds a live token and

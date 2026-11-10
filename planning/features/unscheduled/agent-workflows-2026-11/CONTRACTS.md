@@ -370,7 +370,7 @@ a guard. A refusal never stops a person's tool or steals focus. Existing stale/r
   showed on that profile, or null); new inbound `access.repair` (`client`, `profile`). Outbound `access.state`
   adds `connections`, one row per client profile: `client`, `client_name`, `profile`, `server`, `token` (public
   row of the live token the client uses, with `model_open` for a Model-only token, or null: the inline token while
-  the entry carries one, else the saved file's), `source` (`file`, `inline` or null), `saved_token` (the saved
+  the entry carries one, and none once that inline token is revoked; else the saved file's), `source` (`file`, `inline` or null), `saved_token` (the saved
   file's live token, which Repair applies, or null), `entry` (`configured`, `absent`, `outdated`, `inline`, `other`, `no_client`, `unreadable`), `contacted`
   (`client`, `at`, or null), `verified_at`, `setup` (token-free text). `access.connected` adds `profile` and
   `setup` (present when the state is manual); new outbound `access.replacement` (`client`, `profile`, `token`).
