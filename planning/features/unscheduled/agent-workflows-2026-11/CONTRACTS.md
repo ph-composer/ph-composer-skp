@@ -130,8 +130,9 @@ writes a dictionary. New names:
   components, with the root-composed transform and the carried lock, visibility and shared-storage flags.
 - `Pages.bounded(..., prepare:)`: builds the sliced rows before the byte cut, so a page computes only its own rows.
 - `ph_composer.zones.make_candidates`: params `parent_path` (default `[]`), `limit`, `cursor`. Rows: each Group
-  directly in that context with `parent_path`, `entity_ids`, `name`, `refusal` (Make Zone's own check after its
-  edit-path check, `Zones.make_refusal`) and `open_required`; beside them `loose_faces` and `loose_edges`.
+  directly in that context with `path`, `name`, `hidden`, `make_zone` (`parent_path`, `entity_ids`) and `refusal`
+  (Make Zone's own check after its edit-path check, `Zones.make_refusal`, plus `ContextCommands.open_refusal` for a
+  context that is not open); beside them `open_required`, `loose_faces` and `loose_edges`.
 - `ph_composer.spaces.candidate_faces.list` param `context` (a root-to-container path), beside `space` and `volume`:
   Faces loose there, `candidate: "space"`, `operation: "ph_composer.spaces.create"`, the refusal Create Space gives
   that Face named alone with that context open (`CreateFaces.read` with `context:`).

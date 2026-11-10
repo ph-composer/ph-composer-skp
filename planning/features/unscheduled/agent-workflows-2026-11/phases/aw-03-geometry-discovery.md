@@ -1,6 +1,6 @@
 # AW-03 · Find existing geometry without selection
 
-STATUS: Authorized 2026-11-10, not started. ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication.
+STATUS: Implemented on branch `feat/agent-workflows-aw-03` (API 1.36); review and host/MCP gate in STATUS. ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication.
 DEPENDS ON: AW-01/AW-02. FINDING: R06. CONTRACT: C04. ACCEPTANCE: A06.
 
 ## Outcome
