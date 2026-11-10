@@ -33,6 +33,8 @@ healthy rows. Every new write has normal, refusal, changed-target, no-op, rollba
 appropriate to its boundary. New public registration must carry schemas, examples, units, refusals,
 capability and side effects. No test may replace a required native or client gate with the stub.
 
+Current states, 2026-11-10: A12 closed by `AW10`; A17 open (`AW10` 13 of 14, its gesture row blocked); A13 and A11's native dialog clicks open on one full-screen hold (`AW10H`); A14 and A16 deferred, optional. STATUS.md holds the receipts.
+
 Windows, SketchUp 2023 and public distribution remain separate unverified gates. If a selected case
 cannot run, retain its exact missing prerequisite and state; do not mark the stage accepted on offline
 results alone.

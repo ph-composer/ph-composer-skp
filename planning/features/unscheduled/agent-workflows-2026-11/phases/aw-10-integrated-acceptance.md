@@ -1,6 +1,6 @@
 # AW-10 · All-feature acceptance and handoff
 
-STATUS: Authorized 2026-11-10, not started. ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication.
+STATUS: Evidence recorded on branch 2026-11-10, no product code; A17 open: AW05R pass, AW10 blocked with 13 of 14 assertions passing (gesture row), AW10H blocked on one full-screen hold (see the packet STATUS). ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication.
 DEPENDS ON: AW-01 through AW-09 selected scope. ACCEPTANCE: entire selected register, especially A17.
 
 ## Outcome

@@ -104,6 +104,18 @@ stays clean.
 | Omit Zone B from export | Room B absent; `equipment.zone_omitted` on ERV-2's and HWS-1's rows for B; Room A unchanged |
 | Force the ventilation section's translate to fail for ERV-1 (test seam) | `object.unavailable`, blocking; the pair is not written (D4-06) |
 
+## Agent workflow coverage
+
+Carried from the agent-workflows review on 2026-11-10. Every durable record, child collection and
+assignment Phase 4 adds meets the [workflow acceptance matrix](../../code-review/agent-workflows-2026-11/COVERAGE.md#workflow-acceptance-that-every-future-feature-should-meet):
+a client with only the installed connection discovers its schema, enumerates every object with an
+empty selection, reads exact references, values and SI units in pages within the reply budget,
+previews and applies each supported edit, reads the outcome back and locates it. Exercise
+unassigned, unreadable, unavailable-extension, orphaned and copied objects, and add the new
+operations to the installed guide. M15's fresh-process run includes one recorded client session
+that does this for each new family, as the agent-workflows AW10 case did. This adds evidence to
+the rows above; it adds no product scope.
+
 ## Completion boundary
 
 M01 to M15 close Phase 4. Every METr check, including whether PHX writes one device or three for
