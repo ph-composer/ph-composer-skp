@@ -4473,6 +4473,98 @@
         "src/ph_composer/shell/refusals.rb"
       ],
       "native_control_required": false
+    },
+    {
+      "id": "AW03",
+      "label": "Agent-workflows AW-03 inventory and candidate reads on the installed RBZ in a fresh synthetic Model, over the real loopback MCP listener with a read/view/model_write token: with nothing selected, context children list the root and a 30-degree rotated nested wrapper; Make Zone candidates at the root and in the wrapper (open required), first-Space candidate Faces in the wrapper with world loops matching InstancePath, and unassigned thermal Edge candidates are read with no revision, selection or edit-path change; Make Zone commits at the root and in the opened wrapper, a first Space is created, an unassigned Edge is assigned, read back by path, cleared and reread with end points matching InstancePath; a stale cursor and a stale reference refuse; native Undo and Redo of the clear; every reply within 24 KiB",
+      "mode": "mixed",
+      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/shell/context_children.rb",
+        "src/ph_composer/shell/context_commands.rb",
+        "src/ph_composer/core/occurrence_path.rb",
+        "src/ph_composer/features/zones/zone/make_candidates.rb",
+        "src/ph_composer/features/spaces/scoped_reads.rb",
+        "src/ph_composer/features/spaces/create_faces.rb",
+        "src/ph_composer/features/thermal_bridges/assignment/path_reads.rb",
+        "src/ph_composer/features/thermal_bridges/assignment/reference_target.rb",
+        "src/ph_composer/features/thermal_bridges/assignment/selection.rb",
+        "src/ph_composer/features/thermal_bridges/declarations/assignment.rb"
+      ],
+      "native_control_required": true
+    },
+    {
+      "id": "AW04",
+      "label": "Agent-workflows AW-04 definition detail reads on the installed RBZ in a fresh synthetic Model, over the real loopback MCP listener with a read/model_write token: a Material with 30 KB non-ASCII user_data and 1,500 keys, a 10 x 10 Window Type, a 30 x 12 Assembly and 120 Assemblies on one Material are created by invoke and read completely through records.list summary, records.detail fragments, part and uses reads with exact reconstruction; the oversized materials.delete preview is read by part, a stale preview cursor refuses, and the preview applies with its digest; no read changes the revision; every reply within 24 KiB",
+      "mode": "native",
+      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/agent_access/executor.rb",
+        "src/ph_composer/agent_access/tools.rb",
+        "src/ph_composer/features/assemblies/declarations/parts.rb",
+        "src/ph_composer/features/windows/declarations/parts.rb",
+        "src/ph_composer/shell/fragments.rb",
+        "src/ph_composer/shell/pages.rb",
+        "src/ph_composer/shell/preview_parts.rb",
+        "src/ph_composer/shell/record_queries.rb"
+      ],
+      "native_control_required": false
+    },
+    {
+      "id": "AW05",
+      "label": "Agent-workflows AW-05 occurrence detail reads on the installed RBZ in a fresh synthetic Model, over the real loopback MCP listener with a read/model_write token: in a wrapper turned 30 degrees and moved 10 m, a Zone with a 450-hole wall, a floor, a 300-Edge run and loose Edges; Units with 30 KB user_data, host extent holes, Zone findings, the run's members, glazed area by Face, and Floor Segment loops read completely by page within 24 KiB; reconstructed Unit metadata guards an update that reads back exactly and a later edit refuses target.changed; paged reads equal the in-process whole reads and member end points match native InstancePath world coordinates",
+      "mode": "native",
+      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/windows/declarations/units.rb",
+        "src/ph_composer/features/windows/units/host_extent.rb",
+        "src/ph_composer/features/windows/units/areas.rb",
+        "src/ph_composer/features/windows/units/convert_review.rb",
+        "src/ph_composer/features/thermal_bridges/declarations/schedule.rb",
+        "src/ph_composer/features/thermal_bridges/scan/occurrences.rb",
+        "src/ph_composer/features/zones/declarations/zone.rb",
+        "src/ph_composer/features/zones/options/registration.rb",
+        "src/ph_composer/features/spaces/declarations/spaces.rb",
+        "src/ph_composer/shell/fragments.rb",
+        "src/ph_composer/shell/record_queries.rb"
+      ],
+      "native_control_required": false
+    },
+    {
+      "id": "AW06",
+      "label": "Agent-workflows AW-06 library catalog and export paging on the installed RBZ in a fresh synthetic Model, over the real loopback MCP listener: a synthetic file library with 350 rejected rows loads compactly and every warning pages; a 30 KB note rejoins from catalog detail; a reload makes the old generation refuse library.catalog_stale; a Frame copy and its assignment built from the describe example apply in one invoke and read back; native Undo removes both and Redo restores both; the compact export with paged omissions writes the approved file, which parses back with its SHA-256; every reply within 24 KiB",
+      "mode": "mixed",
+      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/library/catalog_reads.rb",
+        "src/ph_composer/library/coordinator.rb",
+        "src/ph_composer/library/export_registration.rb",
+        "src/ph_composer/library/export_workflow.rb",
+        "src/ph_composer/library/file_writer.rb",
+        "src/ph_composer/library/refuses.rb",
+        "src/ph_composer/library/schemas.rb",
+        "src/ph_composer/features/windows/library_assignment.rb"
+      ],
+      "native_control_required": true
+    },
+    {
+      "id": "AW07",
+      "label": "Agent-workflows AW-07 export QA, run diagnostics and thermal-bridge repair on the installed RBZ in a fresh synthetic Model, over the real loopback MCP listener with a read/model_write/export token: an oversized preflight reads compactly and by page; a blocked export keeps its diagnostics, read before and after a Model edit, with no output pair written; a broken Edge assignment is previewed and repaired, native Undo restores its exact bytes and Redo removes them while another dictionary stays; a stranded assignment is repaired; the rest is classified and exported through the normal runtime, and the written run's report and HBJSON match the files and their hashes; save and fresh-process reopen",
+      "mode": "mixed",
+      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/export/diagnostic_pages.rb",
+        "src/ph_composer/export/metadata_check.rb",
+        "src/ph_composer/export/preflight_view.rb",
+        "src/ph_composer/export/run_diagnostics.rb",
+        "src/ph_composer/export/task.rb",
+        "src/ph_composer/export/tasks.rb",
+        "src/ph_composer/features/thermal_bridges/assignment/repair.rb",
+        "src/ph_composer/features/thermal_bridges/assignment/operations.rb",
+        "src/ph_composer/agent_access/executor.rb",
+        "src/ph_composer/agent_access/tools.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }
