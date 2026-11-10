@@ -336,9 +336,9 @@
       "sha256": "ad0a0729f41d444e1d3b979a07bc996e991ff5abfe9ab6b4b58c2fe0a62fac0b"
     },
     "html/icons.js": {
-      "bytes": 11413,
+      "bytes": 12345,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "1a95b1f0c7ffe0d33782623d1125841cd0cf41f7ad735a80b1f16b6a18a869c5"
+      "sha256": "ae769a7d0c4b07031ab9812cd350d17b6e4638549d0f5295ccaafe1f1390ed54"
     },
     "html/index.html": {
       "bytes": 8263,
@@ -571,9 +571,9 @@
       "sha256": "2e94421a914c75953be65845ed1c30fad144f6bf10cc0ef7aaf4b023d4192025"
     },
     "html/view_controls.js": {
-      "bytes": 12837,
+      "bytes": 13309,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "349b4c3b99f4dabd5d3ed7ca69941348a683b980498ee448096692df385f9f36"
+      "sha256": "82a559c6d8dfd7d3af015b3032ab78e11c0af63eaa37de52368aa1b7291c7161"
     },
     "html/workspace.js": {
       "bytes": 1630,

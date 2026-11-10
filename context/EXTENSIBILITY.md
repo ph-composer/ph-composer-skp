@@ -785,8 +785,8 @@ so `tools/examples/zones/example_zone_view.js`, two columns and `value`, is a co
   listed the view row is hidden; with none the host shows the Zone rows alone.
 - **The host keeps** the Zone rows and their Name column, the Zone row's in-place cells
   (`zone_cells.js`: Building-Segment, Level, Ground depth), Make independent, the text filter, the
-  Zone filters (Building-Segment, Level), which rows are expanded (Expand all and Collapse all reach
-  every row with rows beneath it), and the panel hooks (`navigationGuard`, `outcomeText`, `workedOn`).
+  Zone filters (Building-Segment, Level), which rows are expanded (the control row's one Collapse all / Expand all
+  toggle reaches every row with rows beneath it), and the panel hooks (`navigationGuard`, `outcomeText`, `workedOn`).
 - **A view owns** its rows, its columns, their header Colour-by toggles and value filters, its sort,
   its checked rows, its selection bar, its settings and its tools. Checked Zones are shared: on a
   switch the host asks the old view which Zone rows are fully checked (`checkedZones`) and, when there

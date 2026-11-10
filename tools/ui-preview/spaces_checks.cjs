@@ -21,6 +21,14 @@ async function open(page, fixture) {
   await page.locator(".phc-zone-view:not([hidden]) .phc-table").waitFor();
 }
 
+/* Opens every row through the one Collapse all / Expand all toggle, which offers Collapse all while anything
+   is open, so the partly open table the fixture starts with takes two presses. */
+async function expandAll(page) {
+  const toggle = page.locator(".phc-overview .phc-view-expansion");
+  if (await toggle.getAttribute("aria-label") === "Collapse all") await toggle.click();
+  await page.getByRole("button", { name: "Expand all", exact: true }).click();
+}
+
 function visibleRows(page) {
   return page.locator(".phc-zone-view:not([hidden]) tr[data-row-key]:not([hidden])");
 }
@@ -47,7 +55,7 @@ check({ name: "spaces", output }, async ({ newPage, step }) => {
     // The reference model: Zone rows with sums, Spaces beneath, and no marker on Living Zone's differing sums.
     await open(page, "spaces");
     assert.equal(await page.locator(".phc-overview .phc-view-count").textContent(), "2 Zones · 4 Spaces");
-    await page.getByRole("button", { name: "Expand all" }).click();
+    await expandAll(page);
     assert.equal(await visibleRows(page).count(), 16, "2 Zones, 4 Spaces, 5 Volumes and 5 Floor Segments");
     const living = page.locator('.phc-zone-view:not([hidden]) tr[data-row-key=\'["Zone",[100]]\']');
     assert.equal(await living.locator(".phc-row-marker:not([hidden])").count(), 0, "no supply and extract marker on a Zone");
@@ -136,7 +144,7 @@ check({ name: "spaces", output }, async ({ newPage, step }) => {
     step("Height from solid");
     // Height from solid from a Volume row: the confirmation shows the solid's volume, the floor area and the height.
     await open(page, "spaces");
-    await page.getByRole("button", { name: "Expand all" }).click();
+    await expandAll(page);
     await page.getByRole("button", { name: "Height of Volume 1 from a solid" }).first().click();
     const height = page.locator("dialog:visible");
     await height.waitFor();
@@ -206,7 +214,7 @@ check({ name: "spaces", output }, async ({ newPage, step }) => {
         `(runs ${times.map(time => time.toFixed(0)).join(", ")} ms)`);
     };
     await measure("Zones open");
-    await page.getByRole("button", { name: "Expand all" }).click();
+    await expandAll(page);
     await measure("every row open");
     return `Spaces browser checks passed; evidence in ${output}`;
 });

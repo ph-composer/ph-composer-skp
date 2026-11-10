@@ -64,10 +64,7 @@ function table(p, fields) {
 }
 
 function expandAll(p) {
-  var button = p.section().querySelectorAll("button").filter(function (node) {
-    return node.textContent === "Expand all";
-  })[0];
-  button.listeners.click({ preventDefault: function () {} });
+  fixture.expandAll(p.section());
 }
 
 test("Spaces, Volumes and Floor Segments sit three deep under their Zone, with no Space Floor row", function () {
@@ -221,20 +218,22 @@ test("a filter matching a Space lists only that Space; one matching the Zone lis
 
 /* ---------------------------------------------------------------- review (PR #150) */
 
-function button(p, text) {
-  return p.section().querySelectorAll("button").filter(function (node) { return node.textContent === text; })[0];
-}
-
 function labelled(p, label) {
   return p.section().closest("[data-pane]").querySelectorAll("button, input").filter(function (node) {
     return node.getAttribute("aria-label") === label;
   })[0];
 }
 
-test("Expand all is offered while Spaces and Volumes start collapsed", function () {
+test("the open Zones offer Collapse all while their Spaces start collapsed, and Expand all once shut", function () {
   var p = page();
   p.panel.receive({ type: "panel.snapshot", payload: snapshot() });
-  assert.strictEqual(button(p, "Expand all").disabled, false);
+  var toggle = p.section().querySelector(".phc-view-expansion");
+  assert.deepStrictEqual([toggle.getAttribute("aria-label"), toggle.disabled], ["Collapse all", false],
+    "a partly open table offers Collapse all");
+  toggle.listeners.click({});
+  toggle = p.section().querySelector(".phc-view-expansion");
+  assert.deepStrictEqual([toggle.getAttribute("aria-label"), toggle.getAttribute("data-icon"), toggle.disabled],
+    ["Expand all", "copy_plus", false]);
 });
 
 test("the group of Spaces outside every Zone counts as no Zone and stays last in any sort", function () {

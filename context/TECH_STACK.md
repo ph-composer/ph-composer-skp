@@ -770,7 +770,8 @@ this foundation when their feature lands.
   `HeaderToggle`) bound to a mode or to a group modes declare. Header and row icons may show only on
   hover or focus; a state (a pressed toggle, an active filter, a checked box) stays visible at rest.
 - `ui.ViewControls` for filtering, ordering (with a sort-direction toggle, or from column menus with
-  `columnSort: true`) and grouping; filtering hides rows and never drops
+  `columnSort: true`) and grouping, with one Collapse all / Expand all icon toggle that collapses while
+  anything is open and expands once everything is shut; filtering hides rows and never drops
   records, so drafts and expansion survive.
 - `ui.Bubble` for non-modal editors anchored to a control: shared surface and pointer, viewport
   positioning, one active bubble, Escape and outside-click dismissal, focus return.

@@ -87,4 +87,15 @@ function zones() {
   });
 }
 
-module.exports = { section: section, zones: zones };
+/* Opens every row through the control row's one Collapse all / Expand all toggle. While anything is open it
+   offers Collapse all, so a partly open table takes a second press. */
+function expandAll(section) {
+  for (var press = 0; press < 2; press += 1) {
+    var toggle = section.querySelector(".phc-view-expansion");
+    var expanding = toggle.getAttribute("aria-label") === "Expand all";
+    toggle.listeners.click({ preventDefault: function () {} });
+    if (expanding) return;
+  }
+}
+
+module.exports = { section: section, zones: zones, expandAll: expandAll };

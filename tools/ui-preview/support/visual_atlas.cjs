@@ -276,6 +276,8 @@ check({ name: "visual_atlas", output }, async ({ newPage, step }) => {
           await page.getByRole("button", { name: label, exact: true }).click();
           await shot("key-popup", "spaces", screen); await cancel();
         }
+        // The one expansion toggle offers Collapse all while the Zones are open, then Expand all.
+        await page.getByRole("button", { name: "Collapse all", exact: true }).click();
         await page.getByRole("button", { name: "Expand all", exact: true }).click();
         for (const [label, screen] of [["Height of Volume 1 from a solid", "space-height-from-solid"],
           ["Delete Volume 1", "space-delete-only-volume"], ["Delete Volume 2", "space-delete-volume"]]) {

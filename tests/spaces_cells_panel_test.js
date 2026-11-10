@@ -58,8 +58,7 @@ function enter(input, text) {
 }
 
 function expandAll(p) {
-  p.section().querySelectorAll("button").filter(function (node) { return node.textContent === "Expand all"; })[0]
-    .listeners.click({ preventDefault: function () {} });
+  fixture.expandAll(p.section());
 }
 
 function payloads(p, name) {

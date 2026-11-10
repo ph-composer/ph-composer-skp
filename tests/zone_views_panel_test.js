@@ -121,9 +121,7 @@ test("switching shows the other view's columns and rows, sends nothing to the Mo
   assert.deepStrictEqual(shownColumns(p), ["actions", "hierarchy", "name", "gross_m2", "unclassified_m2"],
     "the example lists no Zone cells and no Face columns");
   assert.deepStrictEqual(rowKinds(p), ["Zone"], "a view with no child rows shows the Zone rows alone");
-  var collapse = p.section().querySelectorAll("button").filter(function (node) {
-    return node.textContent === "Collapse all";
-  })[0];
+  var collapse = p.section().querySelector(".phc-view-expansion");
   assert.strictEqual(collapse.disabled, true, "nothing opens, so nothing collapses");
   var surface = p.section().querySelectorAll(".phc-zone-view").filter(function (node) { return !node.hidden; })[0];
   assert.deepStrictEqual(surface.querySelectorAll("td").filter(function (td) {

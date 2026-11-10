@@ -1058,13 +1058,10 @@ test("Expand all and Collapse all reach the unclassified summary, and the filter
   function count() {
     return section.querySelectorAll("[data-row-key]").filter(function (node) { return !node.hidden; }).length;
   }
-  function byText(root, text) {
-    return root.querySelectorAll("button").filter(function (node) { return node.textContent === text; })[0];
-  }
   assert.strictEqual(count(), 4);
-  byText(section, "Collapse all").listeners.click({});
+  byLabel(section, "Collapse all").listeners.click({});
   assert.strictEqual(count(), 1);
-  byText(section, "Expand all").listeners.click({});
+  byLabel(section, "Expand all").listeners.click({});
   assert.strictEqual(count(), 4);
   var filter = byLabel(section, "Filter Zones");
   filter.value = "unclassified";
@@ -1500,9 +1497,7 @@ test("column filters combine across Zone and Face values without using text sear
   p.panel.receive({ type: "view.result", payload: { request_id: p.sent[1].payload.request_id,
     session: "session-a", outcome: { status: "completed" } } });
   var search = byLabel(p.section, "Filter Zones"); search.value = "Nothing"; search.listeners.input({});
-  var collapse = p.section.querySelectorAll("button").filter(function (node) {
-    return node.textContent === "Collapse all";
-  })[0];
+  var collapse = byLabel(p.section, "Collapse all");
   click(collapse);
   assert.strictEqual(p.sent.length, 2, "search and collapsing do not change viewport scope");
   exclude("Boundary", "Outdoors");
