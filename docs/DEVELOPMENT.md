@@ -140,10 +140,13 @@ every push to `main`. A newer push to the same pull request cancels the run in p
 
 Generated goldens are regenerated with `make fixtures`, which prints every file it changed; every
 other run compares them. Each golden has exactly one owning test, listed in `FIXTURE_OWNERS` in
-the Makefile, and `FIXTURE_PATHS` names what `make fixtures-check` compares. There are two:
+the Makefile, and `FIXTURE_PATHS` names what `make fixtures-check` compares. They are
 `tests/fixtures/phase_one/two_zones_extraction.json`, the Phase 1 two-Zone extraction, owned by
-`tests/phase_one_export_test.rb`; and [`API_REFERENCE.md`](API_REFERENCE.md), the generated API
-reference, owned by `tests/api_reference_test.rb`. Hand-authored inputs live apart from goldens and
+`tests/phase_one_export_test.rb`; the thermal-bridge extraction under `tests/fixtures/thermal_bridges/`,
+owned by `tests/thermal_bridge_export_test.rb`; [`API_REFERENCE.md`](API_REFERENCE.md), the generated
+API reference, owned by `tests/api_reference_test.rb`; and `src/ph_composer/agent_access/guide.md`, the
+shipped copy of [`AGENT_GUIDE.md`](AGENT_GUIDE.md) the connection serves, owned by
+`tests/agent_guide_test.rb`. Edit the guide in `docs/` and run `make fixtures`. Hand-authored inputs live apart from goldens and
 nothing regenerates them.
 
 `make fixtures-check` compares the goldens' content before and after regenerating them, not against
