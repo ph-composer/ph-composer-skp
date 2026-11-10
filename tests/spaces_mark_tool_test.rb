@@ -108,6 +108,21 @@ class SpacesMarkToolTest < PhComposerTestCase
     assert_equal 2, volumes.length
   end
 
+  # The two root Faces share no Edge, so one drag across them makes two Volumes, in one Undo step.
+  def test_a_drag_across_separate_faces_at_a_space_root_makes_a_volume_each
+    @model.active_path = [@zone, @space]
+    tool.start(1.0)
+    point(:a, [@root_face])
+    point(:b, [@root_face2])
+    operations = @model.operations.length
+    press(:a)
+    move(:b)
+    release
+    assert_equal operations + 1, @model.operations.length
+    assert_equal "Added 2 Volumes to the Space with 2 Floor Segments.", Sketchup.status_texts.last
+    assert_equal 3, space_row.fetch("volumes").length
+  end
+
   def test_a_face_in_a_zone_outside_any_space_is_offered_create_space_and_nothing_is_written
     @model.active_path = [@zone]
     tool.start(1.0)

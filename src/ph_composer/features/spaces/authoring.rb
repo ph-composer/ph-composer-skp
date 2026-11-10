@@ -32,8 +32,9 @@ module PhComposer
           "height_source" => Settings.read(request.model).fetch("last_height_m") ? "last_height" : "default" }
       end
 
-      # Makes one Space from Faces loose in the open edit context, hosted in `zone`, or in no Zone when it is nil.
-      # The Space Group stands where the Faces were drawn, except that it never stays inside a Zone.
+      # Makes one Space from Faces loose in the open edit context, hosted in `zone`, or in no Zone when it is nil,
+      # with one Volume per set of Faces joined by shared Edges. The Space Group stands where the Faces were drawn,
+      # except that it never stays inside a Zone.
       def create(request, proposal, faces:, zone: nil, name: nil, number: nil, weighting_factor: 1.0)
         context = Resolve.integer_path(faces.first)[0...-1]
         context_open!(request.model, context,
@@ -52,20 +53,20 @@ module PhComposer
         allocate = Records::Identity.allocator(request, request.params)
         height = Settings.default_height_m(request.model)
         space = { "id" => allocate.call("spc"), "schema_version" => 1, "name" => name.to_s,
-                  "number" => number || next_number(scan, zone_id), "default_height_m" => height,
-                  "next_volume_sequence" => 2 }
+                  "number" => number || next_number(scan, zone_id), "default_height_m" => height }
         space["zone_id"] = zone_id if zone_id
-        volume = new_volume(allocate, 1, height)
-        segments = segments_for(allocate, face_ids, weighting_factor)
-        [[SPACE, space], [VOLUME, volume]].each { |kind, record| Spaces.validate!(kind, record) }
-        proposal.add_step(GroupStep.new(:context_path => context, :face_ids => face_ids, :space => space,
-                                        :volume => volume, :segments => segments, :place_in => found.outside),
+        sets = Steps.connected_ids(Operations::EntityScope.new(context).resolve(request.model), face_ids)
+        volumes = new_volumes(allocate, sets, 1, height, weighting_factor)
+        space["next_volume_sequence"] = volumes.length + 1
+        Spaces.validate!(SPACE, space)
+        proposal.add_step(GroupStep.new(:context_path => context, :volumes => volumes, :space => space,
+                                        :place_in => found.outside),
                           :scopes => [context, found.outside].compact.map { |path| Operations::EntityScope.new(path) })
-        { "space_id" => space.fetch("id"), "volume_id" => volume.fetch("id"),
-          "floor_segment_ids" => segments.values.map { |record| record.fetch("id") } }
+        { "space_id" => space.fetch("id"), "volumes" => created(volumes) }
       end
 
-      # Loose Faces at a Space's root become its next Volume, with the Space's default height.
+      # Loose Faces at a Space's root become its next Volumes, one per set of Faces joined by shared Edges, each
+      # with the Space's default height.
       def create_volume(request, proposal, space:, faces:, weighting_factor: 1.0)
         scan = Occurrences.scan(request.model)
         occurrence = Resolve.occurrence(scan, space, :mutable => false)
@@ -74,14 +75,31 @@ module PhComposer
         face_ids = space_root_faces(request.model, occurrence, faces)
         before = occurrence.record
         allocate = Records::Identity.allocator(request, request.params)
-        volume = new_volume(allocate, before.fetch("next_volume_sequence"), before.fetch("default_height_m"))
-        segments = segments_for(allocate, face_ids, weighting_factor)
-        proposal.add_step(GroupStep.new(:context_path => occurrence.path, :face_ids => face_ids, :volume => volume,
-                                        :segments => segments),
+        sets = Steps.connected_ids(Occurrences.entity_at(request.model, occurrence.path).entities, face_ids)
+        first = before.fetch("next_volume_sequence")
+        volumes = new_volumes(allocate, sets, first, before.fetch("default_height_m"), weighting_factor)
+        proposal.add_step(GroupStep.new(:context_path => occurrence.path, :volumes => volumes),
                           :scopes => [Operations::EntityScope.new(occurrence.path)])
-        after = before.merge("next_volume_sequence" => before.fetch("next_volume_sequence") + 1)
+        after = before.merge("next_volume_sequence" => first + volumes.length)
         record_step(proposal, SPACE_KIND, occurrence.path, before, after)
-        { "volume_id" => volume.fetch("id"), "floor_segment_ids" => segments.values.map { |record| record["id"] } }
+        { "volumes" => created(volumes) }
+      end
+
+      # One validated NewVolume per set of Face ids, numbered on from `first`.
+      def new_volumes(allocate, sets, first, height, weighting_factor)
+        sets.each_with_index.map do |face_ids, index|
+          volume = Spaces.validate!(VOLUME, new_volume(allocate, first + index, height))
+          NewVolume.new(:face_ids => face_ids, :volume => volume,
+                        :segments => segments_for(allocate, face_ids, weighting_factor))
+        end
+      end
+
+      # What a create answers for each new Volume: its id and its Floor Segments' ids.
+      def created(volumes)
+        volumes.map do |plan|
+          { "volume_id" => plan.volume.fetch("id"),
+            "floor_segment_ids" => plan.segments.values.map { |record| record.fetch("id") } }
+        end
       end
 
       # One record's editable values, guarded by what the caller last read. A null removes an

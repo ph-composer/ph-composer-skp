@@ -237,8 +237,7 @@ module PhComposer
 
       def add_volume(space, paths, factor, revision)
         outcome = invoke(ADD_VOLUME, { "space" => space, "faces" => paths, "weighting_factor" => factor }, revision)
-        report(outcome, "Added a Volume to the Space with #{paths.length} " \
-                        "#{paths.length == 1 ? 'Floor Segment' : 'Floor Segments'}.")
+        report(outcome, outcome["status"] == "completed" && AddVolumeMenu.added(outcome.dig("value", "volumes")))
       end
 
       # Nothing is written: the Faces are remembered, until the next gesture or the tool ends, for the Create

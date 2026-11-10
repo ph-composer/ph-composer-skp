@@ -12,7 +12,7 @@ module PhComposer
         "space.nested" => true, "space.volume_nested" => true, "space.volume_orphan" => true,
         "space.segment_misplaced" => true, "space.volume_moved" => false,
         "space.volume_unprotected" => false, "space.duplicate_identity" => true,
-        "space.offset_from_zone" => false, "space.floor_overlap" => false
+        "space.offset_from_zone" => false, "space.floor_overlap" => false, "space.floor_disconnected" => false
       }.freeze
 
       module_function
@@ -43,8 +43,9 @@ module PhComposer
                                       "Zone, or remove it from the missing Zone.", :repair => "unhost")
       end
 
-      # `floor_overlap` says two of its Floor Segments cover the same plan area.
-      def volume(row, floor_overlap: false)
+      # `floor_overlap` says two of its Floor Segments cover the same plan area; `floor_disconnected` that its Floor
+      # Segments are not all joined by shared Edges.
+      def volume(row, floor_overlap: false, floor_disconnected: false)
         name = "Volume #{row.dig('values', 'number')}"
         found = []
         found << finding("space.volume_nested", "#{name} is below another Group inside its Space.") if row["nested"]
@@ -52,6 +53,10 @@ module PhComposer
         if floor_overlap
           found << finding("space.floor_overlap", "#{name} has Floor Segments that overlap in plan, so the area they " \
                                                   "share counts twice.")
+        end
+        if floor_disconnected
+          found << finding("space.floor_disconnected", "#{name} has Floor Segments that share no Edge with the " \
+                                                       "others, so its floor is in separate pieces.")
         end
         if !row["open"] && !row["protected"]
           found << finding("space.volume_unprotected", "#{name} is not protected; its Faces can be edited from the " \

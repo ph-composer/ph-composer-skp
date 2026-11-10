@@ -13,8 +13,8 @@ Plan: [PLAN.md](PLAN.md). States: `Scoped` · `In progress` · `Implemented on b
 | SUI-01 | #416 | Merged to main | [#427](https://github.com/ph-composer/ph-composer-skp/pull/427) | `make ci` exit 0 (Ruby 2527 runs, 0 failures; JS 856 pass; Python 264 passed; fixtures up to date; RBZ verified). `make ui-checks UI_CHECKS=tools/ui-preview/spaces_checks.cjs` passed. Host check recorded in the PR |
 | SUI-02 | #417 | Merged to main | [#428](https://github.com/ph-composer/ph-composer-skp/pull/428) | `make ci` exit 0 (Ruby 2541 runs, 0 failures; JS 856 pass; Python 264 passed; fixtures up to date; RBZ verified). Host check recorded in the PR |
 | SUI-03 | #419, #421 | Merged to main | [#429](https://github.com/ph-composer/ph-composer-skp/pull/429) | `make ci` exit 0 (Ruby 2556 runs, 0 failures; JS 856 pass; Python 264 passed; fixtures up to date; RBZ verified). Host check recorded in the PR |
-| SUI-04 | #422 | Implemented on branch | | `make ci` exit 0 (Ruby 2565 runs, 0 failures; JS 856 pass; Python 264 passed; fixtures up to date; RBZ verified). Host check recorded in the PR |
-| SUI-05 | #423 | Scoped | | |
+| SUI-04 | #422 | Merged to main | [#430](https://github.com/ph-composer/ph-composer-skp/pull/430) | `make ci` exit 0 (Ruby 2567 runs, 0 failures; JS 856 pass; Python 264 passed; fixtures up to date; RBZ verified). Host check recorded in the PR |
+| SUI-05 | #423 | Implemented on branch | | `make ci` exit 0 (Ruby 2579 runs, 0 failures; JS 856 pass; Python 264 passed; fixtures up to date; RBZ verified). Host check recorded in the PR |
 | SUI-06 | #424 | Scoped | | |
 | SUI-07 | #420 | Scoped | | |
 | SUI-08 | #418, #425 | Scoped | | |

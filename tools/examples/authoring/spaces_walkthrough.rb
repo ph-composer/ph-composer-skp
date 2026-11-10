@@ -7,8 +7,9 @@
 # a fourth in the new Space, and later copies a Volume as a native copy leaves it. Everything else is the
 # client, through PhComposer::API alone: it moves the edit path only with `ph_composer.context.open` and
 # `.root`, finds the loose Face with `spaces.candidate_faces.list`, and never assigns a path or walks
-# geometry. The client creates the Space from the three floor surfaces, a second Volume, one Floor Segment
-# marked as not counting, a height, two airflows and one cleared, reads back, recovers from a stale edit,
+# geometry. The client creates the Space from the three floor surfaces, which touch nowhere and so make three
+# Volumes, then adds a fourth Volume, marks one Floor Segment as not counting, sets a height, two airflows and
+# one cleared, reads back, recovers from a stale edit,
 # reads the copy's duplicate identity and makes it independent, and moves the Space into the second
 # Zone. Each write is one Undo step; navigation adds no operation of its own, though SketchUp records
 # leaving a Group on its Undo stack. The refusals segment shows a stale path, a locked step and a wrong
@@ -138,14 +139,14 @@ module SpacesWalkthrough
                                                         stranger == "session.unknown" }
   end
 
-  # The Space has both Volumes, 3 m² weighted (one of four 1 m² Floor Segments counts nothing), and the
-  # supply set, the extract cleared to a zero that counts and transfer unset.
+  # The Space has its four Volumes, one per separate floor surface, 3 m² weighted (one of four 1 m² Floor
+  # Segments counts nothing), and the supply set, the extract cleared to a zero that counts and transfer unset.
   def read_back(client, session_id, space_id)
     space = space_row(client, space_id)
     metrics = space.fetch("metrics")
     weighted = (metrics.fetch("weighted_area_m2") - 3.0).abs < 1e-6
     flows = space.fetch("airflows") == { "v_sup_m3h" => 60.0, "v_eta_m3h" => 0.0, "v_tran_m3h" => 0.0 }
-    client.steps << { "step" => "read back", "passed" => space.fetch("volumes").length == 2 && weighted && flows }
+    client.steps << { "step" => "read back", "passed" => space.fetch("volumes").length == 4 && weighted && flows }
     { "session" => session_id, "space_id" => space_id, "metrics" => metrics,
       "passed" => client.steps.all? { |row| row.fetch("passed") }, "steps" => client.steps }
   end

@@ -30203,9 +30203,9 @@ Example params:
 
 ### `ph_composer.spaces.create`
 
-Make one new Space with one Volume from a floor surface: explicit Faces loose in the open edit context, each becoming a Floor Segment. Works at the root, in a plain Group and in an open Zone, whose Space Group is placed outside the Zone at the same world position. Owner: `ph_composer.spaces`.
+Make one new Space from a floor surface: explicit Faces loose in the open edit context, each becoming a Floor Segment. Faces joined by a shared Edge, a step included, share one Volume; Faces meeting only at a corner, or not at all, make separate Volumes. Works at the root, in a plain Group and in an open Zone, whose Space Group is placed outside the Zone at the same world position. Owner: `ph_composer.spaces`.
 
-Undo step: Create Space. Groups the Faces and writes the Space, Volume and Floor Segment records.
+Undo step: Create Space. Groups each set of joined Faces as a Volume, the Volumes as the Space, and writes the Space, Volume and Floor Segment records.
 
 Refuses: `record.unreadable`, `space.context_required`, `space.nothing_to_create`, `target.ambiguous`, `target.changed`, `target.edit_path_changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
 
@@ -30282,21 +30282,34 @@ Result:
   "additionalProperties": false,
   "required": [
     "space_id",
-    "volume_id",
-    "floor_segment_ids"
+    "volumes"
   ],
   "properties": {
     "space_id": {
       "type": "string"
     },
-    "volume_id": {
-      "type": "string"
-    },
-    "floor_segment_ids": {
+    "volumes": {
       "type": "array",
       "items": {
-        "type": "string"
-      }
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "volume_id",
+          "floor_segment_ids"
+        ],
+        "properties": {
+          "volume_id": {
+            "type": "string"
+          },
+          "floor_segment_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "description": "Each new Volume and its Floor Segments, one per set of Faces joined by shared Edges, numbered in that order."
     }
   }
 }
@@ -31448,9 +31461,9 @@ Example params:
 
 ### `ph_composer.spaces.volumes.create`
 
-Group explicit loose Faces at an open Space's root into its next Volume. Owner: `ph_composer.spaces`.
+Group explicit loose Faces at an open Space's root into its next Volumes: one per set of Faces joined by shared Edges, each with the Space's default height. Owner: `ph_composer.spaces`.
 
-Undo step: Add Volume. Groups the Faces and writes their records.
+Undo step: Add Volume. Groups each set of joined Faces as a Volume and writes their records.
 
 Refuses: `record.unreadable`, `space.context_required`, `space.shares_edge`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
 
@@ -31518,18 +31531,31 @@ Result:
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "volume_id",
-    "floor_segment_ids"
+    "volumes"
   ],
   "properties": {
-    "volume_id": {
-      "type": "string"
-    },
-    "floor_segment_ids": {
+    "volumes": {
       "type": "array",
       "items": {
-        "type": "string"
-      }
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "volume_id",
+          "floor_segment_ids"
+        ],
+        "properties": {
+          "volume_id": {
+            "type": "string"
+          },
+          "floor_segment_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "description": "Each new Volume and its Floor Segments, one per set of Faces joined by shared Edges, numbered in that order."
     }
   }
 }
@@ -56791,6 +56817,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `space.context_required` | The edit context holding the Faces must be open to group them. |
 | `space.duplicate_identity` | Another occurrence carries this Space, Volume or Floor Segment's id: a copy. |
 | `space.empty` | A Space has no Volume. |
+| `space.floor_disconnected` | A Volume's Floor Segments are not all joined by shared Edges; it still exports as drawn. |
 | `space.floor_overlap` | Two Floor Segments of one Volume overlap in plan, so their shared area counts twice. |
 | `space.floor_projected` | A Floor Segment is not horizontal; its plan area is used. |
 | `space.height_missing` | A Volume has no average clear ceiling height. |
@@ -56973,3 +57000,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.29 | 2026-11-09 | The ph_composer.spaces.labels readout is now ph_composer.spaces.show, on by default in every Model session; it draws each Volume's preview outline with the Space labels. |
 | 1.30 | 2026-11-09 | ph_composer.spaces.remove is new: a Space's records go and its floor Faces stay as plain geometry, in one Undo step. |
 | 1.31 | 2026-11-09 | A Volume whose Floor Segments overlap in plan reads the space.floor_overlap finding, a warning that does not block export. |
+| 1.32 | 2026-11-09 | ph_composer.spaces.create and volumes.create make one Volume per set of Faces joined by shared Edges and answer volumes, a list of volume_id and floor_segment_ids, in place of volume_id and floor_segment_ids. A Volume whose Floor Segments are not all joined reads the space.floor_disconnected finding, a warning that does not block export. The add_volume_menu menu item is new, and create_menu is no longer offered inside a Space. |

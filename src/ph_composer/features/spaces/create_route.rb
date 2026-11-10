@@ -17,8 +17,10 @@ module PhComposer
 
       # Offered when a selected Face could become a floor, or the running Mark floor tool offered one. A wall or a
       # classified Face never could, so a selection of only those leaves the item out; one beside a floor stays
-      # for the review's "Left out" list.
+      # for the review's "Left out" list. Inside an open Space or Volume no Face could, as a Space is never made
+      # inside another: there Add New Volume to Space and Mark floor apply.
       def available?(read)
+        return false if Records::EntityStore.claimed?(Array(read.model.active_path))
         return true if floor_selected?(read)
 
         tool = Spaces.mark_tool(read.session)
