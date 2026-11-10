@@ -105,6 +105,26 @@ class ApiReferenceTest < PhComposerTestCase
     refute_equal pointer, API.discover.fetch("refusal_documentation")
   end
 
+  # Each shipped library kind publishes the target its copy's assignment takes and examples that meet it,
+  # so the one-Undo copy and assign can be written from describe alone.
+  def test_every_shipped_library_kind_describes_its_assignment_target_with_examples
+    kinds = API.discover.fetch("library_kinds")
+    described = kinds.to_h { |row| [row.fetch("wire_kind"), API.describe(:name => row.fetch("name"))] }
+
+    assert_equal %w[frames glazings materials psi_install_types], described.keys.sort
+    described.each do |wire_kind, description|
+      assignment = description.fetch("assignment")
+      assert_equal [true, wire_kind], [assignment.fetch("supported"), description.fetch("wire_kind")]
+      refute_empty assignment.fetch("examples"), wire_kind
+      assignment.fetch("examples").each do |example|
+        assert_empty PhComposer::JsonSchema.validate(example, assignment.fetch("target")), wire_kind
+      end
+    end
+    assert_equal %w[perimeter model_default],
+                 described.fetch("psi_install_types").dig("assignment", "examples").map { |example| example["mode"] }
+    assert_equal "ph_composer.library.copy", described.fetch("materials").fetch("copy")
+  end
+
   def test_quantities_carry_their_units
     zones = API.describe(:name => "ph_composer.zones.list").fetch("result")
     faces = API.describe(:name => "ph_composer.zones.faces.list").fetch("result")

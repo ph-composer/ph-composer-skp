@@ -26,6 +26,37 @@ module PhComposer
       "location" => %w[location.unknown location.revoked location.used location.kind_mismatch location.unavailable
                        location.setup_unreadable location.setup_unavailable].freeze
     }.freeze
+    # What each COMMON code means, in one line, so a client with only the connection can plan recovery;
+    # context/CONTRACTS.md, "Outcomes and codes", is the authority these follow. Discovery publishes them
+    # with the sets; `describe`'s `refuses` rows keep a null description for every foundation code.
+    MEANINGS = {
+      "request.malformed" => "The request envelope or its arguments are not well formed; nothing ran.",
+      "request.api_version" => "The request names an API major version this build does not serve.",
+      "request.capability_denied" => "The caller's grant does not include the capability the operation needs.",
+      "session.unknown" => "The Model session is closed, was reopened or was never opened; discover again.",
+      "session.busy" => "Another change is running or deferred work is settling; read context and retry later.",
+      "params.invalid" => "The params do not meet the operation's params schema or a rule it states.",
+      "operation.failed" => "An unexpected error; the outcome's effect says whether anything was kept.",
+      "request.pending" => "A retry of a request that is still running; ask for its outcome later.",
+      "request.sequence_conflict" => "This sequence or key was already used for a different change.",
+      "request.outcome_unavailable" => "The outcome is too old to know; read the Model before acting again.",
+      "revision.stale" => "The Model changed after expected_revision; read again and decide again.",
+      "proposal.changed" => "The change is no longer the one the preview's proposal_digest described.",
+      "operation.rollback_unverified" => "An abort ran but the unchanged-data check failed or could not run.",
+      "operation.proposal_required" => "A participant was called outside an action's proposal.",
+      "operation.participant_cycle" => "A participant was asked to call itself, directly or through another.",
+      "proposal.foreign_write" => "A participant or library callback staged a write to a kind its owner does not own.",
+      "proposal.contribution_replaced" => "A contributor removed or changed what an earlier one proposed.",
+      "access.user_required" => "The operation needs a location only the user can choose; ask the user to approve one.",
+      "request.cancelled" => "The user dismissed the dialog that would have approved the request.",
+      "location.unknown" => "No approved location has that id.",
+      "location.revoked" => "The user revoked that approved location.",
+      "location.used" => "That single-use location already added its library.",
+      "location.kind_mismatch" => "That approved location is for another kind of file or folder.",
+      "location.unavailable" => "That approved location is no longer there as approved.",
+      "location.setup_unreadable" => "This machine's stored location setup cannot be read.",
+      "location.setup_unavailable" => "This machine's location setup could not be read or saved."
+    }.freeze
     # Codes no handler raises: an unknown name never reaches one, and only dispatch or a native client
     # answers for an approval. An operation's `refuses` never lists them.
     DISPATCH_ONLY = (%w[request.unknown_operation] + COMMON.fetch("approval")).freeze

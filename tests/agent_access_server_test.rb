@@ -84,6 +84,21 @@ class AgentAccessServerTest < PhComposerTestCase
     assert_equal AgentAccess::MCP::PROTOCOL_VERSIONS.first, newer.fetch("protocolVersion")
     assert_equal({ "major" => 1, "minor" => PhComposer::API::MINOR }, known.dig("_meta", "ph_composer/api"))
     assert_equal PhComposer::VERSION, known.dig("serverInfo", "version")
+    assert_equal AgentAccess::Guide::DIGEST, known.dig("_meta", "ph_composer/guide", "digest")
+    assert_includes known.fetch("instructions"), "section guide"
+  end
+
+  # The installed route to the guide: initialize names it, and discover reads its topics through tools/call.
+  def test_the_guide_is_read_through_discover_on_the_connection
+    index = call_tool("discover")
+    topics = call_tool("discover", "section" => "guide").dig("structuredContent", "topics")
+    loop_topic = call_tool("discover", "section" => "guide", "topic" => "the_loop").fetch("structuredContent")
+
+    assert_equal({ "tool" => "discover", "arguments" => { "section" => "guide" } },
+                 index.dig("structuredContent", "guide", "read"))
+    assert_equal AgentAccess::Guide::TOPICS.map { |topic| topic.fetch("id") }, topics.map { |topic| topic.fetch("id") }
+    assert_match(/\A## The loop\n/, loop_topic.fetch("text"))
+    assert_equal AgentAccess::Guide::DIGEST, loop_topic.dig("version", "digest")
   end
 
   def test_a_notification_is_accepted_and_the_lists_answer

@@ -263,7 +263,9 @@ module PhComposer
     # `display_label` is `->(mapped_values) { "text" }`, the label a catalog row, a local record and a
     # resolution candidate show; it is the only word the library service reads from a kind's values,
     # so a kind need not have a `name`. The wire schema must declare `id`, the row's identity.
-    LibraryCallback = Struct.new(:params, :result, :refuses, :handler, keyword_init: true)
+    # A callback's optional `examples` are params it accepts; discovery publishes the `assign` callback's
+    # targets as the kind's assignment examples (Library::KindDescriptor).
+    LibraryCallback = Struct.new(:params, :result, :refuses, :handler, :examples, keyword_init: true)
     LibraryAdapter = Struct.new(:wire_kind, :wire_version, :fingerprint_version, :wire_schema,
                                 :mapped_schema, :fingerprint_fields,
                                 :map, :reverse, :fingerprint, :display_label, :local_read, :create, :replace, :assign,

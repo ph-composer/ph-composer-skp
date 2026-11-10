@@ -15,9 +15,9 @@ records or visual context, propose changes where appropriate, apply validated op
 read back the result. Writes use the same domain rules and native Undo as the application UI.
 The interface reports conflicts when the model changed after the agent inspected it.
 
-Agent access will be explicit and revocable. The user controls which model and file operations
-the connection may perform. The public interface will return structured results and diagnostics
-without requiring access to private implementation code.
+Agent access is explicit and revocable. The user controls which model and file operations the
+connection may perform. The public interface returns structured results and diagnostics without
+requiring access to private implementation code.
 
 ## Available now
 
@@ -109,20 +109,28 @@ block from `~/.codex/config.toml`. PH-Composer itself is removed with SketchUp's
 
 ## Working with an agent
 
-Give your agent [AGENT_GUIDE.md](AGENT_GUIDE.md) before it starts: it is the operating guide for
-the connection, from finding the Model to reading back what changed, with recipes and what to do
-when a request is refused or a reply is lost. Both clients above completed its scenarios against
+The connection carries the operating guide, [AGENT_GUIDE.md](AGENT_GUIDE.md): from finding the Model
+to reading back what changed, with recipes and what to do when a request is refused or a reply is
+lost. The extension ships it, and an agent reads it through `discover`, a topic at a time, with no
+copy of this repository; the connection's first instructions tell it so. You can still give your
+agent the file before it starts. The same `discover` pages through everything installed: operations,
+record kinds, entity kinds, extensions, library kinds and the refusals every operation can answer.
+Both clients above completed the guide's scenarios against
 SketchUp 2026 on macOS: reading, a change with a replayed key, recovery from a stale revision and
 from a change you made meanwhile, Spaces built from loose Faces, an Assembly assignment, a library
 copy, a Window placed at a position you gave, an image of the view, and an export whose file they
 read and checked.
 
 An agent granted Capture the view can take an image of the Model SketchUp is showing, at the
-viewport's size or one it asks for. The image leaves out PH-Composer's own overlays.
+viewport's size or one it asks for. The image leaves out PH-Composer's own overlays. Like an export,
+the image is a file on this computer: the agent receives its path, hash and size, and reads it with
+its client's own file tools. A client that cannot read local files cannot open it.
 
 ## Not yet available
 
-An agent cannot yet work out where a Window fits on a wall by itself: no read gives a Face's width
-and height, so tell it the dimensions. The connection serves agents on this computer only; a remote or hosted connector is not
-planned. Arbitrary Ruby evaluation bridges remain development tools. The engineering requirements
+An agent cannot yet find the first floor Faces or Groups to build on by itself: it works from the
+selection, the open Group or paths you give it, so select or name them. Once a Face is known,
+`ph_composer.windows.units.host_extent` gives its outline and size, so an agent can place a Window
+on it at a position it works out. The connection serves agents on this computer only; a remote or
+hosted connector is not planned. Arbitrary Ruby evaluation bridges remain development tools. The engineering requirements
 and acceptance checks are in [AGENT_INTERFACE.md](../context/AGENT_INTERFACE.md).

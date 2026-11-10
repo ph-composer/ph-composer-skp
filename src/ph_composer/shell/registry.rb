@@ -212,7 +212,7 @@ module PhComposer
     }.freeze
     LIBRARY_ADAPTER_VALUES = %i[wire_kind wire_version fingerprint_version wire_schema mapped_schema
                                 fingerprint_fields].freeze
-    LIBRARY_CALLBACK_VALUES = %i[params result refuses].freeze
+    LIBRARY_CALLBACK_VALUES = %i[params result refuses examples].freeze
     LIBRARY_CALLBACKS = %i[local_read create replace assign].freeze
 
     def own(declaration)

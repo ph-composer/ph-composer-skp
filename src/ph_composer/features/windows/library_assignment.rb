@@ -19,10 +19,28 @@ module PhComposer
         Shapes.object(target, :optional => %w[id element_id expected_values side])
       end
 
+      # One target per shape the collection's assignment takes: a Window Type element side for a Frame or
+      # an install, the element for a Glazing, and the Model default for an install.
+      def examples(collection)
+        element = { "id" => GridRegistration::EXAMPLE_ID, "element_id" => GridRegistration::EXAMPLE_ELEMENT,
+                    "expected_values" => {} }
+        settings = Settings::DEFAULTS
+        targets = case collection
+                  when "glazings" then [element]
+                  when "frames" then [element.merge("side" => "left")]
+                  else [element.merge("side" => "bottom", "mode" => "perimeter", "expected_settings" => settings),
+                        { "mode" => "model_default", "expected_settings" => settings }]
+                  end
+        ids = { "frames" => "frm_Ab12Cd34Ef56", "glazings" => "glz_Ab12Cd34Ef56" }
+        local = ids.fetch(collection, "psi_Ab12Cd34Ef56")
+        targets.map { |target| { "target" => target, "local_id" => local } }
+      end
+
       def callback(collection)
         result = Shapes.object({ "assigned" => { "type" => "boolean" } })
         Declarations::LibraryCallback.new(
           :params => Shapes.object({ "target" => target_schema(collection), "local_id" => Shapes::TEXT }),
+          :examples => examples(collection),
           :result => result, :refuses => collection == "psi_install_types" ? Refuses::EDIT : Refuses::TYPE_EDIT,
           :handler => lambda do |request, proposal|
             target = request.params.fetch("target")
