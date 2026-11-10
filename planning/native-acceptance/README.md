@@ -38,6 +38,7 @@ not make them disposable.
 
 | Summary | Purpose |
 | --- | --- |
+| [AW01 target safety](evidence/aw01-target-safety-2026-11-10.md) | Agent-workflows AW-01: claimed-contents Make Zone refusal, legacy overlap finding and removal guard, strict null Face identity, locked Zone edits, Space create receipt, native Undo/Redo and fresh-process reopen (`AW01`) |
 | [LH1 hosted Library, run 2](evidence/lh1-hosted-library-2026-11-03-run2.md) | P2-16's host gate on the build with the pairing display: all sixteen assertions pass, including the firm change (`LH1`) |
 | [LH1 hosted Library](evidence/lh1-hosted-library-2026-11-03.md) | P2-16's host gate with the PH-Elements connector: connect, load, copy and revisions, Keychain reopen and interrupted replace, cancel, revoke, archive, offline, disconnect, credential sweep (`LH1`; fails on the missing pairing display) |
 | [Production support PS-05](evidence/production-support-ps05-2026-10-19.md) | Incident references, page faults, runtime deadlines, lost replies, preference writes, Help & Diagnostics, the support report and help links on the installed build (`PS1` to `PS9`) |
