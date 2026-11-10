@@ -1,7 +1,7 @@
 # Spaces UI/UX refinement 2026-11: delivery plan
 
 DATE: 2026-11-09
-STATUS: In progress. Stage ledger in [STATUS.md](STATUS.md).
+STATUS: Complete 2026-11-10, archived. Stage ledger in [STATUS.md](STATUS.md).
 AUTHOR: Ed May, BLDGTYP; Claude
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/426 (tracking)
 
@@ -29,7 +29,7 @@ So the loop runs with `--merge`. Reviewer: `gpt-6.1-sol` unless the stage says s
 - Gate: `make ci && git commit -s ... && git push`. Never `--no-verify`.
 - A stage that changes SketchUp-visible behavior gets a real-host check on the head that goes to
   merge, recorded in the PR. Use the bridge plus native controls as
-  [`context/NATIVE_CONTROL_CAPABILITIES.md`](../../../../context/NATIVE_CONTROL_CAPABILITIES.md)
+  [`context/NATIVE_CONTROL_CAPABILITIES.md`](../../../context/NATIVE_CONTROL_CAPABILITIES.md)
   says: a context-menu item is reached through `app_menu` on SketchUp's Edit selection submenu,
   which runs the same handlers as a right-click. This loop is not a release claim.
 - The PR says `Closes #<stage issue>` and `Part of #426`. Only the last stage closes #426.

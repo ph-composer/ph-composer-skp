@@ -17,4 +17,3 @@ requests. A packet moves into a phase directory when it is scheduled.
 | [legend-hover-highlight](legend-hover-highlight/README.md) | feature | Requested |
 | [zones-entry-points](zones-entry-points/README.md) | feature | Requested |
 | [panel-keyboard-focus](panel-keyboard-focus/README.md) | feature | Requested |
-| [spaces-ui-refinement-2026-11](spaces-ui-refinement-2026-11/PLAN.md) | feature | In progress (#426) |
