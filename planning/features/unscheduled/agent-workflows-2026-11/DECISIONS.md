@@ -1,6 +1,6 @@
 # Decisions for implementation intake
 
-STATUS: D01-D10 recommended defaults accepted 2026-11-10 under the implementation go; AW-01 to AW-04 choices recorded below.
+STATUS: D01-D10 recommended defaults accepted 2026-11-10 under the implementation go; AW-01 to AW-06 choices recorded below.
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication
 
 | ID | Question | Recommendation and scope |
@@ -59,6 +59,16 @@ AW-04 choices, recorded before the gate:
 | D13-a | AW-05's compact forms are opt-in params (`metadata`, `geometry`, `overview`, `compact`) with today's whole reply as the default, as D12-a chose for `records.list`; the panel and `.all` reads are unchanged. `schedule.list` without `compact` still carries the first 50 Edge findings and unreadable assignments, as it documents, because the paged reads are now the complete route; each of those unreadable messages is cut at 512 characters, as `records.list` cuts its own |
 | D13-b | Detail of a computed result (a Unit row, a restore offer, a convert review, a Spaces row) is a fragment read of the same row the list builds, by a path into it, through the one `Fragments.detail`; repeated geometry and collections (holes, loop points, run members, Faces, offers, findings, adoption sources) page as rows instead, since an agent reads rows one page at a time. A convert group's sources are fragments, not rows, because they are one reviewed value whose digest is its handle |
 | D13-c | A Thermal Bridge run is named in `runs.members.list` by its derived `identifier`, valid only at the revision it was read; raw assignment identity stays AW-03's Edge reads. A convert group's `sources_digest` is the SHA-256 of its sources as `convert_review.detail` answers them, so it is a handle on what was reviewed while `units.convert` still takes the whole group |
+
+AW-06 choices, recorded before the gate:
+
+| ID | Choice |
+| --- | --- |
+| D14-a | One opt-in param, `compact` (boolean), on `library.load`, `catalog`, `in_file`, `export_preview` and `export_file`, the whole reply the default as D12-a and D13-a chose, so the panel's reads and the load and export results it consumes are unchanged. The setup command and the file export are outcomes the executor trims to status and revision when too large, so their compact forms are what keep generation, state, `library_id`, `written` and the counts; `catalog` and `in_file` pages are now cut by size, which only moves where `next_cursor` falls |
+| D14-a2 | A compact page cuts labels and names, never an identifier: `library_id`, `record_id` and a note's `code` are the keys a detail read and a copy name, as AW-02 keeps `Discovery::IDENTIFIERS` whole. A row whose identifiers alone outgrow a reply comes alone and is refused as `request.response_too_large`, never cut silently. A compact comparison lists the first candidates, at most 20 and within 8 KiB serialized, and counts them in `candidate_total`; `in_file.detail` reads any of them. A compact export result cuts `library_name` the same way, since a caller or a replaced file can supply any length |
+| D14-b | The Psi assignment target stays one object schema: `core/json_schema.rb` has no `oneOf`, and adding it to the validator for one adapter is outside this stage. The two published examples (`perimeter`, `model_default`) and the schema's `description` name each shape's keys; the handler still refuses any other key set as `params.invalid` |
+| D14-c | A large compound copy is reviewed through AW-04's compact preview, unchanged. A `use_library` replacement names existing ids, so every part is `stable` and reads whole; a `create` copy names a fresh id each run (D12-c) but stays small, because its resolution has no candidates and `affected` lists references only, so its preview fits one reply and its reviewed detail is the catalog row (`catalog.detail`) at the same generation. Deterministic preview ids stay the D12-c follow-up |
+| D14-d | The optional retained receipt for a lost `export_file` reply is not selected (deferred, optional). `export_file` answers `destination_state`, the SHA-256 of the bytes it wrote; after a lost reply `export_preview` with the location reports `destination.state`, and a value other than the reviewed one means a file was written there. No path, file read or retained record is added |
 
 AW-01 through AW-07 can be made concrete without choosing a model vendor or a remote service.
 Routine naming/helper decisions belong to coding agents within the accepted contracts. Record a

@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 38
+    MINOR = 39
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -190,7 +190,13 @@ module PhComposer
                     "zones.options.adoption_sources.list and .detail, zones.faces.assembly_usage.list and .faces; " \
                     "thermal_bridges.schedule.list takes compact beside runs.members.list, " \
                     "schedule.by_type.list, schedule.edge_findings.list and schedule.unreadable.list; and " \
-                    "spaces.detail reads a Space's, Volume's or Floor Segment's part, loops included." }
+                    "spaces.detail reads a Space's, Volume's or Floor Segment's part, loops included." },
+      { "minor" => 39, "date" => "2026-11-10",
+        "change" => "Complete reads of library catalogs and exports: library.load, catalog, in_file, export_preview " \
+                    "and export_file take compact, which counts notes and omissions and summarizes rows; " \
+                    "library.warnings.list and unavailable.list page a catalog's notes; library.catalog.detail and " \
+                    "in_file.detail read one row's part in fragments; library.export_preview.omissions pages an " \
+                    "export's omissions against its projection_digest; export_file answers destination_state." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

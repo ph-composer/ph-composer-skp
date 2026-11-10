@@ -140,6 +140,11 @@ module PhComposer
         declaration = State.kind(params.fetch("kind"), request.registry)
         entry = State.for(request.session).fetch(params.fetch("provider_id"), params.fetch("kind"), request.registry,
                                                  :generation => params.fetch("generation"))
+        [declaration, entry, row_in(entry, params)]
+      end
+
+      # The one catalog row `params` names by `library_id` and `record_id`; none or two refuse.
+      def row_in(entry, params)
         rows = entry.fetch("rows").select do |row|
           row.fetch("library_id") == params.fetch("library_id") && row.fetch("record_id") == params.fetch("record_id")
         end
@@ -147,7 +152,7 @@ module PhComposer
           raise Error.new("library.row_unavailable", "The selected library record is unavailable or ambiguous.")
         end
 
-        [declaration, entry, rows.first]
+        rows.first
       end
 
       # A catalog snapshot mapped to local values by the kind's adapter, refused when the adapter returns

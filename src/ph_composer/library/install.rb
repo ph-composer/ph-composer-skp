@@ -8,6 +8,7 @@ require_relative "export_registration"
 require_relative "copy_participant"
 require_relative "refuses"
 require_relative "connection/commands"
+require_relative "catalog_reads"
 
 module PhComposer
   module Library
@@ -32,8 +33,9 @@ module PhComposer
     end
 
     def page_params
-      properties = selected_params.fetch("properties").merge("limit" => Pages::LIMIT, "cursor" => Pages::CURSOR)
-      object(properties, :optional => %w[generation limit cursor])
+      properties = selected_params.fetch("properties").merge("compact" => CatalogReads::COMPACT,
+                                                             "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR)
+      object(properties, :optional => %w[generation compact limit cursor])
     end
 
     COPY_EXAMPLE = { "provider_id" => "example", "kind" => "example_parts", "generation" => 1,
@@ -104,16 +106,19 @@ module PhComposer
                                              :examples => [PAGE_EXAMPLE]) do |request|
         in_file(request)
       end
+      load = selected_params.fetch("properties").slice("provider_id", "kind").merge("compact" => CatalogReads::COMPACT)
       feature.setup_command("#{FEATURE_ID}.load",
                             :description => "Read a configured library into session memory.",
                             :refuses => Refuses::LOAD_COMMAND,
-                            :params => object(selected_params.fetch("properties").slice("provider_id", "kind")),
+                            :params => object(load, :optional => ["compact"]),
                             :result => Schemas.summary,
                             :examples => [{ "provider_id" => "example", "kind" => "example_parts" }]) do |request|
         params = request.params
-        State.for(request.session).refresh(params.fetch("provider_id"), params.fetch("kind"), request.registry)
-             .reject { |key, _value| key == "rows" }
+        summary = State.for(request.session).refresh(params.fetch("provider_id"), params.fetch("kind"),
+                                                     request.registry).reject { |key, _value| key == "rows" }
+        params["compact"] ? CatalogReads.compact_entry(summary) : summary
       end
+      CatalogReads.install(feature)
     end
 
     def install_commands(feature)
@@ -131,28 +136,39 @@ module PhComposer
 
     # A catalog generation is immutable, so a row's position in it is a stable page key. The cursor
     # is bound to the generation, and, for `in_file`, whose resolution reads local definitions, to
-    # the Model revision as well.
-    def catalog_page(request, query, revision: nil)
+    # the Model revision as well. A page is cut by size; `prepare` turns its catalog rows into the rows
+    # it answers, so only the page's own rows are resolved, and `compact` then summarizes them.
+    def catalog_page(request, query, revision: nil, prepare: ->(rows) { rows })
       params = request.params
       entry = State.for(request.session).fetch(params.fetch("provider_id"), params.fetch("kind"), request.registry,
                                                :generation => params["generation"])
       rows = entry.fetch("rows").each_with_index.to_a
-      page, next_cursor = Pages.slice(request, query, rows, :key => ->((_row, index)) { [index] },
-                                                            :revision => [entry.fetch("generation"), revision])
-      entry.merge("rows" => page.map(&:first), "total" => rows.length, "next_cursor" => next_cursor)
+      answered = lambda do |sliced|
+        page = prepare.call(sliced.map(&:first))
+        params["compact"] ? page.map { |row| CatalogReads.compact_row(row) } : page
+      end
+      page, next_cursor = Pages.bounded(request, query, rows, :key => ->((_row, index)) { [index] },
+                                                              :revision => [entry.fetch("generation"), revision],
+                                                              :prepare => answered)
+      header = params["compact"] ? CatalogReads.compact_entry(entry) : entry
+      header.merge("rows" => page, "total" => rows.length, "next_cursor" => next_cursor)
     end
 
     def in_file(request)
-      page = catalog_page(request, "#{FEATURE_ID}.in_file", :revision => request.revision)
+      catalog_page(request, "#{FEATURE_ID}.in_file", :revision => request.revision,
+                                                     :prepare => ->(rows) { resolved(request, rows) })
+    end
+
+    # Catalog rows, each with how it resolves against the local definitions of its kind.
+    def resolved(request, rows)
       declaration = State.kind(request.params.fetch("kind"), request.registry)
       locals = CallbackInvoker.call(request, declaration, declaration.adapter.local_read, {}, :readonly => true)
       provider = State.for(request.session).provider(request.params.fetch("provider_id"), request.registry)
-      rows = page.fetch("rows").map do |row|
+      rows.map do |row|
         mapped = Coordinator.map(declaration.adapter, row.fetch("snapshot"))
         source = Coordinator.source_identity(provider, row, request.params.fetch("kind"))
         row.merge("resolution" => Coordinator.resolve(declaration.adapter, source, mapped, locals))
       end
-      page.merge("rows" => rows)
     end
   end
 end

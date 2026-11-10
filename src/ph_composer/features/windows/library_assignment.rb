@@ -16,8 +16,14 @@ module PhComposer
 
         target.merge!("mode" => { "type" => "string", "enum" => %w[perimeter model_default] },
                       "expected_settings" => Settings::VALUES)
-        Shapes.object(target, :optional => %w[id element_id expected_values side])
+        Shapes.object(target, :optional => %w[id element_id expected_values side], :description => PSI_TARGETS)
       end
+
+      # The schema validator has no oneOf, so the two install targets are one object and this says which keys
+      # each takes; the handler refuses any other set as params.invalid.
+      PSI_TARGETS = "Two shapes. perimeter: id, element_id, side, expected_values (the Window Type as last read), " \
+                    "mode and expected_settings, and paints that element side. model_default: mode and " \
+                    "expected_settings only, and makes the copy the Model's default installation."
 
       # One target per shape the collection's assignment takes: a Window Type element side for a Frame or
       # an install, the element for a Glazing, and the Model default for an install.
