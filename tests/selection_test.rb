@@ -139,10 +139,10 @@ class SelectionTest < PhComposerTestCase
     client = ZONES::Selection.client(@session)
 
     assert_nil client.edit("ground_depth_mm")
-    assert_equal [["Ground depth (mm)"], ["304.8"], "Selected Zones"], UI.inputboxes.last
+    assert_equal [[depth_prompt("mm")], ["304.8"], "Selected Zones"], UI.inputboxes.last
     PhComposer::Preferences.set("unit_system", "IP")
     assert_nil client.edit("ground_depth_mm")
-    assert_equal [["Ground depth (in)"], ["12"], "Selected Zones"], UI.inputboxes.last
+    assert_equal [[depth_prompt("in")], ["12"], "Selected Zones"], UI.inputboxes.last
     assert_equal @operation_count, @model.operations.length, "cancelling writes nothing"
   end
 
@@ -159,7 +159,7 @@ class SelectionTest < PhComposerTestCase
     operations = @model.operations.length
     UI.inputbox_result = ["4.92"]
     assert_nil ZONES::Selection.client(@session).edit("ground_depth_mm")
-    assert_equal [["Ground depth (in)"], ["4.92"], "Selected Zones"], UI.inputboxes.last
+    assert_equal [[depth_prompt("in")], ["4.92"], "Selected Zones"], UI.inputboxes.last
     assert_equal operations, @model.operations.length
     @groups.each { |group| assert_equal 125.0, ZONES::ZONE_STORE.read(group).fetch("ground_depth_mm") }
   end
@@ -170,7 +170,7 @@ class SelectionTest < PhComposerTestCase
     operations = @model.operations.length
     UI.inputbox_result = [""]
     assert_nil ZONES::Selection.client(@session).edit("ground_depth_mm")
-    assert_equal [["Ground depth (mm)"], [""], "Selected Zones"], UI.inputboxes.last
+    assert_equal [[depth_prompt("mm")], [""], "Selected Zones"], UI.inputboxes.last
     assert_equal operations, @model.operations.length
   end
 
@@ -411,6 +411,10 @@ class SelectionTest < PhComposerTestCase
   end
 
   private
+
+  def depth_prompt(unit)
+    "Ground depth (#{unit})#{ZONES::Selection::Client::PROMPT_PADDING}"
+  end
 
   def set_ground_depth(millimetres)
     @groups.each do |group|
