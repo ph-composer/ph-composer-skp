@@ -66,8 +66,10 @@ class DefinitionDetailTest < PhComposerTestCase
     list = { "kind" => MATERIALS::KIND.id, "metadata" => "summary" }
 
     page = completed(query("#{P}.records.list", list))
-    assert_equal({ "absent.extension" => "unavailable" }, page.dig("records", 0, "extension_status"))
-    assert_equal ["absent.extension"], page.dig("records", 0, "metadata", "extension_data").keys
+    extensions = page.dig("records", 0, "metadata", "extension_data")
+    assert_equal [1, { "unavailable" => 1 }], extensions.values_at("namespaces", "statuses")
+    refute page.dig("records", 0).key?("extension_status")
+    assert_equal({ "absent.extension" => "unavailable" }, detail(MATERIALS::KIND.id, id, %w[extension_status]))
     assert_equal [["mat_#{'B' * 12}", "record.unreadable"]], page.fetch("unreadable").map { |row|
       row.values_at("id", "code")
     }
@@ -199,6 +201,7 @@ class DefinitionDetailTest < PhComposerTestCase
     assert_equal whole.fetch("proposal_digest"), compact.fetch("proposal_digest")
     assert_equal [nil, [], []], compact.values_at("value", "affected", "findings")
     assert_equal whole.fetch("affected").length, compact.dig("detail", "parts", "affected", "count")
+    assert(compact.dig("detail", "parts").values.all? { |part| part.fetch("stable") })
     reviewed = PreviewParts::PARTS.to_h { |part| [part, preview_part(action, part, compact)] }
     assert_equal whole.slice(*PreviewParts::PARTS), reviewed
     assert_equal revision, @session.revision
@@ -256,6 +259,55 @@ class DefinitionDetailTest < PhComposerTestCase
     request.params = { "cursor" => [JSON.generate(forged)].pack("m0") }
     error = assert_raises(PhComposer::CodedError) { PhComposer::Fragments.read(request, "probe", value) }
     assert_equal "params.invalid", error.code
+  end
+
+  def test_many_extension_namespaces_and_long_names_still_fit_one_row
+    kind = RecordFixtures::DEFINITION
+    id = "tdf_#{'E' * 12}"
+    envelopes = Array.new(300) do |index|
+      ["absent.extension_#{index}", { "schema_version" => 1, "payload" => {}, "references" => [],
+                                      "export_relevance" => "local_only" }]
+    end.to_h
+    kind.store.write(@model, "id" => id, "schema_version" => 1, "label" => "Outside", "extension_data" => envelopes)
+    row = completed(query("#{P}.records.list", "kind" => kind.id, "fields" => [], "metadata" => "summary"))
+          .dig("records", 0)
+    assert_equal({ "unavailable" => 300 }, row.dig("metadata", "extension_data", "statuses"))
+    assert_equal envelopes, detail(kind.id, id, %w[extension_data])
+
+    long = "n" * 30_000
+    material = create_material(long)
+    layer = { "id" => "lyr_#{'L' * 12}", "thickness_mm" => 50.0,
+              "segments" => [{ "id" => "seg_#{'S' * 12}", "width_mm" => 100.0, "material_id" => material,
+                               "is_continuous_insulation" => false, "steel_stud_spacing_mm" => nil }] }
+    assembly = assignment_invoke("#{P}.assemblies.assemblies.create",
+                                 "values" => { "name" => long, "layers" => [layer] }).dig("value", "id")
+    segment = completed(query("#{P}.assemblies.assemblies.segments.list", "assembly_id" => assembly))
+              .dig("segments", 0)
+    assert_equal [256, ["material_name"]], [segment.fetch("material_name").length, segment.fetch("truncated")]
+    use = completed(query("#{P}.assemblies.materials.uses.list", "material_id" => material)).dig("uses", 0)
+    assert_equal ["name"], use.fetch("truncated")
+
+    elements = Array.new(100) do |index|
+      PhComposer::Windows::Types.blank(index / 10, index % 10, :identity => ->(_prefix) { format("wel_%012d", index) })
+                                .merge("name" => "e" * 9_000)
+    end
+    type = assignment_invoke("#{P}.windows.types.create",
+                             "values" => { "name" => "t" * 9_000, "rows_m" => [0.3] * 10, "columns_m" => [0.3] * 10,
+                                           "elements" => elements }).dig("value", "id")
+    rows = pages_of("#{P}.windows.types.elements.list", { "type_id" => type }, "elements")
+    assert_equal [["element.name"]], rows.flat_map { |page| page.fetch("elements") }.map { |row| row["truncated"] }.uniq
+    assert_equal ["name"], rows.first.dig("type", "truncated")
+    assert_equal "e" * 9_000, detail(PhComposer::Windows::TYPE_KIND, type, ["values", "elements", 99, "name"])
+  end
+
+  def test_a_preview_that_names_new_ids_each_run_marks_those_parts_unstable
+    parts = Array.new(350) { |index| { "label" => "Part #{index}", "length_mm" => 10.0 } }
+    action = { "name" => "test.fixture.create", "params" => { "parts" => parts } }
+    compact = agent("preview", action)
+    assert_equal [nil, []], compact.values_at("value", "affected")
+    parts = compact.dig("detail", "parts")
+    assert_equal({ "value" => false, "affected" => false, "findings" => true },
+                 parts.transform_values { |part| part.fetch("stable") })
   end
 
   def test_a_long_key_is_read_without_echoing_its_path

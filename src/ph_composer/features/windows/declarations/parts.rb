@@ -24,8 +24,9 @@ module PhComposer
         "thermal" => Shapes.described(TYPE_THERMAL, "The Type's totals, without the per-element results its rows " \
                                                     "carry."),
         "findings" => Shapes.described(Shapes::FINDINGS, "The Type's findings that name no element."),
-        "element_count" => { "type" => "integer", "minimum" => 0 }
-      })
+        "element_count" => { "type" => "integer", "minimum" => 0 },
+        "truncated" => ContextChildren::TRUNCATED
+      }, :optional => ["truncated"])
       ELEMENT = Shapes.object({
         "index" => { "type" => "integer", "minimum" => 0 },
         "element" => Shapes.described(Types::ELEMENT, "The element as stored."),
@@ -36,8 +37,13 @@ module PhComposer
                                         "description" => "Each edge's classification and whether an installation " \
                                                          "can be painted there; null for an empty element."),
         "copy_slot" => Shapes.described(Shapes::TEXT, "This element's slot in an installation copy."),
-        "findings" => Shapes.described(Shapes::FINDINGS, "The Type's findings that name this element.")
-      })
+        "findings" => Shapes.described(Shapes::FINDINGS, "The Type's findings that name this element."),
+        "truncated" => Shapes.described(Shapes.list(Shapes::TEXT),
+                                        "element.name when it was cut to #{OccurrencePath::NAME_CHARACTERS} " \
+                                        "characters; records.detail reads it whole.")
+      }, :optional => ["truncated"])
+      USE = Shapes.with(InventoryRegistration::USE, "truncated" => ContextChildren::TRUNCATED)
+                  .merge("required" => InventoryRegistration::USE.fetch("required"))
       PAGE = { "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL }.freeze
       UNREADABLE = { "type" => "integer", "minimum" => 0 }.freeze
       REFUSES = (Refuses::PAGE + %w[record.unreadable target.not_found]).freeze
@@ -55,7 +61,7 @@ module PhComposer
           query(feature, "#{FEATURE_ID}.#{collection}.uses.list",
                 "One bounded page of what uses a #{kind.label}: a #{collection} row's uses, in its order.",
                 { "id" => Shapes.id(kind.id_prefix, "The #{kind.label} to read.") },
-                { "id" => Shapes::TEXT, "uses" => Shapes.list(InventoryRegistration::USE),
+                { "id" => Shapes::TEXT, "uses" => Shapes.list(USE),
                   "unreadable" => UNREADABLE.merge("description" => "Window Types that cannot be read, so " \
                                                                     "whether they use it is unknown.") },
                 { "id" => "#{kind.id_prefix}_Ab12Cd34Ef56" }) { |request| uses(request, collection) }
@@ -82,23 +88,34 @@ module PhComposer
         findings = row.fetch("findings").group_by { |finding| finding["element_id"] }
         rows = record.fetch("elements").each_with_index.map do |element, index|
           id = element.fetch("id")
-          { "index" => index, "element" => element, "thermal" => by_element[id],
-            "install_edges" => topology.fetch("edges")[id], "copy_slot" => topology.fetch("copy_slots").fetch(id),
-            "findings" => findings.fetch(id, []) }
+          element_row(element).merge("index" => index, "thermal" => by_element[id],
+                                     "install_edges" => topology.fetch("edges")[id],
+                                     "copy_slot" => topology.fetch("copy_slots").fetch(id),
+                                     "findings" => findings.fetch(id, []))
         end
+        summary = type_summary(record, display, findings.fetch(nil, []))
+        # The summary rides on every page, so the rows get what it leaves of the page budget.
+        room = [Pages::MAX_PAGE_BYTES - JSON.generate(summary).bytesize, Pages::MAX_PAGE_BYTES / 4].max
         page, next_cursor = Pages.bounded(request, "#{FEATURE_ID}.types.elements.list", rows,
-                                          :key => ->(element) { [element.fetch("index")] })
-        { "type" => type_summary(record, display, findings.fetch(nil, [])), "elements" => page,
-          "next_cursor" => next_cursor, "total" => rows.length }
+                                          :key => ->(element) { [element.fetch("index")] }, :max_bytes => room)
+        { "type" => summary, "elements" => page, "next_cursor" => next_cursor, "total" => rows.length }
+      end
+
+      # The stored element, its name cut as every name in a row is, and `truncated` when it was.
+      def element_row(element)
+        bounded = OccurrencePath.bounded_names("name" => element.fetch("name"))
+        row = { "element" => element.merge("name" => bounded.fetch("name")) }
+        bounded.key?("truncated") ? row.merge("truncated" => ["element.name"]) : row
       end
 
       def type_summary(record, display, findings)
-        { "id" => record.fetch("id"), "name" => record.fetch("name"), "rows_m" => record.fetch("rows_m"),
+        { "id" => record.fetch("id"), "rows_m" => record.fetch("rows_m"),
           "columns_m" => record.fetch("columns_m"), "width_m" => display.fetch("width_m"),
           "height_m" => display.fetch("height_m"), "install_depth_m" => display.fetch("install_depth_m"),
           "complete" => display.fetch("complete"), "copy_key" => display.fetch("install_topology").fetch("copy_key"),
           "thermal" => display.fetch("thermal").reject { |key, _value| key == "elements" }, "findings" => findings,
           "element_count" => record.fetch("elements").length }
+          .merge(OccurrencePath.bounded_names("name" => record.fetch("name")))
       end
 
       # A product row's uses, as Snapshot.product builds them, a page at a time by position.
@@ -110,7 +127,9 @@ module PhComposer
         types, unreadable = DefinitionLists.read(request.engine, TYPE_KIND, request.engine.ids(TYPE_KIND))
         product = Snapshot.product(request.engine.view(kind.id, record), record, kind,
                                    Graph.uses(types, settings.fetch("default_psi_install_id")), settings)
-        rows = product.fetch("uses").each_with_index.map { |use, index| [index, use] }
+        rows = product.fetch("uses").each_with_index.map do |use, index|
+          [index, use.merge(OccurrencePath.bounded_names(use.slice("name")))]
+        end
         page, next_cursor = Pages.bounded(request, "#{FEATURE_ID}.#{collection}.uses.list", rows,
                                           :key => ->(row) { [row.first] })
         { "id" => id, "uses" => page.map(&:last), "unreadable" => unreadable.length, "next_cursor" => next_cursor,

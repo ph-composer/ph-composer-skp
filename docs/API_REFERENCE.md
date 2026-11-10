@@ -6314,7 +6314,7 @@ Result:
               "string",
               "null"
             ],
-            "description": "Null when none is assigned or found."
+            "description": "Null when none is assigned or found; cut to 256 characters, named in truncated."
           },
           "flags": {
             "type": "array",
@@ -6322,6 +6322,13 @@ Result:
               "type": "string"
             },
             "description": "What keeps this Layer-Segment from calculating, by code; empty when nothing does."
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
           }
         }
       }
@@ -7377,6 +7384,13 @@ Result:
           },
           "name": {
             "type": "string"
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
           }
         }
       }
@@ -9450,7 +9464,7 @@ Params:
         "full",
         "summary"
       ],
-      "description": "full (the default): user_data and extension_data as stored. summary: neither, but their size and digest in metadata and each value's size in value_bytes; read a large one with ph_composer.records.detail."
+      "description": "full (the default): user_data, extension_data and extension_status as stored. summary: none of them, but their sizes, digests and status counts in metadata and each value's size in value_bytes; read any of them whole with ph_composer.records.detail."
     },
     "limit": {
       "type": "number",
@@ -9482,7 +9496,7 @@ Result:
       "items": {
         "type": "object"
       },
-      "description": "Each record's kind, id, schema_version, values, extension_status, and user_data and extension_data or, with metadata summary, metadata and value_bytes."
+      "description": "Each record's kind, id, schema_version, values, and user_data, extension_data and extension_status or, with metadata summary, metadata and value_bytes."
     },
     "next_cursor": {
       "type": [
@@ -16613,6 +16627,13 @@ Result:
           },
           "name": {
             "type": "string"
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
           }
         }
       }
@@ -17437,6 +17458,13 @@ Result:
           },
           "name": {
             "type": "string"
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
           }
         }
       }
@@ -18272,6 +18300,13 @@ Result:
           },
           "name": {
             "type": "string"
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
           }
         }
       }
@@ -19661,6 +19696,13 @@ Result:
         "element_count": {
           "type": "integer",
           "minimum": 0
+        },
+        "truncated": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "The names cut to 256 characters; absent when none was."
         }
       }
     },
@@ -20165,6 +20207,13 @@ Result:
               }
             },
             "description": "The Type's findings that name this element."
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "element.name when it was cut to 256 characters; records.detail reads it whole."
           }
         }
       }

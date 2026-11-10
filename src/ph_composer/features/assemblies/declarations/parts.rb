@@ -22,11 +22,15 @@ module PhComposer
         "layer_id" => Shapes::TEXT, "layer_index" => { "type" => "integer", "minimum" => 0 },
         "index" => { "type" => "integer", "minimum" => 0 },
         "segment" => Shapes.described(Assembly::Schema::SEGMENT, "The Layer-Segment as stored."),
-        "material_name" => { "type" => %w[string null], "description" => "Null when none is assigned or found." },
+        "material_name" => { "type" => %w[string null],
+                             "description" => "Null when none is assigned or found; cut to " \
+                                              "#{OccurrencePath::NAME_CHARACTERS} characters, named in truncated." },
         "flags" => Shapes.described(Shapes.list(Shapes::TEXT), "What keeps this Layer-Segment from calculating, " \
-                                                               "by code; empty when nothing does.")
-      })
-      USE = Shapes.object({ "assembly_id" => Shapes::TEXT, "name" => Shapes::TEXT })
+                                                               "by code; empty when nothing does."),
+        "truncated" => ContextChildren::TRUNCATED
+      }, :optional => ["truncated"])
+      USE = Shapes.object({ "assembly_id" => Shapes::TEXT, "name" => Shapes::TEXT,
+                            "truncated" => ContextChildren::TRUNCATED }, :optional => ["truncated"])
       PAGE = { "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL }.freeze
       ASSEMBLY_ID = Shapes.id("asm", "The Assembly to read.")
       REFUSES = (Refuses::PAGE + %w[record.unreadable target.not_found]).freeze
@@ -90,8 +94,8 @@ module PhComposer
           layer.fetch("segments").each_with_index.map do |segment, index|
             material = materials[segment["material_id"]]
             { "layer_id" => layer.fetch("id"), "layer_index" => layer_index, "index" => index,
-              "segment" => segment, "material_name" => material && material["name"],
-              "flags" => Thermal.segment_flags(segment, materials) }
+              "segment" => segment, "flags" => Thermal.segment_flags(segment, materials) }
+              .merge(OccurrencePath.bounded_names("material_name" => material && material["name"]))
           end
         end
         result = page(request, "#{FEATURE_ID}.assemblies.segments.list", rows,
@@ -104,7 +108,9 @@ module PhComposer
         record = request.engine.find(MATERIAL_KIND, id)
         assemblies, unreadable = DefinitionLists.read(request.engine, ASSEMBLY_KIND,
                                                       request.engine.ids(ASSEMBLY_KIND).sort)
-        rows = Snapshot.material_uses(record, assemblies)
+        rows = Snapshot.material_uses(record, assemblies).map do |use|
+          use.merge(OccurrencePath.bounded_names(use.slice("name")))
+        end
         result = page(request, "#{FEATURE_ID}.materials.uses.list", rows, ->(row) { [row.fetch("assembly_id")] })
         { "material_id" => id, "uses" => result.fetch("rows"), "unreadable" => unreadable.length }
           .merge(result.slice("next_cursor", "total"))

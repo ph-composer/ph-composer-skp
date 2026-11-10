@@ -163,9 +163,10 @@ comes alone, and asking for fewer `fields` reads past it. An unreadable record i
 `unreadable` beside the page and counted in `total`.
 Implemented (API 1.37): complete reads of what one reply cannot hold. `Pages::REPLY_BYTES` (24 KB) is the
 one reply budget the executor enforces. `ph_composer.records.list` cuts its page by size too, an
-unreadable row weighed with the rest, and with `metadata` `"summary"` leaves out `user_data` and
-`extension_data`, keeping `extension_status`, and gives their sizes and digests in `metadata` and each
-value's size in `value_bytes`; the default stays the stored maps. `ph_composer.records.detail` answers
+unreadable row weighed with the rest, and with `metadata` `"summary"` leaves out `user_data`,
+`extension_data` and `extension_status` and gives their sizes, digests, namespace count and envelopes
+per status in `metadata` and each value's size in `value_bytes`, so a summary row stays bounded; the
+default stays the stored maps. `ph_composer.records.detail` answers
 one value of a record, named by a `path` into the view `records.list` answers (from `values`,
 `user_data`, `extension_data` or `extension_status`), as canonical JSON text in fragments
 (`shell/fragments.rb`): whole UTF-8 characters, at most 12 KB each once escaped, with the byte offset
@@ -175,7 +176,8 @@ and the whole text's size and SHA-256, its cursor carrying that digest; a path n
 `windows.types.elements.list` (each element's stored value, thermal result, installation edges,
 copy slot and findings, beside the Type's totals from the row `types.list` builds), and the `uses` of
 a Material (`assemblies.materials.uses.list`) or Window product (`windows.<collection>.uses.list`),
-with the count of owners that could not be read.
+with the count of owners that could not be read. A name in any part row is cut at 256 characters and
+named in `truncated`; the Type elements page leaves its rows what the repeated Type summary does not use.
 Implemented (API 1.36): reads that need no selection. `ph_composer.context.children` pages the entities
 directly inside the Model root or one Group or component, named by its root-to-container `path`
 (`core/occurrence_path.rb` walks it, through components too, and composes the transform once from the
@@ -297,7 +299,8 @@ changed values, affected references and validation findings. A proposal binds to
 revision; applying it revalidates those preconditions. Implemented (API 1.37): the agent `preview`
 answers a preview larger than one reply compact (`PreviewParts.compact`), keeping status, revision and
 `proposal_digest` and giving the size, SHA-256 and count of `value`, `affected` and `findings` in
-`detail.parts`; `preview` with `part` reads one part exactly in fragments from a preview run again,
+`detail.parts`, with `stable` false for a part a second run answered differently (a create naming new
+ids); `preview` with `part` reads one part exactly in fragments from a preview run again,
 bound to the revision and proposal digest, so every consequence can be reviewed before an invoke carries
 the digest, and no transaction stays open meanwhile. Routine edits need not acquire an extra
 approval dialog just because the caller is an agent. Reuse the user's granted scope, and enforce

@@ -28,28 +28,31 @@ module PhComposer
         "fields" => { "type" => "array", "items" => { "type" => "string" },
                       "description" => "Only these values of each record; all when absent." },
         "metadata" => { "type" => "string", "enum" => %w[full summary],
-                        "description" => "full (the default): user_data and extension_data as stored. summary: " \
-                                         "neither, but their size and digest in metadata and each value's size " \
-                                         "in value_bytes; read a large one with #{DETAIL}." },
+                        "description" => "full (the default): user_data, extension_data and extension_status as " \
+                                         "stored. summary: none of them, but their sizes, digests and status " \
+                                         "counts in metadata and each value's size in value_bytes; read any of " \
+                                         "them whole with #{DETAIL}." },
         "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR
       }
     }.freeze
 
     SIZE = { "type" => "integer", "minimum" => 0 }.freeze
+    STATUSES = { "type" => "object", "additionalProperties" => SIZE,
+                 "description" => "How many envelopes read each status, such as unavailable." }.freeze
     METADATA = SchemaShapes.object({
       "user_data" => SchemaShapes.with(Fragments::SUMMARY, "keys" => SIZE),
-      "extension_data" => { "type" => "object", "additionalProperties" => Fragments::SUMMARY,
-                            "description" => "Each stored envelope's size and digest, by namespace." }
-    }, :description => "With metadata summary: what user_data and extension_data hold, in place of them.").freeze
+      "extension_data" => SchemaShapes.with(Fragments::SUMMARY, "namespaces" => SIZE, "statuses" => STATUSES)
+    }, :description => "With metadata summary: what user_data, extension_data and extension_status hold, in " \
+                       "place of them; read any of them whole with #{DETAIL}.").freeze
 
     RESULT = {
       "type" => "object",
       "required" => %w[records next_cursor unreadable units total],
       "properties" => {
         "records" => { "type" => "array", "items" => { "type" => "object" },
-                       "description" => "Each record's kind, id, schema_version, values, extension_status, and " \
-                                        "user_data and extension_data or, with metadata summary, metadata and " \
-                                        "value_bytes." },
+                       "description" => "Each record's kind, id, schema_version, values, and user_data, " \
+                                        "extension_data and extension_status or, with metadata summary, " \
+                                        "metadata and value_bytes." },
         "next_cursor" => Pages::NEXT_CURSOR,
         "unreadable" => { "type" => "array", "items" => { "type" => "object" } },
         "units" => { "type" => "object", "description" => "The SI unit of each numeric value, by field key." },
@@ -171,7 +174,8 @@ module PhComposer
 
       user_data = view.delete("user_data")
       extensions = view.delete("extension_data")
-      envelopes = extensions.transform_values { |envelope| Fragments.summary(envelope) }
+      statuses = view.delete("extension_status").values.tally
+      envelopes = Fragments.summary(extensions).merge("namespaces" => extensions.length, "statuses" => statuses)
       view.merge("metadata" => { "user_data" => Fragments.summary(user_data).merge("keys" => user_data.length),
                                  "extension_data" => envelopes },
                  "value_bytes" => values.transform_values { |value| CanonicalJson.generate(value).bytesize })

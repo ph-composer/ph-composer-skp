@@ -69,9 +69,10 @@ last read; if the Model holds something else now, the edit is refused and nothin
 A record or a preview can be larger than one reply. These reads give all of it exactly, in parts.
 
 - **Find what is large.** `ph_composer.records.list` with `metadata` `"summary"` and `fields` `[]`
-  leaves out `user_data` and `extension_data` and tells you their size (`metadata`) and each value's
-  size (`value_bytes`). `extension_status` stays, so data from an extension that is not installed
-  still reads `unavailable`. When a feature's list page is refused as too large, one row is larger
+  leaves out `user_data`, `extension_data` and `extension_status` and tells you their size and, in
+  `metadata.extension_data.statuses`, how many extension envelopes read each status, such as
+  `unavailable` for data from an extension that is not installed. `value_bytes` gives each value's
+  size. When a feature's list page is refused as too large, one row is larger
   than a reply: ask the same list with `fields` `[]` for its ids, then read that record's parts.
 - **Read one value whole.** `ph_composer.records.detail` with the record's `kind` and `id` and a
   `path` into the record, such as `["user_data", "notes"]` or `["values", "layers"]`, answers the
@@ -84,16 +85,18 @@ A record or a preview can be larger than one reply. These reads give all of it e
   pages a Window Type's elements with each one's thermal result, installation edges and findings, and
   gives the Type's totals beside them. `ph_composer.assemblies.materials.uses.list` and
   `ph_composer.windows.frames.uses.list` (also `glazings` and `psi_install_types`) page what uses a
-  record, and count in `unreadable` the records that could not be read to tell. Use them rather than
-  recomputing anything yourself.
+  record, and count in `unreadable` the records that could not be read to tell. A name longer than
+  256 characters is cut in these rows and named in `truncated`; read it whole with
+  `ph_composer.records.detail`. Use them rather than recomputing anything yourself.
 - **Review a large preview.** When a preview is larger than one reply, `preview` still answers its
   `proposal_digest` and revision, leaves out `value`, `affected` and `findings`, and gives each one's
   size, digest and count in `detail.parts`. Call `preview` again with the same `name` and `params` and
   `part` set to each of them, following `next_cursor`, and join them as above. Every fragment repeats
   the `proposal_digest`; then invoke with it. Never apply a change whose affected list you have not
-  read. A preview that names new ids gives different ones each time it runs, so a part of it longer
-  than one fragment is refused as `query.cursor_expired`; read what it changes from the records after
-  you apply it, or ask the user.
+  read. A preview that names new ids gives different ones each time it runs, and its part says
+  `stable` false: such a part longer than one fragment is refused as `query.cursor_expired`, and a
+  shorter one will not match its digest. Read what it changed from the records after you apply it, or
+  ask the user.
 - **If the Model changes while you read,** the next fragment or page is refused as
   `query.cursor_expired`. Start that value again from its first fragment; never join fragments of two
   versions.

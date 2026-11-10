@@ -319,7 +319,7 @@ module PhComposer
     # each part's size and digest, the parts themselves read with preview_part.
     def preview(context:, name:, params: {}, within: nil)
       outcome = Dispatch.new.preview(context, name, params)
-      within ? PreviewParts.compact(outcome, within) : outcome
+      within ? PreviewParts.compact(outcome, within, -> { Dispatch.new.preview(context, name, params) }) : outcome
     end
 
     # One part of a preview (`value`, `affected` or `findings`) as canonical JSON text in fragments, the

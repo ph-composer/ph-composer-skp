@@ -112,25 +112,29 @@ changes nothing; AW-05 reuses the helper for occurrence data. New names:
   refuses `query.cursor_expired` after any change. `Fragments.summary(value)` gives `bytes` and `sha256`. `Pages::REPLY_BYTES` (24 KiB) is the one
   reply budget; `AgentAccess::Executor::MAX_RESULT_BYTES` is it.
 - `ph_composer.records.list` pages by bytes (`Pages.bounded`, an unreadable row weighed too) and takes `metadata`:
-  `full` (default, the rows as before) or `summary`, which leaves out `user_data` and `extension_data`, keeps
-  `extension_status`, and adds `metadata` (`user_data`: `keys`, `bytes`, `sha256`; `extension_data`: by namespace,
-  `bytes`, `sha256`) and `value_bytes` (each stored value's canonical size).
+  `full` (default, the rows as before) or `summary`, which leaves out `user_data`, `extension_data` and
+  `extension_status` and adds `metadata` (`user_data`: `keys`, `bytes`, `sha256`; `extension_data`: `namespaces`,
+  `bytes`, `sha256` and `statuses`, the count of envelopes per status) and `value_bytes` (each stored value's
+  canonical size), so a summary row stays bounded however many keys or namespaces a record holds.
 - `ph_composer.records.detail`: params `kind`, `id`, `path` (1 to 32 keys and indexes into the record's public view,
   starting at `values`, `user_data`, `extension_data` or `extension_status`), `cursor`. Result `kind`, `id`,
   `type` (JSON type), `fragment`, `next_cursor`; the path is not echoed, since a long key would crowd the reply. A path naming nothing refuses `target.not_found`, so an absent key
   differs from a stored `null` or `false`.
 - `ph_composer.assemblies.assemblies.layers.list` (`assembly_id`) and `ph_composer.assemblies.assemblies.segments.list`
   (`assembly_id`, optional `layer_id`): one row per Layer (index, thickness, membrane, air-barrier face, segment count)
-  or per Layer-Segment (Layer, index, stored segment, Material name, `flags` from `Thermal.segment_flags`).
+  or per Layer-Segment (Layer, index, stored segment, Material name, `flags` from `Thermal.segment_flags`). In every
+  part row a name over `OccurrencePath::NAME_CHARACTERS` is cut and named in `truncated` (`element.name` for a Window
+  element), and `records.detail` reads it whole.
 - `ph_composer.windows.types.elements.list` (`type_id`): `type`, the Type's derived summary from the row
   `windows.types.list` builds (dimensions, `complete`, `copy_key`, `thermal` totals without `elements`, the findings
   with no element), and one row per stored element: `index`, `element`, its `thermal` result and `install_edges`
-  (null for an empty element), `copy_slot` and its `findings`.
+  (null for an empty element), `copy_slot` and its `findings`; the rows get the page budget the summary leaves.
 - `ph_composer.assemblies.materials.uses.list` (`material_id`) and `ph_composer.windows.<collection>.uses.list`
   (`id`; `frames`, `glazings`, `psi_install_types`): the row's `uses` a page at a time, with `unreadable`, the
   count of owners (Assemblies or Window Types) that cannot be read.
 - MCP `preview` over the reply budget answers the outcome with `value` null, `affected` and `findings` empty, and
-  `detail` `parts` (`value`, `affected`, `findings`: `bytes`, `sha256`, and `count` for a list), keeping status,
+  `detail` `parts` (`value`, `affected`, `findings`: `bytes`, `sha256`, `stable`, and `count` for a list; `stable` is
+  false when a second run of the preview answered that part differently, as a create naming new ids does), keeping status,
   revision and `proposal_digest`. MCP `preview` with `part` (and `cursor`) calls `API.preview_part`, which reruns the
   preview and answers `part`, `proposal_digest` and that part's `fragment`; its cursor binds the action, params,
   part, revision and proposal digest. Nothing is retained or held open between fragments.

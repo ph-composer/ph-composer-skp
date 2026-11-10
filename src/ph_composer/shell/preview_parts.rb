@@ -17,13 +17,18 @@ module PhComposer
     module_function
 
     # `outcome` with value, affected and findings left out and each part's size and digest (and count, for a
-    # list) in `detail`, when it serializes larger than `within` bytes; unchanged otherwise.
-    def compact(outcome, within)
+    # list) in `detail`, when it serializes larger than `within` bytes; unchanged otherwise. `rerun` runs the
+    # same preview again: a part that comes out different (an action that names new ids each run) is marked
+    # `stable: false`, since what a later read answers for it will not match this digest.
+    def compact(outcome, within, rerun)
       return outcome unless outcome["status"] == "completed" && JSON.generate(outcome).bytesize > within
 
+      again = rerun.call
       parts = PARTS.to_h do |part|
         value = outcome[part]
-        summary = Fragments.summary(value)
+        summary = Fragments.summary(value).merge("stable" => again["status"] == "completed" &&
+                                                             CanonicalJson.generate(again[part]) ==
+                                                             CanonicalJson.generate(value))
         [part, value.is_a?(Array) ? summary.merge("count" => value.length) : summary]
       end
       outcome.merge("message" => "#{outcome['message']} It is larger than one reply: read its value, affected " \
