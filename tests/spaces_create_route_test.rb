@@ -29,9 +29,9 @@ class SpacesCreateRouteTest < PhComposerTestCase
   end
 
   def test_offered_on_a_face_selection_or_mark_floors_offer_and_not_otherwise
-    refute ROUTE.available?(@session)
+    refute ROUTE.available?(read)
     @model.selection.add(@loose)
-    assert ROUTE.available?(@session)
+    assert ROUTE.available?(read)
     @model.selection.clear
     tool = PhComposer::Spaces.mark_tool(@session)
     tool.start(1.0)
@@ -39,11 +39,39 @@ class SpacesCreateRouteTest < PhComposerTestCase
     @model.active_view.picks[[100, 100]] = [@loose]
     tool.onLButtonDown(0, 100, 100, @model.active_view)
     tool.onLButtonUp(0, 100, 100, @model.active_view)
-    assert ROUTE.available?(@session), "the tool's offer"
+    assert ROUTE.available?(read), "the tool's offer"
     menus = PhComposer::Commands.install_feature_menus(UI::Menu.new("Context"), :contextual => true)
     assert_includes menu_labels(menus), ROUTE::LABEL
     tool.onLButtonDown(0, 200, 200, @model.active_view)
     assert_empty tool.offered, "the next gesture drops the offer"
+  end
+
+  def test_left_out_when_no_selected_face_is_both_unclassified_and_non_vertical
+    upright = Sketchup::Face.new(1400, {}, :points => [[0, 0, 0], [40, 0, 0], [40, 0, 40]].map do |x, y, z|
+      Geom::Point3d.new(x, y, z)
+    end)
+    @model.entities << upright
+    @model.selection.add(upright)
+    refute ROUTE.available?(read), "a wall outside every Zone"
+    @model.selection.clear
+    @model.active_path = [@zone]
+    @model.selection.add(@wall)
+    refute ROUTE.available?(read), "a classified Face in the open Zone"
+  end
+
+  def test_an_unclassified_floor_in_an_open_zone_keeps_the_item_beside_a_classified_face
+    @model.active_path = [@zone]
+    @model.selection.add(@loose)
+    assert ROUTE.available?(read), "a newly drawn floor Face"
+    @model.selection.add(@wall)
+    assert ROUTE.available?(read), "a mixed selection still reaches the review"
+  end
+
+  def test_a_selection_over_the_limit_stays_offered_for_the_route_to_refuse
+    limit = PhComposer::Pages::MAXIMUM_LIMIT
+    faces = Array.new(limit + 1) { |index| floor_face(5000 + index, rectangle(index, 0, 1, 1)) }
+    faces.each { |face| @model.selection.add(face) }
+    assert ROUTE.available?(read)
   end
 
   def test_with_no_faces_it_says_a_space_is_a_floor_surface_and_writes_nothing
@@ -128,6 +156,10 @@ class SpacesCreateRouteTest < PhComposerTestCase
                                      "expected_values" => {} },
                         :request => { "sequence" => 1, "expected_revision" => @session.revision })
     assert_equal "completed", result.fetch("status"), result.inspect
+  end
+
+  def read
+    PhComposer::HandlerRequest.for(@session, :owner => "ph_composer.spaces", :name => "ph_composer.spaces.create_menu")
   end
 
   def view(command, params)

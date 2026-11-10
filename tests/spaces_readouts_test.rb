@@ -153,6 +153,25 @@ class SpacesReadoutsTest < PhComposerTestCase
                  @service.readout_drawings.fetch(TOTALS).last[3]
   end
 
+  def test_the_label_options_are_offered_on_a_space_volume_or_floor_segment_only
+    menu = PhComposer::Registry.current.menu_items.fetch("ph_composer.spaces.labels_net_volume_menu")
+    read = PhComposer::HandlerRequest.for(@session, :owner => menu.owner, :name => menu.name)
+    @service.readout(LABELS, :on => true)
+    segment = floor_face(9111, rectangle(0, 0, 1, 1), segment_record("Q"))
+    volume = volume_group(9110, volume_record("Q"), [segment])
+    [space_group(9100, space_record("Q", :number => "1", :name => "Q"), [volume]), volume, segment].each do |entity|
+      @model.selection.clear
+      @model.selection.add(entity)
+      assert menu.available.call(read), entity.class.name
+    end
+    zone = zone_group(9001, "Z", [Sketchup::Face.new(9002)])
+    [zone, zone.entities.to_a.first, Sketchup::Group.new(9003, Sketchup::Entities.new([]))].each do |entity|
+      @model.selection.clear
+      @model.selection.add(entity)
+      refute menu.available.call(read), entity.class.name
+    end
+  end
+
   def test_turning_the_readouts_and_options_on_writes_nothing
     operations = @model.operations.length
     revision = @session.revision

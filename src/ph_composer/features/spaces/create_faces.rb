@@ -48,7 +48,7 @@ module PhComposer
         paths = faces.map { |path| Resolve.integer_path(path) }.uniq
         active = Array(model.active_path)
         open_path = active.map(&:persistent_id)
-        transform = active.reduce(Geom::Transformation.new) { |carried, entity| carried * entity.transformation }
+        transform = open_transform(active)
         context = context_refusal(active)
         containment = request.query(CONTAINMENT, "paths" => paths).fetch("paths")
         records = request.query(HOST_CONTEXT, "paths" => paths).fetch("faces").to_h { |row| [row.fetch("path"), row] }
@@ -58,6 +58,11 @@ module PhComposer
         zone = own_zone(containment, eligible)
         Read.new(:eligible => eligible, :left_out => left_out, :open_zone => zone,
                  :outside => zone && zone.fetch("zone_path")[0...-1], :transform => transform)
+      end
+
+      # What maps a Face loose in the open context to world coordinates.
+      def open_transform(active)
+        active.reduce(Geom::Transformation.new) { |carried, entity| carried * entity.transformation }
       end
 
       # The Zone to preselect: the open one, otherwise the one holding the outlines, otherwise none.

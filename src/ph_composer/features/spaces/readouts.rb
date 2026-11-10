@@ -58,7 +58,7 @@ module PhComposer
           # offers them over a selection, not on every right-click.
           feature.menu_item("#{FEATURE_ID}.labels_#{key}_menu", :label => label, :menu => MENU,
                                                                 :available => lambda { |read|
-                                                                  !read.model.selection.empty? &&
+                                                                  space_selected?(read.model) &&
                                                                     ColourBy.for(read.session).readouts_on
                                                                             .include?(SHOW)
                                                                 },
@@ -67,6 +67,13 @@ module PhComposer
                                                                 }) do |session|
             set_options(session, key => !options(session)[key])
           end
+        end
+      end
+
+      # Whether the selection holds a Space, a Volume or a Floor Segment, the things the labels are for.
+      def space_selected?(model)
+        model.selection.to_a.any? do |entity|
+          [SPACE_STORE, VOLUME_STORE, FLOOR_SEGMENT_STORE].any? { |store| store.marks?(entity) }
         end
       end
 

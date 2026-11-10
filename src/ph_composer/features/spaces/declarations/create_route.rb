@@ -30,7 +30,7 @@ module PhComposer
       def install(feature)
         feature.menu_item("#{FEATURE_ID}.create_menu", :label => CreateRoute::LABEL, :menu => EXTENSION_NAME,
                                                        :available => ->(read) {
-                                                                       CreateRoute.available?(read.session)
+                                                                       CreateRoute.available?(read)
                                                                      }) do |session|
           CreateRoute.client(session).run
         end

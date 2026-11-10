@@ -870,6 +870,13 @@ the rest of the context menu is still built. Providers run only while building a
 the Extensions menu is installed once. The shell validates the supplied entry shapes and remains
 independent of contributor vocabulary and record kinds.
 
+A feature whose Groups or Faces must not be turned into something else constructs their
+`Records::EntityStore` with `claims_entity: true`. `Records::EntityStore.claimed?(entities)` and
+`selection_claimed?(model)`, which also counts the open contexts, are the one check another feature
+reads, so its menu rule and its action refuse without naming the claimant. Spaces claims its Space, Volume
+and Floor Segment records; Zones and Windows read the check. A Zone does not claim: it hosts other features'
+objects on purpose.
+
 ### Setup entries
 
 Implemented in WT-12 (#343). Setup for this computer that belongs to no page, such as agent access,

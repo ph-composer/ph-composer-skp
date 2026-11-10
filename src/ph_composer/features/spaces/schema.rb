@@ -12,9 +12,9 @@ module PhComposer
     SPACE_KIND = "#{FEATURE_ID}.space"
     VOLUME_KIND = "#{FEATURE_ID}.volume"
     FLOOR_SEGMENT_KIND = "#{FEATURE_ID}.floor_segment"
-    SPACE_STORE = Records::EntityStore.new("ph_composer.space")
-    VOLUME_STORE = Records::EntityStore.new("ph_composer.space_volume")
-    FLOOR_SEGMENT_STORE = Records::EntityStore.new("ph_composer.floor_segment")
+    SPACE_STORE = Records::EntityStore.new("ph_composer.space", :claims_entity => true)
+    VOLUME_STORE = Records::EntityStore.new("ph_composer.space_volume", :claims_entity => true)
+    FLOOR_SEGMENT_STORE = Records::EntityStore.new("ph_composer.floor_segment", :claims_entity => true)
     FLOOR_PREFIX = "flr"
     AIRFLOWS = %w[v_sup_m3h v_eta_m3h v_tran_m3h].freeze
     DEFAULT_HEIGHT_M = 2.5

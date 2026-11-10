@@ -41,13 +41,54 @@ class WindowConvertRouteTest < PhComposerTestCase
     menus.values.flat_map { |menu| menu.entries.map { |entry| entry.is_a?(Array) ? entry.first : entry } }
   end
 
+  def read
+    PhComposer::HandlerRequest.for(@session, :owner => W::FEATURE_ID, :name => "#{W::FEATURE_ID}.convert_menu")
+  end
+
   def test_offered_on_a_face_selection_in_the_context_menu_and_not_otherwise
     face = zone_with([ring(2, 1, 1.2, 1.5)]).first
-    refute ROUTE.available?(@session)
+    refute ROUTE.available?(read)
     @model.selection.add(face)
-    assert ROUTE.available?(@session)
+    assert ROUTE.available?(read)
     menus = PhComposer::Commands.install_feature_menus(UI::Menu.new("Context"), :contextual => true)
     assert_includes menu_labels(menus), ROUTE::LABEL
+  end
+
+  def test_in_an_open_zone_it_is_offered_only_on_a_face_nested_in_another
+    rectangle = zone_with([ring(2, 1, 1.2, 1.5)]).first
+    @model.active_path = [@group]
+    @model.selection.add(@host)
+    refute ROUTE.available?(read), "the Face around the rectangle"
+    @model.selection.add(rectangle)
+    assert ROUTE.available?(read), "one nested Face keeps a mixed selection"
+    @model.selection.clear
+    @model.selection.add(rectangle)
+    assert ROUTE.available?(read)
+  end
+
+  # Two Zone Faces meeting at a corner share an Edge of their outer loops; neither is inside the other.
+  def test_a_face_sharing_only_outline_edges_in_a_zone_is_not_nested
+    shared = Sketchup::Edge.new(next_id, inches(0, 0, 0), inches(0, 0, 8))
+    first = Sketchup::Face.new(next_id, {}, :points => [[0, 0, 0], [8, 0, 0], [8, 0, 8], [0, 0, 8]].map { |point|
+      inches(*point)
+    }, :edges => [shared])
+    second = Sketchup::Face.new(next_id, {}, :points => [[0, 0, 0], [0, 8, 0], [0, 8, 8], [0, 0, 8]].map { |point|
+      inches(*point)
+    }, :edges => [shared])
+    @group = Sketchup::Group.new(next_id, Sketchup::Entities.new([first, second, shared]))
+    @model.entities << @group
+    made = assignment_invoke("ph_composer.zones.make", "parent_path" => [], "entity_ids" => [@group.persistent_id])
+    assert_equal "completed", made.fetch("status"), made.inspect
+    @model.active_path = [@group]
+    @model.selection.add(first)
+    refute ROUTE.available?(read)
+  end
+
+  def test_faces_outside_every_zone_keep_the_item_whatever_their_topology
+    face = Sketchup::Face.new(next_id)
+    @model.entities << face
+    @model.selection.add(face)
+    assert ROUTE.available?(read)
   end
 
   def test_the_extensions_menu_always_lists_the_item
