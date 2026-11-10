@@ -19,9 +19,11 @@ module PhComposer
       # The compact index lists every operation's name while it fits under this; past it, counts by owner;
       # past that too, totals only, with the features and operations left to their sections.
       INDEX_BYTES = 20 * 1024
-      # A row's text longer than this is cut in a list page, and the row names it in `truncated`, so one
-      # registration with a long description cannot make a page larger than a reply.
+      # A row's prose or list longer than this is cut in a list page, and the row names it in `truncated`, so
+      # one registration with a long description or a long `requires` cannot make a page larger than a reply.
+      # The names a caller looks a row up by are never cut.
       ROW_TEXT_BYTES = 1024
+      IDENTIFIERS = %w[kind name id namespace owner wire_kind record_kind].freeze
       PAGE_KEYS = %w[limit cursor].freeze
 
       module_function
@@ -41,7 +43,7 @@ module PhComposer
 
         page = page.reject { |key, _value| key == "operations" }.merge(
           "operation_counts" => operations.transform_values { |owners| owners.transform_values(&:length) },
-          "next" => "#{index_next} Too many operations are installed to name here; page them with section " \
+          "next" => "#{index_next} The index is too large to name every operation; page them with section " \
                     "operations."
         )
         return page if JSON.generate(page).bytesize <= INDEX_BYTES
@@ -118,13 +120,27 @@ module PhComposer
         found.map { |row| bounded_row(row) }
       end
 
-      # `row` with each text value over ROW_TEXT_BYTES cut there; `describe` answers the whole declaration.
+      # `row` with each text or list value over ROW_TEXT_BYTES cut there, identifiers whole; `describe`
+      # answers the whole declaration.
       def bounded_row(row)
-        long = row.select { |_key, value| value.is_a?(String) && value.bytesize > ROW_TEXT_BYTES }.keys
-        return row if long.empty?
+        cut = row.each_with_object({}) do |(key, value), shortened|
+          next if IDENTIFIERS.include?(key)
 
-        cut = long.to_h { |key| [key, row.fetch(key).byteslice(0, ROW_TEXT_BYTES).scrub("")] }
-        row.merge(cut).merge("truncated" => long)
+          if value.is_a?(String) && value.bytesize > ROW_TEXT_BYTES
+            shortened[key] = value.byteslice(0, ROW_TEXT_BYTES).scrub("")
+          elsif value.is_a?(Array) && JSON.generate(value).bytesize > ROW_TEXT_BYTES
+            shortened[key] = leading_items(value)
+          end
+        end
+        cut.empty? ? row : row.merge(cut).merge("truncated" => cut.keys)
+      end
+
+      def leading_items(values)
+        total = 2
+        values.take_while do |value|
+          total += JSON.generate(value).bytesize + 1
+          total <= ROW_TEXT_BYTES
+        end
       end
 
       def list(document, name, arguments, identity)

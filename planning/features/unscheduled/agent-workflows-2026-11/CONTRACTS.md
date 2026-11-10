@@ -69,7 +69,8 @@ not Model-provided instructions. Model names, notes and provider prose remain un
   `reference_targets`, `extensions`, `library_kinds`, `refusals`, `contracts`, `guide`), `topic`, `limit`,
   `cursor`; page keys `section`, `registry`, `rows`, `total`, `next_cursor`, `owner`; index keys `registry`,
   `sections`, `guide`, and `operation_counts` in place of `operations` past 20 KiB, then neither `features`
-nor counts; a row's text over 1 KiB is cut and named in the row's `truncated`. A stale-registry cursor
+nor counts; a row's prose or list over 1 KiB is cut and named in the row's `truncated`, identifiers
+(`Discovery::IDENTIFIERS`) never. A stale-registry cursor
   refuses `query.cursor_expired`; a foreign or edited one `params.invalid`.
 - `AgentAccess::Guide` over `agent_access/guide.md` (the shipped copy of `docs/AGENT_GUIDE.md`): topic ids
   are slugged second-level headings and `<parent>.<child>` for third-level ones, plus `overview`;

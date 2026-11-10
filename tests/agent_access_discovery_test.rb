@@ -206,6 +206,29 @@ class AgentAccessDiscoveryTest < PhComposerTestCase
     assert_equal PhComposer::API.discover.fetch("features").length, all_rows("features").length
   end
 
+  # A feature requiring hundreds of others still pages whole through the executor, its list cut and named;
+  # an identifier is never cut, so describe still finds what the row names.
+  def test_long_lists_are_cut_and_identifiers_kept
+    others = Array.new(400) { |index| synthetic(index, :queries => 1) }
+    PhComposer::Registry.install(others)
+    long_name = "synthetic.needy.#{'n' * 1100}"
+    needy = Module.new
+    needy.define_singleton_method(:install) do |registry|
+      feature = registry.feature("synthetic.needy", :contract_version => 1,
+                                                    :requires => Array.new(400) { |index| "synthetic.f#{index}" })
+      feature.query(long_name, :description => "Needs many.", :params => { "type" => "object" },
+                               :result => { "type" => "object" }, :refuses => []) { {} }
+    end
+    PhComposer::Registry.install([needy])
+    row = all_rows("features").find { |feature| feature.fetch("id") == "synthetic.needy" }
+    operation = all_rows("operations", :owner => "synthetic.needy").first
+
+    assert_equal ["requires"], row.fetch("truncated")
+    assert_operator row.fetch("requires").length, :<, 400
+    assert_equal long_name, operation.fetch("name")
+    refute @executor.call(@reader, "describe", "name" => long_name)["isError"]
+  end
+
   # One registration with a very long description still pages, cut, with the cut named.
   def test_one_oversized_row_is_cut_to_fit_a_page
     PhComposer::Registry.install([synthetic(0, :queries => 1, :description => "Long. " * 5000)])
@@ -215,6 +238,9 @@ class AgentAccessDiscoveryTest < PhComposerTestCase
     assert_equal ["description"], row.fetch("truncated")
     assert_equal Discovery::ROW_TEXT_BYTES, row.fetch("description").bytesize
     assert_nil found.fetch("next_cursor")
+    cut = Discovery.bounded_row("name" => "x", "description" => "\u00e9t\u00e9 " * 400).fetch("description")
+    assert cut.valid_encoding?
+    assert_operator cut.bytesize, :<=, Discovery::ROW_TEXT_BYTES
   end
 
   # A list section of rows that are each large still pages within the budget and loses none.

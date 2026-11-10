@@ -91,8 +91,9 @@ The agent connection's `discover` tool keeps its compact index and its `owner` p
 `refusals` (the common sets, a one-line meaning per code from `Refusals::MEANINGS`, and the
 documentation pointer), `contracts` (API, contract versions, grants, export task methods with their
 retention, Outcome and request schemas) and `guide`. A list section takes `limit` (100 by default, at
-most 500) and `cursor`, and cuts each page at 16 KiB of rows; a row's text over 1 KiB is cut and the
-row names the key in `truncated` (`describe` answers the whole), so one long registration still pages; its cursor binds the section, the owner
+most 500) and `cursor`, and cuts each page at 16 KiB of rows; a row's prose or list over 1 KiB is cut and
+the row names the key in `truncated` (identifiers such as `name`, `id`, `namespace` and `owner` are
+never cut, and `describe` answers the whole), so one long registration still pages; its cursor binds the section, the owner
 filter and `registry`, a digest of everything `API.discover` answers but the sessions, so after an
 install changes the registry the cursor is refused as `query.cursor_expired`. Every page and the index
 carry `registry`. The index lists the sections with their totals and the guide's version; past

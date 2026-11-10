@@ -887,7 +887,8 @@ module PhComposer
         return unless callback.params.is_a?(Hash) && JsonSchema.schema_problems(callback.params).empty?
 
         examples.each_with_index do |example, index|
-          findings = JsonSchema.validate(example, callback.params)
+          findings = JsonValue.problems(example)
+          findings = JsonSchema.validate(example, callback.params) if findings.empty?
           problem(item, "#{part} example #{index} does not meet its params: #{findings.first}") unless findings.empty?
         end
       end

@@ -36,11 +36,12 @@ extension carries this text, so an agent with only the connection can read it; `
 
 `discover` with `section` answers one bounded page; follow `next_cursor` for the next. A cursor
 belongs to its section and owner and to what was installed when it was issued: after an extension is
-installed or removed it is refused as `query.cursor_expired`, so start again from the first page.
+installed or removed it is refused as `query.cursor_expired`, so start again from the first page. In
+any section, a description or list longer than a row allows is cut, and the row names it in
+`truncated`; a name or id never is, and `describe` gives the whole declaration.
 
 - `operations`: every query, action, view command, setup command and file export, with its kind,
-  owner and description. Add `owner` for one feature's. A description longer than a row allows is
-  cut, and the row names it in `truncated`; `describe` gives the whole.
+  owner and description. Add `owner` for one feature's.
 - `features`: every installed feature, with its contract version and what it requires.
 - `record_kinds` and `reference_targets`: the catalog kinds stored in the Model's records and the
   entity kinds stored on its geometry. `describe` one by id for its values, references and

@@ -262,6 +262,9 @@ class LibraryRegistrationTest < PhComposerTestCase
     malformed.create.params = { "properties" => {} }
     malformed.create.examples = [{}]
     assert_includes refused(feature("test.library", malformed)).map(&:code), "registration.schema_invalid"
+    value = adapter
+    value.create.examples = [{ "id" => "one", "open" => Float::INFINITY }]
+    assert(refused(feature("test.library", value)).any? { |item| item.message.include?("not a finite number") })
     [{}, [1], [{ "id" => 7 }]].each do |examples|
       value = adapter
       value.create.examples = examples
