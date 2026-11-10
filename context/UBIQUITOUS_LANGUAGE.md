@@ -134,7 +134,7 @@ not coin a third vocabulary between SketchUp and honeybee. Faces belong to a Zon
 | Average clear ceiling height | The one height a Volume carries. Net volume is net floor area times this height, as honeybee-ph's `SpaceVolume` computes it |
 | Volume preview | The overlay extrusion of a Volume's Floor Segments by its height. Drawn, never modeled |
 | Height from solid | The helper that sets a Volume's height from a closed group the user drew: the group's volume divided by the Volume's net floor area |
-| Set Height | The viewport tool that sets one Volume's height: click its prism, then drag the top or type a value in the measurements box |
+| Set Height | The viewport tool that sets one Volume's height. It starts with a selected Volume, or a Space's one Volume, already picked; a Space with several Volumes waits for a click on one. Then drag the top or type a value in the measurements box |
 | Edit Floor Surface | The context-menu item that opens a selected Volume, or a Space's one Volume, unprotected, as Enter does in the Spaces view |
 | Space label | Viewport text at a Space's reference point, as `101 Living \| iCFA 2,083 ft² \| Vol: 20,831 ft³`. Its values are whole numbers. iCFA and net volume show unless turned off; supply and extract, shown on request, follow as `\| Sup 60 cfm / Ext 60 cfm` |
 | Selection totals | The HUD readout of summed iCFA, net volume and airflows for the selected Spaces |

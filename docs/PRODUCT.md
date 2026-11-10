@@ -271,14 +271,15 @@ counted twice; a new Volume refuses one too. The refusal says to draw the floor 
 group the solid and use Height from solid.
 
 Set Height, in SketchUp's Extensions menu and in the context menu on a Space or Volume, is a viewport tool for one
-Volume's height: click the Space's prism, then drag its top or type a value in the measurements box. Each entry
-is one Undo step, and the value also becomes the Model's last height. Edit Floor Surface, in the same menus, opens the
+Volume's height. A selected Volume, or the one Volume of a selected Space, is picked as soon as the tool starts:
+type a value in the measurements box and press Enter, or drag the top of the Space. For a Space with several
+Volumes, click one Volume first. Each entry is one Undo step, and the value also becomes the Model's last height. Edit Floor Surface, in the same menus, opens the
 Volume of a selected Volume or a one-Volume Space, unprotected, for ordinary SketchUp edits to its floor surface; leaving
 it protects the Volume again.
 
 Colour by Space, Ventilation, Weighting factor and Height colour each Space's Floor Segments and the
-preview prism that its height draws over them, with a legend. Show Spaces, on by default each time a
-Model is opened, draws every Space's prism outline and its label whether or not a mode is on, in the
+Volume preview that its height draws over them, with a legend. Show Spaces, on by default each time a
+Model is opened, draws the outline of every Volume preview and each Space's label whether or not a mode is on, in the
 panel's units; turn it off from Table options in Zones > Spaces or the Colour by menu. Selection totals, the
 sums for the selected Spaces, are turned on in the same places. None of this is saved in the model.
 
@@ -302,7 +303,7 @@ written. The run can be cancelled, a failed replacement leaves the previous pair
 never saves the SKP. A run blocked by a finding writes nothing, and the Export tab still shows its
 report, marked as coming from a run that wrote no model, so its figures are there to fix the block.
 Each Space travels on its Zone's Room with its Volumes, heights, Floor Segments, both factors, its
-preview prism and its airflows. The report gives a Spaces schedule for each Zone with the table's
+Volume previews and its airflows. The report gives a Spaces schedule for each Zone with the table's
 columns and the totals for each Zone and Building-Segment, and names any Space drawn beside its Zone,
 which exports where it was drawn. The METr model is a later exporter, deferred until more of the building can be
 authored. Independent consumers decide how to view, review and calculate

@@ -121,7 +121,7 @@ class SpacesSetHeightToolTest < PhComposerTestCase
   def test_typing_refuses_with_nothing_picked_or_an_entry_that_is_no_height
     operations = @model.operations.length
     typed({ "3m" => 3 * INCHES }, "3m")
-    assert_match(/Click a Space's prism first/, Sketchup.status_texts.last)
+    assert_equal "Click a Space first, then type its height. Nothing was written.", Sketchup.status_texts.last
 
     press(aim(0, 0, *FROM_ABOVE))
     release
@@ -221,7 +221,7 @@ class SpacesSetHeightToolTest < PhComposerTestCase
     press(aim(0, 0, [50.0, 50.0, 20.0], [0.0, 0.0, -1.0]))
     release
     typed({ "3m" => 3 * INCHES }, "3m")
-    assert_match(/Click a Space's prism first/, Sketchup.status_texts.last)
+    assert_match(/Click a Space first/, Sketchup.status_texts.last)
   end
 
   def test_a_volume_with_no_height_is_picked_on_its_floor_and_given_one
@@ -238,7 +238,164 @@ class SpacesSetHeightToolTest < PhComposerTestCase
     press(aim(0, 0, *FROM_ABOVE))
     release
     typed({ "3m" => 3 * INCHES }, "3m")
-    assert_match(/Click a Space's prism first/, Sketchup.status_texts.last)
+    assert_match(/Click a Space first/, Sketchup.status_texts.last)
+  end
+
+  # Starting from a selection.
+
+  KNOWN = "Set Height: drag the top of the Space, or type a height."
+  CLICK_ONE = "Set Height: click a Volume, then drag its top or type a height."
+
+  def start_on(entity, active_path)
+    @model.select_tool(nil)
+    @model.selection.clear
+    @model.active_path = active_path
+    @model.selection.add(entity)
+    tool.start
+  end
+
+  def second_volume
+    floor = floor_face(1191, rectangle(0, 5, 1, 1), segment_record("Z"))
+    space.entities << volume_group(1190, volume_record("Z", :number => 2), [floor])
+  end
+
+  def test_a_space_with_one_volume_takes_a_typed_height_with_no_click_as_one_undo_step
+    start_on(space, [zone])
+    assert_equal KNOWN, Sketchup.status_texts.last
+    operations = @model.operations.length
+
+    typed({ "3.2m" => 3.2 * INCHES }, "3.2m")
+
+    assert_in_delta 3.2, height, 1e-9
+    assert_equal operations + 1, @model.operations.length
+    assert_match(/Height set to/, Sketchup.status_texts.last)
+  end
+
+  def test_a_selected_volume_takes_a_typed_height_with_no_click
+    start_on(volume, [zone, space])
+    assert_equal KNOWN, Sketchup.status_texts.last
+    operations = @model.operations.length
+
+    typed({ "3.2m" => 3.2 * INCHES }, "3.2m")
+
+    assert_in_delta 3.2, height, 1e-9
+    assert_equal operations + 1, @model.operations.length
+  end
+
+  def test_the_volume_picked_at_the_start_is_highlighted_and_shown_in_the_measurements_box
+    shown = []
+    Sketchup.define_singleton_method(:vcb_label=) { |_text| nil }
+    Sketchup.define_singleton_method(:vcb_value=) { |text| shown << text }
+    Sketchup.define_singleton_method(:format_length) { |inches| format("%.1fin", inches) }
+    start_on(space, [zone])
+    assert_equal ["#{(2.5 * INCHES).round(1)}in"], shown
+    @view.draws.clear
+    tool.draw(@view)
+    refute_empty @view.draws
+  ensure
+    %i[vcb_label= vcb_value= format_length].each { |name| Sketchup.singleton_class.remove_method(name) }
+  end
+
+  def test_a_drag_works_from_the_volume_picked_at_the_start
+    start_on(space, [zone])
+    press(side_on(0, 1.0))
+    drag_to(side_on(100, 1.5))
+    release
+    assert_in_delta 3.0, height, 1e-9
+  end
+
+  def test_a_space_with_several_volumes_prompts_and_refuses_a_typed_height_until_one_is_picked
+    second_volume
+    start_on(space, [zone])
+    assert_equal CLICK_ONE, Sketchup.status_texts.last
+    operations = @model.operations.length
+
+    typed({ "3m" => 3 * INCHES }, "3m")
+    assert_equal "Click a Space first, then type its height. Nothing was written.", Sketchup.status_texts.last
+    assert_equal operations, @model.operations.length
+    assert_in_delta 2.5, height, 1e-9
+
+    press(aim(0, 0, *FROM_ABOVE))
+    release
+    assert_equal KNOWN, Sketchup.status_texts.last
+    typed({ "3m" => 3 * INCHES }, "3m")
+    assert_in_delta 3.0, height, 1e-9
+  end
+
+  def test_a_press_on_nothing_lets_go_of_the_volume_picked_at_the_start
+    start_on(space, [zone])
+    press(aim(0, 0, [50.0, 50.0, 20.0], [0.0, 0.0, -1.0]))
+    release
+    assert_equal CLICK_ONE, Sketchup.status_texts.last
+
+    typed({ "3m" => 3 * INCHES }, "3m")
+    assert_match(/Click a Space first/, Sketchup.status_texts.last)
+    assert_in_delta 2.5, height, 1e-9
+  end
+
+  def test_a_scan_that_cannot_read_at_the_start_says_why_when_a_height_is_typed
+    occurrences = PhComposer::Spaces::Occurrences
+    original = occurrences.method(:scan)
+    @model.select_tool(nil)
+    @model.active_path = [zone]
+    @model.selection.add(space)
+    unreadable = PhComposer::CodedError.new("record.unreadable", "Bad Volume.")
+    occurrences.define_singleton_method(:scan) { |*| raise unreadable }
+    tool.start
+
+    typed({ "3m" => 3 * INCHES }, "3m")
+
+    assert_equal "Bad Volume. Nothing was written.", Sketchup.status_texts.last
+  ensure
+    occurrences.define_singleton_method(:scan, original)
+  end
+
+  def test_a_selected_volume_the_section_cuts_away_whole_is_not_picked_and_one_cut_part_way_is
+    upper_storey_and_section_below(2.9)
+    upper = zone.entities.to_a.last
+    start_on(upper.entities.to_a.first, [zone, upper])
+    assert_equal CLICK_ONE, Sketchup.status_texts.last, "the upper storey is above the cut"
+
+    start_on(volume, [zone, space])
+    assert_equal KNOWN, Sketchup.status_texts.last, "Living shows below the cut"
+  end
+
+  def test_a_read_error_at_the_start_is_not_reported_once_the_records_read_again
+    occurrences = PhComposer::Spaces::Occurrences
+    original = occurrences.method(:scan)
+    unreadable = PhComposer::CodedError.new("record.unreadable", "Bad Volume.")
+    occurrences.define_singleton_method(:scan) { |*| raise unreadable }
+    start_on(space, [zone])
+    occurrences.define_singleton_method(:scan, original)
+    second_volume
+    start_on(space, [zone])
+
+    typed({ "3m" => 3 * INCHES }, "3m")
+
+    assert_equal "Click a Space first, then type its height. Nothing was written.", Sketchup.status_texts.last
+  ensure
+    occurrences.define_singleton_method(:scan, original)
+  end
+
+  def test_a_hidden_selected_volume_is_not_picked
+    start_on(volume, [zone, space])
+    volume.hidden = true
+    @model.select_tool(nil)
+    tool.start
+    assert_equal CLICK_ONE, Sketchup.status_texts.last
+  end
+
+  def test_choosing_it_again_while_it_runs_moves_the_pick_to_the_new_selection
+    start_on(space, [zone])
+    other = zone.entities.to_a[1]
+    @model.selection.clear
+    @model.selection.add(other)
+    tool.start
+
+    typed({ "3.1m" => 3.1 * INCHES }, "3.1m")
+
+    assert_in_delta 3.1, PhComposer::Spaces::VOLUME_STORE.read(other.entities.to_a.first)[KEY], 1e-9
+    assert_in_delta 2.5, height, 1e-9
   end
 
   # A Volume above Living, then a section plane keeping what is below `z` metres.
