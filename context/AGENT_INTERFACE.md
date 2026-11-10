@@ -452,6 +452,14 @@ slot. This operation is separate from the longer-lived HBJSON runtime task below
 
 `API.export_preflight` requires `read` and returns feature-owned findings and explicit repair actions.
 A caller invokes selected repairs through the ordinary `model_write` contract, then revalidates.
+Its bounded forms (`Export::DiagnosticPages`) leave every contributor's own preflight query as it is:
+`compact` counts by owner and code over the whole preflight, `part` pages findings or repairs with each
+row's owner and key, filtered by owner, codes, severity or record id without changing the declared
+`unfiltered_total`, and `row` reads one row whole; their cursors bind the Model revision. Each preflight
+also runs extraction's metadata rules (`Export::MetadataCheck`, the same rules `Export::RecordReader`
+raises on) over the records its section reads, so a reserved `user_data` key or extension data nothing
+exports is reported before a run; HBJSON conformance and the passed `user_data` guard stay translation
+checks that only a run makes.
 `API.start_export`, `export_status`, `cancel_export` and `latest_export` require the separate `export`
 grant. A scripted start names an approved save destination as `location` and, to replace a pair,
 the state `export_preflight(location:)` reported (see "Locations only the user can choose").
@@ -460,7 +468,13 @@ answers each task method with its grant, keyword params, result schema and an ex
 (`export/task_contract.rb`), so a client needs no hand-written signature.
 
 One task may run per Model session. Status is detached, carries counts and diagnostics, and omits
-canonical HBJSON bytes. A successful result names the approved location, by id and label, and the
+canonical HBJSON bytes. Every snapshot names its `source` (the revision and content generation it read)
+and, once ended, `diagnostics`; a receipt trimmed to the reply budget keeps both. When a task ends it
+keeps what that run generated: its findings, its compact result and its rendered report (a blocked
+run's included, though it writes no file), or why it kept no report. `export_status` with `part` reads
+that retained content for the caller that started the task, never the Model or a second translation,
+with cursors bound to the task, and refuses `task.running` before the task ends; retention, the owner
+check, revocation and Model close bound it as they bound polling. A successful result names the approved location, by id and label, and the
 run; to the caller that started the task alone it also gives `artifacts`, each written file's path,
 SHA-256 and size, and to every other caller no path. A lost reply or timeout does not cancel a task. Poll or use `latest_export`
 before deciding whether to retry. Polling never repeats a write. The latest 20 terminal tasks are
@@ -672,7 +686,12 @@ reads the native selection as explicit Edge references with each one's Zone and 
 past 250 Edges. The right-click "Thermal bridge" menu and the edge tool are pointer routes; their
 explicit-reference equivalent is `edges.assign`. `runs.locate` shows a run's or a finding's Edges;
 `export_preflight` lists every finding before export, against the placed Windows' outlines that
-`ph_composer.windows.units.outlines` reads. [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Thermal Bridge
+`ph_composer.windows.units.outlines` reads. What `edges.clear` cannot reach, stored text that is not a
+JSON object and a readable assignment on an Edge no Zone holds, has its own explicit route:
+`edges.repair_candidates` lists each with its root-to-Edge path and the SHA-256 of the stored text, and
+`edges.repair` takes that path and fingerprint, previews what it discards and removes that one record,
+leaving geometry and every other dictionary, as one Undo step. It refuses other text, a locked or shared
+path and anything clear serves, and never takes a dictionary name. [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Thermal Bridge
 Types", is the recipe.
 
 Zones exposes native split identity recovery as `ph_composer.zones.repair_split_face`. The native

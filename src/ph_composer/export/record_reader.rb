@@ -159,30 +159,15 @@ module PhComposer
         { "id" => id }.merge(values).merge(exported.empty? ? {} : { "extensions" => exported }).merge(passed)
       end
 
+      # The rules are MetadataCheck's, which a preflight runs too; extraction raises the first problem.
       def declared_payload(id, namespace, envelope, fields)
-        status = Records::Extension.status(envelope, @catalog.extension(namespace))
-        unless status == "understood"
-          code = { "unavailable" => "extension.unavailable", "invalid" => "extension.invalid" }
-                 .fetch(status, "extension.schema_unsupported")
-          block(code,
-                "#{namespace} data on #{id} is #{status}, so it cannot be exported. Nothing was written.")
-        end
+        refuse(MetadataCheck.payload_problem(id, namespace, envelope, @catalog))
         DeepCopy.call(envelope.fetch("payload").slice(*fields))
       end
 
       def leave_out(id, namespace, envelope)
-        relevance = Records::Extension.readable?(envelope) ? envelope.fetch("export_relevance", "unknown") : "unknown"
-        case relevance
-        when "local_only"
-          note("export.metadata_omitted", id, "#{namespace} data is local to this Model and was not exported.")
-        when "required"
-          block("extension.unavailable",
-                "#{id} holds #{namespace} data that export needs, and nothing installed exports it. " \
-                "Nothing was written.")
-        else
-          block("export.relevance_unknown",
-                "#{id} holds #{namespace} data whose effect on the export is unknown. Nothing was written.")
-        end
+        refuse(MetadataCheck.left_out_problem(id, namespace, envelope))
+        note("export.metadata_omitted", id, "#{namespace} data is local to this Model and was not exported.")
       end
 
       # `{"user_data" => ...}` to merge into the exported record, or `{}`.
@@ -195,11 +180,7 @@ module PhComposer
           return {}
         end
 
-        taken = (value.keys & @reserved).first
-        if taken
-          block("export.blocked", "#{id} has user_data under the reserved key #{taken}, which an exporter writes " \
-                                  "itself. Rename that key. Nothing was written.")
-        end
+        refuse(MetadataCheck.reserved_problem(id, value, @reserved))
         { "user_data" => DeepCopy.call(value) }
       end
 
@@ -207,8 +188,8 @@ module PhComposer
         note("export.metadata_omitted", id, "User data is local to this Model and was not exported.")
       end
 
-      def block(code, message)
-        raise Blocked.new(code, message, "section" => @section)
+      def refuse(problem)
+        raise Blocked.new(problem.code, problem.message, "section" => @section) if problem
       end
     end
   end

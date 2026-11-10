@@ -5,8 +5,8 @@
 # no Zones or Windows file names it.
 #
 #   type/           the Thermal Bridge Type kind, its operations and reads; names no Edge, Zone or run
-#   assignment/     the record on an Edge, its reference target, assign, clear, the selection read and the
-#                   path reads
+#   assignment/     the record on an Edge, its reference target, assign, clear, the repair of what clear
+#                   cannot reach, the selection read and the path reads
 #   runs/           pure Ruby: chains of assigned Edges, the schedule and its findings, over detached facts
 #   scan/           the live read: one walk for assigned Edges, Zones' answers for their paths, the schedule
 #   run_locate.rb   runs.locate, which selects a run's Edges through the foundation's context.open
@@ -21,6 +21,7 @@ require_relative "type/reads"
 require_relative "assignment/schema"
 require_relative "assignment/reference_target"
 require_relative "assignment/steps"
+require_relative "assignment/repair"
 require_relative "assignment/operations"
 require_relative "assignment/selection"
 require_relative "assignment/path_reads"

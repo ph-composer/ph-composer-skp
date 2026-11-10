@@ -45,8 +45,24 @@ module PhComposer
         task.snapshot(owner)
       end
 
-      def status(id, owner)
-        fetch(id, owner).snapshot(owner)
+      # The task's snapshot, compact on request, or with `part` one part of what it kept when it ended
+      # (Task#diagnostic), its cursors bound to this task alone, so a later edit of the Model expires none.
+      TASK_PARTS = { "findings" => %w[codes blocks_export object_id], "report" => [], "result" => [],
+                     "outcome" => [] }.freeze
+
+      def status(id, owner, options = {})
+        options = TaskContract.check_options!("export_status", options)
+        task = fetch(id, owner)
+        DiagnosticPages.check!(options, TASK_PARTS)
+        part = options["part"]
+        return task.snapshot(owner, :compact => options["compact"]) unless part
+        if part != "findings" && !(options.keys & %w[row limit]).empty?
+          raise CodedError.new("params.invalid", "The #{part} part is read in fragments; it takes a cursor only.")
+        end
+
+        request = DiagnosticPages::Request.new(:session => @session, :params => options.merge("task_id" => id),
+                                               :revision => id)
+        { "task_id" => id, "source" => task.source, "part" => part }.merge(task.diagnostic(request, part))
       end
 
       def cancel(id, owner)
@@ -55,9 +71,10 @@ module PhComposer
         task.snapshot(owner)
       end
 
-      def latest(owner)
+      def latest(owner, options = {})
+        compact = TaskContract.check_options!("latest_export", options)["compact"]
         prune
-        @tasks.values.reverse.find { |task| task.owner.handle == owner.handle }&.snapshot(owner)
+        @tasks.values.reverse.find { |task| task.owner.handle == owner.handle }&.snapshot(owner, :compact => compact)
       end
 
       # The tasks `handle` started, for the acknowledgment of a revoked token: those that completed and

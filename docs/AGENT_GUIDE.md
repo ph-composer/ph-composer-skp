@@ -263,6 +263,18 @@ and refuses as a whole if any target changed or cannot be written. `ph_composer.
 removes the assignment. Each is one Undo step. An Edge split or copied in SketchUp keeps its
 assignment, and the pieces share one id, which reads mark `copied`; nothing needs repairing.
 
+Two cases are beyond `edges.clear`: an assignment whose stored text is not a JSON object
+(`record.unreadable`), and a readable assignment on an Edge no Zone holds, which has no Edge reference.
+`ph_composer.thermal_bridges.edges.repair_candidates` lists both a page at a time, each with its root-to-Edge
+`path`, `condition` (`unreadable` or `stranded`), `fingerprint` (the SHA-256 of the stored text) and the
+`write_refusal` its path meets. Preview `ph_composer.thermal_bridges.edges.repair` with that `path` and
+`fingerprint`: it shows the stored text's size, digest and opening characters and, for a readable record,
+the values and metadata it discards. Invoke it with the preview's digest to remove that one record, and
+nothing else, as one Undo step. Other stored text refuses `target.changed`; a locked or shared path refuses
+as an ordinary write does; an assignment `edges.clear` can reach refuses `thermal_bridge.repair_not_needed`.
+Removing a readable assignment first proves nothing still names it, which needs every assignment readable, so
+repair the unreadable ones first.
+
 `ph_composer.thermal_bridges.edge_tool.choose` arms the edge tool with a type and quantity for a person
 at the mouse: each click or drag across Edges is one `edges.assign` and one Undo step, at most 250
 Edges a gesture. It is the pointer route; its explicit-reference equivalent is `edges.assign`, which is
@@ -374,9 +386,27 @@ returns the file's path; the user opens the file.
 `ph_composer.locations.list` shows the destinations the user approved; you cannot add one. If there
 is none, ask the user to approve one with Allow agents to export here in the Export tab.
 `export_preflight` says what would block the export; with `location`, `destination.problem` says why
-`start_export` refuses that destination itself (ask the user to approve another). A pair already there
+`start_export` refuses that destination itself (ask the user to approve another). On a large Model the
+whole preflight is larger than one reply: `compact` answers `ready`, `totals`, `by_owner` and `by_code`
+over the whole preflight, and `part` `"findings"` or `"repairs"` reads one list a page at a time, filtered
+by `owner`, `codes`, `blocks_export` or `object_id`. `total` counts the rows matching the filter and
+`unfiltered_total` the whole list. A long message is cut, and a large `locate` or repair `params` is given
+by size and digest, each named in `truncated`; `row` with a row's key reads it whole in fragments. A
+preflight cursor expires when the Model changes. The preflight also reports what export would refuse
+in stored metadata: a passed-through `user_data` using a reserved key (`export.blocked`), and extension
+data nothing installed can export (`extension.unavailable`, `export.relevance_unknown` and the like). Only
+the translation itself checks the HBJSON, so a clean preflight is not a promise. A pair already there
 is replaced only with `replace` and the reported `state` as `expected_destination`. `start_export` with a location's id, then
-`export_status` until the outcome arrives. While `cancellable` is true, `cancel_export` with the
+`export_status` until the outcome arrives; poll with `compact`, which leaves the findings, result and
+report out. Every task names the `source` it read (the Model `revision` and content generation when it
+started) and, once it ends, its `diagnostics`: finding counts and the size and SHA-256 of the report and
+result it kept, or `report_absent` saying why it kept no report (`no_translation`: it stopped before the
+translation answered). `export_status` with `part` reads what that run kept, never the Model as it is
+now: `"findings"` a page at a time with the same filters and `row` as the preflight, `"report"` (the
+generated report, including a blocked run's, which writes no file), `"result"` and `"outcome"` (the
+whole outcome, for a failure message longer than `compact` shows) in fragments. Its
+cursors belong to the task, so an edit made after the run does not expire them; the task's retention,
+your token and the Model staying open do. A part before the task ends refuses `task.running`. While `cancellable` is true, `cancel_export` with the
 task's `task_id` stops it and writes nothing; once writing has started it finishes, and polling shows
 its outcome. Cancelling or dropping your own request does not cancel the task. When it is `export.complete`, `artifacts` gives each
 file's path on this computer, SHA-256 and size, for you alone. The connection returns the path, not

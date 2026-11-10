@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 39
+    MINOR = 40
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -196,7 +196,15 @@ module PhComposer
                     "and export_file take compact, which counts notes and omissions and summarizes rows; " \
                     "library.warnings.list and unavailable.list page a catalog's notes; library.catalog.detail and " \
                     "in_file.detail read one row's part in fragments; library.export_preview.omissions pages an " \
-                    "export's omissions against its projection_digest; export_file answers destination_state." }
+                    "export's omissions against its projection_digest; export_file answers destination_state." },
+      { "minor" => 40, "date" => "2026-11-10",
+        "change" => "Complete export QA and repair: export_preflight takes compact (counts by owner and code) and " \
+                    "part (a filtered page of findings or repairs, or one row whole); preflights report the " \
+                    "metadata extraction refuses; export_status and latest_export take compact, every task names " \
+                    "its source and diagnostics, and export_status with part reads an ended task's findings, " \
+                    "report and result, refusing task.running before it ends; " \
+                    "thermal_bridges.edges.repair_candidates and edges.repair remove an unreadable or stranded " \
+                    "Edge assignment." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {
@@ -364,21 +372,33 @@ module PhComposer
       Dispatch.new.export_task(context, :start, :location => location)
     end
 
-    # `location`, an approved destination's id, adds what that destination holds to the result.
-    def export_preflight(context:, location: nil)
-      Dispatch.new.export_preflight(context, location)
+    # `location`, an approved destination's id, adds what that destination holds to the result. `compact`
+    # counts the findings and repairs in place of the lists; `part` pages one of them, filtered by `owner`,
+    # `codes`, `blocks_export` or `object_id`, and `row` reads one row whole (Export::TaskContract).
+    def export_preflight(context:, location: nil, compact: nil, part: nil, owner: nil, codes: nil,
+                         blocks_export: nil, object_id: nil, row: nil, limit: nil, cursor: nil)
+      options = { "compact" => compact, "part" => part, "owner" => owner, "codes" => codes,
+                  "blocks_export" => blocks_export, "object_id" => object_id, "row" => row, "limit" => limit,
+                  "cursor" => cursor }
+      Dispatch.new.export_preflight(context, location, options)
     end
 
-    def export_status(context:, task_id:)
-      Dispatch.new.export_task(context, :status, :task_id => task_id)
+    # `compact` leaves the findings, result and report out of the outcome; once the task ended, `part` reads
+    # what it kept: a page of `findings` (filtered by `codes`, `blocks_export` or `object_id`, or one by
+    # `row`), or the `report` or `result` in fragments.
+    def export_status(context:, task_id:, compact: nil, part: nil, codes: nil, blocks_export: nil, object_id: nil,
+                      row: nil, limit: nil, cursor: nil)
+      options = { "compact" => compact, "part" => part, "codes" => codes, "blocks_export" => blocks_export,
+                  "object_id" => object_id, "row" => row, "limit" => limit, "cursor" => cursor }
+      Dispatch.new.export_task(context, :status, :task_id => task_id, :options => options)
     end
 
     def cancel_export(context:, task_id:)
       Dispatch.new.export_task(context, :cancel, :task_id => task_id)
     end
 
-    def latest_export(context:)
-      Dispatch.new.export_task(context, :latest, {})
+    def latest_export(context:, compact: nil)
+      Dispatch.new.export_task(context, :latest, :options => { "compact" => compact })
     end
 
     def session_summary(session)

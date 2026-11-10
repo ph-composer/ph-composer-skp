@@ -10,7 +10,7 @@ module PhComposer
         CONTAINMENT = "ph_composer.zones.containment"
         # What the user can do about an assigned Edge a type delete cannot rewrite where it sits.
         STRANDED_ROUTES = {
-          "outside_zone" => "move it into a Zone, or erase it",
+          "outside_zone" => "move it into a Zone, or remove its assignment (#{Repair::ROUTE})",
           "target.shared_definition" => "open its shared Group with Edit Group and close it, or explode its component",
           "target.locked" => "unlock its Group or Zone",
           "cutting_instance" => "erase it from the cutting component",

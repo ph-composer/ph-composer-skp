@@ -57,13 +57,23 @@ module PhComposer
         end
         findings += unreadable.map do |row|
           preflight_row({ "code" => row.fetch("code"), "blocks_export" => true,
-                          "message" => "An assigned Edge's record cannot be read: #{row.fetch('message')}",
+                          "message" => "An assigned Edge's record cannot be read: #{row.fetch('message')} To " \
+                                       "discard it, #{Assignment::Repair::ROUTE}.",
                           "locate" => { "edge_paths" => [row.fetch("path")] } }, nil)
         end
-        { "findings" => findings, "repairs" => [] }
+        { "findings" => findings + metadata_findings(request), "repairs" => [] }
       rescue CodedError => error
         { "findings" => [{ "code" => error.code, "section" => SECTION, "object_id" => nil,
                            "message" => error.message, "blocks_export" => true }], "repairs" => [] }
+      end
+
+      # The metadata extraction refuses, read as `records` and `facts` read it: each Type, and each Edge's
+      # assignment with the envelopes another contributor claims on it.
+      def metadata_findings(request)
+        check = Export::MetadataCheck
+        check.findings(request, check.definitions(request, TYPE_KIND), :section => SECTION) +
+          check.findings(request, check.entity_records(request.model, Assignment::STORE),
+                         :section => SECTION, :target_kind => EDGE_KIND)
       end
 
       def preflight_row(finding, object_id, prefix = "")

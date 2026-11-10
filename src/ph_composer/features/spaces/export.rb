@@ -135,10 +135,21 @@ module PhComposer
           repairs << repair if repair
         end
         findings.concat(offset_findings(request.model))
+        findings.concat(metadata_findings(request))
         { "findings" => findings, "repairs" => repairs.uniq { |row| row.fetch("id") } }
       rescue CodedError => error
         { "findings" => [{ "code" => error.code, "section" => SECTION, "object_id" => nil,
                            "message" => error.message, "blocks_export" => true }], "repairs" => [] }
+      end
+
+      # The metadata extraction refuses, read as `records` reads each Space, Volume and Floor Segment: user_data
+      # passed through, and the envelopes another contributor claims on each kind.
+      def metadata_findings(request)
+        { SPACE_STORE => SPACE_KIND, VOLUME_STORE => VOLUME_KIND, FLOOR_SEGMENT_STORE => FLOOR_SEGMENT_KIND }
+          .flat_map do |store, kind|
+            Export::MetadataCheck.findings(request, Export::MetadataCheck.entity_records(request.model, store),
+                                           :section => SECTION, :user_data => true, :target_kind => kind)
+          end
       end
 
       def finding_row(finding, reference, object_id)

@@ -69,7 +69,16 @@ module PhComposer
         findings.concat((bad_materials + bad_assemblies).map do |row|
           preflight_row(row.fetch("code"), row.fetch("id"), row.fetch("message"), true)
         end)
+        findings.concat(metadata_findings(request))
         { "findings" => findings, "repairs" => [] }
+      end
+
+      # The metadata extraction refuses, read as `records` reads it: Materials alone, Assemblies with their
+      # user_data passed through.
+      def metadata_findings(request)
+        check = Export::MetadataCheck
+        check.findings(request, check.definitions(request, MATERIAL_KIND), :section => SECTION) +
+          check.findings(request, check.definitions(request, ASSEMBLY_KIND), :section => SECTION, :user_data => true)
       end
 
       def preflight_row(code, id, message, blocking)

@@ -20,7 +20,9 @@ module PhComposer
                                               "placement.",
         "thermal_bridge.on_window_perimeter" => "An assigned Edge lies on a placed Window's outline; its install " \
                                                 "psi-value belongs to the Window Type.",
-        "thermal_bridge.hidden" => "An Edge to locate, or a Group holding it, is hidden or on a hidden tag."
+        "thermal_bridge.hidden" => "An Edge to locate, or a Group holding it, is hidden or on a hidden tag.",
+        "thermal_bridge.repair_not_needed" => "A Zone holds the Edge and its assignment can be read, so " \
+                                              "edges.clear removes it; edges.repair is for what clear cannot reach."
       }.freeze
 
       module_function

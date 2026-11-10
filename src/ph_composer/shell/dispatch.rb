@@ -31,9 +31,9 @@ module PhComposer
       owner = Export::Tasks::Owner.new(caller.handle, -> { !session.callers.fetch(caller.handle).nil? })
       value = case operation
               when :start then tasks.start(**arguments, :owner => owner)
-              when :status then tasks.status(arguments.fetch(:task_id), owner)
+              when :status then tasks.status(arguments.fetch(:task_id), owner, arguments.fetch(:options, {}))
               when :cancel then tasks.cancel(arguments.fetch(:task_id), owner)
-              when :latest then tasks.latest(owner)
+              when :latest then tasks.latest(owner, arguments.fetch(:options, {}))
               else raise InternalError, "Unknown export task operation."
               end
       Outcome.completed(:revision => session.revision, :value => value)
@@ -45,28 +45,29 @@ module PhComposer
       unexpected_outcome(error, session, "export.#{operation}")
     end
 
-    # With `location`, an approved destination's id, the result also says what that destination holds.
-    def export_preflight(context, location = nil)
+    # With `location`, an approved destination's id, the result also says what that destination holds;
+    # `options` ask for a bounded form instead of the whole (Export::PreflightView).
+    def export_preflight(context, location = nil, options = {})
       session, = resolve(context, "read", nil, nil)
-      value = { "findings" => [], "repairs" => [] }
-      value["destination"] = Export.destination_report(location) if location
-      @registry.export_contributors.values.sort_by(&:name).each do |contributor|
+      options = Export::PreflightView.check!(options)
+      lists = { "findings" => [], "repairs" => [] }
+      @registry.export_contributors.values.sort_by(&:name).each_with_index do |contributor, place|
         next unless contributor.preflight
 
         outcome = query(context, contributor.preflight, {})
         return outcome unless outcome["status"] == "completed"
 
-        declared = outcome.fetch("value")
-        value["findings"].concat(declared.fetch("findings"))
-        declared.fetch("repairs").each do |repair|
-          action = @registry.actions[repair["action"]]
-          unless action&.owner == contributor.owner
-            raise InternalError, "Preflight repair needs its owner's public action."
-          end
+        %w[findings repairs].each do |list|
+          outcome.dig("value", list).each_with_index do |row, index|
+            if list == "repairs" && @registry.actions[row["action"]]&.owner != contributor.owner
+              raise InternalError, "Preflight repair needs its owner's public action."
+            end
 
-          value["repairs"] << repair
+            lists[list] << [[place, index], row.merge("owner" => contributor.owner)]
+          end
         end
       end
+      value = Export::PreflightView.answer(session, lists, location, options)
       Outcome.completed(:revision => session.revision, :value => DeepCopy.call(value))
     rescue CodedError => error
       coded_outcome(error, session)

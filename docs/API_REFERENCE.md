@@ -14455,6 +14455,149 @@ Example params:
 }
 ```
 
+### `ph_composer.thermal_bridges.edges.repair_candidates`
+
+One bounded page of the Edges whose stored assignment edges.clear cannot reach: text that is not a JSON object anywhere, or a readable record on an Edge no Zone holds. Each row gives the fingerprint edges.repair takes. Removing a readable record needs every assignment readable, so repair the unreadable ones first. Owner: `ph_composer.thermal_bridges`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "edges",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "condition",
+          "containment",
+          "fingerprint",
+          "bytes",
+          "record",
+          "write_refusal"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "condition": {
+            "type": "string",
+            "enum": [
+              "unreadable",
+              "stranded"
+            ],
+            "description": "unreadable: the stored text is not a JSON object; stranded: a readable record on an Edge no Zone holds, which edges.clear cannot name."
+          },
+          "containment": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Why no Zone holds the Edge, as zones.containment reads it; null in a Zone."
+          },
+          "fingerprint": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "description": "SHA-256 of the stored text (a non-text value's canonical JSON), hex, as edges.repair_candidates gives it."
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "record": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "A readable record's id, thermal_bridge_type_id and quantity; null otherwise."
+          },
+          "write_refusal": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "description": "The refusal a write to the Edge meets from its path, or null."
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 50
+}
+```
+
 ### `ph_composer.thermal_bridges.edges.selection`
 
 One bounded page of the selected Edges under the active path, each with the Zone holding it, its assignment and the refusal a write meets; other entities are reported as ignored. Owner: `ph_composer.thermal_bridges`.
@@ -41180,6 +41323,106 @@ Example params:
 }
 ```
 
+### `ph_composer.thermal_bridges.edges.repair`
+
+Remove one Edge's unreadable or stranded thermal-bridge assignment, named by its root-to-Edge path and the fingerprint of the text read; the preview says what is discarded. Geometry, the Type and every other record stay. Owner: `ph_composer.thermal_bridges`.
+
+Undo step: Repair Thermal Bridge Assignment. Removes the ph_composer.thermal_bridge record from that one Edge.
+
+Before calling: The Edge's path crosses no locked or shared storage. The stored text is still the one the fingerprint names.
+
+Refuses: `copy.rule_missing`, `record.unreadable`, `reference.in_use`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_kind`, `thermal_bridge.repair_not_needed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "path",
+    "fingerprint"
+  ],
+  "properties": {
+    "path": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "minItems": 1,
+      "description": "The root-to-Edge persistent-id path."
+    },
+    "fingerprint": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256 of the stored text (a non-text value's canonical JSON), hex, as edges.repair_candidates gives it."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "path",
+    "condition",
+    "containment",
+    "stored",
+    "discarded"
+  ],
+  "properties": {
+    "path": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "condition": {
+      "type": "string",
+      "enum": [
+        "unreadable",
+        "stranded"
+      ],
+      "description": "unreadable: the stored text is not a JSON object; stranded: a readable record on an Edge no Zone holds, which edges.clear cannot name."
+    },
+    "containment": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Why no Zone holds the Edge, as zones.containment reads it; null in a Zone."
+    },
+    "stored": {
+      "type": "object",
+      "description": "The text removed: bytes, sha256, readable, valid and excerpt, its first 256 characters."
+    },
+    "discarded": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "What a readable record held: id, thermal_bridge_type_id, quantity, the first 50 user_data_keys and extension_namespaces with user_data_key_total and extension_namespace_total; a long or structured value cut and named in truncated; null for unreadable text."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "path": [
+    1201,
+    1205
+  ],
+  "fingerprint": "0000000000000000000000000000000000000000000000000000000000000000"
+}
+```
+
 ### `ph_composer.thermal_bridges.types.create`
 
 Create one Thermal Bridge Type. The group starts at 15-Ambient and the psi-value empty unless values give them. Owner: `ph_composer.thermal_bridges`.
@@ -64837,7 +65080,7 @@ HBJSON runtime exports use retained task methods. Each params key is the method'
 
 ### `PhComposer::API.export_preflight`
 
-Every export contributor's findings and the repairs it offers, before starting. Needs `read`.
+Every export contributor's findings and the repairs it offers, before starting. compact counts them; part pages one list, filtered by owner, codes, blocks_export or object_id, and row reads one row whole. A page's cursor expires when the Model changes. Needs `read`.
 
 Keyword arguments besides context:
 
@@ -64850,6 +65093,55 @@ Keyword arguments besides context:
       "type": "string",
       "minLength": 1,
       "description": "An approved destination's id, to report what it holds now."
+    },
+    "compact": {
+      "type": "boolean",
+      "description": "Counts by owner and code, blocking and warnings, and the destination, in place of the lists."
+    },
+    "part": {
+      "type": "string",
+      "enum": [
+        "findings",
+        "repairs"
+      ],
+      "description": "One filtered page of findings or repairs, bound to this revision."
+    },
+    "owner": {
+      "type": "string",
+      "description": "Only one feature's rows, by its id."
+    },
+    "codes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      },
+      "description": "Only findings with one of these codes."
+    },
+    "blocks_export": {
+      "type": "boolean",
+      "description": "Only blocking findings, or only warnings."
+    },
+    "object_id": {
+      "type": "string",
+      "description": "Only findings about this record."
+    },
+    "row": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "items": {
+        "type": "integer"
+      },
+      "description": "One row whole, by the row key a page gave, as fragments."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page or fragment of the same read."
     }
   }
 }
@@ -65048,6 +65340,8 @@ Result value:
     "stage",
     "count",
     "cancellable",
+    "source",
+    "diagnostics",
     "outcome"
   ],
   "description": "One task's progress. Never carries the canonical HBJSON bytes.",
@@ -65074,6 +65368,85 @@ Result value:
     "cancellable": {
       "type": "boolean",
       "description": "False once writing starts or the task ended."
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "revision",
+        "export_generation"
+      ],
+      "description": "The Model revision and content generation the run read, captured when it started; null only for a task that failed before it read anything.",
+      "properties": {
+        "revision": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "export_generation": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
+    },
+    "diagnostics": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "Null until the task ends; then what it kept, which export_status with part reads: the finding counts, and the generated report and compact result as size and digest, or null.",
+      "properties": {
+        "findings": {
+          "type": "integer"
+        },
+        "blocking": {
+          "type": "integer"
+        },
+        "report": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "Its canonical JSON text's size and SHA-256.",
+          "properties": {
+            "bytes": {
+              "type": "integer"
+            },
+            "sha256": {
+              "type": "string"
+            }
+          }
+        },
+        "result": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "Its canonical JSON text's size and SHA-256.",
+          "properties": {
+            "bytes": {
+              "type": "integer"
+            },
+            "sha256": {
+              "type": "string"
+            }
+          }
+        },
+        "report_absent": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "no_translation",
+            "not_rendered",
+            null
+          ],
+          "description": "Why no report was kept: no_translation when the run ended before translation answered, not_rendered when it stopped after."
+        }
+      }
     },
     "outcome": {
       "type": [
@@ -65224,7 +65597,7 @@ Example arguments:
 
 ### `PhComposer::API.export_status`
 
-Poll one task this caller started. An expired or other-Model handle refuses task.expired; another caller's refuses task.foreign. Needs `export`.
+Poll one task this caller started; compact while polling. Once it ended, part reads what it kept, bound to this task and not the Model: findings a page at a time, the report or the result in fragments; before that part refuses task.running. An expired or other-Model handle refuses task.expired; another caller's refuses task.foreign. Needs `export`.
 
 Keyword arguments besides context:
 
@@ -65239,6 +65612,53 @@ Keyword arguments besides context:
     "task_id": {
       "type": "string",
       "description": "task_id from start_export."
+    },
+    "compact": {
+      "type": "boolean",
+      "description": "Leave the findings, the result and the report out of the outcome; diagnostics counts them and export_status with part reads them."
+    },
+    "part": {
+      "type": "string",
+      "enum": [
+        "findings",
+        "report",
+        "result",
+        "outcome"
+      ],
+      "description": "What the ended task kept: a filtered page of findings, or the generated report, the compact result or the whole outcome (a long failure message included) as fragments. Never reads the Model or exports again."
+    },
+    "codes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      },
+      "description": "Only findings with one of these codes."
+    },
+    "blocks_export": {
+      "type": "boolean",
+      "description": "Only blocking findings, or only warnings."
+    },
+    "object_id": {
+      "type": "string",
+      "description": "Only findings about this record."
+    },
+    "row": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "items": {
+        "type": "integer"
+      },
+      "description": "One row whole, by the row key a page gave, as fragments."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page or fragment of the same read."
     }
   }
 }
@@ -65255,6 +65675,8 @@ Result value:
     "stage",
     "count",
     "cancellable",
+    "source",
+    "diagnostics",
     "outcome"
   ],
   "description": "One task's progress. Never carries the canonical HBJSON bytes.",
@@ -65281,6 +65703,85 @@ Result value:
     "cancellable": {
       "type": "boolean",
       "description": "False once writing starts or the task ended."
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "revision",
+        "export_generation"
+      ],
+      "description": "The Model revision and content generation the run read, captured when it started; null only for a task that failed before it read anything.",
+      "properties": {
+        "revision": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "export_generation": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
+    },
+    "diagnostics": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "Null until the task ends; then what it kept, which export_status with part reads: the finding counts, and the generated report and compact result as size and digest, or null.",
+      "properties": {
+        "findings": {
+          "type": "integer"
+        },
+        "blocking": {
+          "type": "integer"
+        },
+        "report": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "Its canonical JSON text's size and SHA-256.",
+          "properties": {
+            "bytes": {
+              "type": "integer"
+            },
+            "sha256": {
+              "type": "string"
+            }
+          }
+        },
+        "result": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "Its canonical JSON text's size and SHA-256.",
+          "properties": {
+            "bytes": {
+              "type": "integer"
+            },
+            "sha256": {
+              "type": "string"
+            }
+          }
+        },
+        "report_absent": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "no_translation",
+            "not_rendered",
+            null
+          ],
+          "description": "Why no report was kept: no_translation when the run ended before translation answered, not_rendered when it stopped after."
+        }
+      }
     },
     "outcome": {
       "type": [
@@ -65427,6 +65928,25 @@ Example arguments:
 }
 ```
 
+Example arguments:
+
+```json
+{
+  "task_id": "export_0123456789abcdef01234567",
+  "compact": true
+}
+```
+
+Example arguments:
+
+```json
+{
+  "task_id": "export_0123456789abcdef01234567",
+  "part": "findings",
+  "blocks_export": true
+}
+```
+
 ### `PhComposer::API.cancel_export`
 
 Cancel a task this caller started before it starts writing; nothing is written. Another caller's refuses task.foreign. Needs `export`.
@@ -65460,6 +65980,8 @@ Result value:
     "stage",
     "count",
     "cancellable",
+    "source",
+    "diagnostics",
     "outcome"
   ],
   "description": "One task's progress. Never carries the canonical HBJSON bytes.",
@@ -65486,6 +66008,85 @@ Result value:
     "cancellable": {
       "type": "boolean",
       "description": "False once writing starts or the task ended."
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "revision",
+        "export_generation"
+      ],
+      "description": "The Model revision and content generation the run read, captured when it started; null only for a task that failed before it read anything.",
+      "properties": {
+        "revision": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "export_generation": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
+    },
+    "diagnostics": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "Null until the task ends; then what it kept, which export_status with part reads: the finding counts, and the generated report and compact result as size and digest, or null.",
+      "properties": {
+        "findings": {
+          "type": "integer"
+        },
+        "blocking": {
+          "type": "integer"
+        },
+        "report": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "Its canonical JSON text's size and SHA-256.",
+          "properties": {
+            "bytes": {
+              "type": "integer"
+            },
+            "sha256": {
+              "type": "string"
+            }
+          }
+        },
+        "result": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "Its canonical JSON text's size and SHA-256.",
+          "properties": {
+            "bytes": {
+              "type": "integer"
+            },
+            "sha256": {
+              "type": "string"
+            }
+          }
+        },
+        "report_absent": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "no_translation",
+            "not_rendered",
+            null
+          ],
+          "description": "Why no report was kept: no_translation when the run ended before translation answered, not_rendered when it stopped after."
+        }
+      }
     },
     "outcome": {
       "type": [
@@ -65642,7 +66243,12 @@ Keyword arguments besides context:
 {
   "type": "object",
   "additionalProperties": false,
-  "properties": {}
+  "properties": {
+    "compact": {
+      "type": "boolean",
+      "description": "Leave the findings, the result and the report out of the outcome; diagnostics counts them and export_status with part reads them."
+    }
+  }
 }
 ```
 
@@ -65660,6 +66266,8 @@ Result value:
     "stage",
     "count",
     "cancellable",
+    "source",
+    "diagnostics",
     "outcome"
   ],
   "description": "One task's progress. Never carries the canonical HBJSON bytes.",
@@ -65686,6 +66294,85 @@ Result value:
     "cancellable": {
       "type": "boolean",
       "description": "False once writing starts or the task ended."
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "revision",
+        "export_generation"
+      ],
+      "description": "The Model revision and content generation the run read, captured when it started; null only for a task that failed before it read anything.",
+      "properties": {
+        "revision": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "export_generation": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
+    },
+    "diagnostics": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "Null until the task ends; then what it kept, which export_status with part reads: the finding counts, and the generated report and compact result as size and digest, or null.",
+      "properties": {
+        "findings": {
+          "type": "integer"
+        },
+        "blocking": {
+          "type": "integer"
+        },
+        "report": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "Its canonical JSON text's size and SHA-256.",
+          "properties": {
+            "bytes": {
+              "type": "integer"
+            },
+            "sha256": {
+              "type": "string"
+            }
+          }
+        },
+        "result": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "Its canonical JSON text's size and SHA-256.",
+          "properties": {
+            "bytes": {
+              "type": "integer"
+            },
+            "sha256": {
+              "type": "string"
+            }
+          }
+        },
+        "report_absent": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "no_translation",
+            "not_rendered",
+            null
+          ],
+          "description": "Why no report was kept: no_translation when the run ended before translation answered, not_rendered when it stopped after."
+        }
+      }
     },
     "outcome": {
       "type": [
@@ -65830,6 +66517,14 @@ Example arguments:
 {}
 ```
 
+Example arguments:
+
+```json
+{
+  "compact": true
+}
+```
+
 ## Feature codes
 
 The codes each feature raises under its own noun, as an outcome's `code` or a finding's. The foundation's and the shared nouns' codes are listed in context/CONTRACTS.md, "Outcomes and codes".
@@ -65907,6 +66602,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `thermal_bridge.on_window_perimeter` | An assigned Edge lies on a placed Window's outline; its install psi-value belongs to the Window Type. |
 | `thermal_bridge.outside_zone` | An assigned Edge is in no Zone, so it is not exported. |
 | `thermal_bridge.psi_missing` | A Thermal Bridge Type has no psi-value, so an Edge using it cannot export. |
+| `thermal_bridge.repair_not_needed` | A Zone holds the Edge and its assignment can be read, so edges.clear removes it; edges.repair is for what clear cannot reach. |
 | `thermal_bridge.shared_definition` | An assigned Edge is in shared component storage and counts once per placement. |
 | `thermal_bridge.type_missing` | Assigned Edges name a Thermal Bridge Type that no longer exists, so they cannot export. |
 
@@ -66063,3 +66759,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.37 | 2026-11-10 | Complete reads of large definitions and metadata: ph_composer.records.detail answers one value of a record exactly in fragments with its size and SHA-256; records.list pages by size and takes metadata summary; assemblies.assemblies.layers.list and segments.list, windows.types.elements.list, assemblies.materials.uses.list and windows.<collection>.uses.list page a definition's parts and derived results; and preview takes within and preview_part, so a preview larger than a reply keeps its proposal_digest and is read by part. |
 | 1.38 | 2026-11-10 | Complete reads of large occurrence, geometry and schedule data: windows.units.list takes fields and metadata summary and windows.units.detail reads one Unit's part in fragments; units.host_extent takes geometry summary beside host_extent.holes and .points; units.face_areas.list and units.unhosted.list page the glazed area table; convert_review takes compact and convert_review.detail reads a group's sources; zones.list takes overview summary beside zones.restorable.list, restorable.detail and zones.findings.list; zones.options.adoption_sources.list and .detail, zones.faces.assembly_usage.list and .faces; thermal_bridges.schedule.list takes compact beside runs.members.list, schedule.by_type.list, schedule.edge_findings.list and schedule.unreadable.list; and spaces.detail reads a Space's, Volume's or Floor Segment's part, loops included. |
 | 1.39 | 2026-11-10 | Complete reads of library catalogs and exports: library.load, catalog, in_file, export_preview and export_file take compact, which counts notes and omissions and summarizes rows; library.warnings.list and unavailable.list page a catalog's notes; library.catalog.detail and in_file.detail read one row's part in fragments; library.export_preview.omissions pages an export's omissions against its projection_digest; export_file answers destination_state. |
+| 1.40 | 2026-11-10 | Complete export QA and repair: export_preflight takes compact (counts by owner and code) and part (a filtered page of findings or repairs, or one row whole); preflights report the metadata extraction refuses; export_status and latest_export take compact, every task names its source and diagnostics, and export_status with part reads an ended task's findings, report and result, refusing task.running before it ends; thermal_bridges.edges.repair_candidates and edges.repair remove an unreadable or stranded Edge assignment. |

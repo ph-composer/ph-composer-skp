@@ -60,7 +60,7 @@ module PhComposer
         end
         answer = tool.run.call(binding.context, arguments, live, binding.sequencer)
         note_committed(live, arguments, answer) if name == "invoke"
-        result(answer, :acted => tool.capability != "read")
+        result(answer, :acted => acts?(tool, arguments))
       rescue CodedError => error
         result(Outcome.refused(error.code, error.message, :revision => nil, :detail => error.detail))
       end
@@ -142,6 +142,12 @@ module PhComposer
         value.is_a?(Hash) && value.key?("status") && value.key?("effect")
       end
 
+      # Whether a call may have changed something, so an oversized answer is trimmed rather than refused: every
+      # tool but the reads, and not export_status with part, which reads what an ended task kept.
+      def acts?(tool, arguments)
+        tool.capability != "read" && !(tool.name == "export_status" && arguments.key?("part"))
+      end
+
       # What a tool that acts did is never reported as refused because its answer was large: the outcome
       # keeps its status, code, effect, revision and sequence, and drops the value and the lists, which the
       # caller reads back.
@@ -152,21 +158,29 @@ module PhComposer
                       "detail" => { "omitted" => %w[value affected findings] })
       end
 
-      # An export task's identity, stage and outcome with its artifacts, so a caller keeps where its files
-      # are and what they hash to when the task's diagnostics are too large to send; nil for anything else.
+      # An export task's identity, stage, source and outcome with its artifacts and diagnostics counts, so a
+      # caller keeps which run it was, where its files are and what they hash to when the task's diagnostics are
+      # too large to send (export_status with part reads them); nil for anything else.
       def task_receipt(value)
         return nil unless value.is_a?(Hash) && value.key?("task_id")
 
         outcome = value["outcome"]
         inner = outcome && outcome["value"].is_a?(Hash) ? outcome["value"].slice("artifacts") : nil
-        kept = outcome && outcome.slice("status", "code", "message", "effect", "revision").merge("value" => inner)
-        value.slice("task_id", "stage", "count", "cancellable").merge("outcome" => kept)
+        kept = outcome && outcome.slice("status", "code", "effect", "revision")
+                                 .merge("message" => outcome["message"].to_s[0, MAX_ECHO * 2], "value" => inner)
+        value.slice("task_id", "stage", "count", "cancellable", "source", "diagnostics").merge("outcome" => kept)
       end
 
       # Only what says what happened, for an outcome still over the budget once trimmed.
+      # An export task keeps its id, source and outcome code, which export_status with part reads from.
       def minimal(outcome)
+        task = outcome["value"].is_a?(Hash) && outcome["value"]["task_id"] ? outcome["value"] : nil
+        kept = task && task.slice("task_id", "stage", "source").merge(
+          "outcome" => task["outcome"]&.slice("status", "code", "effect", "revision")
+        )
         Outcome.build(outcome["status"], outcome["code"], "The result was over the reply limit; read back what " \
-                                                          "it changed.", outcome["effect"], outcome["revision"])
+                                                          "it changed.", outcome["effect"], outcome["revision"],
+                      :value => kept)
                .merge(outcome.slice("sequence"))
       end
 

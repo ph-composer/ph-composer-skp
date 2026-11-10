@@ -80,7 +80,7 @@ module PhComposer
                    elsif !Schema.problems(record).empty?
                      [issue("face.invalid", "Face assignment is invalid: #{Schema.problems(record).first}.", true)]
                    else
-                     assignment_issues(request, occurrence, record, index)
+                     assignment_issues(request, occurrence, record, index) + metadata_issues(request, record)
                    end
           issues.map do |found|
             { "code" => found.code, "section" => SECTION, "object_id" => record && record["id"],
@@ -89,6 +89,14 @@ module PhComposer
                   "faces" => [occurrence.reference.merge("entity_id" => record && record["id"])]
                 }
               } }
+          end
+        end
+
+        # The metadata extraction refuses on this Face's assignment, read as the section reads it.
+        def metadata_issues(request, record)
+          Export::MetadataCheck.findings(request, [record], :section => SECTION, :user_data => true,
+                                                            :target_kind => REFERENCE_KIND).map do |row|
+            issue(row.fetch("code"), row.fetch("message"), true)
           end
         end
 
