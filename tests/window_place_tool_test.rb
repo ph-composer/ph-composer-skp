@@ -337,6 +337,30 @@ class WindowPlaceToolTest < PhComposerTestCase
     assert_equal revision, @session.revision
   end
 
+  def test_place_windows_is_left_out_on_a_selection_or_context_another_feature_claims
+    menu = PhComposer::Registry.current.menu_items.fetch("#{W::FEATURE_ID}.place_tool.menu")
+    read = PhComposer::HandlerRequest.for(@session, :owner => W::FEATURE_ID, :name => menu.name)
+    assert menu.available.call(read), "an empty selection still offers the tool"
+    @model.active_path = [@group]
+    @model.selection.add(@face)
+    assert menu.available.call(read), "a Zone Face keeps it"
+    @model.active_path = []
+    @model.selection.clear
+    space = Sketchup::Group.new(1500, Sketchup::Entities.new([]))
+    PhComposer::Spaces::SPACE_STORE.write(space, "id" => "spc_AAAAAAAAAAAA")
+    @model.entities << space
+    @model.selection.add(space)
+    refute menu.available.call(read), "a Space"
+    @model.selection.clear
+    segment = Sketchup::Face.new(1502)
+    PhComposer::Spaces::FLOOR_SEGMENT_STORE.write(segment, "id" => "fsg_AAAAAAAAAAAA")
+    volume = Sketchup::Group.new(1501, Sketchup::Entities.new([segment]))
+    @model.entities << volume
+    @model.active_path = [volume]
+    @model.selection.add(segment)
+    refute menu.available.call(read), "a Floor Segment in an open Volume"
+  end
+
   def test_selected_face_context_menu_routes_through_public_choose
     @model.active_path = [@group]
     @model.selection.add(@face)

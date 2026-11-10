@@ -425,10 +425,16 @@ module Sketchup
   end
 
   class Loop
-    attr_reader :vertices
+    attr_reader :vertices, :edges
 
-    def initialize(points)
+    def initialize(points, edges: [], outer: false)
       @vertices = points.map { |point| Vertex.new(point) }
+      @edges = edges
+      @outer = outer
+    end
+
+    def outer?
+      @outer
     end
 
     def transform!(transformation)
@@ -568,11 +574,14 @@ module Sketchup
     # `edges` is opt-in. The host always gives a Face its bounding Edges, but most fixtures here do
     # not care about topology, so a Face built without them simply reports none and any rule that
     # reads topology is vacuously satisfied. A fixture that means to test edge sharing passes them.
-    def initialize(persistent_id, dictionaries = {}, points: nil, holes: [], normal: nil, edges: [])
+    # `hole_edges` names which of them each hole's loop holds, in `holes` order.
+    def initialize(persistent_id, dictionaries = {}, points: nil, holes: [], normal: nil, edges: [], hole_edges: [])
       super(persistent_id, dictionaries)
       points ||= [Geom::Point3d.new(0, 0, 0), Geom::Point3d.new(1, 0, 0), Geom::Point3d.new(1, 1, 0)]
-      @outer_loop = Loop.new(points)
-      @loops = [@outer_loop] + holes.map { |loop| Loop.new(loop) }
+      @outer_loop = Loop.new(points, :edges => Array(edges) - hole_edges.flatten, :outer => true)
+      @loops = [@outer_loop] + holes.each_with_index.map do |loop, index|
+        Loop.new(loop, :edges => hole_edges[index] || [])
+      end
       @normal = normal || Face.newell_normal(@outer_loop.vertices.map(&:position))
       @edges = Array(edges)
       @edges.each { |edge| edge.attach_face(self) }

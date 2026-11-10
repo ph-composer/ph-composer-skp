@@ -30,11 +30,12 @@ module WindowConvertFixtures
   def zone_with(rectangles, outer: WALL, holes: nil)
     shared = {}
     rectangle_edges = edges_of(rectangles, shared)
+    around = outer_edges(rectangles, rectangle_edges)
+    rings = holes || hole_rings(rectangles)
     host = Sketchup::Face.new(next_id, {}, :points => outer.map { |point| inches(*point) },
-                                           :holes => (holes || hole_rings(rectangles)).map { |ring|
-                                             ring.map { |point| inches(*point) }
-                                           },
-                                           :edges => outer_edges(rectangles, rectangle_edges))
+                                           :holes => rings.map { |ring| ring.map { |point| inches(*point) } },
+                                           :edges => perimeter(outer) + around,
+                                           :hole_edges => rings.length == 1 ? [around] : [])
     faces = rectangles.zip(rectangle_edges).map do |points, edges|
       Sketchup::Face.new(next_id, {}, :points => points.map { |point| inches(*point) }, :edges => edges)
     end
@@ -44,6 +45,11 @@ module WindowConvertFixtures
     assert_equal "completed", result.fetch("status"), result.inspect
     @host = host
     faces
+  end
+
+  # The host's own outline, which only it uses.
+  def perimeter(outer)
+    edges_of([outer], {}).first
   end
 
   # The Edges not shared by two rectangles: those the host's hole holds.

@@ -56,6 +56,48 @@ class ZoneMenuTest < PhComposerTestCase
     assert_equal 1, @model.operations.length
   end
 
+  # Zones reads the shared claim and names no feature; the action refuses what the menu leaves out.
+  def test_a_claimed_group_is_left_out_of_the_menu_and_refused_by_the_action
+    PhComposer::Spaces::SPACE_STORE.write(@group, "id" => "spc_AAAAAAAAAAAA")
+
+    refute @declaration.available.call(read)
+    assert_nil ZONES.make_target(@model)
+    result = make(@group.persistent_id)
+
+    assert_equal "refused", result.fetch("status")
+    assert_equal "target.wrong_kind", result.fetch("code")
+    assert_match(/already belongs to PH-Composer/, result.fetch("message"))
+    assert_empty @model.operations
+    assert_nil ZONES::ZONE_STORE.read(@group)
+  end
+
+  def test_a_claimed_face_in_an_open_context_is_left_out_and_refused
+    segment = Sketchup::Face.new(401)
+    PhComposer::Spaces::FLOOR_SEGMENT_STORE.write(segment, "id" => "fsg_AAAAAAAAAAAA")
+    volume = Sketchup::Group.new(400, Sketchup::Entities.new([segment]))
+    PhComposer::Spaces::VOLUME_STORE.write(volume, "id" => "vol_AAAAAAAAAAAA")
+    @model.entities << volume
+    @model.active_path = [volume]
+    select(segment)
+
+    refute @declaration.available.call(read)
+    result = make(segment.persistent_id, :parent_path => [400])
+    assert_equal "target.wrong_kind", result.fetch("code")
+    assert_empty @model.operations
+  end
+
+  def test_a_plain_group_inside_an_open_claimed_context_is_refused
+    plain = Sketchup::Group.new(501, Sketchup::Entities.new([Sketchup::Face.new(502)]))
+    space = Sketchup::Group.new(500, Sketchup::Entities.new([plain]))
+    PhComposer::Spaces::SPACE_STORE.write(space, "id" => "spc_BBBBBBBBBBBB")
+    @model.entities << space
+    @model.active_path = [space]
+    select(plain)
+
+    refute @declaration.available.call(read)
+    assert_equal "target.wrong_kind", make(501, :parent_path => [500]).fetch("code")
+  end
+
   def test_invalid_selection_omits_the_item
     face = Sketchup::Face.new(301)
     @model.entities << face
@@ -177,5 +219,11 @@ class ZoneMenuTest < PhComposerTestCase
 
   def read
     PhComposer::HandlerRequest.for(@session, :owner => @declaration.owner, :name => @declaration.name)
+  end
+
+  def make(entity_id, parent_path: [])
+    API.invoke(:context => API.connect(:session_id => @session.id), :name => "#{ZONES::FEATURE_ID}.make",
+               :params => { "parent_path" => parent_path, "entity_ids" => [entity_id] },
+               :request => { "sequence" => 1, "expected_revision" => @session.revision })
   end
 end

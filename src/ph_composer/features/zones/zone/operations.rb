@@ -306,6 +306,10 @@ module PhComposer
       unless make_zone_shape?(selected)
         raise CodedError.new("target.wrong_kind", "Make Zone accepts one Group or loose Faces and Edges.")
       end
+      if Records::EntityStore.claimed?(selected + Array(model.active_path))
+        raise CodedError.new("target.wrong_kind", "The selection already belongs to PH-Composer, so it cannot be " \
+                                                  "made into a Zone.")
+      end
       if Array(model.active_path).any? { |entity| ZONE_STORE.read(entity) }
         raise CodedError.new("target.wrong_hierarchy", "A Zone cannot be made inside another Zone.")
       end

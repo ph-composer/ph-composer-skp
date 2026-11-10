@@ -15,12 +15,31 @@ module PhComposer
 
       module_function
 
-      # A cheap structural test for the menu: a Face is selected, or the running Mark floor tool offered one.
-      def available?(session)
-        return true if session.model.selection.to_a.any? { |entity| entity.is_a?(Sketchup::Face) }
+      # Offered when a selected Face could become a floor, or the running Mark floor tool offered one. A wall or a
+      # classified Face never could, so a selection of only those leaves the item out; one beside a floor stays
+      # for the review's "Left out" list.
+      def available?(read)
+        return true if floor_selected?(read)
 
-        tool = Spaces.mark_tool(session)
+        tool = Spaces.mark_tool(read.session)
         tool.active? && !tool.offered.empty?
+      end
+
+      # Whether a selected Face is both non-vertical and unclassified: the review's own rule for those two, with
+      # the geometry read first so only possible floors ask Zones. A selection too large for that read, or one
+      # Zones cannot read, stays offered: the route says why when it runs.
+      def floor_selected?(read)
+        active = Array(read.model.active_path)
+        transform = CreateFaces.open_transform(active)
+        floors = read.model.selection.to_a.grep(Sketchup::Face).reject { |face| Eligibility.wall?(face, transform) }
+        return false if floors.empty?
+        return true if floors.length > Pages::MAXIMUM_LIMIT
+
+        open_path = active.map(&:persistent_id)
+        rows = read.query(CreateFaces::HOST_CONTEXT, "paths" => floors.map { |face| open_path + [face.persistent_id] })
+        rows.fetch("faces").count { |row| row.dig("reference", "entity_id") } < floors.length
+      rescue UserError
+        true
       end
 
       def review(session)

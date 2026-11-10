@@ -14,7 +14,7 @@ module PhComposer
       def install(feature, review_result, paths_param)
         feature.menu_item("#{FEATURE_ID}.convert_menu", :label => Units::ConvertRoute::LABEL, :menu => EXTENSION_NAME,
                                                         :available => ->(read) {
-                                                                        Units::ConvertRoute.available?(read.session)
+                                                                        Units::ConvertRoute.available?(read)
                                                                       }) do |session|
           Units::ConvertRoute.client(session).run
         end

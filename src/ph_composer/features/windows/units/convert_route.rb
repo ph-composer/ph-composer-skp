@@ -3,9 +3,9 @@
 module PhComposer
   module Windows
     module Units
-      # Convert to Window Type from SketchUp's menus: offered on any Face selection, it hands the panel a
-      # review of what `units.convert_review` takes and leaves out, so a mixed selection reaches the review
-      # whole. The panel confirms with `units.convert`; the route itself writes nothing.
+      # Convert to Window Type from SketchUp's menus: offered on a Face selection that could be drawn rectangles,
+      # it hands the panel a review of what `units.convert_review` takes and leaves out, so a mixed selection
+      # reaches the review whole. The panel confirms with `units.convert`; the route itself writes nothing.
       module ConvertRoute
         LABEL = "Convert to Window Type…"
         REVIEW_QUERY = "#{FEATURE_ID}.units.convert_review".freeze
@@ -15,9 +15,30 @@ module PhComposer
 
         module_function
 
-        # A cheap structural test for the context menu, which asks on every right-click.
-        def available?(session)
-          session.model.selection.to_a.any? { |entity| entity.is_a?(Sketchup::Face) }
+        # Asks on every right-click, so one Face answers for the context and the rest is topology. Faces in a
+        # Zone must be cut into a Face around them; outside every Zone the review finds the host by geometry.
+        def available?(read)
+          faces = read.model.selection.to_a.grep(Sketchup::Face)
+          return false if faces.empty?
+
+          !in_zone?(read, faces.first) || faces.any? { |face| nested?(face) }
+        end
+
+        # By the rule ConvertHosts resolves hosts with. A read Zones refuses stays offered, for the route to say why.
+        def in_zone?(read, face)
+          path = Array(read.model.active_path).map(&:persistent_id) + [face.persistent_id]
+          Placement::Hosts.context(read, [path]).key?(path)
+        rescue UserError
+          false
+        end
+
+        # Whether `face` is drawn inside another: an Edge of its outline lies in an inner loop of the Face around it.
+        # ConvertHosts stays the authority when the action runs.
+        def nested?(face)
+          outline = face.outer_loop.edges
+          outline.flat_map(&:faces).uniq.any? do |other|
+            other != face && other.loops.reject(&:outer?).any? { |inner| !(inner.edges & outline).empty? }
+          end
         end
 
         def dialog(session)

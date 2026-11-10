@@ -82,10 +82,12 @@ module PhComposer
       def menus(feature)
         feature.menu_item("#{PREFIX}.menu", :label => "Place Window…", :menu => MENU,
                                             :available => ->(read) {
-                                                            !type_rows(read.engine).empty?
+                                                            placeable?(read) && !type_rows(read.engine).empty?
                                                           }) { |session| choose_from_menu(session) }
         feature.menu_entries("#{PREFIX}.face_menu", :menu => MENU,
-                                                    :available => ->(read) { !selected_face(read).nil? }) do |read|
+                                                    :available => ->(read) {
+                                                                    placeable?(read) && !selected_face(read).nil?
+                                                                  }) do |read|
           host = selected_face(read)
           type_rows(read.engine).map do |row|
             id = row.fetch("id")
@@ -100,6 +102,12 @@ module PhComposer
                                                                }) do |session|
           Windows.place_tool(session).stop
         end
+      end
+
+      # What is selected, or the open context it sits in, takes no Window once it belongs to PH-Composer. Otherwise,
+      # empty selection included, the tool is offered.
+      def placeable?(read)
+        !Records::EntityStore.selection_claimed?(read.model)
       end
 
       def type_rows(engine)

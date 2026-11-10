@@ -91,7 +91,8 @@ read only until it is made independent with Make Zone independent, on its row or
 menu. Ambiguity is refused rather than guessed.
 
 Make Zone and the Zone attributes are available from the selected geometry's native context menu.
-The Zones header has no Make Zone button; use the native context menu to create a Zone.
+The Zones header has no Make Zone button; use the native context menu to create a Zone. Make Zone is not offered on,
+and refuses, a Space, a Volume, a Floor Segment or anything inside one.
 The Geometry view's selection bar offers Solve when at least two Zones are fully checked. A partially
 checked Zone is excluded; fully checked Zones remain included when hidden by a filter. Checking
 all Zones provides the whole-Model workflow. The native command solves selected Zones. A pairing
@@ -187,7 +188,7 @@ the panel shows the two measurements as a callout and SketchUp labels its measur
 
 Draw-then-convert is the other route. Draw the opening as a rectangle with SketchUp's own tools on a Zone Face, or
 coplanar with one outside every Zone, select it and choose Convert to Window Type from the context menu or the
-Extensions menu. The panel lists what becomes a Window Type and why anything else is left out. Rectangles sharing an
+Extensions menu. In an open Zone the context menu offers it only on a Face nested in the Face around it. The panel lists what becomes a Window Type and why anything else is left out. Rectangles sharing an
 Edge become one mulled Type, and same-size rectangles share one. Each new Type is named by its size and blank unless
 you choose Copy from. One Undo restores the drawn rectangles.
 
@@ -253,7 +254,8 @@ it stops.
 In the viewport, a click or a drag over Faces inside a Volume marks them as Floor Segments in one Undo
 step; a click on a Face at a Space's root adds the next Volume. A Face loose in the open context and in no
 Space is offered Create Space, and a classified Zone Face or a Face inside a closed Group is refused with the reason.
-Create Space is in SketchUp's Extensions and context menus on a Face selection, in any open context: at the
+Create Space is in SketchUp's Extensions menu, and in the context menu on a selection with at least one unclassified,
+non-vertical Face, in any open context: at the
 Model root, in a plain Group such as a storey, or in an open Zone, where the Space is placed outside the Zone at the
 same world position, so Zone Faces are never touched. The review says what a Space is and why it
 leaves out any Faces, and offers a Zone choice, set to the
