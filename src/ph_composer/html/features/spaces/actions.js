@@ -1,6 +1,6 @@
 /* The Spaces view's row actions: Locate every row; Open or Close a Space; Enter a Volume;
  * Delete a Space, Remove a Space keeping its floors and Remove a Volume, each after a confirmation naming what
- * goes; Move a Space to another Zone; and the repair a row's finding names (Restore position, Make independent).
+ * goes; Move a Space to Zone; and the repair a row's finding names (Restore position, Make independent).
  *
  * Every Model change carries the revision the row was painted from, so a row from a stale snapshot refuses
  * rather than acting on what has changed. Context commands are view commands (they move the edit context and
@@ -109,7 +109,7 @@ function (panel, requests, ui, units, preferences, fields) {
       items.push(open ? { id: "spaces.close", icon: "close", label: "Close " + name, disabled: busy } :
         { id: "spaces.open", icon: "enter", label: "Open " + name, disabled: busy });
       if (this.zones.length > 1 || !record.space.zone && this.zones.length) {
-        items.push({ id: "spaces.move", icon: "assign", label: "Move " + name + " to another Zone", disabled: busy });
+        items.push({ id: "spaces.move", icon: "assign", label: "Move " + name + " to Zone", disabled: busy });
       }
       items.push({ id: "spaces.remove", icon: "ungroup", label: "Remove " + name + ", keep its floors",
         disabled: busy });
@@ -212,7 +212,7 @@ function (panel, requests, ui, units, preferences, fields) {
     choices.forEach(function (zone, index) { select.appendChild(ui.option(String(index), zone.name || "Zone")); });
     var cancel = ui.button("Cancel", function () { dialog.closeModal(); }), self = this;
     var revision = this.host.revision;
-    dialog.replaceChildren(ui.element("h2", "", "Move " + describe(record) + " to another Zone"),
+    dialog.replaceChildren(ui.element("h2", "", "Move " + describe(record) + " to Zone"),
       ui.element("p", "", "The Space is hosted in the Zone you pick. It stays where it stands, with its Volumes and " +
         "Floor Segments; its number and values are kept."), select,
       ui.actionRow(cancel, ui.button("Move", function () {

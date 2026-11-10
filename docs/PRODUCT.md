@@ -282,6 +282,15 @@ Volumes, click one Volume first. Each entry is one Undo step, and the value also
 Volume of a selected Volume or a one-Volume Space, unprotected, for ordinary SketchUp edits to its floor surface; leaving
 it protects the Volume again.
 
+The context menu on selected Spaces offers Set Name… and Set Airflows… for one or several Spaces, and Set Number…
+and Move to Zone for one. Move to Zone lists the Model's Zones with the Space's own checked. Set Airflows… shows
+Supply, Extract and Transfer in the panel's units, each with the value the selected Spaces share or blank where they
+differ. A field left as shown changes nothing, an emptied field removes the value, and with all three removed the
+Space uses its Zone's ventilation load again. Set Weighting Factor, on Floor Segment Faces in an open Volume, on
+Volumes and on Spaces, sets every Floor Segment they hold to 1, to a factor already used in the Model, or to a value
+from 0 to 1 typed in Other…. A factor is checked only when all of those Floor Segments have it. Each of these edits
+is one Undo step.
+
 Colour by Space, Ventilation, Weighting factor and Height colour each Space's Floor Segments and the
 Volume preview that its height draws over them, with a legend. Show Spaces, on by default each time a
 Model is opened, draws the outline of every Volume preview and each Space's label whether or not a mode is on, in the

@@ -18,6 +18,8 @@
 #   set_height_tool.rb, prism_pick.rb  the Set Height viewport tool and its pure pointer maths
 #   edit_floor_surface_menu.rb  the native route into a Volume's floor surface
 #   add_volume_menu.rb  Add New Volume to Space, the native route to volumes.create
+#   weighting_factor_menu.rb  Set Weighting Factor on Floor Segments, Volumes and Spaces, through floors.mark
+#   space_edit_menu.rb  Move to Zone, Set Number…, Set Name… and Set Airflows… on selected Spaces
 #   declarations/   what Spaces registers
 require_relative "schema"
 require_relative "scan/occurrences"
@@ -63,6 +65,8 @@ require_relative "prism_pick"
 require_relative "set_height_tool"
 require_relative "edit_floor_surface_menu"
 require_relative "add_volume_menu"
+require_relative "weighting_factor_menu"
+require_relative "space_edit_menu"
 require_relative "declarations/create_route"
 
 module PhComposer
@@ -88,6 +92,8 @@ module PhComposer
       SetHeightTool.install(feature)
       EditFloorSurfaceMenu.install(feature)
       AddVolumeMenu.install(feature)
+      WeightingFactorMenu.install(feature)
+      SpaceEditMenu.install(feature)
     end
   end
 end

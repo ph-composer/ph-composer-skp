@@ -97,9 +97,6 @@ module PhComposer
       class Client
         # The fields whose value is one of the Model's Zone options rather than free text.
         OPTION_FIELDS = %w[building_segment level].freeze
-        # Widens a measured field's label; UI.inputbox on macOS otherwise wraps the unit out of sight
-        # (context/SKETCHUP_HOST_BEHAVIOR.md, "Saving, dialogs and the panel").
-        PROMPT_PADDING = " " * 16
 
         def initialize(session)
           @session = session
@@ -159,7 +156,7 @@ module PhComposer
           quantity = MEASURED_FIELDS[field]
           return FIELDS.fetch(field) unless quantity
 
-          "#{FIELDS.fetch(field)} (#{Units.label(:quantity => quantity, :system => system)})#{PROMPT_PADDING}"
+          HostPrompt.measured(FIELDS.fetch(field), :quantity => quantity, :system => system)
         end
 
         # Never grouped: the dialog hands this text back to be read as a number.
