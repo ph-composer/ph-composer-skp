@@ -42,6 +42,19 @@ module PhComposer
         volumes.length == 1 ? volumes.first : SEVERAL_VOLUMES
       end
 
+      # What the selection means: the Volume and its path from the Model root, or the sentence saying why there is
+      # none.
+      def target(session)
+        entity = selected(session)
+        return SELECT_ONE unless entity
+
+        volume = Protection.volume?(entity) ? entity : volume_in(entity)
+        return volume if volume.is_a?(String)
+
+        path = Array(session.model.active_path).map(&:persistent_id) + [entity.persistent_id]
+        [volume, volume.equal?(entity) ? path : path + [volume.persistent_id]]
+      end
+
       class Client
         def initialize(session)
           @session = session
@@ -50,14 +63,10 @@ module PhComposer
         end
 
         def run
-          entity = EditFloorSurfaceMenu.selected(@session)
-          return say(SELECT_ONE) unless entity
+          target = EditFloorSurfaceMenu.target(@session)
+          return say(target) if target.is_a?(String)
 
-          path = Array(@session.model.active_path).map(&:persistent_id) + [entity.persistent_id]
-          volume = Protection.volume?(entity) ? entity : EditFloorSurfaceMenu.volume_in(entity)
-          return say(volume) if volume.is_a?(String)
-
-          path += [volume.persistent_id] unless volume.equal?(entity)
+          volume, path = target
           open_volume(volume, { "volume_id" => VOLUME_STORE.read(volume).fetch("id"), "entity_path" => path })
         rescue CodedError => error
           say(error.message)

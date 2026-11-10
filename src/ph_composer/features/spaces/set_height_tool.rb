@@ -2,9 +2,31 @@
 
 module PhComposer
   module Spaces
-    # The Set Height tool (context/EXTENSIBILITY.md, "Viewport tools"): click a Volume's prism, drag it or type a
-    # value in the measurements box. It calls `update` like any other client and opens no operation of its own:
-    # an abandoned drag writes nothing and one entry is one Undo step, the Model's last height included.
+    # One Volume's prism as the Set Height tool last read it: `loops` holds each Floor Segment's world loops in metres.
+    SetHeightCandidate = Struct.new(:volume, :loops, :prism, :bounds, keyword_init: true) do
+      def path
+        volume.path
+      end
+
+      def height
+        volume.record["avg_ceiling_height_m"]
+      end
+
+      def reference
+        { "volume_id" => volume.record.fetch("id"), "entity_path" => volume.path }
+      end
+
+      def prism_at(height_m)
+        loops.filter_map { |segment| Prism.segment(segment, height_m) }
+      end
+    end
+
+    # The Set Height tool (context/EXTENSIBILITY.md, "Viewport tools"): drag a Volume's prism or type a value in the
+    # measurements box. It calls `update` like any other client and opens no operation of its own: an abandoned drag
+    # writes nothing and one entry is one Undo step, the Model's last height included.
+    #
+    # It starts with the Volume the selection names already picked, a selected Volume or a Space's one Volume, so a
+    # value can be typed at once. A Space with several Volumes, or no such selection, waits for a click on one.
     #
     # A prism is drawn, not modelled, so the pointer is tested against each visible Volume's prism (PrismPick)
     # rather than through the host's pick, skipping whatever an active section plane has cut away. The prisms are
@@ -20,32 +42,13 @@ module PhComposer
       DRAG_PIXELS = 3
       HOVER_COLOUR = [184, 59, 59].freeze
       PICKED_COLOUR = [47, 143, 131].freeze
-      INSTRUCTIONS = "Set Height: click a Space's prism, then drag its top or type a height."
-      PICKED = "Drag the top, or type a height and press Enter."
+      INSTRUCTIONS = "Set Height: click a Volume, then drag its top or type a height."
+      PICKED = "Set Height: drag the top of the Space, or type a height."
       CANCELLED = "The Set Height drag was cancelled. Nothing was written."
-      NOTHING_PICKED = "Click a Space's prism first, then type its height."
+      NOTHING_PICKED = "Click a Space first, then type its height."
       BAD_ENTRY = "Type a height above zero, such as 2.5m or 8'."
       TOO_LOW = "A Volume's height must be above its floor."
       GONE = "That Volume no longer exists."
-
-      # One Volume's prism as last read: `loops` holds each Floor Segment's world loops in metres.
-      Candidate = Struct.new(:volume, :loops, :prism, :bounds, keyword_init: true) do
-        def path
-          volume.path
-        end
-
-        def height
-          volume.record["avg_ceiling_height_m"]
-        end
-
-        def reference
-          { "volume_id" => volume.record.fetch("id"), "entity_path" => volume.path }
-        end
-
-        def prism_at(height_m)
-          loops.filter_map { |segment| Prism.segment(segment, height_m) }
-        end
-      end
 
       # `moved` is past DRAG_PIXELS; `adjusted` is that a ray has given a height, which a straight-down view never does.
       Drag = Struct.new(:candidate, :anchor, :x, :y, :revision, :height, :moved, :adjusted, keyword_init: true)
@@ -65,9 +68,14 @@ module PhComposer
         @candidates = []
       end
 
+      # Chosen again while it runs, only the target changes.
       def start
         model = @session.model
-        model.select_tool(self) if model.respond_to?(:select_tool)
+        if active?
+          pick_selected
+        elsif model.respond_to?(:select_tool)
+          model.select_tool(self)
+        end
         self
       end
 
@@ -88,10 +96,7 @@ module PhComposer
 
       def activate
         @active = true
-        @picked_path = nil
-        forget_read
-        Sketchup.status_text = INSTRUCTIONS if Sketchup.respond_to?(:status_text=)
-        show_measurement(nil)
+        pick_selected
       end
 
       def deactivate(view)
@@ -164,7 +169,7 @@ module PhComposer
 
       def onUserText(text, view)
         @drag = nil
-        return refuse(NOTHING_PICKED) unless @picked_path
+        return refuse(@read_error || NOTHING_PICKED) unless @picked_path
 
         forget_read
         candidate = picked
@@ -228,6 +233,22 @@ module PhComposer
         @read_at = nil
       end
 
+      def pick_selected
+        @picked_path = nil
+        forget_read
+        arm(selected_candidate, @session.model.active_view)
+      rescue StandardError => error
+        report_exception(error, @session.model.active_view, :notify => true)
+      end
+
+      # The visible Volume the selection names, or nil when the user has to click one.
+      def selected_candidate
+        target = EditFloorSurfaceMenu.target(@session)
+        return if target.is_a?(String)
+
+        candidates.find { |candidate| candidate.path == target.last }
+      end
+
       # Every visible Volume's prism, read once per revision. An unreadable record leaves nothing to pick and
       # says why at the next press or entry.
       def candidates
@@ -250,7 +271,7 @@ module PhComposer
           next unless @visibility.path_visible?(volume.path)
 
           loops = volume.segments.map { |segment| FaceCapture.call(segment.entity, segment.transform).loops_m }
-          candidate = Candidate.new(:volume => volume, :loops => loops)
+          candidate = SetHeightCandidate.new(:volume => volume, :loops => loops)
           candidate.prism = candidate.prism_at(candidate.height.to_f)
           candidate.bounds = PrismPick.bounds(candidate.prism)
           candidate

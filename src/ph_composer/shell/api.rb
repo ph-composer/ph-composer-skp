@@ -130,7 +130,7 @@ module PhComposer
                     "zones export rows lose container_paths." },
       { "minor" => 29, "date" => "2026-11-09",
         "change" => "The ph_composer.spaces.labels readout is now ph_composer.spaces.show, on by default in every " \
-                    "Model session; it draws each Volume's prism outline with the Space labels." },
+                    "Model session; it draws each Volume's preview outline with the Space labels." },
       { "minor" => 30, "date" => "2026-11-09",
         "change" => "ph_composer.spaces.remove is new: a Space's records go and its floor Faces stay as plain " \
                     "geometry, in one Undo step." },
