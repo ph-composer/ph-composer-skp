@@ -97,6 +97,14 @@ class SpacesDeleteVolumeTest < PhComposerTestCase
     @model.active_path = [@zone_a, @zone_a.entities.to_a[1]]
     select(bath_volume)
     assert MENU.selected(@model).only, "a Volume nested in the selected one goes with it"
+
+    inner = space_group(1170, space_record("P", :number => "9"),
+                        [volume_group(1180, volume_record("P"), [floor_face(1181, rectangle(0, 8, 1, 1))])])
+    @living.entities.to_a.last.entities.clear!
+    @living.entities << inner
+    @model.active_path = [@zone_a, @living]
+    select(@living.entities.to_a.first)
+    assert MENU.selected(@model).only, "a nested Space's Volume is not the outer Space's"
   end
 
   # Every Spaces record below the Volume is erased with it, so each is reported and checked for references.
@@ -107,6 +115,27 @@ class SpacesDeleteVolumeTest < PhComposerTestCase
     deleted = invoke("volumes.delete", "volume" => volume_reference(1320))
     assert_equal "completed", deleted["status"], deleted.inspect
     assert_includes deleted.fetch("affected").map { |row| row["id"] }, "fsg_#{'K' * 12}"
+  end
+
+  # A surviving record that names a record below the Volume refuses the delete, and nothing is erased.
+  def test_a_reference_to_a_record_below_the_volume_refuses_and_writes_nothing
+    nested = floor_face(1331, rectangle(9, 9, 1, 1), segment_record("K"))
+    @hall_second.entities << Sketchup::Group.new(1330, Sketchup::Entities.new([nested]))
+    links = PhComposer::Records::Extension.new(
+      :namespace => "test.spaces.links", :schema_version => 1,
+      :references => [{ "path" => "$.floor", "target_kind" => SPACES::FLOOR_SEGMENT_KIND, "cardinality" => "one" }]
+    )
+    envelope = links.envelope("floor" => "fsg_#{'K' * 12}")
+    SPACES::SPACE_STORE.write(@living, SPACES::SPACE_STORE.read(@living)
+                                             .merge("extension_data" => { "outside.unavailable" => envelope }))
+    @model.active_path = [@zone_a, @hall]
+    operations = @model.operations.length
+
+    refused = invoke("volumes.delete", "volume" => volume_reference(1320))
+
+    assert_equal %w[refused reference.in_use none], refused.values_at("status", "code", "effect")
+    assert_equal operations, @model.operations.length
+    assert_equal [1310, 1320], @hall.entities.to_a.map(&:persistent_id)
   end
 
   # A script may empty a Space; the Space then reads space.empty until it is fixed.

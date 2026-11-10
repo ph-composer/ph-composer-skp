@@ -51,12 +51,11 @@ module PhComposer
                      :only => others(model, path, volume_path).empty?)
       end
 
-      # The Volumes in the Space at `space_path` that deleting the Volume at `volume_path` would leave.
+      # The Space at `space_path`'s own Volumes, as the scan finds them, that deleting the Volume at `volume_path`
+      # would leave. A Volume of a Space nested inside it is that Space's, not this one's.
       def others(model, space_path, volume_path)
-        scan = Occurrences.scan(model, :strict => false)
-        (scan.volumes + scan.orphan_volumes).select do |found|
-          found.path[0, space_path.length] == space_path && found.path[0, volume_path.length] != volume_path
-        end
+        space = Occurrences.scan(model, :strict => false).spaces.find { |found| found.path == space_path }
+        Array(space&.volumes).reject { |found| found.path[0, volume_path.length] == volume_path }
       end
 
       # The question asked before a Space's only Volume goes: the Space goes with it.
