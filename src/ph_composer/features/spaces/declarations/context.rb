@@ -55,7 +55,7 @@ module PhComposer
         feature.view_command("#{FEATURE_ID}.context.open",
                              :description => "Open a Space, or a Volume volumes.unprotect unlocked, as the edit " \
                                              "context; a Volume being left is protected first.",
-                             :refuses => TARGET + %w[space.volume_protected], :side_effects => LEAVING,
+                             :refuses => TARGET + %w[space.volume_protected session.inactive], :side_effects => LEAVING,
                              :params => Shapes.object({ "reference" => OPEN_PARAM }), :result => PATH_RESULT,
                              :examples => [{ "reference" => EXAMPLE_SPACE }]) do |request|
           Navigation.open(request, :reference => request.params.fetch("reference"))

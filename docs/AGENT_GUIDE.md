@@ -160,6 +160,12 @@ that pages or fragments what was left out. Fragments join and check exactly as a
   user edited it. Read again, decide again, and send a new request.
 - **`session.busy`.** Another change is running, deferred work is settling, or the user has a tool
   in use. Wait and read `context` again; never ask the user to drop what they are doing for you.
+- **`session.inactive`.** The Model is open but not the one SketchUp shows, and SketchUp moves the
+  open Group only in the Model it shows. Reads and changes still work there; ask the user to switch
+  windows only if you need to open or close a Group.
+- **Your call timed out.** A call whose connection you closed before SketchUp picked it up, for
+  example while a SketchUp message box was open, does not run. Send the same invoke again with the
+  same `idempotency_key`: one that ran answers its first outcome, one that did not runs now.
 - **A lost reply.** Do not send a different request. Call `outcome` with the same
   `idempotency_key`, or send the same invoke again with the same key: the first outcome answers and
   the change is never applied twice. `request.outcome_unavailable` means it is too old to know;

@@ -61,6 +61,18 @@ module PhComposer
         session
       end
 
+      # The session a transaction callback belongs to. SketchUp reports the transactions of an operation on a
+      # Model it is not showing to the shown Model's observers, with the shown Model as the argument
+      # (context/SKETCHUP_HOST_BEHAVIOR.md); a callback that arrives while another session is inside its own
+      # operation (a change request or an `operating` block) is that session's, so neither Model's revision is
+      # misread.
+      def for_transaction(model)
+        own = sessions[model.object_id]
+        return own if own&.operating?
+
+        sessions.values.find(&:operating?) || self.for(model)
+      end
+
       # The open session with this id, or nil when it was never issued or its Model has closed.
       def find(id)
         all.find { |session| session.id == id }
@@ -119,17 +131,15 @@ module PhComposer
         session = sessions.delete(model.object_id)
         return true unless session
 
-        observers = session.observers
-        model.remove_observer(observers.model) if observers.model && model.respond_to?(:remove_observer)
-        selection = model.selection
-        selection.remove_observer(observers.selection) if observers.selection && selection.respond_to?(:remove_observer)
-        layers = model.respond_to?(:layers) ? model.layers : nil
-        layers.remove_observer(observers.layers) if observers.layers && layers.respond_to?(:remove_observer)
-        view = model.respond_to?(:active_view) ? model.active_view : nil
-        view.remove_observer(observers.view) if observers.view && view.respond_to?(:remove_observer)
-        rendering_options, rendering_observer = observers.rendering
-        rendering_options&.remove_observer(rendering_observer)
-        session.detach
+        # A closed Model's view can raise TypeError when asked (context/SKETCHUP_HOST_BEHAVIOR.md); its observers
+        # went with it. The session's own timers and deferred work stop either way.
+        begin
+          remove_observers(model, session.observers)
+        rescue TypeError
+          raise if !model.respond_to?(:valid?) || model.valid?
+        ensure
+          session.detach
+        end
         true
       end
 
@@ -144,6 +154,18 @@ module PhComposer
       end
 
       private
+
+      def remove_observers(model, observers)
+        model.remove_observer(observers.model) if observers.model && model.respond_to?(:remove_observer)
+        selection = model.selection
+        selection.remove_observer(observers.selection) if observers.selection && selection.respond_to?(:remove_observer)
+        layers = model.respond_to?(:layers) ? model.layers : nil
+        layers.remove_observer(observers.layers) if observers.layers && layers.respond_to?(:remove_observer)
+        view = model.respond_to?(:active_view) ? model.active_view : nil
+        view.remove_observer(observers.view) if observers.view && view.respond_to?(:remove_observer)
+        rendering_options, rendering_observer = observers.rendering
+        rendering_options&.remove_observer(rendering_observer)
+      end
 
       def register_subscriber(subscribers, block)
         raise ArgumentError, "A session subscriber block is required." unless block

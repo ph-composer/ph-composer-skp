@@ -1,6 +1,6 @@
 # Proposed contract changes
 
-STATUS: C01 bound and implemented by AW-01 (API 1.34); C02 bound and implemented by AW-02 (API 1.35); C04 bound and implemented by AW-03 (API 1.36); C03 definition part bound by AW-04 (API 1.37); C03 occurrence part bound by AW-05 (API 1.38); C05 bound by AW-06 (API 1.39); C06 and C07 bound on the AW-07 branch (API 1.40); C08 first half (client profiles) bound by AW-08 (API 1.41); its second half remains a proposal. Baseline API 1.31.
+STATUS: C01 bound and implemented by AW-01 (API 1.34); C02 bound and implemented by AW-02 (API 1.35); C04 bound and implemented by AW-03 (API 1.36); C03 definition part bound by AW-04 (API 1.37); C03 occurrence part bound by AW-05 (API 1.38); C05 bound by AW-06 (API 1.39); C06 and C07 bound on the AW-07 branch (API 1.40); C08 first half (client profiles) bound by AW-08 (API 1.41); its second half (host readiness) bound by AW-09 without the native gesture policy, which awaits measurement. Baseline API 1.31.
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication
 
 The durable authorities remain `context/CONTRACTS.md`, `AGENT_INTERFACE.md`, `EXTENSIBILITY.md`
@@ -386,6 +386,32 @@ a guard. A refusal never stops a person's tool or steals focus. Existing stale/r
 - `CodexConfig` (new, pure): `.state`, `.edit`, `.append`, `.inline_token`, `.server_names`.
 - `CallLog#contact`, `#take_contacts` and a call row's `verifies`; `Server` `on_calls` receives
   `(rows, contacts)`; `Listener.contacts`, `Listener.verified`, `Listener.calls_made(rows, contacts)`.
+
+**Second half bound at AW-09 from the `AW09M` measurement (no new operation or code; API 1.42 because
+`spaces.context.open` now declares `session.inactive`; choices D17-a to D17-e).** The native gesture policy is not bound: a Move, Line or held drag partway
+through was not measured, so no tool-name write guard is added. New names and rules:
+
+- `LoopbackHttp.peer_open?(socket)`: false once the client closed its side (a peek reads end of stream or the
+  connection reset); true while it waits or sent more. `Server#handoff` takes `connected:` (a callable, default
+  always true) and `Server::Entry` keeps it. A tools/call whose client is gone is never run: the worker checks
+  before it queues the call, and the pump checks again before it runs a waiting one. The call is logged with
+  status `abandoned` and no code; `outcome` by its key answers `request.outcome_unavailable`, as for a key never
+  sent. A call already running finishes, as before.
+- `Sessions.for_transaction(model)`: the session a transaction callback belongs to. While a session is inside its
+  own operation (`ModelSession#operating?`: inside `mutate`, or inside `ModelSession#operating`, which wraps an
+  operation the extension opens outside a change request, today Spaces' Volume protection and release), the
+  callback is that session's, the reported Model's own first; otherwise it is `Sessions.for(model)`. Measured
+  commit callbacks arrive inside the operation; a late one is not routed. The three transaction callbacks of
+  `HostObservers::ModelObserver` use it, so a write to a Model that is not shown advances only its own revision.
+- `EditContext.shown!(model)`: raises `session.inactive` for a Model SketchUp is not showing. `context.open` and
+  `context.root` (before any path change), `spaces.context.open` (unless the path is already open),
+  `spaces.context.close` and `spaces.locate` call it; `spaces.context.open` adds `session.inactive` to its
+  `refuses`, the others already declared it. An action that moves the path inside its own operation is unchanged.
+- `Sessions.detach(model)` treats a `TypeError` from removing a closed Model's observers as expected (it re-raises
+  for a valid Model) and always runs `ModelSession#detach`, so pruning a closed Model never raises and its deferred
+  work and timers stop. A call on a closed target answers `session.unknown`.
+- Unchanged: `context` readiness, `busy_reason`, the busy check in dispatch, queue bounds, the 30 s handoff and
+  10 s starvation answers, sequences, retained outcomes and replay.
 
 Optional artifact retrieval is caller/run-scoped and bounded, hashes the original content, and
 observes expiry/revocation. Optional history returns operation, affected refs, source/result revisions

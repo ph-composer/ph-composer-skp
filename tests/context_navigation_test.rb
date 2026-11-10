@@ -143,9 +143,10 @@ class ContextNavigationTest < PhComposerTestCase
     refute @volume.locked?, "no boundary ran"
   end
 
-  # SketchUp ignores a return to the root on a Model it is not showing, so the move refuses before the
-  # open Volume is protected rather than reporting a change that did not happen.
-  def test_a_return_to_the_root_of_a_model_not_shown_refuses_with_nothing_locked
+  # SketchUp ignores a return to the root on a Model it is not showing, and honors a deeper path there but
+  # reports the change to the shown Model's observers, so every move refuses before the open Volume is
+  # protected; Spaces navigation refuses alike. A path equal to the current one still changes nothing.
+  def test_moving_the_path_of_a_model_not_shown_refuses_with_nothing_locked
     @volume.locked = false
     @model.active_path = [@zone, @space, @volume]
     other = Sketchup::Model.new
@@ -153,14 +154,59 @@ class ContextNavigationTest < PhComposerTestCase
     revision = @session.revision
     starts = @model.operation_starts.length
 
-    refused = [view(ROOT), view(OPEN, "path" => [])].map { |result| result["code"] }
+    refused = [view(ROOT), view(OPEN, "path" => []), view(OPEN, "path" => [100]),
+               view("ph_composer.spaces.context.close")].map { |result| result["code"] }
 
-    assert_equal %w[session.inactive session.inactive], refused
+    assert_equal %w[session.inactive] * 4, refused
     refute @volume.locked?, "no boundary ran"
     assert_equal [@zone, @space, @volume], @model.active_path
     assert_equal revision, @session.revision
     assert_equal starts, @model.operation_starts.length
-    assert_equal({ "path" => [100], "changed" => true }, moved(OPEN, "path" => [100]))
+    assert_equal({ "path" => [100, 110, 111], "changed" => false }, moved(OPEN, "path" => [100, 110, 111]))
+  ensure
+    Sketchup.active_model = @model
+  end
+
+  # Spaces navigation on a Model not shown refuses like the foundation's, before any boundary or selection;
+  # opening the Space already open changes nothing and still answers.
+  def test_spaces_open_and_locate_refuse_on_a_model_not_shown_unless_nothing_moves
+    Sketchup.active_model = Sketchup::Model.new
+    revision = @session.revision
+    starts = @model.operation_starts.length
+    space = { "reference" => { "space_id" => "spc_#{'S' * 12}", "entity_path" => [100, 110] } }
+    volume = { "reference" => { "volume_id" => "vol_#{'A' * 12}", "entity_path" => [100, 110, 111] } }
+
+    refused = [view("ph_composer.spaces.context.open", space),
+               view("ph_composer.spaces.locate", volume)].map { |result| result["code"] }
+
+    assert_equal %w[session.inactive session.inactive], refused
+    assert_empty @model.active_path.to_a
+    assert_equal 0, @model.selection.length
+    assert_equal [revision, starts], [@session.revision, @model.operation_starts.length]
+    @model.active_path = [@zone, @space]
+    assert_equal({ "path" => [100, 110] }, moved("ph_composer.spaces.context.open", space))
+  ensure
+    Sketchup.active_model = @model
+  end
+
+  # Protection run as deferred work on a Model not shown, its commit reported to the shown Model's observers as
+  # SketchUp does (context/SKETCHUP_HOST_BEHAVIOR.md): the hidden Model's revision counts it, the shown one stays.
+  def test_protecting_a_volume_on_a_model_not_shown_counts_for_its_own_session
+    shown = Sketchup::Model.new
+    shown_session = PhComposer::Sessions.for(shown)
+    Sketchup.active_model = shown
+    reported = shown_session.observers.model
+    forward = Object.new
+    forward.define_singleton_method(:onTransactionCommit) { |_model| reported.onTransactionCommit(shown) }
+    @model.observers.dup.each { |observer| @model.remove_observer(observer) }
+    @model.add_observer(forward)
+    @volume.locked = false
+    revisions = [shown_session.revision, @session.revision]
+
+    assert SPACES::Protection.protect(@model, @volume)
+
+    assert @volume.locked?
+    assert_equal [revisions[0], revisions[1] + 1], [shown_session.revision, @session.revision]
   ensure
     Sketchup.active_model = @model
   end

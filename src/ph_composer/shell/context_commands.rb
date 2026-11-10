@@ -82,6 +82,7 @@ module PhComposer
       end
       return { "path" => current, "changed" => false } if ids == current
 
+      EditContext.shown!(model)
       tool_free!(model)
       path = resolve(model, ids)
       reentered!(EditContext.current(model), path)

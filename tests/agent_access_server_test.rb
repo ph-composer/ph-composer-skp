@@ -443,6 +443,44 @@ class AgentAccessServerTest < PhComposerTestCase
     assert_empty ran
   end
 
+  # Under a blocking native modal no Ruby thread runs, so the client times out and closes while its call
+  # waits; on 26.1.188 that call ran once the modal closed (context/AGENT_INTERFACE.md). A call whose client
+  # has gone is never run, whether it is still waiting in the queue or only now being handed off.
+  def test_a_call_whose_client_closed_the_connection_never_runs
+    ran = []
+    @executor.define_singleton_method(:call) { |*arguments| ran << arguments }
+    pending = @server.snapshot.fetch("pending")
+    socket = TCPSocket.new("127.0.0.1", @server.port)
+    body = rpc("tools/call", "name" => "discover", "arguments" => {})
+    socket.write("POST /mcp HTTP/1.1\r\nHost: 127.0.0.1:#{@server.port}\r\nAuthorization: Bearer #{@token}\r\n" \
+                 "Content-Type: application/json\r\nContent-Length: #{body.bytesize}\r\n\r\n#{body}")
+    sleep 0.01 until @server.snapshot.fetch("pending") > pending
+    socket.close
+    sleep 0.05 # the loopback close reaches the server's side
+    @server.pump
+    late = @server.send(:handoff, @row, "discover", {}, :connected => -> { false })
+
+    assert_empty ran
+    assert_equal "session.busy", late.dig("structuredContent", "code")
+    sleep 0.01 until @server.snapshot.fetch("recent").length >= 2
+    assert_equal %w[abandoned abandoned], @server.snapshot.fetch("recent").map { |row| row["status"] }
+  end
+
+  def test_a_peer_is_open_while_it_waits_and_closed_once_it_hangs_up
+    listener = TCPServer.new("127.0.0.1", 0)
+    client = TCPSocket.new("127.0.0.1", listener.addr[1])
+    accepted = listener.accept
+
+    waiting = PhComposer::LoopbackHttp.peer_open?(accepted)
+    client.close
+    sleep 0.01 until accepted.wait_readable(0)
+
+    assert waiting
+    refute PhComposer::LoopbackHttp.peer_open?(accepted)
+  ensure
+    [client, accepted, listener].each { |io| io&.close unless io&.closed? }
+  end
+
   # Activation and close between enqueue and execution: the call names its session, so a Model that
   # became active meanwhile is never the target, and a closed one answers session.unknown unrun.
   def test_a_queued_call_runs_on_the_session_it_named_or_refuses_once_that_model_closed

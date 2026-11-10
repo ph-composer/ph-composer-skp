@@ -39,6 +39,21 @@ class SessionsTest < PhComposerTestCase
     refute session.valid?
   end
 
+  # A closed Model's view raises when asked, as SketchUp's did on 26.1.188 (context/SKETCHUP_HOST_BEHAVIOR.md):
+  # pruning it never raises, and its session still drops its deferred work.
+  def test_pruning_a_closed_model_whose_view_raises_still_detaches_its_session
+    model = Sketchup::Model.new
+    session = Sessions.for(model)
+    deferred = session.feature_state(:test) { PhComposer::DeferredWork.new { |_jobs| nil } }
+    deferred.queue(:job, 1)
+    model.define_singleton_method(:valid?) { false }
+    model.define_singleton_method(:active_view) { raise TypeError, "reference to deleted Model" }
+
+    assert_nil Sessions.find(session.id)
+    refute session.valid?
+    refute deferred.pending?
+  end
+
   def test_installing_registers_the_observer_and_opening_the_active_model_creates_its_session
     created = []
     unsubscribe = Sessions.on_host_event(:session_created) { |session| created << session }
@@ -126,6 +141,25 @@ class SessionsTest < PhComposerTestCase
 
     session.host_event(:transaction_committed)
     assert_equal 3, session.revision
+  end
+
+  # SketchUp reports the transactions of an operation on a Model it is not showing to the shown Model's
+  # observers, naming the shown Model (context/SKETCHUP_HOST_BEHAVIOR.md). The session inside its own
+  # operation claims them: the shown Model's revision stays, and the hidden Model's next edit still counts.
+  def test_an_operation_on_a_model_not_shown_reported_to_the_shown_model_is_its_own
+    shown = Sketchup.active_model
+    hidden = Sketchup::Model.new
+    shown_session = Sessions.for(shown)
+    hidden_session = Sessions.for(hidden)
+    revisions = [shown_session.revision, hidden_session.revision]
+
+    hidden_session.mutate do
+      shown_session.observers.model.onTransactionCommit(shown)
+      true
+    end
+    hidden_session.observers.model.onTransactionCommit(hidden)
+
+    assert_equal [revisions[0], revisions[1] + 2], [shown_session.revision, hidden_session.revision]
   end
 
   # SketchUp 26.1.188 reports an aborted operation as an Undo (context/SKETCHUP_HOST_BEHAVIOR.md);
