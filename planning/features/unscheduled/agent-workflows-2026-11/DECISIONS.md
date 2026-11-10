@@ -32,6 +32,14 @@ AW-01 choices, recorded before code:
 | D03-a | A Zone's own lock is checked by `Occurrences.resolve_editable_zone`, which `zones.update`, `update_field`, `update_metadata` and `UpdateZoneStep` apply share; Face writes already refused it. `writable_zone!` is unchanged, so export preflight does not newly block a locked Zone. Split identity repair's own Face writes through `face_at` do not check the Zone's own lock: a follow-up outside AW-01 |
 | D06-a | Space create receipt adds `accepted`, `left_out` and per-Volume `faces`. The reviewed-set precondition is the existing `expected_revision` (and `proposal_digest` from an action preview); no digest parameter and no strict all-or-nothing mode are added |
 
+AW-02 choices, recorded before the gate:
+
+| ID | Choice |
+| --- | --- |
+| D04-a | The guide is a bounded topic read through the existing `discover` tool (`section: "guide"`, `topic`), not a new tool verb and not MCP resources, which stay empty; one source, `docs/AGENT_GUIDE.md`, shipped as a fixture-checked copy. Whether both fresh clients find and use it unprompted is AW-10's client evidence |
+| D03-b | Discovery pages are cut at the shared 16 KiB row budget (`Pages::MAX_PAGE_BYTES`) under the unchanged 24 KiB reply limit. The legacy `owner` page stays unpaged for existing callers; `section: "operations"` with `owner` is the paged route |
+| D01-d | Foundation codes keep a null `description` in `describe`'s `refuses`; their meanings are published once, in the `refusals` section, so the existing contract does not change |
+
 AW-01 through AW-07 can be made concrete without choosing a model vendor or a remote service.
 Routine naming/helper decisions belong to coding agents within the accepted contracts. Record a
 changed product/security/compatibility choice here before dependent work; do not let a generic

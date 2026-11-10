@@ -39,8 +39,12 @@ module PhComposer
     COPY_EXAMPLE = { "provider_id" => "example", "kind" => "example_parts", "generation" => 1,
                      "library_id" => "synthetic", "record_id" => "one", "choice" => "create" }.freeze
 
+    # A copy names the generation it reviewed: unlike a catalog read, it never falls back to the current one.
     def copy_params
       properties = selected_params.fetch("properties").merge(
+        "generation" => described(GENERATION, "The catalog generation the row was read from, as catalog and " \
+                                              "in_file answer it. Required; a stale one is refused as " \
+                                              "library.catalog_stale."),
         "library_id" => described(TEXT, "The library holding the row, as the catalog row gives it."),
         "record_id" => described(TEXT, "The row's record id within that library."),
         "choice" => described({ "type" => "string", "enum" => %w[create keep_local use_library] },
@@ -53,7 +57,8 @@ module PhComposer
                                                "resolution. Refused when the local record changed since."),
         "assignment" => described(OBJECT, "Optional: where the owning feature also assigns the copied record, " \
                                           "in that kind's assignment target shape, such as one Window Type " \
-                                          "element side.")
+                                          "element side. describe the library kind (discover's library_kinds " \
+                                          "names it) for that shape and its examples.")
       )
       object(properties, :optional => %w[local_id expected_values assignment])
     end

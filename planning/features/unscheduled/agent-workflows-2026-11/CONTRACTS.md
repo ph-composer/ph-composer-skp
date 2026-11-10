@@ -1,6 +1,6 @@
 # Proposed contract changes
 
-STATUS: C01 bound and implemented on the AW-01 branch (API 1.34); C02-C08 remain proposals. Baseline API 1.31.
+STATUS: C01 bound and implemented by AW-01 (API 1.34); C02 bound and implemented on the AW-02 branch (API 1.35); C03-C08 remain proposals. Baseline API 1.31.
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication
 
 The durable authorities remain `context/CONTRACTS.md`, `AGENT_INTERFACE.md`, `EXTENSIBILITY.md`
@@ -53,6 +53,28 @@ No participant becomes a directly callable external operation.
 The operating guide is packaged with the build, versioned with its API, reachable through a small
 topic read or proven MCP resource path, and linked from discovery/initialize. It is documentation,
 not Model-provided instructions. Model names, notes and provider prose remain untrusted data.
+
+**Bound at AW-02 (API 1.35).** No new MCP tool and no new registered operation. New names:
+
+- `API.discover` key `library_kinds`: rows `name`, `owner`, `wire_kind`, `wire_version`, `record_kind`,
+  `assignment_supported`. `API.describe` answers a library kind by its registered name
+  (`Library::KindDescriptor.call`, `kind: "library_kind"`, with `wire_schema`, `copy` and `assignment`:
+  `supported`, `target`, `examples`, `refuses`, or `supported: false` with `library.assignment_unavailable`)
+  and an extension by namespace (`Records::Extension#descriptor`, `kind: "extension"`, with
+  `payload_schema: null` and `statuses` from `Records::Extension::STATUS_MEANINGS`).
+- `Declarations::LibraryCallback#examples`, optional, each checked against the callback's params at
+  registration; the assign callback's targets are the published assignment examples.
+- `Refusals::MEANINGS`: one line per code of every common set.
+- MCP `discover` arguments `section` (`AgentAccess::Discovery::SECTIONS`: `operations`, `features`, `record_kinds`,
+  `reference_targets`, `extensions`, `library_kinds`, `refusals`, `contracts`, `guide`), `topic`, `limit`,
+  `cursor`; page keys `section`, `registry`, `rows`, `total`, `next_cursor`, `owner`; index keys `registry`,
+  `sections`, `guide`, and `operation_counts` in place of `operations` past 20 KiB, then neither `features`
+nor counts; a row's prose or list over 1 KiB is cut and named in the row's `truncated`, identifiers
+(`Discovery::IDENTIFIERS`) never. A stale-registry cursor
+  refuses `query.cursor_expired`; a foreign or edited one `params.invalid`.
+- `AgentAccess::Guide` over `agent_access/guide.md` (the shipped copy of `docs/AGENT_GUIDE.md`): topic ids
+  are slugged second-level headings and `<parent>.<child>` for third-level ones, plus `overview`;
+  `initialize` `_meta["ph_composer/guide"]` gives `api`, `extension`, `digest`, `topics` and `read`.
 
 ## C03 · Complete retrieval under a transport budget
 

@@ -4454,6 +4454,25 @@
         "src/ph_composer/features/spaces/declarations/*"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "AW02",
+      "label": "Agent-workflows AW-02 discovery and installed guide on the installed RBZ in a fresh process: over the real loopback MCP listener with a read-only token, initialize names the guide in its instructions and _meta; discover's index points to the guide and lists the sections; the guide's topics and one topic's text read through discover; record_kinds, reference_targets and library_kinds list every installed kind, a library kind describes its assignment target and examples, refusals give every common code a meaning; operations page to the end through cursors; every reply stays within 24 KiB; once revoked, the token is refused (401), and the listener stops when it was the last live token",
+      "mode": "native",
+      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/agent_access/discovery.rb",
+        "src/ph_composer/agent_access/guide.rb",
+        "src/ph_composer/agent_access/guide.md",
+        "src/ph_composer/agent_access/mcp.rb",
+        "src/ph_composer/agent_access/tools.rb",
+        "src/ph_composer/agent_access/executor.rb",
+        "src/ph_composer/agent_access/server.rb",
+        "src/ph_composer/library/kind_descriptor.rb",
+        "src/ph_composer/shell/api.rb",
+        "src/ph_composer/shell/refusals.rb"
+      ],
+      "native_control_required": false
     }
   ]
 }

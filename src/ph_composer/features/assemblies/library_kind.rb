@@ -49,9 +49,9 @@ module PhComposer
         shape
       end
 
-      def callback(params, result, refuses:, &handler)
+      def callback(params, result, refuses:, examples: nil, &handler)
         Declarations::LibraryCallback.new(:params => params, :result => result, :refuses => refuses,
-                                          :handler => handler)
+                                          :handler => handler, :examples => examples)
       end
 
       def local_read
@@ -113,7 +113,10 @@ module PhComposer
           key == "material_id"
         end)
         params = Shapes.object({ "target" => target, "local_id" => Shapes::TEXT })
-        callback(params, Shapes::RESULT, :refuses => Refuses::EDIT) do |request, proposal|
+        example = { "target" => { "id" => Shapes::EXAMPLE_ID, "expected_values" => {},
+                                  "layer_id" => Shapes::EXAMPLE_LAYER, "segment_id" => Shapes::EXAMPLE_SEGMENT },
+                    "local_id" => "mat_Ab12Cd34Ef56" }
+        callback(params, Shapes::RESULT, :refuses => Refuses::EDIT, :examples => [example]) do |request, proposal|
           gesture = request.params.fetch("target").merge("material_id" => request.params.fetch("local_id"))
           Assembly::Operations.gesture(request, proposal,
                                        :id => gesture.fetch("id"),

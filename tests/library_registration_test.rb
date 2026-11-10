@@ -255,4 +255,26 @@ class LibraryRegistrationTest < PhComposerTestCase
                                               :record_kind => "test.library.widget", :adapter => {})
     end).map(&:code), "registration.schema_invalid"
   end
+
+  # An example a callback publishes is params it accepts; discovery shows the assign callback's to agents.
+  def test_callback_examples_must_meet_their_params
+    malformed = adapter
+    malformed.create.params = { "properties" => {} }
+    malformed.create.examples = [{}]
+    assert_includes refused(feature("test.library", malformed)).map(&:code), "registration.schema_invalid"
+    value = adapter
+    value.create.examples = [{ "id" => "one", "open" => Float::INFINITY }]
+    assert(refused(feature("test.library", value)).any? { |item| item.message.include?("not a finite number") })
+    [{}, [1], [{ "id" => 7 }]].each do |examples|
+      value = adapter
+      value.create.examples = examples
+      diagnostics = refused(feature("test.library", value))
+      assert diagnostics.any? { |item| item.message.include?("create example") }, diagnostics.inspect
+    end
+    value = adapter
+    value.assign = callback.tap { |assign| assign.examples = [{ "id" => "one" }] }
+    Registry.install([feature("test.library", value)])
+    described = PhComposer::API.describe(:name => "test.library.wire")
+    assert_equal [true, []], [described.dig("assignment", "supported"), described.dig("assignment", "examples")]
+  end
 end

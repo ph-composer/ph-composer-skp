@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 34
+    MINOR = 35
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -155,7 +155,15 @@ module PhComposer
                     "zones.list, zones.all and export preflight read the zone.ownership_conflict finding, which " \
                     "does not block export. A Face reference with a null entity_id refuses target.changed on every " \
                     "Face write once the Face has a record, and zones.update and update_metadata refuse a locked " \
-                    "Zone (target.locked) as update_field does." }
+                    "Zone (target.locked) as update_field does." },
+      { "minor" => 35, "date" => "2026-11-10",
+        "change" => "discover adds library_kinds, and describe answers a library kind by name (its wire kind and " \
+                    "version, and its assignment target schema and examples or that it has none) and an installed " \
+                    "extension by namespace. The agent connection's discover takes section, owner, limit, cursor " \
+                    "and topic for bounded pages of operations, record kinds, reference targets, extensions, " \
+                    "library kinds, common refusals with their meanings, contracts and the operating guide; " \
+                    "initialize names the guide. ph_composer.library.copy's generation says it is required, as " \
+                    "its schema already did." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {
@@ -213,13 +221,14 @@ module PhComposer
           { "namespace" => extension.namespace, "owner" => registry.owner_of(extension.namespace),
             "schema_version" => extension.schema_version, "export_relevance" => extension.export_relevance }
         end,
+        "library_kinds" => registry.library_kinds.values.map { |kind| Library::KindDescriptor.summary(kind) },
         "snapshot_sections" => registry.snapshot_sections.values.map { |section| section.name }
       )
     end
 
     # The full declaration of one registered query, action, view command, setup command, file export,
-    # record kind or entity kind, or of one export task method, or nil when none has the name. The
-    # schemas are copies; validation keeps its own.
+    # record kind, entity kind, library kind or extension namespace, or of one export task method, or nil
+    # when none has the name. The schemas are copies; validation keeps its own.
     def describe(name:)
       registry = Registry.current
       if (operation = registry.queries[name] || registry.actions[name] || registry.view_commands[name] ||
@@ -238,8 +247,23 @@ module PhComposer
                                .merge(target.descriptor.to_h))
       end
 
-      kind = registry.record_kinds[name]
-      kind && DeepCopy.call({ "kind" => "record_kind", "owner" => registry.owner_of(name) }.merge(kind.descriptor.to_h))
+      if (kind = registry.record_kinds[name])
+        return DeepCopy.call({ "kind" => "record_kind", "owner" => registry.owner_of(name) }
+                               .merge(kind.descriptor.to_h))
+      end
+
+      described_contribution(registry, name)
+    end
+
+    # A library kind by its registered name, or an installed extension by its namespace.
+    def described_contribution(registry, name)
+      if (library_kind = registry.library_kinds[name])
+        return DeepCopy.call(Library::KindDescriptor.call(library_kind))
+      end
+
+      extension = registry.extensions[name]
+      extension && DeepCopy.call({ "kind" => "extension", "owner" => registry.owner_of(name) }
+                                   .merge(extension.descriptor))
     end
 
     # Issues a caller handle for an open Model session and returns the context to call with. This is
@@ -370,6 +394,6 @@ module PhComposer
       Declarations::OPERATION_KINDS.fetch(operation.class)
     end
     private_class_method :session_summary, :summary, :operation_description, :refusal, :operation_kind,
-                         :described_terms
+                         :described_terms, :described_contribution
   end
 end

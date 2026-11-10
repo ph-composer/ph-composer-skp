@@ -25,6 +25,16 @@ module PhComposer
       #   unsupported  a newer version than installed, or an envelope that cannot be read
       #   unavailable  no extension with this namespace is installed
       STATUSES = %w[understood invalid outdated unsupported unavailable].freeze
+      # The same, as discovery publishes it beside the installed extensions.
+      STATUS_MEANINGS = {
+        "understood" => "Installed, current, and the payload meets the installed contract.",
+        "invalid" => "Installed and current, but the payload or its references fail the installed contract; " \
+                     "kept as stored and never copied, migrated or exported.",
+        "outdated" => "Stored at an older version the installed migrations can raise.",
+        "unsupported" => "Stored at a newer version than installed, at an older one the installed migrations " \
+                         "cannot raise, or not readable as an envelope.",
+        "unavailable" => "No extension with this namespace is installed; the envelope is preserved as stored."
+      }.freeze
 
       attr_reader :namespace, :schema_version, :references, :export_relevance, :copy, :migrations
 
@@ -40,6 +50,14 @@ module PhComposer
         @migrations = migrations.freeze
         @validate = validate
         @copy = copy
+      end
+
+      # What `describe` answers for this namespace: the installed contract only. A declaration carries a
+      # validator, not a JSON Schema, so `payload_schema` is null rather than one inferred from data.
+      def descriptor
+        { "namespace" => namespace, "schema_version" => schema_version, "references" => DeepCopy.call(references),
+          "export_relevance" => export_relevance, "copy" => @copy.to_s, "migrates_from" => migrations.keys.sort,
+          "payload_schema" => nil, "statuses" => STATUS_MEANINGS }
       end
 
       def problems(payload)

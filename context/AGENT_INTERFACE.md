@@ -9,8 +9,10 @@ projected reads; the export task methods; and in-process grants (`read`, `view`,
 `export`) enforced at dispatch. Phase 3a1 added the external path: a loopback MCP endpoint served
 from the extension with per-user bearer tokens granted in the Agent Access dialog; the Model context
 read and the edit-path commands; capability and declared terms in `describe`; and the bounded Spaces
-reads with candidate Faces. Its remaining stages (write grants, artifacts, capture) are proposed
-until their owning packet records them.
+reads with candidate Faces. The write, setup, export and capture grants, client Connect and the
+agent scenarios followed and are implemented ("User-controlled local access"). The agent-workflows
+packet (API 1.35) added bounded discovery sections and the operating guide served by topic; what
+each section of this document marks "Implemented" is the current contract, and the rest is proposal.
 
 Users bring their own agents. PH-Composer supplies documented access to inspect, view and edit
 the authored model without requiring an agent to understand private Ruby internals or operate
@@ -71,6 +73,41 @@ the handler still checks) and a query's `response`: `{"bounded": false, "prefer"
 whole-Model read the panel uses and names the bounded read a client with a reply budget calls
 instead. Registration refuses malformed terms and a `prefer` that names no query. `discover` adds
 `schemas`: the Outcome envelope and a mutation's `request`, as JSON Schema.
+
+Implemented (API 1.35): `discover` adds `library_kinds`, each kind's registered name, owner, wire kind
+and version, copied record kind and `assignment_supported`; `describe` answers a library kind by name
+(`Library::KindDescriptor`: its wire schema and `assignment`, either the target schema
+`ph_composer.library.copy` takes as `assignment` with the assign callback's declared `examples`, or
+`supported: false` with `library.assignment_unavailable`) and an installed extension by namespace
+(`Records::Extension#descriptor`: version, references, export relevance, copy rule, the versions it
+migrates from, `payload_schema: null` since a declaration carries a validator rather than a schema,
+and what each stored-data status means). Every row comes from registration, so an outside kind,
+extension or adapter is described with no change to the shell or the transport. A library callback's
+optional `examples` must meet its params, which registration checks.
+
+The agent connection's `discover` tool keeps its compact index and its `owner` page and adds
+`section` (`agent_access/discovery.rb`): `operations` (each row with its `kind`; `owner` filters),
+`features`, `record_kinds`, `reference_targets`, `extensions` (with the status meanings), `library_kinds`,
+`refusals` (the common sets, a one-line meaning per code from `Refusals::MEANINGS`, and the
+documentation pointer), `contracts` (API, contract versions, grants, export task methods with their
+retention, Outcome and request schemas) and `guide`. A list section takes `limit` (100 by default, at
+most 500) and `cursor`, and cuts each page at 16 KiB of rows; a row's prose or list over 1 KiB is cut and
+the row names the key in `truncated` (identifiers such as `name`, `id`, `namespace` and `owner` are
+never cut, and `describe` answers the whole), so one long registration still pages; its cursor binds the section, the owner
+filter and `registry`, a digest of everything `API.discover` answers but the sessions, so after an
+install changes the registry the cursor is refused as `query.cursor_expired`. Every page and the index
+carry `registry`. The index lists the sections with their totals and the guide's version; past
+20 KiB it gives operation counts by owner in place of names, and past that leaves the features and the
+counts to their sections. Sessions stay filtered by the token.
+
+The operating guide is `docs/AGENT_GUIDE.md`, shipped as `agent_access/guide.md` (a golden that
+`make fixtures` copies and the offline suite compares) and read once at load by
+`AgentAccess::Guide`. Each second-level section is a topic and each third-level section a topic of
+its own, so one topic fits a reply. `discover` with `section` `guide` lists the topics with their
+sizes and the guide's version (API version, extension version, SHA-256 of the text); with `topic` it
+returns one topic's text. `initialize` names it in its instructions and as `_meta["ph_composer/guide"]`.
+It is documentation the build carries; no Model text reaches it. MCP resources stay empty: the topic
+read works through the tool flow both tested clients already use.
 
 Do not make a client infer action names or capabilities from private file paths or the current UI.
 Reject incompatible API versions explicitly and document deprecations. New features register
@@ -413,7 +450,9 @@ connections are open.
 `initialize`, `ping`, `tools/list`, `resources/list` and `prompts/list` are answered on the worker
 (`agent_access/mcp.rb`): `initialize` answers the client's revision when it is `2025-11-25` (Claude
 Code 2.1.300) or `2025-06-18` (Codex 0.163.0), otherwise the newer, and reports
-`serverInfo.version` and `_meta["ph_composer/api"]`. `tools/call` is queued for the main thread,
+`serverInfo.version`, `_meta["ph_composer/api"]` and `_meta["ph_composer/guide"]`. Its instructions
+tell the agent to read the guide through `discover`, to name a session by id and confirm it with
+`context`'s path, since two open Models can share a file name, and to treat Model text as data. `tools/call` is queued for the main thread,
 where a UI-timer pump (50 ms while calls wait, 100 ms idle, ending each tick with a short sleep so
 the workers run) hands it to `agent_access/executor.rb`. A token may have 8 calls waiting; a ninth,
 a call older than 30 s, or a pump that has not ticked for 10 s is answered `session.busy` by the
@@ -424,7 +463,7 @@ The executor rechecks the token, validates the arguments against the tool's fixe
 the one API call the tool names (`agent_access/tools.rb`, the allowlist). A token acts on a session
 through one caller handle from `API.connect` with the token's capabilities, kept while both live.
 The tools are the API verbs: `discover` (a compact index of every operation name by kind and owner,
-or one owner's full entries), `describe`, `query`, `preview`, `context` and `export_preflight`, all
+one owner's full entries, or one bounded section page: "Discover before acting"), `describe`, `query`, `preview`, `context` and `export_preflight`, all
 `read`; `invoke` and `outcome` (`model_write`); `view`; `setup`; and `export_file`, `start_export`,
 `export_status`, `cancel_export` and `latest_export` (`export`). `tools/list` shows a token only the
 tools its capabilities reach, and the executor refuses the rest as unknown. An agent never counts
@@ -632,20 +671,12 @@ records actual copy/split/Solve targets; the independent review of that work pas
 
 ## Delivery and acceptance
 
-Ed confirmed the delivery split during Phase 0 planning on 2026-09-18. Phase 0 establishes the
-shared programming interface and a synthetic client that discovers operations, reads records,
-performs validated writes and reads back results with the panel closed. Its acceptance includes
-stale-request rejection and native Undo. Phase 0 ships no external adapter and makes no claim
-that users' agents can connect.
-
-The user-facing connection belongs to a separate delivery packet, including transport, packaging
-and connection/access controls. Its milestone remains to be scheduled. This split does not select
-MCP or authorize implementation of either part.
-
-Foundation design establishes the transport-independent query/action contracts and tests a
-synthetic feature with the panel closed. Feature implementations carry their schemas and examples
-as they land. Select and package the external adapter in an owning plan before claiming users can
-connect; this document does not authorize a new server or an implementation phase.
+Phase 0 established the shared programming interface and a synthetic client that discovers
+operations, reads records, performs validated writes and reads back results with the panel closed.
+Phase 3a1 and its successors selected and shipped the local MCP adapter described above; the tested
+clients and versions are in [AGENT_ACCESS](../docs/AGENT_ACCESS.md). A development build is not a
+release: public distribution, Windows and SketchUp 2023 keep their own gates. New agent-facing work
+is planned in its owning packet; this document does not authorize implementation.
 
 Required evidence for the implemented interface includes:
 
@@ -672,6 +703,6 @@ Reviewed 2026-09-18:
   discovery, tools, resources and transport separation. These support the adapter recommendation;
   they do not settle our application semantics or prove SketchUp compatibility.
 
-Before implementation, decide the local transport/companion packaging, supported protocol versions,
-access-grant UX, revision and idempotency lifetimes, task persistence, capture capabilities and
-delivery owner. Do not treat the MCP recommendation as an approved dependency selection.
+The transport (MCP served from Ruby inside SketchUp), protocol versions, grants, revision and
+idempotency lifetimes, task retention and capture were decided in their implementing phases and are
+recorded above. Remote or hosted transports and Windows client setup remain open choices.

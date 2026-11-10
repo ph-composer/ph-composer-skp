@@ -872,6 +872,25 @@ module PhComposer
                                                                  callback.params["type"] == "object"
         problem(item, "#{part} needs a callable handler") unless callback.handler.respond_to?(:call)
         check_refusal_list(item, callback.refuses, Refusals::ANY_OPERATION, "#{part}.refuses")
+        check_library_examples(item, part, callback)
+      end
+
+      # Optional examples are params the callback accepts, so a published example is always one it takes.
+      def check_library_examples(item, part, callback)
+        examples = callback.examples
+        return if examples.nil?
+
+        unless examples.is_a?(Array) && examples.all? { |example| example.is_a?(Hash) }
+          problem(item, "#{part} examples must be a list of params objects")
+          return
+        end
+        return unless callback.params.is_a?(Hash) && JsonSchema.schema_problems(callback.params).empty?
+
+        examples.each_with_index do |example, index|
+          findings = JsonValue.problems(example)
+          findings = JsonSchema.validate(example, callback.params) if findings.empty?
+          problem(item, "#{part} example #{index} does not meet its params: #{findings.first}") unless findings.empty?
+        end
       end
 
       def check_library_providers

@@ -17,7 +17,7 @@ module PhComposerTools
     module_function
 
     def markdown(registry)
-      [intro, kinds(registry), common_refusals,
+      [intro, kinds(registry), library_kinds(registry), common_refusals,
        *GROUPS.map { |title, key, capability| operations(registry, title, key, capability) },
        participants(registry), tasks, codes(registry), changes].join("\n")
     end
@@ -85,6 +85,29 @@ module PhComposerTools
         declarations.map { |declaration| operation_section(declaration, registry) }.join("\n")
     end
 
+    # Each library kind as `describe` answers it: what `ph_composer.library.copy` copies, and the target its
+    # `assignment` param takes, or that it takes none.
+    def library_kinds(registry)
+      sections = registry.library_kinds.values.sort_by(&:name).map do |declaration|
+        described = PhComposer::Library::KindDescriptor.call(declaration)
+        lines = ["### `#{described.fetch('name')}`", "",
+                 "Wire kind `#{described.fetch('wire_kind')}`, version #{described.fetch('wire_version')}, copied " \
+                 "as `#{described.fetch('record_kind')}`. Owner: `#{described.fetch('owner')}`.", ""]
+        assignment = described.fetch("assignment")
+        unless assignment.fetch("supported")
+          lines << "No assignment: `ph_composer.library.copy` refuses one with `library.assignment_unavailable`."
+          next lines.join("\n") + "\n"
+        end
+
+        lines.concat(json_block("Assignment target", assignment.fetch("target")))
+        assignment.fetch("examples").each { |example| lines.concat(json_block("Example assignment", example)) }
+        lines.join("\n")
+      end
+      "## Library kinds\n\nWhat `ph_composer.library.copy` can copy, by the wire kind its `kind` param names. " \
+        "Its `assignment` param takes the kind's assignment target, and the copy and the assignment are one " \
+        "Undo step.\n\n#{sections.join("\n")}"
+    end
+
     # Participants answer no client, so they have a section of their own rather than a capability.
     def participants(registry)
       sections = registry.proposal_participants.values.sort_by(&:name).map do |declaration|
@@ -107,7 +130,13 @@ module PhComposerTools
         "`common_refusal_sets`. Every refusal has `code`, `owner` and `description`; the foundation's " \
         "description is null. Discovery's `refusal_documentation` points to " \
         "[Outcomes and codes](#{PhComposer::API.discover.fetch('refusal_documentation')}).\n\n" \
-        "| Set | Codes |\n| --- | --- |\n#{rows.join("\n")}\n"
+        "| Set | Codes |\n| --- | --- |\n#{rows.join("\n")}\n\n" \
+        "What each common code means, as the agent connection's discover section `refusals` gives it:\n\n" \
+        "| Code | Meaning |\n| --- | --- |\n#{meanings}\n"
+    end
+
+    def meanings
+      PhComposer::Refusals::MEANINGS.sort.map { |code, meaning| "| `#{code}` | #{meaning} |" }.join("\n")
     end
 
     # The shell's export task methods: API methods with keyword arguments, not registered operations.

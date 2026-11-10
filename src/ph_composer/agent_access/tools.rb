@@ -7,7 +7,7 @@ module PhComposer
     # here; an agent reads them with `describe`, so an outside feature's operations work with no change
     # to this table. This table is the allowlist the Executor runs and `tools/list` shows.
     module Tools
-      OPERATION_KINDS = %w[queries view_commands setup_commands file_exports actions].freeze
+      OPERATION_KINDS = Discovery::OPERATION_KINDS.keys.freeze
       INDEX_KEYS = %w[api extension capabilities sessions features schemas].freeze
 
       module_function
@@ -31,21 +31,24 @@ module PhComposer
                                "never applied twice." }.freeze
       REVISION = { "type" => "integer", "description" => "The revision of the read this change is based on." }.freeze
 
-      # Without an owner, a compact index: every operation's name by kind and owner. With one, that
-      # owner's full entries. The whole discovery document is larger than one tool result may be.
+      # Without a section or an owner, a compact index: every operation's name by kind and owner, the
+      # sections to page and the guide. With a section, one bounded page of it (AgentAccess::Discovery).
+      # With only an owner, that owner's full entries, unpaged as before. The whole discovery document is
+      # larger than one tool result may be.
       def discover(arguments, token)
         document = API.discover
         sessions = served(document.fetch("sessions"), token)
         document = document.merge("sessions" => sessions)
         connection = token.slice("id", "label", "capabilities", "model_name")
         connection["reason"] = unserved(token) if sessions.empty? && token["model_name"]
-        page = if (owner = arguments["owner"])
+        page = if arguments["section"]
+                 Discovery.section(document, arguments)
+               elsif (owner = arguments["owner"])
+                 Discovery.check_unsectioned(arguments)
                  owned(document, owner)
                else
-                 document.slice(*INDEX_KEYS).merge("operations" => index(document),
-                                                   "next" => "Call discover with an owner for its operations' " \
-                                                             "descriptions, then describe one operation by name " \
-                                                             "for its params and result.")
+                 Discovery.check_unsectioned(arguments)
+                 Discovery.index(document, INDEX_KEYS)
                end
         page.merge("connection" => connection)
       end
@@ -66,13 +69,6 @@ module PhComposer
         open = names.empty? ? "no Model is open" : "open now: #{names.join(', ')}"
         "This token is bound to #{token['model_name']}, which is not open; #{open}. Open #{token['model_name']} " \
           "in SketchUp, or ask the user for a token for this Model."
-      end
-
-      def index(document)
-        OPERATION_KINDS.to_h do |kind|
-          [kind, document.fetch(kind).group_by { |entry| entry["owner"] }
-                         .transform_values { |entries| entries.map { |entry| entry["name"] } }]
-        end
       end
 
       def owned(document, owner)
@@ -133,9 +129,19 @@ module PhComposer
       end
 
       TABLE = [
-        tool("discover", "Start here. Lists the open Model sessions by file name, the features and every " \
-                         "operation's name. Pass owner (a feature id) for that feature's operation descriptions.",
-             object({ "owner" => string("A feature id from this tool's features list.") }, []),
+        tool("discover", "Start here. Lists the open Model sessions with their ids and file names, the features, " \
+                         "every operation's name, the sections to page and the operating guide. Pass section for " \
+                         "one bounded page: operations (with owner for one feature's), features, record_kinds, " \
+                         "reference_targets, extensions, library_kinds, refusals, contracts or guide (with topic " \
+                         "for one topic's text).",
+             object({ "owner" => string("A feature id from this tool's features list."),
+                      "section" => { "type" => "string", "enum" => Discovery::SECTIONS,
+                                     "description" => "One section of what is installed, a bounded page at a time." },
+                      "topic" => string("With section guide: one topic's id, from the guide section's topics."),
+                      "limit" => { "type" => "integer", "minimum" => 1, "maximum" => Pages::MAXIMUM_LIMIT,
+                                   "description" => "With a list section: rows per page, " \
+                                                    "#{Pages::DEFAULT_LIMIT} when absent." },
+                      "cursor" => string("With a list section: next_cursor from its previous page.") }, []),
              :session => false) { |_context, arguments, token| discover(arguments, token) },
         tool("describe", "The full declaration of one operation: what it does, its params and result schemas, " \
                          "examples and refusals. Read it before calling the operation.",
