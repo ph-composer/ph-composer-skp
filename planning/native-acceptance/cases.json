@@ -4610,7 +4610,9 @@
         "src/ph_composer/session/host_observers.rb",
         "src/ph_composer/session/edit_context.rb",
         "src/ph_composer/shell/context_commands.rb",
-        "src/ph_composer/features/spaces/context/navigation.rb"
+        "src/ph_composer/features/spaces/context/navigation.rb",
+        "src/ph_composer/session/model_session.rb",
+        "src/ph_composer/features/spaces/context/protection.rb"
       ],
       "native_control_required": true
     }
