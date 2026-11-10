@@ -34,7 +34,7 @@ class AgentAccessConnectionsTest < PhComposerTestCase
     assert_equal 0o600, File.stat(path).mode & 0o777
     assert_equal 0o700, File.stat(Connections.directory).mode & 0o777
     assert_equal ["codex.json"], Dir.children(Connections.directory), "no temporary file is left"
-    assert_equal({ "codex" => Tokens.digest(second) }, Connections.digests)
+    assert_equal Tokens.digest(second), Connections.digest("codex", "default")
   end
 
   def test_a_folder_that_is_a_link_is_refused_and_nothing_is_written
@@ -69,7 +69,8 @@ class AgentAccessConnectionsTest < PhComposerTestCase
     File.binwrite(Connections.path("codex"), "{\"Authorization\":\"Bearer \xFF\"}")
     File.binwrite(Connections.path("claude_code"), "not json")
 
-    assert_empty Connections.digests
+    assert_nil Connections.digest("codex", "default")
+    assert_nil Connections.digest("claude_code", "default")
     Tokens.revoke(issued.dig("row", "id"))
 
     refute File.exist?(Connections.path("codex"))
@@ -91,7 +92,7 @@ class AgentAccessConnectionsTest < PhComposerTestCase
     assert_equal "configured", result.fetch("state")
     assert_includes result.fetch("message"), "start a new Claude Code session"
     assert_includes result.fetch("message"), "SketchUp does not need a restart"
-    assert_equal({ "claude_code" => Tokens.digest(token) }, Connections.digests)
+    assert_equal Tokens.digest(token), Connections.digest("claude_code", "default")
   end
 
   def test_connect_claude_code_without_the_command_saves_the_token_and_says_to_run_the_command
@@ -156,7 +157,8 @@ class AgentAccessConnectionsTest < PhComposerTestCase
 
     assert_equal "configured", same.fetch("state")
     assert_equal "manual", other.fetch("state")
-    assert_includes other.fetch("message"), "already names the ph-composer server"
+    assert_includes other.fetch("message"), "gives the ph-composer server in a form PH-Composer does not change"
+    assert_equal ClientConfig.codex_block(46_110), other.fetch("setup"), "the token-free block to paste"
     assert_equal old, File.binread(config)
   end
 

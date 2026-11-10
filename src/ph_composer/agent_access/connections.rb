@@ -6,10 +6,15 @@ require "shellwords"
 
 module PhComposer
   module AgentAccess
-    # The token each supported client connects with, kept in one owner-only file per client
+    # The token each connection profile uses, kept in one owner-only file per client and profile
     # (context/AGENT_INTERFACE.md, "Security posture"). The client's own configuration names the file once,
-    # through a header helper that prints it, so a new token for that client changes the file and never the
+    # through a header helper that prints it, so a new token for that profile changes the file and never the
     # client's settings. Each file holds the request header, `{"Authorization": "Bearer <token>"}`.
+    #
+    # A client profile is one client entry (context/AGENT_INTERFACE.md, "User-controlled local access"). The
+    # default is the entry named `ph-composer` with the file `<client>.json`, as Connect always wrote it, so an
+    # existing setup is the default unchanged; another is `ph-composer-<name>` with `<client>.<name>.json`.
+    # Nothing else records a profile: the files here and the clients' own entries are the list.
     #
     # A file is the only copy of a token PH-Composer keeps outside the issuing dialog. It is written when the
     # user connects a client and deleted as soon as its token is no longer live, after a revoke or a reset.
@@ -17,6 +22,10 @@ module PhComposer
       CLIENTS = { "claude_code" => "Claude Code", "codex" => "Codex" }.freeze
       FOLDER = ".ph-composer"
       MAX_BYTES = 1024
+      DEFAULT_PROFILE = "default"
+      # A bare TOML key and a Claude Code server name: lowercase letters, digits and inner hyphens.
+      PROFILE = /\A[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?\z/.freeze
+      FILE = /\A(#{CLIENTS.keys.join('|')})(?:\.([a-z0-9-]+))?\.json\z/.freeze
 
       class << self
         # Where the files live; the offline suite points it at a scratch folder.
@@ -26,21 +35,30 @@ module PhComposer
           @directory || File.join(Dir.home, FOLDER)
         end
 
-        def path(client)
-          File.join(directory, "#{checked(client)}.json")
+        def path(client, profile = DEFAULT_PROFILE)
+          name = checked_profile(profile) == DEFAULT_PROFILE ? checked(client) : "#{checked(client)}.#{profile}"
+          File.join(directory, "#{name}.json")
         end
 
         # The shell command a client runs to read its header: `/bin/cat` and the file's path, escaped for the
         # shell both clients run it in (a path with nothing to escape, the usual case, is left as it is).
-        def helper(client)
-          "/bin/cat #{Shellwords.escape(path(client))}"
+        def helper(client, profile = DEFAULT_PROFILE)
+          "/bin/cat #{Shellwords.escape(path(client, profile))}"
+        end
+
+        # The profile name, refused as `params.invalid` unless it is the default or a valid name.
+        def checked_profile(profile)
+          return profile if profile == DEFAULT_PROFILE || profile.is_a?(String) && profile.match?(PROFILE)
+
+          raise CodedError.new("params.invalid", "A profile name is 1 to 32 lowercase letters, digits and hyphens, " \
+                                                 "starting and ending with a letter or digit.")
         end
 
         # Replaces the client's file with one holding `token`, written whole: a client reading it while it
         # changes sees the old file or the new one, never part of either.
-        def write(client, token)
+        def write(client, token, profile = DEFAULT_PROFILE)
           created = renamed = false
-          target = path(client)
+          target = path(client, profile)
           folder = owned_folder
           temporary = File.join(folder, ".#{checked(client)}.#{SecureRandom.hex(6)}.tmp")
           File.open(temporary, File::WRONLY | File::CREAT | File::EXCL, 0o600) do |file|
@@ -58,27 +76,35 @@ module PhComposer
           File.unlink(temporary) if created && !renamed && File.exist?(temporary)
         end
 
-        # The digest of the token each client's file holds, by client; a client without a readable file is
-        # left out.
-        def digests
-          CLIENTS.keys.each_with_object({}) do |client, held|
-            token = token_in(path(client))
-            held[client] = Tokens.digest(token) if token
+        # Every saved file by client and profile, with the digest of the token it holds, or nil when it cannot
+        # be read: `[{"client", "profile", "path", "digest"}]`, the default profile first.
+        def saved
+          entries = Dir.exist?(directory) ? Dir.children(directory) : []
+          rows = entries.filter_map do |entry|
+            client, profile = entry.match(FILE)&.captures
+            next unless client && (profile.nil? || profile.match?(PROFILE) && profile != DEFAULT_PROFILE)
+
+            file = File.join(directory, entry)
+            { "client" => client, "profile" => profile || DEFAULT_PROFILE, "path" => file,
+              "digest" => token_in(file)&.then { |token| Tokens.digest(token) } }
           end
-        rescue StandardError
-          {}
+          rows.sort_by { |row| [row["client"], row["profile"] == DEFAULT_PROFILE ? 0 : 1, row["profile"]] }
+        rescue SystemCallError
+          []
         end
 
-        # Deletes every client file that does not hold a live token, one it cannot read included, so a revoked
+        # The digest of the token one profile's file holds, or nil.
+        def digest(client, profile)
+          token_in(path(client, profile))&.then { |token| Tokens.digest(token) }
+        end
+
+        # Deletes every saved file that does not hold a live token, one it cannot read included, so a revoked
         # token is never left on disk. Never raises: a revoke must not fail on a file it cannot delete.
         def prune(live_digests)
-          held = digests
-          CLIENTS.each_key do |client|
-            file = path(client)
-            next unless File.symlink?(file) || File.exist?(file)
-            next if live_digests.include?(held[client])
+          saved.each do |row|
+            next if live_digests.include?(row["digest"])
 
-            File.unlink(file)
+            File.unlink(row["path"])
           rescue StandardError => error
             Diagnostics.exception("agent_access_connection_prune", error)
           end

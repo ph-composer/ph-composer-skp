@@ -44,7 +44,7 @@
 .agent-access-server { color: var(--muted); }
 /* The issued tokens fold under one summary below the status line; New token, in the header, is the page's job.
    Inside, each period is a heading over ruled rows, as Help & Diagnostics lists its records. */
-.agent-access-tokens > summary { padding: 8px 0; color: var(--ink); font-weight: 600; }
+.agent-access-tokens > summary, .agent-access-connections > summary { padding: 8px 0; color: var(--ink); font-weight: 600; }
 .agent-access-group h3 { margin: 12px 0 4px; color: var(--muted); font-size: var(--text-sm); font-weight: 600; }
 .agent-access-items { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
 .agent-access .agent-access-revoked-toggle { margin-top: 12px; }
@@ -76,3 +76,15 @@
 .agent-access-other { margin: 0 0 4px; }
 .agent-access-other > summary { padding: 6px 0; color: var(--muted-strong); }
 .agent-access-other[open] > summary { margin-bottom: 4px; }
+/* Connect's profile: the choice and a new name on their own rows above Connect, then, in the warning ink, the
+   token it would replace. */
+.agent-access-profile { margin: 0 0 8px; }
+.agent-access-profile .agent-access-field { margin-bottom: 8px; }
+.agent-access-profile .agent-access-field[hidden] { display: none; }
+.agent-access-replace { margin: 0 0 8px; color: var(--warning-ink); }
+.agent-access-replace:empty { display: none; }
+/* The connections fold like the tokens; a row's hand setup unfolds inside its text column. */
+.agent-access-connections { margin-top: 4px; }
+.agent-access-connection .agent-access-other { margin: 4px 0 0; }
+.agent-access-connection .agent-access-secret { margin-bottom: 4px; }
+.agent-access-revoke-effects:empty { display: none; }

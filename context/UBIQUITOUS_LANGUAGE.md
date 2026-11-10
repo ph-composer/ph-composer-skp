@@ -37,6 +37,8 @@ predecessor's designPH terms (adoption, push, origin row, designPH difference, T
 | Dimension format | A builder's choice of how lengths appear within the active display units: mm, cm or m in SI; decimal inches, decimal feet, feet and inches, or fractional inches in IP |
 | Canonical unit | The fixed SI unit a stored field is written in, named by the field (`thickness_mm`, `width_m`, `u_w_m2k`). Display units convert from it and never replace it |
 | Table layout | A table's saved column visibility, widths and ordering. A local user preference outside the SKP; filter text and expansion are not part of it |
+| Agent token | The secret an agent's client presents to PH-Composer's local connection, issued, listed and revoked by the user in the Agent Access window, with the access chosen when it was issued |
+| Client profile | One entry PH-Composer sets up in an agent client, Default (`ph-composer`) or named (`ph-composer-<name>`), each reading its own saved Agent token. Not a library Connection |
 | Locate | An explicit row action that selects an entity in SketchUp and zooms the view to it, refusing hidden targets. Selecting a row without zooming is not Locate |
 
 ## Geometry units and the honeybee mapping

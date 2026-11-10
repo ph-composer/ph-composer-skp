@@ -21,15 +21,18 @@ module PhComposer
         "access.revoke" => %w[id],
         "access.reset" => [],
         "access.port" => %w[port],
-        "access.connect" => %w[client token]
+        "access.connect" => %w[client token profile replace],
+        "access.repair" => %w[client profile]
       }.freeze
       OUTBOUND = {
-        "access.state" => %w[state tokens offered server model],
+        "access.state" => %w[state tokens offered server model connections],
         "access.issued" => %w[token row clients],
         "access.failure" => %w[message],
         "access.revoked" => %w[id summary],
-        "access.connected" => %w[client state message]
+        "access.connected" => %w[client profile state message setup],
+        "access.replacement" => %w[client profile token]
       }.freeze
+      DEFAULT_PROFILE = Connections::DEFAULT_PROFILE
 
       class << self
         def show
@@ -84,16 +87,58 @@ module PhComposer
           "PhComposerUI.get(\"agent_access/page\").receive(#{JSON.generate('type' => type, 'payload' => payload)})"
         end
 
-        # What the page shows: every token with its latest call since SketchUp started and the clients
-        # connected with it, and the listener.
+        # What the page shows: every token with its latest call since SketchUp started and the connections
+        # that use it, the saved connections, and the listener.
         def state
           calls = Listener.last_calls
-          connected = connected_clients
+          server = AgentAccess.server_status
+          rows = connections(server["port"])
           tokens = Tokens.list.map do |row|
-            row.merge("last_call" => calls[row["id"]], "connected" => connected.fetch(row["id"], []))
+            row.merge("last_call" => calls[row["id"]], "connected" => connection_names(rows, row["id"]))
           end
-          { "state" => Tokens.state, "tokens" => tokens, "offered" => Tokens::OFFERED,
-            "server" => AgentAccess.server_status, "model" => active_model }
+          { "state" => Tokens.state, "tokens" => tokens, "offered" => Tokens::OFFERED, "server" => server,
+            "model" => active_model, "connections" => rows }
+        end
+
+        # Every connection profile a saved file or a client entry names (Connections), each with the live
+        # token bound to it and where that binding is kept, what the client's file says of the entry, whether
+        # a client has contacted and verified with that token since SketchUp started, and the token-free
+        # setup to run or paste. Never a token (context/AGENT_INTERFACE.md, "User-controlled local access").
+        def connections(port)
+          live = Tokens.snapshot
+          contacts = Listener.contacts
+          verified = Listener.verified
+          profiles.map do |client, profile|
+            entry, source, digest = bound(client, profile, port, live)
+            token = digest && live.fetch(digest)
+            saved = live[Connections.digest(client, profile)]
+            { "client" => client, "client_name" => Connections::CLIENTS.fetch(client), "profile" => profile,
+              "server" => ClientConfig.server_name(profile), "token" => token && bound_token(token),
+              "source" => source, "saved_token" => saved && bound_token(saved), "entry" => entry["setup"],
+              "contacted" => token && contacts[token["id"]], "verified_at" => token && verified[token["id"]],
+              "setup" => ClientConfig.setup_text(client, port, profile) }
+          end
+        end
+
+        # The profiles of saved files and of the clients' own entries, by client, the default first.
+        def profiles
+          saved = Connections.saved.map { |row| row.values_at("client", "profile") }
+          named = Connections::CLIENTS.keys.flat_map do |client|
+            ClientSetup.server_names(client).filter_map do |name|
+              profile = name == ClientConfig::SERVER_NAME ? DEFAULT_PROFILE : name.delete_prefix("ph-composer-")
+              [client, profile] if profile == DEFAULT_PROFILE || profile.match?(Connections::PROFILE)
+            end
+          end
+          (saved | named).sort_by { |client, profile| [client, profile == DEFAULT_PROFILE ? 0 : 1, profile] }
+        end
+
+        # A bound token as a connection row shows it: its public facts and, for a Model-only token, whether
+        # its Model is open, so a row can say why the client reaches nothing.
+        def bound_token(token)
+          row = token.slice("id", "label", "capabilities", "model_name")
+          return row unless token["model_name"]
+
+          row.merge("model_open" => Sessions.all.any? { |session| Tokens.serves?(token, session) })
         end
 
         # The Model a token issued now would be bound to for "this Model only": its file name and an opaque
@@ -104,11 +149,11 @@ module PhComposer
           path.empty? ? nil : { "name" => File.basename(path), "key" => model_key(path) }
         end
 
-        # The names of the clients whose saved token is each live token, by token id.
-        def connected_clients
-          ids = Tokens.snapshot.transform_values { |row| row.fetch("id") }
-          Connections.digests.each_with_object({}) do |(client, digest), by_id|
-            (by_id[ids[digest]] ||= []) << Connections::CLIENTS.fetch(client) if ids.key?(digest)
+        # The connections bound to one token, as the token list names them: the client, and the profile
+        # when it is not the default.
+        def connection_names(rows, token_id)
+          rows.select { |row| row.dig("token", "id") == token_id }.map do |row|
+            row["profile"] == DEFAULT_PROFILE ? row["client_name"] : "#{row['client_name']} (#{row['profile']})"
           end
         end
 
@@ -153,7 +198,8 @@ module PhComposer
           when "access.port"
             Listener.port = payload["port"]
             refresh
-          when "access.connect" then connect(payload["client"], payload["token"])
+          when "access.connect" then connect(payload)
+          when "access.repair" then repair(payload["client"], payload.fetch("profile", DEFAULT_PROFILE))
           end
         end
 
@@ -186,25 +232,88 @@ module PhComposer
                                                              "Check This Model only again and create the token.")
         end
 
-        # Saves the token the page holds for one client and sets the client up to read it. The page sends the
-        # token back because nothing in Ruby keeps it; only a live token is saved, and only while the
-        # listener runs, so the setup names a port something listens on.
-        def connect(client, token)
-          name = Connections::CLIENTS.fetch(client) do
-            raise UserError, "#{client.to_s[0, 40].inspect} is not a client."
-          end
+        # Saves the token the page holds for one client's profile and sets the client up to read it. The page
+        # sends the token back because nothing in Ruby keeps it; only a live token is saved, and only while the
+        # listener runs, so the setup names a port something listens on. A profile another live token holds is
+        # changed only when `replace` names that token, the one the page showed: otherwise nothing is
+        # written and the page is told which token Connect would replace.
+        def connect(payload)
+          client = payload["client"]
+          profile = Connections.checked_profile(payload.fetch("profile", DEFAULT_PROFILE))
+          name = client_name(client)
+          token = payload["token"]
           unless token.is_a?(String) && Tokens.snapshot.key?(Tokens.digest(token))
             raise CodedError.new("agent_access.token_unknown", "This token is no longer live. Create another " \
                                                                "to connect #{name}.")
           end
-          status = Listener.status
-          unless status["state"] == "listening"
-            raise CodedError.new("agent_access.not_listening", "PH-Composer is not listening, so #{name} could " \
-                                                               "not connect. #{status['message']}".strip)
+          port = listening_port(name)
+          held = binding(client, profile, port)
+          if replacing?(held, token, payload["replace"])
+            if payload["replace"].nil?
+              return publish("access.replacement", "client" => client, "profile" => profile, "token" => held)
+            end
+
+            refresh
+            raise CodedError.new("agent_access.connection_changed", "This connection changed since it was shown: " \
+                                                                    "it now uses #{held['label']}. Check it and " \
+                                                                    "connect again.")
           end
 
-          publish("access.connected", ClientSetup.connect(client, token, status["port"]).merge("client" => client))
+          answer = ClientSetup.connect(client, token, port, :profile => profile)
+          publish("access.connected",
+                  answer.merge("client" => client, "profile" => profile, "setup" => answer["setup"]))
           refresh
+        end
+
+        # Whether Connect would replace another live token the page did not name.
+        def replacing?(held, token, replace)
+          !held.nil? && held["id"] != Tokens.snapshot.dig(Tokens.digest(token), "id") && held["id"] != replace
+        end
+
+        # Sets a saved connection's client up again with the token its file already holds, which never leaves
+        # Ruby or the file.
+        def repair(client, profile)
+          name = client_name(client)
+          answer = ClientSetup.repair(client, listening_port(name), :profile => Connections.checked_profile(profile))
+          publish("access.connected",
+                  answer.merge("client" => client, "profile" => profile, "setup" => answer["setup"]))
+          refresh
+        end
+
+        # The live token a profile is bound to, by its saved file or by a token its client entry carries
+        # itself, as its public row; nil when none is live.
+        def binding(client, profile, port)
+          live = Tokens.snapshot
+          digest = bound(client, profile, port, live).last
+          digest && Tokens.public_row(live.fetch(digest))
+        end
+
+        # The client entry's state, and the live token the client uses for the profile: the one its entry
+        # carries inline while it does, since a token saved for the profile is then only waiting for its
+        # setup; otherwise the saved file's. Answers `[entry, source, digest]`, source and digest nil when
+        # no live token is bound.
+        def bound(client, profile, port, live)
+          entry = ClientSetup.entry(client, port, profile)
+          # The entry sends its own token: a revoked one binds nothing, never the token saved beside it.
+          if entry["setup"] == "inline"
+            inline = entry["inline_digest"]
+            return live.key?(inline) ? [entry, "inline", inline] : [entry, nil, nil]
+          end
+
+          file = Connections.digest(client, profile)
+          live.key?(file) ? [entry, "file", file] : [entry, nil, nil]
+        end
+
+        def client_name(client)
+          Connections::CLIENTS.fetch(client) { raise UserError, "#{client.to_s[0, 40].inspect} is not a client." }
+        end
+
+        def listening_port(name)
+          status = Listener.status
+          return status["port"] if status["state"] == "listening"
+
+          raise CodedError.new("agent_access.not_listening", "PH-Composer is not listening, so #{name} could " \
+                                                             "not connect. #{status['message']}".strip)
         end
 
         # The revoke takes effect here, on the main thread, before the next call is run; the page shows

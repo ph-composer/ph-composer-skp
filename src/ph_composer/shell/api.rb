@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 40
+    MINOR = 41
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -204,7 +204,10 @@ module PhComposer
                     "its source and diagnostics, and export_status with part reads an ended task's findings, " \
                     "report and result, refusing task.running before it ends; " \
                     "thermal_bridges.edges.repair_candidates and edges.repair remove an unreadable or stranded " \
-                    "Edge assignment." }
+                    "Edge assignment." },
+      { "minor" => 41, "date" => "2026-11-10",
+        "change" => "The Agent Access dialog's catalog adds agent_access.connection_changed, refused when a " \
+                    "connection profile is bound to another token than the one shown; no operation changes." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

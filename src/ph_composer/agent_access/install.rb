@@ -20,7 +20,9 @@ module PhComposer
       "agent_access.model_unsaved" => "A token can be bound only to a Model that has been saved to a file.",
       "agent_access.model_changed" => "The open Model changed since the form showed it; nothing was issued.",
       "agent_access.connection_unavailable" => "The token could not be saved for the client in its owner-only file.",
-      "agent_access.not_listening" => "PH-Composer is not listening, so no client was set up."
+      "agent_access.not_listening" => "PH-Composer is not listening, so no client was set up.",
+      "agent_access.connection_changed" => "The connection now uses another token than the one shown; nothing was " \
+                                           "changed."
     }.freeze
 
     module_function

@@ -582,33 +582,57 @@ instead of showing it, and Codex 0.163.0 kept about 10,000 tokens of a larger on
 recent calls (tool, operation name, session, status, code, time; no params, value, path or token)
 is flushed to the diagnostics log.
 
-Implemented: client connection, `agent_access/connections.rb`, `client_setup.rb` and
-`client_config.rb`. The token a client uses is saved in that client's own file,
-`~/.ph-composer/claude_code.json` or `codex.json`, holding the request header
-(`{"Authorization": "Bearer <token>"}`), and the client's configuration names the file once through
-its header helper, `/bin/cat <path>`, which the client runs in a shell each time it connects. A new
-token for a client changes only its file; changing the port changes the URL and needs Connect again
-(from a new token's dialog: the secret exists only there). macOS only.
+Implemented: client connection, `agent_access/connections.rb`, `client_setup.rb`, `client_config.rb` and
+`codex_config.rb`. A client profile is one entry in a client: the
+default, named `ph-composer`, and any others, `ph-composer-<name>` (1 to 32 of `a-z`, `0-9`, `-`). The
+token a profile uses is saved in its own file, `~/.ph-composer/<client>.json` for the default (the file
+Connect always wrote, so an existing setup is the default unchanged) or `<client>.<name>.json`, holding
+the request header (`{"Authorization": "Bearer <token>"}`), and the client's entry names the file once
+through its header helper, `/bin/cat <path>`, which the client runs in a shell each time it connects.
+Profiles are derived from those files and the clients' own entries, never stored, so an entry whose token
+was revoked stays listed as needing one. A new token for a profile changes only its file. Two profiles
+bound to two Model-only tokens give one client two servers, each reaching its own Model. macOS only.
 Both clients connected this way from a process started with only `HOME`, `PATH=/usr/bin:/bin` and
 `USER` in its environment, as a GUI-launched client is (Claude Code 2.1.317 `headersHelper`, user scope,
 no trust prompt; Codex 0.167.0 `http_headers_helper`, a string, shelled, so a quoted path with a space
-works). When a token is issued, the dialog offers Connect per client, then two forms to paste: the
-setup Connect makes, which names the file and not the token, and an inline form that carries the token
-in the client's settings. Connect sends the token the page holds back to Ruby, which saves it only when
-its digest is live and the listener is listening, then sets the client up:
+works). When a token is issued, the dialog offers Connect per client with a Profile choice (Default, a saved
+profile of that client, or a new name), then, for the default profile, two forms to paste: the setup
+Connect makes, which names the file and not the token, and an inline form that carries the token in the
+client's settings. Connect sends the token the page holds back to Ruby with the profile and `replace`, the
+id of the token the page showed on that profile. Ruby saves it only when its digest is live and the
+listener is listening. A profile bound to another live token, by its file or by a token its entry
+carries inline, changes only when `replace` names that token: otherwise nothing is written and the
+dialog answers `access.replacement` with that token's public row, which the page shows beside Replace
+and connect; a `replace` naming a token no longer bound refuses `agent_access.connection_changed`. The
+old token stays live until revoked. Then the client is set up:
 
 - Claude Code: nothing runs when `~/.claude.json` (read, never written) already holds the same
-  `ph-composer` entry, so a new token touches no client setting. Otherwise `claude mcp add-json --scope
-  user ph-composer <json>`, the binary taken from a fixed list of absolute paths (`~/.local/bin`,
+  entry for the profile, so a new token touches no client setting. Otherwise `claude mcp add-json --scope
+  user <entry> <json>`, the binary taken from a fixed list of absolute paths (`~/.local/bin`,
   `/opt/homebrew/bin`, `/usr/local/bin`, `~/.claude/local`), a regular executable file owned by the user
   or root and not world-writable. On "already exists" (an entry of another form), `claude mcp remove
-  --scope user ph-composer` and the add once more; any other failure removes nothing.
-- Codex: has no command that sets a helper, and `codex mcp add` rewrites the whole config, so the block
-  is appended to `~/.codex/config.toml` after a blank line, every existing byte kept. A config where any
-  line outside a comment has `ph-composer` as a key (a table, a dotted key, an inline table) is left
-  untouched, since a second definition would invalidate the whole file: the same block answers
-  configured, another form asks the user to set its `url` and `http_headers_helper`. A path that only
-  contains the name, such as a project folder, is not a key. The block is appended only when no key or
+  --scope user <entry>` and the add once more, by that entry's name only; any other failure removes nothing.
+- Codex: has no command that sets a helper (0.167.0 `codex mcp add` takes `--url` and
+  `--bearer-token-env-var` only), and it rewrites the whole config, so `CodexConfig` edits the text. It
+  reads each line in its TOML context: a header or key counts only on a line that starts outside every
+  string, array and inline table, so table-like text in another setting's multi-line string or array is
+  never taken for a table, and a file whose strings or brackets do not close is never edited. With
+  no entry for the profile the block is appended to `~/.codex/config.toml` after a blank line, every
+  existing byte kept. With the plain `[mcp_servers.<entry>]` table present, only its `url` line and its
+  token line (`http_headers_helper`, or `http_headers` holding exactly one inline `Authorization` bearer)
+  are replaced, every other line kept byte for byte, so the profile's own extra settings
+  (`startup_timeout_sec`, `enabled`) still read as set up. A token given another way
+  (`bearer_token_env_var`, `env_http_headers`, other headers, a dotted `http_headers.` key or an
+  `http_headers` sub-table), stdio keys, any line of the table that is not one bare `key = value` (a quoted
+  or dotted key, a multi-line value or string), a file that is not valid UTF-8, or the entry given again by
+  a dotted key or an inline table answers manual with the token-free block,
+  as a second definition would invalidate the whole file. A path that only contains the name, such as a
+  project folder, is not a key. Before an edit the replaced bytes are kept in
+  `config.toml.ph-composer-backup` (0600); the file is read again and nothing is written when it changed
+  since it was planned or is read-only; the new file is written beside the real file a link points to and
+  renamed onto it, so a linked config stays a link (a dangling link or a linked backup is refused); the
+  result is read back and must show the entry set up, and a file that still holds exactly what was
+  written is otherwise put back as it was. The block is appended only when no key or
   header holds an escape (one could spell either name unseen) and the root `mcp_servers` table is
   opened only by plain `[mcp_servers.<other>]` headers; an inline or dotted root `mcp_servers` or an
   `[mcp_servers]` table cannot be extended this way, so the user adds the block. Another table's own
@@ -617,8 +641,26 @@ its digest is live and the listener is listening, then sets the client up:
 
 Either way the answer ends with the step the user takes: start a new session of that client, since a
 running one never sees a newly added server; SketchUp needs no restart. When a step cannot be done the
-token is still saved and the answer says what to run or paste. The token list shows which clients use
-each token. The `agent_access.port` preference changes from the dialog when the port is taken, which a
+token is still saved and the answer carries the token-free setup to run or paste. The token list shows
+which client profiles use each token, and the Revoke confirm names those that lose access.
+
+The Client profiles list shows each profile with the token it uses (and, for a Model-only token,
+whether its Model is open) and three states kept apart: set up (what the client's file says of the entry,
+read and never written: set up, absent, outdated, inline, set up another way, client not set up,
+unreadable), contacted (a client sent `initialize` with that token since SketchUp started, with the
+`clientInfo` name and version it gave, cut to 60 characters) and verified (that token's latest
+`discover` or `context` completed: an Outcome with status `completed`, or discover's page, never a busy,
+failed or refused answer, and no `connection.reason`). A profile's token is the one the client uses: the
+token its entry carries inline while it does (none once that token is revoked), otherwise the saved file's; a saved token the entry does
+not read yet is shown as waiting for Repair. Contacted and
+verified belong to the token, so profiles sharing one share them. No test write and no client process
+verifies a connection; the user starts a client session. A profile whose file holds a live token and
+whose entry is not set up offers Repair (`access.repair`), which reruns the client setup against the
+current port with the saved file and never reads the token back; any profile not set up shows its
+token-free setup to copy. Repair answers `agent_access.token_unknown` when the file's token is no longer
+live; an inline token is replaced by Connect with a new token, whose answer says to revoke the old one.
+Setup stays on the host thread: `claude mcp add-json` measured 0.37 s and `claude mcp get` 0.34 s on
+2026-11-10, within the 20 s budget. The `agent_access.port` preference changes from the dialog when the port is taken, which a
 stopped listener checks as well, and New token waits for a free port; each token's latest call since
 launch is kept per token, apart from the recent-call ring, and shown beside it as calls finish.
 
@@ -638,8 +680,8 @@ Decided and implemented; a change to any of these is a security decision, not a 
 - The store keeps only each token's SHA-256. PH-Composer shows the secret once, in the issuing
   dialog; a copy the user makes for a client is the user's. Tokens do not expire; revocation is
   explicit, and the most recently revoked tokens stay listed with their dates.
-- A token the user connects to a client is also kept in that client's file under `~/.ph-composer/`
-  (folder 0700, file 0600, refused when the folder is a link or another account's), written to a
+- A token the user connects to a client profile is also kept in that profile's file under
+  `~/.ph-composer/` (one file per client profile, folder 0700, file 0600, refused when the folder is a link or another account's), written to a
   temporary file and renamed so a client never reads half of one, the temporary file removed whatever
   stops the write. At every store write, a revoke or a reset, any client file that does not hold a live
   token is deleted, one that cannot be read included; a failure there is logged and never stops the
@@ -650,8 +692,9 @@ Decided and implemented; a change to any of these is a security decision, not a 
   and a `PATH` of the binary's folder and the system folders, its own process group, 20 s for the whole
   Connect (SketchUp waits on it), then TERM to the group and, 2 s later, KILL to whatever of it is left. No argument carries the
   token, so it never reaches a command line or shell history; the output is kept to its first 4 KiB as
-  valid text, read only for "already exists" and its first line shown to the user, never logged. The Codex setup is
-  a file append, not a program. The client then runs the helper, `/bin/cat` and the path escaped for
+  valid text, read only for "already exists" and its first line shown to the user, never logged. Repair runs the same
+  program the same way. The Codex setup is a file edit confined to the profile's own table, not a program,
+  and never writes the token into `config.toml`. The client then runs the helper, `/bin/cat` and the path escaped for
   the shell, which PH-Composer writes and no page or agent can change.
 - The port is fixed per preference. On a computer with several accounts, another account can bind it
   while SketchUp is not listening and receive the token from an agent that connects then. The user
