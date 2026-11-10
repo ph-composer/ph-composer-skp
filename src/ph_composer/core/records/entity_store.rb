@@ -24,7 +24,7 @@ module PhComposer
       end
 
       def self.claim(store)
-        claiming[store.dictionary] = store
+        claiming[[store.dictionary, store.key]] = store
       end
 
       def self.claiming
