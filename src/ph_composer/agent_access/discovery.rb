@@ -14,10 +14,14 @@ module PhComposer
         "queries" => "query", "view_commands" => "view_command", "setup_commands" => "setup_command",
         "file_exports" => "file_export", "actions" => "action"
       }.freeze
-      LISTS = %w[operations record_kinds reference_targets extensions library_kinds].freeze
+      LISTS = %w[operations features record_kinds reference_targets extensions library_kinds].freeze
       SECTIONS = (LISTS + %w[refusals contracts guide]).freeze
-      # The compact index lists every operation's name while it fits under this; past it, counts by owner.
+      # The compact index lists every operation's name while it fits under this; past it, counts by owner;
+      # past that too, totals only, with the features and operations left to their sections.
       INDEX_BYTES = 20 * 1024
+      # A row's text longer than this is cut in a list page, and the row names it in `truncated`, so one
+      # registration with a long description cannot make a page larger than a reply.
+      ROW_TEXT_BYTES = 1024
       PAGE_KEYS = %w[limit cursor].freeze
 
       module_function
@@ -35,10 +39,16 @@ module PhComposer
                                            "operations" => operations, "next" => index_next)
         return page if JSON.generate(page).bytesize <= INDEX_BYTES
 
-        page.reject { |key, _value| key == "operations" }.merge(
+        page = page.reject { |key, _value| key == "operations" }.merge(
           "operation_counts" => operations.transform_values { |owners| owners.transform_values(&:length) },
           "next" => "#{index_next} Too many operations are installed to name here; page them with section " \
                     "operations."
+        )
+        return page if JSON.generate(page).bytesize <= INDEX_BYTES
+
+        page.reject { |key, _value| %w[operation_counts features].include?(key) }.merge(
+          "next" => "#{index_next} Too many features are installed to list here; page them with section " \
+                    "features, and their operations with section operations."
         )
       end
 
@@ -97,14 +107,24 @@ module PhComposer
       end
 
       def rows(document, name, owner)
-        case name
-        when "operations"
-          OPERATION_KINDS.flat_map do |key, kind|
-            document.fetch(key).select { |entry| owner.nil? || entry["owner"] == owner }
-                    .map { |entry| { "kind" => kind }.merge(entry) }
-          end
-        else document.fetch(name)
-        end
+        found = case name
+                when "operations"
+                  OPERATION_KINDS.flat_map do |key, kind|
+                    document.fetch(key).select { |entry| owner.nil? || entry["owner"] == owner }
+                            .map { |entry| { "kind" => kind }.merge(entry) }
+                  end
+                else document.fetch(name)
+                end
+        found.map { |row| bounded_row(row) }
+      end
+
+      # `row` with each text value over ROW_TEXT_BYTES cut there; `describe` answers the whole declaration.
+      def bounded_row(row)
+        long = row.select { |_key, value| value.is_a?(String) && value.bytesize > ROW_TEXT_BYTES }.keys
+        return row if long.empty?
+
+        cut = long.to_h { |key| [key, row.fetch(key).byteslice(0, ROW_TEXT_BYTES).scrub("")] }
+        row.merge(cut).merge("truncated" => long)
       end
 
       def list(document, name, arguments, identity)

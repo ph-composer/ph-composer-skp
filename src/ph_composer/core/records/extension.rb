@@ -31,7 +31,8 @@ module PhComposer
         "invalid" => "Installed and current, but the payload or its references fail the installed contract; " \
                      "kept as stored and never copied, migrated or exported.",
         "outdated" => "Stored at an older version the installed migrations can raise.",
-        "unsupported" => "Stored at a newer version than installed, or not readable as an envelope.",
+        "unsupported" => "Stored at a newer version than installed, at an older one the installed migrations " \
+                         "cannot raise, or not readable as an envelope.",
         "unavailable" => "No extension with this namespace is installed; the envelope is preserved as stored."
       }.freeze
 

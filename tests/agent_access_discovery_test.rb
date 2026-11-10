@@ -69,8 +69,11 @@ class AgentAccessDiscoveryTest < PhComposerTestCase
         assert_equal rows.length, page("section" => section).fetch("total")
       end
       rows.each do |row|
-        described = discover("name" => row.fetch(key)).fetch("structuredContent")
-        refute_equal "request.unknown_operation", described["code"], "#{section} #{row.fetch(key)}"
+        result = @executor.call(@reader, "describe", "name" => row.fetch(key))
+        described = result.fetch("structuredContent")
+        refute result["isError"], "#{section} #{row.fetch(key)}"
+        assert_nil described["status"], "#{section} #{row.fetch(key)} answered an outcome"
+        assert_equal row.fetch(key), described.fetch(key), "#{section} #{row.fetch(key)}"
       end
     end
     assert_includes all_rows("record_kinds").map { |row| row.fetch("id") }, "test.fixture.part"
@@ -86,6 +89,10 @@ class AgentAccessDiscoveryTest < PhComposerTestCase
     assert_nil described.fetch("payload_schema")
     assert_equal PhComposer::Records::Extension::STATUSES, described.fetch("statuses").keys
     assert_equal PhComposer::Records::Extension::STATUSES, listed.fetch("statuses").keys
+    unmigrated = PhComposer::Records::Extension.new(:namespace => "test.fixture.review", :schema_version => 3)
+    envelope = { "schema_version" => 1, "payload" => {}, "references" => [], "export_relevance" => "unknown" }
+    assert_equal "unsupported", PhComposer::Records::Extension.status(envelope, unmigrated)
+    assert_includes described.dig("statuses", "unsupported"), "older one the installed migrations cannot raise"
   end
 
   def test_operations_page_by_owner_and_kind_and_carry_no_participant
@@ -188,6 +195,28 @@ class AgentAccessDiscoveryTest < PhComposerTestCase
     assert_operator all_rows("operations", :owner => "synthetic.f7").length, :==, 12
   end
 
+  # Hundreds of small features later, the index keeps only totals and the features page instead.
+  def test_the_index_fits_with_hundreds_of_features
+    PhComposer::Registry.install(Array.new(400) { |index| synthetic(index, :queries => 1) })
+    index = page({})
+
+    assert_nil index["features"]
+    assert_nil index["operation_counts"]
+    assert_includes index.fetch("next"), "section features"
+    assert_equal PhComposer::API.discover.fetch("features").length, all_rows("features").length
+  end
+
+  # One registration with a very long description still pages, cut, with the cut named.
+  def test_one_oversized_row_is_cut_to_fit_a_page
+    PhComposer::Registry.install([synthetic(0, :queries => 1, :description => "Long. " * 5000)])
+    found = page("section" => "operations", "owner" => "synthetic.f0", "limit" => 1)
+    row = found.fetch("rows").first
+
+    assert_equal ["description"], row.fetch("truncated")
+    assert_equal Discovery::ROW_TEXT_BYTES, row.fetch("description").bytesize
+    assert_nil found.fetch("next_cursor")
+  end
+
   # A list section of rows that are each large still pages within the budget and loses none.
   def test_large_rows_page_within_the_budget
     document = PhComposer::API.discover
@@ -228,14 +257,14 @@ class AgentAccessDiscoveryTest < PhComposerTestCase
     result.dig("structuredContent", "code")
   end
 
-  # A feature of twelve queries with long descriptions, built only from public registration calls.
-  def synthetic(index)
+  # A feature of queries with long descriptions, built only from public registration calls.
+  def synthetic(index, queries: 12, description: "A synthetic read. " * 12)
     id = "synthetic.f#{index}"
     Module.new.tap do |feature_module|
       feature_module.define_singleton_method(:install) do |registry|
         feature = registry.feature(id, :contract_version => 1)
-        12.times do |number|
-          feature.query("#{id}.read_#{number}", :description => "A synthetic read. " * 12,
+        queries.times do |number|
+          feature.query("#{id}.read_#{number}", :description => description,
                                                 :params => { "type" => "object" }, :result => { "type" => "object" },
                                                 :refuses => []) { {} }
         end

@@ -884,7 +884,7 @@ module PhComposer
           problem(item, "#{part} examples must be a list of params objects")
           return
         end
-        return unless callback.params.is_a?(Hash)
+        return unless callback.params.is_a?(Hash) && JsonSchema.schema_problems(callback.params).empty?
 
         examples.each_with_index do |example, index|
           findings = JsonSchema.validate(example, callback.params)

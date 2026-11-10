@@ -39,7 +39,9 @@ belongs to its section and owner and to what was installed when it was issued: a
 installed or removed it is refused as `query.cursor_expired`, so start again from the first page.
 
 - `operations`: every query, action, view command, setup command and file export, with its kind,
-  owner and description. Add `owner` for one feature's.
+  owner and description. Add `owner` for one feature's. A description longer than a row allows is
+  cut, and the row names it in `truncated`; `describe` gives the whole.
+- `features`: every installed feature, with its contract version and what it requires.
 - `record_kinds` and `reference_targets`: the catalog kinds stored in the Model's records and the
   entity kinds stored on its geometry. `describe` one by id for its values, references and
   occurrence reference.
@@ -196,10 +198,11 @@ file's path on this computer, SHA-256 and size, for you alone. The connection re
 the file: read it with your client's own file tools and compare the hash before parsing it. A client
 that cannot read local files cannot check the file. A later export to the same destination replaces it.
 
-Metadata is not exported just because it is stored. A Zone's, Face's, Window Unit's or Assembly's
-`user_data` passes through to its HBJSON object, and the report counts those objects as
-`export.user_data_passed`; elsewhere `user_data` stays in the Model with an `export.metadata_omitted`
-finding. An extension's data leaves with the extension that exports it: data marked local to the
+Metadata is not exported just because it is stored. Where a feature exports a record's `user_data`
+(today Zones, Faces, Window Units, Assemblies, Spaces, Volumes and Floor Segments), it passes through
+to the HBJSON object, and the report counts those objects as `export.user_data_passed`; any other
+`user_data` stays in the Model with an `export.metadata_omitted` finding. Read the export's findings
+rather than assume. An extension's data leaves with the extension that exports it: data marked local to the
 Model is left out with the same finding, and data whose effect on the export is required or unknown,
 with nothing installed to export it, blocks the export.
 

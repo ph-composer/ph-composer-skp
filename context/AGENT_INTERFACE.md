@@ -87,15 +87,17 @@ optional `examples` must meet its params, which registration checks.
 
 The agent connection's `discover` tool keeps its compact index and its `owner` page and adds
 `section` (`agent_access/discovery.rb`): `operations` (each row with its `kind`; `owner` filters),
-`record_kinds`, `reference_targets`, `extensions` (with the status meanings), `library_kinds`,
+`features`, `record_kinds`, `reference_targets`, `extensions` (with the status meanings), `library_kinds`,
 `refusals` (the common sets, a one-line meaning per code from `Refusals::MEANINGS`, and the
 documentation pointer), `contracts` (API, contract versions, grants, export task methods with their
 retention, Outcome and request schemas) and `guide`. A list section takes `limit` (100 by default, at
-most 500) and `cursor`, and cuts each page at 16 KiB of rows; its cursor binds the section, the owner
+most 500) and `cursor`, and cuts each page at 16 KiB of rows; a row's text over 1 KiB is cut and the
+row names the key in `truncated` (`describe` answers the whole), so one long registration still pages; its cursor binds the section, the owner
 filter and `registry`, a digest of everything `API.discover` answers but the sessions, so after an
 install changes the registry the cursor is refused as `query.cursor_expired`. Every page and the index
 carry `registry`. The index lists the sections with their totals and the guide's version; past
-20 KiB it gives operation counts by owner in place of names. Sessions stay filtered by the token.
+20 KiB it gives operation counts by owner in place of names, and past that leaves the features and the
+counts to their sections. Sessions stay filtered by the token.
 
 The operating guide is `docs/AGENT_GUIDE.md`, shipped as `agent_access/guide.md` (a golden that
 `make fixtures` copies and the offline suite compares) and read once at load by

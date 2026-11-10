@@ -258,6 +258,10 @@ class LibraryRegistrationTest < PhComposerTestCase
 
   # An example a callback publishes is params it accepts; discovery shows the assign callback's to agents.
   def test_callback_examples_must_meet_their_params
+    malformed = adapter
+    malformed.create.params = { "properties" => {} }
+    malformed.create.examples = [{}]
+    assert_includes refused(feature("test.library", malformed)).map(&:code), "registration.schema_invalid"
     [{}, [1], [{ "id" => 7 }]].each do |examples|
       value = adapter
       value.create.examples = examples

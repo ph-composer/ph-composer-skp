@@ -131,7 +131,7 @@ module PhComposer
       TABLE = [
         tool("discover", "Start here. Lists the open Model sessions with their ids and file names, the features, " \
                          "every operation's name, the sections to page and the operating guide. Pass section for " \
-                         "one bounded page: operations (with owner for one feature's), record_kinds, " \
+                         "one bounded page: operations (with owner for one feature's), features, record_kinds, " \
                          "reference_targets, extensions, library_kinds, refusals, contracts or guide (with topic " \
                          "for one topic's text).",
              object({ "owner" => string("A feature id from this tool's features list."),
