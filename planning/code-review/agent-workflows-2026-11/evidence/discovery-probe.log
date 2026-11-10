@@ -1,0 +1,117 @@
+Run options: --seed 11293
+
+# Running:
+
+{
+  "api": {
+    "major": 1,
+    "minor": 31
+  },
+  "counts": {
+    "queries": 77,
+    "actions": 114,
+    "view_commands": 31,
+    "setup_commands": 17,
+    "file_exports": 1,
+    "participants": 1
+  },
+  "compact_discovery_bytes": 13017,
+  "missing_external_keys": [
+    "contract_versions",
+    "common_refusals",
+    "refusal_documentation",
+    "tasks",
+    "queries",
+    "view_commands",
+    "setup_commands",
+    "file_exports",
+    "actions",
+    "participants",
+    "record_kinds",
+    "reference_targets",
+    "extensions",
+    "snapshot_sections"
+  ],
+  "owner_discovery": [
+    {
+      "owner": "ph_composer.records",
+      "bytes": 391,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "owner": "ph_composer.context",
+      "bytes": 885,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "owner": "ph_composer.view",
+      "bytes": 440,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "owner": "ph_composer.colour_by",
+      "bytes": 1154,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "owner": "ph_composer.library",
+      "bytes": 3503,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "owner": "ph_composer.locations",
+      "bytes": 1653,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "owner": "ph_composer.agent_access",
+      "bytes": 256,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "owner": "ph_composer.assemblies",
+      "bytes": 6148,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "owner": "ph_composer.zones",
+      "bytes": 10744,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "owner": "ph_composer.windows",
+      "bytes": 21742,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "owner": "ph_composer.spaces",
+      "bytes": 9492,
+      "is_error": false,
+      "code": null
+    },
+    {
+      "owner": "ph_composer.thermal_bridges",
+      "bytes": 4126,
+      "is_error": false,
+      "code": null
+    }
+  ],
+  "failed_descriptions": [
+
+  ]
+}
+.
+
+Finished in 0.192182s, 5.2034 runs/s, 15.6102 assertions/s.
+
+1 runs, 3 assertions, 0 failures, 0 errors, 0 skips

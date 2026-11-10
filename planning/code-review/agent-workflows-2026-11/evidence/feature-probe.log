@@ -1,0 +1,30 @@
+Run options: --seed 9741
+
+# Running:
+
+create Space: {"status":"completed","effect":"committed","code":"ok","value":{"space_id":"spc_a9172610746b","volume_id":"vol_b86f10e4de73","floor_segment_ids":["fsg_00d530891978"]}}
+Make Zone on that Space Group: {"status":"completed","effect":"committed","code":"ok","value":{"zone_id":"zon_050ebd5de130"}}
+Zone faces now includes Floor Segment: {"status":"completed","effect":"none","code":"ok","value":{"faces":[{"reference":{"zone_id":"zon_050ebd5de130","zone_path":[100003],"entity_path":[100001,101],"entity_id":null},"zone_name":"Zone 1","area_m2":12.0,"values":{},"user_data":{},"extension_data":{},"extension_status":{},"suggested":{"face_type":"RoofCeiling","boundary_condition":"Ground"},"attached_zone_state":null,"adjacency_state":null,"assembly_state":"absent","findings":[],"state":"unclassified"}],"units":{"area_m2":"m2"},"next_cursor":null,"total":1}}
+delete Space with same Group: {"status":"completed","effect":"committed","code":"ok","value":{"space_id":"spc_a9172610746b"}}
+Zone inventory after delete Space: {"status":"completed","effect":"none","code":"ok","value":{"zones":[],"make_zone":null,"restorable":[],"findings":[],"units":{"ground_depth_mm":"mm","face_area_m2":"m2","unclassified_face_area_m2":"m2"},"next_cursor":null,"total":0}}
+.schedule.list limit 1, 35943 bytes; 1 run; 799 edge paths
+.unreadable edge in schedule: {"status":"completed","effect":"none","code":"ok","value":{"runs":[],"edge_findings":[],"totals":{"by_type":[],"by_group":[{"group":"15-Ambient","heat_loss_w_k":0.0},{"group":"16-Perimeter","heat_loss_w_k":0.0},{"group":"17-FS/BC","heat_loss_w_k":0.0}],"run_count":0,"heat_loss_w_k":0.0},"edge_finding_total":0,"unreadable":[{"path":[100,101],"code":"record.unreadable","message":"The ph_composer.thermal_bridge record is not valid JSON."}],"unreadable_total":1,"units":{"length_m":"m","psi_w_mk":"W/mK","heat_loss_w_k":"W/K"},"next_cursor":null,"total":0}}
+selection of unreadable edge: {"status":"refused","effect":"none","code":"record.unreadable","value":null}
+clear unreadable edge via explicit path: {"status":"refused","effect":"none","code":"record.unreadable","value":null}
+.Make Zone on plain wrapper holding a Space: {"status":"completed","effect":"committed","code":"ok","value":{"zone_id":"zon_b4cbff90481b"}}
+.zones.list limit 1 plus 450 restore targets, 101578 bytes; 450 restore targets
+.locked zone batch edit: {"status":"refused","effect":"none","code":"target.locked","value":null}
+locked zone single edit: {"status":"completed","effect":"committed","code":"ok","value":{"zone_id":"zon_ZZZZZZZZZZZZ"}}
+.classify exact copied Face id: {"status":"refused","effect":"none","code":"target.ambiguous","value":null}
+classify same path, null id: {"status":"failed","effect":"rolled_back","code":"operation.failed","value":null}
+stored after null id: [{"boundary_condition"=>"Ground", "face_type"=>"Floor", "id"=>"fac_AAAAAAAAAAAA", "schema_version"=>1}, {"boundary_condition"=>"Ground", "face_type"=>"Floor", "id"=>"fac_AAAAAAAAAAAA", "schema_version"=>1}]
+.classify previously unclassified: {"status":"completed","effect":"committed","code":"ok","value":{"face_ids":["fac_f8bd36645b64"]}}
+classify again using the old null id on current revision: {"status":"completed","effect":"committed","code":"ok","value":{"face_ids":["fac_f8bd36645b64"]}}
+reverse using old null id on current revision: {"status":"completed","effect":"committed","code":"ok","value":{}}
+.create preview with missing path: {"status":"completed","effect":"none","code":"ok","value":{"accepted":[[101]],"left_out":[{"path":[102],"reason":"not_found","message":"That Face no longer exists."}],"zone":null,"height_m":2.5,"height_source":"default"}}
+direct create with missing path: {"status":"completed","effect":"committed","code":"ok","value":{"space_id":"spc_7d34becb57e2","volume_id":"vol_adf0420122c8","floor_segment_ids":["fsg_a7d6e8d34f04"]}}
+.
+
+Finished in 1.085146s, 8.2938 runs/s, 63.5859 assertions/s.
+
+9 runs, 69 assertions, 0 failures, 0 errors, 0 skips
