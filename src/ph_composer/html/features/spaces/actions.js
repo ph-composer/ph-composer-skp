@@ -175,11 +175,14 @@ function (panel, requests, ui, units, preferences, fields) {
     return true;
   };
 
-  /* Delete a Volume and its floor Faces. A Space's only Volume offers Delete Space instead, so the panel never
-     leaves a Space empty. */
+  /* Delete a Volume and its floor Faces, and any Volume nested in it. When no other Volume of the Space would be
+     left, it offers Delete Space instead, so the panel never leaves a Space empty. */
   SpaceActions.prototype.deleteVolume = function (record, reference) {
     var self = this, space = copy(record.space.reference);
-    if ((record.space.volumes || []).length === 1) {
+    var left = (record.space.volumes || []).filter(function (volume) {
+      return !startsWith(volume.reference.entity_path, reference.entity_path);
+    });
+    if (!left.length) {
       var spaceName = describe({ space: record.space });
       this.askFirst("Delete Space?", (record.volume.values.display_name || "Volume " + record.volume.values.number) +
         " is the only Volume of " + spaceName + ", so the Space goes with it: " + spaceName + " and everything in " +

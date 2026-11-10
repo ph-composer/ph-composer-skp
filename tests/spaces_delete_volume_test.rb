@@ -82,6 +82,33 @@ class SpacesDeleteVolumeTest < PhComposerTestCase
     assert_equal [1100, 1200, 1300], group(1000).entities.to_a.map(&:persistent_id)
   end
 
+  # Only Volumes left outside the selected one count: a nested sibling keeps the Space, a Volume nested inside the
+  # selected one goes with it.
+  def test_the_only_volume_question_counts_nested_volumes_by_whether_they_survive
+    sibling = volume_group(1160, volume_record("N", :number => 2), [floor_face(1161, rectangle(0, 6, 1, 1))])
+    @living.entities << Sketchup::Group.new(1150, Sketchup::Entities.new([sibling]))
+    @model.active_path = [@zone_a, @living]
+    select(@living.entities.to_a.first)
+    refute MENU.selected(@model).only, "a sibling Volume in a plain Group stays"
+
+    bath_volume = @zone_a.entities.to_a[1].entities.to_a.first
+    inner = floor_face(1261, rectangle(4, 4, 1, 1))
+    bath_volume.entities << volume_group(1260, volume_record("C", :number => 2), [inner])
+    @model.active_path = [@zone_a, @zone_a.entities.to_a[1]]
+    select(bath_volume)
+    assert MENU.selected(@model).only, "a Volume nested in the selected one goes with it"
+  end
+
+  # Every Spaces record below the Volume is erased with it, so each is reported and checked for references.
+  def test_a_record_nested_below_the_volume_is_reported_deleted
+    nested = floor_face(1331, rectangle(9, 9, 1, 1), segment_record("K"))
+    @hall_second.entities << Sketchup::Group.new(1330, Sketchup::Entities.new([nested]))
+    @model.active_path = [@zone_a, @hall]
+    deleted = invoke("volumes.delete", "volume" => volume_reference(1320))
+    assert_equal "completed", deleted["status"], deleted.inspect
+    assert_includes deleted.fetch("affected").map { |row| row["id"] }, "fsg_#{'K' * 12}"
+  end
+
   # A script may empty a Space; the Space then reads space.empty until it is fixed.
   def test_the_operation_works_from_inside_the_volume_and_volumes_remove_still_keeps_the_faces
     @model.active_path = [@zone_a, @hall, @hall_second]

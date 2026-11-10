@@ -284,25 +284,25 @@ module PhComposer
     end
 
     # Erases one Volume Group and its floor Faces, as SketchUp's Delete would: the records go with the
-    # entities. A Volume open, or open below, closes to its Space first, joining the same Undo step.
+    # entities. `records` holds the kind, id and path of every Spaces record at or below the Volume, its own
+    # among them. A Volume open, or open below, closes to its Space first, joining the same Undo step.
     class DeleteVolumeStep
       attr_reader :affected
 
-      def initialize(path:, before:, segments:)
+      def initialize(path:, before:, records:)
         @path = path.dup.freeze
         @before = DeepCopy.frozen(before)
-        @segments = DeepCopy.frozen(segments)
-        @affected = [{ "kind" => VOLUME_KIND, "id" => before.fetch("id"), "change" => "deleted",
-                       "reference" => { "volume_id" => before.fetch("id"), "entity_path" => @path } }] +
-                    @segments.map do |segment|
-                      { "kind" => FLOOR_SEGMENT_KIND, "id" => segment.fetch("id"), "change" => "deleted",
-                        "reference" => { "floor_segment_id" => segment.fetch("id"),
-                                         "entity_path" => segment.fetch("path") } }
-                    end
+        @records = DeepCopy.frozen(records)
+        @affected = @records.map do |row|
+          id = row.fetch("id")
+          { "kind" => row.fetch("kind"), "id" => id, "change" => "deleted",
+            "reference" => { Resolve::TARGETS.fetch(row.fetch("kind")).id_key => id,
+                             "entity_path" => row.fetch("path") } }
+        end
       end
 
       def descriptor
-        { "name" => "delete_volume", "path" => @path, "before" => @before, "segments" => @segments }
+        { "name" => "delete_volume", "path" => @path, "before" => @before, "records" => @records }
       end
 
       def apply(model, _slots)

@@ -33,7 +33,8 @@ module PhComposer
         !AddVolumeMenu.open_space(Array(model.active_path)).nil?
       end
 
-      # The selected Volume, or nil unless `available?`.
+      # The selected Volume, or nil unless `available?`. It is the Space's only Volume when no other Volume the scan
+      # finds in the Space, nested ones included, stands outside it.
       def selected(model)
         return unless available?(model)
 
@@ -41,13 +42,21 @@ module PhComposer
         space = active.last
         volume = model.selection.to_a.first
         path = active.map(&:persistent_id)
+        volume_path = path + [volume.persistent_id]
         volume_record = VOLUME_STORE.read(volume)
         space_record = SPACE_STORE.read(space)
-        Selected.new(:volume => { "volume_id" => volume_record.fetch("id"),
-                                  "entity_path" => path + [volume.persistent_id] },
+        Selected.new(:volume => { "volume_id" => volume_record.fetch("id"), "entity_path" => volume_path },
                      :space => { "space_id" => space_record.fetch("id"), "entity_path" => path },
                      :volume_record => volume_record, :space_record => space_record,
-                     :only => space.entities.to_a.count { |entity| Protection.volume?(entity) } == 1)
+                     :only => others(model, path, volume_path).empty?)
+      end
+
+      # The Volumes in the Space at `space_path` that deleting the Volume at `volume_path` would leave.
+      def others(model, space_path, volume_path)
+        scan = Occurrences.scan(model, :strict => false)
+        (scan.volumes + scan.orphan_volumes).select do |found|
+          found.path[0, space_path.length] == space_path && found.path[0, volume_path.length] != volume_path
+        end
       end
 
       # The question asked before a Space's only Volume goes: the Space goes with it.
