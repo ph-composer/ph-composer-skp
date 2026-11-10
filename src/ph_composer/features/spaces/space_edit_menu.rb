@@ -143,7 +143,7 @@ module PhComposer
           defaults = [value.to_s]
           revision = @session.revision
           entered = UI.inputbox([prompt], defaults, title(spaces))
-          return if entered.nil? || entered == defaults
+          return if !entered || entered == defaults
 
           submit(spaces, { field => entered.first }, revision)
         end

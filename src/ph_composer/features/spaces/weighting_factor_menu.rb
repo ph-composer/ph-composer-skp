@@ -11,8 +11,6 @@ module PhComposer
       MENU = "Set Weighting Factor"
       OTHER = "Other…"
       MARK = "#{FEATURE_ID}.floors.mark"
-      # Places a factor shows in its label and in Other…'s field; trailing zeros are dropped.
-      DIGITS = 6
       PROMPT = "Weighting factor (0 to 1)"
       SELECT = "Select Floor Segment Faces in an open Volume, or Volumes, or Spaces, then choose Set Weighting " \
                "Factor. #{Outcome::NOTHING_WRITTEN}".freeze
@@ -57,8 +55,10 @@ module PhComposer
         segments.map { |segment| Float(segment.record.fetch("weighting_factor")) }.uniq
       end
 
+      # The factor written out in full, as the Weighting factor legend shows it: two stored factors never share a
+      # label, and the label reads back as the factor it names.
       def label(factor)
-        Units.format_number(factor, DIGITS, :group_from => nil)
+        ColourModes.band(factor)
       end
 
       # 1, every other factor the Model uses from the largest down, then Other…. A record that does not read is
@@ -66,8 +66,7 @@ module PhComposer
       def entries(session)
         scan = Occurrences.scan(session.model, :strict => false)
         current = factors(affected(scan, target_paths(session.model) || []))
-        # Factors that show the same label are one choice.
-        choices = ([1.0] + (factors(scan.segments) - [1.0]).sort.reverse).uniq { |factor| label(factor) }
+        choices = [1.0] + (factors(scan.segments) - [1.0]).sort.reverse
         listed = choices.map do |factor|
           checked = current == [factor] ? MF_CHECKED : MF_UNCHECKED
           Declarations::MenuEntry.new(:label => label(factor), :state => ->(_session) { checked },
@@ -106,7 +105,7 @@ module PhComposer
           shown = shared.length == 1 ? WeightingFactorMenu.label(shared.first) : ""
           revision = @session.revision
           entered = UI.inputbox([PROMPT], [shown], MENU)
-          return if entered.nil? || HostPrompt.unchanged?(entered.first, shown)
+          return if !entered || HostPrompt.unchanged?(entered.first, shown)
 
           factor = typed_factor(entered.first)
           return announce(INVALID) unless factor

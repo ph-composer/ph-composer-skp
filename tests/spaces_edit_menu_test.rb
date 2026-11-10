@@ -113,6 +113,28 @@ class SpacesEditMenuTest < PhComposerTestCase
     assert_equal @operations + 1, @model.operations.length
   end
 
+  def test_factors_that_round_alike_stay_distinct_choices_each_checked_on_its_own
+    living_face, bath_face = [@living, @bath].map { |space| space.entities.to_a.first.entities.to_a.first }
+    { living_face => 0.1234561, bath_face => 0.1234562 }.each do |face, factor|
+      store = PhComposer::Spaces::FLOOR_SEGMENT_STORE
+      store.write(face, store.read(face).merge("weighting_factor" => factor))
+    end
+    @model.active_path = [@zone_a]
+    select(@living)
+    assert_equal ["1", "0.1234562", "0.1234561", "0", FACTOR::OTHER], labels(FACTOR::MENU)
+    assert_equal [MF_UNCHECKED, MF_UNCHECKED, MF_CHECKED, MF_UNCHECKED], checks(FACTOR::MENU)
+  end
+
+  def test_cancelling_any_dialog_writes_nothing
+    @model.active_path = [@zone_a]
+    select(@living)
+    UI.inputbox_result = false
+    dialogs = [[FACTOR::MENU, FACTOR::OTHER], [nil, EDIT::NUMBER], [nil, EDIT::NAME], [nil, EDIT::AIRFLOWS_LABEL]]
+    dialogs.each { |menu, label| assert_nil choose(menu, label), label }
+    assert_equal 4, UI.inputboxes.length
+    assert_equal @operations, @model.operations.length
+  end
+
   def test_move_to_zone_checks_the_current_zone_and_moves_the_space_in_one_step
     @model.active_path = [@zone_a]
     select(@living)
