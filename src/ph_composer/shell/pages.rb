@@ -19,8 +19,10 @@ module PhComposer
     TOTAL = { "type" => "integer", "minimum" => 0,
               "description" => "Rows matching the filter, on every page." }.freeze
     PAGE_KEYS = %w[limit cursor].freeze
-    # The serialized rows of one bounded page stay under this, so the page and its envelope fit an
-    # agent's reply (context/AGENT_INTERFACE.md, "User-controlled local access", the 24 KB budget).
+    # The one reply budget: an agent connection refuses a serialized result larger than this, envelope and
+    # all (context/AGENT_INTERFACE.md, "User-controlled local access").
+    REPLY_BYTES = 24 * 1024
+    # The serialized rows of one bounded page stay under this, so the page and its envelope fit REPLY_BYTES.
     MAX_PAGE_BYTES = 16 * 1024
 
     module_function

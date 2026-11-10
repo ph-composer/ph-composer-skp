@@ -1,6 +1,6 @@
 # Proposed contract changes
 
-STATUS: C01 bound and implemented by AW-01 (API 1.34); C02 bound and implemented by AW-02 (API 1.35); C04 bound and implemented on the AW-03 branch (API 1.36); C03 and C05-C08 remain proposals. Baseline API 1.31.
+STATUS: C01 bound and implemented by AW-01 (API 1.34); C02 bound and implemented by AW-02 (API 1.35); C04 bound and implemented by AW-03 (API 1.36); C03 definition part bound on the AW-04 branch (API 1.37); C03 occurrence part and C05-C08 remain proposals. Baseline API 1.31.
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication
 
 The durable authorities remain `context/CONTRACTS.md`, `AGENT_INTERFACE.md`, `EXTENSIBILITY.md`
@@ -100,6 +100,40 @@ Compound previews also need a compact digest/summary and complete detail retriev
 same inputs/revision/proposal digest. Do not lose the digest to oversized affected/findings arrays
 or imply that a user reviewed omitted destructive consequences. No transaction stays open while
 detail is read; apply revalidates the original proposal as today.
+
+**Bound at AW-04 (API 1.37), definition and metadata part.** Every new read is a query (capability `read`) that
+changes nothing; AW-05 reuses the helper for occurrence data. New names:
+
+- `Fragments` (`shell/fragments.rb`), the shared helper: `Fragments.read(request, query, value, revision:)` cuts the
+  canonical JSON text of one value (`CanonicalJson`) into UTF-8 fragments, each at most `Fragments::MAX_TEXT_BYTES`
+  (12 KiB) once escaped as a JSON string and never split inside a character, answering `fragment` (`encoding`
+  `"json"`, `offset` and `bytes` in UTF-8 bytes, `total_bytes`, `sha256` of the whole text, `text`) and `next_cursor`
+  through `Pages.token`, so a cursor binds session, query, filter and revision, carries the text's digest, and
+  refuses `query.cursor_expired` after any change. `Fragments.summary(value)` gives `bytes` and `sha256`. `Pages::REPLY_BYTES` (24 KiB) is the one
+  reply budget; `AgentAccess::Executor::MAX_RESULT_BYTES` is it.
+- `ph_composer.records.list` pages by bytes (`Pages.bounded`, an unreadable row weighed too) and takes `metadata`:
+  `full` (default, the rows as before) or `summary`, which leaves out `user_data` and `extension_data`, keeps
+  `extension_status`, and adds `metadata` (`user_data`: `keys`, `bytes`, `sha256`; `extension_data`: by namespace,
+  `bytes`, `sha256`) and `value_bytes` (each stored value's canonical size).
+- `ph_composer.records.detail`: params `kind`, `id`, `path` (1 to 32 keys and indexes into the record's public view,
+  starting at `values`, `user_data`, `extension_data` or `extension_status`), `cursor`. Result `kind`, `id`,
+  `type` (JSON type), `fragment`, `next_cursor`; the path is not echoed, since a long key would crowd the reply. A path naming nothing refuses `target.not_found`, so an absent key
+  differs from a stored `null` or `false`.
+- `ph_composer.assemblies.assemblies.layers.list` (`assembly_id`) and `ph_composer.assemblies.assemblies.segments.list`
+  (`assembly_id`, optional `layer_id`): one row per Layer (index, thickness, membrane, air-barrier face, segment count)
+  or per Layer-Segment (Layer, index, stored segment, Material name, `flags` from `Thermal.segment_flags`).
+- `ph_composer.windows.types.elements.list` (`type_id`): `type`, the Type's derived summary from the row
+  `windows.types.list` builds (dimensions, `complete`, `copy_key`, `thermal` totals without `elements`, the findings
+  with no element), and one row per stored element: `index`, `element`, its `thermal` result and `install_edges`
+  (null for an empty element), `copy_slot` and its `findings`.
+- `ph_composer.assemblies.materials.uses.list` (`material_id`) and `ph_composer.windows.<collection>.uses.list`
+  (`id`; `frames`, `glazings`, `psi_install_types`): the row's `uses` a page at a time, with `unreadable`, the
+  count of owners (Assemblies or Window Types) that cannot be read.
+- MCP `preview` over the reply budget answers the outcome with `value` null, `affected` and `findings` empty, and
+  `detail` `parts` (`value`, `affected`, `findings`: `bytes`, `sha256`, and `count` for a list), keeping status,
+  revision and `proposal_digest`. MCP `preview` with `part` (and `cursor`) calls `API.preview_part`, which reruns the
+  preview and answers `part`, `proposal_digest` and that part's `fragment`; its cursor binds the action, params,
+  part, revision and proposal digest. Nothing is retained or held open between fragments.
 
 ## C04 · Geometry candidate and assignment reads
 

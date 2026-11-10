@@ -22,6 +22,7 @@ require_relative "install_save"
 require_relative "snapshot"
 require_relative "declarations/records"
 require_relative "declarations/inventories"
+require_relative "declarations/parts"
 require_relative "declarations/grid"
 require_relative "library_kinds"
 require_relative "declarations/installs"
@@ -46,6 +47,7 @@ module PhComposer
       feature.record_kind(Types::KIND)
       Settings.install(feature)
       InventoryRegistration.install(feature)
+      PartRegistration.install(feature)
       RecordRegistration.install(feature)
       GridRegistration.install(feature)
       InstallsRegistration.install(feature)

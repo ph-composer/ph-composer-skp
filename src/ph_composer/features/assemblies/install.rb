@@ -33,6 +33,7 @@ require_relative "declarations/inventories"
 require_relative "declarations/records"
 require_relative "declarations/layers"
 require_relative "declarations/segments"
+require_relative "declarations/parts"
 require_relative "library_kind"
 require_relative "codes"
 require_relative "refuses"
@@ -49,6 +50,7 @@ module PhComposer
       RecordRegistration.install(feature)
       LayerRegistration.install(feature)
       SegmentRegistration.install(feature)
+      PartRegistration.install(feature)
       MaterialsLibrary.install(feature)
       ExportProjection.install(feature)
       SourceReport.install(feature)

@@ -23,11 +23,13 @@ extension carries this text, so an agent with only the connection can read it; `
 4. **Read what you need, in pages.** Use the bounded reads (`ph_composer.spaces.list`,
    `ph_composer.zones.faces.list`, `ph_composer.assemblies.assemblies.list` and the like) with
    `fields` and `limit`, and pass `next_cursor` back for the next page. A result larger than one
-   reply is refused, not cut: ask for less.
+   reply is refused, not cut: ask for less, then read what you left out in parts (see "Large
+   records and previews").
 5. **Describe before you call.** `describe` gives an operation's params and result schemas, its
    examples, its refusals and, for a view command, what else it can trigger (`side_effects`).
 6. **Preview a compound change.** `preview` shows what an action would change without changing
-   anything, and returns a `proposal_digest` to send with the invoke.
+   anything, and returns a `proposal_digest` to send with the invoke. Read all of it before you
+   apply it, even when it is larger than one reply.
 7. **Apply.** `invoke` with the action's `params`, the `expected_revision` of the read your change
    is based on, and an `idempotency_key` you choose. Each action is one Undo step for the user.
 8. **Read back.** Read the records you changed and compare them with what you meant to write.
@@ -61,6 +63,40 @@ any section, a description or list longer than a row allows is cut, and the row 
 Every number is SI and its schema says the unit as `x-unit`: metres, square metres, cubic metres,
 cubic metres per hour. Convert before you write. An edit carries `expected_values`, the values you
 last read; if the Model holds something else now, the edit is refused and nothing is written.
+
+## Large records and previews
+
+A record or a preview can be larger than one reply. These reads give all of it exactly, in parts.
+
+- **Find what is large.** `ph_composer.records.list` with `metadata` `"summary"` and `fields` `[]`
+  leaves out `user_data` and `extension_data` and tells you their size (`metadata`) and each value's
+  size (`value_bytes`). `extension_status` stays, so data from an extension that is not installed
+  still reads `unavailable`. When a feature's list page is refused as too large, one row is larger
+  than a reply: ask the same list with `fields` `[]` for its ids, then read that record's parts.
+- **Read one value whole.** `ph_composer.records.detail` with the record's `kind` and `id` and a
+  `path` into the record, such as `["user_data", "notes"]` or `["values", "layers"]`, answers the
+  value as JSON text in `fragment`. Pass `next_cursor` back until it is null, join every fragment's
+  `text` in order, check the joined text's UTF-8 length and SHA-256 against `total_bytes` and
+  `sha256`, then parse it. A path that names nothing is refused as `target.not_found`; a stored
+  `null` or `false` is a value.
+- **Read a definition's parts.** `ph_composer.assemblies.assemblies.layers.list` and
+  `segments.list` page an Assembly's Layers and Layer-Segments; `ph_composer.windows.types.elements.list`
+  pages a Window Type's elements with each one's thermal result, installation edges and findings, and
+  gives the Type's totals beside them. `ph_composer.assemblies.materials.uses.list` and
+  `ph_composer.windows.frames.uses.list` (also `glazings` and `psi_install_types`) page what uses a
+  record, and count in `unreadable` the records that could not be read to tell. Use them rather than
+  recomputing anything yourself.
+- **Review a large preview.** When a preview is larger than one reply, `preview` still answers its
+  `proposal_digest` and revision, leaves out `value`, `affected` and `findings`, and gives each one's
+  size, digest and count in `detail.parts`. Call `preview` again with the same `name` and `params` and
+  `part` set to each of them, following `next_cursor`, and join them as above. Every fragment repeats
+  the `proposal_digest`; then invoke with it. Never apply a change whose affected list you have not
+  read. A preview that names new ids gives different ones each time it runs, so a part of it longer
+  than one fragment is refused as `query.cursor_expired`; read what it changes from the records after
+  you apply it, or ask the user.
+- **If the Model changes while you read,** the next fragment or page is refused as
+  `query.cursor_expired`. Start that value again from its first fragment; never join fragments of two
+  versions.
 
 ## When something goes wrong
 

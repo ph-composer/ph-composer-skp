@@ -28,7 +28,7 @@ class ApiTest < PhComposerTestCase
   def test_discovery_lists_the_session_and_every_registration_by_name
     found = API.discover
 
-    assert_equal({ "major" => 1, "minor" => 36 }, found.fetch("api"))
+    assert_equal({ "major" => 1, "minor" => 37 }, found.fetch("api"))
     assert_equal [@session.id], found.fetch("sessions").map { |session| session.fetch("id") }
     assert_includes found.fetch("actions").map { |action| action.fetch("name") }, "test.fixture.update_parts"
     assert_includes found.fetch("queries").map { |query| query.fetch("name") }, "ph_composer.records.list"
@@ -69,15 +69,19 @@ class ApiTest < PhComposerTestCase
   def test_pages_are_bounded_and_bound_to_their_revision
     create_parts(101)
 
-    first = records.fetch("value")
-    second = records(:cursor => first.fetch("next_cursor")).fetch("value")
+    first = records(:fields => []).fetch("value")
+    second = records(:fields => [], :cursor => first.fetch("next_cursor")).fetch("value")
     assert_equal [100, 1, 101], [first.fetch("records").length, second.fetch("records").length, first.fetch("total")]
     assert_nil second.fetch("next_cursor")
-    assert_equal 101, records(:limit => 500).dig("value", "records").length
+    assert_equal 101, records(:fields => [], :limit => 500).dig("value", "records").length
+    whole = records(:limit => 500).fetch("value")
+    assert_operator JSON.generate(whole.fetch("records")).bytesize, :<=, PhComposer::Pages::MAX_PAGE_BYTES
+    assert_equal 101, whole.fetch("records").length + records(:limit => 500, :cursor => whole.fetch("next_cursor"))
+                                                      .dig("value", "records").length
 
     [0, 501, 2.5].each { |limit| assert_equal "query.limit_invalid", records(:limit => limit).fetch("code") }
     create_parts(1, 2)
-    assert_equal "query.cursor_expired", records(:cursor => first.fetch("next_cursor")).fetch("code")
+    assert_equal "query.cursor_expired", records(:fields => [], :cursor => first.fetch("next_cursor")).fetch("code")
   end
 
   def test_a_projection_returns_only_the_named_values_and_reports_unreadable_records

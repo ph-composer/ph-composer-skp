@@ -34,10 +34,15 @@ module PhComposer
       end
 
       def material(view, record, assemblies)
-        uses = assemblies.select do |assembly|
+        uses = material_uses(record, assemblies)
+        view.merge("findings" => Validation.material(record), "uses" => uses, "use_count" => uses.length)
+      end
+
+      # The Assemblies of `assemblies` whose Layer-Segments name `record`, a Material, in their order.
+      def material_uses(record, assemblies)
+        assemblies.select do |assembly|
           Assembly::Schema::MATERIAL_REFERENCE.ids(assembly).include?(record.fetch("id"))
         end.map { |assembly| { "assembly_id" => assembly.fetch("id"), "name" => assembly.fetch("name") } }
-        view.merge("findings" => Validation.material(record), "uses" => uses, "use_count" => uses.length)
       end
 
       def assembly(view, record, materials, material_findings: nil)

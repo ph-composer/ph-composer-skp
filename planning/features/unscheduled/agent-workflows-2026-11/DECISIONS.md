@@ -1,6 +1,6 @@
 # Decisions for implementation intake
 
-STATUS: D01-D10 recommended defaults accepted 2026-11-10 under the implementation go; AW-01, AW-02 and AW-03 choices recorded below.
+STATUS: D01-D10 recommended defaults accepted 2026-11-10 under the implementation go; AW-01 to AW-04 choices recorded below.
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication
 
 | ID | Question | Recommendation and scope |
@@ -47,6 +47,15 @@ AW-03 choices, recorded before code:
 | D11-a | Inventory filtering: `context.children` lists every direct child whatever its state and filters only by `kinds`. Each row says `hidden` (its own flag or a hidden tag), `locked`, `shared` (component storage, or a Group whose definition another Group shares), `solid` and the registered `records` on it; `container` carries the same flags down the path. Hidden, locked, shared and foreign-owned objects are represented, never dropped, so a total never depends on view state |
 | D11-b | Candidate refusals are what the owning action gives the candidate named alone, read through the action's own check with the candidate's context in place of the open one. A candidate at a context that is not open is not refused for that: the row says the edit path must be opened first (`open_required`, or `requires`), which `context.open` does |
 | D11-c | Height from solid has no owner proof linking a solid to a Volume, so acquisition is `context.children` (`solid`, `records`) and the existing `volumes.height_from_solid_preview`, which refuses a non-solid; no new Spaces read. A Window restore host is given only when geometry proves one writable Zone Face; otherwise the row says what the user must choose |
+
+AW-04 choices, recorded before the gate:
+
+| ID | Choice |
+| --- | --- |
+| D12-a | `records.list` keeps the stored maps by default, so existing callers read what they did; the compact form is opt-in (`metadata: "summary"`). Its pages are now cut by size as every other list is, which only moves where `next_cursor` falls |
+| D12-b | Exact detail is the value's canonical JSON as text fragments cut at UTF-8 character boundaries, offsets in bytes, with the whole text's size and SHA-256: an agent reads the text directly, which base64 would prevent, and a byte cut never splits a character. Fragments are at most 12 KiB escaped, leaving the 24 KiB reply room for its envelope |
+| D12-c | Preview detail is stateless: `preview` with `part` runs the preview again and binds its cursor to the revision and the proposal digest; nothing is retained. Compaction applies only to a budgeted caller (`within`, the agent `preview`); the panel's preview is unchanged. A fragment of a changed preview refuses `query.cursor_expired`, documented on the tool and in the guide, not in each action's `refuses`, since only the fragment read answers it. A fragment cursor also carries the text's digest, so a preview that mints fresh ids on each run (a create) refuses its second fragment rather than joining two runs; such a part is readable only while it fits one fragment. Deterministic preview ids are a follow-up outside AW-04 |
+| D12-d | Part reads exist where a valid record outgrows a reply: Assembly Layers and Layer-Segments, Window Type elements, Material and Window product uses. A Thermal Bridge Type row carries no unbounded array, so it gets none |
 
 AW-01 through AW-07 can be made concrete without choosing a model vendor or a remote service.
 Routine naming/helper decisions belong to coding agents within the accepted contracts. Record a

@@ -87,3 +87,16 @@ selected.
 | R06 Spaces | `spaces.candidate_faces.list` with neither `space` nor `volume` refuses `params.invalid`; no first-Space route | Open |
 | R06 Thermal Bridges | `edges.selection` answers `total: 0`; the only Edge reads registered are `edges.selection` and `selection_all` | Open |
 | R06 inventory | No registered query enumerates children or candidates at a path (`child`, `candidate`, `inventory` match only `spaces.candidate_faces.list`) | Open |
+
+## AW-04 stage-entry recheck (AW-03 head `3a768fbc`, API 1.36)
+
+`rbenv exec ruby -Itests planning/code-review/agent-workflows-2026-11/evidence/envelope_probe.rb -n
+"/window_type_children|cannot_project_away_metadata/"`: 2 runs, 0 failures; the baseline sizes are unchanged.
+
+| Finding | Measured on the AW-03 head | Entry state |
+| --- | --- | --- |
+| R07 metadata | `records.list` with `fields: []`, one Material with 30 KB `user_data`: 30,469 bytes, `request.response_too_large`; the typed `materials.list fields:[values]` 1,243 bytes | Open |
+| R07 Window Type | 10 x 10 Type, `types.list fields:[values]` 26,041 bytes, `[display]` 106,013; generic `records.list fields:[elements]` 25,912 | Open |
+| R07 uses and Layers | No part read registered for Assembly Layers, Layer-Segments, Type elements or a row's `uses` (source read of `assemblies/declarations`, `windows/declarations`) | Open |
+| R07 compound preview | Source evidence: `Dispatch#proposal_preview` bundles value, affected and findings with the digest, and the MCP `preview` tool is a read, so an oversized preview is refused whole and its digest lost | Open; proved with an oversized fixture in AW-04 |
+
