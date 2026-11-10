@@ -170,8 +170,9 @@ module PhComposer
                     "zones.make_candidates, windows.units.convert_candidates and windows.units.restore_candidates " \
                     "list what Make Zone, Convert and Restore could take there; thermal_bridges.edges.at and " \
                     "edges.candidates read Edges by path in edges.selection's rows plus endpoints_m; and " \
-                    "spaces.candidate_faces.list takes context for a first Space. edges.selection's copied flag no " \
-                    "longer refuses for an unreadable record on another Edge." }
+                    "spaces.candidate_faces.list takes context for a first Space. A name over 256 characters is " \
+                    "cut and named in the row's truncated. edges.selection's copied flag no longer refuses for an " \
+                    "unreadable record on another Edge." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

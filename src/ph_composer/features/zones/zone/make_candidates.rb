@@ -44,10 +44,11 @@ module PhComposer
 
       def row(model, container, group, shared, zones)
         refusal = shared || Zones.make_refusal(model, container.instances, [group], :zones => zones)
-        { "path" => container.path + [group.persistent_id], "name" => group.name.to_s,
-          "hidden" => OccurrencePath.hidden?(group),
-          "make_zone" => { "parent_path" => container.path, "entity_ids" => [group.persistent_id] },
-          "refusal" => refusal && { "code" => refusal.code, "message" => refusal.message } }
+        row = { "path" => container.path + [group.persistent_id], "name" => group.name.to_s,
+                "hidden" => OccurrencePath.hidden?(group),
+                "make_zone" => { "parent_path" => container.path, "entity_ids" => [group.persistent_id] },
+                "refusal" => refusal && { "code" => refusal.code, "message" => refusal.message } }
+        row.merge(OccurrencePath.bounded_names(row.slice("name")))
       end
       private_class_method :context_refusal, :row
     end

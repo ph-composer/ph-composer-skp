@@ -168,14 +168,15 @@ root): each row's path, kind, type, name, definition name, whether it is hidden 
 locked, shared storage or a closed solid, its child count and the registered records on it
 (`Records::EntityStore.records_on`, by presence, with `claims`). Every child is listed whatever its
 state; only `kinds` filters, and `container` carries the path's lock, visibility and shared storage. A
-missing or repeated step refuses `target.not_found`, a leaf that holds nothing `target.wrong_kind`.
+missing or repeated step refuses `target.not_found`, a leaf that holds nothing `target.wrong_kind`. A
+name over 256 characters is cut and named in the row's `truncated`, so one row fits the reply budget.
 Owners answer what their actions could take in one container, each row with the refusal the action
 gives it named alone, read through the action's own check with that context in place of the open one,
 and what to open first when it is not open: `zones.make_candidates` (the Groups, `Zones.make_refusal`),
 `spaces.candidate_faces.list` with `context` (loose Faces for `spaces.create`, `CreateFaces.read` with
 `alone:`), `windows.units.convert_candidates` (rectangles for `units.convert_review`) and
-`windows.units.restore_candidates` (stamped panes by Window Type, with the host only when one writable
-Zone Face holds every pane, else `needs`). `thermal_bridges.edges.at` reads explicit root-to-Edge
+`windows.units.restore_candidates` (stamped panes by Window Type, with the host only when one Zone Face
+holds every pane and resolves for writing as `units.restore` resolves it, else `needs`). `thermal_bridges.edges.at` reads explicit root-to-Edge
 paths, such as a schedule run's `edge_paths`, and `edges.candidates` the Edges in one container,
 optionally only `unassigned` or `assigned`, both in `edges.selection`'s rows plus world `endpoints_m`; a
 path naming no Edge is a row with its reason. Each computes only its page's rows (`Pages.bounded`'s

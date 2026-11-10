@@ -202,8 +202,9 @@ module PhComposer
         "hidden" => { "type" => "boolean", "description" => "Hidden itself, or on a hidden tag or tag folder." },
         "make_zone" => MAKE_TARGET.merge("description" => "The params #{FEATURE_ID}.make takes for this Group."),
         "refusal" => REFUSAL.merge("description" => "The refusal Make Zone gives this Group in this context, or " \
-                                                    "null when it would make the Zone.")
-      })
+                                                    "null when it would make the Zone."),
+        "truncated" => ContextChildren::TRUNCATED
+      }, :optional => ["truncated"])
       MAKE_CANDIDATES_RESULT = Shapes.object({
         "parent_path" => PATH,
         "open_required" => { "type" => "boolean",

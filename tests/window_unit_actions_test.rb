@@ -598,7 +598,8 @@ class WindowUnitActionsTest < PhComposerTestCase
     assert_equal after, scope.capture(@model)
   end
 
-  def test_public_restore_replaces_exact_loose_panes_with_new_default_anchor_unit
+  # A placed Window left as one exact loose pane on its host, as exploding it leaves it: [original, pane Face].
+  def exploded_pane
     place(3.0, "head_left")
     original = U::Occurrences.all(@model).first
     pane = U::WorldGeometry.map(U::DefinitionPlan.build(type), original.transform.to_a).panes.first
@@ -614,6 +615,28 @@ class WindowUnitActionsTest < PhComposerTestCase
     face.back_material = face.material
     U::PANE_STORE.write(face, "window_type_id" => @type_id, "element_id" => pane.element_id)
     @group.entities.erase_entities(original.entity)
+    [original, face]
+  end
+
+  # A host whose path looks writable but whose Zone identity a copy shares is not offered: restore would refuse.
+  def test_a_restore_host_with_a_duplicated_zone_identity_is_not_offered
+    exploded_pane
+    copy = Sketchup::Group.new(Sketchup::Entities.allocate_persistent_id, Sketchup::Entities.new)
+    @model.entities << copy
+    UI.run_timers
+    PhComposer::Zones::ZONE_STORE.write(copy, PhComposer::Zones::ZONE_STORE.read(@group))
+
+    offer = assignment_query("#{PREFIX}.units.restore_candidates", "path" => [@group.persistent_id])
+            .fetch("candidates").first
+    refused = assignment_invoke("#{PREFIX}.units.restore", "host" => @face_reference, "type_id" => @type_id,
+                                                           "pane_paths" => offer.fetch("pane_paths"))
+
+    assert_equal [nil, "host"], offer.values_at("host", "needs")
+    assert_equal "target.ambiguous", refused.fetch("code"), refused.inspect
+  end
+
+  def test_public_restore_replaces_exact_loose_panes_with_new_default_anchor_unit
+    original, face = exploded_pane
     scope = U::RestorePaneScope.new([@group.persistent_id], [face.persistent_id], type)
     before = scope.capture(@model)
     # Found with no selection: the stamp names the Type and the one Zone Face holding the pane is its host.

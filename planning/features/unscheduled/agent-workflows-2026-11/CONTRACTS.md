@@ -123,7 +123,8 @@ writes a dictionary. New names:
   `component`, `face`, `edge`, `other`), `limit`, `cursor`. Result `container` (`path`, and `locked`, `hidden`,
   `shared` carried down the path), `children` (`path`, `persistent_id`, `kind`, `type`, `name`, `definition_name`,
   `hidden`, `locked`, `shared`, `solid`, `child_count`, `records`: `dictionary`, `key`, `claims`), `next_cursor`,
-  `total`. A step that is missing or repeated refuses `target.not_found`; one that is not a Group or component
+  `total`. A name over `OccurrencePath::NAME_CHARACTERS` (256) characters is cut and named in the row's `truncated`,
+  here and in `zones.make_candidates`. A step that is missing or repeated refuses `target.not_found`; one that is not a Group or component
   `target.wrong_kind`. Filtering choice D11-a.
 - `Records::EntityStore.records_on(entity)`: the registered stores marking one entity, by presence.
 - `OccurrencePath.resolve(model, path)` (core): the read-only walk of a root-to-container path through Groups and
@@ -144,7 +145,8 @@ writes a dictionary. New names:
   corners, no hole) loose in that container, each `path`, `outline_m`, `refusal` (Convert's own source read), for
   `units.convert_review`. `ph_composer.windows.units.restore_candidates`: params `path`, `limit`, `cursor`: one row per
   Window Type stamped on loose pane Faces there (`type_id`, `pane_paths`, `element_ids`), with `host` when exactly
-  one writable Zone Face holds every pane on its plane and inside its outline, else `host: null` and `needs`
+  one Zone Face holds every pane on its plane and inside its outline and resolves for writing through
+  `Placement::Hosts.writable`, as `units.restore` resolves it, else `host: null` and `needs`
   (`host` or `selection`, the latter when the panes of more than one Window of that Type are mixed).
 
 ## C05 · Library catalog and compound copy

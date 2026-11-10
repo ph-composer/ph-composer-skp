@@ -7312,6 +7312,13 @@ Result:
               }
             },
             "description": "The registered PH-Composer records on the entity, valid or not, by dictionary; empty for none."
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
           }
         }
       },
@@ -24021,6 +24028,13 @@ Result:
               }
             },
             "description": "The refusal Make Zone gives this Group in this context, or null when it would make the Zone."
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
           }
         }
       },
@@ -60699,4 +60713,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.33 | 2026-11-10 | ph_composer.spaces.volumes.delete is new: it erases one Volume and its floor Faces in one Undo step, where volumes.remove keeps the Faces. The delete_volume_menu menu item is new. |
 | 1.34 | 2026-11-10 | ph_composer.spaces.create answers accepted and left_out as create_preview does, and each new Volume of create and volumes.create answers faces, its source Face paths. spaces.delete, remove, volumes.delete and volumes.remove refuse target.foreign_records while another feature's records are on or inside the Group. Make Zone refuses a Group holding a claimed object at any depth (target.wrong_hierarchy) and Restore a claimed member (target.wrong_kind); zones.list, zones.all and export preflight read the zone.ownership_conflict finding, which does not block export. A Face reference with a null entity_id refuses target.changed on every Face write once the Face has a record, and zones.update and update_metadata refuse a locked Zone (target.locked) as update_field does. |
 | 1.35 | 2026-11-10 | discover adds library_kinds, and describe answers a library kind by name (its wire kind and version, and its assignment target schema and examples or that it has none) and an installed extension by namespace. The agent connection's discover takes section, owner, limit, cursor and topic for bounded pages of operations, record kinds, reference targets, extensions, library kinds, common refusals with their meanings, contracts and the operating guide; initialize names the guide. ph_composer.library.copy's generation says it is required, as its schema already did. |
-| 1.36 | 2026-11-10 | Selection-free reads at an explicit path: ph_composer.context.children pages the entities directly in the root or one Group or component, with their state and records; zones.make_candidates, windows.units.convert_candidates and windows.units.restore_candidates list what Make Zone, Convert and Restore could take there; thermal_bridges.edges.at and edges.candidates read Edges by path in edges.selection's rows plus endpoints_m; and spaces.candidate_faces.list takes context for a first Space. edges.selection's copied flag no longer refuses for an unreadable record on another Edge. |
+| 1.36 | 2026-11-10 | Selection-free reads at an explicit path: ph_composer.context.children pages the entities directly in the root or one Group or component, with their state and records; zones.make_candidates, windows.units.convert_candidates and windows.units.restore_candidates list what Make Zone, Convert and Restore could take there; thermal_bridges.edges.at and edges.candidates read Edges by path in edges.selection's rows plus endpoints_m; and spaces.candidate_faces.list takes context for a first Space. A name over 256 characters is cut and named in the row's truncated. edges.selection's copied flag no longer refuses for an unreadable record on another Edge. |

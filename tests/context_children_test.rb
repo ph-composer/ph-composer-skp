@@ -115,6 +115,25 @@ class ContextChildrenTest < PhComposerTestCase
     assert_operator pages, :>, 2
   end
 
+  # SketchUp bounds no name: a long one is cut by characters, multibyte text included, and the row names it.
+  def test_a_long_name_is_cut_and_named_so_one_row_stays_inside_the_reply_budget
+    long = "é" * 26_000
+    @wrapper.entities << Sketchup::Group.new(250, Sketchup::Entities.new, :name => long)
+
+    result = query("path" => [200], "kinds" => ["group"], "limit" => 1, "cursor" => children(
+      "path" => [200], "kinds" => ["group"], "limit" => 2
+    ).fetch("next_cursor"))
+    row = result.dig("value", "children", 0)
+    candidate = API.query(:context => @context, :name => "ph_composer.zones.make_candidates",
+                          :params => { "parent_path" => [200] })
+    named = candidate.dig("value", "candidates").find { |entry| entry.fetch("path") == [200, 250] }
+
+    assert_equal [250, "é" * 256, ["name"]], row.values_at("persistent_id", "name", "truncated")
+    assert_operator JSON.generate(result).bytesize, :<, 24 * 1024
+    assert_equal [256, ["name"]], [named.fetch("name").length, named.fetch("truncated")]
+    refute children("path" => [200], "kinds" => ["face"]).dig("children", 0).key?("truncated")
+  end
+
   def test_a_missing_step_and_a_leaf_that_holds_nothing_refuse
     assert_equal "target.not_found", query("path" => [999]).fetch("code")
     assert_equal "target.wrong_kind", query("path" => [200, 201]).fetch("code")

@@ -52,7 +52,7 @@ module PhComposer
           panes = faces.filter_map { |face| (found = stamp(face)) && [face, found] }
           groups = panes.group_by { |_face, found| found.fetch("window_type_id") }.sort_by(&:first)
           build = lambda do |rows|
-            hosts = host_faces(request, container, faces - panes.map(&:first))
+            hosts = rows.empty? ? [] : host_faces(request, container, faces - panes.map(&:first))
             rows.map { |type_id, members| restore_row(request, container, type_id, members, hosts) }
           end
           page, next_cursor = Pages.bounded(request, RESTORE, groups, :key => ->(group) { [group.first] },
@@ -84,7 +84,8 @@ module PhComposer
 
           outlines = members.map { |face, _found| FaceCapture.call(face, container.transform).outer_loop }
           holding = hosts.select { |host| holds?(host.geometry, outlines) }
-          holding.length == 1 ? row.merge("host" => holding.first.reference) : row.merge("needs" => "host")
+          host = holding.length == 1 && writable(request, holding.first)
+          host ? row.merge("host" => host) : row.merge("needs" => "host")
         end
 
         def type_refusal(request, type_id)
@@ -107,6 +108,16 @@ module PhComposer
           end
         end
 
+        # The host's reference when the Face resolves for writing as units.restore resolves it (Zone and Face
+        # identity, locks, a Surface pair), or nil: a path that looks writable can still name a copied identity.
+        def writable(request, host)
+          Placement::Hosts.writable(request, host.reference,
+                                    :index => request.locate_index(Placement::Hosts::FACE_KIND))
+                          .reference
+        rescue CodedError
+          nil
+        end
+
         # Every pane point on the host's plane, and every pane inside the host's outline.
         def holds?(geometry, outlines)
           plane = Placement::Plane.new(geometry)
@@ -118,7 +129,7 @@ module PhComposer
         rescue CodedError
           false
         end
-        private_class_method :corners, :stamp, :restore_row, :type_refusal, :host_faces, :holds?
+        private_class_method :corners, :stamp, :restore_row, :type_refusal, :host_faces, :writable, :holds?
       end
     end
   end

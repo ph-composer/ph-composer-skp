@@ -12,6 +12,10 @@ module PhComposer
     # whether or not a context is open (context/SKETCHUP_HOST_BEHAVIOR.md, "Observers and edit contexts").
     # `locked`, `hidden` and `shared` are true when any step along the path is.
     Resolved = Struct.new(:path, :instances, :entities, :transform, :locked, :hidden, :shared, keyword_init: true)
+    # A native name longer than this many characters is cut in a candidate or inventory row, which names the
+    # field in `truncated`: SketchUp bounds no name, and a row must fit the agent reply budget. 256 characters
+    # are at most 1 KiB of UTF-8.
+    NAME_CHARACTERS = 256
 
     module_function
 
@@ -51,6 +55,14 @@ module PhComposer
       elsif entity.is_a?(Sketchup::ComponentInstance)
         entity.definition.entities
       end
+    end
+
+    # `fields` (name => text) with each text longer than NAME_CHARACTERS cut, and `truncated` naming the cut
+    # fields; no `truncated` key when nothing was cut.
+    def bounded_names(fields)
+      cut = fields.select { |_key, text| text.to_s.length > NAME_CHARACTERS }.keys
+      bounded = fields.to_h { |key, text| [key, cut.include?(key) ? text.to_s[0, NAME_CHARACTERS] : text] }
+      cut.empty? ? bounded : bounded.merge("truncated" => cut)
     end
 
     # Hidden itself, or on a tag that is hidden, or in a hidden tag folder.

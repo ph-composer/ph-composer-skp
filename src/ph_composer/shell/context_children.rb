@@ -12,6 +12,9 @@ module PhComposer
   # the Model, and moves nothing. It names no feature: ownership comes from Records::EntityStore.
   module ContextChildren
     KINDS = %w[group component face edge other].freeze
+    TRUNCATED = { "type" => "array", "items" => { "type" => "string" },
+                  "description" => "The names cut to #{OccurrencePath::NAME_CHARACTERS} characters; absent when " \
+                                   "none was." }.freeze
 
     extend SchemaShapes
 
@@ -61,15 +64,16 @@ module PhComposer
       contents = OccurrencePath.contents(entity)
       container = !contents.nil?
       name = entity.respond_to?(:name) ? entity.name.to_s : ""
-      { "path" => parent_path + [entity.persistent_id], "persistent_id" => entity.persistent_id,
-        "kind" => kind(entity), "type" => entity.typename, "name" => name,
-        "definition_name" => container ? definition_name(entity) : nil,
-        "hidden" => OccurrencePath.hidden?(entity),
-        "locked" => container ? entity.locked? : nil,
-        "shared" => container ? OccurrencePath.shared?(entity) : nil,
-        "solid" => container ? entity.volume.to_f.positive? : nil,
-        "child_count" => container ? contents.length : nil,
-        "records" => Records::EntityStore.records_on(entity) }
+      row = { "path" => parent_path + [entity.persistent_id], "persistent_id" => entity.persistent_id,
+              "kind" => kind(entity), "type" => entity.typename, "name" => name,
+              "definition_name" => container ? definition_name(entity) : nil,
+              "hidden" => OccurrencePath.hidden?(entity),
+              "locked" => container ? entity.locked? : nil,
+              "shared" => container ? OccurrencePath.shared?(entity) : nil,
+              "solid" => container ? entity.volume.to_f.positive? : nil,
+              "child_count" => container ? contents.length : nil,
+              "records" => Records::EntityStore.records_on(entity) }
+      row.merge(OccurrencePath.bounded_names(row.slice("name", "definition_name")))
     end
 
     def definition_name(entity)
@@ -111,8 +115,9 @@ module PhComposer
         "child_count" => { "type" => %w[integer null], "minimum" => 0,
                            "description" => "Entities directly inside a Group or component; null for anything else." },
         "records" => list(record, :description => "The registered PH-Composer records on the entity, valid or " \
-                                                  "not, by dictionary; empty for none.")
-      })
+                                                  "not, by dictionary; empty for none."),
+        "truncated" => TRUNCATED
+      }, :optional => ["truncated"])
       container = object({
         "path" => { "type" => "array", "items" => { "type" => "integer" } },
         "locked" => { "type" => "boolean", "description" => "A step on the path is locked." },
