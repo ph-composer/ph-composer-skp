@@ -13,10 +13,16 @@ module PhComposer
     module UnitRegistration
       STATUS_MAP = { "type" => "object", "description" => "Each extension envelope's status, by namespace." }.freeze
       EXAMPLE_UNIT = { "unit_id" => "wun_Ab12Cd34Ef56", "entity_path" => [1201, 1203] }.freeze
+      EXAMPLE_HOST = { "zone_id" => "zon_Ab12Cd34Ef56", "zone_path" => [1201], "entity_path" => [1202],
+                       "entity_id" => nil }.freeze
       METADATA_EXAMPLE = { "updates" => [{ "reference" => EXAMPLE_UNIT, "user_data" => {},
                                            "expected_metadata" => { "user_data" => {}, "extension_data" => {} } }] }
                          .freeze
       ANCHOR = { "type" => "string", "enum" => Units::Anchors::ALL }.freeze
+      GEOMETRY = { "type" => "string", "enum" => %w[full summary],
+                   "description" => "full (the default): outline_m and holes on every page. summary: their counts " \
+                                    "instead, so the Units page has the reply; read them with " \
+                                    "#{Units::HostExtent::POINTS} and #{Units::HostExtent::HOLES}." }.freeze
       ANCHOR_TEXT = "Which point of the opening sits at the placement point: sill, center or head, by left, " \
                     "center or right as seen from outside."
 
@@ -84,12 +90,16 @@ module PhComposer
                            "findings" => Shapes.list(finding))
         prefix = "#{FEATURE_ID}.units"
         result = Shapes.object({ "units" => Shapes.list(view) })
-        feature.query("#{prefix}.list",
-                      :description => "Window occurrences and native findings, without writes.",
+        feature.query(Units::Actions::LIST,
+                      :description => "One bounded page of Window occurrences and native findings, without writes.",
                       :refuses => Refuses::UNIT_READ + Refuses::PAGE,
-                      :params => Shapes.list_params,
-                      :result => Shapes.with(result, "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL),
-                      :examples => [{}]) { |request| Units::Actions.list(request) }
+                      :params => list_params,
+                      :result => Shapes.object({ "units" => Shapes.list(list_row(view)),
+                                                 "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL }),
+                      :examples => [{}, { "fields" => [], "metadata" => "summary", "limit" => 20 }]) do |request|
+          Units::Actions.list(request)
+        end
+        detail(feature, reference)
         feature.query("#{prefix}.all", :description => "All Window occurrences and native findings for the snapshot.",
                                        :response => { "bounded" => false, "prefer" => "#{prefix}.list" },
                                        :refuses => Refuses::UNIT_READ,
@@ -97,6 +107,54 @@ module PhComposer
           Units::Actions.list(request, :paged => false)
         end
         feature.snapshot_section(prefix, :query => "#{prefix}.all")
+      end
+
+      def list_params
+        params = Shapes.list_params
+        params.merge("properties" => params.fetch("properties").merge(
+          "fields" => { "type" => "array", "items" => { "type" => "string",
+                                                        "enum" => Units::RECORD_KIND.fields.map(&:key) },
+                        "description" => "Only these values of each Unit; all when absent." },
+          "metadata" => { "type" => "string", "enum" => %w[full summary],
+                          "description" => "full (the default): user_data, extension_data and extension_status as " \
+                                           "stored. summary: none of them, but their sizes, digests and status " \
+                                           "counts in metadata and each value's size in value_bytes, and the " \
+                                           "native name cut at #{OccurrencePath::NAME_CHARACTERS} characters; " \
+                                           "read any of them whole with #{Units::Actions::DETAIL}." }
+        ))
+      end
+
+      # A list row: the whole row by default; with fields only those values; with metadata summary the
+      # metadata maps' sizes in place of the maps.
+      def list_row(view)
+        properties = view.fetch("properties")
+        values = properties.fetch("values").reject { |key, _value| key == "required" }
+        view.merge("required" => view.fetch("required") - %w[user_data extension_data extension_status],
+                   "properties" => properties.merge(
+                     "values" => values.merge("description" => "Every value, or only those fields names."),
+                     "metadata" => RecordQueries::METADATA, "value_bytes" => Shapes::OBJECT,
+                     "truncated" => ContextChildren::TRUNCATED
+                   ))
+      end
+
+      def detail(feature, reference)
+        parts = Units::Actions::DETAIL_PARTS
+        feature.query(Units::Actions::DETAIL,
+                      :description => "One part of one Window occurrence's units.list row, exactly, as canonical " \
+                                      "JSON text in fragments: join every fragment's text in order, check its " \
+                                      "sha256 and parse it. Pass next_cursor back for the next fragment.",
+                      :refuses => Refuses::UNIT_READ + %w[query.cursor_expired target.ambiguous target.changed
+                                                          target.not_found],
+                      :params => Shapes.object({ "unit" => unit(reference, "The Window occurrence to read."),
+                                                 "path" => Fragments.path_param(parts, "[\"user_data\", " \
+                                                                                       "\"notes\"], [\"name\"]"),
+                                                 "cursor" => Pages::CURSOR }, :optional => %w[cursor]),
+                      :result => Shapes.object({ "unit_id" => Shapes::TEXT, "type" => Fragments::TYPE,
+                                                 "fragment" => Fragments::FRAGMENT,
+                                                 "next_cursor" => Pages::NEXT_CURSOR }),
+                      :examples => [{ "unit" => EXAMPLE_UNIT, "path" => %w[user_data] }]) do |request|
+          Units::Actions.detail(request)
+        end
       end
 
       def repairs(feature, face, reference)
@@ -304,32 +362,76 @@ module PhComposer
       def host_extent(feature, face, reference)
         number = { "type" => "number", "x-unit" => "m" }
         rectangle = { "x_m" => number, "y_m" => number, "width_m" => number, "height_m" => number }
-        feature.query("#{FEATURE_ID}.units.host_extent",
+        host_param = host(face, "The Zone Face a Window would be placed on.")
+        count = { "type" => "integer", "minimum" => 0 }
+        feature.query(Units::HostExtent::QUERY,
                       :description => "A writable Zone Face's outline and bounding width and height in the frame " \
                                       "units.place offsets use, with the holes and Window outlines on its plane " \
                                       "to keep clear of.",
                       :refuses => Refuses::HOST_EXTENT + Refuses::PAGE,
-                      :params => Shapes.object({ "host" => host(face, "The Zone Face a Window would be placed on."),
-                                                 "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR },
-                                               :optional => %w[limit cursor]),
+                      :params => Shapes.object({
+                        "host" => host_param,
+                        "geometry" => GEOMETRY,
+                        "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR
+                      }, :optional => %w[geometry limit cursor]),
                       :result => Shapes.object({
                         "width_m" => number, "height_m" => number,
                         "outline_m" => Shapes.list({ "type" => "array", "items" => number, "minItems" => 2,
                                                      "maxItems" => 2 },
                                                    :description => "The Face's outer loop as [x_m, y_m] offsets; " \
                                                                    "a Face that is not a rectangle is narrower " \
-                                                                   "than width_m by height_m in places."),
+                                                                   "than width_m by height_m in places. Absent " \
+                                                                   "with geometry summary."),
                         "holes" => Shapes.list(Shapes.object(rectangle),
-                                               :description => "Each hole's bounding rectangle, in offsets."),
+                                               :description => "Each hole's bounding rectangle, in offsets. Absent " \
+                                                               "with geometry summary."),
+                        "outline_points" => count.merge("description" => "With geometry summary: the outer loop's " \
+                                                                         "point count."),
+                        "hole_count" => count.merge("description" => "With geometry summary: how many holes."),
                         "units" => Shapes.list(Shapes.object({ "reference" => reference }.merge(rectangle)),
                                                :description => "One page of the Window outlines on the Face's plane " \
                                                                "that meet its bounding box, each as a bounding " \
                                                                "rectangle in offsets."),
                         "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL
-                      }),
-                      :examples => [{ "host" => { "zone_id" => "zon_Ab12Cd34Ef56", "zone_path" => [1201],
-                                                  "entity_path" => [1202], "entity_id" => nil } }]) do |request|
+                      }, :optional => %w[outline_m holes outline_points hole_count]),
+                      :examples => [{ "host" => EXAMPLE_HOST }, { "host" => EXAMPLE_HOST,
+                                                                  "geometry" => "summary" }]) do |request|
           Units::HostExtent.read(request, request.params.fetch("host"))
+        end
+        host_loops(feature, host_param, rectangle, count)
+      end
+
+      def host_loops(feature, host, rectangle, count)
+        number = rectangle.fetch("x_m")
+        page = { "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL }
+        paging = { "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR }
+        index = count.merge("description" => "The hole's place in the Face's loops, as hole names it.")
+        feature.query(Units::HostExtent::HOLES,
+                      :description => "One bounded page of a writable Zone Face's holes, each its bounding " \
+                                      "rectangle in the offsets units.place uses and its point count.",
+                      :refuses => Refuses::HOST_EXTENT + Refuses::PAGE,
+                      :params => Shapes.object({ "host" => host }.merge(paging), :optional => Pages::PAGE_KEYS),
+                      :result => Shapes.object({ "holes" => Shapes.list(Shapes.object(
+                        { "index" => index }.merge(rectangle).merge("point_count" => count)
+                      )) }.merge(page)),
+                      :examples => [{ "host" => EXAMPLE_HOST }]) do |request|
+          Units::HostExtent.holes(request, request.params.fetch("host"))
+        end
+        feature.query(Units::HostExtent::POINTS,
+                      :description => "One bounded page of the points of a writable Zone Face's outer loop, or of " \
+                                      "one hole, in loop order, as offsets units.place uses.",
+                      :refuses => (Refuses::HOST_EXTENT + Refuses::PAGE + %w[target.not_found]).uniq,
+                      :params => Shapes.object({ "host" => host,
+                                                 "hole" => count.merge("description" => "The hole to read, as " \
+                                                                                        "#{Units::HostExtent::HOLES} " \
+                                                                                        "numbers it; the outer loop " \
+                                                                                        "when absent.") }
+                                                 .merge(paging), :optional => %w[hole limit cursor]),
+                      :result => Shapes.object({ "points" => Shapes.list(Shapes.object({
+                        "index" => count, "x_m" => number, "y_m" => number
+                      })) }.merge(page)),
+                      :examples => [{ "host" => EXAMPLE_HOST }, { "host" => EXAMPLE_HOST, "hole" => 0 }]) do |request|
+          Units::HostExtent.points(request, request.params.fetch("host"), request.params["hole"])
         end
       end
 

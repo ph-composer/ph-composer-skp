@@ -139,7 +139,53 @@ module PhComposer
         row = zone_view(zone, duplicates.include?(zone.record.fetch("id")), request, counts)
         params.key?("fields") ? project_row(row, params["fields"]) : row
       end
-      overview(request.model, rows).merge("next_cursor" => next_cursor, "total" => zones.length)
+      whole = overview(request.model, rows)
+      if params["overview"] == "summary"
+        whole = whole.reject { |key, _value| %w[restorable findings].include?(key) }
+                     .merge("restorable_total" => whole.fetch("restorable").length,
+                            "finding_total" => whole.fetch("findings").length)
+      end
+      whole.merge("next_cursor" => next_cursor, "total" => zones.length)
+    end
+
+    RESTORABLE_LIST = "#{FEATURE_ID}.restorable.list"
+    RESTORABLE_DETAIL = "#{FEATURE_ID}.restorable.detail"
+    FINDINGS_LIST = "#{FEATURE_ID}.findings.list"
+    # What a restore offer row leaves out, which grows with the exploded Zone: restorable.detail reads them.
+    OFFER_DETAIL = %w[entity_ids choice_record].freeze
+
+    # One bounded page of the restore offers, by Zone id, without their member ids or choice record:
+    # zones.restore needs only `parent_path` and `zone_id`. Labels are cut as every name in a row is.
+    def restorable(request)
+      offers = Repair.orphans(request.model).sort_by { |offer| offer.fetch("zone_id") }
+      rows = offers.map do |offer|
+        offer.reject { |key, _value| OFFER_DETAIL.include?(key) }
+             .merge(OccurrencePath.bounded_names(offer.slice("building_segment", "level")))
+      end
+      page, next_cursor = Pages.bounded(request, RESTORABLE_LIST, rows, :key => ->(row) { row.fetch("zone_id") })
+      { "restorable" => page, "next_cursor" => next_cursor, "total" => rows.length }
+    end
+
+    # One part of one restore offer, exactly, in fragments (shell/fragments.rb).
+    def restorable_detail(request)
+      zone_id = request.params.fetch("zone_id")
+      offer = Repair.orphans(request.model).find { |row| row.fetch("zone_id") == zone_id }
+      raise CodedError.new("target.not_found", "No exploded Zone #{zone_id} can be restored.") unless offer
+
+      { "zone_id" => zone_id }
+        .merge(Fragments.detail(request, RESTORABLE_DETAIL, offer, request.params.fetch("path"),
+                                :parts => offer.keys - %w[zone_id]))
+    end
+
+    # One bounded page of the Zone findings list and all carry, in their order.
+    def findings(request)
+      found = Occurrences.component_findings(request.model) + Occurrences.ownership_findings(request.model)
+      # A message quotes a Zone's name, which can be of any length; the row is cut so it never crowds the page.
+      rows = found.each_with_index.map do |finding, index|
+        [index, finding.merge("message" => finding.fetch("message")[0, RecordQueries::MAX_MESSAGE])]
+      end
+      page, next_cursor = Pages.bounded(request, FINDINGS_LIST, rows, :key => ->(row) { [row.first] })
+      { "findings" => page.map(&:last), "next_cursor" => next_cursor, "total" => rows.length }
     end
 
     # Every Zone occurrence, whole: the panel's projection. Scripts page `list` instead.

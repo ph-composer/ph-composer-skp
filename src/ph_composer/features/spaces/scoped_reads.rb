@@ -11,6 +11,9 @@ module PhComposer
       FLOOR_SEGMENTS = "#{FEATURE_ID}.floor_segments.list"
       FINDINGS = "#{FEATURE_ID}.findings.list"
       CANDIDATE_FACES = "#{FEATURE_ID}.candidate_faces.list"
+      DETAIL = "#{FEATURE_ID}.detail"
+      SCOPES = { "space" => %w[space_id Space], "volume" => %w[volume_id Volume],
+                 "floor_segment" => ["floor_segment_id", "Floor Segment"] }.freeze
       CANDIDATE_FIELDS = %w[plan_area_m2 normal horizontal loops_m].freeze
       OPEN_SPACE = "The Space open for editing (ph_composer.spaces.context.open)."
       OPEN_CONTEXT = "This context open for editing (ph_composer.context.open with its path): Create Space takes " \
@@ -43,6 +46,33 @@ module PhComposer
         segments = with_loops(request.model, segments) if Array(params["fields"]).include?("loops_m")
         page(request, FLOOR_SEGMENTS, "floor_segments",
              segments.map { |segment| Summaries.segment(segment, params["fields"]) })
+      end
+
+      # One part of one Space's, Volume's or Floor Segment's row as `all` builds it, exactly, in fragments
+      # (shell/fragments.rb): what a page cannot hold, such as a Floor Segment's loops_m over hundreds of holes
+      # or large user_data. The reference resolves as the scoped reads resolve it.
+      def detail(request)
+        params = request.params
+        named = SCOPES.keys.select { |key| params.key?(key) }
+        raise CodedError.new("params.invalid", "Name one Space, Volume or Floor Segment.") unless named.length == 1
+
+        rows, = Reads.assemble(request)
+        scope = named.first
+        reference = params.fetch(scope)
+        id_key, label = SCOPES.fetch(scope)
+        row = case scope
+              when "space" then located(rows, reference, id_key, label)
+              when "volume" then located(scope_volumes(request, rows, reference), reference, id_key, label)
+              else segment_row(request, rows, reference, id_key, label)
+              end
+        Fragments.detail(request, DETAIL, row, params.fetch("path"), :parts => row.keys - Summaries::IDENTITY)
+      end
+
+      # A Floor Segment's row with its loops, from the Volume its path names.
+      def segment_row(request, rows, reference, id_key, label)
+        volume = { "entity_path" => Resolve.integer_path(reference.fetch("entity_path"))[0...-1] }
+        segments = scope_volumes(request, rows, volume).flat_map { |row| row.fetch("floor_segments") }
+        with_loops(request.model, [located(segments, reference, id_key, label)]).first
       end
 
       # Each Floor Segment's loops in metres, read again from its Face only when `fields` asks for them.

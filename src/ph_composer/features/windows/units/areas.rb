@@ -10,6 +10,10 @@ module PhComposer
       module Areas
         QUERY = "#{FEATURE_ID}.units.glazed_area_by_face"
         SECTION = "#{FEATURE_ID}.unit_areas"
+        # Bounded pages of the same table: the Face rows, optionally of some Zones, and the unhosted Units.
+        LIST = "#{FEATURE_ID}.units.face_areas.list"
+        UNHOSTED = "#{FEATURE_ID}.units.unhosted.list"
+        SCOPE = %w[zone_ids zone_paths].freeze
 
         module_function
 
@@ -31,6 +35,67 @@ module PhComposer
                     request.query("#{FEATURE_ID}.units.all").fetch("units"), types)
           end
           feature.snapshot_section(SECTION, :query => QUERY)
+          install_pages(feature, row, result)
+        end
+
+        def install_pages(feature, row, result)
+          page = { "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL }
+          ids = { "type" => "array", "items" => Shapes::TEXT, "maxItems" => Pages::MAXIMUM_LIMIT,
+                  "description" => "Only Faces in occurrences of these Zone ids." }
+          paths = { "type" => "array", "items" => { "type" => "array", "items" => { "type" => "integer" } },
+                    "maxItems" => Pages::MAXIMUM_LIMIT, "description" => "Only Faces in the Zones at these paths." }
+          feature.query(LIST,
+                        :description => "One bounded page of #{QUERY}'s Face rows in Zone and Face path order, " \
+                                        "optionally of some Zones: gross, glazed opening and net opaque area, " \
+                                        "withheld (null, with findings) when the geometry is uncertain.",
+                        :refuses => Refuses::UNIT_READ + Refuses::PAGE,
+                        :params => Shapes.object({ "zone_ids" => ids, "zone_paths" => paths,
+                                                   "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR },
+                                                 :optional => SCOPE + Pages::PAGE_KEYS),
+                        :result => Shapes.object({ "faces" => Shapes.list(row),
+                                                   "unhosted_unit_total" => Pages::TOTAL.merge(
+                                                     "description" => "Units on no Zone Face, in the whole Model; " \
+                                                                      "#{UNHOSTED} lists them."
+                                                   ) }.merge(page)),
+                        :examples => [{}, { "zone_ids" => ["zon_Ab12Cd34Ef56"], "limit" => 50 }]) do |request|
+            faces(request)
+          end
+          feature.query(UNHOSTED,
+                        :description => "One bounded page of the Window occurrences #{QUERY} counts on no Zone Face, " \
+                                        "in path order.",
+                        :refuses => Refuses::UNIT_READ + Refuses::PAGE,
+                        :params => Shapes.object({ "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR },
+                                                 :optional => Pages::PAGE_KEYS),
+                        :result => Shapes.object({ "units" => result.dig("properties", "unhosted_units") }.merge(page)),
+                        :examples => [{}]) { |request| unhosted(request) }
+        end
+
+        def faces(request)
+          params = request.params
+          table = table(request, LIST)
+          rows = table.fetch("faces").select do |row|
+            reference = row.fetch("reference")
+            (!params.key?("zone_ids") || params["zone_ids"].include?(reference.fetch("zone_id"))) &&
+              (!params.key?("zone_paths") || params["zone_paths"].include?(reference.fetch("zone_path")))
+          end
+          key = ->(row) { row.fetch("reference").values_at("zone_path", "entity_path").flatten }
+          page, next_cursor = Pages.bounded(request, LIST, rows.sort_by(&key), :key => key)
+          { "faces" => page, "unhosted_unit_total" => table.fetch("unhosted_units").length,
+            "next_cursor" => next_cursor, "total" => rows.length }
+        end
+
+        def unhosted(request)
+          units = table(request, UNHOSTED).fetch("unhosted_units")
+          key = ->(reference) { reference.fetch("entity_path") }
+          page, next_cursor = Pages.bounded(request, UNHOSTED, units.sort_by(&key), :key => key)
+          { "units" => page, "next_cursor" => next_cursor, "total" => units.length }
+        end
+
+        # The whole table, as QUERY answers it; a bad limit or cursor refuses before it is measured.
+        def table(request, query)
+          Pages.limit(request.params)
+          Pages.position(request, query)
+          request.query(QUERY)
         end
 
         def measure(faces, units, types)
@@ -73,7 +138,7 @@ module PhComposer
         rescue CodedError
           nil
         end
-        private_class_method :opening_area
+        private_class_method :opening_area, :install_pages, :faces, :unhosted, :table
       end
     end
   end

@@ -75,8 +75,12 @@ module PhComposer
                      "description" => "Only the occurrences at these root-to-Zone paths." },
         "fields" => { "type" => "array", "items" => { "type" => "string", "enum" => VALUE_KEYS },
                       "description" => "Project each row to these values; the whole row when absent." },
+        "overview" => { "type" => "string", "enum" => %w[full summary],
+                        "description" => "full (the default): every restore offer and Zone finding on every page. " \
+                                         "summary: their counts instead; #{Zones::RESTORABLE_LIST} and " \
+                                         "#{Zones::FINDINGS_LIST} page them." },
         "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR
-      }, :optional => %w[ids paths fields limit cursor]).freeze
+      }, :optional => %w[ids paths fields overview limit cursor]).freeze
       RESTORABLE = Shapes.object({
         "zone_id" => Shapes::ID, "building_segment" => { "type" => %w[string null] },
         "level" => { "type" => %w[string null] }, "parent_path" => PATH,
@@ -106,8 +110,17 @@ module PhComposer
       LIST_RESULT = Shapes.object(
         ALL_RESULT.fetch("properties").merge(
           "zones" => Shapes.list(PROJECTED_ZONE_ROW, :description => "One page of Zone occurrences in path order."),
+          "restorable_total" => Pages::TOTAL.merge("description" => "With overview summary: how many restore offers."),
+          "finding_total" => Pages::TOTAL.merge("description" => "With overview summary: how many Zone findings."),
           "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL
-        )
+        ), :optional => %w[restorable findings restorable_total finding_total]
+      ).freeze
+      RESTORABLE_ROW = RESTORABLE.merge(
+        "required" => RESTORABLE.fetch("required") - Zones::OFFER_DETAIL,
+        "properties" => RESTORABLE.fetch("properties").reject { |key, _value| Zones::OFFER_DETAIL.include?(key) }
+                                  .merge("truncated" => ContextChildren::TRUNCATED),
+        "description" => "A restore offer without its member ids or choice record; #{Zones::RESTORABLE_DETAIL} " \
+                         "reads them."
       ).freeze
       ZONE_ID_RESULT = Shapes.object({ "zone_id" => Shapes::ID }).freeze
 
@@ -128,6 +141,39 @@ module PhComposer
         end
         install_containment(feature)
         install_make_candidates(feature)
+        install_overview_pages(feature)
+      end
+
+      # The collections every zones.list page carries, a bounded page at a time.
+      def install_overview_pages(feature)
+        page = { "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL }
+        paging = Shapes.object({ "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR }, :optional => Pages::PAGE_KEYS)
+        feature.query(Zones::RESTORABLE_LIST,
+                      :description => "One bounded page of the exploded Zones Restore can regroup, by Zone id: " \
+                                      "each offer's parent_path and zone_id are #{FEATURE_ID}.restore's params.",
+                      :refuses => READ + Refuses::PAGE, :params => paging,
+                      :result => Shapes.object({ "restorable" => Shapes.list(RESTORABLE_ROW) }.merge(page)),
+                      :examples => [{}, { "limit" => 50 }]) { |request| Zones.restorable(request) }
+        feature.query(Zones::RESTORABLE_DETAIL,
+                      :description => "One part of one restore offer, exactly, as canonical JSON text in fragments: " \
+                                      "join every fragment's text in order, check its sha256 and parse it.",
+                      :refuses => READ + %w[query.cursor_expired target.not_found],
+                      :params => Shapes.object({ "zone_id" => Shapes::ID.merge("description" => "The offer's zone_id."),
+                                                 "path" => Fragments.path_param(RESTORABLE.fetch("properties").keys -
+                                                                                ["zone_id"], "[\"entity_ids\"]"),
+                                                 "cursor" => Pages::CURSOR }, :optional => ["cursor"]),
+                      :result => Shapes.object({ "zone_id" => Shapes::ID, "type" => Fragments::TYPE,
+                                                 "fragment" => Fragments::FRAGMENT,
+                                                 "next_cursor" => Pages::NEXT_CURSOR }),
+                      :examples => [{ "zone_id" => "zon_Ab12Cd34Ef56", "path" => ["entity_ids"] }]) do |request|
+          Zones.restorable_detail(request)
+        end
+        feature.query(Zones::FINDINGS_LIST,
+                      :description => "One bounded page of the Zone findings zones.list carries: Zone records no " \
+                                      "read takes as a Zone, and Zones on another feature's Group.",
+                      :refuses => READ + Refuses::PAGE, :params => paging,
+                      :result => Shapes.object({ "findings" => Shapes.list(FINDING) }.merge(page)),
+                      :examples => [{}]) { |request| Zones.findings(request) }
       end
 
       # The two edits of an existing Zone occurrence: its values, and its metadata.

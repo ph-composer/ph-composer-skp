@@ -47,9 +47,53 @@ module PhComposer
                                                       :examples => [{}]) do |request|
             Adoption.preview(request, Inventory.rows(request.model))
           end
+          install_sources_page(feature)
           install_actions(feature)
           feature.snapshot_section(PREFIX, :query => "#{PREFIX}.all")
           install_retargeters(feature)
+        end
+
+        SOURCES_LIST = "#{PREFIX}.adoption_sources.list"
+
+        # adoption_preview's sources a bounded page at a time, by key, each naming the cluster it collides in.
+        def install_sources_page(feature)
+          row = SOURCE.merge("required" => SOURCE.fetch("required") + ["cluster"],
+                             "properties" => SOURCE.fetch("properties").merge(
+                               "truncated" => ContextChildren::TRUNCATED,
+                               "cluster" => { "type" => %w[string null],
+                                              "description" => "The key of the first source in this source's " \
+                                                               "collision cluster (adoption_preview's " \
+                                                               "collision_clusters), or null when it collides " \
+                                                               "with none." }
+                             ))
+          feature.query(SOURCES_LIST,
+                        :description => "One bounded page of the legacy and copied choices adoption_preview lists, " \
+                                        "by key, beside whether adoption is required and the suggested Segment.",
+                        :refuses => (REFUSALS + %w[query.cursor_expired query.limit_invalid]).uniq,
+                        :params => Shapes.object({ "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR },
+                                                 :optional => Pages::PAGE_KEYS),
+                        :result => Shapes.object({ "required" => { "type" => "boolean" },
+                                                   "suggested_segment" => { "type" => "string" },
+                                                   "sources" => Shapes.list(row), "next_cursor" => Pages::NEXT_CURSOR,
+                                                   "total" => Pages::TOTAL }),
+                        :examples => [{}, { "limit" => 50 }]) { |request| sources_page(request) }
+        end
+
+        def sources_page(request)
+          Pages.limit(request.params)
+          Pages.position(request, SOURCES_LIST)
+          preview = Adoption.preview(request, Inventory.rows(request.model))
+          clusters = preview.fetch("collision_clusters").each_with_object({}) do |keys, found|
+            keys.each { |key| found[key] = keys.first }
+          end
+          rows = preview.fetch("sources").map do |source|
+            source.merge("cluster" => clusters[source.fetch("key")])
+                  .merge(OccurrencePath.bounded_names(source.slice("name")))
+          end
+          rows.sort_by! { |source| source.fetch("key") }
+          page, next_cursor = Pages.bounded(request, SOURCES_LIST, rows, :key => ->(source) { source.fetch("key") })
+          preview.slice("required", "suggested_segment").merge("sources" => page, "next_cursor" => next_cursor,
+                                                               "total" => rows.length)
         end
 
         def install_actions(feature)

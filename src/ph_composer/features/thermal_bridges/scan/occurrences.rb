@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "set"
+
 module PhComposer
   module ThermalBridges
     # The live read behind the schedule. It walks the Model once for assigned Edges and asks Zones, through
@@ -16,6 +18,11 @@ module PhComposer
       # Edge findings and unreadable assignments a bounded page lists, beside a count of every one.
       DETAIL_ROWS = 50
       LIST = "#{FEATURE_ID}.schedule.list".freeze
+      MEMBERS = "#{FEATURE_ID}.runs.members.list".freeze
+      EDGE_FINDINGS = "#{FEATURE_ID}.schedule.edge_findings.list".freeze
+      UNREADABLE = "#{FEATURE_ID}.schedule.unreadable.list".freeze
+      # An unreadable assignment's message can quote stored text of any length; a page row is cut here.
+      MAX_MESSAGE = RecordQueries::MAX_MESSAGE
       UNITS = { "length_m" => "m", "psi_w_mk" => "W/mK", "heat_loss_w_k" => "W/K" }.freeze
 
       module_function
@@ -31,18 +38,107 @@ module PhComposer
       # One bounded page of runs in schedule order, with the totals over every run and the first
       # DETAIL_ROWS Edge findings and unreadable assignments. The runs share the page's byte budget with
       # what is beside them. A bad limit or cursor refuses before the Model is walked.
+      # With `compact`, each run leaves out its points and Edge paths and each finding its Edges, counting
+      # them, and the Edge findings and unreadable assignments are left to their own pages, counted.
       def page(request)
-        Pages.limit(request.params)
-        Pages.position(request, LIST)
-        whole = schedule(request)
+        whole = paged_schedule(request, LIST)
+        compact = request.params["compact"]
         runs = whole.fetch("runs")
-        beside = whole.merge("runs" => [], "edge_findings" => whole.fetch("edge_findings").first(DETAIL_ROWS),
-                             "unreadable" => whole.fetch("unreadable").first(DETAIL_ROWS))
-        # A cursor holds a String or an Array, so a run's place in the schedule is carried as a one-item Array.
-        order = runs.each_with_index.to_h { |row, index| [row.fetch("identifier"), [index]] }
-        page, cursor = Pages.bounded(request, LIST, runs, :key => ->(row) { order.fetch(row.fetch("identifier")) },
-                                                          :max_bytes => budget(beside))
-        beside.merge("runs" => page, "next_cursor" => cursor, "total" => runs.length)
+        runs = runs.map { |run| compact_run(run) } if compact
+        beside = if compact
+                   whole.reject { |key, _value| %w[edge_findings unreadable].include?(key) }
+                        .merge("runs" => [], "totals" => compact_totals(whole.fetch("totals")))
+                 else
+                   whole.merge("runs" => [], "edge_findings" => whole.fetch("edge_findings").first(DETAIL_ROWS),
+                               "unreadable" => whole.fetch("unreadable").first(DETAIL_ROWS).map { |row| cut(row) })
+                 end
+        # A cursor holds a String or an Array, so a run's place in the schedule is carried as a one-item Array:
+        # its index, since two runs may share an identifier.
+        indexed = runs.each_with_index.map { |row, index| [[index], row] }
+        page, cursor = Pages.bounded(request, LIST, indexed, :key => :first.to_proc, :max_bytes => budget(beside))
+        beside.merge("runs" => page.map(&:last), "next_cursor" => cursor, "total" => runs.length)
+      end
+
+      # One page of one run's member Edges in run order, each with its root-to-Edge path and world end points,
+      # or of only the Edges one of its findings names. The run is named by its derived identifier, which
+      # changes with the geometry, so a run that changed refuses target.not_found as well as by cursor.
+      def members(request)
+        whole = paged_schedule(request, MEMBERS)
+        identifier = request.params.fetch("identifier")
+        run = whole.fetch("runs").find { |row| row.fetch("identifier") == identifier }
+        raise CodedError.new("target.not_found", "No thermal-bridge run is #{identifier} now.") unless run
+
+        paths = run.fetch("edge_paths")
+        points = run.fetch("points_m")
+        named = named_paths(run, request.params["finding"])&.to_set
+        rows = paths.each_with_index.filter_map do |path, index|
+          next if named && !named.include?(path)
+
+          { "index" => index, "path" => path, "points_m" => [points[index], points[index + 1]] }
+        end
+        page, next_cursor = Pages.bounded(request, MEMBERS, rows, :key => ->(row) { [row.fetch("index")] })
+        { "identifier" => identifier, "members" => page, "next_cursor" => next_cursor, "total" => rows.length }
+      end
+
+      # One page of the assigned Edges no Zone holds, or of the assignments that cannot be read, by path.
+      def edge_findings(request)
+        listed(request, EDGE_FINDINGS, "edge_findings")
+      end
+
+      def unreadable(request)
+        listed(request, UNREADABLE, "unreadable") { |row| cut(row) }
+      end
+
+      def cut(row)
+        row.merge("message" => row.fetch("message")[0, MAX_MESSAGE])
+      end
+
+      def listed(request, query, key)
+        rows = paged_schedule(request, query).fetch(key).sort_by { |row| row.fetch("path") }
+        rows = rows.map { |row| yield row } if block_given?
+        page, next_cursor = Pages.bounded(request, query, rows, :key => ->(row) { row.fetch("path") })
+        { key => page, "next_cursor" => next_cursor, "total" => rows.length }
+      end
+
+      # The whole schedule for one page of `query`; a bad limit or cursor refuses before the Model is walked.
+      def paged_schedule(request, query)
+        Pages.limit(request.params)
+        Pages.position(request, query)
+        schedule(request)
+      end
+
+      def named_paths(run, finding)
+        return nil if finding.nil?
+
+        found = run.fetch("findings")[finding]
+        raise CodedError.new("target.not_found", "The run has no finding #{finding}.") unless found
+
+        found.dig("locate", "edge_paths")
+      end
+
+      # A run row without what grows with its length: its points, its Edge paths and each finding's Edges, and
+      # with its labels cut as every name in a bounded row is.
+      def compact_run(run)
+        zone = run.fetch("zone")
+        bounded = OccurrencePath.bounded_names(zone.slice("name", "building_segment"))
+        labels = OccurrencePath.bounded_names(run.slice("display_name", "type_name"))
+        truncated = Array(bounded.delete("truncated")).map { |key| "zone.#{key}" } + Array(labels.delete("truncated"))
+        compact = run.reject { |key, _value| %w[points_m edge_paths].include?(key) }.merge(labels).merge(
+          "zone" => zone.merge(bounded), "edge_count" => run.fetch("edge_paths").length,
+          "point_count" => run.fetch("points_m").length,
+          "findings" => run.fetch("findings").map do |finding|
+            finding.reject { |key, _value| key == "locate" }
+                   .merge("edge_count" => finding.dig("locate", "edge_paths").length)
+          end
+        )
+        truncated.empty? ? compact : compact.merge("truncated" => truncated)
+      end
+
+      # The totals with each type's name cut, so the totals beside every page grow with the number of types only.
+      def compact_totals(totals)
+        totals.merge("by_type" => totals.fetch("by_type").map do |row|
+          row.merge(OccurrencePath.bounded_names(row.slice("type_name")).reject { |key, _value| key == "truncated" })
+        end)
       end
 
       # What the page's runs may take: the page budget less what travels beside them, never below one row,

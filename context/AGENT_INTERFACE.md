@@ -178,6 +178,20 @@ copy slot and findings, beside the Type's totals from the row `types.list` build
 a Material (`assemblies.materials.uses.list`) or Window product (`windows.<collection>.uses.list`),
 with the count of owners that could not be read. A name in any part row is cut at 256 characters and
 named in `truncated`; the Type elements page leaves its rows what the repeated Type summary does not use.
+Implemented (API 1.38): the same for occurrences, geometry and schedules. Each list whose row or beside-row
+collection can outgrow a reply takes an optional compact form, its whole reply the default: `windows.units.list`
+`fields` and `metadata` `"summary"` (as `records.list`, the native name cut at 256), `units.host_extent` `geometry`
+`"summary"`, `units.convert_review` `compact`, `zones.list` `overview` `"summary"` and
+`thermal_bridges.schedule.list` `compact`, each counting what it leaves out. What was left out has its own read:
+`units.host_extent.holes` and `.points` (rectangles and loop points in placement offsets), `units.face_areas.list`
+(optionally by Zone) and `units.unhosted.list`, `zones.faces.assembly_usage.list` and `.faces`,
+`zones.restorable.list`, `zones.findings.list`, `zones.options.adoption_sources.list` (each with its collision
+`cluster`), `thermal_bridges.runs.members.list` (a run's Edges with world end points, by its derived
+`identifier`, or one finding's), `schedule.edge_findings.list` and `schedule.unreadable.list`. One row of a computed
+result reads exactly through `Fragments.detail`, a path into the row the list builds: `windows.units.detail` (by
+Unit reference), `units.convert_review.detail` (a group's sources, whose SHA-256 is the compact `sources_digest`),
+`zones.restorable.detail` and `spaces.detail` (a Space, Volume or Floor Segment row, loops included). Every one
+reads the owner's own whole result, so a page never computes a rule of its own.
 Implemented (API 1.36): reads that need no selection. `ph_composer.context.children` pages the entities
 directly inside the Model root or one Group or component, named by its root-to-container `path`
 (`core/occurrence_path.rb` walks it, through components too, and composes the transform once from the

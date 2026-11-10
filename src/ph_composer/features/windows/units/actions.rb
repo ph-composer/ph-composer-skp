@@ -29,23 +29,62 @@ module PhComposer
           { "unit_id" => record.fetch("id") }
         end
 
+        LIST = "#{FEATURE_ID}.units.list"
+        DETAIL = "#{FEATURE_ID}.units.detail"
+        # The parts of a Unit's row units.detail reaches; reference, id and schema_version are in every row.
+        DETAIL_PARTS = %w[name values user_data extension_data extension_status host findings].freeze
+
+        # Paged: one page cut by size (Pages.bounded) whose rows are built only for that page, projected by
+        # `fields` and, with `metadata` "summary", without the metadata maps (RecordQueries.summarize) and
+        # with the native name cut as every name in a bounded row is.
         def list(request, paged: true)
+          params = request.params
+          check_fields!(params["fields"])
           reads = ReadContext.new(request)
           id_counts = reads.occurrences.group_by { |item| item.record.fetch("id") }.transform_values(&:length)
-          polygons = reads.occurrences.filter_map do |item|
+          polygons = polygons(reads)
+          items = reads.occurrences.sort_by(&:path)
+          items = items.select { |item| params.fetch("ids").include?(item.record.fetch("id")) } if params.key?("ids")
+          build = ->(item) { unit_row(request, reads, item, polygons, id_counts) }
+          return { "units" => items.map(&build) } unless paged
+
+          summary = params["metadata"] == "summary"
+          prepare = ->(page) { page.map { |item| project(build.call(item), params["fields"], summary) } }
+          rows, cursor = Pages.bounded(request, LIST, items, :key => :path.to_proc, :prepare => prepare)
+          { "units" => rows, "next_cursor" => cursor, "total" => items.length }
+        end
+
+        # One part of one Unit's row, exactly, in fragments (shell/fragments.rb). The reference resolves as
+        # every Unit action resolves it, so a moved, copied or re-identified Unit refuses rather than
+        # answering another occurrence's data.
+        def detail(request)
+          reference = request.params.fetch("unit")
+          item = Occurrences.resolve(request.model, reference)
+          reads = ReadContext.new(request)
+          id_counts = reads.occurrences.count { |other| other.record.fetch("id") == item.record.fetch("id") }
+          row = unit_row(request, reads, item, polygons(reads), item.record.fetch("id") => id_counts)
+          { "unit_id" => reference.fetch("unit_id") }
+            .merge(Fragments.detail(request, DETAIL, row, request.params.fetch("path"), :parts => DETAIL_PARTS))
+        end
+
+        def check_fields!(fields)
+          unknown = Array(fields) - RECORD_KIND.fields.map(&:key)
+          raise CodedError.new("params.invalid", "A Window unit has no field #{unknown.first}.") unless unknown.empty?
+        end
+
+        def polygons(reads)
+          reads.occurrences.filter_map do |item|
             polygon = reads.read_polygon(item)
             [item.path, polygon] if polygon
           end.to_h
-          items = reads.occurrences.sort_by(&:path)
-          if request.params.key?("ids")
-            items = items.select { |item| request.params.fetch("ids").include?(item.record.fetch("id")) }
-          end
-          total = items.length
-          items, cursor = Pages.slice(request, "#{FEATURE_ID}.units.list", items, :key => :path.to_proc) if paged
-          rows = items.map { |item| unit_row(request, reads, item, polygons, id_counts) }
-          result = { "units" => rows }
-          result.merge!("next_cursor" => cursor, "total" => total) if paged
-          result
+        end
+
+        def project(row, fields, summary)
+          values = row.fetch("values")
+          row["values"] = values.slice(*fields) if fields
+          return row unless summary
+
+          RecordQueries.summarize(row, values).merge(OccurrencePath.bounded_names(row.slice("name")))
         end
 
         # One Unit occurrence as the list shows it, with the findings its Type, host and neighbours raise.
@@ -75,7 +114,7 @@ module PhComposer
           nil
         end
 
-        private_class_method :primary, :unit_row
+        private_class_method :primary, :unit_row, :check_fields!, :polygons, :project
       end
     end
   end

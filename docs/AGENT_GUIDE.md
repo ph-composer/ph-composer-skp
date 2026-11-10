@@ -101,6 +101,52 @@ A record or a preview can be larger than one reply. These reads give all of it e
   `query.cursor_expired`. Start that value again from its first fragment; never join fragments of two
   versions.
 
+## Large occurrences, geometry and schedules
+
+Placed Windows, host Faces, Zones, Thermal Bridge runs and Spaces can outgrow a reply too. Each
+list below has a compact form that keeps every row small and counts what it leaves out, and a read
+that pages or fragments what was left out. Fragments join and check exactly as above.
+
+- **Windows.** `ph_composer.windows.units.list` takes `fields` and `metadata` `"summary"`, as
+  `records.list` does, and cuts a long native name, naming it in `truncated`.
+  `ph_composer.windows.units.detail` reads one part of one Unit's row, such as `["user_data"]` or
+  `["name"]`, by the Unit's `reference`. To edit a Unit's metadata, read both `user_data` and
+  `extension_data` this way and pass them as `expected_metadata` to `units.update_metadata`; an edit
+  made since your read refuses the whole write as `target.changed`.
+- **Host Faces.** `ph_composer.windows.units.host_extent` with `geometry` `"summary"` gives the Face's
+  size and counts in place of its outline and holes, so the Window rows have the reply.
+  `ph_composer.windows.units.host_extent.holes` pages the holes as rectangles, and
+  `ph_composer.windows.units.host_extent.points` pages the outer loop's points, or one hole's with
+  `hole`, in the same offsets.
+- **Areas.** `ph_composer.windows.units.face_areas.list` pages the gross, glazed and net opaque area of
+  each Face, optionally of some Zones, with the same nulls and findings where the geometry is
+  uncertain; `ph_composer.windows.units.unhosted.list` pages the Windows on no Zone Face.
+  `ph_composer.zones.faces.assembly_usage.list` pages each Assembly's Face count and gross area, and
+  `ph_composer.zones.faces.assembly_usage.faces` one Assembly's Faces. Use these rather than adding
+  areas up yourself.
+- **Convert to Window Type.** `ph_composer.windows.units.convert_review` with `compact` true leaves out
+  each group's `sources` and gives their count and `sources_digest`;
+  `ph_composer.windows.units.convert_review.detail` with the same `paths` and `path`
+  `["groups", 0, "sources"]` reads them, and their SHA-256 equals that digest. `units.convert` still
+  takes the whole group.
+- **Zones.** `ph_composer.zones.list` with `overview` `"summary"` counts the restore offers and Zone
+  findings instead of repeating them on every page. `ph_composer.zones.restorable.list` pages the offers
+  (`parent_path` and `zone_id` are `zones.restore`'s params), `ph_composer.zones.restorable.detail`
+  reads an offer's `entity_ids` or `choice_record`, and `ph_composer.zones.findings.list` pages the
+  findings. `ph_composer.zones.options.adoption_sources.list` pages the choices adoption would ask
+  about, each naming the collision `cluster` it is in.
+- **Thermal Bridge runs.** `ph_composer.thermal_bridges.schedule.list` with `compact` true leaves out
+  each run's `points_m` and `edge_paths` and each finding's Edges, counting them, and leaves the Edge
+  findings and unreadable assignments to `ph_composer.thermal_bridges.schedule.edge_findings.list`
+  and `ph_composer.thermal_bridges.schedule.unreadable.list`. `ph_composer.thermal_bridges.runs.members.list`
+  pages a run's Edges by its `identifier`, each with its path and world end points, or with `finding`
+  only the Edges one finding names. A run's identifier changes with its geometry, so it names a run
+  only for the moment; to find assigned Edges, read them through
+  `ph_composer.thermal_bridges.edges.candidates` or `ph_composer.thermal_bridges.edges.at`.
+- **Spaces.** `ph_composer.spaces.detail` reads one part of one Space's, Volume's or Floor Segment's
+  row, such as a Floor Segment's `["loops_m"]` when it has too many holes for
+  `ph_composer.spaces.floor_segments.list` with `fields` `["loops_m"]`.
+
 ## When something goes wrong
 
 - **Refused.** Read `code` and `message`; `describe` lists what each operation can refuse. Nothing
@@ -226,7 +272,8 @@ quantity, in W/K), and its `findings`. Only `thermal_bridge.type_missing` and
 `thermal_bridge.psi_missing` block export; the others are warnings. An assigned Edge no Zone holds is
 in no run and reports in `edge_findings`. Nothing points at a run, so to show one pass its
 `edge_paths`, or a finding's `locate`, to `ph_composer.thermal_bridges.runs.locate`, which opens the
-context holding the Edges, selects them and frames them.
+context holding the Edges, selects them and frames them. A long run fits a reply only with `compact`;
+see "Large occurrences, geometry and schedules".
 
 Before exporting, `ph_composer.thermal_bridges.export_preflight` lists the same findings, each with a
 `locate` to pass on, and one more warning the schedule does not give: `thermal_bridge.on_window_perimeter`,
@@ -241,7 +288,8 @@ Place Units with `ph_composer.windows.units.place` at explicit Faces and positio
 read `ph_composer.windows.units.list` back. `ph_composer.windows.units.host_extent` gives a Face's
 outline and its bounding width and height in the frame `offsets` use, with the holes and Window
 outlines on its plane as rectangles in that frame. Keep an opening inside the outline, not only the
-bounding box, and clear of those rectangles.
+bounding box, and clear of those rectangles. A Face with many holes fits a reply only with `geometry`
+`"summary"`; see "Large occurrences, geometry and schedules".
 `ph_composer.windows.units.outlines` gives every placed Unit's outline in world metres, with the Face
 it is glued to, a bounded page at a time.
 

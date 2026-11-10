@@ -232,6 +232,29 @@ module PhComposer
         end
       end
 
+      def install_detail(feature, refuses)
+        feature.query(ScopedReads::DETAIL,
+                      :description => "One part of one Space's, Volume's or Floor Segment's row as spaces.all " \
+                                      "builds it, a Floor Segment's with loops_m, exactly, as canonical JSON text " \
+                                      "in fragments: join every fragment's text in order, check its sha256 and " \
+                                      "parse it. Name exactly one of space, volume and floor_segment.",
+                      :refuses => refuses,
+                      :examples => [{ "floor_segment" => { "floor_segment_id" => "fsg_Ab12Cd34Ef56",
+                                                           "entity_path" => [1201, 1202, 1203, 1204] },
+                                      "path" => ["loops_m"] }],
+                      :params => Shapes.object({ "space" => scope(SPACE_REFERENCE, "Space"),
+                                                 "volume" => scope(VOLUME_REFERENCE, "Volume"),
+                                                 "floor_segment" => scope(FLOOR_SEGMENT_REFERENCE, "Floor Segment"),
+                                                 "path" => Fragments.path_param(%w[values metrics loops_m user_data],
+                                                                                "[\"loops_m\", 0]"),
+                                                 "cursor" => Pages::CURSOR },
+                                               :optional => %w[space volume floor_segment cursor]),
+                      :result => Shapes.object({ "type" => Fragments::TYPE, "fragment" => Fragments::FRAGMENT,
+                                                 "next_cursor" => Pages::NEXT_CURSOR })) do |request|
+          ScopedReads.detail(request)
+        end
+      end
+
       def install_scoped(feature)
         refuses = READ + %w[query.cursor_expired query.limit_invalid target.not_found target.changed]
         example = { "space_id" => "spc_Ab12Cd34Ef56", "entity_path" => [1201, 1202] }
@@ -255,6 +278,7 @@ module PhComposer
           ScopedReads.floor_segments(request)
         end
         install_candidates(feature, refuses, example)
+        install_detail(feature, refuses)
         feature.query(ScopedReads::FINDINGS,
                       :description => "One page of the findings of the Model, or of one Space and its children, " \
                                       "each with the reference of what it is about; optionally only some codes. " \

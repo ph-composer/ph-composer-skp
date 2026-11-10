@@ -9314,7 +9314,7 @@ Params:
           "integer"
         ]
       },
-      "description": "Keys and array indexes into the record as ph_composer.records.list answers it, starting at values, user_data, extension_data, extension_status: [\"user_data\", \"notes\"], [\"values\", \"layers\", 0]."
+      "description": "Keys and array indexes into the view, starting at values, user_data, extension_data, extension_status: [\"user_data\", \"notes\"], [\"values\", \"layers\", 0]."
     },
     "cursor": {
       "type": "string",
@@ -11014,6 +11014,206 @@ Example params:
 
 ```json
 {}
+```
+
+### `ph_composer.spaces.detail`
+
+One part of one Space's, Volume's or Floor Segment's row as spaces.all builds it, a Floor Segment's with loops_m, exactly, as canonical JSON text in fragments: join every fragment's text in order, check its sha256 and parse it. Name exactly one of space, volume and floor_segment. Owner: `ph_composer.spaces`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.changed`, `target.not_found`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "path"
+  ],
+  "properties": {
+    "space": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "space_id",
+        "entity_path"
+      ],
+      "properties": {
+        "space_id": {
+          "type": "string"
+        },
+        "entity_path": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "description": "The root-to-entity persistent-id path."
+        }
+      },
+      "description": "The Space whose children to read, by the reference a read returned."
+    },
+    "volume": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "volume_id",
+        "entity_path"
+      ],
+      "properties": {
+        "volume_id": {
+          "type": "string"
+        },
+        "entity_path": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "description": "The root-to-entity persistent-id path."
+        }
+      },
+      "description": "The Volume whose children to read, by the reference a read returned."
+    },
+    "floor_segment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "floor_segment_id",
+        "entity_path"
+      ],
+      "properties": {
+        "floor_segment_id": {
+          "type": "string"
+        },
+        "entity_path": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "description": "The root-to-entity persistent-id path."
+        }
+      },
+      "description": "The Floor Segment whose children to read, by the reference a read returned."
+    },
+    "path": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": {
+        "type": [
+          "string",
+          "integer"
+        ]
+      },
+      "description": "Keys and array indexes into the view, starting at values, metrics, loops_m, user_data: [\"loops_m\", 0]."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "fragment",
+    "next_cursor"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "object",
+        "array",
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ],
+      "description": "The JSON type of the value at path; a stored null or false is a value."
+    },
+    "fragment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "encoding",
+        "offset",
+        "bytes",
+        "total_bytes",
+        "sha256",
+        "text"
+      ],
+      "properties": {
+        "encoding": {
+          "type": "string",
+          "enum": [
+            "json"
+          ],
+          "description": "The fragments joined in order are the value's canonical JSON text."
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Where this fragment starts, in UTF-8 bytes of the whole text."
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "This fragment's length in UTF-8 bytes."
+        },
+        "total_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The whole text's UTF-8 length."
+        },
+        "sha256": {
+          "type": "string",
+          "description": "SHA-256 of the whole text's UTF-8 bytes, hex."
+        },
+        "text": {
+          "type": "string",
+          "description": "This fragment: whole characters, never a split one."
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "floor_segment": {
+    "floor_segment_id": "fsg_Ab12Cd34Ef56",
+    "entity_path": [
+      1201,
+      1202,
+      1203,
+      1204
+    ]
+  },
+  "path": [
+    "loops_m"
+  ]
+}
 ```
 
 ### `ph_composer.spaces.export_preflight`
@@ -13966,6 +14166,127 @@ Example params:
 {}
 ```
 
+### `ph_composer.thermal_bridges.runs.members.list`
+
+One bounded page of one run's Edges in run order, each with its path and world end points, or only those one of its findings names. Owner: `ph_composer.thermal_bridges`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.not_found`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "identifier"
+  ],
+  "properties": {
+    "identifier": {
+      "type": "string",
+      "description": "The run's identifier from the schedule."
+    },
+    "finding": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Only the Edges of the run's finding at this index."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "identifier",
+    "members",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "identifier": {
+      "type": "string"
+    },
+    "members": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "index",
+          "path",
+          "points_m"
+        ],
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "The Edge's place in the run: it joins points_m i and i + 1."
+          },
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "points_m": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            "description": "Its world end points in metres, in run order."
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "identifier": "tb_0a1b2c3d4e5f"
+}
+```
+
+Example params:
+
+```json
+{
+  "identifier": "tb_0a1b2c3d4e5f",
+  "finding": 0
+}
+```
+
 ### `ph_composer.thermal_bridges.schedule.all`
 
 The whole schedule in one read, for the panel's Schedule on open and Refresh. Owner: `ph_composer.thermal_bridges`.
@@ -14384,9 +14705,9 @@ Example params:
 {}
 ```
 
-### `ph_composer.thermal_bridges.schedule.list`
+### `ph_composer.thermal_bridges.schedule.edge_findings.list`
 
-One bounded page of thermal-bridge runs, each with its Zone, type, length, psi-value, quantity, heat loss and findings, with totals over every run. Owner: `ph_composer.thermal_bridges`.
+One bounded page of the assigned Edges no Zone holds, by path: in no run, not exported. Owner: `ph_composer.thermal_bridges`.
 
 Refuses: `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `validation.failed`, and the `query` common set.
 
@@ -14417,10 +14738,123 @@ Result:
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "runs",
     "edge_findings",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "edge_findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "message",
+          "blocks_export",
+          "locate",
+          "path"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "blocks_export": {
+            "type": "boolean"
+          },
+          "locate": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "edge_paths"
+            ],
+            "properties": {
+              "edge_paths": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  }
+                },
+                "description": "Root-to-Edge persistent-id paths."
+              }
+            },
+            "description": "The Edges named, as runs.locate takes them."
+          },
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.thermal_bridges.schedule.list`
+
+One bounded page of thermal-bridge runs, each with its Zone, type, length, psi-value, quantity, heat loss and findings, with totals over every run. Owner: `ph_composer.thermal_bridges`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "compact": {
+      "type": "boolean",
+      "description": "Leave out each run's points_m and edge_paths and each finding's Edges, counted instead, and the Edge findings and unreadable assignments, which ph_composer.thermal_bridges.schedule.edge_findings.list and ph_composer.thermal_bridges.schedule.unreadable.list page; ph_composer.thermal_bridges.runs.members.list pages a run's Edges. False when absent."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "runs",
     "edge_finding_total",
-    "unreadable",
     "unreadable_total",
     "totals",
     "units",
@@ -14445,8 +14879,6 @@ Result:
           "length_m",
           "heat_loss_w_k",
           "closed",
-          "points_m",
-          "edge_paths",
           "shared",
           "findings"
         ],
@@ -14565,8 +14997,7 @@ Result:
               "required": [
                 "code",
                 "message",
-                "blocks_export",
-                "locate"
+                "blocks_export"
               ],
               "properties": {
                 "code": {
@@ -14597,9 +15028,31 @@ Result:
                     }
                   },
                   "description": "The Edges named, as runs.locate takes them."
+                },
+                "edge_count": {
+                  "type": "integer",
+                  "minimum": 0
                 }
               }
-            }
+            },
+            "description": "With compact, each finding's Edges counted; ph_composer.thermal_bridges.runs.members.list with finding pages them."
+          },
+          "edge_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "With compact: how many Edges."
+          },
+          "point_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "With compact: how many points."
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
           }
         }
       },
@@ -14830,6 +15283,100 @@ Example params:
 {
   "limit": 20
 }
+```
+
+Example params:
+
+```json
+{
+  "compact": true
+}
+```
+
+### `ph_composer.thermal_bridges.schedule.unreadable.list`
+
+One bounded page of the Edge assignments that are not valid, by path; not counted. A message over 512 characters is cut. Owner: `ph_composer.thermal_bridges`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "unreadable",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
 ```
 
 ### `ph_composer.thermal_bridges.types.all`
@@ -21731,6 +22278,10 @@ Params:
       "minItems": 1,
       "maxItems": 500,
       "description": "Each candidate Face's entity path from the Model root."
+    },
+    "compact": {
+      "type": "boolean",
+      "description": "Leave out each group's sources and each left-out row's paths, which grow with the selection, giving their count and digest; ph_composer.windows.units.convert_review.detail reads them. False when absent."
     }
   }
 }
@@ -21759,8 +22310,7 @@ Result:
           "layout_index",
           "matching_types",
           "preselected_type_id",
-          "default_name",
-          "sources"
+          "default_name"
         ],
         "properties": {
           "host": {
@@ -21908,6 +22458,28 @@ Result:
               }
             },
             "description": "The rectangles, one per Window Type element."
+          },
+          "source_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sources_digest": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "bytes",
+              "sha256"
+            ],
+            "properties": {
+              "bytes": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "sha256": {
+                "type": "string"
+              }
+            },
+            "description": "The size and SHA-256 of the group's sources as ph_composer.windows.units.convert_review.detail answers them."
           }
         }
       }
@@ -21918,7 +22490,6 @@ Result:
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "paths",
           "code",
           "message"
         ],
@@ -21941,6 +22512,21 @@ Result:
           },
           "message": {
             "type": "string"
+          },
+          "path_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "first_path": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "minItems": 1,
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            }
           }
         }
       }
@@ -21959,6 +22545,506 @@ Example params:
       1204
     ]
   ]
+}
+```
+
+Example params:
+
+```json
+{
+  "paths": [
+    [
+      1201,
+      1204
+    ]
+  ],
+  "compact": true
+}
+```
+
+### `ph_composer.windows.units.convert_review.detail`
+
+One part of the whole review of the same paths, exactly, as canonical JSON text in fragments: join every fragment's text in order, check its sha256 and parse it. ["groups", 0, "sources"] is a group's sources, whose sha256 is its compact sources_digest. Owner: `ph_composer.windows`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `record.unreadable`, `target.not_found`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "paths",
+    "path"
+  ],
+  "properties": {
+    "paths": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "minItems": 1,
+      "maxItems": 500,
+      "description": "Each candidate Face's entity path from the Model root."
+    },
+    "path": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": {
+        "type": [
+          "string",
+          "integer"
+        ]
+      },
+      "description": "Keys and array indexes into the view, starting at groups, left_out: [\"groups\", 0, \"sources\"]."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "fragment",
+    "next_cursor"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "object",
+        "array",
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ],
+      "description": "The JSON type of the value at path; a stored null or false is a value."
+    },
+    "fragment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "encoding",
+        "offset",
+        "bytes",
+        "total_bytes",
+        "sha256",
+        "text"
+      ],
+      "properties": {
+        "encoding": {
+          "type": "string",
+          "enum": [
+            "json"
+          ],
+          "description": "The fragments joined in order are the value's canonical JSON text."
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Where this fragment starts, in UTF-8 bytes of the whole text."
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "This fragment's length in UTF-8 bytes."
+        },
+        "total_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The whole text's UTF-8 length."
+        },
+        "sha256": {
+          "type": "string",
+          "description": "SHA-256 of the whole text's UTF-8 bytes, hex."
+        },
+        "text": {
+          "type": "string",
+          "description": "This fragment: whole characters, never a split one."
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "paths": [
+    [
+      1201,
+      1204
+    ]
+  ],
+  "path": [
+    "groups",
+    0,
+    "sources"
+  ]
+}
+```
+
+### `ph_composer.windows.units.detail`
+
+One part of one Window occurrence's units.list row, exactly, as canonical JSON text in fragments: join every fragment's text in order, check its sha256 and parse it. Pass next_cursor back for the next fragment. Owner: `ph_composer.windows`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.not_found`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "unit",
+    "path"
+  ],
+  "properties": {
+    "unit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "unit_id",
+        "entity_path"
+      ],
+      "properties": {
+        "unit_id": {
+          "type": "string"
+        },
+        "entity_path": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "integer"
+          }
+        }
+      },
+      "description": "The Window occurrence to read."
+    },
+    "path": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": {
+        "type": [
+          "string",
+          "integer"
+        ]
+      },
+      "description": "Keys and array indexes into the view, starting at name, values, user_data, extension_data, extension_status, host, findings: [\"user_data\", \"notes\"], [\"name\"]."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "unit_id",
+    "type",
+    "fragment",
+    "next_cursor"
+  ],
+  "properties": {
+    "unit_id": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "object",
+        "array",
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ],
+      "description": "The JSON type of the value at path; a stored null or false is a value."
+    },
+    "fragment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "encoding",
+        "offset",
+        "bytes",
+        "total_bytes",
+        "sha256",
+        "text"
+      ],
+      "properties": {
+        "encoding": {
+          "type": "string",
+          "enum": [
+            "json"
+          ],
+          "description": "The fragments joined in order are the value's canonical JSON text."
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Where this fragment starts, in UTF-8 bytes of the whole text."
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "This fragment's length in UTF-8 bytes."
+        },
+        "total_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The whole text's UTF-8 length."
+        },
+        "sha256": {
+          "type": "string",
+          "description": "SHA-256 of the whole text's UTF-8 bytes, hex."
+        },
+        "text": {
+          "type": "string",
+          "description": "This fragment: whole characters, never a split one."
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "unit": {
+    "unit_id": "wun_Ab12Cd34Ef56",
+    "entity_path": [
+      1201,
+      1203
+    ]
+  },
+  "path": [
+    "user_data"
+  ]
+}
+```
+
+### `ph_composer.windows.units.face_areas.list`
+
+One bounded page of ph_composer.windows.units.glazed_area_by_face's Face rows in Zone and Face path order, optionally of some Zones: gross, glazed opening and net opaque area, withheld (null, with findings) when the geometry is uncertain. Owner: `ph_composer.windows`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "zone_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 500,
+      "description": "Only Faces in occurrences of these Zone ids."
+    },
+    "zone_paths": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        }
+      },
+      "maxItems": 500,
+      "description": "Only Faces in the Zones at these paths."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "faces",
+    "unhosted_unit_total",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "faces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reference",
+          "gross_area_m2",
+          "glazed_area_m2",
+          "net_opaque_area_m2",
+          "unit_count",
+          "findings"
+        ],
+        "properties": {
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path",
+              "entity_path",
+              "entity_id"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "entity_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "entity_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          },
+          "gross_area_m2": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "x-unit": "m2"
+          },
+          "glazed_area_m2": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "x-unit": "m2"
+          },
+          "net_opaque_area_m2": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "x-unit": "m2"
+          },
+          "unit_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "unhosted_unit_total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Units on no Zone Face, in the whole Model; ph_composer.windows.units.unhosted.list lists them."
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "zone_ids": [
+    "zon_Ab12Cd34Ef56"
+  ],
+  "limit": 50
 }
 ```
 
@@ -22157,6 +23243,14 @@ Params:
       },
       "description": "The Zone Face a Window would be placed on."
     },
+    "geometry": {
+      "type": "string",
+      "enum": [
+        "full",
+        "summary"
+      ],
+      "description": "full (the default): outline_m and holes on every page. summary: their counts instead, so the Units page has the reply; read them with ph_composer.windows.units.host_extent.points and ph_composer.windows.units.host_extent.holes."
+    },
     "limit": {
       "type": "number",
       "description": "Page size, 1 to 500; 100 when absent."
@@ -22178,8 +23272,6 @@ Result:
   "required": [
     "width_m",
     "height_m",
-    "outline_m",
-    "holes",
     "units",
     "next_cursor",
     "total"
@@ -22204,7 +23296,7 @@ Result:
         "minItems": 2,
         "maxItems": 2
       },
-      "description": "The Face's outer loop as [x_m, y_m] offsets; a Face that is not a rectangle is narrower than width_m by height_m in places."
+      "description": "The Face's outer loop as [x_m, y_m] offsets; a Face that is not a rectangle is narrower than width_m by height_m in places. Absent with geometry summary."
     },
     "holes": {
       "type": "array",
@@ -22236,7 +23328,17 @@ Result:
           }
         }
       },
-      "description": "Each hole's bounding rectangle, in offsets."
+      "description": "Each hole's bounding rectangle, in offsets. Absent with geometry summary."
+    },
+    "outline_points": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "With geometry summary: the outer loop's point count."
+    },
+    "hole_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "With geometry summary: how many holes."
     },
     "units": {
       "type": "array",
@@ -22324,9 +23426,332 @@ Example params:
 }
 ```
 
+Example params:
+
+```json
+{
+  "host": {
+    "zone_id": "zon_Ab12Cd34Ef56",
+    "zone_path": [
+      1201
+    ],
+    "entity_path": [
+      1202
+    ],
+    "entity_id": null
+  },
+  "geometry": "summary"
+}
+```
+
+### `ph_composer.windows.units.host_extent.holes`
+
+One bounded page of a writable Zone Face's holes, each its bounding rectangle in the offsets units.place uses and its point count. Owner: `ph_composer.windows`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.surface_host`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "host"
+  ],
+  "properties": {
+    "host": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "zone_id",
+        "zone_path",
+        "entity_path",
+        "entity_id"
+      ],
+      "properties": {
+        "zone_id": {
+          "type": "string"
+        },
+        "zone_path": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "entity_path": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "entity_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "description": "The Zone Face a Window would be placed on."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "holes",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "holes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "index",
+          "x_m",
+          "y_m",
+          "width_m",
+          "height_m",
+          "point_count"
+        ],
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "The hole's place in the Face's loops, as hole names it."
+          },
+          "x_m": {
+            "type": "number",
+            "x-unit": "m"
+          },
+          "y_m": {
+            "type": "number",
+            "x-unit": "m"
+          },
+          "width_m": {
+            "type": "number",
+            "x-unit": "m"
+          },
+          "height_m": {
+            "type": "number",
+            "x-unit": "m"
+          },
+          "point_count": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "host": {
+    "zone_id": "zon_Ab12Cd34Ef56",
+    "zone_path": [
+      1201
+    ],
+    "entity_path": [
+      1202
+    ],
+    "entity_id": null
+  }
+}
+```
+
+### `ph_composer.windows.units.host_extent.points`
+
+One bounded page of the points of a writable Zone Face's outer loop, or of one hole, in loop order, as offsets units.place uses. Owner: `ph_composer.windows`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.surface_host`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "host"
+  ],
+  "properties": {
+    "host": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "zone_id",
+        "zone_path",
+        "entity_path",
+        "entity_id"
+      ],
+      "properties": {
+        "zone_id": {
+          "type": "string"
+        },
+        "zone_path": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "entity_path": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "entity_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "description": "The Zone Face a Window would be placed on."
+    },
+    "hole": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The hole to read, as ph_composer.windows.units.host_extent.holes numbers it; the outer loop when absent."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "points",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "points": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "index",
+          "x_m",
+          "y_m"
+        ],
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "x_m": {
+            "type": "number",
+            "x-unit": "m"
+          },
+          "y_m": {
+            "type": "number",
+            "x-unit": "m"
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "host": {
+    "zone_id": "zon_Ab12Cd34Ef56",
+    "zone_path": [
+      1201
+    ],
+    "entity_path": [
+      1202
+    ],
+    "entity_id": null
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "host": {
+    "zone_id": "zon_Ab12Cd34Ef56",
+    "zone_path": [
+      1201
+    ],
+    "entity_path": [
+      1202
+    ],
+    "entity_id": null
+  },
+  "hole": 0
+}
+```
+
 ### `ph_composer.windows.units.list`
 
-Window occurrences and native findings, without writes. Owner: `ph_composer.windows`.
+One bounded page of Window occurrences and native findings, without writes. Owner: `ph_composer.windows`.
 
 Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
@@ -22353,6 +23778,25 @@ Params:
     "cursor": {
       "type": "string",
       "description": "next_cursor from the previous page of the same query and filter."
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "window_type_id",
+          "anchor"
+        ]
+      },
+      "description": "Only these values of each Unit; all when absent."
+    },
+    "metadata": {
+      "type": "string",
+      "enum": [
+        "full",
+        "summary"
+      ],
+      "description": "full (the default): user_data, extension_data and extension_status as stored. summary: none of them, but their sizes, digests and status counts in metadata and each value's size in value_bytes, and the native name cut at 256 characters; read any of them whole with ph_composer.windows.units.detail."
     }
   }
 }
@@ -22379,12 +23823,9 @@ Result:
           "id",
           "schema_version",
           "values",
-          "user_data",
-          "extension_data",
           "reference",
           "host",
           "name",
-          "extension_status",
           "findings"
         ],
         "properties": {
@@ -22397,10 +23838,6 @@ Result:
           "values": {
             "type": "object",
             "additionalProperties": false,
-            "required": [
-              "window_type_id",
-              "anchor"
-            ],
             "properties": {
               "window_type_id": {
                 "type": "string"
@@ -22419,7 +23856,8 @@ Result:
                   "head_right"
                 ]
               }
-            }
+            },
+            "description": "Every value, or only those fields names."
           },
           "user_data": {
             "type": "object",
@@ -22528,6 +23966,80 @@ Result:
                 }
               }
             }
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "user_data",
+              "extension_data"
+            ],
+            "properties": {
+              "user_data": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "bytes",
+                  "sha256",
+                  "keys"
+                ],
+                "properties": {
+                  "bytes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "sha256": {
+                    "type": "string"
+                  },
+                  "keys": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              },
+              "extension_data": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "bytes",
+                  "sha256",
+                  "namespaces",
+                  "statuses"
+                ],
+                "properties": {
+                  "bytes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "sha256": {
+                    "type": "string"
+                  },
+                  "namespaces": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "statuses": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "description": "How many envelopes read each status, such as unavailable."
+                  }
+                }
+              }
+            },
+            "description": "With metadata summary: what user_data, extension_data and extension_status hold, in place of them; read any of them whole with ph_composer.records.detail."
+          },
+          "value_bytes": {
+            "type": "object"
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
           }
         }
       }
@@ -22552,6 +24064,16 @@ Example params:
 
 ```json
 {}
+```
+
+Example params:
+
+```json
+{
+  "fields": [],
+  "metadata": "summary",
+  "limit": 20
+}
 ```
 
 ### `ph_composer.windows.units.outlines`
@@ -22938,6 +24460,89 @@ Result:
           }
         }
       }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.windows.units.unhosted.list`
+
+One bounded page of the Window occurrences ph_composer.windows.units.glazed_area_by_face counts on no Zone Face, in path order. Owner: `ph_composer.windows`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "units",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "units": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "unit_id",
+          "entity_path"
+        ],
+        "properties": {
+          "unit_id": {
+            "type": "string"
+          },
+          "entity_path": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
     }
   }
 }
@@ -24160,6 +25765,209 @@ Example params:
 {}
 ```
 
+### `ph_composer.zones.faces.assembly_usage.faces`
+
+One bounded page of the Face occurrences one Assembly is assigned to, in assembly_usage's order, beside its Face count and gross area. Owner: `ph_composer.zones`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.not_found`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "assembly_id"
+  ],
+  "properties": {
+    "assembly_id": {
+      "type": "string",
+      "description": "The Assembly to read."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "assembly_id",
+    "face_count",
+    "gross_area_m2",
+    "faces",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "assembly_id": {
+      "type": "string"
+    },
+    "face_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "gross_area_m2": {
+      "type": "number",
+      "x-unit": "m2"
+    },
+    "faces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "zone_id",
+          "zone_path",
+          "entity_path",
+          "entity_id"
+        ],
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          },
+          "zone_path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "entity_path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "entity_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "assembly_id": "asm_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.zones.faces.assembly_usage.list`
+
+One bounded page of assembly_usage's rows by Assembly id, each its Face count and gross area without the Faces; ph_composer.zones.faces.assembly_usage.faces pages those. Owner: `ph_composer.zones`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "assemblies",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "assemblies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "assembly_id",
+          "face_count",
+          "gross_area_m2"
+        ],
+        "properties": {
+          "assembly_id": {
+            "type": "string"
+          },
+          "face_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "gross_area_m2": {
+            "type": "number",
+            "x-unit": "m2"
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
 ### `ph_composer.zones.faces.attached_assignment`
 
 The pending native Face assignment handoff. Owner: `ph_composer.zones`.
@@ -25178,6 +26986,110 @@ Example params:
 {}
 ```
 
+### `ph_composer.zones.findings.list`
+
+One bounded page of the Zone findings zones.list carries: Zone records no read takes as a Zone, and Zones on another feature's Group. Owner: `ph_composer.zones`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "findings",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "message",
+          "reference"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "zone.component",
+              "zone.ownership_conflict"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "entity_path"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "entity_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "description": "A Zone record no read takes as a Zone, such as one on a component, with the way back, or a Zone on or inside a Group another feature owns."
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
 ### `ph_composer.zones.list`
 
 One page of Zone occurrences, filtered and projected, and the Make Zone target. Owner: `ph_composer.zones`.
@@ -25226,6 +27138,14 @@ Params:
       },
       "description": "Project each row to these values; the whole row when absent."
     },
+    "overview": {
+      "type": "string",
+      "enum": [
+        "full",
+        "summary"
+      ],
+      "description": "full (the default): every restore offer and Zone finding on every page. summary: their counts instead; ph_composer.zones.restorable.list and ph_composer.zones.findings.list page them."
+    },
     "limit": {
       "type": "number",
       "description": "Page size, 1 to 500; 100 when absent."
@@ -25247,8 +27167,6 @@ Result:
   "required": [
     "zones",
     "make_zone",
-    "restorable",
-    "findings",
     "units",
     "next_cursor",
     "total"
@@ -25613,6 +27531,16 @@ Result:
         }
       }
     },
+    "restorable_total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "With overview summary: how many restore offers."
+    },
+    "finding_total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "With overview summary: how many Zone findings."
+    },
     "next_cursor": {
       "type": [
         "string",
@@ -25943,6 +27871,154 @@ Example params:
 
 ```json
 {}
+```
+
+### `ph_composer.zones.options.adoption_sources.list`
+
+One bounded page of the legacy and copied choices adoption_preview lists, by key, beside whether adoption is required and the suggested Segment. Owner: `ph_composer.zones`.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.options_adoption_required`, `zone.options_conflict`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "required",
+    "suggested_segment",
+    "sources",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "required": {
+      "type": "boolean"
+    },
+    "suggested_segment": {
+      "type": "string"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "collection",
+          "name",
+          "colour",
+          "export_identifier",
+          "source_id",
+          "live",
+          "recoverable",
+          "cluster"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "collection": {
+            "type": "string",
+            "enum": [
+              "building_segment",
+              "level"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "colour": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "export_identifier": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "live": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "recoverable": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
+          },
+          "cluster": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The key of the first source in this source's collision cluster (adoption_preview's collision_clusters), or null when it collides with none."
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 50
+}
 ```
 
 ### `ph_composer.zones.options.all`
@@ -26499,6 +28575,280 @@ Example params:
 {
   "collection": "level",
   "id": "lvl_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.zones.restorable.detail`
+
+One part of one restore offer, exactly, as canonical JSON text in fragments: join every fragment's text in order, check its sha256 and parse it. Owner: `ph_composer.zones`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `record.unreadable`, `target.not_found`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "zone_id",
+    "path"
+  ],
+  "properties": {
+    "zone_id": {
+      "type": "string",
+      "description": "The offer's zone_id."
+    },
+    "path": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": {
+        "type": [
+          "string",
+          "integer"
+        ]
+      },
+      "description": "Keys and array indexes into the view, starting at building_segment, level, parent_path, entity_ids, member_count, refusal, choice_record, unrecoverable: [\"entity_ids\"]."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "zone_id",
+    "type",
+    "fragment",
+    "next_cursor"
+  ],
+  "properties": {
+    "zone_id": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "object",
+        "array",
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ],
+      "description": "The JSON type of the value at path; a stored null or false is a value."
+    },
+    "fragment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "encoding",
+        "offset",
+        "bytes",
+        "total_bytes",
+        "sha256",
+        "text"
+      ],
+      "properties": {
+        "encoding": {
+          "type": "string",
+          "enum": [
+            "json"
+          ],
+          "description": "The fragments joined in order are the value's canonical JSON text."
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Where this fragment starts, in UTF-8 bytes of the whole text."
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "This fragment's length in UTF-8 bytes."
+        },
+        "total_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The whole text's UTF-8 length."
+        },
+        "sha256": {
+          "type": "string",
+          "description": "SHA-256 of the whole text's UTF-8 bytes, hex."
+        },
+        "text": {
+          "type": "string",
+          "description": "This fragment: whole characters, never a split one."
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "zone_id": "zon_Ab12Cd34Ef56",
+  "path": [
+    "entity_ids"
+  ]
+}
+```
+
+### `ph_composer.zones.restorable.list`
+
+One bounded page of the exploded Zones Restore can regroup, by Zone id: each offer's parent_path and zone_id are ph_composer.zones.restore's params. Owner: `ph_composer.zones`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "restorable",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "restorable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "zone_id",
+          "building_segment",
+          "level",
+          "parent_path",
+          "member_count",
+          "refusal",
+          "unrecoverable"
+        ],
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          },
+          "building_segment": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "level": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "parent_path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "member_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "refusal": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              null,
+              "mixed_context",
+              "stamps_conflict",
+              "shared_edge"
+            ],
+            "description": "Why Restore would refuse, or null when it can run."
+          },
+          "unrecoverable": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Zone fields Restore cannot recover."
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
+          }
+        },
+        "description": "A restore offer without its member ids or choice record; ph_composer.zones.restorable.detail reads them."
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 50
 }
 ```
 
@@ -62465,3 +64815,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.35 | 2026-11-10 | discover adds library_kinds, and describe answers a library kind by name (its wire kind and version, and its assignment target schema and examples or that it has none) and an installed extension by namespace. The agent connection's discover takes section, owner, limit, cursor and topic for bounded pages of operations, record kinds, reference targets, extensions, library kinds, common refusals with their meanings, contracts and the operating guide; initialize names the guide. ph_composer.library.copy's generation says it is required, as its schema already did. |
 | 1.36 | 2026-11-10 | Selection-free reads at an explicit path: ph_composer.context.children pages the entities directly in the root or one Group or component, with their state and records; zones.make_candidates, windows.units.convert_candidates and windows.units.restore_candidates list what Make Zone, Convert and Restore could take there; thermal_bridges.edges.at and edges.candidates read Edges by path in edges.selection's rows plus endpoints_m; and spaces.candidate_faces.list takes context for a first Space. A name over 256 characters is cut and named in the row's truncated. edges.selection's copied flag no longer refuses for an unreadable record on another Edge. |
 | 1.37 | 2026-11-10 | Complete reads of large definitions and metadata: ph_composer.records.detail answers one value of a record exactly in fragments with its size and SHA-256; records.list pages by size and takes metadata summary; assemblies.assemblies.layers.list and segments.list, windows.types.elements.list, assemblies.materials.uses.list and windows.<collection>.uses.list page a definition's parts and derived results; and preview takes within and preview_part, so a preview larger than a reply keeps its proposal_digest and is read by part. |
+| 1.38 | 2026-11-10 | Complete reads of large occurrence, geometry and schedule data: windows.units.list takes fields and metadata summary and windows.units.detail reads one Unit's part in fragments; units.host_extent takes geometry summary beside host_extent.holes and .points; units.face_areas.list and units.unhosted.list page the glazed area table; convert_review takes compact and convert_review.detail reads a group's sources; zones.list takes overview summary beside zones.restorable.list, restorable.detail and zones.findings.list; zones.options.adoption_sources.list, zones.faces.assembly_usage.list and .faces; thermal_bridges.schedule.list takes compact beside runs.members.list, schedule.edge_findings.list and schedule.unreadable.list; and spaces.detail reads a Space's, Volume's or Floor Segment's part, loops included. |

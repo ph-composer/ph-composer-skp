@@ -20,16 +20,20 @@ module PhComposer
         face = DeepCopy.call(registry.record_descriptor("ph_composer.zones.faces.face").occurrence_schema)
         review_result = Shapes.object({ "groups" => Shapes.list(group_shape(face)),
                                         "left_out" => Shapes.list(left_out_shape) })
-        feature.query("#{FEATURE_ID}.units.convert_review",
+        feature.query(Units::ConvertReview::QUERY,
                       :description => "Which drawn rectangles Convert to Window Type would take, grouped by shared " \
                                       "Edges into Window Type layouts, and why it leaves each other Face out. Writes " \
                                       "nothing. Sizes are the frame outer size.",
                       :refuses => Refuses::CONVERT_REVIEW,
-                      :params => Shapes.object({ "paths" => paths_param }),
-                      :result => review_result,
-                      :examples => [{ "paths" => [[1201, 1204]] }]) do |request|
-          Units::ConvertReview.read(request, request.params.fetch("paths"))
+                      :params => Shapes.object({ "paths" => paths_param, "compact" => compact_param },
+                                               :optional => ["compact"]),
+                      :result => compact_result(face),
+                      :examples => [{ "paths" => [[1201, 1204]] },
+                                    { "paths" => [[1201, 1204]], "compact" => true }]) do |request|
+          review = Units::ConvertReview.read(request, request.params.fetch("paths"))
+          request.params["compact"] ? Units::ConvertReview.compact(review) : review
         end
+        install_detail(feature)
         feature.action("#{FEATURE_ID}.units.convert",
                        :description => "Replace reviewed drawn rectangles with placed Windows, one per group: a new " \
                                        "Window Type sized from the geometry or a Type of that size. Sizes are the " \
@@ -49,6 +53,50 @@ module PhComposer
         end
         ConvertRouteRegistration.install(feature, review_result, paths_param)
         install_candidates(feature)
+      end
+
+      def compact_param
+        { "type" => "boolean",
+          "description" => "Leave out each group's sources and each left-out row's paths, which grow with the " \
+                           "selection, giving their count and digest; #{Units::ConvertReview::DETAIL} reads them. " \
+                           "False when absent." }
+      end
+
+      # The whole review, or with compact its groups without sources and left-out rows without paths.
+      def compact_result(face)
+        group = group_shape(face)
+        left_out = left_out_shape
+        count = { "type" => "integer", "minimum" => 0 }
+        compact = {
+          "source_count" => count,
+          "sources_digest" => Shapes.described(Fragments::SUMMARY, "The size and SHA-256 of the group's sources " \
+                                                                   "as #{Units::ConvertReview::DETAIL} answers them."),
+          "path_count" => count, "first_path" => PATH.merge("type" => %w[array null])
+        }
+        loosen = lambda do |shape, whole, added|
+          shape.merge("required" => shape.fetch("required") - [whole],
+                      "properties" => shape.fetch("properties").merge(compact.slice(*added)))
+        end
+        Shapes.object({ "groups" => Shapes.list(loosen.call(group, "sources", %w[source_count sources_digest])),
+                        "left_out" => Shapes.list(loosen.call(left_out, "paths", %w[path_count first_path])) })
+      end
+
+      def install_detail(feature)
+        feature.query(Units::ConvertReview::DETAIL,
+                      :description => "One part of the whole review of the same paths, exactly, as canonical JSON " \
+                                      "text in fragments: join every fragment's text in order, check its sha256 " \
+                                      "and parse it. [\"groups\", 0, \"sources\"] is a group's sources, whose " \
+                                      "sha256 is its compact sources_digest.",
+                      :refuses => (Refuses::CONVERT_REVIEW + %w[query.cursor_expired target.not_found]).uniq,
+                      :params => Shapes.object({ "paths" => paths_param,
+                                                 "path" => Fragments.path_param(Units::ConvertReview::PARTS,
+                                                                                "[\"groups\", 0, \"sources\"]"),
+                                                 "cursor" => Pages::CURSOR }, :optional => ["cursor"]),
+                      :result => Shapes.object({ "type" => Fragments::TYPE, "fragment" => Fragments::FRAGMENT,
+                                                 "next_cursor" => Pages::NEXT_CURSOR }),
+                      :examples => [{ "paths" => [[1201, 1204]], "path" => ["groups", 0, "sources"] }]) do |request|
+          Units::ConvertReview.detail(request, request.params.fetch("paths"), request.params.fetch("path"))
+        end
       end
 
       def install_candidates(feature)
@@ -137,8 +185,8 @@ module PhComposer
                         "code" => Shapes.described(Shapes::TEXT, "Why, as a published code."),
                         "message" => Shapes::TEXT })
       end
-      private_class_method :groups_param, :paths_param, :container_path, :install_candidates, :group_shape,
-                           :source_shape, :left_out_shape
+      private_class_method :groups_param, :paths_param, :compact_param, :compact_result, :install_detail,
+                           :container_path, :install_candidates, :group_shape, :source_shape, :left_out_shape
     end
   end
 end

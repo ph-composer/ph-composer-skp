@@ -21,11 +21,37 @@ module PhComposer
 
         module_function
 
+        QUERY = "#{FEATURE_ID}.units.convert_review"
+        DETAIL = "#{QUERY}.detail"
+        PARTS = %w[groups left_out].freeze
+
         def read(request, paths)
           sources, left_out = ConvertSources.read(request.model, paths)
           built, unbuilt = assess(request, sources)
           { "groups" => rows(built, types(request)),
             "left_out" => (left_out + unbuilt).sort_by { |row| row.fetch("paths").first } }
+        end
+
+        # The review without its two lists that grow with the selection, a group's sources and a left-out
+        # row's paths: each is counted and digested (Fragments.summary) in their place, and DETAIL reads it.
+        # A group's sources digest is the handle of what was reviewed: the same review read again answers
+        # the same digest until the geometry changes, and `units.convert` still takes the whole group.
+        def compact(review)
+          { "groups" => review.fetch("groups").map do |group|
+            sources = group.fetch("sources")
+            group.reject { |key, _value| key == "sources" }
+                 .merge("source_count" => sources.length, "sources_digest" => Fragments.summary(sources))
+          end,
+            "left_out" => review.fetch("left_out").map do |row|
+              paths = row.fetch("paths")
+              row.reject { |key, _value| key == "paths" }
+                 .merge("path_count" => paths.length, "first_path" => paths.first)
+            end }
+        end
+
+        # One part of the whole review of `paths`, exactly, in fragments bound to the revision.
+        def detail(request, paths, path)
+          Fragments.detail(request, DETAIL, read(request, paths), path, :parts => PARTS)
         end
 
         # The groups the rectangles form, first path first, and a left-out row for each that cannot convert.
