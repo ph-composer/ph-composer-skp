@@ -25,15 +25,15 @@ module PhComposer
 
     class ModelObserver < Sketchup::ModelObserver
       def onTransactionCommit(model)
-        Sessions.for(model).host_event(:transaction_committed)
+        Sessions.for_transaction(model).host_event(:transaction_committed)
       end
 
       def onTransactionUndo(model)
-        Sessions.for(model).host_event(:transaction_undone)
+        Sessions.for_transaction(model).host_event(:transaction_undone)
       end
 
       def onTransactionRedo(model)
-        Sessions.for(model).host_event(:transaction_redone)
+        Sessions.for_transaction(model).host_event(:transaction_redone)
       end
 
       def onActivePathChanged(model)

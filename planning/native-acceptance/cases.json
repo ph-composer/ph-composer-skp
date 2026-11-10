@@ -4583,6 +4583,36 @@
         "src/ph_composer/html/agent_access/agent_access.css"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "AW09M",
+      "label": "Agent-workflows AW-09 host-readiness measurement on the installed RBZ in a throwaway synthetic Model, over the real loopback MCP listener with a read/view/model_write/export/capture token and a development recorder: context, read, Material and Zone writes, Colour-by, context open, capture and export start while Select is idle, a native Move and a native Line gesture are partway through (click-move and held drag), a PH-Composer tool is active, deferred work is held pending, a native modal is open, another Model is active, and the target Model closes; per call whether it ran, was refused, timed out or changed the native gesture, with Edit menu Undo labels, native Undo/Redo and readback",
+      "mode": "native",
+      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/agent_access/server.rb",
+        "src/ph_composer/agent_access/executor.rb",
+        "src/ph_composer/shell/dispatch.rb",
+        "src/ph_composer/session/model_session.rb",
+        "src/ph_composer/shell/context_commands.rb"
+      ],
+      "native_control_required": true
+    },
+    {
+      "id": "AW09",
+      "label": "Agent-workflows AW-09 host-readiness guard on the installed RBZ in a throwaway synthetic Model, over the real loopback MCP listener: a write sent while a blocking message box is open, whose client times out and closes, never runs once the box closes, and the same key sent again runs once; with a second Model shown, a write to the hidden Model advances only its own revision, a later commit on it still advances it, and context.open there refuses session.inactive; closing the target Model answers session.unknown with no failed call; Select, Move-idle and Classify-active writes unchanged",
+      "mode": "mixed",
+      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/agent_access/server.rb",
+        "src/ph_composer/runtime/http.rb",
+        "src/ph_composer/session/sessions.rb",
+        "src/ph_composer/session/host_observers.rb",
+        "src/ph_composer/session/edit_context.rb",
+        "src/ph_composer/shell/context_commands.rb",
+        "src/ph_composer/features/spaces/context/navigation.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }

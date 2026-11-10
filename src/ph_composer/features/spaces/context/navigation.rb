@@ -34,6 +34,7 @@ module PhComposer
         end
 
         occurrence = Resolve.occurrence(Occurrences.scan(model), reference, :mutable => false)
+        EditContext.shown!(model) unless EditContext.current_ids(model) == occurrence.path
         raise CodedError.new("target.locked", "That occurrence or a Group above it is locked.") if occurrence.locked
         if occurrence.entity.locked?
           raise CodedError.new("space.volume_protected", "The Volume is protected. Unprotect it before opening it.")
@@ -48,6 +49,7 @@ module PhComposer
         model = request.model
         path = EditContext.current(model)
         index = path.rindex { |entity| Protection.volume?(entity) || space?(entity) }
+        EditContext.shown!(model) if index
         EditContext.enter(model, path[0...index]) if index
         { "path" => EditContext.current_ids(model) }
       end
@@ -70,6 +72,7 @@ module PhComposer
       # target; the target is still the one framed.
       def locate(request, reference:)
         model = request.model
+        EditContext.shown!(model)
         occurrence = Resolve.occurrence(Occurrences.scan(model), reference, :mutable => false)
         entities = entities_for(model, occurrence.path[0...-1]) + [occurrence.entity]
         stop = entities[0...-1].index { |entity| entity.respond_to?(:locked?) && entity.locked? }

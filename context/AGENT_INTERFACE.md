@@ -547,7 +547,14 @@ where a UI-timer pump (50 ms while calls wait, 100 ms idle, ending each tick wit
 the workers run) hands it to `agent_access/executor.rb`. A token may have 8 calls waiting; a ninth,
 a call older than 30 s, or a pump that has not ticked for 10 s is answered `session.busy` by the
 worker and never runs. Workers do run while the main thread does long Ruby work; under a native
-modal no Ruby thread runs, so the client sees its own tool timeout (measured on 26.1.188).
+modal no Ruby thread runs, so the client sees its own tool timeout (measured on 26.1.188). The request
+stays unread until the modal closes, so a call whose client has closed the connection is never run:
+the worker asks before it queues the call and the pump again before it runs it
+(`LoopbackHttp.peer_open?`), and the diagnostics record it as `abandoned`. A client that shuts down
+only its sending side after the request reads as gone too. Its key was never given a
+sequence, so the same invoke sent again runs once. A sheet such as Make Component stops no timer and
+is not a busy state. Changes to a Model SketchUp is not showing run and land on that Model's Undo
+stack; moving its edit path is refused `session.inactive` (measured in the AW09M run, 2026-11-10).
 
 The executor rechecks the token, validates the arguments against the tool's fixed schema, and makes
 the one API call the tool names (`agent_access/tools.rb`, the allowlist). A token acts on a session

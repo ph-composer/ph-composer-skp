@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 41
+    MINOR = 42
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -207,7 +207,11 @@ module PhComposer
                     "Edge assignment." },
       { "minor" => 41, "date" => "2026-11-10",
         "change" => "The Agent Access dialog's catalog adds agent_access.connection_changed, refused when a " \
-                    "connection profile is bound to another token than the one shown; no operation changes." }
+                    "connection profile is bound to another token than the one shown; no operation changes." },
+      { "minor" => 42, "date" => "2026-11-10",
+        "change" => "ph_composer.spaces.context.open declares session.inactive: it, context.open, " \
+                    "spaces.context.close and spaces.locate refuse to move the edit path of a Model SketchUp is " \
+                    "not showing. An agent call whose client closed the connection before it ran is not run." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

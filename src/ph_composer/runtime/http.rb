@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "io/wait"
+require "socket"
 
 module PhComposer
   # The HTTP/1.1 the loopback asset server speaks: read one request line within a deadline and a
@@ -128,6 +129,18 @@ module PhComposer
 
     def monotonic
       Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    end
+
+    # Whether the client is still there to read a reply, asked once its whole request has been read: false
+    # when a peek reads the end of the stream (the client closed its side, as one does when it stops waiting)
+    # or the connection was reset; true while it waits with nothing more to send, or when it sent more. A
+    # client that shuts down its sending side and still waits for the reply reads as gone; MCP clients close
+    # both sides together.
+    def peer_open?(session)
+      peeked = session.recv_nonblock(1, Socket::MSG_PEEK, :exception => false)
+      !(peeked.nil? || peeked == "")
+    rescue IOError, SystemCallError
+      false
     end
   end
 end

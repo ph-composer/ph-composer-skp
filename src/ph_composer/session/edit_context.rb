@@ -22,6 +22,16 @@ module PhComposer
       model.respond_to?(:active_entities) ? model.active_entities : model.entities
     end
 
+    # Refuses a path change a view command asks of a Model SketchUp is not showing. SketchUp honors a deeper
+    # path there but reports the change to the shown Model's observers, and ignores a return to the root
+    # (context/SKETCHUP_HOST_BEHAVIOR.md), so navigation needs the shown Model either way.
+    def shown!(model)
+      return if model.equal?(Sketchup.active_model)
+
+      raise CodedError.new("session.inactive", "SketchUp moves the open Group only in the Model it shows; switch " \
+                                               "to this Model's window first. Nothing moved.")
+    end
+
     # Opens `path` (Groups and ComponentInstances, outermost first) as the edit context. Each boundary
     # runs first; a path equal to the current one is not assigned again, so the host reports no change.
     # SketchUp ignores a return to the root on a Model that is not the active document

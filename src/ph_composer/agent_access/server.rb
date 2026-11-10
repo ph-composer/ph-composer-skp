@@ -31,6 +31,72 @@ module PhComposer
       end
     end
 
+    # How a Server holds one tool call between its worker and the main thread: queued until the pump runs it,
+    # or answered without running when it waited too long, the pump starved, the server stopped or the client
+    # closed the connection. Every method but `take_next` (the pump's) runs on a worker with the lock held. It
+    # names no constant, so it reads the same in the Server that includes it.
+    module ServerQueue
+      private
+
+      def expired?(entry)
+        @clock.call >= entry.deadline
+      end
+
+      # The next waiting entry, now :running; an expired one at the head is dropped unrun, and so is one
+      # whose client has gone.
+      def take_next
+        @lock.synchronize do
+          while (entry = @queue.shift)
+            next if entry.state != :waiting
+
+            unrun = if expired?(entry) then :cancelled
+                    elsif !entry.connected.call then :abandoned
+                    end
+            if unrun
+              entry.state = unrun
+              @answered.broadcast
+              next
+            end
+            entry.state = :running
+            return entry
+          end
+          nil
+        end
+      end
+
+      def entry_age(entry)
+        (@handoff_seconds - (entry.deadline - @clock.call)).round
+      end
+
+      # Called with the lock held: the entry will not run.
+      def busy(entry, message)
+        entry.state = :cancelled
+        @queue.delete(entry)
+        record_busy(entry)
+        @executor.busy(message)
+      end
+
+      # Called with the lock held, on a worker: the client of this call closed the connection before it ran,
+      # so it never runs and no one reads the answer; the diagnostics record it as abandoned.
+      def abandoned(entry)
+        entry.state = :abandoned
+        @queue.delete(entry)
+        record(entry, { "structuredContent" => { "status" => "abandoned" } }, @clock.call)
+        @executor.busy("The client closed the connection before SketchUp ran this call; it did not run.")
+      end
+
+      # Called with the lock held, on a worker: a busy answer is a call as far as the diagnostics go, and
+      # the next pump tick passes it on with the rest.
+      def record_busy(entry)
+        record(entry, { "structuredContent" => { "status" => "busy", "code" => "session.busy" } }, @clock.call)
+      end
+
+      # Called with the lock held.
+      def record(entry, result, started)
+        @calls.add(entry.token, entry.tool, entry.arguments, result, ((@clock.call - started) * 1000).round)
+      end
+    end
+
     # The loopback listener agents connect to (context/AGENT_INTERFACE.md, "User-controlled local
     # access", where the bounds below are recorded). HTTP/1.1 on 127.0.0.1, one JSON-RPC message per
     # `POST /mcp`, authenticated by an agent token.
@@ -41,9 +107,13 @@ module PhComposer
     # Ruby threads run only while the main thread yields, so the pump ends each tick with a short sleep,
     # as the asset server's does. When the pump has not ticked within STARVATION_SECONDS the worker
     # answers `session.busy` itself; under a native modal no thread runs at all, and the client's own
-    # timeout is what the caller sees.
+    # timeout is what the caller sees. A call whose client has closed the connection is never run: the
+    # worker checks before it queues the call and the pump before it runs it, since after a modal the worker
+    # reads a request its client gave up on long before (context/AGENT_INTERFACE.md, "User-controlled local
+    # access").
     class Server
       include ServerRevocation
+      include ServerQueue
 
       DEFAULT_PORT = 46_110
       REQUEST_TIMEOUT = 5.0
@@ -64,8 +134,11 @@ module PhComposer
 
       # One tool call. `state` is :waiting in the queue, :running once the pump has taken it (it then always
       # finishes), and :done with its result; a worker gives up only on a :waiting entry, which becomes
-      # :cancelled and is never run.
-      Entry = Struct.new(:token, :tool, :arguments, :deadline, :result, :state, keyword_init: true)
+      # :cancelled and is never run, and the pump leaves one whose client has gone :abandoned, also unrun.
+      # `connected` answers whether the client still waits for the reply.
+      Entry = Struct.new(:token, :tool, :arguments, :deadline, :result, :state, :connected, keyword_init: true)
+      # The `connected` of a call that came by no connection the server can ask, such as a test's.
+      ALWAYS_CONNECTED = -> { true }
 
       attr_reader :port
 
@@ -216,9 +289,10 @@ module PhComposer
       end
 
       def serve(session)
-        status, body, extra = answer(LoopbackHttp.read_request(session, :timeout => REQUEST_TIMEOUT,
-                                                                        :max_header_bytes => MAX_HEADER_BYTES,
-                                                                        :max_body_bytes => MAX_BODY_BYTES))
+        request = LoopbackHttp.read_request(session, :timeout => REQUEST_TIMEOUT,
+                                                     :max_header_bytes => MAX_HEADER_BYTES,
+                                                     :max_body_bytes => MAX_BODY_BYTES)
+        status, body, extra = answer(request, -> { LoopbackHttp.peer_open?(session) })
         LoopbackHttp.respond_json(session, status, body, extra || [])
       rescue StandardError
         begin
@@ -232,7 +306,7 @@ module PhComposer
       end
 
       # [status, body, extra headers] for one request, refusing in the receipt's order.
-      def answer(request)
+      def answer(request, connected = ALWAYS_CONNECTED)
         return [request.refusal, ""] if request.refusal
         return [405, "", ["Allow: POST"]] unless request.verb == "POST"
         return [404, ""] unless request.target == PATH
@@ -242,7 +316,7 @@ module PhComposer
         return [401, "", ["WWW-Authenticate: Bearer"]] unless token
         return [415, ""] unless json_media_type?(request.headers["content-type"])
 
-        message(request.body, token)
+        message(request.body, token, connected)
       end
 
       # `application/json`, in any case, with or without parameters such as a charset.
@@ -275,7 +349,7 @@ module PhComposer
 
       # A request id is a string or an integer (MCP allows no other); a message without one is a
       # notification.
-      def message(body, token)
+      def message(body, token, connected = ALWAYS_CONNECTED)
         return rpc_error(nil, -32_700, "The body is not UTF-8 JSON.", 400) unless body.valid_encoding?
 
         parsed = JSON.parse(body)
@@ -286,37 +360,39 @@ module PhComposer
         end
         return [202, ""] unless parsed.key?("id")
 
-        dispatch(parsed, token)
+        dispatch(parsed, token, connected)
       rescue JSON::ParserError
         rpc_error(nil, -32_700, "The body is not JSON.", 400)
       end
 
-      def dispatch(message, token)
+      def dispatch(message, token, connected = ALWAYS_CONNECTED)
         id = message["id"]
-        return tool_call(id, message["params"], token) if message["method"] == "tools/call"
+        return tool_call(id, message["params"], token, connected) if message["method"] == "tools/call"
 
         @lock.synchronize { @calls.contact(token, message["params"]) } if message["method"] == "initialize"
         result = @protocol.answer(message, token)
         result ? rpc_result(id, result) : rpc_error(id, -32_601, "Method not found: #{message['method'][0, 60]}")
       end
 
-      def tool_call(id, params, token)
+      def tool_call(id, params, token, connected = ALWAYS_CONNECTED)
         unless params.is_a?(Hash) && params["name"].is_a?(String) && (params["arguments"] || {}).is_a?(Hash)
           return rpc_error(id, -32_602, "tools/call needs a tool name and an arguments object.")
         end
 
-        rpc_result(id, handoff(token, params["name"], params["arguments"] || {}))
+        rpc_result(id, handoff(token, params["name"], params["arguments"] || {}, :connected => connected))
       end
 
-      # Queues the call and waits for the pump's answer, the handoff deadline or a starved pump.
-      def handoff(token, tool, arguments)
+      # Queues the call and waits for the pump's answer, the handoff deadline or a starved pump. A call whose
+      # client is already gone is not queued.
+      def handoff(token, tool, arguments, connected: ALWAYS_CONNECTED)
         entry = Entry.new(:token => token, :tool => tool, :arguments => arguments,
-                          :deadline => @clock.call + @handoff_seconds, :state => :waiting)
+                          :deadline => @clock.call + @handoff_seconds, :state => :waiting, :connected => connected)
         @lock.synchronize do
           if @queue.count { |queued| queued.token.fetch("id") == token.fetch("id") } >= MAX_PENDING_PER_TOKEN
             record_busy(entry)
             return @executor.busy("This token already has #{MAX_PENDING_PER_TOKEN} calls waiting for SketchUp.")
           end
+          return abandoned(entry) unless connected.call
 
           @queue << entry
           wait(entry)
@@ -328,6 +404,7 @@ module PhComposer
       def wait(entry)
         loop do
           return entry.result if entry.state == :done
+          return abandoned(entry) if entry.state == :abandoned
 
           # Dropped by the pump past its deadline, or by `stop`.
           if entry.state == :cancelled
@@ -345,51 +422,6 @@ module PhComposer
 
           @answered.wait(@lock, WAIT_STEP)
         end
-      end
-
-      def expired?(entry)
-        @clock.call >= entry.deadline
-      end
-
-      # The next waiting entry, now :running; an expired one at the head is dropped unrun.
-      def take_next
-        @lock.synchronize do
-          while (entry = @queue.shift)
-            next if entry.state != :waiting
-
-            if expired?(entry)
-              entry.state = :cancelled
-              @answered.broadcast
-              next
-            end
-            entry.state = :running
-            return entry
-          end
-          nil
-        end
-      end
-
-      def entry_age(entry)
-        (@handoff_seconds - (entry.deadline - @clock.call)).round
-      end
-
-      # Called with the lock held: the entry will not run.
-      def busy(entry, message)
-        entry.state = :cancelled
-        @queue.delete(entry)
-        record_busy(entry)
-        @executor.busy(message)
-      end
-
-      # Called with the lock held, on a worker: a busy answer is a call as far as the diagnostics go, and
-      # the next pump tick passes it on with the rest.
-      def record_busy(entry)
-        record(entry, { "structuredContent" => { "status" => "busy", "code" => "session.busy" } }, @clock.call)
-      end
-
-      # Called with the lock held.
-      def record(entry, result, started)
-        @calls.add(entry.token, entry.tool, entry.arguments, result, ((@clock.call - started) * 1000).round)
       end
 
       # On the main thread. An entry the worker gave up on, or that expired in the queue, never runs.

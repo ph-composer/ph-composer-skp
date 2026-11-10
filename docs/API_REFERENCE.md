@@ -60452,7 +60452,7 @@ Open a Space, or a Volume volumes.unprotect unlocked, as the edit context; a Vol
 
 Side effects: Moves the edit path, which advances the Model revision; leaving a Volume that was open and unprotected protects it again. No authored value changes; SketchUp itself records leaving a Group as an Undo entry, and undoing it reopens the Group.
 
-Refuses: `record.unreadable`, `space.volume_protected`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `validation.failed`, and the `view_command` common set.
+Refuses: `record.unreadable`, `session.inactive`, `space.volume_protected`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `validation.failed`, and the `view_command` common set.
 
 Params:
 
@@ -66762,3 +66762,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.39 | 2026-11-10 | Complete reads of library catalogs and exports: library.load, catalog, in_file, export_preview and export_file take compact, which counts notes and omissions and summarizes rows; library.warnings.list and unavailable.list page a catalog's notes; library.catalog.detail and in_file.detail read one row's part in fragments; library.export_preview.omissions pages an export's omissions against its projection_digest; export_file answers destination_state. |
 | 1.40 | 2026-11-10 | Complete export QA and repair: export_preflight takes compact (counts by owner and code) and part (a filtered page of findings or repairs, or one row whole); preflights report the metadata extraction refuses; export_status and latest_export take compact, every task names its source and diagnostics, and export_status with part reads an ended task's findings, report and result, refusing task.running before it ends; thermal_bridges.edges.repair_candidates and edges.repair remove an unreadable or stranded Edge assignment. |
 | 1.41 | 2026-11-10 | The Agent Access dialog's catalog adds agent_access.connection_changed, refused when a connection profile is bound to another token than the one shown; no operation changes. |
+| 1.42 | 2026-11-10 | ph_composer.spaces.context.open declares session.inactive: it, context.open, spaces.context.close and spaces.locate refuse to move the edit path of a Model SketchUp is not showing. An agent call whose client closed the connection before it ran is not run. |
