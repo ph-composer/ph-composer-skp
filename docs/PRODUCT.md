@@ -243,7 +243,7 @@ shows on the Volume row, where it is set. Each Zone row shows its Spaces' sums; 
 inherits its airflow from the Zone, the Zone shows a dash instead. Cells edit in place, and a range fill or a paste from a
 spreadsheet is one Undo step. Checked rows edit together in the selection bar, and checked Zones
 stay checked when switching to the Geometry view. Each row offers Locate and, where they apply, Open,
-Close, Enter, Delete, Remove, Remove Volume, Move to Zone and the repair its problem names. The Weighting
+Close, Enter, Delete, Remove, Delete Volume, Move to Zone and the repair its problem names. The Weighting
 factor column filters the table and colours the Model by factor. A Volume's height can be set from a closed solid the user draws, its volume over the Volume's net floor area, after a confirmation that shows both numbers. There is no Level rail and no
 separate balance view; column widths last for the session.
 
@@ -265,7 +265,11 @@ are joined: two Faces sharing a SketchUp Edge, a step between a floor and a ramp
 Faces meeting only at a corner, or not at all, make a Volume each.
 With a Space open, Add New Volume to Space takes the place of Create Space in the context menu on loose Faces at the
 Space's root. It opens no dialog: the selected Faces become the Space's next Volumes by the same rule, with weighting
-factor 1 and the Space's default height, in one Undo step. Space Groups stay Untagged; apply a tag of
+factor 1 and the Space's default height, in one Undo step. Volumes stay locked, so SketchUp's Delete key passes
+them by; Delete Volume in the context menu on one Volume selected in an open Space erases it with its floor Faces in
+one Undo step, as a Volume row's Delete does in the Spaces view. A Space's only Volume asks first and offers Delete
+Space instead, so neither route leaves a Space empty; a Space that does end up with no Volume shows a warning until
+it is fixed. Scripts keep a second choice: removing a Volume keeps its Faces loose in the Space. Space Groups stay Untagged; apply a tag of
 your own to show or hide them. Draw a room's floor surface just below the Zone's floor, or
 inset from its walls, so that it touches no envelope Face. A floor surface drawn with its edges on the
 walls splits them, and Create Space leaves it out, saying to Undo it and draw it below or inset.

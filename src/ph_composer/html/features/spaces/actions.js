@@ -1,6 +1,7 @@
 /* The Spaces view's row actions: Locate every row; Open or Close a Space; Enter a Volume;
- * Delete a Space, Remove a Space keeping its floors and Remove a Volume, each after a confirmation naming what
- * goes; Move a Space to Zone; and the repair a row's finding names (Restore position, Make independent).
+ * Delete a Space, Remove a Space keeping its floors and Delete a Volume with its floor Faces, each after a
+ * confirmation naming what goes (a Space's only Volume offers Delete Space instead); Move a Space to Zone; and the
+ * repair a row's finding names (Restore position, Make independent).
  *
  * Every Model change carries the revision the row was painted from, so a row from a stale snapshot refuses
  * rather than acting on what has changed. Context commands are view commands (they move the edit context and
@@ -119,14 +120,14 @@ function (panel, requests, ui, units, preferences, fields) {
       if (!this.open(row)) items.push({ id: "spaces.enter", icon: "enter", label: "Enter " + name, disabled: busy });
       items.push({ id: "spaces.height_from_solid", icon: "ruler", label: "Height of " + name + " from a solid",
         disabled: busy });
-      items.push({ id: "spaces.remove_volume", icon: "delete", label: "Remove " + name, disabled: busy });
+      items.push({ id: "spaces.delete_volume", icon: "delete", label: "Delete " + name, disabled: busy });
     }
     return items;
   };
 
   // The actions that change records or the edit context's protection; a held cell draft must not be lost to one.
   var CHANGES = { "spaces.enter": true, "spaces.restore": true, "spaces.independent": true, "spaces.delete": true,
-    "spaces.remove": true, "spaces.remove_volume": true, "spaces.move": true, "spaces.unhost": true,
+    "spaces.remove": true, "spaces.delete_volume": true, "spaces.move": true, "spaces.unhost": true,
     "spaces.height_from_solid": true };
 
   /* Runs one of this view's actions; false for an action it does not own. */
@@ -166,17 +167,31 @@ function (panel, requests, ui, units, preferences, fields) {
           self.runAt(revision, PREFIX + ".remove", { space: reference });
         });
         break;
-      case "spaces.remove_volume":
-        this.askFirst("Remove " + describe(record), "The Volume's records go and its Faces stay loose in the " +
-          "Space. One Undo brings them back.", "Remove", function (revision) {
-          self.runAt(revision, PREFIX + ".volumes.remove", { volume: reference });
-        });
-        break;
+      case "spaces.delete_volume": this.deleteVolume(record, reference); break;
       case "spaces.move": this.pickZone(record, reference); break;
       case "spaces.height_from_solid": this.heightFromSolid(record, reference); break;
       default: return false;
     }
     return true;
+  };
+
+  /* Delete a Volume and its floor Faces. A Space's only Volume offers Delete Space instead, so the panel never
+     leaves a Space empty. */
+  SpaceActions.prototype.deleteVolume = function (record, reference) {
+    var self = this, space = copy(record.space.reference);
+    if ((record.space.volumes || []).length === 1) {
+      var spaceName = describe({ space: record.space });
+      this.askFirst("Delete Space?", (record.volume.values.display_name || "Volume " + record.volume.values.number) +
+        " is the only Volume of " + spaceName + ", so the Space goes with it: " + spaceName + " and everything in " +
+        "it will be erased. One Undo brings it back.", "Delete Space", function (revision) {
+        self.runAt(revision, PREFIX + ".delete", { space: space });
+      });
+      return;
+    }
+    this.askFirst("Delete Volume?", describe(record) + " and its floor Faces will be erased. One Undo brings them " +
+      "back.", "Delete", function (revision) {
+      self.runAt(revision, PREFIX + ".volumes.delete", { volume: reference });
+    });
   };
 
   /* Sends a change as of the revision a confirmation opened at, so one reviewed against older rows refuses. */

@@ -132,6 +132,18 @@ module PhComposer
         { "volume_id" => occurrence.record.fetch("id") }
       end
 
+      # Erases one Volume with its floor Faces, as SketchUp's Delete would; remove_volume keeps the Faces.
+      def delete_volume(request, proposal, volume:)
+        occurrence = Resolve.occurrence(Occurrences.scan(request.model), volume, :mutable => true)
+        check_removals!(request, proposal, [[VOLUME_KIND, occurrence]] +
+                                           occurrence.segments.map { |segment| [FLOOR_SEGMENT_KIND, segment] })
+        segments = occurrence.segments.map { |segment| { "id" => segment.record.fetch("id"), "path" => segment.path } }
+        proposal.add_step(DeleteVolumeStep.new(:path => occurrence.path, :before => occurrence.record,
+                                               :segments => segments),
+                          :scopes => [Operations::EntityScope.new(occurrence.path[0...-1])])
+        { "volume_id" => occurrence.record.fetch("id") }
+      end
+
       # Puts a moved Volume back where its record says it was left, and protects it, in one Undo step.
       def restore_position(request, proposal, volume:)
         model = request.model

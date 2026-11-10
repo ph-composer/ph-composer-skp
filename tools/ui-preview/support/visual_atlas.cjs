@@ -278,7 +278,7 @@ check({ name: "visual_atlas", output }, async ({ newPage, step }) => {
         }
         await page.getByRole("button", { name: "Expand all", exact: true }).click();
         for (const [label, screen] of [["Height of Volume 1 from a solid", "space-height-from-solid"],
-          ["Remove Volume 1", "space-remove-volume"]]) {
+          ["Delete Volume 1", "space-delete-only-volume"], ["Delete Volume 2", "space-delete-volume"]]) {
           await page.getByRole("button", { name: label, exact: true }).first().click();
           await page.locator("dialog[open]").waitFor(); await shot("key-popup", "spaces", screen); await cancel();
         }

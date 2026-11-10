@@ -283,6 +283,41 @@ module PhComposer
       end
     end
 
+    # Erases one Volume Group and its floor Faces, as SketchUp's Delete would: the records go with the
+    # entities. A Volume open, or open below, closes to its Space first, joining the same Undo step.
+    class DeleteVolumeStep
+      attr_reader :affected
+
+      def initialize(path:, before:, segments:)
+        @path = path.dup.freeze
+        @before = DeepCopy.frozen(before)
+        @segments = DeepCopy.frozen(segments)
+        @affected = [{ "kind" => VOLUME_KIND, "id" => before.fetch("id"), "change" => "deleted",
+                       "reference" => { "volume_id" => before.fetch("id"), "entity_path" => @path } }] +
+                    @segments.map do |segment|
+                      { "kind" => FLOOR_SEGMENT_KIND, "id" => segment.fetch("id"), "change" => "deleted",
+                        "reference" => { "floor_segment_id" => segment.fetch("id"),
+                                         "entity_path" => segment.fetch("path") } }
+                    end
+      end
+
+      def descriptor
+        { "name" => "delete_volume", "path" => @path, "before" => @before, "segments" => @segments }
+      end
+
+      def apply(model, _slots)
+        volume = Occurrences.entity_at(model, @path)
+        unless volume.is_a?(Sketchup::Group) && VOLUME_STORE.read(volume) == @before
+          raise CodedError.new("target.changed", "The Volume changed after it was previewed. Nothing was written.")
+        end
+
+        Steps.leave_open_group(model, volume)
+        volume.locked = false
+        parent = @path.length == 1 ? model.entities : Occurrences.entity_at(model, @path[0...-1]).entities
+        parent.erase_entities(volume)
+      end
+    end
+
     # Removes one Space's structure, RemoveVolumeStep one level up: every Spaces record at or below it goes,
     # its Volume and Space Groups are exploded innermost first, and the Faces stay where they are as plain
     # geometry. `records` holds each record's kind, path and pre-image, the Space's own among them.
