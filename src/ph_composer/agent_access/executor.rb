@@ -122,7 +122,7 @@ module PhComposer
       # never turned into a refusal by its size.
       def result(value, acted: false)
         text = JSON.generate(value)
-        if text.bytesize > MAX_RESULT_BYTES && acted && outcome?(value)
+        if text.bytesize > MAX_RESULT_BYTES && acted && outcome?(value) && !part_read?(value)
           value = trimmed(value)
           text = JSON.generate(value)
           value = minimal(value) if text.bytesize > MAX_RESULT_BYTES
@@ -140,6 +140,12 @@ module PhComposer
 
       def outcome?(value)
         value.is_a?(Hash) && value.key?("status") && value.key?("effect")
+      end
+
+      # A part read of an ended export task (export_status with part) changes nothing, so an oversized one is
+      # refused as any read is, never trimmed to a receipt.
+      def part_read?(value)
+        value["value"].is_a?(Hash) && value["value"].key?("part")
       end
 
       # What a tool that acts did is never reported as refused because its answer was large: the outcome
@@ -160,14 +166,21 @@ module PhComposer
 
         outcome = value["outcome"]
         inner = outcome && outcome["value"].is_a?(Hash) ? outcome["value"].slice("artifacts") : nil
-        kept = outcome && outcome.slice("status", "code", "message", "effect", "revision").merge("value" => inner)
+        kept = outcome && outcome.slice("status", "code", "effect", "revision")
+                                 .merge("message" => outcome["message"].to_s[0, MAX_ECHO * 2], "value" => inner)
         value.slice("task_id", "stage", "count", "cancellable", "source", "diagnostics").merge("outcome" => kept)
       end
 
       # Only what says what happened, for an outcome still over the budget once trimmed.
+      # An export task keeps its id, source and outcome code, which export_status with part reads from.
       def minimal(outcome)
+        task = outcome["value"].is_a?(Hash) && outcome["value"]["task_id"] ? outcome["value"] : nil
+        kept = task && task.slice("task_id", "stage", "source").merge(
+          "outcome" => task["outcome"]&.slice("status", "code", "effect", "revision")
+        )
         Outcome.build(outcome["status"], outcome["code"], "The result was over the reply limit; read back what " \
-                                                          "it changed.", outcome["effect"], outcome["revision"])
+                                                          "it changed.", outcome["effect"], outcome["revision"],
+                      :value => kept)
                .merge(outcome.slice("sequence"))
       end
 

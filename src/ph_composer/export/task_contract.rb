@@ -100,9 +100,10 @@ module PhComposer
       }.merge(FILTERS).freeze
       STATUS_OPTIONS = {
         "compact" => COMPACT,
-        "part" => { "type" => "string", "enum" => %w[findings report result],
+        "part" => { "type" => "string", "enum" => %w[findings report result outcome],
                     "description" => "What the ended task kept: a filtered page of findings, or the generated " \
-                                     "report or compact result as fragments. Never reads the Model or exports again." }
+                                     "report, the compact result or the whole outcome (a long failure message " \
+                                     "included) as fragments. Never reads the Model or exports again." }
       }.merge(FILTERS).freeze
       ROW = {
         "type" => "object", "description" => "A row as its whole list holds it, with owner (a preflight row) and " \

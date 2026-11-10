@@ -86,6 +86,12 @@ module PhComposer
                       "source" => source, "diagnostics" => @diagnostics, "outcome" => outcome)
       end
 
+      # The whole outcome as its owner polls it, in fragments: a failure message of any length is read here.
+      def outcome_part(request)
+        fragment, next_cursor = Fragments.read(request, "export_status.outcome", snapshot(@owner).fetch("outcome"))
+        { "fragment" => fragment, "next_cursor" => next_cursor }
+      end
+
       # The Model revision and content generation the run read, captured when it started.
       def source
         { "revision" => @source_revision, "export_generation" => @generation }
@@ -96,6 +102,7 @@ module PhComposer
       # (`row`), or the generated report or compact result as fragments.
       def diagnostic(request, part)
         raise Blocked.new("task.running", "That export has not finished; poll export_status.") unless terminal?
+        return outcome_part(request) if part == "outcome"
 
         @retained.read(request, part)
       end
@@ -358,11 +365,16 @@ module PhComposer
         @session.request_refresh if @session.valid?
       end
 
-      # The outcome without what `diagnostic` reads a part at a time.
+      # The outcome without what `diagnostic` reads a part at a time, its message cut as a page row's is; the
+      # `outcome` part reads it whole.
       def compact_outcome(outcome)
         value = outcome["value"]
         value = value.reject { |key, _value| %w[result report_html].include?(key) } if value.is_a?(Hash)
-        outcome.reject { |key, _value| key == "findings" }.merge("value" => value)
+        compact = outcome.reject { |key, _value| key == "findings" }.merge("value" => value)
+        message = outcome["message"].to_s
+        return compact if message.length <= DiagnosticPages::MAX_MESSAGE
+
+        compact.merge("message" => message[0, DiagnosticPages::MAX_MESSAGE], "truncated" => ["message"])
       end
 
       # The preflight warnings no finding in `findings` already reports by code and object, once each, in

@@ -41331,7 +41331,7 @@ Undo step: Repair Thermal Bridge Assignment. Removes the ph_composer.thermal_bri
 
 Before calling: The Edge's path crosses no locked or shared storage. The stored text is still the one the fingerprint names.
 
-Refuses: `record.unreadable`, `reference.in_use`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_kind`, `thermal_bridge.repair_not_needed`, and the `action` common set.
+Refuses: `copy.rule_missing`, `record.unreadable`, `reference.in_use`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_kind`, `thermal_bridge.repair_not_needed`, and the `action` common set.
 
 Params:
 
@@ -65622,9 +65622,10 @@ Keyword arguments besides context:
       "enum": [
         "findings",
         "report",
-        "result"
+        "result",
+        "outcome"
       ],
-      "description": "What the ended task kept: a filtered page of findings, or the generated report or compact result as fragments. Never reads the Model or exports again."
+      "description": "What the ended task kept: a filtered page of findings, or the generated report, the compact result or the whole outcome (a long failure message included) as fragments. Never reads the Model or exports again."
     },
     "codes": {
       "type": "array",

@@ -306,16 +306,19 @@ optional and the whole reply stays the default (D15-a). New names:
   (`Fragments.summary`), each cut named in `truncated`; beside them `total` (rows matching the filter) and
   `unfiltered_total` (the part's rows), the cursor bound to the Model revision. `part` with `row` answers that whole
   row's canonical JSON in `fragment`s.
-- `export_status` params `compact`, `part` (`findings` | `report` | `result`), `codes`, `blocks_export`, `object_id`,
+- `export_status` params `compact`, `part` (`findings` | `report` | `result` | `outcome`), `codes`, `blocks_export`, `object_id`,
   `row`, `limit`, `cursor`; `latest_export` param `compact`. Every task snapshot adds `source` (`revision`,
   `export_generation`, captured at start) and `diagnostics` (null until the task ends: `findings`, `blocking`,
   `report` and `result` as `Fragments.summary` or null, `report_absent` null or why: `no_translation`,
-  `not_rendered`). `compact` leaves `outcome.findings`, `outcome.value.result` and `outcome.value.report_html` out.
+  `not_rendered`). `compact` leaves `outcome.findings`, `outcome.value.result` and `outcome.value.report_html` out
+  and cuts a message over 512 characters, named in `outcome.truncated`; the `outcome` part reads the whole outcome.
   `part` reads what the task retained when it ended (`Export::Task#diagnostic`), never the Model: `findings` pages
   as the preflight part does, `report` (the generated report HTML, of a written or a blocked run) and `result` (the
   compact translation result) answer `fragment`s; the cursor binds the task, not the Model revision. A part of a task
   that has not ended refuses `task.running`; `task.expired` and `task.foreign` stay as they were.
-- `AgentAccess::Executor` keeps `source` and `diagnostics` in an export receipt trimmed to the reply budget.
+- `AgentAccess::Executor` keeps `source` and `diagnostics` in an export receipt trimmed to the reply budget, and
+  `task_id`, `source` and the outcome code even in its last fallback; a part read over the budget is refused as a
+  read, never trimmed.
 - `Export::MetadataCheck.problems` (the metadata rules `Export::RecordReader` applies, shared) and
   `Export::MetadataCheck.findings`: every metadata blocker of the records a contributor's preflight names, as
   blocking preflight rows with the codes extraction raises (`export.blocked` for a reserved `user_data` key,

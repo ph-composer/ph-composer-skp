@@ -47,7 +47,8 @@ module PhComposer
 
       # The task's snapshot, compact on request, or with `part` one part of what it kept when it ended
       # (Task#diagnostic), its cursors bound to this task alone, so a later edit of the Model expires none.
-      TASK_PARTS = { "findings" => %w[codes blocks_export object_id], "report" => [], "result" => [] }.freeze
+      TASK_PARTS = { "findings" => %w[codes blocks_export object_id], "report" => [], "result" => [],
+                     "outcome" => [] }.freeze
 
       def status(id, owner, options = {})
         options = TaskContract.check_options!("export_status", options)

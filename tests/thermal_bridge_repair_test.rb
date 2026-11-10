@@ -110,6 +110,10 @@ class ThermalBridgeRepairTest < PhComposerTestCase
     assert_equal "committed", repaired["effect"], repaired.inspect
     [[100, 130, 131], [100, 140, 141]].each { |path| live(*path).delete_attribute(STORE.dictionary, STORE.key) }
     @session.host_event(:transaction_committed)
+    held = STORE.read(@held)
+    STORE.write(@held, held.merge("extension_data" => { "test.opaque" => "not an envelope" }))
+    assert_equal "copy.rule_missing", invoke("edges.repair", params)["code"], "an opaque envelope fails closed"
+    STORE.write(@held, held)
     preview = API.preview(:context => @context, :name => "#{TB::FEATURE_ID}.edges.repair", :params => params)
     assert_equal ["stranded", "outside_zone"], preview.fetch("value").values_at("condition", "containment")
     assert_equal({ "id" => "tbe_BBBBBBBBBBBB", "thermal_bridge_type_id" => @type, "quantity" => 1,

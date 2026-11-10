@@ -113,7 +113,7 @@ module PhComposer
                                                     "description" => "Edges whose assignment was removed." } })
       PRECONDITIONS = ["Each Edge is inside a Zone, reached through no shared, locked or other Zone storage.",
                        "Each target carries the reference and values edges.selection last read."].freeze
-      REPAIR = %w[record.unreadable reference.in_use target.changed target.locked target.not_found
+      REPAIR = %w[copy.rule_missing record.unreadable reference.in_use target.changed target.locked target.not_found
                   target.shared_definition target.wrong_kind thermal_bridge.repair_not_needed].freeze
       FINGERPRINT = { "type" => "string", "pattern" => "^[0-9a-f]{64}$",
                       "description" => "SHA-256 of the stored text (a non-text value's canonical JSON), hex, as " \

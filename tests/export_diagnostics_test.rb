@@ -32,6 +32,10 @@ class ExportDiagnosticsTest < PhComposerTestCase
           "object_id" => "fixture_#{index}", "message" => "Runtime finding #{index}: #{'detail ' * 20}",
           "blocks_export" => index != 7 }
       end
+      if Runtime.long_id
+        findings << { "code" => "object.long", "section" => "synthetic", "object_id" => Runtime.long_id,
+                      "message" => "One finding about a record with a long id.", "blocks_export" => true }
+      end
       @on_message.call("runtime.translation", "request_id" => id, "result" => {
         "schema_version" => 1, "run_id" => id, "state" => "complete_with_findings", "sections" => [],
         "failure" => nil, "findings" => findings,
@@ -40,7 +44,7 @@ class ExportDiagnosticsTest < PhComposerTestCase
     end
 
     class << self
-      attr_accessor :closing
+      attr_accessor :closing, :long_id
     end
   end
 
@@ -165,6 +169,34 @@ class ExportDiagnosticsTest < PhComposerTestCase
     assert_equal "access.revoked", revoked.dig("structuredContent", "code")
   end
 
+  def test_an_oversized_kept_row_is_refused_by_page_and_read_whole_by_row
+    Runtime.long_id = "x" * 30_000
+    task = blocked_run
+    page = @executor.call(@token, "export_status", "session" => @session.id, "task_id" => task, "part" => "findings",
+                                                   "codes" => ["object.long"])
+    assert_equal "request.response_too_large", page.dig("structuredContent", "code")
+    row = joined("export_status", "task_id" => task, "part" => "findings", "row" => [240])
+    assert_equal "x" * 30_000, row.fetch("object_id")
+  ensure
+    Runtime.long_id = nil
+  end
+
+  def test_a_failure_message_over_the_budget_keeps_the_task_and_reads_whole
+    ready_model
+    face = PhComposer::Zones::Faces::FACE_STORE
+    entity = assignment_entity
+    namespace = "test.#{'n' * 30_000}"
+    face.write(entity, face.read(entity).merge("extension_data" => { namespace => envelope("unknown") }))
+    task = blocked_run
+    status = agent("export_status", "task_id" => task, "compact" => true).fetch("value")
+    assert_equal [task, "export.relevance_unknown", ["message"]],
+                 [status.fetch("task_id"), status.dig("outcome", "code"), status.dig("outcome", "truncated")]
+    whole = agent("export_status", "task_id" => task).fetch("value")
+    assert_equal [task, "export.relevance_unknown"], [whole.fetch("task_id"), whole.dig("outcome", "code")]
+    outcome = joined("export_status", "task_id" => task, "part" => "outcome")
+    assert_includes outcome.fetch("message"), namespace
+  end
+
   def test_a_closed_session_drops_its_tasks
     task = blocked_run
     PhComposer::Export::Tasks.for(@session).detach
@@ -182,6 +214,11 @@ class ExportDiagnosticsTest < PhComposerTestCase
       face.write(entity, stored.merge("extension_data" => { "test.other" => envelope(relevance) }))
       assert_equal codes, blocking_codes.uniq, relevance
     end
+    face.write(entity, stored.merge("extension_data" => { "test.one" => envelope("required"),
+                                                          "test.two" => envelope("required") }))
+    named = PhComposer::API.export_preflight(:context => @context).dig("value", "findings")
+                           .select { |row| row["object_id"] == stored.fetch("id") }.map { |row| row.fetch("message") }
+    assert_equal 2, named.count { |message| message.include?("test.one") || message.include?("test.two") }
     face.write(entity, stored)
     assembly = PhComposer::Assemblies::Assembly::Schema::KIND.store
     record = assembly.read(@model, "asm_Single000001")

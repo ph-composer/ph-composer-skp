@@ -74,7 +74,7 @@ module PhComposer
       end
 
       # Blocking preflight rows for every problem in `records` (stored hashes, each with its `id`), read as
-      # `section`'s contract reads them, once per record id and code.
+      # `section`'s contract reads them, each distinct problem once however many placements show the record.
       def findings(request, records, section:, user_data: false, target_kind: nil)
         registry = request.registry
         reserved = (Collection.reserved(registry) + [RecordReader::RESERVED_USER_DATA_KEY]).uniq
@@ -86,7 +86,7 @@ module PhComposer
               "message" => problem.message, "blocks_export" => true }
           end
         end
-        rows.uniq { |row| row.values_at("object_id", "code") }
+        rows.uniq { |row| row.values_at("object_id", "code", "message") }
       end
 
       # The stored records of one definition kind that can be read; one that cannot is the owner's own

@@ -403,7 +403,8 @@ started) and, once it ends, its `diagnostics`: finding counts and the size and S
 result it kept, or `report_absent` saying why it kept no report (`no_translation`: it stopped before the
 translation answered). `export_status` with `part` reads what that run kept, never the Model as it is
 now: `"findings"` a page at a time with the same filters and `row` as the preflight, `"report"` (the
-generated report, including a blocked run's, which writes no file) and `"result"` in fragments. Its
+generated report, including a blocked run's, which writes no file), `"result"` and `"outcome"` (the
+whole outcome, for a failure message longer than `compact` shows) in fragments. Its
 cursors belong to the task, so an edit made after the run does not expire them; the task's retention,
 your token and the Model staying open do. A part before the task ends refuses `task.running`. While `cancellable` is true, `cancel_export` with the
 task's `task_id` stops it and writes nothing; once writing has started it finishes, and polling shows
