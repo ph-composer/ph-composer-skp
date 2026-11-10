@@ -16,6 +16,9 @@ module PhComposer
     # The parts of a record's view `detail` reaches; kind, id and schema_version are in every list row.
     PARTS = %w[values user_data extension_data extension_status].freeze
     MAX_PATH = 32
+    # An unreadable row's message names what is wrong, which can quote stored text of any length; the row is
+    # cut here so it never crowds out the page. records.detail on the record refuses with the whole message.
+    MAX_MESSAGE = 512
 
     PARAMS = {
       "type" => "object",
@@ -162,7 +165,7 @@ module PhComposer
     def entry(engine, kind, id, fields, summary)
       view = engine.view(kind.id, engine.find(kind.id, id))
     rescue CodedError => error
-      [false, { "id" => id, "code" => error.code, "message" => error.message }]
+      [false, { "id" => id, "code" => error.code, "message" => error.message[0, MAX_MESSAGE] }]
     else
       [true, row(view, fields, summary)]
     end

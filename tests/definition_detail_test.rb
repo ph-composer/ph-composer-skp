@@ -310,6 +310,18 @@ class DefinitionDetailTest < PhComposerTestCase
                  parts.transform_values { |part| part.fetch("stable") })
   end
 
+  def test_an_unreadable_record_with_a_long_diagnostic_does_not_block_the_records_behind_it
+    kind = RecordFixtures::DEFINITION
+    kind.store.write(@model, "id" => "tdf_#{'A' * 12}", "schema_version" => 1, "label" => "Broken", "x" * 30_000 => 1)
+    kind.store.write(@model, "id" => "tdf_#{'B' * 12}", "schema_version" => 1, "label" => "Valid")
+    params = { "kind" => kind.id, "fields" => [], "metadata" => "summary", "limit" => 1 }
+    pages = [completed(query("#{P}.records.list", params))]
+    pages << completed(query("#{P}.records.list", params.merge("cursor" => pages.first.fetch("next_cursor"))))
+    assert_nil pages.last.fetch("next_cursor")
+    assert_equal [["tdf_#{'A' * 12}"], []], pages.map { |page| page.fetch("unreadable").map { |row| row.fetch("id") } }
+    assert_equal [[], ["tdf_#{'B' * 12}"]], pages.map { |page| page.fetch("records").map { |row| row.fetch("id") } }
+  end
+
   def test_a_long_key_is_read_without_echoing_its_path
     key = "k" * 14_000
     id = create_material("Long key", key => TEXT * 400)
