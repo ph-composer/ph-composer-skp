@@ -53,6 +53,17 @@ class EntityStoreClaimsTest < PhComposerTestCase
     refute STORE.claimed_within?([open])
   end
 
+  def test_records_on_names_each_store_on_one_entity_by_presence
+    entity = group(13)
+    @first.write(entity, "id" => "g")
+    entity.set_attribute("ph_composer.test_unclaimed", "record", "{damaged")
+
+    assert_equal [{ "dictionary" => DICTIONARY, "key" => "first", "claims" => true },
+                  { "dictionary" => "ph_composer.test_unclaimed", "key" => "record", "claims" => false }],
+                 STORE.records_on(entity)
+    assert_empty STORE.records_on(group(14))
+  end
+
   def test_the_selection_check_counts_the_open_context
     child = group(6)
     claimed = group(5, child)

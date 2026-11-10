@@ -1,6 +1,6 @@
 # Proposed contract changes
 
-STATUS: C01 bound and implemented by AW-01 (API 1.34); C02 bound and implemented on the AW-02 branch (API 1.35); C03-C08 remain proposals. Baseline API 1.31.
+STATUS: C01 bound and implemented by AW-01 (API 1.34); C02 bound and implemented by AW-02 (API 1.35); C04 bound and implemented on the AW-03 branch (API 1.36); C03 and C05-C08 remain proposals. Baseline API 1.31.
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication
 
 The durable authorities remain `context/CONTRACTS.md`, `AGENT_INTERFACE.md`, `EXTENSIBILITY.md`
@@ -113,6 +113,42 @@ Candidate reads must not move selection/edit path, mint identities, unlock geome
 definition independent. Hidden/locked/shared/foreign-owned cases are represented or explicitly
 filtered by a declared option. World transforms apply exactly once. Large loops and topology use
 C03 detail. Native shape creation and general transformations are excluded.
+
+**Bound at AW-03 (API 1.36).** Six new queries, all reads (capability `read`); no new action. Every one takes an
+explicit root-to-container `path` or explicit paths, pages by persistent id under `Pages::MAX_PAGE_BYTES`, binds its
+cursor to the revision and its filter, and never moves the selection, the edit path or the camera, mints an id or
+writes a dictionary. New names:
+
+- `ph_composer.context.children` (foundation): params `path` (default `[]`, the root), `kinds` (subset of `group`,
+  `component`, `face`, `edge`, `other`), `limit`, `cursor`. Result `container` (`path`, and `locked`, `hidden`,
+  `shared` carried down the path), `children` (`path`, `persistent_id`, `kind`, `type`, `name`, `definition_name`,
+  `hidden`, `locked`, `shared`, `solid`, `child_count`, `records`: `dictionary`, `key`, `claims`), `next_cursor`,
+  `total`. A name over `OccurrencePath::NAME_CHARACTERS` (256) characters is cut and named in the row's `truncated`,
+  here and in `zones.make_candidates`; in `edges.at` and `edges.candidates` the Zone's name, Building-Segment and
+  Level are cut the same way and named `zone.name` and so on. A step that is missing or repeated refuses `target.not_found`; one that is not a Group or component
+  `target.wrong_kind`. Filtering choice D11-a.
+- `Records::EntityStore.records_on(entity)`: the registered stores marking one entity, by presence.
+- `OccurrencePath.resolve(model, path)` (core): the read-only walk of a root-to-container path through Groups and
+  components, with the root-composed transform and the carried lock, visibility and shared-storage flags.
+- `Pages.bounded(..., prepare:)`: builds the sliced rows before the byte cut, so a page computes only its own rows.
+- `ph_composer.zones.make_candidates`: params `parent_path` (default `[]`), `limit`, `cursor`. Rows: each Group
+  directly in that context with `path`, `name`, `hidden`, `make_zone` (`parent_path`, `entity_ids`) and `refusal`
+  (Make Zone's own check after its edit-path check, `Zones.make_refusal`, plus `ContextCommands.open_refusal` for a
+  context that is not open); beside them `open_required`, `loose_faces` and `loose_edges`.
+- `ph_composer.spaces.candidate_faces.list` param `context` (a root-to-container path), beside `space` and `volume`:
+  Faces loose there, `candidate: "space"`, `operation: "ph_composer.spaces.create"`, the refusal Create Space gives
+  that Face named alone with that context open (`CreateFaces.read` with `context:`).
+- `ph_composer.thermal_bridges.edges.at`: params `paths` (1 to 250 root-to-Edge paths). `ph_composer.thermal_bridges.
+  edges.candidates`: params `path`, `assigned` (`any`, `assigned`, `unassigned`), `limit`, `cursor`, the Edges
+  directly in that container. Both answer `edges.selection`'s rows plus `endpoints_m`; a path that names no Edge reads
+  `reason` `not_found` or `not_an_edge`.
+- `ph_composer.windows.units.convert_candidates`: params `path`, `limit`, `cursor`: the rectangles (four square
+  corners, no hole) loose in that container, each `path`, `outline_m`, `refusal` (Convert's own source read), for
+  `units.convert_review`. `ph_composer.windows.units.restore_candidates`: params `path`, `limit`, `cursor`: one row per
+  Window Type stamped on loose pane Faces there (`type_id`, `pane_paths`, `element_ids`), with `host` when exactly
+  one Zone Face holds every pane on its plane and inside its outline and resolves for writing through
+  `Placement::Hosts.writable`, as `units.restore` resolves it, else `host: null` and `needs`
+  (`host` or `selection`, the latter when the panes of more than one Window of that Type are mixed).
 
 ## C05 · Library catalog and compound copy
 

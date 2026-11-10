@@ -104,7 +104,66 @@ class SpacesCandidateFacesTest < PhComposerTestCase
     assert_equal "completed", together["status"], together.inspect
   end
 
+  QUARTER_TURN = [0.0, 1.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 500.0, 0.0, 0.0, 1.0].freeze
+
+  # A first Space needs no Space and no selection: the Faces loose at the root or in a rotated plain wrapper
+  # are candidates for create, each refused as create refuses it named alone.
+  def test_a_context_lists_its_loose_faces_for_a_first_space_with_creates_own_refusals
+    floor = floor_face(3001, rectangle(20, 0, 2, 3))
+    wall = floor_face(3002, [[30, 0, 0], [32, 0, 0], [32, 0, 2], [30, 0, 2]])
+    turned = floor_face(3101, rectangle(1, 0, 2, 2))
+    wrapper = Sketchup::Group.new(3100, Sketchup::Entities.new([turned]),
+                                  :transformation => Geom::Transformation.new(QUARTER_TURN))
+    [floor, wall, wrapper].each { |entity| @model.entities << entity }
+    scope = PhComposer::Operations::EntityScope.new([])
+    before = [scope.capture(@model), @model.selection.to_a, @model.active_path, @session.revision]
+
+    root = candidates("context" => [])
+    inside = candidates("context" => [3100], "fields" => %w[plan_area_m2 loops_m])
+
+    assert_equal before, [scope.capture(@model), @model.selection.to_a, @model.active_path, @session.revision]
+    assert_equal [[3001], [3002]], root.map { |row| row["entity_path"] }
+    assert_equal [["space", "ph_composer.spaces.create", nil, nil], ["space", "ph_composer.spaces.create",
+                                                                     "vertical", nil]],
+                 root.map { |row| [row["candidate"], row["operation"], row.dig("refusal", "code"), row["requires"]] }
+    preview = API.query(:context => @context, :name => "ph_composer.spaces.create_preview",
+                        :params => { "faces" => [[3002]] }).fetch("value")
+    assert_equal ["vertical"], preview.fetch("left_out").map { |row| row["reason"] }
+    assert_in_delta 6.0, root.first["plan_area_m2"], 1e-9
+    row = inside.first
+    assert_equal [[3100, 3101], nil], [row["entity_path"], row["refusal"]]
+    assert_match(/ph_composer.context.open/, row["requires"])
+    assert_in_delta 4.0, row["plan_area_m2"], 1e-9
+    # The quarter turn maps (1, 0) to (0, 1) and moves 500 inches along x, applied once.
+    assert_equal [12.7, 1.0, 0.0], row.dig("loops_m", 0, 0).map { |value| value.round(9) }
+
+    opened = API.view(:context => @context, :name => "ph_composer.context.open", :params => { "path" => [3100] })
+    assert_equal "completed", opened["status"], opened.inspect
+    assert_nil candidates("context" => [3100]).first["requires"]
+    created = invoke("ph_composer.spaces.create", "faces" => [row["entity_path"]])
+    assert_equal [[[3100, 3101]], []], [created.dig("value", "accepted"), created.dig("value", "left_out")],
+                 created.inspect
+  end
+
+  def test_an_empty_or_locked_context_and_a_changed_model_read_as_create_would
+    empty = Sketchup::Group.new(3200, Sketchup::Entities.new)
+    locked = Sketchup::Group.new(3300, Sketchup::Entities.new([floor_face(3301, rectangle(0, 0, 1, 1)),
+                                                               floor_face(3302, rectangle(2, 0, 1, 1))]),
+                                 :locked => true)
+    [empty, locked].each { |entity| @model.entities << entity }
+
+    assert_equal [[], 0], query("context" => [3200]).fetch("value").values_at("candidate_faces", "total")
+    rows = candidates("context" => [3300])
+    assert_equal %w[target.locked target.locked], rows.map { |row| row.dig("refusal", "code") }
+    first = query("context" => [3300], "limit" => 1).fetch("value")
+    @session.host_event(:transaction_committed)
+    assert_equal "query.cursor_expired",
+                 query("context" => [3300], "limit" => 1, "cursor" => first.fetch("next_cursor"))["code"]
+  end
+
   def test_a_scope_names_one_parent
+    assert_equal "params.invalid", query("space" => SPACE, "context" => [])["code"]
+    assert_equal "target.not_found", query("context" => [999])["code"]
     assert_equal "params.invalid", query({})["code"]
     assert_equal "target.changed", query("space" => SPACE.merge("space_id" => "spc_XXXXXXXXXXXX"))["code"]
   end

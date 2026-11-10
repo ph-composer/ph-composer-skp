@@ -2,6 +2,7 @@
 
 require_relative "../units/convert_review"
 require_relative "../units/convert"
+require_relative "../units/candidates"
 require_relative "convert_route"
 
 module PhComposer
@@ -47,6 +48,37 @@ module PhComposer
           Units::Convert.run(request, proposal, :groups => request.params.fetch("groups"))
         end
         ConvertRouteRegistration.install(feature, review_result, paths_param)
+        install_candidates(feature)
+      end
+
+      def install_candidates(feature)
+        point = { "type" => "array", "items" => METRES, "minItems" => 3, "maxItems" => 3 }
+        row = Shapes.object({
+          "path" => PATH,
+          "outline_m" => Shapes.list(point, :description => "The rectangle's four corners in world metres."),
+          "hidden" => { "type" => "boolean", "description" => "Hidden itself, or on a hidden tag or tag folder." },
+          "refusal" => Shapes.object({ "code" => Shapes::TEXT, "message" => Shapes::TEXT })
+                             .merge("type" => %w[object null],
+                                    "description" => "What Convert's source read refuses for this Face alone, " \
+                                                     "such as locked or shared storage; null when it reads.")
+        })
+        feature.query(Units::Candidates::CONVERT,
+                      :description => "One bounded page of the rectangles loose in one container, the root when " \
+                                      "path is absent: Faces with four square corners and no hole, the shapes " \
+                                      "Convert to Window Type takes. Pass their paths to units.convert_review, " \
+                                      "which groups them and finds each group's host. Needs no selection.",
+                      :refuses => %w[geometry.invalid query.cursor_expired query.limit_invalid target.not_found
+                                     target.wrong_kind],
+                      :params => Shapes.object({ "path" => container_path, "limit" => Pages::LIMIT,
+                                                 "cursor" => Pages::CURSOR }, :optional => %w[path limit cursor]),
+                      :result => Shapes.object({ "candidates" => Shapes.list(row), "next_cursor" => Pages::NEXT_CURSOR,
+                                                 "total" => Pages::TOTAL }),
+                      :examples => [{ "path" => [1201] }]) { |request| Units::Candidates.convert(request) }
+      end
+
+      def container_path
+        { "type" => "array", "items" => { "type" => "integer" },
+          "description" => "The root-to-container path, such as a Zone's; [] or absent for the Model root." }
       end
 
       def groups_param
@@ -105,7 +137,8 @@ module PhComposer
                         "code" => Shapes.described(Shapes::TEXT, "Why, as a published code."),
                         "message" => Shapes::TEXT })
       end
-      private_class_method :groups_param, :paths_param, :group_shape, :source_shape, :left_out_shape
+      private_class_method :groups_param, :paths_param, :container_path, :install_candidates, :group_shape,
+                           :source_shape, :left_out_shape
     end
   end
 end

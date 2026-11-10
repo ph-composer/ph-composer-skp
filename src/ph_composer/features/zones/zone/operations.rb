@@ -305,35 +305,47 @@ module PhComposer
 
       entities = Occurrences.entities_at(model, parent_path)
       selected = entity_ids.map { |id| Occurrences.unique_entity(entities, id) }
+      refusal = make_refusal(model, Array(model.active_path), selected)
+      raise refusal if refusal
+    end
+
+    # The refusal Make Zone gives `selected` in the edit context `context`, the Groups from the root to their
+    # parent, or nil when it would make the Zone. One rule for the action, which passes the open context, and
+    # for `make_candidates`, which passes each candidate's own; `zones` lets a read over many candidates walk
+    # the Model's Zones once.
+    def make_refusal(model, context, selected, zones: nil)
       unless make_zone_shape?(selected)
-        raise CodedError.new("target.wrong_kind", "Make Zone accepts one Group or loose Faces and Edges.")
+        return CodedError.new("target.wrong_kind", "Make Zone accepts one Group or loose Faces and Edges.")
       end
 
-      claim_refusal!(model, selected)
-      if Array(model.active_path).any? { |entity| ZONE_STORE.read(entity) }
-        raise CodedError.new("target.wrong_hierarchy", "A Zone cannot be made inside another Zone.")
+      claim_refusal!(model, selected, :context => context)
+      if context.any? { |entity| ZONE_STORE.read(entity) }
+        return CodedError.new("target.wrong_hierarchy", "A Zone cannot be made inside another Zone.")
       end
 
+      parent_path = context.map(&:persistent_id)
       selected.each do |entity|
         if entity.is_a?(Sketchup::Group)
           prefix = parent_path + [entity.persistent_id]
-          contains_zone = Occurrences.zones(model).any? { |zone| zone.path[0, prefix.length] == prefix }
-          if contains_zone
-            raise CodedError.new("target.wrong_hierarchy", "The selected Group is already or contains a Zone.")
+          zones ||= Occurrences.zones(model)
+          if zones.any? { |zone| zone.path[0, prefix.length] == prefix }
+            return CodedError.new("target.wrong_hierarchy", "The selected Group is already or contains a Zone.")
           end
         end
-        if entity.respond_to?(:locked?) && entity.locked?
-          raise CodedError.new("target.locked", "The selected Group is locked.")
-        end
+        locked = entity.respond_to?(:locked?) && entity.locked?
+        return CodedError.new("target.locked", "The selected Group is locked.") if locked
       end
+      nil
+    rescue CodedError => error
+      error
     end
 
     # What Make Zone and Restore refuse in what they would group: an entity another feature claims, at any depth
     # inside it, or an open context it is in (Records::EntityStore.claimed_within?). A Zone hosts other features'
     # objects through their records, never by taking their Groups into its own (context/EXTENSIBILITY.md,
-    # "Native menu items").
-    def claim_refusal!(model, selected)
-      if Records::EntityStore.claimed?(selected + Array(model.active_path))
+    # "Native menu items"). `context` is the Groups the selection sits in, the open ones unless a read names others.
+    def claim_refusal!(model, selected, context: Array(model.active_path))
+      if Records::EntityStore.claimed?(selected + context)
         raise CodedError.new("target.wrong_kind", "The selection already belongs to PH-Composer, so it cannot be " \
                                                   "made into a Zone.")
       end

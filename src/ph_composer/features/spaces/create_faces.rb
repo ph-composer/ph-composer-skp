@@ -44,18 +44,24 @@ module PhComposer
 
       module_function
 
-      def read(request, faces)
+      # `context` is the Groups and components from the root to the edit context the Faces are taken from: the
+      # open one, or the one a candidate read names. `alone` judges each Face as if it were named by itself, which
+      # is what a candidate read reports: a Face it calls eligible is then taken with any other eligible Face.
+      def read(request, faces, context: Array(request.model.active_path), alone: false)
         model = request.model
         paths = faces.map { |path| Resolve.integer_path(path) }.uniq
-        active = Array(model.active_path)
-        open_path = active.map(&:persistent_id)
-        transform = open_transform(active)
-        context = context_refusal(active)
+        open_path = context.map(&:persistent_id)
+        transform = open_transform(context)
+        refusal = context_refusal(context)
         containment = request.query(CONTAINMENT, "paths" => paths).fetch("paths")
         records = request.query(HOST_CONTEXT, "paths" => paths).fetch("faces").to_h { |row| [row.fetch("path"), row] }
         candidates, left_out = sort(model, paths, containment, records,
-                                    :open_path => open_path, :context => context, :transform => transform)
-        eligible = settle(Operations::EntityScope.new(open_path).resolve(model), candidates, left_out)
+                                    :open_path => open_path, :context => refusal, :transform => transform)
+        eligible = if alone
+                     settle_alone(model, candidates, left_out)
+                   else
+                     settle(Operations::EntityScope.new(open_path).resolve(model), candidates, left_out)
+                   end
         zone = own_zone(containment, eligible)
         Read.new(:eligible => eligible, :left_out => left_out, :open_zone => zone,
                  :outside => zone && zone.fetch("zone_path")[0...-1], :transform => transform)
@@ -141,6 +147,16 @@ module PhComposer
         left_out.concat(in_solid.map { |face| left_out_row(face.path, ["solid", SOLID]) })
         eligible = without_edge_sharing(entities, loose)
         left_out.concat((loose - eligible).map { |face| left_out_row(face.path, ["shares_edge", SHARES_EDGE]) })
+        eligible
+      end
+
+      # Each candidate named by itself: one Face is never a closed solid, and any Edge it shares is with a Face
+      # outside the set, as Eligibility.alone! reads it for a new Volume.
+      def settle_alone(model, candidates, left_out)
+        eligible, sharing = candidates.partition do |face|
+          Steps.sharing([Occurrences.entity_at(model, face.path)], [face.face_id]).empty?
+        end
+        left_out.concat(sharing.map { |face| left_out_row(face.path, ["shares_edge", SHARES_EDGE]) })
         eligible
       end
 

@@ -47,6 +47,7 @@ module PhComposer
         rename(feature, reference)
         flip_repair(feature, reference)
         restore_repair(feature, face)
+        restore_candidates(feature, face)
         return_to_host(feature, reference)
         place(feature, face)
         host_extent(feature, face, reference)
@@ -262,6 +263,42 @@ module PhComposer
                                  :type_id => request.params.fetch("type_id"),
                                  :pane_paths => request.params.fetch("pane_paths"))
         end
+      end
+
+      def restore_candidates(feature, face)
+        path = { "type" => "array", "minItems" => 1, "items" => { "type" => "integer", "minimum" => 1 } }
+        row = Shapes.object({
+          "type_id" => Shapes.described(Shapes::TEXT, "The Window Type the panes are stamped with."),
+          "pane_paths" => Shapes.list(path, :description => "Every loose pane Face stamped with it, root-to-Face."),
+          "element_ids" => Shapes.list(Shapes::TEXT, :description => "The Type elements their stamps name."),
+          "host" => face.merge("type" => %w[object null],
+                               "description" => "The one writable Zone Face holding every pane on its plane and " \
+                                                "inside its outline; null when not exactly one does."),
+          "needs" => { "type" => %w[string null], "enum" => Units::Candidates::NEEDS + [nil],
+                       "description" => "What the user must choose before units.restore: host, the Face the panes " \
+                                        "lie on; selection, which panes are one Window, when two carry one " \
+                                        "element. Null when the row is complete." },
+          "refusal" => Shapes.object({ "code" => Shapes::TEXT, "message" => Shapes::TEXT })
+                             .merge("type" => %w[object null],
+                                    "description" => "Why the stamped Type cannot be restored, such as a Type no " \
+                                                     "longer in the Model; null otherwise.")
+        })
+        feature.query(Units::Candidates::RESTORE,
+                      :description => "One bounded page of the loose Window pane Faces in one container, the root " \
+                                      "when path is absent, one row per Window Type their stamps name, with the " \
+                                      "host the geometry proves or what the user must choose. A row with needs " \
+                                      "null supplies units.restore's params, which still checks the panes' exact " \
+                                      "geometry and may refuse. Needs no selection.",
+                      :refuses => %w[geometry.invalid query.cursor_expired query.limit_invalid record.unreadable
+                                     target.not_found target.wrong_kind validation.failed],
+                      :params => Shapes.object({ "path" => { "type" => "array", "items" => { "type" => "integer" },
+                                                             "description" => "The root-to-container path; [] or " \
+                                                                              "absent for the Model root." },
+                                                 "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR },
+                                               :optional => %w[path limit cursor]),
+                      :result => Shapes.object({ "candidates" => Shapes.list(row), "next_cursor" => Pages::NEXT_CURSOR,
+                                                 "total" => Pages::TOTAL }),
+                      :examples => [{ "path" => [1201] }]) { |request| Units::Candidates.restore(request) }
       end
 
       def host_extent(feature, face, reference)

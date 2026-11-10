@@ -11,7 +11,8 @@ from the extension with per-user bearer tokens granted in the Agent Access dialo
 read and the edit-path commands; capability and declared terms in `describe`; and the bounded Spaces
 reads with candidate Faces. The write, setup, export and capture grants, client Connect and the
 agent scenarios followed and are implemented ("User-controlled local access"). The agent-workflows
-packet (API 1.35) added bounded discovery sections and the operating guide served by topic; what
+packet added bounded discovery sections and the operating guide served by topic (API 1.35) and
+selection-free candidate and path reads (API 1.36); what
 each section of this document marks "Implemented" is the current contract, and the rest is proposal.
 
 Users bring their own agents. PH-Composer supplies documented access to inspect, view and edit
@@ -160,6 +161,29 @@ projection over the row's own properties that always keeps `kind`, `id` and `sch
 Without `fields`, a row is the one the matching `.all` read gives. A row larger than the budget
 comes alone, and asking for fewer `fields` reads past it. An unreadable record is reported in
 `unreadable` beside the page and counted in `total`.
+Implemented (API 1.36): reads that need no selection. `ph_composer.context.children` pages the entities
+directly inside the Model root or one Group or component, named by its root-to-container `path`
+(`core/occurrence_path.rb` walks it, through components too, and composes the transform once from the
+root): each row's path, kind, type, name, definition name, whether it is hidden (itself or by tag),
+locked, shared storage or a closed solid, its child count and the registered records on it
+(`Records::EntityStore.records_on`, by presence, with `claims`). Every child is listed whatever its
+state; only `kinds` filters, and `container` carries the path's lock, visibility and shared storage. A
+missing or repeated step refuses `target.not_found`, a leaf that holds nothing `target.wrong_kind`. A
+name over 256 characters is cut and named in the row's `truncated`, so one row fits the reply budget; the
+Edge path reads cut the Zone's labels the same way (`zone.name`).
+Owners answer what their actions could take in one container, each row with the refusal the action
+gives it named alone, read through the action's own check with that context in place of the open one,
+and what to open first when it is not open: `zones.make_candidates` (the Groups, `Zones.make_refusal`),
+`spaces.candidate_faces.list` with `context` (loose Faces for `spaces.create`, `CreateFaces.read` with
+`alone:`), `windows.units.convert_candidates` (rectangles for `units.convert_review`) and
+`windows.units.restore_candidates` (stamped panes by Window Type, with the host only when one Zone Face
+holds every pane and resolves for writing as `units.restore` resolves it, else `needs`). `thermal_bridges.edges.at` reads explicit root-to-Edge
+paths, such as a schedule run's `edge_paths`, and `edges.candidates` the Edges in one container,
+optionally only `unassigned` or `assigned`, both in `edges.selection`'s rows plus world `endpoints_m`; a
+path naming no Edge is a row with its reason. Each computes only its page's rows (`Pages.bounded`'s
+`prepare`) and binds its cursor to the revision and filter. Height from solid has no owner proof
+linking a solid to a Volume: `context.children`' `solid` and `volumes.height_from_solid_preview` are its
+route.
 `spaces.update` and `spaces.batch_update` type `values` and `expected_values` field by field from the
 record definitions, with units; null clears an optional value, and a field the referenced kind does
 not take is refused.

@@ -27,14 +27,35 @@ module PhComposer
         # root-to-Edge persistent-id paths, so each placement of a shared definition is its own entry.
         def entries(model)
           found = []
+          each_tagged(model) do |edge, path|
+            record = STORE.read(edge)
+            found << Records::ReferenceEntry.new(:kind => EDGE_KIND, :key => path, :record => record) if record
+          end
+          found
+        end
+
+        # The assignment id of every tagged Edge occurrence whose record can be read, one per occurrence; a
+        # record that is not valid JSON names no id, so a read counting copies skips it rather than refusing.
+        def readable_ids(model)
+          ids = []
+          each_tagged(model) do |edge, _path|
+            record = STORE.read(edge)
+            ids << (record.is_a?(Hash) ? record["id"] : nil)
+          rescue CodedError => error
+            raise unless error.code == "record.unreadable"
+          end
+          ids
+        end
+
+        # Every Edge carrying an assignment record, with its root-to-Edge path, through Groups and components.
+        def each_tagged(model)
           pending = [[model.entities, []]]
           until pending.empty?
             entities, path = pending.shift
             entities.each do |entity|
               current = path + [entity.persistent_id]
               if entity.is_a?(Sketchup::Edge)
-                record = STORE.read(entity)
-                found << Records::ReferenceEntry.new(:kind => EDGE_KIND, :key => current, :record => record) if record
+                yield entity, current if STORE.marks?(entity)
               elsif entity.is_a?(Sketchup::Group)
                 pending << [entity.entities, current]
               elsif entity.is_a?(Sketchup::ComponentInstance)
@@ -42,7 +63,6 @@ module PhComposer
               end
             end
           end
-          found
         end
 
         # The strict resolver. Zones resolves the Zone and every step inside it, and refuses what a write
@@ -81,7 +101,7 @@ module PhComposer
             raise CodedError.new("target.changed", "The Edge now has an assignment.")
           end
         end
-        private_class_method :check_identity!
+        private_class_method :check_identity!, :each_tagged
       end
 
       TARGET = Records::ReferenceTarget.new(

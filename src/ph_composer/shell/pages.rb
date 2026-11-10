@@ -37,10 +37,13 @@ module PhComposer
     # As `slice`, then cut at the last whole row that keeps the page's serialized rows under `max_bytes`,
     # with a cursor that resumes after it. A row is never split; one row larger than the budget comes
     # alone, and a caller with a reply budget asks for fewer `fields`.
-    # `size` weighs a row when what the page carries beside its rows grows with them.
+    # `size` weighs a row when what the page carries beside its rows grows with them. `prepare`, when given,
+    # turns the sliced rows into the rows the page answers, one for one, so a read that is costly per row
+    # computes only the rows of this page; `key` still reads the rows `rows` holds.
     def bounded(request, query, rows, key:, revision: request.revision, max_bytes: MAX_PAGE_BYTES,
-                size: ->(row) { JSON.generate(row).bytesize + 1 })
-      page, next_cursor = slice(request, query, rows, :key => key, :revision => revision)
+                size: ->(row) { JSON.generate(row).bytesize + 1 }, prepare: nil)
+      sliced, next_cursor = slice(request, query, rows, :key => key, :revision => revision)
+      page = prepare ? prepare.call(sliced) : sliced
       total = 2
       fitted = page.take_while.with_index do |row, index|
         total += size.call(row)
@@ -48,7 +51,7 @@ module PhComposer
       end
       return [page, next_cursor] if fitted.length == page.length
 
-      [fitted, token(request, query, key.call(fitted.last), revision)]
+      [fitted, token(request, query, key.call(sliced[fitted.length - 1]), revision)]
     end
 
     def limit(params)
