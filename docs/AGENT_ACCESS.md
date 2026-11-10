@@ -89,9 +89,10 @@ Code 2.1.317 and Codex 0.167.0 on macOS, including clients not started from a te
   block to put in its place. Check it with `codex mcp get ph-composer`.
 - A Codex session that cannot ask for approval, such as `codex exec`, refuses PH-Composer's tools that
   change the Model or start an export ("requires approval, but approval policy is never"), so it can
-  only read. To let such a session write, add
-  `default_tools_approval_mode = "approve"` to the `[mcp_servers.ph-composer]` block, or pass
-  `-c 'mcp_servers.ph-composer.default_tools_approval_mode="approve"'` for one run. The token's
+  only read. To let such a session write, add `default_tools_approval_mode = "approve"` to the
+  entry's block, or pass `-c 'mcp_servers.ph-composer.default_tools_approval_mode="approve"'` for one
+  run. The entry is `ph-composer` for the Default profile and `ph-composer-<name>` for a named one
+  (see Profiles below), so a named profile's block is `[mcp_servers.ph-composer-<name>]`. The token's
   grants still limit what it can do.
 
 Then start a new session of your client: a session already open does not see a newly added server.

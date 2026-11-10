@@ -4630,7 +4630,12 @@
         "src/ph_composer/features/spaces/authoring.rb",
         "src/ph_composer/shell/fragments.rb",
         "src/ph_composer/shell/pages.rb",
-        "src/ph_composer/agent_access/executor.rb"
+        "src/ph_composer/agent_access/executor.rb",
+        "src/ph_composer/features/zones/zone/operations.rb",
+        "src/ph_composer/features/zones/zone/schema.rb",
+        "src/ph_composer/features/spaces/reads.rb",
+        "src/ph_composer/features/spaces/create_faces.rb",
+        "src/ph_composer/shell/record_queries.rb"
       ],
       "native_control_required": false
     },
@@ -4647,10 +4652,20 @@
         "src/ph_composer/agent_access/server.rb",
         "src/ph_composer/agent_access/tokens.rb",
         "src/ph_composer/agent_access/sequencer.rb",
-        "src/ph_composer/shell/dispatch.rb",
         "src/ph_composer/session/model_session.rb",
         "src/ph_composer/session/sessions.rb",
-        "src/ph_composer/export/tasks.rb"
+        "src/ph_composer/export/tasks.rb",
+        "src/ph_composer/features/*",
+        "src/ph_composer/library/*",
+        "src/ph_composer/export/*",
+        "src/ph_composer/python/*",
+        "src/ph_composer/colour_by/*",
+        "src/ph_composer/agent_access/connections.rb",
+        "src/ph_composer/agent_access/client_setup.rb",
+        "src/ph_composer/agent_access/dialog.rb",
+        "src/ph_composer/shell/dispatch.rb",
+        "src/ph_composer/shell/api.rb",
+        "src/ph_composer/shell/context_commands.rb"
       ],
       "native_control_required": true
     },
