@@ -10,6 +10,9 @@
 /* The shown view's tools in the controls row: its help, then what it binds there (Spaces' range-edit tools). */
 .phc-overview .phc-view-tools { display: flex; align-items: center; gap: 8px; }
 .phc-overview .phc-view-tools:empty { display: none; }
+/* The control row's menus (Columns, Colour by, then the shown view's own) sit together as one icon group. */
+.phc-overview .phc-control-menus, .phc-overview .phc-view-menus { display: flex; align-items: center; gap: 2px; }
+.phc-overview .phc-view-menus:empty { display: none; }
 /* A setting reads as one row, its words at the left and its field at the right, in the bubble as anywhere. */
 .phc-zone-setting, .phc-bubble-content label.phc-zone-setting { display: flex; flex-direction: row; align-items: center;
   justify-content: space-between; gap: 12px; margin: 4px 0; text-align: left; color: var(--muted); font-size: var(--text-sm);

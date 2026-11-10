@@ -1158,7 +1158,7 @@ test("the header groups the authoring tools, the pane has no inspector, and help
   assert.ok(section.querySelector(".phc-heading") === header, "the header is repainted in place, not rebuilt");
 });
 
-test("Colour by lives in the column headers, Window Type in the Assembly's, the rest in Table options", function () {
+test("Colour by lives in the column headers and in one Colour by menu that lists every mode", function () {
   var p = page(), payload = snapshot();
   payload.sections["ph_composer.colour_by.legend"] = { status: "completed", value: {
     mode: "ph_composer.zones.faces.by_boundary_condition", label: "Boundary condition", rows: [], modes: [
@@ -1182,21 +1182,33 @@ test("Colour by lives in the column headers, Window Type in the Assembly's, the 
   assert.deepStrictEqual(assembly.parentNode.querySelectorAll(".phc-action-menu-item").map(function (node) {
     return node.textContent;
   }), ["Assembly", "Window Type"]);
-  var options = byLabel(section, "Table options");
-  click(options);
-  var items = options.parentNode.querySelectorAll(".phc-action-menu-item");
-  assert.deepStrictEqual(items.map(function (node) { return node.textContent; }),
-    ["Ground depth column", "Colour by Side"], "only a mode no column offers is listed");
-  click(items[1]);
+  var colour = byLabel(section, "Colour by");
+  assert.strictEqual(colour.getAttribute("aria-pressed"), "true", "pressed while a mode is on");
+  click(colour);
+  var items = colour.parentNode.querySelectorAll(".phc-action-menu-item");
+  assert.deepStrictEqual(items.map(function (node) { return node.textContent; }), ["Zone", "Building-Segment", "Level",
+    "Face type", "Boundary condition", "Assembly", "Window Type", "Side"], "every mode, a column's included");
+  assert.deepStrictEqual(items.filter(function (node) { return node.getAttribute("aria-pressed") === "true"; })
+    .map(function (node) { return node.textContent; }), ["Boundary condition"]);
+  click(items[7]);
   assert.deepStrictEqual(JSON.parse(JSON.stringify(p.sent[0].payload.params)), { mode: "outside.probe.by_side" });
-  click(options);
-  click(options.parentNode.querySelectorAll(".phc-action-menu-item")[0]);
+  var columnsMenu = byLabel(section, "Columns");
+  click(columnsMenu);
+  assert.deepStrictEqual(columnsMenu.parentNode.querySelectorAll(".phc-action-menu-item").map(function (node) {
+    return [node.textContent, node.getAttribute("aria-pressed")];
+  }), [["Ground depth", "false"]], "Geometry offers Ground depth");
+  click(columnsMenu.parentNode.querySelectorAll(".phc-action-menu-item")[0]);
   assert.strictEqual(section.querySelectorAll(".col-ground_depth_mm").filter(function (node) {
     return node.tagName === "th";
-  })[0].hidden, false, "Ground depth shows from Table options");
+  })[0].hidden, false, "Ground depth shows from the Columns menu");
+  click(colour);
+  assert.strictEqual(colour.parentNode.querySelectorAll(".phc-action-menu-item").length, 8,
+    "showing a column leaves the Colour by list as it was");
+  assert.strictEqual(byLabel(section, "Labels"), undefined, "Geometry has no Labels menu");
+  assert.strictEqual(byLabel(section, "Table options"), undefined, "no Table options menu remains");
 });
 
-test("Ground depth waits in Table options, and its heading says what it does", function () {
+test("Ground depth waits in the Columns menu, and its heading says what it does", function () {
   var p = page();
   p.panel.receive({ type: "panel.snapshot", payload: snapshot() });
   var section = p.query("[data-section='ph_composer.overview']");
@@ -1602,16 +1614,16 @@ test("removing an unused Segment drops its stale filter without clearing checked
   assert.ok(p.section.closest("[data-pane]").querySelector(".phc-selection-bar"), "checked Faces survive management");
 });
 
-test("Table options will not hide a column while a Zone edit is held", function () {
+test("the Columns menu will not hide a column while a Zone edit is held", function () {
   var p = page();
   p.panel.receive({ type: "panel.snapshot", payload: managedSnapshot() });
   var section = p.query("[data-section='ph_composer.overview']"), segment = byLabel(section, "Zone 1 Building-Segment");
   segment.value = "bsg_tower"; segment.listeners.change({});
   result(p, 0, { status: "completed", effect: "committed" });
-  var options = byLabel(section, "Table options");
+  var options = byLabel(section, "Columns");
   click(options);
   click(options.parentNode.querySelectorAll(".phc-action-menu-item").filter(function (node) {
-    return node.textContent === "Ground depth column";
+    return node.textContent === "Ground depth";
   })[0]);
   assert.strictEqual(section.querySelectorAll(".col-ground_depth_mm").filter(function (node) {
     return node.tagName === "th";

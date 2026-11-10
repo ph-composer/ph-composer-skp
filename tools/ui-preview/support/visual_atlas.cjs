@@ -284,8 +284,10 @@ check({ name: "visual_atlas", output }, async ({ newPage, step }) => {
           await page.getByRole("button", { name: label, exact: true }).first().click();
           await page.locator("dialog[open]").waitFor(); await shot("key-popup", "spaces", screen); await cancel();
         }
-        await page.getByRole("button", { name: "Table options", exact: true }).click();
-        await shot("key-popup", "spaces", "spaces-table-options");
+        for (const [label, screen] of [["Labels", "spaces-labels"], ["Spaces view settings", "spaces-view-settings"]]) {
+          await page.getByRole("button", { name: label, exact: true }).click();
+          await shot("key-popup", "spaces", screen); await page.keyboard.press("Escape");
+        }
 
         await open("rich", "overview", "Geometry");
         await page.getByRole("combobox", { name: "Wall 1 boundary", exact: true }).first().selectOption("AttachedZone");

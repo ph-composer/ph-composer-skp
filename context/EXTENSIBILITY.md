@@ -771,8 +771,8 @@ so `tools/examples/zones/example_zone_view.js`, two columns and `value`, is a co
 | `attach({ surface, mount, toolbar, hiddenColumns })`, `prepare(rows, state)`, `painted()` | Once, the view's own surface, table mount and tools slot in the controls row (Spaces binds its range-edit grid there; `help` puts a help button first); each paint, its rows before the table paints (to refresh cell drafts), and a call after every paint, a row opened from its chevron included |
 | `create`, `dispose`, `consume(state, send)` | The view's state for one Model, and what it reads from each snapshot before rows are built. Every listed view consumes, shown or not, so work that arrives for a hidden view (a native handoff, a tool that turned on late) still reaches it |
 | `zoneRecord(record)`, `children(row)`, `initiallyOpen(row)`, `extraRows()`, `tiers` | What a Zone row carries for the view, the rows beneath it (none by default), whether a row the view adds opens by default (`null`: the host's rule), top-level group rows after the Zones (records outside every Zone; `record.zone` is null; they follow the Zones in any sort, count as no Zone, and show while the text filter and the view's filters pass them), and how many tree levels open (2 by default; Spaces, four deep, gives 3) |
-| `columns`, `leadingColumns`, `value`, `cell(td, row, field)`, `decorate`, `zoneMarker(row)` (asked of every row, the host's Zone states first), `widths`, `hiddenColumns`, `optionalColumns` | The view's columns (`leadingColumns` sit before Name), their text or in-place control, a cell's flag, the Zone row's marker after the host's own, default widths, the columns hidden at first, and the `[field, label]` pairs Table options shows or hides |
-| `tableOptions(toggle)` | The view's own Table options choices after its columns, each through `toggle(text, pressed, run)` (Spaces adds its readouts and, while Show Spaces is on, their lines; `sections/colour_by.js` `readouts(state)` and `showReadout(state, name, on)` reach any feature's readouts without naming one) |
+| `columns`, `leadingColumns`, `value`, `cell(td, row, field)`, `decorate`, `zoneMarker(row)` (asked of every row, the host's Zone states first), `widths`, `hiddenColumns`, `optionalColumns` | The view's columns (`leadingColumns` sit before Name), their text or in-place control, a cell's flag, the Zone row's marker after the host's own, default widths, the columns hidden at first, and the `[field, label]` pairs the Columns menu shows or hides |
+| `menus` | The view's own icon-button menus in the control row, after the host's Columns and Colour by: each `{ label, icon, unavailable(vs), fill(vs, toggle) }`. `label` is the tooltip, accessible name and menu heading; `icon` a registered icon. `fill` runs each time the menu opens and adds its choices through `toggle(text, pressed, run)`; `unavailable`, asked on every paint, answers why the menu cannot open now, or null, and the host keeps the button on screen with that reason as its tooltip. Spaces declares Labels (its label lines, unavailable while Show Spaces is off) and "Spaces view settings" (Show Spaces and Selection totals); `sections/colour_by.js` `readouts(state)` and `showReadout(state, name, on)` reach any feature's readouts without naming one |
 | `colourBy`, `sorted`, `filteredFields`, `filterValues`, `filterLabel`, `headerAction`, `menuValueAction`, `menuExtra` | The view's columns' Colour-by bindings, sort and value filters, and anything its column header and menu add (Faces adds the Classify paint, Spaces the Mark floor paint); the host closes the menu once a value action has run |
 | `zoneMatch`, `rowMatch`, `search`, `queryMatch(row, query, zone)`, `sortValue(record, field)`, `sort(list, field, direction)`, `viewportPaths` | How the view's filters and sort reach Zone rows (`sortValue` gives a Zone row's value in the view's sorted columns), its own rows and the viewport mask (by default each Zone that passes `zoneMatch`, whole). When the text filter matches a Zone only through the view's `search` text, `queryMatch` says which of the view's rows still show (by default all) |
 | `actions(row)`, `zoneActions(row)`, `action(row, item, control)`, `inspect`, `locate(row)`, `clearLocate`, `selected(row)` | Row actions (`control` is the pressed button, to anchor what it opens), the Zone row's actions after Make independent, Locate (`clearLocate` answers whether it cleared anything), and which rows paint as selected (Spaces: the row open in the edit context) |
@@ -786,7 +786,7 @@ so `tools/examples/zones/example_zone_view.js`, two columns and `value`, is a co
 - **The host keeps** the Zone rows and their Name column, the Zone row's in-place cells
   (`zone_cells.js`: Building-Segment, Level, Ground depth), Make independent, the text filter, the
   Zone filters (Building-Segment, Level), which rows are expanded (the control row's one Collapse all / Expand all
-  toggle reaches every row with rows beneath it), and the panel hooks (`navigationGuard`, `outcomeText`, `workedOn`).
+  toggle reaches every row with rows beneath it), the control row's Columns and Colour by menus, and the panel hooks (`navigationGuard`, `outcomeText`, `workedOn`).
 - **A view owns** its rows, its columns, their header Colour-by toggles and value filters, its sort,
   its checked rows, its selection bar, its settings and its tools. Checked Zones are shared: on a
   switch the host asks the old view which Zone rows are fully checked (`checkedZones`) and, when there
@@ -795,9 +795,9 @@ so `tools/examples/zones/example_zone_view.js`, two columns and `value`, is a co
   table mount, so its column widths, hidden columns and column menus are its own. The host keeps one
   controls row and moves the view's column filters and sort out of it and back on a switch; a Zone
   filter stays while the next view shows its column and otherwise leaves with the view that does, so
-  no filter applies without a column to clear it from; hiding a column through Table options drops its
-  filter for the same reason, and showing a Zone column again drops the older copy a view kept. Table
-  options changes nothing while a Zone edit is held. A column has a menu when it sorts (`sorted`) or
+  no filter applies without a column to clear it from; hiding a column through the Columns menu drops its
+  filter for the same reason, and showing a Zone column again drops the older copy a view kept. The
+  Columns menu changes nothing while a Zone edit is held. A column has a menu when it sorts (`sorted`) or
   filters (`filteredFields`), and offers only those. All of it survives a switch away and back.
 - **Switching** is a host action that sends nothing to the Model and never changes the SketchUp
   selection. It is refused while `draftReason` or `leaveReason` answers; otherwise it calls the old
@@ -807,8 +807,8 @@ so `tools/examples/zones/example_zone_view.js`, two columns and `value`, is a co
   the last Colour-by mode is remembered. A view state is never written to the Model, which would
   dirty it and add an Undo entry. A session opens on the remembered view while it is listed, else the
   first. A shown view that stops being listed leaves the same way, unless `draftReason` or
-  `leaveReason` answers: it stays listed until that work is done. Table options offers Colour by for
-  every mode no column of the shown view displays.
+  `leaveReason` answers: it stays listed until that work is done. The Colour by menu lists every
+  registered mode, whatever columns are shown, and is pressed while a mode is on.
 - **Gestures.** The host owns the gestures that clear Locate (a pointer press elsewhere, Escape). A
   Locate outline outlasts a switch, so they reach every view's `clearLocate`. Escape unwinds one layer
   at a time: an open bubble or column menu, then the shown view's `escape` (Faces: the Classify

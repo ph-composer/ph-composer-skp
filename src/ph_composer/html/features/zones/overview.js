@@ -5,11 +5,11 @@
  * heading switches between them, shown while more than one is listed.
  *
  * Colour by, sort and value filters live in the column headers, the shared view controls above the table
- * hold the text filter, the count and Table options, and a view may float a selection bar over the bottom of
- * the table. The table is the shared record table; this file holds the Zone rows, the Name column, the
- * Zone's own cells, the filter, the expansion and the one call that paints the table, and asks the active
- * view for everything else through its hooks. Every hook receives the view's own state first; the view
- * reaches this screen's state only through the `host` handle it was created with.
+ * hold the text filter, the count and the menus (Columns, Colour by, then the view's own), and a view may
+ * float a selection bar over the bottom of the table. The table is the shared record table; this file holds
+ * the Zone rows, the Name column, the Zone's own cells, the filter, the expansion and the one call that paints
+ * the table, and asks the active view for everything else through its hooks. Every hook receives the view's
+ * own state first; the view reaches this screen's state only through the `host` handle it was created with.
  */
 PhComposerUI.define("features/zones/overview", ["panel", "workspace", "request", "snapshot", "units",
   "unit_preferences", "table", "view_controls", "column_menu", "sections/colour_by", "fields", "subtabs",
@@ -89,7 +89,7 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
       function (message, tone) { panel.notify(message, tone); }, function (collection, result) {
         reconcileOptionFilters(screen, collection, result);
       });
-    screen.options = tableOptions(screen);
+    screen.menus = controlMenus(screen);
     screen.controls = new viewControls.ViewControls({
       label: "Zones", placeholder: "Zone", fields: ORDER_FIELDS, initialOrder: "name",
       columnSort: true,
@@ -397,31 +397,35 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
     return actions.concat([{ node: menu.root, persistent: menu.filtered() }]);
   }
 
-  /* A mode a column the shown view displays offers; every other registered mode is offered in Table options. */
-  function boundToColumn(own, mode, shown) {
-    var bindings = colourBindings(own);
-    return Object.keys(bindings).some(function (field) {
-      var binding = bindings[field];
-      return shown.indexOf(field) >= 0 && !own.hiddenColumns[field] &&
-        (binding.mode ? binding.mode === mode.name : binding.group === mode.group);
-    });
+  /* The Zone columns and the view's `optionalColumns` the Columns menu shows or hides. */
+  function optionalColumns(own) {
+    return (zoneFields(own).indexOf("ground_depth_mm") >= 0 ? [["ground_depth_mm", "Ground depth"]] : [])
+      .concat(own.view.optionalColumns || []);
   }
 
-  /* Table options: show or hide Ground depth, and Colour by for a mode no visible column offers. */
-  function tableOptions(state) {
-    var menu = new ui.ActionMenu("Table options", { onOpen: function () { fill(); } });
-    function toggle(text, pressed, handler) {
-      var item = menu.add(text, handler);
-      item.classList.add("phc-setting-choice");
-      item.setAttribute("aria-pressed", String(pressed));
-    }
-    function fill() {
-      var own = active(state), legend = snapshot.value(panel.state, "ph_composer.colour_by.legend") || { mode: null };
+  /* One icon-button menu of the control row. It fills each time it opens, through
+     `toggle(text, pressed, run)`, so it always lists the state in force. */
+  function controlMenu(label, icon, fill) {
+    var menu = new ui.ActionMenu(label, { icon: icon, onOpen: function () {
       menu.content.replaceChildren();
-      var optional = (zoneFields(own).indexOf("ground_depth_mm") >= 0 ? [["ground_depth_mm", "Ground depth"]] : [])
-        .concat(own.view.optionalColumns || []);
-      optional.forEach(function (column) {
-        toggle(column[1] + " column", !own.hiddenColumns[column[0]], function () {
+      fill(function (text, pressed, run) {
+        var item = menu.add(text, run);
+        item.classList.add("phc-setting-choice");
+        item.setAttribute("aria-pressed", String(pressed));
+      });
+    } });
+    menu.root.classList.add("phc-control-menu");
+    return menu;
+  }
+
+  /* The host's menus at the head of the control row's menus: Columns, the optional columns of the shown view,
+     and Colour by, every registered mode in one list that never changes as columns are shown or hidden. The
+     shown view's own menus (`menus`) follow them in `root`. */
+  function controlMenus(state) {
+    var columnsMenu = controlMenu("Columns", "columns", function (toggle) {
+      var own = active(state);
+      optionalColumns(own).forEach(function (column) {
+        toggle(column[1], !own.hiddenColumns[column[0]], function () {
           var field = column[0], reason = draftReason(state);
           // A held edit keeps the table as it is, so its cell and Cancel stay in view.
           if (reason) return refuse(reason);
@@ -435,17 +439,65 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
           panel.repaint();
         });
       });
-      // The shown view's own choices (Spaces: its readouts and their lines).
-      call(own, "tableOptions", [toggle], null);
-      var shown = columns(own, units.profile(AREA, preferences.current())).map(function (column) { return column[0]; });
-      colourBy.modes(panel.state).filter(function (mode) { return !boundToColumn(own, mode, shown); })
-        .forEach(function (mode) {
-          var on = legend.mode === mode.name;
-          toggle("Colour by " + mode.label, on, function () { colourBy.activate(panel.state, on ? null : mode.name); });
-        });
+    });
+    var colourMenu = controlMenu("Colour by", "palette", function (toggle) {
+      var mode = colourByMode();
+      colourBy.modes(panel.state).forEach(function (entry) {
+        var on = mode === entry.name;
+        toggle(entry.label, on, function () { colourBy.activate(panel.state, on ? null : entry.name); });
+      });
+    });
+    var root = ui.element("div", "phc-control-menus");
+    root.appendChild(columnsMenu.root); root.appendChild(colourMenu.root);
+    return { root: root, columns: columnsMenu, colourBy: colourMenu };
+  }
+
+  function colourByMode() {
+    return (snapshot.value(panel.state, "ph_composer.colour_by.legend") || { mode: null }).mode;
+  }
+
+  /* The shown view's menus, built once for its slot from its `menus` declarations. */
+  function viewMenus(own) {
+    if (!own.viewMenus) {
+      var entries = (own.view.menus || []).map(function (spec) {
+        return { spec: spec, menu: controlMenu(spec.label, spec.icon, function (toggle) {
+          spec.fill.call(own.view, own.vs, toggle);
+        }) };
+      });
+      own.viewMenus = { root: ui.element("div", "phc-view-menus"), entries: entries };
+      entries.forEach(function (entry) { own.viewMenus.root.appendChild(entry.menu.root); });
     }
-    menu.root.classList.add("phc-table-options");
-    return menu;
+    return own.viewMenus;
+  }
+
+  /* Shows or hides one menu; a hidden one is closed, so no stale open bubble outlives it. */
+  function showMenu(menu, shown) {
+    menu.root.hidden = !shown;
+    if (!shown && !menu.bubble.panel.hidden) menu.bubble.close(false);
+  }
+
+  /* Each paint: Columns shows while the view has a column to offer, Colour by is pressed while a mode is on,
+     and each of the view's menus says why it cannot open now. */
+  function paintMenus(state, own) {
+    var menus = state.menus, shownMenus = viewMenus(own);
+    showMenu(menus.columns, optionalColumns(own).length > 0);
+    showMenu(menus.colourBy, colourBy.modes(panel.state).length > 0);
+    menus.colourBy.trigger.setAttribute("aria-pressed", String(Boolean(colourByMode())));
+    if (shownMenus.root.parentNode !== menus.root) {
+      // The view shown before takes its menus with it, closed.
+      Object.keys(state.slots).forEach(function (id) {
+        var other = state.slots[id].viewMenus;
+        if (!other || other === shownMenus || !other.root.parentNode) return;
+        other.entries.forEach(function (entry) {
+          if (!entry.menu.bubble.panel.hidden) entry.menu.bubble.close(false);
+        });
+        other.root.parentNode.removeChild(other.root);
+      });
+      menus.root.appendChild(shownMenus.root);
+    }
+    shownMenus.entries.forEach(function (entry) {
+      entry.menu.setUnavailable(entry.spec.unavailable ? entry.spec.unavailable.call(own.view, own.vs) : null);
+    });
   }
 
   /* Collapse all and Expand all act on the tree, because this screen groups by the tree rather than
@@ -674,16 +726,17 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
       root.insertBefore(screenState.controls.root, row);
       root.removeChild(row);
     }
-    if (screenState.options.root.parentNode !== screenState.controls.root) {
-      screenState.controls.root.insertBefore(screenState.options.root, screenState.controls.count.nextSibling);
+    if (screenState.menus.root.parentNode !== screenState.controls.root) {
+      screenState.controls.root.insertBefore(screenState.menus.root, screenState.controls.count.nextSibling);
     }
-    // Only the shown view's tools stand in the row, after Table options.
+    paintMenus(screenState, own);
+    // Only the shown view's tools stand in the row, after its menus.
     Object.keys(screenState.slots).forEach(function (id) {
       var tools = screenState.slots[id].toolbar;
       if (screenState.slots[id] !== own && tools.parentNode) tools.parentNode.removeChild(tools);
     });
     if (own.toolbar.parentNode !== screenState.controls.root) {
-      screenState.controls.root.insertBefore(own.toolbar, screenState.options.root.nextSibling);
+      screenState.controls.root.insertBefore(own.toolbar, screenState.menus.root.nextSibling);
     }
     if (tools.parentNode !== screenState.controls.root) screenState.controls.root.appendChild(tools);
     var heading = header(screenState, root.closest("[data-pane]").getAttribute("data-pane")).page.root;
