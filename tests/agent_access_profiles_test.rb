@@ -194,6 +194,11 @@ class AgentAccessProfilesTest < PhComposerTestCase
     assert_equal %w[inline Inline Fresh], [row["source"], row.dig("token", "label"), row.dig("saved_token", "label")]
     connect(dialog, fresh["token"])
     assert_equal "Inline", delivered(dialog, "access.replacement").last.dig("token", "label")
+
+    # Revoking the inline token leaves the entry sending a dead token: no binding, the new one still waiting.
+    Tokens.revoke(old.dig("row", "id"))
+    row = Dialog.connections(46_110).find { |item| item["client"] == "codex" }
+    assert_equal [nil, nil, "Fresh"], [row["source"], row["token"], row.dig("saved_token", "label")]
   ensure
     File.chmod(0o600, @config) if File.exist?(@config)
   end
@@ -244,6 +249,14 @@ class AgentAccessProfilesTest < PhComposerTestCase
     assert_equal nested, File.binread(@config)
     File.binwrite(@config, "x = \"unclosed\n[mcp_servers.ph-composer]\n")
     assert_equal "other", ClientSetup.entry("codex", 46_110, "default")["setup"]
+
+    # A note or comment naming the server defines nothing (review 2 of PR #448).
+    noted = "#{ClientConfig.codex_block(46_110)}\nenabled = true # [mcp_servers.ph-composer]\n" \
+            "note = \"see [mcp_servers.ph-composer]\"\n"
+    File.binwrite(@config, noted)
+    assert_equal "outdated", ClientSetup.entry("codex", 47_001, "default")["setup"]
+    assert_equal "configured", ClientSetup.connect("codex", token, 47_001).fetch("state")
+    assert_valid_toml File.binread(@config)
   end
 
   def test_forms_codex_cannot_be_edited_for_certain_answer_manual_with_the_token_free_block
@@ -257,7 +270,9 @@ class AgentAccessProfilesTest < PhComposerTestCase
      "[mcp_servers.ph-composer]\nurl = \"x\"\n[mcp_servers.ph-composer.http_headers]\n" \
      "Authorization = \"Bearer #{token}\"\n",
      "[mcp_servers.ph-composer]\nfoo = [\n  [1, 2],\n]\nurl = \"x\"\n",
-     "[mcp_servers.ph-composer]\nurl = \"x\"\n\n[x]\nmcp_servers.ph-composer.enabled = false\n"]
+     "[mcp_servers.ph-composer]\nurl = \"x\"\n\n[x]\nmcp_servers.ph-composer.enabled = false\n",
+     "[mcp_servers.ph-composer]\nurl = \"x\"\n[mcp_servers.ph-composer.\"http_\\u0068eaders\"]\n" \
+     "Authorization = \"Bearer #{token}\"\n"]
       .each do |form|
       File.binwrite(@config, form)
       result = ClientSetup.connect("codex", token, 46_110)

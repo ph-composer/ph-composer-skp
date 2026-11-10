@@ -87,7 +87,7 @@ check({ name: "agent_access", output }, async ({ newPage, step }) => {
     { client: "codex", client_name: "Codex", profile: "house-b-with-a-long-profile-name", server: "ph-composer-house-b",
       token: { id: "synthetic-b", label: "Synthetic house B agent", capabilities: ["read"],
         model_name: "A rather long synthetic file name.skp", model_open: false },
-      source: "file", entry: "outdated", contacted: null, verified_at: null,
+      source: "file", saved_token: { id: "synthetic-b", label: "Synthetic house B agent", capabilities: ["read"] }, entry: "outdated", contacted: null, verified_at: null,
       setup: "[mcp_servers.ph-composer-house-b]\nurl = \"http://127.0.0.1:47001/mcp\"\nhttp_headers_helper = \"/bin/cat /Users/example/.ph-composer/codex.house-b.json\"" }];
   for (const [width, height] of [[420, 732], [360, 520]]) {
     await page.setViewportSize({ width, height });

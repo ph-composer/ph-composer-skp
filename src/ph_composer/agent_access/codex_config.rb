@@ -192,15 +192,27 @@ module PhComposer
       # set up while the file gives a token another way.
       def defined_once?(all, name, start)
         escaped = Regexp.escape(name)
-        sub_table = /\A\s*\[\s*mcp_servers\s*\.\s*(?:#{escaped}|"#{escaped}"|'#{escaped}')\s*\.\s*["']?([A-Za-z0-9_-]+)/
+        own = /\A\s*\[\s*mcp_servers\s*\.\s*(?:#{escaped}|"#{escaped}"|'#{escaped}')\s*\.\s*/
+        sub_table = /#{own}("[^"]*"|'[^']*'|[A-Za-z0-9_-]+)/
         names = /(?:\A|[\s.\[{,])["']?#{escaped}["']?\s*[.=\]]/
         starts = statement_starts(all)
         all.each_with_index.none? do |line, index|
-          next false if index == start || !starts[index] || line.lstrip.start_with?("#") || !line.match?(names)
+          next false if index == start || !starts[index] || !syntax(line).match?(names)
 
           segment = line[sub_table, 1]
-          segment.nil? || segment == "url" || (TOKEN_KEYS + OTHER_KEYS).include?(segment)
+          # A quoted segment with an escape could spell http_headers unseen, so it is not read as harmless.
+          next true if segment.nil? || segment.include?("\\")
+
+          segment = segment.delete("\"'")
+          segment == "url" || (TOKEN_KEYS + OTHER_KEYS).include?(segment)
         end
+      end
+
+      # A statement line as TOML syntax: its comment cut and every string that is a value, not a key, emptied,
+      # so a server name in a note or a comment is not taken for a definition.
+      def syntax(line)
+        line.gsub(/"(?:[^"\\]|\\.)*"|'[^']*'/) { |literal| $~.post_match.match?(/\A\s*[=.\]]/) ? literal : '""' }
+            .sub(/#.*/m, "")
       end
 
       # The server's plain table header, its name bare or quoted.
@@ -251,7 +263,7 @@ module PhComposer
       # as a project folder, is not a key.
       def names_server?(all, name)
         key = /(?:\A|[\s.\[{,])["']?#{Regexp.escape(name)}["']?\s*[.=\]]/
-        statements(all).any? { |line| !line.lstrip.start_with?("#") && line.match?(key) }
+        statements(all).any? { |line| syntax(line).match?(key) }
       end
 
       # Whether a new `[mcp_servers.<name>]` table can follow what the file has: no key or header holds an

@@ -294,8 +294,11 @@ module PhComposer
         # no live token is bound.
         def bound(client, profile, port, live)
           entry = ClientSetup.entry(client, port, profile)
-          inline = entry["inline_digest"]
-          return [entry, "inline", inline] if entry["setup"] == "inline" && live.key?(inline)
+          # The entry sends its own token: a revoked one binds nothing, never the token saved beside it.
+          if entry["setup"] == "inline"
+            inline = entry["inline_digest"]
+            return live.key?(inline) ? [entry, "inline", inline] : [entry, nil, nil]
+          end
 
           file = Connections.digest(client, profile)
           live.key?(file) ? [entry, "file", file] : [entry, nil, nil]
