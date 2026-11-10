@@ -121,9 +121,7 @@ test("switching shows the other view's columns and rows, sends nothing to the Mo
   assert.deepStrictEqual(shownColumns(p), ["actions", "hierarchy", "name", "gross_m2", "unclassified_m2"],
     "the example lists no Zone cells and no Face columns");
   assert.deepStrictEqual(rowKinds(p), ["Zone"], "a view with no child rows shows the Zone rows alone");
-  var collapse = p.section().querySelectorAll("button").filter(function (node) {
-    return node.textContent === "Collapse all";
-  })[0];
+  var collapse = p.section().querySelector(".phc-view-expansion");
   assert.strictEqual(collapse.disabled, true, "nothing opens, so nothing collapses");
   var surface = p.section().querySelectorAll(".phc-zone-view").filter(function (node) { return !node.hidden; })[0];
   assert.deepStrictEqual(surface.querySelectorAll("td").filter(function (td) {
@@ -349,7 +347,7 @@ test("a view's own column sorts the Zone rows by the value it gives", function (
   assert.deepStrictEqual(names(), ["5", "20"]);
 });
 
-test("Table options offers Colour by for a Zone mode the shown view has no column for", function () {
+test("the Colour by menu lists every mode, whether or not the shown view has its column", function () {
   var p = page(), state = snapshot(AREAS);
   state.sections["ph_composer.colour_by.legend"] = { status: "completed", value: {
     mode: "ph_composer.zones.by_level", label: "Level", rows: [], modes: [
@@ -357,11 +355,45 @@ test("Table options offers Colour by for a Zone mode the shown view has no colum
       { name: "ph_composer.zones.by_building_segment", label: "Building-Segment", group: null },
       { name: "ph_composer.zones.by_level", label: "Level", group: null }] } };
   p.panel.receive({ type: "panel.snapshot", payload: state });
-  var options = byLabel(p, "Table options");
+  var options = byLabel(p, "Colour by");
   click(options);
   assert.deepStrictEqual(options.parentNode.querySelectorAll(".phc-action-menu-item").map(function (node) {
     return node.textContent;
-  }), ["Colour by Building-Segment", "Colour by Level"]);
+  }), ["Zone", "Building-Segment", "Level"]);
+  assert.strictEqual(options.getAttribute("aria-pressed"), "true");
+});
+
+/* The `menus` hook: a contributed view's menus follow Columns and Colour by, each fills with the view's own
+   state when it opens, and each says why it cannot open while its `unavailable` answers. */
+test("a view supplies its own control-row menus through the menus hook", function () {
+  var p = page({ example: false }), on = false, filled = [];
+  p.modules.table_views.register("ph_composer.zones", { id: "example.menus", label: "Menus", order: 97,
+    sections: ["ph_composer.zones.overview"], zoneFields: [],
+    create: function () { return { name: "probe state" }; },
+    menus: [{ label: "Probe", icon: "tag",
+      unavailable: function (vs) { return on ? null : "Not while " + vs.name + " is off."; },
+      fill: function (vs, toggle) {
+        filled.push(vs.name);
+        toggle("Probe line", true, function () { filled.push("ran"); });
+      } }] });
+  p.panel.receive({ type: "panel.snapshot", payload: snapshot("example.menus") });
+  var menus = p.section().closest("[data-pane]").querySelectorAll(".phc-control-menu").filter(function (node) {
+    return !node.hidden;
+  });
+  assert.deepStrictEqual(menus.map(function (node) { return node.children[0].getAttribute("data-icon"); }),
+    ["tag"], "no optional columns and no modes leave the view's menu alone");
+  var probe = menus[0].children[0];
+  assert.strictEqual(probe.getAttribute("aria-label"), "Probe. Not while probe state is off.");
+  click(probe);
+  assert.deepStrictEqual(filled, [], "an unavailable menu opens nothing");
+  on = true;
+  p.panel.receive({ type: "panel.snapshot", payload: snapshot("example.menus") });
+  assert.strictEqual(probe.getAttribute("aria-label"), "Probe");
+  click(probe);
+  var item = probe.parentNode.querySelectorAll(".phc-action-menu-item")[0];
+  assert.deepStrictEqual([item.textContent, item.getAttribute("aria-pressed")], ["Probe line", "true"]);
+  click(item);
+  assert.deepStrictEqual(filled, ["probe state", "ran"]);
 });
 
 test("a shown view that stops being listed leaves as a switch does: its filters go with it", function () {
@@ -517,10 +549,10 @@ test("a Zone filter set while its column was shown elsewhere replaces an older o
   function count() { return p.section().querySelector(".phc-view-count").textContent; }
   keep("house");
   click(tab(p, "Segments"));
-  var options = byLabel(p, "Table options");
+  var options = byLabel(p, "Columns");
   click(options);
   click(options.parentNode.querySelectorAll(".phc-action-menu-item").filter(function (node) {
-    return node.textContent === "Building-Segment column";
+    return node.textContent === "Building-Segment";
   })[0]);
   keep("annex");
   assert.strictEqual(count(), "1 of 2 Zones · 1 filter");

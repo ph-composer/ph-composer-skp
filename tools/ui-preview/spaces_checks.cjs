@@ -1,6 +1,7 @@
 /* The Spaces view on the real panel with the synthetic Spaces fixtures: the reference model's rows, sums,
    airflow states and selection bar at representative widths; the Weighting factor column's paint; the
-   Spaces modes' header toggles and the readouts in Table options; an empty
+   Spaces modes' header toggles; the control row's Collapse all / Expand all toggle and its Columns, Colour by,
+   Labels and Spaces view settings menus at every panel size; an empty
    Model; and the unit-switch cost on 300 Spaces (units U1-F1), whose median it prints. SketchUp pixels and
    Chromium 88 remain host checks. */
 const assert = require("node:assert/strict");
@@ -19,6 +20,14 @@ async function open(page, fixture) {
   await page.locator(".phc-overview .phc-table").first().waitFor();
   await page.getByRole("tab", { name: "Spaces" }).click();
   await page.locator(".phc-zone-view:not([hidden]) .phc-table").waitFor();
+}
+
+/* Opens every row through the one Collapse all / Expand all toggle, which offers Collapse all while anything
+   is open, so the partly open table the fixture starts with takes two presses. */
+async function expandAll(page) {
+  const toggle = page.locator(".phc-overview .phc-view-expansion");
+  if (await toggle.getAttribute("aria-label") === "Collapse all") await toggle.click();
+  await page.getByRole("button", { name: "Expand all", exact: true }).click();
 }
 
 function visibleRows(page) {
@@ -47,7 +56,7 @@ check({ name: "spaces", output }, async ({ newPage, step }) => {
     // The reference model: Zone rows with sums, Spaces beneath, and no marker on Living Zone's differing sums.
     await open(page, "spaces");
     assert.equal(await page.locator(".phc-overview .phc-view-count").textContent(), "2 Zones · 4 Spaces");
-    await page.getByRole("button", { name: "Expand all" }).click();
+    await expandAll(page);
     assert.equal(await visibleRows(page).count(), 16, "2 Zones, 4 Spaces, 5 Volumes and 5 Floor Segments");
     const living = page.locator('.phc-zone-view:not([hidden]) tr[data-row-key=\'["Zone",[100]]\']');
     assert.equal(await living.locator(".phc-row-marker:not([hidden])").count(), 0, "no supply and extract marker on a Zone");
@@ -115,28 +124,88 @@ check({ name: "spaces", output }, async ({ newPage, step }) => {
     await glyph.click();
     await glyph.waitFor({ state: "hidden" });
 
-    step("Spaces modes and Table options");
-    // The Spaces modes from their column headers, and the readouts and label lines in Table options.
+    step("Spaces modes and the control-row menus");
+    // The Spaces modes from their column headers; every mode again in the Colour by menu, pressed while one is on.
     await open(page, "spaces");
     assert.equal(await page.getByRole("button", { name: "Colour by Ventilation" }).count(), 3);
     await page.getByRole("button", { name: "Colour by Height" }).click();
     await page.locator(".phc-zone-view:not([hidden]) button[aria-label='Colour by Height'][aria-pressed='true']")
       .waitFor();
-    await page.getByRole("button", { name: "Table options" }).click();
-    const options = page.locator(".phc-table-options .phc-action-menu-item:visible");
-    await options.filter({ hasText: "Label net volume" }).waitFor();
-    assert.equal(await options.filter({ hasText: "Show Spaces" }).getAttribute("aria-pressed"), "true");
+    const colourMenu = page.getByRole("button", { name: "Colour by", exact: true });
+    await page.locator(".phc-overview .phc-control-menu button[aria-label='Colour by'][aria-pressed='true']").waitFor();
+    const items = page.locator(".phc-action-menu:visible .phc-action-menu-item");
+    async function menuTexts(trigger) {
+      await trigger.click();
+      await items.first().waitFor();
+      const texts = await items.allTextContents();
+      await page.keyboard.press("Escape");
+      return texts;
+    }
+    const modes = await menuTexts(colourMenu);
+    for (const mode of ["Space", "Ventilation", "Weighting factor", "Height"]) {
+      assert(modes.includes(mode), `the Colour by menu lists ${mode}`);
+    }
+    const columnsMenu = page.getByRole("button", { name: "Columns", exact: true });
+    assert.deepEqual(await menuTexts(columnsMenu), ["Building-Segment", "Level", "Net area factor"]);
+    await columnsMenu.click();
+    await items.filter({ hasText: "Level" }).click();
+    await page.locator(".phc-zone-view:not([hidden]) th.col-level:not([hidden])").waitFor();
+    assert.deepEqual(await menuTexts(colourMenu), modes, "showing a column leaves the Colour by list as it was");
+    await columnsMenu.click();
+    await items.filter({ hasText: "Level" }).click();
+    // Labels opens while Show Spaces is on, and waits, with its reason as the tooltip, while it is off.
+    const settingsMenu = page.getByRole("button", { name: "Spaces view settings", exact: true });
+    assert.deepEqual(await menuTexts(settingsMenu), ["Show Spaces", "Selection totals"]);
+    assert.deepEqual(await menuTexts(page.getByRole("button", { name: "Labels", exact: true })),
+      ["Weighted area (iCFA)", "Net volume", "Supply and extract"]);
+    await page.getByRole("button", { name: "Labels", exact: true }).click();
+    await items.first().waitFor();
     await page.evaluate(async () => {
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
       await Promise.all(document.getAnimations().map(animation => animation.finished));
     });
-    await page.screenshot({ path: path.join(output, "spaces-table-options.png") });
+    await page.screenshot({ path: path.join(output, "spaces-labels-menu.png") });
     await page.keyboard.press("Escape");
+    await settingsMenu.click();
+    await items.filter({ hasText: "Show Spaces" }).click();
+    const waiting = page.locator(".phc-overview .phc-control-menu button[data-icon='tag'][aria-disabled='true']");
+    await waiting.waitFor();
+    assert.match(await waiting.getAttribute("data-tooltip"), /^Turn on Show Spaces/);
+    await waiting.click({ force: true });
+    assert.equal(await items.count(), 0, "Labels opens nothing while Show Spaces is off");
+    await page.screenshot({ path: path.join(output, "spaces-labels-waiting.png") });
+    await settingsMenu.click();
+    await items.filter({ hasText: "Show Spaces" }).click();
+    await page.locator(".phc-overview .phc-control-menu button[data-icon='tag']:not([aria-disabled])").waitFor();
+    await page.getByRole("button", { name: "Colour by Height" }).click();
+
+    step("the control row at panel sizes");
+    // The one expansion toggle and the four menus fit the control row at every panel size, on both tabs.
+    for (const tab of ["Spaces", "Geometry"]) {
+      await page.getByRole("tab", { name: tab, exact: true }).click();
+      for (const [width, height] of PANEL_SIZES) {
+        await setPanelSize(page, width, height);
+        assert.equal((await paneFacts(page, { floating: [] })).sideways, false,
+          `${tab} at ${width} x ${height}: the pane does not scroll sideways`);
+        const misplaced = await page.evaluate(() => {
+          const row = document.querySelector(".phc-overview > .phc-inventory-controls").getBoundingClientRect();
+          return [...document.querySelectorAll(".phc-overview .phc-view-expansion, .phc-overview .phc-control-menu")]
+            .filter(node => node.offsetParent).filter(node => {
+              const box = node.getBoundingClientRect();
+              return box.left < row.left || box.right > row.right || box.right > innerWidth;
+            }).map(node => node.querySelector("button")?.getAttribute("aria-label") || "Collapse all toggle");
+        });
+        assert.deepEqual(misplaced, [], `${tab} at ${width} x ${height}: every control stays inside the row`);
+        await page.locator(".phc-overview > .phc-inventory-controls").screenshot({
+          path: path.join(output, `control-row-${tab.toLowerCase()}-${width}x${height}.png`) });
+      }
+    }
+    await page.setViewportSize({ width: 1280, height: 900 });
 
     step("Height from solid");
     // Height from solid from a Volume row: the confirmation shows the solid's volume, the floor area and the height.
     await open(page, "spaces");
-    await page.getByRole("button", { name: "Expand all" }).click();
+    await expandAll(page);
     await page.getByRole("button", { name: "Height of Volume 1 from a solid" }).first().click();
     const height = page.locator("dialog:visible");
     await height.waitFor();
@@ -206,7 +275,7 @@ check({ name: "spaces", output }, async ({ newPage, step }) => {
         `(runs ${times.map(time => time.toFixed(0)).join(", ")} ms)`);
     };
     await measure("Zones open");
-    await page.getByRole("button", { name: "Expand all" }).click();
+    await expandAll(page);
     await measure("every row open");
     return `Spaces browser checks passed; evidence in ${output}`;
 });

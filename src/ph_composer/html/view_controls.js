@@ -88,17 +88,18 @@ PhComposerUI.define("view_controls", ["dom", "icons"], function (dom, icons) {
     this.columnSort = options.columnSort ? { field: options.initialOrder || "name", direction: "asc" } : null;
     if (options.columnSort) { this.orderBy.parentNode.hidden = true; this.directionToggle.hidden = true; }
     this.toggleGroup = function (key) { self.collapsed[key] = !self.collapsed[key]; changed(); };
-    this.collapseAll = button("Collapse all", function () {
-      if (options.expansion) options.expansion.collapseAll();
-      else self.groups.forEach(function (group) { self.collapsed[group.key] = true; });
-      changed();
-    });
-    this.expandAll = button("Expand all", function () {
-      if (options.expansion) options.expansion.expandAll();
+    /* One button for Collapse all and Expand all: it collapses while anything is open, a partly open
+       table included, and expands only once everything is shut. `project` paints which. */
+    this.expansionToggle = icons.iconButton("Collapse all", "copy_minus", function () {
+      var collapse = self.expansionToggle.getAttribute("data-icon") === "copy_minus";
+      if (options.expansion) {
+        if (collapse) options.expansion.collapseAll(); else options.expansion.expandAll();
+      } else if (collapse) self.groups.forEach(function (group) { self.collapsed[group.key] = true; });
       else self.collapsed = Object.create(null);
       changed();
     });
-    this.root.appendChild(this.collapseAll); this.root.appendChild(this.expandAll);
+    this.expansionToggle.classList.add("phc-view-expansion");
+    this.root.appendChild(this.expansionToggle);
     this.count = element("span", "phc-view-count"); this.count.setAttribute("role", "status");
     this.root.appendChild(this.count);
   }
@@ -209,12 +210,16 @@ PhComposerUI.define("view_controls", ["dom", "icons"], function (dom, icons) {
         var key = id(row.record);
         return matches[key] || retained[key] ? groups[group(row.record).key] : null;
       } : null };
-    this.collapseAll.hidden = this.expandAll.hidden = !(groupField || this.options.expansion);
+    this.expansionToggle.hidden = !(groupField || this.options.expansion);
     var expansion = this.options.expansion;
-    this.collapseAll.disabled = expansion ? !expansion.canCollapse(projection) :
-      this.groups.every(function (entry) { return entry.collapsed; });
-    this.expandAll.disabled = expansion ? !expansion.canExpand(projection) :
-      this.groups.every(function (entry) { return !entry.collapsed; });
+    var canCollapse = expansion ? expansion.canCollapse(projection) :
+      this.groups.some(function (entry) { return !entry.collapsed; });
+    var canExpand = expansion ? expansion.canExpand(projection) :
+      this.groups.some(function (entry) { return entry.collapsed; });
+    var collapse = canCollapse || !canExpand;
+    icons.paintIconButton(this.expansionToggle, collapse ? "Collapse all" : "Expand all",
+      collapse ? "copy_minus" : "copy_plus");
+    this.expansionToggle.disabled = !canCollapse && !canExpand;
     this.clear.hidden = !query;
     // The row says how many records there are, and how many a filter leaves; the page header counts nothing.
     // `count` may be false (no count) or a function (shown, total, filtered) giving the screen's own words.

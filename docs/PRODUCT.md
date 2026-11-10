@@ -298,8 +298,10 @@ is one Undo step.
 Colour by Space, Ventilation, Weighting factor and Height colour each Space's Floor Segments and the
 Volume preview that its height draws over them, with a legend. Show Spaces, on by default each time a
 Model is opened, draws the outline of every Volume preview and each Space's label whether or not a mode is on, in the
-panel's units; turn it off from Table options in Zones > Spaces or the Colour by menu. Selection totals, the
-sums for the selected Spaces, are turned on in the same places. None of this is saved in the model.
+panel's units; turn it off from the Spaces view settings in Zones > Spaces or from the Colour by menu in
+SketchUp. Selection totals, the sums for the selected Spaces, are turned on in the same places. While Show
+Spaces is on, the Labels menu beside them chooses what each label adds: weighted area (iCFA), net volume, and
+supply and extract. None of this is saved in the model.
 
 Copying a Space in SketchUp makes the copy independent at once, with the next free number in its Zone,
 and one Undo removes both. A copied Zone copies no Spaces outside it. A storey Group copied whole,

@@ -346,6 +346,10 @@ input[type="color"].phc-color-wheel:focus-visible { outline: 2px solid var(--int
 .phc-workspace .phc-icon-button:hover:enabled, .phc-workspace .phc-help:hover:enabled {
   color:var(--ink); background-color:#0d2a300f; border-color:transparent; }
 .phc-workspace .phc-icon-button:disabled { background-color:transparent; border-color:transparent; opacity:.45; }
+/* One held back for a stated reason looks disabled but stays hoverable, so its tooltip can give the reason. */
+.phc-workspace .phc-icon-button[aria-disabled="true"],
+.phc-workspace .phc-icon-button[aria-disabled="true"]:hover:enabled {
+  background-color:transparent; border-color:transparent; opacity:.45; cursor:not-allowed; }
 .phc-help svg { display:block; }
 .phc-icon-button svg { display:block; }
 

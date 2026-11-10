@@ -16,9 +16,9 @@
       "sha256": "c5bd5bac72640039240d109caea530dedf1fff25064549cc68eed7283f2a06bd"
     },
     "html/base.css": {
-      "bytes": 21025,
+      "bytes": 21355,
       "mime": "text/css; charset=utf-8",
-      "sha256": "c0e63bd0bfaaf02a0c3b0a67792630b71f1e91e461309bffecae317ecc7fd8c4"
+      "sha256": "2727fe9c2a96d4e529c45a0af16a31c7a50956ece5cbeebb3e73524e53a82aca"
     },
     "html/boot.js": {
       "bytes": 369,
@@ -141,9 +141,9 @@
       "sha256": "43aac700af82188b8aedfcdeab1af2d23a4664728221022282303a504181888d"
     },
     "html/features/spaces/view.js": {
-      "bytes": 20529,
+      "bytes": 20951,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "6c0116fa42f758f039b8a9a33101d98cef3caef0a929b0ec931f0b2f5c1e9f60"
+      "sha256": "b5e9c2f4fefd350687c797a324748fe8d3af725a732e76e88f13c0eb4b4a5832"
     },
     "html/features/thermal_bridges/assign_bar.js": {
       "bytes": 11913,
@@ -291,9 +291,9 @@
       "sha256": "5cdfedd2c1f977aae1a40d6c6e7979cfb9e866b5c13550954b29d520fa981900"
     },
     "html/features/zones/faces_view.js": {
-      "bytes": 40798,
+      "bytes": 40801,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "a57d9ba9ed8e7f98ad3c89445b67ff6c849710166ff3ae5c47e03ede7a8254c8"
+      "sha256": "4b2224b002005cc089bf288895ef1482fc82135cbfd7df23af32770c08d09625"
     },
     "html/features/zones/option_dialog.js": {
       "bytes": 18234,
@@ -301,9 +301,9 @@
       "sha256": "2c0de743bec5ba6b179338e85a6048103ce981e71b1c372a5e0e59ae9927e947"
     },
     "html/features/zones/overview.js": {
-      "bytes": 53117,
+      "bytes": 55342,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "b96b8e1561b4110b18540cb4e35fb3b07c5bb43ad626841fa3071c35cc14b80f"
+      "sha256": "d20b24411e2816b8e711aef1c2508966f88a6d2da8c833c5d47e1a6403ef93f4"
     },
     "html/features/zones/selection_assignment.js": {
       "bytes": 3325,
@@ -326,9 +326,9 @@
       "sha256": "260284f4f31732e0639dda8579367b93bd13eaf7caa32dc984215663542b9f83"
     },
     "html/features/zones/zones.css": {
-      "bytes": 8491,
+      "bytes": 8770,
       "mime": "text/css; charset=utf-8",
-      "sha256": "d29d8f038797c7c29fad3be64de66d3540d66cf38608520fffa5af861dd0915d"
+      "sha256": "f58ed1e9eead16c157c40e05ee9eb4b6f1d7d6b4b6246f236550af161d100439"
     },
     "html/fields.js": {
       "bytes": 1833,
@@ -336,9 +336,9 @@
       "sha256": "ad0a0729f41d444e1d3b979a07bc996e991ff5abfe9ab6b4b58c2fe0a62fac0b"
     },
     "html/icons.js": {
-      "bytes": 11413,
+      "bytes": 12345,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "1a95b1f0c7ffe0d33782623d1125841cd0cf41f7ad735a80b1f16b6a18a869c5"
+      "sha256": "ae769a7d0c4b07031ab9812cd350d17b6e4638549d0f5295ccaafe1f1390ed54"
     },
     "html/index.html": {
       "bytes": 8263,
@@ -431,9 +431,9 @@
       "sha256": "856b5a781333c45e5d9e2ddc6e3ff9921a59832b10fab48b599c34075a467eb9"
     },
     "html/overlay.js": {
-      "bytes": 26638,
+      "bytes": 27966,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "2f66549fe081d4c4e7f7dc964f520ef2e9a79d0d4c1c255e90a8a10023c30a02"
+      "sha256": "9280061399e623fd6615bd594eb7cdaf9cc712e5bfcd1b055a580df66e95c6b1"
     },
     "html/page_header.js": {
       "bytes": 1807,
@@ -526,9 +526,9 @@
       "sha256": "61fa05fa4086b6022a5005a7fb9173b9bc6b85152507e8a4840783448895fc67"
     },
     "html/table.css": {
-      "bytes": 22276,
+      "bytes": 22283,
       "mime": "text/css; charset=utf-8",
-      "sha256": "677f05ab1762851b148dcacdd335011fd382f7be81753fdc8d57e953ed2460f4"
+      "sha256": "68522885b80dc5847becaa9bf8e515a585ce0fce195ce37a4a75a57e3cada63c"
     },
     "html/table.js": {
       "bytes": 34598,
@@ -571,9 +571,9 @@
       "sha256": "2e94421a914c75953be65845ed1c30fad144f6bf10cc0ef7aaf4b023d4192025"
     },
     "html/view_controls.js": {
-      "bytes": 12837,
+      "bytes": 13309,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "349b4c3b99f4dabd5d3ed7ca69941348a683b980498ee448096692df385f9f36"
+      "sha256": "82a559c6d8dfd7d3af015b3032ab78e11c0af63eaa37de52368aa1b7291c7161"
     },
     "html/workspace.js": {
       "bytes": 1630,

@@ -1,5 +1,5 @@
 /* The shared record table: the tree table, its sticky identity columns, column resizing, editable cells
-   and the table options menu. Ported from the predecessor's table.css; the columns a screen declares are
+   and the control row's menus. Ported from the predecessor's table.css; the columns a screen declares are
    the widths it sets, so nothing here names a feature's data. */
 .live-panel .phc-table td, .live-panel .phc-table th { font-size: 13px; }
 .live-panel .phc-table [aria-invalid="true"] { border-color: var(--red); }
@@ -236,7 +236,7 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
   background-position: right center, right center; background-size: 48px 100%, 20px 100%;
   background-repeat: no-repeat; background-attachment: local, scroll; }
 .is-empty-table, .phc-inventory-table:not(.is-overflowing), .phc-table-mount:not(.is-overflowing) { background-image: none !important; }
-/* The record count, the table options and the help end the action bar as one cluster at its right. */
+/* The record count, the control row's menus and the help end the action bar as one cluster at its right. */
 .phc-inventory-controls .phc-view-count { margin-left: auto; }
 .phc-inventory-controls .phc-pane-tools { margin-left: 0; }
 .phc-inventory-controls .phc-pane-tools:empty { display: none; }

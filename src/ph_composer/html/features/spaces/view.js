@@ -312,26 +312,39 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
     return vs.cells.draftReason() || vs.selection.draftReason();
   }
 
-  /* Table options: the Spaces readouts, and the label lines while Show Spaces is on. Each is a view command;
-     none writes to the Model. */
-  function tableOptions(vs, toggle) {
-    var shown = colourBy.readouts(panel.state).filter(function (readout) { return READOUT_LABELS[readout.name]; });
-    shown.forEach(function (readout) {
-      toggle(READOUT_LABELS[readout.name], readout.on, function () {
-        colourBy.showReadout(panel.state, readout.name, !readout.on);
-      });
-    });
-    var labels = shown.filter(function (readout) { return readout.name === "ph_composer.spaces.show"; })[0];
-    if (!labels || !labels.on) return;
-    var options = snapshot.value(panel.state, "ph_composer.spaces.label_options") || {};
-    LABEL_LINES.forEach(function (line) {
-      toggle("Label " + line[1].charAt(0).toLowerCase() + line[1].slice(1), Boolean(options[line[0]]), function () {
-        var change = {};
-        change[line[0]] = !options[line[0]];
-        vs.labelOptions.send("ph_composer.spaces.labels.set_options", change);
-      });
-    });
+  function spacesReadouts() {
+    return colourBy.readouts(panel.state).filter(function (readout) { return READOUT_LABELS[readout.name]; });
   }
+
+  /* The view's two menus in the control row: Labels, the lines a Space label shows, which waits for Show Spaces;
+     and the view's settings, its readouts. Each choice is a view command; none writes to the Model. */
+  var MENUS = [
+    { label: "Labels", icon: "tag",
+      unavailable: function () {
+        var shown = spacesReadouts().some(function (readout) {
+          return readout.name === "ph_composer.spaces.show" && readout.on;
+        });
+        return shown ? null : "Turn on Show Spaces in the Spaces view settings to choose what its labels show.";
+      },
+      fill: function (vs, toggle) {
+        var options = snapshot.value(panel.state, "ph_composer.spaces.label_options") || {};
+        LABEL_LINES.forEach(function (line) {
+          toggle(line[1], Boolean(options[line[0]]), function () {
+            var change = {};
+            change[line[0]] = !options[line[0]];
+            vs.labelOptions.send("ph_composer.spaces.labels.set_options", change);
+          });
+        });
+      } },
+    { label: "Spaces view settings", icon: "settings",
+      fill: function (vs, toggle) {
+        spacesReadouts().forEach(function (readout) {
+          toggle(READOUT_LABELS[readout.name], readout.on, function () {
+            colourBy.showReadout(panel.state, readout.name, !readout.on);
+          });
+        });
+      } }
+  ];
 
   function count(vs) {
     var total = vs.spaces.length;
@@ -341,7 +354,7 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
   var VIEW = {
     id: "ph_composer.spaces", label: "Spaces", order: 20, sections: [SECTION], tiers: 3,
     placeholder: "Zone, number or name",
-    // Building-Segment and Level stay available from Table options; Ground depth is the Faces view's.
+    // Building-Segment and Level stay available from the Columns menu; Ground depth is the Faces view's.
     zoneFields: ["building_segment", "level"],
     hiddenColumns: { building_segment: true, level: true, net_area_factor: true },
     optionalColumns: [["building_segment", "Building-Segment"], ["level", "Level"],
@@ -387,7 +400,7 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
     leadingColumns: leadingColumns, columns: columns, value: value, decorate: decorate, zoneMarker: marker,
     sortValue: sortValue, sort: sort, search: search, queryMatch: queryMatch, count: count,
     colourBy: COLOUR_BY,
-    tableOptions: tableOptions,
+    menus: MENUS,
     filteredFields: { weighting_factor: true },
     filterValues: filterValues, filterLabel: function (vs, field, value) { return value; },
     zoneMatch: zoneMatch, rowMatch: rowMatch, viewportPaths: viewportPaths,

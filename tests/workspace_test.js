@@ -310,6 +310,26 @@ test("an action menu runs its item once, closes, and marks destructive items", f
   assert.strictEqual(menu.trigger.getAttribute("aria-label"), "Part actions");
 });
 
+test("an action menu takes its own icon, and an unavailable one says why and opens nothing", function () {
+  var menu = new ui.ActionMenu("Labels", { icon: "tag" });
+  context.document.body.appendChild(menu.root);
+  assert.strictEqual(menu.trigger.getAttribute("data-icon"), "tag");
+  menu.trigger.listeners.click({});
+  menu.setUnavailable("Turn on Show Spaces first.");
+  assert.strictEqual(menu.bubble.panel.hidden, true, "an open menu that becomes unavailable closes");
+  assert.deepStrictEqual([menu.trigger.getAttribute("aria-disabled"), menu.trigger.getAttribute("aria-label"),
+    menu.trigger.getAttribute("data-tooltip"), menu.trigger.disabled],
+  ["true", "Labels. Turn on Show Spaces first.", "Turn on Show Spaces first.", false]);
+  menu.trigger.listeners.click({});
+  menu.trigger.listeners.keydown({ key: "ArrowDown", preventDefault: function () {} });
+  assert.strictEqual(menu.bubble.panel.hidden, true);
+  menu.setUnavailable(null);
+  assert.deepStrictEqual([menu.trigger.getAttribute("aria-disabled"), menu.trigger.getAttribute("aria-label"),
+    menu.trigger.getAttribute("data-tooltip")], [null, "Labels", "Labels"]);
+  menu.trigger.listeners.click({});
+  assert.strictEqual(menu.bubble.panel.hidden, false);
+});
+
 test("a dialog opened from an action menu item returns focus to the menu's trigger", function () {
   var dialog = ui.formDialog("", function () { dialog.closeModal(); });
   var menu = new ui.ActionMenu("More actions");

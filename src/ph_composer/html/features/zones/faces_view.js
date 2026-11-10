@@ -736,7 +736,7 @@ function (panel, ui, snapshot, units, fields, words, tableViews, attachedAssignm
     help: "Select Faces in SketchUp, or check their rows, to edit them together in the bar under the table. " +
       "A column's palette icon colours the Model by that column; its menu sorts and filters.",
     colourBy: COLOUR_BY, sorted: SORTED, filteredFields: FACE_FIELDS,
-    // Most Zones keep the default, so Ground depth waits in Table options until it is wanted.
+    // Most Zones keep the default, so Ground depth waits in the Columns menu until it is wanted.
     hiddenColumns: { ground_depth_mm: true },
     // Sized so the whole table shows at the panel's usual width with the Zone columns beside them.
     widths: { face_type: 126, boundary_condition: 110, area_m2: 104, assembly_id: 156 },

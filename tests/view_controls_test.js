@@ -112,43 +112,61 @@ test("grouping counts each group and the toggle collapses one at a time", functi
     { key: "b", record: RECORDS[1], depth: 0 }).collapsed, true);
 });
 
-test("Collapse all and Expand all are offered only when there is something to collapse", function () {
+/* The toggle's icon, tooltip and accessible name, and whether it can be pressed. */
+function toggleState(h) {
+  var node = h.controls.expansionToggle;
+  return [node.getAttribute("data-icon"), node.getAttribute("data-tooltip"), node.getAttribute("aria-label"),
+    node.disabled];
+}
+
+test("one toggle collapses while any group is open and expands once all are shut", function () {
   var h = harness({ groups: [["level", "Level"]] });
 
   h.controls.project(RECORDS, config());
-  assert.strictEqual(h.controls.collapseAll.hidden, true, "no grouping, nothing to collapse");
+  assert.strictEqual(h.controls.expansionToggle.hidden, true, "no grouping, nothing to collapse");
 
   control(h, "Group by").value = "level";
-  h.controls.project(RECORDS, config());
-  assert.strictEqual(h.controls.collapseAll.hidden, false);
-  assert.strictEqual(h.controls.collapseAll.disabled, false);
-  assert.strictEqual(h.controls.expandAll.disabled, true, "everything is already open");
+  var projection = h.controls.project(RECORDS, config());
+  assert.strictEqual(h.controls.expansionToggle.hidden, false);
+  assert.deepStrictEqual(toggleState(h), ["copy_minus", "Collapse all", "Collapse all", false]);
 
-  h.controls.collapseAll.listeners.click({});
+  h.controls.toggleGroup(projection.group({ key: "b", record: RECORDS[1], depth: 0 }).key);
   h.controls.project(RECORDS, config());
-  assert.strictEqual(h.controls.collapseAll.disabled, true);
-  h.controls.expandAll.listeners.click({});
+  assert.deepStrictEqual(toggleState(h), ["copy_minus", "Collapse all", "Collapse all", false],
+    "a partly open table still offers Collapse all");
+
+  h.controls.expansionToggle.listeners.click({});
   h.controls.project(RECORDS, config());
-  assert.strictEqual(h.controls.expandAll.disabled, true);
+  assert.deepStrictEqual(toggleState(h), ["copy_plus", "Expand all", "Expand all", false]);
+  h.controls.expansionToggle.listeners.click({});
+  h.controls.project(RECORDS, config());
+  assert.deepStrictEqual(toggleState(h), ["copy_minus", "Collapse all", "Collapse all", false]);
 });
 
-/* A screen whose tree is its grouping hands over its own expansion, and the two buttons act on it. */
+/* A screen whose tree is its grouping hands over its own expansion, and the toggle acts on it. */
 test("a caller's own expansion replaces the group collapse", function () {
-  var acted = [];
+  var acted = [], open = true, closed = false;
   var h = harness({ expansion: {
     collapseAll: function () { acted.push("collapse"); },
     expandAll: function () { acted.push("expand"); },
-    canCollapse: function () { return true; },
-    canExpand: function () { return false; }
+    canCollapse: function () { return open; },
+    canExpand: function () { return closed; }
   } });
 
   h.controls.project(RECORDS, config());
-  assert.strictEqual(h.controls.collapseAll.hidden, false, "shown without any grouping");
-  assert.strictEqual(h.controls.expandAll.disabled, true);
+  assert.strictEqual(h.controls.expansionToggle.hidden, false, "shown without any grouping");
+  assert.deepStrictEqual(toggleState(h), ["copy_minus", "Collapse all", "Collapse all", false]);
+  h.controls.expansionToggle.listeners.click({});
 
-  h.controls.collapseAll.listeners.click({});
-  h.controls.expandAll.listeners.click({});
+  open = false; closed = true;
+  h.controls.project(RECORDS, config());
+  assert.deepStrictEqual(toggleState(h), ["copy_plus", "Expand all", "Expand all", false]);
+  h.controls.expansionToggle.listeners.click({});
   assert.deepStrictEqual(acted, ["collapse", "expand"]);
+
+  closed = false;
+  h.controls.project(RECORDS, config());
+  assert.strictEqual(h.controls.expansionToggle.disabled, true, "nothing to open or shut");
 });
 
 test("the order choices are replaced only when they actually differ", function () {

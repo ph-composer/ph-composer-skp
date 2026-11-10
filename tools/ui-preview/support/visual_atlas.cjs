@@ -276,14 +276,18 @@ check({ name: "visual_atlas", output }, async ({ newPage, step }) => {
           await page.getByRole("button", { name: label, exact: true }).click();
           await shot("key-popup", "spaces", screen); await cancel();
         }
+        // The one expansion toggle offers Collapse all while the Zones are open, then Expand all.
+        await page.getByRole("button", { name: "Collapse all", exact: true }).click();
         await page.getByRole("button", { name: "Expand all", exact: true }).click();
         for (const [label, screen] of [["Height of Volume 1 from a solid", "space-height-from-solid"],
           ["Delete Volume 1", "space-delete-only-volume"], ["Delete Volume 2", "space-delete-volume"]]) {
           await page.getByRole("button", { name: label, exact: true }).first().click();
           await page.locator("dialog[open]").waitFor(); await shot("key-popup", "spaces", screen); await cancel();
         }
-        await page.getByRole("button", { name: "Table options", exact: true }).click();
-        await shot("key-popup", "spaces", "spaces-table-options");
+        for (const [label, screen] of [["Labels", "spaces-labels"], ["Spaces view settings", "spaces-view-settings"]]) {
+          await page.getByRole("button", { name: label, exact: true }).click();
+          await shot("key-popup", "spaces", screen); await page.keyboard.press("Escape");
+        }
 
         await open("rich", "overview", "Geometry");
         await page.getByRole("combobox", { name: "Wall 1 boundary", exact: true }).first().selectOption("AttachedZone");

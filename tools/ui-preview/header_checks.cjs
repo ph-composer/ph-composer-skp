@@ -62,8 +62,8 @@ check({ name: "header", output }, async ({ newPage, step }) => {
     await page.screenshot({ path: path.join(output, "headers-active.png") });
     step("Ground depth starts hidden, and says what it does once shown");
     assert.equal(await table.locator("th.col-ground_depth_mm").isHidden(), true);
-    await page.getByRole("button", { name: "Table options", exact: true }).click();
-    await page.getByRole("button", { name: "Ground depth column", exact: true }).click();
+    await page.getByRole("button", { name: "Columns", exact: true }).click();
+    await page.getByRole("button", { name: "Ground depth", exact: true }).click();
     await page.keyboard.press("Escape");
     await page.locator("[data-unit-system='IP']").click();
     assert.equal(await table.locator("th.col-ground_depth_mm .phc-th-label").innerText(), "Ground depth in");

@@ -330,12 +330,35 @@ PhComposerUI.define("overlay", ["dom", "icons"], function (dom, icons) {
     };
     return root;
   }
+  /* An icon-button menu: the ellipsis unless `options.icon` names another icon. */
   function ActionMenu(label, options) {
-    var trigger = iconButton(label || "More actions", "more"),
-      bubble = new Bubble(trigger, label || "More actions", options);
+    var self = this;
+    this.label = label || "More actions"; this.unavailable = null;
+    var trigger = iconButton(this.label, (options && options.icon) || "more"),
+      bubble = new Bubble(trigger, this.label, Object.assign({}, options, { ownTrigger: true }));
+    trigger.addEventListener("click", function () { if (!self.unavailable) bubble.toggle(); });
+    trigger.addEventListener("keydown", function (event) {
+      if (self.unavailable || (event.key !== "ArrowRight" && event.key !== "ArrowDown")) return;
+      event.preventDefault(); bubble.open();
+    });
     bubble.root.classList.add("phc-action-menu-anchor"); bubble.panel.classList.add("phc-action-menu");
     this.root = bubble.root; this.trigger = trigger; this.bubble = bubble; this.content = bubble.content;
   }
+  /* Why the menu cannot open now, or null when it can. An unavailable menu keeps its trigger on screen with the
+     reason as its tooltip and in its accessible name, and opens nothing: a natively disabled button would show
+     no tooltip. An open menu that becomes unavailable closes. */
+  ActionMenu.prototype.setUnavailable = function (reason) {
+    this.unavailable = reason || null;
+    if (this.unavailable) {
+      this.trigger.setAttribute("aria-disabled", "true");
+      this.trigger.setAttribute("aria-label", this.label + ". " + this.unavailable);
+      dom.tooltip(this.trigger, this.unavailable);
+      if (!this.bubble.panel.hidden) this.bubble.close(false);
+    } else {
+      this.trigger.removeAttribute("aria-disabled");
+      icons.paintIconButton(this.trigger, this.label);
+    }
+  };
   ActionMenu.prototype.add = function (label, handler, options) {
     // Focus goes back to the trigger before the handler runs, so a dialog it opens returns there, not to
     // this item, which the closed menu has hidden.

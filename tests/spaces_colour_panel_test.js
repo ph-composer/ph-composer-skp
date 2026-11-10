@@ -1,8 +1,8 @@
 "use strict";
 
-/* The Spaces view's Colour by: the Name, airflow, Weighting factor and Height headers offer the Spaces modes,
-   and Table options lists the Spaces readouts and, while Show Spaces is on, their lines. Every control is a
-   view command. */
+/* The Spaces view's Colour by: the Name, airflow, Weighting factor and Height headers offer the Spaces modes;
+   the Spaces view settings menu lists the Spaces readouts, and the Labels menu, while Show Spaces is on, their
+   lines. Every control is a view command. */
 
 var assert = require("assert");
 var test = require("node:test");
@@ -64,10 +64,14 @@ function snapshot(readouts, options) {
   };
 }
 
-function openOptions(p) {
-  p.click(p.byLabel("Table options")[0]);
-  return p.pane().querySelectorAll(".phc-action-menu-item").filter(function (node) { return !node.hidden; });
+/* Opens one of the control row's menus and answers its items. */
+function openMenu(p, label) {
+  var trigger = p.byLabel(label)[0];
+  p.click(trigger);
+  return trigger.parentNode.querySelectorAll(".phc-action-menu-item");
 }
+
+function texts(items) { return items.map(function (node) { return node.textContent; }); }
 
 function item(items, text) { return items.filter(function (node) { return node.textContent === text; })[0]; }
 
@@ -82,24 +86,47 @@ test("the Name, airflow, Weighting factor and Height headers offer the Spaces mo
   assert.deepStrictEqual(p.views().pop(), ["ph_composer.colour_by.activate", { mode: "ph_composer.spaces.by_height" }]);
 });
 
-test("Table options turns each Spaces readout on", function () {
+test("the Spaces control row holds Columns, Colour by, Labels and the Spaces view settings", function () {
   var p = page();
   p.receive(snapshot());
-  var items = openOptions(p);
+  var menus = p.pane().querySelectorAll(".phc-control-menu").filter(function (node) { return !node.hidden; });
+  assert.deepStrictEqual(menus.map(function (node) { return node.children[0].getAttribute("data-icon"); }),
+    ["columns", "palette", "tag", "settings"]);
+  assert.deepStrictEqual(texts(openMenu(p, "Columns")), ["Building-Segment", "Level", "Net area factor"]);
+  assert.deepStrictEqual(texts(openMenu(p, "Colour by")), ["Space", "Ventilation", "Weighting factor", "Height"]);
+  assert.strictEqual(p.byLabel("Colour by")[0].getAttribute("aria-pressed"), "false", "no mode is on");
+});
+
+test("the Spaces view settings turn each Spaces readout on", function () {
+  var p = page();
+  p.receive(snapshot());
+  var items = openMenu(p, "Spaces view settings");
+  assert.deepStrictEqual(texts(items), ["Show Spaces", "Selection totals"]);
+  assert.strictEqual(p.byLabel("Spaces view settings")[0].getAttribute("data-tooltip"), "Spaces view settings");
   assert.strictEqual(item(items, "Show Spaces").getAttribute("aria-pressed"), "false");
-  assert.ok(item(items, "Selection totals"));
-  assert.strictEqual(item(items, "Label net volume"), undefined, "no label lines while the labels are off");
   p.click(item(items, "Show Spaces"));
   assert.deepStrictEqual(p.views().pop(), ["ph_composer.colour_by.readout",
     { readout: "ph_composer.spaces.show", on: true }]);
 });
 
-test("while Show Spaces is on, Table options lists each line and toggles it", function () {
+test("Labels waits for Show Spaces, and its tooltip says why", function () {
+  var p = page();
+  p.receive(snapshot());
+  var reason = "Turn on Show Spaces in the Spaces view settings to choose what its labels show.";
+  var labels = p.byLabel("Labels. " + reason)[0];
+  assert.deepStrictEqual([labels.getAttribute("aria-disabled"), labels.getAttribute("data-tooltip")], ["true", reason]);
+  p.click(labels);
+  assert.strictEqual(labels.parentNode.querySelectorAll(".phc-action-menu-item").length, 0, "it opens nothing");
+});
+
+test("while Show Spaces is on, Labels lists each line and toggles it", function () {
   var p = page();
   p.receive(snapshot([{ name: "ph_composer.spaces.show", label: "Show Spaces", selection: false, on: true }],
     { weighted_area: true, net_volume: false, airflows: false }));
-  var items = openOptions(p);
-  assert.strictEqual(item(items, "Label weighted area (iCFA)").getAttribute("aria-pressed"), "true");
-  p.click(item(items, "Label net volume"));
+  assert.strictEqual(p.byLabel("Labels")[0].getAttribute("aria-disabled"), null);
+  var items = openMenu(p, "Labels");
+  assert.deepStrictEqual(texts(items), ["Weighted area (iCFA)", "Net volume", "Supply and extract"]);
+  assert.strictEqual(item(items, "Weighted area (iCFA)").getAttribute("aria-pressed"), "true");
+  p.click(item(items, "Net volume"));
   assert.deepStrictEqual(p.views().pop(), ["ph_composer.spaces.labels.set_options", { net_volume: true }]);
 });

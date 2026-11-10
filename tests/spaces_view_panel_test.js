@@ -64,10 +64,7 @@ function table(p, fields) {
 }
 
 function expandAll(p) {
-  var button = p.section().querySelectorAll("button").filter(function (node) {
-    return node.textContent === "Expand all";
-  })[0];
-  button.listeners.click({ preventDefault: function () {} });
+  fixture.expandAll(p.section());
 }
 
 test("Spaces, Volumes and Floor Segments sit three deep under their Zone, with no Space Floor row", function () {
@@ -172,7 +169,7 @@ test("Zone rows sort by the view's sums, and Spaces within each Zone by their ow
     ["Space", "Bath", "4"], ["Zone", "Zone B", "12"], ["Space", "Loft", "12"]]);
 });
 
-test("Building-Segment, Level and Net area factor are hidden by default and offered in Table options", function () {
+test("Building-Segment, Level and Net area factor are hidden by default and offered in the Columns menu", function () {
   var p = page();
   p.panel.receive({ type: "panel.snapshot", payload: snapshot() });
   var hidden = shown(p).querySelectorAll("th").filter(function (th) { return th.hidden; }).map(function (th) {
@@ -180,12 +177,12 @@ test("Building-Segment, Level and Net area factor are hidden by default and offe
   });
   assert.deepStrictEqual(hidden, ["col-building_segment", "col-level", "col-net_area_factor"]);
   var options = p.section().querySelectorAll("button").filter(function (node) {
-    return node.getAttribute("aria-label") === "Table options";
+    return node.getAttribute("aria-label") === "Columns";
   })[0];
   options.listeners.click({ preventDefault: function () {} });
   assert.deepStrictEqual(options.parentNode.querySelectorAll(".phc-action-menu-item").map(function (node) {
     return node.textContent;
-  }), ["Building-Segment column", "Level column", "Net area factor column"]);
+  }), ["Building-Segment", "Level", "Net area factor"]);
 });
 
 test("filtering, sorting, expansion and switching views send nothing to the Model", function () {
@@ -221,20 +218,22 @@ test("a filter matching a Space lists only that Space; one matching the Zone lis
 
 /* ---------------------------------------------------------------- review (PR #150) */
 
-function button(p, text) {
-  return p.section().querySelectorAll("button").filter(function (node) { return node.textContent === text; })[0];
-}
-
 function labelled(p, label) {
   return p.section().closest("[data-pane]").querySelectorAll("button, input").filter(function (node) {
     return node.getAttribute("aria-label") === label;
   })[0];
 }
 
-test("Expand all is offered while Spaces and Volumes start collapsed", function () {
+test("the open Zones offer Collapse all while their Spaces start collapsed, and Expand all once shut", function () {
   var p = page();
   p.panel.receive({ type: "panel.snapshot", payload: snapshot() });
-  assert.strictEqual(button(p, "Expand all").disabled, false);
+  var toggle = p.section().querySelector(".phc-view-expansion");
+  assert.deepStrictEqual([toggle.getAttribute("aria-label"), toggle.disabled], ["Collapse all", false],
+    "a partly open table offers Collapse all");
+  toggle.listeners.click({});
+  toggle = p.section().querySelector(".phc-view-expansion");
+  assert.deepStrictEqual([toggle.getAttribute("aria-label"), toggle.getAttribute("data-icon"), toggle.disabled],
+    ["Expand all", "copy_plus", false]);
 });
 
 test("the group of Spaces outside every Zone counts as no Zone and stays last in any sort", function () {
@@ -264,23 +263,23 @@ test("a Model whose only Space is outside every Zone counts no Zone", function (
   assert.deepStrictEqual(table(p, []).map(function (row) { return row[0]; }), ["NoZone", "Space"]);
 });
 
-test("hiding a column through Table options drops its filter", function () {
+test("hiding a column through the Columns menu drops its filter", function () {
   var p = page();
   p.panel.receive({ type: "panel.snapshot", payload: snapshot() });
   function option(text) {
-    var options = labelled(p, "Table options");
+    var options = labelled(p, "Columns");
     options.listeners.click({ preventDefault: function () {} });
     options.parentNode.querySelectorAll(".phc-action-menu-item").filter(function (node) {
       return node.textContent === text;
     })[0].listeners.click({ preventDefault: function () {} });
   }
-  option("Building-Segment column");
+  option("Building-Segment");
   var menu = labelled(p, "Building-Segment column menu");
   menu.listeners.click({ preventDefault: function () {} });
   var box = menu.parentNode.querySelectorAll("input").filter(function (node) { return node.type === "checkbox"; })[0];
   box.checked = false; box.listeners.change({});
   assert.match(p.section().querySelector(".phc-view-count").textContent, /1 filter$/);
   p.context.document.activeElement && p.context.document.activeElement.blur();
-  option("Building-Segment column");
+  option("Building-Segment");
   assert.doesNotMatch(p.section().querySelector(".phc-view-count").textContent, /filter/);
 });
