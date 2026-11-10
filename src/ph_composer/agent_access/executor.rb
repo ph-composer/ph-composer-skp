@@ -19,7 +19,7 @@ module PhComposer
                         keyword_init: true)
       # Serialized `structuredContent` larger than this is refused, never truncated: both target clients
       # fail a larger result (context/AGENT_INTERFACE.md, "User-controlled local access").
-      MAX_RESULT_BYTES = 24 * 1024
+      MAX_RESULT_BYTES = Pages::REPLY_BYTES
       # The most of a caller's own text (a name, a schema path) an error message repeats back.
       MAX_ECHO = 160
       SESSION_UNKNOWN = "That Model session is closed or was never opened. Call discover for the open ones."

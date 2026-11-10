@@ -94,6 +94,22 @@ module PhComposer
                            :run => run).freeze
       end
 
+      # The whole preview when it fits one reply, else its compact form; with `part`, one fragment of that part.
+      def preview(context, arguments)
+        name = arguments["name"]
+        params = arguments.fetch("params", {})
+        if arguments.key?("cursor") && !arguments.key?("part")
+          return Outcome.refused("params.invalid", "A cursor reads the next fragment of a part; name the part.",
+                                 :revision => nil)
+        end
+        if arguments.key?("part")
+          return API.preview_part(:context => context, :name => name, :params => params, :part => arguments["part"],
+                                  :cursor => arguments["cursor"])
+        end
+
+        API.preview(:context => context, :name => name, :params => params, :within => Executor::MAX_RESULT_BYTES)
+      end
+
       # One mutation with the sequence the binding assigns, which every invoke result carries.
       def invoke(context, arguments, sequencer)
         sequence = sequencer.assign(arguments["idempotency_key"])
@@ -152,11 +168,15 @@ module PhComposer
           API.query(:context => context, :name => arguments["name"], :params => arguments.fetch("params", {}))
         end,
         tool("preview", "Shows what an action would change on one Model session without changing anything, with " \
-                        "the proposal digest an invoke can carry.",
-             object({ "session" => SESSION, "name" => NAME, "params" => PARAMS }, %w[session name]),
-             :session => true) do |context, arguments|
-          API.preview(:context => context, :name => arguments["name"], :params => arguments.fetch("params", {}))
-        end,
+                        "the proposal digest an invoke can carry. A preview larger than one reply leaves out value, " \
+                        "affected and findings and gives each one's size and digest in detail.parts: read each " \
+                        "with part, following next_cursor, and join the fragments' text; after any change the next " \
+                        "fragment is refused as query.cursor_expired.",
+             object({ "session" => SESSION, "name" => NAME, "params" => PARAMS,
+                      "part" => { "type" => "string", "enum" => PreviewParts::PARTS,
+                                  "description" => "One part of the preview, as canonical JSON text in fragments." },
+                      "cursor" => string("With part: next_cursor from its previous fragment.") }, %w[session name]),
+             :session => true) { |context, arguments| preview(context, arguments) },
         tool("context", "Where one Model session stands: its file name and path, revision, whether it is busy, " \
                         "the edit path from the root and the selection, in pages. Read it before acting on the " \
                         "selection or the open Group.",

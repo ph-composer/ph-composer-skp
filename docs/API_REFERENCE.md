@@ -5347,6 +5347,131 @@ Example params:
 {}
 ```
 
+### `ph_composer.assemblies.assemblies.layers.list`
+
+One bounded page of an Assembly's Layers, outside first as stored. Owner: `ph_composer.assemblies`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.not_found`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "assembly_id"
+  ],
+  "properties": {
+    "assembly_id": {
+      "type": "string",
+      "pattern": "^asm_[A-Za-z0-9]{12}$",
+      "description": "The Assembly to read."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "assembly_id",
+    "layers",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "assembly_id": {
+      "type": "string"
+    },
+    "layers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "index",
+          "thickness_mm",
+          "membrane",
+          "air_barrier",
+          "segment_count"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "thickness_mm": {
+            "type": "number",
+            "x-unit": "mm"
+          },
+          "membrane": {
+            "type": "boolean",
+            "description": "Every Layer-Segment's Material is a membrane, so it adds no thickness."
+          },
+          "air_barrier": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The face carrying the air barrier, or null when this Layer does not."
+          },
+          "segment_count": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "assembly_id": "asm_Ab12Cd34Ef56"
+}
+```
+
+Example params:
+
+```json
+{
+  "assembly_id": "asm_Ab12Cd34Ef56",
+  "limit": 20
+}
+```
+
 ### `ph_composer.assemblies.assemblies.list`
 
 One bounded page of assemblies, with display findings. Owner: `ph_composer.assemblies`.
@@ -6059,6 +6184,185 @@ Example params:
   "fields": [
     "values"
   ]
+}
+```
+
+### `ph_composer.assemblies.assemblies.segments.list`
+
+One bounded page of an Assembly's Layer-Segments, by Layer and position, or one Layer's. Owner: `ph_composer.assemblies`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.not_found`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "assembly_id"
+  ],
+  "properties": {
+    "assembly_id": {
+      "type": "string",
+      "pattern": "^asm_[A-Za-z0-9]{12}$",
+      "description": "The Assembly to read."
+    },
+    "layer_id": {
+      "type": "string",
+      "pattern": "^lyr_[A-Za-z0-9]{12}$",
+      "description": "Only this Layer's."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "assembly_id",
+    "segments",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "assembly_id": {
+      "type": "string"
+    },
+    "segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "layer_id",
+          "layer_index",
+          "index",
+          "segment",
+          "material_name",
+          "flags"
+        ],
+        "properties": {
+          "layer_id": {
+            "type": "string"
+          },
+          "layer_index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "segment": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "width_mm",
+              "material_id",
+              "is_continuous_insulation",
+              "steel_stud_spacing_mm"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^seg_[A-Za-z0-9]{12}$",
+                "description": "This Layer-Segment's id, unique within its Layer. For a new one, choose any id of this form; reads return it from then on."
+              },
+              "width_mm": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "x-unit": "mm"
+              },
+              "material_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^mat_[A-Za-z0-9]{12}$",
+                "description": "The Material's id, or null while none is assigned."
+              },
+              "is_continuous_insulation": {
+                "type": "boolean"
+              },
+              "steel_stud_spacing_mm": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "exclusiveMinimum": 0,
+                "x-unit": "mm"
+              }
+            },
+            "description": "The Layer-Segment as stored."
+          },
+          "material_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Null when none is assigned or found; cut to 256 characters, named in truncated."
+          },
+          "flags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "What keeps this Layer-Segment from calculating, by code; empty when nothing does."
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "assembly_id": "asm_Ab12Cd34Ef56"
+}
+```
+
+Example params:
+
+```json
+{
+  "assembly_id": "asm_Ab12Cd34Ef56",
+  "limit": 20
 }
 ```
 
@@ -7012,6 +7316,120 @@ Example params:
   "fields": [
     "values"
   ]
+}
+```
+
+### `ph_composer.assemblies.materials.uses.list`
+
+One bounded page of the Assemblies that use a Material, by Assembly id: a Material row's uses. Owner: `ph_composer.assemblies`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.not_found`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "material_id"
+  ],
+  "properties": {
+    "material_id": {
+      "type": "string",
+      "pattern": "^mat_[A-Za-z0-9]{12}$",
+      "description": "The Material to read."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "material_id",
+    "uses",
+    "unreadable",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "material_id": {
+      "type": "string"
+    },
+    "uses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "assembly_id",
+          "name"
+        ],
+        "properties": {
+          "assembly_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Assemblies that cannot be read, so whether they use it is unknown."
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "material_id": "mat_Ab12Cd34Ef56"
+}
+```
+
+Example params:
+
+```json
+{
+  "material_id": "mat_Ab12Cd34Ef56",
+  "limit": 20
 }
 ```
 
@@ -8860,9 +9278,154 @@ Example params:
 {}
 ```
 
+### `ph_composer.records.detail`
+
+One value of one stored record, exactly, as canonical JSON text in fragments: join every fragment's text in order, check its sha256 and parse it. Pass next_cursor back for the next fragment. Owner: `ph_composer.records`.
+
+Refuses: `query.cursor_expired`, `record.unreadable`, `target.not_found`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "id",
+    "path"
+  ],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "description": "Record kind id, as listed by discovery."
+    },
+    "id": {
+      "type": "string",
+      "description": "The record's id."
+    },
+    "path": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": {
+        "type": [
+          "string",
+          "integer"
+        ]
+      },
+      "description": "Keys and array indexes into the record as ph_composer.records.list answers it, starting at values, user_data, extension_data, extension_status: [\"user_data\", \"notes\"], [\"values\", \"layers\", 0]."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "id",
+    "type",
+    "fragment",
+    "next_cursor"
+  ],
+  "properties": {
+    "kind": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "object",
+        "array",
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ],
+      "description": "The JSON type of the value at path; a stored null or false is a value."
+    },
+    "fragment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "encoding",
+        "offset",
+        "bytes",
+        "total_bytes",
+        "sha256",
+        "text"
+      ],
+      "properties": {
+        "encoding": {
+          "type": "string",
+          "enum": [
+            "json"
+          ],
+          "description": "The fragments joined in order are the value's canonical JSON text."
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Where this fragment starts, in UTF-8 bytes of the whole text."
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "This fragment's length in UTF-8 bytes."
+        },
+        "total_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The whole text's UTF-8 length."
+        },
+        "sha256": {
+          "type": "string",
+          "description": "SHA-256 of the whole text's UTF-8 bytes, hex."
+        },
+        "text": {
+          "type": "string",
+          "description": "This fragment: whole characters, never a split one."
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "kind": "example.foundation.part",
+  "id": "prt_Ab12Cd34Ef56",
+  "path": [
+    "user_data"
+  ]
+}
+```
+
 ### `ph_composer.records.list`
 
-Stored records of one kind, in id order, a page at a time. Owner: `ph_composer.records`.
+Stored records of one kind, in id order, a bounded page at a time. Owner: `ph_composer.records`.
 
 Refuses: `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
 
@@ -8895,6 +9458,14 @@ Params:
       },
       "description": "Only these values of each record; all when absent."
     },
+    "metadata": {
+      "type": "string",
+      "enum": [
+        "full",
+        "summary"
+      ],
+      "description": "full (the default): user_data, extension_data and extension_status as stored. summary: none of them, but their sizes, digests and status counts in metadata and each value's size in value_bytes; read any of them whole with ph_composer.records.detail."
+    },
     "limit": {
       "type": "number",
       "description": "Page size, 1 to 500; 100 when absent."
@@ -8924,7 +9495,8 @@ Result:
       "type": "array",
       "items": {
         "type": "object"
-      }
+      },
+      "description": "Each record's kind, id, schema_version, values, and user_data, extension_data and extension_status or, with metadata summary, metadata and value_bytes."
     },
     "next_cursor": {
       "type": [
@@ -8958,6 +9530,16 @@ Example params:
 {
   "kind": "example.foundation.part",
   "limit": 20
+}
+```
+
+Example params:
+
+```json
+{
+  "kind": "example.foundation.part",
+  "fields": [],
+  "metadata": "summary"
 }
 ```
 
@@ -15971,6 +16553,129 @@ Example params:
 }
 ```
 
+### `ph_composer.windows.frames.uses.list`
+
+One bounded page of what uses a Frame: a frames row's uses, in its order. Owner: `ph_composer.windows`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.not_found`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^frm_[A-Za-z0-9]{12}$",
+      "description": "The Frame to read."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "uses",
+    "unreadable",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "uses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "name"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "type_id": {
+            "type": "string"
+          },
+          "element_id": {
+            "type": "string"
+          },
+          "side": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Window Types that cannot be read, so whether they use it is unknown."
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "frm_Ab12Cd34Ef56"
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "frm_Ab12Cd34Ef56",
+  "limit": 20
+}
+```
+
 ### `ph_composer.windows.glazings.all`
 
 The complete glazings inventory for the panel snapshot. Owner: `ph_composer.windows`.
@@ -16676,6 +17381,129 @@ Example params:
   "fields": [
     "values"
   ]
+}
+```
+
+### `ph_composer.windows.glazings.uses.list`
+
+One bounded page of what uses a Glazing: a glazings row's uses, in its order. Owner: `ph_composer.windows`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.not_found`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^glz_[A-Za-z0-9]{12}$",
+      "description": "The Glazing to read."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "uses",
+    "unreadable",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "uses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "name"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "type_id": {
+            "type": "string"
+          },
+          "element_id": {
+            "type": "string"
+          },
+          "side": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Window Types that cannot be read, so whether they use it is unknown."
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "glz_Ab12Cd34Ef56"
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "glz_Ab12Cd34Ef56",
+  "limit": 20
 }
 ```
 
@@ -17395,6 +18223,129 @@ Example params:
   "fields": [
     "values"
   ]
+}
+```
+
+### `ph_composer.windows.psi_install_types.uses.list`
+
+One bounded page of what uses a Psi-Install Type: a psi_install_types row's uses, in its order. Owner: `ph_composer.windows`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.not_found`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^psi_[A-Za-z0-9]{12}$",
+      "description": "The Psi-Install Type to read."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "uses",
+    "unreadable",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "uses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "name"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "type_id": {
+            "type": "string"
+          },
+          "element_id": {
+            "type": "string"
+          },
+          "side": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Window Types that cannot be read, so whether they use it is unknown."
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "psi_Ab12Cd34Ef56"
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "psi_Ab12Cd34Ef56",
+  "limit": 20
 }
 ```
 
@@ -18513,6 +19464,791 @@ Example params:
 
 ```json
 {}
+```
+
+### `ph_composer.windows.types.elements.list`
+
+One bounded page of a Window Type's elements in stored order, each with its thermal result, installation edges and copy slot, beside the Type's totals and findings. Owner: `ph_composer.windows`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.not_found`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type_id"
+  ],
+  "properties": {
+    "type_id": {
+      "type": "string",
+      "pattern": "^wnt_[A-Za-z0-9]{12}$",
+      "description": "The Window Type to read."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "elements",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "type": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "rows_m",
+        "columns_m",
+        "width_m",
+        "height_m",
+        "install_depth_m",
+        "complete",
+        "copy_key",
+        "thermal",
+        "findings",
+        "element_count"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "rows_m": {
+          "type": "array",
+          "items": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "x-unit": "m"
+          }
+        },
+        "columns_m": {
+          "type": "array",
+          "items": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "x-unit": "m"
+          }
+        },
+        "width_m": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "m"
+        },
+        "height_m": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "m"
+        },
+        "install_depth_m": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "m"
+        },
+        "complete": {
+          "type": "boolean"
+        },
+        "copy_key": {
+          "type": "string",
+          "description": "Equal on two Types when an installation copy between them is accepted; opaque."
+        },
+        "thermal": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "findings",
+            "uw_w_m2k",
+            "u_effective_w_m2k",
+            "complete"
+          ],
+          "properties": {
+            "findings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "side": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "area_m2": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "m2"
+            },
+            "empty_area_m2": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "m2"
+            },
+            "h_construction_w_k": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "W/K"
+            },
+            "h_install_w_k": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "W/K"
+            },
+            "uw_w_m2k": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "W/m2K"
+            },
+            "u_effective_w_m2k": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "W/m2K"
+            },
+            "complete": {
+              "type": "boolean"
+            }
+          },
+          "description": "The Type's totals, without the per-element results its rows carry."
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "element_id": {
+                "type": "string"
+              },
+              "side": {
+                "type": "string"
+              },
+              "product_id": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "The Type's findings that name no element."
+        },
+        "element_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "truncated": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "The names cut to 256 characters; absent when none was."
+        }
+      }
+    },
+    "elements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "index",
+          "element",
+          "thermal",
+          "install_edges",
+          "copy_slot",
+          "findings"
+        ],
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "element": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "name",
+              "kind",
+              "row_span",
+              "column_span",
+              "glazing_id",
+              "frames",
+              "installs",
+              "operation"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "glazed",
+                  "empty"
+                ]
+              },
+              "row_span": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "column_span": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "glazing_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "frames": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "top",
+                  "right",
+                  "bottom",
+                  "left"
+                ],
+                "properties": {
+                  "top": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "right": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "bottom": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "left": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                }
+              },
+              "installs": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "top",
+                  "right",
+                  "bottom",
+                  "left"
+                ],
+                "properties": {
+                  "top": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "right": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "bottom": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "left": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                }
+              },
+              "operation": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "additionalProperties": false,
+                "required": [
+                  "type",
+                  "directions"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "fixed",
+                      "swing",
+                      "slide"
+                    ]
+                  },
+                  "directions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "left",
+                        "right",
+                        "up",
+                        "down"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "description": "The element as stored."
+          },
+          "thermal": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "area_m2",
+              "edges",
+              "findings",
+              "h_construction_w_k",
+              "h_install_w_k",
+              "g_value",
+              "uw_w_m2k",
+              "u_effective_w_m2k",
+              "complete"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "area_m2": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "m2"
+              },
+              "edges": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "side",
+                    "length_m",
+                    "install"
+                  ],
+                  "properties": {
+                    "side": {
+                      "type": "string"
+                    },
+                    "length_m": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "m"
+                    },
+                    "install": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "source",
+                        "id",
+                        "psi_w_mk"
+                      ],
+                      "properties": {
+                        "source": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "psi_w_mk": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "W/mK"
+                        }
+                      }
+                    },
+                    "frame_area_m2": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "m2"
+                    },
+                    "glass_edge_m": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "m"
+                    },
+                    "h_frame_w_k": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "W/K"
+                    },
+                    "h_spacer_w_k": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "W/K"
+                    }
+                  }
+                }
+              },
+              "findings": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "code",
+                    "message"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "side": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "h_construction_w_k": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "W/K"
+              },
+              "h_install_w_k": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "W/K"
+              },
+              "glazing_area_m2": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "m2"
+              },
+              "frame_area_m2": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "m2"
+              },
+              "h_glazing_w_k": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "W/K"
+              },
+              "g_value": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "uw_w_m2k": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "W/m2K"
+              },
+              "u_effective_w_m2k": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "W/m2K"
+              },
+              "complete": {
+                "type": "boolean"
+              }
+            },
+            "description": "Null for an empty element."
+          },
+          "install_edges": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "top",
+              "right",
+              "bottom",
+              "left"
+            ],
+            "properties": {
+              "top": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "classification",
+                  "paintable"
+                ],
+                "properties": {
+                  "classification": {
+                    "type": "string",
+                    "enum": [
+                      "perimeter",
+                      "shared",
+                      "partial"
+                    ]
+                  },
+                  "paintable": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "right": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "classification",
+                  "paintable"
+                ],
+                "properties": {
+                  "classification": {
+                    "type": "string",
+                    "enum": [
+                      "perimeter",
+                      "shared",
+                      "partial"
+                    ]
+                  },
+                  "paintable": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "bottom": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "classification",
+                  "paintable"
+                ],
+                "properties": {
+                  "classification": {
+                    "type": "string",
+                    "enum": [
+                      "perimeter",
+                      "shared",
+                      "partial"
+                    ]
+                  },
+                  "paintable": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "left": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "classification",
+                  "paintable"
+                ],
+                "properties": {
+                  "classification": {
+                    "type": "string",
+                    "enum": [
+                      "perimeter",
+                      "shared",
+                      "partial"
+                    ]
+                  },
+                  "paintable": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            },
+            "description": "Each edge's classification and whether an installation can be painted there; null for an empty element."
+          },
+          "copy_slot": {
+            "type": "string",
+            "description": "This element's slot in an installation copy."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "message"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "element_id": {
+                  "type": "string"
+                },
+                "side": {
+                  "type": "string"
+                },
+                "product_id": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "The Type's findings that name this element."
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "element.name when it was cut to 256 characters; records.detail reads it whole."
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "type_id": "wnt_Ab12Cd34Ef56"
+}
+```
+
+Example params:
+
+```json
+{
+  "type_id": "wnt_Ab12Cd34Ef56",
+  "limit": 20
+}
 ```
 
 ### `ph_composer.windows.types.list`
@@ -60728,3 +62464,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.34 | 2026-11-10 | ph_composer.spaces.create answers accepted and left_out as create_preview does, and each new Volume of create and volumes.create answers faces, its source Face paths. spaces.delete, remove, volumes.delete and volumes.remove refuse target.foreign_records while another feature's records are on or inside the Group. Make Zone refuses a Group holding a claimed object at any depth (target.wrong_hierarchy) and Restore a claimed member (target.wrong_kind); zones.list, zones.all and export preflight read the zone.ownership_conflict finding, which does not block export. A Face reference with a null entity_id refuses target.changed on every Face write once the Face has a record, and zones.update and update_metadata refuse a locked Zone (target.locked) as update_field does. |
 | 1.35 | 2026-11-10 | discover adds library_kinds, and describe answers a library kind by name (its wire kind and version, and its assignment target schema and examples or that it has none) and an installed extension by namespace. The agent connection's discover takes section, owner, limit, cursor and topic for bounded pages of operations, record kinds, reference targets, extensions, library kinds, common refusals with their meanings, contracts and the operating guide; initialize names the guide. ph_composer.library.copy's generation says it is required, as its schema already did. |
 | 1.36 | 2026-11-10 | Selection-free reads at an explicit path: ph_composer.context.children pages the entities directly in the root or one Group or component, with their state and records; zones.make_candidates, windows.units.convert_candidates and windows.units.restore_candidates list what Make Zone, Convert and Restore could take there; thermal_bridges.edges.at and edges.candidates read Edges by path in edges.selection's rows plus endpoints_m; and spaces.candidate_faces.list takes context for a first Space. A name over 256 characters is cut and named in the row's truncated. edges.selection's copied flag no longer refuses for an unreadable record on another Edge. |
+| 1.37 | 2026-11-10 | Complete reads of large definitions and metadata: ph_composer.records.detail answers one value of a record exactly in fragments with its size and SHA-256; records.list pages by size and takes metadata summary; assemblies.assemblies.layers.list and segments.list, windows.types.elements.list, assemblies.materials.uses.list and windows.<collection>.uses.list page a definition's parts and derived results; and preview takes within and preview_part, so a preview larger than a reply keeps its proposal_digest and is read by part. |

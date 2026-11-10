@@ -83,7 +83,6 @@ module PhComposer
         end
         flags
       end
-      private_class_method :segment_flags
 
       # Counts possible thermal paths with an early exit; no Cartesian paths are generated here.
       def calculation_limited?(layers, materials)

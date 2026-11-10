@@ -106,8 +106,13 @@ are clients of it.
 - `connect(session_id:, capabilities:)`: an explicit context for one Model session. Capabilities
   default to `read`, `view` and `model_write`; `setup` and `export` are granted explicitly.
 - `query(context:, name:, params:)`: a bounded read returning values, never live SketchUp objects.
-- `preview(context:, name:, params:)`: builds and validates an action's proposal without writing,
-  and returns its `proposal_digest`.
+- `preview(context:, name:, params:, within: nil)`: builds and validates an action's proposal without
+  writing, and returns its `proposal_digest`. With `within`, a byte budget, a larger completed preview
+  answers compact: status, revision and `proposal_digest` kept, `value`, `affected` and `findings` left
+  out and each one's size and SHA-256 (and count) in `detail.parts` (`shell/preview_parts.rb`).
+- `preview_part(context:, name:, part:, params:, cursor:)`: one of those parts as canonical JSON text in
+  fragments, the preview run again for each; the cursor binds the action, params, part, revision and
+  proposal digest. Nothing is retained or held open between fragments.
 - `view(context:, name:, params:)`: a view command that changes what the host shows. It writes no
   authored data and leaves no Undo entry of its own, so it takes no request; it may trigger the
   Model's own protection boundaries, which the command declares in `side_effects`.
@@ -143,7 +148,10 @@ expected values.
 List queries filter by id and path, project `fields`, order by a stable key and page: default 100,
 maximum 500, otherwise `query.limit_invalid`. A cursor answers only the same session, query, filter
 and revision: an expired one is `query.cursor_expired`, one this query did not issue is
-`params.invalid`. Discovery and descriptions are detached copies. A query or preview that fails
+`params.invalid`. A value larger than a reply is read exactly in fragments (`shell/fragments.rb`): its
+canonical JSON text cut into whole UTF-8 characters, each fragment with its byte offset and the whole
+text's size and SHA-256, behind the same cursor binding, so a changed value refuses instead of joining two
+versions. Discovery and descriptions are detached copies. A query or preview that fails
 unexpectedly answers `failed`, code `operation.failed`, effect `none`.
 
 Dispatch presents nothing: it returns the outcome, and the calling client shows the message.

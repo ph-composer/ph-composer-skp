@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 36
+    MINOR = 37
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -172,7 +172,14 @@ module PhComposer
                     "edges.candidates read Edges by path in edges.selection's rows plus endpoints_m; and " \
                     "spaces.candidate_faces.list takes context for a first Space. A name over 256 characters is " \
                     "cut and named in the row's truncated. edges.selection's copied flag no longer refuses for an " \
-                    "unreadable record on another Edge." }
+                    "unreadable record on another Edge." },
+      { "minor" => 37, "date" => "2026-11-10",
+        "change" => "Complete reads of large definitions and metadata: ph_composer.records.detail answers one value " \
+                    "of a record exactly in fragments with its size and SHA-256; records.list pages by size and " \
+                    "takes metadata summary; assemblies.assemblies.layers.list and segments.list, " \
+                    "windows.types.elements.list, assemblies.materials.uses.list and windows.<collection>.uses.list " \
+                    "page a definition's parts and derived results; and preview takes within and preview_part, so " \
+                    "a preview larger than a reply keeps its proposal_digest and is read by part." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {
@@ -308,8 +315,20 @@ module PhComposer
       Dispatch.new.file_export(context, name, params)
     end
 
-    def preview(context:, name:, params: {})
-      Dispatch.new.preview(context, name, params)
+    # `within`, a byte budget, answers a larger completed preview compact: its proposal_digest, revision and
+    # each part's size and digest, the parts themselves read with preview_part.
+    def preview(context:, name:, params: {}, within: nil)
+      outcome = Dispatch.new.preview(context, name, params)
+      within ? PreviewParts.compact(outcome, within, -> { Dispatch.new.preview(context, name, params) }) : outcome
+    end
+
+    # One part of a preview (`value`, `affected` or `findings`) as canonical JSON text in fragments, the
+    # preview run again for each (PreviewParts.read); `cursor` is the previous fragment's next_cursor.
+    def preview_part(context:, name:, part:, params: {}, cursor: nil)
+      outcome = Dispatch.new.preview(context, name, params)
+      return outcome unless outcome["status"] == "completed"
+
+      PreviewParts.read(Sessions.find(context.session_id), outcome, name, params, part, cursor)
     end
 
     # `request` is `{"sequence" => n, "expected_revision" => r}`: `n` counts this caller's mutations
