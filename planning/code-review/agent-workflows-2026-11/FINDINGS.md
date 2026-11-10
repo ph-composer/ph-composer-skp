@@ -274,3 +274,27 @@ Recommendation: optional `expected_revision` checked before recovery or destinat
 source revision in compact task receipts. Preserve existing callers' latest-state behavior and the
 existing export-generation distinction for view-only navigation. Test stale start writes nothing
 and an accepted start carries its original source identity through completion. Owner: optional AW-07 slice.
+
+## Reconciliation at AW-10 (2026-11-10)
+
+Each finding's state after the ten stages. The packet [ledger](../../features/unscheduled/agent-workflows-2026-11/STATUS.md)
+holds the evidence; this table only closes the loop on the register.
+
+| Finding | State | Where |
+| --- | --- | --- |
+| R01 | Fixed; the direct case superseded by SUI-02 `f93d8b6b` | AW-01 (#440), host case `AW01` |
+| R02 | Fixed | AW-01 (#440), `AW01` |
+| R03 | Fixed | AW-01 (#440), `AW01` |
+| R04 | Fixed, SUI-05's receipt shape kept | AW-01 (#440), `AW01` |
+| R05 | Fixed | AW-02 (#441), `AW02` |
+| R06 | Fixed | AW-03 (#442), `AW03` |
+| R07 | Fixed | AW-04 (#443), AW-05 (#444); host `AW04`, `AW05`, and AW-05's two blocked rows in `AW05R` |
+| R08 | Fixed | AW-06 (#445), `AW06` |
+| R09 | Fixed | AW-07 (#446), `AW07` |
+| R10 | Fixed | AW-07 (#446), `AW07` |
+| R11 | Fixed and host-verified with the dialog's buttons clicked by script; the same clicks as native input deferred to one full-screen hold (owner: the AW10H held run) | AW-08 (#448), `AW08`, `AW10H` |
+| R12 | Fixed | AW-02 (#441) guide through the connection; AW-10 fresh Claude Code and Codex runs (`AW10`, 13 of 14 assertions; its blocked row is the gesture conflict, not the guide). Guide gaps those clients reported deferred to a guide follow-up (owner: next intake) |
+| R13 | Partly fixed: AW-09 (#449) guards abandoned calls, hidden-Model callbacks, navigation and close. The mid-gesture rows and the guard decision they feed are deferred to one full-screen hold (owner: the AW10H held run, recipe in `_private/host/aw10/HELD_RUN.md`) | AW-09, `AW09M`, `AW09`, `AW10H` |
+| R14 | Deferred, optional (D07, D08); owner: a separately selected follow-up packet | AW-09 |
+| R15 | Fixed | AW-02 (#441) descriptors, AW-06 (#445) workflows |
+| R16 | Deferred, optional (D15-e); owner: a separately selected follow-up packet | AW-07 |

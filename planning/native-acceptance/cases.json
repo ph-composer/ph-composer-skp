@@ -4615,6 +4615,62 @@
         "src/ph_composer/features/spaces/context/protection.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "AW05R",
+      "label": "Agent-workflows AW-10 rerun of AW-05's two blocked rows on the installed RBZ in a fresh synthetic Model, over the real loopback MCP listener with a read/model_write token: 450 loose Faces stamped by distinct legacy Zones and 80 Component instances carrying Zone records (labelled store setup, no authoring route exists), and a 30 m x 30 m floor Face with 450 holes made a Space through spaces.create; the zones.list summary, 450 restore offers and one offer's entity_ids, 80 component Zone findings and the Floor Segment's 451 loops read completely by page and fragment within 24 KiB and equal the in-process whole reads; no read changes the revision",
+      "mode": "native",
+      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/zones/declarations/zone.rb",
+        "src/ph_composer/features/zones/zone/repair.rb",
+        "src/ph_composer/features/zones/zone/index.rb",
+        "src/ph_composer/features/spaces/declarations/spaces.rb",
+        "src/ph_composer/features/spaces/scoped_reads.rb",
+        "src/ph_composer/features/spaces/authoring.rb",
+        "src/ph_composer/shell/fragments.rb",
+        "src/ph_composer/shell/pages.rb",
+        "src/ph_composer/agent_access/executor.rb"
+      ],
+      "native_control_required": false
+    },
+    {
+      "id": "AW10",
+      "label": "Agent-workflows AW-10 integrated acceptance on the installed RBZ, panel closed, nothing selected, two open synthetic Models sharing a file name: fresh Claude Code and Codex sessions with only the MCP connection (no repository, no operator skills) read the installed guide, verify their context and are refused the other Model's scope, then build Zones, Faces, adjacency, Spaces, Materials and Assemblies, Windows, Thermal Bridges, QA and an export from existing synthetic geometry; a harness injects a lost reply, a repeated key, a stale revision, a human edit, revocation and a target close; native Undo and Redo, save and fresh-process reopen; the exported HBJSON's identities, references, values and hashes are checked against the Model",
+      "mode": "mixed",
+      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/agent_access/guide.md",
+        "src/ph_composer/agent_access/mcp.rb",
+        "src/ph_composer/agent_access/tools.rb",
+        "src/ph_composer/agent_access/executor.rb",
+        "src/ph_composer/agent_access/server.rb",
+        "src/ph_composer/agent_access/tokens.rb",
+        "src/ph_composer/agent_access/sequencer.rb",
+        "src/ph_composer/shell/dispatch.rb",
+        "src/ph_composer/session/model_session.rb",
+        "src/ph_composer/session/sessions.rb",
+        "src/ph_composer/export/tasks.rb"
+      ],
+      "native_control_required": true
+    },
+    {
+      "id": "AW10H",
+      "label": "Agent-workflows AW-10 held native rows on the installed RBZ under one full-screen hold: Repair, Revoke, the Revoke confirmation and Done clicked natively in the Agent Access dialog (client files in a scratch home), and agent calls over the real loopback MCP listener while a native Move (click-move and held drag) and a native Line are partway through, with the gesture's completion, the Edit menu's Undo entries and the moving entity read back",
+      "mode": "native",
+      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/agent_access/dialog.rb",
+        "src/ph_composer/agent_access/client_setup.rb",
+        "src/ph_composer/agent_access/connections.rb",
+        "src/ph_composer/html/agent_access/page.js",
+        "src/ph_composer/agent_access/server.rb",
+        "src/ph_composer/session/model_session.rb",
+        "src/ph_composer/session/sessions.rb",
+        "src/ph_composer/shell/dispatch.rb",
+        "src/ph_composer/shell/context_commands.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }
