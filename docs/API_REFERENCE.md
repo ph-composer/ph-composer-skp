@@ -4604,7 +4604,8 @@ Assignment target:
         }
       }
     }
-  }
+  },
+  "description": "Two shapes. perimeter: id, element_id, side, expected_values (the Window Type as last read), mode and expected_settings, and paints that element side. model_default: mode and expected_settings only, and makes the copy the Model's default installation."
 }
 ```
 
@@ -8084,6 +8085,10 @@ Params:
       "minimum": 1,
       "description": "The catalog generation the caller read. Omit it to use the current one; a stale one is refused as library.catalog_stale."
     },
+    "compact": {
+      "type": "boolean",
+      "description": "true counts the warnings and unavailable notes, summarizes each row's snapshot and comparison, and cuts long labels; the detail and notes reads give them whole. false, the default, answers them in full."
+    },
     "limit": {
       "type": "number",
       "description": "Page size, 1 to 500; 100 when absent."
@@ -8107,8 +8112,6 @@ Result:
     "kind",
     "generation",
     "state",
-    "warnings",
-    "unavailable",
     "freshness",
     "published_at",
     "failure",
@@ -8268,6 +8271,14 @@ Result:
         }
       }
     },
+    "warning_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "unavailable_total": {
+      "type": "integer",
+      "minimum": 0
+    },
     "rows": {
       "type": "array",
       "items": {
@@ -8278,7 +8289,6 @@ Result:
           "library_name",
           "record_id",
           "wire_schema_version",
-          "snapshot",
           "display_label"
         ],
         "properties": {
@@ -8301,6 +8311,30 @@ Result:
           "display_label": {
             "type": "string",
             "description": "The kind adapter's label for the row's mapped values."
+          },
+          "snapshot_summary": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "bytes",
+              "sha256"
+            ],
+            "properties": {
+              "bytes": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "sha256": {
+                "type": "string"
+              }
+            }
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Fields cut to 256 characters; the detail read gives them whole."
           }
         }
       }
@@ -8328,6 +8362,173 @@ Example params:
   "provider_id": "example",
   "kind": "example_parts",
   "limit": 100
+}
+```
+
+### `ph_composer.library.catalog.detail`
+
+One part of one catalog row, read exactly in fragments. Owner: `ph_composer.library`.
+
+Refuses: `library.catalog_stale`, `library.kind_unavailable`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.row_unavailable`, `query.cursor_expired`, `query.limit_invalid`, `target.not_found`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_id",
+    "kind",
+    "library_id",
+    "record_id",
+    "path"
+  ],
+  "properties": {
+    "provider_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "A configured library, by the id ph_composer.library.providers lists."
+    },
+    "kind": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The library kind, such as materials or frames; providers lists the kinds each library serves."
+    },
+    "generation": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "The catalog generation the caller read. Omit it to use the current one; a stale one is refused as library.catalog_stale."
+    },
+    "library_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The library holding the row, as the catalog row gives it."
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The row's record id within that library."
+    },
+    "path": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": {
+        "type": [
+          "string",
+          "integer"
+        ]
+      },
+      "description": "Keys and array indexes into the view, starting at snapshot, display_label, library_name: [\"snapshot\", \"notes\"]."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "generation",
+    "type",
+    "fragment",
+    "next_cursor"
+  ],
+  "properties": {
+    "generation": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "object",
+        "array",
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ],
+      "description": "The JSON type of the value at path; a stored null or false is a value."
+    },
+    "fragment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "encoding",
+        "offset",
+        "bytes",
+        "total_bytes",
+        "sha256",
+        "text"
+      ],
+      "properties": {
+        "encoding": {
+          "type": "string",
+          "enum": [
+            "json"
+          ],
+          "description": "The fragments joined in order are the value's canonical JSON text."
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Where this fragment starts, in UTF-8 bytes of the whole text."
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "This fragment's length in UTF-8 bytes."
+        },
+        "total_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The whole text's UTF-8 length."
+        },
+        "sha256": {
+          "type": "string",
+          "description": "SHA-256 of the whole text's UTF-8 bytes, hex."
+        },
+        "text": {
+          "type": "string",
+          "description": "This fragment: whole characters, never a split one."
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "provider_id": "example",
+  "kind": "example_parts",
+  "library_id": "synthetic",
+  "record_id": "one",
+  "path": [
+    "snapshot",
+    "notes"
+  ]
 }
 ```
 
@@ -8461,6 +8662,10 @@ Params:
       "minItems": 1,
       "description": "With scope selected: the records to export, each by record kind and id."
     },
+    "compact": {
+      "type": "boolean",
+      "description": "true counts the omissions in omission_total in place of listing them; ph_composer.library.export_preview.omissions pages them. false, the default, lists them."
+    },
     "location": {
       "type": "string",
       "minLength": 1,
@@ -8478,9 +8683,9 @@ Result:
   "additionalProperties": false,
   "required": [
     "kinds",
-    "omissions",
     "projection_digest",
-    "revision"
+    "revision",
+    "scope"
   ],
   "properties": {
     "kinds": {
@@ -8549,6 +8754,10 @@ Result:
         }
       }
     },
+    "omission_total": {
+      "type": "integer",
+      "minimum": 0
+    },
     "projection_digest": {
       "type": "string",
       "minLength": 1
@@ -8556,6 +8765,13 @@ Result:
     "revision": {
       "type": "integer",
       "minimum": 0
+    },
+    "scope": {
+      "type": "string",
+      "enum": [
+        "all",
+        "selected"
+      ]
     },
     "destination": {
       "type": "object",
@@ -8585,6 +8801,169 @@ Example params:
 
 ```json
 {}
+```
+
+### `ph_composer.library.export_preview.omissions`
+
+A bounded page of what a library export leaves out, for the same scope as export_preview. Owner: `ph_composer.library`.
+
+Refuses: `library.adapter_invalid`, `library.catalog_too_many_rows`, `library.kind_unavailable`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `revision.stale`, `target.not_found`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "scope": {
+      "type": "string",
+      "enum": [
+        "all",
+        "selected"
+      ],
+      "description": "all, the default, takes every supported local definition; selected takes only records."
+    },
+    "kinds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "description": "Limit the export to these library kinds, such as materials."
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "record_kind",
+          "id"
+        ],
+        "properties": {
+          "record_kind": {
+            "type": "string",
+            "minLength": 1
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "minItems": 1,
+      "description": "With scope selected: the records to export, each by record kind and id."
+    },
+    "projection_digest": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The projection_digest export_preview reported; refused as revision.stale if the projection is no longer that one."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "omissions",
+    "total",
+    "next_cursor",
+    "projection_digest",
+    "revision"
+  ],
+  "properties": {
+    "omissions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "record_kind",
+          "record_kind_label",
+          "fields",
+          "reason"
+        ],
+        "properties": {
+          "record_kind": {
+            "type": "string",
+            "minLength": 1
+          },
+          "record_kind_label": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The registered record kind's label, for display; kind and record_kind stay the identifiers."
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "projection_digest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "scope": "all",
+  "limit": 50
+}
 ```
 
 ### `ph_composer.library.in_file`
@@ -8619,6 +8998,10 @@ Params:
       "minimum": 1,
       "description": "The catalog generation the caller read. Omit it to use the current one; a stale one is refused as library.catalog_stale."
     },
+    "compact": {
+      "type": "boolean",
+      "description": "true counts the warnings and unavailable notes, summarizes each row's snapshot and comparison, and cuts long labels; the detail and notes reads give them whole. false, the default, answers them in full."
+    },
     "limit": {
       "type": "number",
       "description": "Page size, 1 to 500; 100 when absent."
@@ -8642,8 +9025,6 @@ Result:
     "kind",
     "generation",
     "state",
-    "warnings",
-    "unavailable",
     "freshness",
     "published_at",
     "failure",
@@ -8803,6 +9184,14 @@ Result:
         }
       }
     },
+    "warning_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "unavailable_total": {
+      "type": "integer",
+      "minimum": 0
+    },
     "rows": {
       "type": "array",
       "items": {
@@ -8813,7 +9202,6 @@ Result:
           "library_name",
           "record_id",
           "wire_schema_version",
-          "snapshot",
           "display_label",
           "resolution"
         ],
@@ -8837,6 +9225,30 @@ Result:
           "display_label": {
             "type": "string",
             "description": "The kind adapter's label for the row's mapped values."
+          },
+          "snapshot_summary": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "bytes",
+              "sha256"
+            ],
+            "properties": {
+              "bytes": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "sha256": {
+                "type": "string"
+              }
+            }
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Fields cut to 256 characters; the detail read gives them whole."
           },
           "resolution": {
             "type": "object",
@@ -8864,8 +9276,6 @@ Result:
                   "required": [
                     "id",
                     "display_label",
-                    "differences",
-                    "expected_values",
                     "comparison_available",
                     "source_changed"
                   ],
@@ -8936,9 +9346,44 @@ Result:
                         "boolean",
                         "null"
                       ]
+                    },
+                    "difference_fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "expected_values_summary": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "bytes",
+                        "sha256"
+                      ],
+                      "properties": {
+                        "bytes": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "sha256": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "truncated": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Fields cut to 256 characters; the detail read gives them whole."
                     }
                   }
                 }
+              },
+              "candidate_total": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Compact only: every candidate; candidates lists the first 20."
               }
             }
           }
@@ -8968,6 +9413,175 @@ Example params:
   "provider_id": "example",
   "kind": "example_parts",
   "limit": 100
+}
+```
+
+### `ph_composer.library.in_file.detail`
+
+One part of one in_file row, its comparison with local records included, read exactly in fragments. Owner: `ph_composer.library`.
+
+Refuses: `library.adapter_invalid`, `library.callback_invalid`, `library.catalog_stale`, `library.kind_unavailable`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.row_semantic_invalid`, `library.row_unavailable`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.not_found`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_id",
+    "kind",
+    "library_id",
+    "record_id",
+    "path"
+  ],
+  "properties": {
+    "provider_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "A configured library, by the id ph_composer.library.providers lists."
+    },
+    "kind": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The library kind, such as materials or frames; providers lists the kinds each library serves."
+    },
+    "generation": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "The catalog generation the caller read. Omit it to use the current one; a stale one is refused as library.catalog_stale."
+    },
+    "library_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The library holding the row, as the catalog row gives it."
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The row's record id within that library."
+    },
+    "path": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": {
+        "type": [
+          "string",
+          "integer"
+        ]
+      },
+      "description": "Keys and array indexes into the view, starting at snapshot, display_label, library_name, resolution: [\"snapshot\", \"notes\"]."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "generation",
+    "type",
+    "fragment",
+    "next_cursor"
+  ],
+  "properties": {
+    "generation": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "object",
+        "array",
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ],
+      "description": "The JSON type of the value at path; a stored null or false is a value."
+    },
+    "fragment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "encoding",
+        "offset",
+        "bytes",
+        "total_bytes",
+        "sha256",
+        "text"
+      ],
+      "properties": {
+        "encoding": {
+          "type": "string",
+          "enum": [
+            "json"
+          ],
+          "description": "The fragments joined in order are the value's canonical JSON text."
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Where this fragment starts, in UTF-8 bytes of the whole text."
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "This fragment's length in UTF-8 bytes."
+        },
+        "total_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The whole text's UTF-8 length."
+        },
+        "sha256": {
+          "type": "string",
+          "description": "SHA-256 of the whole text's UTF-8 bytes, hex."
+        },
+        "text": {
+          "type": "string",
+          "description": "This fragment: whole characters, never a split one."
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "provider_id": "example",
+  "kind": "example_parts",
+  "library_id": "synthetic",
+  "record_id": "one",
+  "path": [
+    "resolution",
+    "candidates",
+    0,
+    "expected_values"
+  ]
 }
 ```
 
@@ -9177,6 +9791,258 @@ Example params:
 
 ```json
 {}
+```
+
+### `ph_composer.library.unavailable.list`
+
+A bounded page of a loaded catalog's unavailable notes, in order. Owner: `ph_composer.library`.
+
+Refuses: `library.catalog_stale`, `library.kind_unavailable`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_id",
+    "kind"
+  ],
+  "properties": {
+    "provider_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "A configured library, by the id ph_composer.library.providers lists."
+    },
+    "kind": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The library kind, such as materials or frames; providers lists the kinds each library serves."
+    },
+    "generation": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "The catalog generation the caller read. Omit it to use the current one; a stale one is refused as library.catalog_stale."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_id",
+    "kind",
+    "generation",
+    "unavailable",
+    "total",
+    "next_cursor"
+  ],
+  "properties": {
+    "provider_id": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string"
+    },
+    "generation": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "unavailable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "library_id": {
+            "type": "string"
+          },
+          "record_id": {
+            "type": "string"
+          },
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "provider_id": "example",
+  "kind": "example_parts",
+  "limit": 100
+}
+```
+
+### `ph_composer.library.warnings.list`
+
+A bounded page of a loaded catalog's warnings notes, in order. Owner: `ph_composer.library`.
+
+Refuses: `library.catalog_stale`, `library.kind_unavailable`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_id",
+    "kind"
+  ],
+  "properties": {
+    "provider_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "A configured library, by the id ph_composer.library.providers lists."
+    },
+    "kind": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The library kind, such as materials or frames; providers lists the kinds each library serves."
+    },
+    "generation": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "The catalog generation the caller read. Omit it to use the current one; a stale one is refused as library.catalog_stale."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_id",
+    "kind",
+    "generation",
+    "warnings",
+    "total",
+    "next_cursor"
+  ],
+  "properties": {
+    "provider_id": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string"
+    },
+    "generation": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "library_id": {
+            "type": "string"
+          },
+          "record_id": {
+            "type": "string"
+          },
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "provider_id": "example",
+  "kind": "example_parts",
+  "limit": 100
+}
 ```
 
 ### `ph_composer.locations.list`
@@ -37760,8 +38626,6 @@ Result:
             "required": [
               "id",
               "display_label",
-              "differences",
-              "expected_values",
               "comparison_available",
               "source_changed"
             ],
@@ -37832,9 +38696,44 @@ Result:
                   "boolean",
                   "null"
                 ]
+              },
+              "difference_fields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "expected_values_summary": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "bytes",
+                  "sha256"
+                ],
+                "properties": {
+                  "bytes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "sha256": {
+                    "type": "string"
+                  }
+                }
+              },
+              "truncated": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Fields cut to 256 characters; the detail read gives them whole."
               }
             }
           }
+        },
+        "candidate_total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Compact only: every candidate; candidates lists the first 20."
         }
       }
     },
@@ -62417,6 +63316,10 @@ Params:
       "type": "string",
       "minLength": 1,
       "description": "The library kind, such as materials or frames; providers lists the kinds each library serves."
+    },
+    "compact": {
+      "type": "boolean",
+      "description": "true counts the warnings and unavailable notes, summarizes each row's snapshot and comparison, and cuts long labels; the detail and notes reads give them whole. false, the default, answers them in full."
     }
   }
 }
@@ -62433,8 +63336,6 @@ Result:
     "kind",
     "generation",
     "state",
-    "warnings",
-    "unavailable",
     "freshness",
     "published_at",
     "failure",
@@ -62590,6 +63491,14 @@ Result:
           "minimum": 1
         }
       }
+    },
+    "warning_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "unavailable_total": {
+      "type": "integer",
+      "minimum": 0
     }
   }
 }
@@ -63490,6 +64399,10 @@ Params:
       "minLength": 1,
       "description": "The projection_digest export_preview reported; refused if what would be written differs. Required to replace a file at an approved location."
     },
+    "compact": {
+      "type": "boolean",
+      "description": "true counts the omissions in omission_total in place of listing them; ph_composer.library.export_preview.omissions pages them. false, the default, lists them."
+    },
     "location": {
       "type": "object",
       "additionalProperties": false,
@@ -63526,11 +64439,11 @@ Result:
   "additionalProperties": false,
   "required": [
     "kinds",
-    "omissions",
     "library_id",
     "library_name",
     "identity",
-    "written"
+    "written",
+    "destination_state"
   ],
   "properties": {
     "kinds": {
@@ -63599,6 +64512,18 @@ Result:
         }
       }
     },
+    "omission_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "projection_digest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0
+    },
     "library_id": {
       "type": "string",
       "minLength": 1
@@ -63616,6 +64541,11 @@ Result:
     },
     "written": {
       "type": "boolean"
+    },
+    "destination_state": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The SHA-256 the destination holds after the write; export_preview with the location reports it as destination.state."
     }
   }
 }
@@ -63756,8 +64686,6 @@ Result:
             "required": [
               "id",
               "display_label",
-              "differences",
-              "expected_values",
               "comparison_available",
               "source_changed"
             ],
@@ -63828,9 +64756,44 @@ Result:
                   "boolean",
                   "null"
                 ]
+              },
+              "difference_fields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "expected_values_summary": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "bytes",
+                  "sha256"
+                ],
+                "properties": {
+                  "bytes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "sha256": {
+                    "type": "string"
+                  }
+                }
+              },
+              "truncated": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Fields cut to 256 characters; the detail read gives them whole."
               }
             }
           }
+        },
+        "candidate_total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Compact only: every candidate; candidates lists the first 20."
         }
       }
     },
@@ -65091,3 +66054,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.36 | 2026-11-10 | Selection-free reads at an explicit path: ph_composer.context.children pages the entities directly in the root or one Group or component, with their state and records; zones.make_candidates, windows.units.convert_candidates and windows.units.restore_candidates list what Make Zone, Convert and Restore could take there; thermal_bridges.edges.at and edges.candidates read Edges by path in edges.selection's rows plus endpoints_m; and spaces.candidate_faces.list takes context for a first Space. A name over 256 characters is cut and named in the row's truncated. edges.selection's copied flag no longer refuses for an unreadable record on another Edge. |
 | 1.37 | 2026-11-10 | Complete reads of large definitions and metadata: ph_composer.records.detail answers one value of a record exactly in fragments with its size and SHA-256; records.list pages by size and takes metadata summary; assemblies.assemblies.layers.list and segments.list, windows.types.elements.list, assemblies.materials.uses.list and windows.<collection>.uses.list page a definition's parts and derived results; and preview takes within and preview_part, so a preview larger than a reply keeps its proposal_digest and is read by part. |
 | 1.38 | 2026-11-10 | Complete reads of large occurrence, geometry and schedule data: windows.units.list takes fields and metadata summary and windows.units.detail reads one Unit's part in fragments; units.host_extent takes geometry summary beside host_extent.holes and .points; units.face_areas.list and units.unhosted.list page the glazed area table; convert_review takes compact and convert_review.detail reads a group's sources; zones.list takes overview summary beside zones.restorable.list, restorable.detail and zones.findings.list; zones.options.adoption_sources.list and .detail, zones.faces.assembly_usage.list and .faces; thermal_bridges.schedule.list takes compact beside runs.members.list, schedule.by_type.list, schedule.edge_findings.list and schedule.unreadable.list; and spaces.detail reads a Space's, Volume's or Floor Segment's part, loops included. |
+| 1.39 | 2026-11-10 | Complete reads of library catalogs and exports: library.load, catalog, in_file, export_preview and export_file take compact, which counts notes and omissions and summarizes rows; library.warnings.list and unavailable.list page a catalog's notes; library.catalog.detail and in_file.detail read one row's part in fragments; library.export_preview.omissions pages an export's omissions against its projection_digest; export_file answers destination_state. |

@@ -119,9 +119,10 @@ class AgentAccessDiscoveryTest < PhComposerTestCase
     assert_equal true, tags.fetch("assignment_supported")
     assert_equal({ "type" => "object", "required" => ["id"], "properties" => { "id" => { "type" => "string" } } },
                  described.dig("assignment", "target").slice("type", "required", "properties"))
-    assert_equal [], described.dig("assignment", "examples")
-    refute_match(/tags|materials|frames/, File.read(File.join(SOURCE_ROOT, "ph_composer", "agent_access",
-                                                              "discovery.rb")))
+    assert_equal [{ "id" => "bth_Ab12Cd34Ef56" }], described.dig("assignment", "examples")
+    %w[discovery.rb tools.rb executor.rb].each do |file|
+      refute_match(/tags|materials|frames/, File.read(File.join(SOURCE_ROOT, "ph_composer", "agent_access", file)))
+    end
   end
 
   def test_refusals_give_every_common_code_a_meaning_the_contract_lists

@@ -19,13 +19,21 @@ module PhComposer
       # Version 1 catalogs are `unloaded`, `loaded`, `empty` or `failed`; version 2 catalogs are `unloaded`,
       # `loading`, `ready` (with or without rows), `stale` (a failed load kept the last generation),
       # `unavailable` (a failed load had none) or `cancelled`, and name the `snapshot` they were read from.
+      # The compact form (`compact`) counts the notes in `warning_total` and `unavailable_total` in place of
+      # listing them; `warnings.list` and `unavailable.list` page them.
       def summary
         object({ "provider_id" => TEXT, "kind" => TEXT, "generation" => GENERATION,
                  "state" => { "type" => "string", "enum" => STATES },
                  "warnings" => list(note), "unavailable" => list(note), "freshness" => freshness,
                  "published_at" => NULLABLE_TEXT, "failure" => failure, "age_seconds" => NULLABLE_NUMBER,
-                 "snapshot" => snapshot }, :optional => ["snapshot"])
+                 "snapshot" => snapshot, "warning_total" => COUNT, "unavailable_total" => COUNT },
+               :optional => %w[snapshot warnings unavailable warning_total unavailable_total])
       end
+
+      COUNT = { "type" => "integer", "minimum" => 0 }.freeze
+      # The fields a compact row or candidate cut at OccurrencePath::NAME_CHARACTERS.
+      TRUNCATED = { "type" => "array", "items" => TEXT,
+                    "description" => "Fields cut to 256 characters; the detail read gives them whole." }.freeze
 
       STATES = %w[unloaded empty loaded failed loading ready stale unavailable cancelled].freeze
 
@@ -62,26 +70,48 @@ module PhComposer
       def resolution
         difference = object({ "field" => TEXT, "local" => VALUE, "incoming" => VALUE,
                               "local_present" => BOOLEAN, "incoming_present" => BOOLEAN })
+        # A compact candidate gives `difference_fields` and `expected_values_summary` in place of `differences`
+        # and `expected_values`, which in_file.detail reads whole.
         candidate = object({ "id" => TEXT,
                              "display_label" => { "type" => %w[string null],
                                                   "description" => "The local record's label; null when it has none." },
                              "differences" => list(difference),
                              "expected_values" => OBJECT, "comparison_available" => BOOLEAN,
-                             "source_changed" => { "type" => %w[boolean null] } })
+                             "source_changed" => { "type" => %w[boolean null] },
+                             "difference_fields" => list(TEXT), "expected_values_summary" => Fragments::SUMMARY,
+                             "truncated" => TRUNCATED },
+                           :optional => %w[differences expected_values difference_fields expected_values_summary
+                                           truncated])
         outcomes = %w[create reuse review_required ambiguous_source ambiguous_name]
+        total = { "type" => "integer", "minimum" => 0,
+                  "description" => "Compact only: every candidate; candidates lists the first 20." }
         object({ "outcome" => { "type" => "string", "enum" => outcomes },
-                 "candidates" => list(candidate) })
+                 "candidates" => list(candidate), "candidate_total" => total }, :optional => ["candidate_total"])
       end
 
       def page(resolved: false)
+        # A compact row gives `snapshot_summary` in place of `snapshot`, which catalog.detail reads whole.
         row = object({ "library_id" => TEXT, "library_name" => TEXT, "record_id" => TEXT,
                        "wire_schema_version" => { "type" => "integer", "minimum" => 1 }, "snapshot" => OBJECT,
-                       "display_label" => described(TEXT, "The kind adapter's label for the row's mapped values.") })
+                       "display_label" => described(TEXT, "The kind adapter's label for the row's mapped values."),
+                       "snapshot_summary" => Fragments::SUMMARY, "truncated" => TRUNCATED },
+                     :optional => %w[snapshot snapshot_summary truncated])
         row["properties"]["resolution"] = resolution if resolved
         row["required"] << "resolution" if resolved
         object(summary.fetch("properties").merge("rows" => list(row),
                                                  "total" => Pages::TOTAL, "next_cursor" => Pages::NEXT_CURSOR),
-               :optional => ["snapshot"])
+               :optional => summary.fetch("properties").keys - summary.fetch("required"))
+      end
+
+      # One page of a catalog's warnings or unavailable notes (`key` names which).
+      def notes_page(key)
+        object({ "provider_id" => TEXT, "kind" => TEXT, "generation" => GENERATION, key => list(note),
+                 "total" => Pages::TOTAL, "next_cursor" => Pages::NEXT_CURSOR })
+      end
+
+      def detail
+        object({ "generation" => GENERATION, "type" => Fragments::TYPE, "fragment" => Fragments::FRAGMENT,
+                 "next_cursor" => Pages::NEXT_CURSOR })
       end
 
       def copy_result

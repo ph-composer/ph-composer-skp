@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "digest"
 require "securerandom"
 require_relative "export_projection"
 require_relative "file_writer"
@@ -57,9 +58,14 @@ module PhComposer
         end
 
         writer.write(bytes)
-        ExportProjection.summary(before, request.registry).merge("library_id" => library.fetch("id"),
-                                                                 "library_name" => library.fetch("name"),
-                                                                 "identity" => identity, "written" => true)
+        value = ExportProjection.summary(before, request.registry)
+                                .merge("library_id" => library.fetch("id"), "library_name" => library.fetch("name"),
+                                       "identity" => identity, "written" => true,
+                                       "destination_state" => Digest::SHA256.hexdigest(bytes))
+        return value unless request.params["compact"]
+
+        ExportRegistration.compact(value).merge("projection_digest" => before.fetch("projection_digest"),
+                                                "revision" => request.session.revision)
       rescue SystemCallError, IOError, EncodingError
         raise Error.new("library.export_write_failed", "The library file could not be written."), :cause => nil
       end

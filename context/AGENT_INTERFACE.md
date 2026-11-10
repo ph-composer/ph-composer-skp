@@ -193,6 +193,17 @@ result reads exactly through `Fragments.detail`, a path into the row the list bu
 Unit reference), `units.convert_review.detail` (a group's sources, whose SHA-256 is the compact `sources_digest`),
 `zones.restorable.detail`, `zones.options.adoption_sources.detail` and `spaces.detail` (a Space, Volume or Floor Segment row, loops included). Every one
 reads the owner's own whole result, so a page never computes a rule of its own.
+Implemented (API 1.39): the same for library catalogs and exports (`library/catalog_reads.rb`,
+`library/export_registration.rb`). `library.load`, `catalog`, `in_file`, `export_preview` and `export_file` take
+`compact`, the whole reply the default: the catalog summary counts its notes (`warning_total`, `unavailable_total`),
+a row gives `snapshot_summary` for its snapshot and cuts its labels at 256 (never an identifier), an `in_file`
+candidate gives `difference_fields` and `expected_values_summary` (the first 20 beside `candidate_total`), and the
+export forms give `omission_total`. `catalog` and
+`in_file` pages are cut by size. `library.warnings.list` and `unavailable.list` page the notes;
+`library.catalog.detail` and `in_file.detail` read one row's part through `Fragments.detail`, by `library_id`,
+`record_id` and a path into the row the list builds; `library.export_preview.omissions` pages the projection's
+omissions. Catalog cursors bind the generation, in-file ones the revision too, and omission cursors the revision
+and the projection digest, so a reload, an edit or a changed projection refuses rather than mixing two.
 Implemented (API 1.36): reads that need no selection. `ph_composer.context.children` pages the entities
 directly inside the Model root or one Group or component, named by its root-to-container `path`
 (`core/occurrence_path.rb` walks it, through components too, and composes the transform once from the
@@ -413,7 +424,10 @@ export, the preview's `projection_digest`. A library export writes only a `.json
 approved HBJSON destination refuses it with `library.destination_invalid`. A destination
 that changed since refuses with `library.destination_changed` or `export.destination_changed`; a
 replacement without consent refuses with `export.replace_required`. The native Save sheet's consent
-is given against the file as it is when the user answers.
+is given against the file as it is when the user answers. A library export's result gives
+`destination_state`, the SHA-256 of what it wrote, which is the `destination.state` the preview reports
+afterwards while the file is unchanged. No receipt is kept for a lost reply: the caller compares the
+destination's state with the one it reviewed.
 
 Three operations take a location today: `ph_composer.library.export_file`,
 `ph_composer.library.providers.add_file` and `.providers.add_folder`; the HBJSON export task takes
@@ -706,7 +720,8 @@ Phase 2 features, programmatic reads and writes. Each has a panel-closed walkthr
   [Walkthrough](../tools/examples/authoring/windows_walkthrough.rb),
   [placement](../tools/examples/authoring/windows_placement_walkthrough.rb).
 - **Library** (`ph_composer.library.*`). Reads: `providers`, `providers.setup_state`, `catalog`,
-  `in_file` and `export_preview`. Writes: `copy`, with preview, an explicit choice and optional
+  `in_file` and `export_preview`, with `warnings.list`, `unavailable.list`, `catalog.detail`,
+  `in_file.detail` and `export_preview.omissions` for what their compact forms leave out. Writes: `copy`, with preview, an explicit choice and optional
   assignment, and the `copy_into_proposal` participant for a feature's own action. The setup command
   `load` reads a configured provider into the session catalog and `providers.remove` removes one,
   both under the `setup` grant. When `providers.setup_state` reports this machine's stored setup

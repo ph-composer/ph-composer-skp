@@ -1,6 +1,6 @@
 # Proposed contract changes
 
-STATUS: C01 bound and implemented by AW-01 (API 1.34); C02 bound and implemented by AW-02 (API 1.35); C04 bound and implemented by AW-03 (API 1.36); C03 definition part bound by AW-04 (API 1.37); C03 occurrence part bound on the AW-05 branch (API 1.38); C05-C08 remain proposals. Baseline API 1.31.
+STATUS: C01 bound and implemented by AW-01 (API 1.34); C02 bound and implemented by AW-02 (API 1.35); C04 bound and implemented by AW-03 (API 1.36); C03 definition part bound by AW-04 (API 1.37); C03 occurrence part bound by AW-05 (API 1.38); C05 bound on the AW-06 branch (API 1.39); C06-C08 remain proposals. Baseline API 1.31.
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication
 
 The durable authorities remain `context/CONTRACTS.md`, `AGENT_INTERFACE.md`, `EXTENSIBILITY.md`
@@ -243,6 +243,37 @@ are paged against that same projection. Selecting fewer records is not a recover
 export. A post-write hash/size/library identity receipt is optional; it must not widen file approval.
 Load and export outcomes retain compact state/identity/counts even when detailed warnings or omissions
 need a later page; completion must not be inferable only from a generic omitted-value message.
+
+**Bound at AW-06 (API 1.39).** Every new read is a query (capability `read`) that changes nothing. Each existing
+whole reply is unchanged; `compact` (boolean, default false) is the one opt-in param of this stage (D14-a). New names:
+
+- `compact` on `ph_composer.library.load`, `library.catalog`, `library.in_file`: the catalog summary leaves out
+  `warnings` and `unavailable` and gives `warning_total` and `unavailable_total`; a compact catalog row leaves out
+  `snapshot` and gives `snapshot_summary` (`bytes`, `sha256` of its canonical JSON, `Fragments.summary`), with
+  `display_label` and `library_name` cut at `OccurrencePath::NAME_CHARACTERS` and named in `truncated`; a compact
+  `in_file` candidate leaves out `differences` and `expected_values` and gives `difference_fields` (the field names)
+  and `expected_values_summary`, its label cut the same way, and a compact resolution lists the first 20 candidates
+  beside `candidate_total`. `catalog` and `in_file` pages are now cut by size
+  (`Pages.bounded`) in both forms.
+- `ph_composer.library.warnings.list` and `ph_composer.library.unavailable.list` (`provider_id`, `kind`, optional
+  `generation`, `limit`, `cursor`): a catalog's notes in order, `total`, cursor bound to the generation.
+- `ph_composer.library.catalog.detail` (`provider_id`, `kind`, optional `generation`, `library_id`, `record_id`,
+  `path` from `snapshot`, `display_label` or `library_name`, `cursor`): result `generation`, `type`, `fragment`,
+  `next_cursor`, through `Fragments.detail`, bound to the generation. `ph_composer.library.in_file.detail`: the same
+  params with `path` also from `resolution`, the row `in_file` builds, bound to the generation and the Model revision.
+  A row named by no or two rows refuses `library.row_unavailable`, as copy does.
+- `export_preview` answers `scope` in both forms. `compact` on `ph_composer.library.export_preview`: `omissions`
+  left out, `omission_total` given beside `kinds`, `scope`, `projection_digest`, `revision` and `destination`. `ph_composer.library.export_preview.omissions`
+  (`scope`, `kinds`, `records`, optional `projection_digest`, `limit`, `cursor`): the projection's omission rows,
+  `total`, `projection_digest`, `revision`, cursor bound to the Model revision and the projection digest; a
+  `projection_digest` that is not the current projection's refuses `revision.stale`.
+- `compact` on `ph_composer.library.export_file`: `omissions` left out, `omission_total`, `projection_digest` and
+  `revision` given. Both forms add `destination_state`, the SHA-256 the destination holds after the write, which
+  `export_preview` with the location reports as `destination.state`.
+
+R15 adds no name: AW-02's descriptor already publishes each adapter's `assignment.target` and examples from its
+own callback. The Psi target stays one object schema (`core/json_schema.rb` has no `oneOf`), its two shapes given
+by the two examples and the schema's `description` (D14-b).
 
 ## C06 · QA and retained outcomes
 

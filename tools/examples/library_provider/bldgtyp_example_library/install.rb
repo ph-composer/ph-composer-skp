@@ -84,9 +84,9 @@ module BldgtypExampleLibrary
       [tag, holder]
     end
 
-    def callback(params, result = OBJECT, &handler)
+    def callback(params, result = OBJECT, examples: nil, &handler)
       PhComposer::Declarations::LibraryCallback.new(:params => params, :result => result, :refuses => [],
-                                                    :handler => handler)
+                                                    :handler => handler, :examples => examples)
     end
 
     def edit(properties)
@@ -119,9 +119,12 @@ module BldgtypExampleLibrary
                                                            :expected_values => request.params.fetch("expected_values"))
           { "id" => id }
         end,
-        # The assignment target is one holder; assigning names the copied tag on it.
+        # The assignment target is one holder; assigning names the copied tag on it. The example is what
+        # `describe` publishes as the kind's assignment example.
         :assign => callback(edit("target" => edit("id" => { "type" => "string" }),
-                                 "local_id" => { "type" => "string" })) do |request, proposal|
+                                 "local_id" => { "type" => "string" }),
+                            :examples => [{ "target" => { "id" => "bth_Ab12Cd34Ef56" },
+                                            "local_id" => "btg_Ab12Cd34Ef56" }]) do |request, proposal|
           id = request.params.fetch("target").fetch("id")
           tag = request.params.fetch("local_id")
           request.engine.propose_update(HOLDER, id, proposal, :values => { "tag_id" => tag })

@@ -321,8 +321,51 @@ What the Model already holds is read through the owning feature's own list, such
 
 A copy can also assign the new record in the same Undo step, such as a Frame to one side of a
 Window Type element: `describe` the library kind (the `library_kinds` section names it) for the
-`assignment` target its copy takes and examples of it. A kind whose `assignment` says it is not
-supported is copied without one.
+`assignment` target its copy takes and examples of it. Send the example whose keys fit what you mean,
+with the ids and the values you read, as the copy's `assignment`; where a target has more than one
+shape, its `description` says which keys each takes. Preview the copy, then invoke it with the
+`proposal_digest`: the copy and the assignment are one Undo step, and a target that is wrong or
+changed since you read it refuses both. A kind whose `assignment` says it is not supported is copied
+without one.
+
+A catalog can be larger than a reply. Pass `compact` true to `ph_composer.library.load`,
+`ph_composer.library.catalog` and `ph_composer.library.in_file`:
+
+- **Counts, not lists.** The compact forms give `warning_total` and `unavailable_total` in place of
+  the rows a library left out or could not serve. `ph_composer.library.warnings.list` and
+  `ph_composer.library.unavailable.list` page them, one note per skipped or normalized row.
+- **Rows.** A compact row gives `snapshot_summary` (the size and SHA-256 of its snapshot) in place
+  of the snapshot, and cuts a label or library name longer than 256 characters, naming it in
+  `truncated`. `ph_composer.library.catalog.detail` reads one part of one row, by its `library_id`
+  and `record_id` and a `path` such as `["snapshot", "notes"]`, in fragments that join and check as
+  above.
+- **Comparisons.** A compact `in_file` candidate names its `difference_fields` and gives
+  `expected_values_summary`; `ph_composer.library.in_file.detail` with a `path` such as
+  `["resolution", "candidates", 0, "expected_values"]` reads them whole. A `use_library` copy needs
+  those `expected_values` exactly. A compact comparison lists the first 20 local candidates and
+  counts them all in `candidate_total`; read the others by index the same way.
+- **Generations.** Every catalog page, note page and fragment is bound to the catalog `generation`
+  it was read from, so after a reload the next one is refused as `query.cursor_expired`. The in-file
+  reads compare with the Model as well, so an edit expires them too. Start that read again.
+
+### Library export
+
+`ph_composer.library.export_preview` says what a library file export would hold: counts by kind,
+what it leaves out (`omissions`), its `projection_digest` and, with an approved `location`,
+`destination.state`, the SHA-256 the destination holds now. With `compact` true it gives
+`omission_total` in place of the list; `ph_composer.library.export_preview.omissions` with the same
+`scope`, `kinds` and `records` and the `projection_digest` pages them, refused as `revision.stale`
+once the projection is no longer that one. Read every omission of an all-scope export before you
+replace a file with it; choosing fewer records is a different export, not a way round a long list.
+`ph_composer.library.export_file` (an `export_file` tool call with the location) replaces an
+existing file only with `replace`, the reported `state` as `expected_destination` and the
+`projection_digest`; a destination that changed since is refused as `library.destination_changed`.
+Pass `compact` true: its result counts the omissions too and always fits a reply, with `library_id`,
+`written` and `destination_state`, the SHA-256 the file holds now. Without it the result lists every
+omission and, for a long list, is answered with its status only. If the reply is lost, call
+`export_preview` with the location: a `destination.state` that is no longer the one you reviewed
+means a file was written there. Nothing else is kept for a lost reply, and the connection never
+returns the file's path; the user opens the file.
 
 ### Export
 

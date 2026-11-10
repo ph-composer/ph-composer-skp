@@ -7,7 +7,8 @@ module PhComposer
     module Refuses
       CALLBACKS = { "ph_composer.library.copy" => %i[local_read create replace assign],
                     "ph_composer.library.copy_into_proposal" => %i[local_read create replace assign],
-                    "ph_composer.library.in_file" => [:local_read] }.transform_values(&:freeze).freeze
+                    "ph_composer.library.in_file" => [:local_read],
+                    "ph_composer.library.in_file.detail" => [:local_read] }.transform_values(&:freeze).freeze
 
       # The version 2 provider callbacks each operation runs, keyed like CALLBACKS.
       PROVIDER_CALLBACKS = {
@@ -43,6 +44,10 @@ module PhComposer
       CATALOG = (LOAD + PAGE + %w[library.catalog_stale]).freeze
       IN_FILE = (CATALOG + %w[library.adapter_invalid library.callback_invalid library.row_semantic_invalid
                               record.unreadable]).freeze
+      # A row named by library_id and record_id, then a part of it (Fragments.detail).
+      ROW_DETAIL = %w[library.row_unavailable target.not_found].freeze
+      CATALOG_DETAIL = (CATALOG + ROW_DETAIL).freeze
+      IN_FILE_DETAIL = (IN_FILE + ROW_DETAIL).freeze
       COPY = (LOAD + %w[copy.rule_missing extension.invalid identity.conflict library.adapter_invalid
                         library.callback_invalid library.catalog_stale library.local_choice_required
                         library.review_required library.row_semantic_invalid
@@ -52,6 +57,7 @@ module PhComposer
                         validation.failed] + USE).uniq.freeze
       EXPORTABLE = %w[library.adapter_invalid library.catalog_too_many_rows library.kind_unavailable
                       record.unreadable target.not_found].freeze
+      EXPORT_OMISSIONS = (EXPORTABLE + PAGE + %w[revision.stale]).freeze
       EXPORT_PREVIEW = (EXPORTABLE + %w[library.destination_invalid library.export_write_failed location.kind_mismatch
                                         location.revoked location.setup_unavailable location.setup_unreadable
                                         location.unavailable location.unknown location.used]).freeze
