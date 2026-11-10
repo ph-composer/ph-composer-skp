@@ -77,3 +77,15 @@ screenshot) was aborted as a user interrupt before its first action. Control was
 again. All seven rows are recorded `blocked`: the dialog's Repair, Revoke, Revoke confirmation and Done as native
 clicks, Move click-move, Move held drag and Line partway through, and the guard decision that depends on them.
 Missing prerequisite: one uninterrupted full-screen hold. The ready recipe is `_private/host/aw10/HELD_RUN.md`.
+
+### Run 2 (2026-11-10, main `3da2a9ab`): blocked again, before the hold
+
+Installed RBZ from `make rbz && make install` on main `3da2a9ab`, SketchUp 26.1.188, fresh process, the same
+fixture and labelled setup. Preparation was verified: the recorder's `run_end` matched the client's check row
+(context completed/ok, SelectionTool in both), and the dialog setup now connected both clients, Claude Code (client
+id `claude_code`) and Codex, with the saved setups on 46110 and the listener on 46111, so both rows offered Repair.
+`request_full_control` was then called once and its approval card went unanswered within the time limit; it was
+not requested again, so no native click or gesture was made. All seven rows are recorded `blocked` a second time,
+and the guard decision stays open. Cleanup revoked every token and the destination the run made, put the listener
+back on 46110, removed the scratch client home and quit SketchUp cleanly. Missing prerequisite unchanged: one
+approved, uninterrupted full-screen hold (recipe `_private/host/aw10/HELD_RUN.md`).
