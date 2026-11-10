@@ -187,7 +187,8 @@ collection can outgrow a reply takes an optional compact form, its whole reply t
 (optionally by Zone) and `units.unhosted.list`, `zones.faces.assembly_usage.list` and `.faces`,
 `zones.restorable.list`, `zones.findings.list`, `zones.options.adoption_sources.list` (each with its collision
 `cluster`), `thermal_bridges.runs.members.list` (a run's Edges with world end points, by its derived
-`identifier`, or one finding's), `schedule.edge_findings.list` and `schedule.unreadable.list`. One row of a computed
+`identifier` and, when two runs share it, the compact row's `index`, or one finding's), `schedule.by_type.list`,
+`schedule.edge_findings.list` and `schedule.unreadable.list`. One row of a computed
 result reads exactly through `Fragments.detail`, a path into the row the list builds: `windows.units.detail` (by
 Unit reference), `units.convert_review.detail` (a group's sources, whose SHA-256 is the compact `sources_digest`),
 `zones.restorable.detail` and `spaces.detail` (a Space, Volume or Floor Segment row, loops included). Every one

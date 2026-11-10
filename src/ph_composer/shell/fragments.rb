@@ -63,11 +63,15 @@ module PhComposer
     # cursor. `parts` are the top-level keys a caller may start at; the path is not echoed, since a long key
     # would crowd the reply.
     def detail(request, query, view, path, parts:, revision: request.revision)
-      raise CodedError.new("params.invalid", "A path starts at #{parts.join(', ')}.") unless parts.include?(path.first)
-
+      check_start!(path, parts)
       value = at(view, path)
       fragment, next_cursor = read(request, query, value, :revision => revision)
       { "type" => json_type(value), "fragment" => fragment, "next_cursor" => next_cursor }
+    end
+
+    # A path starts at one of `parts`; a caller that resolves its view at a cost checks this first.
+    def check_start!(path, parts)
+      raise CodedError.new("params.invalid", "A path starts at #{parts.join(', ')}.") unless parts.include?(path.first)
     end
 
     # The value `path` names in `view`; a key or index naming nothing refuses, so absent is never null.

@@ -116,6 +116,22 @@ class OccurrenceDetailTest < PhComposerTestCase
                  query("#{P}.windows.units.host_extent.points", "host" => host, "hole" => 450).fetch("code")
   end
 
+  def test_a_page_of_500_far_apart_loop_points_fits_a_reply
+    radius = 100_000 / 0.0254
+    outer = Array.new(1000) do |index|
+      angle = 2 * Math::PI * index / 1000
+      Geom::Point3d.new(radius * Math.cos(angle), radius * Math.sin(angle), 0)
+    end
+    @model.entities << Sketchup::Group.new(1000, Sketchup::Entities.new([Sketchup::Face.new(1001, {},
+                                                                                            :points => outer)]))
+    assert_equal "completed", assignment_invoke("#{P}.zones.make", "parent_path" => [], "entity_ids" => [1000])
+      .fetch("status")
+    host = assignment_faces.first.fetch("reference")
+    points = rows_of("#{P}.windows.units.host_extent.points", { "host" => host, "limit" => 500 }, "points",
+                     :pages => 3)
+    assert_equal (0...1000).to_a, points.map { |point| point.fetch("index") }
+  end
+
   def test_the_zone_list_leaves_450_restore_offers_and_80_findings_to_their_own_pages
     450.times { |index| stamp(2000 + index, format("zon_%012d", index), "Segment #{index}", "Level 1") }
     80.times do |index|
@@ -194,7 +210,10 @@ class OccurrenceDetailTest < PhComposerTestCase
     assert_equal "request.response_too_large", query("#{P}.thermal_bridges.schedule.list", "limit" => 1).fetch("code")
     page = completed(query("#{P}.thermal_bridges.schedule.list", "compact" => true))
     row = page.dig("runs", 0)
-    assert_equal [799, 800, whole.fetch("totals")], [row.fetch("edge_count"), row.fetch("point_count"), page["totals"]]
+    totals = whole.fetch("totals")
+    assert_equal [799, 800, 0], row.values_at("edge_count", "point_count", "index")
+    assert_equal totals.reject { |key, _value| key == "by_type" }.merge("type_count" => 1), page.fetch("totals")
+    assert_equal totals.fetch("by_type"), rows_of("#{P}.thermal_bridges.schedule.by_type.list", {}, "by_type")
     refute row.key?("edge_paths")
     assert_equal run.fetch("findings").map { |finding|
       [finding.fetch("code"), finding.dig("locate", "edge_paths").length]
@@ -214,6 +233,36 @@ class OccurrenceDetailTest < PhComposerTestCase
                                            "identifier" => "tb_gone").fetch("code")
     assert_equal "target.not_found", query("#{P}.thermal_bridges.runs.members.list",
                                            "identifier" => row.fetch("identifier"), "finding" => 9).fetch("code")
+  end
+
+  def test_runs_sharing_an_identifier_and_long_type_names_stay_readable
+    name = "T" * 30_000
+    type_id = created("#{P}.thermal_bridges.types.create", "values" => { "name" => name, "group" => "15-Ambient" })
+              .fetch("id")
+    edges = Array.new(2) do |copy|
+      edge = Sketchup::Edge.new(7000 + copy, Sketchup::Vertex.new(Geom::Point3d.new(0, 0, 0)),
+                                Sketchup::Vertex.new(Geom::Point3d.new(40, 0, 0)))
+      assign(edge, format("tbe_%012d", copy), type_id)
+      edge
+    end
+    @model.entities << zone_group(100, "Z", edges)
+    whole = API.query(:context => @context, :name => "#{P}.thermal_bridges.schedule.all").fetch("value")
+    runs = completed(query("#{P}.thermal_bridges.schedule.list", "compact" => true)).fetch("runs")
+    assert_equal whole.fetch("runs").length, runs.length
+    assert_includes runs.first.fetch("truncated"), "type_name"
+    assert_includes runs.first.fetch("truncated"), "findings.0.message"
+    assert_equal [name[0, 256]], rows_of("#{P}.thermal_bridges.schedule.by_type.list", {}, "by_type")
+      .map { |row| row.fetch("type_name") }
+    shared = runs.group_by { |run| run.fetch("identifier") }.values.find { |group| group.length > 1 }
+    skip "the stub gives these runs distinct identifiers" unless shared
+
+    named = { "identifier" => shared.first.fetch("identifier") }
+    assert_equal "target.ambiguous", query("#{P}.thermal_bridges.runs.members.list", named).fetch("code")
+    members = shared.map do |run|
+      rows_of("#{P}.thermal_bridges.runs.members.list", named.merge("index" => run.fetch("index")), "members")
+    end
+    assert_equal shared.map { |run| whole.dig("runs", run.fetch("index"), "edge_paths") },
+                 members.map { |rows| rows.map { |member| member.fetch("path") } }
   end
 
   def test_more_than_50_orphan_and_unreadable_assignments_are_each_listed_once
@@ -261,6 +310,7 @@ class OccurrenceDetailTest < PhComposerTestCase
 
     key = ->(row) { row.fetch("reference").values_at("zone_path", "entity_path").flatten }
     read = pages_of("#{P}.windows.units.face_areas.list", {}, "faces")
+    assert_operator read.length, :>, 1
     assert_equal whole.fetch("faces").sort_by(&key), read.flat_map { |page| page.fetch("faces") }
     assert_equal [1], read.map { |page| page.fetch("unhosted_unit_total") }.uniq
     assert_equal whole.fetch("unhosted_units"), rows_of("#{P}.windows.units.unhosted.list", {}, "units")
@@ -277,6 +327,7 @@ class OccurrenceDetailTest < PhComposerTestCase
     summary = rows_of("#{P}.zones.faces.assembly_usage.list", {}, "assemblies")
     assert_equal usage.map { |row| row.reject { |name, _value| name == "faces" } }, summary
     used = pages_of("#{P}.zones.faces.assembly_usage.faces", { "assembly_id" => assembly }, "faces")
+    assert_operator used.length, :>, 1
     assert_equal usage.find { |row| row.fetch("assembly_id") == assembly }.fetch("faces"),
                  used.flat_map { |page| page.fetch("faces") }
     assert_equal [183], used.map { |page| page.fetch("face_count") }.uniq

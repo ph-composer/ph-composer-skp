@@ -92,16 +92,27 @@ module PhComposer
         RUN.fetch("properties").merge(
           "edge_count" => COUNT.merge("description" => "With compact: how many Edges."),
           "point_count" => COUNT.merge("description" => "With compact: how many points."),
+          "index" => COUNT.merge("description" => "With compact: the run's place in the schedule, which names it " \
+                                                  "to #{Scan::MEMBERS} when two runs share an identifier."),
           "findings" => Shapes.list(LIST_FINDING).merge("description" => "With compact, each finding's Edges " \
                                                                          "counted; #{Scan::MEMBERS} with finding " \
                                                                          "pages them."),
           "truncated" => ContextChildren::TRUNCATED
-        ), :optional => %w[points_m edge_paths edge_count point_count truncated]
+        ), :optional => %w[points_m edge_paths index edge_count point_count truncated]
+      )
+      COMPACT_TOTALS = TOTALS.merge(
+        "required" => TOTALS.fetch("required") - ["by_type"],
+        "properties" => TOTALS.fetch("properties").merge(
+          "type_count" => COUNT.merge("description" => "With compact: how many types by_type has; " \
+                                                       "#{Scan::BY_TYPE} pages them.")
+        ),
+        "description" => "Over every run; with compact without by_type, counted in type_count."
       )
       LIST_RESULT_ANY = LIST_RESULT.merge(
         "required" => LIST_RESULT.fetch("required") - %w[edge_findings unreadable],
         "properties" => LIST_RESULT.fetch("properties").merge(
-          "runs" => Shapes.list(LIST_RUN).merge("description" => "One page of runs in schedule order.")
+          "runs" => Shapes.list(LIST_RUN).merge("description" => "One page of runs in schedule order."),
+          "totals" => COMPACT_TOTALS
         )
       )
       LIST_PARAMS = Shapes.object({
@@ -112,6 +123,9 @@ module PhComposer
                                         "pages a run's Edges. False when absent." },
         "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR
       }, :optional => %w[compact limit cursor])
+      MEMBER_INDEX = COUNT.merge("description" => "The run's index from a compact schedule row; needed only when " \
+                                                  "two runs share the identifier.").freeze
+      MEMBER_FINDING = COUNT.merge("description" => "Only the Edges of the run's finding at this index.").freeze
       PAGING = Shapes.object({ "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR }, :optional => Pages::PAGE_KEYS)
       MEMBER = Shapes.object({
         "index" => COUNT.merge("description" => "The Edge's place in the run: it joins points_m i and i + 1."),
@@ -130,19 +144,29 @@ module PhComposer
         feature.query(Scan::MEMBERS,
                       :description => "One bounded page of one run's Edges in run order, each with its path and " \
                                       "world end points, or only those one of its findings names.",
-                      :refuses => PAGE + %w[target.not_found],
+                      :refuses => PAGE + %w[target.ambiguous target.not_found],
                       :params => Shapes.object({
                         "identifier" => Shapes.described(Shapes::TEXT, "The run's identifier from the schedule."),
-                        "finding" => COUNT.merge("description" => "Only the Edges of the run's finding at this " \
-                                                                  "index."),
+                        "index" => MEMBER_INDEX, "finding" => MEMBER_FINDING,
                         "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR
-                      }, :optional => %w[finding limit cursor]),
+                      }, :optional => %w[index finding limit cursor]),
                       :result => Shapes.object({ "identifier" => Shapes::TEXT,
                                                  "members" => Shapes.list(MEMBER) }.merge(page)),
                       :examples => [{ "identifier" => "tb_0a1b2c3d4e5f" },
                                     { "identifier" => "tb_0a1b2c3d4e5f", "finding" => 0 }]) do |request|
           Scan.members(request)
         end
+        feature.query(Scan::BY_TYPE,
+                      :description => "One bounded page of the schedule's totals by Thermal Bridge Type, over " \
+                                      "every run, as schedule.list's totals.by_type; a name over " \
+                                      "#{OccurrencePath::NAME_CHARACTERS} characters is cut and named in truncated.",
+                      :refuses => PAGE, :params => PAGING,
+                      :result => Shapes.object({ "by_type" => TOTALS.dig("properties", "by_type").merge(
+                        "items" => Shapes.object(TOTALS.dig("properties", "by_type", "items", "properties")
+                                                       .merge("truncated" => ContextChildren::TRUNCATED),
+                                                 :optional => ["truncated"])
+                      ) }.merge(page)),
+                      :examples => [{}]) { |request| Scan.by_type(request) }
         feature.query(Scan::EDGE_FINDINGS,
                       :description => "One bounded page of the assigned Edges no Zone holds, by path: in no run, " \
                                       "not exported.",

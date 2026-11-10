@@ -63,10 +63,11 @@ module PhComposer
           loop = hole.nil? ? frame.outer : frame.holes[hole]
           raise CodedError.new("target.not_found", "The Face has no hole #{hole}.") unless loop
 
-          rows = offsets(loop, frame.origin).each_with_index.map { |(x, y), index| [index, x, y] }
-          page, next_cursor = Pages.bounded(request, POINTS, rows, :key => ->(row) { [row.first] })
-          { "points" => page.map { |index, x, y| { "index" => index, "x_m" => x, "y_m" => y } },
-            "next_cursor" => next_cursor, "total" => rows.length }
+          rows = offsets(loop, frame.origin).each_with_index.map { |(x, y), index|
+            { "index" => index, "x_m" => x, "y_m" => y }
+          }
+          page, next_cursor = Pages.bounded(request, POINTS, rows, :key => ->(row) { [row.fetch("index")] })
+          { "points" => page, "next_cursor" => next_cursor, "total" => rows.length }
         end
 
         def frame(host)

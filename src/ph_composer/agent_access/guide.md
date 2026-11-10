@@ -136,11 +136,14 @@ that pages or fragments what was left out. Fragments join and check exactly as a
   findings. `ph_composer.zones.options.adoption_sources.list` pages the choices adoption would ask
   about, each naming the collision `cluster` it is in.
 - **Thermal Bridge runs.** `ph_composer.thermal_bridges.schedule.list` with `compact` true leaves out
-  each run's `points_m` and `edge_paths` and each finding's Edges, counting them, and leaves the Edge
-  findings and unreadable assignments to `ph_composer.thermal_bridges.schedule.edge_findings.list`
-  and `ph_composer.thermal_bridges.schedule.unreadable.list`. `ph_composer.thermal_bridges.runs.members.list`
+  each run's `points_m` and `edge_paths` and each finding's Edges, counting them, and leaves the totals
+  by type, the Edge findings and the unreadable assignments to
+  `ph_composer.thermal_bridges.schedule.by_type.list`,
+  `ph_composer.thermal_bridges.schedule.edge_findings.list` and
+  `ph_composer.thermal_bridges.schedule.unreadable.list`. `ph_composer.thermal_bridges.runs.members.list`
   pages a run's Edges by its `identifier`, each with its path and world end points, or with `finding`
-  only the Edges one finding names. A run's identifier changes with its geometry, so it names a run
+  only the Edges one finding names; when two runs share an identifier it is refused as
+  `target.ambiguous`, and the compact row's `index` names one. A run's identifier changes with its geometry, so it names a run
   only for the moment; to find assigned Edges, read them through
   `ph_composer.thermal_bridges.edges.candidates` or `ph_composer.thermal_bridges.edges.at`.
 - **Spaces.** `ph_composer.spaces.detail` reads one part of one Space's, Volume's or Floor Segment's

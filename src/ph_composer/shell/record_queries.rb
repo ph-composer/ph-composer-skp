@@ -116,6 +116,7 @@ module PhComposer
     def detail(request)
       params = request.params
       kind = request.engine.kind(params.fetch("kind"))
+      Fragments.check_start!(params.fetch("path"), PARTS)
       view = request.engine.view(kind.id, request.engine.find(kind.id, params.fetch("id")))
       { "kind" => kind.id, "id" => params.fetch("id") }
         .merge(Fragments.detail(request, DETAIL, view, params.fetch("path"), :parts => PARTS))

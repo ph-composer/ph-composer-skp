@@ -14170,7 +14170,7 @@ Example params:
 
 One bounded page of one run's Edges in run order, each with its path and world end points, or only those one of its findings names. Owner: `ph_composer.thermal_bridges`.
 
-Refuses: `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.not_found`, `validation.failed`, and the `query` common set.
+Refuses: `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.ambiguous`, `target.not_found`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -14185,6 +14185,11 @@ Params:
     "identifier": {
       "type": "string",
       "description": "The run's identifier from the schedule."
+    },
+    "index": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The run's index from a compact schedule row; needed only when two runs share the identifier."
     },
     "finding": {
       "type": "integer",
@@ -14705,6 +14710,124 @@ Example params:
 {}
 ```
 
+### `ph_composer.thermal_bridges.schedule.by_type.list`
+
+One bounded page of the schedule's totals by Thermal Bridge Type, over every run, as schedule.list's totals.by_type; a name over 256 characters is cut and named in truncated. Owner: `ph_composer.thermal_bridges`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "by_type",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "by_type": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type_id",
+          "type_name",
+          "group",
+          "run_count",
+          "edge_count",
+          "length_m",
+          "heat_loss_w_k"
+        ],
+        "properties": {
+          "type_id": {
+            "type": "string"
+          },
+          "type_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "group": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "run_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "edge_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "length_m": {
+            "type": "number"
+          },
+          "heat_loss_w_k": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names cut to 256 characters; absent when none was."
+          }
+        }
+      },
+      "description": "Each type with a run; used length and heat loss over every run of it."
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
 ### `ph_composer.thermal_bridges.schedule.edge_findings.list`
 
 One bounded page of the assigned Edges no Zone holds, by path: in no run, not exported. Owner: `ph_composer.thermal_bridges`.
@@ -15047,6 +15170,11 @@ Result:
             "minimum": 0,
             "description": "With compact: how many points."
           },
+          "index": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "With compact: the run's place in the schedule, which names it to ph_composer.thermal_bridges.runs.members.list when two runs share an identifier."
+          },
           "truncated": {
             "type": "array",
             "items": {
@@ -15149,7 +15277,6 @@ Result:
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "by_type",
         "by_group",
         "run_count",
         "heat_loss_w_k"
@@ -15232,8 +15359,14 @@ Result:
         },
         "heat_loss_w_k": {
           "type": "number"
+        },
+        "type_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "With compact: how many types by_type has; ph_composer.thermal_bridges.schedule.by_type.list pages them."
         }
-      }
+      },
+      "description": "Over every run; with compact without by_type, counted in type_count."
     },
     "units": {
       "type": "object",
@@ -64815,4 +64948,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.35 | 2026-11-10 | discover adds library_kinds, and describe answers a library kind by name (its wire kind and version, and its assignment target schema and examples or that it has none) and an installed extension by namespace. The agent connection's discover takes section, owner, limit, cursor and topic for bounded pages of operations, record kinds, reference targets, extensions, library kinds, common refusals with their meanings, contracts and the operating guide; initialize names the guide. ph_composer.library.copy's generation says it is required, as its schema already did. |
 | 1.36 | 2026-11-10 | Selection-free reads at an explicit path: ph_composer.context.children pages the entities directly in the root or one Group or component, with their state and records; zones.make_candidates, windows.units.convert_candidates and windows.units.restore_candidates list what Make Zone, Convert and Restore could take there; thermal_bridges.edges.at and edges.candidates read Edges by path in edges.selection's rows plus endpoints_m; and spaces.candidate_faces.list takes context for a first Space. A name over 256 characters is cut and named in the row's truncated. edges.selection's copied flag no longer refuses for an unreadable record on another Edge. |
 | 1.37 | 2026-11-10 | Complete reads of large definitions and metadata: ph_composer.records.detail answers one value of a record exactly in fragments with its size and SHA-256; records.list pages by size and takes metadata summary; assemblies.assemblies.layers.list and segments.list, windows.types.elements.list, assemblies.materials.uses.list and windows.<collection>.uses.list page a definition's parts and derived results; and preview takes within and preview_part, so a preview larger than a reply keeps its proposal_digest and is read by part. |
-| 1.38 | 2026-11-10 | Complete reads of large occurrence, geometry and schedule data: windows.units.list takes fields and metadata summary and windows.units.detail reads one Unit's part in fragments; units.host_extent takes geometry summary beside host_extent.holes and .points; units.face_areas.list and units.unhosted.list page the glazed area table; convert_review takes compact and convert_review.detail reads a group's sources; zones.list takes overview summary beside zones.restorable.list, restorable.detail and zones.findings.list; zones.options.adoption_sources.list, zones.faces.assembly_usage.list and .faces; thermal_bridges.schedule.list takes compact beside runs.members.list, schedule.edge_findings.list and schedule.unreadable.list; and spaces.detail reads a Space's, Volume's or Floor Segment's part, loops included. |
+| 1.38 | 2026-11-10 | Complete reads of large occurrence, geometry and schedule data: windows.units.list takes fields and metadata summary and windows.units.detail reads one Unit's part in fragments; units.host_extent takes geometry summary beside host_extent.holes and .points; units.face_areas.list and units.unhosted.list page the glazed area table; convert_review takes compact and convert_review.detail reads a group's sources; zones.list takes overview summary beside zones.restorable.list, restorable.detail and zones.findings.list; zones.options.adoption_sources.list, zones.faces.assembly_usage.list and .faces; thermal_bridges.schedule.list takes compact beside runs.members.list, schedule.by_type.list, schedule.edge_findings.list and schedule.unreadable.list; and spaces.detail reads a Space's, Volume's or Floor Segment's part, loops included. |

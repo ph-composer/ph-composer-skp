@@ -189,8 +189,8 @@ module PhComposer
                     "summary beside zones.restorable.list, restorable.detail and zones.findings.list; " \
                     "zones.options.adoption_sources.list, zones.faces.assembly_usage.list and .faces; " \
                     "thermal_bridges.schedule.list takes compact beside runs.members.list, " \
-                    "schedule.edge_findings.list and schedule.unreadable.list; and spaces.detail reads a Space's, " \
-                    "Volume's or Floor Segment's part, loops included." }
+                    "schedule.by_type.list, schedule.edge_findings.list and schedule.unreadable.list; and " \
+                    "spaces.detail reads a Space's, Volume's or Floor Segment's part, loops included." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

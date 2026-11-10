@@ -171,9 +171,11 @@ New names:
   `cluster`. `ph_composer.zones.faces.assembly_usage.list` (rows without `faces`) and
   `ph_composer.zones.faces.assembly_usage.faces` (`assembly_id`).
 - `ph_composer.thermal_bridges.schedule.list` param `compact`: runs without `points_m` and `edge_paths`
-  (`edge_count`, `point_count`, Zone labels cut), findings without `locate` (`edge_count`), no `edge_findings` or
-  `unreadable` (their totals stay). `ph_composer.thermal_bridges.runs.members.list` (`identifier`, optional
-  `finding`): rows `index`, `path`, `points_m` (the Edge's two world end points). `ph_composer.thermal_bridges.
+  (`index`, `edge_count`, `point_count`, labels cut), findings without `locate` (`edge_count`, message cut at 512),
+  totals without `by_type` (`type_count`), no `edge_findings` or `unreadable` (their totals stay).
+  `ph_composer.thermal_bridges.schedule.by_type.list`. `ph_composer.thermal_bridges.runs.members.list`
+  (`identifier`, optional `index` and `finding`; two runs sharing the identifier without `index` refuse
+  `target.ambiguous`): rows `index`, `path`, `points_m` (the Edge's two world end points). `ph_composer.thermal_bridges.
   schedule.edge_findings.list` and `schedule.unreadable.list` (message cut at 512), by path.
 - `ph_composer.spaces.detail` (exactly one of `space`, `volume`, `floor_segment`, then `path`, `cursor`): one part of
   the row `spaces.all` builds, a Floor Segment's with `loops_m`.
