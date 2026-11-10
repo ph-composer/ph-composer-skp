@@ -12445,6 +12445,13 @@ Result:
               "x-unit": "m"
             },
             "description": "The Edge's two ends in world metres, through every transform from the root; null with no Edge."
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Zone labels cut to 256 characters, such as zone.name; absent when none was."
           }
         }
       }
@@ -12717,6 +12724,13 @@ Result:
               "x-unit": "m"
             },
             "description": "The Edge's two ends in world metres, through every transform from the root; null with no Edge."
+          },
+          "truncated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Zone labels cut to 256 characters, such as zone.name; absent when none was."
           }
         }
       }

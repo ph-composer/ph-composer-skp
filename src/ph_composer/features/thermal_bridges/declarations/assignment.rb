@@ -81,8 +81,11 @@ module PhComposer
                       "description" => "Hidden itself, or on a hidden tag or tag folder; null with no Edge." },
         "endpoints_m" => Shapes.list(POINT).merge("type" => %w[array null],
                                                   "description" => "The Edge's two ends in world metres, through " \
-                                                                   "every transform from the root; null with no Edge.")
-      ))
+                                                                   "every transform from the root; null with no Edge."),
+        "truncated" => { "type" => "array", "items" => { "type" => "string" },
+                         "description" => "Zone labels cut to #{OccurrencePath::NAME_CHARACTERS} characters, such as " \
+                                          "zone.name; absent when none was." }
+      ), :optional => ["truncated"])
       PATH_PAGE = { "edges" => Shapes.list(PATH_ROW), "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL,
                     "units" => Shapes.object({ "endpoints_m" => { "type" => "string", "enum" => ["m"] } }) }.freeze
       AT_PARAMS = Shapes.object({

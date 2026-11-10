@@ -69,6 +69,7 @@ module PhComposer
           by_path = contained.to_h do |containment, (record, problem), item|
             row = Selection.row(containment, record, copied).merge("endpoints_m" => endpoints(item),
                                                                    "hidden" => OccurrencePath.hidden?(item.edge))
+            row = bounded_zone(row)
             [item.path, problem ? row.merge("record_problem" => problem) : row]
           end
           items.map { |item| by_path.fetch(item.path) { absent(item) } }
@@ -92,12 +93,25 @@ module PhComposer
           ends.map { |vertex| FaceCapture.point_m(vertex.position.transform(item.transform)) }
         end
 
+        # The Zone's name, Building-Segment and Level are native or user text with no bound; each over
+        # OccurrencePath::NAME_CHARACTERS is cut and named in the row's `truncated` (`zone.name`), so one row fits
+        # a reply. Its reference and ids are never cut.
+        def bounded_zone(row)
+          zone = row["zone"]
+          return row unless zone
+
+          labels = OccurrencePath.bounded_names(zone.slice("name", "building_segment", "level"))
+          cut = labels.delete("truncated")
+          row = row.merge("zone" => zone.merge(labels))
+          cut ? row.merge("truncated" => cut.map { |key| "zone.#{key}" }) : row
+        end
+
         def absent(item)
           { "path" => item.path, "reference" => nil, "zone" => nil, "reason" => item.reason, "values" => {},
             "copied" => false, "record_problem" => nil, "write_refusal" => nil, "endpoints_m" => nil,
             "hidden" => nil }
         end
-        private_class_method :find, :rows, :stored, :endpoints, :absent
+        private_class_method :find, :rows, :stored, :endpoints, :bounded_zone, :absent
       end
     end
   end

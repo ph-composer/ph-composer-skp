@@ -329,6 +329,24 @@ class ThermalBridgeAssignmentTest < PhComposerTestCase
     assert_equal "query.cursor_expired", expired["code"]
   end
 
+  # Zone labels have no bound; a long one is cut in the row and named, and the reference is kept whole.
+  def test_a_long_zone_name_is_cut_so_an_edge_row_fits_one_reply
+    long = zone("zon_EEEEEEEEEEEE", 800, [edge(801)])
+    record = PhComposer::Zones::ZONE_STORE.read(long).merge("name" => "Ž" * 26_000)
+    PhComposer::Zones::ZONE_STORE.write(long, record)
+    @model.entities << long
+
+    result = API.query(:context => @context, :name => "#{TB::FEATURE_ID}.edges.at",
+                       :params => { "paths" => [[800, 801]] })
+    row = result.dig("value", "edges", 0)
+
+    assert_operator JSON.generate(result).bytesize, :<, 24 * 1024
+    assert_equal ["Ž" * 256, ["zone.name"]], [row.dig("zone", "name"), row.fetch("truncated")]
+    assert_equal({ "zone_id" => "zon_EEEEEEEEEEEE", "zone_path" => [800], "entity_path" => [801], "entity_id" => nil },
+                 row.fetch("reference"))
+    refute path_read("edges.at", "paths" => [[100, 101]]).dig("edges", 0).key?("truncated")
+  end
+
   def test_many_edges_page_to_the_end_within_the_reply_budget
     crowd = zone("zon_DDDDDDDDDDDD", 700, (7001..7400).map { |id| edge(id) })
     @model.entities << crowd

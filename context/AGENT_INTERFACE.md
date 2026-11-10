@@ -169,7 +169,8 @@ locked, shared storage or a closed solid, its child count and the registered rec
 (`Records::EntityStore.records_on`, by presence, with `claims`). Every child is listed whatever its
 state; only `kinds` filters, and `container` carries the path's lock, visibility and shared storage. A
 missing or repeated step refuses `target.not_found`, a leaf that holds nothing `target.wrong_kind`. A
-name over 256 characters is cut and named in the row's `truncated`, so one row fits the reply budget.
+name over 256 characters is cut and named in the row's `truncated`, so one row fits the reply budget; the
+Edge path reads cut the Zone's labels the same way (`zone.name`).
 Owners answer what their actions could take in one container, each row with the refusal the action
 gives it named alone, read through the action's own check with that context in place of the open one,
 and what to open first when it is not open: `zones.make_candidates` (the Groups, `Zones.make_refusal`),

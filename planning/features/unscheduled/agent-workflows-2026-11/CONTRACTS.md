@@ -124,7 +124,8 @@ writes a dictionary. New names:
   `shared` carried down the path), `children` (`path`, `persistent_id`, `kind`, `type`, `name`, `definition_name`,
   `hidden`, `locked`, `shared`, `solid`, `child_count`, `records`: `dictionary`, `key`, `claims`), `next_cursor`,
   `total`. A name over `OccurrencePath::NAME_CHARACTERS` (256) characters is cut and named in the row's `truncated`,
-  here and in `zones.make_candidates`. A step that is missing or repeated refuses `target.not_found`; one that is not a Group or component
+  here and in `zones.make_candidates`; in `edges.at` and `edges.candidates` the Zone's name, Building-Segment and
+  Level are cut the same way and named `zone.name` and so on. A step that is missing or repeated refuses `target.not_found`; one that is not a Group or component
   `target.wrong_kind`. Filtering choice D11-a.
 - `Records::EntityStore.records_on(entity)`: the registered stores marking one entity, by presence.
 - `OccurrencePath.resolve(model, path)` (core): the read-only walk of a root-to-container path through Groups and
