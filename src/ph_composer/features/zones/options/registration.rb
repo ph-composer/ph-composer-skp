@@ -48,6 +48,7 @@ module PhComposer
             Adoption.preview(request, Inventory.rows(request.model))
           end
           install_sources_page(feature)
+          install_sources_detail(feature)
           install_actions(feature)
           feature.snapshot_section(PREFIX, :query => "#{PREFIX}.all")
           install_retargeters(feature)
@@ -77,6 +78,33 @@ module PhComposer
                                                    "sources" => Shapes.list(row), "next_cursor" => Pages::NEXT_CURSOR,
                                                    "total" => Pages::TOTAL }),
                         :examples => [{}, { "limit" => 50 }]) { |request| sources_page(request) }
+        end
+
+        SOURCES_DETAIL = "#{PREFIX}.adoption_sources.detail"
+
+        # One adoption source's row, whole, in fragments: a name longer than a list row keeps.
+        def install_sources_detail(feature)
+          feature.query(SOURCES_DETAIL,
+                        :description => "One part of one adoption source as adoption_preview lists it, exactly, as " \
+                                        "canonical JSON text in fragments: join every fragment's text in order, " \
+                                        "check its sha256 and parse it.",
+                        :refuses => (REFUSALS + %w[query.cursor_expired target.not_found]).uniq,
+                        :params => Shapes.object({ "key" => Shapes.described(Shapes::ID, "The source's key."),
+                                                   "path" => Fragments.path_param(SOURCE.fetch("properties").keys -
+                                                                                  ["key"], "[\"name\"]"),
+                                                   "cursor" => Pages::CURSOR }, :optional => ["cursor"]),
+                        :result => Shapes.object({ "key" => Shapes::ID, "type" => Fragments::TYPE,
+                                                   "fragment" => Fragments::FRAGMENT,
+                                                   "next_cursor" => Pages::NEXT_CURSOR }),
+                        :examples => [{ "key" => "legacy:level:0a1b", "path" => ["name"] }]) do |request|
+            key = request.params.fetch("key")
+            source = Adoption.preview(request, Inventory.rows(request.model)).fetch("sources")
+                             .find { |row| row.fetch("key") == key }
+            raise CodedError.new("target.not_found", "No adoption source is #{key}.") unless source
+
+            { "key" => key }.merge(Fragments.detail(request, SOURCES_DETAIL, source, request.params.fetch("path"),
+                                                    :parts => source.keys - ["key"]))
+          end
         end
 
         def sources_page(request)

@@ -129,12 +129,14 @@ that pages or fragments what was left out. Fragments join and check exactly as a
   `ph_composer.windows.units.convert_review.detail` with the same `paths` and `path`
   `["groups", 0, "sources"]` reads them, and their SHA-256 equals that digest. `units.convert` still
   takes the whole group.
-- **Zones.** `ph_composer.zones.list` with `overview` `"summary"` counts the restore offers and Zone
-  findings instead of repeating them on every page. `ph_composer.zones.restorable.list` pages the offers
+- **Zones.** `ph_composer.zones.list` with `overview` `"summary"` counts the restore offers, the Zone
+  findings and the selection's Make Zone target instead of repeating them on every page; read what Make
+  Zone can take with `ph_composer.zones.make_candidates`. `ph_composer.zones.restorable.list` pages the offers
   (`parent_path` and `zone_id` are `zones.restore`'s params), `ph_composer.zones.restorable.detail`
   reads an offer's `entity_ids` or `choice_record`, and `ph_composer.zones.findings.list` pages the
   findings. `ph_composer.zones.options.adoption_sources.list` pages the choices adoption would ask
-  about, each naming the collision `cluster` it is in.
+  about, each naming the collision `cluster` it is in; `ph_composer.zones.options.adoption_sources.detail`
+  reads one source whole, such as a name cut in the list.
 - **Thermal Bridge runs.** `ph_composer.thermal_bridges.schedule.list` with `compact` true leaves out
   each run's `points_m` and `edge_paths` and each finding's Edges, counting them, and leaves the totals
   by type, the Edge findings and the unreadable assignments to

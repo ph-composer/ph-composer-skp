@@ -191,7 +191,7 @@ collection can outgrow a reply takes an optional compact form, its whole reply t
 `schedule.edge_findings.list` and `schedule.unreadable.list`. One row of a computed
 result reads exactly through `Fragments.detail`, a path into the row the list builds: `windows.units.detail` (by
 Unit reference), `units.convert_review.detail` (a group's sources, whose SHA-256 is the compact `sources_digest`),
-`zones.restorable.detail` and `spaces.detail` (a Space, Volume or Floor Segment row, loops included). Every one
+`zones.restorable.detail`, `zones.options.adoption_sources.detail` and `spaces.detail` (a Space, Volume or Floor Segment row, loops included). Every one
 reads the owner's own whole result, so a page never computes a rule of its own.
 Implemented (API 1.36): reads that need no selection. `ph_composer.context.children` pages the entities
 directly inside the Model root or one Group or component, named by its root-to-container `path`

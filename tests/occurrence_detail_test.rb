@@ -146,9 +146,18 @@ class OccurrenceDetailTest < PhComposerTestCase
     assert_equal [450, 80], [whole.fetch("restorable").length, whole.fetch("findings").length]
 
     assert_equal "request.response_too_large", query("#{P}.zones.list", "limit" => 1, "fields" => []).fetch("code")
+    loose = Array.new(4000) do |index|
+      Sketchup::Edge.new(10_000 + index, Sketchup::Vertex.new(Geom::Point3d.new(index, 0, 0)),
+                         Sketchup::Vertex.new(Geom::Point3d.new(index, 1, 0)))
+    end
+    loose.each { |edge| @model.entities << edge }
+    @model.selection.add(loose)
+    target = API.query(:context => @context, :name => "#{P}.zones.list").dig("value", "make_zone")
     summary = completed(query("#{P}.zones.list", "limit" => 1, "fields" => [], "overview" => "summary"))
     assert_equal [450, 80], summary.values_at("restorable_total", "finding_total")
     refute summary.key?("restorable")
+    refute summary.key?("make_zone")
+    assert_equal [4000, 4000], [target.fetch("entity_ids").length, summary.fetch("make_zone_entity_count")]
 
     offers = rows_of("#{P}.zones.restorable.list", {}, "restorable", :pages => 2)
     expected = whole.fetch("restorable").sort_by { |offer| offer.fetch("zone_id") }
@@ -174,6 +183,8 @@ class OccurrenceDetailTest < PhComposerTestCase
 
   def test_450_adoption_sources_page_with_their_collision_clusters
     450.times { |index| stamp(5000 + index, format("zon_X%011d", index), "Copied #{index}", "Level #{index}") }
+    long = "S" * 30_000
+    stamp(4998, "zon_#{'L' * 12}", long, "Level 1")
     segment = { "id" => "bsg_#{'F' * 12}", "schema_version" => 1, "name" => "Copied 0", "colour" => "#123456",
                 "export_identifier" => PhComposer::Zones::Options.export_identifier("Copied 0") }
     face = floor_face(4999, rectangle(0, 0, 3, 4))
@@ -187,10 +198,14 @@ class OccurrenceDetailTest < PhComposerTestCase
     refute_empty preview.fetch("collision_clusters")
 
     sources = rows_of("#{P}.zones.options.adoption_sources.list", {}, "sources", :pages => 2)
-    assert_equal preview.fetch("sources").sort_by { |source| source.fetch("key") },
-                 sources.map { |source| source.reject { |key, _value| key == "cluster" } }
+    expected = preview.fetch("sources").map { |source| source.merge("name" => source.fetch("name")[0, 256]) }
+    assert_equal expected.sort_by { |source| source.fetch("key") },
+                 sources.map { |source| source.reject { |key, _value| %w[cluster truncated].include?(key) } }
     clustered = sources.reject { |source| source.fetch("cluster").nil? }.map { |source| source.fetch("key") }
     assert_equal preview.fetch("collision_clusters").flatten.sort, clustered.sort
+    cut = sources.find { |source| source["truncated"] == ["name"] }
+    assert_equal long, fragments_of("#{P}.zones.options.adoption_sources.detail", "key" => cut.fetch("key"),
+                                                                                  "path" => ["name"])
   end
 
   def test_a_799_edge_run_and_its_finding_page_their_edges_with_compact_schedule_rows

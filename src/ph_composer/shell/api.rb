@@ -187,7 +187,7 @@ module PhComposer
                     "units.face_areas.list and units.unhosted.list page the glazed area table; convert_review " \
                     "takes compact and convert_review.detail reads a group's sources; zones.list takes overview " \
                     "summary beside zones.restorable.list, restorable.detail and zones.findings.list; " \
-                    "zones.options.adoption_sources.list, zones.faces.assembly_usage.list and .faces; " \
+                    "zones.options.adoption_sources.list and .detail, zones.faces.assembly_usage.list and .faces; " \
                     "thermal_bridges.schedule.list takes compact beside runs.members.list, " \
                     "schedule.by_type.list, schedule.edge_findings.list and schedule.unreadable.list; and " \
                     "spaces.detail reads a Space's, Volume's or Floor Segment's part, loops included." }

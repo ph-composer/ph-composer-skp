@@ -27277,7 +27277,7 @@ Params:
         "full",
         "summary"
       ],
-      "description": "full (the default): every restore offer and Zone finding on every page. summary: their counts instead; ph_composer.zones.restorable.list and ph_composer.zones.findings.list page them."
+      "description": "full (the default): the Make Zone target and every restore offer and Zone finding on every page. summary: their counts instead; ph_composer.zones.restorable.list and ph_composer.zones.findings.list page the offers and findings, and ph_composer.zones.make_candidates what Make Zone can take."
     },
     "limit": {
       "type": "number",
@@ -27299,7 +27299,6 @@ Result:
   "additionalProperties": false,
   "required": [
     "zones",
-    "make_zone",
     "units",
     "next_cursor",
     "total"
@@ -27674,6 +27673,14 @@ Result:
       "minimum": 0,
       "description": "With overview summary: how many Zone findings."
     },
+    "make_zone_entity_count": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "description": "With overview summary: how many entities the selection's Make Zone target names, or null when it has none."
+    },
     "next_cursor": {
       "type": [
         "string",
@@ -28004,6 +28011,141 @@ Example params:
 
 ```json
 {}
+```
+
+### `ph_composer.zones.options.adoption_sources.detail`
+
+One part of one adoption source as adoption_preview lists it, exactly, as canonical JSON text in fragments: join every fragment's text in order, check its sha256 and parse it. Owner: `ph_composer.zones`.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `query.cursor_expired`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.options_adoption_required`, `zone.options_conflict`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "key",
+    "path"
+  ],
+  "properties": {
+    "key": {
+      "type": "string",
+      "description": "The source's key."
+    },
+    "path": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": {
+        "type": [
+          "string",
+          "integer"
+        ]
+      },
+      "description": "Keys and array indexes into the view, starting at collection, name, colour, export_identifier, source_id, live, recoverable: [\"name\"]."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "key",
+    "type",
+    "fragment",
+    "next_cursor"
+  ],
+  "properties": {
+    "key": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "object",
+        "array",
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ],
+      "description": "The JSON type of the value at path; a stored null or false is a value."
+    },
+    "fragment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "encoding",
+        "offset",
+        "bytes",
+        "total_bytes",
+        "sha256",
+        "text"
+      ],
+      "properties": {
+        "encoding": {
+          "type": "string",
+          "enum": [
+            "json"
+          ],
+          "description": "The fragments joined in order are the value's canonical JSON text."
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Where this fragment starts, in UTF-8 bytes of the whole text."
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "This fragment's length in UTF-8 bytes."
+        },
+        "total_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The whole text's UTF-8 length."
+        },
+        "sha256": {
+          "type": "string",
+          "description": "SHA-256 of the whole text's UTF-8 bytes, hex."
+        },
+        "text": {
+          "type": "string",
+          "description": "This fragment: whole characters, never a split one."
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "key": "legacy:level:0a1b",
+  "path": [
+    "name"
+  ]
+}
 ```
 
 ### `ph_composer.zones.options.adoption_sources.list`
@@ -64948,4 +65090,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.35 | 2026-11-10 | discover adds library_kinds, and describe answers a library kind by name (its wire kind and version, and its assignment target schema and examples or that it has none) and an installed extension by namespace. The agent connection's discover takes section, owner, limit, cursor and topic for bounded pages of operations, record kinds, reference targets, extensions, library kinds, common refusals with their meanings, contracts and the operating guide; initialize names the guide. ph_composer.library.copy's generation says it is required, as its schema already did. |
 | 1.36 | 2026-11-10 | Selection-free reads at an explicit path: ph_composer.context.children pages the entities directly in the root or one Group or component, with their state and records; zones.make_candidates, windows.units.convert_candidates and windows.units.restore_candidates list what Make Zone, Convert and Restore could take there; thermal_bridges.edges.at and edges.candidates read Edges by path in edges.selection's rows plus endpoints_m; and spaces.candidate_faces.list takes context for a first Space. A name over 256 characters is cut and named in the row's truncated. edges.selection's copied flag no longer refuses for an unreadable record on another Edge. |
 | 1.37 | 2026-11-10 | Complete reads of large definitions and metadata: ph_composer.records.detail answers one value of a record exactly in fragments with its size and SHA-256; records.list pages by size and takes metadata summary; assemblies.assemblies.layers.list and segments.list, windows.types.elements.list, assemblies.materials.uses.list and windows.<collection>.uses.list page a definition's parts and derived results; and preview takes within and preview_part, so a preview larger than a reply keeps its proposal_digest and is read by part. |
-| 1.38 | 2026-11-10 | Complete reads of large occurrence, geometry and schedule data: windows.units.list takes fields and metadata summary and windows.units.detail reads one Unit's part in fragments; units.host_extent takes geometry summary beside host_extent.holes and .points; units.face_areas.list and units.unhosted.list page the glazed area table; convert_review takes compact and convert_review.detail reads a group's sources; zones.list takes overview summary beside zones.restorable.list, restorable.detail and zones.findings.list; zones.options.adoption_sources.list, zones.faces.assembly_usage.list and .faces; thermal_bridges.schedule.list takes compact beside runs.members.list, schedule.by_type.list, schedule.edge_findings.list and schedule.unreadable.list; and spaces.detail reads a Space's, Volume's or Floor Segment's part, loops included. |
+| 1.38 | 2026-11-10 | Complete reads of large occurrence, geometry and schedule data: windows.units.list takes fields and metadata summary and windows.units.detail reads one Unit's part in fragments; units.host_extent takes geometry summary beside host_extent.holes and .points; units.face_areas.list and units.unhosted.list page the glazed area table; convert_review takes compact and convert_review.detail reads a group's sources; zones.list takes overview summary beside zones.restorable.list, restorable.detail and zones.findings.list; zones.options.adoption_sources.list and .detail, zones.faces.assembly_usage.list and .faces; thermal_bridges.schedule.list takes compact beside runs.members.list, schedule.by_type.list, schedule.edge_findings.list and schedule.unreadable.list; and spaces.detail reads a Space's, Volume's or Floor Segment's part, loops included. |

@@ -76,9 +76,10 @@ module PhComposer
         "fields" => { "type" => "array", "items" => { "type" => "string", "enum" => VALUE_KEYS },
                       "description" => "Project each row to these values; the whole row when absent." },
         "overview" => { "type" => "string", "enum" => %w[full summary],
-                        "description" => "full (the default): every restore offer and Zone finding on every page. " \
-                                         "summary: their counts instead; #{Zones::RESTORABLE_LIST} and " \
-                                         "#{Zones::FINDINGS_LIST} page them." },
+                        "description" => "full (the default): the Make Zone target and every restore offer and " \
+                                         "Zone finding on every page. summary: their counts instead; " \
+                                         "#{Zones::RESTORABLE_LIST} and #{Zones::FINDINGS_LIST} page the offers " \
+                                         "and findings, and #{FEATURE_ID}.make_candidates what Make Zone can take." },
         "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR
       }, :optional => %w[ids paths fields overview limit cursor]).freeze
       RESTORABLE = Shapes.object({
@@ -112,8 +113,11 @@ module PhComposer
           "zones" => Shapes.list(PROJECTED_ZONE_ROW, :description => "One page of Zone occurrences in path order."),
           "restorable_total" => Pages::TOTAL.merge("description" => "With overview summary: how many restore offers."),
           "finding_total" => Pages::TOTAL.merge("description" => "With overview summary: how many Zone findings."),
+          "make_zone_entity_count" => { "type" => %w[integer null], "minimum" => 0,
+                                        "description" => "With overview summary: how many entities the selection's " \
+                                                         "Make Zone target names, or null when it has none." },
           "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL
-        ), :optional => %w[restorable findings restorable_total finding_total]
+        ), :optional => %w[make_zone restorable findings restorable_total finding_total make_zone_entity_count]
       ).freeze
       RESTORABLE_ROW = RESTORABLE.merge(
         "required" => RESTORABLE.fetch("required") - Zones::OFFER_DETAIL,

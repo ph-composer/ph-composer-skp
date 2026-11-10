@@ -164,11 +164,13 @@ New names:
 - `ph_composer.windows.units.convert_review` param `compact`: groups without `sources` (`source_count`,
   `sources_digest`), left-out rows without `paths` (`path_count`, `first_path`).
   `ph_composer.windows.units.convert_review.detail` (`paths`, `path` from `groups` or `left_out`, `cursor`).
-- `ph_composer.zones.list` param `overview` (`full` | `summary`: `restorable_total`, `finding_total`).
+- `ph_composer.zones.list` param `overview` (`full` | `summary`: no `make_zone`, `restorable` or `findings`;
+  `make_zone_entity_count`, `restorable_total`, `finding_total`).
   `ph_composer.zones.restorable.list`: offers by `zone_id` without `entity_ids` and `choice_record`, labels cut.
   `ph_composer.zones.restorable.detail` (`zone_id`, `path`, `cursor`). `ph_composer.zones.findings.list`.
   `ph_composer.zones.options.adoption_sources.list`: `required`, `suggested_segment`, sources by `key` with
-  `cluster`. `ph_composer.zones.faces.assembly_usage.list` (rows without `faces`) and
+  `cluster`, names cut; `ph_composer.zones.options.adoption_sources.detail` (`key`, `path`, `cursor`).
+  `ph_composer.zones.faces.assembly_usage.list` (rows without `faces`) and
   `ph_composer.zones.faces.assembly_usage.faces` (`assembly_id`).
 - `ph_composer.thermal_bridges.schedule.list` param `compact`: runs without `points_m` and `edge_paths`
   (`index`, `edge_count`, `point_count`, labels cut), findings without `locate` (`edge_count`, message cut at 512),

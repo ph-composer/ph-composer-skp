@@ -141,9 +141,11 @@ module PhComposer
       end
       whole = overview(request.model, rows)
       if params["overview"] == "summary"
-        whole = whole.reject { |key, _value| %w[restorable findings].include?(key) }
+        target = whole.fetch("make_zone")
+        whole = whole.reject { |key, _value| %w[make_zone restorable findings].include?(key) }
                      .merge("restorable_total" => whole.fetch("restorable").length,
-                            "finding_total" => whole.fetch("findings").length)
+                            "finding_total" => whole.fetch("findings").length,
+                            "make_zone_entity_count" => target && target.fetch("entity_ids").length)
       end
       whole.merge("next_cursor" => next_cursor, "total" => zones.length)
     end
