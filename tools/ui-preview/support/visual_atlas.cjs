@@ -272,7 +272,7 @@ check({ name: "visual_atlas", output }, async ({ newPage, step }) => {
         await page.locator("dialog.phc-create-space[open]").waitFor(); await cleanPreview();
         await shot("key-popup", "spacescreate", "space-create-review");
         await open("spaces", "overview", "Spaces");
-        for (const [label, screen] of [["Move Living to another Zone", "space-move"], ["Delete Living", "space-delete"]]) {
+        for (const [label, screen] of [["Move Living to Zone", "space-move"], ["Delete Living", "space-delete"]]) {
           await page.getByRole("button", { name: label, exact: true }).click();
           await shot("key-popup", "spaces", screen); await cancel();
         }

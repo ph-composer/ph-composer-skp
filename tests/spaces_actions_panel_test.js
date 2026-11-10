@@ -140,7 +140,7 @@ test("Delete confirms in the shared dialog, naming what goes, and Cancel sends n
 test("Move to Zone offers the other Zones and sends the chosen one", function () {
   var p = page();
   p.receive(snapshot());
-  p.click(p.action("Move Living to another Zone"));
+  p.click(p.action("Move Living to Zone"));
   var dialog = p.context.document.querySelector("dialog");
   var select = dialog.querySelector("select");
   assert.deepStrictEqual(select.querySelectorAll("option").map(function (node) { return node.textContent; }),
@@ -228,7 +228,7 @@ test("a row change waits while a cell draft is held", function () {
   })[0];
   name.value = "Lounge"; name.listeners.input({});
   var before = p.sent.length;
-  p.click(p.action("Move Living to another Zone"));
+  p.click(p.action("Move Living to Zone"));
   assert.strictEqual(p.sent.length, before);
   assert.strictEqual(p.context.document.querySelector("dialog"), null, "no dialog opens over the draft");
   assert.match(p.panel.state.ui.notice.message, /Finish or cancel/);

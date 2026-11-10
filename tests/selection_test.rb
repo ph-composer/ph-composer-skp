@@ -413,7 +413,7 @@ class SelectionTest < PhComposerTestCase
   private
 
   def depth_prompt(unit)
-    "Ground depth (#{unit})#{ZONES::Selection::Client::PROMPT_PADDING}"
+    "Ground depth (#{unit})#{PhComposer::HostPrompt::PADDING}"
   end
 
   def set_ground_depth(millimetres)
