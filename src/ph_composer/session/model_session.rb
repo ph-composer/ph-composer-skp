@@ -96,6 +96,23 @@ module PhComposer
       @committing
     end
 
+    # Runs the block as an operation the extension opens outside a change request, such as deferred
+    # protection. Its commit is an outside change to the revision, as a user's is; while the block runs,
+    # transaction callbacks SketchUp reports to another Model's observers are this session's
+    # (context/SKETCHUP_HOST_BEHAVIOR.md, `Sessions.for_transaction`).
+    def operating
+      previous = @operating
+      @operating = true
+      yield
+    ensure
+      @operating = previous
+    end
+
+    # True while one of this session's own operations is open: a change request or an `operating` block.
+    def operating?
+      @committing || @operating ? true : false
+    end
+
     # Completes deferred Model work before something reads the Model as a whole.
     def settle
       @feature_state.each_value { |state| state.settle if state.respond_to?(:settle) }

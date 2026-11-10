@@ -59,22 +59,26 @@ module PhComposer
       # Locks `volume` in one transparent operation. A lock that cannot be written is put back and the
       # operation still commits, because aborting it would undo the step it joined. Inside an extension
       # operation (Delete Space closing the path) the lock joins that operation instead: a nested start
-      # would split its Undo step. Answers whether it wrote.
+      # would split its Undo step. Either way the session owns the operation's callbacks (`operating`).
+      # Answers whether it wrote.
       def protect(model, volume)
         return false unless volume && valid?(volume) && !volume.locked?
 
-        started = !Sessions.for(model).mutating? && model.start_operation("Protect Volume", true, false, true)
-        begin
-          volume.locked = true
-        rescue StandardError => error
-          Diagnostics.exception("space_protect", error)
+        session = Sessions.for(model)
+        session.operating do
+          started = !session.mutating? && model.start_operation("Protect Volume", true, false, true)
           begin
-            volume.locked = false
-          rescue StandardError
-            nil
+            volume.locked = true
+          rescue StandardError => error
+            Diagnostics.exception("space_protect", error)
+            begin
+              volume.locked = false
+            rescue StandardError
+              nil
+            end
+          ensure
+            model.commit_operation if started
           end
-        ensure
-          model.commit_operation if started
         end
         true
       end
@@ -84,13 +88,15 @@ module PhComposer
       def release(model, volume)
         return false unless volume && valid?(volume) && volume.locked?
 
-        started = model.start_operation("Unprotect Volume", true, false, true)
-        begin
-          volume.locked = false
-        rescue StandardError => error
-          Diagnostics.exception("space_release", error)
-        ensure
-          model.commit_operation if started
+        Sessions.for(model).operating do
+          started = model.start_operation("Unprotect Volume", true, false, true)
+          begin
+            volume.locked = false
+          rescue StandardError => error
+            Diagnostics.exception("space_release", error)
+          ensure
+            model.commit_operation if started
+          end
         end
         !volume.locked?
       end

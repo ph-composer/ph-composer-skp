@@ -64,12 +64,13 @@ module PhComposer
       # The session a transaction callback belongs to. SketchUp reports the transactions of an operation on a
       # Model it is not showing to the shown Model's observers, with the shown Model as the argument
       # (context/SKETCHUP_HOST_BEHAVIOR.md); a callback that arrives while another session is inside its own
-      # operation is that session's, so neither Model's revision is misread.
+      # operation (a change request or an `operating` block) is that session's, so neither Model's revision is
+      # misread.
       def for_transaction(model)
         own = sessions[model.object_id]
-        return own if own&.mutating?
+        return own if own&.operating?
 
-        sessions.values.find(&:mutating?) || self.for(model)
+        sessions.values.find(&:operating?) || self.for(model)
       end
 
       # The open session with this id, or nil when it was never issued or its Model has closed.

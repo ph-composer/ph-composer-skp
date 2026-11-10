@@ -398,9 +398,10 @@ through was not measured, so no tool-name write guard is added. New names and ru
   status `abandoned` and no code; `outcome` by its key answers `request.outcome_unavailable`, as for a key never
   sent. A call already running finishes, as before.
 - `Sessions.for_transaction(model)`: the session a transaction callback belongs to. While a session is inside its
-  own operation (`ModelSession#mutating?`), the callback is that session's, the reported Model's own first;
-  otherwise it is `Sessions.for(model)`. Measured commit callbacks arrive inside the operation; a late one is
-  not routed. The three transaction callbacks of
+  own operation (`ModelSession#operating?`: inside `mutate`, or inside `ModelSession#operating`, which wraps an
+  operation the extension opens outside a change request, today Spaces' Volume protection and release), the
+  callback is that session's, the reported Model's own first; otherwise it is `Sessions.for(model)`. Measured
+  commit callbacks arrive inside the operation; a late one is not routed. The three transaction callbacks of
   `HostObservers::ModelObserver` use it, so a write to a Model that is not shown advances only its own revision.
 - `EditContext.shown!(model)`: raises `session.inactive` for a Model SketchUp is not showing. `context.open` and
   `context.root` (before any path change), `spaces.context.open` (unless the path is already open),
