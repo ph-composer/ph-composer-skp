@@ -197,6 +197,36 @@ class ExportDiagnosticsTest < PhComposerTestCase
     assert_includes outcome.fetch("message"), namespace
   end
 
+  def test_metadata_checks_read_what_extraction_reads_and_name_every_reserved_key
+    ready_model
+    store = PhComposer::ThermalBridges::Assignment::STORE
+    edge = Sketchup::Edge.new(901, Geom::Point3d.new(0, 0, 0), Geom::Point3d.new(10, 0, 0))
+    type = assignment_invoke("ph_composer.thermal_bridges.types.create",
+                             "values" => { "name" => "Cut", "psi_w_mk" => 0.1 }).dig("value", "id")
+    store.write(edge, "id" => "tbe_CCCCCCCCCCCC", "schema_version" => 1, "thermal_bridge_type_id" => type,
+                      "quantity" => 1, "user_data" => {}, "extension_data" => { "test.req" => envelope("required") })
+    definition = Sketchup::ComponentDefinition.new(Sketchup::Entities.new([edge]))
+    definition.behavior.cuts_opening = true
+    @model.entities << Sketchup::ComponentInstance.new(900, definition)
+    assert_empty blocking_codes, "an Edge inside a cutting component is not extracted, so its metadata cannot block"
+    definition.behavior.cuts_opening = false
+    assert_includes blocking_codes, "extension.unavailable"
+
+    check = PhComposer::Export::MetadataCheck
+    stored = { "id" => "asm_X", "user_data" => { "ph_composer" => 1, "test" => 2 } }
+    found = check.problems(stored, :catalog => PhComposer::Registry.current.catalog, :claims => {},
+                                   :reserved => %w[ph_composer test], :user_data => true)
+    assert_equal 2, found.length
+    assert_equal found.first, check.reserved_problem("asm_X", stored.fetch("user_data"), %w[ph_composer test])
+  end
+
+  def test_an_oversized_committed_result_naming_a_part_is_trimmed_not_refused
+    value = { "part" => "x", "rows" => ["y" * 30_000] }
+    outcome = PhComposer::Outcome.build("completed", "ok", "Done.", "committed", 4, :value => value)
+    answer = @executor.send(:result, outcome, :acted => true).fetch("structuredContent")
+    assert_equal %w[completed committed], answer.values_at("status", "effect")
+  end
+
   def test_a_closed_session_drops_its_tasks
     task = blocked_run
     PhComposer::Export::Tasks.for(@session).detach

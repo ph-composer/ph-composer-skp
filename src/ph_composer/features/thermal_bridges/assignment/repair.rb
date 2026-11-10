@@ -19,6 +19,8 @@ module PhComposer
         # A readable record's values a reply shows are cut so any record fits: text to a name's length, a
         # value that is not text or a number to its size and digest, and key lists to this many.
         MAX_KEYS = 50
+        # A parsed JSON number has no size bound; one longer than this is given by size and digest.
+        MAX_NUMBER_BYTES = 64
         # What ordinary clear serves, which this refuses so it never becomes a lax clear.
         NOT_NEEDED = "A Zone holds this Edge and its assignment can be read; clear it with " \
                      "ph_composer.thermal_bridges.edges.clear."
@@ -169,7 +171,8 @@ module PhComposer
             if value.is_a?(String) && value.length > OccurrencePath::NAME_CHARACTERS
               cut << field
               value = value[0, OccurrencePath::NAME_CHARACTERS]
-            elsif !(value.nil? || value.is_a?(String) || value.is_a?(Numeric))
+            elsif !(value.nil? || value.is_a?(String) || value.is_a?(Numeric)) ||
+                  (value.is_a?(Numeric) && JSON.generate(value).bytesize > MAX_NUMBER_BYTES)
               cut << field
               value = Fragments.summary(value)
             end

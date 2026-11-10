@@ -21,7 +21,7 @@ module PhComposer
       # namespace a definition read names to the payload fields it exports.
       def problems(stored, catalog:, claims:, reserved:, user_data: false, target_kind: nil, named: {})
         id = stored.fetch("id")
-        found = user_data ? [reserved_problem(id, stored.fetch("user_data", {}), reserved)].compact : []
+        found = user_data ? reserved_problems(id, stored.fetch("user_data", {}), reserved) : []
         extensions = stored.fetch("extension_data", {})
         (extensions.is_a?(Hash) ? extensions : {}).each do |namespace, envelope|
           claimed = target_kind && claims[[namespace, target_kind]]
@@ -35,14 +35,19 @@ module PhComposer
         found
       end
 
-      # The passed user_data's first reserved top-level key, as a problem, or nil.
+      # The passed user_data's first reserved top-level key, as a problem, or nil: what extraction raises.
       def reserved_problem(id, value, reserved)
-        taken = value.is_a?(Hash) ? (value.keys & reserved).first : nil
-        return nil unless taken
+        reserved_problems(id, value, reserved).first
+      end
 
-        Problem.new(:code => "export.blocked",
-                    :message => "#{id} has user_data under the reserved key #{taken}, which an exporter writes " \
-                                "itself. Rename that key. Nothing was written.")
+      # One problem per reserved top-level key the passed user_data takes, for a preflight to list them all.
+      def reserved_problems(id, value, reserved)
+        taken = value.is_a?(Hash) ? value.keys & reserved : []
+        taken.map do |key|
+          Problem.new(:code => "export.blocked",
+                      :message => "#{id} has user_data under the reserved key #{key}, which an exporter writes " \
+                                  "itself. Rename that key. Nothing was written.")
+        end
       end
 
       # An envelope a contributor exports must be understood by an installed extension.
@@ -99,25 +104,32 @@ module PhComposer
         end
       end
 
-      # The readable records `store` keeps on entities anywhere in the Model, through Groups and component
-      # contents, each entity once however many placements show it. An unreadable one is the owner's own
+      # The readable records `store` keeps on entities extraction reads (GeometrySnapshot.walk), through Groups
+      # and component contents, each entity once however many placements show it: a Face or Edge inside a
+      # cutting component is not captured, so its record is not read. An unreadable record is the owner's own
       # preflight finding already.
       def entity_records(model, store)
         found = []
         seen = {}
-        pending = [model.entities]
+        pending = [[model.entities, true]]
         until pending.empty?
-          pending.shift.each do |entity|
-            next if seen[entity.object_id]
+          entities, captured = pending.shift
+          entities.each do |entity|
+            geometry = entity.is_a?(Sketchup::Face) || entity.is_a?(Sketchup::Edge)
+            next if seen[[entity.object_id, captured]] || (geometry && !captured)
 
-            seen[entity.object_id] = true
+            seen[[entity.object_id, captured]] = true
             record = readable(store, entity)
             found << record if record
             contents = OccurrencePath.contents(entity)
-            pending << contents if contents
+            pending << [contents, captured && !cuts?(entity)] if contents
           end
         end
-        found
+        found.uniq(&:object_id)
+      end
+
+      def cuts?(entity)
+        entity.is_a?(Sketchup::ComponentInstance) && entity.definition.behavior.cuts_opening?
       end
 
       def readable(store, entity)
@@ -128,7 +140,7 @@ module PhComposer
       rescue CodedError, TypeError
         nil
       end
-      private_class_method :readable
+      private_class_method :readable, :cuts?
     end
   end
 end

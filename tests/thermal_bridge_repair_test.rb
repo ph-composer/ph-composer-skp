@@ -185,6 +185,14 @@ class ThermalBridgeRepairTest < PhComposerTestCase
     assert_equal [50, 80, ["quantity"]], [discarded.fetch("user_data_keys").length,
                                           discarded.fetch("user_data_key_total"), discarded.fetch("truncated")]
     assert_operator JSON.generate(preview).bytesize, :<, PhComposer::Pages::REPLY_BYTES
+
+    huge = text.sub(/"quantity":\[[^\]]*\]/, "\"quantity\":#{'9' * 30_001}")
+    @stranded.set_attribute(STORE.dictionary, STORE.key, huge)
+    @session.host_event(:transaction_committed)
+    page = raw_query("edges.repair_candidates", "limit" => 1)
+    assert_operator JSON.generate(page).bytesize, :<, PhComposer::Pages::REPLY_BYTES
+    assert_equal [digest(huge), ["quantity"]], [page.dig("value", "edges", 0, "fingerprint"),
+                                                page.dig("value", "edges", 0, "record", "truncated")]
   end
 
   def test_diagnostics_name_the_repair_route

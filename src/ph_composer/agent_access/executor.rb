@@ -60,7 +60,7 @@ module PhComposer
         end
         answer = tool.run.call(binding.context, arguments, live, binding.sequencer)
         note_committed(live, arguments, answer) if name == "invoke"
-        result(answer, :acted => tool.capability != "read")
+        result(answer, :acted => acts?(tool, arguments))
       rescue CodedError => error
         result(Outcome.refused(error.code, error.message, :revision => nil, :detail => error.detail))
       end
@@ -122,7 +122,7 @@ module PhComposer
       # never turned into a refusal by its size.
       def result(value, acted: false)
         text = JSON.generate(value)
-        if text.bytesize > MAX_RESULT_BYTES && acted && outcome?(value) && !part_read?(value)
+        if text.bytesize > MAX_RESULT_BYTES && acted && outcome?(value)
           value = trimmed(value)
           text = JSON.generate(value)
           value = minimal(value) if text.bytesize > MAX_RESULT_BYTES
@@ -142,10 +142,10 @@ module PhComposer
         value.is_a?(Hash) && value.key?("status") && value.key?("effect")
       end
 
-      # A part read of an ended export task (export_status with part) changes nothing, so an oversized one is
-      # refused as any read is, never trimmed to a receipt.
-      def part_read?(value)
-        value["value"].is_a?(Hash) && value["value"].key?("part")
+      # Whether a call may have changed something, so an oversized answer is trimmed rather than refused: every
+      # tool but the reads, and not export_status with part, which reads what an ended task kept.
+      def acts?(tool, arguments)
+        tool.capability != "read" && !(tool.name == "export_status" && arguments.key?("part"))
       end
 
       # What a tool that acts did is never reported as refused because its answer was large: the outcome
