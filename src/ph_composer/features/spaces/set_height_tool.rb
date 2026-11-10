@@ -169,11 +169,10 @@ module PhComposer
 
       def onUserText(text, view)
         @drag = nil
-        return refuse(@read_error || NOTHING_PICKED) unless @picked_path
-
+        # Read afresh: a typed value is its own gesture, and a repaired record no longer reports its old error.
         forget_read
-        candidate = picked
-        return refuse(@read_error || GONE) unless candidate
+        candidate = candidates.find { |found| found.path == @picked_path }
+        return refuse(@read_error || (@picked_path ? GONE : NOTHING_PICKED)) unless candidate
 
         height = parse(text)
         return refuse(BAD_ENTRY) unless height
@@ -188,10 +187,7 @@ module PhComposer
         candidate, height, colour = shown
         return unless candidate && view.respond_to?(:draw)
 
-        # Read for this frame: toggling section cuts moves no revision.
-        points = ColourBy::OccurrenceVisibility.new(@session.model).clip_segments(
-          Prism.outline(candidate.prism_at(height)).flatten(1).map { |corner| inches(corner) }, candidate.path
-        )
+        points = outline(candidate, height)
         return if points.empty?
 
         view.drawing_color = Sketchup::Color.new(*colour) if view.respond_to?(:drawing_color=)
@@ -241,12 +237,20 @@ module PhComposer
         report_exception(error, @session.model.active_view, :notify => true)
       end
 
-      # The visible Volume the selection names, or nil when the user has to click one.
+      # The Volume the selection names while some of it shows, or nil when the user has to click one.
       def selected_candidate
         target = EditFloorSurfaceMenu.target(@session)
         return if target.is_a?(String)
 
-        candidates.find { |candidate| candidate.path == target.last }
+        candidate = candidates.find { |found| found.path == target.last }
+        candidate unless candidate.nil? || outline(candidate, candidate.height.to_f).empty?
+      end
+
+      # The prism's edges an active section leaves, in world inches. Read each time: toggling a section cut moves
+      # no revision.
+      def outline(candidate, height)
+        corners = Prism.outline(candidate.prism_at(height)).flatten(1).map { |corner| inches(corner) }
+        ColourBy::OccurrenceVisibility.new(@session.model).clip_segments(corners, candidate.path)
       end
 
       # Every visible Volume's prism, read once per revision. An unreadable record leaves nothing to pick and

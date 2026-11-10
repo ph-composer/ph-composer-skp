@@ -350,6 +350,33 @@ class SpacesSetHeightToolTest < PhComposerTestCase
     occurrences.define_singleton_method(:scan, original)
   end
 
+  def test_a_selected_volume_the_section_cuts_away_whole_is_not_picked_and_one_cut_part_way_is
+    upper_storey_and_section_below(2.9)
+    upper = zone.entities.to_a.last
+    start_on(upper.entities.to_a.first, [zone, upper])
+    assert_equal CLICK_ONE, Sketchup.status_texts.last, "the upper storey is above the cut"
+
+    start_on(volume, [zone, space])
+    assert_equal KNOWN, Sketchup.status_texts.last, "Living shows below the cut"
+  end
+
+  def test_a_read_error_at_the_start_is_not_reported_once_the_records_read_again
+    occurrences = PhComposer::Spaces::Occurrences
+    original = occurrences.method(:scan)
+    unreadable = PhComposer::CodedError.new("record.unreadable", "Bad Volume.")
+    occurrences.define_singleton_method(:scan) { |*| raise unreadable }
+    start_on(space, [zone])
+    occurrences.define_singleton_method(:scan, original)
+    second_volume
+    start_on(space, [zone])
+
+    typed({ "3m" => 3 * INCHES }, "3m")
+
+    assert_equal "Click a Space first, then type its height. Nothing was written.", Sketchup.status_texts.last
+  ensure
+    occurrences.define_singleton_method(:scan, original)
+  end
+
   def test_a_hidden_selected_volume_is_not_picked
     start_on(volume, [zone, space])
     volume.hidden = true
