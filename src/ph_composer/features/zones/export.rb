@@ -59,10 +59,25 @@ module PhComposer
                         "object_id" => finding.dig("reference", "zone_id"), "message" => finding.fetch("message"),
                         "blocks_export" => false }
         end
+        findings.concat(metadata_findings(request, zones))
         repair = { "id" => "#{FEATURE_ID}.solve_all", "label" => "Re-solve adjacencies before export",
                    "checked" => true, "action" => "#{FEATURE_ID}.solve_adjacency",
                    "params" => { "zones" => zones.map(&:reference) } }
         { "findings" => findings, "repairs" => zones.empty? ? [] : [repair] }
+      end
+
+      # The metadata extraction refuses, read as `records` reads it: each Zone with its user_data passed
+      # through, and alone each Building-Segment and Level choice a Zone names, the only ones it reads.
+      def metadata_findings(request, zones)
+        check = Export::MetadataCheck
+        records = zones.map(&:record)
+        named = { Options::SEGMENTS => "building_segment_id", Options::LEVELS => "level_id" }
+        check.findings(request, records, :section => SECTION, :user_data => true, :target_kind => REFERENCE_KIND) +
+          named.flat_map do |kind, field|
+            ids = records.select { |record| record["schema_version"] == 2 }.filter_map { |record| record[field] }
+            chosen = check.definitions(request, kind.id).select { |choice| ids.include?(choice["id"]) }
+            check.findings(request, chosen, :section => SECTION)
+          end
       end
 
       # Gross area per Assembly over the emitted Faces. Window net areas are the Windows report's.

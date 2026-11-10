@@ -95,17 +95,33 @@ module PhComposer
         result
       end
 
+      # The projection's findings and repairs, beside every metadata problem extraction would refuse. The
+      # projection reads through the real RecordReader, which stops at the first problem; that row is left
+      # out when the metadata rows already name it.
       def preflight(request)
+        metadata = metadata_findings(request)
         snapshot = Export::GeometrySnapshot.capture(request.model, :revision => request.session.revision)
         records = Export::RecordReader.new(request.engine, request.registry.catalog,
                                            :claims => Export::Collection.claims(request.registry),
                                            :reserved => Export::Collection.reserved(request.registry))
         reader = Export::SnapshotReader.new(records, snapshot, :registry => request.registry)
         result = reader.within(APERTURES) { projection(reader) }
-        { "findings" => result.findings, "repairs" => result.repairs.uniq { |row| row.fetch("id") } }
+        { "findings" => result.findings + metadata, "repairs" => result.repairs.uniq { |row| row.fetch("id") } }
       rescue CodedError => error
-        { "findings" => [{ "code" => error.code, "section" => APERTURES, "object_id" => nil,
-                           "message" => error.message, "blocks_export" => true }], "repairs" => [] }
+        named = Array(metadata).any? { |row| row.values_at("code", "message") == [error.code, error.message] }
+        refused = { "code" => error.code, "section" => APERTURES, "object_id" => nil,
+                    "message" => error.message, "blocks_export" => true }
+        { "findings" => (named ? [] : [refused]) + Array(metadata), "repairs" => [] }
+      end
+
+      # The metadata extraction refuses, read as `assessment` reads it: each Window Type and product alone,
+      # and each Unit with its user_data passed through.
+      def metadata_findings(request)
+        check = Export::MetadataCheck
+        kinds = [TYPE_KIND] + Products::KINDS.values.map(&:id)
+        kinds.flat_map { |kind| check.findings(request, check.definitions(request, kind), :section => APERTURES) } +
+          check.findings(request, check.entity_records(request.model, Units::STORE),
+                         :section => APERTURES, :user_data => true, :target_kind => Units::REFERENCE_KIND)
       end
 
       def report(result, display_units)

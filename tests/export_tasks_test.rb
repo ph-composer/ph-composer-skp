@@ -2,6 +2,7 @@
 
 require_relative "test_helper"
 require "tmpdir"
+require "digest"
 
 class ExportTasksTest < PhComposerTestCase
   OWNER = PhComposer::Export::Tasks::Owner.new("test-owner", -> { true })
@@ -371,6 +372,43 @@ class ExportTasksTest < PhComposerTestCase
     assert @runtime.stopped
   end
 
+  # A written run keeps the report it rendered and its result for its caller, read in fragments that join to
+  # the written report's bytes; a run stopped after translation keeps its findings and says it rendered none.
+  # Each task's cursors are its own.
+  def test_a_written_or_stopped_run_keeps_what_it_generated_and_cursors_stay_with_their_task
+    written = start.fetch("task_id")
+    drain
+    @runtime.success_with({ "type" => "Model", "rooms" => [] },
+                          :findings => %w[zone wall].map do |id|
+                            { "code" => "fixture.note", "section" => "fixture", "object_id" => id,
+                              "message" => "A note.", "blocks_export" => false }
+                          end)
+    drain
+    diagnostics = @tasks.status(written, OWNER, "compact" => true).fetch("diagnostics")
+    assert_equal [2, 0, nil], diagnostics.values_at("findings", "blocking", "report_absent")
+    report = read_fragments(written, "report")
+    assert_equal File.read(File.join(@directory, "test-export-report.html")), report
+    assert_equal diagnostics.dig("report", "sha256"),
+                 Digest::SHA256.hexdigest(PhComposer::CanonicalJson.generate(report))
+    assert_equal @tasks.status(written, OWNER).dig("outcome", "value", "result"), read_fragments(written, "result")
+
+    stopped = start(:replace => true).fetch("task_id")
+    drain
+    @runtime.success
+    @tasks.cancel(stopped, OWNER)
+    drain
+    kept = @tasks.status(stopped, OWNER, "compact" => true).fetch("diagnostics")
+    assert_equal [0, nil, "not_rendered"], kept.values_at("findings", "report", "report_absent")
+    refute_nil kept.fetch("result")
+
+    page = @tasks.status(written, OWNER, "part" => "findings", "limit" => 1)
+    assert_equal [["zone"], 2], [page.fetch("findings").map { |row| row.fetch("object_id") }, page.fetch("total")]
+    error = assert_raises(PhComposer::CodedError) do
+      @tasks.status(stopped, OWNER, "part" => "findings", "limit" => 1, "cursor" => page.fetch("next_cursor"))
+    end
+    assert_equal "params.invalid", error.code
+  end
+
   # A write the filesystem refuses fails in fixed words: neither the status nor the latest task names
   # the destination folder or file.
   def test_a_failed_pair_write_names_no_path
@@ -637,6 +675,19 @@ class ExportTasksTest < PhComposerTestCase
   def start(replace: false)
     approval = PhComposer::NativeApproval::Granted.new(:path => @destination, :replace => replace)
     @tasks.start(:owner => OWNER, :approval => approval, :runtime_factory => @factory)
+  end
+
+  # A part a task kept, its fragments joined and parsed.
+  def read_fragments(id, part)
+    text = +""
+    cursor = nil
+    loop do
+      answer = @tasks.status(id, OWNER, { "part" => part, "cursor" => cursor }.compact)
+      text << answer.dig("fragment", "text")
+      cursor = answer.fetch("next_cursor")
+      break unless cursor
+    end
+    JSON.parse(text)
   end
 
   def approved_destination

@@ -115,7 +115,8 @@ module PhComposer
         # The finding on an assigned Edge no Zone holds; it is not exported.
         def outside(fact)
           finding("thermal_bridge.outside_zone", "An assigned Edge is not in a Zone (#{fact.reason.tr('_', ' ')}), " \
-                                                 "so it is not exported. Move it into a Zone, or clear it.",
+                                                 "so it is not exported. Move it into a Zone, or remove its " \
+                                                 "assignment: #{Assignment::Repair::ROUTE}.",
                   [fact.path], false).merge("path" => fact.path)
         end
 

@@ -113,6 +113,43 @@ module PhComposer
                                                     "description" => "Edges whose assignment was removed." } })
       PRECONDITIONS = ["Each Edge is inside a Zone, reached through no shared, locked or other Zone storage.",
                        "Each target carries the reference and values edges.selection last read."].freeze
+      REPAIR = %w[record.unreadable reference.in_use target.changed target.locked target.not_found
+                  target.shared_definition target.wrong_kind thermal_bridge.repair_not_needed].freeze
+      FINGERPRINT = { "type" => "string", "pattern" => "^[0-9a-f]{64}$",
+                      "description" => "SHA-256 of the stored text (a non-text value's canonical JSON), hex, as " \
+                                       "edges.repair_candidates gives it." }.freeze
+      REPAIR_ROW = Shapes.object({
+        "path" => Assignment::Target::PATH,
+        "condition" => { "type" => "string", "enum" => %w[unreadable stranded],
+                         "description" => "unreadable: the stored text is not a JSON object; stranded: a readable " \
+                                          "record on an Edge no Zone holds, which edges.clear cannot name." },
+        "containment" => { "type" => %w[string null],
+                           "description" => "Why no Zone holds the Edge, as zones.containment reads it; null in " \
+                                            "a Zone." },
+        "fingerprint" => FINGERPRINT, "bytes" => { "type" => "integer", "minimum" => 0 },
+        "record" => { "type" => %w[object null],
+                      "description" => "A readable record's id, thermal_bridge_type_id and quantity; null otherwise." },
+        "write_refusal" => REFUSAL
+      })
+      REPAIR_PARAMS = Shapes.object({
+        "path" => Assignment::Target::PATH.merge("minItems" => 1,
+                                                 "description" => "The root-to-Edge persistent-id path."),
+        "fingerprint" => FINGERPRINT
+      }).freeze
+      REPAIR_RESULT = Shapes.object({
+        "path" => Assignment::Target::PATH,
+        "condition" => REPAIR_ROW.dig("properties", "condition"),
+        "containment" => REPAIR_ROW.dig("properties", "containment"),
+        "stored" => { "type" => "object",
+                      "description" => "The text removed: bytes, sha256, readable, valid and excerpt, its first " \
+                                       "#{Assignment::Repair::EXCERPT} characters." },
+        "discarded" => { "type" => %w[object null],
+                         "description" => "What a readable record held: id, thermal_bridge_type_id, quantity, the " \
+                                          "first #{Assignment::Repair::MAX_KEYS} user_data_keys and " \
+                                          "extension_namespaces with user_data_key_total and " \
+                                          "extension_namespace_total; a long or structured value cut and named " \
+                                          "in truncated; null for unreadable text." }
+      })
 
       module_function
 
@@ -132,6 +169,33 @@ module PhComposer
                       :examples => [{}]) { |request| Assignment::Selection.all(request) }
         feature.snapshot_section("#{PREFIX}.selected", :query => "#{PREFIX}.selection_all")
         install_path_reads(feature)
+        install_repair(feature)
+      end
+
+      def install_repair(feature)
+        feature.query(Assignment::Repair::CANDIDATES,
+                      :description => "One bounded page of the Edges whose stored assignment edges.clear cannot " \
+                                      "reach: text that is not a JSON object anywhere, or a readable record on an " \
+                                      "Edge no Zone holds. Each row gives the fingerprint edges.repair takes. " \
+                                      "Removing a readable record needs every assignment readable, so repair the " \
+                                      "unreadable ones first.",
+                      :refuses => %w[query.cursor_expired query.limit_invalid],
+                      :params => SELECTION_PARAMS,
+                      :result => Shapes.object({ "edges" => Shapes.list(REPAIR_ROW) }.merge(PAGE_PROPERTIES)),
+                      :examples => [{}, { "limit" => 50 }]) { |request| Assignment::Repair.candidates(request) }
+        feature.action(Assignment::Repair::ACTION,
+                       :description => "Remove one Edge's unreadable or stranded thermal-bridge assignment, named by " \
+                                       "its root-to-Edge path and the fingerprint of the text read; the preview " \
+                                       "says what is discarded. Geometry, the Type and every other record stay.",
+                       :refuses => REPAIR, :params => REPAIR_PARAMS, :result => REPAIR_RESULT,
+                       :undo_name => "Repair Thermal Bridge Assignment",
+                       :preconditions => ["The Edge's path crosses no locked or shared storage.",
+                                          "The stored text is still the one the fingerprint names."],
+                       :side_effects => "Removes the ph_composer.thermal_bridge record from that one Edge.",
+                       :examples => [{ "path" => [1201, 1205], "fingerprint" => "0" * 64 }]) do |request, proposal|
+          Assignment::Repair.repair(request, proposal, :path => request.params.fetch("path"),
+                                                       :fingerprint => request.params.fetch("fingerprint"))
+        end
       end
 
       def install_path_reads(feature)

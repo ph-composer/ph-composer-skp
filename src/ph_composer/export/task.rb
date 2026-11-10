@@ -46,6 +46,7 @@ module PhComposer
                           :on_message => callback)
         }
         @timer = CoalescedTimer.new
+        @retained = RunDiagnostics.new
         @stage = "queued"
         @count = 0
         @units = Preferences.snapshot.fetch("unit_system")
@@ -71,14 +72,32 @@ module PhComposer
       end
 
       # `asker`, the Tasks::Owner polling, sees where the committed pair is and what it hashes to only when
-      # it started the task (context/AGENT_INTERFACE.md, "Locations only the user can choose").
-      def snapshot(asker = nil)
+      # it started the task (context/AGENT_INTERFACE.md, "Locations only the user can choose"). Every snapshot
+      # names the source the run read (`source`) and, once it ended, what it kept (`diagnostics`); `compact`
+      # leaves the findings, the result and the report out of the outcome for `diagnostic` to read.
+      def snapshot(asker = nil, compact: false)
         outcome = @outcome
         if @artifacts && asker && asker.handle == @owner.handle
           outcome = outcome.merge("value" => outcome.fetch("value").merge("artifacts" => @artifacts))
         end
+        outcome = compact_outcome(outcome) if compact && outcome
         DeepCopy.call("task_id" => id, "stage" => @stage, "count" => @count,
-                      "cancellable" => !terminal? && @stage != "writing", "outcome" => outcome)
+                      "cancellable" => !terminal? && @stage != "writing",
+                      "source" => source, "diagnostics" => @diagnostics, "outcome" => outcome)
+      end
+
+      # The Model revision and content generation the run read, captured when it started.
+      def source
+        { "revision" => @source_revision, "export_generation" => @generation }
+      end
+
+      # One part of what the run kept when it ended, read for `request` (Export::DiagnosticPages::Request),
+      # never from the Model and never by translating again: a page of its findings, one finding whole
+      # (`row`), or the generated report or compact result as fragments.
+      def diagnostic(request, part)
+        raise Blocked.new("task.running", "That export has not finished; poll export_status.") unless terminal?
+
+        @retained.read(request, part)
       end
 
       def cancel
@@ -139,8 +158,10 @@ module PhComposer
         result.fetch("summary")["findings"] = result.fetch("findings").length
         result["state"] = "complete_with_findings" if result["state"] == "complete" && !result["findings"].empty?
         Privacy.validate!(result)
+        @retained.translated(result.fetch("findings"), compact_result(result))
         unless result.dig("summary", "publishable") && result.dig("canonical_model", "hbjson")
           value = { "result" => compact_result(result) }.merge(blocked_report(result))
+          @retained.report = value["report_html"]
           return finish(Outcome.build("refused", "export.blocked", "Export not created. Resolve the blocking findings.",
                                       "none", @session.revision, :findings => result.fetch("findings"),
                                                                  :value => value))
@@ -161,6 +182,7 @@ module PhComposer
                             "The destination pair changed during export. Choose it again.")
         end
         html = Report.render(@result, :display_units => @units)
+        @retained.report = html
         coherent!
         return revoked unless still_permitted?
 
@@ -325,6 +347,7 @@ module PhComposer
 
       def finish(outcome)
         @outcome = outcome
+        @diagnostics = @retained.summary
         @finished_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
         @stage = "finished"
         @timer.cancel
@@ -333,6 +356,13 @@ module PhComposer
         @runtime&.stop
         @runtime = @builder = @extraction = @result = @warnings = nil
         @session.request_refresh if @session.valid?
+      end
+
+      # The outcome without what `diagnostic` reads a part at a time.
+      def compact_outcome(outcome)
+        value = outcome["value"]
+        value = value.reject { |key, _value| %w[result report_html].include?(key) } if value.is_a?(Hash)
+        outcome.reject { |key, _value| key == "findings" }.merge("value" => value)
       end
 
       # The preflight warnings no finding in `findings` already reports by code and object, once each, in

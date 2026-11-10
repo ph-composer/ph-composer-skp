@@ -47,7 +47,8 @@ module PhComposer
           ids
         end
 
-        # Every Edge carrying an assignment record, with its root-to-Edge path, through Groups and components.
+        # Every Edge carrying an assignment record, readable or not, with its root-to-Edge path, through Groups
+        # and components, once per placement.
         def each_tagged(model)
           pending = [[model.entities, []]]
           until pending.empty?
@@ -101,7 +102,7 @@ module PhComposer
             raise CodedError.new("target.changed", "The Edge now has an assignment.")
           end
         end
-        private_class_method :check_identity!, :each_tagged
+        private_class_method :check_identity!
       end
 
       TARGET = Records::ReferenceTarget.new(

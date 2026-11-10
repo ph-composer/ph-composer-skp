@@ -131,6 +131,12 @@ module PhComposer
         API.outcome(:context => context, :request => { "sequence" => sequence }).merge("sequence" => sequence)
       end
 
+      # A task method's bounded-read options from the arguments, as the API's keyword arguments.
+      def task_options(name, arguments)
+        keys = Export::TaskContract::TASKS.fetch(name).dig("params", "properties").keys - %w[location task_id]
+        arguments.slice(*keys).transform_keys(&:to_sym)
+      end
+
       # A task method's params with the session it runs on.
       def task_schema(name)
         params = Export::TaskContract::TASKS.fetch(name).fetch("params")
@@ -187,10 +193,11 @@ module PhComposer
                     :params => arguments.slice("limit", "cursor"))
         end,
         tool("export_preflight", "Checks whether one Model session can export now and what would block it, " \
-                                 "optionally against an approved destination's id.",
-             object({ "session" => SESSION, "location" => string("An approved location id.") }, ["session"]),
-             :session => true) do |context, arguments|
-          API.export_preflight(:context => context, :location => arguments["location"])
+                                 "optionally against an approved destination's id. compact counts by owner and " \
+                                 "code; part pages findings or repairs with filters, and row reads one whole.",
+             task_schema("export_preflight"), :session => true) do |context, arguments|
+          API.export_preflight(:context => context, :location => arguments["location"],
+                               **task_options("export_preflight", arguments))
         end,
         tool("invoke", "Applies one action to one Model session as one Undo step, refused with nothing written if " \
                        "the Model changed since expected_revision. Preview first for a compound edit. The result " \
@@ -230,10 +237,13 @@ module PhComposer
              task_schema("start_export"), :session => true, :capability => "export") do |context, arguments|
           API.start_export(:context => context, :location => arguments.fetch("location"))
         end,
-        tool("export_status", "One export task's progress and, once it ends, its outcome.",
+        tool("export_status", "One export task's progress and, once it ends, its outcome; compact while polling. " \
+                              "Once it ended, part reads what it kept: findings a page at a time, the report or " \
+                              "the result in fragments, unchanged by later edits.",
              task_schema("export_status"), :session => true, :capability => "export",
                                            :annotations => READ_ONLY) do |context, arguments|
-          API.export_status(:context => context, :task_id => arguments.fetch("task_id"))
+          API.export_status(:context => context, :task_id => arguments.fetch("task_id"),
+                            **task_options("export_status", arguments))
         end,
         tool("cancel_export", "Cancels an export task before it starts writing.",
              task_schema("cancel_export"), :session => true, :capability => "export") do |context, arguments|
@@ -241,9 +251,9 @@ module PhComposer
         end,
         tool("latest_export", "The most recent export task this token started on the Model, to find one after a " \
                               "lost reply.",
-             object({ "session" => SESSION }, ["session"]), :session => true, :capability => "export",
-                                                            :annotations => READ_ONLY) do |context, _arguments|
-          API.latest_export(:context => context)
+             task_schema("latest_export"), :session => true, :capability => "export",
+                                           :annotations => READ_ONLY) do |context, arguments|
+          API.latest_export(:context => context, **task_options("latest_export", arguments))
         end
       ].to_h { |entry| [entry.name, entry] }.freeze
     end

@@ -152,15 +152,16 @@ module PhComposer
                       "detail" => { "omitted" => %w[value affected findings] })
       end
 
-      # An export task's identity, stage and outcome with its artifacts, so a caller keeps where its files
-      # are and what they hash to when the task's diagnostics are too large to send; nil for anything else.
+      # An export task's identity, stage, source and outcome with its artifacts and diagnostics counts, so a
+      # caller keeps which run it was, where its files are and what they hash to when the task's diagnostics are
+      # too large to send (export_status with part reads them); nil for anything else.
       def task_receipt(value)
         return nil unless value.is_a?(Hash) && value.key?("task_id")
 
         outcome = value["outcome"]
         inner = outcome && outcome["value"].is_a?(Hash) ? outcome["value"].slice("artifacts") : nil
         kept = outcome && outcome.slice("status", "code", "message", "effect", "revision").merge("value" => inner)
-        value.slice("task_id", "stage", "count", "cancellable").merge("outcome" => kept)
+        value.slice("task_id", "stage", "count", "cancellable", "source", "diagnostics").merge("outcome" => kept)
       end
 
       # Only what says what happened, for an outcome still over the budget once trimmed.

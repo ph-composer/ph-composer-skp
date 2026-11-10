@@ -129,3 +129,21 @@ from a scratch test with the offline stub.
 | R08 export | 180 metadata omissions: `export_preview` with `location` 31,963 bytes, refused; `limit` refused `params.invalid` | Open |
 | R15 descriptors | AW-02 publishes each adapter's `assignment.target` and examples (Material segment, Frame side, Glazing element, Psi perimeter and Model default) from its own callback; copy's `generation` is required and described so | Closed by AW-02 for schema groundwork; the workflow proof through MCP and the outside example's own example are AW-06's |
 
+
+## AW-07 stage-entry recheck (AW-06 head `62f24db9`, API 1.39)
+
+`rbenv exec ruby -Itests planning/code-review/agent-workflows-2026-11/evidence/envelope_probe.rb -n
+"/export_preflight_and_face_area|oversized_blocked|reserved_metadata/"` and `feature_probe.rb -n "/unreadable_edge/"`:
+4 runs, 0 failures; every baseline reproduced. The outside-Zone case by source read of the AW-06 head.
+
+| Finding | Measured on the AW-06 head | Entry state |
+| --- | --- | --- |
+| R09 preflight | 180 unclassified Faces: `export_preflight` 59,074 bytes and `zones.faces.export_preflight` 58,862, both `request.response_too_large`; `limit` refused `params.invalid` | Open |
+| R09 task | 240 distinct runtime findings: in-process status 152,946 bytes; MCP `export_status` and `latest_export` keep `export.blocked` with `findings` and `report_html` absent; no pair written | Open |
+| R09 metadata | Assembly with `user_data.ph_composer`: preflight codes `assembly.segment_unassigned`, `zone.none`; the run is refused `export.blocked` for the reserved key | Open |
+| R10 unreadable | `{broken` on a Zone Edge: schedule `unreadable`, preflight blocking `record.unreadable`; `edges.selection` and `edges.clear` refuse `record.unreadable`, the text stays | Open |
+| R10 outside Zone | `thermal_bridge.outside_zone` says "clear it", but `edges.clear` needs a Zone-qualified reference; Type delete's stranded route says "erase it" (source read) | Open |
+| R16 | Optional expected revision at `start_export` | Deferred, optional (D15-e) |
+
+After the change, `envelope_probe.rb`'s `test_assembly_reserved_metadata_block_is_absent_from_preflight` fails
+as a probe should once its finding is fixed: the preflight now lists `export.blocked`.

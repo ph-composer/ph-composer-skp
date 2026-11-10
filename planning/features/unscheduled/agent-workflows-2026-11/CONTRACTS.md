@@ -1,6 +1,6 @@
 # Proposed contract changes
 
-STATUS: C01 bound and implemented by AW-01 (API 1.34); C02 bound and implemented by AW-02 (API 1.35); C04 bound and implemented by AW-03 (API 1.36); C03 definition part bound by AW-04 (API 1.37); C03 occurrence part bound by AW-05 (API 1.38); C05 bound on the AW-06 branch (API 1.39); C06-C08 remain proposals. Baseline API 1.31.
+STATUS: C01 bound and implemented by AW-01 (API 1.34); C02 bound and implemented by AW-02 (API 1.35); C04 bound and implemented by AW-03 (API 1.36); C03 definition part bound by AW-04 (API 1.37); C03 occurrence part bound by AW-05 (API 1.38); C05 bound by AW-06 (API 1.39); C06 and C07 bound on the AW-07 branch (API 1.40); C08 remains a proposal. Baseline API 1.31.
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication
 
 The durable authorities remain `context/CONTRACTS.md`, `AGENT_INTERFACE.md`, `EXTENSIBILITY.md`
@@ -294,6 +294,33 @@ refuse stale input before filesystem recovery or writes. Preserve the existing n
 distinction. Retrieval of generated diagnostic report content is required; portable retrieval of the
 written artifact file bytes in C08 is a separate optional capability.
 
+**Bound at AW-07 (API 1.40).** No new MCP tool and no new foundation code beyond `task.running`. Each new param is
+optional and the whole reply stays the default (D15-a). New names:
+
+- `export_preflight` (API, MCP tool) params `compact`, `part` (`findings` | `repairs`), `owner`, `codes`,
+  `blocks_export`, `object_id`, `row`, `limit`, `cursor`. `compact` answers `ready`, `totals` (`findings`, `blocking`,
+  `warnings`, `repairs`), `by_owner` (`owner`, `findings`, `blocking`, `repairs`), `by_code` (`code`, `owner`,
+  `findings`, `blocking`) and `destination`, in place of `findings` and `repairs`. `part` answers one page of that list
+  (`Export::DiagnosticPages`), each row with its `row` key (`[contributor place, index]`) and `owner`, a `message`
+  over 512 characters cut, a `locate` or repair `params` over 1 KiB given as `locate_summary` or `params_summary`
+  (`Fragments.summary`), each cut named in `truncated`; beside them `total` (rows matching the filter) and
+  `unfiltered_total` (the part's rows), the cursor bound to the Model revision. `part` with `row` answers that whole
+  row's canonical JSON in `fragment`s.
+- `export_status` params `compact`, `part` (`findings` | `report` | `result`), `codes`, `blocks_export`, `object_id`,
+  `row`, `limit`, `cursor`; `latest_export` param `compact`. Every task snapshot adds `source` (`revision`,
+  `export_generation`, captured at start) and `diagnostics` (null until the task ends: `findings`, `blocking`,
+  `report` and `result` as `Fragments.summary` or null, `report_absent` null or why: `no_translation`,
+  `not_rendered`). `compact` leaves `outcome.findings`, `outcome.value.result` and `outcome.value.report_html` out.
+  `part` reads what the task retained when it ended (`Export::Task#diagnostic`), never the Model: `findings` pages
+  as the preflight part does, `report` (the generated report HTML, of a written or a blocked run) and `result` (the
+  compact translation result) answer `fragment`s; the cursor binds the task, not the Model revision. A part of a task
+  that has not ended refuses `task.running`; `task.expired` and `task.foreign` stay as they were.
+- `AgentAccess::Executor` keeps `source` and `diagnostics` in an export receipt trimmed to the reply budget.
+- `Export::MetadataCheck.problems` (the metadata rules `Export::RecordReader` applies, shared) and
+  `Export::MetadataCheck.findings`: every metadata blocker of the records a contributor's preflight names, as
+  blocking preflight rows with the codes extraction raises (`export.blocked` for a reserved `user_data` key,
+  `extension.unavailable`, `extension.invalid`, `extension.schema_unsupported`, `export.relevance_unknown`).
+
 ## C07 · Explicit damaged-assignment repair
 
 Ordinary assign/clear stays strict. A dedicated repair names an Edge's native occurrence path,
@@ -302,6 +329,25 @@ explains what data is discarded. Apply checks writable storage and identity/refe
 removes only this owner's assignment and uses one restorable native operation. A changed payload,
 wrong/shared/locked target or unreviewed scope refuses before mutation. Never accept arbitrary
 dictionary names, arbitrary eval or unbounded destructive cleanup.
+
+**Bound at AW-07 (API 1.40).** New names:
+
+- `ph_composer.thermal_bridges.edges.repair_candidates` (query, `read`): params `limit`, `cursor`. One row per Edge
+  whose stored assignment ordinary clear cannot reach: `path` (root to Edge), `condition` (`unreadable`, not valid
+  JSON; `stranded`, readable but held by no Zone), `containment` (why no Zone holds it, as `zones.containment`
+  reads it, or null), `fingerprint` (SHA-256 of the stored text), `bytes`, `record` (`id`,
+  `thermal_bridge_type_id`, `quantity` when readable, else null), `write_refusal` (`target.locked` or
+  `target.shared_definition` from the path, or null). Pages by path, bound to the revision.
+- `ph_composer.thermal_bridges.edges.repair` (action, `model_write`): params `path`, `fingerprint`. Removes that one
+  Edge's `ph_composer.thermal_bridge` record and nothing else, as one Undo step. Result `path`, `condition`,
+  `containment`, `stored` (`bytes`, `sha256`, `readable`, `valid`, `excerpt` cut at 256 characters), `discarded`
+  (`id`, `thermal_bridge_type_id`, `quantity`, `user_data_keys`, `extension_namespaces`, or null for unreadable
+  text). Refuses `target.not_found`, `target.wrong_kind`, `target.locked`, `target.shared_definition`,
+  `target.changed` (other stored text), `reference.in_use`, and `thermal_bridge.repair_not_needed` for a readable
+  record a Zone holds, which `edges.clear` serves. Apply re-reads the text and refuses `target.changed` before
+  writing.
+- The unreadable preflight row, the `thermal_bridge.outside_zone` finding and the Type delete's stranded route name
+  `edges.repair_candidates` and `edges.repair`.
 
 ## C08 · Client and host cooperation
 
