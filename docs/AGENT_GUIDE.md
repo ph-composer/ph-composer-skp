@@ -342,8 +342,9 @@ A catalog can be larger than a reply. Pass `compact` true to `ph_composer.librar
 - **Comparisons.** A compact `in_file` candidate names its `difference_fields` and gives
   `expected_values_summary`; `ph_composer.library.in_file.detail` with a `path` such as
   `["resolution", "candidates", 0, "expected_values"]` reads them whole. A `use_library` copy needs
-  those `expected_values` exactly. A compact comparison lists the first 20 local candidates and
-  counts them all in `candidate_total`; read the others by index the same way.
+  those `expected_values` exactly. A compact comparison lists the first local candidates, at most
+  20 and as many as fit 8 KiB, and counts them all in `candidate_total`; read the others by index
+  the same way.
 - **Generations.** Every catalog page, note page and fragment is bound to the catalog `generation`
   it was read from, so after a reload the next one is refused as `query.cursor_expired`. The in-file
   reads compare with the Model as well, so an edit expires them too. Start that read again.
@@ -360,8 +361,9 @@ replace a file with it; choosing fewer records is a different export, not a way 
 `ph_composer.library.export_file` (an `export_file` tool call with the location) replaces an
 existing file only with `replace`, the reported `state` as `expected_destination` and the
 `projection_digest`; a destination that changed since is refused as `library.destination_changed`.
-Pass `compact` true: its result counts the omissions too and always fits a reply, with `library_id`,
-`written` and `destination_state`, the SHA-256 the file holds now. Without it the result lists every
+Pass `compact` true: its result counts the omissions too, cuts a library name longer than 256
+characters (naming it in `truncated`) and fits a reply, with `library_id`, `written` and
+`destination_state`, the SHA-256 the file holds now. Without it the result lists every
 omission and, for a long list, is answered with its status only. If the reply is lost, call
 `export_preview` with the location: a `destination.state` that is no longer the one you reviewed
 means a file was written there. Nothing else is kept for a lost reply, and the connection never

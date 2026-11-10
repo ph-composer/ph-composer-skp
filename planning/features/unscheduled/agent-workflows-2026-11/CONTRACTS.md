@@ -252,8 +252,8 @@ whole reply is unchanged; `compact` (boolean, default false) is the one opt-in p
   `snapshot` and gives `snapshot_summary` (`bytes`, `sha256` of its canonical JSON, `Fragments.summary`), with
   `display_label` and `library_name` cut at `OccurrencePath::NAME_CHARACTERS` and named in `truncated`; a compact
   `in_file` candidate leaves out `differences` and `expected_values` and gives `difference_fields` (the field names)
-  and `expected_values_summary`, its label cut the same way, and a compact resolution lists the first 20 candidates
-  beside `candidate_total`. `catalog` and `in_file` pages are now cut by size
+  and `expected_values_summary`, its label cut the same way, and a compact resolution lists the first candidates, at
+  most 20 and within 8 KiB, beside `candidate_total`. `catalog` and `in_file` pages are now cut by size
   (`Pages.bounded`) in both forms.
 - `ph_composer.library.warnings.list` and `ph_composer.library.unavailable.list` (`provider_id`, `kind`, optional
   `generation`, `limit`, `cursor`): a catalog's notes in order, `total`, cursor bound to the generation.
@@ -268,7 +268,7 @@ whole reply is unchanged; `compact` (boolean, default false) is the one opt-in p
   `total`, `projection_digest`, `revision`, cursor bound to the Model revision and the projection digest; a
   `projection_digest` that is not the current projection's refuses `revision.stale`.
 - `compact` on `ph_composer.library.export_file`: `omissions` left out, `omission_total`, `projection_digest` and
-  `revision` given. Both forms add `destination_state`, the SHA-256 the destination holds after the write, which
+  `revision` given, `library_name` cut at 256 characters and named in `truncated`. Both forms add `destination_state`, the SHA-256 the destination holds after the write, which
   `export_preview` with the location reports as `destination.state`.
 
 R15 adds no name: AW-02's descriptor already publishes each adapter's `assignment.target` and examples from its

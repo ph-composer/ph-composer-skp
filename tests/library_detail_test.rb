@@ -234,16 +234,18 @@ class LibraryDetailTest < PhComposerTestCase
     preview = completed(query("#{L}.export_preview", "location" => location, "compact" => true))
     digest = preview.fetch("projection_digest")
     approved = { "id" => location, "replace" => true, "expected_destination" => preview.dig("destination", "state") }
-    export = { "location" => approved, "projection_digest" => digest, "compact" => true }
+    name = "🙂\"" * 8_000
+    export = { "location" => approved, "projection_digest" => digest, "compact" => true, "library_name" => name }
     written = completed(agent("export_file", "name" => "#{L}.export_file", "params" => export))
     assert_equal [true, 180, digest], written.values_at("written", "omission_total", "projection_digest")
+    assert_equal [256, ["library_name"]], [written.fetch("library_name").length, written.fetch("truncated")]
     after = completed(query("#{L}.export_preview", "location" => location, "compact" => true))
     assert_equal written.fetch("destination_state"), after.dig("destination", "state")
     parsed = PhComposer::Library::LibraryFile.parse(File.binread(@path), :adapters => lambda do |wire|
       PhComposer::Library::State.kind(wire, PhComposer::Registry.current).adapter
     end)
-    assert_equal [written.fetch("library_id"), 180],
-                 [parsed.dig("library", "id"), parsed.dig("rows", "materials").length]
+    assert_equal [written.fetch("library_id"), name, 180],
+                 [parsed.dig("library", "id"), parsed.dig("library", "name"), parsed.dig("rows", "materials").length]
 
     changed = export.merge("location" => approved.merge("expected_destination" => "0" * 64))
     stale = agent("export_file", "name" => "#{L}.export_file", "params" => changed)
@@ -314,5 +316,25 @@ class LibraryDetailTest < PhComposerTestCase
                  completed(query("#{L}.export_preview", "compact" => true)).fetch("projection_digest")
     stale = query("#{L}.export_preview.omissions", "limit" => 1, "cursor" => first.fetch("next_cursor"))
     assert_equal "query.cursor_expired", stale.fetch("code")
+  end
+
+  # Twenty same-named locals whose names are 400 four-byte characters and escapes: the compact comparison keeps
+  # only the candidates that fit its byte budget, counts them all, and one page of one row still fits a reply.
+  def test_a_compact_comparison_of_long_multibyte_labels_stays_within_a_reply
+    name = "🙂\"\\" * 140
+    write_library(@path, envelope([library_row.merge("name" => name)]))
+    params = SELECTED.merge("generation" => completed(load).fetch("generation"))
+    kind = Assemblies::Materials::Schema::KIND
+    20.times do |index|
+      values = Assemblies::Materials::Schema.defaults("name" => name)
+      kind.store.write(Sketchup.active_model, values.merge("id" => format("mat_%012d", index), "schema_version" => 1))
+    end
+    resolution = completed(query("#{L}.in_file", params.merge("compact" => true, "limit" => 1)))
+                 .dig("rows", 0, "resolution")
+    assert_equal 20, resolution.fetch("candidate_total")
+    assert_operator resolution.fetch("candidates").length, :<, 20
+    assert(resolution.fetch("candidates").all? { |row| row.fetch("truncated") == ["display_label"] })
+    assert_equal name, fragments_of("#{L}.in_file.detail",
+                                    params.merge(ROW, "path" => ["resolution", "candidates", 19, "display_label"]))
   end
 end

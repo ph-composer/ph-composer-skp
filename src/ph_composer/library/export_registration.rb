@@ -37,9 +37,12 @@ module PhComposer
                 "ph_composer.library.export_preview.omissions pages them. false, the default, lists them."
       OMISSIONS = "ph_composer.library.export_preview.omissions"
 
-      # `value` with its omissions counted in place of listed.
+      # `value` with its omissions counted in place of listed, and a library name longer than
+      # OccurrencePath::NAME_CHARACTERS cut and named in `truncated`.
       def compact(value)
-        value.reject { |key, _value| key == "omissions" }.merge("omission_total" => value.fetch("omissions").length)
+        names = value.key?("library_name") ? OccurrencePath.bounded_names(value.slice("library_name")) : {}
+        value.reject { |key, _value| key == "omissions" }.merge(names)
+             .merge("omission_total" => value.fetch("omissions").length)
       end
 
       def summary_fields
@@ -67,7 +70,10 @@ module PhComposer
                                .merge("library_id" => Library::TEXT, "library_name" => Library::TEXT,
                                       "identity" => { "type" => "string", "enum" => %w[new update] },
                                       "written" => { "type" => "boolean" }, "destination_state" => state)
-        shape = Library.object(fields, :optional => %w[omissions omission_total projection_digest revision])
+        cut = Library.described({ "type" => "array", "items" => Library::TEXT },
+                                "Compact only: fields cut to 256 characters, such as library_name.")
+        shape = Library.object(fields.merge("truncated" => cut),
+                               :optional => %w[omissions omission_total projection_digest revision truncated])
         feature.file_export("#{FEATURE_ID}.export_file",
                             :description => "Write local definitions to a library file the user chooses in the " \
                                             "native save dialog; export_preview shows what it will hold.",

@@ -84,7 +84,8 @@ module PhComposer
                                            truncated])
         outcomes = %w[create reuse review_required ambiguous_source ambiguous_name]
         total = { "type" => "integer", "minimum" => 0,
-                  "description" => "Compact only: every candidate; candidates lists the first 20." }
+                  "description" => "Compact only: every candidate; candidates lists the first ones, at most 20, " \
+                                   "that fit 8 KiB." }
         object({ "outcome" => { "type" => "string", "enum" => outcomes },
                  "candidates" => list(candidate), "candidate_total" => total }, :optional => ["candidate_total"])
       end

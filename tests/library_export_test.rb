@@ -88,6 +88,17 @@ class LibraryExportTest < PhComposerTestCase
     assert_equal "params.invalid", export(selected.merge("scope" => "all"))["code"]
   end
 
+  # The staged bytes are checked as bytes: text outside ASCII in a name or a note is written, not refused.
+  def test_non_ascii_text_is_written_and_read_back
+    row = @records.first.merge("name" => "W\u00e4rme \u6f22\u5b57 \u{1F642}", "notes" => "\u00e9" * 10)
+    Assemblies::Materials::Schema::KIND.store.write(Sketchup.active_model, row)
+    result = export("library_name" => "Biblioth\u00e8que")
+    assert_equal "completed", result["status"], result.inspect
+    written = JSON.parse(File.read(@path, :encoding => "UTF-8"))
+    assert_equal "Biblioth\u00e8que", written.dig("library", "name")
+    assert_includes written.dig("kinds", "materials").map { |material| material["name"] }, row["name"]
+  end
+
   def test_unapproved_replacement_and_stale_revision_preserve_destination
     File.write(@path, "original bytes")
     assert_equal "export.replace_required", export({}, false)["code"]

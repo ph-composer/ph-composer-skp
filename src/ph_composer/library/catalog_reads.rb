@@ -14,8 +14,10 @@ module PhComposer
       IN_FILE_DETAIL = "ph_composer.library.in_file.detail"
       NOTES = { WARNINGS => "warnings", UNAVAILABLE => "unavailable" }.freeze
       ROW_PARTS = %w[snapshot display_label library_name].freeze
-      # A compact comparison lists at most this many local candidates, so one row stays well inside a page.
+      # A compact comparison lists at most this many local candidates, and only as many as fit CANDIDATE_BYTES
+      # serialized, so one row stays well inside a page whatever the labels hold.
       CANDIDATES = 20
+      CANDIDATE_BYTES = 8 * 1024
       DETAIL_EXAMPLE = { "provider_id" => "example", "kind" => "example_parts", "library_id" => "synthetic",
                          "record_id" => "one", "path" => %w[snapshot notes] }.freeze
       COMPACT = { "type" => "boolean",
@@ -43,16 +45,24 @@ module PhComposer
         compact
       end
 
-      # The first CANDIDATES candidates, compact, and how many there are; in_file.detail reads any of them whole.
+      # The first candidates, compact, while they number at most CANDIDATES and weigh at most CANDIDATE_BYTES (the
+      # first always), and how many there are; in_file.detail reads any of them whole.
       def compact_resolution(resolution)
         all = resolution.fetch("candidates")
-        candidates = all.first(CANDIDATES).map do |candidate|
-          candidate.slice("id", "comparison_available", "source_changed")
-                   .merge(OccurrencePath.bounded_names(candidate.slice("display_label")))
-                   .merge("difference_fields" => candidate.fetch("differences").map { |row| row.fetch("field") },
-                          "expected_values_summary" => Fragments.summary(candidate.fetch("expected_values")))
+        weight = 0
+        candidates = all.first(CANDIDATES).map { |candidate| compact_candidate(candidate) }
+                        .take_while.with_index do |candidate, index|
+          weight += JSON.generate(candidate).bytesize
+          index.zero? || weight <= CANDIDATE_BYTES
         end
         resolution.merge("candidates" => candidates, "candidate_total" => all.length)
+      end
+
+      def compact_candidate(candidate)
+        candidate.slice("id", "comparison_available", "source_changed")
+                 .merge(OccurrencePath.bounded_names(candidate.slice("display_label")))
+                 .merge("difference_fields" => candidate.fetch("differences").map { |row| row.fetch("field") },
+                        "expected_values_summary" => Fragments.summary(candidate.fetch("expected_values")))
       end
 
       def install(feature)

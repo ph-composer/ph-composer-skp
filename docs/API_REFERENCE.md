@@ -9383,7 +9383,7 @@ Result:
               "candidate_total": {
                 "type": "integer",
                 "minimum": 0,
-                "description": "Compact only: every candidate; candidates lists the first 20."
+                "description": "Compact only: every candidate; candidates lists the first ones, at most 20, that fit 8 KiB."
               }
             }
           }
@@ -38733,7 +38733,7 @@ Result:
         "candidate_total": {
           "type": "integer",
           "minimum": 0,
-          "description": "Compact only: every candidate; candidates lists the first 20."
+          "description": "Compact only: every candidate; candidates lists the first ones, at most 20, that fit 8 KiB."
         }
       }
     },
@@ -64546,6 +64546,14 @@ Result:
       "type": "string",
       "minLength": 1,
       "description": "The SHA-256 the destination holds after the write; export_preview with the location reports it as destination.state."
+    },
+    "truncated": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Compact only: fields cut to 256 characters, such as library_name."
     }
   }
 }
@@ -64793,7 +64801,7 @@ Result:
         "candidate_total": {
           "type": "integer",
           "minimum": 0,
-          "description": "Compact only: every candidate; candidates lists the first 20."
+          "description": "Compact only: every candidate; candidates lists the first ones, at most 20, that fit 8 KiB."
         }
       }
     },

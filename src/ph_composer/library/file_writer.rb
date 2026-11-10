@@ -62,7 +62,8 @@ module PhComposer
           file.flush
           file.fsync
         end
-        unless File.binread(stage) == bytes
+        # binread answers binary text, so the comparison is of bytes, whatever `bytes`' encoding.
+        unless File.binread(stage) == bytes.b
           raise Error.new("library.export_write_failed", "The staged library file could not be verified.")
         end
 

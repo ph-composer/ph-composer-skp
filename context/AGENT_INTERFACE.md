@@ -197,7 +197,7 @@ Implemented (API 1.39): the same for library catalogs and exports (`library/cata
 `library/export_registration.rb`). `library.load`, `catalog`, `in_file`, `export_preview` and `export_file` take
 `compact`, the whole reply the default: the catalog summary counts its notes (`warning_total`, `unavailable_total`),
 a row gives `snapshot_summary` for its snapshot and cuts its labels at 256 (never an identifier), an `in_file`
-candidate gives `difference_fields` and `expected_values_summary` (the first 20 beside `candidate_total`), and the
+candidate gives `difference_fields` and `expected_values_summary` (at most 20, within 8 KiB, beside `candidate_total`), and the
 export forms give `omission_total`. `catalog` and
 `in_file` pages are cut by size. `library.warnings.list` and `unavailable.list` page the notes;
 `library.catalog.detail` and `in_file.detail` read one row's part through `Fragments.detail`, by `library_id`,
