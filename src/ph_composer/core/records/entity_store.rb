@@ -87,6 +87,16 @@ module PhComposer
       end
       private_class_method :records_within
 
+      # The registered stores whose record is on `entity`, readable or not, each as `dictionary`, `key` and
+      # `claims` (whether the record makes the entity its feature's own object). By presence, so a damaged
+      # record still shows; it names no feature, and reads no value.
+      def self.records_on(entity)
+        stores.values.select { |store| store.marks?(entity) }.map do |store|
+          { "dictionary" => store.dictionary, "key" => store.key,
+            "claims" => claiming.key?([store.dictionary, store.key]) }
+        end.sort_by { |row| [row.fetch("dictionary"), row.fetch("key")] }
+      end
+
       def self.claim(store)
         claiming[[store.dictionary, store.key]] = store
       end

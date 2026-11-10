@@ -7109,6 +7109,250 @@ Example params:
 {}
 ```
 
+### `ph_composer.context.children`
+
+One bounded page of the native entities directly inside the Model root or one Group or component, by persistent id, each with its kind, name, whether it is hidden, locked, shared or a closed solid, and the PH-Composer records on it. Nothing is filtered out except by kinds. Reads only; nothing is selected. Owner: `ph_composer.context`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, `target.not_found`, `target.wrong_kind`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "path": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "description": "Persistent ids of the Groups and components from the root to the container, outermost first; [] or absent for the Model root."
+    },
+    "kinds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "group",
+          "component",
+          "face",
+          "edge",
+          "other"
+        ]
+      },
+      "minItems": 1,
+      "description": "Only children of these kinds; every kind when absent."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "container",
+    "children",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "container": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "locked",
+        "hidden",
+        "shared"
+      ],
+      "properties": {
+        "path": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "locked": {
+          "type": "boolean",
+          "description": "A step on the path is locked."
+        },
+        "hidden": {
+          "type": "boolean",
+          "description": "A step on the path is hidden."
+        },
+        "shared": {
+          "type": "boolean",
+          "description": "A step on the path is shared storage."
+        }
+      }
+    },
+    "children": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "persistent_id",
+          "kind",
+          "type",
+          "name",
+          "definition_name",
+          "hidden",
+          "locked",
+          "shared",
+          "solid",
+          "child_count",
+          "records"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "The child's root-to-entity path, as writes and path reads take it."
+          },
+          "persistent_id": {
+            "type": "integer"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "group",
+              "component",
+              "face",
+              "edge",
+              "other"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "SketchUp's type name, such as Group or Face."
+          },
+          "name": {
+            "type": "string",
+            "description": "The instance name; empty if none."
+          },
+          "definition_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "A Group's or component's definition name; null for anything else."
+          },
+          "hidden": {
+            "type": "boolean",
+            "description": "Hidden itself, or on a hidden tag or tag folder."
+          },
+          "locked": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "A Group's or component's own lock; null for anything else."
+          },
+          "shared": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Component storage, or a Group whose definition another Group shares; null for anything else."
+          },
+          "solid": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Whether SketchUp reads a Group or component as a closed solid; null for anything else."
+          },
+          "child_count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "Entities directly inside a Group or component; null for anything else."
+          },
+          "records": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "dictionary",
+                "key",
+                "claims"
+              ],
+              "properties": {
+                "dictionary": {
+                  "type": "string"
+                },
+                "key": {
+                  "type": "string"
+                },
+                "claims": {
+                  "type": "boolean",
+                  "description": "Whether the record makes the entity its feature's own object, which another feature does not build on."
+                }
+              }
+            },
+            "description": "The registered PH-Composer records on the entity, valid or not, by dictionary; empty for none."
+          }
+        }
+      },
+      "description": "This page, by persistent id."
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "path": [
+    1201
+  ],
+  "kinds": [
+    "group",
+    "component"
+  ]
+}
+```
+
 ### `ph_composer.context.read`
 
 Where this Model session stands: the Model's file name and path, its revision and view generation, whether it is busy and why, the edit path from the root, and the selection in pages. Reads only. Owner: `ph_composer.context`.
@@ -9598,9 +9842,9 @@ Example params:
 
 ### `ph_composer.spaces.candidate_faces.list`
 
-One page of the Faces of one Space or one Volume that carry no record yet: Floor candidates inside a Volume (for floors.mark) and loose Faces at the Space's root (for volumes.create), each with the refusal its operation would give now. Name exactly one. Owner: `ph_composer.spaces`.
+One page of the Faces of one Space or one Volume that carry no record yet: Floor candidates inside a Volume (for floors.mark) and loose Faces at the Space's root (for volumes.create); or the Faces loose in one context (for create), with no Space yet and no selection. Each has the refusal its operation would give it named alone now. Name exactly one of space, volume and context. Owner: `ph_composer.spaces`.
 
-Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.changed`, `target.not_found`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.changed`, `target.not_found`, `target.shared_definition`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -9653,6 +9897,13 @@ Params:
         }
       },
       "description": "The Volume whose children to read, by the reference a read returned."
+    },
+    "context": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "description": "A root-to-container path, [] for the root: its loose Faces, for a first Space."
     },
     "fields": {
       "type": "array",
@@ -9716,9 +9967,10 @@ Result:
             "type": "string",
             "enum": [
               "floor",
-              "volume"
+              "volume",
+              "space"
             ],
-            "description": "floor: in a Volume, to mark; volume: loose at a Space's root, to group into a new Volume."
+            "description": "floor: in a Volume, to mark; volume: loose at a Space's root, to group into a new Volume; space: loose in a context named by context, to make a new Space with create."
           },
           "space": {
             "type": [
@@ -9788,7 +10040,7 @@ Result:
                 "type": "string"
               }
             },
-            "description": "What `operation` would refuse with now, or null when it would accept."
+            "description": "The refusal the operation gives the Face named alone, or null. For a space candidate the code is create's left_out reason."
           },
           "requires": {
             "type": [
@@ -9796,6 +10048,10 @@ Result:
               "null"
             ],
             "description": "What the operation needs first."
+          },
+          "hidden": {
+            "type": "boolean",
+            "description": "For a space candidate: hidden itself, or on a hidden tag or tag folder."
           },
           "plan_area_m2": {
             "type": "number",
@@ -9855,6 +10111,14 @@ Example params:
       1202
     ]
   }
+}
+```
+
+Example params:
+
+```json
+{
+  "context": []
 }
 ```
 
@@ -11950,6 +12214,576 @@ Example params:
 
 ```json
 {}
+```
+
+### `ph_composer.thermal_bridges.edges.at`
+
+The Edges at explicit root-to-Edge paths, a bounded page at a time in the order given, each with the Zone holding it, its complete reference, its assignment and the refusal a write meets, as edges.selection reads them, and its world endpoints. Needs no selection; a path naming no Edge is a row with its reason. Owner: `ph_composer.thermal_bridges`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "paths"
+  ],
+  "properties": {
+    "paths": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        },
+        "minItems": 1
+      },
+      "minItems": 1,
+      "maxItems": 500,
+      "description": "Root-to-Edge persistent-id paths, such as a schedule run's edge_paths; answered in this order."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "edges",
+    "next_cursor",
+    "total",
+    "units"
+  ],
+  "properties": {
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "reference",
+          "zone",
+          "reason",
+          "values",
+          "copied",
+          "record_problem",
+          "write_refusal",
+          "hidden",
+          "endpoints_m"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "reference": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path",
+              "entity_path",
+              "entity_id"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "entity_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1
+              },
+              "entity_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The Edge's assignment id, or null for an Edge with none."
+              }
+            },
+            "description": "The Edge's reference, or null when no Zone holds it."
+          },
+          "zone": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path",
+              "name",
+              "building_segment",
+              "level"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "name": {
+                "type": "string"
+              },
+              "building_segment": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "level": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "description": "The Zone holding the Edge, as ph_composer.zones.containment reads it."
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Why there is no reference: not_found or not_an_edge when the path names no Edge, otherwise why no Zone holds it, as zones.containment reads it; null with a Zone."
+          },
+          "values": {
+            "type": "object",
+            "description": "The Edge's assignment values as stored (thermal_bridge_type_id and quantity); empty when it has none."
+          },
+          "copied": {
+            "type": "boolean",
+            "description": "Whether another Edge carries the same assignment id, as a split or a copy leaves it. Routine; nothing repairs it."
+          },
+          "record_problem": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Why the stored assignment is invalid, or null. An invalid one can still be cleared or reassigned."
+          },
+          "write_refusal": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "description": "The refusal a write to the Edge meets from its path, or null."
+          },
+          "hidden": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Hidden itself, or on a hidden tag or tag folder; null with no Edge."
+          },
+          "endpoints_m": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 3,
+              "maxItems": 3,
+              "x-unit": "m"
+            },
+            "description": "The Edge's two ends in world metres, through every transform from the root; null with no Edge."
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    },
+    "units": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "endpoints_m"
+      ],
+      "properties": {
+        "endpoints_m": {
+          "type": "string",
+          "enum": [
+            "m"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "paths": [
+    [
+      1201,
+      1205
+    ]
+  ]
+}
+```
+
+### `ph_composer.thermal_bridges.edges.candidates`
+
+One bounded page of the Edges directly inside one container, the root when path is absent, by persistent id, in edges.at's rows: with assigned "unassigned", the Edges an assignment could start from. Needs no selection; walks that container only. Owner: `ph_composer.thermal_bridges`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.not_found`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "path": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "description": "The root-to-container path, a Zone's or a Group's inside it; [] or absent for the Model root."
+    },
+    "assigned": {
+      "type": "string",
+      "enum": [
+        "any",
+        "assigned",
+        "unassigned"
+      ],
+      "description": "Only Edges with an assignment record, or only those without; any when absent."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "edges",
+    "next_cursor",
+    "total",
+    "units",
+    "container"
+  ],
+  "properties": {
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "reference",
+          "zone",
+          "reason",
+          "values",
+          "copied",
+          "record_problem",
+          "write_refusal",
+          "hidden",
+          "endpoints_m"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "reference": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path",
+              "entity_path",
+              "entity_id"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "entity_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1
+              },
+              "entity_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The Edge's assignment id, or null for an Edge with none."
+              }
+            },
+            "description": "The Edge's reference, or null when no Zone holds it."
+          },
+          "zone": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path",
+              "name",
+              "building_segment",
+              "level"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "name": {
+                "type": "string"
+              },
+              "building_segment": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "level": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "description": "The Zone holding the Edge, as ph_composer.zones.containment reads it."
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Why there is no reference: not_found or not_an_edge when the path names no Edge, otherwise why no Zone holds it, as zones.containment reads it; null with a Zone."
+          },
+          "values": {
+            "type": "object",
+            "description": "The Edge's assignment values as stored (thermal_bridge_type_id and quantity); empty when it has none."
+          },
+          "copied": {
+            "type": "boolean",
+            "description": "Whether another Edge carries the same assignment id, as a split or a copy leaves it. Routine; nothing repairs it."
+          },
+          "record_problem": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Why the stored assignment is invalid, or null. An invalid one can still be cleared or reassigned."
+          },
+          "write_refusal": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "description": "The refusal a write to the Edge meets from its path, or null."
+          },
+          "hidden": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Hidden itself, or on a hidden tag or tag folder; null with no Edge."
+          },
+          "endpoints_m": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 3,
+              "maxItems": 3,
+              "x-unit": "m"
+            },
+            "description": "The Edge's two ends in world metres, through every transform from the root; null with no Edge."
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    },
+    "units": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "endpoints_m"
+      ],
+      "properties": {
+        "endpoints_m": {
+          "type": "string",
+          "enum": [
+            "m"
+          ]
+        }
+      }
+    },
+    "container": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "locked",
+        "hidden",
+        "shared"
+      ],
+      "properties": {
+        "path": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "locked": {
+          "type": "boolean",
+          "description": "A step on the path is locked."
+        },
+        "hidden": {
+          "type": "boolean",
+          "description": "A step on the path is hidden."
+        },
+        "shared": {
+          "type": "boolean",
+          "description": "A step on the path is shared storage."
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "path": [
+    1201
+  ],
+  "assigned": "unassigned"
+}
 ```
 
 ### `ph_composer.thermal_bridges.edges.selection`
@@ -18980,6 +19814,137 @@ Example params:
 {}
 ```
 
+### `ph_composer.windows.units.convert_candidates`
+
+One bounded page of the rectangles loose in one container, the root when path is absent: Faces with four square corners and no hole, the shapes Convert to Window Type takes. Pass their paths to units.convert_review, which groups them and finds each group's host. Needs no selection. Owner: `ph_composer.windows`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `target.not_found`, `target.wrong_kind`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "path": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "description": "The root-to-container path, such as a Zone's; [] or absent for the Model root."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "candidates",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "outline_m",
+          "hidden",
+          "refusal"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "outline_m": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "x-unit": "m"
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "description": "The rectangle's four corners in world metres."
+          },
+          "hidden": {
+            "type": "boolean",
+            "description": "Hidden itself, or on a hidden tag or tag folder."
+          },
+          "refusal": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "description": "What Convert's source read refuses for this Face alone, such as locked or shared storage; null when it reads."
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "path": [
+    1201
+  ]
+}
+```
+
 ### `ph_composer.windows.units.convert_review`
 
 Which drawn rectangles Convert to Window Type would take, grouped by shared Edges into Window Type layouts, and why it leaves each other Face out. Writes nothing. Sizes are the frame outer size. Owner: `ph_composer.windows`.
@@ -19982,6 +20947,186 @@ Example params:
 ```json
 {
   "limit": 20
+}
+```
+
+### `ph_composer.windows.units.restore_candidates`
+
+One bounded page of the loose Window pane Faces in one container, the root when path is absent, one row per Window Type their stamps name, with the host the geometry proves or what the user must choose. A row with needs null supplies units.restore's params, which still checks the panes' exact geometry and may refuse. Needs no selection. Owner: `ph_composer.windows`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.not_found`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "path": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "description": "The root-to-container path; [] or absent for the Model root."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "candidates",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type_id",
+          "pane_paths",
+          "element_ids",
+          "host",
+          "needs",
+          "refusal"
+        ],
+        "properties": {
+          "type_id": {
+            "type": "string",
+            "description": "The Window Type the panes are stamped with."
+          },
+          "pane_paths": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "description": "Every loose pane Face stamped with it, root-to-Face."
+          },
+          "element_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The Type elements their stamps name."
+          },
+          "host": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path",
+              "entity_path",
+              "entity_id"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "entity_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "entity_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "description": "The one writable Zone Face holding every pane on its plane and inside its outline; null when not exactly one does."
+          },
+          "needs": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "host",
+              "selection",
+              null
+            ],
+            "description": "What the user must choose before units.restore: host, the Face the panes lie on; selection, which panes are one Window, when two carry one element. Null when the row is complete."
+          },
+          "refusal": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "description": "Why the stamped Type cannot be restored, such as a Type no longer in the Model; null otherwise."
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "path": [
+    1201
+  ]
 }
 ```
 
@@ -22741,6 +23886,186 @@ Example params:
     "name"
   ],
   "limit": 20
+}
+```
+
+### `ph_composer.zones.make_candidates`
+
+One page of the Groups directly in one edit context, the root when parent_path is absent, that Make Zone could take, each with the refusal it would give there. Needs no selection; selects and opens nothing. Owner: `ph_composer.zones`.
+
+Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.not_found`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "parent_path": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "description": "The edit context to look in; the root when absent."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "parent_path",
+    "open_required",
+    "candidates",
+    "next_cursor",
+    "total",
+    "loose_faces",
+    "loose_edges"
+  ],
+  "properties": {
+    "parent_path": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "open_required": {
+      "type": "boolean",
+      "description": "Make Zone runs in the open edit context: true when this one is not open, so ph_composer.context.open with parent_path comes first."
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "name",
+          "hidden",
+          "make_zone",
+          "refusal"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "The Group's root-to-Group path."
+          },
+          "name": {
+            "type": "string",
+            "description": "The Group's instance name; empty if none."
+          },
+          "hidden": {
+            "type": "boolean",
+            "description": "Hidden itself, or on a hidden tag or tag folder."
+          },
+          "make_zone": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "parent_path",
+              "entity_ids"
+            ],
+            "properties": {
+              "parent_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "description": "The edit context the Zone is made in."
+              },
+              "entity_ids": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1,
+                "description": "One Group, or loose Faces and Edges, by persistent id."
+              }
+            },
+            "description": "The params ph_composer.zones.make takes for this Group."
+          },
+          "refusal": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "description": "The refusal Make Zone gives this Group in this context, or null when it would make the Zone."
+          }
+        }
+      },
+      "description": "This page of the Groups directly in the context, by persistent id."
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    },
+    "loose_faces": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Faces loose in the context, which Make Zone also takes by id; ph_composer.context.children lists them."
+    },
+    "loose_edges": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Edges loose in the context."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "parent_path": [
+    1201
+  ],
+  "limit": 50
 }
 ```
 
@@ -59374,3 +60699,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.33 | 2026-11-10 | ph_composer.spaces.volumes.delete is new: it erases one Volume and its floor Faces in one Undo step, where volumes.remove keeps the Faces. The delete_volume_menu menu item is new. |
 | 1.34 | 2026-11-10 | ph_composer.spaces.create answers accepted and left_out as create_preview does, and each new Volume of create and volumes.create answers faces, its source Face paths. spaces.delete, remove, volumes.delete and volumes.remove refuse target.foreign_records while another feature's records are on or inside the Group. Make Zone refuses a Group holding a claimed object at any depth (target.wrong_hierarchy) and Restore a claimed member (target.wrong_kind); zones.list, zones.all and export preflight read the zone.ownership_conflict finding, which does not block export. A Face reference with a null entity_id refuses target.changed on every Face write once the Face has a record, and zones.update and update_metadata refuse a locked Zone (target.locked) as update_field does. |
 | 1.35 | 2026-11-10 | discover adds library_kinds, and describe answers a library kind by name (its wire kind and version, and its assignment target schema and examples or that it has none) and an installed extension by namespace. The agent connection's discover takes section, owner, limit, cursor and topic for bounded pages of operations, record kinds, reference targets, extensions, library kinds, common refusals with their meanings, contracts and the operating guide; initialize names the guide. ph_composer.library.copy's generation says it is required, as its schema already did. |
+| 1.36 | 2026-11-10 | Selection-free reads at an explicit path: ph_composer.context.children pages the entities directly in the root or one Group or component, with their state and records; zones.make_candidates, windows.units.convert_candidates and windows.units.restore_candidates list what Make Zone, Convert and Restore could take there; thermal_bridges.edges.at and edges.candidates read Edges by path in edges.selection's rows plus endpoints_m; and spaces.candidate_faces.list takes context for a first Space. edges.selection's copied flag no longer refuses for an unreadable record on another Edge. |

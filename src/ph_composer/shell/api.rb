@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 35
+    MINOR = 36
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -163,7 +163,15 @@ module PhComposer
                     "and topic for bounded pages of operations, record kinds, reference targets, extensions, " \
                     "library kinds, common refusals with their meanings, contracts and the operating guide; " \
                     "initialize names the guide. ph_composer.library.copy's generation says it is required, as " \
-                    "its schema already did." }
+                    "its schema already did." },
+      { "minor" => 36, "date" => "2026-11-10",
+        "change" => "Selection-free reads at an explicit path: ph_composer.context.children pages the entities " \
+                    "directly in the root or one Group or component, with their state and records; " \
+                    "zones.make_candidates, windows.units.convert_candidates and windows.units.restore_candidates " \
+                    "list what Make Zone, Convert and Restore could take there; thermal_bridges.edges.at and " \
+                    "edges.candidates read Edges by path in edges.selection's rows plus endpoints_m; and " \
+                    "spaces.candidate_faces.list takes context for a first Space. edges.selection's copied flag no " \
+                    "longer refuses for an unreadable record on another Edge." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

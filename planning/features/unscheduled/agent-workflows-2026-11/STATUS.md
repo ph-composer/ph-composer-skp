@@ -65,3 +65,15 @@ the evidence folder, so the same reads ran from a scratch test):
 | R05 | MCP `discover` index 12,993 bytes with keys `api`, `extension`, `capabilities`, `sessions`, `features`, `schemas`, `operations`; `record_kinds` (11), `reference_targets` (9), `extensions`, `common_refusals`, `tasks` and `contract_versions` only in process; Windows owner page 21,682 bytes against 24,576 | Open |
 | R12 | `resources/list` and `prompts/list` empty; `initialize` instructions select the session by file name; the guide reached a client only as a repository file | Open |
 | R15 | `library.copy.assignment` a bare object; no adapter descriptor in `discover` or `describe`; copy's `generation` described as omittable while its schema already required it | Open; schema groundwork here, workflows AW-06 |
+
+## AW-03 stage-entry recheck (AW-02 head `380f147c`, API 1.35)
+
+Measured with the offline stub from a scratch test before any change: a root Group holding one Face, nothing
+selected.
+
+| Finding | Measured on the AW-02 head | Entry state |
+| --- | --- | --- |
+| R06 Zones | `zones.list` answers `make_zone: null` and `total: 0`; no read lists Groups Make Zone could take | Open |
+| R06 Spaces | `spaces.candidate_faces.list` with neither `space` nor `volume` refuses `params.invalid`; no first-Space route | Open |
+| R06 Thermal Bridges | `edges.selection` answers `total: 0`; the only Edge reads registered are `edges.selection` and `selection_all` | Open |
+| R06 inventory | No registered query enumerates children or candidates at a path (`child`, `candidate`, `inventory` match only `spaces.candidate_faces.list`) | Open |

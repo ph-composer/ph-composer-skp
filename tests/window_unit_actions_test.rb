@@ -616,9 +616,13 @@ class WindowUnitActionsTest < PhComposerTestCase
     @group.entities.erase_entities(original.entity)
     scope = U::RestorePaneScope.new([@group.persistent_id], [face.persistent_id], type)
     before = scope.capture(@model)
-    result = assignment_invoke("#{PREFIX}.units.restore",
-                               "host" => @face_reference,
-                               "type_id" => @type_id, "pane_paths" => [[@group.persistent_id, face.persistent_id]])
+    # Found with no selection: the stamp names the Type and the one Zone Face holding the pane is its host.
+    offer = assignment_query("#{PREFIX}.units.restore_candidates", "path" => [@group.persistent_id])
+            .fetch("candidates").first
+    assert_equal [@type_id, [[@group.persistent_id, face.persistent_id]], @face_reference, nil, nil],
+                 offer.values_at("type_id", "pane_paths", "host", "needs", "refusal")
+    assert_equal before, scope.capture(@model)
+    result = assignment_invoke("#{PREFIX}.units.restore", offer.slice("host", "type_id", "pane_paths"))
     assert_equal "completed", result.fetch("status"), result.inspect
     refute_equal original.record.fetch("id"), result.dig("value", "unit_id")
     assert_equal "sill_center", units.first.dig("values", "anchor")
@@ -629,6 +633,33 @@ class WindowUnitActionsTest < PhComposerTestCase
     assert_empty units
     @model.redo
     assert_equal result.dig("value", "unit_id"), units.first.fetch("id")
+  end
+
+  # Panes no Zone Face holds name their Type but not a host, and two panes of one element are two Windows: each
+  # row says what the user must choose instead of guessing.
+  def test_restore_candidates_say_what_the_geometry_cannot_prove
+    loose = [2001, 2002].map do |id|
+      face = Sketchup::Face.new(id, {}, :points => [[0, 0, 500], [10, 0, 500], [10, 10, 500], [0, 10, 500]]
+                                                   .map { |point| Geom::Point3d.new(*point) })
+      U::PANE_STORE.write(face, "window_type_id" => @type_id, "element_id" => "wel_#{id}")
+      face
+    end
+    @model.entities << loose.first
+    off = assignment_query("#{PREFIX}.units.restore_candidates").fetch("candidates").first
+    @model.entities << loose.last
+    loose.last.set_attribute(U::PANE_STORE.dictionary, U::PANE_STORE.key,
+                             JSON.generate("window_type_id" => @type_id, "element_id" => "wel_2001"))
+    mixed = assignment_query("#{PREFIX}.units.restore_candidates").fetch("candidates").first
+
+    assert_equal [nil, "host"], off.values_at("host", "needs")
+    gone = Sketchup::Face.new(2003, {}, :points => [[0, 0, 900], [10, 0, 900], [10, 10, 900]]
+                                                   .map { |point| Geom::Point3d.new(*point) })
+    U::PANE_STORE.write(gone, "window_type_id" => "wnt_ZZZZZZZZZZZZ", "element_id" => "wel_Z")
+    @model.entities << gone
+    rows = assignment_query("#{PREFIX}.units.restore_candidates").fetch("candidates")
+    missing = rows.find { |row| row["type_id"] == "wnt_ZZZZZZZZZZZZ" }
+    assert_equal "target.not_found", missing.dig("refusal", "code")
+    assert_equal [%w[wel_2001 wel_2001], "selection"], mixed.values_at("element_ids", "needs")
   end
 
   def test_reset_can_discard_selected_geometry_beyond_the_generated_footprint

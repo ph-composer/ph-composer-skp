@@ -10,12 +10,14 @@ module PhComposer
   # in `side_effects`. They name no feature.
   #
   # A selection page is bound to the revision and the view generation it was read at, so a cursor
-  # expires when the selection changes even though the Model did not.
+  # expires when the selection changes even though the Model did not. What is inside a container, with no
+  # selection at all, is ContextChildren's read.
   module ContextCommands
     FEATURE_ID = "ph_composer.context"
     READ = "#{FEATURE_ID}.read"
     OPEN = "#{FEATURE_ID}.open"
     ROOT = "#{FEATURE_ID}.root"
+    CHILDREN = "#{FEATURE_ID}.children"
     PATH = { "type" => "array", "items" => { "type" => "integer" },
              "description" => "Persistent ids of Groups and Components from the root, outermost first." }.freeze
     EXPECTED_PATH = PATH.merge("description" => "The edit path as last read; refused when it has changed since.")
@@ -46,6 +48,7 @@ module PhComposer
                           :result => result, :refuses => %w[query.cursor_expired query.limit_invalid],
                           :while_busy => true,
                           :examples => [{}, { "limit" => 50 }]) { |request| read(request) }
+      ContextChildren.install(feature)
     end
 
     def install_navigation(feature)
@@ -101,6 +104,15 @@ module PhComposer
                                                          "through another copy of its parent; close to the root " \
                                                          "first. Nothing moved.")
       end
+    end
+
+    # The refusal `open` would give `ids` now, from its own step checks, or nil when it would open them: a
+    # read that offers a context to open says so before a client tries.
+    def open_refusal(model, ids)
+      resolve(model, ids)
+      nil
+    rescue CodedError => error
+      error
     end
 
     def resolve(model, ids)

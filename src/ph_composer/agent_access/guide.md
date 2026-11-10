@@ -82,12 +82,39 @@ last read; if the Model holds something else now, the edit is refused and nothin
 
 ## Recipes
 
+### Finding geometry without a selection
+
+Nothing needs the user to select anything first. Every read below takes a root-to-container `path`
+(`[]` is the Model root), pages by persistent id and changes nothing: no selection, no edit path, no
+record. Their ids and paths are the ones the writes take, so never read ids through a script.
+
+- `ph_composer.context.children` lists what is directly inside the root or one Group or component:
+  each entity's `path`, `kind`, name, whether it is `hidden`, `locked`, `shared` storage or a `solid`,
+  its `child_count`, and the PH-Composer `records` on it. Walk down one container at a time; `kinds`
+  narrows a page to Groups, components, Faces or Edges. Hidden and locked things are listed, never
+  dropped.
+- Each feature's candidate read answers what its action could take in one container, with the
+  refusal that action would give each candidate named alone. A context that is not open is not a
+  refusal: open it with `ph_composer.context.open` first, as the row says (`open_required` or
+  `requires`).
+
+### A first Zone
+
+1. `ph_composer.zones.make_candidates` with `parent_path` lists the Groups there that Make Zone could
+   take, each with its `make_zone` params and `refusal`: a locked Group, one another feature owns, one
+   inside another Zone. `loose_faces` counts the loose Faces Make Zone can group instead; their ids come
+   from `ph_composer.context.children` with `kinds` `["face", "edge"]`.
+2. If `open_required`, `ph_composer.context.open` with that path. Then `ph_composer.zones.make` with the
+   row's `make_zone` and an optional `name`; read the new Zone back with `ph_composer.zones.list`.
+
 ### Spaces from loose Faces
 
 A new Space or Volume is made from floor Faces a person draws in SketchUp; the connection does not
 draw geometry. Ask the user to draw the floor surfaces first, then:
 
-1. `context`, then `ph_composer.context.open` with the path holding the floor surfaces and `expected_path`. The
+1. Find the floor Faces with `ph_composer.spaces.candidate_faces.list` and `context`, the path holding them: each
+   loose Face there, with the refusal Create Space gives it named alone (a wall, a Face sharing an Edge with an
+   unselected one, a Face in a solid). Then `ph_composer.context.open` with that path and `expected_path`. The
    root, a plain Group or a Zone's own context all work.
 2. `ph_composer.spaces.create_preview` with the Faces' root-to-Face paths says what would be taken and which Zone to
    host the Space in. `ph_composer.spaces.create` from those Faces, with that `zone` or none. Each set of Faces
@@ -106,6 +133,11 @@ draw geometry. Ask the user to draw the floor surfaces first, then:
    Space's record and moves no geometry. Read every changed reference back.
 
 Leaving a Volume locks it again; the navigation commands say so in `side_effects`.
+
+For Height from solid, find the solid with `ph_composer.context.children`: a Group or component with `solid`
+true and no Spaces record. `ph_composer.spaces.volumes.height_from_solid_preview` with the Volume and the
+solid's `path` says the height it would give, or refuses a solid that is not closed; nothing proves which
+solid belongs to which Volume, so ask the user when it is not plain.
 
 ### Assemblies
 
@@ -130,7 +162,12 @@ route: each target is an Edge reference inside its Zone (`zone_id`, `zone_path`,
 quantity (1 when absent). `ph_composer.thermal_bridges.edges.selection` returns the selected Edges in
 that shape a bounded page at a time, each with the Zone holding it and the refusal a write would
 meet; follow `next_cursor` to read them all. An Edge outside every Zone has no reference and cannot
-be assigned. For a native path you hold yourself,
+be assigned. Without a selection, `ph_composer.thermal_bridges.edges.candidates` with a Zone's `path` (or a
+Group's inside it) lists the Edges directly there in the same rows, with world `endpoints_m`;
+`assigned` `"unassigned"` keeps only Edges with no assignment yet. `ph_composer.thermal_bridges.edges.at`
+reads explicit root-to-Edge paths the same way, such as a schedule run's `edge_paths`, so a schedule row
+reads back, reassigns or clears without `runs.locate`; a path that names no Edge is a row with its
+`reason`. After a write, read the Edges back by path. For a native path you hold yourself,
 `ph_composer.zones.containment` answers which Zone holds it. One command reaches at most 250 Edges
 and refuses as a whole if any target changed or cannot be written. `ph_composer.thermal_bridges.edges.clear`
 removes the assignment. Each is one Undo step. An Edge split or copied in SketchUp keeps its
@@ -168,6 +205,16 @@ outlines on its plane as rectangles in that frame. Keep an opening inside the ou
 bounding box, and clear of those rectangles.
 `ph_composer.windows.units.outlines` gives every placed Unit's outline in world metres, with the Face
 it is glued to, a bounded page at a time.
+
+Rectangles a person drew on a wall become Windows through Convert to Window Type.
+`ph_composer.windows.units.convert_candidates` with the Zone's `path` lists the rectangles there (four
+square corners, no hole); pass their paths to `ph_composer.windows.units.convert_review`, which groups
+them, finds each group's host and matching Types, and gives the `groups` `units.convert` takes with their
+digests. Loose pane Faces left by an exploded Window are listed by
+`ph_composer.windows.units.restore_candidates`, one row per Window Type their stamps name. A row with
+`needs` null is `units.restore`'s params as it stands; `needs` `"host"` means no single Zone Face holds
+the panes, and `"selection"` that the panes of two Windows of one Type are mixed: ask the user which
+Face, or which panes, rather than choosing by a name.
 
 ### Library records
 

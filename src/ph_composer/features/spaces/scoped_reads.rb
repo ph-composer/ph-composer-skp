@@ -13,6 +13,9 @@ module PhComposer
       CANDIDATE_FACES = "#{FEATURE_ID}.candidate_faces.list"
       CANDIDATE_FIELDS = %w[plan_area_m2 normal horizontal loops_m].freeze
       OPEN_SPACE = "The Space open for editing (ph_composer.spaces.context.open)."
+      OPEN_CONTEXT = "This context open for editing (ph_composer.context.open with its path): Create Space takes " \
+                     "Faces loose in the open edit context."
+      CREATE = "#{FEATURE_ID}.create".freeze
       PATH = ->(row) { row.dig("reference", "entity_path") }
 
       module_function
@@ -62,11 +65,14 @@ module PhComposer
       # a Space's root, ready to group into a new Volume; each with the operation it is for and the
       # refusal that operation would give now. Reading stamps nothing and repairs nothing.
       def candidate_faces(request)
-        scan = Occurrences.scan(request.model)
         params = request.params
-        unless params.key?("space") ^ params.key?("volume")
-          raise CodedError.new("params.invalid", "Name one Space or one Volume whose candidate Faces to read.")
+        unless %w[space volume context].count { |key| params.key?(key) } == 1
+          raise CodedError.new("params.invalid", "Name one Space, one Volume or one context whose candidate Faces " \
+                                                 "to read.")
         end
+        return context_candidates(request) if params.key?("context")
+
+        scan = Occurrences.scan(request.model)
 
         faces = if params.key?("space")
                   space = Resolve.occurrence(scan, params["space"], :mutable => false)
@@ -78,6 +84,43 @@ module PhComposer
         rows = faces.sort_by(&:path).map { |face| candidate_row(scan, face, params["fields"]) }
         page, next_cursor = Pages.bounded(request, CANDIDATE_FACES, rows, :key => ->(row) { row["entity_path"] })
         { "candidate_faces" => page, "next_cursor" => next_cursor, "total" => rows.length }
+      end
+
+      # The Faces loose in one edit context, the root or a plain Group or a Zone's own context, for a first
+      # Space: each with the refusal Create Space gives it named alone with that context open (CreateFaces.read,
+      # the action's own rule), and what to open first when it is not. Only the page's Faces are judged.
+      def context_candidates(request)
+        model = request.model
+        container = OccurrencePath.resolve(model, request.params.fetch("context"))
+        faces = container.entities.to_a.grep(Sketchup::Face).map { |face| container.path + [face.persistent_id] }.sort
+        open = Array(model.active_path).map(&:persistent_id) == container.path
+        blocked = ContextCommands.open_refusal(model, container.path) unless open
+        build = lambda do |paths|
+          next [] if paths.empty?
+
+          found = CreateFaces.read(request, paths, :context => container.instances, :alone => true)
+          refusals = found.left_out.to_h { |row| [row.fetch("path"), row] }
+          paths.map do |path|
+            left_out = blocked ? { "reason" => blocked.code, "message" => blocked.message } : refusals[path]
+            context_row(Occurrences.entity_at(model, path), path, left_out, container.transform, open,
+                        request.params["fields"])
+          end
+        end
+        page, next_cursor = Pages.bounded(request, CANDIDATE_FACES, faces, :key => ->(path) { path },
+                                                                           :prepare => build)
+        { "candidate_faces" => page, "next_cursor" => next_cursor, "total" => faces.length }
+      end
+
+      def context_row(face, path, left_out, transform, open, fields)
+        geometry = FaceCapture.call(face, transform)
+        row = { "entity_path" => path, "candidate" => "space", "space" => nil, "volume" => nil,
+                "operation" => CREATE, "refusal" => left_out && { "code" => left_out.fetch("reason"),
+                                                                  "message" => left_out.fetch("message") },
+                "requires" => open ? nil : OPEN_CONTEXT, "hidden" => OccurrencePath.hidden?(face),
+                "plan_area_m2" => Metrics.projected_area_m2(geometry.loops_m), "normal" => geometry.normal,
+                "horizontal" => Metrics.horizontal?(geometry.normal), "loops_m" => geometry.loops_m }
+        fixed = %w[entity_path candidate space volume operation refusal requires hidden]
+        row.slice(*(fixed + (fields || (CANDIDATE_FIELDS - ["loops_m"]))))
       end
 
       def candidate_row(scan, face, fields)

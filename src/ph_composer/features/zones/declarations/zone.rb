@@ -127,18 +127,7 @@ module PhComposer
           Zones.all(request)
         end
         install_containment(feature)
-      end
-
-      def install_containment(feature)
-        feature.query("#{FEATURE_ID}.containment",
-                      :description => "The Zone occurrence holding the entity at each explicit native path, for a " \
-                                      "feature storing records on geometry inside Zones. Scans only each path, " \
-                                      "never the whole Model.",
-                      :refuses => %w[record.unreadable validation.failed], :params => CONTAINMENT_PARAMS,
-                      :result => CONTAINMENT_RESULT,
-                      :examples => [{ "paths" => [[1201, 1202]] }]) do |request|
-          Zones.containment(request, :paths => request.params.fetch("paths"))
-        end
+        install_make_candidates(feature)
       end
 
       # The two edits of an existing Zone occurrence: its values, and its metadata.
@@ -206,6 +195,56 @@ module PhComposer
                                                             "strictly.")
         }))
       }).freeze
+
+      MAKE_CANDIDATE = Shapes.object({
+        "path" => PATH.merge("description" => "The Group's root-to-Group path."),
+        "name" => { "type" => "string", "description" => "The Group's instance name; empty if none." },
+        "hidden" => { "type" => "boolean", "description" => "Hidden itself, or on a hidden tag or tag folder." },
+        "make_zone" => MAKE_TARGET.merge("description" => "The params #{FEATURE_ID}.make takes for this Group."),
+        "refusal" => REFUSAL.merge("description" => "The refusal Make Zone gives this Group in this context, or " \
+                                                    "null when it would make the Zone.")
+      })
+      MAKE_CANDIDATES_RESULT = Shapes.object({
+        "parent_path" => PATH,
+        "open_required" => { "type" => "boolean",
+                             "description" => "Make Zone runs in the open edit context: true when this one is not " \
+                                              "open, so ph_composer.context.open with parent_path comes first." },
+        "candidates" => Shapes.list(MAKE_CANDIDATE, :description => "This page of the Groups directly in the " \
+                                                                    "context, by persistent id."),
+        "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL,
+        "loose_faces" => Shapes::COUNT.merge("description" => "Faces loose in the context, which Make Zone also " \
+                                                              "takes by id; ph_composer.context.children lists them."),
+        "loose_edges" => Shapes::COUNT.merge("description" => "Edges loose in the context.")
+      }).freeze
+
+      def install_make_candidates(feature)
+        feature.query(MakeCandidates::QUERY,
+                      :description => "One page of the Groups directly in one edit context, the root when " \
+                                      "parent_path is absent, that Make Zone could take, each with the refusal it " \
+                                      "would give there. Needs no selection; selects and opens nothing.",
+                      :refuses => (READ + Refuses::PAGE + %w[target.not_found]).uniq,
+                      :params => Shapes.object({ "parent_path" => PATH.merge("description" => "The edit context " \
+                                                                                              "to look in; the root " \
+                                                                                              "when absent."),
+                                                 "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR },
+                                               :optional => %w[parent_path limit cursor]),
+                      :result => MAKE_CANDIDATES_RESULT,
+                      :examples => [{}, { "parent_path" => [1201], "limit" => 50 }]) do |request|
+          MakeCandidates.read(request)
+        end
+      end
+
+      def install_containment(feature)
+        feature.query("#{FEATURE_ID}.containment",
+                      :description => "The Zone occurrence holding the entity at each explicit native path, for a " \
+                                      "feature storing records on geometry inside Zones. Scans only each path, " \
+                                      "never the whole Model.",
+                      :refuses => %w[record.unreadable validation.failed], :params => CONTAINMENT_PARAMS,
+                      :result => CONTAINMENT_RESULT,
+                      :examples => [{ "paths" => [[1201, 1202]] }]) do |request|
+          Zones.containment(request, :paths => request.params.fetch("paths"))
+        end
+      end
 
       def install(feature)
         feature.reference_target(TARGET)

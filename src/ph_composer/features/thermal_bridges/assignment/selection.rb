@@ -62,6 +62,8 @@ module PhComposer
                     "entity_path" => containment.fetch("entity_path"), "entity_id" => Assignment.identity(record) }
         end
 
+        # One Edge's row from its `zones.containment` row, its stored record and the ids copies share; the path
+        # reads (PathReads) answer the same row.
         def row(containment, record, copied)
           reference = reference(containment, record)
           { "path" => containment.fetch("path"), "reference" => reference,
@@ -77,10 +79,10 @@ module PhComposer
           ids = records.compact.map { |record| record["id"] }.compact
           return [] if ids.empty?
 
-          counts = Target.entries(model).map { |entry| entry.record["id"] }.tally
+          counts = Target.readable_ids(model).tally
           ids.select { |id| counts.fetch(id, 0) > 1 }
         end
-        private_class_method :rows, :row, :copied_ids, :ignored
+        private_class_method :rows, :ignored
 
         # Whether a write can reach the Edge a selection row names: a Zone holds it, through no shared,
         # locked or other Zone storage. The menu and the panel's assign bar both offer only such Edges.

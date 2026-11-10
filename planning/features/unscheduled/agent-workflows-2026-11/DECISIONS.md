@@ -1,6 +1,6 @@
 # Decisions for implementation intake
 
-STATUS: D01-D10 recommended defaults accepted 2026-11-10 under the implementation go; AW-01 choices recorded below.
+STATUS: D01-D10 recommended defaults accepted 2026-11-10 under the implementation go; AW-01, AW-02 and AW-03 choices recorded below.
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication
 
 | ID | Question | Recommendation and scope |
@@ -39,6 +39,14 @@ AW-02 choices, recorded before the gate:
 | D04-a | The guide is a bounded topic read through the existing `discover` tool (`section: "guide"`, `topic`), not a new tool verb and not MCP resources, which stay empty; one source, `docs/AGENT_GUIDE.md`, shipped as a fixture-checked copy. Whether both fresh clients find and use it unprompted is AW-10's client evidence |
 | D03-b | Discovery pages are cut at the shared 16 KiB row budget (`Pages::MAX_PAGE_BYTES`) under the unchanged 24 KiB reply limit. The legacy `owner` page stays unpaged for existing callers; `section: "operations"` with `owner` is the paged route |
 | D01-d | Foundation codes keep a null `description` in `describe`'s `refuses`; their meanings are published once, in the `refusals` section, so the existing contract does not change |
+
+AW-03 choices, recorded before code:
+
+| ID | Choice |
+| --- | --- |
+| D11-a | Inventory filtering: `context.children` lists every direct child whatever its state and filters only by `kinds`. Each row says `hidden` (its own flag or a hidden tag), `locked`, `shared` (component storage, or a Group whose definition another Group shares), `solid` and the registered `records` on it; `container` carries the same flags down the path. Hidden, locked, shared and foreign-owned objects are represented, never dropped, so a total never depends on view state |
+| D11-b | Candidate refusals are what the owning action gives the candidate named alone, read through the action's own check with the candidate's context in place of the open one. A candidate at a context that is not open is not refused for that: the row says the edit path must be opened first (`open_required`, or `requires`), which `context.open` does |
+| D11-c | Height from solid has no owner proof linking a solid to a Volume, so acquisition is `context.children` (`solid`, `records`) and the existing `volumes.height_from_solid_preview`, which refuses a non-solid; no new Spaces read. A Window restore host is given only when geometry proves one writable Zone Face; otherwise the row says what the user must choose |
 
 AW-01 through AW-07 can be made concrete without choosing a model vendor or a remote service.
 Routine naming/helper decisions belong to coding agents within the accepted contracts. Record a

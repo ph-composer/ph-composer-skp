@@ -155,14 +155,22 @@ module PhComposer
                         "required" => %w[entity_path candidate space volume operation refusal requires],
                         "properties" => {
                           "entity_path" => Shapes::ZONE_PATH.merge("description" => "The Face's path from the root."),
-                          "candidate" => { "type" => "string", "enum" => %w[floor volume],
+                          "candidate" => { "type" => "string", "enum" => %w[floor volume space],
                                            "description" => "floor: in a Volume, to mark; volume: loose at a " \
-                                                            "Space's root, to group into a new Volume." },
+                                                            "Space's root, to group into a new Volume; space: " \
+                                                            "loose in a context named by context, to make a new " \
+                                                            "Space with create." },
                           "space" => SPACE_REFERENCE.merge("type" => %w[object null]),
                           "volume" => VOLUME_REFERENCE.merge("type" => %w[object null]),
-                          "operation" => Shapes::TEXT, "refusal" => REFUSAL,
+                          "operation" => Shapes::TEXT,
+                          "refusal" => REFUSAL.merge("description" => "The refusal the operation gives the Face " \
+                                                                      "named alone, or null. For a space candidate " \
+                                                                      "the code is create's left_out reason."),
                           "requires" => { "type" => %w[string null],
                                           "description" => "What the operation needs first." },
+                          "hidden" => { "type" => "boolean",
+                                        "description" => "For a space candidate: hidden itself, or on a hidden " \
+                                                         "tag or tag folder." },
                           "plan_area_m2" => AREA,
                           "normal" => { "type" => "array", "items" => { "type" => "number" } },
                           "horizontal" => { "type" => "boolean" },
@@ -201,16 +209,22 @@ module PhComposer
       end
 
       def install_candidates(feature, refuses, example)
+        context = Shapes::ZONE_PATH.merge("description" => "A root-to-container path, [] for the root: its loose " \
+                                                           "Faces, for a first Space.")
         feature.query(ScopedReads::CANDIDATE_FACES,
                       :description => "One page of the Faces of one Space or one Volume that carry no record yet: " \
                                       "Floor candidates inside a Volume (for floors.mark) and loose Faces at the " \
-                                      "Space's root (for volumes.create), each with the refusal its operation would " \
-                                      "give now. Name exactly one.",
-                      :refuses => refuses, :examples => [{ "space" => example }],
+                                      "Space's root (for volumes.create); or the Faces loose in one context (for " \
+                                      "create), with no Space yet and no selection. Each has the refusal its " \
+                                      "operation would give it named alone now. Name exactly one of space, " \
+                                      "volume and context.",
+                      :refuses => (refuses + %w[target.wrong_kind target.shared_definition]).uniq,
+                      :examples => [{ "space" => example }, { "context" => [] }],
                       :params => Shapes.object({ "space" => scope(SPACE_REFERENCE, "Space"),
                                                  "volume" => scope(VOLUME_REFERENCE, "Volume"),
+                                                 "context" => context,
                                                  "fields" => fields(ScopedReads::CANDIDATE_FIELDS) }.merge(PAGE),
-                                               :optional => %w[space volume fields limit cursor]),
+                                               :optional => %w[space volume context fields limit cursor]),
                       :result => Shapes.object({ "candidate_faces" => Shapes.list(CANDIDATE_ROW),
                                                  "next_cursor" => Pages::NEXT_CURSOR,
                                                  "total" => Pages::TOTAL })) do |request|

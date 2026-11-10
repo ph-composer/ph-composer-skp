@@ -275,7 +275,85 @@ class ThermalBridgeAssignmentTest < PhComposerTestCase
     assert_equal [record.fetch("id")] * 2, [@edges.first, piece].map { |entity| STORE.read(entity)["id"] }
   end
 
+  # With no selection: the unassigned Edges of a Zone in a rotated wrapper, assigned from their row, read back
+  # by path, cleared and read again; a schedule run's edge_paths read the same way, with no runs.locate.
+  def test_path_reads_find_assign_read_back_and_clear_an_edge_without_a_selection
+    scope = PhComposer::Operations::EntityScope.new([])
+    before = [scope.capture(@model), @model.selection.to_a, @model.active_path, @session.revision]
+    found = path_read("edges.candidates", "path" => [20, 200], "assigned" => "unassigned")
+
+    assert_equal before, [scope.capture(@model), @model.selection.to_a, @model.active_path, @session.revision]
+    row = found.fetch("edges").first
+    assert_equal [[20, 200, 201], { "zone_id" => "zon_BBBBBBBBBBBB", "zone_path" => [20, 200],
+                                    "entity_path" => [201], "entity_id" => nil }, {}],
+                 row.values_at("path", "reference", "values")
+    # The quarter turn maps (100, 201) inches to (-201, 100) and moves 500 inches along x, applied once.
+    assert_equal [[12.7, 0.0, 0.0], [7.5946, 2.54, 0.0]],
+                 row.fetch("endpoints_m").map { |point| point.map { |value| value.round(4) } }
+    assigned = assign([{ "reference" => row.fetch("reference"), "expected_values" => row.fetch("values") }], @parapet)
+    assert_equal "committed", assigned["effect"], assigned.inspect
+
+    back = path_read("edges.at", "paths" => [[20, 200, 201]]).fetch("edges").first
+    assert_equal [assigned.dig("value", "edge_ids", 0), { "thermal_bridge_type_id" => @parapet, "quantity" => 1 }],
+                 [back.dig("reference", "entity_id"), back.fetch("values")]
+    assert_empty path_read("edges.candidates", "path" => [20, 200], "assigned" => "unassigned").fetch("edges")
+    cleared = invoke("edges.clear", "targets" => [{ "reference" => back.fetch("reference"),
+                                                    "expected_values" => back.fetch("values") }])
+    assert_equal "committed", cleared["effect"], cleared.inspect
+    assert_nil path_read("edges.at", "paths" => [[20, 200, 201]]).dig("edges", 0, "reference", "entity_id")
+  end
+
+  def test_a_schedule_run_reads_by_its_edge_paths_and_bad_paths_and_storage_are_rows_not_refusals
+    assign(@edges.first(2).map { |entity| target(entity) }, @slab)
+    STORE.write(@edges.last, "id" => "tbe_AAAAAAAAAAAA", "quantity" => "many")
+    @loose.set_attribute(STORE.dictionary, STORE.key, "{not json")
+    paths = API.query(:context => @context, :name => "#{TB::FEATURE_ID}.schedule.list")
+               .dig("value", "runs").flat_map { |run| run.fetch("edge_paths") }
+
+    rows = path_read("edges.at", "paths" => paths).fetch("edges")
+    assert_equal [@slab] * paths.length, rows.map { |row| row.dig("values", "thermal_bridge_type_id") }
+    assert(rows.all? { |row| row.dig("reference", "entity_id").start_with?("tbe_") })
+    odd = path_read("edges.at", "paths" => [[100, 999], [100, 110], [100, 140, 141], [100, 130, 131], [5],
+                                            [100, 103]]).fetch("edges")
+    assert_equal ["not_found", "not_an_edge", nil, nil, "outside_zone", nil], odd.map { |row| row.fetch("reason") }
+    assert_equal [nil, nil, "target.shared_definition", "target.locked", nil, nil],
+                 odd.map { |row| row.dig("write_refusal", "code") }
+    refute_nil odd.last.fetch("record_problem")
+    assert_match(/not valid JSON/, odd[4].fetch("record_problem"))
+    @edges[1].set_attribute(STORE.dictionary, STORE.key, "[1]")
+    assert_match(/not a JSON object/, path_read("edges.at", "paths" => [[100, 102]]).dig("edges", 0, "record_problem"))
+    first = path_read("edges.candidates", "path" => [100], "limit" => 1)
+    @session.host_event(:transaction_committed)
+    expired = API.query(:context => @context, :name => "#{TB::FEATURE_ID}.edges.candidates",
+                        :params => { "path" => [100], "limit" => 1, "cursor" => first.fetch("next_cursor") })
+    assert_equal "query.cursor_expired", expired["code"]
+  end
+
+  def test_many_edges_page_to_the_end_within_the_reply_budget
+    crowd = zone("zon_DDDDDDDDDDDD", 700, (7001..7400).map { |id| edge(id) })
+    @model.entities << crowd
+    paths = (7001..7400).map { |id| [700, id] }
+    [["edges.at", { "paths" => paths }], ["edges.candidates", { "path" => [700] }]].each do |name, params|
+      seen = []
+      cursor = nil
+      loop do
+        result = API.query(:context => @context, :name => "#{TB::FEATURE_ID}.#{name}",
+                           :params => params.merge("limit" => 500, "cursor" => cursor).compact)
+        assert_operator JSON.generate(result).bytesize, :<, 24 * 1024
+        seen.concat(result.dig("value", "edges").map { |row| row.fetch("path") })
+        break unless (cursor = result.dig("value", "next_cursor"))
+      end
+      assert_equal paths, seen, name
+    end
+  end
+
   private
+
+  def path_read(name, params)
+    result = API.query(:context => @context, :name => "#{TB::FEATURE_ID}.#{name}", :params => params)
+    assert_equal "completed", result["status"], result.inspect
+    result.fetch("value")
+  end
 
   # The entity at a root-to-entity path in the live Model, which Undo restores as new objects.
   def live(*path)

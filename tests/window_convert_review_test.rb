@@ -45,6 +45,30 @@ class WindowConvertReviewTest < PhComposerTestCase
     assert_equal before, @model.operations.length
   end
 
+  # With no selection: the rectangles in the Zone are found by shape alone (its wall, which has a hole, is not
+  # one), and their paths make the review's group; reading moves and writes nothing.
+  def test_convert_candidates_find_the_drawn_rectangles_and_the_review_takes_their_paths
+    faces = zone_with([ring(1, 1, 0.6, 1.5), ring(1.6, 1, 1.2, 1.5)], :holes => [ring(1, 1, 1.8, 1.5)])
+    scope = PhComposer::Operations::EntityScope.new([])
+    before = [scope.capture(@model), @model.selection.to_a, @model.active_path, @model.operations.length]
+
+    found = assignment_query("ph_composer.windows.units.convert_candidates", "path" => [@group.persistent_id])
+
+    assert_equal before, [scope.capture(@model), @model.selection.to_a, @model.active_path, @model.operations.length]
+    rows = found.fetch("candidates")
+    assert_equal faces.map { |face| path(face) }.sort, rows.map { |row| row.fetch("path") }
+    assert_equal [nil, nil], rows.map { |row| row.fetch("refusal") }
+    assert_equal [[1.0, 0.0, 1.0], [1.6, 0.0, 1.0]], rows.map { |row| row.dig("outline_m", 0).map { |v| v.round(6) } }
+    group = review(*rows.map { |row| row.fetch("path") }).fetch("groups").first
+    assert_equal [[0.6, 1.2], host_reference], [group.fetch("columns_m"), group.fetch("host")]
+    @model.entities << (empty = Sketchup::Group.new(next_id, Sketchup::Entities.new))
+    assert_equal 0, assignment_query("ph_composer.windows.units.convert_candidates",
+                                     "path" => [empty.persistent_id]).fetch("total")
+    @group.locked = true
+    locked = assignment_query("ph_composer.windows.units.convert_candidates", "path" => [@group.persistent_id])
+    assert_equal ["target.locked"] * 2, locked.fetch("candidates").map { |row| row.dig("refusal", "code") }
+  end
+
   def test_three_rectangles_sharing_edges_are_one_group_of_three_columns
     faces = zone_with([ring(1, 1, 0.6, 1.5), ring(1.6, 1, 1.2, 1.5), ring(2.8, 1, 0.6, 1.5)],
                       :holes => [ring(1, 1, 2.4, 1.5)])
