@@ -4,6 +4,7 @@ _private/
 dist/
 output/
 .playwright-mcp/
+__test_project__
 
 # Developer lint tooling, installed per branch by `bundle install` and `pnpm install`. Ignored at
 # the base of the stack so a `git add -A` on any branch cannot sweep vendored files into a commit.
