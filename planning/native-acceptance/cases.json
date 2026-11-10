@@ -4665,7 +4665,10 @@
         "src/ph_composer/agent_access/dialog.rb",
         "src/ph_composer/shell/dispatch.rb",
         "src/ph_composer/shell/api.rb",
-        "src/ph_composer/shell/context_commands.rb"
+        "src/ph_composer/shell/context_commands.rb",
+        "src/ph_composer/core/records/engine.rb",
+        "src/ph_composer/core/records/catalog.rb",
+        "src/ph_composer/session/host_observers.rb"
       ],
       "native_control_required": true
     },
