@@ -32,7 +32,7 @@ class SpacesReadoutsTest < PhComposerTestCase
     assert_equal 1, model.overlays.count { |overlay| overlay.is_a?(PhComposer::ColourBy::Overlay) }
     view = model.active_view
     model.overlays.to_a.first.draw(view)
-    assert_includes view.texts.map { |_point, text, _options| text }, "101 Living"
+    assert_includes view.texts.map { |_point, text, _options| text }, "101 Living | iCFA 12 m² | Vol: 30 m³"
     assert_operator view.draws.count { |mode, *| mode == GL_LINES }, :>=, 1
   end
 
@@ -77,16 +77,48 @@ class SpacesReadoutsTest < PhComposerTestCase
     assert_in_delta 1.0, loft.point.z / INCHES, 1e-9, "a sloped segment's label sits at its mean height"
   end
 
-  def test_each_option_adds_its_line_and_the_view_command_redraws_them
+  def test_a_new_session_shows_weighted_area_and_net_volume_but_not_airflows
+    assert_equal({ "weighted_area" => true, "net_volume" => true, "airflows" => false },
+                 API.query(:context => @context, :name => "ph_composer.spaces.labels.options").fetch("value"))
+  end
+
+  def test_each_option_adds_its_section_and_the_view_command_redraws_them
     @service.readout(LABELS, :on => true)
-    result = API.view(:context => @context, :name => "ph_composer.spaces.labels.set_options",
-                      :params => { "weighted_area" => true, "net_volume" => true, "airflows" => true })
+    result = set_label_options("weighted_area" => true, "net_volume" => true, "airflows" => true)
     assert_equal "completed", result.fetch("status"), result.inspect
-    living = @service.readout_drawings.fetch(LABELS).first.find { |anchor| anchor.parts.first == "101 Living" }
-    assert_equal ["101 Living", "  ", ["area", 12.0], "  ", ["volume", 30.0], "  ", ["airflow", 60.0], " / ",
-                  ["airflow", 0.0]], living.parts
-    loft = @service.readout_drawings.fetch(LABELS).first.find { |anchor| anchor.parts.first == "201 Loft" }
-    refute_includes loft.parts.flatten, "airflow", "an inheriting Space has no rates to show"
+    assert_equal "101 Living | iCFA 12 m² | Vol: 30 m³ | Sup 60 m³/h / Ext 0 m³/h", label_text("101 Living", "SI")
+    assert_equal "101 Living | iCFA 129 ft² | Vol: 1,059 ft³ | Sup 35 cfm / Ext 0 cfm", label_text("101 Living", "IP")
+    refute_includes label_text("201 Loft", "SI"), "Sup", "an inheriting Space has no rates to show"
+  end
+
+  def test_every_combination_of_options_leaves_no_stray_separator
+    @service.readout(LABELS, :on => true)
+    [true, false].repeated_permutation(3).each do |area, volume, airflows|
+      set_label_options("weighted_area" => area, "net_volume" => volume, "airflows" => airflows)
+      expected = ["101 Living", area ? "iCFA 12 m²" : nil, volume ? "Vol: 30 m³" : nil,
+                  airflows ? "Sup 60 m³/h / Ext 0 m³/h" : nil].compact.join(" | ")
+      assert_equal expected, label_text("101 Living", "SI")
+    end
+  end
+
+  def test_a_space_with_no_number_or_name_starts_at_its_first_value
+    @model.entities.to_a.first.entities << space_group(
+      1500, space_record("N", :number => "", :name => ""),
+      [volume_group(1510, volume_record("N"), [floor_face(1511, rectangle(20, 20, 2, 2), segment_record("N"))])]
+    )
+    @service.invalidate!(:force => true)
+    texts = @service.readout_drawings.fetch(LABELS).first.map { |anchor| readout_text(anchor.parts, "SI") }
+    assert_includes texts, "iCFA 4 m² | Vol: 10 m³"
+  end
+
+  def test_only_the_label_rounds_the_selection_totals_keep_their_decimals
+    zone = @model.entities.to_a.first
+    @model.active_path = [zone]
+    @model.selection.add(zone.entities.to_a[1])
+    @service.readout(TOTALS, :on => true)
+    assert_equal "102 Bath | iCFA 4 m² | Vol: 10 m³", label_text("102 Bath", "SI")
+    hud = @service.readout_drawings.fetch(TOTALS).last
+    assert_equal "Net volume 9.6 m³", readout_text(hud[2], "SI")
   end
 
   def test_a_space_with_no_floor_segment_has_no_label
@@ -180,5 +212,20 @@ class SpacesReadoutsTest < PhComposerTestCase
     API.view(:context => @context, :name => "ph_composer.spaces.labels.set_options",
              :params => { "net_volume" => true })
     assert_equal [operations, revision], [@model.operations.length, @session.revision]
+  end
+
+  private
+
+  def set_label_options(values)
+    API.view(:context => @context, :name => "ph_composer.spaces.labels.set_options", :params => values)
+  end
+
+  def readout_text(parts, system)
+    PhComposer::ColourBy::ReadoutOutput.text(parts, system)
+  end
+
+  def label_text(first_part, system)
+    readout_text(@service.readout_drawings.fetch(LABELS).first.find { |anchor| anchor.parts.first == first_part }.parts,
+                 system)
   end
 end

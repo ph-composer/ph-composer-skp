@@ -47,7 +47,7 @@
     this.spaces = settings.spaces ? JSON.parse(JSON.stringify(settings.spaces)) : null;
     this.markTool = { active: false, weighting_factor: 1, gesture_limit: 250 };
     this.readoutsOn = ["ph_composer.spaces.show"];
-    this.labelOptions = { weighted_area: false, net_volume: false, airflows: false };
+    this.labelOptions = { weighted_area: true, net_volume: true, airflows: false };
     this.createReview = settings.createReview ? JSON.parse(JSON.stringify(settings.createReview)) : null;
     this.selectedFaces = JSON.parse(JSON.stringify(settings.selectedFaces || []));
     this.makeZone = settings.makeZone || null;

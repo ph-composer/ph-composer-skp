@@ -134,6 +134,65 @@ class SelectionTest < PhComposerTestCase
     assert_equal @operation_count + 1, @model.operations.length
   end
 
+  def test_ground_depth_dialog_follows_the_display_units
+    set_ground_depth(304.8)
+    client = ZONES::Selection.client(@session)
+
+    assert_nil client.edit("ground_depth_mm")
+    assert_equal [["Ground depth (mm)"], ["304.8"], "Selected Zones"], UI.inputboxes.last
+    PhComposer::Preferences.set("unit_system", "IP")
+    assert_nil client.edit("ground_depth_mm")
+    assert_equal [["Ground depth (in)"], ["12"], "Selected Zones"], UI.inputboxes.last
+    assert_equal @operation_count, @model.operations.length, "cancelling writes nothing"
+  end
+
+  def test_a_ground_depth_entered_in_inches_is_stored_in_millimetres
+    PhComposer::Preferences.set("unit_system", "IP")
+    UI.inputbox_result = ["10"]
+    assert_equal "completed", ZONES::Selection.client(@session).edit("ground_depth_mm").fetch("status")
+    @groups.each { |group| assert_in_delta 254.0, ZONES::ZONE_STORE.read(group).fetch("ground_depth_mm"), 1e-9 }
+  end
+
+  def test_ok_with_the_shown_ground_depth_writes_nothing_though_it_was_rounded
+    set_ground_depth(125.0)
+    PhComposer::Preferences.set("unit_system", "IP")
+    operations = @model.operations.length
+    UI.inputbox_result = ["4.92"]
+    assert_nil ZONES::Selection.client(@session).edit("ground_depth_mm")
+    assert_equal [["Ground depth (in)"], ["4.92"], "Selected Zones"], UI.inputboxes.last
+    assert_equal operations, @model.operations.length
+    @groups.each { |group| assert_equal 125.0, ZONES::ZONE_STORE.read(group).fetch("ground_depth_mm") }
+  end
+
+  def test_ok_on_the_blank_shown_for_mixed_ground_depths_writes_nothing
+    first = ZONES::ZONE_STORE.read(@groups.first)
+    ZONES::ZONE_STORE.write(@groups.first, first.merge("ground_depth_mm" => 50.0))
+    operations = @model.operations.length
+    UI.inputbox_result = [""]
+    assert_nil ZONES::Selection.client(@session).edit("ground_depth_mm")
+    assert_equal [["Ground depth (mm)"], [""], "Selected Zones"], UI.inputboxes.last
+    assert_equal operations, @model.operations.length
+  end
+
+  def test_a_ground_depth_too_large_to_store_is_refused_as_a_bad_entry
+    PhComposer::Preferences.set("unit_system", "IP")
+    UI.inputbox_result = ["1e308"]
+    result = ZONES::Selection.client(@session).edit("ground_depth_mm")
+    assert_equal ["refused", "Enter a valid ground depth. Nothing was written."], result.values_at("status", "message")
+  end
+
+  def test_a_large_ground_depth_is_shown_without_grouping_so_it_reads_back
+    set_ground_depth(12_345.0)
+    UI.inputbox_result = nil
+    ZONES::Selection.client(@session).edit("ground_depth_mm")
+    assert_equal ["12345"], UI.inputboxes.last[1]
+  end
+
+  def test_the_menu_item_names_no_unit
+    item = PhComposer::Registry.current.menu_items.fetch("ph_composer.zones.edit_ground_depth_mm_menu")
+    assert_equal "Set Ground depth…", item.label
+  end
+
   def test_solve_client_passes_selected_occurrences_and_captured_revision
     read = query("ph_composer.zones.selection")
     invocation = nil
@@ -352,6 +411,12 @@ class SelectionTest < PhComposerTestCase
   end
 
   private
+
+  def set_ground_depth(millimetres)
+    @groups.each do |group|
+      ZONES::ZONE_STORE.write(group, ZONES::ZONE_STORE.read(group).merge("ground_depth_mm" => millimetres))
+    end
+  end
 
   def make_zone(id)
     faces = 3.times.map do |index|

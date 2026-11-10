@@ -616,6 +616,8 @@ eslint. The 2023 host's CEF version is confirmed when a 2023 host is available.
 - Every panel number is parsed and formatted through `html/units.js`. Do not add a second parser or
   unit table. The length grammar, regional number formats and per-quantity factors are the
   predecessor's U1 contracts C1 to C5 (`../../../ph-navigator-sketchup/planning/archive/units/PLAN.md`).
+  A native dialog outside the panel, such as a `UI.inputbox`, shows a value with `Units.format` and reads a
+  number back with `Units.from_display` (`core/units.rb`); it accepts a plain number in the display unit.
 - The first keystroke or paste fixes a draft's starting profile, so a switch never reinterprets
   text already typed.
 - The preference lives in `Sketchup.write_default` (`shell/preferences.rb`), never in page storage.
