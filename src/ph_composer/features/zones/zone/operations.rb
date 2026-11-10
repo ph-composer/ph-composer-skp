@@ -109,6 +109,8 @@ module PhComposer
         Options.refuse("zone.options_adoption_required", "Adopt the recoverable choices before Restore")
       end
       parent_path = Occurrences.integer_path(parent_path)
+      members = Occurrences.entities_at(request.model, parent_path)
+      claim_refusal!(request.model, offer.fetch("entity_ids").map { |id| Occurrences.unique_entity(members, id) })
       step = MakeZoneStep.new(:parent_path => parent_path, :entity_ids => offer.fetch("entity_ids"),
                               :record => record, :regroup => true)
       proposal.add_step(step, :scopes => [Operations::EntityScope.new(parent_path)])
@@ -152,7 +154,7 @@ module PhComposer
 
     def overview(model, rows)
       { "zones" => rows, "make_zone" => make_target(model), "restorable" => Repair.orphans(model),
-        "findings" => Occurrences.component_findings(model),
+        "findings" => Occurrences.component_findings(model) + Occurrences.ownership_findings(model),
         "units" => { "ground_depth_mm" => "mm", "face_area_m2" => "m2", "unclassified_face_area_m2" => "m2" } }
     end
 
@@ -196,7 +198,7 @@ module PhComposer
     end
 
     def update(request, proposal, reference:, values:, expected_values:)
-      occurrence = Occurrences.resolve_zone(request.model, reference, :mutable => true)
+      occurrence = Occurrences.resolve_editable_zone(request.model, reference)
       before = occurrence.record
       if before.fetch("schema_version") == 2 && Options::Adoption.needs_adoption?(request.engine, before)
         Options.refuse("zone.options_adoption_required", "Adopt copied Zone choices before editing")
@@ -226,7 +228,7 @@ module PhComposer
       catalog = request.registry.catalog
       rows = Records::Metadata.distinct_updates(updates).map do |update|
         reference = update.fetch("reference")
-        before = Occurrences.resolve_zone(request.model, reference, :mutable => true).record
+        before = Occurrences.resolve_editable_zone(request.model, reference).record
         after = Records::Metadata.planned(request.engine, catalog, before, update, "Zone")
         Schema.validate!(after)
         [reference, before, after]
@@ -306,10 +308,8 @@ module PhComposer
       unless make_zone_shape?(selected)
         raise CodedError.new("target.wrong_kind", "Make Zone accepts one Group or loose Faces and Edges.")
       end
-      if Records::EntityStore.claimed?(selected + Array(model.active_path))
-        raise CodedError.new("target.wrong_kind", "The selection already belongs to PH-Composer, so it cannot be " \
-                                                  "made into a Zone.")
-      end
+
+      claim_refusal!(model, selected)
       if Array(model.active_path).any? { |entity| ZONE_STORE.read(entity) }
         raise CodedError.new("target.wrong_hierarchy", "A Zone cannot be made inside another Zone.")
       end
@@ -326,6 +326,22 @@ module PhComposer
           raise CodedError.new("target.locked", "The selected Group is locked.")
         end
       end
+    end
+
+    # What Make Zone and Restore refuse in what they would group: an entity another feature claims, at any depth
+    # inside it, or an open context it is in (Records::EntityStore.claimed_within?). A Zone hosts other features'
+    # objects through their records, never by taking their Groups into its own (context/EXTENSIBILITY.md,
+    # "Native menu items").
+    def claim_refusal!(model, selected)
+      if Records::EntityStore.claimed?(selected + Array(model.active_path))
+        raise CodedError.new("target.wrong_kind", "The selection already belongs to PH-Composer, so it cannot be " \
+                                                  "made into a Zone.")
+      end
+      return unless Records::EntityStore.claimed_within?(selected)
+
+      raise CodedError.new("target.wrong_hierarchy", "The selected Group holds geometry another PH-Composer " \
+                                                     "feature owns, so it cannot be made into a Zone. Nothing was " \
+                                                     "written.")
     end
 
     # Make Zone takes one Group, or loose Faces and Edges.

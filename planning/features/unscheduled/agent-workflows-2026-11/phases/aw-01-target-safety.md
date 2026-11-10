@@ -1,6 +1,6 @@
 # AW-01 · Safe targets, ownership and creation receipts
 
-STATUS: Proposed, not authorized. ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/435 (review/planning publication only).
+STATUS: Implemented on branch `feat/agent-workflows-aw-01`. ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication.
 DEPENDS ON: latest SUI-02/05/07 source check and explicit implementation authorization.
 FINDINGS: R01-R04. CONTRACTS: C01. ACCEPTANCE: A01-A04.
 

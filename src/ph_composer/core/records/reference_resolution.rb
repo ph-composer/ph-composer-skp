@@ -72,7 +72,35 @@ module PhComposer
         raise CodedError.new("reference.in_use", message, "target_kind" => kind_id, "id" => id)
       end
 
+      # How many of the records `check_subtree_removal!` refuses for its detail names; `total` counts them all.
+      FOREIGN_RECORD_DETAIL = 20
+
+      # Refuses `target.foreign_records` when a record of a kind outside `owned_kinds` sits on the entity at
+      # the root-to-entity persistent-id `path` or anywhere below it: erasing or exploding that subtree would
+      # take another owner's data with it. It reads every registered entity-owned target whose occurrence key
+      # is such a path (context/EXTENSIBILITY.md, "Entity-owned reference targets"); a target keyed otherwise
+      # holds nothing in a subtree. A target whose records cannot be read refuses as reading it does.
+      def check_subtree_removal!(path, owned_kinds:)
+        foreign = @catalog.reference_targets.reject { |target| owned_kinds.include?(target.id) }.flat_map do |target|
+          target.entries(@model).select { |entry| within_path?(entry.key, path) }
+        end
+        return if foreign.empty?
+
+        labels = foreign.map { |entry| @catalog.reference_target(entry.kind).label }.uniq
+        raise CodedError.new("target.foreign_records",
+                             "It holds #{labels.join(', ')} data another feature owns, which would go with it. " \
+                             "Remove that data with its own feature first. Nothing was written.",
+                             "total" => foreign.length,
+                             "records" => foreign.first(FOREIGN_RECORD_DETAIL).map do |entry|
+                               { "kind" => entry.kind, "path" => entry.key }
+                             end)
+      end
+
       private
+
+      def within_path?(key, path)
+        key.is_a?(Array) && key.length >= path.length && key[0, path.length] == path
+      end
 
       def reference_identity(entry)
         id = entry.record["id"]

@@ -30,7 +30,7 @@ module PhComposer
       session.unknown session.busy session.closed session.changed session.inactive
       revision.stale proposal.changed record.unreadable proposal.foreign_write proposal.contribution_replaced
       target.not_found target.changed target.ambiguous target.locked target.wrong_kind target.wrong_hierarchy
-      target.wrong_zone target.same_zone target.shared_definition target.edit_path_changed
+      target.wrong_zone target.same_zone target.shared_definition target.edit_path_changed target.foreign_records
       params.invalid validation.failed reference.invalid reference.in_use geometry.invalid geometry.failed
       geometry.split_failed
       extension.unavailable extension.schema_unsupported extension.migration_required extension.migration_failed

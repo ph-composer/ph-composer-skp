@@ -294,6 +294,35 @@ class ZoneRepairTest < PhComposerTestCase
     assert_empty @model.entities.to_a.select { |entity| entity.is_a?(Sketchup::Group) }
   end
 
+  # Restore regroups through Make Zone's step, so it refuses a member another feature claims as Make Zone does.
+  def test_restore_refuses_a_claimed_member_and_writes_nothing
+    _group, zone_id = exploded_zone
+    face = @model.entities.to_a.find { |entity| entity.is_a?(Sketchup::Face) }
+    PhComposer::Spaces::FLOOR_SEGMENT_STORE.write(face, "id" => "fsg_EEEEEEEEEEEE")
+    operation_count = @model.operations.length
+
+    result = invoke("ph_composer.zones.restore", { "parent_path" => [], "zone_id" => zone_id })
+
+    assert_equal %w[refused target.wrong_kind none], result.values_at("status", "code", "effect")
+    assert_equal operation_count, @model.operations.length
+    assert_empty @model.entities.to_a.select { |entity| entity.is_a?(Sketchup::Group) }
+  end
+
+  # The step both routes share repeats the claim check at apply, so a claim made after planning still stops it.
+  def test_make_zone_step_refuses_at_apply_when_its_group_came_to_hold_a_claimed_object
+    inner = Sketchup::Group.new(6210, Sketchup::Entities.new([Sketchup::Face.new(6211)]))
+    wrapper = Sketchup::Group.new(6200, Sketchup::Entities.new([inner]))
+    @model.entities << wrapper
+    record = { "id" => "zon_SSSSSSSSSSSS", "schema_version" => 1, "name" => "Late", "building_segment" => "B",
+               "level" => nil, "ground_depth_mm" => 0.0 }
+    step = PhComposer::Zones::MakeZoneStep.new(:parent_path => [], :entity_ids => [6200], :record => record)
+    PhComposer::Spaces::SPACE_STORE.write(inner, "id" => "spc_SSSSSSSSSSSS")
+
+    error = assert_raises(PhComposer::CodedError) { step.apply(@model, {}) }
+    assert_equal "target.wrong_hierarchy", error.code
+    assert_nil ZONE_STORE.read(wrapper)
+  end
+
   # Offering them would make Restore build a Zone inside the live one.
   def test_stamped_faces_moved_into_a_live_zone_are_not_offered_for_restore
     _group, zone_id = exploded_zone

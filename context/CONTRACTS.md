@@ -232,7 +232,7 @@ Codes are stable `noun.condition` strings, one per outcome:
 | Session | `session.unknown` (closed, reopened or never issued), `session.busy`, `session.closed`, `session.changed` (a native menu built for another Model), `session.inactive` (the panel's Model is no longer shown, or a return to the root was asked of a Model SketchUp is not showing) |
 | Preconditions | `revision.stale`, `proposal.changed`, `record.unreadable` |
 | Proposal contributions | `proposal.foreign_write` (a participant or library callback staged a write to a kind its owner does not own, or into another change set), `proposal.contribution_replaced` (it removed or changed what an earlier contributor proposed) |
-| Targets | `target.not_found`, `target.changed`, `target.ambiguous`, `target.locked`, `target.wrong_kind`, `target.wrong_hierarchy`, `target.wrong_zone`, `target.same_zone`, `target.shared_definition`, `target.edit_path_changed` |
+| Targets | `target.not_found`, `target.changed`, `target.ambiguous`, `target.locked`, `target.wrong_kind`, `target.wrong_hierarchy`, `target.wrong_zone`, `target.same_zone`, `target.shared_definition`, `target.edit_path_changed`, `target.foreign_records` (erasing or exploding the target would take another owner's records with it) |
 | Validation | `params.invalid`, `validation.failed`, `reference.invalid`, `reference.in_use`, `geometry.invalid`, `geometry.failed`, `geometry.split_failed` |
 | Extension data | `extension.unavailable`, `extension.schema_unsupported`, `extension.migration_required`, `extension.migration_failed`, `extension.invalid`, `copy.rule_missing` |
 | Query | `query.limit_invalid`, `query.cursor_expired` |
@@ -527,7 +527,16 @@ Create Space takes Faces loose in the open edit context: the root, a plain Group
 world position (W6-2), and a Face in a Group within a Zone is left out. `create_preview` names the Zone to preselect: the open
 Zone, otherwise the first whose plan footprint holds the outlines' centroid and whose height range holds them
 (`Spaces::ZoneInference`), otherwise none. `create` takes a `zone` or none. Space and Volume Groups are Untagged and no
-tag is created (W6-4). A closed solid is refused (W6-7).
+tag is created (W6-4). A closed solid is refused (W6-7). `create` takes the Faces the preview would accept and leaves
+the others out, never refusing for them alone; its result repeats the preview's `accepted` and `left_out`, and each
+Volume in it (and in `volumes.create`) names the `faces` it was made from, in `floor_segment_ids` order. The panel's
+review sends only the accepted Faces at the revision it read, so a changed Model refuses `revision.stale` rather than
+taking a different set; a caller binds a reviewed set the same way. No strict all-or-nothing mode exists.
+
+Erasing or exploding Spaces structure (`delete`, `remove`, `volumes.delete`, `volumes.remove`) first asks the engine
+whether another owner's entity-owned record sits on the Group or below it (`Records::Engine#check_subtree_removal!`)
+and refuses `target.foreign_records` with the kinds and paths if one does, so a Zone record on a Space Group, a
+classified envelope Face or a thermal-bridge Edge inside it is never erased with it.
 
 Copies follow one contract (W6-10). A copied Space, alone or inside a copied plain Group, takes a new id and keeps
 its `zone_id`. A plain Group copied whole is first given its own storage through

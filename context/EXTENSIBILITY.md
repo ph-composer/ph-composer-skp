@@ -875,9 +875,15 @@ independent of contributor vocabulary and record kinds.
 A feature whose Groups or Faces must not be turned into something else constructs their
 `Records::EntityStore` with `claims_entity: true`. `Records::EntityStore.claimed?(entities)` and
 `selection_claimed?(model)`, which also counts the open contexts, are the one check another feature
-reads, so its menu rule and its action refuse without naming the claimant. Spaces claims its Space, Volume
-and Floor Segment records; Zones and Windows read the check. A Zone does not claim: it hosts other features'
-objects on purpose.
+reads, so its menu rule and its action refuse without naming the claimant. `claimed_within?(entities)`
+also reads everything inside the Groups and components among them, at any depth: a feature that would turn
+a container into something of its own reads it, since the container's contents go with it. A record that
+cannot be parsed still claims. Spaces claims its Space, Volume and Floor Segment records; Zones and Windows
+read the check. Make Zone refuses a Group holding a claimed object at any depth (`target.wrong_hierarchy`),
+and Restore, which regroups stamped Faces, refuses a claimed member (`target.wrong_kind`). A Zone does not
+claim: it hosts other features' objects on purpose, by their records, never by taking their Groups into its
+own. A Zone record already on or inside a claimed Group, from a Model made before that refusal, reads the
+`zone.ownership_conflict` finding, which does not block export, and nothing repairs it automatically.
 
 ### Setup entries
 
@@ -1141,6 +1147,13 @@ will replace. This establishes the final identity set, including the untouched o
 retaining split piece, before copied payloads are accepted. A remap applies only to the declared
 target kind and objects included in that copy. A list of newly allocated UUID strings alone is
 not evidence that their reference targets exist.
+
+An entity-owned target keys each occurrence by its root-to-entity persistent-id path; a target with one
+Model-wide slot keys it otherwise. A feature that erases or explodes one of its own Groups calls
+`request.engine.check_subtree_removal!(path, owned_kinds:)` first: any registered target's record on that
+Group or below it, of a kind the caller does not own, refuses `target.foreign_records`, naming the kinds
+and up to 20 paths. Removing what is only the caller's own stays its own business, through its
+`check_identity_removal!` references.
 
 Incoming references outside a copied collection remain unchanged. After explicit split repair
 they name the piece retaining the old UUID. If a solver cut retains no original native Face,

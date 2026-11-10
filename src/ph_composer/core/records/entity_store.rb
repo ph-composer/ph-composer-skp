@@ -18,10 +18,39 @@ module PhComposer
         entities.any? { |entity| stores.any? { |store| store.marks?(entity) } }
       end
 
+      # Whether any of `entities`, or anything inside a Group or component among them at any depth, is claimed:
+      # turning a container into something else takes its contents along, so a plain wrapper around a claimed
+      # object is as taken as the object itself. A record that cannot be parsed still claims, since `marks?`
+      # reads presence, so damaged data reads as occupied and is never repaired here.
+      def self.claimed_within?(entities)
+        pending = entities.to_a.dup
+        seen = {}
+        until pending.empty?
+          entity = pending.pop
+          return true if claimed?([entity])
+
+          contents = container_contents(entity)
+          next if contents.nil? || seen[contents.object_id]
+
+          seen[contents.object_id] = true
+          pending.concat(contents.to_a)
+        end
+        false
+      end
+
       # What a selection is read against: the selected entities and every open context around them.
       def self.selection_claimed?(model)
         claimed?(model.selection.to_a + Array(model.active_path))
       end
+
+      def self.container_contents(entity)
+        if entity.is_a?(Sketchup::Group)
+          entity.entities
+        elsif entity.is_a?(Sketchup::ComponentInstance)
+          entity.definition.entities
+        end
+      end
+      private_class_method :container_contents
 
       def self.claim(store)
         claiming[[store.dictionary, store.key]] = store

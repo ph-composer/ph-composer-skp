@@ -27,6 +27,8 @@ module PhComposer
         verify_edit_path!(model)
         entities = Operations::EntityScope.new(@parent_path).resolve(model)
         selected = @entity_ids.map { |id| Occurrences.unique_entity(entities, id) }
+        # Make Zone checked this while planning; Restore's regroup meets it only here.
+        Zones.claim_refusal!(model, selected)
         group = (existing_group(selected) unless @regroup) || entities.add_group(selected)
         if group.respond_to?(:locked?) && group.locked?
           raise CodedError.new("target.locked", "The selected Group is locked.")
@@ -74,7 +76,7 @@ module PhComposer
       end
 
       def apply(model, _slots)
-        occurrence = Occurrences.resolve_zone(model, @reference, :mutable => true)
+        occurrence = Occurrences.resolve_editable_zone(model, @reference)
         current = occurrence.record
         raise CodedError.new("target.changed", "The Zone changed after it was previewed.") unless current == @before
 

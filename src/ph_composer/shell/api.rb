@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 33
+    MINOR = 34
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -145,7 +145,17 @@ module PhComposer
                     "menu item is new, and create_menu is no longer offered inside a Space." },
       { "minor" => 33, "date" => "2026-11-10",
         "change" => "ph_composer.spaces.volumes.delete is new: it erases one Volume and its floor Faces in one Undo " \
-                    "step, where volumes.remove keeps the Faces. The delete_volume_menu menu item is new." }
+                    "step, where volumes.remove keeps the Faces. The delete_volume_menu menu item is new." },
+      { "minor" => 34, "date" => "2026-11-10",
+        "change" => "ph_composer.spaces.create answers accepted and left_out as create_preview does, and each new " \
+                    "Volume of create and volumes.create answers faces, its source Face paths. spaces.delete, " \
+                    "remove, volumes.delete and volumes.remove refuse target.foreign_records while another " \
+                    "feature's records are on or inside the Group. Make Zone refuses a Group holding a claimed " \
+                    "object at any depth (target.wrong_hierarchy) and Restore a claimed member (target.wrong_kind); " \
+                    "zones.list, zones.all and export preflight read the zone.ownership_conflict finding, which " \
+                    "does not block export. A Face reference with a null entity_id refuses target.changed on every " \
+                    "Face write once the Face has a record, and zones.update and update_metadata refuse a locked " \
+                    "Zone (target.locked) as update_field does." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

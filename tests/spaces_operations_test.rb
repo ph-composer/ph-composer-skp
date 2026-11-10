@@ -472,6 +472,130 @@ class SpacesOperationsTest < PhComposerTestCase
     assert_equal [1131], plain.entities.to_a.map(&:persistent_id), "the plain Group stays, its Volume exploded"
   end
 
+  LEGACY_ZONE = { "id" => "zon_OOOOOOOOOOOO", "schema_version" => 1, "name" => "Overlap",
+                  "building_segment" => "Main Building", "level" => "L1", "ground_depth_mm" => 0.0 }.freeze
+
+  # A Zone record on a Space Group, as Make Zone could leave it before it refused a claimed Group: the read names
+  # the conflict without repairing it, and no Spaces erase or explode takes the Zone along
+  # (context/EXTENSIBILITY.md, "Entity-owned reference targets").
+  def test_a_zone_on_a_space_group_is_reported_and_blocks_erasing_or_exploding_the_space
+    reference = space_at_root
+    PhComposer::Zones::ZONE_STORE.write(@space, LEGACY_ZONE)
+    finding = query("ph_composer.zones.list").fetch("findings").find { |row| row["code"] == "zone.ownership_conflict" }
+    assert_equal({ "zone_id" => "zon_OOOOOOOOOOOO", "entity_path" => [1100] }, finding.fetch("reference"))
+    preflight = query("ph_composer.zones.export_preflight").fetch("findings")
+                                                           .find { |row| row["code"] == "zone.ownership_conflict" }
+    assert_equal false, preflight.fetch("blocks_export")
+    before = @model.operations.length
+
+    %w[ph_composer.spaces.delete ph_composer.spaces.remove].each do |name|
+      [API.preview(:context => @context, :name => name, :params => { "space" => reference }),
+       invoke(name, "space" => reference)].each do |result|
+        assert_equal %w[refused target.foreign_records none], result.values_at("status", "code", "effect"), name
+        assert_equal [{ "kind" => "ph_composer.zones.zone", "path" => [1100] }], result.dig("detail", "records")
+      end
+    end
+    assert_equal before, @model.operations.length
+    assert_equal LEGACY_ZONE, PhComposer::Zones::ZONE_STORE.read(@space)
+    assert_equal [1100], @model.entities.to_a.map(&:persistent_id)
+  end
+
+  # Another owner's record below a Volume, a classified envelope Face on its floor, blocks erasing or exploding
+  # the Volume and its Space; with no such record the same delete runs and other owners' records elsewhere stay.
+  def test_another_owners_record_below_a_volume_blocks_its_removal_and_nothing_else
+    @zone_floor = floor_face(1191, rectangle(20, 0, 1, 1))
+    zone = zone_group(1190, "K", [@zone_floor])
+    reference = space_at_root
+    @model.entities << zone
+    record = { "id" => "fac_KKKKKKKKKKKK", "schema_version" => 1, "face_type" => "Floor" }
+    PhComposer::Zones::Faces::FACE_STORE.write(@zone_floor, record)
+    PhComposer::Zones::Faces::FACE_STORE.write(@first, record.merge("id" => "fac_LLLLLLLLLLLL"))
+    volume = spaces.first.fetch("volumes").find { |row| row.dig("reference", "entity_path").last == 1110 }
+    before = @model.operations.length
+
+    [["ph_composer.spaces.volumes.delete", { "volume" => volume.fetch("reference") }],
+     ["ph_composer.spaces.volumes.remove", { "volume" => volume.fetch("reference") }],
+     ["ph_composer.spaces.delete", { "space" => reference }]].each do |name, params|
+      result = invoke(name, params)
+      assert_equal %w[refused target.foreign_records none], result.values_at("status", "code", "effect"), name
+    end
+    assert_equal before, @model.operations.length
+
+    PhComposer::Zones::Faces::FACE_STORE.delete(@first)
+    assert_equal %w[completed committed], invoke("ph_composer.spaces.delete", "space" => reference)
+      .values_at("status", "effect")
+    assert_equal record, PhComposer::Zones::Faces::FACE_STORE.read(@zone_floor)
+  end
+
+  # The create receipt names every named Face's outcome and the grouping, as the preview does; the UI's
+  # reviewed set, sent at the revision it read, is taken whole or refused.
+  def test_create_reports_what_it_took_what_it_left_out_and_how_it_grouped
+    zone_with_outlines
+    wall = Sketchup::Face.new(108, {}, :points => [[0, 9, 0], [1, 9, 0], [1, 9, 1], [0, 9, 1]].map do |x, y, z|
+      Geom::Point3d.new(x * INCHES, y * INCHES, z * INCHES)
+    end)
+    edge = Sketchup::Edge.new(109, Geom::Point3d.new(0, 0, 0), Geom::Point3d.new(INCHES, 0, 0))
+    segment = floor_face(110, rectangle(0, 12, 1, 1), segment_record("F"))
+    @zone_group.entities << wall << edge << segment
+    named = [face_path(@living), face_path(@bath), [90, 100, 999], [90, 100, 109], [90, 100, 108], [90, 100, 110]]
+    preview = query("ph_composer.spaces.create_preview", "faces" => named)
+
+    result = invoke("ph_composer.spaces.create", "zone" => @zone, "faces" => named)
+
+    assert_equal %w[completed committed], result.values_at("status", "effect")
+    value = result.fetch("value")
+    assert_equal preview.fetch("accepted"), value.fetch("accepted")
+    assert_equal preview.fetch("left_out"), value.fetch("left_out")
+    assert_equal [[90, 100, 999], "not_found"], value.dig("left_out", 0).values_at("path", "reason")
+    reasons = value.fetch("left_out").map { |row| row["reason"] }.sort
+    assert_equal %w[floor_segment not_a_face not_found vertical], reasons
+    assert_equal [[[90, 100, 101]], [[90, 100, 102]]], value.fetch("volumes").map { |row| row.fetch("faces") }
+    read_back = spaces.first.fetch("volumes").to_h do |row|
+      [row.dig("reference", "volume_id"),
+       row.fetch("floor_segments").map { |seg| seg.dig("reference", "floor_segment_id") }]
+    end
+    value.fetch("volumes").each do |row|
+      assert_equal row.fetch("floor_segment_ids"), read_back.fetch(row.fetch("volume_id"))
+    end
+
+    stale = invoke("ph_composer.spaces.create", "zone" => @zone, "faces" => [face_path(@living)])
+    @sequence += 1
+    reviewed = API.invoke(:context => @context, :name => "ph_composer.spaces.create",
+                          :params => { "zone" => @zone, "faces" => [face_path(@living)] },
+                          :request => { "sequence" => @sequence, "expected_revision" => @session.revision - 1 })
+    assert_equal "refused", stale.fetch("status"), "the Face is a Floor Segment now"
+    assert_equal %w[refused revision.stale none], reviewed.values_at("status", "code", "effect")
+  end
+
+  # A Volume of several joined Faces names them in floor_segment_ids order; a locked context takes nothing.
+  def test_create_names_each_volumes_faces_in_segment_order_and_refuses_through_a_lock
+    zone_with_outlines
+    edge = Sketchup::Edge.new(300, Geom::Point3d.new(7 * INCHES, 0, 0), Geom::Point3d.new(7 * INCHES, INCHES, 0))
+    left, right = [[306, 6], [307, 7]].map do |id, x|
+      points = rectangle(x, 0, 1, 1).map { |px, py, pz| Geom::Point3d.new(px * INCHES, py * INCHES, pz * INCHES) }
+      Sketchup::Face.new(id, {}, :points => points, :edges => [edge])
+    end
+    @zone_group.entities << edge << left << right
+
+    result = create([right, left])
+
+    assert_equal "completed", result.fetch("status"), result.inspect
+    volume = result.dig("value", "volumes", 0)
+    assert_equal 2, volume.fetch("faces").length
+    read_back = spaces.first.fetch("volumes", []).first.fetch("floor_segments").to_h do |segment|
+      [segment.dig("reference", "floor_segment_id"), segment.dig("reference", "entity_path").last]
+    end
+    assert_equal volume.fetch("faces").map(&:last), volume.fetch("floor_segment_ids").map { |id| read_back.fetch(id) }
+
+    @zone_group.locked = true
+    before = @model.operations.length
+    preview = query("ph_composer.spaces.create_preview", "faces" => [face_path(@living)])
+    locked = create([@living])
+    assert_equal %w[locked], preview.fetch("left_out").map { |row| row["reason"] }
+    assert_equal %w[refused space.nothing_to_create none], locked.values_at("status", "code", "effect")
+    assert_equal before, @model.operations.length
+  end
+
   def test_remove_space_works_from_any_edit_context_in_one_undo_step
     zone_with_outlines
     create([@living])

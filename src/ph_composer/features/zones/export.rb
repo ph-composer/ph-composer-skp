@@ -54,6 +54,11 @@ module PhComposer
                         "object_id" => finding.dig("reference", "zone_id"), "message" => finding.fetch("message"),
                         "blocks_export" => true }
         end
+        Occurrences.ownership_findings(request.model, :index => index).each do |finding|
+          findings << { "code" => finding.fetch("code"), "section" => SECTION,
+                        "object_id" => finding.dig("reference", "zone_id"), "message" => finding.fetch("message"),
+                        "blocks_export" => false }
+        end
         repair = { "id" => "#{FEATURE_ID}.solve_all", "label" => "Re-solve adjacencies before export",
                    "checked" => true, "action" => "#{FEATURE_ID}.solve_adjacency",
                    "params" => { "zones" => zones.map(&:reference) } }

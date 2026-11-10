@@ -1,7 +1,7 @@
 # Proposed contract changes
 
-STATUS: Proposals for implementation review, not current APIs. Baseline API 1.31.
-ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/435 (review/planning publication only)
+STATUS: C01 bound and implemented on the AW-01 branch (API 1.34); C02-C08 remain proposals. Baseline API 1.31.
+ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication
 
 The durable authorities remain `context/CONTRACTS.md`, `AGENT_INTERFACE.md`, `EXTENSIBILITY.md`
 and `TECH_STACK.md`. This file defines this packet's proposed deltas and avoids restating those rules.
@@ -22,6 +22,20 @@ Legacy conflicting data gets a read-only diagnostic and a defined repair/refusal
 Space creation's receipt identifies accepted and rejected source paths, reasons and resulting
 Space/Volume grouping. A reviewed accepted set has a digest or equivalent explicit precondition.
 The UI's intentional filtering stays explicit. Any new strict mode is additive and documented.
+
+**Bound at AW-01 (API 1.34).** No new operation. New names:
+
+- `Records::EntityStore.claimed_within?(entities)`: the recursive claim check.
+- `Records::Engine#check_subtree_removal!(path, owned_kinds:)`, refusing the new foundation code
+  `target.foreign_records` with detail `total` and up to 20 `records` (`kind`, `path`).
+- Zones finding `zone.ownership_conflict` (reference `zone_id`, `entity_path`), in Zones overview findings
+  and export preflight, `blocks_export: false`.
+- `ph_composer.spaces.create` result fields `accepted` and `left_out` (the preview's shapes), and `faces`
+  on each Volume of `create` and `volumes.create`.
+- Spaces `delete`, `remove`, `volumes.delete`, `volumes.remove` declare `target.foreign_records`.
+
+Strict null identity and the Zone own-lock rule add no name: they make existing resolvers enforce the
+documented contract (context/CONTRACTS.md, "Geometry records and occurrence references").
 
 ## C02 · Bounded discovery and guide
 

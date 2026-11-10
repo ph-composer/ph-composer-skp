@@ -1,6 +1,6 @@
 # AW-07 · Complete QA, export diagnostics and explicit repair
 
-STATUS: Proposed, not authorized. ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/435 (review/planning publication only).
+STATUS: Authorized 2026-11-10, not started. ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication.
 DEPENDS ON: AW-04/AW-05; AW-06 for integrated library recipe.
 FINDINGS: R09/R10; R16 optional. CONTRACTS: C06/C07. ACCEPTANCE: A09/A10; A16 if selected.
 

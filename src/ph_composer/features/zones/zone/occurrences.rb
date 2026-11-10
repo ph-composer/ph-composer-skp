@@ -72,6 +72,23 @@ module PhComposer
         end
       end
 
+      # A Zone record on a Group another feature claims, or inside one, as a Model made before Make Zone refused
+      # that can still hold. The Zone stays readable and this names it, read only: it repairs nothing, and an
+      # erase of the claimant's Group refuses while the Zone is there (Records::Engine#check_subtree_removal!)
+      # rather than taking the Zone along.
+      def ownership_findings(model, index: nil)
+        zones(model, :index => index).filter_map do |zone|
+          along = entities_along(model, zone.path)
+          next unless along && Records::EntityStore.claimed?(along)
+
+          { "code" => "zone.ownership_conflict",
+            "reference" => { "zone_id" => zone.record.fetch("id"), "entity_path" => zone.path },
+            "message" => "Zone \"#{zone.record.fetch('name')}\" is on, or inside, a Group another PH-Composer " \
+                         "feature owns, which Make Zone no longer allows. Deleting or removing that Group through " \
+                         "its feature is refused while the Zone is there, so neither is lost silently." }
+        end
+      end
+
       def resolve_zone(model, reference, mutable: false, index: nil)
         zone_id = reference.fetch("zone_id")
         path = integer_path(reference.fetch("zone_path"))
@@ -82,6 +99,15 @@ module PhComposer
         zone = matching_ids.first
         raise_target("target.changed", "The Zone occurrence path has changed.") unless zone.path == path
         writable_zone!(zone) if mutable
+        zone
+      end
+
+      # The Zone occurrence a write to its own record resolves: every refusal a mutable path shows and the Zone
+      # Group's own lock, which a Face write inside it also refuses. Single, batch and metadata edits and
+      # their apply resolve through here, so they refuse alike.
+      def resolve_editable_zone(model, reference, index: nil)
+        zone = resolve_zone(model, reference, :mutable => true, :index => index)
+        unlocked_zone!(zone)
         zone
       end
 
@@ -104,6 +130,10 @@ module PhComposer
         found
       end
 
+      # A null `entity_id` asserts that the Face has no record: once it has one the reference is stale and
+      # refuses `target.changed`, so a caller that refreshed only the revision cannot write a Face it did not
+      # reread. `allow_unassigned` waives that for the camera and selection views alone; no write passes it
+      # (context/CONTRACTS.md, "Geometry records and occurrence references").
       def resolve_face(model, reference, mutable: false, allow_unassigned: false, index: nil)
         zone = resolve_zone(model, reference, :mutable => mutable, :index => index)
         occurrence = face_at(zone, reference.fetch("entity_path"), :mutable => mutable)

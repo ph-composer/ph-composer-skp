@@ -1,6 +1,6 @@
 # AW-02 · Complete discovery and installed guidance
 
-STATUS: Proposed, not authorized. ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/435 (review/planning publication only).
+STATUS: Authorized 2026-11-10, not started. ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication.
 DEPENDS ON: authorization; can precede target fixes without claiming safe writes.
 FINDINGS: R05, R12, R15 descriptor portion. CONTRACTS: C02/C03. ACCEPTANCE: A05/A12/A15.
 
