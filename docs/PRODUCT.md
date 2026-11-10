@@ -92,7 +92,9 @@ menu. Ambiguity is refused rather than guessed.
 
 Make Zone and the Zone attributes are available from the selected geometry's native context menu.
 The Zones header has no Make Zone button; use the native context menu to create a Zone. Make Zone is not offered on,
-and refuses, a Space, a Volume, a Floor Segment or anything inside one.
+and refuses, a Space, a Volume, a Floor Segment or anything inside one, nor a Group that holds one at any depth.
+Deleting or removing a Space or a Volume is refused while another feature's data, such as a Zone or a classified
+Face, sits on it or inside it, so that data is never erased with it.
 The Geometry view's selection bar offers Solve when at least two Zones are fully checked. A partially
 checked Zone is excluded; fully checked Zones remain included when hidden by a filter. Checking
 all Zones provides the whole-Model workflow. The native command solves selected Zones. A pairing

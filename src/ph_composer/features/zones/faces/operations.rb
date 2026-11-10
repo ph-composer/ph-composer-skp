@@ -146,10 +146,7 @@ module PhComposer
         # afterwards, by steps that resolve against the live Model themselves.
         index = Zones::Index.new(request.model)
         targets = references.map do |reference|
-          occurrence = Zones::Occurrences.resolve_face(
-            request.model, reference, :mutable => true, :allow_unassigned => reference["entity_id"].nil?,
-                                      :index => index
-          )
+          occurrence = Zones::Occurrences.resolve_face(request.model, reference, :mutable => true, :index => index)
           record = FACE_STORE.read(occurrence.entity)
           check_expected!(record, expected)
           [occurrence, record]
@@ -193,8 +190,7 @@ module PhComposer
         # Each target resolves for mutation now, so a Face in a shared or locked Group refuses here,
         # with its instruction, rather than failing when the step applies.
         unrecorded = unrecorded.select do |occurrence|
-          Zones::Occurrences.resolve_face(request.model, occurrence.reference,
-                                          :mutable => true, :allow_unassigned => true, :index => index)
+          Zones::Occurrences.resolve_face(request.model, occurrence.reference, :mutable => true, :index => index)
           true
         rescue CodedError => error
           raise unless skip_unwritable && UNWRITABLE_CODES.include?(error.code)
@@ -219,7 +215,7 @@ module PhComposer
       # is what makes any Surface pair read stale on the next reconciliation.
       def reverse(request, proposal, face:)
         reference = face
-        Zones::Occurrences.resolve_face(request.model, reference, :mutable => true, :allow_unassigned => true)
+        Zones::Occurrences.resolve_face(request.model, reference, :mutable => true)
         scope = Operations::EntityScope.new(reference.fetch("zone_path")[0...-1])
         proposal.add_step(ReverseFaceStep.new(:reference => reference), :scopes => [scope])
         {}

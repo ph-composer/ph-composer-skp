@@ -27,9 +27,7 @@ module PhComposer
             record = FACE_STORE.read(entity)
             Schema.validate!(record) if record
             reference = picked.reference(record && record.fetch("id"))
-            resolved = Zones::Occurrences.resolve_face(model, reference,
-                                                       :mutable => true,
-                                                       :allow_unassigned => record.nil?, :index => index)
+            resolved = Zones::Occurrences.resolve_face(model, reference, :mutable => true, :index => index)
             Zones::Selection.resolve(model, resolved.zone.reference, index)
             reference
           end
@@ -39,9 +37,7 @@ module PhComposer
           index = Zones::Index.new(request.model)
           references = selected(request.model, :index => index)
           targets = references.map do |reference|
-            face = Zones::Occurrences.resolve_face(request.model, reference,
-                                                   :index => index,
-                                                   :allow_unassigned => reference["entity_id"].nil?)
+            face = Zones::Occurrences.resolve_face(request.model, reference, :index => index)
             record = FACE_STORE.read(face.entity)
             { "reference" => reference, "expected_values" => record ? Schema.values(record) : {} }
           end
@@ -90,9 +86,7 @@ module PhComposer
           end
 
           references.each do |reference|
-            face = Zones::Occurrences.resolve_face(request.model, reference,
-                                                   :mutable => true,
-                                                   :allow_unassigned => reference["entity_id"].nil?, :index => index)
+            face = Zones::Occurrences.resolve_face(request.model, reference, :mutable => true, :index => index)
             Zones::Selection.resolve(request.model, face.zone.reference, index)
           end
           state = handoff(request.session)

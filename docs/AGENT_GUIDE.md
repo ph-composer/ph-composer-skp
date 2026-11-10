@@ -64,7 +64,10 @@ draw geometry. Ask the user to draw the floor surfaces first, then:
 2. `ph_composer.spaces.create_preview` with the Faces' root-to-Face paths says what would be taken and which Zone to
    host the Space in. `ph_composer.spaces.create` from those Faces, with that `zone` or none. Each set of Faces
    joined by a shared Edge becomes one Volume, and each Face a Floor Segment; the result's `volumes` lists them in
-   order. No loose Face is left over. The Space Group stands outside every Zone.
+   order, each with the `faces` it was made from. The result's `accepted` and `left_out` say which named Faces were
+   taken and why each other one was not, as the preview does. To take exactly the reviewed Faces, send the
+   preview's `accepted` at the revision the preview read: a changed Model refuses `revision.stale`. No loose Face is
+   left over. The Space Group stands outside every Zone.
 3. For another Volume, `ph_composer.context.open` the new Space and ask the user to draw its floor surface
    there. `ph_composer.spaces.candidate_faces.list` for the Space then lists it, with the operation it
    is for and the refusal it would meet now. Faces that share an Edge go together, and each joined set becomes

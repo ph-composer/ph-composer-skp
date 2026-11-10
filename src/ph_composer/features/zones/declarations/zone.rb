@@ -87,9 +87,11 @@ module PhComposer
         "unrecoverable" => Shapes.list({ "type" => "string" }, :description => "Zone fields Restore cannot recover.")
       }, :optional => ["choice_record"], :description => "An exploded Zone whose stamped members Restore can regroup.")
       FINDING = Shapes.object({
-        "code" => { "type" => "string", "enum" => ["zone.component"] }, "message" => { "type" => "string" },
+        "code" => { "type" => "string", "enum" => %w[zone.component zone.ownership_conflict] },
+        "message" => { "type" => "string" },
         "reference" => Shapes.object({ "zone_id" => Shapes::ID, "entity_path" => PATH })
-      }, :description => "A Zone record no read takes as a Zone, such as one on a component, with the way back.")
+      }, :description => "A Zone record no read takes as a Zone, such as one on a component, with the way back, " \
+                         "or a Zone on or inside a Group another feature owns.")
       ALL_RESULT = Shapes.object({
         "zones" => Shapes.list(ZONE_ROW, :description => "Every Zone occurrence, copies and nested Zones included."),
         "make_zone" => MAKE_TARGET.merge("type" => %w[object null],

@@ -4436,6 +4436,24 @@
         "src/ph_composer/html/units.js"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "AW01",
+      "label": "Agent-workflows AW-01 target safety on the installed RBZ in a fresh synthetic Model: Make Zone refuses a plain wrapper holding a Space; a synthetic legacy Zone record on a Space Group reads zone.ownership_conflict and Spaces delete/remove refuse target.foreign_records with both records kept; a stale null Face identity refuses classify, reverse and assign_assembly after the Face gained a record, and a copied Face record refuses before any transaction; a copied Zone refuses update; a locked Zone refuses update, update_field and update_metadata with no revision change; Space create reports accepted, left_out and per-Volume faces; native Undo/Redo of classify, rename, create and delete; save and fresh-process reopen keep every identity and record",
+      "mode": "mixed",
+      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/core/records/entity_store.rb",
+        "src/ph_composer/core/records/reference_resolution.rb",
+        "src/ph_composer/features/zones/zone/*",
+        "src/ph_composer/features/zones/faces/*",
+        "src/ph_composer/features/zones/export.rb",
+        "src/ph_composer/features/spaces/authoring.rb",
+        "src/ph_composer/features/spaces/create_faces.rb",
+        "src/ph_composer/features/spaces/steps.rb",
+        "src/ph_composer/features/spaces/declarations/*"
+      ],
+      "native_control_required": true
     }
   ]
 }

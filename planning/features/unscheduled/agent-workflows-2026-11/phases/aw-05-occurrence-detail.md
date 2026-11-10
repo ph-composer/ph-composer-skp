@@ -1,6 +1,6 @@
 # AW-05 · Complete occurrence, geometry and schedule reads
 
-STATUS: Proposed, not authorized. ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/435 (review/planning publication only).
+STATUS: Authorized 2026-11-10, not started. ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication.
 DEPENDS ON: AW-03 and AW-04 budgeting. FINDING: R07 occurrence portion. CONTRACTS: C03/C04.
 ACCEPTANCE: A07b.
 

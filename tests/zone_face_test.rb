@@ -396,6 +396,135 @@ class ZoneFaceTest < PhComposerTestCase
     assert_equal %w[completed committed], result.values_at("status", "effect")
   end
 
+  # A null entity_id asserts that the Face has no record (context/CONTRACTS.md, "Geometry records and
+  # occurrence references"): every Face write refuses it once the Face has one, at the current revision too.
+  def test_a_null_face_identity_refuses_every_write_once_the_face_has_a_record
+    group = box_group(600)
+    @model.entities << group
+    make_group_zone(group)
+    stale, untouched = query("ph_composer.zones.faces.list").dig("value", "faces").first(2)
+    assert_nil stale.dig("reference", "entity_id")
+    assert_equal "committed", invoke("ph_composer.zones.faces.classify",
+                                     classify_params(stale, "Wall", "Outdoors")).fetch("effect")
+    record = PhComposer::Zones::Faces::FACE_STORE.read(group.entities.to_a.first)
+    operation_count = @model.operations.length
+
+    writes = {
+      "ph_composer.zones.faces.classify" => classify_params(stale, "Floor", "Ground"),
+      "ph_composer.zones.faces.reverse" => { "face" => stale.fetch("reference") },
+      "ph_composer.zones.faces.assign_assembly" => {
+        "assembly_id" => nil, "targets" => [{ "reference" => stale.fetch("reference"), "expected_values" => {} }]
+      }
+    }
+    writes.each do |name, params|
+      [API.preview(:context => @context, :name => name, :params => params), invoke(name, params)].each do |result|
+        assert_equal %w[refused target.changed none], result.values_at("status", "code", "effect"), name
+      end
+    end
+    handoff = API.view(:context => @context, :name => "ph_composer.zones.faces.open_attached_assignment",
+                       :params => { "faces" => [stale.fetch("reference")], "revision" => @session.revision })
+    assert_equal %w[refused target.changed], handoff.values_at("status", "code")
+    assert_equal operation_count, @model.operations.length
+    assert_equal record, PhComposer::Zones::Faces::FACE_STORE.read(group.entities.to_a.first)
+
+    # A Face that truly has no record is still written through a null identity.
+    fresh = invoke("ph_composer.zones.faces.classify", classify_params(untouched, "Wall", "Outdoors"))
+    assert_equal %w[completed committed], fresh.values_at("status", "effect")
+  end
+
+  def test_a_null_identity_naming_a_face_with_a_copied_record_refuses_before_any_transaction
+    group = box_group(620)
+    @model.entities << group
+    make_group_zone(group)
+    first, second = group.entities.to_a.first(2)
+    record = { "id" => "fac_AAAAAAAAAAAA", "schema_version" => 1, "face_type" => "Floor",
+               "boundary_condition" => "Ground" }
+    [first, second].each { |face| PhComposer::Zones::Faces::FACE_STORE.write(face, record) }
+    row = query("ph_composer.zones.faces.list").dig("value", "faces").first
+    masked = classify_params(row, "Wall", "Outdoors")
+             .merge("faces" => [row.fetch("reference").merge("entity_id" => nil)], "expected_values" => {})
+    operation_count = @model.operations.length
+
+    preview = API.preview(:context => @context, :name => "ph_composer.zones.faces.classify", :params => masked)
+    result = invoke("ph_composer.zones.faces.classify", masked)
+
+    [preview, result].each do |outcome|
+      assert_equal %w[refused target.changed none], outcome.values_at("status", "code", "effect")
+    end
+    assert_equal operation_count, @model.operations.length
+    assert_equal [record, record], [first, second].map { |face| PhComposer::Zones::Faces::FACE_STORE.read(face) }
+  end
+
+  # Apply resolves strictly too: a Face that gains a record between planning and applying stops the step.
+  def test_reverse_refuses_at_apply_when_the_face_gained_a_record
+    group = box_group(640)
+    @model.entities << group
+    make_group_zone(group)
+    reference = query("ph_composer.zones.faces.list").dig("value", "faces", 0, "reference")
+    step = PhComposer::Zones::Faces::ReverseFaceStep.new(:reference => reference)
+    face = group.entities.to_a.first
+    PhComposer::Zones::Faces::FACE_STORE.write(face, { "id" => "fac_BBBBBBBBBBBB", "schema_version" => 1 })
+    normal = [face.normal.x, face.normal.y, face.normal.z]
+
+    error = assert_raises(PhComposer::CodedError) { step.apply(@model, {}) }
+    assert_equal "target.changed", error.code
+    assert_equal normal, [face.normal.x, face.normal.y, face.normal.z]
+  end
+
+  def test_classify_refuses_at_apply_when_a_planned_unassigned_face_gained_a_record
+    group = box_group(650)
+    @model.entities << group
+    make_group_zone(group)
+    row = query("ph_composer.zones.faces.list").dig("value", "faces", 0)
+    request = PhComposer::HandlerRequest.for(@session, :owner => PhComposer::Zones::FEATURE_ID, :name => "test")
+    proposal = PhComposer::Operations::Proposal.new
+    intent = classify_params(row, "Wall", "Ground").fetch("intent")
+    PhComposer::Zones::Faces.classify(request, proposal, :faces => [row.fetch("reference")], :intent => intent)
+    face = group.entities.to_a.first
+    gained = { "id" => "fac_GGGGGGGGGGGG", "schema_version" => 1, "face_type" => "Floor" }
+    PhComposer::Zones::Faces::FACE_STORE.write(face, gained)
+
+    error = assert_raises(PhComposer::CodedError) { proposal.steps.first.apply(@model, {}) }
+    assert_equal "target.changed", error.code
+    assert_equal gained, PhComposer::Zones::Faces::FACE_STORE.read(face)
+  end
+
+  # One write rule for a Zone's own record: its own lock refuses a single, batch and metadata edit, at preview
+  # and invoke, with no Undo entry.
+  def test_a_locked_zone_refuses_single_batch_and_metadata_edits
+    group = box_group(660)
+    @model.entities << group
+    zone = make_group_zone(group)
+    before = zone.fetch("values")
+    record = PhComposer::Zones::ZONE_STORE.read(group)
+    group.locked = true
+    operation_count = @model.operations.length
+    metadata = { "user_data" => record.fetch("user_data", {}), "extension_data" => record.fetch("extension_data", {}) }
+
+    writes = {
+      "ph_composer.zones.update" => { "reference" => zone.fetch("reference"),
+                                      "values" => before.merge("name" => "Changed"), "expected_values" => before },
+      "ph_composer.zones.update_field" => { "field" => "name", "value" => "Changed",
+                                            "targets" => [{ "reference" => zone.fetch("reference"),
+                                                            "expected_values" => before }] },
+      "ph_composer.zones.update_metadata" => { "updates" => [{ "reference" => zone.fetch("reference"),
+                                                               "user_data" => { "firm.note" => "x" },
+                                                               "expected_metadata" => metadata }] }
+    }
+    writes.each do |name, params|
+      [API.preview(:context => @context, :name => name, :params => params), invoke(name, params)].each do |result|
+        assert_equal %w[refused target.locked none], result.values_at("status", "code", "effect"), name
+      end
+    end
+    assert_equal operation_count, @model.operations.length
+    assert_equal record, PhComposer::Zones::ZONE_STORE.read(group)
+
+    step = PhComposer::Zones::UpdateZoneStep.new(:reference => zone.fetch("reference"), :before => record,
+                                                 :after => record.merge("name" => "Changed"))
+    error = assert_raises(PhComposer::CodedError) { step.apply(@model, {}) }
+    assert_equal "target.locked", error.code
+  end
+
   private
 
   def assert_shared_group_refusals

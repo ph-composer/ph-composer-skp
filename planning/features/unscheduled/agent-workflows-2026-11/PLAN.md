@@ -1,8 +1,8 @@
 # Delivery plan
 
 DATE: 2026-11-09
-STATUS: Proposed. Planning only; implementation not authorized.
-ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/435 (review/planning publication only)
+STATUS: In progress. Implementation authorized 2026-11-10 (#439); one branch and PR per stage.
+ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication
 
 ## Intended result
 

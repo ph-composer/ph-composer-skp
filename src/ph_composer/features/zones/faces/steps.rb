@@ -66,8 +66,7 @@ module PhComposer
           index = Zones::Index.new(model)
           resolved = @updates.map do |update|
             reference = update.fetch("reference")
-            occurrence = Zones::Occurrences.resolve_face(model, reference, :mutable => true,
-                                                                           :allow_unassigned => true, :index => index)
+            occurrence = Zones::Occurrences.resolve_face(model, reference, :mutable => true, :index => index)
             current = FACE_STORE.read(occurrence.entity)
             unless current == update.fetch("before")
               raise CodedError.new("target.changed", "A Face changed after the gesture was previewed.")
@@ -97,7 +96,7 @@ module PhComposer
         end
 
         def apply(model, _slots)
-          occurrence = Zones::Occurrences.resolve_face(model, @reference, :mutable => true, :allow_unassigned => true)
+          occurrence = Zones::Occurrences.resolve_face(model, @reference, :mutable => true)
           occurrence.entity.reverse!
         end
       end

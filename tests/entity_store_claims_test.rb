@@ -37,6 +37,22 @@ class EntityStoreClaimsTest < PhComposerTestCase
     refute STORE.claimed?([group(4)])
   end
 
+  def test_the_contents_check_finds_a_claim_at_any_depth_and_leaves_its_input_alone
+    claimed = group(9)
+    @first.write(claimed, "id" => "e")
+    definition = Sketchup::ComponentDefinition.new(Sketchup::Entities.new([group(8, claimed)]))
+    wrapper = group(7, Sketchup::ComponentInstance.new(10, definition))
+    selected = [wrapper]
+
+    assert STORE.claimed_within?(selected)
+    refute STORE.claimed?(selected), "the flat check reads the wrapper alone"
+    assert_equal [wrapper], selected
+
+    open = group(11, group(12))
+    @other.write(open, "id" => "f")
+    refute STORE.claimed_within?([open])
+  end
+
   def test_the_selection_check_counts_the_open_context
     child = group(6)
     claimed = group(5, child)

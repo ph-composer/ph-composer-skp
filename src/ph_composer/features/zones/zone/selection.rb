@@ -26,18 +26,9 @@ module PhComposer
         end
       end
 
+      # The writable Zone, its own lock and every lock above it refused as a single edit refuses them.
       def resolve(model, reference, index)
-        zone = Occurrences.resolve_zone(model, reference, :mutable => true, :index => index)
-        parent = model.entities
-        zone.path.each do |id|
-          entity = Occurrences.unique_entity(parent, id)
-          if entity.respond_to?(:locked?) && entity.locked?
-            raise CodedError.new("target.locked", "A selected Zone or its parent Group is locked.")
-          end
-
-          parent = entity.is_a?(Sketchup::Group) ? entity.entities : entity.definition.entities
-        end
-        zone
+        Occurrences.resolve_editable_zone(model, reference, :index => index)
       end
 
       def available?(session)

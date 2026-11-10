@@ -236,9 +236,7 @@ module PhComposer
         end
 
         def target_record(request, reference, index)
-          occurrence = Occurrences.resolve_face(request.model, reference,
-                                                :mutable => true,
-                                                :allow_unassigned => reference["entity_id"].nil?, :index => index)
+          occurrence = Occurrences.resolve_face(request.model, reference, :mutable => true, :index => index)
           Zones::Selection.resolve(request.model, occurrence.zone.reference, index)
           before = FACE_STORE.read(occurrence.entity)
           Schema.validate!(before) if before

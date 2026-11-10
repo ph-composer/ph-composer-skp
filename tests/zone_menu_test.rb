@@ -98,6 +98,40 @@ class ZoneMenuTest < PhComposerTestCase
     assert_equal "target.wrong_kind", make(501, :parent_path => [500]).fetch("code")
   end
 
+  # A plain wrapper is as taken as what it holds: a claimed Group or Face at any depth, through a component's
+  # definition too, keeps Make Zone from turning the wrapper into a Zone (context/EXTENSIBILITY.md, "Native
+  # menu items"). A record that cannot be parsed still counts.
+  def test_a_plain_wrapper_holding_a_claimed_object_at_any_depth_is_refused
+    space = Sketchup::Group.new(610, Sketchup::Entities.new([Sketchup::Face.new(611)]))
+    PhComposer::Spaces::SPACE_STORE.write(space, "id" => "spc_CCCCCCCCCCCC")
+    middle = Sketchup::Group.new(605, Sketchup::Entities.new([space]))
+    definition = Sketchup::ComponentDefinition.new(Sketchup::Entities.new([middle]))
+    wrapper = Sketchup::Group.new(600, Sketchup::Entities.new([Sketchup::ComponentInstance.new(601, definition)]))
+    @model.entities << wrapper
+    select(wrapper)
+
+    refute @declaration.available.call(read)
+    result = make(600)
+    assert_equal %w[refused target.wrong_hierarchy none], result.values_at("status", "code", "effect")
+    assert_empty @model.operations
+    assert_nil ZONES::ZONE_STORE.read(wrapper)
+
+    space.set_attribute(PhComposer::Spaces::SPACE_STORE.dictionary, PhComposer::Spaces::SPACE_STORE.key, "{broken")
+    assert_equal "target.wrong_hierarchy", make(600).fetch("code")
+  end
+
+  # Ordinary records that do not claim, a classified envelope Face's, leave the wrapper open.
+  def test_a_wrapper_holding_only_unclaimed_records_still_becomes_a_zone
+    face = Sketchup::Face.new(701)
+    ZONES::Faces::FACE_STORE.write(face, { "id" => "fac_DDDDDDDDDDDD", "schema_version" => 1 })
+    inner = Sketchup::Group.new(702, Sketchup::Entities.new([face]))
+    wrapper = Sketchup::Group.new(700, Sketchup::Entities.new([inner]))
+    @model.entities << wrapper
+    select(wrapper)
+
+    assert_equal %w[completed committed], make(700).values_at("status", "effect")
+  end
+
   def test_invalid_selection_omits_the_item
     face = Sketchup::Face.new(301)
     @model.entities << face

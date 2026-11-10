@@ -18170,7 +18170,8 @@ Result:
           "code": {
             "type": "string",
             "enum": [
-              "zone.component"
+              "zone.component",
+              "zone.ownership_conflict"
             ]
           },
           "message": {
@@ -18196,7 +18197,7 @@ Result:
             }
           }
         },
-        "description": "A Zone record no read takes as a Zone, such as one on a component, with the way back."
+        "description": "A Zone record no read takes as a Zone, such as one on a component, with the way back, or a Zone on or inside a Group another feature owns."
       }
     },
     "units": {
@@ -20429,7 +20430,8 @@ Result:
           "code": {
             "type": "string",
             "enum": [
-              "zone.component"
+              "zone.component",
+              "zone.ownership_conflict"
             ]
           },
           "message": {
@@ -20455,7 +20457,7 @@ Result:
             }
           }
         },
-        "description": "A Zone record no read takes as a Zone, such as one on a component, with the way back."
+        "description": "A Zone record no read takes as a Zone, such as one on a component, with the way back, or a Zone on or inside a Group another feature owns."
       }
     },
     "units": {
@@ -30282,7 +30284,9 @@ Result:
   "additionalProperties": false,
   "required": [
     "space_id",
-    "volumes"
+    "volumes",
+    "accepted",
+    "left_out"
   ],
   "properties": {
     "space_id": {
@@ -30295,7 +30299,8 @@ Result:
         "additionalProperties": false,
         "required": [
           "volume_id",
-          "floor_segment_ids"
+          "floor_segment_ids",
+          "faces"
         ],
         "properties": {
           "volume_id": {
@@ -30306,10 +30311,63 @@ Result:
             "items": {
               "type": "string"
             }
+          },
+          "faces": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              },
+              "minItems": 1,
+              "description": "The root-to-entity persistent-id path."
+            },
+            "description": "The named Faces' root-to-Face paths before grouping, in floor_segment_ids order."
           }
         }
       },
       "description": "Each new Volume and its Floor Segments, one per set of Faces joined by shared Edges, numbered in that order."
+    },
+    "accepted": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        },
+        "minItems": 1,
+        "description": "The root-to-entity persistent-id path."
+      },
+      "description": "The named Faces taken, as create_preview accepts them."
+    },
+    "left_out": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "reason",
+          "message"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 1,
+            "description": "The root-to-entity persistent-id path."
+          },
+          "reason": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "The named Faces not taken, each with its reason, as create_preview leaves them out."
     }
   }
 }
@@ -30340,7 +30398,7 @@ Erase one Space and everything in it. Owner: `ph_composer.spaces`.
 
 Undo step: Delete Space. Erases the Space Group.
 
-Refuses: `copy.rule_missing`, `record.unreadable`, `reference.in_use`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `validation.failed`, and the `action` common set.
+Refuses: `copy.rule_missing`, `record.unreadable`, `reference.in_use`, `target.ambiguous`, `target.changed`, `target.foreign_records`, `target.locked`, `target.not_found`, `target.shared_definition`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -30786,7 +30844,7 @@ Remove one Space and keep its floors: the records of the Space, its Volumes and 
 
 Undo step: Remove Space. Explodes the Space and Volume Groups and removes their records.
 
-Refuses: `copy.rule_missing`, `record.unreadable`, `reference.in_use`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `validation.failed`, and the `action` common set.
+Refuses: `copy.rule_missing`, `record.unreadable`, `reference.in_use`, `target.ambiguous`, `target.changed`, `target.foreign_records`, `target.locked`, `target.not_found`, `target.shared_definition`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -31541,7 +31599,8 @@ Result:
         "additionalProperties": false,
         "required": [
           "volume_id",
-          "floor_segment_ids"
+          "floor_segment_ids",
+          "faces"
         ],
         "properties": {
           "volume_id": {
@@ -31552,6 +31611,18 @@ Result:
             "items": {
               "type": "string"
             }
+          },
+          "faces": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              },
+              "minItems": 1,
+              "description": "The root-to-entity persistent-id path."
+            },
+            "description": "The named Faces' root-to-Face paths before grouping, in floor_segment_ids order."
           }
         }
       },
@@ -31588,7 +31659,7 @@ Erase one Volume and its floor Faces, as SketchUp's Delete would. Deleting a Spa
 
 Undo step: Delete Volume. Erases the Volume Group, its Faces and their records.
 
-Refuses: `copy.rule_missing`, `record.unreadable`, `reference.in_use`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `validation.failed`, and the `action` common set.
+Refuses: `copy.rule_missing`, `record.unreadable`, `reference.in_use`, `target.ambiguous`, `target.changed`, `target.foreign_records`, `target.locked`, `target.not_found`, `target.shared_definition`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -31793,7 +31864,7 @@ Remove one Volume's structure: its Floor Segment records go and its Faces stay l
 
 Undo step: Remove Volume. Explodes the Volume Group and removes its records.
 
-Refuses: `copy.rule_missing`, `record.unreadable`, `reference.in_use`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `validation.failed`, and the `action` common set.
+Refuses: `copy.rule_missing`, `record.unreadable`, `reference.in_use`, `target.ambiguous`, `target.changed`, `target.foreign_records`, `target.locked`, `target.not_found`, `target.shared_definition`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -57038,6 +57109,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `zone.option_export_conflict` | Distinct Building Segments share one export identifier; map to a survivor. |
 | `zone.options_adoption_required` | Adopt the legacy or copied choices before editing categories. |
 | `zone.options_conflict` | Recovery or shared-storage choice evidence conflicts; explicit repair is required. |
+| `zone.ownership_conflict` | A Zone record sits on, or inside, a Group another feature owns; deleting or removing that Group through its feature is refused while it is there. |
 | `zone.restore_is_limited` | Restore recovers the Zone id, Building-Segment and Level only. |
 | `zone.restore_unsafe` | The Zone cannot be restored from what remains. |
 
@@ -57078,3 +57150,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.31 | 2026-11-09 | A Volume whose Floor Segments overlap in plan reads the space.floor_overlap finding, a warning that does not block export. |
 | 1.32 | 2026-11-09 | ph_composer.spaces.create and volumes.create make one Volume per set of Faces joined by shared Edges and answer volumes, a list of volume_id and floor_segment_ids, in place of volume_id and floor_segment_ids. A Volume whose Floor Segments are not all joined reads the space.floor_disconnected finding, a warning that does not block export. The add_volume_menu menu item is new, and create_menu is no longer offered inside a Space. |
 | 1.33 | 2026-11-10 | ph_composer.spaces.volumes.delete is new: it erases one Volume and its floor Faces in one Undo step, where volumes.remove keeps the Faces. The delete_volume_menu menu item is new. |
+| 1.34 | 2026-11-10 | ph_composer.spaces.create answers accepted and left_out as create_preview does, and each new Volume of create and volumes.create answers faces, its source Face paths. spaces.delete, remove, volumes.delete and volumes.remove refuse target.foreign_records while another feature's records are on or inside the Group. Make Zone refuses a Group holding a claimed object at any depth (target.wrong_hierarchy) and Restore a claimed member (target.wrong_kind); zones.list, zones.all and export preflight read the zone.ownership_conflict finding, which does not block export. A Face reference with a null entity_id refuses target.changed on every Face write once the Face has a record, and zones.update and update_metadata refuse a locked Zone (target.locked) as update_field does. |

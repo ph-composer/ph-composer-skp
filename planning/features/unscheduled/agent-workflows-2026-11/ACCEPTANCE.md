@@ -1,7 +1,7 @@
 # Acceptance register
 
-STATUS: Proposed cases; none executed for this implementation packet.
-ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/435 (review/planning publication only)
+STATUS: Cases in execution; STATUS.md records each result.
+ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication
 
 Baseline review checks are in the review's evidence folder. They establish findings and existing
 behavior; they do not close any implementation row below. Each receipt records commit, API/build,

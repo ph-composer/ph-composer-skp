@@ -59,18 +59,28 @@ module PhComposer
                              "description" => "Where the height comes from: the Model's last height, or the " \
                                               "default until one is entered." }
       })
+      SOURCE_FACES = Shapes.list(PATH, :description => "The named Faces' root-to-Face paths before grouping, " \
+                                                       "in floor_segment_ids order.")
       # One new Volume per set of Faces joined by shared Edges, in the order the first Face of each was named.
       NEW_VOLUMES = Shapes.list(Shapes.object({ "volume_id" => Shapes::TEXT,
-                                                "floor_segment_ids" => Shapes.list(Shapes::TEXT) }),
+                                                "floor_segment_ids" => Shapes.list(Shapes::TEXT),
+                                                "faces" => SOURCE_FACES }),
                                 :description => "Each new Volume and its Floor Segments, one per set of Faces " \
                                                 "joined by shared Edges, numbered in that order.").freeze
-      CREATED = Shapes.object({ "space_id" => Shapes::TEXT, "volumes" => NEW_VOLUMES })
+      CREATED = Shapes.object({
+        "space_id" => Shapes::TEXT, "volumes" => NEW_VOLUMES,
+        "accepted" => Shapes.list(PATH, :description => "The named Faces taken, as create_preview accepts them."),
+        "left_out" => Shapes.list(LEFT_OUT, :description => "The named Faces not taken, each with its reason, as " \
+                                                            "create_preview leaves them out.")
+      })
       TARGET = %w[record.unreadable target.ambiguous target.changed target.locked target.not_found
                   target.shared_definition validation.failed].freeze
       SPACE_PARAM = SPACE_REFERENCE.merge("description" => "The Space, as list returns it.").freeze
       VOLUME_PARAM = VOLUME_REFERENCE.merge("description" => "The Volume, as list returns it.").freeze
       # Removing an identity checks that nothing still names it.
       REMOVAL = (TARGET + %w[copy.rule_missing reference.in_use]).freeze
+      # Erasing or exploding a Group also refuses while another feature's records are on it or inside it.
+      GROUP_REMOVAL = (REMOVAL + %w[target.foreign_records]).freeze
       ZONE_TARGET = %w[record.unreadable target.ambiguous target.changed target.locked target.not_found
                        target.shared_definition target.wrong_hierarchy target.wrong_kind validation.failed].freeze
       EXAMPLE_ZONE = { "zone_id" => "zon_Ab12Cd34Ef56", "zone_path" => [1201] }.freeze
@@ -149,7 +159,7 @@ module PhComposer
         ["volumes.remove", {
           :description => "Remove one Volume's structure: its Floor Segment records go and its Faces stay loose in " \
                           "the Space.",
-          :refuses => REMOVAL, :params => Shapes.object({ "volume" => VOLUME_PARAM }),
+          :refuses => GROUP_REMOVAL, :params => Shapes.object({ "volume" => VOLUME_PARAM }),
           :result => Shapes.object({ "volume_id" => Shapes::TEXT }), :undo_name => "Remove Volume",
           :side_effects => "Explodes the Volume Group and removes its records.",
           :examples => [{ "volume" => EXAMPLE_VOLUME }]
@@ -160,7 +170,7 @@ module PhComposer
           :description => "Erase one Volume and its floor Faces, as SketchUp's Delete would. Deleting a Space's " \
                           "only Volume leaves the Space empty, which reads space.empty; the menu item and the " \
                           "panel offer ph_composer.spaces.delete instead.",
-          :refuses => REMOVAL, :params => Shapes.object({ "volume" => VOLUME_PARAM }),
+          :refuses => GROUP_REMOVAL, :params => Shapes.object({ "volume" => VOLUME_PARAM }),
           :result => Shapes.object({ "volume_id" => Shapes::TEXT }), :undo_name => "Delete Volume",
           :side_effects => "Erases the Volume Group, its Faces and their records.",
           :examples => [{ "volume" => EXAMPLE_VOLUME }]
@@ -168,7 +178,7 @@ module PhComposer
           Authoring.delete_volume(request, proposal, :volume => params.fetch("volume"))
         }],
         ["delete", {
-          :description => "Erase one Space and everything in it.", :refuses => REMOVAL,
+          :description => "Erase one Space and everything in it.", :refuses => GROUP_REMOVAL,
           :params => Shapes.object({ "space" => SPACE_PARAM }),
           :result => Shapes.object({ "space_id" => Shapes::TEXT }),
           :undo_name => "Delete Space", :side_effects => "Erases the Space Group.",
@@ -178,7 +188,7 @@ module PhComposer
           :description => "Remove one Space and keep its floors: the records of the Space, its Volumes and their " \
                           "Floor Segments go, the Groups are exploded and the Faces stay where they are as plain " \
                           "geometry.",
-          :refuses => REMOVAL, :params => Shapes.object({ "space" => SPACE_PARAM }),
+          :refuses => GROUP_REMOVAL, :params => Shapes.object({ "space" => SPACE_PARAM }),
           :result => Shapes.object({ "space_id" => Shapes::TEXT }), :undo_name => "Remove Space",
           :side_effects => "Explodes the Space and Volume Groups and removes their records.",
           :examples => [{ "space" => EXAMPLE_SPACE }]

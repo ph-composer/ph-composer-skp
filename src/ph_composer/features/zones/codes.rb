@@ -50,6 +50,8 @@ module PhComposer
         "zone.options_adoption_required" => "Adopt the legacy or copied choices before editing categories.",
         "zone.component" => "A Zone record sits on a component, as Make Component leaves it, so it is not read " \
                             "as a Zone; Undo, or explode the component and restore the Zone.",
+        "zone.ownership_conflict" => "A Zone record sits on, or inside, a Group another feature owns; deleting " \
+                                     "or removing that Group through its feature is refused while it is there.",
         "zone.identity_in_use" => "The Zone being restored is already in the Model.",
         "zone.identity_unique" => "The Zone's identity is already unique; there is nothing to repair.",
         "zone.none" => "The Model has no Zone to export.",

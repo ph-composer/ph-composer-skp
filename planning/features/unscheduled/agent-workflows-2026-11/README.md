@@ -1,8 +1,8 @@
 # Agent workflow completeness
 
 DATE: 2026-11-09
-STATUS: Scoped, implementation plans drafted. No implementation authorized.
-ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/435 (review/planning publication only)
+STATUS: In progress. Implementation authorized 2026-11-10; AW-01 implemented on branch.
+ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication
 BASELINE: `f65ccee62b0a3994a46001d55f7aefd1a69f0faf`, API 1.31.
 
 This packet turns the [comprehensive review](../../../code-review/agent-workflows-2026-11/README.md)
@@ -21,8 +21,7 @@ this packet's contracts/acceptance and the linked finding/probe. The agent must 
 merged source before implementing a baseline finding. A proposed plan is not evidence that the
 feature exists or that its implementation has permission.
 
-The review/planning publication is tracked by #435 and was authorized on 2026-11-10. It changes
-only planning material and retained synthetic evidence. No implementation, installation or release
-is authorized. Create stage-specific issue-backed intake when implementation is selected. Coordinate
-native host use with other work; the Spaces UI packet is now merged and archived, and its changes
-must be included in the stage-entry recheck.
+The review/planning publication was tracked by #435 (closed). Ed authorized implementation of all ten
+stages on 2026-11-10, tracked by #439: one branch and PR per stage through the pr-loop, Codex review,
+merge on green delegated, computer use authorized. Installation, release and public distribution remain
+unauthorized. The Spaces UI packet is merged and archived; its changes are part of each stage-entry recheck.

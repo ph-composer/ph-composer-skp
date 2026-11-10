@@ -1,6 +1,6 @@
 # AW-08 · Repairable client connections
 
-STATUS: Proposed, not authorized. ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/435 (review/planning publication only).
+STATUS: Authorized 2026-11-10, not started. ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication.
 DEPENDS ON: AW-02 and D02 profile UX choice. FINDING: R11. CONTRACT: C08. ACCEPTANCE: A11.
 
 ## Outcome
