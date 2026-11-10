@@ -15,7 +15,6 @@ module PhComposer
     DETAIL = "#{FEATURE_ID}.detail"
     # The parts of a record's view `detail` reaches; kind, id and schema_version are in every list row.
     PARTS = %w[values user_data extension_data extension_status].freeze
-    MAX_PATH = 32
     # An unreadable row's message names what is wrong, which can quote stored text of any length; the row is
     # cut here so it never crowds out the page. records.detail on the record refuses with the whole message.
     MAX_MESSAGE = 512
@@ -66,17 +65,13 @@ module PhComposer
     DETAIL_PARAMS = SchemaShapes.object({
       "kind" => { "type" => "string", "description" => "Record kind id, as listed by discovery." },
       "id" => { "type" => "string", "description" => "The record's id." },
-      "path" => { "type" => "array", "minItems" => 1, "maxItems" => MAX_PATH,
-                  "items" => { "type" => %w[string integer] },
-                  "description" => "Keys and array indexes into the record as #{LIST} answers it, starting at " \
-                                   "#{PARTS.join(', ')}: [\"user_data\", \"notes\"], [\"values\", \"layers\", 0]." },
+      "path" => Fragments.path_param(PARTS, "[\"user_data\", \"notes\"], [\"values\", \"layers\", 0]"),
       "cursor" => Pages::CURSOR
     }, :optional => %w[cursor]).freeze
 
     DETAIL_RESULT = SchemaShapes.object({
       "kind" => { "type" => "string" }, "id" => { "type" => "string" },
-      "type" => { "type" => "string", "enum" => %w[object array string number boolean null],
-                  "description" => "The JSON type of the value at path; a stored null or false is a value." },
+      "type" => Fragments::TYPE,
       "fragment" => Fragments::FRAGMENT, "next_cursor" => Pages::NEXT_CURSOR
     }).freeze
 
@@ -121,39 +116,10 @@ module PhComposer
     def detail(request)
       params = request.params
       kind = request.engine.kind(params.fetch("kind"))
-      path = params.fetch("path")
-      unless PARTS.include?(path.first)
-        raise CodedError.new("params.invalid", "A path starts at #{PARTS.join(', ')}.")
-      end
-
-      value = at(request.engine.view(kind.id, request.engine.find(kind.id, params.fetch("id"))), path)
-      fragment, next_cursor = Fragments.read(request, DETAIL, value)
-      { "kind" => kind.id, "id" => params.fetch("id"), "type" => json_type(value), "fragment" => fragment,
-        "next_cursor" => next_cursor }
-    end
-
-    # The value `path` names in `view`; a key or index naming nothing refuses, so absent is never null.
-    def at(view, path)
-      path.each_with_index.reduce(view) do |value, (step, index)|
-        found = value.is_a?(Hash) && step.is_a?(String) && value.key?(step)
-        found ||= value.is_a?(Array) && step.is_a?(Integer) && step.between?(0, value.length - 1)
-        unless found
-          raise CodedError.new("target.not_found", "Nothing is stored at #{JSON.generate(path[0..index])[0, 200]}.")
-        end
-
-        value[step]
-      end
-    end
-
-    def json_type(value)
-      case value
-      when Hash then "object"
-      when Array then "array"
-      when String then "string"
-      when Numeric then "number"
-      when true, false then "boolean"
-      else "null"
-      end
+      Fragments.check_start!(params.fetch("path"), PARTS)
+      view = request.engine.view(kind.id, request.engine.find(kind.id, params.fetch("id")))
+      { "kind" => kind.id, "id" => params.fetch("id") }
+        .merge(Fragments.detail(request, DETAIL, view, params.fetch("path"), :parts => PARTS))
     end
 
     def check_fields!(kind, fields)
@@ -173,8 +139,13 @@ module PhComposer
     def row(view, fields, summary)
       values = view.fetch("values")
       view["values"] = values.slice(*fields) if fields
-      return view unless summary
+      summary ? summarize(view, values) : view
+    end
 
+    # `view` without user_data, extension_data and extension_status, and with what they hold in `metadata`
+    # and each of `values`' stored size in `value_bytes`: the summary row of any record view that carries
+    # those three, a catalog record's or an entity record's.
+    def summarize(view, values)
       user_data = view.delete("user_data")
       extensions = view.delete("extension_data")
       statuses = view.delete("extension_status").values.tally

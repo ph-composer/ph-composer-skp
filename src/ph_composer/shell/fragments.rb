@@ -29,6 +29,15 @@ module PhComposer
     }).freeze
     SUMMARY = SchemaShapes.object({ "bytes" => { "type" => "integer", "minimum" => 0 },
                                     "sha256" => { "type" => "string" } }).freeze
+    MAX_PATH = 32
+    TYPE = { "type" => "string", "enum" => %w[object array string number boolean null],
+             "description" => "The JSON type of the value at path; a stored null or false is a value." }.freeze
+
+    # A detail read's `path` param: keys and indexes into one public view, starting at one of `parts`.
+    def self.path_param(parts, example)
+      { "type" => "array", "minItems" => 1, "maxItems" => MAX_PATH, "items" => { "type" => %w[string integer] },
+        "description" => "Keys and array indexes into the view, starting at #{parts.join(', ')}: #{example}." }
+    end
 
     module_function
 
@@ -48,6 +57,45 @@ module PhComposer
       next_cursor = finish < text.bytesize ? Pages.token(request, query, [finish, digest], revision) : nil
       [{ "encoding" => ENCODING, "offset" => offset, "bytes" => piece.bytesize, "total_bytes" => text.bytesize,
          "sha256" => digest, "text" => piece }, next_cursor]
+    end
+
+    # One detail answer: the JSON type of the value `path` names in `view` and its fragment for `request`'s
+    # cursor. `parts` are the top-level keys a caller may start at; the path is not echoed, since a long key
+    # would crowd the reply.
+    def detail(request, query, view, path, parts:, revision: request.revision)
+      check_start!(path, parts)
+      value = at(view, path)
+      fragment, next_cursor = read(request, query, value, :revision => revision)
+      { "type" => json_type(value), "fragment" => fragment, "next_cursor" => next_cursor }
+    end
+
+    # A path starts at one of `parts`; a caller that resolves its view at a cost checks this first.
+    def check_start!(path, parts)
+      raise CodedError.new("params.invalid", "A path starts at #{parts.join(', ')}.") unless parts.include?(path.first)
+    end
+
+    # The value `path` names in `view`; a key or index naming nothing refuses, so absent is never null.
+    def at(view, path)
+      path.each_with_index.reduce(view) do |value, (step, index)|
+        found = value.is_a?(Hash) && step.is_a?(String) && value.key?(step)
+        found ||= value.is_a?(Array) && step.is_a?(Integer) && step.between?(0, value.length - 1)
+        unless found
+          raise CodedError.new("target.not_found", "Nothing is stored at #{JSON.generate(path[0..index])[0, 200]}.")
+        end
+
+        value[step]
+      end
+    end
+
+    def json_type(value)
+      case value
+      when Hash then "object"
+      when Array then "array"
+      when String then "string"
+      when Numeric then "number"
+      when true, false then "boolean"
+      else "null"
+      end
     end
 
     # A cursor's offset is one this text issued: inside it and on a character boundary. A cursor issued

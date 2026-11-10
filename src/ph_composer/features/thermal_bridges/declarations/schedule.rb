@@ -84,19 +84,110 @@ module PhComposer
         "unreadable" => ALL.fetch("unreadable").merge("description" => "The first #{Scan::DETAIL_ROWS}."),
         "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL
       ))
-      LIST_PARAMS = Shapes.object({ "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR }, :optional => %w[limit cursor])
+      # A run row as schedule.list answers it: whole, or with compact without its points, its Edge paths and
+      # each finding's Edges, counted instead.
+      LIST_FINDING = Shapes.object(FINDING.fetch("properties").merge("edge_count" => COUNT),
+                                   :optional => %w[locate edge_count])
+      LIST_RUN = Shapes.object(
+        RUN.fetch("properties").merge(
+          "edge_count" => COUNT.merge("description" => "With compact: how many Edges."),
+          "point_count" => COUNT.merge("description" => "With compact: how many points."),
+          "index" => COUNT.merge("description" => "With compact: the run's place in the schedule, which names it " \
+                                                  "to #{Scan::MEMBERS} when two runs share an identifier."),
+          "findings" => Shapes.list(LIST_FINDING).merge("description" => "With compact, each finding's Edges " \
+                                                                         "counted; #{Scan::MEMBERS} with finding " \
+                                                                         "pages them."),
+          "truncated" => ContextChildren::TRUNCATED
+        ), :optional => %w[points_m edge_paths index edge_count point_count truncated]
+      )
+      COMPACT_TOTALS = TOTALS.merge(
+        "required" => TOTALS.fetch("required") - ["by_type"],
+        "properties" => TOTALS.fetch("properties").merge(
+          "type_count" => COUNT.merge("description" => "With compact: how many types by_type has; " \
+                                                       "#{Scan::BY_TYPE} pages them.")
+        ),
+        "description" => "Over every run; with compact without by_type, counted in type_count."
+      )
+      LIST_RESULT_ANY = LIST_RESULT.merge(
+        "required" => LIST_RESULT.fetch("required") - %w[edge_findings unreadable],
+        "properties" => LIST_RESULT.fetch("properties").merge(
+          "runs" => Shapes.list(LIST_RUN).merge("description" => "One page of runs in schedule order."),
+          "totals" => COMPACT_TOTALS
+        )
+      )
+      LIST_PARAMS = Shapes.object({
+        "compact" => { "type" => "boolean",
+                       "description" => "Leave out each run's points_m and edge_paths and each finding's Edges, " \
+                                        "counted instead, and the Edge findings and unreadable assignments, which " \
+                                        "#{Scan::EDGE_FINDINGS} and #{Scan::UNREADABLE} page; #{Scan::MEMBERS} " \
+                                        "pages a run's Edges. False when absent." },
+        "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR
+      }, :optional => %w[compact limit cursor])
+      MEMBER_INDEX = COUNT.merge("description" => "The run's index from a compact schedule row; needed only when " \
+                                                  "two runs share the identifier.").freeze
+      MEMBER_FINDING = COUNT.merge("description" => "Only the Edges of the run's finding at this index.").freeze
+      PAGING = Shapes.object({ "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR }, :optional => Pages::PAGE_KEYS)
+      MEMBER = Shapes.object({
+        "index" => COUNT.merge("description" => "The Edge's place in the run: it joins points_m i and i + 1."),
+        "path" => PATH, "points_m" => Shapes.list(Shapes.list(NUMBER), :description => "Its world end points in " \
+                                                                                       "metres, in run order.")
+      })
       LOCATE_RESULT = Shapes.object({ "path" => PATH.merge("description" => "The edit path afterwards."),
                                       "selected" => COUNT })
       EXAMPLE_PATHS = { "edge_paths" => [[1201, 1205], [1201, 1206]] }.freeze
 
       module_function
 
+      # The schedule's parts that grow with the Model, a bounded page at a time.
+      def install_pages(feature)
+        page = { "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL }
+        feature.query(Scan::MEMBERS,
+                      :description => "One bounded page of one run's Edges in run order, each with its path and " \
+                                      "world end points, or only those one of its findings names.",
+                      :refuses => PAGE + %w[target.ambiguous target.not_found],
+                      :params => Shapes.object({
+                        "identifier" => Shapes.described(Shapes::TEXT, "The run's identifier from the schedule."),
+                        "index" => MEMBER_INDEX, "finding" => MEMBER_FINDING,
+                        "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR
+                      }, :optional => %w[index finding limit cursor]),
+                      :result => Shapes.object({ "identifier" => Shapes::TEXT,
+                                                 "members" => Shapes.list(MEMBER) }.merge(page)),
+                      :examples => [{ "identifier" => "tb_0a1b2c3d4e5f" },
+                                    { "identifier" => "tb_0a1b2c3d4e5f", "finding" => 0 }]) do |request|
+          Scan.members(request)
+        end
+        feature.query(Scan::BY_TYPE,
+                      :description => "One bounded page of the schedule's totals by Thermal Bridge Type, over " \
+                                      "every run, as schedule.list's totals.by_type; a name over " \
+                                      "#{OccurrencePath::NAME_CHARACTERS} characters is cut and named in truncated.",
+                      :refuses => PAGE, :params => PAGING,
+                      :result => Shapes.object({ "by_type" => TOTALS.dig("properties", "by_type").merge(
+                        "items" => Shapes.object(TOTALS.dig("properties", "by_type", "items", "properties")
+                                                       .merge("truncated" => ContextChildren::TRUNCATED),
+                                                 :optional => ["truncated"])
+                      ) }.merge(page)),
+                      :examples => [{}]) { |request| Scan.by_type(request) }
+        feature.query(Scan::EDGE_FINDINGS,
+                      :description => "One bounded page of the assigned Edges no Zone holds, by path: in no run, " \
+                                      "not exported.",
+                      :refuses => PAGE, :params => PAGING,
+                      :result => Shapes.object({ "edge_findings" => Shapes.list(EDGE_FINDING) }.merge(page)),
+                      :examples => [{}]) { |request| Scan.edge_findings(request) }
+        feature.query(Scan::UNREADABLE,
+                      :description => "One bounded page of the Edge assignments that are not valid, by path; not " \
+                                      "counted. A message over #{Scan::MAX_MESSAGE} characters is cut.",
+                      :refuses => PAGE, :params => PAGING,
+                      :result => Shapes.object({ "unreadable" => Shapes.list(UNREADABLE) }.merge(page)),
+                      :examples => [{}]) { |request| Scan.unreadable(request) }
+      end
+
       def install(feature)
         feature.query("#{PREFIX}.list",
                       :description => "One bounded page of thermal-bridge runs, each with its Zone, type, length, " \
                                       "psi-value, quantity, heat loss and findings, with totals over every run.",
-                      :refuses => PAGE, :params => LIST_PARAMS, :result => LIST_RESULT,
-                      :examples => [{}, { "limit" => 20 }]) { |request| Scan.page(request) }
+                      :refuses => PAGE, :params => LIST_PARAMS, :result => LIST_RESULT_ANY,
+                      :examples => [{}, { "limit" => 20 }, { "compact" => true }]) { |request| Scan.page(request) }
+        install_pages(feature)
         feature.query("#{PREFIX}.all",
                       :description => "The whole schedule in one read, for the panel's Schedule on open and Refresh.",
                       :response => { "bounded" => false, "prefer" => "#{PREFIX}.list" },

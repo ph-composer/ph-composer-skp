@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 37
+    MINOR = 38
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -179,7 +179,18 @@ module PhComposer
                     "takes metadata summary; assemblies.assemblies.layers.list and segments.list, " \
                     "windows.types.elements.list, assemblies.materials.uses.list and windows.<collection>.uses.list " \
                     "page a definition's parts and derived results; and preview takes within and preview_part, so " \
-                    "a preview larger than a reply keeps its proposal_digest and is read by part." }
+                    "a preview larger than a reply keeps its proposal_digest and is read by part." },
+      { "minor" => 38, "date" => "2026-11-10",
+        "change" => "Complete reads of large occurrence, geometry and schedule data: windows.units.list takes fields " \
+                    "and metadata summary and windows.units.detail reads one Unit's part in fragments; " \
+                    "units.host_extent takes geometry summary beside host_extent.holes and .points; " \
+                    "units.face_areas.list and units.unhosted.list page the glazed area table; convert_review " \
+                    "takes compact and convert_review.detail reads a group's sources; zones.list takes overview " \
+                    "summary beside zones.restorable.list, restorable.detail and zones.findings.list; " \
+                    "zones.options.adoption_sources.list and .detail, zones.faces.assembly_usage.list and .faces; " \
+                    "thermal_bridges.schedule.list takes compact beside runs.members.list, " \
+                    "schedule.by_type.list, schedule.edge_findings.list and schedule.unreadable.list; and " \
+                    "spaces.detail reads a Space's, Volume's or Floor Segment's part, loops included." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

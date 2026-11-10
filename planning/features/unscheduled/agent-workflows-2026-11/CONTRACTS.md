@@ -1,6 +1,6 @@
 # Proposed contract changes
 
-STATUS: C01 bound and implemented by AW-01 (API 1.34); C02 bound and implemented by AW-02 (API 1.35); C04 bound and implemented by AW-03 (API 1.36); C03 definition part bound on the AW-04 branch (API 1.37); C03 occurrence part and C05-C08 remain proposals. Baseline API 1.31.
+STATUS: C01 bound and implemented by AW-01 (API 1.34); C02 bound and implemented by AW-02 (API 1.35); C04 bound and implemented by AW-03 (API 1.36); C03 definition part bound by AW-04 (API 1.37); C03 occurrence part bound on the AW-05 branch (API 1.38); C05-C08 remain proposals. Baseline API 1.31.
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication
 
 The durable authorities remain `context/CONTRACTS.md`, `AGENT_INTERFACE.md`, `EXTENSIBILITY.md`
@@ -138,6 +138,49 @@ changes nothing; AW-05 reuses the helper for occurrence data. New names:
   revision and `proposal_digest`. MCP `preview` with `part` (and `cursor`) calls `API.preview_part`, which reruns the
   preview and answers `part`, `proposal_digest` and that part's `fragment`; its cursor binds the action, params,
   part, revision and proposal digest. Nothing is retained or held open between fragments.
+
+**Bound at AW-05 (API 1.38), occurrence, geometry and schedule part.** Every new read is a query (capability `read`)
+that changes nothing; each pages through `Pages.bounded` bound to the revision, or answers fragments through
+`Fragments`. Each existing whole read (`zones.all`, `units.all`, `glazed_area_by_face`, `assembly_usage`,
+`adoption_preview`, `schedule.all`) is unchanged, and each new param is optional with the old behaviour as default.
+New names:
+
+- `Fragments.detail(request, query, view, path, parts:)`, `Fragments.at`, `Fragments.json_type`,
+  `Fragments.path_param`, `Fragments::TYPE` (moved from `records.detail`, which now calls them):
+  one value at a `path` into a public view, answered `type`, `fragment`, `next_cursor`.
+  `RecordQueries.summarize(view, values)`: the `metadata` summary row, shared by `units.list`.
+- `ph_composer.windows.units.list` params `fields` (`window_type_id`, `anchor`) and `metadata` (`full` | `summary`:
+  no metadata maps, `metadata` and `value_bytes` as `records.list`, the native `name` cut at 256 and named in
+  `truncated`); pages cut by size. `ph_composer.windows.units.detail` params `unit` (reference), `path` (from
+  `name`, `values`, `user_data`, `extension_data`, `extension_status`, `host`, `findings`), `cursor`; result
+  `unit_id`, `type`, `fragment`, `next_cursor`; the reference resolves as Unit actions resolve it.
+- `ph_composer.windows.units.host_extent` param `geometry` (`full` | `summary`: `outline_points` and `hole_count`
+  in place of `outline_m` and `holes`). `ph_composer.windows.units.host_extent.holes` (`host`): rows `index`,
+  the bounding rectangle, `point_count`. `ph_composer.windows.units.host_extent.points` (`host`, optional `hole`):
+  rows `index`, `x_m`, `y_m` of the outer loop or that hole.
+- `ph_composer.windows.units.face_areas.list` (`zone_ids`, `zone_paths`): `glazed_area_by_face`'s Face rows in Zone
+  and Face path order, with `unhosted_unit_total`. `ph_composer.windows.units.unhosted.list`: its
+  `unhosted_units`.
+- `ph_composer.windows.units.convert_review` param `compact`: groups without `sources` (`source_count`,
+  `sources_digest`), left-out rows without `paths` (`path_count`, `first_path`).
+  `ph_composer.windows.units.convert_review.detail` (`paths`, `path` from `groups` or `left_out`, `cursor`).
+- `ph_composer.zones.list` param `overview` (`full` | `summary`: no `make_zone`, `restorable` or `findings`;
+  `make_zone_entity_count`, `restorable_total`, `finding_total`).
+  `ph_composer.zones.restorable.list`: offers by `zone_id` without `entity_ids` and `choice_record`, labels cut.
+  `ph_composer.zones.restorable.detail` (`zone_id`, `path`, `cursor`). `ph_composer.zones.findings.list`.
+  `ph_composer.zones.options.adoption_sources.list`: `required`, `suggested_segment`, sources by `key` with
+  `cluster`, names cut; `ph_composer.zones.options.adoption_sources.detail` (`key`, `path`, `cursor`).
+  `ph_composer.zones.faces.assembly_usage.list` (rows without `faces`) and
+  `ph_composer.zones.faces.assembly_usage.faces` (`assembly_id`).
+- `ph_composer.thermal_bridges.schedule.list` param `compact`: runs without `points_m` and `edge_paths`
+  (`index`, `edge_count`, `point_count`, labels cut), findings without `locate` (`edge_count`, message cut at 512),
+  totals without `by_type` (`type_count`), no `edge_findings` or `unreadable` (their totals stay).
+  `ph_composer.thermal_bridges.schedule.by_type.list`. `ph_composer.thermal_bridges.runs.members.list`
+  (`identifier`, optional `index` and `finding`; two runs sharing the identifier without `index` refuse
+  `target.ambiguous`): rows `index`, `path`, `points_m` (the Edge's two world end points). `ph_composer.thermal_bridges.
+  schedule.edge_findings.list` and `schedule.unreadable.list` (message cut at 512), by path.
+- `ph_composer.spaces.detail` (exactly one of `space`, `volume`, `floor_segment`, then `path`, `cursor`): one part of
+  the row `spaces.all` builds, a Floor Segment's with `loops_m`.
 
 ## C04 · Geometry candidate and assignment reads
 

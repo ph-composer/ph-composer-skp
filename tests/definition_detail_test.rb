@@ -4,16 +4,17 @@ require "digest"
 require_relative "test_helper"
 require_relative "support/assembly_assignment_fixtures"
 require_relative "support/test_feature"
+require_relative "support/agent_reads"
 
 # Large definitions and metadata read completely through the agent connection (AW-04, contract C03,
 # acceptance A07a): every reply goes through the real executor and fits its budget, and what the pages and
 # fragments carry joins back to exactly what the whole read answers in process.
 class DefinitionDetailTest < PhComposerTestCase
   include AssemblyAssignmentFixtures
+  include AgentReads
 
   A = PhComposer::AgentAccess
   P = "ph_composer"
-  BUDGET = A::Executor::MAX_RESULT_BYTES
   MATERIALS = PhComposer::Assemblies::Materials::Schema
   ASSEMBLIES = PhComposer::Assemblies::Assembly::Schema
   # Multibyte text, escapes and a four-byte character, so fragment cuts land inside characters and escapes.
@@ -349,34 +350,6 @@ class DefinitionDetailTest < PhComposerTestCase
   PreviewParts = PhComposer::PreviewParts
   CanonicalJson = PhComposer::CanonicalJson
 
-  # The structuredContent of one tool call through the real executor, which must fit the budget.
-  def agent(tool, arguments)
-    answer = @executor.call(@token, tool, { "session" => @session.id }.merge(arguments))
-    content = answer.fetch("structuredContent")
-    assert_operator JSON.generate(content).bytesize, :<=, BUDGET
-    content
-  end
-
-  def query(name, params)
-    agent("query", "name" => name, "params" => params)
-  end
-
-  def completed(outcome)
-    assert_equal "completed", outcome.fetch("status"), outcome.inspect
-    outcome.fetch("value")
-  end
-
-  # Every page of a paged read, following next_cursor; each page has rows and every reply fits.
-  def pages_of(name, params, rows)
-    pages = [completed(query(name, params))]
-    while (cursor = pages.last.fetch("next_cursor"))
-      pages << completed(query(name, params.merge("cursor" => cursor)))
-    end
-    assert pages.all? { |page| !page.fetch(rows).empty? }
-    assert_equal pages.first.fetch("total"), pages.sum { |page| page.fetch(rows).length }
-    pages
-  end
-
   def detail(kind, id, path)
     params = { "kind" => kind, "id" => id, "path" => path }
     joined(->(cursor) { completed(query("#{P}.records.detail", params.merge(cursor ? { "cursor" => cursor } : {}))) })
@@ -395,29 +368,6 @@ class DefinitionDetailTest < PhComposerTestCase
       assert_equal compact.fetch("proposal_digest"), value.fetch("proposal_digest")
       value
     end, compact.dig("detail", "parts", part))
-  end
-
-  # The value whose fragments `read` answers, joined in order and checked against the size and digest every
-  # fragment repeats (and `summary`, when given).
-  def joined(read, summary = nil)
-    text = +""
-    cursor = nil
-    loop do
-      value = read.call(cursor)
-      fragment = value.fetch("fragment")
-      assert_equal text.bytesize, fragment.fetch("offset")
-      assert fragment.fetch("text").valid_encoding?
-      assert_equal fragment.fetch("bytes"), fragment.fetch("text").bytesize
-      text << fragment.fetch("text")
-      cursor = value.fetch("next_cursor")
-      next if cursor
-
-      assert_equal [fragment.fetch("total_bytes"), fragment.fetch("sha256")],
-                   [text.bytesize, Digest::SHA256.hexdigest(text)]
-      assert_equal summary.slice("bytes", "sha256"),
-                   { "bytes" => text.bytesize, "sha256" => fragment.fetch("sha256") } if summary
-      return JSON.parse(text, :quirks_mode => true)
-    end
   end
 
   def create_material(name, user_data = {}, values = {})

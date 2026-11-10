@@ -151,7 +151,8 @@ and revision: an expired one is `query.cursor_expired`, one this query did not i
 `params.invalid`. A value larger than a reply is read exactly in fragments (`shell/fragments.rb`): its
 canonical JSON text cut into whole UTF-8 characters, each fragment with its byte offset and the whole
 text's size and SHA-256, behind the same cursor binding, so a changed value refuses instead of joining two
-versions. Discovery and descriptions are detached copies. A query or preview that fails
+versions. Every detail read names its value by a path into one public view (`Fragments.detail`), never an
+arbitrary dictionary. Discovery and descriptions are detached copies. A query or preview that fails
 unexpectedly answers `failed`, code `operation.failed`, effect `none`.
 
 Dispatch presents nothing: it returns the outcome, and the calling client shows the message.

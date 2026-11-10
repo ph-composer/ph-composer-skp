@@ -22,7 +22,63 @@ module PhComposer
                                  "type" => { "type" => %w[string null] }, "color" => Shapes::ID }).freeze
         CHOICES = Shapes.object({ "assemblies" => Shapes.list(CHOICE) }).freeze
 
+        USAGE_LIST = "#{PREFIX}.assembly_usage.list"
+        USAGE_FACES = "#{PREFIX}.assembly_usage.faces"
+        USAGE_SUMMARY = USAGE_ROW.merge(
+          "required" => USAGE_ROW.fetch("required") - ["faces"],
+          "properties" => USAGE_ROW.fetch("properties").reject { |key, _value| key == "faces" }
+        ).freeze
+
         module_function
+
+        # assembly_usage a bounded page at a time: the Assemblies' counts and areas, then one Assembly's Faces.
+        # Both come from the same Face table assembly_usage reads, so nothing is recalculated by a caller.
+        def install_usage_pages(feature)
+          page = { "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL }
+          paging = { "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR }
+          refuses = Refuses::READ + %w[geometry.invalid] + Refuses::PAGE
+          feature.query(USAGE_LIST,
+                        :description => "One bounded page of assembly_usage's rows by Assembly id, each its Face " \
+                                        "count and gross area without the Faces; #{USAGE_FACES} pages those.",
+                        :refuses => refuses,
+                        :params => Shapes.object(paging, :optional => Pages::PAGE_KEYS),
+                        :result => Shapes.object({ "assemblies" => Shapes.list(USAGE_SUMMARY) }.merge(page)),
+                        :examples => [{}]) do |request|
+            rows = usage(request, USAGE_LIST).map { |row| row.reject { |key, _value| key == "faces" } }
+            found, next_cursor = Pages.bounded(request, USAGE_LIST, rows, :key => ->(row) { row.fetch("assembly_id") })
+            { "assemblies" => found, "next_cursor" => next_cursor, "total" => rows.length }
+          end
+          feature.query(USAGE_FACES,
+                        :description => "One bounded page of the Face occurrences one Assembly is assigned to, in " \
+                                        "assembly_usage's order, beside its Face count and gross area.",
+                        :refuses => (refuses + %w[target.not_found]).uniq,
+                        :params => Shapes.object({ "assembly_id" => Shapes.described(Shapes::ID, "The Assembly " \
+                                                                                                 "to read.") }
+                                                   .merge(paging), :optional => Pages::PAGE_KEYS),
+                        :result => Shapes.object(USAGE_ROW.fetch("properties").merge(page)),
+                        :examples => [{ "assembly_id" => "asm_Ab12Cd34Ef56" }]) { |request| usage_faces(request) }
+        end
+
+        def usage_faces(request)
+          id = request.params.fetch("assembly_id")
+          row = usage(request, USAGE_FACES).find { |usage| usage.fetch("assembly_id") == id }
+          unless row || request.engine.ids(AssemblyAssignment::KIND).include?(id)
+            raise CodedError.new("target.not_found", "No Assembly #{id} exists or is assigned to a Face.")
+          end
+
+          row ||= { "assembly_id" => id, "face_count" => 0, "gross_area_m2" => 0.0, "faces" => [] }
+          faces = row.fetch("faces").each_with_index.map { |face, index| [index, face] }
+          page, next_cursor = Pages.bounded(request, USAGE_FACES, faces, :key => ->(face) { [face.first] })
+          row.merge("faces" => page.map(&:last), "next_cursor" => next_cursor, "total" => faces.length)
+        end
+
+        # The whole usage, as assembly_usage answers it; a bad limit or cursor refuses before the walk.
+        def usage(request, query)
+          Pages.limit(request.params)
+          Pages.position(request, query)
+          Faces.all(request).fetch("assembly_usage")
+        end
+        private_class_method :usage_faces, :usage
 
         def install(feature)
           feature.action("#{PREFIX}.assign_assembly",
@@ -45,6 +101,7 @@ module PhComposer
                         :refuses => Refuses::READ + %w[geometry.invalid],
                         :params => Shapes::NONE, :result => Shapes.object({ "assemblies" => USAGE }),
                         :examples => [{}]) { |request| { "assemblies" => Faces.all(request).fetch("assembly_usage") } }
+          install_usage_pages(feature)
           # Identical snapshot queries are memoized for this build by the shared shell. Usage and the
           # Face table therefore share one walk, without retaining an Index after the read phase.
           feature.snapshot_section("#{PREFIX}.usage", :query => "#{PREFIX}.all")

@@ -47,9 +47,81 @@ module PhComposer
                                                       :examples => [{}]) do |request|
             Adoption.preview(request, Inventory.rows(request.model))
           end
+          install_sources_page(feature)
+          install_sources_detail(feature)
           install_actions(feature)
           feature.snapshot_section(PREFIX, :query => "#{PREFIX}.all")
           install_retargeters(feature)
+        end
+
+        SOURCES_LIST = "#{PREFIX}.adoption_sources.list"
+
+        # adoption_preview's sources a bounded page at a time, by key, each naming the cluster it collides in.
+        def install_sources_page(feature)
+          row = SOURCE.merge("required" => SOURCE.fetch("required") + ["cluster"],
+                             "properties" => SOURCE.fetch("properties").merge(
+                               "truncated" => ContextChildren::TRUNCATED,
+                               "cluster" => { "type" => %w[string null],
+                                              "description" => "The key of the first source in this source's " \
+                                                               "collision cluster (adoption_preview's " \
+                                                               "collision_clusters), or null when it collides " \
+                                                               "with none." }
+                             ))
+          feature.query(SOURCES_LIST,
+                        :description => "One bounded page of the legacy and copied choices adoption_preview lists, " \
+                                        "by key, beside whether adoption is required and the suggested Segment.",
+                        :refuses => (REFUSALS + %w[query.cursor_expired query.limit_invalid]).uniq,
+                        :params => Shapes.object({ "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR },
+                                                 :optional => Pages::PAGE_KEYS),
+                        :result => Shapes.object({ "required" => { "type" => "boolean" },
+                                                   "suggested_segment" => { "type" => "string" },
+                                                   "sources" => Shapes.list(row), "next_cursor" => Pages::NEXT_CURSOR,
+                                                   "total" => Pages::TOTAL }),
+                        :examples => [{}, { "limit" => 50 }]) { |request| sources_page(request) }
+        end
+
+        SOURCES_DETAIL = "#{PREFIX}.adoption_sources.detail"
+
+        # One adoption source's row, whole, in fragments: a name longer than a list row keeps.
+        def install_sources_detail(feature)
+          feature.query(SOURCES_DETAIL,
+                        :description => "One part of one adoption source as adoption_preview lists it, exactly, as " \
+                                        "canonical JSON text in fragments: join every fragment's text in order, " \
+                                        "check its sha256 and parse it.",
+                        :refuses => (REFUSALS + %w[query.cursor_expired target.not_found]).uniq,
+                        :params => Shapes.object({ "key" => Shapes.described(Shapes::ID, "The source's key."),
+                                                   "path" => Fragments.path_param(SOURCE.fetch("properties").keys -
+                                                                                  ["key"], "[\"name\"]"),
+                                                   "cursor" => Pages::CURSOR }, :optional => ["cursor"]),
+                        :result => Shapes.object({ "key" => Shapes::ID, "type" => Fragments::TYPE,
+                                                   "fragment" => Fragments::FRAGMENT,
+                                                   "next_cursor" => Pages::NEXT_CURSOR }),
+                        :examples => [{ "key" => "legacy:level:0a1b", "path" => ["name"] }]) do |request|
+            key = request.params.fetch("key")
+            source = Adoption.preview(request, Inventory.rows(request.model)).fetch("sources")
+                             .find { |row| row.fetch("key") == key }
+            raise CodedError.new("target.not_found", "No adoption source is #{key}.") unless source
+
+            { "key" => key }.merge(Fragments.detail(request, SOURCES_DETAIL, source, request.params.fetch("path"),
+                                                    :parts => source.keys - ["key"]))
+          end
+        end
+
+        def sources_page(request)
+          Pages.limit(request.params)
+          Pages.position(request, SOURCES_LIST)
+          preview = Adoption.preview(request, Inventory.rows(request.model))
+          clusters = preview.fetch("collision_clusters").each_with_object({}) do |keys, found|
+            keys.each { |key| found[key] = keys.first }
+          end
+          rows = preview.fetch("sources").map do |source|
+            source.merge("cluster" => clusters[source.fetch("key")])
+                  .merge(OccurrencePath.bounded_names(source.slice("name")))
+          end
+          rows.sort_by! { |source| source.fetch("key") }
+          page, next_cursor = Pages.bounded(request, SOURCES_LIST, rows, :key => ->(source) { source.fetch("key") })
+          preview.slice("required", "suggested_segment").merge("sources" => page, "next_cursor" => next_cursor,
+                                                               "total" => rows.length)
         end
 
         def install_actions(feature)
