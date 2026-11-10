@@ -18,9 +18,10 @@ Residual and deferred:
   right-click) and the panel by DOM clicks through the bridge; no physical right-click or HtmlDialog
   click was observed. Each PR lists what its check did not observe.
 - Other features still offer Convert to Window Type… and Repair split Face identities… on a Floor Segment
-  Face, and Convert at an open Space's root; their own availability rules, outside #417.
+  Face, and Convert at an open Space's root; their own availability rules, outside #417. Tracked in
+  [#437](https://github.com/ph-composer/ph-composer-skp/issues/437).
 - With a Space open, `Model#modified?` stays true after a plain save (pre-existing, seen in the SUI-07
-  experiment).
+  experiment). Tracked in [#438](https://github.com/ph-composer/ph-composer-skp/issues/438).
 
 Plan: [PLAN.md](PLAN.md). States: `Scoped` · `In progress` · `Implemented on branch` ·
 `Merged to main` · `Blocked` · `Deferred`. Evidence names the command output or PR it rests on.
