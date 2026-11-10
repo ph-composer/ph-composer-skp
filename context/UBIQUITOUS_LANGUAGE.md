@@ -125,7 +125,7 @@ not coin a third vocabulary between SketchUp and honeybee. Faces belong to a Zon
 | Term | Meaning |
 | --- | --- |
 | Space | One unique SketchUp Group hosted in a Zone through the Zone reference on its record, containing one or more Volumes and Space-level data: iCFA, ventilation airflows, occupancy. Maps to a honeybee-ph `Space` on its Zone's Room. Do not call it Room in product copy, and do not confuse it with honeybee's Room, which is a Zone |
-| Volume | A protected structural Group directly inside a Space, holding one logical Space Floor |
+| Volume | A protected structural Group directly inside a Space, holding one logical Space Floor: Faces joined by shared Edges. Create Space and Add New Volume to Space make one Volume per joined set; Faces meeting only at a corner are separate |
 | Space Floor | Logical grouping of Floor Segments in a Volume; not another SketchUp Group |
 | Floor surface | The Face or Faces drawn to define a Space's floor. Create Space turns each one into a Floor Segment. Do not call it an outline in product copy |
 | Floor Segment | A face inside a Volume that the user has marked as floor area, carrying PH-Composer identity, a weighting factor and a net area factor. In the predecessor this identity sat on a designPH TFA face; here PH-Composer owns the classification. Maps to honeybee-ph `SpaceFloorSegment` |
@@ -135,6 +135,7 @@ not coin a third vocabulary between SketchUp and honeybee. Faces belong to a Zon
 | Volume preview | The overlay extrusion of a Volume's Floor Segments by its height. Drawn, never modeled |
 | Height from solid | The helper that sets a Volume's height from a closed group the user drew: the group's volume divided by the Volume's net floor area |
 | Set Height | The viewport tool that sets one Volume's height. It starts with a selected Volume, or a Space's one Volume, already picked; a Space with several Volumes waits for a click on one. Then drag the top or type a value in the measurements box |
+| Add New Volume to Space | The context-menu item, offered on loose Faces at an open Space's root in place of Create Space, that makes them the Space's next Volumes in one Undo step, with no dialog |
 | Edit Floor Surface | The context-menu item that opens a selected Volume, or a Space's one Volume, unprotected, as Enter does in the Spaces view |
 | Space label | Viewport text at a Space's reference point, as `101 Living \| iCFA 2,083 ft² \| Vol: 20,831 ft³`. Its values are whole numbers. iCFA and net volume show unless turned off; supply and extract, shown on request, follow as `\| Sup 60 cfm / Ext 60 cfm` |
 | Selection totals | The HUD readout of summed iCFA, net volume and airflows for the selected Spaces |
@@ -207,7 +208,8 @@ A Zone hosts Spaces and contains envelope faces; a Space contains Volumes; each 
 Floor Segments. A Space is in a Zone because its record names that Zone, wherever its Group or its floors
 sit in the scene, and nothing tests geometric containment. A Space cannot span Zones. A Floor Segment is never the same face as an envelope
 Floor. A valid Space has at least one Volume and a valid Volume at least one Floor
-Segment. Empty structures are visible recovery states.
+Segment, all joined by shared Edges. Empty structures are visible recovery states, and a Volume whose Floor
+Segments come apart is a warning that does not block export.
 
 Layer thickness is independent of shared material conductivity, density and specific heat.
 Different layer thicknesses do not create different material records.

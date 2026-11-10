@@ -59,8 +59,12 @@ module PhComposer
                              "description" => "Where the height comes from: the Model's last height, or the " \
                                               "default until one is entered." }
       })
-      CREATED = Shapes.object({ "space_id" => Shapes::TEXT, "volume_id" => Shapes::TEXT,
-                                "floor_segment_ids" => Shapes.list(Shapes::TEXT) })
+      # One new Volume per set of Faces joined by shared Edges, in the order the first Face of each was named.
+      NEW_VOLUMES = Shapes.list(Shapes.object({ "volume_id" => Shapes::TEXT,
+                                                "floor_segment_ids" => Shapes.list(Shapes::TEXT) }),
+                                :description => "Each new Volume and its Floor Segments, one per set of Faces " \
+                                                "joined by shared Edges, numbered in that order.").freeze
+      CREATED = Shapes.object({ "space_id" => Shapes::TEXT, "volumes" => NEW_VOLUMES })
       TARGET = %w[record.unreadable target.ambiguous target.changed target.locked target.not_found
                   target.shared_definition validation.failed].freeze
       SPACE_PARAM = SPACE_REFERENCE.merge("description" => "The Space, as list returns it.").freeze
@@ -78,9 +82,11 @@ module PhComposer
       # Each action as [name, declaration, handler]; a handler takes the request, the proposal and the params.
       ACTIONS = [
         ["create", {
-          :description => "Make one new Space with one Volume from a floor surface: explicit Faces loose in the open " \
-                          "edit context, each becoming a Floor Segment. Works at the root, in a plain Group and in " \
-                          "an open Zone, whose Space Group is placed outside the Zone at the same world position.",
+          :description => "Make one new Space from a floor surface: explicit Faces loose in the open edit context, " \
+                          "each becoming a Floor Segment. Faces joined by a shared Edge, a step included, share one " \
+                          "Volume; Faces meeting only at a corner, or not at all, make separate Volumes. Works at " \
+                          "the root, in a plain Group and in an open Zone, whose Space Group is placed outside the " \
+                          "Zone at the same world position.",
           :refuses => (ZONE_TARGET + %w[space.context_required space.nothing_to_create target.edit_path_changed]).uniq,
           :params => Shapes.object(PREVIEW_PARAMS.fetch("properties").merge(
             "zone" => OPTIONAL_ZONE.merge("description" => "The Zone that hosts the new Space; absent or null for no " \
@@ -93,7 +99,8 @@ module PhComposer
             "weighting_factor" => FACTOR
           ), :optional => %w[zone name number weighting_factor]),
           :result => CREATED, :undo_name => "Create Space",
-          :side_effects => "Groups the Faces and writes the Space, Volume and Floor Segment records.",
+          :side_effects => "Groups each set of joined Faces as a Volume, the Volumes as the Space, and writes the " \
+                           "Space, Volume and Floor Segment records.",
           :examples => [{ "zone" => EXAMPLE_ZONE, "faces" => [[1202]], "name" => "Living" }]
         }, lambda { |request, proposal, params|
           Authoring.create(request, proposal, :zone => params["zone"], :faces => params.fetch("faces"),
@@ -101,14 +108,16 @@ module PhComposer
                                               :weighting_factor => params.fetch("weighting_factor", DEFAULT_FACTOR))
         }],
         ["volumes.create", {
-          :description => "Group explicit loose Faces at an open Space's root into its next Volume.",
+          :description => "Group explicit loose Faces at an open Space's root into its next Volumes: one per set " \
+                          "of Faces joined by shared Edges, each with the Space's default height.",
           :refuses => (TARGET + %w[space.context_required space.shares_edge target.wrong_hierarchy
                                    target.wrong_kind]).uniq,
           :params => Shapes.object({ "space" => SPACE_PARAM,
                                      "faces" => PATHS, "weighting_factor" => FACTOR },
                                    :optional => ["weighting_factor"]),
-          :result => Shapes.object({ "volume_id" => Shapes::TEXT, "floor_segment_ids" => Shapes.list(Shapes::TEXT) }),
-          :undo_name => "Add Volume", :side_effects => "Groups the Faces and writes their records.",
+          :result => Shapes.object({ "volumes" => NEW_VOLUMES }),
+          :undo_name => "Add Volume", :side_effects => "Groups each set of joined Faces as a Volume and writes their " \
+                                                       "records.",
           :examples => [{ "space" => EXAMPLE_SPACE, "faces" => [[1201, 1300, 1320]] }]
         }, lambda { |request, proposal, params|
           Authoring.create_volume(request, proposal, :space => params.fetch("space"), :faces => params.fetch("faces"),

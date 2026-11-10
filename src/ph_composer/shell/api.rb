@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 31
+    MINOR = 32
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -136,7 +136,13 @@ module PhComposer
                     "geometry, in one Undo step." },
       { "minor" => 31, "date" => "2026-11-09",
         "change" => "A Volume whose Floor Segments overlap in plan reads the space.floor_overlap finding, a warning " \
-                    "that does not block export." }
+                    "that does not block export." },
+      { "minor" => 32, "date" => "2026-11-09",
+        "change" => "ph_composer.spaces.create and volumes.create make one Volume per set of Faces joined by shared " \
+                    "Edges and answer volumes, a list of volume_id and floor_segment_ids, in place of volume_id and " \
+                    "floor_segment_ids. A Volume whose Floor Segments are not all joined reads the " \
+                    "space.floor_disconnected finding, a warning that does not block export. The add_volume_menu " \
+                    "menu item is new, and create_menu is no longer offered inside a Space." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

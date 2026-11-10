@@ -133,6 +133,17 @@ class SpacesExportTest < PhComposerTestCase
     assert_equal 2, records.first.fetch("volumes").first.fetch("floor_segments").length
   end
 
+  def test_disconnected_floor_segments_are_reported_and_the_space_still_exports
+    faces = [floor_face(1111, rectangle(0, 0, 2, 2), segment_record("L")),
+             floor_face(1112, rectangle(5, 0, 2, 2), segment_record("M"))]
+    @model.entities << zone_group(1000, "A", [space_group(1100, space_record("L", :number => "101"),
+                                                          [volume_group(1110, volume_record("L"), faces)])])
+    row = API.query(:context => @context, :name => X::PREFLIGHT).fetch("value").fetch("findings")
+             .find { |finding| finding["code"] == "space.floor_disconnected" }
+    assert_equal ["vol_LLLLLLLLLLLL", false], row.values_at("object_id", "blocks_export")
+    assert_equal 2, records.first.fetch("volumes").first.fetch("floor_segments").length
+  end
+
   def test_a_zone_warning_names_its_zone_and_a_stray_copy_offers_its_repair
     reference_model
     living = @model.entities.to_a.first.entities.to_a.first

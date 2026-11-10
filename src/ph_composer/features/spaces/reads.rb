@@ -166,7 +166,8 @@ module PhComposer
           "floor_segments" => segments
         )
         overlap = FloorOverlap.any?(captured.map { |_segment, geometry| geometry.loops_m })
-        row.merge("findings" => Findings.volume(row, :floor_overlap => overlap) +
+        disconnected = Steps.connected(volume.segments.map(&:entity)).length > 1
+        row.merge("findings" => Findings.volume(row, :floor_overlap => overlap, :floor_disconnected => disconnected) +
                                  duplicate(counts, VOLUME_KIND, volume.record, repeated,
                                            :ancestor => volume.shared_above && "Space"))
       end

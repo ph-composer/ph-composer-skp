@@ -17,6 +17,7 @@
 #   mark_tool.rb    the Mark floor viewport tool; declarations/mark_tool.rb its state and commands
 #   set_height_tool.rb, prism_pick.rb  the Set Height viewport tool and its pure pointer maths
 #   edit_floor_surface_menu.rb  the native route into a Volume's floor surface
+#   add_volume_menu.rb  Add New Volume to Space, the native route to volumes.create
 #   declarations/   what Spaces registers
 require_relative "schema"
 require_relative "scan/occurrences"
@@ -61,6 +62,7 @@ require_relative "height_from_solid_menu"
 require_relative "prism_pick"
 require_relative "set_height_tool"
 require_relative "edit_floor_surface_menu"
+require_relative "add_volume_menu"
 require_relative "declarations/create_route"
 
 module PhComposer
@@ -85,6 +87,7 @@ module PhComposer
       HeightFromSolidMenu.install(feature)
       SetHeightTool.install(feature)
       EditFloorSurfaceMenu.install(feature)
+      AddVolumeMenu.install(feature)
     end
   end
 end

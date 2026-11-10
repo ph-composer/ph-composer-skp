@@ -114,22 +114,32 @@ module PhComposer
       end
     end
 
-    # Groups explicit loose Faces of one open context into a new Volume inside a new Space (or, with no
-    # `space`, into a new Volume inside the open Space) and writes their records. SketchUp groups only
-    # what is in the active edit context reliably, so the context must be open where the Faces are; the
-    # host keeps each grouped Face's persistent id and dictionaries (context/SKETCHUP_HOST_BEHAVIOR.md,
-    # "Zone grouping and face topology"). `place_in`, set when the Faces were loose in an open Zone, is the path
-    # the new Space Group moves to at the same world position, so that no Space stays inside a Zone
-    # (context/SKETCHUP_HOST_BEHAVIOR.md, "Re-placing a Group's definition"). Both Groups stay Untagged: the
-    # user's active tag is not a Spaces setting (W6-4).
+    # One new Volume a GroupStep makes: the loose Faces it groups, its record, and each Face's Floor Segment
+    # record by the Face's persistent id as a string.
+    NewVolume = Struct.new(:face_ids, :volume, :segments, keyword_init: true) do
+      def descriptor
+        { "face_ids" => face_ids, "volume" => volume, "segments" => segments }
+      end
+    end
+
+    # Groups explicit loose Faces of one open context into new Volumes, one per connected set of Faces
+    # (Steps.connected), inside a new Space (or, with no `space`, inside the open Space) and writes their
+    # records. SketchUp groups only what is in the active edit context reliably, so the context must be open
+    # where the Faces are; the host keeps each grouped Face's persistent id and dictionaries
+    # (context/SKETCHUP_HOST_BEHAVIOR.md, "Zone grouping and face topology"). `place_in`, set when the Faces were
+    # loose in an open Zone, is the path the new Space Group moves to at the same world position, so that no
+    # Space stays inside a Zone (context/SKETCHUP_HOST_BEHAVIOR.md, "Re-placing a Group's definition"). Every
+    # Group stays Untagged: the user's active tag is not a Spaces setting (W6-4).
     class GroupStep
       attr_reader :affected
 
-      def initialize(context_path:, face_ids:, volume:, segments:, space: nil, place_in: nil)
+      # `volumes` is a list of NewVolume, in the order their Groups are made.
+      def initialize(context_path:, volumes:, space: nil, place_in: nil)
         @context_path = context_path.dup.freeze
-        @face_ids = face_ids.dup.freeze
-        @volume = DeepCopy.frozen(volume)
-        @segments = DeepCopy.frozen(segments)
+        @volumes = volumes.map do |plan|
+          NewVolume.new(:face_ids => plan.face_ids.dup.freeze, :volume => DeepCopy.frozen(plan.volume),
+                        :segments => DeepCopy.frozen(plan.segments)).freeze
+        end.freeze
         @space = DeepCopy.frozen(space)
         @place_in = place_in&.dup&.freeze
         @affected = []
@@ -137,13 +147,13 @@ module PhComposer
 
       def descriptor
         { "name" => @space ? "create_space" : "create_volume", "context_path" => @context_path,
-          "face_ids" => @face_ids, "space" => @space, "volume" => @volume, "segments" => @segments,
-          "place_in" => @place_in }
+          "space" => @space, "volumes" => @volumes.map(&:descriptor), "place_in" => @place_in }
       end
 
       def temporary_ids
-        [@space && @space.fetch("id"), @volume.fetch("id"), @volume.fetch("floor_id"),
-         *@segments.values.map { |record| record.fetch("id") }].compact
+        [@space && @space.fetch("id"), *@volumes.flat_map do |plan|
+          [plan.volume.fetch("id"), plan.volume.fetch("floor_id"), *plan.segments.values.map { |record| record["id"] }]
+        end].compact
       end
 
       def apply(model, _slots)
@@ -152,28 +162,37 @@ module PhComposer
         end
 
         entities = Operations::EntityScope.new(@context_path).resolve(model)
-        faces = @face_ids.map { |id| loose_face(entities, id) }
-        unless Steps.sharing(entities, @face_ids).empty?
+        faces = @volumes.map { |plan| plan.face_ids.map { |id| loose_face(entities, id) } }
+        unless Steps.sharing(entities, @volumes.flat_map(&:face_ids)).empty?
           raise CodedError.new("target.changed", "A Face now shares an Edge with another. Nothing was written.")
         end
 
-        volume = entities.add_group(faces + faces.flat_map { |face| Array(face.edges) }.uniq)
-        untag(model, volume)
+        groups = faces.map do |members|
+          entities.add_group(members + members.flat_map { |face| Array(face.edges) }.uniq).tap do |group|
+            untag(model, group)
+          end
+        end
         space = nil
         if @space
-          volume_id = volume.persistent_id
-          space = entities.add_group([volume])
+          ids = groups.map(&:persistent_id)
+          space = entities.add_group(groups)
           space = place_outside(model, entities, space) if @place_in
           untag(model, space)
-          # Grouping moves the Volume; find it again inside the Space rather than trust the old reference.
-          volume = space.entities.to_a.find { |entity| entity.persistent_id == volume_id }
+          # Grouping moves the Volumes; find them again inside the Space rather than trust the old references.
+          inside = space.entities.to_a.to_h { |entity| [entity.persistent_id, entity] }
+          groups = ids.map do |id|
+            inside.fetch(id) { raise CodedError.new("target.changed", "A new Volume was lost. Nothing was written.") }
+          end
           SPACE_STORE.write(space, @space)
           space.name = Names.space(@space) if space.respond_to?(:name=)
         end
         space_path = space ? (@place_in || @context_path) + [space.persistent_id] : @context_path
-        write_volume(volume, model, space_path)
-        volume.locked = true
-        record_affected(space_path, volume, space && { "space_id" => @space.fetch("id") })
+        @affected = space ? [space_affected(space_path)] : []
+        @volumes.zip(groups).each do |plan, group|
+          write_volume(group, plan, model, space_path)
+          group.locked = true
+          @affected.concat(volume_affected(plan, space_path + [group.persistent_id]))
+        end
       end
 
       private
@@ -204,30 +223,31 @@ module PhComposer
         face
       end
 
-      def write_volume(volume, model, parent_ids)
-        home = Protection.local_transform(model, volume, parent_ids).to_a
-        VOLUME_STORE.write(volume, @volume.merge("home_transform" => home))
-        volume.name = Names.volume(@volume) if volume.respond_to?(:name=)
-        volume.entities.to_a.grep(Sketchup::Face).each do |face|
-          record = @segments[face.persistent_id.to_s]
+      def write_volume(group, plan, model, parent_ids)
+        home = Protection.local_transform(model, group, parent_ids).to_a
+        VOLUME_STORE.write(group, plan.volume.merge("home_transform" => home))
+        group.name = Names.volume(plan.volume) if group.respond_to?(:name=)
+        group.entities.to_a.grep(Sketchup::Face).each do |face|
+          record = plan.segments[face.persistent_id.to_s]
           FLOOR_SEGMENT_STORE.write(face, record) if record
         end
       end
 
-      def record_affected(space_path, volume, space)
-        volume_path = space_path + [volume.persistent_id]
-        @affected = []
-        if space
-          @affected << { "kind" => SPACE_KIND, "id" => space.fetch("space_id"), "change" => "created",
-                         "reference" => space.merge("entity_path" => space_path) }
-        end
-        @affected << { "kind" => VOLUME_KIND, "id" => @volume.fetch("id"), "change" => "created",
-                       "reference" => { "volume_id" => @volume.fetch("id"), "entity_path" => volume_path } }
-        @segments.each do |face_id, record|
-          @affected << { "kind" => FLOOR_SEGMENT_KIND, "id" => record.fetch("id"), "change" => "created",
-                         "reference" => { "floor_segment_id" => record.fetch("id"),
-                                          "entity_path" => volume_path + [Integer(face_id)] } }
-        end
+      def space_affected(space_path)
+        id = @space.fetch("id")
+        { "kind" => SPACE_KIND, "id" => id, "change" => "created",
+          "reference" => { "space_id" => id, "entity_path" => space_path } }
+      end
+
+      def volume_affected(plan, volume_path)
+        id = plan.volume.fetch("id")
+        [{ "kind" => VOLUME_KIND, "id" => id, "change" => "created",
+           "reference" => { "volume_id" => id, "entity_path" => volume_path } }] +
+          plan.segments.map do |face_id, record|
+            { "kind" => FLOOR_SEGMENT_KIND, "id" => record.fetch("id"), "change" => "created",
+              "reference" => { "floor_segment_id" => record.fetch("id"),
+                               "entity_path" => volume_path + [Integer(face_id)] } }
+          end
       end
     end
 
@@ -362,18 +382,39 @@ module PhComposer
         components(faces, ids).select { |component| closed?(component, ids) }.flatten.map(&:persistent_id)
       end
 
-      def components(faces, ids)
-        seen = []
-        faces.each_with_object([]) do |start, found|
-          next if seen.include?(start.persistent_id)
+      # `faces` sorted into the sets joined by shared Edges, a step between planes included; Faces meeting only
+      # at a corner share no Edge, so they stay apart. The sets follow their first Face in `faces`, and each lists
+      # its Faces as the walk reached them: one set is one Volume's floor surface.
+      def connected(faces)
+        components(faces, faces.map(&:persistent_id))
+      end
 
-          seen << start.persistent_id
+      # `face_ids`, Faces of `entities`, sorted by `connected`, each set in `face_ids` order. A Face no longer
+      # there refuses rather than leaving a Volume short.
+      def connected_ids(entities, face_ids)
+        by_id = entities.to_a.grep(Sketchup::Face).to_h { |face| [face.persistent_id, face] }
+        faces = face_ids.map do |id|
+          by_id.fetch(id) do
+            raise CodedError.new("target.changed", "A Face changed after it was read. Nothing was written.")
+          end
+        end
+        order = face_ids.each_with_index.to_h
+        connected(faces).map { |set| set.map(&:persistent_id).sort_by { |id| order.fetch(id) } }
+      end
+
+      def components(faces, ids)
+        wanted = ids.to_h { |id| [id, true] }
+        seen = {}
+        faces.each_with_object([]) do |start, found|
+          next if seen[start.persistent_id]
+
+          seen[start.persistent_id] = true
           component = [start]
           component.each do |face|
             neighbours(face).each do |other|
-              next if seen.include?(other.persistent_id) || !ids.include?(other.persistent_id)
+              next if seen[other.persistent_id] || !wanted[other.persistent_id]
 
-              seen << other.persistent_id
+              seen[other.persistent_id] = true
               component << other
             end
           end

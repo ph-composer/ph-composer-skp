@@ -22,8 +22,9 @@ module PhComposer
       }.freeze
       NOT_LOOSE = ["not_loose", "The Face is not loose in the open edit context."].freeze
       FLOOR_SEGMENT = ["floor_segment", "The Face is already a Floor Segment."].freeze
-      IN_SPACE = ["in_space", "The Face is inside a Space. To add it to that Space, use Mark floor at the Space's " \
-                              "root; to make a new Space, draw it outside this one."].freeze
+      IN_SPACE = ["in_space", "The Face is inside a Space. To add it to that Space, select it at the Space's root " \
+                              "and choose Add New Volume to Space; to make a new Space, draw it outside this " \
+                              "one."].freeze
       # A floor surface drawn on the Zone's walls splits them and shares their Edges, so Create Space leaves
       # it out; the way out is to draw it where it touches no other Face.
       SHARES_EDGE = "The Face shares an Edge with an unselected Face; grouping it would split that Face. Undo " \

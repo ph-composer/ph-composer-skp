@@ -252,15 +252,20 @@ turns it on with that factor, and a pressed paint glyph in the column header sto
 Colour by weighting factor shows while it runs, and the Colour by view from before comes back when
 it stops.
 In the viewport, a click or a drag over Faces inside a Volume marks them as Floor Segments in one Undo
-step; a click on a Face at a Space's root adds the next Volume. A Face loose in the open context and in no
-Space is offered Create Space, and a classified Zone Face or a Face inside a closed Group is refused with the reason.
+step; a click or a drag over loose Faces at a Space's root adds the next Volumes. A Face loose in the open context
+and in no Space is offered Create Space, and a classified Zone Face or a Face inside a closed Group is refused with the reason.
 Create Space is in SketchUp's Extensions menu, and in the context menu on a selection with at least one unclassified,
-non-vertical Face, in any open context: at the
+non-vertical Face, in any open context outside a Space: at the
 Model root, in a plain Group such as a storey, or in an open Zone, where the Space is placed outside the Zone at the
 same world position, so Zone Faces are never touched. The review says what a Space is and why it
 leaves out any Faces, and offers a Zone choice, set to the
 open Zone or the Zone whose plan footprint and height range hold the floor surface, which you can change, or No Zone. The new Space takes the Model's last height.
-Create makes the Space, its Volume and its Floor Segments in one Undo step. Space Groups stay Untagged; apply a tag of
+Create makes the Space, its Volumes and their Floor Segments in one Undo step. Faces share a Volume only when they
+are joined: two Faces sharing a SketchUp Edge, a step between a floor and a ramp included, go in one Volume, while
+Faces meeting only at a corner, or not at all, make a Volume each.
+With a Space open, Add New Volume to Space takes the place of Create Space in the context menu on loose Faces at the
+Space's root. It opens no dialog: the selected Faces become the Space's next Volumes by the same rule, with weighting
+factor 1 and the Space's default height, in one Undo step. Space Groups stay Untagged; apply a tag of
 your own to show or hide them. Draw a room's floor surface just below the Zone's floor, or
 inset from its walls, so that it touches no envelope Face. A floor surface drawn with its edges on the
 walls splits them, and Create Space leaves it out, saying to Undo it and draw it below or inset.
@@ -292,6 +297,8 @@ its row. Move to Zone hosts a Space in another Zone where it stands, keeping its
 If its Zone is erased, the Space stays with a finding that blocks export and offers Remove from Zone.
 Two Floor Segments of one Volume that overlap in plan raise a warning, since the area they share counts
 twice; export still runs. Separate Volumes are not compared, so two storeys of one Zone overlap freely.
+A Volume whose Floor Segments no longer all share Edges, after a joining Face is erased or a separate Face is marked
+in it, raises a warning too. Export still runs and nothing is split for you.
 Remove on a Space's row takes away the Space and its Volumes and leaves their floor Faces where they
 are as plain geometry; Delete erases the Faces too. Each is one Undo step.
 
