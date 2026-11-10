@@ -75,7 +75,8 @@ module PhComposer
       # `session.busy` result a worker sends without the main thread.
       # `port` 0 binds a free port, for tests. The two bounds are parameters only so a test need not wait
       # out the real ones.
-      # `on_calls` receives, on the main thread, the diagnostic rows of the calls each pump tick finished.
+      # `on_calls` receives, on the main thread, the diagnostic rows of the calls each pump tick finished and
+      # the clients that began a session with a token since the last tick (CallLog#contact).
       def initialize(port:, protocol:, executor:, timer_api: UI, clock: -> { LoopbackHttp.monotonic },
                      starvation_seconds: STARVATION_SECONDS, handoff_seconds: HANDOFF_SECONDS, on_calls: nil)
         @port = port
@@ -294,6 +295,7 @@ module PhComposer
         id = message["id"]
         return tool_call(id, message["params"], token) if message["method"] == "tools/call"
 
+        @lock.synchronize { @calls.contact(token, message["params"]) } if message["method"] == "initialize"
         result = @protocol.answer(message, token)
         result ? rpc_result(id, result) : rpc_error(id, -32_601, "Method not found: #{message['method'][0, 60]}")
       end
@@ -408,8 +410,8 @@ module PhComposer
       end
 
       def flush_ring
-        rows = @lock.synchronize { @calls.take_unread }
-        @on_calls&.call(rows) unless rows.empty?
+        rows, contacts = @lock.synchronize { [@calls.take_unread, @calls.take_contacts] }
+        @on_calls&.call(rows, contacts) unless rows.empty? && contacts.empty?
         # The tool and operation names are the agent's own text, so each is logged only when it is declared.
         rows.each do |row|
           tool = Tools::TABLE.key?(row["tool"]) ? row["tool"] : nil

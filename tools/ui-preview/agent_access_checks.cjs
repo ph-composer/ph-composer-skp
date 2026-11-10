@@ -78,6 +78,39 @@ check({ name: "agent_access", output }, async ({ newPage, step }) => {
       await page.keyboard.press("Escape");
     }
   }
+  step("connections and Connect's profile choice fit the narrow widths without sideways scroll");
+  const CONNECTIONS = [
+    { client: "claude_code", client_name: "Claude Code", profile: "default", server: "ph-composer",
+      token: { id: token.id, label: token.label, capabilities: ["read"] }, source: "file", entry: "configured",
+      contacted: { client: "claude-code 2.1.317", at: "2026-11-10T12:00:00Z" }, verified_at: "2026-11-10T12:01:00Z",
+      setup: "claude mcp add-json --scope user ph-composer '{}'" },
+    { client: "codex", client_name: "Codex", profile: "house-b-with-a-long-profile-name", server: "ph-composer-house-b",
+      token: { id: "synthetic-b", label: "Synthetic house B agent", capabilities: ["read"],
+        model_name: "A rather long synthetic file name.skp", model_open: false },
+      source: "file", entry: "outdated", contacted: null, verified_at: null,
+      setup: "[mcp_servers.ph-composer-house-b]\nurl = \"http://127.0.0.1:47001/mcp\"\nhttp_headers_helper = \"/bin/cat /Users/example/.ph-composer/codex.house-b.json\"" }];
+  for (const [width, height] of [[420, 732], [360, 520]]) {
+    await page.setViewportSize({ width, height });
+    await receive("access.state", { ...STATE.payload, tokens: [token], connections: CONNECTIONS,
+      server: { state: "listening", port: 47001 } });
+    const box = page.locator("details.agent-access-connections");
+    if (!(await box.evaluate(node => node.open))) await box.locator(":scope > summary").click();
+    await box.locator(".agent-access-connection details summary").first().click();
+    await page.getByRole("button", { name: "Repair Codex (house-b-with-a-long-profile-name)", exact: true }).waitFor();
+    assert(await page.locator(".agent-access").evaluate(node => node.scrollWidth <= node.clientWidth + 1),
+      `connections: no sideways scroll at ${width}`);
+    await page.screenshot({ path: path.join(output, `connections-${width}x${height}.png`), fullPage: true });
+    await receive("access.issued", { token: "SYNTHETIC-NOT-A-CREDENTIAL", row: { ...token, id: "synthetic-new" },
+      clients: CLIENTS });
+    const modal = page.locator("dialog[open]");
+    await modal.getByRole("button", { name: "Replace and connect", exact: true }).waitFor();
+    await modal.getByLabel("Claude Code profile", { exact: true }).selectOption("");
+    await modal.getByLabel("Claude Code new profile name", { exact: true }).fill("house-c");
+    await modal.getByRole("button", { name: "Connect Claude Code", exact: true }).waitFor();
+    assert(await modal.evaluate(node => node.scrollWidth <= node.clientWidth + 1), `profile: no sideways scroll ${width}`);
+    await page.screenshot({ path: path.join(output, `issued-profile-${width}x${height}.png`) });
+    await page.keyboard.press("Escape");
+  }
   step("wide recovery state retains one centered reading column");
   await page.setViewportSize({ width: 1280, height: 800 });
   await receive("access.state", { ...STATE.payload, state: "unreadable",

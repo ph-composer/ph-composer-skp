@@ -14,7 +14,7 @@ module PhComposer
       # Builds the Server for a port. The offline suite replaces it so no test binds the agent port.
       DEFAULT_FACTORY = lambda do |port|
         Server.new(:port => port, :protocol => MCP, :executor => Executor.new(:tools => Tools::TABLE),
-                   :on_calls => ->(rows) { Listener.calls_made(rows) })
+                   :on_calls => ->(rows, contacts) { Listener.calls_made(rows, contacts) })
       end
 
       class << self
@@ -50,10 +50,12 @@ module PhComposer
           log_no_live_token if server.stop
         end
 
-        # Stops the listener and forgets every token's latest call: a fresh process.
+        # Stops the listener and forgets every token's latest call, contact and verification: a fresh process.
         def reset
           stop
           @last_calls = {}
+          @contacts = {}
+          @verified = {}
         end
 
         # The dialog's status line: listening on a port, stopped with no live token, or unable to bind,
@@ -97,21 +99,39 @@ module PhComposer
           (@last_calls ||= {}).dup
         end
 
-        # Called by the server on the main thread with the calls its pump just finished.
-        def calls_made(rows)
+        # Each token's latest client contact since SketchUp started, by token id: the client as it named
+        # itself and when (context/AGENT_INTERFACE.md, "User-controlled local access").
+        def contacts
+          (@contacts ||= {}).dup
+        end
+
+        # When each token's latest verifying read (CallLog::VERIFYING_TOOLS) completed, by token id.
+        def verified
+          (@verified ||= {}).dup
+        end
+
+        # Called by the server on the main thread with the calls its pump just finished and the clients that
+        # began a session since its last tick.
+        def calls_made(rows, contacts = [])
           calls = (@last_calls ||= {})
           rows.each do |row|
             calls.delete(row["token"])
             calls[row["token"]] = { "at" => row["at"], "status" => row["error"] ? "error" : row["status"] }
+            (@verified ||= {})[row["token"]] = row["at"] if row["verifies"]
           end
-          # Kept for every token the store still lists (at most its live and revoked rows), however many
-          # other tokens called since.
-          listed = Tokens.list.map { |row| row["id"] }
-          calls.select! { |token, _call| listed.include?(token) }
+          contacts.each { |row| (@contacts ||= {})[row["token"]] = row.slice("client", "at") }
+          forget_unlisted
           Dialog.refresh
         end
 
         private
+
+        # Kept for every token the store still lists (at most its live and revoked rows), however many other
+        # tokens called since.
+        def forget_unlisted
+          listed = Tokens.list.map { |row| row["id"] }
+          [@last_calls, @contacts, @verified].compact.each { |held| held.select! { |token, _| listed.include?(token) } }
+        end
 
         def stop_with_no_live_token
           running = !@server.nil?

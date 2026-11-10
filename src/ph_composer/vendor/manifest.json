@@ -1,9 +1,9 @@
 {
   "assets": {
     "html/agent_access/agent_access.css": {
-      "bytes": 6211,
+      "bytes": 7016,
       "mime": "text/css; charset=utf-8",
-      "sha256": "6ffc84bee810f85c3caa02b334d2663551c56baa994e2b6802c32b0b5251dc1c"
+      "sha256": "9eb51209f98e1c1135e07ba2ba7c126314998501c4ecc94fe986ed4ad4dd585b"
     },
     "html/agent_access/index.html": {
       "bytes": 1191,
@@ -11,9 +11,9 @@
       "sha256": "ab0ab4ec01e3f548ff03aebf51b8af68fbc6c08216add3587baa3af12af1c64d"
     },
     "html/agent_access/page.js": {
-      "bytes": 25865,
+      "bytes": 37629,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "c5bd5bac72640039240d109caea530dedf1fff25064549cc68eed7283f2a06bd"
+      "sha256": "0781ed35a619217514f710b45fa2ea0b1a80d3cfbb65d0cbc666c08d91d404ae"
     },
     "html/base.css": {
       "bytes": 21355,

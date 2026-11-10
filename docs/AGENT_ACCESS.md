@@ -88,11 +88,31 @@ Code 2.1.317 and Codex 0.167.0 on macOS, including clients not started from a te
 
 Then start a new session of your client: a session already open does not see a newly added server.
 SketchUp does not need a restart. A new token later only needs Connect in its window; the client's
-settings stay as they are. If you change the port, create a token and press Connect so the client uses
-the new port. Connect works on macOS.
+settings stay as they are. Connect works on macOS.
 
-**Where the token is kept.** Connect keeps the token in `~/.ph-composer/`, one file per client, which
-only your account can read; it is never typed on a command line, so it is not in your shell history.
+**Profiles.** Each client can hold several PH-Composer entries, one per profile, so two projects can
+each have their own token in the same client. Connect asks which profile to set up: Default, the entry
+named `ph-composer` that earlier setups made, a profile you named before, or a new one. A new profile's
+name uses lowercase letters, digits and hyphens, and becomes the entry `ph-composer-<name>`, with its
+own saved token. Give each project a token limited to its Model with This Model only, connect each to
+its own profile, and a session of that client reaches both Models, each through its own entry. If the
+profile you chose already uses another token, the window names that token before anything changes, and
+the button reads Replace and connect. The replaced token stays live until you revoke it.
+
+**Client profiles.** Below the tokens, the window lists each profile it finds, for both clients, with
+the token it uses and three separate facts: whether the client's settings are set up for it, whether a
+client has contacted PH-Composer with that token since SketchUp started (and which client said so), and
+whether a session has verified the connection by reading what the token reaches, which changes nothing in
+your Models. To verify, start a new session of the client and let it run discover. When a profile's
+settings are out of date, after a port change or an older setup, press Repair: PH-Composer sets the
+client up again with the token it already saved, which it never shows. A profile that is not set up
+also shows the setup to copy and run or paste by hand. Codex settings that PH-Composer cannot change
+for certain, such as a token read from an environment variable, are left as they are. Before it
+changes `~/.codex/config.toml`, PH-Composer keeps the previous file beside it as
+`config.toml.ph-composer-backup`, and it writes nothing if the file changed meanwhile or is read-only.
+
+**Where the token is kept.** Connect keeps the token in `~/.ph-composer/`, one file per client profile,
+which only your account can read; it is never typed on a command line, so it is not in your shell history.
 Revoking the token deletes its file. Each client's Other ways to connect also shows a setup with the token itself,
 which keeps it in the client's settings file (`~/.claude.json` or `~/.codex/config.toml`) and, for
 the command, in your shell history; a new token then means setting the client up again. Anyone who
@@ -103,9 +123,10 @@ user accounts, another account could run a program on that port while SketchUp i
 and receive the token from an agent that connects then. On such a computer, revoke your tokens when
 you finish and issue a new one when you start.
 
-To disconnect an agent, revoke its token in the Agent Access window. To remove the entry from a
-client as well, run `claude mcp remove --scope user ph-composer`, or delete the `[mcp_servers.ph-composer]`
-block from `~/.codex/config.toml`. PH-Composer itself is removed with SketchUp's Extension Manager.
+To disconnect an agent, revoke its token in the Agent Access window; the confirmation names the client
+profiles that lose access. To remove the entry from a client as well, run `claude mcp remove --scope
+user ph-composer`, or delete the `[mcp_servers.ph-composer]` block from `~/.codex/config.toml`; a named
+profile's entry is `ph-composer-<name>`. PH-Composer itself is removed with SketchUp's Extension Manager.
 
 ## Working with an agent
 

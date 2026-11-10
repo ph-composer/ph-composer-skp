@@ -589,7 +589,7 @@ class AgentAccessServerTest < PhComposerTestCase
 
   def test_a_tokens_latest_call_reaches_an_open_dialog_and_outlives_the_ring_and_a_port_change
     @server.stop
-    @server = server(:on_calls => ->(rows) { AgentAccess::Listener.calls_made(rows) })
+    @server = server(:on_calls => ->(rows, contacts) { AgentAccess::Listener.calls_made(rows, contacts) })
     dialog = AgentAccess::Dialog.show
     call_tool("discover")
     discovered = AgentAccess::Listener.last_calls.fetch(@row.fetch("id"))
@@ -609,9 +609,25 @@ class AgentAccessServerTest < PhComposerTestCase
     assert(shown.any? { |row| row["id"] == @row.fetch("id") && row.dig("last_call", "status") == "completed" })
   end
 
+  # Contacted (a client's initialize) and verified (a discover that reached the Models) are recorded apart,
+  # from the real route; neither needs a write (context/AGENT_INTERFACE.md, "User-controlled local access").
+  def test_a_clients_initialize_is_its_contact_and_a_discover_verifies_the_token
+    @server.stop
+    @server = server(:on_calls => ->(rows, contacts) { AgentAccess::Listener.calls_made(rows, contacts) })
+    body(post(rpc("initialize", "protocolVersion" => "2025-06-18",
+                                "clientInfo" => { "name" => "codex-mcp-client", "version" => "0.167.0" })))
+    @server.pump
+
+    assert_equal "codex-mcp-client 0.167.0", AgentAccess::Listener.contacts.dig(@row.fetch("id"), "client")
+    assert_nil AgentAccess::Listener.verified[@row.fetch("id")]
+    call_tool("discover")
+    refute_nil AgentAccess::Listener.verified[@row.fetch("id")]
+  end
+
   def test_a_busy_answer_counts_as_the_tokens_latest_call_and_a_listed_token_is_never_evicted
     @server.stop
-    @server = server(:starvation_seconds => 0.2, :on_calls => ->(rows) { AgentAccess::Listener.calls_made(rows) })
+    @server = server(:starvation_seconds => 0.2,
+                     :on_calls => ->(rows, contacts) { AgentAccess::Listener.calls_made(rows, contacts) })
     result_of(post(rpc("tools/call", "name" => "discover", "arguments" => {})))
     @server.pump
     rotated = Array.new(70) { |index| { "token" => "token_ROTATED#{index}", "at" => "t", "status" => "completed" } }

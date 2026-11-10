@@ -1,6 +1,6 @@
 # Proposed contract changes
 
-STATUS: C01 bound and implemented by AW-01 (API 1.34); C02 bound and implemented by AW-02 (API 1.35); C04 bound and implemented by AW-03 (API 1.36); C03 definition part bound by AW-04 (API 1.37); C03 occurrence part bound by AW-05 (API 1.38); C05 bound by AW-06 (API 1.39); C06 and C07 bound on the AW-07 branch (API 1.40); C08 remains a proposal. Baseline API 1.31.
+STATUS: C01 bound and implemented by AW-01 (API 1.34); C02 bound and implemented by AW-02 (API 1.35); C04 bound and implemented by AW-03 (API 1.36); C03 definition part bound by AW-04 (API 1.37); C03 occurrence part bound by AW-05 (API 1.38); C05 bound by AW-06 (API 1.39); C06 and C07 bound on the AW-07 branch (API 1.40); C08 first half (client profiles) bound by AW-08 (API 1.41); its second half remains a proposal. Baseline API 1.31.
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication
 
 The durable authorities remain `context/CONTRACTS.md`, `AGENT_INTERFACE.md`, `EXTENSIBILITY.md`
@@ -362,6 +362,29 @@ format is unrecognized. Reconnect may reuse only a still-live credential the app
 Configured, contacted and verified are distinct states. Verify with harmless discovery/context,
 not a test mutation. Host-gesture readiness is defined from AW-09 measurements before implementing
 a guard. A refusal never stops a person's tool or steals focus. Existing stale/replay behavior stays.
+
+**First half bound at AW-08 (API 1.41).** No public operation; the Agent Access dialog and its Ruby owners
+(choices D16-a to D16-f). New names:
+
+- Dialog inbound `access.connect` adds `profile` (`"default"` or a name) and `replace` (the token id the page
+  showed on that profile, or null); new inbound `access.repair` (`client`, `profile`). Outbound `access.state`
+  adds `connections`, one row per client profile: `client`, `client_name`, `profile`, `server`, `token` (public
+  row of the live bound token with `model_open` for a Model-only token, or null), `source` (`file`, `inline` or
+  null), `entry` (`configured`, `absent`, `outdated`, `inline`, `other`, `no_client`, `unreadable`), `contacted`
+  (`client`, `at`, or null), `verified_at`, `setup` (token-free text). `access.connected` adds `profile` and
+  `setup` (present when the state is manual); new outbound `access.replacement` (`client`, `profile`, `token`).
+- Code `agent_access.connection_changed`: `replace` names a token no longer bound to the profile.
+- `Connections::DEFAULT_PROFILE`, `Connections::PROFILE`, `Connections.path(client, profile)`,
+  `.helper(client, profile)`, `.write(client, token, profile)`, `.saved`, `.digest(client, profile)`,
+  `.checked_profile`; `Connections.digests` is removed.
+- `ClientConfig.server_name(profile)`, `.setup_text(client, port, profile)`, `.codex_url_line(port)`,
+  `.codex_helper_line(profile)`; `claude_server` and `codex_block` take a profile.
+- `ClientSetup.connect(client, token, port, profile:)`, `.repair(client, port, profile:)`,
+  `.entry(client, port, profile)`, `.server_names(client)`, `.home` (replacing the `codex_home` and
+  `claude_settings` writers), `BACKUP_SUFFIX`.
+- `CodexConfig` (new, pure): `.state`, `.edit`, `.append`, `.inline_token`, `.server_names`.
+- `CallLog#contact`, `#take_contacts` and a call row's `verifies`; `Server` `on_calls` receives
+  `(rows, contacts)`; `Listener.contacts`, `Listener.verified`, `Listener.calls_made(rows, contacts)`.
 
 Optional artifact retrieval is caller/run-scoped and bounded, hashes the original content, and
 observes expiry/revocation. Optional history returns operation, affected refs, source/result revisions

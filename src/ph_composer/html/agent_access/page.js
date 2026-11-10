@@ -39,6 +39,25 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
       return line;
     }
 
+    /* What a client's own settings say of a connection's entry (ClientSetup.entry), as a row says it. */
+    var ENTRY = {
+      configured: "set up",
+      absent: "not in the client's settings",
+      outdated: "set up for another port or file",
+      inline: "its token is kept in the client's settings",
+      other: "set up another way",
+      no_client: "the client is not set up on this computer",
+      unreadable: "the client's settings cannot be read"
+    };
+    var DEFAULT_PROFILE = "default";
+    var NEW_PROFILE = "";
+    function profileLabel(profile) { return profile === DEFAULT_PROFILE ? "Default" : profile; }
+    /* A connection as the token list and the Revoke confirm name it: the client, and its profile unless it is
+       the default. */
+    function connectionName(row) {
+      return row.client_name + (row.profile === DEFAULT_PROFILE ? "" : " (" + row.profile + ")");
+    }
+
     /* Live tokens by when they were issued, newest first: the windows a user remembers a token by. */
     var PERIODS = ["Today", "Yesterday", "This week", "This year", "Earlier"];
     function period(iso, now) {
@@ -65,7 +84,8 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
       this.now = (options && options.now) || function () { return new Date(); };
       this.showRevoked = false; this.issuedState = { client: null };
       this.post = post; this.tokens = []; this.offered = ["read"]; this.unreadable = false; this.pending = false;
-      this.connectButtons = []; this.connectStatus = {};
+      this.connectButtons = []; this.connectStatus = {}; this.connections = []; this.replacements = {};
+      this.openSetups = {};
       this.model = null;
       this.revoking = null;
       this.root = el("div", "agent-access");
@@ -75,7 +95,7 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
       this.help = overlay.helpButton("Disconnecting an agent", "Revoke its token here; the agent can no longer " +
         "connect, and the copy saved for a client is deleted. To remove PH-Composer from a client as well, run " +
         "claude mcp remove --scope user ph-composer, or delete the [mcp_servers.ph-composer] block from " +
-        "~/.codex/config.toml.");
+        "~/.codex/config.toml; a profile's entry is named ph-composer-<profile>.");
       this.header = header.pageHeader({ title: "Agent Access", actions: [this.help], primary: this.create });
       this.root.appendChild(this.header.root);
       this.server = el("p", "muted agent-access-server"); this.server.setAttribute("role", "status");
@@ -105,6 +125,16 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
       this.revokedToggle.className = "agent-access-revoked-toggle";
       this.tokensBox.appendChild(this.revokedToggle);
       this.root.appendChild(this.tokensBox);
+      // Each saved connection: which token it uses, what the client's settings say, and whether a client has
+      // contacted and verified with that token, kept apart; Repair sets the client up again.
+      this.connectionsBox = el("details", "agent-access-connections");
+      this.connectionsSummary = el("summary");
+      this.connectionsBox.appendChild(this.connectionsSummary);
+      this.connectionList = el("div", "agent-access-items");
+      this.connectionList.setAttribute("role", "list");
+      this.connectionList.setAttribute("aria-label", "Client profiles");
+      this.connectionsBox.appendChild(this.connectionList);
+      this.root.appendChild(this.connectionsBox);
       this.empty = el("p", "muted agent-access-empty", "No agent tokens. A token lets one agent, such as " +
         "Claude Code or Codex, connect to PH-Composer with the access you choose.");
       this.root.appendChild(this.empty);
@@ -123,7 +153,9 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
       if (message.type === "access.state") {
         this.pending = false;
         this.tokens = payload.tokens || []; this.offered = payload.offered || ["read"];
-        this.model = payload.model || null;
+        this.model = payload.model || null; this.connections = payload.connections || [];
+        // The host's state is the binding from now on; a replacement it answered earlier is in it.
+        this.replacements = {};
         this.unreadable = payload.state === "unreadable";
         this.serverStatus = payload.server || {};
         if (this.revoking && !this.tokens.some(function (row) { return row.id === this.revoking && !row.revoked_at; },
@@ -134,6 +166,8 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
         this.showIssued(payload.token, payload.row, payload.clients || []);
       } else if (message.type === "access.connected") {
         this.pending = false; this.connected(payload); this.paint();
+      } else if (message.type === "access.replacement") {
+        this.pending = false; this.replacementShown(payload); this.paint();
       } else if (message.type === "access.revoked") {
         this.notice.show(revokedLine(payload.summary || {}), { tone: "success" });
       } else if (message.type === "access.failure") {
@@ -148,6 +182,7 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
         [this.issuedDialog, this.copyStatus]]
         .filter(function (pair) { return !pair[0].hidden; })[0];
       // A refused Connect answers under that client's button, where "Connecting" was said.
+      this.repairing = null; this.replacements = {};
       if (open && open[0] === this.issuedDialog && this.connectStatus[this.connecting]) {
         this.connectStatus[this.connecting].textContent = message;
         this.connectStatus[this.connecting].setAttribute("data-state", "failed");
@@ -187,13 +222,68 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
       this.portRow.hidden = server.state !== "unavailable";
       if (this.portRow.hidden || document.activeElement !== this.portInput) this.portInput.value = server.port || "";
       this.portApply.disabled = this.pending;
-      this.paintTokens();
+      this.paintTokens(); this.paintConnections();
       this.unreadableNotice.hidden = !this.unreadable;
       this.reset.disabled = this.pending;
       // A token issued while the port is taken would carry snippets for a port nothing listens on.
       this.create.disabled = this.pending || this.unreadable || server.state === "unavailable";
       this.createSubmit.disabled = this.pending;
       this.connectButtons.forEach(function (button) { button.disabled = self.pending; });
+      if (this.clientTabs) this.paintProfiles();
+    };
+
+    /* The folded connection list, one row per saved connection, in the host's order. */
+    Page.prototype.paintConnections = function () {
+      var self = this;
+      this.connectionList.replaceChildren.apply(this.connectionList, this.connections.map(function (row) {
+        return self.connectionRow(row);
+      }));
+      this.connectionsSummary.textContent = "Client profiles · " + this.connections.length;
+      this.connectionsBox.hidden = !this.connections.length;
+    };
+    Page.prototype.connectionRow = function (connection) {
+      var self = this, row = el("div", "agent-access-row agent-access-connection");
+      row.setAttribute("role", "listitem");
+      var text = el("div", "agent-access-row-text"), token = connection.token;
+      text.appendChild(el("span", "agent-access-row-label",
+        connection.client_name + " · " + profileLabel(connection.profile)));
+      var facts = [];
+      if (token) {
+        var scope = token.model_name ? ", only " + token.model_name +
+          (token.model_open === false ? " (not open)" : "") : "";
+        facts.push("uses " + token.label + scope);
+      } else facts.push("no live token: create a token and connect it to this profile");
+      facts.push(ENTRY[connection.entry] || connection.entry);
+      if (token) {
+        facts.push(connection.contacted ? "token contacted by " + (connection.contacted.client || "a client") +
+          " " + time(connection.contacted.at) : "token not contacted since SketchUp started");
+        if (connection.verified_at) facts.push("token verified " + time(connection.verified_at));
+      }
+      text.appendChild(el("small", "muted", facts.join(" · ")));
+      if (connection.entry !== "configured") {
+        // Rows are rebuilt at every state the host sends, an agent's call included; an open one stays open.
+        var key = connection.client + ":" + connection.profile, manual = el("details", "agent-access-other");
+        manual.open = Boolean(this.openSetups[key]);
+        manual.addEventListener("toggle", function () { self.openSetups[key] = manual.open; });
+        manual.appendChild(el("summary", "", "Set up by hand"));
+        var field = this.copyField(connection.client_name + " setup", "textarea");
+        field.value.value = connection.setup; manual.appendChild(field.root);
+        text.appendChild(manual);
+      }
+      row.appendChild(text);
+      // Repair needs the token its file holds: an inline token or none is replaced by Connect with a new one.
+      if (token && connection.source === "file" && connection.entry !== "configured") {
+        var repair = dom.button("Repair", function () {
+          if (self.pending) return;
+          self.repairing = connection.client + ":" + connection.profile;
+          self.send("access.repair", { client: connection.client, profile: connection.profile });
+        });
+        repair.className = "agent-access-revoke";
+        repair.setAttribute("aria-label", "Repair " + connectionName(connection));
+        repair.disabled = this.pending || this.unreadable;
+        row.appendChild(repair);
+      }
+      return row;
     };
 
     /* The folded token list: live tokens under the period they were issued in, then, only when asked for,
@@ -314,7 +404,7 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
       value.readOnly = true; value.setAttribute("aria-label", label);
       if (tag === "textarea") value.rows = 3;
       var copy = icons.iconButton("Copy " + label, "duplicate", function () {
-        self.copyText(value, label);
+        self.copyText(value, label, self.issuedDialog.hidden ? null : self.copyStatus);
       });
       root.appendChild(value); root.appendChild(copy);
       return { root: root, value: value, copy: copy };
@@ -324,23 +414,35 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
     Page.prototype.showClients = function (clients) {
       var self = this, tabs = [];
       this.clients.replaceChildren(); this.connectButtons = []; this.connectStatus = {};
+      this.connectSetup = {}; this.connectSetupValue = {}; this.pickers = {}; this.replacements = {};
       clients.forEach(function (client) {
         var section = el("section", "agent-access-client");
+        var picker = self.profilePicker(client);
         var connect = dom.button("Connect " + client.client, function () {
           if (self.pending) return;
+          var profile = picker.chosen();
+          if (profile === null) { picker.name.focus(); return; }
+          var held = self.heldBy(client.id, profile);
           self.connecting = client.id;
           self.connectStatus[client.id].textContent = "Connecting " + client.client + "…";
-          self.send("access.connect", { client: client.id, token: self.secret.value });
+          self.connectSetup[client.id].hidden = true;
+          self.send("access.connect", { client: client.id, token: self.secret.value, profile: profile,
+            replace: held ? held.id : null });
         });
         connect.className = "agent-access-connect primary";
+        picker.connect = connect; picker.client = client; self.pickers[client.id] = picker;
         var status = el("p", "agent-access-connected"); status.setAttribute("role", "status");
+        // What to run or paste when Connect could not, for the profile it was asked for; never the token.
+        var setup = self.copyField(client.client + " profile setup", "textarea"); setup.root.hidden = true;
         self.connectButtons.push(connect); self.connectStatus[client.id] = status;
-        section.appendChild(connect); section.appendChild(status);
+        self.connectSetup[client.id] = setup.root; self.connectSetupValue[client.id] = setup.value;
+        section.appendChild(picker.root); section.appendChild(connect); section.appendChild(status);
+        section.appendChild(setup.root);
         section.appendChild(el("p", "muted", "Connect saves the token in a file only your account can read and " +
           "sets " + client.client + " up, once, to read it there. Connecting again later with a new token " +
           "changes only that file."));
         var other = el("details", "agent-access-other");
-        other.appendChild(el("summary", "", "Other ways to connect"));
+        other.appendChild(el("summary", "", "Other ways to connect the Default profile"));
         client.forms.forEach(function (form) {
           other.appendChild(el("p", "muted", form.title));
           var field = self.copyField(client.client + " setup", "textarea");
@@ -355,16 +457,91 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
         tabs: tabs });
       this.clients.appendChild(this.clientTabs.root);
       tabs.forEach(function (tab) { self.clients.appendChild(tab.surface); });
+      this.paintProfiles();
+    };
+    /* The profile Connect sets up for one client: Default, a saved one, or a new one named here. */
+    Page.prototype.profilePicker = function (client) {
+      var self = this, root = el("div", "agent-access-profile");
+      var label = el("label", "agent-access-field"); label.appendChild(el("span", "", "Profile"));
+      var select = el("select"); select.setAttribute("aria-label", client.client + " profile");
+      label.appendChild(select); root.appendChild(label);
+      var nameRow = el("label", "agent-access-field"); nameRow.appendChild(el("span", "", "New profile name"));
+      var name = el("input"); name.setAttribute("maxlength", "32"); name.setAttribute("placeholder", "house-b");
+      name.setAttribute("aria-label", client.client + " new profile name");
+      nameRow.appendChild(name); root.appendChild(nameRow);
+      var replace = el("p", "agent-access-replace"); replace.setAttribute("role", "status");
+      root.appendChild(replace);
+      var picker = { root: root, select: select, name: name, nameRow: nameRow, replace: replace, touched: false };
+      select.addEventListener("change", function () { picker.touched = true; self.paintProfiles(); });
+      name.addEventListener("input", function () { self.paintProfiles(); });
+      // The profile Connect would set up, or null while a new profile's name is not a valid one.
+      picker.chosen = function () {
+        if (select.value !== NEW_PROFILE) return select.value;
+        var typed = name.value.trim();
+        return /^[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?$/.test(typed) && typed !== DEFAULT_PROFILE ? typed : null;
+      };
+      return picker;
+    };
+    /* The live token a client's profile uses now, as the latest state or a replacement answer says. */
+    Page.prototype.heldBy = function (client, profile) {
+      var key = client + ":" + profile;
+      if (Object.prototype.hasOwnProperty.call(this.replacements, key)) return this.replacements[key];
+      var row = this.connections.find(function (item) { return item.client === client && item.profile === profile; });
+      return row && row.token && row.token.id !== this.issuedId ? row.token : null;
+    };
+    /* Each client's profile choices from the saved connections, and what Connect would replace there. */
+    Page.prototype.paintProfiles = function () {
+      var self = this;
+      Object.keys(this.pickers || {}).forEach(function (id) {
+        var picker = self.pickers[id], kept = picker.touched ? picker.select.value : DEFAULT_PROFILE;
+        var names = [DEFAULT_PROFILE].concat(self.connections.filter(function (row) {
+          return row.client === id && row.profile !== DEFAULT_PROFILE;
+        }).map(function (row) { return row.profile; }));
+        // Rebuilt only when the profiles change, so a state the host sends never closes an open choice.
+        if (picker.names !== names.join("\n")) {
+          picker.names = names.join("\n");
+          var options = names.map(function (profile) {
+            var option = el("option", "", profileLabel(profile)); option.value = profile; return option;
+          });
+          var fresh = el("option", "", "New profile…"); fresh.value = NEW_PROFILE; options.push(fresh);
+          picker.select.replaceChildren.apply(picker.select, options);
+        }
+        var next = kept !== NEW_PROFILE && names.indexOf(kept) === -1 ? DEFAULT_PROFILE : kept;
+        if (picker.select.value !== next) picker.select.value = next;
+        picker.nameRow.hidden = picker.select.value !== NEW_PROFILE;
+        var profile = picker.chosen(), held = profile === null ? null : self.heldBy(id, profile);
+        picker.replace.textContent = held ? profileLabel(profile) + " uses " + held.label + " now. Connecting " +
+          "gives it this token; " + held.label + " stays live until you revoke it." : "";
+        picker.connect.textContent = held ? "Replace and connect" : "Connect " + picker.client.client;
+        picker.connect.disabled = self.pending || profile === null;
+      });
+    };
+    /* Connect found another live token on the profile: nothing was written, and the page says which. */
+    Page.prototype.replacementShown = function (payload) {
+      this.replacements[payload.client + ":" + payload.profile] = payload.token;
+      var status = this.connectStatus[payload.client];
+      if (status) {
+        status.textContent = "Nothing changed yet. Check the token this replaces, then press Replace and connect.";
+        status.setAttribute("data-state", "manual");
+      }
     };
     /* What Connect did, under that client's button: always ends with starting a new client session. */
     Page.prototype.connected = function (payload) {
+      if (this.repairing) {
+        this.repairing = null;
+        this.notice.show(payload.message, { tone: payload.state === "configured" ? "success" : "warning" });
+        return;
+      }
       var status = this.connectStatus[payload.client];
       if (!status) return;
+      delete this.replacements[payload.client + ":" + payload.profile];
       status.textContent = payload.message;
       status.setAttribute("data-state", payload.state);
+      this.connectSetup[payload.client].hidden = !payload.setup;
+      this.connectSetupValue[payload.client].value = payload.setup || "";
     };
     Page.prototype.showIssued = function (token, row, clients) {
-      this.issuedTitle.textContent = "Token created: " + row.label;
+      this.issuedTitle.textContent = "Token created: " + row.label; this.issuedId = row.id;
       this.secret.value = token; this.copyStatus.textContent = "";
       this.showClients(clients);
       this.issuedDialog.openModal(); this.secret.select();
@@ -372,12 +549,13 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
     /* Copies the selected text within the click, which a file page needs; the clipboard API is the second
        try. Either way the text stays selected, so Command-C works when both are refused. The answer is said
        inside the dialog, which holds the focus. */
-    Page.prototype.copyText = function (field, label) {
+    Page.prototype.copyText = function (field, label, status) {
       var clipboard = window.navigator && window.navigator.clipboard, self = this;
-      var copied = function () {
-        self.copyStatus.textContent = label.charAt(0).toUpperCase() + label.slice(1) + " copied.";
+      var say = function (text, tone) {
+        if (status) status.textContent = text; else self.notice.show(text, { tone: tone });
       };
-      var manual = function () { self.copyStatus.textContent = "Copy the selected text with Command-C."; };
+      var copied = function () { say(label.charAt(0).toUpperCase() + label.slice(1) + " copied.", "success"); };
+      var manual = function () { say("Copy the selected text with Command-C.", "info"); };
       field.select();
       if (document.execCommand && document.execCommand("copy")) copied();
       else if (clipboard && clipboard.writeText) clipboard.writeText(field.value).then(copied, manual);
@@ -387,6 +565,7 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
     Page.prototype.closeIssued = function () {
       if (this.clientTabs) { this.clientTabs.dispose(); this.clientTabs = null; }
       this.secret.value = ""; this.clients.replaceChildren(); this.connectButtons = []; this.connectStatus = {};
+      this.pickers = {}; this.replacements = {}; this.issuedId = null;
       this.issuedDialog.closeModal();
     };
 
@@ -398,6 +577,7 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
       this.revokeDialog.appendChild(this.revokeTitle);
       this.revokeDialog.appendChild(el("p", "", "The agent holding this token can no longer connect. Work it has " +
         "already done in your Models stays."));
+      this.revokeEffects = el("p", "agent-access-revoke-effects"); this.revokeDialog.appendChild(this.revokeEffects);
       this.revokeError = inlineMessage("alert"); this.revokeDialog.appendChild(this.revokeError);
       var cancel = dom.button("Cancel", function () { self.closeRevoke(); });
       this.revokeConfirm = dom.button("Revoke", function () {
@@ -409,6 +589,10 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
     Page.prototype.openRevoke = function (token) {
       if (this.pending) return;
       this.revoking = token.id; this.revokeTitle.textContent = "Revoke " + token.label + "?";
+      var losing = this.connections.filter(function (row) { return row.token && row.token.id === token.id; })
+        .map(connectionName);
+      this.revokeEffects.textContent = losing.length ? "These client profiles lose access: " + losing.join(", ") +
+        "." : "";
       this.revokeError.textContent = "";
       this.revokeDialog.openModal();
     };

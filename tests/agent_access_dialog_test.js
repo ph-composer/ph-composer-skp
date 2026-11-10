@@ -114,7 +114,9 @@ test("the created token comes with each client's Connect and setup to copy, and 
         { title: "Or, one command", text: "claude mcp add ... " + "ab".repeat(24) }],
       check: "claude mcp get ph-composer", remove: "claude mcp remove ph-composer" }];
     o.view.receive({ type: "access.issued", payload: { token: "ab".repeat(24), row: TOKEN, clients: clients } });
-    var fields = o.view.clients.querySelectorAll("textarea");
+    var fields = o.view.clients.querySelectorAll("textarea").filter(function (field) {
+      return field.getAttribute("aria-label") === "Claude Code setup";
+    });
     assert.deepStrictEqual(Array.prototype.map.call(fields, function (field) { return field.value; }),
       clients[0].forms.map(function (form) { return form.text; }));
     var text = allText(o.view.clients), at = clients[0].forms.map(function (form) { return text.indexOf(form.title); });
@@ -141,7 +143,7 @@ test("the created token shows one client at a time: Connect first, other setups 
   var claude = sections[0];
   assert.ok(/(^| )primary( |$)/.test(named(claude, "Connect Claude Code").className), "Connect is the default");
   var other = claude.querySelector("details");
-  assert.strictEqual(other.querySelector("summary").textContent, "Other ways to connect");
+  assert.strictEqual(other.querySelector("summary").textContent, "Other ways to connect the Default profile");
   assert.ok(!other.open, "the other setups start folded");
   assert.ok(allText(other).includes("Claude setup") && allText(other).includes("claude mcp get ph-composer"));
   named(tabs, "Codex").dispatchEvent({ type: "click" });
@@ -156,7 +158,8 @@ test("Connect sends the client and the token once, says what it did and what to 
   var connect = named(o.view.clients, "Connect Codex");
   connect.dispatchEvent({ type: "click" }); connect.dispatchEvent({ type: "click" });
   assert.deepStrictEqual(JSON.parse(JSON.stringify(o.sent)),
-    [{ type: "access.connect", payload: { client: "codex", token: "ab".repeat(24) } }]);
+    [{ type: "access.connect", payload: { client: "codex", token: "ab".repeat(24), profile: "default",
+      replace: null } }]);
   assert.ok(connect.disabled, "one Connect at a time");
   o.view.receive({ type: "access.connected", payload: { client: "codex", state: "configured",
     message: "Codex is set up to read its token from PH-Composer. Then start a new Codex session to connect." } });
@@ -306,4 +309,103 @@ test("a revoke is acknowledged with what the token's exports had done", function
   var text = allText(o.view.notice);
   assert.ok(text.includes("Token revoked") && text.includes("1 export(s) it started had completed") &&
     text.includes("stop without writing") && text.includes("2 change(s)") && text.includes("1 waiting call(s)"));
+});
+
+/* Client profiles (context/AGENT_INTERFACE.md, "User-controlled local access"): each saved profile, the token
+   it uses, what the client's settings say, contacted and verified kept apart; Repair and the hand setup
+   only where the entry is not set up. */
+var CONNECTIONS = [
+  { client: "claude_code", client_name: "Claude Code", profile: "default", server: "ph-composer",
+    token: { id: TOKEN.id, label: "Claude Code", capabilities: ["read"] }, source: "file", entry: "configured",
+    contacted: { client: "claude-code 2.1.317", at: "2026-10-18T14:00:00Z" }, verified_at: "2026-10-18T14:01:00Z",
+    setup: "claude mcp add-json --scope user ph-composer '{}'" },
+  { client: "codex", client_name: "Codex", profile: "house-b", server: "ph-composer-house-b",
+    token: { id: "token_CCCCCCCCCCCC", label: "House B", capabilities: ["read"], model_name: "b.skp",
+      model_open: false }, source: "file", entry: "outdated", contacted: null, verified_at: null,
+    setup: "[mcp_servers.ph-composer-house-b]\nurl = \"http://127.0.0.1:47001/mcp\"" },
+  { client: "codex", client_name: "Codex", profile: "default", server: "ph-composer", token: null, source: null,
+    entry: "inline", contacted: null, verified_at: null, setup: "[mcp_servers.ph-composer]" }];
+
+test("connections list each profile's token, set-up state, contact and verification apart, with Repair where needed",
+  function () {
+    var o = setup({ connections: CONNECTIONS, server: { state: "listening", port: 47001 } });
+    assert.strictEqual(o.view.connectionsSummary.textContent, "Client profiles · 3");
+    var rows = o.view.connectionList.querySelectorAll(".agent-access-connection").map(allText);
+    assert.ok(rows[0].includes("Claude Code · Default") && rows[0].includes("set up") &&
+      rows[0].includes("contacted by claude-code 2.1.317") && rows[0].includes("verified"));
+    assert.ok(rows[1].includes("Codex · house-b") && rows[1].includes("only b.skp (not open)") &&
+      rows[1].includes("another port") && rows[1].includes("not contacted") && !rows[1].includes("verified"));
+    assert.ok(rows[2].includes("no live token") && rows[2].includes("kept in the client's settings"));
+    assert.strictEqual(named(o.view.connectionList, "Repair Claude Code"), undefined, "a set-up entry needs none");
+    assert.strictEqual(named(o.view.connectionList, "Repair Codex"), undefined, "no live token, nothing to repair");
+    assert.strictEqual(o.view.connectionList.querySelectorAll("details").length, 2, "hand setup where not set up");
+    named(o.view.connectionList, "Repair Codex (house-b)").dispatchEvent({ type: "click" });
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(o.sent)),
+      [{ type: "access.repair", payload: { client: "codex", profile: "house-b" } }]);
+    o.view.receive({ type: "access.connected", payload: { client: "codex", profile: "house-b", state: "configured",
+      message: "Codex is set up to read its token from PH-Composer." } });
+    assert.strictEqual(o.view.notice.getAttribute("data-tone"), "success");
+    assert.ok(allText(o.view.notice).includes("Codex is set up"));
+  });
+
+test("Connect picks a profile, shows the token it replaces before sending, and a new profile needs a valid name",
+  function () {
+    var o = setup({ connections: CONNECTIONS, server: { state: "listening", port: 46110 } });
+    var mine = Object.assign({}, TOKEN, { id: "token_NEWNEWNEWNEW", label: "New one" });
+    o.view.receive({ type: "access.issued", payload: { token: "ab".repeat(24), row: mine, clients: [
+      { id: "claude_code", client: "Claude Code", forms: [], check: "" },
+      { id: "codex", client: "Codex", forms: [], check: "" }] } });
+    var picker = o.view.pickers.claude_code;
+    assert.deepStrictEqual(picker.select.querySelectorAll("option").map(function (node) { return node.value; }),
+      ["default", ""]);
+    assert.ok(picker.replace.textContent.includes("Default uses Claude Code now"));
+    assert.strictEqual(picker.connect.textContent, "Replace and connect");
+    picker.connect.dispatchEvent({ type: "click" });
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(o.sent.pop())), { type: "access.connect", payload: {
+      client: "claude_code", token: "ab".repeat(24), profile: "default", replace: TOKEN.id } });
+    o.view.receive({ type: "access.failure", payload: { message: "refused" } });
+    picker.select.value = ""; picker.select.dispatchEvent({ type: "change" });
+    assert.strictEqual(picker.nameRow.hidden, false);
+    picker.name.value = "House B"; picker.name.dispatchEvent({ type: "input" });
+    assert.ok(picker.connect.disabled, "a name that cannot be a profile");
+    picker.name.value = "house-c"; picker.name.dispatchEvent({ type: "input" });
+    assert.strictEqual(picker.connect.textContent, "Connect Claude Code");
+    picker.connect.dispatchEvent({ type: "click" });
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(o.sent.pop().payload)),
+      { client: "claude_code", token: "ab".repeat(24), profile: "house-c", replace: null });
+    // The host found a token the page had not shown: nothing changed, and the page now names it.
+    o.view.receive({ type: "access.replacement", payload: { client: "claude_code", profile: "house-c",
+      token: { id: "token_DDDDDDDDDDDD", label: "Other" } } });
+    assert.ok(picker.replace.textContent.includes("house-c uses Other now"));
+    assert.ok(allText(o.view.clients).includes("Nothing changed yet"));
+    assert.strictEqual(picker.connect.textContent, "Replace and connect");
+    o.view.receive({ type: "access.connected", payload: { client: "codex", profile: "house-b", state: "manual",
+      message: "The token is saved for Codex.", setup: "[mcp_servers.ph-composer-house-b]" } });
+    assert.strictEqual(o.view.connectSetup.codex.hidden, false);
+    assert.strictEqual(o.view.connectSetupValue.codex.value, "[mcp_servers.ph-composer-house-b]");
+    assert.ok(!allText(o.view.connectSetup.codex).includes("ab".repeat(24)));
+  });
+
+test("a refresh keeps an open hand setup open and a refusal drops a replacement the host no longer holds",
+  function () {
+    var o = setup({ connections: CONNECTIONS });
+    var details = o.view.connectionList.querySelectorAll("details")[0];
+    details.open = true; details.dispatchEvent({ type: "toggle" });
+    o.view.receive({ type: "access.state", payload: { state: "readable", tokens: [TOKEN], offered: ["read"],
+      server: { state: "listening", port: 47001 }, connections: CONNECTIONS } });
+    assert.strictEqual(o.view.connectionList.querySelectorAll("details")[0].open, true);
+    o.view.receive({ type: "access.issued", payload: { token: "ab".repeat(24), row: Object.assign({}, TOKEN,
+      { id: "token_NEWNEWNEWNEW" }), clients: [{ id: "codex", client: "Codex", forms: [], check: "" }] } });
+    o.view.receive({ type: "access.replacement", payload: { client: "codex", profile: "default",
+      token: { id: "token_GONEGONEGONE", label: "Gone" } } });
+    assert.ok(o.view.pickers.codex.replace.textContent.includes("Gone"));
+    o.view.receive({ type: "access.failure", payload: { message: "This connection changed since it was shown." } });
+    assert.strictEqual(o.view.pickers.codex.replace.textContent, "", "the next Connect asks the host again");
+  });
+
+test("Revoke names the connections that lose access", function () {
+  var o = setup({ connections: CONNECTIONS });
+  named(o.view.list, "Revoke Claude Code").dispatchEvent({ type: "click" });
+  assert.ok(o.view.revokeEffects.textContent.includes("These client profiles lose access") &&
+    o.view.revokeEffects.textContent.includes("Claude Code"));
 });
