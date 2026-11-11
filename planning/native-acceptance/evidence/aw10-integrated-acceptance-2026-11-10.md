@@ -89,3 +89,11 @@ not requested again, so no native click or gesture was made. All seven rows are 
 and the guard decision stays open. Cleanup revoked every token and the destination the run made, put the listener
 back on 46110, removed the scratch client home and quit SketchUp cleanly. Missing prerequisite unchanged: one
 approved, uninterrupted full-screen hold (recipe `_private/host/aw10/HELD_RUN.md`).
+
+### Run 3 (2026-11-11, main `95147b5e`): approved, then interrupted
+
+Same installed build (shipped source unchanged since `3da2a9ab`), fresh process, same fixture and labelled setup.
+Preparation verified again: recorder `run_end` equal to the client's check row, both clients offering Repair with
+the listener on 46111. `request_full_control` was approved; the first `computer_batch` (one screenshot) was then
+aborted as a user interrupt before its first action. Control was released and not requested again. All seven rows
+are recorded `blocked` a third time; the guard decision stays open. Cleanup read back as in run 2.
