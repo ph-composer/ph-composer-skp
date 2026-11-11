@@ -24,27 +24,45 @@ module PhComposer
 
         # Every tagged Edge in the Model, inside every Group and ComponentInstance, shared definitions and
         # cutting components included: an orphaned or shared tag still names its type. Keys are the
-        # root-to-Edge persistent-id paths, so each placement of a shared definition is its own entry.
+        # root-to-Edge persistent-id paths, so each placement of a shared definition is its own entry. Stored
+        # text that is not a JSON object names no id, so it can name no type and nothing can name it: it is no
+        # entry, and the engine's reference check, clear and a type delete pass over it rather than refusing
+        # (`unreadable_paths` lists it for the outcome that passed it).
         def entries(model)
           found = []
           each_tagged(model) do |edge, path|
-            record = STORE.read(edge)
+            record = readable(edge)
             found << Records::ReferenceEntry.new(:kind => EDGE_KIND, :key => path, :record => record) if record
           end
           found
         end
 
         # The assignment id of every tagged Edge occurrence whose record can be read, one per occurrence; a
-        # record that is not valid JSON names no id, so a read counting copies skips it rather than refusing.
+        # record that is not a JSON object names no id, so a read counting copies skips it rather than refusing.
         def readable_ids(model)
           ids = []
-          each_tagged(model) do |edge, _path|
-            record = STORE.read(edge)
-            ids << (record.is_a?(Hash) ? record["id"] : nil)
-          rescue CodedError => error
-            raise unless error.code == "record.unreadable"
-          end
+          each_tagged(model) { |edge, _path| ids << readable(edge)&.fetch("id", nil) }
           ids
+        end
+
+        # The root-to-Edge path of every tagged Edge whose stored text is not a JSON object.
+        def unreadable_paths(model)
+          paths = []
+          each_tagged(model) { |edge, path| paths << path unless readable(edge) }
+          paths
+        end
+
+        # The Edge's stored record when its text is a JSON object, else nil: a stored value that is not text
+        # (which SketchUp allows) is not one either.
+        def readable(edge)
+          return nil unless edge.get_attribute(STORE.dictionary, STORE.key).is_a?(String)
+
+          record = STORE.read(edge)
+          record.is_a?(Hash) ? record : nil
+        rescue CodedError => error
+          raise unless error.code == "record.unreadable"
+
+          nil
         end
 
         # Every Edge carrying an assignment record, readable or not, with its root-to-Edge path, through Groups

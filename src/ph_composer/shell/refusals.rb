@@ -10,8 +10,13 @@ module PhComposer
   # also answers the "approval" set, and the "location" set when an approved location may answer it.
   # `discover` publishes the sets once and `describe` names the sets one operation answers.
   module Refusals
-    ANY_OPERATION = %w[request.malformed request.api_version request.capability_denied session.unknown session.busy
-                       params.invalid operation.failed].freeze
+    ANY_OPERATION = %w[request.malformed request.api_version request.capability_denied session.unknown access.revoked
+                       session.busy params.invalid operation.failed].freeze
+    # What a mutation refuses before it is accepted: it consumed no sequence, retained no outcome and wrote
+    # nothing (context/CONTRACTS.md, "Retries"). Dispatch answers them before acceptance; a handler raising one
+    # after it would be retained, but as a refusal that wrote nothing, so a retry running again is still safe.
+    BEFORE_ACCEPTANCE = %w[request.malformed request.api_version session.unknown access.revoked
+                           request.unknown_operation request.capability_denied session.busy].freeze
     COMMON = {
       "query" => ANY_OPERATION,
       "action" => (ANY_OPERATION + %w[request.pending request.sequence_conflict request.outcome_unavailable
@@ -34,6 +39,7 @@ module PhComposer
       "request.api_version" => "The request names an API major version this build does not serve.",
       "request.capability_denied" => "The caller's grant does not include the capability the operation needs.",
       "session.unknown" => "The Model session is closed, was reopened or was never opened; discover again.",
+      "access.revoked" => "This caller's access was revoked; nothing ran.",
       "session.busy" => "Another change is running, deferred work is settling or the user is partway through a " \
                         "Move; read context and retry later.",
       "params.invalid" => "The params do not meet the operation's params schema or a rule it states.",

@@ -12,6 +12,7 @@ class ThermalBridgeRepairTest < PhComposerTestCase
   STORE = TB::Assignment::STORE
   BROKEN = "{broken é"
   FOREIGN = ["test.other_owner", "record"].freeze
+  UNREADABLE_PATHS = [[100, 101], [100, 130, 131], [100, 140, 141]].freeze
 
   def setup
     super
@@ -74,7 +75,10 @@ class ThermalBridgeRepairTest < PhComposerTestCase
   def test_unreadable_text_is_previewed_removed_alone_and_restored_exactly_by_undo
     reference = { "zone_id" => "zon_AAAAAAAAAAAA", "zone_path" => [100], "entity_path" => [101], "entity_id" => nil }
     clear = invoke("edges.clear", "targets" => [{ "reference" => reference }])
-    assert_equal "record.unreadable", clear["code"], "ordinary clear stays strict"
+    assert_equal ["completed", "none", 0, BROKEN], [clear["status"], clear["effect"], clear.dig("value", "cleared"),
+                                                    stored(@broken)], "clear never removes what it cannot read"
+    finding = unreadable_finding(clear)
+    assert_equal [UNREADABLE_PATHS, 3], [finding.fetch("edge_paths").sort, finding.fetch("total")]
 
     params = { "path" => [100, 101], "fingerprint" => digest(BROKEN) }
     preview = API.preview(:context => @context, :name => "#{TB::FEATURE_ID}.edges.repair", :params => params)
@@ -103,13 +107,7 @@ class ThermalBridgeRepairTest < PhComposerTestCase
 
   def test_a_stranded_record_discloses_what_it_held_and_undo_restores_its_bytes
     params = { "path" => [5], "fingerprint" => digest(@stranded_text) }
-    # Removing a readable id needs every record read to prove nothing names it, so unreadable text elsewhere
-    # refuses first; it is repaired (or, here behind a lock and a component, removed by the user) before.
-    assert_equal "record.unreadable", invoke("edges.repair", params)["code"]
-    repaired = invoke("edges.repair", "path" => [100, 101], "fingerprint" => digest(BROKEN))
-    assert_equal "committed", repaired["effect"], repaired.inspect
-    [[100, 130, 131], [100, 140, 141]].each { |path| live(*path).delete_attribute(STORE.dictionary, STORE.key) }
-    @session.host_event(:transaction_committed)
+    # Removing a readable id proves nothing names it; unreadable text elsewhere names nothing, so it is passed over.
     held = STORE.read(@held)
     STORE.write(@held, held.merge("extension_data" => { "test.opaque" => "not an envelope" }))
     assert_equal "copy.rule_missing", invoke("edges.repair", params)["code"], "an opaque envelope fails closed"
@@ -128,6 +126,51 @@ class ThermalBridgeRepairTest < PhComposerTestCase
     assert(query("thermal_bridges.schedule.list").fetch("edge_findings").empty?)
     @model.undo
     assert_equal @stranded_text, live(5).get_attribute(STORE.dictionary, STORE.key)
+  end
+
+  # Unreadable text on other Edges names nothing, so clearing a readable Edge proceeds, leaves that text as it is
+  # and names it in a finding.
+  def test_clear_passes_over_unreadable_text_on_other_edges_and_names_it
+    reference = { "zone_id" => "zon_AAAAAAAAAAAA", "zone_path" => [100], "entity_path" => [102],
+                  "entity_id" => "tbe_AAAAAAAAAAAA" }
+    cleared = invoke("edges.clear", "targets" => [{ "reference" => reference }])
+
+    assert_equal ["committed", 1], [cleared["effect"], cleared.dig("value", "cleared")], cleared.inspect
+    assert_nil stored(live(100, 102))
+    assert_equal [BROKEN] * 3, UNREADABLE_PATHS.map { |path| stored(live(*path)) }
+    assert_equal 3, unreadable_finding(cleared).fetch("total")
+  end
+
+  # JSON that is not an object and a stored value that is not text are unreadable the same way.
+  def test_clear_passes_over_json_that_is_not_an_object_and_values_that_are_not_text
+    @broken.set_attribute(STORE.dictionary, STORE.key, 123)
+    live(100, 130, 131).set_attribute(STORE.dictionary, STORE.key, "[1]")
+    live(100, 140, 141).set_attribute(STORE.dictionary, STORE.key, "\"text\"")
+    @session.host_event(:transaction_committed)
+    targets = [[101, nil], [102, "tbe_AAAAAAAAAAAA"]].map do |id, entity_id|
+      { "reference" => { "zone_id" => "zon_AAAAAAAAAAAA", "zone_path" => [100], "entity_path" => [id],
+                         "entity_id" => entity_id } }
+    end
+    cleared = invoke("edges.clear", "targets" => targets)
+
+    assert_equal ["committed", 1, 3], [cleared["effect"], cleared.dig("value", "cleared"),
+                                       unreadable_finding(cleared).fetch("total")], cleared.inspect
+    assert_equal [123, "[1]", "\"text\""], UNREADABLE_PATHS.map { |path| stored(live(*path)) }
+  end
+
+  # A Thermal Bridge Type delete reads every Edge for references; unreadable text is passed over and named.
+  def test_a_type_delete_passes_over_unreadable_text_and_names_it
+    unused = invoke("types.create", "values" => { "name" => "Sill", "psi_w_mk" => 0.02 }).dig("value", "id")
+    live(5).delete_attribute(STORE.dictionary, STORE.key)
+    @session.host_event(:transaction_committed)
+
+    plain = invoke("types.delete", "id" => unused)
+    replaced = invoke("types.delete", "id" => @type, "replacement_id" => nil)
+
+    assert_equal %w[committed committed], [plain["effect"], replaced["effect"]], [plain, replaced].inspect
+    assert_nil stored(live(100, 102))
+    assert_equal [BROKEN] * 3, UNREADABLE_PATHS.map { |path| stored(live(*path)) }
+    assert_equal [3, 3], [plain, replaced].map { |outcome| unreadable_finding(outcome).fetch("total") }
   end
 
   def test_changed_wrong_locked_shared_and_served_targets_refuse_before_any_write
@@ -210,6 +253,11 @@ class ThermalBridgeRepairTest < PhComposerTestCase
   def record(id)
     { "id" => id, "schema_version" => 1, "thermal_bridge_type_id" => @type, "quantity" => 1, "user_data" => {},
       "extension_data" => {} }
+  end
+
+  def unreadable_finding(outcome)
+    outcome.fetch("findings").find { |finding| finding["code"] == "thermal_bridge.unreadable_skipped" } ||
+      flunk("no unreadable finding in #{outcome.inspect}")
   end
 
   def stored(entity)

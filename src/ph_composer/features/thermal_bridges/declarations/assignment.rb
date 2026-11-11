@@ -177,8 +177,8 @@ module PhComposer
                       :description => "One bounded page of the Edges whose stored assignment edges.clear cannot " \
                                       "reach: text that is not a JSON object anywhere, or a readable record on an " \
                                       "Edge no Zone holds. Each row gives the fingerprint edges.repair takes. " \
-                                      "Removing a readable record needs every assignment readable, so repair the " \
-                                      "unreadable ones first.",
+                                      "Unreadable text names nothing, so clear, a type delete and repair pass " \
+                                      "over it elsewhere.",
                       :refuses => %w[query.cursor_expired query.limit_invalid],
                       :params => SELECTION_PARAMS,
                       :result => Shapes.object({ "edges" => Shapes.list(REPAIR_ROW) }.merge(PAGE_PROPERTIES)),

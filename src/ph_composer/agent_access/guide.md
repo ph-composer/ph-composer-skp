@@ -158,6 +158,10 @@ that pages or fragments what was left out. Fragments join and check exactly as a
 
 - **Refused.** Read `code` and `message`; `describe` lists what each operation can refuse. Nothing
   was written unless `effect` says otherwise.
+- **A refusal before the change was taken.** `session.busy`, `request.unknown_operation`,
+  `request.malformed`, `request.capability_denied`, `session.unknown` and `access.revoked` mean the invoke
+  never ran, so its `idempotency_key` is free: fix the request and send it again with the same key. Any
+  other refusal is kept under the key, and the same invoke sent again answers it again.
 - **`revision.stale` or `target.changed`.** The Model changed after you read it, often because the
   user edited it. Read again, decide again, and send a new request.
 - **`session.busy`.** Another change is running, deferred work is settling, or the user has a tool
@@ -305,8 +309,10 @@ Two cases are beyond `edges.clear`: an assignment whose stored text is not a JSO
 the values and metadata it discards. Invoke it with the preview's digest to remove that one record, and
 nothing else, as one Undo step. Other stored text refuses `target.changed`; a locked or shared path refuses
 as an ordinary write does; an assignment `edges.clear` can reach refuses `thermal_bridge.repair_not_needed`.
-Removing a readable assignment first proves nothing still names it, which needs every assignment readable, so
-repair the unreadable ones first.
+Text that is not a JSON object names nothing PH-Composer can read, so `edges.clear`, a Thermal Bridge Type delete and `edges.repair`
+do not refuse for it elsewhere. Clear and the delete leave it as it is, skip an Edge holding it, and name those
+Edges in a `thermal_bridge.unreadable_skipped` finding with the first 20 paths and the total. Export still
+blocks on it, so repair it before you export.
 
 `ph_composer.thermal_bridges.edge_tool.choose` arms the edge tool with a type and quantity for a person
 at the mouse: each click or drag across Edges is one `edges.assign` and one Undo step, at most 250

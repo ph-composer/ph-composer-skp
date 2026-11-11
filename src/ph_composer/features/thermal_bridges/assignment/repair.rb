@@ -134,8 +134,8 @@ module PhComposer
         end
 
         # A valid record whose id no other Edge keeps may be named by another record; removing it then refuses
-        # reference.in_use, as clear's does. The engine's check reads every assignment to prove that, so
-        # unreadable text on any other Edge refuses record.unreadable first (fail closed): repair it first.
+        # reference.in_use, as clear's does. The engine's check reads every assignment to prove that; text on
+        # another Edge that is not a JSON object names nothing, so the check passes over it (Target.entries).
         def check_references!(request, proposal, path, stored)
           return unless stored.readable? && RECORD_KIND.problems(stored.record).empty?
 

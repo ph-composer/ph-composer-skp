@@ -4645,12 +4645,12 @@ Every operation answers the codes of its kind's set besides its own, and an oper
 
 | Set | Codes |
 | --- | --- |
-| `query` | `request.malformed`, `request.api_version`, `request.capability_denied`, `session.unknown`, `session.busy`, `params.invalid`, `operation.failed` |
-| `action` | `request.malformed`, `request.api_version`, `request.capability_denied`, `session.unknown`, `session.busy`, `params.invalid`, `operation.failed`, `request.pending`, `request.sequence_conflict`, `request.outcome_unavailable`, `revision.stale`, `proposal.changed`, `operation.rollback_unverified` |
-| `view_command` | `request.malformed`, `request.api_version`, `request.capability_denied`, `session.unknown`, `session.busy`, `params.invalid`, `operation.failed` |
-| `setup_command` | `request.malformed`, `request.api_version`, `request.capability_denied`, `session.unknown`, `session.busy`, `params.invalid`, `operation.failed` |
-| `file_export` | `request.malformed`, `request.api_version`, `request.capability_denied`, `session.unknown`, `session.busy`, `params.invalid`, `operation.failed` |
-| `participant` | `request.malformed`, `request.api_version`, `request.capability_denied`, `session.unknown`, `session.busy`, `params.invalid`, `operation.failed`, `operation.proposal_required`, `operation.participant_cycle`, `proposal.foreign_write`, `proposal.contribution_replaced` |
+| `query` | `request.malformed`, `request.api_version`, `request.capability_denied`, `session.unknown`, `access.revoked`, `session.busy`, `params.invalid`, `operation.failed` |
+| `action` | `request.malformed`, `request.api_version`, `request.capability_denied`, `session.unknown`, `access.revoked`, `session.busy`, `params.invalid`, `operation.failed`, `request.pending`, `request.sequence_conflict`, `request.outcome_unavailable`, `revision.stale`, `proposal.changed`, `operation.rollback_unverified` |
+| `view_command` | `request.malformed`, `request.api_version`, `request.capability_denied`, `session.unknown`, `access.revoked`, `session.busy`, `params.invalid`, `operation.failed` |
+| `setup_command` | `request.malformed`, `request.api_version`, `request.capability_denied`, `session.unknown`, `access.revoked`, `session.busy`, `params.invalid`, `operation.failed` |
+| `file_export` | `request.malformed`, `request.api_version`, `request.capability_denied`, `session.unknown`, `access.revoked`, `session.busy`, `params.invalid`, `operation.failed` |
+| `participant` | `request.malformed`, `request.api_version`, `request.capability_denied`, `session.unknown`, `access.revoked`, `session.busy`, `params.invalid`, `operation.failed`, `operation.proposal_required`, `operation.participant_cycle`, `proposal.foreign_write`, `proposal.contribution_replaced` |
 | `approval` | `access.user_required`, `request.cancelled` |
 | `location` | `location.unknown`, `location.revoked`, `location.used`, `location.kind_mismatch`, `location.unavailable`, `location.setup_unreadable`, `location.setup_unavailable` |
 
@@ -4658,6 +4658,7 @@ What each common code means, as the agent connection's discover section `refusal
 
 | Code | Meaning |
 | --- | --- |
+| `access.revoked` | This caller's access was revoked; nothing ran. |
 | `access.user_required` | The operation needs a location only the user can choose; ask the user to approve one. |
 | `location.kind_mismatch` | That approved location is for another kind of file or folder. |
 | `location.revoked` | The user revoked that approved location. |
@@ -14457,7 +14458,7 @@ Example params:
 
 ### `ph_composer.thermal_bridges.edges.repair_candidates`
 
-One bounded page of the Edges whose stored assignment edges.clear cannot reach: text that is not a JSON object anywhere, or a readable record on an Edge no Zone holds. Each row gives the fingerprint edges.repair takes. Removing a readable record needs every assignment readable, so repair the unreadable ones first. Owner: `ph_composer.thermal_bridges`.
+One bounded page of the Edges whose stored assignment edges.clear cannot reach: text that is not a JSON object anywhere, or a readable record on an Edge no Zone holds. Each row gives the fingerprint edges.repair takes. Unreadable text names nothing, so clear, a type delete and repair pass over it elsewhere. Owner: `ph_composer.thermal_bridges`.
 
 Refuses: `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
 
@@ -66606,6 +66607,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `thermal_bridge.repair_not_needed` | A Zone holds the Edge and its assignment can be read, so edges.clear removes it; edges.repair is for what clear cannot reach. |
 | `thermal_bridge.shared_definition` | An assigned Edge is in shared component storage and counts once per placement. |
 | `thermal_bridge.type_missing` | Assigned Edges name a Thermal Bridge Type that no longer exists, so they cannot export. |
+| `thermal_bridge.unreadable_skipped` | Edges hold thermal-bridge text that is not a JSON object; an edges.clear or Thermal Bridge Type delete left them as they are and did not read them for references. edges.repair removes them. |
 
 ### `ph_composer.view`
 
@@ -66764,3 +66766,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.41 | 2026-11-10 | The Agent Access dialog's catalog adds agent_access.connection_changed, refused when a connection profile is bound to another token than the one shown; no operation changes. |
 | 1.42 | 2026-11-10 | ph_composer.spaces.context.open declares session.inactive: it, context.open, spaces.context.close and spaces.locate refuse to move the edit path of a Model SketchUp is not showing. An agent call whose client closed the connection before it ran is not run. |
 | 1.43 | 2026-11-11 | Every action refuses session.busy, before it takes a sequence, while the user is partway through a Move in SketchUp, which its commit would cancel; context readiness and discover's session busy say so. Reads and the Line tool are unaffected. An agent invoke answered busy releases its idempotency_key for the retry. |
+| 1.44 | 2026-11-11 | Every invoke refused before acceptance releases the idempotency_key it bound; access.revoked joins every kind's common refusals. thermal_bridges.edges.clear and types.delete pass over Edges whose text is not a JSON object, leave it and name them in a thermal_bridge.unreadable_skipped finding. zones.repair_identity refuses a locked Zone. |

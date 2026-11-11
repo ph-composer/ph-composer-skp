@@ -108,6 +108,9 @@ module PhComposer
         end
         raise CodedError.new("target.wrong_hierarchy", "A Zone cannot be nested inside another Zone.") if zone.nested
 
+        refusal = lock_refusal(zone)
+        raise refusal if refusal
+
         copies = Occurrences.zones(model).count { |other| other.record.fetch("id") == zone.record.fetch("id") }
         return if copies > 1
 
@@ -137,8 +140,8 @@ module PhComposer
           CodedError.new("target.shared_definition",
                          "This Zone is inside a copied Group that still shares its contents. #{OPEN_GROUP}, " \
                          "then try again.")
-        elsif zone.locked_parent || (zone.entity.respond_to?(:locked?) && zone.entity.locked?)
-          CodedError.new("target.locked", "This Zone or a Group containing it is locked. Unlock it first.")
+        elsif (locked = lock_refusal(zone))
+          locked
         elsif member_containers(zone).any? { |entity| entity.is_a?(Sketchup::ComponentInstance) }
           CodedError.new("target.shared_definition",
                          "Some of this Zone's Faces are inside a component, which its placements share by " \
@@ -148,6 +151,14 @@ module PhComposer
         elsif ids < 2
           CodedError.new("zone.identity_unique", "This Zone already has an identity of its own.")
         end
+      end
+
+      # The refusal a write to this occurrence meets from its own lock or a locked Group above it, as every Zone
+      # write refuses, as an unraised CodedError, or nil when neither is locked.
+      def lock_refusal(zone)
+        return nil unless zone.locked_parent || (zone.entity.respond_to?(:locked?) && zone.entity.locked?)
+
+        CodedError.new("target.locked", "This Zone or a Group containing it is locked. Unlock it first.")
       end
 
       # Every Group or ComponentInstance inside the Zone that holds a Face the repair writes. Nested

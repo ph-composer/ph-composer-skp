@@ -12,7 +12,8 @@ module PhComposer
       EDIT = %w[record.unreadable reference.invalid target.changed target.not_found validation.failed].freeze
       DUPLICATE = %w[copy.rule_missing extension.invalid record.unreadable reference.invalid target.not_found
                      validation.failed].freeze
-      # A delete scans every record for references to it, so an unreadable envelope anywhere refuses it.
+      # A delete scans every record for references to it, so an unreadable envelope anywhere refuses it; an
+      # Edge whose text is not a JSON object names nothing, so it is passed over and named in a finding.
       # With a replacement it also rewrites every Edge naming the type, which an Edge changed since planning
       # refuses at apply with Zones' target codes.
       DELETE = %w[copy.rule_missing record.unreadable reference.in_use target.ambiguous target.changed
@@ -125,6 +126,7 @@ module PhComposer
           params = request.params
           id = params.fetch("id")
           expected = params.fetch("expected_values", {})
+          Assignment::Operations.note_unreadable(request, proposal, "The delete")
           if params.key?("replacement_id")
             Assignment::Operations.delete_type(request, proposal, :id => id, :expected_values => expected,
                                                                   :replacement_id => params.fetch("replacement_id"))

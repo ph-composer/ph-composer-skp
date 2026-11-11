@@ -168,6 +168,43 @@ class ZoneRepairTest < PhComposerTestCase
     assert_equal %w[refused zone.identity_unique none], result.values_at("status", "code", "effect")
   end
 
+  # Identity repair writes the Zone record and every member Face, so a lock on the Zone or a Group above it
+  # refuses it the way every other Zone write does, and nothing is written.
+  def test_repair_refuses_a_locked_copy_or_a_copy_inside_a_locked_group
+    original, copy = copied_zone
+    before = [original, copy].map { |group| ZONE_STORE.read(group) }
+    copy.locked = true
+    own = invoke("ph_composer.zones.repair_identity", { "zone_path" => [copy.persistent_id] })
+    copy.locked = false
+    @model.entities.delete(copy)
+    parent = Sketchup::Group.new(500, Sketchup::Entities.new([copy]), :locked => true)
+    @model.entities << parent
+    treat_duplicates_as_existing(@model)
+    UI.run_timers
+    above = invoke("ph_composer.zones.repair_identity", { "zone_path" => [500, copy.persistent_id] })
+
+    [own, above].each do |result|
+      assert_equal %w[refused target.locked none], result.values_at("status", "code", "effect"), result.inspect
+    end
+    assert_equal before, [original, copy].map { |group| ZONE_STORE.read(group) }
+  end
+
+  # A lock set after the repair was planned still stops it at apply.
+  def test_repair_refuses_at_apply_when_the_copy_was_locked_after_planning
+    _original, copy = copied_zone
+    zone = PhComposer::Zones::Repair.occurrence_at(@model, [copy.persistent_id])
+    catalog = PhComposer::Registry.current.catalog
+    plan = PhComposer::Zones::Repair.identity_plan(@model, zone, @session.revision, catalog,
+                                                   PhComposer::Records::Engine.new(@model, catalog))
+    step = PhComposer::Zones::RepairIdentityStep.new(:reference => zone.reference, :plan => plan)
+    before = ZONE_STORE.read(copy)
+    copy.locked = true
+
+    error = assert_raises(PhComposer::CodedError) { step.apply(@model, {}) }
+    assert_equal "target.locked", error.code
+    assert_equal before, ZONE_STORE.read(copy)
+  end
+
   def test_repair_refuses_a_copy_held_in_shared_component_storage
     group = box_group(200, 2)
     @model.entities << group

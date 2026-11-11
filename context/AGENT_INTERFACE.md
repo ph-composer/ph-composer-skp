@@ -559,8 +559,8 @@ stack; moving its edit path is refused `session.inactive` (measured in the AW09M
 cancels a native Move partway through (`context/SKETCHUP_HOST_BEHAVIOR.md`), so every action refuses
 `session.busy` while MoveTool is in a state other than 0, before it takes a sequence or key. A cancelled Move leaves the
 revision as it was, so the same invoke then runs; a finished Move advances it, so the agent reads `context` again and sends
-a new invoke. A busy invoke's `idempotency_key` is released (`Sequencer#release`), so its next send takes a new
-sequence; reads, view commands, previews and export start still run, and the
+a new invoke. The busy invoke's `idempotency_key` is released, as for every refusal before acceptance (below), so
+its next send takes a new sequence; reads, view commands, previews and export start still run, and the
 Line tool partway through is not guarded (measured in the AW10H run, 2026-11-11).
 
 The executor rechecks the token, validates the arguments against the tool's fixed schema, and makes
@@ -575,7 +575,11 @@ sequences: per token and session (`agent_access/sequencer.rb`) each `invoke` tak
 and an optional `idempotency_key` (at most 64 characters) keeps the sequence it was first given, so a
 repeated key goes through the retained-outcome path as the same sequence: the same request answers
 its first outcome, another conflicts (`request.sequence_conflict`), and one whose outcome has expired
-is `request.outcome_unavailable` and is never given a new sequence. Every `invoke` and `outcome`
+is `request.outcome_unavailable` and is never given a new sequence. An invoke refused before acceptance
+(`Refusals::BEFORE_ACCEPTANCE`: busy, an unknown operation, a closed session or revoked caller, a missing
+capability, a malformed request) ran nothing, so a key that invoke bound is released (`Sequencer#release`) and the
+same key sent again takes a new sequence and runs once; a key bound by an earlier send keeps its sequence whatever a
+later send under it is refused, so an accepted change never runs twice. Every `invoke` and `outcome`
 result carries `sequence`, an optional field of the published Outcome schema that only this route
 sets; `outcome` takes a sequence or a key. A lost reply is recovered by reading state: `outcome` for
 an invoke, the setup's own read (such as `ph_composer.library.providers`) for a setup command,
@@ -758,7 +762,10 @@ JSON object and a readable assignment on an Edge no Zone holds, has its own expl
 `edges.repair_candidates` lists each with its root-to-Edge path and the SHA-256 of the stored text, and
 `edges.repair` takes that path and fingerprint, previews what it discards and removes that one record,
 leaving geometry and every other dictionary, as one Undo step. It refuses other text, a locked or shared
-path and anything clear serves, and never takes a dictionary name. [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Thermal Bridge
+path and anything clear serves, and never takes a dictionary name. Such text names nothing, so `edges.clear`, a
+Thermal Bridge Type delete and `edges.repair` pass over it when they check what still names a removed record; clear
+and the delete leave it as it is, skip it as a target, and name its Edges in a `thermal_bridge.unreadable_skipped`
+finding (paths of the first 20, and the total). [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Thermal Bridge
 Types", is the recipe.
 
 Zones exposes native split identity recovery as `ph_composer.zones.repair_split_face`. The native
