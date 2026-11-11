@@ -13,6 +13,11 @@ module PhComposer
     module ClientConfig
       SERVER_NAME = "ph-composer"
       DEFAULT = Connections::DEFAULT_PROFILE
+      # Codex asks before each call to a server's tools unless the entry approves them, and a session that
+      # cannot ask, such as `codex exec`, then refuses every write (0.167.0); the token's grants still bound
+      # what a call can do (context/AGENT_INTERFACE.md, "User-controlled local access").
+      CODEX_APPROVAL_KEY = "default_tools_approval_mode"
+      CODEX_APPROVAL_LINE = "#{CODEX_APPROVAL_KEY} = \"approve\"".freeze
 
       module_function
 
@@ -90,7 +95,7 @@ module PhComposer
       end
 
       def codex_table(port, profile = DEFAULT)
-        "[mcp_servers.#{server_name(profile)}]\n#{codex_url_line(port)}\n"
+        "[mcp_servers.#{server_name(profile)}]\n#{codex_url_line(port)}\n#{CODEX_APPROVAL_LINE}\n"
       end
 
       def codex_url_line(port)

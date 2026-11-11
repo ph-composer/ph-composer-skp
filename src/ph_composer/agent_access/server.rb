@@ -316,7 +316,10 @@ module PhComposer
         return [401, "", ["WWW-Authenticate: Bearer"]] unless token
         return [415, ""] unless json_media_type?(request.headers["content-type"])
 
-        message(request.body, token, connected)
+        # The client profile the request names, kept beside the token's row so the call log can say which
+        # profile contacted and verified; grants still come from the token alone.
+        profile = Connections.presented(request.headers[Connections::PROFILE_HEADER.downcase])
+        message(request.body, token.merge("profile" => profile), connected)
       end
 
       # `application/json`, in any case, with or without parameters such as a charset.

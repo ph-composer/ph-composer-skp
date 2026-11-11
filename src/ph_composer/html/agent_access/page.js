@@ -126,7 +126,7 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
       this.tokensBox.appendChild(this.revokedToggle);
       this.root.appendChild(this.tokensBox);
       // Each saved connection: which token it uses, what the client's settings say, and whether a client has
-      // contacted and verified with that token, kept apart; Repair sets the client up again.
+      // contacted and verified through it, kept apart; Repair sets the client up again.
       this.connectionsBox = el("details", "agent-access-connections");
       this.connectionsSummary = el("summary");
       this.connectionsBox.appendChild(this.connectionsSummary);
@@ -258,9 +258,10 @@ PhComposerUI.define("agent_access/page", ["dom", "icons", "overlay", "page_heade
       if (saved && (!token || saved.id !== token.id)) facts.push(saved.label + " is saved for it and waits for Repair");
       facts.push(ENTRY[connection.entry] || connection.entry);
       if (token) {
-        facts.push(connection.contacted ? "token contacted by " + (connection.contacted.client || "a client") +
-          " " + time(connection.contacted.at) : "token not contacted since SketchUp started");
-        if (connection.verified_at) facts.push("token verified " + time(connection.verified_at));
+        // Contacted and verified are this profile's own when its client names it, else the token's.
+        facts.push(connection.contacted ? "contacted by " + (connection.contacted.client || "a client") +
+          " " + time(connection.contacted.at) : "not contacted since SketchUp started");
+        if (connection.verified_at) facts.push("verified " + time(connection.verified_at));
       }
       text.appendChild(el("small", "muted", facts.join(" · ")));
       if (connection.entry !== "configured") {

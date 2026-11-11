@@ -84,16 +84,17 @@ Code 2.1.317 and Codex 0.167.0 on macOS, including clients not started from a te
   shows that command for you to run in Terminal once. Check it with `claude mcp get ph-composer`,
   which should say Connected.
 - Connect Codex saves the token the same way and adds a `[mcp_servers.ph-composer]` block to
-  `~/.codex/config.toml`, leaving the rest of the file as it was. If the file already has a
-  `[mcp_servers.ph-composer]` block from an earlier setup, it is left alone and the window shows the
-  block to put in its place. Check it with `codex mcp get ph-composer`.
-- A Codex session that cannot ask for approval, such as `codex exec`, refuses PH-Composer's tools that
-  change the Model or start an export ("requires approval, but approval policy is never"), so it can
-  only read. To let such a session write, add `default_tools_approval_mode = "approve"` to the
-  entry's block, or pass `-c 'mcp_servers.ph-composer.default_tools_approval_mode="approve"'` for one
-  run. The entry is `ph-composer` for the Default profile and `ph-composer-<name>` for a named one
-  (see Profiles below), so a named profile's block is `[mcp_servers.ph-composer-<name>]`. The token's
-  grants still limit what it can do.
+  `~/.codex/config.toml`, leaving the rest of the file as it was. If the file already has that block
+  from an earlier setup, Connect changes only its `url` and token lines and keeps your other settings.
+  Check it with `codex mcp get ph-composer`.
+- The block Connect writes holds `default_tools_approval_mode = "approve"`, so Codex runs PH-Composer's
+  tools without asking before each call. Without it, a Codex session that cannot ask, such as
+  `codex exec`, refuses the tools that change the Model or start an export ("requires approval, but
+  approval policy is never") and can only read. A block from an earlier setup without the line reads
+  as out of date until you press Repair, which adds it; an approval setting you chose yourself is kept.
+  For one run, `-c 'mcp_servers.ph-composer.default_tools_approval_mode="approve"'` does the same. The
+  entry is `ph-composer` for the Default profile and `ph-composer-<name>` for a named one (see Profiles
+  below). The token's grants still limit what it can do, so give a token only the grants its work needs.
 
 Then start a new session of your client: a session already open does not see a newly added server.
 SketchUp does not need a restart. A new token later only needs Connect in its window; the client's
@@ -110,9 +111,10 @@ the button reads Replace and connect. The replaced token stays live until you re
 
 **Client profiles.** Below the tokens, the window lists each profile it finds, for both clients, with
 the token it uses and three separate facts: whether the client's settings are set up for it, whether a
-client has contacted PH-Composer with that token since SketchUp started (and which client said so), and
-whether a session has verified the connection by reading what the token reaches, which changes nothing in
-your Models. To verify, start a new session of the client and let it run discover. When a profile's
+client has contacted PH-Composer through that profile since SketchUp started (and which client said so),
+and whether a session has verified the connection by reading what the token reaches, which changes nothing
+in your Models. Two profiles that share a token each show their own client. A profile whose settings carry
+the token itself shows what clients using the token that way did. To verify, start a new session of the client and let it run discover. When a profile's
 settings are out of date, after a port change or an older setup, press Repair: PH-Composer sets the
 client up again with the token it already saved, which it never shows. A profile that is not set up
 also shows the setup to copy and run or paste by hand. Codex settings that PH-Composer cannot change

@@ -656,10 +656,35 @@ class AgentAccessServerTest < PhComposerTestCase
                                 "clientInfo" => { "name" => "codex-mcp-client", "version" => "0.167.0" })))
     @server.pump
 
-    assert_equal "codex-mcp-client 0.167.0", AgentAccess::Listener.contacts.dig(@row.fetch("id"), "client")
-    assert_nil AgentAccess::Listener.verified[@row.fetch("id")]
+    assert_equal "codex-mcp-client 0.167.0", AgentAccess::Listener.contacts.dig([@row.fetch("id"), nil], "client")
+    assert_nil AgentAccess::Listener.verified[[@row.fetch("id"), nil]]
     call_tool("discover")
-    refute_nil AgentAccess::Listener.verified[@row.fetch("id")]
+    refute_nil AgentAccess::Listener.verified[[@row.fetch("id"), nil]]
+  end
+
+  # Two profiles sharing one token each send their own label from their file, so each keeps its own contact
+  # and verification; a label that names no supported client and profile is dropped, never kept.
+  def test_contacted_and_verified_are_kept_by_the_profile_the_request_names
+    @server.stop
+    @server = server(:on_calls => ->(rows, contacts) { AgentAccess::Listener.calls_made(rows, contacts) })
+    id = @row.fetch("id")
+    { "claude_code.default" => "claude-code 2.1.317", "codex.house-b" => "codex-mcp-client 0.167.0",
+      "codex.House B" => "spoofed" }.each do |label, client|
+      name, version = client.split
+      body(post(rpc("initialize", "protocolVersion" => "2025-06-18",
+                                  "clientInfo" => { "name" => name, "version" => version }),
+                :headers => { "PH-Composer-Profile" => label }))
+    end
+    discover = rpc("tools/call", "name" => "discover", "arguments" => {})
+    request = Thread.new { post(discover, :headers => { "PH-Composer-Profile" => "codex.house-b" }) }
+    pump_until { !request.alive? }
+    @server.pump
+
+    contacts = AgentAccess::Listener.contacts
+    assert_equal({ [id, "claude_code.default"] => "claude-code 2.1.317",
+                   [id, "codex.house-b"] => "codex-mcp-client 0.167.0", [id, nil] => "spoofed" },
+                 contacts.transform_values { |row| row["client"] })
+    assert_equal [[id, "codex.house-b"]], AgentAccess::Listener.verified.keys
   end
 
   def test_a_busy_answer_counts_as_the_tokens_latest_call_and_a_listed_token_is_never_evicted

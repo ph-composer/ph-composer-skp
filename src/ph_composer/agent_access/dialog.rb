@@ -102,7 +102,7 @@ module PhComposer
 
         # Every connection profile a saved file or a client entry names (Connections), each with the live
         # token bound to it and where that binding is kept, what the client's file says of the entry, whether
-        # a client has contacted and verified with that token since SketchUp started, and the token-free
+        # a client has contacted and verified through it since SketchUp started (seen_as), and the token-free
         # setup to run or paste. Never a token (context/AGENT_INTERFACE.md, "User-controlled local access").
         def connections(port)
           live = Tokens.snapshot
@@ -112,12 +112,22 @@ module PhComposer
             entry, source, digest = bound(client, profile, port, live)
             token = digest && live.fetch(digest)
             saved = live[Connections.digest(client, profile)]
+            seen = token && seen_as(token, client, profile, source)
             { "client" => client, "client_name" => Connections::CLIENTS.fetch(client), "profile" => profile,
               "server" => ClientConfig.server_name(profile), "token" => token && bound_token(token),
               "source" => source, "saved_token" => saved && bound_token(saved), "entry" => entry["setup"],
-              "contacted" => token && contacts[token["id"]], "verified_at" => token && verified[token["id"]],
+              "contacted" => seen && contacts[seen], "verified_at" => seen && verified[seen],
               "setup" => ClientConfig.setup_text(client, port, profile) }
           end
+        end
+
+        # Which calls a profile's contacted and verified come from, as Listener keys them: its own, when the
+        # client reads the saved file and that file names the profile (Connections::PROFILE_HEADER), so two
+        # profiles sharing a token each show their own client; otherwise the token's calls that named no
+        # profile, such as an entry carrying the token inline.
+        def seen_as(token, client, profile, source)
+          own = source == "file" && Connections.labelled?(client, profile)
+          [token["id"], own ? Connections.label(client, profile) : nil]
         end
 
         # The profiles of saved files and of the clients' own entries, by client, the default first.

@@ -333,7 +333,8 @@ test("connections list each profile's token, set-up state, contact and verificat
     assert.strictEqual(o.view.connectionsSummary.textContent, "Client profiles · 3");
     var rows = o.view.connectionList.querySelectorAll(".agent-access-connection").map(allText);
     assert.ok(rows[0].includes("Claude Code · Default") && rows[0].includes("set up") &&
-      rows[0].includes("contacted by claude-code 2.1.317") && rows[0].includes("verified"));
+      rows[0].includes("contacted by claude-code 2.1.317") && rows[0].includes("verified") &&
+      !rows[0].includes("token contacted"));
     assert.ok(rows[1].includes("Codex · house-b") && rows[1].includes("only b.skp (not open)") &&
       rows[1].includes("another port") && rows[1].includes("not contacted") && !rows[1].includes("verified"));
     assert.ok(rows[2].includes("no live token") && rows[2].includes("kept in the client's settings"));

@@ -10,6 +10,8 @@ module PhComposer
     module Listener
       PORT_KEY = "agent_access.port"
       PORTS = (1024..65_535).freeze
+      # The client profile labels whose contact and verification are kept per token (Connections.presented).
+      LABELS_PER_TOKEN = 16
 
       # Builds the Server for a port. The offline suite replaces it so no test binds the agent port.
       DEFAULT_FACTORY = lambda do |port|
@@ -99,13 +101,14 @@ module PhComposer
           (@last_calls ||= {}).dup
         end
 
-        # Each token's latest client contact since SketchUp started, by token id: the client as it named
-        # itself and when (context/AGENT_INTERFACE.md, "User-controlled local access").
+        # Each token's latest client contact since SketchUp started, by `[token id, profile label]`, the label
+        # nil for a client whose request named no profile: the client as it named itself and when
+        # (context/AGENT_INTERFACE.md, "User-controlled local access").
         def contacts
           (@contacts ||= {}).dup
         end
 
-        # When each token's latest verifying read (CallLog::VERIFYING_TOOLS) completed, by token id.
+        # When each token's latest verifying read (CallLog::VERIFYING_TOOLS) completed, keyed as `contacts`.
         def verified
           (@verified ||= {}).dup
         end
@@ -117,20 +120,32 @@ module PhComposer
           rows.each do |row|
             calls.delete(row["token"])
             calls[row["token"]] = { "at" => row["at"], "status" => row["error"] ? "error" : row["status"] }
-            (@verified ||= {})[row["token"]] = row["at"] if row["verifies"]
+            remember(@verified ||= {}, row.values_at("token", "profile"), row["at"]) if row["verifies"]
           end
-          contacts.each { |row| (@contacts ||= {})[row["token"]] = row.slice("client", "at") }
+          contacts.each do |row|
+            remember(@contacts ||= {}, row.values_at("token", "profile"), row.slice("client", "at"))
+          end
           forget_unlisted
           Dialog.refresh
         end
 
         private
 
+        # The latest value for one `[token id, label]`, keeping at most LABELS_PER_TOKEN labels of that token:
+        # a label is the client's text, so a client cannot grow this without bound.
+        def remember(held, key, value)
+          held.delete(key)
+          held[key] = value
+          labels = held.keys.select { |(token, _)| token == key.first }
+          labels.first([labels.length - LABELS_PER_TOKEN, 0].max).each { |old| held.delete(old) }
+        end
+
         # Kept for every token the store still lists (at most its live and revoked rows), however many other
         # tokens called since.
         def forget_unlisted
           listed = Tokens.list.map { |row| row["id"] }
-          [@last_calls, @contacts, @verified].compact.each { |held| held.select! { |token, _| listed.include?(token) } }
+          @last_calls&.select! { |token, _| listed.include?(token) }
+          [@contacts, @verified].compact.each { |held| held.select! { |(token, _), _| listed.include?(token) } }
         end
 
         def stop_with_no_live_token
