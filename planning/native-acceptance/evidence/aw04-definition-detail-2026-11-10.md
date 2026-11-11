@@ -1,7 +1,7 @@
 # AW04 definition detail reads, 2026-11-10
 
 Case `AW04` (agent-workflows stage AW-04, acceptance A07a of
-[the packet](../../features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md)). Run on branch
+[the packet](../../archive/agent-workflows-2026-11/ACCEPTANCE.md)). Run on branch
 `feat/agent-workflows-aw-07` at `0d5cd927` (PR #446, squash-merged to main as `009b5915` with identical source, which contains AW-04 as merged in #443), installed RBZ built from
 that head (SHA-256 `ad70209a6f95…`), SketchUp 26.1.188, Ruby 3.2.2, macOS. Fresh process on a fresh copy of the blank
 template; synthetic data only.

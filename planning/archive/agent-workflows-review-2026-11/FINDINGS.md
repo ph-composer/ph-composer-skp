@@ -28,7 +28,7 @@ Correction: reuse the new claim mechanism, then settle and enforce the descendan
 rules through feature-neutral ownership contracts. Never put Spaces names into Zones. Guard
 destructive subtree removal against another owner's records/references. Preserve ordinary permitted
 Face/Edge assignments. Test direct and wrapped containers, malformed claimed records, existing
-overlaps, preview/apply, rollback, native Undo and save/reopen. [AW-01](../../features/unscheduled/agent-workflows-2026-11/phases/aw-01-target-safety.md).
+overlaps, preview/apply, rollback, native Undo and save/reopen. [AW-01](../agent-workflows-2026-11/phases/aw-01-target-safety.md).
 
 ## R02 · P1 · Some Face writes treat a stale null identity as a current target
 
@@ -275,9 +275,9 @@ source revision in compact task receipts. Preserve existing callers' latest-stat
 existing export-generation distinction for view-only navigation. Test stale start writes nothing
 and an accepted start carries its original source identity through completion. Owner: optional AW-07 slice.
 
-## Reconciliation at AW-10 (2026-11-10)
+## Reconciliation at AW-10 (2026-11-10, updated 2026-11-11 for the Move guard)
 
-Each finding's state after the ten stages. The packet [ledger](../../features/unscheduled/agent-workflows-2026-11/STATUS.md)
+Each finding's state after the ten stages. The packet [ledger](../agent-workflows-2026-11/STATUS.md)
 holds the evidence; this table only closes the loop on the register.
 
 | Finding | State | Where |
@@ -292,9 +292,9 @@ holds the evidence; this table only closes the loop on the register.
 | R08 | Fixed | AW-06 (#445), `AW06` |
 | R09 | Fixed | AW-07 (#446), `AW07` |
 | R10 | Fixed | AW-07 (#446), `AW07` |
-| R11 | Fixed and host-verified with the dialog's buttons clicked by script; the same clicks as native input deferred to one full-screen hold (owner: the AW10H held run) | AW-08 (#448), `AW08`, `AW10H` |
+| R11 | Fixed and host-verified: the dialog's buttons clicked by script in `AW08`, then Repair, Revoke with its confirmation and Done as native clicks in `AW10H` run 4 | AW-08 (#448), `AW08`, `AW10H` |
 | R12 | Fixed | AW-02 (#441) guide through the connection; AW-10 fresh Claude Code and Codex runs (`AW10`, 13 of 14 assertions; its blocked row is the gesture conflict, not the guide). Guide gaps those clients reported deferred to a guide follow-up (owner: next intake) |
-| R13 | Partly fixed: AW-09 (#449) guards abandoned calls, hidden-Model callbacks, navigation and close. The mid-gesture rows and the guard decision they feed are deferred to one full-screen hold (owner: the AW10H held run, recipe in `_private/host/aw10/HELD_RUN.md`) | AW-09, `AW09M`, `AW09`, `AW10H` |
+| R13 | Fixed: AW-09 (#449) guards abandoned calls, hidden-Model callbacks, navigation and close. `AW10H` run 4 measured that a write cancels a Move partway through (Line unaffected); the Move guard (#453, D17-f) refuses changes `session.busy` then, and `AW10G` run 5 passed 3 of 3. Rotate and Scale unmeasured | AW-09, `AW09M`, `AW09`, `AW10H`, `AW10G`, #453 |
 | R14 | Deferred, optional (D07, D08); owner: a separately selected follow-up packet | AW-09 |
 | R15 | Fixed | AW-02 (#441) descriptors, AW-06 (#445) workflows |
 | R16 | Deferred, optional (D15-e); owner: a separately selected follow-up packet | AW-07 |

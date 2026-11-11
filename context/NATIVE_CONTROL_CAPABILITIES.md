@@ -1,6 +1,6 @@
 # Native-control capabilities
 
-DATE: 2026-10-01, updated 2026-10-26
+DATE: 2026-10-01, updated 2026-11-11
 STATUS: Development guidance grounded in SketchUp 26.1.188 on the current macOS system.
 
 Choose the control by the claim being tested. Recheck current tool capabilities when they change;
@@ -27,6 +27,7 @@ these are observed limitations of this run, not permanent limits of SketchUp or 
 | Controls shown only on hover (header and row icons) | Inject a dev-only style through `dialog.execute_script` that sets them visible, target them by coordinate, then remove the style before any at-rest check | Background control cannot hover. Never leave the style in place while judging what shows at rest (2026-10-04, ZT-07). |
 | Reading panel DOM state into Ruby | A development callback registered before the panel's `show`, or window pixels | On SketchUp 26.1.188 (2026-10-15, E18) `add_action_callback` on an already shown HtmlDialog never reached `window.sketchup`, even after `set_file` reloaded the page. Read pixels instead, or wrap the dialog's construction in a development helper. |
 | Pointer drags inside the panel | Full-screen native control: `left_mouse_down`, stepped moves, a capture while held, `left_mouse_up` | Hover-revealed handles appear for the real pointer, so no visibility style is needed when the pointer passes over the row first (E18). Bridge-driven focus changes (`Sketchup.focus`) work while the button is held, to test blur. |
+| An agent write while a native viewport gesture is partway through (Move click-move, held drag, Line) | Full-screen native control in one approved, uninterrupted hold, run from the conductor session, with every held row batched into one recipe; the bridge and the client recorder read tool state, refusals and the Undo stack | A background click on the viewport was refused while SketchUp was in the background (AW09M). AW09M and AW10H runs 1 to 3 ran no held row: the card went unanswered twice, and twice `computer_batch` aborted as a user interrupt after approval. One hold ran all rows in AW10H run 4 and AW10G run 5 ([evidence](../planning/native-acceptance/evidence/aw10-integrated-acceptance-2026-11-10.md)); the measured host fact is in [host behavior](SKETCHUP_HOST_BEHAVIOR.md) |
 | Fresh process / install | Existing hostkit launch and build/install workflow | Inspect all open documents first. `launch` quits the host and may kill it after timeout; a scratch save does not authorize discarding unrelated work. |
 
 A human handoff names one action, its starting state, when to release/stop, the expected visible cue,

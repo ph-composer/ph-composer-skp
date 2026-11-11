@@ -1,7 +1,7 @@
 # Delivery plan
 
 DATE: 2026-11-09
-STATUS: In progress. Implementation authorized 2026-11-10 (#439); one branch and PR per stage.
+STATUS: Complete 2026-11-11 (#439). Ten stages, one branch and PR per stage, merged through #440 to #453; M1 to M3 met; optional R14 and R16 work deferred.
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication
 
 ## Intended result

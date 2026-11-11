@@ -26,7 +26,7 @@ not a dependency. Its designPH integration is retired and is never reintroduced 
 | Core mechanics cited by code: registration, API, outcomes, revisions, retries, records, references | [`context/CONTRACTS.md`](context/CONTRACTS.md) |
 | Coding and compatibility rules | [`context/CODING_STANDARDS.md`](context/CODING_STANDARDS.md) |
 | Contributor architecture, scripting and extension contracts | [`context/EXTENSIBILITY.md`](context/EXTENSIBILITY.md) |
-| External agent access, discovery, model reads and writes | [`context/AGENT_INTERFACE.md`](context/AGENT_INTERFACE.md) |
+| External agent access, discovery, model reads and writes | [`context/AGENT_INTERFACE.md`](context/AGENT_INTERFACE.md); client setup, profiles and tested client versions in [`docs/AGENT_ACCESS.md`](docs/AGENT_ACCESS.md); the operating guide the connection serves in [`docs/AGENT_GUIDE.md`](docs/AGENT_GUIDE.md) |
 | Security: disclosure route, listener posture, page policies, release checklist | [`SECURITY.md`](SECURITY.md), [`context/AGENT_INTERFACE.md`](context/AGENT_INTERFACE.md) "Security posture", [`context/TECH_STACK.md`](context/TECH_STACK.md) "Panel", [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) (release checklist, `lint-paths`) |
 | Build, install, test and host procedures | [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md), implemented commands and remaining host gates |
 | Development host and browser tooling: bridge, bounded waits, diagnostic reads, fault controls, browser failure evidence | [`tools/hostkit/.index.md`](tools/hostkit/.index.md) and [`tools/ui-preview/.index.md`](tools/ui-preview/.index.md) |

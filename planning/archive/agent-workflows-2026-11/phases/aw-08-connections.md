@@ -1,6 +1,6 @@
 # AW-08 · Repairable client connections
 
-STATUS: Authorized 2026-11-10, not started. ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication.
+STATUS: Complete. Merged to main (#448, `d204c15e`), API 1.41; host case `AW08` pass; the dialog's native clicks passed in AW-10's `AW10H` run 4. ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication.
 DEPENDS ON: AW-02 and D02 profile UX choice. FINDING: R11. CONTRACT: C08. ACCEPTANCE: A11.
 
 ## Outcome

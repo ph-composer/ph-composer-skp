@@ -1,6 +1,6 @@
 # AW-02 · Complete discovery and installed guidance
 
-STATUS: Implemented on branch `feat/agent-workflows-aw-02` (API 1.35), reviewed and host/MCP gate passed; see STATUS. ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication.
+STATUS: Complete. Merged to main (#441, `5818522d`), API 1.35; host case `AW02` pass. ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication.
 DEPENDS ON: authorization; can precede target fixes without claiming safe writes.
 FINDINGS: R05, R12, R15 descriptor portion. CONTRACTS: C02/C03. ACCEPTANCE: A05/A12/A15.
 

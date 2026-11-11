@@ -1,7 +1,7 @@
 # AW02 discovery and installed guide, 2026-11-10
 
 Case `AW02` (agent-workflows stage AW-02, acceptance A05, the installed-route part of A12 and the descriptor
-part of A15 of [the packet](../../features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md)). Branch
+part of A15 of [the packet](../../archive/agent-workflows-2026-11/ACCEPTANCE.md)). Branch
 `feat/agent-workflows-aw-02` at `5c93488b` (PR #441), installed RBZ built from that head (SHA-256 `55ce53c2ea7a…`),
 SketchUp 26.1.188, Ruby 3.2.2, macOS. Fresh process on a fresh copy of the blank template; synthetic data only.
 

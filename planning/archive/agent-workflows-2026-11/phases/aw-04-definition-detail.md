@@ -1,6 +1,6 @@
 # AW-04 · Complete definition and metadata reads
 
-STATUS: Authorized 2026-11-10, not started. ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication.
+STATUS: Complete. Merged to main (#443, `1996d6fe`), API 1.37; host case `AW04` pass. ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication.
 DEPENDS ON: AW-02. FINDING: R07 definition/metadata portion. CONTRACT: C03. ACCEPTANCE: A07a.
 
 ## Outcome

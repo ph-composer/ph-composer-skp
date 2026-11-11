@@ -1,6 +1,6 @@
 # Proposed contract changes
 
-STATUS: C01 bound and implemented by AW-01 (API 1.34); C02 bound and implemented by AW-02 (API 1.35); C04 bound and implemented by AW-03 (API 1.36); C03 definition part bound by AW-04 (API 1.37); C03 occurrence part bound by AW-05 (API 1.38); C05 bound by AW-06 (API 1.39); C06 and C07 bound on the AW-07 branch (API 1.40); C08 first half (client profiles) bound by AW-08 (API 1.41); its second half (host readiness) bound by AW-09; the native gesture guard bound from `AW10H` run 4 (API 1.43). Baseline API 1.31.
+STATUS: Complete: every contract bound and merged to main, durable rules folded into `context/`. C01 bound and implemented by AW-01 (API 1.34); C02 bound and implemented by AW-02 (API 1.35); C04 bound and implemented by AW-03 (API 1.36); C03 definition part bound by AW-04 (API 1.37); C03 occurrence part bound by AW-05 (API 1.38); C05 bound by AW-06 (API 1.39); C06 and C07 bound by AW-07 (API 1.40); C08 first half (client profiles) bound by AW-08 (API 1.41); its second half (host readiness) bound by AW-09 (API 1.42); the native gesture guard bound from `AW10H` run 4 (API 1.43). Baseline API 1.31.
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication
 
 The durable authorities remain `context/CONTRACTS.md`, `AGENT_INTERFACE.md`, `EXTENSIBILITY.md`

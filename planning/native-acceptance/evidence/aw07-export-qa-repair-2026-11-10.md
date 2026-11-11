@@ -1,7 +1,7 @@
 # AW07 export QA, run diagnostics and thermal-bridge repair, 2026-11-10
 
 Case `AW07` (agent-workflows stage AW-07, acceptance A09 and A10 of
-[the packet](../../features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md)). Branch `feat/agent-workflows-aw-07`
+[the packet](../../archive/agent-workflows-2026-11/ACCEPTANCE.md)). Branch `feat/agent-workflows-aw-07`
 at `0d5cd927` (PR #446, squash-merged to main as `009b5915` with identical source), installed RBZ built from that head (SHA-256 `ad70209a6f95…`), SketchUp 26.1.188, Ruby 3.2.2,
 macOS. Fresh process on a fresh copy of the blank template; synthetic data only.
 

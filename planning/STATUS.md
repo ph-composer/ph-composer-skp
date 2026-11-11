@@ -10,7 +10,7 @@ Master index. Every active item gets a row; archived items move to
 The order the work is planned in is in [ROADMAP.md](ROADMAP.md).
 
 Phase 0, its four completed investigations, Phase 1, Phase 2, Phase 3a (Spaces), Phase 3b (thermal bridges), the Ruby readability
-program, production support and developer observability are in [the archive](archive/README.md).
+program, production support, developer observability and agent workflow completeness are in [the archive](archive/README.md).
 Feature packets are grouped in phase directories under `features/`; the Phase column below is
 the roadmap phase, `cross` spans phases, `none` is unscheduled and `n/a` is not a feature packet.
 The remote exists. Historical `none (no remote)` issue cells below mean no issue was recorded;
@@ -20,7 +20,6 @@ reconcile them at each packet's intake rather than treating the old reason as a 
 
 | Phase | Item | Kind | State | Issue | Pointer |
 | ----- | ---- | ---- | ----- | ----- | ------- |
-| none | Agent workflow completeness, November 2026 | implementation | In progress: ten stages authorized 2026-11-10; AW-01 to AW-09 merged, AW-10 (evidence and handoff) on branch; A17 open; held native rows await one full-screen hold | [#439](https://github.com/ph-composer/ph-composer-skp/issues/439) (implementation; #435 tracked publication) | [review](code-review/agent-workflows-2026-11/README.md); [implementation packet](features/unscheduled/agent-workflows-2026-11/README.md); [ledger](features/unscheduled/agent-workflows-2026-11/STATUS.md) |
 | none | GitHub organization and SketchUp repository migration | workflow | Implemented and native-verified 2026-10-25; merge tracked in PR #306 | [#305](https://github.com/ph-composer/ph-composer-skp/issues/305) | [migration plan](features/unscheduled/github-organization-migration.md) |
 | 4 | Mechanical, coordinating packet | phase | Scoped; planned 2026-10-21 as P4-01 to P4-15, D4-01 to D4-12 answered as recommended, none authorized | none (local planning draft) | [features/phase-04-mechanical/](features/phase-04-mechanical/README.md); tracked in its [ledger](features/phase-04-mechanical/STATUS.md) |
 | 4 | Hot water piping | feature | Requested, PRD drafted; re-baselined against `main` 2026-10-21 | none (local planning draft) | [features/phase-04-mechanical/hot-water-piping/](features/phase-04-mechanical/hot-water-piping/README.md) |
