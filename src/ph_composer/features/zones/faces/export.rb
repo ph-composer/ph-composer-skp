@@ -27,7 +27,7 @@ module PhComposer
         def contexts(reader)
           zone_faces(reader.snapshot).map do |entry|
             stored = entry.record(FACE_DICTIONARY)
-            owner = Zones::ExportProjection.zone_owner(reader.snapshot, entry)
+            owner = Zones::ExportProjection.zone_owner(reader, entry.path)
             valid = stored && Schema.problems(stored).empty?
             record = valid && reader.entity_record(stored,
                                                    :fields => EXPORTED_FIELDS,
@@ -212,7 +212,7 @@ module PhComposer
             Schema.validate!(record)
             geometry = entry.geometry
             stamp = entry.record(Zones::STAMP_DICTIONARY)
-            owner = Zones::ExportProjection.zone_owner(reader.snapshot, entry)
+            owner = Zones::ExportProjection.zone_owner(reader, entry.path)
             unless stamp && stamp["zone_id"].is_a?(String) && owner && owner.fetch(1)["id"] == stamp["zone_id"]
               raise Export::Blocked.new("face.wrong_zone", "Face #{record.fetch('id')} has no owning Zone stamp.")
             end

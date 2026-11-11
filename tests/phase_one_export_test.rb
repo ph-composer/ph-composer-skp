@@ -140,6 +140,27 @@ class PhaseOneExportTest < PhComposerTestCase
     assert_equal "face.wrong_zone", error.code
   end
 
+  # A Zone owns what lies strictly below it, through any plain container, and only that; a Zone inside a
+  # Zone refuses.
+  def test_zone_owner_reads_through_plain_containers_and_refuses_a_nested_zone
+    seed_two_boxes
+    left = @model.entities.to_a.find { |entity| entity.persistent_id == 1000 }
+    container = Sketchup::Group.new(1100, Sketchup::Entities.new([Sketchup::Face.new(1101)]))
+    left.entities << container
+    owner = PhComposer::Zones::ExportProjection.method(:zone_owner)
+    reader = snapshot_reader
+
+    assert_equal [[1000], "zon_AAAAAAAAAAAA"], owner.call(reader, [1000, 1100, 1101]).then { |e, r| [e.path, r["id"]] }
+    assert_equal "zon_BBBBBBBBBBBB", owner.call(reader, [2000, 2001]).fetch(1)["id"]
+    assert_nil owner.call(reader, [1000])
+    assert_nil owner.call(reader, [10_000, 1101])
+
+    nested = PhComposer::Zones::ZONE_STORE.read(left).merge("id" => "zon_#{'C' * 12}")
+    PhComposer::Zones::ZONE_STORE.write(container, nested)
+    error = assert_raises(PhComposer::Export::Blocked) { owner.call(snapshot_reader, [1000, 1100, 1101]) }
+    assert_equal ["face.wrong_zone", "A Face is contained by more than one Zone."], [error.code, error.message]
+  end
+
   def test_deleted_surface_counterpart_is_an_accounted_omission
     zones = seed_two_boxes
     invoke("ph_composer.zones.solve_adjacency", "zones" => zones)
@@ -158,6 +179,10 @@ class PhaseOneExportTest < PhComposerTestCase
   end
 
   private
+
+  def snapshot_reader
+    PhComposer::Export::SnapshotReader.new(nil, PhComposer::Export::GeometrySnapshot.capture(@model, :revision => 0))
+  end
 
   def contributor_names
     [PhComposer::Zones::Faces::ExportProjection::SECTION, PhComposer::Zones::ExportProjection::SECTION,
