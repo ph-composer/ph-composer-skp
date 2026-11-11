@@ -22,6 +22,20 @@ class ZoneSplitIdentityMenuTest < PhComposerTestCase
     @rows = [row(101), row(102)]
   end
 
+  def test_offered_on_one_selected_face_but_not_on_a_floor_segment_face_inside_a_space
+    assert MENU.available?(@session)
+
+    segment = Sketchup::Face.new(401)
+    PhComposer::Spaces::FLOOR_SEGMENT_STORE.write(segment, "id" => "fsg_AAAAAAAAAAAA")
+    volume = Sketchup::Group.new(400, Sketchup::Entities.new([segment]))
+    PhComposer::Spaces::VOLUME_STORE.write(volume, "id" => "vol_AAAAAAAAAAAA")
+    @model.entities << volume
+    @model.active_path = [volume]
+    @model.selection.clear
+    @model.selection.add(segment)
+    refute MENU.available?(@session)
+  end
+
   def test_missing_proof_uses_selected_piece_and_preserves_preview_revision
     calls = 0
     previewer = lambda do |**args|
