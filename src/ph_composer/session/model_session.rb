@@ -82,7 +82,7 @@ module PhComposer
       return nil unless label && state != 0 && active_tool_name == name
 
       "The user is partway through a #{label} in SketchUp (#{name}), which a change would cancel; nothing was " \
-        "written. Retry after the user finishes or cancels the #{label}."
+        "written. Read context again once the user finishes or cancels the #{label}, then retry."
     end
 
     # Runs one change request from its first read to its recorded outcome. While it runs the session

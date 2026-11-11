@@ -122,5 +122,5 @@ committed).
 From run 4, choice D17-f: every action refuses `session.busy`, before it takes a sequence, while MoveTool is in a
 state other than 0, with a message naming the tool; `context` readiness reports it. SketchUp's Line tool stays
 unguarded, and reads, view commands and export start are unchanged. Offline tests in `tests/gesture_guard_test.rb`
-cover the tool-state transitions, the refusal and the same sequence running after the Move ends. Case `AW10G`
+cover the tool-state transitions, the refusal, the same request running after a cancelled Move and answering `revision.stale` after a finished one. Case `AW10G`
 re-measures click-move, held drag and Line on the installed build; recipe `_private/host/aw10/HELD_RUN.md`.

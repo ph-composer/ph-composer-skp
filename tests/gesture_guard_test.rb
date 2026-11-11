@@ -48,7 +48,7 @@ class GestureGuardTest < PhComposerTestCase
     assert_nil @session.gesture_reason
   end
 
-  def test_a_write_during_a_move_is_refused_busy_writes_nothing_and_its_sequence_runs_after
+  def test_a_write_during_a_move_is_refused_busy_writes_nothing_and_runs_after_a_cancelled_move
     @model.tools.use_native_tool("MoveTool", 1)
     revision = @session.revision
 
@@ -60,6 +60,22 @@ class GestureGuardTest < PhComposerTestCase
     assert_includes refused["message"], "MoveTool"
     assert_equal ["completed", "committed", revision + 1], later.values_at("status", "effect", "revision")
     assert_equal 1, @model.operations.length
+  end
+
+  # The user's finished Move is a commit of its own, so the held request is stale and its caller decides again.
+  def test_after_a_finished_move_the_held_request_is_stale_and_a_new_one_runs
+    @model.tools.use_native_tool("MoveTool", 1)
+    revision = @session.revision
+    refused = invoke(1, revision)
+    @model.tools.use_native_tool("MoveTool", 0)
+    @session.host_event(:transaction_committed)
+
+    stale = invoke(1, revision)
+    fresh = invoke(2)
+
+    assert_equal "session.busy", refused["code"]
+    assert_equal "revision.stale", stale["code"]
+    assert_equal %w[completed committed], fresh.values_at("status", "effect")
   end
 
   def test_a_retry_of_a_change_that_already_ran_answers_its_outcome_during_a_move

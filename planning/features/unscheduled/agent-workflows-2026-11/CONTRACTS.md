@@ -424,8 +424,9 @@ gesture a commit cancels. New names and rules:
   last recorded state is that of a tool in `GESTURE_TOOLS`, other than 0, and SketchUp still names it the active
   tool; otherwise nil. SketchTool (Line) is not listed: its gesture survives a commit.
 - `Dispatch#mutation`'s busy check takes `busy_reason`, else `gesture_reason`, and refuses `session.busy` (detail
-  `reason`) before the sequence is taken: nothing is written, nothing is retained, and the same request runs once the
-  state returns to 0. It applies to every caller through dispatch. Queries, view commands, setup commands,
+  `reason`) before the sequence is taken: nothing is written and nothing is retained. A cancelled Move leaves the
+  revision, so the same request then runs; a finished Move advances it, so the same request answers `revision.stale`
+  and the caller reads again and sends a new one. It applies to every caller through dispatch. Queries, view commands, setup commands,
   previews, export tasks and `busy_reason` do not consult it.
 - `context` readiness: `busy` is true and `reason` is `busy_reason`, else `gesture_reason`; `active_tool` as
   before. `discover`'s session row `busy` agrees. No schema change. `Refusals::MEANINGS["session.busy"]` names the Move.
