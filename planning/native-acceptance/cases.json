@@ -4689,6 +4689,22 @@
         "src/ph_composer/shell/context_commands.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "AW10G",
+      "label": "Agent-workflows gesture guard re-measurement on the installed RBZ under one full-screen hold: agent writes over the real loopback MCP listener while a native Move is partway through (click-move and held drag) answer session.busy with nothing written, the Move then completes as its own Undo step and reads still answer; a native Line partway through is unchanged (writes commit, Draw Line its own Undo step)",
+      "mode": "native",
+      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/session/host_observers.rb",
+        "src/ph_composer/session/model_session.rb",
+        "src/ph_composer/session/sessions.rb",
+        "src/ph_composer/shell/dispatch.rb",
+        "src/ph_composer/shell/context_commands.rb",
+        "src/ph_composer/agent_access/server.rb",
+        "src/ph_composer/agent_access/executor.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }

@@ -167,10 +167,11 @@ module PhComposer
         "selection" => { "count" => rows.length, "entities" => page, "next_cursor" => next_cursor } }
     end
 
-    # Whether a change could start now: not while another runs or deferred work waits, and the tool the
-    # user has active, which some commands also refuse during.
+    # Whether a change could start now: not while another runs or deferred work waits, or while the user is
+    # partway through a gesture a commit would cancel; and the tool the user has active, which some commands
+    # also refuse during.
     def readiness(session, model)
-      reason = session.busy_reason
+      reason = session.busy_reason || session.gesture_reason
       tools = model.respond_to?(:tools) ? model.tools : nil
       { "busy" => !reason.nil?, "reason" => reason,
         "active_tool" => tools.respond_to?(:active_tool_name) ? tools.active_tool_name.to_s : nil }

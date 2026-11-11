@@ -196,14 +196,52 @@ module Sketchup
     end
 
     # The host names the active tool: Select when none is chosen, and "RubyTool" for an extension's own.
-    Tools = Struct.new(:model) do
+    # `use_native_tool` stands in for the user choosing a native tool and moving it through its states, reported
+    # to the ToolsObserver.
+    class Tools
+      # Any id: the host's numbers, such as 21048 for Move on 26.1.188, are not what the extension reads.
+      NATIVE_TOOL_ID = 1
+
+      attr_reader :model, :observers
+
+      def initialize(model)
+        @model = model
+        @observers = []
+        @native = nil
+      end
+
       def active_tool_name
+        return @native if @native && !model.active_tool
+
         model.active_tool ? "RubyTool" : "SelectionTool"
+      end
+
+      def add_observer(observer)
+        @observers << observer unless @observers.include?(observer)
+        true
+      end
+
+      def remove_observer(observer)
+        !@observers.delete(observer).nil?
+      end
+
+      # As the host reported on 26.1.188: a newly chosen tool's state 0 first, then the choice, then each later state.
+      def use_native_tool(name, state = 0)
+        chosen = @native != name
+        if chosen
+          @native = name
+          @observers.dup.each { |observer| observer.onToolStateChanged(self, name, NATIVE_TOOL_ID, 0) }
+          @observers.dup.each { |observer| observer.onActiveToolChanged(self, name, NATIVE_TOOL_ID) }
+        end
+        return self if chosen && state.zero?
+
+        @observers.dup.each { |observer| observer.onToolStateChanged(self, name, NATIVE_TOOL_ID, state) }
+        self
       end
     end
 
     def tools
-      Tools.new(self)
+      @tools ||= Tools.new(self)
     end
 
     def select_tool(tool)

@@ -19,6 +19,11 @@ module PhComposer
     # Host events that change what the host shows and not the Model.
     VIEW_EVENTS = %i[selection_changed camera_changed].freeze
 
+    # Native tools whose gesture partway through (any tool state but 0) a commit cancels: SketchUp resets the
+    # tool and drops the user's edit (context/SKETCHUP_HOST_BEHAVIOR.md). Only measured tools are listed;
+    # the Line tool (SketchTool) keeps its gesture through a commit.
+    GESTURE_TOOLS = { "MoveTool" => "Move" }.freeze
+
     def initialize(model)
       @model = model
       @id = SecureRandom.uuid.freeze
@@ -34,6 +39,7 @@ module PhComposer
       @feature_state = {}
       @callers = CallerRegistry.new
       @outcomes = OutcomeStore.new
+      @tool_state = nil
     end
 
     # Built by the block on first use and kept for the life of the session.
@@ -47,7 +53,7 @@ module PhComposer
 
     # The observers attached to this session's Model, its selection and its tags, kept so detaching removes
     # exactly those.
-    Observers = Struct.new(:model, :selection, :layers, :view, :rendering, keyword_init: true)
+    Observers = Struct.new(:model, :selection, :layers, :view, :rendering, :tools, keyword_init: true)
 
     def add_observers(observers)
       @observers = observers
@@ -60,6 +66,23 @@ module PhComposer
 
       deferred = @feature_state.each_value.any? { |state| state.respond_to?(:pending?) && state.pending? }
       deferred ? "This Model has deferred work that has not finished." : nil
+    end
+
+    # The active tool and its state, as the host reports them (HostObservers::ToolsObserver).
+    def tool_state_changed(name, state)
+      @tool_state = [name.to_s, state.to_i]
+    end
+
+    # Why a change request cannot start now although a read can, or nil: the user is partway through a
+    # gesture that the change's commit would cancel. The tool SketchUp names now must still be the one whose
+    # state was recorded, so a missed callback cannot hold writes after the user switched tools.
+    def gesture_reason
+      name, state = @tool_state
+      label = GESTURE_TOOLS[name]
+      return nil unless label && state != 0 && active_tool_name == name
+
+      "The user is partway through a #{label} in SketchUp (#{name}), which a change would cancel; nothing was " \
+        "written. Retry after the user finishes or cancels the #{label}."
     end
 
     # Runs one change request from its first read to its recorded outcome. While it runs the session
@@ -157,6 +180,11 @@ module PhComposer
     end
 
     private
+
+    def active_tool_name
+      tools = model.respond_to?(:tools) ? model.tools : nil
+      tools.respond_to?(:active_tool_name) ? tools.active_tool_name.to_s : nil
+    end
 
     def advance_revision_for(kind)
       case kind

@@ -301,7 +301,8 @@ edit-path and value checks still run when the revision matches.
 
 Dispatch runs only on the host-safe execution boundary and serializes mutations. A modal tool,
 Model transition or unsettled session refuses at once as `busy`; there is no durable queue of
-edits, and a scheduled callback revalidates when it runs.
+edits, and a scheduled callback revalidates when it runs. A native gesture a commit would cancel, measured
+for Move partway through, refuses changes alone as `busy` (`ModelSession#gesture_reason`); reads still run.
 
 Validate the whole change set before opening the transaction. One operation owns one native Undo
 step. Feature helpers join the caller's operation; they never open nested independent operations

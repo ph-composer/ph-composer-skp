@@ -1,7 +1,7 @@
 # AW10 integrated acceptance
 
 DATE: 2026-11-10
-CASES: `AW05R`, `AW10`, `AW10H` (agent-workflows AW-10)
+CASES: `AW05R`, `AW10`, `AW10H`, `AW10G` (agent-workflows AW-10)
 BUILD: installed RBZ from `e5e1f4b3` (branch `feat/agent-workflows-aw-10`, stacked on PR #449); SketchUp 26.1.188,
 macOS 26.7.1; real loopback listener on 46110; normal composition.
 
@@ -66,7 +66,7 @@ or that `volumes.list` needs a `space`; `host_bridge.py quit` saves each documen
 token follows that Save As and no longer serves the reopened file; a `pushpull` on a just-opened second Model crashed
 SketchUp (run `AW10-crashed`, now in `context/SKETCHUP_HOST_BEHAVIOR.md`).
 
-## AW10H: the held native rows (blocked)
+## AW10H: the held native rows (run 4: dialog and Line pass, Move fails)
 
 FIXTURE: fresh copy of the blank template; nine Groups and an approved destination by labelled setup, the AW-09
 development recorder checked against a shipping context read (`run_end` completed/ok, SelectionTool in both), a
@@ -97,3 +97,30 @@ Preparation verified again: recorder `run_end` equal to the client's check row, 
 the listener on 46111. `request_full_control` was approved; the first `computer_batch` (one screenshot) was then
 aborted as a user interrupt before its first action. Control was released and not requested again. All seven rows
 are recorded `blocked` a third time; the guard decision stays open. Cleanup read back as in run 2.
+
+### Run 4 (2026-11-11, main `95147b5e`): one uninterrupted hold; Move fails, guard required
+
+Installed RBZ from main `95147b5e`, SketchUp 26.1.188, fresh process, the same fixture and labelled setup, one
+approved full-screen hold run from the conductor session, uninterrupted. The recorder's `run_end` counts equal the
+client rows (38: completed/ok 34, refused `revision.stale` 2, busy `session.busy` 2).
+
+| Assertion | Result |
+| --- | --- |
+| Dialog Repair | Pass: native click on Repair (Codex) with the listener on 46111; notice "Codex is set up to read its token"; the saved URL reads 46111 |
+| Dialog Revoke and confirm | Pass: the confirmation named both affected profiles (Claude Code, Codex); after its Revoke both rows say no live token |
+| Dialog Done | Pass: the scripted issue step was refused (empty capabilities), so the token was made natively (New token, Read only, Create); Done returned to the main screen listing it. No screenshot of the issued token kept |
+| Move click-move | Fail: with MoveTool in state 1 (box displaced), `materials.create` committed and SketchUp reset MoveTool to state 0 between `onTransactionStart` and `onTransactionCommit`; the box returned to its origin and the tool waited for a new pick. Undo held Make Zone, Create Material and the fixture, no Move. `context.open` answered `session.busy`, `moved` `revision.stale`; reads, Colour-by, capture and export start unaffected |
+| Move held drag | Fail: the same while the button was held; the box was back at its origin before mouse-up, no Move in the Undo stack |
+| Line | Pass: with SketchTool in state 1 the same writes committed (Zone 8), the start point held, the second click drew the Edge, and Draw Line was its own Undo step above Make Zone; Redo restored it |
+| Guard decision | Required: a write cancels a Move partway through; scoped by the evidence to MoveTool in a state other than 0 |
+
+Raw recorder, client rows, Edit menu labels and screenshots are kept in `_private/host/aw10/run4/AW10H/` (not
+committed).
+
+## AW10G: the Move guard (implemented, re-measurement pending)
+
+From run 4, choice D17-f: every action refuses `session.busy`, before it takes a sequence, while MoveTool is in a
+state other than 0, with a message naming the tool; `context` readiness reports it. SketchUp's Line tool stays
+unguarded, and reads, view commands and export start are unchanged. Offline tests in `tests/gesture_guard_test.rb`
+cover the tool-state transitions, the refusal and the same sequence running after the Move ends. Case `AW10G`
+re-measures click-move, held drag and Line on the installed build; recipe `_private/host/aw10/HELD_RUN.md`.

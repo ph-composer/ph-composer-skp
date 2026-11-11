@@ -4682,7 +4682,7 @@ What each common code means, as the agent connection's discover section `refusal
 | `request.pending` | A retry of a request that is still running; ask for its outcome later. |
 | `request.sequence_conflict` | This sequence or key was already used for a different change. |
 | `revision.stale` | The Model changed after expected_revision; read again and decide again. |
-| `session.busy` | Another change is running or deferred work is settling; read context and retry later. |
+| `session.busy` | Another change is running, deferred work is settling or the user is partway through a Move; read context and retry later. |
 | `session.unknown` | The Model session is closed, was reopened or was never opened; discover again. |
 
 ## Queries
@@ -66763,3 +66763,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.40 | 2026-11-10 | Complete export QA and repair: export_preflight takes compact (counts by owner and code) and part (a filtered page of findings or repairs, or one row whole); preflights report the metadata extraction refuses; export_status and latest_export take compact, every task names its source and diagnostics, and export_status with part reads an ended task's findings, report and result, refusing task.running before it ends; thermal_bridges.edges.repair_candidates and edges.repair remove an unreadable or stranded Edge assignment. |
 | 1.41 | 2026-11-10 | The Agent Access dialog's catalog adds agent_access.connection_changed, refused when a connection profile is bound to another token than the one shown; no operation changes. |
 | 1.42 | 2026-11-10 | ph_composer.spaces.context.open declares session.inactive: it, context.open, spaces.context.close and spaces.locate refuse to move the edit path of a Model SketchUp is not showing. An agent call whose client closed the connection before it ran is not run. |
+| 1.43 | 2026-11-11 | Every action refuses session.busy, before it takes a sequence, while the user is partway through a Move in SketchUp, which its commit would cancel; context readiness and discover's session busy say so. Reads and the Line tool are unaffected. |
