@@ -71,6 +71,7 @@ module Sketchup
   class ViewObserver; end
   class PagesObserver; end
   class LayersObserver; end
+  class ToolsObserver; end
 
   class Color
     attr_reader :red, :green, :blue, :alpha

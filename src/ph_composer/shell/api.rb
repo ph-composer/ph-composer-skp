@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 42
+    MINOR = 43
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -211,7 +211,12 @@ module PhComposer
       { "minor" => 42, "date" => "2026-11-10",
         "change" => "ph_composer.spaces.context.open declares session.inactive: it, context.open, " \
                     "spaces.context.close and spaces.locate refuse to move the edit path of a Model SketchUp is " \
-                    "not showing. An agent call whose client closed the connection before it ran is not run." }
+                    "not showing. An agent call whose client closed the connection before it ran is not run." },
+      { "minor" => 43, "date" => "2026-11-11",
+        "change" => "Every action refuses session.busy, before it takes a sequence, while the user is partway " \
+                    "through a Move in SketchUp, which its commit would cancel; context readiness and discover's " \
+                    "session busy say so. Reads and the Line tool are unaffected. An agent invoke answered busy " \
+                    "releases its idempotency_key for the retry." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {
@@ -411,7 +416,8 @@ module PhComposer
     def session_summary(session)
       {
         "id" => session.id, "revision" => session.revision, "file_name" => File.basename(session.model.path.to_s),
-        "active" => session.model.equal?(Sketchup.active_model), "busy" => !session.busy_reason.nil?
+        "active" => session.model.equal?(Sketchup.active_model),
+        "busy" => !(session.busy_reason || session.gesture_reason).nil?
       }
     end
 

@@ -114,6 +114,23 @@ module PhComposer
       end
     end
 
+    # The active tool and its state: a commit cancels a Move partway through, so a change request waits
+    # for the user (ModelSession#gesture_reason). A newly chosen tool starts in state 0.
+    class ToolsObserver < Sketchup::ToolsObserver
+      def initialize(model)
+        super()
+        @model = model
+      end
+
+      def onActiveToolChanged(_tools, name, _id)
+        Sessions.for(@model)&.tool_state_changed(name, 0)
+      end
+
+      def onToolStateChanged(_tools, name, _id, state)
+        Sessions.for(@model)&.tool_state_changed(name, state)
+      end
+    end
+
     class SelectionObserver < Sketchup::SelectionObserver
       def onSelectionBulkChange(selection)
         selection_changed(selection)

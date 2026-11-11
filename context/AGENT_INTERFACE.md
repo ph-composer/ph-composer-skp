@@ -242,7 +242,8 @@ accepted by a write.
 
 Implemented: the Model context read, `ph_composer.context.read` (and the agent `context` tool). It
 answers the session (id, file name, the Model's own file path, revision, view generation, whether it
-is the active Model), readiness (busy and why, and the active SketchUp tool), the edit path from the
+is the active Model), readiness (busy and why, and the active SketchUp tool; busy also while the user is
+partway through a Move, which only changes wait for), the edit path from the
 root as persistent id, type and name per open Group or Component, the camera (eye and target in
 metres, up, perspective with its field of view and the extent it spans or parallel with its height, and two-point perspective's offset and scale), and the selection in pages by
 persistent id: at most 200 entities, 100 by default, and never more than 16 KB of rows
@@ -554,7 +555,13 @@ the worker asks before it queues the call and the pump again before it runs it
 only its sending side after the request reads as gone too. Its key was never given a
 sequence, so the same invoke sent again runs once. A sheet such as Make Component stops no timer and
 is not a busy state. Changes to a Model SketchUp is not showing run and land on that Model's Undo
-stack; moving its edit path is refused `session.inactive` (measured in the AW09M run, 2026-11-10).
+stack; moving its edit path is refused `session.inactive` (measured in the AW09M run, 2026-11-10). A change's commit
+cancels a native Move partway through (`context/SKETCHUP_HOST_BEHAVIOR.md`), so every action refuses
+`session.busy` while MoveTool is in a state other than 0, before it takes a sequence or key. A cancelled Move leaves the
+revision as it was, so the same invoke then runs; a finished Move advances it, so the agent reads `context` again and sends
+a new invoke. A busy invoke's `idempotency_key` is released (`Sequencer#release`), so its next send takes a new
+sequence; reads, view commands, previews and export start still run, and the
+Line tool partway through is not guarded (measured in the AW10H run, 2026-11-11).
 
 The executor rechecks the token, validates the arguments against the tool's fixed schema, and makes
 the one API call the tool names (`agent_access/tools.rb`, the allowlist). A token acts on a session

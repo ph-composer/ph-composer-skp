@@ -175,7 +175,9 @@ module PhComposer
       retained = retained_outcome(session, caller, sequence, name, params, expected_revision, proposal_digest)
       return retained if retained
 
-      refuse_if_busy!(session)
+      # A change also waits while the user is partway through a gesture its commit would cancel, such as a Move;
+      # reads do not (ModelSession#gesture_reason).
+      refuse_if_busy!(session, session.busy_reason || session.gesture_reason)
       # Digested before the sequence is taken, so anything that cannot be canonicalized still leaves
       # the caller's sequence free.
       digest = request_digest(name, params, expected_revision, proposal_digest)
@@ -317,8 +319,7 @@ module PhComposer
                                                                            :revision => session.revision)
     end
 
-    def refuse_if_busy!(session)
-      reason = session.busy_reason
+    def refuse_if_busy!(session, reason = session.busy_reason)
       raise CodedError.new("session.busy", reason, "reason" => reason) if reason
     end
 

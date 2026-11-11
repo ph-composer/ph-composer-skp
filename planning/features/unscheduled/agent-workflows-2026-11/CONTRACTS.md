@@ -1,6 +1,6 @@
 # Proposed contract changes
 
-STATUS: C01 bound and implemented by AW-01 (API 1.34); C02 bound and implemented by AW-02 (API 1.35); C04 bound and implemented by AW-03 (API 1.36); C03 definition part bound by AW-04 (API 1.37); C03 occurrence part bound by AW-05 (API 1.38); C05 bound by AW-06 (API 1.39); C06 and C07 bound on the AW-07 branch (API 1.40); C08 first half (client profiles) bound by AW-08 (API 1.41); its second half (host readiness) bound by AW-09 without the native gesture policy, which awaits measurement. Baseline API 1.31.
+STATUS: C01 bound and implemented by AW-01 (API 1.34); C02 bound and implemented by AW-02 (API 1.35); C04 bound and implemented by AW-03 (API 1.36); C03 definition part bound by AW-04 (API 1.37); C03 occurrence part bound by AW-05 (API 1.38); C05 bound by AW-06 (API 1.39); C06 and C07 bound on the AW-07 branch (API 1.40); C08 first half (client profiles) bound by AW-08 (API 1.41); its second half (host readiness) bound by AW-09; the native gesture guard bound from `AW10H` run 4 (API 1.43). Baseline API 1.31.
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication
 
 The durable authorities remain `context/CONTRACTS.md`, `AGENT_INTERFACE.md`, `EXTENSIBILITY.md`
@@ -412,6 +412,29 @@ through was not measured, so no tool-name write guard is added. New names and ru
   work and timers stop. A call on a closed target answers `session.unknown`.
 - Unchanged: `context` readiness, `busy_reason`, the busy check in dispatch, queue bounds, the 30 s handoff and
   10 s starvation answers, sequences, retained outcomes and replay.
+
+**Gesture guard bound from `AW10H` run 4 (API 1.43; choice D17-f).** A Move partway through is the one measured
+gesture a commit cancels. New names and rules:
+
+- `HostObservers::ToolsObserver`, attached per Model to `model.tools` by `Sessions.for` and removed by
+  `Sessions.detach` (`ModelSession::Observers` adds `tools`, the pair of tools object and observer). It records
+  and returns: `onToolStateChanged(tools, name, id, state)` and `onActiveToolChanged(tools, name, id)` (state 0)
+  call `ModelSession#tool_state_changed(name, state)`.
+- `ModelSession::GESTURE_TOOLS` maps `MoveTool` to its label, Move. `ModelSession#gesture_reason`: a message naming the tool while the
+  last recorded state is that of a tool in `GESTURE_TOOLS`, other than 0, and SketchUp still names it the active
+  tool; otherwise nil. SketchTool (Line) is not listed: its gesture survives a commit.
+- `Dispatch#mutation`'s busy check takes `busy_reason`, else `gesture_reason`, and refuses `session.busy` (detail
+  `reason`) before the sequence is taken: nothing is written and nothing is retained. A cancelled Move leaves the
+  revision, so the same request then runs; a finished Move advances it, so the same request answers `revision.stale`
+  and the caller reads again and sends a new one. It applies to every caller through dispatch. Queries, view commands, setup commands,
+  previews, export tasks and `busy_reason` do not consult it.
+- `Sequencer#release(key, sequence)`: the agent connection's `invoke` releases its `idempotency_key` when the answer
+  is `busy`, since dispatch took no sequence; the key's next send takes a new sequence, so two keys refused during a
+  Move both run afterwards in either order. Any other answer keeps the key's sequence, as before.
+- `context` readiness: `busy` is true and `reason` is `busy_reason`, else `gesture_reason`; `active_tool` as
+  before. `discover`'s session row `busy` agrees. No schema change. `Refusals::MEANINGS["session.busy"]` names the Move.
+- Unchanged: `context.open`'s refusal for any tool but Select and the camera tools, and everything the second half
+  lists.
 
 Optional artifact retrieval is caller/run-scoped and bounded, hashes the original content, and
 observes expiry/revocation. Optional history returns operation, affected refs, source/result revisions

@@ -53,9 +53,13 @@ module PhComposer
         view = model.respond_to?(:active_view) ? model.active_view : nil
         view_observer = HostObservers::ViewObserver.new
         view.add_observer(view_observer) if view.respond_to?(:add_observer)
+        tools = model.respond_to?(:tools) ? model.tools : nil
+        tools_observer = HostObservers::ToolsObserver.new(model)
+        tools.add_observer(tools_observer) if tools.respond_to?(:add_observer)
         session.add_observers(ModelSession::Observers.new(:model => model_observer, :selection => selection_observer,
                                                           :layers => layers_observer, :view => view_observer,
-                                                          :rendering => [rendering_options, rendering_observer]))
+                                                          :rendering => [rendering_options, rendering_observer],
+                                                          :tools => [tools, tools_observer]))
         sessions[model.object_id] = session
         session.host_event(:session_created)
         session
@@ -165,6 +169,8 @@ module PhComposer
         view.remove_observer(observers.view) if observers.view && view.respond_to?(:remove_observer)
         rendering_options, rendering_observer = observers.rendering
         rendering_options&.remove_observer(rendering_observer)
+        tools, tools_observer = observers.tools
+        tools.remove_observer(tools_observer) if tools.respond_to?(:remove_observer)
       end
 
       def register_subscriber(subscribers, block)
