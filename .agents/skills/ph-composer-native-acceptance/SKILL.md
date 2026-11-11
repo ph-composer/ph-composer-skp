@@ -46,6 +46,14 @@ accepted decisions, the existing independent reviewer and unchanged evidence wit
    goes to merge: every later fix to a dependency makes the row stale. Write the case's driver as an
    sh script in its run folder from the first run, so the one recorded run is a single command.
 
+Take full-screen control (`request_full_control`) only from the top-level session, never from a
+subagent. In AW10H (2026-11-10 and 11) three subagent holds failed: one card went unanswered and two
+approved holds aborted every action as a user interrupt before it ran; the same hold from the
+top-level session ran clean twice. A subagent prepares everything that needs no card (install,
+`begin`, labelled setup, the recorder check, the case's driver and recipe), then stops and reports
+"ready for hold"; the top-level session takes one card, runs every native step in that hold and
+hands the evidence back. When a stage must measure before it designs, that hold comes first.
+
 An agent client run (Claude Code, Codex) measures the product, so the client runs without the
 operator's personal setup: no user skills, memory, advisor, plugins or reference notes. Claude Code:
 `claude -p --restricted --strict-mcp-config --mcp-config <file> --tools Read` from a scratch folder
