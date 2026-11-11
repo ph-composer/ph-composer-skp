@@ -110,17 +110,29 @@ module PhComposer
         API.preview(:context => context, :name => name, :params => params, :within => Executor::MAX_RESULT_BYTES)
       end
 
-      # One mutation with the sequence the binding assigns, which every invoke result carries. A busy answer
-      # ran nothing and took no sequence in dispatch, so its key is released for the retry.
+      # One mutation with the sequence the binding assigns, which every invoke result carries. A request dispatch
+      # did not accept ran nothing and took no sequence, so a key this invoke bound is released for the retry.
+      # A key bound earlier keeps its sequence: that earlier send may have been accepted, and a later send under
+      # the same key must replay it, never run as new work.
       def invoke(context, arguments, sequencer)
         key = arguments["idempotency_key"]
+        fresh = sequencer.lookup(key).nil?
         sequence = sequencer.assign(key)
         request = { "sequence" => sequence, "expected_revision" => arguments.fetch("expected_revision"),
                     "proposal_digest" => arguments["proposal_digest"] }.compact
         answer = API.invoke(:context => context, :name => arguments["name"], :params => arguments.fetch("params", {}),
                             :request => request)
-        sequencer.release(key, sequence) if answer["status"] == "busy"
+        sequencer.release(key, sequence) if fresh && !accepted?(context, sequence)
         answer.merge("sequence" => sequence)
+      end
+
+      # Whether dispatch accepted this sequence: acceptance raises the caller's highest accepted sequence before
+      # anything runs (context/CONTRACTS.md, "Retries"), and nothing lowers it, so it holds whatever the refusal
+      # code (a handler's refusal after acceptance can carry one dispatch also answers before it) and however
+      # soon the retained outcome expires. A caller or session gone since is no binding a retry can use.
+      def accepted?(context, sequence)
+        caller = Sessions.find(context.session_id)&.callers&.fetch(context.caller)
+        !caller.nil? && caller.highest_sequence >= sequence
       end
 
       # The retained outcome of an invoke, by its sequence or by the key it was sent with.

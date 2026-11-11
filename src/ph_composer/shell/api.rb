@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 43
+    MINOR = 44
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -216,7 +216,12 @@ module PhComposer
         "change" => "Every action refuses session.busy, before it takes a sequence, while the user is partway " \
                     "through a Move in SketchUp, which its commit would cancel; context readiness and discover's " \
                     "session busy say so. Reads and the Line tool are unaffected. An agent invoke answered busy " \
-                    "releases its idempotency_key for the retry." }
+                    "releases its idempotency_key for the retry." },
+      { "minor" => 44, "date" => "2026-11-11",
+        "change" => "Every invoke refused before acceptance releases the idempotency_key it bound; access.revoked " \
+                    "joins every kind's common refusals. thermal_bridges.edges.clear and types.delete pass over " \
+                    "Edges whose text is not a JSON object, leave it and name them in a " \
+                    "thermal_bridge.unreadable_skipped finding. zones.repair_identity refuses a locked Zone." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

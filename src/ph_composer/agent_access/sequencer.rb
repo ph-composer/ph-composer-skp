@@ -7,8 +7,9 @@ module PhComposer
     # `idempotency_key` keeps the sequence it was first given. A repeated key sends that sequence again,
     # so the caller's retained outcome answers it: the same request replays, another conflicts, and one
     # whose outcome has expired is unavailable. A key keeps its sequence as long as this binding is, as the
-    # caller's own sequence memory is, unless the invoke was answered busy: then nothing ran and the key is
-    # released, so a later send takes a new sequence rather than one a later change has passed.
+    # caller's own sequence memory is, unless the invoke that bound it was refused before acceptance (busy,
+    # an unknown operation, a closed session): then nothing ran and the key is released, so a later send takes
+    # a new sequence rather than one a later change has passed.
     class Sequencer
       MAX_KEY = 64
 

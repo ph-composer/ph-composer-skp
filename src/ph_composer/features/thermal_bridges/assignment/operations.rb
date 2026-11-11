@@ -16,8 +16,10 @@ module PhComposer
           "cutting_instance" => "erase it from the cutting component",
           "target.wrong_hierarchy" => "move it out of the nested Zone, or erase it"
         }.freeze
-        # A refusal names this many stranded Edges in its detail and counts the rest.
+        # A refusal names this many stranded Edges in its detail and counts the rest; an unreadable finding
+        # names as many.
         STRANDED_DETAIL = 20
+        UNREADABLE_SKIPPED = "thermal_bridge.unreadable_skipped"
 
         module_function
 
@@ -39,12 +41,33 @@ module PhComposer
         end
 
         # Removes each Edge's assignment, which is what clearing a required reference means. An Edge with
-        # no assignment is left alone.
+        # no assignment is left alone, and so is one whose stored text is not a JSON object: clear never
+        # destroys what it cannot read, and the outcome names it (`note_unreadable`).
         def clear(request, proposal, targets:)
-          updates = resolve(request, targets).filter_map { |located, before| before && update(located, before, nil) }
+          # Every Edge named, unreadable ones included, must agree with its repeats and fit the bound, before any walk.
+          occurrences!(targets)
+          unreadable = note_unreadable(request, proposal, "Clear")
+          readable = targets.reject { |target| unreadable.include?(key(target.fetch("reference"))) }
+          updates = resolve(request, readable).filter_map { |located, before| before && update(located, before, nil) }
           check_removals!(request, proposal, updates)
           propose(proposal, updates)
           { "cleared" => updates.length }
+        end
+
+        # Adds one finding naming the Edges whose stored text is not a JSON object, which `action` leaves as
+        # they are and could not read for references, and returns their root-to-Edge paths. Such text names
+        # nothing, so passing it over is safe; edges.repair is the route that removes it.
+        def note_unreadable(request, proposal, action)
+          paths = Target.unreadable_paths(request.model)
+          return paths if paths.empty?
+
+          proposal.add_finding(
+            "code" => UNREADABLE_SKIPPED, "severity" => "warning",
+            "message" => "#{paths.length} Edge(s) hold thermal-bridge text that is not a JSON object. #{action} left " \
+                         "them as they are and did not read them for references; #{Repair::ROUTE}.",
+            "edge_paths" => paths.first(STRANDED_DETAIL), "total" => paths.length
+          )
+          paths
         end
 
         # Delete a Thermal Bridge Type and, in the same proposal and Undo step, move every Edge naming it to
@@ -85,12 +108,7 @@ module PhComposer
         # Each target resolved for writing, as `[located, record]`. Targets are deduplicated by occurrence
         # and bounded before anything is resolved, so an over-limit command refuses without a walk.
         def resolve(request, targets)
-          unique = targets.group_by { |target| target.fetch("reference").values_at("zone_path", "entity_path") }
-          if unique.values.any? { |group| group.uniq.length > 1 }
-            raise CodedError.new("params.invalid", "Repeated Edge targets disagree on identity or expected values.")
-          end
-
-          Assignment.check_limit!(unique.length)
+          unique = occurrences!(targets)
           index = request.locate_index(EDGE_KIND)
           unique.values.map do |group|
             target = group.first
@@ -99,6 +117,17 @@ module PhComposer
             check_expected!(before, target.fetch("expected_values", {}))
             [located, before]
           end
+        end
+
+        # The targets grouped by occurrence, refusing repeats that disagree and a command past the Edge bound.
+        def occurrences!(targets)
+          unique = targets.group_by { |target| target.fetch("reference").values_at("zone_path", "entity_path") }
+          if unique.values.any? { |group| group.uniq.length > 1 }
+            raise CodedError.new("params.invalid", "Repeated Edge targets disagree on identity or expected values.")
+          end
+
+          Assignment.check_limit!(unique.length)
+          unique
         end
 
         # The root-to-Edge path, as the records provider keys an entry.

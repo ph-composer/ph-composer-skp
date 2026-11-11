@@ -100,6 +100,133 @@ class AgentAccessWriteToolsTest < PhComposerTestCase
     assert_equal 1, resent["sequence"], "an expired key is never given a new sequence"
   end
 
+  # A refusal before acceptance ran nothing and took no sequence, so the key it bound is free: after another
+  # change has run, the same key sent again runs once rather than answering request.outcome_unavailable.
+  # session.busy is covered in gesture_guard_test; the executor refuses an unknown session and the API version
+  # is fixed by API.connect before an invoke reaches dispatch, so neither binds a key on this route.
+  def test_a_key_refused_as_an_unknown_operation_runs_once_when_sent_again
+    refused = invoke("idempotency_key" => "k", "name" => "test.fixture.total_length")
+    invoke
+    sent = invoke("idempotency_key" => "k")
+    replay = invoke("idempotency_key" => "k", "expected_revision" => sent["revision"] - 1)
+
+    assert_equal %w[refused request.unknown_operation none], refused.values_at("status", "code", "effect")
+    assert_equal %w[completed committed], sent.values_at("status", "effect"), sent.inspect
+    assert_equal [3, sent["value"]], [replay["sequence"], replay["value"]]
+    assert_equal 2, @model.operations.length
+  end
+
+  def test_a_key_refused_for_params_that_are_not_plain_json_is_released
+    refused = invoke("idempotency_key" => "k", "params" => { "parts" => ["\xFF".dup.force_encoding("UTF-8")] })
+
+    assert_equal %w[refused request.malformed], refused.values_at("status", "code")
+    assert_nil binding_sequencer.lookup("k")
+  end
+
+  def test_a_key_refused_because_its_caller_handle_ended_is_released
+    invoke
+    @session.callers.revoke(AgentAccess.bindings.fetch([@writer.fetch("id"), @session.id]).context.caller)
+    refused = invoke("idempotency_key" => "k")
+
+    assert_equal %w[refused access.revoked none], refused.values_at("status", "code", "effect")
+    assert_nil binding_sequencer.lookup("k")
+  end
+
+  def test_a_key_refused_for_a_missing_capability_is_released
+    reader = token(%w[read])
+    loose = AgentAccess::Executor::Tool.new(**AgentAccess::Tools::TABLE["invoke"].to_h.merge(:capability => "read"))
+    executor = AgentAccess::Executor.new(:tools => AgentAccess::Tools::TABLE.merge("invoke" => loose))
+    refused = executor.call(reader, "invoke", "session" => @session.id, "name" => CREATE, "params" => PARTS,
+                                              "expected_revision" => @session.revision, "idempotency_key" => "k")
+                      .fetch("structuredContent")
+
+    assert_equal %w[refused request.capability_denied], refused.values_at("status", "code")
+    assert_nil binding_sequencer(reader).lookup("k")
+  end
+
+  # A refusal after acceptance is retained, so its key keeps the sequence and replays it.
+  def test_a_key_refused_as_stale_after_acceptance_replays_the_refusal
+    stale = invoke("idempotency_key" => "k", "expected_revision" => @session.revision - 1)
+    invoke
+    again = invoke("idempotency_key" => "k", "expected_revision" => stale["revision"] - 1)
+
+    assert_equal "revision.stale", stale["code"]
+    assert_equal [1, "revision.stale"], again.values_at("sequence", "code")
+    assert_equal 1, @model.operations.length
+  end
+
+  # A handler may refuse after acceptance with a code dispatch also answers before it; that outcome is retained,
+  # so its key keeps the sequence and replays it rather than running the handler again.
+  module LateRefusal
+    module_function
+
+    def install(registry)
+      feature = registry.feature("test.late", :contract_version => 1)
+      feature.action("test.late.slow", :description => "Outlast outcome retention.", :params => { "type" => "object" },
+                                       :result => { "type" => "object" }, :refuses => [], :undo_name => "Slow",
+                                       :side_effects => "None.") do |request, _proposal|
+        LateRefusal.runs += 1
+        request.session.outcomes.clock = -> { Float::INFINITY }
+        {}
+      end
+      feature.action("test.late.refuse", :description => "Refuse after acceptance.", :params => { "type" => "object" },
+                                         :result => { "type" => "object" }, :refuses => [], :undo_name => "Refuse",
+                                         :side_effects => "None.") do |_request, _proposal|
+        LateRefusal.runs += 1
+        raise PhComposer::CodedError.new("request.malformed", "Refused by the handler.")
+      end
+    end
+
+    class << self
+      attr_accessor :runs
+    end
+  end
+
+  def test_a_key_refused_by_its_handler_after_acceptance_replays_the_refusal
+    PhComposer::Registry.install([LateRefusal])
+    LateRefusal.runs = 0
+    revision = @session.revision
+    refused = invoke("idempotency_key" => "k", "name" => "test.late.refuse", "params" => {})
+    invoke
+    again = invoke("idempotency_key" => "k", "name" => "test.late.refuse", "params" => {},
+                   "expected_revision" => revision)
+
+    assert_equal [1, "request.malformed"], refused.values_at("sequence", "code")
+    assert_equal [1, "request.malformed"], again.values_at("sequence", "code")
+    assert_equal 1, LateRefusal.runs
+  end
+
+  # A change whose retained outcome expires before its reply returns was still accepted, so its key is kept and
+  # a retry answers request.outcome_unavailable rather than running it again.
+  def test_a_key_accepted_whose_outcome_expired_before_the_reply_is_kept
+    PhComposer::Registry.install([LateRefusal])
+    LateRefusal.runs = 0
+    revision = @session.revision
+    first = invoke("idempotency_key" => "k", "name" => "test.late.slow", "params" => {})
+    again = invoke("idempotency_key" => "k", "name" => "test.late.slow", "params" => {},
+                   "expected_revision" => revision)
+
+    assert_equal [1, "completed"], first.values_at("sequence", "status")
+    assert_equal [1, "request.outcome_unavailable"], again.values_at("sequence", "code")
+    assert_equal 1, LateRefusal.runs
+  end
+
+  # A key bound by an earlier, accepted send keeps its sequence whatever a later send under it is refused,
+  # so the change it made is never run twice.
+  def test_a_key_already_accepted_keeps_its_sequence_through_a_later_refusal
+    first = invoke("idempotency_key" => "k")
+    refused = invoke("idempotency_key" => "k", "name" => "test.fixture.total_length")
+    replay = invoke("idempotency_key" => "k", "expected_revision" => first["revision"] - 1)
+
+    assert_equal "request.unknown_operation", refused["code"]
+    assert_equal [1, first["value"]], [replay["sequence"], replay["value"]]
+    assert_equal 1, @model.operations.length
+  end
+
+  def binding_sequencer(row = @writer)
+    AgentAccess.bindings.fetch([row.fetch("id"), @session.id]).sequencer
+  end
+
   def test_a_committed_change_too_large_to_answer_whole_still_says_it_committed
     parts = Array.new(400) { |index| { "label" => "Part #{index} #{'x' * 40}", "length_mm" => 1.0 } }
     sent = invoke("idempotency_key" => "big", "params" => { "parts" => parts })

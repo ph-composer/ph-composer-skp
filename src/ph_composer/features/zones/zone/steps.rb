@@ -146,6 +146,9 @@ module PhComposer
           raise CodedError.new("target.changed", "The Zone identity changed after the repair was previewed.")
         end
 
+        refusal = Repair.lock_refusal(zone)
+        raise refusal if refusal
+
         resolved = @faces.map { |face| [resolve_member(zone, face), face] }
         ZONE_STORE.write(zone.entity, @record)
         resolved.each do |occurrence, face|
