@@ -336,6 +336,23 @@ class AgentAccessProfilesTest < PhComposerTestCase
     assert_valid_toml File.binread(@config)
   end
 
+  # A file that defines the server only through an escaped name reads as set up another way, not absent, and
+  # an escaped name as a value names nothing (#477).
+  def test_a_server_defined_only_by_an_escaped_name_reads_as_other
+    token = Tokens.issue.fetch("token")
+    ["[mcp_servers.\"ph\\u002Dcomposer\"]\nurl = \"x\"\n",
+     "mcp_servers.\"ph\\u002Dcomposer\".url = \"x\"\n",
+     "[mcp_servers]\n\"ph\\u002Dcomposer\" = { url = \"x\" }\n",
+     "mcp_servers = { other = {}, \"ph\\u002Dcomposer\" = { url = \"x\" } }\n"].each do |form|
+      File.binwrite(@config, form)
+      assert_equal "other", ClientSetup.entry("codex", 46_110, "default")["setup"], form
+      assert_equal "manual", ClientSetup.connect("codex", token, 46_110).fetch("state"), form
+      assert_equal form, File.binread(@config)
+    end
+    File.binwrite(@config, "disabled_tools = [\"ph\\u002Dcomposer\"]\n")
+    assert_equal "absent", ClientSetup.entry("codex", 46_110, "default")["setup"]
+  end
+
   def test_a_non_ascii_config_takes_the_block_and_a_failed_read_back_puts_the_file_back
     token = Tokens.issue.fetch("token")
     File.binwrite(@config, "# Jos\u00e9's settings\n".b)

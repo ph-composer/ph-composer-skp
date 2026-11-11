@@ -222,11 +222,15 @@ module PhComposer
 
       # Whether a statement's key holds an escape where it could spell mcp_servers or a server's name, which no
       # literal match sees (TOML reads `"ph-composer"` as the plain name): any table header, or a key at
-      # the root or in a table under the root mcp_servers.
+      # the root or in a table under the root mcp_servers, and a key of an inline root mcp_servers. `text` has
+      # been through `syntax`, so an escape left on it is in a key, never a value.
       def escaped_key?(text, table)
         return text.include?("\\") if text.start_with?("[")
 
-        text[/\A[^=]*/].include?("\\") && (table.nil? || root_servers?(table))
+        key = text[/\A[^=]*/]
+        return key.include?("\\") && root_servers?(table) if table
+
+        key.include?("\\") || (root_servers?(key) && text.include?("\\"))
       end
 
       # A statement line as TOML syntax: its comment cut and every string that is a value, not a key, emptied,
@@ -285,10 +289,16 @@ module PhComposer
       # Whether any line that is not a comment has the server's name as a key, in whatever TOML form: a
       # table, a dotted key or an inline table. A config that does is never appended to, since a second
       # definition would make the whole file invalid for Codex. A path that merely contains the name, such
-      # as a project folder, is not a key.
+      # as a project folder, is not a key. A key or header holding an escape where it could name a server
+      # (`escaped_key?`) counts too: it may spell this name unseen.
       def names_server?(all, name)
         key = /(?:\A|[\s.\[{,])["']?#{Regexp.escape(name)}["']?\s*[.=\]]/
-        statements(all).any? { |line| syntax(line).match?(key) }
+        table = nil
+        statements(all).any? do |line|
+          text = syntax(line).strip
+          table = text.sub(/\A\[+/, "") if text.start_with?("[")
+          text.match?(key) || escaped_key?(text, table)
+        end
       end
 
       # Whether a new `[mcp_servers.<name>]` table can follow what the file has: no key or header holds an
