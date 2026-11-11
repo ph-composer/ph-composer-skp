@@ -224,34 +224,35 @@ def activate_sketchup_once(version: str) -> None:
         restore_focus(version, previous)
 
 
-# Raises the named document window and presses its close button. `performClose:` does nothing while
-# SketchUp is in the background or its windows are on another Space; this route closes the window there.
-RAISE_AND_CLOSE = (
+# Raises a document window, which makes its Model the active one. Closing the active Model leaves
+# `Sketchup.active_model` nil while SketchUp is in the background, even with another document window open.
+RAISE_DOCUMENT = (
     'tell application "System Events" to tell process "SketchUp"\n'
+    'set docWindows to (windows whose name contains " - SketchUp")\n'
+    'if (count of docWindows) is 0 then return "phc_no_window"\n'
     "set frontmost to true\n"
-    'set target to first window whose name contains "{name}"\n'
-    'perform action "AXRaise" of target\n'
-    'click (first button of target whose subrole is "AXCloseButton")\n'
+    'perform action "AXRaise" of (item 1 of docWindows)\n'
+    'return "phc_raised"\n'
     "end tell"
 )
 
 
-def press_close_button(version: str, window_name: str) -> str | None:
-    """Close a document window through System Events, then hand focus back. None, or why it failed."""
+def raise_document(version: str) -> str:
+    """Make a remaining document window key through System Events, then hand focus back. "phc_raised",
+    "phc_no_window", or why the raise failed."""
     previous = frontmost_app()
     try:
         done = subprocess.run(
-            ["osascript", "-e", RAISE_AND_CLOSE.replace("{name}", window_name)],
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=15,
+            ["osascript", "-e", RAISE_DOCUMENT], capture_output=True, text=True, check=False, timeout=15
         )
+        time.sleep(1.0)
     except (subprocess.SubprocessError, OSError) as error:
         return str(error)
     finally:
         restore_focus(version, previous)
-    return None if done.returncode == 0 else (done.stderr or "").strip() or f"osascript exited {done.returncode}"
+    if done.returncode != 0:
+        return (done.stderr or "").strip() or f"osascript exited {done.returncode}"
+    return done.stdout.strip()
 
 
 def run_with_dialog_guard(version: str, code: str, timeout: float = 120.0, escape_after: float = 3.0) -> str:
@@ -272,16 +273,13 @@ def run_with_dialog_guard(version: str, code: str, timeout: float = 120.0, escap
     return out.decode("utf-8", "replace").strip()
 
 
-# Closes the active document without a save prompt: saves it to a scratch path, which leaves it clean
-# whatever its window thinks, then closes its window, answering with its guid. With no document open the
-# active Model is nil. Only the active Model is reachable from Ruby, so a second document (after Cmd-N,
-# say) is closed on the next pass; terminating with one still dirty waits on a save sheet until the process
-# is killed. `performClose:` is queued, so each pass waits for that document to stop being the active one.
-DISCARD_PATH = "/private/tmp/ph_composer_discard_{index}.skp"
+# Closes the active document and discards its changes, with no save prompt and no save: a Save As to a
+# scratch path would move a "This Model only" agent token onto that path. `Model#close(true)` also closes
+# a document while SketchUp is in the background, where `performClose:` does nothing. Only the active
+# Model is reachable from Ruby, so a second document (after Cmd-N, say) is closed on the next pass, once
+# its window is raised; terminating with one still dirty waits on a save sheet until the process is killed.
 CLOSE_ACTIVE = (
-    "m = Sketchup.active_model; if !m then :phc_no_document "
-    'else m.save("{path}"); if m.modified? then :phc_still_dirty '
-    'else guid = m.guid; Sketchup.send_action("performClose:"); "phc_closed:#{guid}" end end'
+    'm = Sketchup.active_model; if !m then :phc_no_document else guid = m.guid; m.close(true); "phc_closed:#{guid}" end'
 )
 ACTIVE_GUID = "m = Sketchup.active_model; m ? m.guid : :phc_no_document"
 MAX_DOCUMENTS = 8
@@ -305,37 +303,38 @@ def document_left(version: str, guid: str) -> bool:
     return evaluate(version, ACTIVE_GUID, timeout=10.0) != guid
 
 
+def close_active(version: str) -> str:
+    return last_value(run_with_dialog_guard(version, CLOSE_ACTIVE, timeout=60.0))
+
+
 def close_documents(version: str) -> str:
-    """Close every open document clean, one active document at a time; say how far it got."""
+    """Close every open document without saving it, one active document at a time; say how far it got."""
     closed = 0
-    for index in range(MAX_DOCUMENTS):
-        discard = DISCARD_PATH.format(index=index)
+    for _ in range(MAX_DOCUMENTS):
         try:
-            answer = last_value(run_with_dialog_guard(version, CLOSE_ACTIVE.replace("{path}", discard), timeout=60.0))
+            answer = close_active(version)
             if answer == "phc_no_document":
-                return f"closed {closed} documents"
+                if (raised := raise_document(version)) == "phc_no_window":
+                    return f"closed {closed} documents"
+                if raised != "phc_raised":
+                    return (
+                        f"closed {closed} documents; stopped: no active Model and no window could be raised: {raised}"
+                    )
+                if (answer := close_active(version)) == "phc_no_document":
+                    return f"closed {closed} documents; stopped: a document window is open but no Model is active"
             if not answer.startswith("phc_closed:"):
-                return f"closed {closed} documents; stopped: the active document is still modified after its save"
+                return f"closed {closed} documents; stopped: the close step answered {answer!r}"
             guid = answer.removeprefix("phc_closed:")
             if not document_left(version, guid):
-                if (failure := press_close_button(version, Path(discard).stem)) is not None:
-                    return f"closed {closed} documents; stopped: performClose: did nothing; its close button: {failure}"
-                if not document_left(version, guid):
-                    return f"closed {closed} documents; stopped: the active document stayed open after its close button"
+                return f"closed {closed} documents; stopped: the active document stayed open after its close"
         except (BridgeError, OSError, TimeoutError) as error:
             return f"closed {closed} documents; the close step failed: {error}"
         closed += 1
     return f"closed {closed} documents; stopped at the limit of {MAX_DOCUMENTS}"
 
 
-def remove_discards() -> None:
-    for index in range(MAX_DOCUMENTS):
-        for suffix in (".skp", ".skb"):
-            Path(DISCARD_PATH.format(index=index)).with_suffix(suffix).unlink(missing_ok=True)
-
-
 def quit_sketchup(version: str) -> str:
-    """Quit without a save dialog: save every open document to a scratch path and close it, then terminate.
+    """Quit without a save dialog: close every open document, discarding its changes, then terminate.
     A host the bridge cannot reach, or one still on a prompt after 30 seconds, is killed."""
     if not sketchup_running():
         return "SketchUp not running"
@@ -347,11 +346,9 @@ def quit_sketchup(version: str) -> str:
             request(state, {"code": 'Sketchup.send_action("terminate:")'}, timeout=10.0)
     for _ in range(30):
         if not sketchup_running():
-            remove_discards()
             return f"SketchUp quit cleanly ({note})"
         time.sleep(1.0)
     subprocess.run(["pkill", "-9", "-x", "SketchUp"], capture_output=True, check=False)
-    remove_discards()
     return f"SketchUp did not quit within 30s; killed ({note}; its documents may be restored on the next launch)"
 
 

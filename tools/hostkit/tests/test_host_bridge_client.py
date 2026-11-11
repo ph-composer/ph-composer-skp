@@ -299,14 +299,18 @@ class DialogGuardTest(unittest.TestCase):
 
 
 class QuitTest(unittest.TestCase):
-    """Every open document is closed clean before terminate, and no document still means a clean quit."""
+    """Every open document is closed, its changes discarded, before terminate; no document still means a clean quit."""
 
     def quit_with(
-        self, replies: list[object], active: Callable[[list[str]], str] = lambda _calls: "another-document"
+        self,
+        replies: list[object],
+        active: Callable[[list[str]], str] = lambda _calls: "another-document",
+        windows: list[str] | None = None,
     ) -> tuple[str, list[str]]:
-        """`active` answers the active-document check, given the calls so far."""
+        """`active` answers the active-document check, given the calls so far; `windows` answers each raise."""
         calls: list[str] = []
         answers = iter(replies)
+        raises = iter(windows or [])
 
         def guard(_version: str, code: str, **_options: float) -> str:
             calls.append(code)
@@ -315,13 +319,17 @@ class QuitTest(unittest.TestCase):
                 raise answer
             return f"console line mentioning none\n{answer}\n"
 
+        def raise_document(_version: str) -> str:
+            calls.append("raise")
+            return next(raises, "phc_no_window")
+
         running = iter([True, False])
         with (
             patch.object(hb, "sketchup_running", side_effect=lambda: next(running)),
             patch.object(hb, "read_state", return_value={"port": 1, "token": "t"}),
             patch.object(hb, "run_with_dialog_guard", side_effect=guard),
             patch.object(hb, "evaluate", side_effect=lambda *_args, **_kw: active(calls)),
-            patch.object(hb, "press_close_button", side_effect=lambda _version, name: calls.append(f"press {name}")),
+            patch.object(hb, "raise_document", side_effect=raise_document),
             patch.object(hb, "request", side_effect=lambda _state, payload, **_kw: calls.append(payload["code"])),
             patch.object(hb.time, "sleep"),
         ):
@@ -330,53 +338,73 @@ class QuitTest(unittest.TestCase):
     def test_each_open_document_is_closed_until_none_is_left_then_terminate(self) -> None:
         outcome, calls = self.quit_with(['"phc_closed:g1"', '"phc_closed:g2"', '"phc_no_document"'])
         self.assertEqual(outcome, "SketchUp quit cleanly (closed 2 documents)")
-        self.assertIn(hb.DISCARD_PATH.format(index=1), calls[1], "each document saves to its own scratch path")
-        self.assertEqual(calls[-1], 'Sketchup.send_action("terminate:")')
+        self.assertEqual(calls[:2], [hb.CLOSE_ACTIVE, hb.CLOSE_ACTIVE])
+        self.assertEqual(calls[-2:], ["raise", 'Sketchup.send_action("terminate:")'])
 
-    def test_a_failed_or_refused_close_step_is_reported_and_still_terminates(self) -> None:
+    def test_a_failed_close_step_is_reported_and_still_terminates(self) -> None:
         outcome, calls = self.quit_with([hb.BridgeError("the close step failed")])
         self.assertEqual(
             outcome, "SketchUp quit cleanly (closed 0 documents; the close step failed: the close step failed)"
         )
         self.assertEqual(calls[-1], 'Sketchup.send_action("terminate:")')
-        outcome, _calls = self.quit_with(['"phc_still_dirty"'])
-        self.assertIn("still modified after its save", outcome)
 
-    def test_a_document_that_stays_active_gets_its_close_button_then_is_reported_open_not_closed(self) -> None:
-        # In the background or on another Space, performClose: does nothing; counting that document
-        # as closed on every pass reported "closed 8 documents" for one.
+    def test_a_document_that_stays_active_is_reported_open_not_closed(self) -> None:
+        # Counting a close that did nothing as closed on every pass reported "closed 8 documents" for one.
         outcome, calls = self.quit_with(['"phc_closed:g1"'], active=lambda _calls: "g1")
         self.assertEqual(
             outcome,
-            "SketchUp quit cleanly (closed 0 documents; "
-            "stopped: the active document stayed open after its close button)",
+            "SketchUp quit cleanly (closed 0 documents; stopped: the active document stayed open after its close)",
         )
-        self.assertEqual(calls[1:], ["press ph_composer_discard_0", 'Sketchup.send_action("terminate:")'])
+        self.assertEqual(calls[1:], ['Sketchup.send_action("terminate:")'])
 
-    def test_a_document_its_close_button_closed_counts_as_closed(self) -> None:
+    def test_a_document_left_without_an_active_model_is_raised_and_closed(self) -> None:
+        # Closing the active document in the background leaves no active Model while another window is open.
         outcome, calls = self.quit_with(
-            ['"phc_closed:g1"', '"phc_no_document"'],
-            active=lambda calls: "phc_no_document" if "press ph_composer_discard_0" in calls else "g1",
+            ['"phc_closed:g1"', '"phc_no_document"', '"phc_closed:g2"', '"phc_no_document"'], windows=["phc_raised"]
         )
-        self.assertEqual(outcome, "SketchUp quit cleanly (closed 1 documents)")
-        self.assertEqual(calls.count("press ph_composer_discard_0"), 1)
+        self.assertEqual(outcome, "SketchUp quit cleanly (closed 2 documents)")
+        self.assertEqual(calls.count("raise"), 2)
+        outcome, _calls = self.quit_with(['"phc_no_document"', '"phc_no_document"'], windows=["phc_raised"])
+        self.assertIn("a document window is open but no Model is active", outcome)
+
+    def test_a_raise_that_fails_or_an_unexpected_answer_stops_the_count_and_says_why(self) -> None:
+        outcome, _calls = self.quit_with(['"phc_no_document"'], windows=["not allowed assistive access"])
+        self.assertIn("no active Model and no window could be raised: not allowed assistive access", outcome)
+        outcome, _calls = self.quit_with(['""'])
+        self.assertEqual(outcome, "SketchUp quit cleanly (closed 0 documents; stopped: the close step answered '')")
+
+    def test_the_raise_reads_osascript_s_answer_or_its_failure(self) -> None:
+        replies = (
+            (subprocess.CompletedProcess([], 0, "phc_raised\n", ""), "phc_raised"),
+            (subprocess.CompletedProcess([], 0, "phc_no_window\n", ""), "phc_no_window"),
+            (subprocess.CompletedProcess([], 1, "", "execution error\n"), "execution error"),
+        )
+        for done, expected in replies:
+            with (
+                patch.object(hb.subprocess, "run", return_value=done),
+                patch.object(hb, "frontmost_app", return_value=None),
+                patch.object(hb.time, "sleep"),
+            ):
+                self.assertEqual(hb.raise_document("2026"), expected)
 
     @unittest.skipUnless(shutil.which("ruby"), "needs a ruby to run the close step")
-    def test_the_close_step_saves_closes_a_clean_model_refuses_a_dirty_one_and_tolerates_none(self) -> None:
+    def test_the_close_step_discards_changes_without_saving_and_tolerates_no_document(self) -> None:
+        # A save to a scratch path is a Save As, which moves a "This Model only" agent token onto it.
         stub = (
-            "class M; def initialize(dirty); @dirty = dirty; end; def modified?; @dirty; end; "
-            'def guid; "G"; end; def save(path); $saved = path; true; end; end; '
+            'class M; def guid; "G"; end; def save(path); $saved = path; true; end; '
+            "def close(ignore_changes = false); $closed = ignore_changes; nil; end; end; "
             "module Sketchup; def self.active_model; $model; end; "
             "def self.send_action(action); $action = action; true; end; end; "
         )
-        code = hb.CLOSE_ACTIVE.replace("{path}", "/private/tmp/x.skp")
         cases = (
-            ("nil", [":phc_no_document", "nil", "nil"]),
-            ("M.new(false)", ['"phc_closed:G"', '"/private/tmp/x.skp"', '"performClose:"']),
-            ("M.new(true)", [":phc_still_dirty", '"/private/tmp/x.skp"', "nil"]),
+            ("nil", [":phc_no_document", "nil", "nil", "nil"]),
+            ("M.new", ['"phc_closed:G"', "true", "nil", "nil"]),
         )
         for model, expected in cases:
-            script = f"{stub}$model = {model}; value = ({code}); puts value.inspect, $saved.inspect, $action.inspect"
+            script = (
+                f"{stub}$model = {model}; value = ({hb.CLOSE_ACTIVE}); "
+                "puts value.inspect, $closed.inspect, $saved.inspect, $action.inspect"
+            )
             result = subprocess.run(["ruby", "-e", script], capture_output=True, text=True, check=True)
             self.assertEqual(result.stdout.split(), expected, model)
 
@@ -488,7 +516,7 @@ class StalledLaunchTest(unittest.TestCase):
         timeout = subprocess.TimeoutExpired(["osascript"], 15)
         with patch.object(hb.subprocess, "run", side_effect=timeout), patch.object(hb.time, "sleep"):
             hb.activate_sketchup_once("2026")
-            self.assertEqual(hb.press_close_button("2026", "ph_composer_discard_0"), str(timeout))
+            self.assertEqual(hb.raise_document("2026"), str(timeout))
 
 
 class RecoveryCopyTest(unittest.TestCase):
