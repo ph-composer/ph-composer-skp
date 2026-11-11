@@ -16,10 +16,11 @@ module PhComposer
         module_function
 
         # Asks on every right-click, so one Face answers for the context and the rest is topology. Faces in a
-        # Zone must be cut into a Face around them; outside every Zone the review finds the host by geometry.
+        # Zone must be cut into a Face around them; outside every Zone the review finds the host by geometry. A
+        # selection or open context another feature claims is never a drawn rectangle, so it leaves the item out.
         def available?(read)
           faces = read.model.selection.to_a.grep(Sketchup::Face)
-          return false if faces.empty?
+          return false if faces.empty? || Records::EntityStore.selection_claimed?(read.model)
 
           !in_zone?(read, faces.first) || faces.any? { |face| nested?(face) }
         end

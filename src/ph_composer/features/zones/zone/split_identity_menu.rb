@@ -20,8 +20,10 @@ module PhComposer
         end
       end
 
+      # One Face selected, outside anything another feature claims: a claimed Face carries no Zone identity.
       def available?(session)
-        session.model.selection.to_a.grep(Sketchup::Face).length == 1
+        model = session.model
+        model.selection.to_a.grep(Sketchup::Face).length == 1 && !Records::EntityStore.selection_claimed?(model)
       end
 
       class Client

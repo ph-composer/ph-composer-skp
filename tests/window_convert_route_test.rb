@@ -91,6 +91,30 @@ class WindowConvertRouteTest < PhComposerTestCase
     assert ROUTE.available?(read)
   end
 
+  # A Space, its Volume and its Floor Segments are claimed by Spaces; Windows reads the claim and names no feature.
+  def test_a_floor_segment_face_inside_a_space_leaves_the_item_out
+    segment = Sketchup::Face.new(next_id)
+    PhComposer::Spaces::FLOOR_SEGMENT_STORE.write(segment, "id" => "fsg_AAAAAAAAAAAA")
+    volume = Sketchup::Group.new(next_id, Sketchup::Entities.new([segment]))
+    PhComposer::Spaces::VOLUME_STORE.write(volume, "id" => "vol_AAAAAAAAAAAA")
+    space = Sketchup::Group.new(next_id, Sketchup::Entities.new([volume]))
+    PhComposer::Spaces::SPACE_STORE.write(space, "id" => "spc_AAAAAAAAAAAA")
+    @model.entities << space
+    @model.active_path = [space, volume]
+    @model.selection.add(segment)
+    refute ROUTE.available?(read)
+  end
+
+  def test_a_face_at_an_open_space_root_leaves_the_item_out
+    face = Sketchup::Face.new(next_id)
+    space = Sketchup::Group.new(next_id, Sketchup::Entities.new([face]))
+    PhComposer::Spaces::SPACE_STORE.write(space, "id" => "spc_AAAAAAAAAAAA")
+    @model.entities << space
+    @model.active_path = [space]
+    @model.selection.add(face)
+    refute ROUTE.available?(read)
+  end
+
   def test_the_extensions_menu_always_lists_the_item
     menus = PhComposer::Commands.install_feature_menus(UI::Menu.new("Extensions"))
     assert_includes menu_labels(menus), ROUTE::LABEL
