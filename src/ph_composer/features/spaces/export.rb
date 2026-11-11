@@ -209,46 +209,55 @@ module PhComposer
         volumes = unique!(snapshot.records(VOLUME_STORE.dictionary, :kind => "group"), "Volume")
         segments = unique!(snapshot.records(FLOOR_SEGMENT_STORE.dictionary, :kind => "face"), "Floor Segment")
         structure!(spaces, volumes, segments)
+        # Each Volume and Floor Segment filed under the path of the container it sits directly in, and each
+        # Zone's own Face points, once per export: per Space, a lookup and not a pass over the snapshot.
+        volumes_in = volumes.group_by { |volume, _| volume.path[0...-1] }
+        segments_in = segments.group_by { |segment, _| segment.path[0...-1] }
+        space_paths = spaces.to_h { |space, _| [space.path, true] }
+        zone_points = {}
         spaces.map do |entry, record|
           Spaces.validate!(SPACE, record)
-          zone = hosting_zone(snapshot, record)
-          own = volumes.select { |volume, _| volume.path[0...-1] == entry.path }
-          reader.entity_record(record, :fields => %w[name number] + AIRFLOWS, :target_kind => SPACE_KIND,
-                                       :path => entry.path, :user_data => true)
-                .merge("zone_id" => zone.last.fetch("id"),
-                       "offset_from_zone" => offset?(snapshot, zone.first, own, segments),
-                       "volumes" => own.map { |volume| volume_record(reader, volume, segments) }
-                                       .sort_by { |row| row.fetch("id") })
+          zone = hosting_zone(reader, record)
+          own = volumes_in.fetch(entry.path, [])
+          exported = reader.entity_record(record, :fields => %w[name number] + AIRFLOWS, :target_kind => SPACE_KIND,
+                                                  :path => entry.path, :user_data => true)
+          extents = zone_points[zone.first.path] ||= own_face_points(reader, zone.first, space_paths)
+          exported.merge("zone_id" => zone.last.fetch("id"),
+                         "offset_from_zone" => Extents.outside?(floor_points(own, segments_in), extents),
+                         "volumes" => own.map { |volume| volume_record(reader, volume, segments_in) }
+                                         .sort_by { |row| row.fetch("id") })
         end.sort_by { |row| row.fetch("id") }
       end
 
+      # The outer-loop points of the Floor Segments in these Volumes.
+      def floor_points(volumes, segments_in)
+        volumes.flat_map do |volume, _|
+          segments_in.fetch(volume.path, []).flat_map { |segment, _| segment.geometry.loops_m.first }
+        end
+      end
+
       # The snapshot Zone the record names. Blocked when it names none, or one that is gone.
-      def hosting_zone(snapshot, record)
+      def hosting_zone(reader, record)
         zone_id = record["zone_id"]
         raise Export::Blocked.new("space.outside_zone", "Space #{record.fetch('id')} is in no Zone.") unless zone_id
 
-        found = Zones::ExportProjection.zone_entry(snapshot, zone_id)
+        found = Zones::ExportProjection.zone_entry(reader, zone_id)
         return found if found
 
         raise Export::Blocked.new("space.zone_missing",
                                   "Space #{record.fetch('id')} names a Zone that is no longer in the Model.")
       end
 
-      # The same rule as the preflight's, from the snapshot: the Space's Floor Segments against the Zone's own Faces.
-      def offset?(snapshot, zone_entry, volumes, segments)
-        spaces = snapshot.records(SPACE_STORE.dictionary, :kind => "group").map(&:first)
-        own = Zones::ExportProjection.zone_faces(snapshot, zone_entry).reject do |face|
-          spaces.any? { |space| snapshot.contains?(space, face) }
+      # The outer-loop points of the Zone's own Faces, those inside no Space: the extents the preflight's offset
+      # rule measures a Space's Floor Segments against, from the snapshot.
+      def own_face_points(reader, zone_entry, space_paths)
+        own = Zones::ExportProjection.zone_faces(reader, zone_entry).reject do |face|
+          (1...face.path.length).any? { |length| space_paths.key?(face.path[0, length]) }
         end
-        zone_points = own.flat_map { |face| face.geometry.loops_m.first }
-        space_points = volumes.flat_map do |volume, _|
-          segments.select { |segment, _| segment.path[0...-1] == volume.path }
-                  .flat_map { |segment, _| segment.geometry.loops_m.first }
-        end
-        Extents.outside?(space_points, zone_points)
+        own.flat_map { |face| face.geometry.loops_m.first }
       end
 
-      def volume_record(reader, (entry, record), segments)
+      def volume_record(reader, (entry, record), segments_in)
         Spaces.validate!(VOLUME, record)
         height = record["avg_ceiling_height_m"]
         unless height
@@ -257,7 +266,7 @@ module PhComposer
         end
 
         # An empty Volume is a warning, not a block: it leaves with no Floor Segment and no prism.
-        own = segments.select { |segment, _| segment.path[0...-1] == entry.path }
+        own = segments_in.fetch(entry.path, [])
         rows = own.map { |segment| segment_record(reader, segment) }.sort_by { |row| row.fetch("id") }
         prisms = Prism.call(own.map { |segment, _| segment.geometry.loops_m }, height)
         reader.entity_record(record, :fields => %w[display_name avg_ceiling_height_m floor_id],
@@ -291,18 +300,18 @@ module PhComposer
 
       # A Volume sits directly in a Space, a Floor Segment directly in a Volume, and no Space inside another.
       def structure!(spaces, volumes, segments)
-        space_paths = spaces.map { |entry, _| entry.path }
-        nested = space_paths.any? do |inner|
-          space_paths.any? { |outer| outer != inner && inner[0, outer.length] == outer }
+        space_paths = spaces.to_h { |entry, _| [entry.path, true] }
+        nested = space_paths.keys.any? do |inner|
+          (1...inner.length).any? { |length| space_paths.key?(inner[0, length]) }
         end
         raise Export::Blocked.new("space.nested", "A Space is inside another Space.") if nested
 
-        unless volumes.all? { |entry, _| space_paths.include?(entry.path[0...-1]) }
+        unless volumes.all? { |entry, _| space_paths.key?(entry.path[0...-1]) }
           raise Export::Blocked.new("space.volume_nested", "A Volume is not directly inside a Space.")
         end
 
-        volume_paths = volumes.map { |entry, _| entry.path }
-        return if segments.all? { |entry, _| volume_paths.include?(entry.path[0...-1]) }
+        volume_paths = volumes.to_h { |entry, _| [entry.path, true] }
+        return if segments.all? { |entry, _| volume_paths.key?(entry.path[0...-1]) }
 
         raise Export::Blocked.new("space.segment_misplaced", "A Floor Segment is not directly inside a Volume.")
       end
