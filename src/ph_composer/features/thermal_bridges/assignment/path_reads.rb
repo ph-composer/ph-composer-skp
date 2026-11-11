@@ -63,29 +63,15 @@ module PhComposer
         # One row per found item, in order. Zones answers containment for the Edges in one read of the page.
         def rows(request, items)
           edges = items.select(&:edge)
-          records = edges.map { |item| stored(item.edge) }
-          copied = Selection.copied_ids(request.model, records.map(&:first))
-          contained = Operations.contained(request, edges.map(&:path)).zip(records, edges)
-          by_path = contained.to_h do |containment, (record, problem), item|
-            row = Selection.row(containment, record, copied).merge("endpoints_m" => endpoints(item),
-                                                                   "hidden" => OccurrencePath.hidden?(item.edge))
-            row = bounded_zone(row)
-            [item.path, problem ? row.merge("record_problem" => problem) : row]
+          reads = edges.map { |item| Target.read(item.edge) }
+          copied = Selection.copied_ids(request.model, reads.map(&:first))
+          contained = Operations.contained(request, edges.map(&:path)).zip(reads, edges)
+          by_path = contained.to_h do |containment, read, item|
+            row = Selection.row(containment, read, copied).merge("endpoints_m" => endpoints(item),
+                                                                 "hidden" => OccurrencePath.hidden?(item.edge))
+            [item.path, bounded_zone(row)]
           end
           items.map { |item| by_path.fetch(item.path) { absent(item) } }
-        end
-
-        # The record as stored and, when it is not valid JSON or not an object, why: such an Edge reads with no
-        # values, and a write to it refuses.
-        def stored(edge)
-          record = STORE.read(edge)
-          return [record, nil] if record.nil? || record.is_a?(Hash)
-
-          [nil, "The #{STORE.dictionary} record is not a JSON object."]
-        rescue CodedError => error
-          raise unless error.code == "record.unreadable"
-
-          [nil, error.message]
         end
 
         def endpoints(item)
@@ -111,7 +97,7 @@ module PhComposer
             "copied" => false, "record_problem" => nil, "write_refusal" => nil, "endpoints_m" => nil,
             "hidden" => nil }
         end
-        private_class_method :find, :rows, :stored, :endpoints, :bounded_zone, :absent
+        private_class_method :find, :rows, :endpoints, :bounded_zone, :absent
       end
     end
   end

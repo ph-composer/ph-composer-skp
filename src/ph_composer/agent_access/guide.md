@@ -316,7 +316,10 @@ Text that is not a JSON object names nothing PH-Composer can read, so `edges.cle
 do not refuse for it elsewhere. Clear and the delete leave it as it is, skip an Edge holding it, and name those
 Edges in a `thermal_bridge.unreadable_skipped` finding with the first 20 paths and the total. `edges.assign`
 naming such an Edge never writes over the text: where its path is writable it refuses `record.unreadable` as a
-whole. `null` and a stored value that is not text count as such text. Export still blocks on it, so repair it before you export.
+whole. `null` and a stored value that is not text count as such text. Every read shows it the same way:
+`edges.selection`, `edges.at` and `edges.candidates` give such an Edge no values, a `record_problem` and a
+`write_refusal` of `record.unreadable`, the schedule lists it in `unreadable`, and the edge tool refuses it.
+Export still blocks on it, so repair it before you export.
 
 `ph_composer.thermal_bridges.edge_tool.choose` arms the edge tool with a type and quantity for a person
 at the mouse: each click or drag across Edges is one `edges.assign` and one Undo step, at most 250

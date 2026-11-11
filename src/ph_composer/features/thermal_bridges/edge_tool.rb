@@ -222,15 +222,17 @@ module PhComposer
       end
 
       # `[:assign, target]` with the `edges.assign` target the Edge's containment and stored record make, or
-      # `[:refuse, reason]`.
+      # `[:refuse, reason]`, in the order `edges.assign` refuses: its path, then stored text that is not a JSON
+      # object, which the tool never writes over.
       def target(entities)
         ids = entities.map(&:persistent_id)
         row = (@rows[ids] ||= query(CONTAINMENT, "paths" => [ids]).fetch("paths").first)
         return [:refuse, row.dig("write_refusal", "message")] if row["write_refusal"]
 
-        record = Assignment::STORE.read(entities.last)
+        record, problem = Assignment::Target.read(entities.last)
         reference = Assignment::Selection.reference(row, record)
         return [:refuse, unreachable(row.fetch("reason"))] unless reference
+        return [:refuse, problem] if problem
 
         [:assign, { "reference" => reference, "expected_values" => Assignment.values(record) }]
       rescue CodedError => error

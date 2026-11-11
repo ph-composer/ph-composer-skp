@@ -52,17 +52,26 @@ module PhComposer
           paths
         end
 
-        # The Edge's stored record when its text is a JSON object, else nil: a stored value that is not text
-        # (which SketchUp allows) is not one either.
+        # The Edge's stored record when its text is a JSON object, else nil.
         def readable(edge)
-          return nil unless edge.get_attribute(STORE.dictionary, STORE.key).is_a?(String)
+          read(edge).first
+        end
+
+        # The one readability rule every Edge read and write takes: `[record, nil]` when the stored text is a
+        # JSON object, `[nil, nil]` when the Edge has no record, and `[nil, problem]` when it holds anything
+        # else: text that does not parse, JSON that is not an object (`null` included) or a value that is not
+        # text, which SketchUp allows. It never raises for what is stored.
+        def read(edge)
+          value = edge.get_attribute(STORE.dictionary, STORE.key)
+          return [nil, nil] if value.nil?
+          return [nil, "The #{STORE.dictionary} record is not JSON text."] unless value.is_a?(String)
 
           record = STORE.read(edge)
-          record.is_a?(Hash) ? record : nil
+          record.is_a?(Hash) ? [record, nil] : [nil, "The #{STORE.dictionary} record is not a JSON object."]
         rescue CodedError => error
           raise unless error.code == "record.unreadable"
 
-          nil
+          [nil, error.message]
         end
 
         # Every Edge carrying an assignment record, readable or not, with its root-to-Edge path, through Groups
@@ -111,14 +120,20 @@ module PhComposer
         # The Edge's stored record, or nil when it has none. Text that is not a JSON object, `null` and a value
         # that is not text included, refuses: a write through it would destroy what edges.repair can still show.
         def stored!(edge)
-          record = readable(edge)
-          return record if record || !STORE.marks?(edge)
+          record, problem = read(edge)
+          return record unless problem
 
-          raise CodedError.new("record.unreadable",
-                               "The Edge's thermal-bridge text is not a JSON object, so nothing was written; " \
-                               "#{Repair::ROUTE}.")
+          refusal = unreadable_refusal
+          raise CodedError.new(refusal.fetch("code"), refusal.fetch("message"))
         end
         private_class_method :stored!
+
+        # What `edges.assign` refuses on an Edge whose stored text is not a JSON object, as a read row's
+        # `write_refusal` gives it, so the menu and the panel offer no write that would meet it.
+        def unreadable_refusal
+          { "code" => "record.unreadable",
+            "message" => "The Edge's thermal-bridge text is not a JSON object; #{Repair::ROUTE}." }
+        end
 
         # A null `entity_id` names an Edge with no assignment, or one whose record holds no valid id, which a
         # write then guards by its values.

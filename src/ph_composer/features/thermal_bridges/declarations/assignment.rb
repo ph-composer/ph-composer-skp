@@ -41,7 +41,9 @@ module PhComposer
                                                                       "ph_composer.zones.containment reads it.")
       REFUSAL = Shapes.object({ "code" => Shapes::TEXT, "message" => Shapes::TEXT })
                       .merge("type" => %w[object null],
-                             "description" => "The refusal a write to the Edge meets from its path, or null.")
+                             "description" => "The refusal a write to the Edge meets from its path, or else " \
+                                              "record.unreadable when its stored text is not a JSON object, which " \
+                                              "only edges.repair removes; null otherwise.")
       SELECTED_ROW = Shapes.object({
         "path" => Assignment::Target::PATH,
         "reference" => REFERENCE.merge("type" => %w[object null],
@@ -54,8 +56,9 @@ module PhComposer
                       "description" => "Whether another Edge carries the same assignment id, as a split or a copy " \
                                        "leaves it. Routine; nothing repairs it." },
         "record_problem" => { "type" => %w[string null],
-                              "description" => "Why the stored assignment is invalid, or null. An invalid one can " \
-                                               "still be cleared or reassigned." },
+                              "description" => "Why the stored assignment is invalid or cannot be read, or null. " \
+                                               "An invalid one can still be cleared or reassigned; text that is " \
+                                               "not a JSON object reads with no values and a write_refusal." },
         "write_refusal" => REFUSAL
       })
       SELECTION_ALL = Shapes.object({

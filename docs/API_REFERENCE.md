@@ -14050,7 +14050,7 @@ Result:
               "string",
               "null"
             ],
-            "description": "Why the stored assignment is invalid, or null. An invalid one can still be cleared or reassigned."
+            "description": "Why the stored assignment is invalid or cannot be read, or null. An invalid one can still be cleared or reassigned; text that is not a JSON object reads with no values and a write_refusal."
           },
           "write_refusal": {
             "type": [
@@ -14070,7 +14070,7 @@ Result:
                 "type": "string"
               }
             },
-            "description": "The refusal a write to the Edge meets from its path, or null."
+            "description": "The refusal a write to the Edge meets from its path, or else record.unreadable when its stored text is not a JSON object, which only edges.repair removes; null otherwise."
           },
           "hidden": {
             "type": [
@@ -14329,7 +14329,7 @@ Result:
               "string",
               "null"
             ],
-            "description": "Why the stored assignment is invalid, or null. An invalid one can still be cleared or reassigned."
+            "description": "Why the stored assignment is invalid or cannot be read, or null. An invalid one can still be cleared or reassigned; text that is not a JSON object reads with no values and a write_refusal."
           },
           "write_refusal": {
             "type": [
@@ -14349,7 +14349,7 @@ Result:
                 "type": "string"
               }
             },
-            "description": "The refusal a write to the Edge meets from its path, or null."
+            "description": "The refusal a write to the Edge meets from its path, or else record.unreadable when its stored text is not a JSON object, which only edges.repair removes; null otherwise."
           },
           "hidden": {
             "type": [
@@ -14564,7 +14564,7 @@ Result:
                 "type": "string"
               }
             },
-            "description": "The refusal a write to the Edge meets from its path, or null."
+            "description": "The refusal a write to the Edge meets from its path, or else record.unreadable when its stored text is not a JSON object, which only edges.repair removes; null otherwise."
           }
         }
       }
@@ -14761,7 +14761,7 @@ Result:
               "string",
               "null"
             ],
-            "description": "Why the stored assignment is invalid, or null. An invalid one can still be cleared or reassigned."
+            "description": "Why the stored assignment is invalid or cannot be read, or null. An invalid one can still be cleared or reassigned; text that is not a JSON object reads with no values and a write_refusal."
           },
           "write_refusal": {
             "type": [
@@ -14781,7 +14781,7 @@ Result:
                 "type": "string"
               }
             },
-            "description": "The refusal a write to the Edge meets from its path, or null."
+            "description": "The refusal a write to the Edge meets from its path, or else record.unreadable when its stored text is not a JSON object, which only edges.repair removes; null otherwise."
           }
         }
       }
@@ -14994,7 +14994,7 @@ Result:
               "string",
               "null"
             ],
-            "description": "Why the stored assignment is invalid, or null. An invalid one can still be cleared or reassigned."
+            "description": "Why the stored assignment is invalid or cannot be read, or null. An invalid one can still be cleared or reassigned; text that is not a JSON object reads with no values and a write_refusal."
           },
           "write_refusal": {
             "type": [
@@ -15014,7 +15014,7 @@ Result:
                 "type": "string"
               }
             },
-            "description": "The refusal a write to the Edge meets from its path, or null."
+            "description": "The refusal a write to the Edge meets from its path, or else record.unreadable when its stored text is not a JSON object, which only edges.repair removes; null otherwise."
           }
         }
       }

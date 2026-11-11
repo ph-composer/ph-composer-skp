@@ -785,7 +785,10 @@ path and anything clear serves, and never takes a dictionary name. Such text nam
 Thermal Bridge Type delete and `edges.repair` pass over it when they check what still names a removed record; clear
 and the delete leave it as it is, skip it as a target, and name its Edges in a `thermal_bridge.unreadable_skipped`
 finding (paths of the first 20, and the total). `edges.assign` naming such an Edge, `null` or a stored value that
-is not text included, never writes over it: past its path's own refusals it refuses `record.unreadable`. [AGENT_GUIDE](../docs/AGENT_GUIDE.md),
+is not text included, never writes over it: past its path's own refusals it refuses `record.unreadable`. Every
+Edge read takes the same rule: the selection and path reads give such an Edge no values, a `record_problem` and a
+`record.unreadable` `write_refusal`, the schedule and the export preflight list it as unreadable, and the edge tool
+refuses it. [AGENT_GUIDE](../docs/AGENT_GUIDE.md),
 "Thermal Bridge Types", is the recipe.
 
 Zones exposes native split identity recovery as `ph_composer.zones.repair_split_face`. The native

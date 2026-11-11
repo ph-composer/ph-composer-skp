@@ -49,9 +49,9 @@ module PhComposer
           parent = Array(model.active_path)
           edges = edges.sort_by { |edge| (parent + [edge]).map(&:persistent_id) }
           paths = edges.map { |edge| (parent + [edge]).map(&:persistent_id) }
-          records = edges.map { |edge| STORE.read(edge) }
-          copied = copied_ids(model, records)
-          [Operations.contained(request, paths).zip(records).map { |row, record| row(row, record, copied) }, others]
+          reads = edges.map { |edge| Target.read(edge) }
+          copied = copied_ids(model, reads.map(&:first))
+          [Operations.contained(request, paths).zip(reads).map { |row, read| row(row, read, copied) }, others]
         end
 
         # The Edge reference a `zones.containment` row and the Edge's stored record make, or nil when no Zone
@@ -62,15 +62,18 @@ module PhComposer
                     "entity_path" => containment.fetch("entity_path"), "entity_id" => Assignment.identity(record) }
         end
 
-        # One Edge's row from its `zones.containment` row, its stored record and the ids copies share; the path
-        # reads (PathReads) answer the same row.
-        def row(containment, record, copied)
+        # One Edge's row from its `zones.containment` row, its stored record as Target.read gives it and the ids
+        # copies share; the path reads (PathReads) answer the same row. Text that is not a JSON object reads
+        # with no values, its problem and, past its path's own, the refusal `edges.assign` meets on it; an
+        # invalid record reads with its first problem and can still be cleared or reassigned.
+        def row(containment, read, copied)
+          record, problem = read
           reference = reference(containment, record)
           { "path" => containment.fetch("path"), "reference" => reference,
             "zone" => containment.fetch("zone"), "reason" => containment.fetch("reason"),
             "values" => Assignment.values(record), "copied" => !record.nil? && copied.include?(record["id"]),
-            "record_problem" => record && Assignment::RECORD_KIND.problems(record).first,
-            "write_refusal" => containment.fetch("write_refusal") }
+            "record_problem" => problem || (record && Assignment::RECORD_KIND.problems(record).first),
+            "write_refusal" => containment.fetch("write_refusal") || (problem && Target.unreadable_refusal) }
         end
 
         # The ids among `records` that more than one Edge in the Model carries. A walk of every tagged Edge,
@@ -85,7 +88,8 @@ module PhComposer
         private_class_method :rows, :ignored
 
         # Whether a write can reach the Edge a selection row names: a Zone holds it, through no shared,
-        # locked or other Zone storage. The menu and the panel's assign bar both offer only such Edges.
+        # locked or other Zone storage, and it holds no text that is not a JSON object. The menu and the
+        # panel's assign bar both offer only such Edges.
         def assignable?(row)
           !row["reference"].nil? && row["write_refusal"].nil?
         end

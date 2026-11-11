@@ -189,6 +189,25 @@ class ThermalBridgeEdgeToolTest < PhComposerTestCase
     assert_nil STORE.read(@edges[0])
   end
 
+  # An Edge whose stored text is not a JSON object, null and a value that is not text included, hovers red and
+  # refuses at the pointer, as edges.assign would refuse it, and its text stays.
+  def test_an_edge_holding_text_that_is_not_a_json_object_refuses_at_the_pointer_and_keeps_it
+    tool.choose(@parapet)
+    point(:a, [@zone_a, @edges[0]])
+    ["{broken", "123", "[1]", "\"s\"", "null", 7].each do |value|
+      @edges[0].set_attribute(STORE.dictionary, STORE.key, value)
+      @session.host_event(:transaction_committed)
+      operations = @model.operations.length
+      move(:a)
+      assert_match(/\AThe #{STORE.dictionary} record is not /, @view.tooltip, value.inspect)
+      click(:a)
+      assert_match(/\AThe #{STORE.dictionary} record is not .* Nothing was written\.\z/, Sketchup.status_texts.last,
+                   value.inspect)
+      assert_equal [operations, value, :warning],
+                   [@model.operations.length, @edges[0].get_attribute(STORE.dictionary, STORE.key), @notices.last.last]
+    end
+  end
+
   def test_a_commit_between_press_and_release_refuses_the_gesture_as_stale
     tool.choose(@parapet)
     point(:a, [@zone_a, @edges[0]])

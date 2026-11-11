@@ -28,7 +28,7 @@ module PhComposer
         ROUTE = "list them with ph_composer.thermal_bridges.edges.repair_candidates and remove each with " \
                 "ph_composer.thermal_bridges.edges.repair"
 
-        # One record as stored: its text (or a non-text value's canonical JSON), digest and parsed form.
+        # One record as stored: its text (or a non-text value's canonical JSON), digest and record (Target.readable).
         Stored = Struct.new(:text, :fingerprint, :record, keyword_init: true) do
           def readable?
             record.is_a?(Hash)
@@ -98,13 +98,7 @@ module PhComposer
           return nil if value.nil?
 
           text = value.is_a?(String) ? value : CanonicalJson.generate(value)
-          Stored.new(:text => text, :fingerprint => Digest::SHA256.hexdigest(text.b), :record => parse(value))
-        end
-
-        def parse(value)
-          value.is_a?(String) ? JSON.parse(value) : nil
-        rescue JSON::ParserError
-          nil
+          Stored.new(:text => text, :fingerprint => Digest::SHA256.hexdigest(text.b), :record => Target.readable(edge))
         end
 
         # Zones' containment of each root-to-Edge path, in the pages its bound admits.
@@ -187,7 +181,7 @@ module PhComposer
           { name => names.first(MAX_KEYS).map { |key| key[0, OccurrencePath::NAME_CHARACTERS] },
             "#{name.chomp('s')}_total" => names.length }
         end
-        private_class_method :parse, :row, :write_refusal, :check_references!, :disclosure, :shown, :keys
+        private_class_method :row, :write_refusal, :check_references!, :disclosure, :shown, :keys
       end
 
       # The one write a repair makes: re-resolve the Edge, refuse any stored text but the reviewed one, and
