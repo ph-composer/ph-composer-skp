@@ -577,10 +577,10 @@ repeated key goes through the retained-outcome path as the same sequence: the sa
 its first outcome, another conflicts (`request.sequence_conflict`), and one whose outcome has expired
 is `request.outcome_unavailable` and is never given a new sequence. An invoke refused before acceptance
 (busy, an unknown operation, a closed session or revoked caller, a missing capability, a malformed request) ran
-nothing and retained no outcome, which is how the connection tells, so a key that invoke bound is released
-(`Sequencer#release`) and the
-same key sent again takes a new sequence and runs once; a key bound by an earlier send keeps its sequence whatever a
-later send under it is refused, so an accepted change never runs twice. Every `invoke` and `outcome`
+nothing and never raised the caller's highest accepted sequence, which is how the connection tells, so a key
+that invoke bound is released (`Sequencer#release`) and the same key sent again takes a new sequence and runs
+once; a key bound by an earlier send keeps its sequence whatever a later send under it is refused, so an accepted
+change never runs twice. Every `invoke` and `outcome`
 result carries `sequence`, an optional field of the published Outcome schema that only this route
 sets; `outcome` takes a sequence or a key. A lost reply is recovered by reading state: `outcome` for
 an invoke, the setup's own read (such as `ph_composer.library.providers`) for a setup command,

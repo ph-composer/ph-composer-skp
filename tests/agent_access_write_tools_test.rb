@@ -162,6 +162,13 @@ class AgentAccessWriteToolsTest < PhComposerTestCase
 
     def install(registry)
       feature = registry.feature("test.late", :contract_version => 1)
+      feature.action("test.late.slow", :description => "Outlast outcome retention.", :params => { "type" => "object" },
+                                       :result => { "type" => "object" }, :refuses => [], :undo_name => "Slow",
+                                       :side_effects => "None.") do |request, _proposal|
+        LateRefusal.runs += 1
+        request.session.outcomes.clock = -> { Float::INFINITY }
+        {}
+      end
       feature.action("test.late.refuse", :description => "Refuse after acceptance.", :params => { "type" => "object" },
                                          :result => { "type" => "object" }, :refuses => [], :undo_name => "Refuse",
                                          :side_effects => "None.") do |_request, _proposal|
@@ -186,6 +193,21 @@ class AgentAccessWriteToolsTest < PhComposerTestCase
 
     assert_equal [1, "request.malformed"], refused.values_at("sequence", "code")
     assert_equal [1, "request.malformed"], again.values_at("sequence", "code")
+    assert_equal 1, LateRefusal.runs
+  end
+
+  # A change whose retained outcome expires before its reply returns was still accepted, so its key is kept and
+  # a retry answers request.outcome_unavailable rather than running it again.
+  def test_a_key_accepted_whose_outcome_expired_before_the_reply_is_kept
+    PhComposer::Registry.install([LateRefusal])
+    LateRefusal.runs = 0
+    revision = @session.revision
+    first = invoke("idempotency_key" => "k", "name" => "test.late.slow", "params" => {})
+    again = invoke("idempotency_key" => "k", "name" => "test.late.slow", "params" => {},
+                   "expected_revision" => revision)
+
+    assert_equal [1, "completed"], first.values_at("sequence", "status")
+    assert_equal [1, "request.outcome_unavailable"], again.values_at("sequence", "code")
     assert_equal 1, LateRefusal.runs
   end
 

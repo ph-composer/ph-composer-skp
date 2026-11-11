@@ -158,10 +158,12 @@ that pages or fragments what was left out. Fragments join and check exactly as a
 
 - **Refused.** Read `code` and `message`; `describe` lists what each operation can refuse. Nothing
   was written unless `effect` says otherwise.
-- **A refusal before the change was taken.** `session.busy`, `request.unknown_operation`,
-  `request.malformed`, `request.capability_denied`, `session.unknown` and `access.revoked` mean the invoke
-  never ran, so its `idempotency_key` is free: fix the request and send it again with the same key. Any
-  other refusal is kept under the key, and the same invoke sent again answers it again.
+- **A refusal before the change was taken.** When the first invoke sent with an `idempotency_key` is
+  refused before PH-Composer takes it (busy, an unknown operation, a missing grant, a closed session or a
+  request it cannot read), the key stays free: fix the request and send it again with the same key. Once
+  a change has been taken under a key, the key keeps it: the operation's own refusal answers again, and a
+  different request under it conflicts, so use a new key for new work. `outcome` with the key says which:
+  a key it does not know is free.
 - **`revision.stale` or `target.changed`.** The Model changed after you read it, often because the
   user edited it. Read again, decide again, and send a new request.
 - **`session.busy`.** Another change is running, deferred work is settling, or the user has a tool

@@ -126,11 +126,13 @@ module PhComposer
         answer.merge("sequence" => sequence)
       end
 
-      # Whether dispatch accepted this sequence. Acceptance is what retains an outcome, running or finished, so a
-      # sequence without one was refused before it (context/CONTRACTS.md, "Retries"), whatever its code: a
-      # handler's refusal after acceptance is retained under the same codes dispatch answers before it.
+      # Whether dispatch accepted this sequence: acceptance raises the caller's highest accepted sequence before
+      # anything runs (context/CONTRACTS.md, "Retries"), and nothing lowers it, so it holds whatever the refusal
+      # code (a handler's refusal after acceptance can carry one dispatch also answers before it) and however
+      # soon the retained outcome expires. A caller or session gone since is no binding a retry can use.
       def accepted?(context, sequence)
-        !Sessions.find(context.session_id)&.outcomes&.lookup(context.caller, sequence).nil?
+        caller = Sessions.find(context.session_id)&.callers&.fetch(context.caller)
+        !caller.nil? && caller.highest_sequence >= sequence
       end
 
       # The retained outcome of an invoke, by its sequence or by the key it was sent with.

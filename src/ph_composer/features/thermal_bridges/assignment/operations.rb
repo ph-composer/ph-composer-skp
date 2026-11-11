@@ -44,9 +44,8 @@ module PhComposer
         # no assignment is left alone, and so is one whose stored text is not a JSON object: clear never
         # destroys what it cannot read, and the outcome names it (`note_unreadable`).
         def clear(request, proposal, targets:)
-          # The bound counts every Edge named, unreadable ones included, before any walk.
-          named = targets.map { |target| target.fetch("reference").values_at("zone_path", "entity_path") }
-          Assignment.check_limit!(named.uniq.length)
+          # Every Edge named, unreadable ones included, must agree with its repeats and fit the bound, before any walk.
+          occurrences!(targets)
           unreadable = note_unreadable(request, proposal, "Clear")
           readable = targets.reject { |target| unreadable.include?(key(target.fetch("reference"))) }
           updates = resolve(request, readable).filter_map { |located, before| before && update(located, before, nil) }
@@ -109,12 +108,7 @@ module PhComposer
         # Each target resolved for writing, as `[located, record]`. Targets are deduplicated by occurrence
         # and bounded before anything is resolved, so an over-limit command refuses without a walk.
         def resolve(request, targets)
-          unique = targets.group_by { |target| target.fetch("reference").values_at("zone_path", "entity_path") }
-          if unique.values.any? { |group| group.uniq.length > 1 }
-            raise CodedError.new("params.invalid", "Repeated Edge targets disagree on identity or expected values.")
-          end
-
-          Assignment.check_limit!(unique.length)
+          unique = occurrences!(targets)
           index = request.locate_index(EDGE_KIND)
           unique.values.map do |group|
             target = group.first
@@ -123,6 +117,17 @@ module PhComposer
             check_expected!(before, target.fetch("expected_values", {}))
             [located, before]
           end
+        end
+
+        # The targets grouped by occurrence, refusing repeats that disagree and a command past the Edge bound.
+        def occurrences!(targets)
+          unique = targets.group_by { |target| target.fetch("reference").values_at("zone_path", "entity_path") }
+          if unique.values.any? { |group| group.uniq.length > 1 }
+            raise CodedError.new("params.invalid", "Repeated Edge targets disagree on identity or expected values.")
+          end
+
+          Assignment.check_limit!(unique.length)
+          unique
         end
 
         # The root-to-Edge path, as the records provider keys an entry.
