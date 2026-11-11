@@ -27,6 +27,9 @@
     this.libraryProviders = JSON.parse(JSON.stringify(settings.libraryProviders || []));
     this.libraryCatalogs = JSON.parse(JSON.stringify(settings.libraryCatalogs || {}));
     this.libraryGenerations = {}; this.libraryFailures = {};
+    // A hosted (version 2) load's state while it runs or after Cancel; `holdLibraryLoads` keeps loads running
+    // until `finishLibraryLoad` publishes them.
+    this.libraryLoads = {}; this.holdLibraryLoads = false;
     this.librarySetupState = settings.librarySetupState || "readable";
     this.approvedLocations = JSON.parse(JSON.stringify(settings.approvedLocations || [
       { id: "location_PreviewDest01", kind: "save_file", label: "Library export", use: "reusable",
@@ -891,6 +894,7 @@
       var generation = this.libraryGenerations[provider.id] || null;
       return Object.assign({}, provider, { catalogs: provider.kinds.map(function (kind) {
         return { kind: kind, generation: generation, state: this.libraryFailures[provider.id] ? "failed" :
+          this.libraryLoads[provider.id] ||
           (!generation ? "unloaded" : ((this.libraryCatalogs[provider.id] || []).length ? "loaded" : "empty")),
         failure: this.libraryFailures[provider.id] || null, age_seconds: generation ? 65 : null, freshness: {} };
       }, this) });
@@ -1006,7 +1010,17 @@
     if (verb === "remove") this.libraryProviders = this.libraryProviders.filter(function (row) {
       return row.id !== params.provider_id;
     });
-    if (verb === "load") {
+    if (verb === "cancel_load") {
+      var running = this.libraryLoads[params.provider_id] === "loading";
+      if (running) this.libraryLoads[params.provider_id] = "cancelled";
+      this.snapshot();
+      this.publish("setup.result", { request_id: payload.request_id, session: payload.session,
+        outcome: { status: "completed", effect: "none", revision: this.revision, value: { cancelled: running } } });
+      return;
+    }
+    if (verb === "load" && this.holdLibraryLoads) this.libraryLoads[params.provider_id] = "loading";
+    else if (verb === "load") {
+      delete this.libraryLoads[params.provider_id];
       if (this.failLibraryRefresh) this.libraryFailures[params.provider_id] =
         { code: "library.file_unreadable", message: "The configured library could not be read." };
       else { this.libraryGenerations[params.provider_id] = (this.libraryGenerations[params.provider_id] || 0) + 1;
@@ -1018,6 +1032,12 @@
     this.snapshot();
     this.publish("setup.result", { request_id: payload.request_id, session: payload.session,
       outcome: { status: "completed", effect: "none", revision: this.revision, value: value } });
+  };
+  /* Ends a held hosted load the way a published snapshot does: the next generation, ready to read. */
+  Host.prototype.finishLibraryLoad = function (providerId) {
+    delete this.libraryLoads[providerId];
+    this.libraryGenerations[providerId] = (this.libraryGenerations[providerId] || 0) + 1;
+    this.snapshot();
   };
   // A synthetic preview of Window copy targets. Ruby owns real transactions, provenance and thermal results.
   Host.prototype.windowLibraryCopy = function (params, staged) {

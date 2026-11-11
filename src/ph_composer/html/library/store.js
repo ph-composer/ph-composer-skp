@@ -8,6 +8,7 @@ PhComposerUI.define("library/store", ["request", "snapshot"], function (request,
     this.providers = []; this.selected = ""; this.rows = []; this.page = null; this.available = false;
     this.views = request.channel(session, send, "library-load", "setup.invoke");
     this.queries = request.channel(session, send, "library-page", "query.invoke");
+    this.cancels = request.channel(session, send, "library-cancel", "setup.invoke");
   }
   Store.prototype.busy = function () { return this.views.busy() || this.queries.busy(); };
   Store.prototype.provider = function () {
@@ -26,7 +27,7 @@ PhComposerUI.define("library/store", ["request", "snapshot"], function (request,
     }, this);
   };
   Store.prototype.reset = function () {
-    this.views.reset(); this.queries.reset(); this.rows = []; this.page = null;
+    this.views.reset(); this.queries.reset(); this.cancels.reset(); this.rows = []; this.page = null;
     this.pageRevision = null; this.attempted = null; this.error = "";
   };
   Store.prototype.update = function (state) {
@@ -38,7 +39,7 @@ PhComposerUI.define("library/store", ["request", "snapshot"], function (request,
       this.reset(); this.loaded = Object.create(null); this.selected = ""; return;
     }
     this.revision = state.revision;
-    this.views.consume(state); this.queries.consume(state);
+    this.views.consume(state); this.queries.consume(state); this.cancels.consume(state);
     Object.keys(this.loaded).forEach(function (id) {
       var provider = this.providers.filter(function (row) { return row.id === id; })[0];
       var catalog = this.catalog(provider), cache = this.loaded[id];
@@ -69,6 +70,8 @@ PhComposerUI.define("library/store", ["request", "snapshot"], function (request,
     if (!provider) return true;
     var catalog = this.catalog(provider);
     if (catalog && catalog.generation) this.read(null, catalog.generation);
+    // A hosted load already running is followed, not started again.
+    else if (catalog && catalog.state === "loading") this.page = Object.assign({}, catalog);
     else this.load();
     this.changed(); return true;
   };
@@ -129,6 +132,25 @@ PhComposerUI.define("library/store", ["request", "snapshot"], function (request,
       });
     });
     return found || { label: source.library_id, changed: false, comparisonAvailable: false };
+  };
+  /* A hosted library's load runs after its request returned: its catalog reads `loading` until it ends. The
+     page keeps that state until the first page of what it published is read, or that read fails. */
+  Store.prototype.cancellable = function () {
+    var catalog = this.catalog(this.provider());
+    return Boolean(catalog && catalog.state === "loading");
+  };
+  Store.prototype.loading = function () {
+    return this.cancellable() || Boolean(!this.error && this.page && this.page.state === "loading");
+  };
+  Store.prototype.cancelling = function () { return this.cancels.busy(); };
+  /* Stops that load; the catalog it would have replaced stays. The next snapshot says `cancelled`. */
+  Store.prototype.cancel = function () {
+    if (this.disposed || !this.cancellable() || this.cancels.busy()) return false;
+    var self = this;
+    this.cancels.run(PREFIX + ".cancel_load", { provider_id: this.selected, kind: this.kind }, {
+      onDone: function () { self.changed(); },
+      onFail: function (outcome) { self.error = outcome.message; self.changed(); } });
+    this.changed(); return true;
   };
   Store.prototype.refresh = function () { return this.load(); };
   Store.prototype.more = function () {

@@ -30,7 +30,11 @@ PhComposerUI.define("library/rows", ["units", "workspace"], function (units, ui)
     this.list.replaceChildren();
     var repeats = this.besideTable && !(this.store && this.store.selected);
     this.search.hidden = this.count.hidden = this.narrowing.hidden = repeats;
+    this.list.removeAttribute("aria-busy");
     if (repeats) return;
+    var selected = Boolean(this.store && this.store.selected), page = selected ? this.store.page : null;
+    var loading = this.loading() || (selected && this.store.busy());
+    if (loading) this.list.setAttribute("aria-busy", "true");
     this.paintCategories(categories);
     var only = this.category.value, sign = this.order.value === "desc" ? -1 : 1;
     this.records.filter(function (row) {
@@ -71,11 +75,12 @@ PhComposerUI.define("library/rows", ["units", "workspace"], function (units, ui)
         }
         entry.name.textContent = adapter.name(row);
         // A library's record says where its click leads; a record already in the file has nothing to add.
-        var known = Boolean(row.resolution && row.resolution.candidates.length);
+        // While its library loads, nothing is copied from it, so the row offers no add.
+        var known = Boolean(row.resolution && row.resolution.candidates.length), locked = self.copyLocked(row);
         if (row.library && !entry.addGlyph) entry.button.appendChild(entry.addGlyph = ui.glyph("add"));
-        if (entry.addGlyph) entry.addGlyph.hidden = !row.library || known;
+        if (entry.addGlyph) entry.addGlyph.hidden = !row.library || known || locked;
         ui.tooltip(entry.button, !row.library ? "" : known ? adapter.name(row) + " is already in this file" :
-          "Add " + adapter.name(row) + " to this file");
+          locked ? "The library is still loading" : "Add " + adapter.name(row) + " to this file");
         entry.bubble.panel.setAttribute("aria-label", adapter.name(row));
         entry.bubble.heading.querySelector("strong").textContent = adapter.name(row);
         entry.bubble.closeButton.setAttribute("aria-label", "Close " + adapter.name(row));
@@ -85,18 +90,19 @@ PhComposerUI.define("library/rows", ["units", "workspace"], function (units, ui)
       self.list.appendChild(group);
     });
     this.list.scrollTop = scrollTop;
-    this.count.textContent = this.visible.length + " shown · " +
-      (this.store && this.store.selected && this.store.page ? this.store.page.total : this.records.length) +
-      (this.store && this.store.selected ? " in library" : " in this file");
+    // A library's count waits for the total its catalog reports; a hosted load reports none while it runs.
+    var total = selected ? page && page.total : this.records.length;
+    this.count.hidden = typeof total !== "number";
+    this.count.textContent = this.count.hidden ? "" :
+      this.visible.length + " shown · " + total + (selected ? " in library" : " in this file");
     if (!Object.keys(grouped).length) {
-      var empty = adapter.emptyText;
-      if (this.store && this.store.selected) {
-        empty = this.store.busy() ? "Loading library…" : "No records in this library.";
-        if (this.store.page && this.store.page.state === "failed" && !this.store.page.generation) {
-          empty = "No catalog is available.";
-        }
+      var empty = query ? "No records match this search." : adapter.emptyText;
+      // Loading, no catalog and an empty catalog are three states: only a catalog read in full can be empty.
+      if (selected && !this.records.length) {
+        empty = loading ? "Loading library…" : page && page.generation && !this.store.error ?
+          "No records in this library." : "No catalog is available.";
       }
-      this.list.appendChild(el("p", "muted", query ? "No records match this search." : empty));
+      this.list.appendChild(el("p", "muted", empty));
     }
   };
   methods.makeRow = function (row) {
@@ -168,11 +174,11 @@ PhComposerUI.define("library/rows", ["units", "workspace"], function (units, ui)
   };
   methods.paintActions = function () {
     if (!this.detail) return;
-    var target = this.adapter.target(this.context);
+    var target = this.adapter.target(this.context), locked = this.copyLocked(this.detail.row);
     this.detail.use.hidden = !this.onUse;
-    this.detail.use.disabled = !this.enabled || this.busy() || Boolean(target.hint);
-    if (this.detail.add) this.detail.add.disabled = !this.enabled || this.busy();
-    this.detail.hint.textContent = this.onUse ? (target.hint || "") : "";
+    this.detail.use.disabled = !this.enabled || this.busy() || locked || Boolean(target.hint);
+    if (this.detail.add) this.detail.add.disabled = !this.enabled || this.busy() || locked;
+    this.detail.hint.textContent = locked ? "The library is still loading." : this.onUse ? (target.hint || "") : "";
   };
   return methods;
 });

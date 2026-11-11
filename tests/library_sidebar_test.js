@@ -247,3 +247,117 @@ test("notes that name no skipped row are reported apart: kept rows as normalized
     assert.strictEqual(o.sidebar.skipped.hidden, true);
   });
 });
+/* A hosted library's first load: the snapshot says `loading`, with no generation, no rows and no total. */
+function hostedLoad() {
+  var o = setup(), catalog = o.state.sections["ph_composer.library.provider_catalogs"].value[0].catalogs[0];
+  o.sidebar.store.select("");
+  Object.assign(catalog, { generation: null, state: "unloaded" });
+  o.sidebar.refresh(o.state, {}, true);
+  o.sidebar.store.select("p"); o.sidebar.updateRows();
+  var load = o.sent[o.sent.length - 1].payload;
+  assert.strictEqual(load.name, "ph_composer.library.load");
+  o.state.ui.setupResults[load.request_id] = { session: "session", request_id: load.request_id,
+    outcome: { status: "completed", value: { kind: "test_parts", generation: null, state: "loading" } } };
+  catalog.state = "loading";
+  o.sidebar.refresh(o.state, {}, true);
+  return Object.assign(o, { catalog: catalog });
+}
+function listText(sidebar) {
+  return sidebar.list.children.map(function (node) { return node.textContent; }).join("|");
+}
+test("while a hosted library loads the list says so, prints no count, and offers Cancel loading", function () {
+  var o = hostedLoad(), sidebar = o.sidebar;
+  assert.strictEqual(listText(sidebar), "Loading library…");
+  assert.strictEqual(sidebar.sourceStatus.textContent, "", "said once, in the list");
+  assert.strictEqual(sidebar.list.getAttribute("aria-busy"), "true");
+  assert.strictEqual(sidebar.count.hidden, true);
+  assert.doesNotMatch(sidebar.count.textContent, /undefined/);
+  assert.strictEqual(sidebar.refreshButton.hidden, true);
+  assert.strictEqual(sidebar.cancelButton.hidden, false);
+  sidebar.cancelButton.listeners.click({});
+  var cancel = o.sent[o.sent.length - 1];
+  assert.strictEqual(cancel.type, "setup.invoke");
+  assert.strictEqual(cancel.payload.name, "ph_composer.library.cancel_load");
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(cancel.payload.params)), { provider_id: "p", kind: "test_parts" });
+  sidebar.updateRows();
+  assert.strictEqual(sidebar.cancelButton.textContent, "Cancelling…");
+  assert.strictEqual(sidebar.cancelButton.disabled, true);
+  sidebar.cancelButton.listeners.click({});
+  assert.strictEqual(o.sent[o.sent.length - 1], cancel, "one cancel at a time");
+  o.state.ui.setupResults[cancel.payload.request_id] = { session: "session", request_id: cancel.payload.request_id,
+    outcome: { status: "completed", value: { cancelled: true } } };
+  o.catalog.state = "cancelled";
+  sidebar.refresh(o.state, {}, true);
+  assert.match(sidebar.sourceStatus.textContent, /^Loading was cancelled\.$/);
+  assert.strictEqual(listText(sidebar), "No catalog is available.");
+  assert.strictEqual(sidebar.cancelButton.hidden, true);
+  assert.strictEqual(sidebar.refreshButton.hidden, false);
+  assert.strictEqual(sidebar.list.getAttribute("aria-busy"), null);
+});
+test("a catalog that ends empty says so; one that ends unavailable is not called empty", function () {
+  var o = hostedLoad(), sidebar = o.sidebar;
+  Object.assign(o.catalog, { generation: 2, state: "ready" });
+  sidebar.refresh(o.state, {}, true);
+  var read = o.sent[o.sent.length - 1].payload;
+  assert.strictEqual(listText(sidebar), "Loading library…", "the first page is still being read");
+  o.state.ui.queryResults[read.request_id] = { session: "session", request_id: read.request_id,
+    outcome: { status: "completed", value: { generation: 2, state: "ready", total: 0, next_cursor: null, rows: [] } } };
+  sidebar.refresh(o.state, {}, true);
+  assert.strictEqual(listText(sidebar), "No records in this library.");
+  assert.strictEqual(sidebar.count.textContent, "0 shown · 0 in library");
+  var other = hostedLoad();
+  Object.assign(other.catalog, { state: "unavailable", failure: { message: "The library could not be loaded." } });
+  other.sidebar.refresh(other.state, {}, true);
+  assert.strictEqual(listText(other.sidebar), "No catalog is available.");
+  assert.strictEqual(other.sidebar.count.hidden, true);
+});
+test("rows kept from the last catalog cannot be copied until a refresh finishes loading", function () {
+  var o = setup(), sidebar = o.sidebar, row = sidebar.records[0], entry = sidebar.entries[row.id];
+  sidebar.adapter.dropSelector = ".target";
+  sidebar.openDetails(entry);
+  Object.assign(o.state.sections["ph_composer.library.provider_catalogs"].value[0].catalogs[0], { state: "loading" });
+  sidebar.refresh(o.state, {}, true);
+  assert.strictEqual(sidebar.records.length, 1, "the last rows stay in view");
+  assert.strictEqual(sidebar.count.textContent, "1 shown · 1 in library");
+  assert.strictEqual(entry.use.disabled, true);
+  assert.strictEqual(entry.add.disabled, true);
+  assert.strictEqual(entry.hint.textContent, "The library is still loading.");
+  assert.strictEqual(entry.addGlyph.hidden, true);
+  assert.strictEqual(sidebar.use(row), false);
+  assert.strictEqual(sidebar.add(row), false);
+  sidebar.drag.start(entry, { button: 0, clientX: 0, clientY: 0 });
+  assert.strictEqual(sidebar.drag.entry, null, "no drag starts from a loading library");
+  assert.deepStrictEqual(o.sent.map(function (item) { return item.type; }), ["query.invoke"]);
+  Object.assign(o.state.sections["ph_composer.library.provider_catalogs"].value[0].catalogs[0], { state: "ready" });
+  sidebar.refresh(o.state, {}, true);
+  assert.strictEqual(entry.add.disabled, false);
+  assert.strictEqual(entry.use.disabled, false);
+  assert.strictEqual(entry.addGlyph.hidden, false);
+  assert.strictEqual(sidebar.use(row), true);
+});
+test("choosing a library whose hosted load is already running follows it instead of starting another", function () {
+  var o = hostedLoad(), sent = o.sent.length;
+  o.sidebar.store.select(""); o.sidebar.store.select("p"); o.sidebar.updateRows();
+  assert.strictEqual(o.sent.length, sent, "no second load");
+  assert.strictEqual(listText(o.sidebar), "Loading library…");
+  assert.strictEqual(o.sidebar.cancelButton.hidden, false);
+});
+test("a held review waits for a refresh to load; a first page that fails is not called empty", function () {
+  var o = setup(); review(o);
+  var catalog = o.state.sections["ph_composer.library.provider_catalogs"].value[0].catalogs[0];
+  catalog.state = "loading"; o.sidebar.refresh(o.state, {}, true);
+  assert.strictEqual(o.sidebar.copy.localButton.disabled, true);
+  assert.strictEqual(o.sidebar.copy.error.textContent, "The library is still loading.");
+  assert.strictEqual(o.sidebar.copy.apply("keep_local"), false);
+  catalog.state = "ready"; o.sidebar.refresh(o.state, {}, true);
+  assert.strictEqual(o.sidebar.copy.localButton.disabled, false);
+  assert.strictEqual(o.sidebar.copy.error.textContent, "");
+  var other = hostedLoad();
+  Object.assign(other.catalog, { generation: 2, state: "ready" });
+  other.sidebar.refresh(other.state, {}, true);
+  var read = other.sent[other.sent.length - 1].payload;
+  other.state.ui.queryResults[read.request_id] = { session: "session", request_id: read.request_id,
+    outcome: { status: "refused", code: "library.catalog_unavailable", message: "The catalog could not be read." } };
+  other.sidebar.refresh(other.state, {}, true);
+  assert.strictEqual(listText(other.sidebar), "No catalog is available.");
+});

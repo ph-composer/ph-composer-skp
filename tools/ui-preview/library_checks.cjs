@@ -4,6 +4,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { check } = require("./support/browser_evidence.cjs");
+const { PANEL_SIZES, paneFacts } = require("./support/pane_fit.cjs");
 const output = process.env.PH_COMPOSER_PREVIEW_EVIDENCE || fs.mkdtempSync(path.join(os.tmpdir(), "phc-library-"));
 const port = process.env.UI_PREVIEW_PORT || "8765";
 fs.mkdirSync(output, { recursive: true });
@@ -45,6 +46,51 @@ check({ name: "library_sidebar_title", output }, async ({ newPage, step }) => {
     await toggle.click();
     assert.equal(await chevronAngle(toggle), folded, "folded, it points the way the sidebar comes back");
     assert.equal(await gear.isVisible(), false, "a folded sidebar is its title alone");
+    await page.close();
+  }
+});
+check({ name: "library_hosted_loading", output }, async ({ newPage, step }) => {
+  for (const [width, height] of PANEL_SIZES) {
+    step(`hosted load ${width}x${height}`);
+    const page = await newPage({ viewport: { width, height } });
+    await page.goto(`http://127.0.0.1:${port}/tools/ui-preview/?fixture=libraries`);
+    await page.evaluate(() => { previewHost.holdLibraryLoads = true; });
+    await page.locator("[data-tab='library']").click();
+    const library = page.locator("[data-section='library']");
+    const sidebar = library.getByRole("tabpanel", { name: "Materials", exact: true }).locator(".library-sidebar-root");
+    if (width < 900) await sidebar.getByRole("button", { name: "Material Library", exact: true }).click();
+    await sidebar.getByLabel("Library source", { exact: true }).selectOption("synthetic");
+    const list = sidebar.locator(".library-sidebar-list");
+    await list.getByText("Loading library…", { exact: true }).waitFor();
+    assert.equal(await list.getAttribute("aria-busy"), "true");
+    assert.equal(await sidebar.getByText(/in library/).count(), 0, "no count before the catalog has a total");
+    assert.equal(await sidebar.getByText(/undefined|No records in this library/).count(), 0);
+    assert.equal(await sidebar.getByRole("button", { name: "Refresh", exact: true }).isVisible(), false);
+    await page.screenshot({ path: path.join(output, `library-hosted-loading-${width}.png`), fullPage: true });
+    await sidebar.getByRole("button", { name: "Cancel loading", exact: true }).click();
+    await sidebar.getByText("Loading was cancelled.", { exact: true }).waitFor();
+    await list.getByText("No catalog is available.", { exact: true }).waitFor();
+    assert.equal(await page.evaluate(() => previewHost.sent.filter(item => item.type === "setup.invoke" &&
+      item.payload.name === "ph_composer.library.cancel_load").length), 1);
+    // A refresh that runs over a loaded catalog keeps its rows in view but copies nothing until it ends.
+    await sidebar.getByRole("button", { name: "Refresh", exact: true }).click();
+    await page.evaluate(() => previewHost.finishLibraryLoad("synthetic"));
+    const fiber = sidebar.locator(".library-sidebar-row-button").filter({ hasText: "Synthetic fiber" });
+    await fiber.waitFor();
+    await sidebar.getByRole("button", { name: "Refresh", exact: true }).click();
+    await sidebar.getByRole("button", { name: "Cancel loading", exact: true }).waitFor();
+    await openRow(page, fiber);
+    const details = sidebar.getByRole("dialog", { name: "Synthetic fiber", exact: true });
+    assert.equal(await details.getByRole("button", { name: "Add to file", exact: true }).isDisabled(), true);
+    await details.getByText("The library is still loading.", { exact: true }).waitFor();
+    await page.evaluate(() => previewHost.finishLibraryLoad("synthetic"));
+    await sidebar.getByRole("button", { name: "Refresh", exact: true }).waitFor();
+    // The status line it leaves can scroll a narrow pane, and the shared bubble closes on scrolling.
+    if (!(await details.isVisible())) await openRow(page, fiber);
+    assert.equal(await details.getByRole("button", { name: "Add to file", exact: true }).isDisabled(), false);
+    assert.equal(await writes(page), 0);
+    const facts = await paneFacts(page, { floating: [], header: null });
+    assert.equal(facts.sideways, false, `the pane never scrolls sideways at ${width}`);
     await page.close();
   }
 });
