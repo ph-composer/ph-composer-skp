@@ -98,12 +98,15 @@ module PhComposer
         [Export::ReportHtml.section("Construction usage", table)]
       end
 
-      # The one Zone occurrence containing a snapshot entry, as [entry, record], or nil. Two means a
-      # Zone nested in a Zone, which export refuses.
-      def zone_owner(snapshot, entry)
-        matches = snapshot.records(ZONE_DICTIONARY, :kind => "group").select do |zone_entry, _record|
-          snapshot.contains?(zone_entry, entry)
+      # The one Zone occurrence holding the snapshot path `path`, as [entry, record], or nil. Two means a
+      # Zone nested in a Zone, which export refuses. The Zone occurrences are indexed by path once per export,
+      # so a lookup reads only the path's own prefixes, outermost first, and never rescans the snapshot. Every
+      # caller gets the same pair: read it, never change it.
+      def zone_owner(reader, path)
+        by_path = reader.projection(:zone_occurrences_by_path) do
+          reader.snapshot.records(ZONE_DICTIONARY, :kind => "group").group_by { |zone_entry, _record| zone_entry.path }
         end
+        matches = (1...path.length).flat_map { |length| by_path.fetch(path[0, length], []) }
         raise Export::Blocked.new("face.wrong_zone", "A Face is contained by more than one Zone.") if matches.length > 1
 
         matches.first

@@ -198,8 +198,10 @@ module PhComposer
         end
       end
 
+      # Indexed by path on first use, so a contributor resolving one path per Face does not rescan the entries.
       def entry_at(path, kind: nil)
-        matches = entries.select { |entry| entry.path == path && (!kind || entry.kind == kind) }
+        @by_path ||= entries.group_by(&:path)
+        matches = @by_path.fetch(path, []).select { |entry| !kind || entry.kind == kind }
         if matches.length > 1
           raise Blocked.new("target.ambiguous", "An export occurrence path resolves more than once.")
         end
