@@ -576,8 +576,9 @@ and an optional `idempotency_key` (at most 64 characters) keeps the sequence it 
 repeated key goes through the retained-outcome path as the same sequence: the same request answers
 its first outcome, another conflicts (`request.sequence_conflict`), and one whose outcome has expired
 is `request.outcome_unavailable` and is never given a new sequence. An invoke refused before acceptance
-(`Refusals::BEFORE_ACCEPTANCE`: busy, an unknown operation, a closed session or revoked caller, a missing
-capability, a malformed request) ran nothing, so a key that invoke bound is released (`Sequencer#release`) and the
+(busy, an unknown operation, a closed session or revoked caller, a missing capability, a malformed request) ran
+nothing and retained no outcome, which is how the connection tells, so a key that invoke bound is released
+(`Sequencer#release`) and the
 same key sent again takes a new sequence and runs once; a key bound by an earlier send keeps its sequence whatever a
 later send under it is refused, so an accepted change never runs twice. Every `invoke` and `outcome`
 result carries `sequence`, an optional field of the published Outcome schema that only this route

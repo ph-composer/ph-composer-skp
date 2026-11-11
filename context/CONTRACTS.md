@@ -324,7 +324,7 @@ clients have separate handles.
 | Sequence | A sequence at or below the caller's highest accepted one is a retry, never new work |
 | Retained outcomes | Up to 256 per session across all handles, oldest evicted first, each for at most 15 minutes |
 | Payload binding | Canonical JSON of operation name, params, expected revision and preview digest |
-| Acceptance | Refusals before acceptance (malformed envelope, unknown session or caller, revoked caller, unknown operation, missing capability, busy: `Refusals::BEFORE_ACCEPTANCE`) consume no sequence and are not retained. Everything after acceptance, including `params.invalid` and `revision.stale`, is retained |
+| Acceptance | Refusals before acceptance (malformed envelope, unknown session or caller, revoked caller, unknown operation, missing capability, busy) consume no sequence and are not retained. Everything after acceptance, including `params.invalid` and `revision.stale`, is retained |
 
 The same sequence and payload returns the retained outcome without another transaction; the same
 sequence with a different payload is `request.sequence_conflict`, whether the first is running or

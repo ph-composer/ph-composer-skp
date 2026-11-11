@@ -44,6 +44,9 @@ module PhComposer
         # no assignment is left alone, and so is one whose stored text is not a JSON object: clear never
         # destroys what it cannot read, and the outcome names it (`note_unreadable`).
         def clear(request, proposal, targets:)
+          # The bound counts every Edge named, unreadable ones included, before any walk.
+          named = targets.map { |target| target.fetch("reference").values_at("zone_path", "entity_path") }
+          Assignment.check_limit!(named.uniq.length)
           unreadable = note_unreadable(request, proposal, "Clear")
           readable = targets.reject { |target| unreadable.include?(key(target.fetch("reference"))) }
           updates = resolve(request, readable).filter_map { |located, before| before && update(located, before, nil) }

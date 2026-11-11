@@ -155,6 +155,40 @@ class AgentAccessWriteToolsTest < PhComposerTestCase
     assert_equal 1, @model.operations.length
   end
 
+  # A handler may refuse after acceptance with a code dispatch also answers before it; that outcome is retained,
+  # so its key keeps the sequence and replays it rather than running the handler again.
+  module LateRefusal
+    module_function
+
+    def install(registry)
+      feature = registry.feature("test.late", :contract_version => 1)
+      feature.action("test.late.refuse", :description => "Refuse after acceptance.", :params => { "type" => "object" },
+                                         :result => { "type" => "object" }, :refuses => [], :undo_name => "Refuse",
+                                         :side_effects => "None.") do |_request, _proposal|
+        LateRefusal.runs += 1
+        raise PhComposer::CodedError.new("request.malformed", "Refused by the handler.")
+      end
+    end
+
+    class << self
+      attr_accessor :runs
+    end
+  end
+
+  def test_a_key_refused_by_its_handler_after_acceptance_replays_the_refusal
+    PhComposer::Registry.install([LateRefusal])
+    LateRefusal.runs = 0
+    revision = @session.revision
+    refused = invoke("idempotency_key" => "k", "name" => "test.late.refuse", "params" => {})
+    invoke
+    again = invoke("idempotency_key" => "k", "name" => "test.late.refuse", "params" => {},
+                   "expected_revision" => revision)
+
+    assert_equal [1, "request.malformed"], refused.values_at("sequence", "code")
+    assert_equal [1, "request.malformed"], again.values_at("sequence", "code")
+    assert_equal 1, LateRefusal.runs
+  end
+
   # A key bound by an earlier, accepted send keeps its sequence whatever a later send under it is refused,
   # so the change it made is never run twice.
   def test_a_key_already_accepted_keeps_its_sequence_through_a_later_refusal

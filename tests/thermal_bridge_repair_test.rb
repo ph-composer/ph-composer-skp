@@ -141,6 +141,19 @@ class ThermalBridgeRepairTest < PhComposerTestCase
     assert_equal 3, unreadable_finding(cleared).fetch("total")
   end
 
+  # The 250-Edge bound counts every Edge a clear names, the unreadable ones it would pass over included.
+  def test_an_oversized_clear_refuses_whole_even_when_it_names_unreadable_edges
+    references = [[101, nil], [102, "tbe_AAAAAAAAAAAA"]] + (1..249).map { |index| [10_000 + index, nil] }
+    targets = references.map do |id, entity_id|
+      { "reference" => { "zone_id" => "zon_AAAAAAAAAAAA", "zone_path" => [100], "entity_path" => [id],
+                         "entity_id" => entity_id } }
+    end
+    refused = invoke("edges.clear", "targets" => targets)
+
+    assert_equal %w[refused gesture.too_large none], refused.values_at("status", "code", "effect")
+    assert_equal record("tbe_AAAAAAAAAAAA"), STORE.read(live(100, 102))
+  end
+
   # JSON that is not an object and a stored value that is not text are unreadable the same way.
   def test_clear_passes_over_json_that_is_not_an_object_and_values_that_are_not_text
     @broken.set_attribute(STORE.dictionary, STORE.key, 123)

@@ -110,10 +110,10 @@ module PhComposer
         API.preview(:context => context, :name => name, :params => params, :within => Executor::MAX_RESULT_BYTES)
       end
 
-      # One mutation with the sequence the binding assigns, which every invoke result carries. A refusal before
-      # acceptance ran nothing and took no sequence in dispatch, so a key this invoke bound is released for the
-      # retry. A key bound earlier keeps its sequence: that earlier send may have been accepted, and a later
-      # send under the same key must replay it, never run as new work.
+      # One mutation with the sequence the binding assigns, which every invoke result carries. A request dispatch
+      # did not accept ran nothing and took no sequence, so a key this invoke bound is released for the retry.
+      # A key bound earlier keeps its sequence: that earlier send may have been accepted, and a later send under
+      # the same key must replay it, never run as new work.
       def invoke(context, arguments, sequencer)
         key = arguments["idempotency_key"]
         fresh = sequencer.lookup(key).nil?
@@ -122,8 +122,15 @@ module PhComposer
                     "proposal_digest" => arguments["proposal_digest"] }.compact
         answer = API.invoke(:context => context, :name => arguments["name"], :params => arguments.fetch("params", {}),
                             :request => request)
-        sequencer.release(key, sequence) if fresh && Refusals::BEFORE_ACCEPTANCE.include?(answer["code"])
+        sequencer.release(key, sequence) if fresh && !accepted?(context, sequence)
         answer.merge("sequence" => sequence)
+      end
+
+      # Whether dispatch accepted this sequence. Acceptance is what retains an outcome, running or finished, so a
+      # sequence without one was refused before it (context/CONTRACTS.md, "Retries"), whatever its code: a
+      # handler's refusal after acceptance is retained under the same codes dispatch answers before it.
+      def accepted?(context, sequence)
+        !Sessions.find(context.session_id)&.outcomes&.lookup(context.caller, sequence).nil?
       end
 
       # The retained outcome of an invoke, by its sequence or by the key it was sent with.
