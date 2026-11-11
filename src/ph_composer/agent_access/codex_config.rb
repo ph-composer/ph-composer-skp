@@ -230,32 +230,33 @@ module PhComposer
       end
 
       # Whether a member of an inline root `mcp_servers = { ... }` is keyed by a basic string holding an
-      # escape, which could spell a server's name. Only first-level keys name a server: values, nested tables
-      # and multi-line strings (always values) are skipped, and an unclosed string ends the read.
-      def escaped_inline_member?(line)
-        open = line.index("{")
-        return false unless open && line[0...open].match?(/\A\s*["']?mcp_servers["']?\s*=\s*\z/)
+      # escape, which could spell a server's name. `statement` runs on through any multi-line string the table
+      # holds. Only the first segment of a first-level key names a server: values, nested tables, the rest of a
+      # dotted key and multi-line strings (always values) are skipped, and an unclosed string ends the read.
+      def escaped_inline_member?(statement)
+        open = statement.index("{")
+        return false unless open && statement[0...open].match?(/\A\s*["']?mcp_servers["']?\s*=\s*\z/)
 
         depth = 0
-        key = true
+        server_key = true
         index = open
-        while index < line.length
-          char = line[index]
+        while index < statement.length
+          char = statement[index]
           case char
           when "#" then return false
           when '"', "'"
-            quote = line[index, 3] == char * 3 ? char * 3 : char
-            close = quote == "'" ? line.index("'", index + 1) : string_end(line, index + quote.length, quote)
+            quote = statement[index, 3] == char * 3 ? char * 3 : char
+            close = quote == "'" ? statement.index("'", index + 1) : string_end(statement, index + quote.length, quote)
             return false unless close
-            return true if quote == '"' && depth == 1 && key && line[index..close].include?("\\")
+            return true if quote == '"' && depth == 1 && server_key && statement[index..close].include?("\\")
 
             index = close + quote.length - 1
           when "{", "[" then depth += 1
           when "}", "]"
             depth -= 1
             return false if depth.zero?
-          when "=" then key = false if depth == 1
-          when "," then key = true if depth == 1
+          when "=", "." then server_key = false if depth == 1
+          when "," then server_key = true if depth == 1
           end
           index += 1
         end
@@ -322,12 +323,22 @@ module PhComposer
       # (`escaped_key?`, `escaped_inline_member?`) counts too: it may spell this name unseen.
       def names_server?(all, name)
         key = /(?:\A|[\s.\[{,])["']?#{Regexp.escape(name)}["']?\s*[.=\]]/
+        starts = statement_starts(all)
         table = nil
-        statements(all).any? do |line|
-          text = syntax(line).strip
+        all.each_index.any? do |index|
+          next false unless starts[index]
+
+          text = syntax(all[index]).strip
           table = text.sub(/\A\[+/, "") if text.start_with?("[")
-          text.match?(key) || escaped_key?(text, table) || (table.nil? && escaped_inline_member?(line))
+          text.match?(key) || escaped_key?(text, table) ||
+            (table.nil? && escaped_inline_member?(statement_text(all, starts, index)))
         end
+      end
+
+      # The statement that starts at `index`, with the lines of a value that runs on.
+      def statement_text(all, starts, index)
+        stop = ((index + 1)...all.length).find { |line| starts[line] } || all.length
+        all[index...stop].join
       end
 
       # Whether a new `[mcp_servers.<name>]` table can follow what the file has: no key or header holds an

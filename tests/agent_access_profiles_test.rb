@@ -348,7 +348,9 @@ class AgentAccessProfilesTest < PhComposerTestCase
     ["[mcp_servers.\"ph\\u002Dcomposer\"]\nurl = \"x\"\n",
      "mcp_servers.\"ph\\u002Dcomposer\".url = \"x\"\n",
      "[mcp_servers]\n\"ph\\u002Dcomposer\" = { url = \"x\" }\n",
-     "mcp_servers = { other = {}, \"ph\\u002Dcomposer\" = { url = \"x\" } }\n"].each do |form|
+     "mcp_servers = { other = {}, \"ph\\u002Dcomposer\" = { url = \"x\" } }\n",
+     "mcp_servers = { other = { args = [\"\"\"a\nb\"\"\"] }, \"ph\\u002Dcomposer\" = { url = \"x\" } }\n"]
+      .each do |form|
       File.binwrite(@config, form)
       assert_equal "other", ClientSetup.entry("codex", 46_110, "default")["setup"], form
       assert_equal "manual", ClientSetup.connect("codex", token, 46_110).fetch("state"), form
@@ -356,7 +358,8 @@ class AgentAccessProfilesTest < PhComposerTestCase
     end
     ["disabled_tools = [\"ph\\u002Dcomposer\"]\n",
      "mcp_servers = { other = { args = [\"\"\"say\\tvalue\nx\"\"\"] } }\n",
-     "mcp_servers = { other = { env = { \"MY\\u005FVAR\" = \"x\" } } }\n"].each do |form|
+     "mcp_servers = { other = { env = { \"MY\\u005FVAR\" = \"x\" } } }\n",
+     "mcp_servers = { other.env.\"MY\\u005FVAR\" = \"x\" }\n"].each do |form|
       File.binwrite(@config, form)
       assert_equal "absent", ClientSetup.entry("codex", 46_110, "default")["setup"], form
     end
