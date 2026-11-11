@@ -2,10 +2,13 @@
 PhComposerUI.define("library/copy", ["request", "units", "workspace"], function (request, units, ui) {
   "use strict";
   var el = ui.element;
+  var LOADING = "The library is still loading.";
   function freeze(value) { return JSON.parse(JSON.stringify(value)); }
   function Copy(session, send, adapter, changed) {
     var self = this;
     this.adapter = adapter; this.changed = changed; this.requests = request.channel(session, send, "library-copy");
+    // Whether a record's source catalog is loading; the placement that owns the catalogs answers.
+    this.loading = function () { return false; };
     this.root = ui.formDialog("library-source-review", function () { self.close(); });
     this.title = el("h2", "", "Review library copy"); this.root.appendChild(this.title);
     this.explanation = el("p", "muted"); this.root.appendChild(this.explanation);
@@ -24,6 +27,7 @@ PhComposerUI.define("library/copy", ["request", "units", "workspace"], function 
     choices.insertBefore(this.localButton, this.libraryButton); this.root.appendChild(choices);
   }
   Copy.prototype.busy = function () { return this.requests.busy(); };
+  Copy.prototype.locked = function () { return Boolean(this.held && this.loading(this.held.row.library)); };
   Copy.prototype.open = function (row, assignment) {
     if (this.disposed || this.enabled === false || this.busy()) return false;
     this.held = { row: freeze(row), assignment: assignment ? freeze(assignment) : null };
@@ -70,8 +74,12 @@ PhComposerUI.define("library/copy", ["request", "units", "workspace"], function 
       });
       if (!candidate.differences.length) this.comparison.appendChild(el("p", "muted", "Copied properties match."));
     }
-    this.localButton.disabled = this.busy() || !candidate;
-    this.libraryButton.disabled = this.busy() || !candidate || !candidate.expected_values;
+    // While the library reloads, a held review waits rather than copying from the catalog being replaced.
+    var locked = this.locked(), waiting = this.busy() || locked;
+    if (locked && !this.busy()) this.error.textContent = LOADING;
+    else if (this.error.textContent === LOADING) this.error.textContent = "";
+    this.localButton.disabled = waiting || !candidate;
+    this.libraryButton.disabled = waiting || !candidate || !candidate.expected_values;
     this.cancel.disabled = this.busy(); this.candidates.disabled = this.busy();
   };
   Copy.prototype.use = function (row, assignment) {
@@ -83,7 +91,7 @@ PhComposerUI.define("library/copy", ["request", "units", "workspace"], function 
     return this.open(row, assignment);
   };
   Copy.prototype.run = function (row, choice, candidate, assignment) {
-    if (this.disposed || this.enabled === false || this.busy()) return false;
+    if (this.disposed || this.enabled === false || this.busy() || this.loading(row.library)) return false;
     var library = row.library, params = { provider_id: library.provider_id, kind: library.kind,
       generation: library.generation, library_id: library.library_id, record_id: library.record_id, choice: choice };
     if (candidate) params.local_id = candidate.id;
@@ -94,7 +102,7 @@ PhComposerUI.define("library/copy", ["request", "units", "workspace"], function 
   };
   Copy.prototype.apply = function (choice) {
     var candidate = this.candidate();
-    if (this.disposed || this.enabled === false || !this.held || !candidate || this.busy() ||
+    if (this.disposed || this.enabled === false || this.locked() || !this.held || !candidate || this.busy() ||
       (choice === "use_library" && this.libraryButton.disabled)) return false;
     return this.run(this.held.row, choice, candidate, this.held.assignment);
   };

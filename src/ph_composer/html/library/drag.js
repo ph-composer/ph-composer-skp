@@ -31,7 +31,8 @@ PhComposerUI.define("library/drag", ["workspace"], function (ui) {
   Drag.prototype.active = function () { return this.sidebar.enabled && !this.sidebar.busy(); };
   Drag.prototype.start = function (entry, event) {
     entry.suppressClick = false;
-    if (event.button !== 0 || !this.sidebar.adapter.dropSelector || !this.active()) return;
+    if (event.button !== 0 || !this.sidebar.adapter.dropSelector || !this.active() ||
+      this.sidebar.copyLocked(entry.row)) return;
     this.end();
     this.entry = entry;
     this.x = event.clientX;

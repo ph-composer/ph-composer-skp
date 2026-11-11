@@ -57,13 +57,16 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
       this.skipped = el("ul", "library-sidebar-skipped"); this.skipped.setAttribute("aria-label", "Records not loaded");
       this.skipped.hidden = true; this.content.appendChild(this.skipped);
       this.refreshButton = ui.button("Refresh", function () { if (!self.busy()) self.store.refresh(); });
+      // While a hosted library loads, its way out takes Refresh's place.
+      this.cancelButton = ui.button("Cancel loading", function () { if (self.store) self.store.cancel(); });
       var controls = this.controls = el("div", "library-source-controls");
       // A work surface that needs a record the library lacks makes one here without leaving (options.create).
       if (options.create) {
         this.createButton = ui.button(options.create.label, function () { if (!self.busy()) options.create.run(); });
         controls.appendChild(this.createButton);
       }
-      controls.appendChild(this.refreshButton); this.content.appendChild(controls);
+      controls.appendChild(this.refreshButton); controls.appendChild(this.cancelButton);
+      this.content.appendChild(controls);
       this.localOnly = Boolean(options.localOnly);
       if (this.localOnly) this.source.hidden = true;
       this.search = el("input");
@@ -97,6 +100,10 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
           }
           self.changed();
         });
+        // A review is held for its own source catalog, which need not be the one the sidebar shows.
+        this.copy.loading = function (library) {
+          return Boolean(library) && self.store.catalogLoading(library.provider_id);
+        };
         this.setup = new Setup(options.session, options.send, this.changed);
         this.root.appendChild(this.copy.root); this.root.appendChild(this.setup.root);
       }
@@ -140,8 +147,13 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
       this.paintActions();
       if (!this.enabled) this.drag.end();
     };
+    /* A library's record is copied only from a catalog that has finished loading. */
+    Sidebar.prototype.loading = function () {
+      return Boolean(this.store && this.store.selected && this.store.loading());
+    };
+    Sidebar.prototype.copyLocked = function (row) { return Boolean(row && row.library) && this.loading(); };
     Sidebar.prototype.use = function (row, selection) {
-      if (this.disposed || !this.enabled || this.busy() || !this.records.some(function (live) {
+      if (this.disposed || !this.enabled || this.busy() || this.copyLocked(row) || !this.records.some(function (live) {
         return live.id === row.id;
       })) return false;
       var target = this.adapter.target(Object.assign({}, this.context, selection ? { selection: selection } : {}));
@@ -193,8 +205,13 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
       }, this);
       this.source.value = this.store ? this.store.selected : "";
       this.source.disabled = !this.store || !this.store.available || this.busy() || Boolean(this.guard());
-      this.refreshButton.hidden = !this.store || !this.store.selected;
-      this.controls.hidden = this.localOnly || (this.refreshButton.hidden && !this.createButton);
+      this.refreshButton.hidden = !this.store || !this.store.selected || this.loading();
+      this.cancelButton.hidden = !this.store || !this.store.selected || !this.store.cancellable();
+      var cancelling = !this.cancelButton.hidden && this.store.cancelling();
+      this.cancelButton.textContent = cancelling ? "Cancelling…" : "Cancel loading";
+      this.cancelButton.disabled = cancelling;
+      this.controls.hidden = this.localOnly || (this.refreshButton.hidden && this.cancelButton.hidden &&
+        !this.createButton);
       this.refreshButton.disabled = this.busy() || Boolean(this.store && this.store.busy());
       this.setupButton.disabled = !this.setup || !this.setup.enabled || this.busy();
       if (this.createButton) this.createButton.disabled = !this.enabled || this.busy();
@@ -207,7 +224,7 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
       var status = this.store && this.store.selected && this.store.busy() ? "Loading library…" : "";
       if (this.store && this.store.error) status = this.store.error;
       // A hosted library's load runs after the request returns: `loading` until its answer arrives.
-      if (page && page.state === "loading") status = "Loading library…";
+      if (this.loading() && !this.store.error) status = "Loading library…";
       if (page && page.state === "cancelled") status = "Loading was cancelled." +
         (page.generation ? " Showing the last catalog." : "");
       if (page && (page.state === "failed" || page.state === "stale" || page.state === "unavailable")) {
@@ -241,9 +258,8 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
       this.skipped.hidden = !skipped.length;
     };
     Sidebar.prototype.add = function (row) {
-      if (this.disposed || !this.enabled || this.busy() || !this.copy || !this.records.some(function (live) {
-        return live.id === row.id;
-      })) return false;
+      if (this.disposed || !this.enabled || this.busy() || this.copyLocked(row) || !this.copy ||
+        !this.records.some(function (live) { return live.id === row.id; })) return false;
       return this.copy.use(row);
     };
     Object.assign(Sidebar.prototype, rows);
