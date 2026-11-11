@@ -263,7 +263,7 @@ class ExportTest < PhComposerTestCase
   def seed_example
     counter = 0
     fixed_ids = ->(prefix) { format("%<prefix>s_%<n>012d", :prefix => prefix, :n => counter += 1) }
-    PhComposer::Records::Identity.stub(:mint, fixed_ids) do
+    PhComposer::HandlerRequest.stub(:proposal_ids, ->(_session, _name, _params) { fixed_ids }) do
       created = invoke("example.foundation.create_parts",
                        "definition_label" => "Frame",
                        "parts" => [{ "label" => "Sill", "length_mm" => 1200 },

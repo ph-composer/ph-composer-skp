@@ -301,14 +301,73 @@ class DefinitionDetailTest < PhComposerTestCase
     assert_equal "e" * 9_000, detail(PhComposer::Windows::TYPE_KIND, type, ["values", "elements", 99, "name"])
   end
 
-  def test_a_preview_that_names_new_ids_each_run_marks_those_parts_unstable
-    parts = Array.new(350) { |index| { "label" => "Part #{index}", "length_mm" => 10.0 } }
+  # A create's ids derive from the session, revision, action and params (context/AGENT_INTERFACE.md, "Writes
+  # with observable outcomes"), so its preview reads by part across calls and its invoke stages those ids.
+  def test_a_preview_that_creates_records_reads_by_part_across_calls_and_its_invoke_names_the_same_ids
+    parts = Array.new(800) { |index| { "label" => "Part #{index}", "length_mm" => 10.0 } }
     action = { "name" => "test.fixture.create", "params" => { "parts" => parts } }
+    whole = API.preview(:context => @context, :name => action.fetch("name"), :params => action.fetch("params"))
     compact = agent("preview", action)
     assert_equal [nil, []], compact.values_at("value", "affected")
-    parts = compact.dig("detail", "parts")
+    assert_equal({ "value" => true, "affected" => true, "findings" => true },
+                 compact.dig("detail", "parts").transform_values { |part| part.fetch("stable") })
+    fragments = 0
+    counted = ->(cursor) { preview_fragment(action, "value", cursor).tap { fragments += 1 } }
+    assert_equal whole.fetch("value"), joined(counted, compact.dig("detail", "parts", "value"))
+    assert_operator fragments, :>, 1
+    assert_equal whole.fetch("affected"), preview_part(action, "affected", compact)
+
+    created = assignment_invoke(action.fetch("name"), action.fetch("params"), compact.fetch("proposal_digest"))
+    assert_equal "committed", created.fetch("effect"), created.inspect
+    assert_equal whole.fetch("value"), created.fetch("value")
+  end
+
+  # `stable` still marks a part a second run answers differently, here a create given random ids.
+  def test_a_preview_that_names_other_ids_each_run_marks_those_parts_unstable
+    parts = Array.new(350) { |index| { "label" => "Part #{index}", "length_mm" => 10.0 } }
+    random = ->(_session, _name, _params) { PhComposer::Records::Identity.method(:mint) }
+    compact = PhComposer::HandlerRequest.stub(:proposal_ids, random) do
+      agent("preview", "name" => "test.fixture.create", "params" => { "parts" => parts })
+    end
     assert_equal({ "value" => false, "affected" => false, "findings" => true },
-                 parts.transform_values { |part| part.fetch("stable") })
+                 compact.dig("detail", "parts").transform_values { |part| part.fetch("stable") })
+  end
+
+  def test_preview_ids_differ_for_other_params_and_after_a_write
+    one = { "parts" => [{ "label" => "Sill", "length_mm" => 1200.0 }] }
+    other = { "parts" => [{ "label" => "Head", "length_mm" => 1200.0 }] }
+    ids = lambda do |params|
+      API.preview(:context => @context, :name => "test.fixture.create", :params => params).fetch("value")
+    end
+    first = ids.call(one)
+    assert_equal first, ids.call(one)
+    refute_equal first.fetch("part_ids"), ids.call(other).fetch("part_ids")
+    refute_equal first.fetch("definition_id"), ids.call(other).fetch("definition_id")
+    create_material("Someone else's edit")
+    refute_equal first.fetch("part_ids"), ids.call(one).fetch("part_ids")
+  end
+
+  def test_a_duplicate_previewed_twice_and_invoked_names_the_same_ids
+    parts = assignment_invoke("test.fixture.create", "parts" => [{ "label" => "Sill", "length_mm" => 1200.0 }] * 2)
+            .dig("value", "part_ids")
+    params = { "ids" => parts }
+    preview = -> { API.preview(:context => @context, :name => "test.fixture.duplicate_parts", :params => params) }
+    mapping = preview.call.fetch("value")
+    assert_equal mapping, preview.call.fetch("value")
+    assert_equal parts, mapping.fetch("mapping").keys
+    assert_equal 2, mapping.fetch("mapping").values.uniq.length
+    assert_equal mapping, assignment_invoke("test.fixture.duplicate_parts", params).fetch("value")
+  end
+
+  # A derived id already stored or staged is passed over for the next one in the sequence.
+  def test_a_derived_id_already_reserved_is_skipped
+    first = PhComposer::Records::Identity.sequence("session", 1) { { "n" => 1 } }.call("tpt")
+    reserved = [first]
+    taken = PhComposer::Records::Identity.sequence("session", 1) { { "n" => 1 } }
+    second = PhComposer::Records::Identity.fresh("tpt", reserved, taken)
+    refute_equal first, second
+    assert_equal [first, second], reserved
+    assert_match PhComposer::Records::Identity.pattern("tpt"), second
   end
 
   def test_an_unreadable_record_with_a_long_diagnostic_does_not_block_the_records_behind_it
@@ -362,12 +421,16 @@ class DefinitionDetailTest < PhComposerTestCase
 
   def preview_part(action, part, compact)
     joined(lambda do |cursor|
-      arguments = action.merge("part" => part)
-      arguments["cursor"] = cursor if cursor
-      value = completed(agent("preview", arguments))
+      value = preview_fragment(action, part, cursor)
       assert_equal compact.fetch("proposal_digest"), value.fetch("proposal_digest")
       value
     end, compact.dig("detail", "parts", part))
+  end
+
+  def preview_fragment(action, part, cursor)
+    arguments = action.merge("part" => part)
+    arguments["cursor"] = cursor if cursor
+    completed(agent("preview", arguments))
   end
 
   def create_material(name, user_data = {}, values = {})

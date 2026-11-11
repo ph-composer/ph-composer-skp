@@ -398,6 +398,33 @@ class RegistryTest < PhComposerTestCase
     assert_equal ["registration.schema_invalid"], diagnostics.map(&:code)
   end
 
+  # Every identifier is at most Registry::ID_MAX_BYTES, so a discover row always fits one agent reply.
+  def test_an_identifier_at_the_cap_installs_and_one_byte_longer_refuses_the_batch
+    cap = Registry::ID_MAX_BYTES
+    long_id = "probe.#{'f' * (cap - 6)}"
+    name = "probe.one.#{'r' * (cap - 10)}"
+    code = "probe_#{'c' * (cap - 14)}.missing"
+    Registry.install([feature { |r| r.feature(long_id, :contract_version => 1) },
+                      feature do |r|
+                        scope = r.feature("probe.one", :contract_version => 1)
+                        scope.code(code, :description => "At the cap.")
+                        scope.query(name, **read) { {} }
+                      end])
+    assert_equal [cap, cap, cap], [long_id, name, code].map(&:bytesize)
+    assert Registry.installed?(long_id)
+
+    Registry.reset
+    diagnostics = refused(feature { |r| r.feature("#{long_id}g", :contract_version => 1) },
+                          feature do |r|
+                            scope = r.feature("probe.two", :contract_version => 1)
+                            scope.code("probe_#{'c' * (cap - 13)}.missing", :description => "Over the cap.")
+                            scope.query("probe.two.#{'r' * (cap - 9)}", **read) { {} }
+                          end)
+    assert_equal ["registration.schema_invalid"] * 3, diagnostics.map(&:code)
+    assert(diagnostics.all? { |item| item.message.end_with?("#{cap + 1} bytes; an identifier is at most #{cap}.") })
+    refute Registry.installed?("probe.two")
+  end
+
   def test_schemas_confirmation_references_sections_and_host_events_are_checked
     kind = PhComposer::Records::RecordKind.new(
       :id => "probe.one.part", :label => "Part", :schema_version => 1, :id_prefix => "prp",

@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 44
+    MINOR = 45
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -221,7 +221,12 @@ module PhComposer
         "change" => "Every invoke refused before acceptance releases the idempotency_key it bound; access.revoked " \
                     "joins every kind's common refusals. thermal_bridges.edges.clear and types.delete pass over " \
                     "Edges whose text is not a JSON object, leave it and name them in a " \
-                    "thermal_bridge.unreadable_skipped finding. zones.repair_identity refuses a locked Zone." }
+                    "thermal_bridge.unreadable_skipped finding. zones.repair_identity refuses a locked Zone." },
+      { "minor" => 45, "date" => "2026-11-11",
+        "change" => "A create or duplicate names its records from the session, revision, action and params, so a " \
+                    "preview run again and its invoke name the same ids and a create's preview parts read across " \
+                    "calls. Registration refuses a feature id, name, wire kind or code longer than 1,024 bytes " \
+                    "as registration.schema_invalid." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

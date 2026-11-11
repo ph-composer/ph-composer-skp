@@ -95,10 +95,11 @@ A record or a preview can be larger than one reply. These reads give all of it e
   size, digest and count in `detail.parts`. Call `preview` again with the same `name` and `params` and
   `part` set to each of them, following `next_cursor`, and join them as above. Every fragment repeats
   the `proposal_digest`; then invoke with it. Never apply a change whose affected list you have not
-  read. A preview that names new ids gives different ones each time it runs, and its part says
-  `stable` false: such a part longer than one fragment is refused as `query.cursor_expired`, and a
-  shorter one will not match its digest. Read what it changed from the records after you apply it, or
-  ask the user.
+  read. A preview that creates records names the same ids each time it runs at the same revision with
+  the same params, and its invoke creates those ids, so you can read its parts across calls. A part that
+  says `stable` false came out different on a second run: such a part longer than one fragment is
+  refused as `query.cursor_expired`, and a shorter one will not match its digest. Read what it changed
+  from the records after you apply it, or ask the user.
 - **If the Model changes while you read,** the next fragment or page is refused as
   `query.cursor_expired`. Start that value again from its first fragment; never join fragments of two
   versions.

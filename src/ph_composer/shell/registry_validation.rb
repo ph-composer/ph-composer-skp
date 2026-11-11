@@ -725,6 +725,32 @@ module PhComposer
       end
     end
 
+    # Every identifier the batch registers is at most ID_MAX_BYTES, so a discover row, which never cuts one,
+    # fits one agent reply (context/AGENT_INTERFACE.md, "Discover before acting").
+    class IdentifierValidation < Validation
+      def diagnostics
+        identifiers.each do |owner, subject, value|
+          next unless value.is_a?(String) && value.bytesize > ID_MAX_BYTES
+
+          add("registration.schema_invalid", owner, subject,
+              "#{value[0, 80]}... is #{value.bytesize} bytes; an identifier is at most #{ID_MAX_BYTES}.")
+        end
+        @diagnostics
+      end
+
+      private
+
+      # [owner, subject, identifier] for each feature id, declared name, code and library wire kind.
+      def identifiers
+        @staging.declared_features.map { |feature| [feature.id, feature.id, feature.id] } +
+          declared_names.map { |owner, name| [owner, name, name] } +
+          @staging.declared_codes.map { |code| [code.owner, code.code, code.code] } +
+          @staging.declared_library_kinds.filter_map do |item|
+            [item.owner, item.name, item.adapter.wire_kind] if item.adapter.is_a?(Declarations::LibraryAdapter)
+          end
+      end
+    end
+
     # Feature codes are not names under a feature id, so they take their own checks.
     class CodeValidation < Validation
       CODE_PATTERN = /\A[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*\z/.freeze

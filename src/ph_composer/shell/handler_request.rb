@@ -18,10 +18,20 @@ module PhComposer
     # for, so a nested read of the same name is refused as recursive.
     def self.for(session, owner:, name:, registry: Registry.current, params: {}, proposal: nil, approval: nil,
                  selection: nil)
-      new(:session => session, :model => session.model, :params => params,
-          :engine => Records::Engine.new(session.model, registry.catalog), :revision => session.revision,
+      engine = Records::Engine.new(session.model, registry.catalog, :identity => proposal_ids(session, name, params))
+      new(:session => session, :model => session.model, :params => params, :engine => engine,
+          :revision => session.revision,
           :registry => registry, :owner => owner, :proposal => proposal, :query_stack => [name],
           :approval => approval, :selection => selection)
+    end
+
+    # The ids this request's creates and duplicates stage: derived from the session, revision, declaration and
+    # params, so the same preview run again, and its invoke, name the same records (context/AGENT_INTERFACE.md,
+    # "Writes with observable outcomes").
+    def self.proposal_ids(session, name, params)
+      Records::Identity.sequence(session.id, session.revision) do
+        { "name" => name, "params" => CanonicalJson.digest(params || {}) }
+      end
     end
 
     def initialize(**fields)

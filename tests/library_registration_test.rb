@@ -256,6 +256,15 @@ class LibraryRegistrationTest < PhComposerTestCase
     end).map(&:code), "registration.schema_invalid"
   end
 
+  def test_a_wire_kind_longer_than_the_identifier_cap_is_refused
+    cap = Registry::ID_MAX_BYTES
+    Registry.install([feature("test.library", adapter("w" * cap))])
+    assert_equal cap, Registry.current.library_kinds.fetch("test.library.wire").adapter.wire_kind.bytesize
+    Registry.reset
+    assert_equal ["#{'w' * 80}... is #{cap + 1} bytes; an identifier is at most #{cap}."],
+                 refused(feature("test.library", adapter("w" * (cap + 1)))).map(&:message)
+  end
+
   # An example a callback publishes is params it accepts; discovery shows the assign callback's to agents.
   def test_callback_examples_must_meet_their_params
     malformed = adapter
