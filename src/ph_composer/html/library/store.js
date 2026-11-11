@@ -135,10 +135,11 @@ PhComposerUI.define("library/store", ["request", "snapshot"], function (request,
   };
   /* A hosted library's load runs after its request returned: its catalog reads `loading` until it ends. The
      page keeps that state until the first page of what it published is read, or that read fails. */
-  Store.prototype.cancellable = function () {
-    var catalog = this.catalog(this.provider());
+  Store.prototype.catalogLoading = function (providerId) {
+    var catalog = this.catalog(this.providers.filter(function (row) { return row.id === providerId; })[0]);
     return Boolean(catalog && catalog.state === "loading");
   };
+  Store.prototype.cancellable = function () { return Boolean(this.selected) && this.catalogLoading(this.selected); };
   Store.prototype.loading = function () {
     return this.cancellable() || Boolean(!this.error && this.page && this.page.state === "loading");
   };

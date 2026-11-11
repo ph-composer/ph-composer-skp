@@ -360,4 +360,16 @@ test("a held review waits for a refresh to load; a first page that fails is not 
     outcome: { status: "refused", code: "library.catalog_unavailable", message: "The catalog could not be read." } };
   other.sidebar.refresh(other.state, {}, true);
   assert.strictEqual(listText(other.sidebar), "No catalog is available.");
+  assert.strictEqual(other.sidebar.sourceStatus.textContent, "The catalog could not be read.");
+});
+test("a review opened while another source is shown waits for its own library's load", function () {
+  var o = setup(), row = o.sidebar.records[0];
+  o.sidebar.store.select(""); o.sidebar.updateRows();
+  Object.assign(o.state.sections["ph_composer.library.provider_catalogs"].value[0].catalogs[0], { state: "loading" });
+  o.sidebar.refresh(o.state, {}, true);
+  o.sidebar.copy.open(Object.assign({}, row, { resolution: { outcome: "review_required", candidates: [{
+    id: "local", name: "Local", differences: [], expected_values: { name: "Local" } }] } }));
+  assert.strictEqual(o.sidebar.copy.libraryButton.disabled, true);
+  assert.strictEqual(o.sidebar.copy.apply("use_library"), false);
+  assert.strictEqual(o.sent.filter(function (message) { return message.type === "action.invoke"; }).length, 0);
 });

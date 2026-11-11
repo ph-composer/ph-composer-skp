@@ -100,6 +100,10 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
           }
           self.changed();
         });
+        // A review is held for its own source catalog, which need not be the one the sidebar shows.
+        this.copy.loading = function (library) {
+          return Boolean(library) && self.store.catalogLoading(library.provider_id);
+        };
         this.setup = new Setup(options.session, options.send, this.changed);
         this.root.appendChild(this.copy.root); this.root.appendChild(this.setup.root);
       }
@@ -127,7 +131,6 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
       if (this.store) {
         this.store.update(state);
         var held = this.copy.held;
-        this.copy.locked = this.loading();
         this.copy.refresh(state, this.enabled && this.store.available &&
           (!held || this.store.valid(held.row.library)));
         this.setup.refresh(state);
@@ -221,7 +224,7 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
       var status = this.store && this.store.selected && this.store.busy() ? "Loading library…" : "";
       if (this.store && this.store.error) status = this.store.error;
       // A hosted library's load runs after the request returns: `loading` until its answer arrives.
-      if (page && page.state === "loading") status = "Loading library…";
+      if (this.loading() && !this.store.error) status = "Loading library…";
       // With no rows to keep in view, the list itself says it is loading.
       if (status === "Loading library…" && !this.records.length) status = "";
       if (page && page.state === "cancelled") status = "Loading was cancelled." +
