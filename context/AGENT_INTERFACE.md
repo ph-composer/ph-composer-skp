@@ -678,8 +678,9 @@ old token stays live until revoked. Then the client is set up:
   header holds an escape (one could spell either name unseen) and the root `mcp_servers` table is
   opened only by plain `[mcp_servers.<other>]` headers; an inline or dotted root `mcp_servers` or an
   `[mcp_servers]` table cannot be extended this way, so the user adds the block. With no plain entry, a
-  header, or a key at the root or under the root `mcp_servers`, that holds an escape reads as set up another
-  way, not absent, since it may define the server under an escaped name. Another table's own
+  header, a key at the root or under the root `mcp_servers`, or a member key of an inline root `mcp_servers`,
+  that holds an escape reads as set up another way, not absent, since it may define the server under an
+  escaped name; an escape in a value, or deeper in another server's settings, does not. Another table's own
   `mcp_servers`, such as a plugin's `[plugins."<name>".mcp_servers.<server>]`, is not the root one. No `~/.codex` folder means Codex is not set up
   and nothing is created.
 

@@ -222,15 +222,44 @@ module PhComposer
 
       # Whether a statement's key holds an escape where it could spell mcp_servers or a server's name, which no
       # literal match sees (TOML reads `"ph-composer"` as the plain name): any table header, or a key at
-      # the root or in a table under the root mcp_servers, and a key of an inline root mcp_servers. `text` has
-      # been through `syntax`, so an escape left on it is in a key, never a value.
+      # the root or in a table under the root mcp_servers.
       def escaped_key?(text, table)
         return text.include?("\\") if text.start_with?("[")
 
-        key = text[/\A[^=]*/]
-        return key.include?("\\") && root_servers?(table) if table
+        text[/\A[^=]*/].include?("\\") && (table.nil? || root_servers?(table))
+      end
 
-        key.include?("\\") || (root_servers?(key) && text.include?("\\"))
+      # Whether a member of an inline root `mcp_servers = { ... }` is keyed by a basic string holding an
+      # escape, which could spell a server's name. Only first-level keys name a server: values, nested tables
+      # and multi-line strings (always values) are skipped, and an unclosed string ends the read.
+      def escaped_inline_member?(line)
+        open = line.index("{")
+        return false unless open && line[0...open].match?(/\A\s*["']?mcp_servers["']?\s*=\s*\z/)
+
+        depth = 0
+        key = true
+        index = open
+        while index < line.length
+          char = line[index]
+          case char
+          when "#" then return false
+          when '"', "'"
+            quote = line[index, 3] == char * 3 ? char * 3 : char
+            close = quote == "'" ? line.index("'", index + 1) : string_end(line, index + quote.length, quote)
+            return false unless close
+            return true if quote == '"' && depth == 1 && key && line[index..close].include?("\\")
+
+            index = close + quote.length - 1
+          when "{", "[" then depth += 1
+          when "}", "]"
+            depth -= 1
+            return false if depth.zero?
+          when "=" then key = false if depth == 1
+          when "," then key = true if depth == 1
+          end
+          index += 1
+        end
+        false
       end
 
       # A statement line as TOML syntax: its comment cut and every string that is a value, not a key, emptied,
@@ -290,14 +319,14 @@ module PhComposer
       # table, a dotted key or an inline table. A config that does is never appended to, since a second
       # definition would make the whole file invalid for Codex. A path that merely contains the name, such
       # as a project folder, is not a key. A key or header holding an escape where it could name a server
-      # (`escaped_key?`) counts too: it may spell this name unseen.
+      # (`escaped_key?`, `escaped_inline_member?`) counts too: it may spell this name unseen.
       def names_server?(all, name)
         key = /(?:\A|[\s.\[{,])["']?#{Regexp.escape(name)}["']?\s*[.=\]]/
         table = nil
         statements(all).any? do |line|
           text = syntax(line).strip
           table = text.sub(/\A\[+/, "") if text.start_with?("[")
-          text.match?(key) || escaped_key?(text, table)
+          text.match?(key) || escaped_key?(text, table) || (table.nil? && escaped_inline_member?(line))
         end
       end
 
