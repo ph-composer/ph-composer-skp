@@ -102,7 +102,10 @@ PhComposerUI.define("library/rows", ["units", "workspace"], function (units, ui)
         empty = loading ? "Loading library…" : page && page.generation && !this.store.error ?
           "No records in this library." : "No catalog is available.";
       }
-      this.list.appendChild(el("p", "muted", empty));
+      var note = el("p", "muted", empty);
+      // The status line above announces the load; the list shows it where the rows will be, said once.
+      if (selected && loading && !this.records.length) note.setAttribute("aria-hidden", "true");
+      this.list.appendChild(note);
     }
   };
   methods.makeRow = function (row) {

@@ -268,7 +268,9 @@ function listText(sidebar) {
 test("while a hosted library loads the list says so, prints no count, and offers Cancel loading", function () {
   var o = hostedLoad(), sidebar = o.sidebar;
   assert.strictEqual(listText(sidebar), "Loading library…");
-  assert.strictEqual(sidebar.sourceStatus.textContent, "", "said once, in the list");
+  assert.strictEqual(sidebar.sourceStatus.textContent, "Loading library…", "announced in the status region");
+  assert.strictEqual(sidebar.sourceStatus.getAttribute("role"), "status");
+  assert.strictEqual(sidebar.list.children[0].getAttribute("aria-hidden"), "true", "and not read twice");
   assert.strictEqual(sidebar.list.getAttribute("aria-busy"), "true");
   assert.strictEqual(sidebar.count.hidden, true);
   assert.doesNotMatch(sidebar.count.textContent, /undefined/);

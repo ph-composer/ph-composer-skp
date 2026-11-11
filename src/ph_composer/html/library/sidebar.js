@@ -225,8 +225,6 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
       if (this.store && this.store.error) status = this.store.error;
       // A hosted library's load runs after the request returns: `loading` until its answer arrives.
       if (this.loading() && !this.store.error) status = "Loading library…";
-      // With no rows to keep in view, the list itself says it is loading.
-      if (status === "Loading library…" && !this.records.length) status = "";
       if (page && page.state === "cancelled") status = "Loading was cancelled." +
         (page.generation ? " Showing the last catalog." : "");
       if (page && (page.state === "failed" || page.state === "stale" || page.state === "unavailable")) {
