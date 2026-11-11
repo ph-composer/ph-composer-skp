@@ -16,6 +16,10 @@ module PhComposer
   # validates; one problem refuses the batch and publishes nothing.
   class Registry
     ID_PATTERN = /\A[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+\z/.freeze
+    # The longest identifier registration admits, in bytes, which are also characters: every identifier is
+    # ASCII. A feature id, declared name, wire kind or code longer than this is refused, so the largest
+    # discover row and its page fit one agent reply (context/AGENT_INTERFACE.md, "Discover before acting").
+    ID_MAX_BYTES = 1024
 
     attr_reader :features, :queries, :actions, :view_commands, :setup_commands, :file_exports, :record_kinds,
                 :reference_targets, :extensions,
@@ -325,7 +329,7 @@ module PhComposer
       end
 
       def diagnostics
-        Validation.new(@live, self).diagnostics + @failures
+        Validation.new(@live, self).diagnostics + IdentifierValidation.new(@live, self).diagnostics + @failures
       end
 
       # Every declaration struct the batch made, which publishing takes ownership of.

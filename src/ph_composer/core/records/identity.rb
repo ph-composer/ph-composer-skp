@@ -18,10 +18,11 @@ module PhComposer
         /\A#{Regexp.escape(prefix)}_[A-Za-z0-9]{12}\z/
       end
 
-      # A new id not already in `reserved`, which then reserves it.
-      def fresh(prefix, reserved)
+      # A new id not already in `reserved`, which then reserves it. `identity` names each candidate: random
+      # by default, or a `sequence` so that a preview and its invoke stage the same ids.
+      def fresh(prefix, reserved, identity = method(:mint))
         loop do
-          id = mint(prefix)
+          id = identity.call(prefix)
           next if reserved.include?(id)
 
           reserved << id
@@ -40,11 +41,18 @@ module PhComposer
       # and its invoke allocate the same ids in the same order and it keeps no state across requests.
       # `inputs` are the operation's arguments, so two different edits at one revision differ.
       def allocator(request, inputs)
+        sequence(request.session.id, request.revision) { inputs }
+      end
+
+      # The ids `allocator` derives, from a session id, a revision and the inputs its block answers. The block
+      # runs once, at the first id, so a request that creates nothing never computes its inputs.
+      def sequence(session_id, revision, &inputs)
         position = 0
+        seed = nil
         lambda do |prefix|
+          seed ||= { "session" => session_id, "revision" => revision, "params" => inputs.call }
           position += 1
-          derived(prefix, "session" => request.session.id, "revision" => request.revision, "params" => inputs,
-                          "position" => position)
+          derived(prefix, seed.merge("position" => position))
         end
       end
     end

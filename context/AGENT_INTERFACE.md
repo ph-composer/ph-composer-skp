@@ -101,6 +101,20 @@ carry `registry`. The index lists the sections with their totals and the guide's
 20 KiB it gives operation counts by owner in place of names, and past that leaves the features and the
 counts to their sections. Sessions stay filtered by the token.
 
+Because identifiers are never cut, registration caps them (API 1.45): a feature id, declared name, wire
+kind or code longer than `Registry::ID_MAX_BYTES`, 1,024 bytes, is refused as
+`registration.schema_invalid` (context/CONTRACTS.md, "Registration"). Identifiers are ASCII, so
+bytes are characters and JSON adds nothing to them. The cap is set by the largest row a list section
+can hold, an action in `operations` paged by its `owner`: two identifiers (`name`, `owner`), a
+`description` and `side_effects` cut at 1,024 bytes that escape at most six times over in JSON
+(a control character becomes `\u0001`), the row's keys and `truncated`, and the page's `section`,
+`registry`, `owner` echo and a base64 `next_cursor` that carries `owner` again. Measured, that page is 12,814 + 4.33 L bytes for identifiers of L bytes, so it fits the 24,576-byte reply while L is
+at most 2,715. A `library_kinds` row holds four identifiers and no prose (about 4.3 KB at the cap),
+and every other row fewer. The cap is 1,024, the same bound every other row value has before
+escaping: the largest row then pages alone at 17,250 bytes, which leaves 7 KB for the other places a
+name is echoed whole, a page cursor and a preview fragment's envelope. `tests/agent_access_discovery_test.rb`
+pages that row through the executor.
+
 The operating guide is `docs/AGENT_GUIDE.md`, shipped as `agent_access/guide.md` (a golden that
 `make fixtures` copies and the offline suite compares) and read once at load by
 `AgentAccess::Guide`. Each second-level section is a topic and each third-level section a topic of
@@ -326,10 +340,14 @@ changed values, affected references and validation findings. A proposal binds to
 revision; applying it revalidates those preconditions. Implemented (API 1.37): the agent `preview`
 answers a preview larger than one reply compact (`PreviewParts.compact`), keeping status, revision and
 `proposal_digest` and giving the size, SHA-256 and count of `value`, `affected` and `findings` in
-`detail.parts`, with `stable` false for a part a second run answered differently (a create naming new
-ids); `preview` with `part` reads one part exactly in fragments from a preview run again,
+`detail.parts`, with `stable` false for a part a second run answered differently; `preview` with `part`
+reads one part exactly in fragments from a preview run again,
 bound to the revision and proposal digest, so every consequence can be reviewed before an invoke carries
-the digest, and no transaction stays open meanwhile. Routine edits need not acquire an extra
+the digest, and no transaction stays open meanwhile. A create or duplicate names its records from
+the session, the revision, the action and a digest of its params (`HandlerRequest.proposal_ids`, API
+1.45), so the same preview run again, and its invoke, stage the same ids, and every part of a create's
+preview is `stable` and reads across calls; any other write, or other params, derives other ids. A
+part stays unstable only when a handler answers something outside its inputs. Routine edits need not acquire an extra
 approval dialog just because the caller is an agent. Reuse the user's granted scope, and enforce
 the same confirmation requirements for all clients when an operation needs confirmation.
 

@@ -42,7 +42,10 @@ FileExport or export task `export`. Library loading and provider setup are setup
 replaces the archived Phase 2 choice of view commands for them (refactor R03, 2026-10-01).
 
 Every declared name starts with its feature's id; a code instead starts with a noun only that
-feature declares. Registrations are staged and validated together:
+feature declares. A feature id, declared name, wire kind or code is at most `Registry::ID_MAX_BYTES`
+(1,024 bytes, ASCII) and a longer one is `registration.schema_invalid`, so a discover row, which never
+cuts an identifier, fits one agent reply (the arithmetic is in context/AGENT_INTERFACE.md, "Discover
+before acting"). Registrations are staged and validated together:
 duplicate ids, missing dependencies, cycles, incompatible contract majors, invalid schemas and
 invalid examples each produce a `registration.*` diagnostic naming the owner and, where one is
 missing, the dependency. Any diagnostic refuses the whole batch and publishes nothing; the last
@@ -352,6 +355,12 @@ legacy mapping reads as empty without repairing the stored record.
 | Read | No repair, allocation or mutation | Report understood, invalid, outdated, unsupported or unavailable separately |
 | Migrate | Explicit version path; validate the result before writing | One atomic operation; failure keeps the original |
 | Export | Only declared supported fields and references | Claimed payload fields only; `user_data` passes through only where its owner opts in; unknown correctness-relevant payload blocks |
+
+A new id is a kind prefix and twelve characters. A handler's engine derives each id it stages from
+the session, the revision, the declaration and a digest of the params, in staging order, skipping any
+id already stored or staged (`HandlerRequest.proposal_ids`), so a preview and its invoke at one
+revision stage the same ids and the next write's revision derives others. An engine built outside a
+handler request, for a read or a repair check, mints random ids.
 
 `propose_duplicate` may receive a block that transforms a detached copy of the authored values
 after identity and extension-reference remapping. The returned object replaces authored values

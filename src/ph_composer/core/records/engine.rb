@@ -10,10 +10,15 @@ module PhComposer
     # validated set and is called only inside the dispatcher's operation (shell/dispatch.rb).
     #
     # Refusals raise CodedError with a code from context/CONTRACTS.md, "Outcomes and codes".
+    #
+    # `identity` names each record a create or duplicate stages. A handler's engine derives them from its
+    # request (HandlerRequest.for), so a preview and its invoke at one revision stage the same ids; an engine
+    # built for a read or a repair check keeps the random default.
     class Engine
-      def initialize(model, catalog)
+      def initialize(model, catalog, identity: Identity.method(:mint))
         @model = model
         @catalog = catalog
+        @identity = identity
       end
 
       # ---------------------------------------------------------------- reads
@@ -68,7 +73,7 @@ module PhComposer
       def propose_create(kind_id, change_set, values:, user_data: nil)
         staging(change_set) do
           kind = @catalog.kind(kind_id)
-          id = Identity.fresh(kind.id_prefix, reserved_ids(kind, change_set))
+          id = Identity.fresh(kind.id_prefix, reserved_ids(kind, change_set), @identity)
           check_value_keys!(kind, values)
           record = { "id" => id, "schema_version" => kind.schema_version }.merge(DeepCopy.call(values))
           record["user_data"] = Metadata.checked_user_data(user_data) unless user_data.nil?
@@ -120,7 +125,9 @@ module PhComposer
             Extension.check_copy_rules!(record.fetch("extension_data", {}), @catalog, kind.label, record.fetch("id"))
           end
           reserved = reserved_ids(kind, change_set)
-          mapping = originals.to_h { |record| [record.fetch("id"), Identity.fresh(kind.id_prefix, reserved)] }
+          mapping = originals.to_h do |record|
+            [record.fetch("id"), Identity.fresh(kind.id_prefix, reserved, @identity)]
+          end
           copies = originals.map do |record|
             copy = copy_of(kind, record, mapping)
             if block_given?

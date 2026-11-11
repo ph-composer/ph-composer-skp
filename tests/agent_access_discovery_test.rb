@@ -212,7 +212,7 @@ class AgentAccessDiscoveryTest < PhComposerTestCase
   def test_long_lists_are_cut_and_identifiers_kept
     others = Array.new(400) { |index| synthetic(index, :queries => 1) }
     PhComposer::Registry.install(others)
-    long_name = "synthetic.needy.#{'n' * 1100}"
+    long_name = "synthetic.needy.#{'n' * (PhComposer::Registry::ID_MAX_BYTES - 16)}"
     needy = Module.new
     needy.define_singleton_method(:install) do |registry|
       feature = registry.feature("synthetic.needy", :contract_version => 1,
@@ -228,6 +228,32 @@ class AgentAccessDiscoveryTest < PhComposerTestCase
     assert_operator row.fetch("requires").length, :<, 400
     assert_equal long_name, operation.fetch("name")
     refute @executor.call(@reader, "describe", "name" => long_name)["isError"]
+  end
+
+  # The largest operations row registration admits: an owner and names near the identifier cap, and a
+  # description and side effects that escape six times over (context/AGENT_INTERFACE.md, "Discover before
+  # acting"). Paged alone by owner with a next cursor, it still fits one reply, identifiers whole.
+  def test_the_largest_row_registration_admits_fits_one_reply
+    owner = "a.#{'f' * (PhComposer::Registry::ID_MAX_BYTES - 6)}"
+    escaped = "\u0001" * 5000
+    largest = Module.new
+    largest.define_singleton_method(:install) do |registry|
+      feature = registry.feature(owner, :contract_version => 1)
+      %w[r0 r1].each do |suffix|
+        feature.action("#{owner}.#{suffix}", :description => escaped, :side_effects => escaped,
+                                             :params => { "type" => "object" }, :result => { "type" => "object" },
+                                             :refuses => [], :undo_name => "Largest", :examples => [{}]) { {} }
+      end
+    end
+    PhComposer::Registry.install([largest])
+    found = page("section" => "operations", "owner" => owner, "limit" => 1)
+    row = found.fetch("rows").first
+
+    assert_equal ["#{owner}.r0", owner], row.values_at("name", "owner")
+    assert_equal PhComposer::Registry::ID_MAX_BYTES - 1, row.fetch("name").bytesize
+    assert_equal %w[description side_effects], row.fetch("truncated")
+    refute_nil found.fetch("next_cursor")
+    assert_operator JSON.generate(found).bytesize, :>, PhComposer::Pages::MAX_PAGE_BYTES
   end
 
   # One registration with a very long description still pages, cut, with the cut named.

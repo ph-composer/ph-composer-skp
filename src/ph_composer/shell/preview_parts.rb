@@ -18,8 +18,9 @@ module PhComposer
 
     # `outcome` with value, affected and findings left out and each part's size and digest (and count, for a
     # list) in `detail`, when it serializes larger than `within` bytes; unchanged otherwise. `rerun` runs the
-    # same preview again: a part that comes out different (an action that names new ids each run) is marked
-    # `stable: false`, since what a later read answers for it will not match this digest.
+    # same preview again: a part that comes out different (a handler answering something outside its inputs;
+    # a create's ids derive from them, HandlerRequest.proposal_ids) is marked `stable: false`, since what a
+    # later read answers for it will not match this digest.
     def compact(outcome, within, rerun)
       return outcome unless outcome["status"] == "completed" && JSON.generate(outcome).bytesize > within
 
