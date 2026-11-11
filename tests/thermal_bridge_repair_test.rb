@@ -183,6 +183,24 @@ class ThermalBridgeRepairTest < PhComposerTestCase
     assert_equal [123, "[1]", "\"text\""], UNREADABLE_PATHS.map { |path| stored(live(*path)) }
   end
 
+  # Assign never writes over what it cannot read: text that does not parse, JSON that is not an object (null
+  # included) and a stored value that is not text each refuse the whole command and leave every Edge as it was.
+  def test_assign_onto_unreadable_text_refuses_and_leaves_it
+    [BROKEN, "123", "[1]", "\"s\"", "null", 123].each do |value|
+      @broken.set_attribute(STORE.dictionary, STORE.key, value)
+      @session.host_event(:transaction_committed)
+      targets = [[101, nil], [102, "tbe_AAAAAAAAAAAA"]].map do |id, entity_id|
+        { "reference" => { "zone_id" => "zon_AAAAAAAAAAAA", "zone_path" => [100], "entity_path" => [id],
+                           "entity_id" => entity_id } }
+      end
+      refused = invoke("edges.assign", "targets" => targets, "thermal_bridge_type_id" => @type, "quantity" => 2)
+
+      assert_equal %w[refused record.unreadable none], refused.values_at("status", "code", "effect"),
+                   "#{value.inspect}: #{refused.inspect}"
+      assert_equal [value, record("tbe_AAAAAAAAAAAA")], [stored(@broken), STORE.read(live(100, 102))]
+    end
+  end
+
   # A Thermal Bridge Type delete reads every Edge for references; unreadable text is passed over and named.
   def test_a_type_delete_passes_over_unreadable_text_and_names_it
     unused = invoke("types.create", "values" => { "name" => "Sill", "psi_w_mk" => 0.02 }).dig("value", "id")
