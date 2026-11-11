@@ -326,14 +326,43 @@ class AgentAccessProfilesTest < PhComposerTestCase
     end
   end
 
-  # An escaped key that cannot name the server, in another table, leaves the entry editable.
+  # An escaped key that cannot name the server, in another table or deep in another server's settings, or an
+  # escape in a multi-line value, leaves the entry editable (review of PR #481).
   def test_an_escaped_key_outside_mcp_servers_leaves_the_entry_editable
     token = Tokens.issue.fetch("token")
-    form = "#{ClientConfig.codex_block(46_110)}\n[profiles.work]\n\"a\\u0062\" = 1\n"
-    File.binwrite(@config, form)
-    assert_equal "configured", ClientSetup.entry("codex", 46_110, "default")["setup"]
-    assert_equal "configured", ClientSetup.connect("codex", token, 47_001).fetch("state")
-    assert_valid_toml File.binread(@config)
+    block = ClientConfig.codex_block(46_110)
+    ["#{block}\n[profiles.work]\n\"a\\u0062\" = 1\n",
+     "mcp_servers.other = { command = \"o\", env = { \"MY\\u005FVAR\" = \"x\" } }\n#{block}\n",
+     "mcp_servers.other.args = [\"\"\"say\\tvalue\nx\"\"\"]\n#{block}\n"].each do |form|
+      File.binwrite(@config, form)
+      assert_equal "configured", ClientSetup.entry("codex", 46_110, "default")["setup"], form
+      assert_equal "configured", ClientSetup.connect("codex", token, 47_001).fetch("state"), form
+      assert_valid_toml File.binread(@config)
+    end
+  end
+
+  # A file that defines the server only through an escaped name reads as set up another way, not absent, and
+  # an escaped name as a value names nothing (#477).
+  def test_a_server_defined_only_by_an_escaped_name_reads_as_other
+    token = Tokens.issue.fetch("token")
+    ["[mcp_servers.\"ph\\u002Dcomposer\"]\nurl = \"x\"\n",
+     "mcp_servers.\"ph\\u002Dcomposer\".url = \"x\"\n",
+     "[mcp_servers]\n\"ph\\u002Dcomposer\" = { url = \"x\" }\n",
+     "mcp_servers = { other = {}, \"ph\\u002Dcomposer\" = { url = \"x\" } }\n",
+     "mcp_servers = { other = { args = [\"\"\"a\nb\"\"\"] }, \"ph\\u002Dcomposer\" = { url = \"x\" } }\n"]
+      .each do |form|
+      File.binwrite(@config, form)
+      assert_equal "other", ClientSetup.entry("codex", 46_110, "default")["setup"], form
+      assert_equal "manual", ClientSetup.connect("codex", token, 46_110).fetch("state"), form
+      assert_equal form, File.binread(@config)
+    end
+    ["disabled_tools = [\"ph\\u002Dcomposer\"]\n",
+     "mcp_servers = { other = { args = [\"\"\"say\\tvalue\nx\"\"\"] } }\n",
+     "mcp_servers = { other = { env = { \"MY\\u005FVAR\" = \"x\" } } }\n",
+     "mcp_servers = { other.env.\"MY\\u005FVAR\" = \"x\" }\n"].each do |form|
+      File.binwrite(@config, form)
+      assert_equal "absent", ClientSetup.entry("codex", 46_110, "default")["setup"], form
+    end
   end
 
   def test_a_non_ascii_config_takes_the_block_and_a_failed_read_back_puts_the_file_back

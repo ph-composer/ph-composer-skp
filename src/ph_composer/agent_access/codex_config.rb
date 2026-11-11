@@ -229,6 +229,40 @@ module PhComposer
         text[/\A[^=]*/].include?("\\") && (table.nil? || root_servers?(table))
       end
 
+      # Whether a member of an inline root `mcp_servers = { ... }` is keyed by a basic string holding an
+      # escape, which could spell a server's name. `statement` runs on through any multi-line string the table
+      # holds. Only the first segment of a first-level key names a server: values, nested tables, the rest of a
+      # dotted key and multi-line strings (always values) are skipped, and an unclosed string ends the read.
+      def escaped_inline_member?(statement)
+        open = statement.index("{")
+        return false unless open && statement[0...open].match?(/\A\s*["']?mcp_servers["']?\s*=\s*\z/)
+
+        depth = 0
+        server_key = true
+        index = open
+        while index < statement.length
+          char = statement[index]
+          case char
+          when "#" then return false
+          when '"', "'"
+            quote = statement[index, 3] == char * 3 ? char * 3 : char
+            close = quote == "'" ? statement.index("'", index + 1) : string_end(statement, index + quote.length, quote)
+            return false unless close
+            return true if quote == '"' && depth == 1 && server_key && statement[index..close].include?("\\")
+
+            index = close + quote.length - 1
+          when "{", "[" then depth += 1
+          when "}", "]"
+            depth -= 1
+            return false if depth.zero?
+          when "=", "." then server_key = false if depth == 1
+          when "," then server_key = true if depth == 1
+          end
+          index += 1
+        end
+        false
+      end
+
       # A statement line as TOML syntax: its comment cut and every string that is a value, not a key, emptied,
       # so a server name in a note, a comment or an array is not taken for a definition. A key string is followed
       # by `=` or `.`, or, in a table header only, by `]`; a value string that ends an array is followed by `]`.
@@ -285,10 +319,26 @@ module PhComposer
       # Whether any line that is not a comment has the server's name as a key, in whatever TOML form: a
       # table, a dotted key or an inline table. A config that does is never appended to, since a second
       # definition would make the whole file invalid for Codex. A path that merely contains the name, such
-      # as a project folder, is not a key.
+      # as a project folder, is not a key. A key or header holding an escape where it could name a server
+      # (`escaped_key?`, `escaped_inline_member?`) counts too: it may spell this name unseen.
       def names_server?(all, name)
         key = /(?:\A|[\s.\[{,])["']?#{Regexp.escape(name)}["']?\s*[.=\]]/
-        statements(all).any? { |line| syntax(line).match?(key) }
+        starts = statement_starts(all)
+        table = nil
+        all.each_index.any? do |index|
+          next false unless starts[index]
+
+          text = syntax(all[index]).strip
+          table = text.sub(/\A\[+/, "") if text.start_with?("[")
+          text.match?(key) || escaped_key?(text, table) ||
+            (table.nil? && escaped_inline_member?(statement_text(all, starts, index)))
+        end
+      end
+
+      # The statement that starts at `index`, with the lines of a value that runs on.
+      def statement_text(all, starts, index)
+        stop = ((index + 1)...all.length).find { |line| starts[line] } || all.length
+        all[index...stop].join
       end
 
       # Whether a new `[mcp_servers.<name>]` table can follow what the file has: no key or header holds an
