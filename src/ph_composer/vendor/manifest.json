@@ -396,9 +396,9 @@
       "sha256": "c310f8c4ab9ad1c4e90e5bff130320ed47f0579751260965fc1ee1615adbfd6d"
     },
     "html/library/rows.js": {
-      "bytes": 10468,
+      "bytes": 10484,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "6837ad0c6aeb55a5021f2f2182491e85d742379c9a3ae2e2f119745c611b7e4c"
+      "sha256": "2d3ed791f19e1248409f8928e1aeb27f3a53a19f2ba62062c81b316bb67b5f78"
     },
     "html/library/section.js": {
       "bytes": 6399,
@@ -411,14 +411,14 @@
       "sha256": "ce1615975f594f5e8eaf83f7a4f74aecac9340cc461257ce15411145deb120f7"
     },
     "html/library/sidebar.js": {
-      "bytes": 15556,
+      "bytes": 15982,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "46151c72a0cbab2f1d5fb5b166270ddc4b0924491329306ef41b8fdd1c6f5dc0"
+      "sha256": "6b2f76f1f6317a218ba3740c4e577e67fa1d9758b36c24e7d7ff0f327a1aab72"
     },
     "html/library/store.js": {
-      "bytes": 9493,
+      "bytes": 9648,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "65835133af1bdc48321b19d9da121405ee4c563125ffbd218c8471536295f2b9"
+      "sha256": "32a94d159fec4ad46489552205e09ac3763ec0e234bb5f50cd8b5df8fa185d7d"
     },
     "html/module.js": {
       "bytes": 2942,

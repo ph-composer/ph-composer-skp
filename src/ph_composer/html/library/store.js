@@ -11,6 +11,8 @@ PhComposerUI.define("library/store", ["request", "snapshot"], function (request,
     this.cancels = request.channel(session, send, "library-cancel", "setup.invoke");
   }
   Store.prototype.busy = function () { return this.views.busy() || this.queries.busy(); };
+  /* A load or Refresh request is out; the page it will replace is still held. */
+  Store.prototype.reloading = function () { return this.views.busy(); };
   Store.prototype.provider = function () {
     var selected = this.selected;
     return this.providers.filter(function (row) { return row.id === selected; })[0];

@@ -151,6 +151,13 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
     Sidebar.prototype.loading = function () {
       return Boolean(this.store && this.store.selected && this.store.loading());
     };
+    /* A load or retry under way, or a first page still being read, speaks over the ending of the page it will
+       replace. A Load more read leaves a stale catalog's warning in place. */
+    Sidebar.prototype.announcesLoading = function () {
+      var store = this.store;
+      return Boolean(store && store.selected) && (store.reloading() || (this.loading() && !store.error) ||
+        (store.busy() && !this.records.length));
+    };
     Sidebar.prototype.copyLocked = function (row) { return Boolean(row && row.library) && this.loading(); };
     Sidebar.prototype.use = function (row, selection) {
       if (this.disposed || !this.enabled || this.busy() || this.copyLocked(row) || !this.records.some(function (live) {
@@ -223,8 +230,6 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
       var page = this.store && this.store.selected && this.store.page;
       var status = this.store && this.store.selected && this.store.busy() ? "Loading library…" : "";
       if (this.store && this.store.error) status = this.store.error;
-      // A hosted library's load runs after the request returns: `loading` until its answer arrives.
-      if (this.loading() && !this.store.error) status = "Loading library…";
       if (page && page.state === "cancelled") status = "Loading was cancelled." +
         (page.generation ? " Showing the last catalog." : "");
       if (page && (page.state === "failed" || page.state === "stale" || page.state === "unavailable")) {
@@ -232,6 +237,8 @@ PhComposerUI.define("library/sidebar", ["library/adapters", "library/drag", "lib
           (page.generation ? " Showing the last successful catalog, loaded " + Math.floor(page.age_seconds || 0) +
             " seconds ago." : " No catalog is available.");
       }
+      // A hosted library's load runs after the request returns: `loading` until its answer arrives.
+      if (this.announcesLoading()) status = "Loading library…";
       if (page && (page.unavailable || []).length) status += " Some record kinds or libraries are unavailable.";
       var notes = page && page.warnings || [];
       var skipped = notes.filter(function (note) { return SKIPPED[note.code] && note.record_id; });

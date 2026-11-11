@@ -296,6 +296,37 @@ test("while a hosted library loads the list says so, prints no count, and offers
   assert.strictEqual(sidebar.refreshButton.hidden, false);
   assert.strictEqual(sidebar.list.getAttribute("aria-busy"), null);
 });
+test("Refresh after a failed or cancelled load announces loading, not the old ending", function () {
+  [["cancelled", null], ["failed", { message: "The library could not be loaded." }]].forEach(function (ending) {
+    var o = hostedLoad(), sidebar = o.sidebar;
+    Object.assign(o.catalog, { state: ending[0], failure: ending[1] });
+    sidebar.refresh(o.state, {}, true);
+    assert.doesNotMatch(sidebar.sourceStatus.textContent, /Loading library/, ending[0] + " ends the load");
+    sidebar.refreshButton.listeners.click({});
+    assert.strictEqual(o.sent[o.sent.length - 1].payload.name, "ph_composer.library.load");
+    sidebar.updateRows();
+    assert.strictEqual(sidebar.sourceStatus.textContent, "Loading library…", "the retry, not the " + ending[0]);
+    assert.strictEqual(listText(sidebar), "Loading library…");
+    assert.strictEqual(sidebar.list.children[0].getAttribute("aria-hidden"), "true", "said once, by the status line");
+    var load = o.sent[o.sent.length - 1].payload;
+    o.state.ui.setupResults[load.request_id] = { session: "session", request_id: load.request_id,
+      outcome: { status: "completed", value: { kind: "test_parts", generation: null, state: "loading" } } };
+    Object.assign(o.catalog, { state: "loading", failure: null });
+    sidebar.refresh(o.state, {}, true);
+    assert.strictEqual(sidebar.sourceStatus.textContent, "Loading library…", "and while the hosted load runs");
+  });
+});
+test("Load more over a stale catalog keeps its warning in the status line", function () {
+  var o = setup(), sidebar = o.sidebar;
+  Object.assign(o.state.sections["ph_composer.library.provider_catalogs"].value[0].catalogs[0],
+    { state: "stale", failure: { message: "The library could not be loaded." }, age_seconds: 5 });
+  Object.assign(sidebar.store.page, { next_cursor: "c2" });
+  sidebar.refresh(o.state, {}, true);
+  sidebar.more.listeners.click({});
+  assert.strictEqual(o.sent[o.sent.length - 1].payload.params.cursor, "c2");
+  sidebar.updateRows();
+  assert.match(sidebar.sourceStatus.textContent, /could not be loaded\. Showing the last successful/);
+});
 test("a catalog that ends empty says so; one that ends unavailable is not called empty", function () {
   var o = hostedLoad(), sidebar = o.sidebar;
   Object.assign(o.catalog, { generation: 2, state: "ready" });
