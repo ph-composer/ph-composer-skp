@@ -784,8 +784,9 @@ leaving geometry and every other dictionary, as one Undo step. It refuses other 
 path and anything clear serves, and never takes a dictionary name. Such text names nothing, so `edges.clear`, a
 Thermal Bridge Type delete and `edges.repair` pass over it when they check what still names a removed record; clear
 and the delete leave it as it is, skip it as a target, and name its Edges in a `thermal_bridge.unreadable_skipped`
-finding (paths of the first 20, and the total). [AGENT_GUIDE](../docs/AGENT_GUIDE.md), "Thermal Bridge
-Types", is the recipe.
+finding (paths of the first 20, and the total). `edges.assign` naming such an Edge, `null` or a stored value that
+is not text included, never writes over it: past its path's own refusals it refuses `record.unreadable`. [AGENT_GUIDE](../docs/AGENT_GUIDE.md),
+"Thermal Bridge Types", is the recipe.
 
 Zones exposes native split identity recovery as `ph_composer.zones.repair_split_face`. The native
 Repair menu and [synthetic scripting client](../tools/examples/authoring/split_identity_walkthrough.rb)

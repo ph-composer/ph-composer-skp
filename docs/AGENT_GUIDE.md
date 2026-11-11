@@ -314,8 +314,9 @@ nothing else, as one Undo step. Other stored text refuses `target.changed`; a lo
 as an ordinary write does; an assignment `edges.clear` can reach refuses `thermal_bridge.repair_not_needed`.
 Text that is not a JSON object names nothing PH-Composer can read, so `edges.clear`, a Thermal Bridge Type delete and `edges.repair`
 do not refuse for it elsewhere. Clear and the delete leave it as it is, skip an Edge holding it, and name those
-Edges in a `thermal_bridge.unreadable_skipped` finding with the first 20 paths and the total. Export still
-blocks on it, so repair it before you export.
+Edges in a `thermal_bridge.unreadable_skipped` finding with the first 20 paths and the total. `edges.assign`
+naming such an Edge never writes over the text: where its path is writable it refuses `record.unreadable` as a
+whole. `null` and a stored value that is not text count as such text. Export still blocks on it, so repair it before you export.
 
 `ph_composer.thermal_bridges.edge_tool.choose` arms the edge tool with a type and quantity for a person
 at the mouse: each click or drag across Edges is one `edges.assign` and one Undo step, at most 250

@@ -27,7 +27,7 @@ module PhComposer
         # root-to-Edge persistent-id paths, so each placement of a shared definition is its own entry. Stored
         # text that is not a JSON object names no id, so it can name no type and nothing can name it: it is no
         # entry, and the engine's reference check, clear and a type delete pass over it rather than refusing
-        # (`unreadable_paths` lists it for the outcome that passed it).
+        # (`unreadable_paths` lists it for the outcome that passed it). A write that names it refuses (`locate`).
         def entries(model)
           found = []
           each_tagged(model) do |edge, path|
@@ -97,7 +97,7 @@ module PhComposer
           end
 
           # The record as stored, not validated, so an invalid assignment can still be cleared or replaced.
-          check_identity!(STORE.read(edge), reference["entity_id"])
+          check_identity!(stored!(edge), reference["entity_id"])
           Records::LocatedEntity.new(:kind => EDGE_KIND, :reference => DeepCopy.call(reference), :entity => edge,
                                      :entities => occurrence.entities, :transform => occurrence.transform,
                                      :parent_path => occurrence.zone.path + occurrence.path[0...-1])
@@ -107,6 +107,18 @@ module PhComposer
         def index(model)
           Zones::Index.new(model)
         end
+
+        # The Edge's stored record, or nil when it has none. Text that is not a JSON object, `null` and a value
+        # that is not text included, refuses: a write through it would destroy what edges.repair can still show.
+        def stored!(edge)
+          record = readable(edge)
+          return record if record || !STORE.marks?(edge)
+
+          raise CodedError.new("record.unreadable",
+                               "The Edge's thermal-bridge text is not a JSON object, so nothing was written; " \
+                               "#{Repair::ROUTE}.")
+        end
+        private_class_method :stored!
 
         # A null `entity_id` names an Edge with no assignment, or one whose record holds no valid id, which a
         # write then guards by its values.
