@@ -14564,7 +14564,7 @@ Result:
                 "type": "string"
               }
             },
-            "description": "The refusal a write to the Edge meets from its path, or else record.unreadable when its stored text is not a JSON object, which only edges.repair removes; null otherwise."
+            "description": "The refusal a write to the Edge meets from its path, or null."
           }
         }
       }
