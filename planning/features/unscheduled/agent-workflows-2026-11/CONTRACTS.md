@@ -428,6 +428,9 @@ gesture a commit cancels. New names and rules:
   revision, so the same request then runs; a finished Move advances it, so the same request answers `revision.stale`
   and the caller reads again and sends a new one. It applies to every caller through dispatch. Queries, view commands, setup commands,
   previews, export tasks and `busy_reason` do not consult it.
+- `Sequencer#release(key, sequence)`: the agent connection's `invoke` releases its `idempotency_key` when the answer
+  is `busy`, since dispatch took no sequence; the key's next send takes a new sequence, so two keys refused during a
+  Move both run afterwards in either order. Any other answer keeps the key's sequence, as before.
 - `context` readiness: `busy` is true and `reason` is `busy_reason`, else `gesture_reason`; `active_tool` as
   before. `discover`'s session row `busy` agrees. No schema change. `Refusals::MEANINGS["session.busy"]` names the Move.
 - Unchanged: `context.open`'s refusal for any tool but Select and the camera tools, and everything the second half

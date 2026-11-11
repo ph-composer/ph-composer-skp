@@ -110,13 +110,17 @@ module PhComposer
         API.preview(:context => context, :name => name, :params => params, :within => Executor::MAX_RESULT_BYTES)
       end
 
-      # One mutation with the sequence the binding assigns, which every invoke result carries.
+      # One mutation with the sequence the binding assigns, which every invoke result carries. A busy answer
+      # ran nothing and took no sequence in dispatch, so its key is released for the retry.
       def invoke(context, arguments, sequencer)
-        sequence = sequencer.assign(arguments["idempotency_key"])
+        key = arguments["idempotency_key"]
+        sequence = sequencer.assign(key)
         request = { "sequence" => sequence, "expected_revision" => arguments.fetch("expected_revision"),
                     "proposal_digest" => arguments["proposal_digest"] }.compact
-        API.invoke(:context => context, :name => arguments["name"], :params => arguments.fetch("params", {}),
-                   :request => request).merge("sequence" => sequence)
+        answer = API.invoke(:context => context, :name => arguments["name"], :params => arguments.fetch("params", {}),
+                            :request => request)
+        sequencer.release(key, sequence) if answer["status"] == "busy"
+        answer.merge("sequence" => sequence)
       end
 
       # The retained outcome of an invoke, by its sequence or by the key it was sent with.

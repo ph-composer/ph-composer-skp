@@ -99,6 +99,29 @@ class GestureGuardTest < PhComposerTestCase
     assert_empty @model.operations
   end
 
+  # A busy invoke took no sequence in dispatch, so its key is free: two keys refused during a Move both run
+  # afterwards, in either order, each once.
+  def test_agent_keys_refused_during_a_move_run_once_each_afterwards_in_any_order
+    row = token(%w[read model_write])
+    executor = AgentAccess::Executor.new(:tools => AgentAccess::Tools::TABLE)
+    send = lambda do |key, revision = @session.revision|
+      executor.call(row, "invoke", "session" => @session.id, "name" => CREATE, "params" => PARTS,
+                                   "expected_revision" => revision, "idempotency_key" => key)
+              .fetch("structuredContent")
+    end
+    @model.tools.use_native_tool("MoveTool", 1)
+    refused = [send.call("a"), send.call("b")]
+    @model.tools.use_native_tool("MoveTool", 0)
+
+    later = [send.call("b"), send.call("a", (revision = @session.revision))]
+    replay = send.call("a", revision)
+
+    assert_equal %w[session.busy session.busy], refused.map { |answer| answer["code"] }
+    assert_equal %w[completed completed], later.map { |answer| answer["status"] }
+    assert_equal later.last["value"], replay["value"]
+    assert_equal 2, @model.operations.length
+  end
+
   def test_writes_run_with_move_idle_and_with_the_line_tool_partway
     @model.tools.use_native_tool("MoveTool", 0)
     idle = invoke(1)

@@ -215,7 +215,8 @@ module PhComposer
       { "minor" => 43, "date" => "2026-11-11",
         "change" => "Every action refuses session.busy, before it takes a sequence, while the user is partway " \
                     "through a Move in SketchUp, which its commit would cancel; context readiness and discover's " \
-                    "session busy say so. Reads and the Line tool are unaffected." }
+                    "session busy say so. Reads and the Line tool are unaffected. An agent invoke answered busy " \
+                    "releases its idempotency_key for the retry." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

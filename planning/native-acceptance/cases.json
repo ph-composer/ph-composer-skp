@@ -4702,7 +4702,9 @@
         "src/ph_composer/shell/dispatch.rb",
         "src/ph_composer/shell/context_commands.rb",
         "src/ph_composer/agent_access/server.rb",
-        "src/ph_composer/agent_access/executor.rb"
+        "src/ph_composer/agent_access/executor.rb",
+        "src/ph_composer/agent_access/tools.rb",
+        "src/ph_composer/agent_access/sequencer.rb"
       ],
       "native_control_required": true
     }

@@ -559,7 +559,8 @@ stack; moving its edit path is refused `session.inactive` (measured in the AW09M
 cancels a native Move partway through (`context/SKETCHUP_HOST_BEHAVIOR.md`), so every action refuses
 `session.busy` while MoveTool is in a state other than 0, before it takes a sequence or key. A cancelled Move leaves the
 revision as it was, so the same invoke then runs; a finished Move advances it, so the agent reads `context` again and sends
-a new invoke; reads, view commands, previews and export start still run, and the
+a new invoke. A busy invoke's `idempotency_key` is released (`Sequencer#release`), so its next send takes a new
+sequence; reads, view commands, previews and export start still run, and the
 Line tool partway through is not guarded (measured in the AW10H run, 2026-11-11).
 
 The executor rechecks the token, validates the arguments against the tool's fixed schema, and makes
