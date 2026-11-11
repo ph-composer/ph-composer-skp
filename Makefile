@@ -41,7 +41,9 @@ syntax:
 # DOM node once grew three processes past 100 GB each and stalled the machine; a Node heap flag does not
 # stop that, because the memory is not the JS heap. `--test-force-exit` ends each file once its tests
 # finish: a panel test leaves a request pending, and its 20 s recovery timer (request.js) otherwise holds
-# the process open, about 20 s idle per file.
+# the process open, about 20 s idle per file (the suite took 64 s without it, 2.7 s with it). On macOS that
+# early exit dropped results still in a file's stdout pipe, so the runner counted fewer tests and passed
+# (5 of 30 runs); tools/js_test_stdout.js, preloaded into every test process, makes that pipe blocking.
 JS_TEST_MAX_RSS_MB ?= 4096
 NODE_TEST_TIMEOUT_MS ?= 60000
 export JS_TEST_MAX_RSS_MB
@@ -53,7 +55,7 @@ export JS_TEST_MAX_RSS_MB
 test: hooks-auto
 	@$(RUBY) -Itests tests/parallel_tests.rb; ruby_status=$$?; \
 	 if [ -n "$(JS_TESTS)" ]; then \
-	   node tools/js_test_guard.js node --test --test-force-exit --test-timeout=$(NODE_TEST_TIMEOUT_MS) $(JS_TESTS); js_status=$$?; \
+	   node tools/js_test_guard.js node --require ./tools/js_test_stdout.js --test --test-force-exit --test-timeout=$(NODE_TEST_TIMEOUT_MS) $(JS_TESTS); js_status=$$?; \
 	 else echo "JavaScript suite: no tests found"; js_status=1; fi; \
 	 uv run pytest; py_status=$$?; \
 	 exit $$((ruby_status | js_status | py_status))
