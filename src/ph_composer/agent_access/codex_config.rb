@@ -11,7 +11,8 @@ module PhComposer
     # sets no approval of its own, and keeps every other byte of the file, so settings the user added
     # (`startup_timeout_sec`, `enabled`, another approval) stay. Anything it cannot read for certain
     # (a token given another way, a quoted key that could spell `url`, a multi-line value in the table, the
-    # server defined with dotted keys or inline) is `other`: the user edits it, from the token-free block.
+    # server defined with dotted keys or inline, a key that holds an escape and so could name the server
+    # unseen) is `other`: the user edits it, from the token-free block.
     #
     # Lines are read with their TOML context (`statement_starts`): a header or key counts only on a line that
     # starts outside any string, array or inline table, so table-like text inside another setting's
@@ -193,24 +194,39 @@ module PhComposer
       end
 
       # Whether the plain table at `start` is the server's only definition: no second header, dotted key or
-      # inline table names it, and none of its own sub-tables sets its url or a token, which would read as
-      # set up while the file gives a token another way.
+      # inline table names it, none of its own sub-tables sets its url or a token, which would read as set up
+      # while the file gives a token another way, and no key that could name it holds an escape.
       def defined_once?(all, name, start)
         escaped = Regexp.escape(name)
         own = /\A\s*\[\s*mcp_servers\s*\.\s*(?:#{escaped}|"#{escaped}"|'#{escaped}')\s*\.\s*/
         sub_table = /#{own}("[^"]*"|'[^']*'|[A-Za-z0-9_-]+)/
         names = /(?:\A|[\s.\[{,])["']?#{escaped}["']?\s*[.=\]]/
         starts = statement_starts(all)
+        table = nil
         all.each_with_index.none? do |line, index|
-          next false if index == start || !starts[index] || !syntax(line).match?(names)
+          next false unless starts[index]
+
+          text = syntax(line).strip
+          table = text.sub(/\A\[+/, "") if text.start_with?("[")
+          next false if index == start
+          next true if escaped_key?(text, table)
+          next false unless text.match?(names)
 
           segment = line[sub_table, 1]
-          # A quoted segment with an escape could spell http_headers unseen, so it is not read as harmless.
-          next true if segment.nil? || segment.include?("\\")
+          next true if segment.nil?
 
           segment = segment.delete("\"'")
           segment == "url" || (TOKEN_KEYS + OTHER_KEYS).include?(segment)
         end
+      end
+
+      # Whether a statement's key holds an escape where it could spell mcp_servers or a server's name, which no
+      # literal match sees (TOML reads `"ph-composer"` as the plain name): any table header, or a key at
+      # the root or in a table under the root mcp_servers.
+      def escaped_key?(text, table)
+        return text.include?("\\") if text.start_with?("[")
+
+        text[/\A[^=]*/].include?("\\") && (table.nil? || root_servers?(table))
       end
 
       # A statement line as TOML syntax: its comment cut and every string that is a value, not a key, emptied,
