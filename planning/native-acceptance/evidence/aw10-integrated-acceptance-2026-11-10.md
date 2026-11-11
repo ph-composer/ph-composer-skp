@@ -117,10 +117,16 @@ client rows (38: completed/ok 34, refused `revision.stale` 2, busy `session.busy
 Raw recorder, client rows, Edit menu labels and screenshots are kept in `_private/host/aw10/run4/AW10H/` (not
 committed).
 
-## AW10G: the Move guard (implemented, re-measurement pending)
+## AW10G: the Move guard (implemented, re-measured: pass)
 
 From run 4, choice D17-f: every action refuses `session.busy`, before it takes a sequence, while MoveTool is in a
 state other than 0, with a message naming the tool; `context` readiness reports it. SketchUp's Line tool stays
 unguarded, and reads, view commands and export start are unchanged. Offline tests in `tests/gesture_guard_test.rb`
 cover the tool-state transitions, the refusal, the same request running after a cancelled Move and answering `revision.stale` after a finished one. Case `AW10G`
 re-measures click-move, held drag and Line on the installed build; recipe `_private/host/aw10/HELD_RUN.md`.
+
+Run 5 (2026-11-11, installed RBZ from the guard head `b960f932`, one uninterrupted full-screen hold, recorder `run_end`
+counts equal the 40 client rows): pass, 3 of 3. During a Move (click-move and held drag) every write answered
+`session.busy` naming MoveTool and wrote nothing; reads, Colour-by, capture and export start completed; no transaction
+ran until the user finished; the Move landed and was the top Undo entry. Line was unchanged from run 4. A write with
+SelectionTool idle committed. Rotate and Scale were not measured.
