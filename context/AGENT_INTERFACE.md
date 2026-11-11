@@ -675,8 +675,8 @@ not read yet is shown as waiting for Repair. The listener keeps contacted and ve
 the profile label a request sends, accepted only when it names a supported client and a valid profile name.
 A profile whose client reads the saved file, and whose file sends its label, shows its own; any other profile
 shows the token's calls that sent no label, such as those of an entry carrying the token inline. So two
-profiles sharing a token each show their own client (Claude Code 2.1.317 sends the helper's every header,
-checked 2026-11-11). The label is the client's text, unauthenticated: any client holding the token can send
+profiles sharing a token each show their own client (Claude Code 2.1.317 and Codex 0.167.0 send every header
+the helper prints, checked 2026-11-11 against a stub listener). The label is the client's text, unauthenticated: any client holding the token can send
 any valid label, so it marks a row and grants nothing. At most 16 labels are kept per token, the latest. No test write and no client process
 verifies a connection; the user starts a client session. A profile whose file holds a live token and
 whose entry is not set up offers Repair (`access.repair`), which reruns the client setup against the
