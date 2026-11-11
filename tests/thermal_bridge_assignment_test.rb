@@ -316,7 +316,7 @@ class ThermalBridgeAssignmentTest < PhComposerTestCase
     odd = path_read("edges.at", "paths" => [[100, 999], [100, 110], [100, 140, 141], [100, 130, 131], [5],
                                             [100, 103]]).fetch("edges")
     assert_equal ["not_found", "not_an_edge", nil, nil, "outside_zone", nil], odd.map { |row| row.fetch("reason") }
-    assert_equal [nil, nil, "target.shared_definition", "target.locked", nil, nil],
+    assert_equal [nil, nil, "target.shared_definition", "target.locked", "record.unreadable", nil],
                  odd.map { |row| row.dig("write_refusal", "code") }
     refute_nil odd.last.fetch("record_problem")
     assert_match(/not valid JSON/, odd[4].fetch("record_problem"))

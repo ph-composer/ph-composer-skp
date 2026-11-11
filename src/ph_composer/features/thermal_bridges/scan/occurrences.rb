@@ -217,8 +217,12 @@ module PhComposer
         [tagged, unreadable]
       end
 
+      # An Edge's assignment by the rule every Edge read takes (Assignment::Target.read): text that is not a JSON
+      # object, `null` and a value that is not text included, is `record.unreadable`; a record that fails its
+      # schema is `validation.failed`.
       def read(edge, path, transform, shared, tagged, unreadable)
-        record = Assignment::STORE.read(edge)
+        record, unread = Assignment::Target.read(edge)
+        return unreadable << { "path" => path, "code" => "record.unreadable", "message" => unread } if unread
         return unless record
 
         problem = Assignment::RECORD_KIND.problems(record).first
@@ -231,10 +235,6 @@ module PhComposer
                                :face_ids => edge.faces.map(&:persistent_id), :shared => shared,
                                :edge => edge, :transform => transform)
         end
-      rescue CodedError => error
-        raise unless error.code == "record.unreadable"
-
-        unreadable << { "path" => path, "code" => error.code, "message" => error.message }
       end
 
       # Component storage, or a Group whose definition another Group shares: geometry every placement of

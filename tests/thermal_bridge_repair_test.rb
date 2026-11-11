@@ -201,6 +201,37 @@ class ThermalBridgeRepairTest < PhComposerTestCase
     end
   end
 
+  # Every read takes the stored text by the rule assign refuses by: text that does not parse, JSON that is not an
+  # object (null included) and a value that is not text each read as a record_problem with no values, and the
+  # schedule and the export preflight list the Edge as unreadable. None answers operation.failed.
+  def test_every_read_reports_unreadable_text_as_its_problem_and_the_schedule_and_preflight_list_it
+    @model.active_path = [live(100)]
+    [BROKEN, "123", "[1]", "\"s\"", "null", 123].each do |value|
+      @broken.set_attribute(STORE.dictionary, STORE.key, value)
+      @session.host_event(:transaction_committed)
+      @model.selection.clear
+      @model.selection.add([@broken])
+      rows = [query("edges.at", "paths" => [[100, 101]]).fetch("edges").first,
+              query("edges.candidates", "path" => [100], "assigned" => "assigned").fetch("edges").first,
+              query("edges.selection").fetch("edges").first, query("edges.selection_all").fetch("edges").first]
+      rows.each do |row|
+        assert_equal [100, 101], row.fetch("path"), value.inspect
+        assert_match(/\AThe #{STORE.dictionary} record is not /, row.fetch("record_problem"), value.inspect)
+        assert_equal [{}, nil, "record.unreadable"],
+                     [row.fetch("values"), row.dig("reference", "entity_id"), row.dig("write_refusal", "code")],
+                     value.inspect
+      end
+      refused = TB::Assignment::Selection.client(@session).clear
+      assert_equal ["refused", value], [refused["status"], stored(@broken)], value.inspect
+      unreadable = query("schedule.list").fetch("unreadable").find { |row| row.fetch("path") == [100, 101] }
+      assert_equal "record.unreadable", unreadable&.fetch("code"), value.inspect
+      blocking = query("export_preflight").fetch("findings").find do |finding|
+        finding.dig("locate", "params", "edge_paths") == [[100, 101]]
+      end
+      assert_equal ["record.unreadable", true], blocking&.values_at("code", "blocks_export"), value.inspect
+    end
+  end
+
   # A Thermal Bridge Type delete reads every Edge for references; unreadable text is passed over and named.
   def test_a_type_delete_passes_over_unreadable_text_and_names_it
     unused = invoke("types.create", "values" => { "name" => "Sill", "psi_w_mk" => 0.02 }).dig("value", "id")

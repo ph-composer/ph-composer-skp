@@ -54,9 +54,13 @@ module PhComposer
                       "description" => "Whether another Edge carries the same assignment id, as a split or a copy " \
                                        "leaves it. Routine; nothing repairs it." },
         "record_problem" => { "type" => %w[string null],
-                              "description" => "Why the stored assignment is invalid, or null. An invalid one can " \
-                                               "still be cleared or reassigned." },
-        "write_refusal" => REFUSAL
+                              "description" => "Why the stored assignment is invalid or cannot be read, or null. " \
+                                               "An invalid one can still be cleared or reassigned; text that is " \
+                                               "not a JSON object reads with no values and a write_refusal." },
+        "write_refusal" => REFUSAL.merge("description" => "The refusal a write to the Edge meets from its path, or " \
+                                                          "else record.unreadable when its stored text is not a " \
+                                                          "JSON object, which only edges.repair removes; null " \
+                                                          "otherwise.")
       })
       SELECTION_ALL = Shapes.object({
         "edges" => Shapes.list(SELECTED_ROW),
