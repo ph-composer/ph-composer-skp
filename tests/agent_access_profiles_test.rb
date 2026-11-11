@@ -299,7 +299,11 @@ class AgentAccessProfilesTest < PhComposerTestCase
      "[mcp_servers.ph-composer]\nfoo = [\n  [1, 2],\n]\nurl = \"x\"\n",
      "[mcp_servers.ph-composer]\nurl = \"x\"\n\n[x]\nmcp_servers.ph-composer.enabled = false\n",
      "[mcp_servers.ph-composer]\nurl = \"x\"\n[mcp_servers.ph-composer.\"http_\\u0068eaders\"]\n" \
-     "Authorization = \"Bearer #{token}\"\n"]
+     "Authorization = \"Bearer #{token}\"\n",
+     "[mcp_servers.ph-composer]\nurl = \"x\"\n[mcp_servers.\"ph\\u002Dcomposer\".http_headers]\n" \
+     "Authorization = \"Bearer #{token}\"\n",
+     "[mcp_servers.ph-composer]\nurl = \"x\"\n[mcp_servers]\n\"ph\\u002Dcomposer\".bearer_token_env_var = \"T\"\n",
+     "mcp_servers.\"ph\\u002Dcomposer\".bearer_token_env_var = \"T\"\n[mcp_servers.ph-composer]\nurl = \"x\"\n"]
       .each do |form|
       File.binwrite(@config, form)
       result = ClientSetup.connect("codex", token, 46_110)
@@ -308,6 +312,16 @@ class AgentAccessProfilesTest < PhComposerTestCase
       refute_includes result["setup"], token
       assert_equal form, File.binread(@config)
     end
+  end
+
+  # An escaped key that cannot name the server, in another table, leaves the entry editable.
+  def test_an_escaped_key_outside_mcp_servers_leaves_the_entry_editable
+    token = Tokens.issue.fetch("token")
+    form = "#{ClientConfig.codex_block(46_110)}\n[profiles.work]\n\"a\\u0062\" = 1\n"
+    File.binwrite(@config, form)
+    assert_equal "configured", ClientSetup.entry("codex", 46_110, "default")["setup"]
+    assert_equal "configured", ClientSetup.connect("codex", token, 47_001).fetch("state")
+    assert_valid_toml File.binread(@config)
   end
 
   def test_a_non_ascii_config_takes_the_block_and_a_failed_read_back_puts_the_file_back
