@@ -115,12 +115,38 @@ class AgentAccessProfilesTest < PhComposerTestCase
     result = ClientSetup.repair("codex", 47_001)
 
     assert_equal "configured", result.fetch("state")
-    assert_equal before.sub("#{ClientConfig.codex_url_line(46_110)}  # old", ClientConfig.codex_url_line(47_001)),
+    assert_equal before.sub("#{ClientConfig.codex_url_line(46_110)}  # old",
+                            "#{ClientConfig.codex_url_line(47_001)}\n#{ClientConfig::CODEX_APPROVAL_LINE}"),
                  File.binread(@config)
     assert_equal before, File.binread("#{@config}#{ClientSetup::BACKUP_SUFFIX}")
     assert_valid_toml File.binread(@config)
     assert_equal 0o600, File.stat("#{@config}#{ClientSetup::BACKUP_SUFFIX}").mode & 0o777
     assert_empty @runs
+  end
+
+  # Codex asks before each tool call unless the entry approves them, and `codex exec` cannot ask, so the entry
+  # Connect writes approves them. An entry written before that reads outdated and Repair adds the line; an
+  # approval the user set is theirs and is kept.
+  def test_the_codex_entry_approves_the_tools_and_keeps_an_approval_the_user_set
+    token = Tokens.issue.fetch("token")
+    Connections.write("codex", token)
+    older = "[mcp_servers.ph-composer]\n#{ClientConfig.codex_url_line(46_110)}\n#{ClientConfig.codex_helper_line}\n"
+    File.binwrite(@config, older)
+    assert_equal "outdated", ClientSetup.entry("codex", 46_110, "default")["setup"]
+
+    assert_equal "configured", ClientSetup.repair("codex", 46_110).fetch("state")
+    assert_equal "#{ClientConfig.codex_block(46_110)}\n", File.binread(@config)
+    assert_includes File.binread(@config), "default_tools_approval_mode = \"approve\"\n"
+
+    own = "#{older}default_tools_approval_mode = \"prompt\"\n"
+    File.binwrite(@config, own)
+    assert_equal "configured", ClientSetup.entry("codex", 46_110, "default")["setup"]
+    assert_equal "configured", ClientSetup.connect("codex", token, 47_001).fetch("state")
+    assert_equal own.sub(ClientConfig.codex_url_line(46_110), ClientConfig.codex_url_line(47_001)),
+                 File.binread(@config)
+    assert_valid_toml File.binread(@config)
+    assert_equal "configured", ClientSetup.repair("codex", 47_001).fetch("state")
+    assert_equal 1, File.binread(@config).scan("default_tools_approval_mode").length, "never written twice"
   end
 
   def test_repair_claude_code_replaces_its_entry_by_name_with_its_own_commands
@@ -172,7 +198,8 @@ class AgentAccessProfilesTest < PhComposerTestCase
     answer = delivered(dialog, "access.connected").last
     assert_equal "configured", answer["state"]
     assert_includes answer["message"], "revoke it here"
-    expected = [ClientConfig.codex_url_line(46_110), ClientConfig.codex_helper_line, "enabled = true"]
+    expected = [ClientConfig.codex_url_line(46_110), ClientConfig::CODEX_APPROVAL_LINE, ClientConfig.codex_helper_line,
+                "enabled = true"]
     assert_equal "[mcp_servers.ph-composer]\n#{expected.join("\n")}\n", File.binread(@config)
     assert_no_secret(dialog, fresh["token"], old["token"])
   end
@@ -350,12 +377,48 @@ class AgentAccessProfilesTest < PhComposerTestCase
     log.add(row, "context", {}, { "structuredContent" => { "status" => "failed" }, "isError" => false }, 3)
     assert_equal [false, false, false, false], log.take_unread.map { |call| call["verifies"] }
     Listener.calls_made([], log.take_contacts)
-    assert_equal "codex-mcp-client 0.167.0", Listener.contacts.dig(id, "client")
+    assert_equal "codex-mcp-client 0.167.0", Listener.contacts.dig([id, nil], "client")
     assert_empty Listener.verified
 
     log.add(row, "context", {}, { "structuredContent" => { "status" => "completed" } }, 3)
     Listener.calls_made(log.take_unread)
-    refute_nil Listener.verified[id]
+    refute_nil Listener.verified[[id, nil]]
+  end
+
+  # Two profiles sharing a token each show the client that contacted through their own file, and a profile
+  # whose entry carries the token inline shows the calls that named no profile (AW-08's report).
+  def test_profiles_sharing_a_token_each_show_their_own_contact
+    token = Tokens.issue(:label => "Shared")
+    id = token.dig("row", "id")
+    Connections.write("codex", token.fetch("token"))
+    Connections.write("claude_code", token.fetch("token"))
+    File.binwrite(@config, ClientConfig.codex_block(46_110))
+    log = CallLog.new
+    log.contact({ "id" => id, "profile" => "codex.default" }, "clientInfo" => { "name" => "codex-mcp-client" })
+    log.add({ "id" => id, "profile" => "codex.default" }, "discover", {}, { "structuredContent" => {} }, 3)
+    log.contact({ "id" => id, "profile" => nil }, "clientInfo" => { "name" => "inline-client" })
+    Listener.calls_made(log.take_unread, log.take_contacts)
+
+    rows = connection_rows.to_h { |row| [row["client"], row] }
+    assert_equal ["codex-mcp-client", nil], [rows["codex"].dig("contacted", "client"),
+                                             rows["claude_code"].dig("contacted", "client")]
+    refute_nil rows["codex"]["verified_at"]
+    assert_nil rows["claude_code"]["verified_at"]
+
+    File.binwrite(@config, "[mcp_servers.ph-composer]\n#{ClientConfig.codex_url_line(46_110)}\n" \
+                           "http_headers = { Authorization = \"Bearer #{token['token']}\" }\n")
+    inline = connection_rows.find { |row| row["client"] == "codex" }
+    assert_equal %w[inline inline-client], [inline["source"], inline.dig("contacted", "client")]
+    assert_nil inline["verified_at"], "the labelled discover was the file profile's, not the inline one's"
+  end
+
+  # A label is the client's text, so the labels kept for one token are bounded, the latest kept.
+  def test_the_labels_kept_per_token_are_bounded
+    log = CallLog.new
+    20.times { |index| log.contact({ "id" => "token_X", "profile" => "codex.p#{index}" }, {}) }
+    Listener.stub(:forget_unlisted, nil) { Listener.calls_made([], log.take_contacts) }
+
+    assert_equal (4..19).map { |index| ["token_X", "codex.p#{index}"] }, Listener.contacts.keys
   end
 
   private

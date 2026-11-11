@@ -601,7 +601,8 @@ Implemented: client connection, `agent_access/connections.rb`, `client_setup.rb`
 default, named `ph-composer`, and any others, `ph-composer-<name>` (1 to 32 of `a-z`, `0-9`, `-`). The
 token a profile uses is saved in its own file, `~/.ph-composer/<client>.json` for the default (the file
 Connect always wrote, so an existing setup is the default unchanged) or `<client>.<name>.json`, holding
-the request header (`{"Authorization": "Bearer <token>"}`), and the client's entry names the file once
+the request headers (`{"Authorization": "Bearer <token>", "PH-Composer-Profile": "<client>.<profile>"}`, the
+second a label naming the profile, never a credential), and the client's entry names the file once
 through its header helper, `/bin/cat <path>`, which the client runs in a shell each time it connects.
 Profiles are derived from those files and the clients' own entries, never stored, so an entry whose token
 was revoked stays listed as needing one. A new token for a profile changes only its file. Two profiles
@@ -632,10 +633,14 @@ old token stays live until revoked. Then the client is set up:
   string, array and inline table, so table-like text in another setting's multi-line string or array is
   never taken for a table, and a file whose strings or brackets do not close is never edited. With
   no entry for the profile the block is appended to `~/.codex/config.toml` after a blank line, every
-  existing byte kept. With the plain `[mcp_servers.<entry>]` table present, only its `url` line and its
-  token line (`http_headers_helper`, or `http_headers` holding exactly one inline `Authorization` bearer)
-  are replaced, every other line kept byte for byte, so the profile's own extra settings
-  (`startup_timeout_sec`, `enabled`) still read as set up. A token given another way
+  existing byte kept. The block sets `default_tools_approval_mode = "approve"`: Codex otherwise asks before
+  each tool call, and a session that cannot ask (`codex exec`, 0.167.0) refuses every write; the token's
+  grants still bound each call. With the plain `[mcp_servers.<entry>]` table present, only its `url` line and
+  its token line (`http_headers_helper`, or `http_headers` holding exactly one inline `Authorization` bearer)
+  are replaced, and the approval line is added when the table sets no `default_tools_approval_mode`; every
+  other line is kept byte for byte, so the profile's own extra settings (`startup_timeout_sec`, `enabled`, an
+  approval of the user's own) still read as set up. A table with no approval reads `outdated`, so Repair
+  adds it. A token given another way
   (`bearer_token_env_var`, `env_http_headers`, other headers, a dotted `http_headers.` key or an
   `http_headers` sub-table), stdio keys, any line of the table that is not one bare `key = value` (a quoted
   or dotted key, a multi-line value or string), a file that is not valid UTF-8, or the entry given again by
@@ -666,8 +671,13 @@ unreadable), contacted (a client sent `initialize` with that token since SketchU
 `discover` or `context` completed: an Outcome with status `completed`, or discover's page, never a busy,
 failed or refused answer, and no `connection.reason`). A profile's token is the one the client uses: the
 token its entry carries inline while it does (none once that token is revoked), otherwise the saved file's; a saved token the entry does
-not read yet is shown as waiting for Repair. Contacted and
-verified belong to the token, so profiles sharing one share them. No test write and no client process
+not read yet is shown as waiting for Repair. The listener keeps contacted and verified by token and by
+the profile label a request sends, accepted only when it names a supported client and a valid profile name.
+A profile whose client reads the saved file, and whose file sends its label, shows its own; any other profile
+shows the token's calls that sent no label, such as those of an entry carrying the token inline. So two
+profiles sharing a token each show their own client (Claude Code 2.1.317 and Codex 0.167.0 send every header
+the helper prints, checked 2026-11-11 against a stub listener). The label is the client's text, unauthenticated: any client holding the token can send
+any valid label, so it marks a row and grants nothing. At most 16 labels are kept per token, the latest. No test write and no client process
 verifies a connection; the user starts a client session. A profile whose file holds a live token and
 whose entry is not set up offers Repair (`access.repair`), which reruns the client setup against the
 current port with the saved file and never reads the token back; any profile not set up shows its

@@ -1,6 +1,6 @@
 # Working in PH-Composer as an agent
 
-DATE: 2026-11-10
+DATE: 2026-11-11
 STATUS: The operating guide for an agent connected through Agent Access. The connection serves it:
 `discover` with `section` `guide` lists its topics, and with a `topic` returns one.
 
@@ -26,7 +26,9 @@ extension carries this text, so an agent with only the connection can read it; `
    reply is refused, not cut: ask for less, then read what you left out in parts (see "Large
    records and previews").
 5. **Describe before you call.** `describe` gives an operation's params and result schemas, its
-   examples, its refusals and, for a view command, what else it can trigger (`side_effects`).
+   examples, its refusals and, for a view command, what else it can trigger (`side_effects`). Its
+   kind says which tool calls it: an operation whose name ends in `_preview`, such as
+   `ph_composer.spaces.create_preview`, is a query, called with `query`, and writes nothing.
 6. **Preview a compound change.** `preview` shows what an action would change without changing
    anything, and returns a `proposal_digest` to send with the invoke. Read all of it before you
    apply it, even when it is larger than one reply.
@@ -205,18 +207,37 @@ record. Their ids and paths are the ones the writes take, so never read ids thro
    from `ph_composer.context.children` with `kinds` `["face", "edge"]`.
 2. If `open_required`, `ph_composer.context.open` with that path. Then `ph_composer.zones.make` with the
    row's `make_zone` and an optional `name`; read the new Zone back with `ph_composer.zones.list`.
+3. Make Zone also classifies the new Zone's Faces while `ph_composer.zones.settings.get` reads
+   `suggest_on_make` true, as it does unless the user turned it off; a Face in a locked or shared Group
+   is left as it is. Each Face takes a face type by its
+   slope (`Wall`, `Floor` or `RoofCeiling`) and a boundary condition: `Ground` when the whole Face is at
+   or below the Zone's ground depth, otherwise `Outdoors`. Read them with `ph_composer.zones.faces.list`
+   and change them with `ph_composer.zones.faces.classify`. A classified Face cannot become a Space's
+   floor; see "Spaces from loose Faces".
+4. A Zone's Building-Segment and Level are options the Model holds, and `ph_composer.zones.update` names
+   them by name, as `building_segment` and `level` in its complete `values` and `expected_values`: a name
+   no option has is refused as `reference.invalid`. Make Zone gives the Zone the
+   default Building-Segment, creating one when the Model has none, and no Level. Read the options with
+   `ph_composer.zones.options.list` with `collection` `building_segment` or `level`, and create one with
+   `ph_composer.zones.options.create`, with that `collection` and `values` holding a `name` and a
+   `colour`, before a Zone names it.
 
 ### Spaces from loose Faces
 
 A new Space or Volume is made from floor Faces a person draws in SketchUp; the connection does not
-draw geometry. Ask the user to draw the floor surfaces first, then:
+draw geometry. Ask the user to draw the floor surfaces first, each its own surface, inset from the walls
+or just below the floor so that it touches no other Face. A Zone's own floor Faces cannot be used once
+classified, as Make Zone classifies them by default: Create Space leaves a classified Face out as
+`classified`. Two floor surfaces
+that share an Edge are each left out alone as `shares_edge`, and taken together they become one Volume
+of one Space, so one Space per room needs floors that do not touch. Then:
 
 1. Find the floor Faces with `ph_composer.spaces.candidate_faces.list` and `context`, the path holding them: each
    loose Face there, with the refusal Create Space gives it named alone (a wall, a Face sharing an Edge with an
    unselected one, a Face in a solid). Then `ph_composer.context.open` with that path and `expected_path`. The
    root, a plain Group or a Zone's own context all work.
-2. `ph_composer.spaces.create_preview` with the Faces' root-to-Face paths says what would be taken and which Zone to
-   host the Space in. `ph_composer.spaces.create` from those Faces, with that `zone` or none. Each set of Faces
+2. `ph_composer.spaces.create_preview`, a query that writes nothing, with `faces`, the Faces' root-to-Face paths,
+   says what would be taken and which Zone to host the Space in. `ph_composer.spaces.create` from those Faces, with that `zone` or none. Each set of Faces
    joined by a shared Edge becomes one Volume, and each Face a Floor Segment; the result's `volumes` lists them in
    order, each with the `faces` it was made from. The result's `accepted` and `left_out` say which named Faces were
    taken and why each other one was not, as the preview does. To take exactly the reviewed Faces, send the
@@ -227,7 +248,10 @@ draw geometry. Ask the user to draw the floor surfaces first, then:
    is for and the refusal it would meet now. Faces that share an Edge go together, and each joined set becomes
    its own Volume.
 4. `ph_composer.spaces.volumes.create` from those Faces, `ph_composer.spaces.floors.mark` for a Face in
-   a Volume, then `ph_composer.spaces.update` for heights and airflows.
+   a Volume, then `ph_composer.spaces.update` for heights and airflows. Read a Space's Volumes with
+   `ph_composer.spaces.volumes.list`, which needs `space`, the Space's `reference` as
+   `ph_composer.spaces.list` gives it; `ph_composer.spaces.floor_segments.list` takes exactly one of
+   `space` and `volume`.
 5. `ph_composer.spaces.move_to_zone` if the Space belongs in another Zone; it writes the Zone on the
    Space's record and moves no geometry. Read every changed reference back.
 
@@ -328,6 +352,17 @@ digests. Loose pane Faces left by an exploded Window are listed by
 `needs` null is `units.restore`'s params as it stands; `needs` `"host"` means no single Zone Face holds
 the panes, and `"selection"` that the panes of two Windows of one Type are mixed: ask the user which
 Face, or which panes, rather than choosing by a name.
+
+A Window Type's layout is a grid: `rows_m`, the row heights from the top, and `columns_m`, the column
+widths from the left, in metres. Its `elements` cover every cell of the grid exactly once. Each
+element's `row_span` and `column_span` are inclusive `[first, last]` band indexes counted from 0, so
+`[0, 0]` is the first band alone and `[0, 2]` the first three. An element id is `wel_` and 12 letters
+or digits, unique within the Type. `ph_composer.windows.types.create` with only a `name` makes one
+glazed element, and the grid actions (`ph_composer.windows.types.grid.insert`,
+`ph_composer.windows.types.grid.merge`, `ph_composer.windows.types.grid.split` and the like) make new
+ids themselves; read them back with `ph_composer.windows.types.elements.list`. A layout you write
+whole in `values` keeps the ids you give, and one that leaves a cell uncovered or overlaps is refused
+as `validation.failed`.
 
 ### Library records
 

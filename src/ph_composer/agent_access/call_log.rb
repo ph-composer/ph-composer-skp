@@ -5,10 +5,11 @@ require "time"
 module PhComposer
   module AgentAccess
     # The listener's record of recent tool calls, for diagnosis and for each token's latest call. A row
-    # holds the token's id, the tool, the operation name and session the arguments carry, how the call
-    # ended, whether it verified the connection and how long it took; never params, a value, a path or the
-    # token. It also holds the clients that started a session with a token (`initialize`), named as they name
-    # themselves, until the pump passes them on. Not thread safe: the Server holds its lock around every call.
+    # holds the token's id, the client profile the request named (Connections.presented) or nil, the tool,
+    # the operation name and session the arguments carry, how the call ended, whether it verified the
+    # connection and how long it took; never params, a value, a path or the token. It also holds the clients
+    # that started a session with a token (`initialize`), named as they name themselves, until the pump passes
+    # them on. Not thread safe: the Server holds its lock around every call.
     class CallLog
       SIZE = 64
       CLIENT_LENGTH = 60
@@ -24,8 +25,9 @@ module PhComposer
 
       def add(token, tool, arguments, result, milliseconds)
         outcome = result["structuredContent"].is_a?(Hash) ? result["structuredContent"] : {}
-        @rows << { "token" => token.fetch("id"), "tool" => tool, "operation" => text(arguments["name"], 120),
-                   "session" => text(arguments["session"], 60), "status" => outcome["status"] || "completed",
+        @rows << { "token" => token.fetch("id"), "profile" => token["profile"], "tool" => tool,
+                   "operation" => text(arguments["name"], 120), "session" => text(arguments["session"], 60),
+                   "status" => outcome["status"] || "completed",
                    "code" => outcome["code"], "error" => result["isError"] == true,
                    "verifies" => verifies?(tool, result, outcome), "ms" => milliseconds, "at" => Time.now.utc.iso8601 }
         @rows.shift while @rows.length > SIZE
@@ -43,12 +45,14 @@ module PhComposer
         @rows.map(&:dup)
       end
 
-      # A client began a session with this token: its `clientInfo` name and version as it gave them, cut.
+      # A client began a session with this token, from the profile it named: its `clientInfo` name and
+      # version as it gave them, cut.
       def contact(token, params)
         info = params.is_a?(Hash) && params["clientInfo"].is_a?(Hash) ? params["clientInfo"] : {}
         name = [info["name"], info["version"]].select { |part| part.is_a?(String) }.join(" ")
         @contacts.shift while @contacts.length >= SIZE
-        @contacts << { "token" => token.fetch("id"), "client" => name.scrub[0, CLIENT_LENGTH],
+        @contacts << { "token" => token.fetch("id"), "profile" => token["profile"],
+                       "client" => name.scrub[0, CLIENT_LENGTH],
                        "at" => Time.now.utc.iso8601 }
       end
 

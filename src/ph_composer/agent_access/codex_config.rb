@@ -7,8 +7,9 @@ module PhComposer
     # TOML library would rewrite the whole file. Pure: ClientSetup reads and writes the file.
     #
     # An entry is the plain `[mcp_servers.<name>]` table. PH-Composer changes only its `url` line and its
-    # token line, a helper or one inline Authorization bearer, and keeps every other byte of the file, so
-    # settings the user added (`startup_timeout_sec`, `enabled`) stay. Anything it cannot read for certain
+    # token line, a helper or one inline Authorization bearer, adds the tool approval line when the table
+    # sets no approval of its own, and keeps every other byte of the file, so settings the user added
+    # (`startup_timeout_sec`, `enabled`, another approval) stay. Anything it cannot read for certain
     # (a token given another way, a quoted key that could spell `url`, a multi-line value in the table, the
     # server defined with dotted keys or inline) is `other`: the user edits it, from the token-free block.
     #
@@ -31,7 +32,7 @@ module PhComposer
       OTHER_KEYS = %w[bearer_token_env_var env_http_headers headers command args env cwd].freeze
 
       # One entry as read: where its table runs, its url, its token line and whether PH-Composer can edit it.
-      Entry = Struct.new(:start, :stop, :url, :helper, :inline_token, :editable, keyword_init: true)
+      Entry = Struct.new(:start, :stop, :url, :helper, :inline_token, :approval, :editable, keyword_init: true)
 
       module_function
 
@@ -40,8 +41,9 @@ module PhComposer
         statements(lines(text)).filter_map { |line| line.match(PROFILE_HEADER)&.[](2) }.uniq
       end
 
-      # `"absent"`, `"configured"` (its url and helper are the ones given), `"outdated"` (PH-Composer's form
-      # with another url or helper), `"inline"` (a token in the file) or `"other"`.
+      # `"absent"`, `"configured"` (its url and helper are the ones given and it sets a tool approval),
+      # `"outdated"` (PH-Composer's form with another url or helper, or no approval), `"inline"` (a token in
+      # the file) or `"other"`.
       def state(text, name, url_line, helper_line)
         return "other" unless utf8?(text) && balanced?(lines(text))
 
@@ -51,7 +53,8 @@ module PhComposer
         return "other" unless entry.editable
         return "inline" if entry.inline_token
 
-        entry.url == value_of(url_line) && entry.helper == value_of(helper_line) ? "configured" : "outdated"
+        current = entry.url == value_of(url_line) && entry.helper == value_of(helper_line) && entry.approval
+        current ? "configured" : "outdated"
       end
 
       # The inline bearer token the entry carries, or nil. Only its digest leaves ClientSetup.
@@ -59,7 +62,8 @@ module PhComposer
         entry(lines(text), name)&.inline_token
       end
 
-      # The file with the entry's url and token lines replaced, or nil when it cannot be edited for certain.
+      # The file with the entry's url and token lines replaced and, when it sets none, the approval line
+      # added, or nil when it cannot be edited for certain.
       def edit(text, name, url_line, helper_line)
         return nil unless utf8?(text) && balanced?(lines(text))
 
@@ -74,8 +78,9 @@ module PhComposer
         header = all[entry.start]
         header = "#{header}\n" unless header.end_with?("\n")
         indent = header[/\A\s*/]
-        (all[0...entry.start] + [header, "#{indent}#{url_line}\n", "#{indent}#{helper_line}\n"] + body +
-          all[entry.stop..]).join
+        approval = entry.approval ? [] : ["#{indent}#{ClientConfig::CODEX_APPROVAL_LINE}\n"]
+        (all[0...entry.start] + [header, "#{indent}#{url_line}\n"] + approval + ["#{indent}#{helper_line}\n"] +
+          body + all[entry.stop..]).join
       end
 
       # The file with the block added after a blank line, or nil when a new table cannot follow what it has.
@@ -242,7 +247,9 @@ module PhComposer
         editable &&= (url.nil? || url.match?(VALUE)) && (helper.nil? || helper.match?(VALUE)) &&
                      (inline.nil? || inline.match?(INLINE_BEARER))
         Entry.new(:start => start, :stop => stop, :url => url && url[VALUE, 1], :helper => helper && helper[VALUE, 1],
-                  :inline_token => inline && inline[INLINE_BEARER, 1], :editable => editable ? true : false)
+                  :inline_token => inline && inline[INLINE_BEARER, 1],
+                  :approval => found[ClientConfig::CODEX_APPROVAL_KEY].first,
+                  :editable => editable ? true : false)
       end
 
       # The bare key a line sets, or nil for a blank line, a comment or a value line of a longer one.

@@ -37,7 +37,8 @@ class AgentAccessClientConfigTest < PhComposerTestCase
     codex = ClientConfig.for(:port => 46_110, :token => TOKEN).last
 
     assert_equal %w[codex Codex], codex.values_at("id", "client")
-    block = "[mcp_servers.ph-composer]\nurl = \"http://127.0.0.1:46110/mcp\"\n"
+    block = "[mcp_servers.ph-composer]\nurl = \"http://127.0.0.1:46110/mcp\"\n" \
+            "default_tools_approval_mode = \"approve\"\n"
     assert_equal ["#{block}http_headers_helper = \"/bin/cat /Users/someone/.ph-composer/codex.json\"",
                   "#{block}http_headers = { Authorization = \"Bearer #{TOKEN}\" }"],
                  codex.fetch("forms").map { |form| form["text"] }

@@ -9,7 +9,9 @@ module PhComposer
     # The token each connection profile uses, kept in one owner-only file per client and profile
     # (context/AGENT_INTERFACE.md, "Security posture"). The client's own configuration names the file once,
     # through a header helper that prints it, so a new token for that profile changes the file and never the
-    # client's settings. Each file holds the request header, `{"Authorization": "Bearer <token>"}`.
+    # client's settings. Each file holds the request headers: `{"Authorization": "Bearer <token>",
+    # "PH-Composer-Profile": "<client>.<profile>"}`. The second names the profile, so when two profiles share
+    # a token the listener can tell their calls apart; it is a label, never a credential.
     #
     # A client profile is one client entry (context/AGENT_INTERFACE.md, "User-controlled local access"). The
     # default is the entry named `ph-composer` with the file `<client>.json`, as Connect always wrote it, so an
@@ -26,6 +28,7 @@ module PhComposer
       # A bare TOML key and a Claude Code server name: lowercase letters, digits and inner hyphens.
       PROFILE = /\A[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?\z/.freeze
       FILE = /\A(#{CLIENTS.keys.join('|')})(?:\.([a-z0-9-]+))?\.json\z/.freeze
+      PROFILE_HEADER = "PH-Composer-Profile"
 
       class << self
         # Where the files live; the offline suite points it at a scratch folder.
@@ -46,6 +49,26 @@ module PhComposer
           "/bin/cat #{Shellwords.escape(path(client, profile))}"
         end
 
+        # The label a profile's file sends in PROFILE_HEADER: `<client>.<profile>`.
+        def label(client, profile = DEFAULT_PROFILE)
+          "#{checked(client)}.#{checked_profile(profile)}"
+        end
+
+        # The label a request presented, or nil unless it names a supported client and a valid profile: the
+        # header is the client's text, so nothing else of it is kept.
+        def presented(value)
+          client, profile = value.to_s.split(".", 2)
+          valid = CLIENTS.key?(client) && (profile == DEFAULT_PROFILE || profile.to_s.match?(PROFILE))
+          valid ? "#{client}.#{profile}" : nil
+        end
+
+        # Whether the profile's file sends its label, as every file Connect writes does.
+        def labelled?(client, profile)
+          header_in(path(client, profile))&.fetch(PROFILE_HEADER, nil) == label(client, profile)
+        rescue StandardError
+          false
+        end
+
         # The profile name, refused as `params.invalid` unless it is the default or a valid name.
         def checked_profile(profile)
           return profile if profile == DEFAULT_PROFILE || profile.is_a?(String) && profile.match?(PROFILE)
@@ -63,7 +86,7 @@ module PhComposer
           temporary = File.join(folder, ".#{checked(client)}.#{SecureRandom.hex(6)}.tmp")
           File.open(temporary, File::WRONLY | File::CREAT | File::EXCL, 0o600) do |file|
             created = true
-            file.write(JSON.generate("Authorization" => "Bearer #{token}"))
+            file.write(JSON.generate("Authorization" => "Bearer #{token}", PROFILE_HEADER => label(client, profile)))
           end
           File.rename(temporary, target)
           renamed = true
@@ -119,10 +142,17 @@ module PhComposer
         end
 
         def token_in(file)
+          header_in(file)&.fetch("Authorization", nil).to_s[/\ABearer (\h{48})\z/, 1]
+        rescue StandardError
+          nil
+        end
+
+        # The headers a file holds, or nil when it is not a small regular file holding a JSON object.
+        def header_in(file)
           return nil unless File.file?(file) && !File.symlink?(file) && File.size(file) <= MAX_BYTES
 
           header = JSON.parse(File.read(file))
-          header.is_a?(Hash) ? header["Authorization"].to_s[/\ABearer (\h{48})\z/, 1] : nil
+          header.is_a?(Hash) ? header : nil
         rescue StandardError
           nil
         end

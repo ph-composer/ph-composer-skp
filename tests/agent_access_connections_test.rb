@@ -30,7 +30,8 @@ class AgentAccessConnectionsTest < PhComposerTestCase
     Connections.write("codex", second)
 
     path = Connections.path("codex")
-    assert_equal({ "Authorization" => "Bearer #{second}" }, JSON.parse(File.read(path)))
+    assert_equal({ "Authorization" => "Bearer #{second}", "PH-Composer-Profile" => "codex.default" },
+                 JSON.parse(File.read(path)))
     assert_equal 0o600, File.stat(path).mode & 0o777
     assert_equal 0o700, File.stat(Connections.directory).mode & 0o777
     assert_equal ["codex.json"], Dir.children(Connections.directory), "no temporary file is left"
