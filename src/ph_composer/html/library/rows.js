@@ -104,7 +104,7 @@ PhComposerUI.define("library/rows", ["units", "workspace"], function (units, ui)
       }
       var note = el("p", "muted", empty);
       // The status line above announces the load; the list shows it where the rows will be, said once.
-      if (selected && loading && !this.records.length) note.setAttribute("aria-hidden", "true");
+      if (selected && this.announcesLoading() && !this.records.length) note.setAttribute("aria-hidden", "true");
       this.list.appendChild(note);
     }
   };

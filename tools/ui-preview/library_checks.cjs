@@ -72,8 +72,12 @@ check({ name: "library_hosted_loading", output }, async ({ newPage, step }) => {
     await list.getByText("No catalog is available.", { exact: true }).waitFor();
     assert.equal(await page.evaluate(() => previewHost.sent.filter(item => item.type === "setup.invoke" &&
       item.payload.name === "ph_composer.library.cancel_load").length), 1);
-    // A refresh that runs over a loaded catalog keeps its rows in view but copies nothing until it ends.
+    // The retry is announced by the status line over the cancelled load it replaces, and said once.
     await sidebar.getByRole("button", { name: "Refresh", exact: true }).click();
+    const status = sidebar.locator(".library-sidebar-content > [role='status']");
+    await status.getByText("Loading library…", { exact: true }).waitFor();
+    assert.equal(await list.getByText("Loading library…", { exact: true }).getAttribute("aria-hidden"), "true");
+    // A refresh that runs over a loaded catalog keeps its rows in view but copies nothing until it ends.
     await page.evaluate(() => previewHost.finishLibraryLoad("synthetic"));
     const fiber = sidebar.locator(".library-sidebar-row-button").filter({ hasText: "Synthetic fiber" });
     await fiber.waitFor();
