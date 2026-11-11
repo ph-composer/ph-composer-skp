@@ -185,6 +185,50 @@ class WindowZoneCopyTest < PhComposerTestCase
                  copied_first.dig("extension_data", extension.namespace, "payload"))
   end
 
+  # Two copied Units share an id and a third copied Unit's payload names it, so the payload cannot say
+  # which copy it meant. With one holder left outside, keeping the id would point the copy at that Unit.
+  def test_a_payload_naming_an_id_two_copied_units_share_refuses_with_one_holder_outside
+    payload_naming_a_shared_sibling
+    copy = shared_copy(@original, 400)
+    copy.make_unique
+    @original.entities.erase_entities(@original.entities.to_a.grep(Sketchup::ComponentInstance).first)
+    assert_equal 1, units_under(@original).count { |row| row.fetch("id") == "wun_000000000001" }
+
+    assert_refused_as_ambiguous(copy)
+  end
+
+  def test_a_payload_naming_an_id_two_copied_units_share_refuses_with_two_holders_outside
+    payload_naming_a_shared_sibling
+    copy = shared_copy(@original, 400)
+
+    assert_refused_as_ambiguous(copy)
+  end
+
+  # Make Zone independent renames only what is held outside the copy. Two copied Units sharing an id
+  # nobody outside holds both keep it, still read as a copied identity, and the next Windows repair
+  # renames the second by path.
+  def test_two_copied_units_sharing_an_id_held_only_inside_both_keep_it_until_the_windows_repair
+    copy = shared_copy(@original, 400)
+    copy.make_unique
+    inside = copy.entities.to_a.grep(Sketchup::ComponentInstance)
+    inside.each { |unit| U.write(unit, U.read(inside.first).merge("id" => "wun_000000000009")) }
+
+    result = invoke(MAKE_INDEPENDENT, { "zone_path" => [copy.persistent_id] })
+
+    assert_equal %w[completed committed], result.values_at("status", "effect"), result.inspect
+    assert_equal %w[wun_000000000009 wun_000000000009], units_under(copy).map { |row| row.fetch("id") }
+    pending = listed_units.select { |row| row.fetch("findings").any? { |f| f["code"] == "window.copy_id_pending" } }
+    assert_equal [[copy.persistent_id]] * 2, pending.map { |row| row.dig("reference", "entity_path").first(1) }
+
+    repair = invoke("ph_composer.windows.units.repair_copied_identities",
+                    { "units" => pending.map { |row| row.fetch("reference") } })
+
+    assert_equal "committed", repair.fetch("effect"), repair.inspect
+    first, second = units_under(copy).map { |row| row.fetch("id") }
+    assert_equal "wun_000000000009", first
+    refute_equal first, second
+  end
+
   def test_a_failing_unit_restore_still_attempts_every_other_unit
     PhComposer::Registry.install([fault_feature])
     native_copy(@original, 400)
@@ -294,6 +338,36 @@ class WindowZoneCopyTest < PhComposerTestCase
       end
     end])
     extension
+  end
+
+  # The Zone's two Units share one id, and a third Unit on its last Face carries a payload naming it.
+  def payload_naming_a_shared_sibling
+    extension = register_unit_extension
+    first, second = @original.entities.to_a.grep(Sketchup::ComponentInstance)
+    record = U.read(first)
+    U.write(second, record)
+    third = Sketchup::ComponentInstance.new(@original.persistent_id + 22, first.definition, {},
+                                            :glued_to => @original.entities.to_a.grep(Sketchup::Face).last)
+    payload = { "sibling" => record.fetch("id") }
+    U.write(third, record.merge("id" => "wun_000000000003",
+                                "extension_data" => { extension.namespace => extension.envelope(payload) }))
+    @original.entities << third
+    U::HostWatch.state(@session).reset
+  end
+
+  def assert_refused_as_ambiguous(copy)
+    zone_before = ZONE_STORE.read(copy)
+    units_before = units_under(copy)
+
+    result = invoke(MAKE_INDEPENDENT, { "zone_path" => [copy.persistent_id] })
+
+    assert_equal %w[refused reference.invalid none], result.values_at("status", "code", "effect"), result.inspect
+    assert_equal zone_before, ZONE_STORE.read(copy)
+    assert_equal units_before, units_under(copy)
+  end
+
+  def listed_units
+    API.query(:context => @context, :name => "ph_composer.windows.units.list").dig("value", "units")
   end
 
   def invoke(name, params)

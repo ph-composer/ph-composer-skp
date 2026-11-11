@@ -80,6 +80,26 @@ class ZoneCopyWatchTest < PhComposerTestCase
     assert_equal "completed", result.fetch("status"), "and the row's command still makes it independent"
   end
 
+  # A later batch does not forget an earlier repair: undoing back past it still warns.
+  def test_an_undo_of_an_earlier_batch_still_warns
+    earlier = native_copy(@original, 400)
+    PhComposer::ModelOperation.perform(@model, "Move") do
+      @original.transformation = Geom::Transformation.translation([10, 0, 0])
+    end
+    UI.run_timers
+    native_copy(@original, 500)
+    UI.run_timers
+
+    assert @model.undo
+    UI.run_timers
+    assert_empty(@notices.select { |_message, tone| tone == :warning }, "the later copy left with its repair")
+    assert @model.undo
+    UI.run_timers
+
+    assert(@model.entities.to_a.any? { |entity| entity.persistent_id == earlier.persistent_id }, "the copy stays")
+    assert_match(/^Undo also took back making the copied Zone independent/, @notices.last.first)
+  end
+
   def test_a_copy_whose_faces_sit_in_a_child_group_is_made_independent_with_its_child
     faces = 3.times.map do |index|
       Sketchup::Face.new(1001 + index, {}, :points => [Geom::Point3d.new(0, 0, index), Geom::Point3d.new(2, 0, index),
@@ -162,6 +182,29 @@ class ZoneCopyWatchTest < PhComposerTestCase
     FACE_STORE.singleton_class.send(:remove_method, :__watch_write)
   end
 
+  # Restore puts back the Zone first. When that write fails the Faces are still put back, and the notice
+  # says not everything could be.
+  def test_a_failing_zone_restore_still_restores_every_face
+    copy = native_copy(@original, 400)
+    copied_id = ZONE_STORE.read(@original).fetch("id")
+    face_writes = 0
+    fail_apply = lambda do |write, entity, record|
+      raise IOError, "injected at apply" if (face_writes += 1) == 3
+
+      write.call(entity, record)
+    end
+    fail_restore = lambda do |write, entity, record|
+      raise IOError, "injected at restore" if record.fetch("id") == copied_id
+
+      write.call(entity, record)
+    end
+
+    with_write(FACE_STORE, fail_apply) { with_write(ZONE_STORE, fail_restore) { UI.run_timers } }
+
+    assert(faces(copy).all? { |record| faces(@original).include?(record) }, "every Face is as copied")
+    assert_equal :error, @notices.last.last
+  end
+
   def test_a_duplicate_that_was_already_there_is_left_for_the_explicit_command
     twin = Sketchup::Group.new(400, @original.entities)
     twin.set_attribute("ph_composer.zone", "record", @original.get_attribute("ph_composer.zone", "record"))
@@ -229,6 +272,15 @@ class ZoneCopyWatchTest < PhComposerTestCase
 
   def watcher
     PhComposer::Zones::CopyWatch.state(@session)
+  end
+
+  # Runs the block with `store.write` answered by `fake`, which is handed the real write to call.
+  def with_write(store, fake)
+    real = store.method(:write)
+    store.define_singleton_method(:write) { |entity, record| fake.call(real, entity, record) }
+    yield
+  ensure
+    store.singleton_class.send(:remove_method, :write)
   end
 
   def native_copy(group, base)

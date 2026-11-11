@@ -95,6 +95,38 @@ class SpacesCopyWatchTest < PhComposerTestCase
     assert_includes @notices.last.last, "records are as copied"
   end
 
+  # Restore puts back the Space first. When that write fails its Volume and Floor Segment are still put
+  # back, and the notice says not everything could be.
+  def test_a_failing_space_restore_still_restores_the_volume_and_floor_segment
+    copy = copy_natively(@space, 120)
+    SPACES::IdentityStep.class_eval do
+      alias_method :real_apply, :apply
+      define_method(:apply) do |model, slots|
+        real_apply(model, slots)
+        raise "injected"
+      end
+    end
+    real_write = SPACES::SPACE_STORE.method(:write)
+    SPACES::SPACE_STORE.define_singleton_method(:write) do |entity, record|
+      raise IOError, "injected at restore" if record.fetch("id") == "spc_SSSSSSSSSSSS"
+
+      real_write.call(entity, record)
+    end
+    begin
+      UI.run_timers
+    ensure
+      SPACES::SPACE_STORE.singleton_class.send(:remove_method, :write)
+      SPACES::IdentityStep.class_eval do
+        alias_method :apply, :real_apply
+        remove_method :real_apply
+      end
+    end
+    volume = copy.entities.to_a.first
+    assert_equal "vol_AAAAAAAAAAAA", SPACES::VOLUME_STORE.read(volume)["id"]
+    assert_equal "fsg_AAAAAAAAAAAA", SPACES::FLOOR_SEGMENT_STORE.read(volume.entities.to_a.first)["id"]
+    assert_equal :error, @notices.last.first
+  end
+
   def test_an_array_of_copies_takes_the_next_free_numbers
     5.times { |index| copy_natively(@space, 120 + index) }
     UI.run_timers
