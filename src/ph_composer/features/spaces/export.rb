@@ -210,20 +210,22 @@ module PhComposer
         segments = unique!(snapshot.records(FLOOR_SEGMENT_STORE.dictionary, :kind => "face"), "Floor Segment")
         structure!(spaces, volumes, segments)
         # Each Volume and Floor Segment filed under the path of the container it sits directly in, and each
-        # Zone's own Face points, once per export: per Space, a lookup and not a pass over the snapshot.
+        # Zone's own-Face extents, once per export: per Space, a lookup and not a pass over the snapshot.
         volumes_in = volumes.group_by { |volume, _| volume.path[0...-1] }
         segments_in = segments.group_by { |segment, _| segment.path[0...-1] }
         space_paths = spaces.to_h { |space, _| [space.path, true] }
-        zone_points = {}
+        zone_bounds = {}
         spaces.map do |entry, record|
           Spaces.validate!(SPACE, record)
           zone = hosting_zone(reader, record)
           own = volumes_in.fetch(entry.path, [])
           exported = reader.entity_record(record, :fields => %w[name number] + AIRFLOWS, :target_kind => SPACE_KIND,
                                                   :path => entry.path, :user_data => true)
-          extents = zone_points[zone.first.path] ||= own_face_points(reader, zone.first, space_paths)
+          bounds = zone_bounds.fetch(zone.first.path) do
+            zone_bounds[zone.first.path] = Extents.bounds(own_face_points(reader, zone.first, space_paths))
+          end
           exported.merge("zone_id" => zone.last.fetch("id"),
-                         "offset_from_zone" => Extents.outside?(floor_points(own, segments_in), extents),
+                         "offset_from_zone" => Extents.outside_bounds?(floor_points(own, segments_in), bounds),
                          "volumes" => own.map { |volume| volume_record(reader, volume, segments_in) }
                                          .sort_by { |row| row.fetch("id") })
         end.sort_by { |row| row.fetch("id") }
