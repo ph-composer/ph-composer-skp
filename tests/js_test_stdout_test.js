@@ -2,7 +2,7 @@
 
 /* tools/js_test_stdout.js: a test process that writes past the pipe's buffer and exits at once still delivers
    every byte, which is what keeps `--test-force-exit` from dropping a file's last results. Without the preload
-   this child delivers 64 KiB of the 1 MiB on macOS; on Linux a pipe write is synchronous, so it passes either way. */
+   this child delivered 64 KiB of the 1 MiB on macOS. */
 
 var assert = require("assert");
 var childProcess = require("child_process");
