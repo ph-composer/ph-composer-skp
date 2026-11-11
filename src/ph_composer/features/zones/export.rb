@@ -98,15 +98,25 @@ module PhComposer
         [Export::ReportHtml.section("Construction usage", table)]
       end
 
-      # The one Zone occurrence holding the snapshot path `path`, as [entry, record], or nil. Two means a
-      # Zone nested in a Zone, which export refuses. The Zone occurrences are indexed by path once per export,
-      # so a lookup reads only the path's own prefixes, outermost first, and never rescans the snapshot. Every
-      # caller gets the same pair: read it, never change it.
-      def zone_owner(reader, path)
+      # Every Zone occurrence in the snapshot as [entry, record], in snapshot order, read once per export and
+      # shared by every lookup below. Every caller gets the same pairs: read them, never change them.
+      def zone_occurrences(reader)
+        reader.projection(:zone_occurrences) { reader.snapshot.records(ZONE_DICTIONARY, :kind => "group") }
+      end
+
+      # The Zone occurrences strictly above the snapshot path `path`, outermost first. They are indexed by
+      # path once per export, so a lookup reads only the path's own prefixes and never rescans the snapshot.
+      def enclosing_zones(reader, path)
         by_path = reader.projection(:zone_occurrences_by_path) do
-          reader.snapshot.records(ZONE_DICTIONARY, :kind => "group").group_by { |zone_entry, _record| zone_entry.path }
+          zone_occurrences(reader).group_by { |zone_entry, _record| zone_entry.path }
         end
-        matches = (1...path.length).flat_map { |length| by_path.fetch(path[0, length], []) }
+        (1...path.length).flat_map { |length| by_path.fetch(path[0, length], []) }
+      end
+
+      # The one Zone occurrence holding the snapshot path `path`, as [entry, record], or nil. Two means a
+      # Zone nested in a Zone, which export refuses.
+      def zone_owner(reader, path)
+        matches = enclosing_zones(reader, path)
         raise Export::Blocked.new("face.wrong_zone", "A Face is contained by more than one Zone.") if matches.length > 1
 
         matches.first
@@ -114,14 +124,26 @@ module PhComposer
 
       # The snapshot Zone a record id names, as [entry, record]; the first in path order for a repeated
       # one, which carries its own finding. Nil when no occurrence holds the id.
-      def zone_entry(snapshot, zone_id)
-        snapshot.records(ZONE_DICTIONARY, :kind => "group").select { |_entry, record| record["id"] == zone_id }
-                .min_by { |entry, _record| entry.path }
+      def zone_entry(reader, zone_id)
+        by_id = reader.projection(:zone_occurrence_by_id) do
+          zone_occurrences(reader).group_by { |_entry, record| record["id"] }
+                                  .transform_values { |pairs| pairs.min_by { |entry, _record| entry.path } }
+        end
+        by_id[zone_id]
       end
 
-      # The snapshot Faces a Zone occurrence owns.
-      def zone_faces(snapshot, zone_entry)
-        snapshot.descendants(zone_entry, :kind => "face")
+      # The snapshot Faces a Zone occurrence owns, at any depth, in snapshot order. One pass files each Face
+      # under every Zone above it, so a Face in a Zone nested in a Zone is in both, as each Zone holds it.
+      def zone_faces(reader, zone_entry)
+        by_zone_path = reader.projection(:zone_faces_by_zone_path) do
+          reader.snapshot.entries.each_with_object({}) do |entry, faces|
+            next unless entry.kind == "face"
+
+            enclosing_zones(reader, entry.path).map { |zone, _record| zone.path }.uniq
+                                               .each { |zone_path| (faces[zone_path] ||= []) << entry }
+          end
+        end
+        by_zone_path.fetch(zone_entry.path, [])
       end
 
       # The section's registered projection, for a contributor that places its own snapshot entries in a Zone
@@ -129,7 +151,7 @@ module PhComposer
       # name, as zones.containment names them live. It writes no finding; the section
       # contract validates the same records and refuses a choice it cannot export.
       def occurrences(reader)
-        reader.snapshot.records(ZONE_DICTIONARY, :kind => "group").map do |entry, record|
+        zone_occurrences(reader).map do |entry, record|
           record = Names.project(record, entry.native_name)
           segment = if record.fetch("schema_version") == 2
                       option_choices(reader).fetch(Options::SEGMENTS.id)[record["building_segment_id"]]&.fetch("name")
@@ -161,11 +183,10 @@ module PhComposer
       end
 
       def records(reader)
-        zones = reader.snapshot.records(ZONE_DICTIONARY, :kind => "group")
-        zones.map do |entry, record|
+        zone_occurrences(reader).map do |entry, record|
           record = Names.project(record, entry.native_name)
           Schema.validate!(record)
-          owned = zone_faces(reader.snapshot, entry)
+          owned = zone_faces(reader, entry)
           assigned = owned.map { |face| [face, face.record(Faces::FACE_DICTIONARY)] }
           missing = assigned.select { |_face, assignment| assignment.nil? }
           unless missing.empty?

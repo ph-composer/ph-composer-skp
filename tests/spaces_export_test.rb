@@ -213,6 +213,22 @@ class SpacesExportTest < PhComposerTestCase
                  records.to_h { |row| [row["id"], row["offset_from_zone"]] })
   end
 
+  # The extents are the Zone occurrence first in path order when a copy repeats its id, and a Face in a plain
+  # Group inside a Space is the Space's, not the Zone's.
+  def test_the_offset_reads_the_first_zone_copy_by_path_and_skips_faces_inside_spaces
+    @model.entities << zone_group(3000, "A", [floor_face(3900, rectangle(20, 0, 5, 5))])
+    clutter = Sketchup::Group.new(1120, Sketchup::Entities.new([floor_face(1121, rectangle(20, 0, 5, 5))]))
+    inside = space_group(1100, space_record("L", :number => "101"),
+                         [volume_group(1110, volume_record("L"), [floor_face(1111, rectangle(1, 0, 1, 1),
+                                                                             segment_record("L"))]), clutter])
+    beside = space_group(1200, space_record("F", :number => "201"),
+                         [volume_group(1210, volume_record("F"), [floor_face(1211, rectangle(20, 0, 1, 1),
+                                                                             segment_record("F"))])])
+    @model.entities << zone_group(1000, "A", [floor_face(1900, rectangle(0, 0, 5, 5)), inside, beside])
+    assert_equal({ "spc_FFFFFFFFFFFF" => true, "spc_LLLLLLLLLLLL" => false },
+                 records.to_h { |row| [row["id"], row["offset_from_zone"]] })
+  end
+
   # Spaces writes no PH-Composer entry of its own on a Space, so a user's keys pass and a ph_composer leaf on a
   # Space refuses.
   def test_the_metadata_guard_passes_user_keys_and_refuses_an_undeclared_reserved_leaf
