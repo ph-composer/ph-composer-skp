@@ -1,6 +1,6 @@
 # AW-09 · Native coexistence and optional artifact access
 
-STATUS: Authorized 2026-11-10, not started. ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication.
+STATUS: Complete. Merged to main (#449, `2e7c757c`), API 1.42; host case `AW09` pass; the mid-gesture rows closed by the Move guard (#453, API 1.43) and `AW10G`; A14 deferred, optional. ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication.
 DEPENDS ON: AW-01/AW-02; AW-07 for task artifacts.
 FINDINGS: R13; optional R14. CONTRACT: C08. ACCEPTANCE: A13; A14 if selected.
 

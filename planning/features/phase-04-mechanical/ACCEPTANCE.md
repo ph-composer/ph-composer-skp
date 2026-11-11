@@ -107,7 +107,7 @@ stays clean.
 ## Agent workflow coverage
 
 Carried from the agent-workflows review on 2026-11-10. Every durable record, child collection and
-assignment Phase 4 adds meets the [workflow acceptance matrix](../../code-review/agent-workflows-2026-11/COVERAGE.md#workflow-acceptance-that-every-future-feature-should-meet):
+assignment Phase 4 adds meets the [workflow acceptance matrix](../../archive/agent-workflows-review-2026-11/COVERAGE.md#workflow-acceptance-that-every-future-feature-should-meet):
 a client with only the installed connection discovers its schema, enumerates every object with an
 empty selection, reads exact references, values and SI units in pages within the reply budget,
 previews and applies each supported edit, reads the outcome back and locates it. Exercise

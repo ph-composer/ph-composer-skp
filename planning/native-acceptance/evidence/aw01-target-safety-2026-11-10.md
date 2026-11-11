@@ -1,7 +1,7 @@
 # AW01 target safety, 2026-11-10
 
 Case `AW01` (agent-workflows stage AW-01, acceptance A01-A04 of
-[the packet](../../features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md)). Branch
+[the packet](../../archive/agent-workflows-2026-11/ACCEPTANCE.md)). Branch
 `feat/agent-workflows-aw-01` at `c3d6d174` (PR #440), installed RBZ built from that head, SketchUp 26.1.188,
 Ruby 3.2.2, macOS. Fresh process on a fresh copy of the blank template; synthetic data only.
 

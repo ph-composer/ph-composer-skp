@@ -34,9 +34,9 @@ Do not switch a shared checkout or overwrite this review's retained inventory/lo
 baseline checkout's root, with its `.ruby-version` active:
 
 ```sh
-rbenv exec ruby -Itests planning/code-review/agent-workflows-2026-11/evidence/discovery_probe.rb
-rbenv exec ruby -Itests planning/code-review/agent-workflows-2026-11/evidence/feature_probe.rb
-rbenv exec ruby -Itests planning/code-review/agent-workflows-2026-11/evidence/envelope_probe.rb
+rbenv exec ruby -Itests planning/archive/agent-workflows-review-2026-11/evidence/discovery_probe.rb
+rbenv exec ruby -Itests planning/archive/agent-workflows-review-2026-11/evidence/feature_probe.rb
+rbenv exec ruby -Itests planning/archive/agent-workflows-review-2026-11/evidence/envelope_probe.rb
 make ui-checks UI_CHECKS=tools/ui-preview/agent_access_checks.cjs
 ```
 

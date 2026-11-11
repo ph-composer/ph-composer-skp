@@ -1,7 +1,7 @@
 # Agent workflows and application access review
 
 DATE: 2026-11-09
-STATUS: Review complete. Recommendations and implementation plans only; no shipping changes.
+STATUS: Review complete; archived 2026-11-11. Recommendations and implementation plans only; no shipping changes. Every finding is fixed or deferred by the [implementation packet](../agent-workflows-2026-11/README.md) (#439).
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/435 (review/planning publication only)
 BASELINE: `f65ccee62b0a3994a46001d55f7aefd1a69f0faf`, fetched `origin/main`, API 1.31.
 BRANCH: `codex/agent-access-review`, isolated worktree.
@@ -23,7 +23,7 @@ complete than initial geometry discovery and large-model QA.
 2. [Feature and data coverage](COVERAGE.md): reads, authoring, relationships, QA and remaining gaps.
 3. [Connection and collaboration](CONNECTIONS.md): setup, host lifecycle, visual context and scope.
 4. [Evidence](evidence/README.md): reproducible probes, passing checks and limitations.
-5. [Implementation packet](../../features/unscheduled/agent-workflows-2026-11/README.md): ordered stages,
+5. [Implementation packet](../agent-workflows-2026-11/README.md): ordered stages,
    proposed contracts, acceptance cases and the sole future-delivery ledger.
 
 ## Scope and findings in context
@@ -73,8 +73,8 @@ launched or changed; no real client configuration, credentials or client model w
 claims below refer only to linked historical receipts. A stub reproduction establishes code behavior,
 not native lifecycle acceptance. No current-client connection, SketchUp 2023 or Windows proof is claimed.
 
-The earlier [agent review](../../archive/agent-access-review/README.md) and
-[Phase 3a1](../../archive/phase-03a1/STATUS.md) are completed history. This review does not reopen their
+The earlier [agent review](../agent-access-review/README.md) and
+[Phase 3a1](../phase-03a1/STATUS.md) are completed history. This review does not reopen their
 closed transport work. It identifies remaining gaps against the later baseline, including new feature
 coverage and limits that ordinary happy-path tests miss.
 
@@ -86,7 +86,7 @@ explicit folder/status rules and existing packet shapes. Issue #435 tracks the s
 
 The documentation branch was advanced to `6d06ff498e68a485ff250fd1bb019cb58d520549` before
 publication. All eight Spaces UI stages are now merged and their packet is
-[archived](../../archive/spaces-ui-refinement-2026-11/STATUS.md). This update preserves that work
+[archived](../spaces-ui-refinement-2026-11/STATUS.md). This update preserves that work
 and the primary checkout's unrelated staged edit. Source line citations, inventory counts, test logs
 and reproduction outcomes in this review still describe `f65ccee6`; they were not regenerated
 against the publication base. In particular, recheck R01/R04 and the added Space/Volume operations

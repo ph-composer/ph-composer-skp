@@ -1,6 +1,6 @@
 # AW-01 · Safe targets, ownership and creation receipts
 
-STATUS: Merged to main (#440, `c67dfb1f`). ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication.
+STATUS: Complete. Merged to main (#440, `c67dfb1f`), API 1.34; host case `AW01` pass. ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication.
 DEPENDS ON: latest SUI-02/05/07 source check and explicit implementation authorization.
 FINDINGS: R01-R04. CONTRACTS: C01. ACCEPTANCE: A01-A04.
 

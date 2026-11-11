@@ -1,6 +1,6 @@
 # AW-06 · Bounded libraries and discoverable compound copy
 
-STATUS: Authorized 2026-11-10, not started. ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication.
+STATUS: Complete. Merged to main (#445, `cd42fbe5`), API 1.39; host case `AW06` pass; the retained export receipt deferred, optional (D14-d). ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication.
 DEPENDS ON: AW-02/AW-04. FINDINGS: R08/R15. CONTRACTS: C03/C05. ACCEPTANCE: A08/A15.
 
 ## Outcome

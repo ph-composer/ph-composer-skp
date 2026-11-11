@@ -4441,7 +4441,7 @@
       "id": "AW01",
       "label": "Agent-workflows AW-01 target safety on the installed RBZ in a fresh synthetic Model: Make Zone refuses a plain wrapper holding a Space; a synthetic legacy Zone record on a Space Group reads zone.ownership_conflict and Spaces delete/remove refuse target.foreign_records with both records kept; a stale null Face identity refuses classify, reverse and assign_assembly after the Face gained a record, and a copied Face record refuses before any transaction; a copied Zone refuses update; a locked Zone refuses update, update_field and update_metadata with no revision change; Space create reports accepted, left_out and per-Volume faces; native Undo/Redo of classify, rename, create and delete; save and fresh-process reopen keep every identity and record",
       "mode": "mixed",
-      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "authority": "planning/archive/agent-workflows-2026-11/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/core/records/entity_store.rb",
         "src/ph_composer/core/records/reference_resolution.rb",
@@ -4459,7 +4459,7 @@
       "id": "AW02",
       "label": "Agent-workflows AW-02 discovery and installed guide on the installed RBZ in a fresh process: over the real loopback MCP listener with a read-only token, initialize names the guide in its instructions and _meta; discover's index points to the guide and lists the sections; the guide's topics and one topic's text read through discover; record_kinds, reference_targets and library_kinds list every installed kind, a library kind describes its assignment target and examples, refusals give every common code a meaning; operations page to the end through cursors; every reply stays within 24 KiB; once revoked, the token is refused (401), and the listener stops when it was the last live token",
       "mode": "native",
-      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "authority": "planning/archive/agent-workflows-2026-11/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/agent_access/discovery.rb",
         "src/ph_composer/agent_access/guide.rb",
@@ -4478,7 +4478,7 @@
       "id": "AW03",
       "label": "Agent-workflows AW-03 inventory and candidate reads on the installed RBZ in a fresh synthetic Model, over the real loopback MCP listener with a read/view/model_write token: with nothing selected, context children list the root and a 30-degree rotated nested wrapper; Make Zone candidates at the root and in the wrapper (open required), first-Space candidate Faces in the wrapper with world loops matching InstancePath, and unassigned thermal Edge candidates are read with no revision, selection or edit-path change; Make Zone commits at the root and in the opened wrapper, a first Space is created, an unassigned Edge is assigned, read back by path, cleared and reread with end points matching InstancePath; a stale cursor and a stale reference refuse; native Undo and Redo of the clear; every reply within 24 KiB",
       "mode": "mixed",
-      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "authority": "planning/archive/agent-workflows-2026-11/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/shell/context_children.rb",
         "src/ph_composer/shell/context_commands.rb",
@@ -4497,7 +4497,7 @@
       "id": "AW04",
       "label": "Agent-workflows AW-04 definition detail reads on the installed RBZ in a fresh synthetic Model, over the real loopback MCP listener with a read/model_write token: a Material with 30 KB non-ASCII user_data and 1,500 keys, a 10 x 10 Window Type, a 30 x 12 Assembly and 120 Assemblies on one Material are created by invoke and read completely through records.list summary, records.detail fragments, part and uses reads with exact reconstruction; the oversized materials.delete preview is read by part, a stale preview cursor refuses, and the preview applies with its digest; no read changes the revision; every reply within 24 KiB",
       "mode": "native",
-      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "authority": "planning/archive/agent-workflows-2026-11/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/agent_access/executor.rb",
         "src/ph_composer/agent_access/tools.rb",
@@ -4514,7 +4514,7 @@
       "id": "AW05",
       "label": "Agent-workflows AW-05 occurrence detail reads on the installed RBZ in a fresh synthetic Model, over the real loopback MCP listener with a read/model_write token: in a wrapper turned 30 degrees and moved 10 m, a Zone with a 450-hole wall, a floor, a 300-Edge run and loose Edges; Units with 30 KB user_data, host extent holes, Zone findings, the run's members, glazed area by Face, and Floor Segment loops read completely by page within 24 KiB; reconstructed Unit metadata guards an update that reads back exactly and a later edit refuses target.changed; paged reads equal the in-process whole reads and member end points match native InstancePath world coordinates",
       "mode": "native",
-      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "authority": "planning/archive/agent-workflows-2026-11/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/windows/declarations/units.rb",
         "src/ph_composer/features/windows/units/host_extent.rb",
@@ -4534,7 +4534,7 @@
       "id": "AW06",
       "label": "Agent-workflows AW-06 library catalog and export paging on the installed RBZ in a fresh synthetic Model, over the real loopback MCP listener: a synthetic file library with 350 rejected rows loads compactly and every warning pages; a 30 KB note rejoins from catalog detail; a reload makes the old generation refuse library.catalog_stale; a Frame copy and its assignment built from the describe example apply in one invoke and read back; native Undo removes both and Redo restores both; the compact export with paged omissions writes the approved file, which parses back with its SHA-256; every reply within 24 KiB",
       "mode": "mixed",
-      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "authority": "planning/archive/agent-workflows-2026-11/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/library/catalog_reads.rb",
         "src/ph_composer/library/coordinator.rb",
@@ -4551,7 +4551,7 @@
       "id": "AW07",
       "label": "Agent-workflows AW-07 export QA, run diagnostics and thermal-bridge repair on the installed RBZ in a fresh synthetic Model, over the real loopback MCP listener with a read/model_write/export token: an oversized preflight reads compactly and by page; a blocked export keeps its diagnostics, read before and after a Model edit, with no output pair written; a broken Edge assignment is previewed and repaired, native Undo restores its exact bytes and Redo removes them while another dictionary stays; a stranded assignment is repaired; the rest is classified and exported through the normal runtime, and the written run's report and HBJSON match the files and their hashes; save and fresh-process reopen",
       "mode": "mixed",
-      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "authority": "planning/archive/agent-workflows-2026-11/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/export/diagnostic_pages.rb",
         "src/ph_composer/export/metadata_check.rb",
@@ -4570,7 +4570,7 @@
       "id": "AW08",
       "label": "Agent-workflows AW-08 client profiles on the installed RBZ: two Models open, a Model-only token per Model connected through the native Agent Access dialog to the Default and a named profile of both Claude Code and Codex (client files in a scratch home, never the user's own); fresh GUI-environment sessions of both clients reach each Model only through its own profile; the replacement line, a manual fallback, a stale binding refusal and the Revoke effects show in the dialog; revoking one profile's token leaves the other profile working; the dialog at standard and narrow widths; exact host, OS and client versions",
       "mode": "mixed",
-      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "authority": "planning/archive/agent-workflows-2026-11/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/agent_access/client_config.rb",
         "src/ph_composer/agent_access/client_setup.rb",
@@ -4588,7 +4588,7 @@
       "id": "AW09M",
       "label": "Agent-workflows AW-09 host-readiness measurement on the installed RBZ in a throwaway synthetic Model, over the real loopback MCP listener with a read/view/model_write/export/capture token and a development recorder: context, read, Material and Zone writes, Colour-by, context open, capture and export start while Select is idle, a native Move and a native Line gesture are partway through (click-move and held drag), a PH-Composer tool is active, deferred work is held pending, a native modal is open, another Model is active, and the target Model closes; per call whether it ran, was refused, timed out or changed the native gesture, with Edit menu Undo labels, native Undo/Redo and readback",
       "mode": "native",
-      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "authority": "planning/archive/agent-workflows-2026-11/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/agent_access/server.rb",
         "src/ph_composer/agent_access/executor.rb",
@@ -4602,7 +4602,7 @@
       "id": "AW09",
       "label": "Agent-workflows AW-09 host-readiness guard on the installed RBZ in a throwaway synthetic Model, over the real loopback MCP listener: a write sent while a blocking message box is open, whose client times out and closes, never runs once the box closes, and the same key sent again runs once; with a second Model shown, a write to the hidden Model advances only its own revision, a later commit on it still advances it, and context.open there refuses session.inactive; closing the target Model answers session.unknown with no failed call; Select, Move-idle and Classify-active writes unchanged",
       "mode": "mixed",
-      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "authority": "planning/archive/agent-workflows-2026-11/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/agent_access/server.rb",
         "src/ph_composer/runtime/http.rb",
@@ -4620,7 +4620,7 @@
       "id": "AW05R",
       "label": "Agent-workflows AW-10 rerun of AW-05's two blocked rows on the installed RBZ in a fresh synthetic Model, over the real loopback MCP listener with a read/model_write token: 450 loose Faces stamped by distinct legacy Zones and 80 Component instances carrying Zone records (labelled store setup, no authoring route exists), and a 30 m x 30 m floor Face with 450 holes made a Space through spaces.create; the zones.list summary, 450 restore offers and one offer's entity_ids, 80 component Zone findings and the Floor Segment's 451 loops read completely by page and fragment within 24 KiB and equal the in-process whole reads; no read changes the revision",
       "mode": "native",
-      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "authority": "planning/archive/agent-workflows-2026-11/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/zones/declarations/zone.rb",
         "src/ph_composer/features/zones/zone/repair.rb",
@@ -4643,7 +4643,7 @@
       "id": "AW10",
       "label": "Agent-workflows AW-10 integrated acceptance on the installed RBZ, panel closed, nothing selected, two open synthetic Models sharing a file name: fresh Claude Code and Codex sessions with only the MCP connection (no repository, no operator skills) read the installed guide, verify their context and are refused the other Model's scope, then build Zones, Faces, adjacency, Spaces, Materials and Assemblies, Windows, Thermal Bridges, QA and an export from existing synthetic geometry; a harness injects a lost reply, a repeated key, a stale revision, a human edit, revocation and a target close; native Undo and Redo, save and fresh-process reopen; the exported HBJSON's identities, references, values and hashes are checked against the Model",
       "mode": "mixed",
-      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "authority": "planning/archive/agent-workflows-2026-11/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/agent_access/guide.md",
         "src/ph_composer/agent_access/mcp.rb",
@@ -4676,7 +4676,7 @@
       "id": "AW10H",
       "label": "Agent-workflows AW-10 held native rows on the installed RBZ under one full-screen hold: Repair, Revoke, the Revoke confirmation and Done clicked natively in the Agent Access dialog (client files in a scratch home), and agent calls over the real loopback MCP listener while a native Move (click-move and held drag) and a native Line are partway through, with the gesture's completion, the Edit menu's Undo entries and the moving entity read back",
       "mode": "native",
-      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "authority": "planning/archive/agent-workflows-2026-11/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/agent_access/dialog.rb",
         "src/ph_composer/agent_access/client_setup.rb",
@@ -4694,7 +4694,7 @@
       "id": "AW10G",
       "label": "Agent-workflows gesture guard re-measurement on the installed RBZ under one full-screen hold: agent writes over the real loopback MCP listener while a native Move is partway through (click-move and held drag) answer session.busy with nothing written, the Move then completes as its own Undo step and reads still answer; a native Line partway through is unchanged (writes commit, Draw Line its own Undo step)",
       "mode": "native",
-      "authority": "planning/features/unscheduled/agent-workflows-2026-11/ACCEPTANCE.md",
+      "authority": "planning/archive/agent-workflows-2026-11/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/session/host_observers.rb",
         "src/ph_composer/session/model_session.rb",

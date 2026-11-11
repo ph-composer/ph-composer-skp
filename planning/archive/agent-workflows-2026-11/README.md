@@ -1,11 +1,11 @@
 # Agent workflow completeness
 
 DATE: 2026-11-09
-STATUS: In progress. Implementation authorized 2026-11-10; AW-01 merged (#440); AW-02 implemented on branch.
+STATUS: Complete 2026-11-11 and archived. AW-01 to AW-10 merged to main (#440 to #450), with the Move guard (#453) and evidence PRs #447, #451 and #452; every selected acceptance case closed; A14 and A16 deferred, optional.
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/439 (implementation); #435 tracked the review/planning publication
 BASELINE: `f65ccee62b0a3994a46001d55f7aefd1a69f0faf`, API 1.31.
 
-This packet turns the [comprehensive review](../../../code-review/agent-workflows-2026-11/README.md)
+This packet turns the [comprehensive review](../agent-workflows-review-2026-11/README.md)
 into ten implementation stages. It completes the existing application interface so agents can
 discover targets, inspect complete data, make safe edits and verify results through the installed
 connection. It adds no built-in agent, model-provider dependency or general Ruby evaluation endpoint.

@@ -9,7 +9,7 @@ Roadmap items 5.1 to 5.5 from [ROADMAP.md](../../ROADMAP.md). Items 5.4 and 5.5 
 yet. The connection provider (2.5) moved here under D2-8 on 2026-10-01; D5-1 un-deferred it on
 2026-11-02 as the generic connection seam for hosted Library providers.
 
-Each packet's acceptance includes the agent [workflow acceptance matrix](../../code-review/agent-workflows-2026-11/COVERAGE.md#workflow-acceptance-that-every-future-feature-should-meet)
+Each packet's acceptance includes the agent [workflow acceptance matrix](../../archive/agent-workflows-review-2026-11/COVERAGE.md#workflow-acceptance-that-every-future-feature-should-meet)
 for the records it adds, as [Phase 4's register](../phase-04-mechanical/ACCEPTANCE.md#agent-workflow-coverage) does.
 
 | Packet | Roadmap | State |
