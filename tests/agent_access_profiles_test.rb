@@ -286,6 +286,18 @@ class AgentAccessProfilesTest < PhComposerTestCase
     assert_valid_toml File.binread(@config)
   end
 
+  # A string value that ends an array names nothing, at the root or in the table (#471).
+  def test_a_server_name_as_an_array_value_leaves_the_entry_editable
+    token = Tokens.issue.fetch("token")
+    block = ClientConfig.codex_block(46_110)
+    ["disabled_tools = [\"ph-composer\"]\n#{block}\n", "#{block}\ndisabled_tools = [\"ph-composer\"]\n"].each do |form|
+      File.binwrite(@config, form)
+      assert_equal "configured", ClientSetup.entry("codex", 46_110, "default")["setup"], form
+      assert_equal "configured", ClientSetup.connect("codex", token, 47_001).fetch("state"), form
+      assert_valid_toml File.binread(@config)
+    end
+  end
+
   def test_forms_codex_cannot_be_edited_for_certain_answer_manual_with_the_token_free_block
     token = Tokens.issue.fetch("token")
     ["[mcp_servers.ph-composer]\nurl = \"x\"\nbearer_token_env_var = \"T\"\n",

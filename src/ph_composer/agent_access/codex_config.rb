@@ -230,9 +230,11 @@ module PhComposer
       end
 
       # A statement line as TOML syntax: its comment cut and every string that is a value, not a key, emptied,
-      # so a server name in a note or a comment is not taken for a definition.
+      # so a server name in a note, a comment or an array is not taken for a definition. A key string is followed
+      # by `=` or `.`, or, in a table header only, by `]`; a value string that ends an array is followed by `]`.
       def syntax(line)
-        line.gsub(/"(?:[^"\\]|\\.)*"|'[^']*'/) { |literal| $~.post_match.match?(/\A\s*[=.\]]/) ? literal : '""' }
+        key_end = line.lstrip.start_with?("[") ? /\A\s*[=.\]]/ : /\A\s*[=.]/
+        line.gsub(/"(?:[^"\\]|\\.)*"|'[^']*'/) { |literal| $~.post_match.match?(key_end) ? literal : '""' }
             .sub(/#.*/m, "")
       end
 
