@@ -1,9 +1,9 @@
 # U1-F1: why a unit switch repaints slowly
 
 DATE: 2026-10-21
-STATUS: Diagnosed. Ed authorized F1 and F2 on 2026-10-21 with a target of under 200 ms with every row open;
-both merged to main through PR #289 (see "Implementation" below). F3 and F4 are not
-authorized.
+STATUS: Closed 2026-11-12. F1 and F2 merged through PR #289. The host re-measure (2026-11-11) gave 169 ms
+with the Zones open and 311 ms with every row open; Ed accepted that for a rare deliberate act. F3 and F4 not
+taken.
 ISSUE: [#154](https://github.com/ph-composer/ph-composer-skp/issues/154)
 
 ## Outcome
