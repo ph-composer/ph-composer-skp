@@ -61400,7 +61400,7 @@ Example params:
 
 ### `ph_composer.view.capture`
 
-Write a PNG of the current view at the current camera and answer its path, hash and what it shows. Geometry only. Owner: `ph_composer.view`.
+Write a PNG of the current view at the current camera and answer its path, hash and what it shows, and with inline the image itself. Geometry only. Owner: `ph_composer.view`.
 
 Side effects: Writes one image file to a temporary folder; deletes this session's captures older than 15 minutes or beyond the newest four. Nothing in the Model or the view changes.
 
@@ -61426,6 +61426,10 @@ Params:
       "minimum": 64,
       "maximum": 4096,
       "description": "Pixels; give width and height together, or neither for the viewport's size."
+    },
+    "inline": {
+      "type": "boolean",
+      "description": "Also answer the PNG itself as inline_image, which an agent connection sends as an image content block."
     }
   },
   "required": []
@@ -61478,6 +61482,27 @@ Result:
         "not_included"
       ],
       "description": "PH-Composer's overlays, tool drawing and panels are not in the image."
+    },
+    "inline_image": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mime_type",
+        "data"
+      ],
+      "description": "The image itself, base64. An agent connection sends it as an image content block beside this result instead of inside it.",
+      "properties": {
+        "mime_type": {
+          "type": "string",
+          "enum": [
+            "image/png"
+          ]
+        },
+        "data": {
+          "type": "string",
+          "description": "The image's bytes, base64."
+        }
+      }
     }
   }
 }
@@ -61495,6 +61520,16 @@ Example params:
 {
   "width": 1600,
   "height": 1000
+}
+```
+
+Example params:
+
+```json
+{
+  "width": 1200,
+  "height": 800,
+  "inline": true
 }
 ```
 
@@ -65613,7 +65648,7 @@ Example arguments:
 
 ### `PhComposer::API.export_status`
 
-Poll one task this caller started; compact while polling. Once it ended, part reads what it kept, bound to this task and not the Model: findings a page at a time, the report or the result in fragments; before that part refuses task.running. An expired or other-Model handle refuses task.expired; another caller's refuses task.foreign. Needs `export`.
+Poll one task this caller started; compact while polling. Once it ended, part reads what it kept, bound to this task and not the Model: findings a page at a time, the report, the result or the written HBJSON file in fragments; before that part refuses task.running. The file part refuses artifact.none for a task that wrote no file and artifact.changed once the file no longer hashes to its receipt. An expired or other-Model handle refuses task.expired; another caller's refuses task.foreign. Needs `export`.
 
 Keyword arguments besides context:
 
@@ -65639,9 +65674,10 @@ Keyword arguments besides context:
         "findings",
         "report",
         "result",
-        "outcome"
+        "outcome",
+        "file"
       ],
-      "description": "What the ended task kept: a filtered page of findings, or the generated report, the compact result or the whole outcome (a long failure message included) as fragments. Never reads the Model or exports again."
+      "description": "What the ended task kept: a filtered page of findings, or the generated report, the compact result, the whole outcome (a long failure message included) or the HBJSON file it wrote as fragments. Never reads the Model or exports again."
     },
     "codes": {
       "type": "array",
@@ -66788,3 +66824,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.48 | 2026-11-12 | With more than one Model open, a change no PH-Composer operation owns advances every open session's revision, since SketchUp does not say which Model an outside script changed; an invoke resting on an earlier read of any of them refuses revision.stale. |
 | 1.49 | 2026-11-12 | start_export takes expected_revision: a Model at another revision refuses revision.stale and starts nothing, and one that changes before the run has read it fails the task revision.stale. |
 | 1.50 | 2026-11-12 | API.outcomes is new: the caller's own retained change outcomes, newest first and paged, each with its sequence, operation, status, effect, code, revision, recorded time and first affected references, never its value or params. The agent outcome tool lists them when given neither sequence nor idempotency_key, with each row's key. |
+| 1.51 | 2026-11-12 | ph_composer.view.capture takes inline and then answers the PNG itself as inline_image, which the agent connection sends as an image content block outside the reply budget; capture.too_large names a smaller width and height. export_status takes part file for a completed task: the written HBJSON's text in fragments with the receipt's hash, refusing artifact.none for a task that wrote no file and artifact.changed for a file that no longer matches its receipt. |

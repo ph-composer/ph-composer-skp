@@ -100,10 +100,11 @@ module PhComposer
       }.merge(FILTERS).freeze
       STATUS_OPTIONS = {
         "compact" => COMPACT,
-        "part" => { "type" => "string", "enum" => %w[findings report result outcome],
+        "part" => { "type" => "string", "enum" => %w[findings report result outcome file],
                     "description" => "What the ended task kept: a filtered page of findings, or the generated " \
-                                     "report, the compact result or the whole outcome (a long failure message " \
-                                     "included) as fragments. Never reads the Model or exports again." }
+                                     "report, the compact result, the whole outcome (a long failure message " \
+                                     "included) or the HBJSON file it wrote as fragments. Never reads the Model " \
+                                     "or exports again." }
       }.merge(FILTERS).freeze
       ROW = {
         "type" => "object", "description" => "A row as its whole list holds it, with owner (a preflight row) and " \
@@ -114,13 +115,18 @@ module PhComposer
       PART_PAGE = {
         "type" => "object",
         "description" => "With part and no row: findings or repairs, one page; total, the rows matching the " \
-                         "filters; unfiltered_total, every row of the part. With row, or a report or result part: " \
-                         "fragment and next_cursor, the canonical JSON text to join and check against its sha256.",
+                         "filters; unfiltered_total, every row of the part. With row, or a report, result, " \
+                         "outcome or file part: fragment and next_cursor, the canonical JSON text to join and " \
+                         "check against its sha256. The file part's joined text parses to one string, the " \
+                         "HBJSON file's text, whose UTF-8 bytes hash to file.sha256, the receipt's.",
         "properties" => {
           "part" => { "type" => "string" }, "findings" => { "type" => "array", "items" => ROW },
           "repairs" => { "type" => "array", "items" => ROW }, "total" => { "type" => "integer" },
           "unfiltered_total" => { "type" => "integer" }, "row" => { "type" => "array" },
           "fragment" => Fragments::FRAGMENT, "next_cursor" => Pages::NEXT_CURSOR,
+          "file" => { "type" => "object", "description" => "The written HBJSON's sha256 and bytes, as its receipt " \
+                                                           "in artifacts gives them.",
+                      "properties" => { "sha256" => { "type" => "string" }, "bytes" => { "type" => "integer" } } },
           "task_id" => { "type" => "string" }, "source" => SOURCE
         }
       }.freeze
@@ -189,8 +195,10 @@ module PhComposer
                          EXAMPLE_TASK.merge("part" => "findings", "blocks_export" => true)],
           "description" => "Poll one task this caller started; compact while polling. Once it ended, part reads " \
                            "what it kept, bound to this task and not the Model: findings a page at a time, the " \
-                           "report or the result in fragments; before that part refuses task.running. An expired " \
-                           "or other-Model handle refuses task.expired; another caller's refuses task.foreign."
+                           "report, the result or the written HBJSON file in fragments; before that part refuses " \
+                           "task.running. The file part refuses artifact.none for a task that wrote no file and " \
+                           "artifact.changed once the file no longer hashes to its receipt. An expired or " \
+                           "other-Model handle refuses task.expired; another caller's refuses task.foreign."
         },
         "cancel_export" => {
           "capability" => "export", "params" => TASK_PARAMS, "result" => STATUS, "examples" => [EXAMPLE_TASK],

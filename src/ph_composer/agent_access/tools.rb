@@ -257,8 +257,9 @@ module PhComposer
         # A capture is a view command under its own grant, so either grant reaches this tool and dispatch
         # applies the one the command declares.
         tool("view", "Runs a view command: the camera, the selection, the open Group, or ph_composer.view.capture " \
-                     "for an image of the view. Never changes authored data; describe says what else it can " \
-                     "trigger, as its side_effects, and which grant it needs.",
+                     "for an image of the view, with inline the image itself beside the result. Never changes " \
+                     "authored data; describe says what else it can trigger, as its side_effects, and which " \
+                     "grant it needs.",
              object({ "session" => SESSION, "name" => NAME, "params" => PARAMS }, %w[session name]),
              :session => true, :capability => %w[view capture], &operation { |**call| API.view(**call) }),
         tool("setup", "Runs a setup command: this computer's libraries and settings, for every Model.",
@@ -274,8 +275,8 @@ module PhComposer
                            **task_options("start_export", arguments))
         end,
         tool("export_status", "One export task's progress and, once it ends, its outcome; compact while polling. " \
-                              "Once it ended, part reads what it kept: findings a page at a time, the report or " \
-                              "the result in fragments, unchanged by later edits.",
+                              "Once it ended, part reads what it kept: findings a page at a time, the report, " \
+                              "the result or the written HBJSON file in fragments, unchanged by later edits.",
              task_schema("export_status"), :session => true, :capability => "export",
                                            :annotations => READ_ONLY) do |context, arguments|
           API.export_status(:context => context, :task_id => arguments.fetch("task_id"),

@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 50
+    MINOR = 51
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -246,7 +246,14 @@ module PhComposer
         "change" => "API.outcomes is new: the caller's own retained change outcomes, newest first and paged, " \
                     "each with its sequence, operation, status, effect, code, revision, recorded time and first " \
                     "affected references, never its value or params. The agent outcome tool lists them when " \
-                    "given neither sequence nor idempotency_key, with each row's key." }
+                    "given neither sequence nor idempotency_key, with each row's key." },
+      { "minor" => 51, "date" => "2026-11-12",
+        "change" => "ph_composer.view.capture takes inline and then answers the PNG itself as inline_image, which " \
+                    "the agent connection sends as an image content block outside the reply budget; " \
+                    "capture.too_large names a smaller width and height. export_status takes part file for a " \
+                    "completed task: the written HBJSON's text in fragments with the receipt's hash, refusing " \
+                    "artifact.none for a task that wrote no file and artifact.changed for a file that no longer " \
+                    "matches its receipt." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

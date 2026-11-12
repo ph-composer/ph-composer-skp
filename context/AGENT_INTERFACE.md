@@ -302,6 +302,19 @@ minimized, the last also with the camera moved: each wrote the current view
 Ruby entirely, workers included, so a call made under one is never captured and the client sees its own
 timeout rather than a refusal.
 
+With `inline: true` (API 1.51) the result also carries the PNG itself as `inline_image` (`shell/inline_image.rb`:
+`mime_type` and base64 `data`, the same bytes the receipt hashes). The executor moves it out of
+`structuredContent` into an MCP `image` content block, so it takes nothing from the 24 KiB budget, and refuses
+one over `InlineImage::MAX_BYTES` (2 MiB decoded) as `request.response_too_large`. Any operation may offer one
+by declaring the key in its result schema. The capture's own 2 MB limit is that cap, so every capture can go
+inline; a larger image refuses `capture.too_large` with a smaller `width` and `height` in `detail`. The cap was
+measured without SketchUp against a stub MCP server returning a PNG image block beside `structuredContent`
+(issue #458, 2026-11-12): Claude Code 2.1.317 (`claude -p --restricted`) and Codex 0.167.1 (`codex exec`,
+which refuses an MCP call under `approval: never` until the server's `default_tools_approval_mode` is
+`"approve"`) each showed their model every image from 100 KB to 2 MB over stdio and 2, 3 and 5 MB over HTTP, so
+2 MiB keeps a margin of more than two. Claude Code gave its model the image, a note naming a copy it saved,
+and `structuredContent`, still dropping the text line.
+
 Overlays stay out of captures by measurement (issue #458, 2026-11-12, SketchUp 26.1.188): the one route that
 shows them, a capture of SketchUp's own window by id (`screencapture -l`) run from inside SketchUp, is refused
 without macOS Screen Recording permission for SketchUp, and the attempt brings up the system's permission flow.
@@ -505,7 +518,13 @@ and, once ended, `diagnostics`; a receipt trimmed to the reply budget keeps both
 keeps what that run generated: its findings, its compact result and its rendered report (a blocked
 run's included, though it writes no file), or why it kept no report. `export_status` with `part` reads
 that retained content for the caller that started the task, never the Model or a second translation,
-with cursors bound to the task, and refuses `task.running` before the task ends; retention, the owner
+with cursors bound to the task, and refuses `task.running` before the task ends. `part: "file"` (API 1.51)
+reads the HBJSON a completed task wrote from its receipt's own path, as one JSON string in fragments beside
+the receipt's `sha256` and `bytes`; no caller names a path (`export/written_file.rb`). Nothing is kept
+between fragments, so each read takes and hashes the whole file again on the main thread (about 11 ms for a
+4.7 MB file, offline): one that is no longer a regular file or no longer hashes to the receipt refuses
+`artifact.changed`, and a task that wrote no file refuses `artifact.none`. A fragment carries at most 12 KiB of
+escaped text, so a large model takes many calls; a client that reads local files reads the receipt's path; retention, the owner
 check, revocation and Model close bound it as they bound polling. A successful result names the approved location, by id and label, and the
 run; to the caller that started the task alone it also gives `artifacts`, each written file's path,
 SHA-256 and size, and to every other caller no path. A lost reply or timeout does not cancel a task. Poll or use `latest_export`

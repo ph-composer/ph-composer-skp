@@ -117,10 +117,17 @@ module PhComposer
 
       # The MCP tool result: the answer as `structuredContent` and one line of text, not a second copy of
       # the JSON, which a client that shows both would count twice. Every result passes through here or
-      # `error`, so none leaves larger than the budget.
+      # `error`, so none leaves larger than the budget. An inline image (InlineImage) leaves the answer first and
+      # travels as an `image` content block under its own cap, outside the budget.
       # `acted` marks a tool that may have changed something (every tool but the reads): its outcome is
       # never turned into a refusal by its size.
       def result(value, acted: false)
+        value, image = detach_image(value)
+        if image && (size = InlineImage.decoded_bytes(image.fetch("data"))) > InlineImage::MAX_BYTES
+          return error("The image is #{size} bytes, over the #{InlineImage::MAX_BYTES}-byte limit of one reply. " \
+                       "Ask for fewer pixels.", "request.response_too_large")
+        end
+
         text = JSON.generate(value)
         if text.bytesize > MAX_RESULT_BYTES && acted && outcome?(value)
           value = trimmed(value)
@@ -134,8 +141,19 @@ module PhComposer
                        "request.response_too_large")
         end
 
-        { "content" => [{ "type" => "text", "text" => summary(value) }], "structuredContent" => value,
-          "isError" => false }
+        content = [{ "type" => "text", "text" => summary(value) }]
+        content << { "type" => "image", "data" => image.fetch("data"), "mimeType" => image.fetch("mime_type") } if image
+        { "content" => content, "structuredContent" => value, "isError" => false }
+      end
+
+      # [the answer without its inline image, the image], or [the answer, nil] when its value carries none.
+      def detach_image(value)
+        inner = value.is_a?(Hash) && value["status"] == "completed" ? value["value"] : nil
+        image = inner.is_a?(Hash) ? inner[InlineImage::KEY] : nil
+        return [value, nil] unless image.is_a?(Hash) && image["data"].is_a?(String) &&
+                                   InlineImage::MIME_TYPES.include?(image["mime_type"])
+
+        [value.merge("value" => inner.reject { |key, _image| key == InlineImage::KEY }), image]
       end
 
       def outcome?(value)
