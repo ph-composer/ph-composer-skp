@@ -1,7 +1,7 @@
 # GitHub open-issue sweep, November 2026
 
 DATE: 2026-11-11
-STATUS: Code complete and host pass run 2026-11-11; LH1 Cancel and two #455 measurements remain (#492)
+STATUS: Code complete and host pass run 2026-11-11; #493 merged and host-checked 2026-11-12; LH1 Cancel and two #455 measurements remain (#492)
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: one per row below
 
@@ -63,6 +63,7 @@ Codex review (gpt-6.1-sol; gpt-6-astra for #473) and every thread answered.
 | [#490](https://github.com/ph-composer/ph-composer-skp/issues/490) | packet-end review of `3682e7f3` | Copy left read only with no warning after Undo/Redo of the copy then Undo of the Move | Open; P4, older code, needs native Undo |
 | [#491](https://github.com/ph-composer/ph-composer-skp/issues/491) | this ledger | CodexConfig: one TOML tokenizer for the subset it reads | Open; needs Ed's go-ahead |
 | [#492](https://github.com/ph-composer/ph-composer-skp/issues/492) | this ledger | Host pass checklist | Open; needs Ed at the Mac |
+| [#493](https://github.com/ph-composer/ph-composer-skp/issues/493) | host pass #492 | Mid-gesture guard for Scale and Rotate | Merged to main: Scale in PR #494 (`441b287a`, API 1.46), Rotate in PR #495 (`67c87df8`, API 1.47). Rotate reports tool state 0 through a turn, so writes refuse whenever the Rotate tool is selected. Host-checked 2026-11-12 on `650ba430`: refused idle and mid-turn, the turn still finished as "Undo Rotate", commit after Select |
 
 Commits merged after their PR's second Codex cycle, covered by the packet-end review: `fe3a8914`
 (#481) and `3682e7f3` (#487); that review filed #489 and #490. `169930bb` (#480) and `34b719d2` (#463) changed only a description
@@ -88,7 +89,7 @@ Evidence stays in the private run folder `_private/host/hostpass-492/`; results 
 - #456: pass by DOM read (three profiles on one token each show their own client).
 - #154: every row open 311 and 303 ms against the 200 ms target (fail); Zones open 169 ms. Engine Chrome 137.
 - #455: an agent write cancels Rotate and Scale mid-gesture; Rotate's partial result merges into the agent's
-  Undo step. Guard extension filed as #493.
+  Undo step. Guard extension filed as #493, delivered by PR #494 and PR #495.
 - LH1 (#332, #472): loading state, Cancel in place and the retry announcement observed; Cancel stopping a load
   and the copy lock wait on a PH-Elements reconnect.
 - Recipe lesson: an empty `ModelOperation.perform` block leaves no Undo entry, so a host case that needs an
