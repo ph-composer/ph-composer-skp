@@ -917,6 +917,28 @@ class ColourByTest < PhComposerTestCase
     assert_equal settled, @model.active_view.invalidations
   end
 
+  # A Model edited while SketchUp shows another hears the change as a revision alone, so its drawing
+  # catches up when SketchUp shows it.
+  def test_a_model_edited_while_hidden_rebuilds_when_it_is_shown
+    hidden_session = PhComposer::Sessions.for(Sketchup::Model.new)
+    service = ColourBy.for(hidden_session).activate("ph_composer.zones.faces.by_face_type")
+    revision = hidden_session.revision
+
+    @session.observers.model.onTransactionCommit(@model)
+    assert_equal [revision + 1, 1], [hidden_session.revision, service.rebuilds], "the edit alone draws nothing"
+    hidden_session.host_event(:model_activated)
+
+    assert_equal 2, service.rebuilds
+  end
+
+  def test_showing_a_model_with_nothing_changed_does_not_rebuild
+    service = activate("ph_composer.zones.faces.by_face_type")
+
+    @session.host_event(:model_activated)
+
+    assert_equal 1, service.rebuilds
+  end
+
   # Hiding a tag changes what may be painted and advances no revision, so it is the one event that
   # rebuilds without one.
   def test_hiding_a_tag_rebuilds_although_the_revision_is_unchanged

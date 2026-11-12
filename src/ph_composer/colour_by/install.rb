@@ -31,11 +31,12 @@ module PhComposer
     # post-commit change publication, since a native commit callback may arrive before the revision
     # advances. A hidden tag need not advance the revision, so `tags_changed` forces a rebuild.
     #
-    # `model_activated` is deliberately absent. A change to a Model while it is inactive reaches the
-    # shown Model's observers instead (context/SKETCHUP_HOST_BEHAVIOR.md): the inactive session hears the
-    # change as a revision advance alone, and its drawing rebuilds on the next invalidating event it hears.
+    # A change to a Model SketchUp is not showing reaches the shown Model's observers instead
+    # (context/SKETCHUP_HOST_BEHAVIOR.md), so that Model's session hears it as a revision advance alone.
+    # `model_activated` lets its drawing catch up when SketchUp shows it. The rebuild compares the revision
+    # and view the drawing was built at, so showing a Model with nothing changed draws nothing new.
     INVALIDATING_EVENTS = %i[transaction_committed transaction_undone transaction_redone active_path_changed
-                             rendering_options_changed].freeze
+                             rendering_options_changed model_activated].freeze
 
     STATE_RESULT = {
       "type" => "object",

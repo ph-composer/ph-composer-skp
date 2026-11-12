@@ -312,8 +312,8 @@ unowned commit as that callback instead, so a late callback leaves no count behi
 change. Only the session of the Model SketchUp names hears the commit as a host event, with its export
 generation, deferred work and panel refresh; the others get the revision alone. So an edit of the shown
 Model does not abort another Model's export, and an outside change to a Model during its own export is not
-detected by the export. Zone names and container watching on the others run again when SketchUp next shows
-them (`model_activated`); Colour-by rebuilds on the next change it hears. Undo and Redo callbacks outside an
+detected by the export. Zone names, container watching and a Colour-by drawing on the others catch up when
+SketchUp next shows them (`model_activated`). Undo and Redo callbacks outside an
 own operation stay with the named Model: native Undo and Redo act on the shown Model only, and their
 subscribers rebaseline state that a Model which did not revert must keep.
 
