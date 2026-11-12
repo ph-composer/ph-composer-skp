@@ -36,7 +36,7 @@ module PhComposer
       "session.unknown" => "The Model session is closed, was reopened or was never opened; discover again.",
       "access.revoked" => "This caller's access was revoked; nothing ran.",
       "session.busy" => "Another change is running, deferred work is settling or the user is partway through a " \
-                        "Move; read context and retry later.",
+                        "Move or Scale; read context and retry later.",
       "params.invalid" => "The params do not meet the operation's params schema or a rule it states.",
       "operation.failed" => "An unexpected error; the outcome's effect says whether anything was kept.",
       "request.pending" => "A retry of a request that is still running; ask for its outcome later.",

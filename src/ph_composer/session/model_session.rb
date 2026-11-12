@@ -20,9 +20,10 @@ module PhComposer
     VIEW_EVENTS = %i[selection_changed camera_changed].freeze
 
     # Native tools whose gesture partway through (any tool state but 0) a commit cancels: SketchUp resets the
-    # tool and drops the user's edit (context/SKETCHUP_HOST_BEHAVIOR.md). Only measured tools are listed;
-    # the Line tool (SketchTool) keeps its gesture through a commit.
-    GESTURE_TOOLS = { "MoveTool" => "Move" }.freeze
+    # tool and drops the user's edit (context/SKETCHUP_HOST_BEHAVIOR.md). The one list of guarded tools; only
+    # measured tools are listed. The Line tool (SketchTool) keeps its gesture through a commit. The Rotate tool
+    # loses its gesture too, but reports no state but 0 while partway, so a state cannot guard it.
+    GESTURE_TOOLS = { "MoveTool" => "Move", "ScaleTool" => "Scale" }.freeze
 
     def initialize(model)
       @model = model

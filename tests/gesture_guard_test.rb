@@ -3,9 +3,9 @@
 require_relative "test_helper"
 require_relative "support/test_feature"
 
-# A change's commit cancels a native Move partway through (context/SKETCHUP_HOST_BEHAVIOR.md), so a change
-# request refuses `session.busy` while the user is mid-Move, before it takes a sequence; reads, context and
-# the Line tool are unaffected (context/AGENT_INTERFACE.md, "Model context").
+# A change's commit cancels a native Move or Scale partway through (context/SKETCHUP_HOST_BEHAVIOR.md), so a
+# change request refuses `session.busy` while the user is mid-gesture, before it takes a sequence; reads,
+# context and the Line tool are unaffected (context/AGENT_INTERFACE.md, "Model context").
 class GestureGuardTest < PhComposerTestCase
   API = PhComposer::API
   AgentAccess = PhComposer::AgentAccess
@@ -129,6 +129,22 @@ class GestureGuardTest < PhComposerTestCase
     drawing = invoke(2)
 
     assert_equal %w[completed completed], [idle["status"], drawing["status"]]
+  end
+
+  def test_a_write_during_a_scale_is_refused_busy_and_writes_nothing
+    @model.tools.use_native_tool("ScaleTool", 1)
+
+    refused = invoke(1)
+
+    assert_equal %w[busy session.busy none], refused.values_at("status", "code", "effect")
+    assert_includes refused["message"], "ScaleTool"
+    assert_empty @model.operations
+  end
+
+  def test_a_write_runs_with_the_scale_tool_idle
+    @model.tools.use_native_tool("ScaleTool", 0)
+
+    assert_equal %w[completed committed], invoke(1).values_at("status", "effect")
   end
 
   def test_reads_previews_and_context_answer_during_a_move_and_context_says_why

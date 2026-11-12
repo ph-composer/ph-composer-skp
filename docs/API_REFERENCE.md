@@ -4683,7 +4683,7 @@ What each common code means, as the agent connection's discover section `refusal
 | `request.pending` | A retry of a request that is still running; ask for its outcome later. |
 | `request.sequence_conflict` | This sequence or key was already used for a different change. |
 | `revision.stale` | The Model changed after expected_revision; read again and decide again. |
-| `session.busy` | Another change is running, deferred work is settling or the user is partway through a Move; read context and retry later. |
+| `session.busy` | Another change is running, deferred work is settling or the user is partway through a Move or Scale; read context and retry later. |
 | `session.unknown` | The Model session is closed, was reopened or was never opened; discover again. |
 
 ## Queries
@@ -66768,3 +66768,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.43 | 2026-11-11 | Every action refuses session.busy, before it takes a sequence, while the user is partway through a Move in SketchUp, which its commit would cancel; context readiness and discover's session busy say so. Reads and the Line tool are unaffected. An agent invoke answered busy releases its idempotency_key for the retry. |
 | 1.44 | 2026-11-11 | Every invoke refused before acceptance releases the idempotency_key it bound; access.revoked joins every kind's common refusals. thermal_bridges.edges.clear and types.delete pass over Edges whose text is not a JSON object, leave it and name them in a thermal_bridge.unreadable_skipped finding. zones.repair_identity refuses a locked Zone. |
 | 1.45 | 2026-11-11 | A create or duplicate names its records from the session, revision, action and params, so a preview run again and its invoke name the same ids and a create's preview parts read across calls. Registration refuses a feature id, name, wire kind or code longer than 1,024 bytes as registration.schema_invalid. |
+| 1.46 | 2026-11-11 | Every action also refuses session.busy while the user is partway through a Scale in SketchUp, as for a Move; context readiness and discover's session busy say so. |
