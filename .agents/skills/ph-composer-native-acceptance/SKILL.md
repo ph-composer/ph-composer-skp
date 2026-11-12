@@ -54,6 +54,13 @@ top-level session ran clean twice. A subagent prepares everything that needs no 
 "ready for hold"; the top-level session takes one card, runs every native step in that hold and
 hands the evidence back. When a stage must measure before it designs, that hold comes first.
 
+Tell Ed in one line before any host step that can change his screen: bringing SketchUp to the front (a
+Model switch is the only way to fire `onActivateModel`), or anything that can raise a macOS permission
+prompt or System Settings window. On 2026-11-12 a `screencapture` run inside SketchUp without Screen
+Recording permission opened System Settings in front of him unannounced. Never answer such a prompt
+yourself. Front and restore by System Events process name: `tell application "Rhinoceros"` fails, while
+`set frontmost of process "Rhinoceros"` works.
+
 An agent client run (Claude Code, Codex) measures the product, so the client runs without the
 operator's personal setup: no user skills, memory, advisor, plugins or reference notes. Claude Code:
 `claude -p --restricted --strict-mcp-config --mcp-config <file> --tools Read` from a scratch folder

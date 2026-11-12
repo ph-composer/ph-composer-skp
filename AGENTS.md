@@ -30,6 +30,7 @@ not a dependency. Its designPH integration is retired and is never reintroduced 
 | Security: disclosure route, listener posture, page policies, release checklist | [`SECURITY.md`](SECURITY.md), [`context/AGENT_INTERFACE.md`](context/AGENT_INTERFACE.md) "Security posture", [`context/TECH_STACK.md`](context/TECH_STACK.md) "Panel", [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) (release checklist, `lint-paths`) |
 | Build, install, test and host procedures | [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md), implemented commands and remaining host gates |
 | Development host and browser tooling: bridge, bounded waits, diagnostic reads, fault controls, browser failure evidence | [`tools/hostkit/.index.md`](tools/hostkit/.index.md) and [`tools/ui-preview/.index.md`](tools/ui-preview/.index.md) |
+| Running a pr-loop stage as a subagent: standing branch, gate, push, review and report rules | [`.agents/stage-brief.md`](.agents/stage-brief.md) |
 | Native acceptance and resuming host gates | [`.agents/skills/ph-composer-native-acceptance/SKILL.md`](.agents/skills/ph-composer-native-acceptance/SKILL.md), then the owning packet and case ledger |
 | Current delivery state or next authorized work | [`planning/STATUS.md`](planning/STATUS.md), then the owning packet |
 | Planning documents or status changes | [`planning/.instructions.md`](planning/.instructions.md) |
