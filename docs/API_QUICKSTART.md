@@ -171,7 +171,8 @@ Export is a task, not a Model change. It writes only to a destination the user a
 Libraries dialog, never to a path you pass. Read the approved destinations, preflight to see what
 blocks the export, then start it with the destination's id and poll until the status carries an
 outcome. An existing pair is replaced only with `replace: true` and the `expected_destination` that
-`export_preflight` reported for that location.
+`export_preflight` reported for that location. To export exactly the Model you reviewed, also pass its
+revision as `expected_revision:`; a Model that changed since is refused with `revision.stale`.
 
 ```ruby
 locations = PhComposer::API.query(context: context, name: "ph_composer.locations.list")["value"]["locations"]

@@ -25,8 +25,12 @@ module PhComposer
 
       # The destination is an approved `location` param, or the native Export workflow's own `approval`,
       # a NativeApproval::Granted (Task). A destination the pair would refuse is refused here, before any
-      # task exists, whichever route chose it.
-      def start(owner:, location: nil, approval: nil, runtime_factory: nil)
+      # task exists, whichever route chose it. `expected_revision`, when given, is checked once deferred Model
+      # work has settled, here on the main thread where the run takes its source; the task checks it again
+      # while it reads (Task#coherent!).
+      def start(owner:, location: nil, approval: nil, expected_revision: nil, runtime_factory: nil)
+        expected_revision = TaskContract.check_options!("start_export",
+                                                        "expected_revision" => expected_revision)["expected_revision"]
         approval ||= ApprovedLocations.grant_param(location, "save_file")
         prune
         if @tasks.values.any? { |task| !task.terminal? }
@@ -39,7 +43,15 @@ module PhComposer
           raise Blocked.new("session.busy", @session.busy_reason)
         end
 
-        task = Task.new(@session, :approval => approval, :runtime_factory => runtime_factory, :owner => owner)
+        @session.settle
+        if expected_revision && expected_revision != @session.revision
+          raise Blocked.new("revision.stale", "The Model has changed since revision #{expected_revision}; it is " \
+                                              "now #{@session.revision}. No export was started.",
+                            "revision" => @session.revision)
+        end
+
+        task = Task.new(@session, :approval => approval, :runtime_factory => runtime_factory, :owner => owner,
+                                  :expected_revision => expected_revision)
         task.start
         @tasks[task.id] = task
         task.snapshot(owner)

@@ -64,6 +64,19 @@ class ExportTasksTest < PhComposerTestCase
     end
   end
 
+  # Deferred feature work that commits once when the session settles, as deferred protection does.
+  class DeferredCommit
+    def initialize(session)
+      @session = session
+      @pending = true
+    end
+
+    def settle
+      @session.outside_commit if @pending
+      @pending = false
+    end
+  end
+
   def setup
     super
     @directory = Dir.mktmpdir("phc-export-task-")
@@ -624,6 +637,73 @@ class ExportTasksTest < PhComposerTestCase
     refute_nil PhComposer::ApprovedLocations.list.first.fetch("last_used_at")
   end
 
+  # expected_revision binds the run to the revision the caller read: the read, the source and the pair.
+  def test_a_start_at_the_expected_revision_reads_and_writes_that_revision
+    revision = @session.revision
+    task = start(:expected_revision => revision)
+    drain
+    @runtime.success
+    drain
+
+    status = @tasks.status(task.fetch("task_id"), OWNER)
+    assert_equal ["export.complete", revision], [status.dig("outcome", "code"), status.dig("source", "revision")]
+    assert File.exist?(@destination)
+  end
+
+  # A stale start answers invoke's refusal shape and starts nothing: no task, no runtime, no file.
+  def test_a_start_at_another_revision_refuses_stale_and_starts_nothing
+    api = PhComposer::API
+    context = api.connect(:session_id => @session.id, :capabilities => ["export"])
+    read = @session.revision
+    external_edit
+
+    refused = api.start_export(:context => context, :location => { "id" => approved_destination },
+                               :expected_revision => read)
+    assert_equal %w[refused revision.stale none], refused.values_at("status", "code", "effect")
+    assert_equal @session.revision, refused.fetch("revision")
+    assert_nil api.latest_export(:context => context).fetch("value")
+    assert_nil @runtime
+    assert_empty Dir.children(@directory)
+    invalid = api.start_export(:context => context, :location => { "id" => approved_destination },
+                               :expected_revision => "1")
+    assert_equal "params.invalid", invalid.fetch("code")
+  end
+
+  # Without expected_revision a start is unbound, as before: an edit after the read is the generation's concern.
+  def test_a_start_without_expected_revision_is_not_bound_to_one
+    revision = @session.revision
+    task = start
+    @session.host_event(:active_path_changed)
+    drain
+    assert_equal revision + 1, @session.revision
+    status = @tasks.status(task.fetch("task_id"), OWNER)
+    assert_equal ["translating", revision], [status.fetch("stage"), status.dig("source", "revision")]
+  end
+
+  # The check runs where the run reads, not where the request arrived: deferred work that commits when the
+  # start settles the session, and an edit before the first reading slice, both leave the run stale.
+  def test_an_edit_between_arrival_and_the_read_is_stale
+    read = @session.revision
+    @session.feature_state("test.export.deferred") { DeferredCommit.new(@session) }
+    error = assert_raises(PhComposer::CodedError) { start(:expected_revision => read) }
+    assert_equal "revision.stale", error.code
+    assert_nil @tasks.latest(OWNER)
+
+    task = start(:expected_revision => @session.revision)
+    external_edit
+    drain
+    outcome = @tasks.status(task.fetch("task_id"), OWNER).fetch("outcome")
+    assert_equal %w[failed revision.stale none], outcome.values_at("status", "code", "effect")
+
+    # The watchdog can see the edit before the next reading slice does; it answers the same.
+    task = start(:expected_revision => @session.revision)
+    external_edit
+    watch_after(0)
+    assert_equal "revision.stale", @tasks.status(task.fetch("task_id"), OWNER).dig("outcome", "code")
+    assert_nil @runtime
+    assert_empty Dir.children(@directory)
+  end
+
   def test_task_retention_is_bounded_and_old_handles_never_restart_a_write
     ids = 21.times.map do
       task = start
@@ -672,9 +752,16 @@ class ExportTasksTest < PhComposerTestCase
     flunk "Collection did not settle within 100 timer slices"
   end
 
-  def start(replace: false)
+  def start(replace: false, expected_revision: nil)
     approval = PhComposer::NativeApproval::Granted.new(:path => @destination, :replace => replace)
-    @tasks.start(:owner => OWNER, :approval => approval, :runtime_factory => @factory)
+    @tasks.start(:owner => OWNER, :approval => approval, :runtime_factory => @factory,
+                 :expected_revision => expected_revision)
+  end
+
+  def external_edit
+    @session.model.start_operation("External edit")
+    @session.model.set_attribute("test", "value", @session.revision)
+    @session.model.commit_operation
   end
 
   # A part a task kept, its fragments joined and parsed.

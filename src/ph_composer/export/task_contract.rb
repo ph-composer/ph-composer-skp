@@ -165,12 +165,21 @@ module PhComposer
           "description" => "Start one export of the canonical HBJSON and its report to a destination the user " \
                            "approved (ph_composer.locations.approve_destination). An existing pair is replaced only " \
                            "with replace and the expected_destination export_preflight reported; one task runs " \
-                           "per Model at a time.",
+                           "per Model at a time. With expected_revision, a Model at another revision refuses " \
+                           "revision.stale and starts nothing, and one that changes before the run has read it " \
+                           "fails the task revision.stale.",
           "params" => {
             "type" => "object", "additionalProperties" => false, "required" => ["location"],
-            "properties" => { "location" => ApprovedLocations.param("save_file") }
+            "properties" => {
+              "location" => ApprovedLocations.param("save_file"),
+              "expected_revision" => { "type" => "integer",
+                                       "description" => "The revision the caller last read; the run exports that " \
+                                                        "revision or none." }
+            }
           },
-          "result" => STATUS, "examples" => [{ "location" => { "id" => "location_AAAAAAAAAAAA" } }]
+          "result" => STATUS,
+          "examples" => [{ "location" => { "id" => "location_AAAAAAAAAAAA" } },
+                         { "location" => { "id" => "location_AAAAAAAAAAAA" }, "expected_revision" => 12 }]
         },
         "export_status" => {
           "capability" => "export",
