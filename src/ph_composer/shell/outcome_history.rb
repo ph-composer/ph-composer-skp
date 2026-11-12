@@ -7,8 +7,10 @@ module PhComposer
   # bound is the history's bound, so the answer says it.
   module OutcomeHistory
     QUERY = "outcomes"
-    # A row names its first affected references and counts them all.
+    # A row names its first affected references, as many as fit AFFECTED_BYTES, and counts them all, so every
+    # row fits a page whatever paths its references carry; `outcome` with the row's sequence reads the whole.
     MAX_AFFECTED = 10
+    AFFECTED_BYTES = 2 * 1024
     RETENTION = { "capacity" => OutcomeStore::CAPACITY, "lifetime_seconds" => OutcomeStore::LIFETIME_SECONDS,
                   "shared" => "across every caller of this Model session" }.freeze
     MESSAGE = "What this session still retains: up to #{OutcomeStore::CAPACITY} outcomes across every caller, " \
@@ -42,7 +44,14 @@ module PhComposer
       { "sequence" => entry.sequence, "idempotency_key" => key, "operation" => entry.name,
         "status" => outcome["status"], "effect" => outcome["effect"], "code" => outcome["code"],
         "revision" => outcome["revision"], "recorded_at" => entry.recorded_utc,
-        "affected" => affected.first(MAX_AFFECTED), "affected_total" => affected.length }
+        "affected" => first_affected(affected), "affected_total" => affected.length }
+    end
+
+    def first_affected(affected)
+      bytes = 2
+      affected.first(MAX_AFFECTED).take_while do |reference|
+        (bytes += JSON.generate(reference).bytesize + 1) <= AFFECTED_BYTES
+      end
     end
   end
 end

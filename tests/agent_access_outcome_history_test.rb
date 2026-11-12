@@ -119,6 +119,44 @@ class AgentAccessOutcomeHistoryTest < PhComposerTestCase
     assert_equal format("%064d", 29), rows.first["idempotency_key"]
   end
 
+  # A reference carries an occurrence path of any depth, so a row names only the references that fit its budget.
+  def test_a_row_whose_references_carry_long_paths_still_fits_one_reply
+    invoke
+    reference = lambda do |width|
+      { "kind" => "test.fixture.part", "id" => "p", "reference" => { "entity_path" => "x" * width } }
+    end
+    [[2, 650], [3, 40_000]].each do |sequence, width|
+      @session.outcomes.begin(handle, sequence, "digest", :name => CREATE)
+      @session.outcomes.finish(handle, sequence, PhComposer::Outcome.completed(
+        :revision => 0, :affected => Array.new(12) { reference.call(width) }
+      ))
+    end
+
+    result = @executor.call(@writer, "outcome", "session" => @session.id, "limit" => 1)
+    second = history("limit" => 1, "cursor" => result.dig("structuredContent", "value", "next_cursor"))
+
+    refute result["isError"], result.inspect
+    assert_operator JSON.generate(result["structuredContent"]).bytesize, :<=, AgentAccess::Executor::MAX_RESULT_BYTES
+    rows = [result.dig("structuredContent", "value", "outcomes", 0), second.dig("value", "outcomes", 0)]
+    assert_equal [[3, 0, 12], [2, 2, 12]],
+                 rows.map { |row| [row["sequence"], row["affected"].length, row["affected_total"]] }
+  end
+
+  def test_a_listed_row_is_a_copy
+    invoke
+    PhComposer::API.outcomes(:context => binding_context).dig("value", "outcomes", 0).each_value do |value|
+      value.replace("changed") if value.is_a?(String)
+    end
+
+    row = history.dig("value", "outcomes", 0)
+    assert_equal CREATE, row["operation"]
+    assert_match(/\A\d{4}-/, row["recorded_at"])
+  end
+
+  def binding_context
+    AgentAccess.bindings.fetch([@writer.fetch("id"), @session.id]).context
+  end
+
   def test_a_cursor_answers_only_the_connection_it_was_issued_to
     other = token
     2.times { invoke }

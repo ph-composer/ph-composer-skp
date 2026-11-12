@@ -621,7 +621,8 @@ result carries `sequence`, an optional field of the published Outcome schema tha
 sets; `outcome` takes a sequence or a key. With neither, `outcome` lists this connection's own retained
 change outcomes, newest first, in `Pages.bounded` pages (API 1.50, `API.outcomes`, `shell/outcome_history.rb`):
 sequence, the key from the binding's `Sequencer`, operation name (recorded at acceptance), status, effect,
-code, revision, recorded time (UTC) and the first 10 affected references with their total; never `value`,
+code, revision, recorded time (UTC) and the first affected references (at most 10 and 2 KiB, so any row fits
+a page; `outcome` with its sequence reads the whole) with their total; never `value`,
 `message`, `detail` or params. Rows come only from the caller's own handle, so another token's never
 appear, and the reply states the store's bound in `retention` and its message. A cursor binds the caller
 (another token's cursor is `params.invalid`) and its highest accepted sequence: a page asked for after a

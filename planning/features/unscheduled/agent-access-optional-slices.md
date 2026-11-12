@@ -92,6 +92,6 @@ here.
 | Stage | State | PR |
 | --- | --- | --- |
 | S1 expected revision | Merged to main 2026-11-12 (API 1.49): checked in `Export::Tasks#start` after settle and again in each reading slice; 4 tests in `tests/export_tasks_test.rb` plus the agent-tool route in `tests/export_diagnostics_test.rb`; `make ci` green (2824 Ruby runs, 876 JS, 264 Python) | [#501](https://github.com/ph-composer/ph-composer-skp/pull/501) |
-| S2 operation history | Implemented on branch `feature/458-s2-operation-history` (API 1.50): `make ci` green, 9 tests in `tests/agent_access_outcome_history_test.rb` | |
+| S2 operation history | Implemented on branch `feature/458-s2-operation-history` (API 1.50): `make ci` green, 11 tests in `tests/agent_access_outcome_history_test.rb`; Codex review (gpt-6.1-sol) 2 P2 fixed | [#502](https://github.com/ph-composer/ph-composer-skp/pull/502) |
 | S3 artifact bytes | Planned | |
 | S4 overlay capture | Closed by measurement 2026-11-12: an in-process window capture is refused without Screen Recording permission and brings up the system's permission flow; geometry-only kept, limit in AGENT_INTERFACE | none |

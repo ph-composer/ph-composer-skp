@@ -57,7 +57,11 @@ module PhComposer
       expire
       own = @entries.values.select { |entry| entry.caller == caller && !entry.pending? }
       own.sort_by { |entry| -entry.sequence }.map do |entry|
-        entry.dup.tap { |copy| copy.outcome = DeepCopy.call(entry.outcome) }
+        entry.dup.tap do |copy|
+          copy.outcome = DeepCopy.call(entry.outcome)
+          copy.name = entry.name&.dup
+          copy.recorded_utc = entry.recorded_utc.dup
+        end
       end
     end
 
