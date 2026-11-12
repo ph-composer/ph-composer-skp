@@ -263,6 +263,7 @@ def raise_document(version: str) -> str:
 # never in a script's source. Focus goes back by System Events process name: `tell application "Rhinoceros"`
 # names a process, not an app, and fails.
 DOCUMENT_MARK = " - SketchUp"
+UNSAVED_TITLE = "Untitled"
 DOCUMENT_WINDOWS = (
     'tell application "System Events" to tell process "SketchUp"\n'
     f'set names to name of (windows whose name contains "{DOCUMENT_MARK}")\n'
@@ -323,14 +324,6 @@ def restore_process(name: str) -> bool:
             return True
         time.sleep(SHOW_INTERVAL_S)
     return frontmost_process() == name
-
-
-def hand_back(name: str) -> bool:
-    """`restore_process`, tried once more when an interrupt cuts it short; a second interrupt escapes."""
-    try:
-        return restore_process(name)
-    except KeyboardInterrupt:
-        return restore_process(name)
 
 
 def contains(title: str, wanted: str) -> bool:
@@ -419,6 +412,10 @@ def raise_and_wait(version: str, wanted: str, deadline_s: float, result: dict[st
     if len(matching) > 1:
         result["error"] = f"more than one document window matches: {matching}"
         return
+    if matching[0].startswith(UNSAVED_TITLE):
+        # An unsaved Model's Ruby title is empty, so its switch could never be confirmed.
+        result["error"] = f"an unsaved Model cannot be confirmed by its title: {matching[0]}"
+        return
     result["window"] = matching[0]
     try:
         ok, answer = osascript(RAISE_WINDOW, matching[0])
@@ -427,7 +424,11 @@ def raise_and_wait(version: str, wanted: str, deadline_s: float, result: dict[st
         else:
             result |= {"ending": "raise_failed", "error": f"the window could not be raised: {answer}"}
     finally:
-        result["restored"] = hand_back(previous)
+        try:
+            result["restored"] = restore_process(previous)
+        except KeyboardInterrupt:  # restore once more, then let the interrupt end the command as cancelled
+            result["restored"] = restore_process(previous)
+            raise
 
 
 def run_with_dialog_guard(version: str, code: str, timeout: float = 120.0, escape_after: float = 3.0) -> str:

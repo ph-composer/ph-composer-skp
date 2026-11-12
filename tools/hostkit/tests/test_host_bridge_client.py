@@ -613,6 +613,8 @@ class ShowModelTest(unittest.TestCase):
             # Only the title part counts: the suffix would match a window the Model's title never contains.
             ([self.OTHER, self.WINDOW], "SketchUp Pro", "no document window's title contains"),
             ([self.WINDOW, 'b07 "draft" copy - SketchUp Pro 2026'], "b07", "more than one document window"),
+            # An unsaved Model's Ruby title is empty, so its switch could never be confirmed.
+            ([self.OTHER, "Untitled - SketchUp Pro 2026"], "untitled", "an unsaved Model cannot be confirmed"),
         ):
             result, calls = self.show(windows=windows, wanted=wanted)
             self.assertEqual(result["ending"], "refused", wanted)
@@ -664,9 +666,9 @@ class ShowModelTest(unittest.TestCase):
         result, calls = self.show(interrupt="raise")
         self.assertEqual((result["ending"], result["restored"]), ("cancelled", True))
         self.assertEqual(self.scripts(calls)[-2:], ["restore", "frontmost"])
-        # An interrupt that cuts the restore short is followed by one more restore.
+        # An interrupt that cuts the restore short is followed by one more restore, and still cancels.
         result, calls = self.show(interrupt="restore")
-        self.assertEqual((result["ending"], result["restored"]), ("shown", True))
+        self.assertEqual((result["ending"], result["restored"]), ("cancelled", True))
         self.assertEqual(self.scripts(calls)[-3:], ["restore", "restore", "frontmost"])
 
     def test_a_restore_that_does_not_take_reports_restored_false(self) -> None:
