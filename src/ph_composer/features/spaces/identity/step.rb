@@ -73,16 +73,22 @@ module PhComposer
         @affected = resolved.map { |row, occurrence| affected_row(row, occurrence.path) }
       end
 
-      # Writes back what apply replaced; nothing when apply did not reach its writes.
+      # Writes back what apply replaced; nothing when apply did not reach its writes. Every captured record
+      # is attempted even after one fails, and the step raises once at the end.
       def restore
         return unless @captured
 
-        @captured.each do |captured|
+        failures = @captured.count do |captured|
           store = captured.store
           entity = captured.entity
           captured.record ? store.write(entity, captured.record) : store.delete(entity)
           entity.name = captured.name if captured.name && store.equal?(SPACE_STORE) && entity.respond_to?(:name=)
+          false
+        rescue StandardError => error
+          Diagnostics.exception("space_restore", error)
+          true
         end
+        raise InternalError, "#{failures} Space records could not be restored." if failures.positive?
       end
 
       private

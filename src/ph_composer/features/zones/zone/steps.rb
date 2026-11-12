@@ -264,14 +264,22 @@ module PhComposer
         write(zone, live)
       end
 
-      # Writes back what apply captured, returning how many entities it touched; 0 before apply.
+      # Writes back what apply captured, returning how many entities it touched; 0 before apply. Every
+      # captured record is attempted even after one fails, and the step raises once at the end.
       def restore
         return 0 unless @captured
 
-        @captured.each do |captured|
+        failures = @captured.count do |captured|
           store = captured.store
           captured.record ? store.write(captured.entity, captured.record) : store.delete(captured.entity)
-        end.length
+          false
+        rescue StandardError => error
+          Diagnostics.exception("zone_restore", error)
+          true
+        end
+        raise InternalError, "#{failures} Zone records could not be restored." if failures.positive?
+
+        @captured.length
       end
 
       private

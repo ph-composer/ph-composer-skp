@@ -602,6 +602,22 @@ class ZoneRepairTest < PhComposerTestCase
     assert_match(/inside a component/, result.fetch("message"))
   end
 
+  # Every copied Face's new id is derived from the id it was copied with, so two Faces sharing an id
+  # would take the same new id, and anything naming that id could not say which Face it meant.
+  def test_make_independent_refuses_a_copy_whose_faces_share_an_id_and_writes_nothing
+    original, copy = shared_copy(860)
+    first, second = original.entities.to_a
+    FACE_STORE.write(second, FACE_STORE.read(first))
+    before = [ZONE_STORE.read(copy), original_state(original)]
+
+    result = invoke(MAKE_INDEPENDENT, { "zone_path" => [copy.persistent_id] })
+
+    assert_equal %w[refused target.ambiguous none], result.values_at("status", "code", "effect"), result.inspect
+    assert_includes result.fetch("message"), "copied Face id occurs more than once"
+    assert_equal before, [ZONE_STORE.read(copy), original_state(original)]
+    assert_equal 2, original.definition.instances.length, "storage is still shared"
+  end
+
   def test_a_failed_make_independent_rolls_back_storage_and_records
     original, copy = shared_copy(820)
     before = [ZONE_STORE.read(copy), copy.definition.instances.length]

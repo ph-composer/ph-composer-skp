@@ -67,7 +67,8 @@ module PhComposer
 
         # Structured payloads are remapped across the whole copied collection, typed by the plan: to
         # the Zone's and Faces' new ids and to sibling Units' new ids; anything else, such as a Type,
-        # keeps its id. An id two copied Units share maps each to its own new id, never a sibling's.
+        # keeps its id. An id two copied Units share maps each to its own new id, never a sibling's, and
+        # a payload naming such an id on another Unit cannot say which copy it meant, so it refuses.
         def copy_extensions(request, updates, description)
           counts = updates.map { |update| update.before.fetch("id") }.tally
           shared = description.fetch("mapping").merge(updates.each_with_object({}) do |update, mapping|
@@ -87,13 +88,25 @@ module PhComposer
             next if data.empty?
 
             old_id = update.before.fetch("id")
+            Records::Extension.check_copy_rules!(data, request.registry.catalog, "Window unit", old_id)
+            refuse_ambiguous!(data, counts, old_id)
             mapping = shared.merge(old_id => update.after.fetch("id"))
             update.after["extension_data"] = Records::Extension.copy_data(data, request.registry.catalog, "Window unit",
                                                                           old_id, mapping, :engine => request.engine,
                                                                                            :reference_plan => plan)
           end
         end
-        private_class_method :updates, :copy_extensions
+
+        def refuse_ambiguous!(data, counts, own_id)
+          named = data.each_value.flat_map do |envelope|
+            Records::Extension.referenced_ids(envelope.fetch("payload"), envelope.fetch("references", []))
+          end
+          return unless named.any? { |kind, id| kind == REFERENCE_KIND && id != own_id && counts.fetch(id, 0) > 1 }
+
+          raise CodedError.new("reference.invalid", "A copied Window's payload names an identity several copied " \
+                                                    "Windows share, so its target is ambiguous.")
+        end
+        private_class_method :updates, :copy_extensions, :refuse_ambiguous!
       end
 
       # Make Unique replaces every entity inside the copy, so the step binds logically: each Unit by its

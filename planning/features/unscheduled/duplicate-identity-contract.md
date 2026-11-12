@@ -18,10 +18,9 @@ the keeper set or the captured records hides nothing; anything that *chooses* th
 finding does.
 
 Four divergences surfaced that matter more than the line count (ambiguity policy, restore failure
-policy, Undo bookkeeping, the Windows `ZoneCopy` keeper). Each feature tests its own side; the
-counterpart cases are untested. They are listed under "Divergences" and filed as
-[#468](https://github.com/ph-composer/ph-composer-skp/issues/468) for a test-first look, independent of
-this decision.
+policy, Undo bookkeeping, the Windows `ZoneCopy` keeper).
+[#468](https://github.com/ph-composer/ph-composer-skp/issues/468) tested each one, independent of this
+decision: three converged on the other feature's policy and one is pinned (see "Divergences").
 
 Paths below are relative to `src/ph_composer/features/` unless they start with `core/`, `shell/`,
 `session/`, `context/` or `tests/`. Line numbers are `main` at `78bc5749`.
@@ -238,39 +237,52 @@ tests.
   against. A third entity-record feature (Phase 4 equipment, or thermal bridges if they start
   re-issuing) changes that.
 
-## Divergences (counterpart cases untested)
+## Divergences (tested in #468)
 
-None is called a bug: no round trip has been run for the uncovered side. Each feature tests its own
-policy; what is missing is the counterpart case in the other features.
+Each counterpart case now has a test. Three were defects (a stale reference, a partial restore, a
+missing Undo warning) with a small local fix, converged on the policy another feature already had; the
+fourth is pinned as Windows' keeper rule, and within the first, Zones' stricter refusal is pinned too.
+Source line numbers above are `78bc5749`, before these fixes.
 
-1. **Ambiguous payload references.** Windows `ZoneCopy` leaves out of the shared mapping an id two
-   copied Units share (`windows/units/zone_copy.rb:72-76`); each Unit's own id is still remapped
-   (`:90`), so only a payload naming a *different* Unit's shared id keeps the old id. Spaces refuses that
-   case `reference.invalid`, also excluding the record's own id (`spaces/identity/plan.rb:137-145`);
-   Zones refuses earlier, on any duplicated Face id (`zones/zone/repair.rb:51-53`). The unmapped Windows
-   reference is still resolved by `copy_data` (`core/records/extension.rb:180-185`), which refuses when
-   it names no record or several (`core/records/reference_resolution.rb:16-23`), so the old id survives
-   only when exactly one holder resolves, and then names that Unit, outside the copy. Covered: Spaces
-   refusal (`tests/spaces_identity_test.rb:189-201`), Windows self-reference
-   (`tests/window_zone_copy_test.rb:154`). Missing: a Windows payload naming a sibling's shared id with
-   one and with two outside holders.
-2. **Restore after a failing write.** Windows attempts every record (`windows/units/records.rb:34-47`);
-   Zones and Spaces stop at the first exception (`zones/zone/steps.rb:265-272`,
-   `spaces/identity/step.rb:77-86`), which could leave later captured records unwritten while
-   `HostFollowUp` reports the step as failed to restore. Covered: Windows continues after a failed
-   write (`tests/window_zone_copy_test.rb:188-205`). Missing: the same injected failure in Zones
-   `MakeIndependentStep#restore` and Spaces `IdentityStep#restore` (`tests/spaces_identity_test.rb:243`
-   covers a successful restore only).
-3. **Undo bookkeeping.** After one warning Zones clears every remembered repair
-   (`zones/zone/copy_watch.rb:61-66`); Spaces drops only copies no longer in the Model and keeps the
-   rest, so a later Undo of an earlier batch still warns (`spaces/copy_watch.rb:72-76`, reason at
-   `:73-74`). Covered: Spaces earlier-batch Undo (`tests/spaces_copy_watch_test.rb:136-148`), Zones
-   single warning (`tests/zone_copy_watch_test.rb:63`). Missing: the Zones earlier-batch case.
-4. **Windows `ZoneCopy` keeper.** Two Units inside a copied Zone sharing an id held nowhere outside both
-   keep it (`windows/units/zone_copy.rb:46`); Spaces keeps one (`spaces/identity/plan.rb:84-90`). The
-   duplicate stays, with its `window.copy_id_pending` export issue (`windows/export_assessment.rb:138`),
-   until the next Windows action repairs it first-by-path (`windows/authoring.rb:5-15`). Missing: a
-   Windows transition test for that case.
+1. **Ambiguous payload references. Windows converged on the Spaces refusal; Zones pinned.** Windows
+   `ZoneCopy` left out of the shared mapping an id two copied Units share, so a payload on a third
+   Unit naming it kept the old id. Measured: with one holder of that id left outside the copy, Make
+   Zone independent completed and the copied payload named the original's Unit; with two, resolution
+   refused `target.ambiguous`. `ZoneCopy.copy_extensions` now refuses `reference.invalid` before
+   copying, as Spaces does, and a payload's reference to its own Unit's id is still remapped
+   (`tests/window_zone_copy_test.rb`,
+   `test_a_payload_naming_an_id_two_copied_units_share_refuses_with_one_holder_outside` and
+   `..._with_two_holders_outside`). Zones keeps its earlier refusal, `target.ambiguous` on any Face id
+   occurring twice in the Zone (`tests/zone_repair_test.rb`,
+   `test_make_independent_refuses_a_copy_whose_faces_share_an_id_and_writes_nothing`): every Face's new
+   id is derived from the id it was copied with, so two Faces sharing one would take the same new id.
+   Spaces: `tests/spaces_identity_test.rb`, `test_a_payload_naming_an_id_several_records_in_the_copy_hold_refuses`.
+2. **Restore after a failing write. Zones and Spaces converged on the Windows policy.** Measured: a
+   failing Zone write in `MakeIndependentStep#restore` left every copied Face with its new id; a failing
+   Space write in `IdentityStep#restore` left its Volume and Floor Segment renamed. Both now attempt
+   every captured record, log each failure and raise once at the end, as `Units.restore_all` does, so
+   `HostFollowUp` still reports the step unrestored (`tests/zone_copy_watch_test.rb`,
+   `test_a_failing_zone_restore_still_restores_every_face`; `tests/spaces_copy_watch_test.rb`,
+   `test_a_failing_space_restore_still_restores_the_volume_and_floor_segment`). Windows:
+   `tests/window_zone_copy_test.rb`, `test_a_failing_unit_restore_still_attempts_every_other_unit`.
+3. **Undo bookkeeping. Zones converged on the Spaces policy.** Measured: copy A repaired inside an
+   unrelated Move, then copy B repaired; undoing B and then the Move left A read only with no warning,
+   though the Zones watcher's own header promises one. Two lines caused it: `remember` replaced the
+   remembered repairs with the latest batch instead of merging, and `undone` cleared all of them after
+   one warning. Zones now merges and, on Undo, drops only copies no longer in the Model, so, as in
+   Spaces, each Undo that leaves a copy reverted warns again; a copy counts as reverted only while it
+   shares its id again, so one the row's command repaired since does not warn (`tests/zone_copy_watch_test.rb`,
+   `test_an_undo_of_an_earlier_batch_still_warns`, `test_an_undo_after_the_explicit_repair_does_not_warn_again`).
+   Spaces, which still lacks that second check (#486):
+   `tests/spaces_copy_watch_test.rb`, `test_an_undo_of_an_earlier_batch_still_warns`.
+4. **Windows `ZoneCopy` keeper. Pinned.** Two Units inside a copied Zone sharing an id held nowhere
+   outside both keep it through Make Zone independent, read `window.copy_id_pending`, and the next
+   `repair_copied_identities` renames the second by path (`tests/window_zone_copy_test.rb`,
+   `test_two_copied_units_sharing_an_id_held_only_inside_both_keep_it_until_the_windows_repair`).
+   Reason: `ZoneCopy` makes the copy independent of what is outside it; a duplicate held only inside
+   predates the copy, loses nothing and stays flagged, and choosing a keeper there would restate
+   `IdentityPlan`'s first-by-path rule in a second place. Spaces keeps one holder
+   (`tests/spaces_identity_test.rb`, `test_an_id_held_only_inside_the_target_keeps_a_holder`).
 
 ## Optional packet: shared copy-repair mechanics
 
@@ -279,11 +291,11 @@ mapping, the keeper set or the captured records as input.
 
 | Stage | Scope | Acceptance |
 | --- | --- | --- |
-| 1 | The missing counterpart tests for divergences 1 to 4 (#468), beside the existing ones cited above; Ed picks the policy for each | One failing or passing test per divergence; decision recorded |
-| 2 | `core/records/copy_remap.rb`: mapping from renamed rows, parent `ReferencePlan` from a transition description, per-row `copy_data`, the chosen ambiguity policy. Adopted by Windows `ZoneCopy` and Spaces `IdentityPlan`; Windows `IdentityPlan` if it fits without `mapping_kind` special-casing | Existing Windows and Spaces copy suites pass unchanged; one helper test per policy branch |
+| 1 | Done in #468: the counterpart tests for divergences 1 to 4 and a policy for each | Recorded under "Divergences" |
+| 2 | `core/records/copy_remap.rb`: mapping from renamed rows, parent `ReferencePlan` from a transition description, per-row `copy_data`, the ambiguity refusal both copies now share. Adopted by Windows `ZoneCopy` and Spaces `IdentityPlan`; Windows `IdentityPlan` if it fits without `mapping_kind` special-casing | Existing Windows and Spaces copy suites pass unchanged; one helper test per policy branch |
 | 3 | `core/records/ordinal_binding.rb` (counts per key plus ordinal, `target.changed`). Adopted by Windows `ZoneCopyStep` and Spaces `IdentityStep` | Same suites pass; one helper test for count change and pre-image change |
-| 4 | `core/records/captured_records.rb` with the chosen restore policy. Adopted by Zones `MakeIndependentStep`, Spaces `IdentityStep`, Windows identity steps (through `Units.restore_all` or replacing it) | Restore tests for a mid-way failure |
-| Deferred | Copy watcher skeleton in `session/`, when a third watcher exists; fold divergence 3's decision into both watchers directly before then | n/a |
+| 4 | `core/records/captured_records.rb` with the attempt-every-record restore policy all three now share. Adopted by Zones `MakeIndependentStep`, Spaces `IdentityStep`, Windows identity steps (through `Units.restore_all` or replacing it) | Restore tests for a mid-way failure |
+| Deferred | Copy watcher skeleton in `session/`, when a third watcher exists; both watchers already share divergence 3's Undo policy (#468) | n/a |
 
 Rubric: `.agents/skills/ph-composer-architecture-review/SKILL.md` and
 `.agents/skills/ph-composer-ruby-quality/SKILL.md`. Host gate required for stages 3 and 4: they change

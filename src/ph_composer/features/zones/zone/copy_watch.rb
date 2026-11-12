@@ -58,12 +58,18 @@ module PhComposer
           reset
           return if @running || @repaired.empty?
 
-          reverted = @repaired.select do |path, id|
-            occurrences.any? { |other_path, other_id| other_path == path && other_id != id }
-          end
+          live = occurrences.to_h
+          return if live.empty? # An unreadable Model is no evidence that the copies left; keep them.
+
+          # A copy no longer in the Model has nothing left to warn about; every other repair is kept, so a
+          # later Undo of an earlier batch, or another Undo after a Redo, still warns.
+          @repaired = @repaired.select { |path, _id| live.key?(path) }
+          # Reverted: the copy lost the id it was given and shares one again. A copy the row's command
+          # made independent since holds an id of its own and is not read only.
+          held = live.values.tally
+          reverted = @repaired.select { |path, id| live.fetch(path) != id && held.fetch(live.fetch(path)) > 1 }
           return if reverted.empty?
 
-          @repaired = {}
           count = reverted.length
           @session.notice("Undo also took back making the #{count == 1 ? 'copied Zone' : "#{count} copied Zones"} " \
                           "independent, because it had joined a later change. #{count == 1 ? 'It is' : 'They are'} " \
@@ -177,7 +183,8 @@ module PhComposer
         def remember(paths, result)
           return unless result.fetch("status") == "completed"
 
-          @repaired = paths.zip(result.fetch("values")).to_h { |path, value| [path, value.fetch("zone_id")] }
+          repaired = paths.zip(result.fetch("values")).to_h { |path, value| [path, value.fetch("zone_id")] }
+          @repaired = @repaired.merge(repaired)
         end
 
         def announce(paths, result)
