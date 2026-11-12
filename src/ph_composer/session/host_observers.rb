@@ -25,7 +25,7 @@ module PhComposer
 
     class ModelObserver < Sketchup::ModelObserver
       def onTransactionCommit(model)
-        Sessions.for_transaction(model).host_event(:transaction_committed)
+        Sessions.transaction_committed(model)
       end
 
       def onTransactionUndo(model)

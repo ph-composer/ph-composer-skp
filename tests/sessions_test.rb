@@ -157,9 +157,69 @@ class SessionsTest < PhComposerTestCase
       shown_session.observers.model.onTransactionCommit(shown)
       true
     end
-    hidden_session.observers.model.onTransactionCommit(hidden)
+    assert_equal [revisions[0], revisions[1] + 1], [shown_session.revision, hidden_session.revision]
 
-    assert_equal [revisions[0], revisions[1] + 2], [shown_session.revision, hidden_session.revision]
+    hidden_session.observers.model.onTransactionCommit(hidden)
+    assert_equal revisions[1] + 2, hidden_session.revision
+  end
+
+  # The hidden Model's own commit whose callback reaches the shown Model's observer after the mutation
+  # returns: the hidden session takes it as its own, so no stale own commit is left to swallow its next
+  # outside change, and the shown Model's revision advances, since SketchUp does not say which Model it was.
+  def test_a_later_own_commit_of_a_model_not_shown_is_taken_there_and_still_advances_the_shown_model
+    shown = Sketchup.active_model
+    shown_session = Sessions.for(shown)
+    hidden_session = Sessions.for(Sketchup::Model.new)
+    hidden_session.mutate { true }
+    revisions = [shown_session.revision, hidden_session.revision]
+
+    shown_session.observers.model.onTransactionCommit(shown)
+    assert_equal [revisions[0] + 1, revisions[1]], [shown_session.revision, hidden_session.revision]
+
+    shown_session.observers.model.onTransactionCommit(shown)
+    assert_equal [revisions[0] + 2, revisions[1] + 1], [shown_session.revision, hidden_session.revision]
+  end
+
+  # SketchUp reports an outside script's operation on a Model it is not showing to the shown Model's
+  # observers (context/SKETCHUP_HOST_BEHAVIOR.md), so with two Models open a commit nothing owns may be
+  # either one's: every open session's revision advances.
+  def test_a_commit_no_operation_owns_advances_every_open_sessions_revision
+    shown = Sketchup.active_model
+    shown_session = Sessions.for(shown)
+    hidden_session = Sessions.for(Sketchup::Model.new)
+    revisions = [shown_session.revision, hidden_session.revision]
+
+    shown_session.observers.model.onTransactionCommit(shown)
+
+    assert_equal revisions.map(&:succ), [shown_session.revision, hidden_session.revision]
+  end
+
+  # The other sessions get the revision alone: host events, the export generation and deferred work follow
+  # the Model SketchUp names, so an edit of the shown Model does not abort a hidden Model's export.
+  def test_the_other_sessions_get_only_a_revision_for_a_commit_no_operation_owns
+    shown = Sketchup.active_model
+    shown_session = Sessions.for(shown)
+    hidden_session = Sessions.for(Sketchup::Model.new)
+    generation = hidden_session.export_generation
+    heard = []
+    Sessions.on_host_event(:transaction_committed) { |session| heard << session }
+
+    shown_session.observers.model.onTransactionCommit(shown)
+
+    assert_equal [[shown_session], generation], [heard, hidden_session.export_generation]
+  end
+
+  # Native Undo and Redo act on the shown Model only, so their callbacks stay with it.
+  def test_undo_and_redo_with_two_models_open_advance_only_the_shown_session
+    shown = Sketchup.active_model
+    shown_session = Sessions.for(shown)
+    hidden_session = Sessions.for(Sketchup::Model.new)
+    revisions = [shown_session.revision, hidden_session.revision]
+
+    shown_session.observers.model.onTransactionUndo(shown)
+    shown_session.observers.model.onTransactionRedo(shown)
+
+    assert_equal [revisions[0] + 2, revisions[1]], [shown_session.revision, hidden_session.revision]
   end
 
   # SketchUp 26.1.188 reports an aborted operation as an Undo (context/SKETCHUP_HOST_BEHAVIOR.md);

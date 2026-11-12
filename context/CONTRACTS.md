@@ -302,6 +302,21 @@ and Redo, and an edit-path change. Display preferences do not advance it. A whol
 deliberately conservative: an unrelated edit may invalidate a proposal. Commit-time reference,
 edit-path and value checks still run when the revision matches.
 
+SketchUp reports an outside script's operation on a Model it is not showing, and that Model's edit-path
+changes, to the shown Model's observers and never to the Model changed (`context/SKETCHUP_HOST_BEHAVIOR.md`).
+A commit callback that arrives while a session is inside its own operation is that session's; no
+PH-Composer operation owns any other. With one Model open, an unowned commit is that Model's. With more than
+one open, it advances every open session's revision: an agent then meets a spurious `revision.stale`, never
+a write on a stale read. A session whose own change's commit callback is still to come takes the first
+unowned commit as that callback instead, so a late callback leaves no count behind to swallow a later
+change. Only the session of the Model SketchUp names hears the commit as a host event, with its export
+generation, deferred work and panel refresh; the others get the revision alone. So an edit of the shown
+Model does not abort another Model's export, and an outside change to a Model during its own export is not
+detected by the export. Zone names and container watching on the others run again when SketchUp next shows
+them (`model_activated`); Colour-by rebuilds on the next change it hears. Undo and Redo callbacks outside an
+own operation stay with the named Model: native Undo and Redo act on the shown Model only, and their
+subscribers rebaseline state that a Model which did not revert must keep.
+
 Dispatch runs only on the host-safe execution boundary and serializes mutations. A modal tool,
 Model transition or unsettled session refuses at once as `busy`; there is no durable queue of
 edits, and a scheduled callback revalidates when it runs. A native gesture a commit would cancel, measured

@@ -133,7 +133,7 @@ module PhComposer
     # Runs the block as an operation the extension opens outside a change request, such as deferred
     # protection. Its commit is an outside change to the revision, as a user's is; while the block runs,
     # transaction callbacks SketchUp reports to another Model's observers are this session's
-    # (context/SKETCHUP_HOST_BEHAVIOR.md, `Sessions.for_transaction`).
+    # (context/SKETCHUP_HOST_BEHAVIOR.md, `Sessions.transaction_committed`).
     def operating
       previous = @operating
       @operating = true
@@ -145,6 +145,19 @@ module PhComposer
     # True while one of this session's own operations is open: a change request or an `operating` block.
     def operating?
       @committing || @operating ? true : false
+    end
+
+    # A commit outside this session's own operation. The first ones still to come for a commit of #mutate
+    # are taken as its callbacks; any other is a change, and the revision advances. `Sessions` also calls
+    # this for a commit SketchUp reported to another open Model, which may have been this one's: then the
+    # revision is all that moves, and host events, the export generation and deferred work follow the Model
+    # SketchUp named.
+    def outside_commit
+      if @own_commits_pending.positive?
+        @own_commits_pending -= 1
+      else
+        @revision += 1
+      end
     end
 
     # Completes deferred Model work before something reads the Model as a whole.
@@ -200,13 +213,7 @@ module PhComposer
     def advance_revision_for(kind)
       case kind
       when :transaction_committed
-        if @committing
-          @commits_seen += 1
-        elsif @own_commits_pending.positive?
-          @own_commits_pending -= 1
-        else
-          @revision += 1
-        end
+        @committing ? @commits_seen += 1 : outside_commit
       when :transaction_undone
         @revision += 1 unless @committing
       when :transaction_redone, :active_path_changed
