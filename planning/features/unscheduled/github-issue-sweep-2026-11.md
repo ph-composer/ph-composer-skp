@@ -1,7 +1,7 @@
 # GitHub open-issue sweep, November 2026
 
 DATE: 2026-11-11
-STATUS: Code complete and host pass run 2026-11-11; 2026-11-12: #493 and #491 merged, LH1 passed, #455 measured with its fix in PR #498; #145 and #154 closed by Ed's decision
+STATUS: Code complete and host pass run 2026-11-11; 2026-11-12: #493 and #491 merged, LH1 passed, #455 measured with its fix in PR #498; #145 and #154 closed by Ed's decision; #455 (PR #498), #490 (PR #499) and #497 (PR #500) merged, #492 closed. Every sweep issue is closed; the native Undo check for #490 and the post-fix host check for #497 are not run
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: one per row below
 
@@ -60,12 +60,12 @@ Codex review (gpt-6.1-sol; gpt-6-astra for #473) and every thread answered.
 | [#486](https://github.com/ph-composer/ph-composer-skp/issues/486) | #487 | Spaces copy watcher Undo warnings | Merged to main, PR #488 (`f0672104`) |
 | [#482](https://github.com/ph-composer/ph-composer-skp/issues/482) | #481 | CodexConfig: backslash in a literal-string key | Merged to main through #491, PR #496 (`fcdd99ca`) |
 | [#489](https://github.com/ph-composer/ph-composer-skp/issues/489) | packet-end review of `fe3a8914` | CodexConfig: `#` comment in a multi-line array in an inline table | Merged to main through #491, PR #496 (`fcdd99ca`) |
-| [#490](https://github.com/ph-composer/ph-composer-skp/issues/490) | packet-end review of `3682e7f3` | Copy left read only with no warning after Undo/Redo of the copy then Undo of the Move | Fixed on `fix/490-copy-watch-redo`: Zones and Spaces watchers keep every repair until detach and skip absent copies (Spaces had the same prune); offline five-step tests in both suites; native Undo not run, listed under Host pass |
+| [#490](https://github.com/ph-composer/ph-composer-skp/issues/490) | packet-end review of `3682e7f3` | Copy left read only with no warning after Undo/Redo of the copy then Undo of the Move | Merged to main (PR #499, `c0d4f6bd`): Zones and Spaces watchers keep every repair until detach and skip absent copies (Spaces had the same prune); offline five-step tests in both suites; native Undo not run, listed under Host pass |
 | [#491](https://github.com/ph-composer/ph-composer-skp/issues/491) | this ledger | CodexConfig: one TOML tokenizer for the subset it reads | Ed's go-ahead 2026-11-12; merged to main, PR #496 (`fcdd99ca`), two gpt-6-astra cycles, the second clean |
 | [#492](https://github.com/ph-composer/ph-composer-skp/issues/492) | this ledger | Host pass checklist | Open; needs Ed at the Mac |
 | [#493](https://github.com/ph-composer/ph-composer-skp/issues/493) | host pass #492 | Mid-gesture guard for Scale and Rotate | Merged to main: Scale in PR #494 (`441b287a`, API 1.46), Rotate in PR #495 (`67c87df8`, API 1.47). Rotate reports tool state 0 through a turn, so writes refuse whenever the Rotate tool is selected. Host-checked 2026-11-12 on `650ba430`: refused idle and mid-turn, the turn still finished as "Undo Rotate", commit after Select |
 | [#455](https://github.com/ph-composer/ph-composer-skp/issues/455) | host pass #492 | Unattributed changes with two or more Models open: measured 2026-11-12 (a hidden Model's edits and edit-path changes reach the shown Model's observer; no `onActivePathChanged` for a hidden Model). Ed chose advance every open session's revision | PR #498 (API 1.48), host-checked by bridge, auto-merge armed 2026-11-12 |
-| [#497](https://github.com/ph-composer/ph-composer-skp/issues/497) | #498 | Colour-by drawing of a Model edited while hidden stays stale when shown: measured 2026-11-12 on 26.1.188, main `62f92e9e` (Zone mode on in the hidden Model; an outside edit advanced its revision 1 to 5 with the drawing still built at 1 and one rebuild; still stale after `onActivateModel` and on a later read) | Fix on branch `fix/497-colour-by-on-activate`: `model_activated` invalidates Colour-by, rebuilding only when the revision or view key changed. Post-fix host check not run |
+| [#497](https://github.com/ph-composer/ph-composer-skp/issues/497) | #498 | Colour-by drawing of a Model edited while hidden stays stale when shown: measured 2026-11-12 on 26.1.188, main `62f92e9e` (Zone mode on in the hidden Model; an outside edit advanced its revision 1 to 5 with the drawing still built at 1 and one rebuild; still stale after `onActivateModel` and on a later read) | Merged to main (PR #500, `251f6ed4`): `model_activated` invalidates Colour-by, rebuilding only when the revision or view key changed. Post-fix host check not run |
 
 Commits merged after their PR's second Codex cycle, covered by the packet-end review: `fe3a8914`
 (#481) and `3682e7f3` (#487); that review filed #489 and #490. `169930bb` (#480) and `34b719d2` (#463) changed only a description
