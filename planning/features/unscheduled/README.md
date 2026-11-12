@@ -11,7 +11,6 @@ requests. A packet moves into a phase directory when it is scheduled.
 | Packet | Kind | State |
 | --- | --- | --- |
 | [metr-export](metr-export/README.md) | feature | Deferred by D12; return milestone unscheduled. Holds every "Through PHX" acceptance step |
-| [agent-access-optional-slices](agent-access-optional-slices.md) | feature | Planned; four stages through pr-loop (#458) |
 | [library-skipped-rows](library-skipped-rows.md) | feature | Implemented on branch; host case pending (#379) |
 | [sketchup-2023-floor](sketchup-2023-floor/README.md) | host gate | Requested |
 | [windows-support](windows-support/README.md) | host gate | Requested |

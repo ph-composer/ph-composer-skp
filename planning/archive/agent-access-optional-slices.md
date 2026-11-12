@@ -1,15 +1,15 @@
 # Agent access: the four deferred slices
 
 DATE: 2026-11-12
-STATUS: Planned. Ed chose "plan, then build all" on 2026-11-12. Stages run one at a time through pr-loop, merge on green.
+STATUS: Complete 2026-11-12. Ed chose "plan, then build all"; S1 to S3 merged (PRs #501, #502, #503, API 1.49 to 1.51), S4 closed by measurement; #458 closed.
 ISSUE: [#458](https://github.com/ph-composer/ph-composer-skp/issues/458)
 
 ## Why
 
 The agent-workflows packet deferred four optional slices
-([archive](../../archive/agent-workflows-2026-11/phases/aw-09-host-collaboration.md), D07, D08, D15-e).
+([archive](agent-workflows-2026-11/phases/aw-09-host-collaboration.md), D07, D08, D15-e).
 Ed selected all four. Each stage is independent. All four touch `agent_access/tools.rb`, `shell/api.rb`
-(one API minor version each) and [AGENT_INTERFACE](../../../context/AGENT_INTERFACE.md), so they run in
+(one API minor version each) and [AGENT_INTERFACE](../../context/AGENT_INTERFACE.md), so they run in
 sequence from fresh main, never stacked.
 
 ## Fixed constraints
@@ -124,5 +124,5 @@ here.
 | --- | --- | --- |
 | S1 expected revision | Merged to main 2026-11-12 (API 1.49): checked in `Export::Tasks#start` after settle and again in each reading slice; 4 tests in `tests/export_tasks_test.rb` plus the agent-tool route in `tests/export_diagnostics_test.rb`; `make ci` green (2824 Ruby runs, 876 JS, 264 Python) | [#501](https://github.com/ph-composer/ph-composer-skp/pull/501) |
 | S2 operation history | Merged to main 2026-11-12 (API 1.50): `make ci` green, 11 tests in `tests/agent_access_outcome_history_test.rb`; Codex review (gpt-6.1-sol) 2 P2 fixed | [#502](https://github.com/ph-composer/ph-composer-skp/pull/502) |
-| S3 artifact bytes | Implemented on branch `feature/458-s3-artifact-bytes` (API 1.51): client measurement above; `make ci` green (2842 Ruby runs, 876 JS, 264 Python); 3 tests in `tests/capture_command_test.rb`, 2 in `tests/export_tasks_test.rb`, the agent route's `artifact.none` in `tests/export_diagnostics_test.rb`; Codex review (gpt-6-astra) P1, P2 and P3 fixed | [#503](https://github.com/ph-composer/ph-composer-skp/pull/503) |
+| S3 artifact bytes | Merged to main 2026-11-12 (`ae2b3822`, API 1.51): client measurement above; `make ci` green (2842 Ruby runs, 876 JS, 264 Python); 3 tests in `tests/capture_command_test.rb`, 2 in `tests/export_tasks_test.rb`, the agent route's `artifact.none` in `tests/export_diagnostics_test.rb`; Codex review (gpt-6-astra) P1, P2 and P3 fixed | [#503](https://github.com/ph-composer/ph-composer-skp/pull/503) |
 | S4 overlay capture | Closed by measurement 2026-11-12: an in-process window capture is refused without Screen Recording permission and brings up the system's permission flow; geometry-only kept, limit in AGENT_INTERFACE | none |
