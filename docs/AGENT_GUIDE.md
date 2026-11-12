@@ -155,6 +155,16 @@ that pages or fragments what was left out. Fragments join and check exactly as a
   row, such as a Floor Segment's `["loops_m"]` when it has too many holes for
   `ph_composer.spaces.floor_segments.list` with `fields` `["loops_m"]`.
 
+## Seeing the view
+
+`ph_composer.view.capture`, called with `view` under the `capture` grant, writes a PNG of the current
+view and answers its path, SHA-256 and size, and the revision, camera, edit path and selection it was
+taken at. Pass `inline` `true` to receive the image itself beside the result, to look at without
+reading a file; it takes nothing from the reply budget. A capture over 2 MiB refuses
+`capture.too_large`, and its `detail` gives a smaller `width` and `height` to ask for. The image shows
+the Model's geometry only: PH-Composer's colouring, tool drawing and panels are not in it
+(`overlays: "not_included"`). A capture moves nothing.
+
 ## When something goes wrong
 
 - **Refused.** Read `code` and `message`; `describe` lists what each operation can refuse. Nothing
@@ -480,9 +490,12 @@ cursors belong to the task, so an edit made after the run does not expire them; 
 your token and the Model staying open do. A part before the task ends refuses `task.running`. While `cancellable` is true, `cancel_export` with the
 task's `task_id` stops it and writes nothing; once writing has started it finishes, and polling shows
 its outcome. Cancelling or dropping your own request does not cancel the task. When it is `export.complete`, `artifacts` gives each
-file's path on this computer, SHA-256 and size, for you alone. The connection returns the path, not
-the file: read it with your client's own file tools and compare the hash before parsing it. A client
-that cannot read local files cannot check the file. A later export to the same destination replaces it.
+file's path on this computer, SHA-256 and size, for you alone. Read the HBJSON with your client's own
+file tools and compare the hash before parsing it, or, while the task is kept, with `export_status` and
+`part` `"file"`: the file's text in fragments, with the receipt's `file.sha256` and `bytes`. Joined, the
+fragments are one JSON string; parse it, and its UTF-8 bytes hash to `file.sha256`. A file that changed
+or went since refuses `artifact.changed`, and a task that wrote no file refuses `artifact.none`. A later
+export to the same destination replaces it.
 
 Metadata is not exported just because it is stored. Where a feature exports a record's `user_data`
 (today Zones, Faces, Window Units, Assemblies, Spaces, Volumes and Floor Segments), it passes through

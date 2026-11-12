@@ -422,6 +422,50 @@ class ExportTasksTest < PhComposerTestCase
     assert_equal "params.invalid", error.code
   end
 
+  # The file part reads the HBJSON the run wrote from its receipt's own path: the joined text is the file and
+  # hashes to the receipt. A changed or removed file refuses; the owner, the running state and retention bound
+  # it as they bound every part.
+  def test_a_written_task_reads_its_hbjson_back_in_fragments_matching_its_receipt
+    id = start.fetch("task_id")
+    assert_equal "task.running", refusal { @tasks.status(id, OWNER, "part" => "file") }
+    drain
+    @runtime.success_with({ "type" => "Model", "rooms" => [], "display_name" => "Raum \u00e9" * 4000 })
+    drain
+    receipt = @tasks.status(id, OWNER).dig("outcome", "value", "artifacts", "hbjson")
+    first = @tasks.status(id, OWNER, "part" => "file")
+    text = read_fragments(id, "file")
+
+    assert_equal File.binread(@destination).force_encoding(Encoding::UTF_8), text
+    assert_equal receipt.fetch("sha256"), Digest::SHA256.hexdigest(text)
+    assert_equal receipt.slice("sha256", "bytes"), first.fetch("file")
+    assert first.fetch("next_cursor"), "a file over one fragment reads in several"
+    other = PhComposer::Export::Tasks::Owner.new("someone-else", -> { true })
+    assert_equal "task.foreign", refusal { @tasks.status(id, other, "part" => "file") }
+    assert_equal "params.invalid", refusal { @tasks.status(id, OWNER, "part" => "file", "limit" => 1) }
+
+    File.binwrite(@destination, File.binread(@destination).sub("Model", "Modal"))
+    assert_equal "artifact.changed",
+                 refusal { @tasks.status(id, OWNER, "part" => "file", "cursor" => first.fetch("next_cursor")) }
+    File.delete(@destination)
+    assert_equal "artifact.changed", refusal { @tasks.status(id, OWNER, "part" => "file") }
+    now = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    Process.stub(:clock_gettime, ->(*) { now + PhComposer::Export::Tasks::RETENTION_SECONDS + 1 }) do
+      assert_equal "task.expired", refusal { @tasks.status(id, OWNER, "part" => "file") }
+    end
+  end
+
+  def test_a_task_that_wrote_no_file_has_none_to_read
+    blocked = start.fetch("task_id")
+    drain
+    @runtime.blocked
+    drain
+    cancelled = start.fetch("task_id")
+    @tasks.cancel(cancelled, OWNER)
+
+    assert_equal %w[artifact.none artifact.none],
+                 [blocked, cancelled].map { |id| refusal { @tasks.status(id, OWNER, "part" => "file") } }
+  end
+
   # A write the filesystem refuses fails in fixed words: neither the status nor the latest task names
   # the destination folder or file.
   def test_a_failed_pair_write_names_no_path
@@ -762,6 +806,13 @@ class ExportTasksTest < PhComposerTestCase
     @session.model.start_operation("External edit")
     @session.model.set_attribute("test", "value", @session.revision)
     @session.model.commit_operation
+  end
+
+  def refusal
+    yield
+    flunk "expected a refusal"
+  rescue PhComposer::CodedError => error
+    error.code
   end
 
   # A part a task kept, its fragments joined and parsed.

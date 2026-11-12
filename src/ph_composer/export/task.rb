@@ -44,8 +44,7 @@ module PhComposer
         @prior = ArtifactPair.state(@destination)
         consent!(approval) if @prior
         @runtime_factory = runtime_factory || ->(&callback) {
-          RuntimeHost.new(:session_id => session.id,
-                          :on_message => callback)
+          RuntimeHost.new(:session_id => session.id, :on_message => callback)
         }
         @timer = CoalescedTimer.new
         @retained = RunDiagnostics.new
@@ -101,10 +100,11 @@ module PhComposer
 
       # One part of what the run kept when it ended, read for `request` (Export::DiagnosticPages::Request),
       # never from the Model and never by translating again: a page of its findings, one finding whole
-      # (`row`), or the generated report or compact result as fragments.
+      # (`row`), the generated report or compact result as fragments, or the HBJSON file it wrote.
       def diagnostic(request, part)
         raise Blocked.new("task.running", "That export has not finished; poll export_status.") unless terminal?
         return outcome_part(request) if part == "outcome"
+        return WrittenFile.part(request, @artifacts&.fetch("hbjson")) if part == "file"
 
         @retained.read(request, part)
       end

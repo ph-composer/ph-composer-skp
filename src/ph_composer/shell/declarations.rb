@@ -15,9 +15,9 @@ module PhComposer
     # and codes"). Foundation and shared-noun codes are listed there instead.
     Code = Struct.new(:code, :owner, :description, keyword_init: true)
     # The nouns of the codes listed in context/CONTRACTS.md, which no feature may declare under.
-    FOUNDATION_CODE_NOUNS = %w[access copy dependency export extension geometry identity library location object
-                               operation params payload proposal query record reference registration request revision
-                               runtime scope section selection session target task validation].freeze
+    FOUNDATION_CODE_NOUNS = %w[access artifact copy dependency export extension geometry identity library location
+                               object operation params payload proposal query record reference registration request
+                               revision runtime scope section selection session target task validation].freeze
     # Every code that table lists, so registration can check an operation's `refuses:` list against it.
     # The table stays the readable authority; tests/outcome_codes_test.rb keeps the two equal.
     FOUNDATION_CODES = %w[
@@ -47,6 +47,7 @@ module PhComposer
       export.blocked export.busy export.cancelled export.failed export.refused export.model_changed
       export.destination_changed export.replace_required export.privacy_undeclared export.relevance_unknown
       export.metadata_omitted export.user_data_passed export.revoked task.expired task.foreign task.running
+      artifact.none artifact.changed
       library.adapter_invalid library.assignment_unavailable library.callback_invalid library.catalog_budget
       library.catalog_stale library.catalog_too_large library.catalog_too_many_rows library.connection_changed
       library.connection_required library.credential_store_failed library.credential_store_unavailable

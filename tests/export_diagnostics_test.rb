@@ -146,6 +146,7 @@ class ExportDiagnosticsTest < PhComposerTestCase
     assert_equal "target.not_found", absent.fetch("code")
     assert_includes absent.fetch("message"), "before translation"
     assert_equal 0, agent("export_status", "task_id" => task, "part" => "findings").dig("value", "total")
+    assert_equal "artifact.none", agent("export_status", "task_id" => task, "part" => "file").fetch("code")
 
     other = token(%w[read export])
     foreign = @executor.call(other, "export_status", "session" => @session.id, "task_id" => task, "part" => "findings")
