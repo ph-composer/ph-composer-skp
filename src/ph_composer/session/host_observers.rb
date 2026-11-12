@@ -114,8 +114,8 @@ module PhComposer
       end
     end
 
-    # The active tool and its state: a commit cancels a Move partway through, so a change request waits
-    # for the user (ModelSession#gesture_reason). A newly chosen tool starts in state 0.
+    # The active tool and its state: a commit cancels a Move or Scale partway through, so a change request
+    # waits for the user (ModelSession#gesture_reason). A newly chosen tool starts in state 0.
     class ToolsObserver < Sketchup::ToolsObserver
       def initialize(model)
         super()

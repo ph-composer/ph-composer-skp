@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 45
+    MINOR = 46
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -226,7 +226,10 @@ module PhComposer
         "change" => "A create or duplicate names its records from the session, revision, action and params, so a " \
                     "preview run again and its invoke name the same ids and a create's preview parts read across " \
                     "calls. Registration refuses a feature id, name, wire kind or code longer than 1,024 bytes " \
-                    "as registration.schema_invalid." }
+                    "as registration.schema_invalid." },
+      { "minor" => 46, "date" => "2026-11-11",
+        "change" => "Every action also refuses session.busy while the user is partway through a Scale in " \
+                    "SketchUp, as for a Move; context readiness and discover's session busy say so." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {
