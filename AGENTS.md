@@ -128,23 +128,6 @@ shared review and polish process without widening scope.
 ## Repository map
 
 `src/ph_composer/` is the shipping extension. `PhComposer` and the `ph_composer` prefix are the
-working namespace D8 confirmed; the final public name is still open. The following owners are implemented:
-
-| Path | Owns |
-| --- | --- |
-| `extension.rb` | The composition root: the feature list (`FEATURES`), the foundation capabilities (`FOUNDATION_FEATURES`) and the load order |
-| `core/` | What several features need and none owns: the record engine, dictionaries, JSON and declaration-schema builders, geometry and units primitives, model operations |
-| `session/` | One `ModelSession` per open Model, its generation, observers and per-feature state objects. Names no feature |
-| `shell/` | Transport and the action registry: the panel dialog, actions, commands, preferences. Names no feature |
-| `features/` | One folder per feature, each registering itself in one `install`. `zones/` owns Zones, Faces and adjacency; `assemblies/` owns Materials and Assemblies; `windows/` owns products, Types, Units and Aperture export; `thermal_bridges/` owns Thermal Bridge Types, Edge assignments, runs, the edge tool and the thermal-bridge export section |
-| `colour_by/` | The shared Colour-by service: the mode registry's consumers, the viewport overlay and HUD, and the drawing cache. Names no feature |
-| `library/` | The optional provider seam, file/folder provider, catalog/copy coordinator and model-library export |
-| `agent_access/` | Local agent access: the token store and the Agent Access dialog, a foundation capability with no public operation |
-| `export/` | The export run: contributors, the attribute guard, artifact hygiene, the report, and the exporter registry |
-| `html/` | The panel: the UI kit at its top level (a module graph with a generated script list and owned stylesheets), the foundation's screens in `sections/` and `library/`, one folder per feature in `features/`, and other dialogs' pages in their own folder with a generated script list (`agent_access/`) |
-| `python/`, `runtime/`, `vendor/` | The translation package and exporter registry (no exporter registered yet), the Pyodide loader and the pinned payload |
-
-Outside it: `tests/` for the offline suites and fixtures, `tools/` for development-only build,
-runtime, UI-preview and hostkit tooling that never ships, `docs/` for the product written for a
-reader who is not building it, `context/` for the durable authorities, and `planning/` for active
-plans and archived evidence.
+working namespace D8 confirmed; the final public name is still open. Its owners and layer
+boundaries are in `context/TECH_STACK.md` and `context/EXTENSIBILITY.md`. `tools/` is
+development-only build, runtime, UI-preview and hostkit tooling that never ships.
