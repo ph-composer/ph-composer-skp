@@ -53,6 +53,15 @@ class SpacesCopyWatchTest < PhComposerTestCase
     copy
   end
 
+  def invoke(name, params)
+    API.invoke(:context => @context, :name => name, :params => params,
+               :request => { "sequence" => 1, "expected_revision" => @session.revision })
+  end
+
+  def undo_warnings
+    @notices.map(&:last).grep(/\AUndo also took back/)
+  end
+
   def spaces
     API.query(:context => @context, :name => "ph_composer.spaces.all").dig("value", "spaces")
   end
@@ -178,6 +187,44 @@ class SpacesCopyWatchTest < PhComposerTestCase
     assert_empty(@notices.select { |tone, _message| tone == :warning })
     @model.undo
     assert_includes @notices.last.last, "Undo also took back"
+  end
+
+  # A Space record that does not read at one Undo is no evidence the copies left: a later Undo that takes
+  # back an earlier repair still warns.
+  def test_an_unreadable_space_at_one_undo_keeps_the_remembered_repairs
+    copy_in_operation(@space, 120)
+    @model.start_operation("Other")
+    @model.commit_operation
+    UI.run_timers
+    stray = Sketchup::Group.new(700, Sketchup::Entities.new([]))
+    stray.set_attribute(SPACES::SPACE_STORE.dictionary, SPACES::SPACE_STORE.key, "{not json")
+    @model.start_operation("Stray")
+    @model.entities << stray
+    @model.commit_operation
+    @model.start_operation("Later")
+    @model.commit_operation
+    2.times { @model.undo }
+    assert_empty undo_warnings, "the stray read nothing, then read again with the repair still in place"
+    @model.undo
+    assert_equal 1, undo_warnings.length
+  end
+
+  # A copy made independent again by the row's command is no longer a copy, so a later Undo of an unrelated
+  # change does not say it is.
+  def test_an_undo_after_the_explicit_repair_does_not_warn_again
+    copy_in_operation(@space, 120)
+    @model.start_operation("Other")
+    @model.commit_operation
+    UI.run_timers
+    @model.undo
+    reference = spaces.find { |row| row.dig("reference", "entity_path") == [100, 120] }.fetch("reference")
+    result = invoke(SPACES::CopyWatch::ACTION, "reference" => reference)
+    assert_equal "completed", result.fetch("status"), result.inspect
+    @model.start_operation("Later")
+    @model.commit_operation
+    warned = undo_warnings.length
+    @model.undo
+    assert_equal warned, undo_warnings.length
   end
 
   def test_a_cut_and_paste_leaves_no_duplicate_and_nothing_is_queued

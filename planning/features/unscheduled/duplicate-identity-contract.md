@@ -273,8 +273,10 @@ Source line numbers above are `78bc5749`, before these fixes.
    Spaces, each Undo that leaves a copy reverted warns again; a copy counts as reverted only while it
    shares its id again, so one the row's command repaired since does not warn (`tests/zone_copy_watch_test.rb`,
    `test_an_undo_of_an_earlier_batch_still_warns`, `test_an_undo_after_the_explicit_repair_does_not_warn_again`).
-   Spaces, which still lacks that second check (#486):
-   `tests/spaces_copy_watch_test.rb`, `test_an_undo_of_an_earlier_batch_still_warns`.
+   Spaces now takes the same check and, like Zones, keeps every remembered repair when the Undo's read
+   finds nothing (#486): `tests/spaces_copy_watch_test.rb`, `test_an_undo_of_an_earlier_batch_still_warns`,
+   `test_an_undo_after_the_explicit_repair_does_not_warn_again`,
+   `test_an_unreadable_space_at_one_undo_keeps_the_remembered_repairs`.
 4. **Windows `ZoneCopy` keeper. Pinned.** Two Units inside a copied Zone sharing an id held nowhere
    outside both keep it through Make Zone independent, read `window.copy_id_pending`, and the next
    `repair_copied_identities` renames the second by path (`tests/window_zone_copy_test.rb`,
