@@ -7,6 +7,7 @@ the client's own decisions, not the machine it usually talks to.
 
 from __future__ import annotations
 
+import argparse
 import contextlib
 import json
 import os
@@ -519,6 +520,175 @@ class StalledLaunchTest(unittest.TestCase):
             self.assertEqual(hb.raise_document("2026"), str(timeout))
 
 
+class ShowModelTest(unittest.TestCase):
+    """show-model fronts SketchUp only for exactly one matching window, waits for the switch, and hands focus
+    back by process name once a raise was attempted. osascript, the bridge and the clock are stubbed."""
+
+    WINDOW = 'b07 "draft" - SketchUp Pro 2026'
+    OTHER = "a09 - SketchUp Pro 2026"
+
+    def show(
+        self,
+        windows: list[str] | None = None,
+        raised: subprocess.CompletedProcess[str] | None = None,
+        titles: list[object] | None = None,
+        frontmost: list[str] | None = None,
+        wanted: str = 'B07 "draft"',
+        deadline: float = 5.0,
+        read_takes: float = 0.0,
+        interrupt: str | None = None,
+    ) -> tuple[dict[str, object], list[list[str]]]:
+        """`windows` answers the listing, `raised` the raise, `titles` each title read, `frontmost` each
+        frontmost read; each read takes `read_takes` seconds, and the first call of the script labelled
+        `interrupt` raises KeyboardInterrupt. Failures come back as osascript gives them: a non-zero exit."""
+        calls: list[list[str]] = []
+        listing = "\n".join(windows if windows is not None else [self.OTHER, self.WINDOW])
+        title_reads = iter(titles if titles is not None else ["a09", 'b07 "draft"'])
+        frontmost_reads = iter(frontmost if frontmost is not None else ["Rhinoceros", "Rhinoceros"])
+        clock = FakeClock()
+
+        def run(command: list[str], **_options: object) -> subprocess.CompletedProcess[str]:
+            nonlocal interrupt
+            calls.append(command)
+            script = command[2]
+            if interrupt is not None and self.scripts([command]) == [interrupt]:
+                interrupt = None
+                raise KeyboardInterrupt
+            if script == hb.FRONTMOST_PROCESS:
+                return subprocess.CompletedProcess(command, 0, f"{next(frontmost_reads, '')}\n", "")
+            if script == hb.DOCUMENT_WINDOWS:
+                return subprocess.CompletedProcess(command, 0, f"{listing}\n", "")
+            if script == hb.RAISE_WINDOW:
+                return raised or subprocess.CompletedProcess(command, 0, "phc_raised\n", "")
+            return subprocess.CompletedProcess(command, 0, "", "")
+
+        def read(code: str, _timeout: float) -> object:
+            self.assertEqual(code, hb.ACTIVE_TITLE)
+            clock.sleep(read_takes)
+            answer = next(title_reads, "a09")
+            if isinstance(answer, BaseException):
+                raise answer
+            return answer
+
+        with (
+            patch.object(hb.subprocess, "run", side_effect=run),
+            patch.object(hb, "bridge_read", return_value=read),
+            patch.object(hb.time, "monotonic", clock.monotonic),
+            patch.object(hb.time, "sleep", clock.sleep),
+        ):
+            return hb.show_model("2026", wanted, deadline), calls
+
+    def scripts(self, calls: list[list[str]]) -> list[str]:
+        names = {
+            hb.FRONTMOST_PROCESS: "frontmost",
+            hb.DOCUMENT_WINDOWS: "list",
+            hb.RAISE_WINDOW: "raise",
+            hb.FRONT_PROCESS: "restore",
+        }
+        return [names[command[2]] for command in calls]
+
+    def test_one_matching_window_is_raised_the_switch_awaited_and_focus_handed_back_by_process_name(self) -> None:
+        result, calls = self.show()
+        self.assertEqual(
+            result,
+            {
+                "ending": "shown",
+                "wanted": 'B07 "draft"',
+                "window": self.WINDOW,
+                "before": "a09",
+                "shown": 'b07 "draft"',
+                "previous": "Rhinoceros",
+                "restored": True,
+                "error": None,
+            },
+        )
+        self.assertEqual(self.scripts(calls), ["frontmost", "list", "raise", "restore", "frontmost"])
+        # Values travel as argv after `--`, never inside a script's source.
+        self.assertEqual(calls[2][3:], ["--", self.WINDOW])
+        self.assertEqual(calls[3][3:], ["--", "Rhinoceros"])
+
+    def test_no_match_or_more_than_one_match_is_refused_without_fronting_or_restoring(self) -> None:
+        for windows, wanted, error in (
+            ([self.OTHER], "b07", "no document window's title contains"),
+            # Only the title part counts: the suffix would match a window the Model's title never contains.
+            ([self.OTHER, self.WINDOW], "SketchUp Pro", "no document window's title contains"),
+            ([self.WINDOW, 'b07 "draft" copy - SketchUp Pro 2026'], "b07", "more than one document window"),
+            # An unsaved Model's Ruby title is empty, so its switch could never be confirmed.
+            ([self.OTHER, "Untitled - SketchUp Pro 2026"], "untitled", "an unsaved Model cannot be confirmed"),
+        ):
+            result, calls = self.show(windows=windows, wanted=wanted)
+            self.assertEqual(result["ending"], "refused", wanted)
+            self.assertIn(error, str(result["error"]))
+            self.assertEqual((result["restored"], result["shown"]), (None, None))
+            self.assertEqual(self.scripts(calls), ["frontmost", "list"])
+
+    def test_nothing_is_fronted_when_a_check_before_the_raise_fails(self) -> None:
+        cases = (
+            ("unreadable frontmost", lambda: self.show(frontmost=[""]), "refused", ["frontmost"]),
+            ("no bridge", lambda: self.show(titles=[ConnectionError("no bridge")]), "bridge_unavailable", []),
+            ("blank text", lambda: self.show(wanted="  "), "refused", []),
+            ("NaN deadline", lambda: self.show(deadline=float("nan")), "refused", []),
+            ("zero deadline", lambda: self.show(deadline=0.0), "refused", []),
+            ("long deadline", lambda: self.show(deadline=hb.MAX_SHOW_DEADLINE_S + 1), "refused", []),
+        )
+        for label, show, ending, scripts in cases:
+            result, calls = show()
+            self.assertEqual((result["ending"], self.scripts(calls)), (ending, scripts), label)
+
+    def test_a_raise_that_fails_still_hands_focus_back(self) -> None:
+        # The raise fronts SketchUp before AXRaise, so a failure after it may already have changed the screen.
+        failed = subprocess.CompletedProcess([], 1, "", "execution error: AXRaise failed (-1719)\n")
+        result, calls = self.show(raised=failed)
+        self.assertEqual((result["ending"], result["restored"]), ("raise_failed", True))
+        self.assertIn("AXRaise failed", str(result["error"]))
+        self.assertEqual(self.scripts(calls)[-2:], ["restore", "frontmost"])
+
+    def test_a_switch_that_never_comes_ends_at_the_deadline_and_still_hands_focus_back(self) -> None:
+        result, calls = self.show(titles=["a09"] * 100)
+        self.assertEqual((result["ending"], result["shown"], result["restored"]), ("timed_out", "a09", True))
+        self.assertEqual(self.scripts(calls)[-2:], ["restore", "frontmost"])
+        for failure, ending in (
+            (hb.host_wait.ReadError("NoMethodError"), "read_failed"),
+            (ConnectionResetError("the bridge went away"), "bridge_unavailable"),
+            (KeyboardInterrupt(), "cancelled"),
+        ):
+            result, _calls = self.show(titles=["a09", failure])
+            self.assertEqual((result["ending"], result["restored"]), (ending, True))
+
+    def test_a_matching_reply_that_arrives_after_the_deadline_is_timed_out_not_shown(self) -> None:
+        result, _calls = self.show(titles=["a09", "a09", 'b07 "draft"'], read_takes=3.0, deadline=5.0)
+        self.assertEqual((result["ending"], result["restored"]), ("timed_out", True))
+        self.assertIn("after the deadline", str(result["error"]))
+
+    def test_an_interrupt_anywhere_reports_cancelled_and_hands_focus_back_once_a_raise_was_tried(self) -> None:
+        result, calls = self.show(titles=[KeyboardInterrupt()])
+        self.assertEqual((result["ending"], result["restored"], calls), ("cancelled", None, []))
+        result, calls = self.show(interrupt="raise")
+        self.assertEqual((result["ending"], result["restored"]), ("cancelled", True))
+        self.assertEqual(self.scripts(calls)[-2:], ["restore", "frontmost"])
+        # An interrupt that cuts the restore short is followed by one more restore, and still cancels.
+        result, calls = self.show(interrupt="restore")
+        self.assertEqual((result["ending"], result["restored"]), ("cancelled", True))
+        self.assertEqual(self.scripts(calls)[-3:], ["restore", "restore", "frontmost"])
+
+    def test_a_restore_that_does_not_take_reports_restored_false(self) -> None:
+        result, calls = self.show(frontmost=["Rhinoceros"] + ["SketchUp"] * 20)
+        self.assertEqual((result["ending"], result["restored"]), ("shown", False))
+        self.assertEqual(self.scripts(calls).count("frontmost"), 1 + hb.RESTORE_CHECKS + 1)
+
+    def test_the_command_exits_zero_only_when_shown_and_restored(self) -> None:
+        args = argparse.Namespace(title="b07", deadline=5.0)
+        for result, code in (
+            ({"ending": "shown", "restored": True}, 0),
+            ({"ending": "shown", "restored": False}, 1),
+            ({"ending": "raise_failed", "restored": True}, 1),
+            ({"ending": "refused", "restored": None}, 1),
+            ({"ending": "bridge_unavailable", "restored": None}, 2),
+        ):
+            with patch.object(hb, "show_model", return_value=result), patch("builtins.print"):
+                self.assertEqual(hb.run_show_model(args, "2026"), code, result)
+
+
 class RecoveryCopyTest(unittest.TestCase):
     def test_only_a_scratch_fixture_has_its_recovery_copy_cleared(self) -> None:
         working = hb.SUPPORT / "SketchUp 2026" / "SketchUp" / "working"
@@ -558,6 +728,7 @@ class CommandRegistryTest(unittest.TestCase):
                 "shot",
                 "key",
                 "console",
+                "show-model",
                 "wait-for",
                 "diagnostics",
                 "fault",

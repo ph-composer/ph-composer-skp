@@ -16,6 +16,7 @@ and waiting for deferred work.
     uv run tools/hostkit/host_bridge.py save
     uv run tools/hostkit/host_bridge.py shot <name> --dir <evidence-dir>
     uv run tools/hostkit/host_bridge.py key 53            # Escape, through System Events
+    uv run tools/hostkit/host_bridge.py show-model <title text>  # fronts SketchUp, then hands focus back
     uv run tools/hostkit/host_bridge.py console --tail 40  # what the Ruby Console showed
     uv run tools/hostkit/host_bridge.py wait-for session_settled --param session=<uuid> --deadline 30 --json
     uv run tools/hostkit/host_bridge.py diagnostics --session <uuid> --severity warning --json
@@ -34,6 +35,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import json
+import math
 import os
 import signal
 import socket
@@ -253,6 +255,180 @@ def raise_document(version: str) -> str:
     if done.returncode != 0:
         return (done.stderr or "").strip() or f"osascript exited {done.returncode}"
     return done.stdout.strip()
+
+
+# show-model: AXRaise the one document window whose title part (its name before " - SketchUp") contains the
+# wanted text, which makes its Model the active one and fires `onActivateModel`. The windows are listed and
+# matched before SketchUp is fronted, so a refusal leaves the screen alone. Values arrive as `argv` after `--`,
+# never in a script's source. Focus goes back by System Events process name: `tell application "Rhinoceros"`
+# names a process, not an app, and fails.
+DOCUMENT_MARK = " - SketchUp"
+UNSAVED_TITLE = "Untitled"
+DOCUMENT_WINDOWS = (
+    'tell application "System Events" to tell process "SketchUp"\n'
+    f'set names to name of (windows whose name contains "{DOCUMENT_MARK}")\n'
+    "set AppleScript's text item delimiters to linefeed\n"
+    "return names as text\n"
+    "end tell"
+)
+RAISE_WINDOW = (
+    "on run argv\n"
+    "set wanted to item 1 of argv\n"
+    'tell application "System Events" to tell process "SketchUp"\n'
+    "set matching to (windows whose name is wanted)\n"
+    'if (count of matching) is not 1 then return "phc_changed"\n'
+    "set frontmost to true\n"
+    'perform action "AXRaise" of (item 1 of matching)\n'
+    'return "phc_raised"\n'
+    "end tell\n"
+    "end run"
+)
+FRONTMOST_PROCESS = 'tell application "System Events" to get name of first process whose frontmost is true'
+FRONT_PROCESS = (
+    "on run argv\n"
+    "set wanted to item 1 of argv\n"
+    'tell application "System Events" to set frontmost of process wanted to true\n'
+    "end run"
+)
+# A lambda with a block-local variable: the bridge evaluates every call in one shared binding.
+ACTIVE_TITLE = "->(; m) { m = Sketchup.active_model; m && m.title }.call"
+SHOW_DEADLINE_S = 15.0
+MAX_SHOW_DEADLINE_S = 120.0
+SHOW_INTERVAL_S = 0.25
+RESTORE_CHECKS = 8
+
+
+def osascript(script: str, *args: str) -> tuple[bool, str]:
+    """Run one AppleScript with `args` as its argv: whether it succeeded, and its output or why it failed."""
+    try:
+        done = subprocess.run(
+            ["osascript", "-e", script, "--", *args], capture_output=True, text=True, check=False, timeout=15
+        )
+    except (subprocess.SubprocessError, OSError) as error:
+        return False, str(error)
+    if done.returncode != 0:
+        return False, (done.stderr or "").strip() or f"osascript exited {done.returncode}"
+    return True, (done.stdout or "").strip()
+
+
+def frontmost_process() -> str | None:
+    ok, name = osascript(FRONTMOST_PROCESS)
+    return name if ok and name else None
+
+
+def restore_process(name: str) -> bool:
+    """Front the process `name` and read back that it is frontmost; activation can lag the request."""
+    osascript(FRONT_PROCESS, name)
+    for _ in range(RESTORE_CHECKS):
+        if frontmost_process() == name:
+            return True
+        time.sleep(SHOW_INTERVAL_S)
+    return frontmost_process() == name
+
+
+def contains(title: str, wanted: str) -> bool:
+    """The one match rule for a window's title part and the Model's title, so both sides agree."""
+    return wanted.casefold() in title.casefold()
+
+
+def wait_for_title(
+    read: Callable[[str, float], Any], wanted: str, deadline_s: float
+) -> tuple[str, str | None, str | None]:
+    """Poll the active Model's title until it contains `wanted` under one deadline: the ending (`shown`,
+    `timed_out`, `read_failed` or `bridge_unavailable`), the last title read, and why it ended when it was
+    not shown. A reply that arrives after the deadline is `timed_out`, never `shown`."""
+    started = time.monotonic()
+    title: str | None = None
+    while True:
+        remaining = deadline_s - (time.monotonic() - started)
+        if remaining <= 0:
+            return "timed_out", title, "the active Model's title never contained the wanted text"
+        try:
+            observed = read(ACTIVE_TITLE, remaining)
+        except host_wait.ReadError as error:
+            return "read_failed", title, str(error)
+        except TimeoutError:
+            return "timed_out", title, "the last read did not answer within the remaining budget"
+        except OSError as error:
+            return "bridge_unavailable", title, str(error)
+        title = observed if isinstance(observed, str) else None
+        if time.monotonic() - started > deadline_s:
+            return "timed_out", title, "the last read answered after the deadline"
+        if title is not None and contains(title, wanted):
+            return "shown", title, None
+        time.sleep(min(SHOW_INTERVAL_S, max(0.0, deadline_s - (time.monotonic() - started))))
+
+
+def show_model(version: str, wanted: str, deadline_s: float) -> dict[str, Any]:
+    """Show the Model whose document window's title part contains `wanted`, then hand focus back to the
+    process that had it. Refuses, without fronting SketchUp, when no window or more than one matches, the
+    bridge is not answering, or the frontmost process cannot be read (focus could not go back). Once a raise
+    is attempted, focus is handed back on every path. `deadline_s` bounds the wait for the switch only."""
+    result: dict[str, Any] = {
+        "ending": "refused",
+        "wanted": wanted,
+        "window": None,
+        "before": None,
+        "shown": None,
+        "previous": None,
+        "restored": None,
+        "error": None,
+    }
+    if not wanted.strip():
+        return result | {"error": "the wanted title text is empty"}
+    if not (math.isfinite(deadline_s) and 0 < deadline_s <= MAX_SHOW_DEADLINE_S):
+        return result | {"error": f"the deadline must be above 0 and at most {MAX_SHOW_DEADLINE_S:.0f} seconds"}
+    try:
+        raise_and_wait(version, wanted, deadline_s, result)
+    except KeyboardInterrupt:
+        result |= {"ending": "cancelled", "error": "interrupted by the developer"}
+    return result
+
+
+def raise_and_wait(version: str, wanted: str, deadline_s: float, result: dict[str, Any]) -> None:
+    """show_model's steps, filling `result` in place as they go, so an interrupt still reports what was done."""
+    read = bridge_read(version)
+    try:
+        result["before"] = read(ACTIVE_TITLE, 10.0)
+    except host_wait.ReadError as error:
+        result["error"] = f"the active Model's title could not be read: {error}"
+        return
+    except OSError as error:
+        result |= {"ending": "bridge_unavailable", "error": str(error)}
+        return
+    if (previous := frontmost_process()) is None:
+        result["error"] = "the frontmost process could not be read, so focus could not be handed back"
+        return
+    result["previous"] = previous
+    ok, listing = osascript(DOCUMENT_WINDOWS)
+    if not ok:
+        result["error"] = f"the document windows could not be read: {listing}"
+        return
+    windows = [name for name in listing.splitlines() if DOCUMENT_MARK in name]
+    matching = [name for name in windows if contains(name.rpartition(DOCUMENT_MARK)[0], wanted)]
+    if not matching:
+        result["error"] = f"no document window's title contains the wanted text; open: {windows}"
+        return
+    if len(matching) > 1:
+        result["error"] = f"more than one document window matches: {matching}"
+        return
+    if matching[0].startswith(UNSAVED_TITLE):
+        # An unsaved Model's Ruby title is empty, so its switch could never be confirmed.
+        result["error"] = f"an unsaved Model cannot be confirmed by its title: {matching[0]}"
+        return
+    result["window"] = matching[0]
+    try:
+        ok, answer = osascript(RAISE_WINDOW, matching[0])
+        if ok and answer == "phc_raised":
+            result["ending"], result["shown"], result["error"] = wait_for_title(read, wanted, deadline_s)
+        else:
+            result |= {"ending": "raise_failed", "error": f"the window could not be raised: {answer}"}
+    finally:
+        try:
+            result["restored"] = restore_process(previous)
+        except KeyboardInterrupt:  # restore once more, then let the interrupt end the command as cancelled
+            result["restored"] = restore_process(previous)
+            raise
 
 
 def run_with_dialog_guard(version: str, code: str, timeout: float = 120.0, escape_after: float = 3.0) -> str:
@@ -553,6 +729,19 @@ def run_console(args: argparse.Namespace, version: str) -> None:
     print(tail(path, args.tail))
 
 
+def configure_show_model(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("title", help="text the document window's name and the Model's title both contain")
+    parser.add_argument("--deadline", type=float, default=SHOW_DEADLINE_S, help="seconds to wait for the switch")
+
+
+def run_show_model(args: argparse.Namespace, version: str) -> int:
+    result = show_model(version, args.title, args.deadline)
+    print(json.dumps(result, indent=2, allow_nan=False))
+    if result["ending"] == "bridge_unavailable":
+        return 2
+    return 0 if result["ending"] == "shown" and result["restored"] else 1
+
+
 def configure_wait_for(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("condition", help=f"one of {', '.join(sorted(host_wait.CONDITIONS))}")
     parser.add_argument("--param", action="append", default=[], metavar="NAME=VALUE")
@@ -672,6 +861,7 @@ COMMANDS: dict[str, tuple[Callable[[argparse.ArgumentParser], None], Callable[..
     "shot": (configure_shot, run_shot),
     "key": (configure_key, run_key),
     "console": (configure_tail(40), run_console),
+    "show-model": (configure_show_model, run_show_model),
     "wait-for": (configure_wait_for, run_wait_for),
     "diagnostics": (configure_diagnostics, run_diagnostics),
     "fault": (configure_fault, run_fault),
