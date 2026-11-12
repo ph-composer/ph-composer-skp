@@ -82,11 +82,13 @@ As built (API 1.51):
   capture can go inline, with a margin over two to the measured 5 MB. So `inline` adds no second size rule;
   `capture.too_large` now names a smaller `width` and `height` in its message and `detail`.
 - **Shape departure:** the image rides in the result's value as `inline_image` (`mime_type`, base64
-  `data`; `shell/inline_image.rb`), and the executor moves any completed value's `inline_image` into the MCP
-  `image` block before measuring the 24 KiB budget, refusing one over the cap as
-  `request.response_too_large`. A handler returns only its value, so this is the one place it can put the
-  image without changing dispatch, and the executor names no operation: any view command or query may
-  declare the key. A Ruby caller gets the base64 in the value.
+  `data`; `shell/inline_image.rb`). The executor always takes it out of `structuredContent` before measuring
+  the 24 KiB budget, and sends it as the MCP `image` block only for a view command whose declared grant is
+  `capture` (read through `API.describe`) and only up to the cap; otherwise it is left out and named in
+  `detail.omitted`, the outcome otherwise unchanged (the Codex review's P1 and P2 on #503: a committed
+  outcome must not become a refusal, and image bytes stay under `capture`). A handler returns only its
+  value, so this is the one place it can put the image without changing dispatch. A Ruby caller gets the
+  base64 in the value.
 - **File part departure:** the HBJSON travels as one JSON string in fragments (`Fragments.read`, as the
   `report` part does), so the fragment `sha256` is of the encoded text, and the receipt's `sha256` and
   `bytes` ride beside it as `file`; the parsed string's UTF-8 bytes hash to them (`export/written_file.rb`,
@@ -122,5 +124,5 @@ here.
 | --- | --- | --- |
 | S1 expected revision | Merged to main 2026-11-12 (API 1.49): checked in `Export::Tasks#start` after settle and again in each reading slice; 4 tests in `tests/export_tasks_test.rb` plus the agent-tool route in `tests/export_diagnostics_test.rb`; `make ci` green (2824 Ruby runs, 876 JS, 264 Python) | [#501](https://github.com/ph-composer/ph-composer-skp/pull/501) |
 | S2 operation history | Merged to main 2026-11-12 (API 1.50): `make ci` green, 11 tests in `tests/agent_access_outcome_history_test.rb`; Codex review (gpt-6.1-sol) 2 P2 fixed | [#502](https://github.com/ph-composer/ph-composer-skp/pull/502) |
-| S3 artifact bytes | Implemented on branch `feature/458-s3-artifact-bytes` (API 1.51): client measurement above; `make ci` green (2842 Ruby runs, 876 JS, 264 Python); 3 tests in `tests/capture_command_test.rb`, 2 in `tests/export_tasks_test.rb`, the agent route's `artifact.none` in `tests/export_diagnostics_test.rb` | |
+| S3 artifact bytes | Implemented on branch `feature/458-s3-artifact-bytes` (API 1.51): client measurement above; `make ci` green (2842 Ruby runs, 876 JS, 264 Python); 3 tests in `tests/capture_command_test.rb`, 2 in `tests/export_tasks_test.rb`, the agent route's `artifact.none` in `tests/export_diagnostics_test.rb`; Codex review (gpt-6-astra) P1, P2 and P3 fixed | [#503](https://github.com/ph-composer/ph-composer-skp/pull/503) |
 | S4 overlay capture | Closed by measurement 2026-11-12: an in-process window capture is refused without Screen Recording permission and brings up the system's permission flow; geometry-only kept, limit in AGENT_INTERFACE | none |

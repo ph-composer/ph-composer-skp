@@ -123,22 +123,34 @@ class CaptureCommandTest < PhComposerTestCase
     assert_equal big, Base64.strict_decode64(capture("inline" => true).dig("value", "inline_image", "data"))
   end
 
-  def test_an_image_over_the_inline_cap_is_refused_by_the_connection_not_cut
+  # An image the call may not carry, or one over the cap, is left out and named, and the outcome stands: a
+  # committed change is never reported as refused, and no base64 reaches structuredContent.
+  def test_an_image_over_the_cap_or_outside_a_capture_command_is_left_out_and_the_outcome_stands
     image = PhComposer::InlineImage
     executor = PhComposer::AgentAccess::Executor.new(:tools => PhComposer::AgentAccess::Tools::TABLE)
-    answer = lambda do |bytes|
-      value = { image::KEY => image.of("x" * bytes) }
-      executor.send(:result, PhComposer::Outcome.completed(:revision => 1, :value => value), :acted => true)
+    answer = lambda do |bytes, images|
+      value = { "receipt" => 1, image::KEY => image.of("x" * bytes) }
+      outcome = PhComposer::Outcome.completed(:revision => 4, :value => value, :effect => "committed")
+      executor.send(:result, outcome, :acted => true, :images => images)
     end
-    over = answer.call(image::MAX_BYTES + 1)
-    at = answer.call(image::MAX_BYTES)
+    at = answer.call(image::MAX_BYTES, true)
+    [answer.call(image::MAX_BYTES + 1, true), answer.call(10, false)].each do |left_out|
+      outcome = left_out.fetch("structuredContent")
+      kept = outcome.values_at("status", "effect", "revision")
+      assert_equal [false, "completed", "committed", 4], [left_out.fetch("isError"), *kept]
+      assert_equal [{ "receipt" => 1 }, [image::KEY]], [outcome.fetch("value"), outcome.dig("detail", "omitted")]
+      assert_equal ["text"], left_out.fetch("content").map { |block| block["type"] }
+    end
 
-    assert_equal [true, "request.response_too_large"], [over.fetch("isError"), over.dig("structuredContent", "code")]
-    assert_equal ["text"], over.fetch("content").map { |block| block["type"] }
     assert_equal %w[text image], at.fetch("content").map { |block| block["type"] }
     assert_equal image::MAX_BYTES, Base64.strict_decode64(at.dig("content", 1, "data")).bytesize
     assert_equal [0, 1, 2, 3].map { |extra| image::MAX_BYTES + extra },
                  [0, 1, 2, 3].map { |extra| image.decoded_bytes(image.of("x" * (image::MAX_BYTES + extra))["data"]) }
+    view = PhComposer::AgentAccess::Tools::TABLE.fetch("view")
+    assert_equal [true, false, false], [CAPTURE, PhComposer::ContextCommands::ROOT, "no.such.command"].map { |name|
+      executor.send(:images?, view, "name" => name)
+    }
+    refute executor.send(:images?, PhComposer::AgentAccess::Tools::TABLE.fetch("query"), "name" => CAPTURE)
   end
 
   def test_one_side_alone_and_a_busy_session_refuse

@@ -303,10 +303,12 @@ Ruby entirely, workers included, so a call made under one is never captured and 
 timeout rather than a refusal.
 
 With `inline: true` (API 1.51) the result also carries the PNG itself as `inline_image` (`shell/inline_image.rb`:
-`mime_type` and base64 `data`, the same bytes the receipt hashes). The executor moves it out of
-`structuredContent` into an MCP `image` content block, so it takes nothing from the 24 KiB budget, and refuses
-one over `InlineImage::MAX_BYTES` (2 MiB decoded) as `request.response_too_large`. Any operation may offer one
-by declaring the key in its result schema. The capture's own 2 MB limit is that cap, so every capture can go
+`mime_type` and base64 `data`, the same bytes the receipt hashes). The executor always moves it out of
+`structuredContent`, and sends it as an MCP `image` content block, taking nothing from the 24 KiB budget, only
+for a view command declared under the `capture` grant (which dispatch checked the caller holds) and only up to
+`InlineImage::MAX_BYTES` (2 MiB decoded). Any other image is left out with the outcome unchanged but for its
+message and `detail.omitted`, so a completed or committed result is never turned into a refusal by its image.
+The capture's own 2 MB limit is that cap, so every capture can go
 inline; a larger image refuses `capture.too_large` with a smaller `width` and `height` in `detail`. The cap was
 measured without SketchUp against a stub MCP server returning a PNG image block beside `structuredContent`
 (issue #458, 2026-11-12): Claude Code 2.1.317 (`claude -p --restricted`) and Codex 0.167.1 (`codex exec`,

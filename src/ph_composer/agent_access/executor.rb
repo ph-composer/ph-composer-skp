@@ -60,7 +60,7 @@ module PhComposer
         end
         answer = tool.run.call(binding.context, arguments, live, binding.sequencer)
         note_committed(live, arguments, answer) if name == "invoke"
-        result(answer, :acted => acts?(tool, arguments))
+        result(answer, :acted => acts?(tool, arguments), :images => images?(tool, arguments))
       rescue CodedError => error
         result(Outcome.refused(error.code, error.message, :revision => nil, :detail => error.detail))
       end
@@ -117,17 +117,12 @@ module PhComposer
 
       # The MCP tool result: the answer as `structuredContent` and one line of text, not a second copy of
       # the JSON, which a client that shows both would count twice. Every result passes through here or
-      # `error`, so none leaves larger than the budget. An inline image (InlineImage) leaves the answer first and
-      # travels as an `image` content block under its own cap, outside the budget.
+      # `error`, so none leaves larger than the budget. An inline image (InlineImage) always leaves the answer
+      # first; it travels as an `image` content block, outside the budget, only when `images` allows it.
       # `acted` marks a tool that may have changed something (every tool but the reads): its outcome is
       # never turned into a refusal by its size.
-      def result(value, acted: false)
-        value, image = detach_image(value)
-        if image && (size = InlineImage.decoded_bytes(image.fetch("data"))) > InlineImage::MAX_BYTES
-          return error("The image is #{size} bytes, over the #{InlineImage::MAX_BYTES}-byte limit of one reply. " \
-                       "Ask for fewer pixels.", "request.response_too_large")
-        end
-
+      def result(value, acted: false, images: false)
+        value, image = detach_image(value, images)
         text = JSON.generate(value)
         if text.bytesize > MAX_RESULT_BYTES && acted && outcome?(value)
           value = trimmed(value)
@@ -146,14 +141,40 @@ module PhComposer
         { "content" => content, "structuredContent" => value, "isError" => false }
       end
 
-      # [the answer without its inline image, the image], or [the answer, nil] when its value carries none.
-      def detach_image(value)
-        inner = value.is_a?(Hash) && value["status"] == "completed" ? value["value"] : nil
-        image = inner.is_a?(Hash) ? inner[InlineImage::KEY] : nil
-        return [value, nil] unless image.is_a?(Hash) && image["data"].is_a?(String) &&
-                                   InlineImage::MIME_TYPES.include?(image["mime_type"])
+      # Whether this call's answer may carry an image block: a view command declared under the `capture` grant,
+      # which dispatch has checked this caller holds. Every other answer's inline image is left out.
+      def images?(tool, arguments)
+        tool.name == "view" && API.describe(:name => arguments["name"].to_s)&.fetch("capability", nil) == "capture"
+      end
 
-        [value.merge("value" => inner.reject { |key, _image| key == InlineImage::KEY }), image]
+      # [the answer without its inline image, the image to send], or [the answer, nil] when there is none to send.
+      # An image this call may not carry, or one over the cap, is left out and named in `detail.omitted`, never
+      # turning the outcome into a refusal: the operation's status, effect and revision stand.
+      def detach_image(value, allowed)
+        inner = value.is_a?(Hash) && value["status"] == "completed" ? value["value"] : nil
+        return [value, nil] unless inner.is_a?(Hash) && inner.key?(InlineImage::KEY)
+
+        image = inner[InlineImage::KEY]
+        stripped = value.merge("value" => inner.reject { |key, _image| key == InlineImage::KEY })
+        reason = image_refusal(image, allowed)
+        return [stripped, image] unless reason
+
+        omitted = Array((value["detail"] || {})["omitted"]) + [InlineImage::KEY]
+        [stripped.merge("message" => "#{value['message']} #{reason}".strip,
+                        "detail" => (value["detail"] || {}).merge("omitted" => omitted)), nil]
+      end
+
+      # Why `image` is not sent, or nil when it is.
+      def image_refusal(image, allowed)
+        return "This call does not carry images, so the image was left out." unless allowed
+        unless image.is_a?(Hash) && image["data"].is_a?(String) && InlineImage::MIME_TYPES.include?(image["mime_type"])
+          return "The image was not a PNG in base64, so it was left out."
+        end
+
+        size = InlineImage.decoded_bytes(image["data"])
+        return nil if size <= InlineImage::MAX_BYTES
+
+        "The image is #{size} bytes, over the #{InlineImage::MAX_BYTES}-byte limit of one reply, so it was left out."
       end
 
       def outcome?(value)
