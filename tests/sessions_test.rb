@@ -202,11 +202,13 @@ class SessionsTest < PhComposerTestCase
     hidden_session = Sessions.for(Sketchup::Model.new)
     generation = hidden_session.export_generation
     heard = []
-    Sessions.on_host_event(:transaction_committed) { |session| heard << session }
+    unsubscribe = Sessions.on_host_event(:transaction_committed) { |session| heard << session }
 
     shown_session.observers.model.onTransactionCommit(shown)
 
     assert_equal [[shown_session], generation], [heard, hidden_session.export_generation]
+  ensure
+    unsubscribe&.call
   end
 
   # Native Undo and Redo act on the shown Model only, so their callbacks stay with it.
