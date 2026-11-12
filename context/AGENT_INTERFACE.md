@@ -257,7 +257,7 @@ accepted by a write.
 Implemented: the Model context read, `ph_composer.context.read` (and the agent `context` tool). It
 answers the session (id, file name, the Model's own file path, revision, view generation, whether it
 is the active Model), readiness (busy and why, and the active SketchUp tool; busy also while the user is
-partway through a Move or Scale, which only changes wait for), the edit path from the
+partway through a Move or Scale or has the Rotate tool selected, which only changes wait for), the edit path from the
 root as persistent id, type and name per open Group or Component, the camera (eye and target in
 metres, up, perspective with its field of view and the extent it spans or parallel with its height, and two-point perspective's offset and scale), and the selection in pages by
 persistent id: at most 200 entities, 100 by default, and never more than 16 KB of rows
@@ -574,13 +574,13 @@ only its sending side after the request reads as gone too. Its key was never giv
 sequence, so the same invoke sent again runs once. A sheet such as Make Component stops no timer and
 is not a busy state. Changes to a Model SketchUp is not showing run and land on that Model's Undo
 stack; moving its edit path is refused `session.inactive` (measured in the AW09M run, 2026-11-10). A change's commit
-cancels a native Move or Scale partway through (`context/SKETCHUP_HOST_BEHAVIOR.md`), so every action refuses
+cancels a native Move, Scale or Rotate partway through (`context/SKETCHUP_HOST_BEHAVIOR.md`), so every action refuses
 `session.busy` while a tool in `ModelSession::GESTURE_TOOLS` (MoveTool, ScaleTool; API 1.46 added ScaleTool) is in a state
-other than 0, before it takes a sequence or key. A cancelled gesture leaves the revision as it was, so the same invoke then
+other than 0, or while a tool in `ModelSession::SELECTED_TOOLS` (RotateTool, API 1.47) is selected in any state, before it takes a sequence or key. A cancelled gesture leaves the revision as it was, so the same invoke then
 runs; a finished one advances it, so the agent reads `context` again and sends a new invoke. The busy invoke's `idempotency_key` is released, as for every refusal before acceptance (below), so
 its next send takes a new sequence; reads, view commands, previews and export start still run, and the
-Line tool partway through is not guarded (measured in the AW10H run, 2026-11-11). A commit also cancels a Rotate partway
-through, but RotateTool reports no state but 0 during the gesture, so the guard cannot see it and a write then commits (#493).
+Line tool partway through is not guarded (measured in the AW10H run, 2026-11-11). RotateTool reports no state but 0 during a turn, so
+the guard cannot tell an idle Rotate tool from one partway and holds changes for both (#493).
 
 The executor rechecks the token, validates the arguments against the tool's fixed schema, and makes
 the one API call the tool names (`agent_access/tools.rb`, the allowlist). A token acts on a session

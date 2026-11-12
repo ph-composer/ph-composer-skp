@@ -306,6 +306,7 @@ Dispatch runs only on the host-safe execution boundary and serializes mutations.
 Model transition or unsettled session refuses at once as `busy`; there is no durable queue of
 edits, and a scheduled callback revalidates when it runs. A native gesture a commit would cancel, measured
 for Move (click-move and held drag) and Scale (click-move) partway through, refuses changes alone as `busy` (`ModelSession#gesture_reason`); reads still run.
+Rotate reports no state while partway, so the Rotate tool selected at all refuses changes the same way.
 
 Validate the whole change set before opening the transaction. One operation owns one native Undo
 step. Feature helpers join the caller's operation; they never open nested independent operations

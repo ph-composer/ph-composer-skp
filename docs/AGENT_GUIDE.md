@@ -168,12 +168,12 @@ that pages or fragments what was left out. Fragments join and check exactly as a
 - **`revision.stale` or `target.changed`.** The Model changed after you read it, often because the
   user edited it. Read again, decide again, and send a new request.
 - **`session.busy`.** Another change is running, deferred work is settling, or the user has a tool
-  in use. A change also waits while the user is partway through a Move or Scale, which its commit would
-  cancel; reads still answer, and `context`'s readiness says why. A finished gesture changes the revision,
-  so decide again from the new read. Wait and read `context` again; never ask the user to drop what they are doing
-  for you. A Rotate partway through is not detected: a change then commits, ends the Rotate and takes its partial
-  turn into your Undo step. While `context`'s readiness names `RotateTool` as the active tool, hold changes
-  until it does not.
+  in use. A change also waits while the user is partway through a Move or Scale, or has the Rotate tool
+  selected at all, since its commit would cancel the gesture; reads still answer, and `context`'s
+  readiness says why. A finished gesture changes the revision, so decide again from the new read.
+  Wait and read `context` again; never ask the user to drop what they are doing for you. If the
+  Rotate tool stays selected after the user has finished turning, you may tell them once that your
+  changes wait until they pick another tool.
 - **`session.inactive`.** The Model is open but not the one SketchUp shows, and SketchUp moves the
   open Group only in the Model it shows. Reads and changes still work there; ask the user to switch
   windows only if you need to open or close a Group.

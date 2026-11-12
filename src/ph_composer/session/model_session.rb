@@ -21,9 +21,11 @@ module PhComposer
 
     # Native tools whose gesture partway through (any tool state but 0) a commit cancels: SketchUp resets the
     # tool and drops the user's edit (context/SKETCHUP_HOST_BEHAVIOR.md). The one list of guarded tools; only
-    # measured tools are listed. The Line tool (SketchTool) keeps its gesture through a commit. The Rotate tool
-    # loses its gesture too, but reports no state but 0 while partway, so a state cannot guard it.
+    # measured tools are listed. The Line tool (SketchTool) keeps its gesture through a commit.
     GESTURE_TOOLS = { "MoveTool" => "Move", "ScaleTool" => "Scale" }.freeze
+    # Native tools a commit cancels whose state never leaves 0 while partway: the Rotate tool reports state 0
+    # through a whole turn (context/SKETCHUP_HOST_BEHAVIOR.md), so a change waits while it is selected at all.
+    SELECTED_TOOLS = { "RotateTool" => "Rotate" }.freeze
 
     def initialize(model)
       @model = model
@@ -76,11 +78,19 @@ module PhComposer
 
     # Why a change request cannot start now although a read can, or nil: the user is partway through a
     # gesture that the change's commit would cancel. The tool SketchUp names now must still be the one whose
-    # state was recorded, so a missed callback cannot hold writes after the user switched tools.
+    # state was recorded, so a missed callback cannot hold writes after the user switched tools. A tool in
+    # SELECTED_TOOLS holds writes from the moment SketchUp names it, whatever its state.
     def gesture_reason
+      active = active_tool_name
+      if (selected = SELECTED_TOOLS[active])
+        return "The #{selected} tool is selected in SketchUp (#{active}); SketchUp does not report whether a " \
+               "#{selected} is partway, and a change would cancel one, so nothing was written. Read context " \
+               "again once the user selects another tool, then retry."
+      end
+
       name, state = @tool_state
       label = GESTURE_TOOLS[name]
-      return nil unless label && state != 0 && active_tool_name == name
+      return nil unless label && state != 0 && active == name
 
       "The user is partway through a #{label} in SketchUp (#{name}), which a change would cancel; nothing was " \
         "written. Read context again once the user finishes or cancels the #{label}, then retry."
