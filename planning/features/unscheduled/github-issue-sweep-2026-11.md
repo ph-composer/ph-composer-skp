@@ -60,7 +60,7 @@ Codex review (gpt-6.1-sol; gpt-6-astra for #473) and every thread answered.
 | [#486](https://github.com/ph-composer/ph-composer-skp/issues/486) | #487 | Spaces copy watcher Undo warnings | Merged to main, PR #488 (`f0672104`) |
 | [#482](https://github.com/ph-composer/ph-composer-skp/issues/482) | #481 | CodexConfig: backslash in a literal-string key | Merged to main through #491, PR #496 (`fcdd99ca`) |
 | [#489](https://github.com/ph-composer/ph-composer-skp/issues/489) | packet-end review of `fe3a8914` | CodexConfig: `#` comment in a multi-line array in an inline table | Merged to main through #491, PR #496 (`fcdd99ca`) |
-| [#490](https://github.com/ph-composer/ph-composer-skp/issues/490) | packet-end review of `3682e7f3` | Copy left read only with no warning after Undo/Redo of the copy then Undo of the Move | Open; P4, older code, needs native Undo |
+| [#490](https://github.com/ph-composer/ph-composer-skp/issues/490) | packet-end review of `3682e7f3` | Copy left read only with no warning after Undo/Redo of the copy then Undo of the Move | Fixed on `fix/490-copy-watch-redo`: Zones and Spaces watchers keep every repair until detach and skip absent copies (Spaces had the same prune); offline five-step tests in both suites; native Undo not run, listed under Host pass |
 | [#491](https://github.com/ph-composer/ph-composer-skp/issues/491) | this ledger | CodexConfig: one TOML tokenizer for the subset it reads | Ed's go-ahead 2026-11-12; merged to main, PR #496 (`fcdd99ca`), two gpt-6-astra cycles, the second clean |
 | [#492](https://github.com/ph-composer/ph-composer-skp/issues/492) | this ledger | Host pass checklist | Open; needs Ed at the Mac |
 | [#493](https://github.com/ph-composer/ph-composer-skp/issues/493) | host pass #492 | Mid-gesture guard for Scale and Rotate | Merged to main: Scale in PR #494 (`441b287a`, API 1.46), Rotate in PR #495 (`67c87df8`, API 1.47). Rotate reports tool state 0 through a turn, so writes refuse whenever the Rotate tool is selected. Host-checked 2026-11-12 on `650ba430`: refused idle and mid-turn, the turn still finished as "Undo Rotate", commit after Select |
@@ -80,6 +80,7 @@ Offline tests are the acceptance for every merged row; these native checks remai
 - #456: Agent Access dialog shows each profile's own client name when two profiles share a token.
 - #474: the edge tool on an Edge with unreadable text: red, refusal tooltip, click refused at the status bar.
 - #487, #486: native Undo for the copy watchers (recipe kept with the conductor's evidence).
+- #490: Zones and Spaces: copy, unrelated change, Undo twice, Redo twice, Undo; the last Undo warns.
 - #455: Rotate and Scale mid-gesture; `onActivePathChanged` routing (measure first); outside-script attribution.
 - #154: unit-switch timing in the HtmlDialog (Chromium 88).
 

@@ -100,6 +100,28 @@ class ZoneCopyWatchTest < PhComposerTestCase
     assert_match(/^Undo also took back making the copied Zone independent/, @notices.last.first)
   end
 
+  # Undo past the copy, then Redo it and the change its repair joined: a repair whose copy left through
+  # Undo comes back with Redo, so undoing that change again still warns.
+  def test_an_undo_after_redoing_a_copy_that_left_through_undo_still_warns
+    native_copy(@original, 400)
+    PhComposer::ModelOperation.perform(@model, "Move") do
+      @original.transformation = Geom::Transformation.translation([10, 0, 0])
+    end
+    UI.run_timers
+    assert @model.undo
+    assert @model.undo
+    assert_equal 1, zone_groups.length, "the second Undo takes the copy away"
+    assert @model.redo
+    assert @model.redo
+    assert_equal %w[found found], states
+
+    assert @model.undo
+    UI.run_timers
+
+    assert_equal %w[shared_definition shared_definition], states
+    assert_equal 2, @notices.count { |message, _tone| message.start_with?("Undo also took back") }
+  end
+
   # A copy made independent again by the row's command is no longer read only, so a later Undo of an
   # unrelated change does not say it is.
   def test_an_undo_after_the_explicit_repair_does_not_warn_again

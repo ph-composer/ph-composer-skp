@@ -189,6 +189,21 @@ class SpacesCopyWatchTest < PhComposerTestCase
     assert_includes @notices.last.last, "Undo also took back"
   end
 
+  # Undo past the copy, then Redo it and the change its repair joined: a repair whose copy left through
+  # Undo comes back with Redo, so undoing that change again still warns.
+  def test_an_undo_after_redoing_a_copy_that_left_through_undo_still_warns
+    copy_in_operation(@space, 120)
+    @model.start_operation("Other")
+    @model.commit_operation
+    UI.run_timers
+    2.times { @model.undo }
+    assert_equal 1, spaces.length, "the second Undo takes the copy away"
+    2.times { @model.redo }
+    @model.undo
+    assert_equal %w[spc_SSSSSSSSSSSS spc_SSSSSSSSSSSS], spaces.map { |row| row["id"] }
+    assert_equal 2, undo_warnings.length
+  end
+
   # A Space record that does not read at one Undo is no evidence the copies left: a later Undo that takes
   # back an earlier repair still warns.
   def test_an_unreadable_space_at_one_undo_keeps_the_remembered_repairs
