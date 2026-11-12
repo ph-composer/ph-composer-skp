@@ -84,4 +84,4 @@ here.
 | S1 expected revision | Planned | |
 | S2 operation history | Planned | |
 | S3 artifact bytes | Planned | |
-| S4 overlay capture | Planned (host measurement first) | |
+| S4 overlay capture | Closed by measurement 2026-11-12: an in-process window capture is refused without Screen Recording permission and brings up the system's permission flow; geometry-only kept, limit in AGENT_INTERFACE | none |

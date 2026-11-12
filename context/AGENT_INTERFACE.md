@@ -302,6 +302,12 @@ minimized, the last also with the camera moved: each wrote the current view
 Ruby entirely, workers included, so a call made under one is never captured and the client sees its own
 timeout rather than a refusal.
 
+Overlays stay out of captures by measurement (issue #458, 2026-11-12, SketchUp 26.1.188): the one route that
+shows them, a capture of SketchUp's own window by id (`screencapture -l`) run from inside SketchUp, is refused
+without macOS Screen Recording permission for SketchUp, and the attempt brings up the system's permission flow.
+A capture must not ask the user for a privacy grant or put a system window in front of them, so the result keeps
+`overlays: "not_included"`, and a client that needs PH-Composer's colouring reads it from the Colour-by state.
+
 Support explicit selection, reveal and camera operations for visual inspection, plus viewport
 capture where the host permits it. Captures identify their model session, revision, camera and
 relevant selection so the agent knows what it saw. Report unsupported or obscured capture states
