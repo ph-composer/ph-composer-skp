@@ -694,6 +694,12 @@ class ExportTasksTest < PhComposerTestCase
     drain
     outcome = @tasks.status(task.fetch("task_id"), OWNER).fetch("outcome")
     assert_equal %w[failed revision.stale none], outcome.values_at("status", "code", "effect")
+
+    # The watchdog can see the edit before the next reading slice does; it answers the same.
+    task = start(:expected_revision => @session.revision)
+    external_edit
+    watch_after(0)
+    assert_equal "revision.stale", @tasks.status(task.fetch("task_id"), OWNER).dig("outcome", "code")
     assert_nil @runtime
     assert_empty Dir.children(@directory)
   end

@@ -27,7 +27,7 @@ module PhComposer
       # a NativeApproval::Granted (Task). A destination the pair would refuse is refused here, before any
       # task exists, whichever route chose it. `expected_revision`, when given, is checked once deferred Model
       # work has settled, here on the main thread where the run takes its source; the task checks it again
-      # while it reads (Task#tick).
+      # while it reads (Task#coherent!).
       def start(owner:, location: nil, approval: nil, expected_revision: nil, runtime_factory: nil)
         expected_revision = TaskContract.check_options!("start_export",
                                                         "expected_revision" => expected_revision)["expected_revision"]

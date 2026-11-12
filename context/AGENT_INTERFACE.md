@@ -491,8 +491,8 @@ the state `export_preflight(location:)` reported (see "Locations only the user c
 An optional `expected_revision` (API 1.49) binds the run to the revision the caller read. `Export::Tasks#start`
 settles deferred Model work and compares it on the main thread, where the run takes its source: another
 revision refuses `revision.stale` with effect `none` and invoke's outcome shape, and no task exists.
-Collection is deferred to timer slices, so each reading slice (`Task#tick`) compares it again before the
-content generation check: a change before the read finishes fails the task `revision.stale`, writing
+Collection is deferred to timer slices, so until the read is done every reading slice and the watchdog
+compare it again (`Task#coherent!`), before the content generation check: a change before the read finishes fails the task `revision.stale`, writing
 nothing. Without it, a start is bound to no revision and only a content change during the run stops it
 (`export.model_changed`).
 The native panel obtains the destination and consent through its Save sheet instead. `API.describe`

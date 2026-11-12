@@ -125,11 +125,6 @@ module PhComposer
       def tick
         return if terminal?
 
-        # Before coherent!: a content edit moves the revision too, and a caller that named one is told so.
-        if @expected_revision && @session.revision != @expected_revision
-          raise Blocked.new("revision.stale", "The Model changed while the export read it; nothing was written.")
-        end
-
         coherent!
         @stage = "reading"
         # Read at the revision the run exports, so the report carries the warnings the preflight showed.
@@ -232,8 +227,13 @@ module PhComposer
         result
       end
 
+      # Until the read is done (@builder), a caller that named a revision is told the Model left it, before the
+      # generation check: a content edit moves the revision too. Every reading slice and the watchdog ask.
       def coherent!
         raise Blocked.new("session.closed", "The Model closed before export finished.") unless @session.valid?
+        if @builder && @expected_revision && @session.revision != @expected_revision
+          raise Blocked.new("revision.stale", "The Model changed while the export read it; nothing was written.")
+        end
         if @session.export_generation != @generation
           raise Blocked.new("export.model_changed", "The Model content changed during export. Start again.")
         end
