@@ -44,6 +44,9 @@ module PhComposer
         SCALAR = /\G(?:\d{4}-\d{2}-\d{2} (?=\d{2}:))?[A-Za-z0-9_+.:-]+/.freeze
         ESCAPES = { "b" => "\b", "t" => "\t", "n" => "\n", "f" => "\f", "r" => "\r", '"' => '"', "\\" => "\\" }.freeze
         UNICODE_DIGITS = { "u" => 4, "U" => 8 }.freeze
+        # Arrays and inline tables are read by recursion, so a value nested deeper than this ends the read
+        # rather than the Ruby stack. A Codex config nests a few levels.
+        MAX_DEPTH = 64
 
         def initialize(text)
           @text = text.b
@@ -52,6 +55,7 @@ module PhComposer
           @text.each_byte.with_index { |byte, index| @newlines << index if byte == 10 }
           @table = []
           @statements = []
+          @depth = 0
         end
 
         def read
@@ -235,6 +239,8 @@ module PhComposer
         # The items of an array or inline table up to `close`, comma separated with an optional trailing comma.
         # Newlines and comments may stand between them.
         def items(close)
+          @depth += 1
+          unreadable if @depth > MAX_DEPTH
           loop do
             skip_blank
             break if char == close
@@ -246,6 +252,7 @@ module PhComposer
             @at += 1
           end
           expect(close)
+          @depth -= 1
         end
 
         # After a statement, only spaces and a comment may stand before the line ends.

@@ -94,6 +94,19 @@ class AgentAccessTomlStatementsTest < PhComposerTestCase
     assert_equal [%w[a], %w[b]], reading.statements.map(&:path), "the statements before the stop are kept"
   end
 
+  # Values nested past the depth a config uses end the read instead of the Ruby stack (review of PR #496).
+  def test_values_nested_too_deep_read_as_other_and_are_never_written
+    codex_config = PhComposer::AgentAccess::CodexConfig
+    url_line = "url = \"http://127.0.0.1:46110/mcp\""
+    assert TomlStatements.read("x = #{'[' * 64}0#{']' * 64}\n").complete
+    ["x = #{'[' * 2000}0#{']' * 2000}\n", "x = #{'{ a = ' * 2000}0#{' }' * 2000}\n"].each do |text|
+      refute TomlStatements.read(text).complete
+      assert_equal "other", codex_config.state(text, "ph-composer", url_line, "http_headers_helper = \"x\"")
+      assert_nil codex_config.append(text, "ph-composer", "[mcp_servers.ph-composer]\n#{url_line}\n")
+      assert_empty codex_config.server_names(text)
+    end
+  end
+
   private
 
   def only_statement(text)

@@ -658,7 +658,9 @@ old token stays live until revoked. Then the client is set up:
   comment is never taken for a table, and a key that spells a name through an escape is read as that name. A
   file outside the subset it reads (bare, quoted and dotted keys, table and array-of-tables headers, the four
   string forms, arrays, inline tables, comments, other values as one bare word), such as one whose strings or
-  brackets do not close or that holds an escape TOML does not define, is never edited and reads `other`. With
+  brackets do not close, whose values nest more than 64 deep or whose key holds an escape TOML does not
+  define, is never edited and reads `other`. A value string is read only as far as where it ends: its
+  escapes are not checked. With
   no entry for the profile the block is appended to `~/.codex/config.toml` after a blank line, every
   existing byte kept. The block sets `default_tools_approval_mode = "approve"`: Codex otherwise asks before
   each tool call, and a session that cannot ask (`codex exec`, 0.167.0) refuses every write; the token's
