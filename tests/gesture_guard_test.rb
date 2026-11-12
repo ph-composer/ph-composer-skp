@@ -3,7 +3,7 @@
 require_relative "test_helper"
 require_relative "support/test_feature"
 
-# A change's commit cancels a native Move or Scale partway through (context/SKETCHUP_HOST_BEHAVIOR.md), so a
+# A change's commit cancels a native Move, Scale or Rotate partway through (context/SKETCHUP_HOST_BEHAVIOR.md), so a
 # change request refuses `session.busy` while the user is mid-gesture, before it takes a sequence; reads,
 # context and the Line tool are unaffected (context/AGENT_INTERFACE.md, "Model context").
 class GestureGuardTest < PhComposerTestCase
@@ -145,6 +145,27 @@ class GestureGuardTest < PhComposerTestCase
     @model.tools.use_native_tool("ScaleTool", 0)
 
     assert_equal %w[completed committed], invoke(1).values_at("status", "effect")
+  end
+
+  # RotateTool reports state 0 through a whole turn, so a write waits while it is selected at all.
+  def test_a_write_with_the_rotate_tool_selected_is_refused_busy_and_runs_once_another_tool_is_chosen
+    @model.tools.use_native_tool("RotateTool", 0)
+    revision = @session.revision
+
+    refused = invoke(1)
+    readiness = API.query(:context => @writer, :name => PhComposer::ContextCommands::READ,
+                          :params => {}).dig("value", "readiness")
+    @model.tools.use_native_tool("RotateTool", 1)
+    partway = invoke(1)
+    @model.tools.use_native_tool("SelectionTool")
+    later = invoke(1)
+
+    assert_equal %w[busy session.busy none], refused.values_at("status", "code", "effect")
+    assert_includes refused["message"], "RotateTool"
+    assert_equal [true, "RotateTool"], readiness.values_at("busy", "active_tool")
+    assert_equal "session.busy", partway["code"]
+    assert_equal ["completed", "committed", revision + 1], later.values_at("status", "effect", "revision")
+    assert_equal 1, @model.operations.length
   end
 
   def test_reads_previews_and_context_answer_during_a_move_and_context_says_why
