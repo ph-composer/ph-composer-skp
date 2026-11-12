@@ -1,7 +1,7 @@
 # Duplicate-identity repair: Zones, Windows and Spaces side by side
 
 DATE: 2026-11-11
-STATUS: Scoped; design evidence only, no refactor authorized. Awaiting Ed's adopt or keep decision on #145.
+STATUS: Complete 2026-11-12. Ed decided keep separate; no contract and no helpers packet. #145 closed.
 AUTHOR: Claude (pr-loop stage worker), for Ed May
 ISSUE: [#145](https://github.com/ph-composer/ph-composer-skp/issues/145)
 

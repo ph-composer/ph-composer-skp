@@ -1,6 +1,6 @@
 # Planning archive
 
-DATE: 2026-11-11
+DATE: 2026-11-12
 STATUS: Index of completed and superseded planning work, newest first.
 AUTHOR: Ed May, BLDGTYP
 
@@ -9,6 +9,7 @@ reached.
 
 | Slug | Date | Outcome | Issue or PR |
 | --- | --- | --- | --- |
+| [duplicate-identity-contract](duplicate-identity-contract.md) | 2026-11-12 | Design evidence: Zones, Windows and Spaces duplicate-identity repair side by side (six keeper rules, three finding shapes, three binding strategies). Ed decided keep separate; no foundation contract, the optional helpers packet not taken. Four divergences resolved in #468 | [#145](https://github.com/ph-composer/ph-composer-skp/issues/145) |
 | [agent-workflows-2026-11](agent-workflows-2026-11/README.md) | 2026-11-11 | Complete: the review's findings delivered as stages AW-01 to AW-10, one PR each through Codex review and a host gate: safe targets and creation receipts, bounded discovery and an installed guide, candidates without selection, complete definition, occurrence, library and QA reads by page and fragment, failed-run diagnostics and explicit repair, client profiles with Repair, host-readiness guards, and a Move guard (`session.busy` while a native Move is partway through, API 1.43). Fresh Claude Code and Codex clients ran the integrated scenario (`AW10`); `AW10G` passed 3 of 3. A14 and A16 deferred, optional; follow-ups listed in its STATUS | [#439](https://github.com/ph-composer/ph-composer-skp/issues/439); PRs [#440](https://github.com/ph-composer/ph-composer-skp/pull/440) to [#453](https://github.com/ph-composer/ph-composer-skp/pull/453) |
 | [agent-workflows-review-2026-11](agent-workflows-review-2026-11/README.md) | 2026-11-11 | Whole-feature agent workflow and connection review at `f65ccee6`, API 1.31: findings R01 to R16 with probes and a workflow coverage matrix; R01 to R13 and R15 fixed by [agent-workflows-2026-11](agent-workflows-2026-11/README.md), R14 and R16 deferred, optional | [#435](https://github.com/ph-composer/ph-composer-skp/issues/435) |
 | [spaces-ui-refinement-2026-11](spaces-ui-refinement-2026-11/PLAN.md) | 2026-11-10 | Complete: the 2026-11-09 Spaces walkthrough's ten issues delivered as stages SUI-01 to SUI-08, one PR each through review and a host check: Floor Surface wording, context menus that offer only what applies, whole-number Space labels, unit-aware Set Ground depth, Set Height without a click, Volumes from connected Faces and Add New Volume to Space, right-click Space editing, Delete Volume (the fallback after native Delete failed on Redo), and the Zones control row's toggle and four menus | [#426](https://github.com/ph-composer/ph-composer-skp/issues/426); PRs #427 to #434 |
