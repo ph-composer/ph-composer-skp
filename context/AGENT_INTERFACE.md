@@ -653,9 +653,12 @@ old token stays live until revoked. Then the client is set up:
   --scope user <entry>` and the add once more, by that entry's name only; any other failure removes nothing.
 - Codex: has no command that sets a helper (0.167.0 `codex mcp add` takes `--url` and
   `--bearer-token-env-var` only), and it rewrites the whole config, so `CodexConfig` edits the text. It
-  reads each line in its TOML context: a header or key counts only on a line that starts outside every
-  string, array and inline table, so table-like text in another setting's multi-line string or array is
-  never taken for a table, and a file whose strings or brackets do not close is never edited. With
+  reads the file as TOML statements (`agent_access/toml_statements.rb`), each header and key with its segments
+  decoded (bare, basic with its escapes, literal), so table-like text in another setting's string, array or
+  comment is never taken for a table, and a key that spells a name through an escape is read as that name. A
+  file outside the subset it reads (bare, quoted and dotted keys, table and array-of-tables headers, the four
+  string forms, arrays, inline tables, comments, other values as one bare word), such as one whose strings or
+  brackets do not close or that holds an escape TOML does not define, is never edited and reads `other`. With
   no entry for the profile the block is appended to `~/.codex/config.toml` after a blank line, every
   existing byte kept. The block sets `default_tools_approval_mode = "approve"`: Codex otherwise asks before
   each tool call, and a session that cannot ask (`codex exec`, 0.167.0) refuses every write; the token's
@@ -675,14 +678,16 @@ old token stays live until revoked. Then the client is set up:
   since it was planned or is read-only; the new file is written beside the real file a link points to and
   renamed onto it, so a linked config stays a link (a dangling link or a linked backup is refused); the
   result is read back and must show the entry set up, and a file that still holds exactly what was
-  written is otherwise put back as it was. The block is appended only when no key or
-  header holds an escape (one could spell either name unseen) and the root `mcp_servers` table is
-  opened only by plain `[mcp_servers.<other>]` headers; an inline or dotted root `mcp_servers` or an
-  `[mcp_servers]` table cannot be extended this way, so the user adds the block. With no plain entry, a
-  header, a key at the root or under the root `mcp_servers`, or a member key of an inline root `mcp_servers`,
-  that holds an escape reads as set up another way, not absent, since it may define the server under an
-  escaped name; an escape in a value, or deeper in another server's settings, does not. Another table's own
-  `mcp_servers`, such as a plugin's `[plugins."<name>".mcp_servers.<server>]`, is not the root one. No `~/.codex` folder means Codex is not set up
+  written is otherwise put back as it was. The entry is the table whose header is written without
+  an escape; any other header, dotted key or inline-table key that names the server, in any table, bare,
+  quoted or escaped, is a second definition, so the entry reads `other` and, with no entry, the file reads as
+  set up another way, not absent. The entry's own sub-tables (`[mcp_servers.<entry>.tools.x]`) are left as they
+  are, unless one is named for its url, a token key or a stdio key. A name only as a value, such as an array item or a project path, is
+  not a key. The block is appended only when the root `mcp_servers` table is
+  opened only by `[mcp_servers.<other>]` headers; an inline or dotted root `mcp_servers`, an
+  `[mcp_servers]` table or an `[[mcp_servers]]` array cannot be extended this way, so the user adds the block.
+  Another table's own `mcp_servers`, such as a plugin's `[plugins."<name>".mcp_servers.<server>]`, is not the
+  root one. No `~/.codex` folder means Codex is not set up
   and nothing is created.
 
 Either way the answer ends with the step the user takes: start a new session of that client, since a

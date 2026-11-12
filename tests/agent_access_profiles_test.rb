@@ -365,6 +365,38 @@ class AgentAccessProfilesTest < PhComposerTestCase
     end
   end
 
+  # A comment inside a multi-line array ends only its line: a server key after it is still read (#489).
+  def test_a_server_key_after_a_comment_in_a_multi_line_array_reads_as_other
+    token = Tokens.issue.fetch("token")
+    ["mcp_servers = { other = { args = [ # c\n\"x\"] }, \"ph\\u002Dcomposer\" = { url = \"x\" } }\n",
+     "mcp_servers = { other = { args = [ # c\n\"x\"] }, \"ph-composer\" = { url = \"x\" } }\n"].each do |form|
+      assert_valid_toml form
+      File.binwrite(@config, form)
+      assert_equal "other", ClientSetup.entry("codex", 46_110, "default")["setup"], form
+      assert_equal "manual", ClientSetup.connect("codex", token, 46_110).fetch("state"), form
+      assert_equal form, File.binread(@config)
+    end
+  end
+
+  # A backslash in a literal-string key is no escape, and an escape that spells another table's name names
+  # nothing: neither hides the entry's state nor refuses the block (#482).
+  def test_a_backslash_in_another_tables_key_leaves_the_entry_readable
+    token = Tokens.issue.fetch("token")
+    block = ClientConfig.codex_block(46_110)
+    ["[projects.'C:\\Users\\x']\ntrust_level = \"trusted\"\n", "[profiles.\"a\\tb\"]\nmodel = \"o3\"\n"].each do |other|
+      File.binwrite(@config, other)
+      assert_equal "absent", ClientSetup.entry("codex", 46_110, "default")["setup"], other
+      assert_equal "configured", ClientSetup.connect("codex", token, 46_110).fetch("state"), other
+      assert_equal "#{other}\n#{block}\n", File.binread(@config)
+      assert_valid_toml File.binread(@config)
+
+      File.binwrite(@config, "#{block}\n#{other}")
+      assert_equal "configured", ClientSetup.entry("codex", 46_110, "default")["setup"], other
+      assert_equal "configured", ClientSetup.connect("codex", token, 47_001).fetch("state"), other
+      assert_valid_toml File.binread(@config)
+    end
+  end
+
   def test_a_non_ascii_config_takes_the_block_and_a_failed_read_back_puts_the_file_back
     token = Tokens.issue.fetch("token")
     File.binwrite(@config, "# Jos\u00e9's settings\n".b)
