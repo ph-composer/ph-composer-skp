@@ -535,9 +535,12 @@ class ShowModelTest(unittest.TestCase):
         frontmost: list[str] | None = None,
         wanted: str = 'B07 "draft"',
         deadline: float = 5.0,
+        read_takes: float = 0.0,
+        interrupt: str | None = None,
     ) -> tuple[dict[str, object], list[list[str]]]:
         """`windows` answers the listing, `raised` the raise, `titles` each title read, `frontmost` each
-        frontmost read. Failures come back as osascript gives them: a non-zero exit with stderr."""
+        frontmost read; each read takes `read_takes` seconds, and the first call of the script labelled
+        `interrupt` raises KeyboardInterrupt. Failures come back as osascript gives them: a non-zero exit."""
         calls: list[list[str]] = []
         listing = "\n".join(windows if windows is not None else [self.OTHER, self.WINDOW])
         title_reads = iter(titles if titles is not None else ["a09", 'b07 "draft"'])
@@ -545,8 +548,12 @@ class ShowModelTest(unittest.TestCase):
         clock = FakeClock()
 
         def run(command: list[str], **_options: object) -> subprocess.CompletedProcess[str]:
+            nonlocal interrupt
             calls.append(command)
             script = command[2]
+            if interrupt is not None and self.scripts([command]) == [interrupt]:
+                interrupt = None
+                raise KeyboardInterrupt
             if script == hb.FRONTMOST_PROCESS:
                 return subprocess.CompletedProcess(command, 0, f"{next(frontmost_reads, '')}\n", "")
             if script == hb.DOCUMENT_WINDOWS:
@@ -557,6 +564,7 @@ class ShowModelTest(unittest.TestCase):
 
         def read(code: str, _timeout: float) -> object:
             self.assertEqual(code, hb.ACTIVE_TITLE)
+            clock.sleep(read_takes)
             answer = next(title_reads, "a09")
             if isinstance(answer, BaseException):
                 raise answer
@@ -644,6 +652,22 @@ class ShowModelTest(unittest.TestCase):
         ):
             result, _calls = self.show(titles=["a09", failure])
             self.assertEqual((result["ending"], result["restored"]), (ending, True))
+
+    def test_a_matching_reply_that_arrives_after_the_deadline_is_timed_out_not_shown(self) -> None:
+        result, _calls = self.show(titles=["a09", "a09", 'b07 "draft"'], read_takes=3.0, deadline=5.0)
+        self.assertEqual((result["ending"], result["restored"]), ("timed_out", True))
+        self.assertIn("after the deadline", str(result["error"]))
+
+    def test_an_interrupt_anywhere_reports_cancelled_and_hands_focus_back_once_a_raise_was_tried(self) -> None:
+        result, calls = self.show(titles=[KeyboardInterrupt()])
+        self.assertEqual((result["ending"], result["restored"], calls), ("cancelled", None, []))
+        result, calls = self.show(interrupt="raise")
+        self.assertEqual((result["ending"], result["restored"]), ("cancelled", True))
+        self.assertEqual(self.scripts(calls)[-2:], ["restore", "frontmost"])
+        # An interrupt that cuts the restore short is followed by one more restore.
+        result, calls = self.show(interrupt="restore")
+        self.assertEqual((result["ending"], result["restored"]), ("shown", True))
+        self.assertEqual(self.scripts(calls)[-3:], ["restore", "restore", "frontmost"])
 
     def test_a_restore_that_does_not_take_reports_restored_false(self) -> None:
         result, calls = self.show(frontmost=["Rhinoceros"] + ["SketchUp"] * 20)

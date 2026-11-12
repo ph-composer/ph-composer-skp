@@ -325,6 +325,14 @@ def restore_process(name: str) -> bool:
     return frontmost_process() == name
 
 
+def hand_back(name: str) -> bool:
+    """`restore_process`, tried once more when an interrupt cuts it short; a second interrupt escapes."""
+    try:
+        return restore_process(name)
+    except KeyboardInterrupt:
+        return restore_process(name)
+
+
 def contains(title: str, wanted: str) -> bool:
     """The one match rule for a window's title part and the Model's title, so both sides agree."""
     return wanted.casefold() in title.casefold()
@@ -334,29 +342,28 @@ def wait_for_title(
     read: Callable[[str, float], Any], wanted: str, deadline_s: float
 ) -> tuple[str, str | None, str | None]:
     """Poll the active Model's title until it contains `wanted` under one deadline: the ending (`shown`,
-    `timed_out`, `read_failed`, `bridge_unavailable` or `cancelled`), the last title read, and why it ended
-    when it was not shown."""
+    `timed_out`, `read_failed` or `bridge_unavailable`), the last title read, and why it ended when it was
+    not shown. A reply that arrives after the deadline is `timed_out`, never `shown`."""
     started = time.monotonic()
     title: str | None = None
-    try:
-        while True:
-            remaining = deadline_s - (time.monotonic() - started)
-            if remaining <= 0:
-                return "timed_out", title, "the active Model's title never contained the wanted text"
-            try:
-                observed = read(ACTIVE_TITLE, remaining)
-            except host_wait.ReadError as error:
-                return "read_failed", title, str(error)
-            except TimeoutError:
-                return "timed_out", title, "the last read did not answer within the remaining budget"
-            except OSError as error:
-                return "bridge_unavailable", title, str(error)
-            title = observed if isinstance(observed, str) else None
-            if title is not None and contains(title, wanted):
-                return "shown", title, None
-            time.sleep(min(SHOW_INTERVAL_S, max(0.0, deadline_s - (time.monotonic() - started))))
-    except KeyboardInterrupt:
-        return "cancelled", title, "interrupted by the developer"
+    while True:
+        remaining = deadline_s - (time.monotonic() - started)
+        if remaining <= 0:
+            return "timed_out", title, "the active Model's title never contained the wanted text"
+        try:
+            observed = read(ACTIVE_TITLE, remaining)
+        except host_wait.ReadError as error:
+            return "read_failed", title, str(error)
+        except TimeoutError:
+            return "timed_out", title, "the last read did not answer within the remaining budget"
+        except OSError as error:
+            return "bridge_unavailable", title, str(error)
+        title = observed if isinstance(observed, str) else None
+        if time.monotonic() - started > deadline_s:
+            return "timed_out", title, "the last read answered after the deadline"
+        if title is not None and contains(title, wanted):
+            return "shown", title, None
+        time.sleep(min(SHOW_INTERVAL_S, max(0.0, deadline_s - (time.monotonic() - started))))
 
 
 def show_model(version: str, wanted: str, deadline_s: float) -> dict[str, Any]:
@@ -378,25 +385,40 @@ def show_model(version: str, wanted: str, deadline_s: float) -> dict[str, Any]:
         return result | {"error": "the wanted title text is empty"}
     if not (math.isfinite(deadline_s) and 0 < deadline_s <= MAX_SHOW_DEADLINE_S):
         return result | {"error": f"the deadline must be above 0 and at most {MAX_SHOW_DEADLINE_S:.0f} seconds"}
+    try:
+        raise_and_wait(version, wanted, deadline_s, result)
+    except KeyboardInterrupt:
+        result |= {"ending": "cancelled", "error": "interrupted by the developer"}
+    return result
+
+
+def raise_and_wait(version: str, wanted: str, deadline_s: float, result: dict[str, Any]) -> None:
+    """show_model's steps, filling `result` in place as they go, so an interrupt still reports what was done."""
     read = bridge_read(version)
     try:
         result["before"] = read(ACTIVE_TITLE, 10.0)
     except host_wait.ReadError as error:
-        return result | {"error": f"the active Model's title could not be read: {error}"}
+        result["error"] = f"the active Model's title could not be read: {error}"
+        return
     except OSError as error:
-        return result | {"ending": "bridge_unavailable", "error": str(error)}
+        result |= {"ending": "bridge_unavailable", "error": str(error)}
+        return
     if (previous := frontmost_process()) is None:
-        return result | {"error": "the frontmost process could not be read, so focus could not be handed back"}
+        result["error"] = "the frontmost process could not be read, so focus could not be handed back"
+        return
     result["previous"] = previous
     ok, listing = osascript(DOCUMENT_WINDOWS)
     if not ok:
-        return result | {"error": f"the document windows could not be read: {listing}"}
+        result["error"] = f"the document windows could not be read: {listing}"
+        return
     windows = [name for name in listing.splitlines() if DOCUMENT_MARK in name]
     matching = [name for name in windows if contains(name.rpartition(DOCUMENT_MARK)[0], wanted)]
     if not matching:
-        return result | {"error": f"no document window's title contains the wanted text; open: {windows}"}
+        result["error"] = f"no document window's title contains the wanted text; open: {windows}"
+        return
     if len(matching) > 1:
-        return result | {"error": f"more than one document window matches: {matching}"}
+        result["error"] = f"more than one document window matches: {matching}"
+        return
     result["window"] = matching[0]
     try:
         ok, answer = osascript(RAISE_WINDOW, matching[0])
@@ -405,8 +427,7 @@ def show_model(version: str, wanted: str, deadline_s: float) -> dict[str, Any]:
         else:
             result |= {"ending": "raise_failed", "error": f"the window could not be raised: {answer}"}
     finally:
-        result["restored"] = restore_process(previous)
-    return result
+        result["restored"] = hand_back(previous)
 
 
 def run_with_dialog_guard(version: str, code: str, timeout: float = 120.0, escape_after: float = 3.0) -> str:
