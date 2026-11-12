@@ -42,6 +42,16 @@ references (capped, with a total). No `value`, params or payloads. Shape: the `o
 `begin`. The reply says the bound ("what this session still retains: up to 256 outcomes, 15 minutes").
 Another caller's rows never appear. Tests: two callers, eviction, expiry and paging.
 
+As built (API 1.50): the listing is a public read, `API.outcomes(context:, limit:, cursor:, keys:)`
+(`shell/outcome_history.rb`, through `Dispatch#outcomes` with the `outcome` grant), so a Ruby script lists
+its own changes too; the agent tool passes the binding's key map (`Sequencer#keys_by_sequence`) as data, so
+the page is sized with every row's key already on it rather than decorated after the 16 KiB cut. The cursor
+binds the caller (in the filter digest) and its highest accepted sequence, not the Model revision: a refused-after-acceptance change adds
+a row without moving the revision, and a panel edit moves the revision without touching the caller's rows.
+Eviction and expiry drop the oldest rows, which sit at the tail of a newest-first list, so they only shorten
+it. A running change is not listed (dispatch is serial on the main thread, so a list never meets one). The
+entry records its operation name and a UTC time at `begin`; the monotonic clock stays the expiry clock.
+
 ### S3 · Artifact bytes
 
 - **Captures:** `ph_composer.view.capture` takes `inline: true` and also returns the PNG as an MCP `image`
@@ -81,7 +91,7 @@ here.
 
 | Stage | State | PR |
 | --- | --- | --- |
-| S1 expected revision | Implemented on branch `feature/458-s1-export-expected-revision` (API 1.49): checked in `Export::Tasks#start` after settle and again in each reading slice; 4 tests in `tests/export_tasks_test.rb` plus the agent-tool route in `tests/export_diagnostics_test.rb`; `make ci` green (2824 Ruby runs, 876 JS, 264 Python) | [#501](https://github.com/ph-composer/ph-composer-skp/pull/501) |
-| S2 operation history | Planned | |
+| S1 expected revision | Merged to main 2026-11-12 (API 1.49): checked in `Export::Tasks#start` after settle and again in each reading slice; 4 tests in `tests/export_tasks_test.rb` plus the agent-tool route in `tests/export_diagnostics_test.rb`; `make ci` green (2824 Ruby runs, 876 JS, 264 Python) | [#501](https://github.com/ph-composer/ph-composer-skp/pull/501) |
+| S2 operation history | Implemented on branch `feature/458-s2-operation-history` (API 1.50): `make ci` green, 11 tests in `tests/agent_access_outcome_history_test.rb`; Codex review (gpt-6.1-sol) 2 P2 fixed | [#502](https://github.com/ph-composer/ph-composer-skp/pull/502) |
 | S3 artifact bytes | Planned | |
 | S4 overlay capture | Closed by measurement 2026-11-12: an in-process window capture is refused without Screen Recording permission and brings up the system's permission flow; geometry-only kept, limit in AGENT_INTERFACE | none |

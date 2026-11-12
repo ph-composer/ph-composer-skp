@@ -9,8 +9,10 @@ module PhComposer
     CAPACITY = 256
     LIFETIME_SECONDS = 15 * 60
 
-    # `outcome` is nil while the request is still running.
-    Entry = Struct.new(:caller, :sequence, :digest, :outcome, :recorded_at, keyword_init: true) do
+    # `outcome` is nil while the request is still running. `name` is the operation it ran. `recorded_at` is the
+    # store's own clock, for expiry; `recorded_utc` is the wall time it was accepted, for a caller to read.
+    Entry = Struct.new(:caller, :sequence, :digest, :name, :outcome, :recorded_at, :recorded_utc,
+                       keyword_init: true) do
       def pending?
         outcome.nil?
       end
@@ -28,11 +30,12 @@ module PhComposer
       @entries[[caller, sequence]]
     end
 
-    def begin(caller, sequence, digest)
+    def begin(caller, sequence, digest, name: nil)
       expire
       @entries.delete(@entries.keys.first) while @entries.length >= CAPACITY
       @entries[[caller, sequence]] = Entry.new(
-        :caller => caller, :sequence => sequence, :digest => digest, :outcome => nil, :recorded_at => @clock.call
+        :caller => caller, :sequence => sequence, :digest => digest, :name => name, :outcome => nil,
+        :recorded_at => @clock.call, :recorded_utc => Time.now.utc.iso8601
       )
     end
 
@@ -47,6 +50,19 @@ module PhComposer
     def retained(caller, sequence)
       outcome = lookup(caller, sequence)&.outcome
       outcome && DeepCopy.call(outcome)
+    end
+
+    # Copies of `caller`'s finished entries still retained, newest first. Nobody else's are ever among them.
+    def history(caller)
+      expire
+      own = @entries.values.select { |entry| entry.caller == caller && !entry.pending? }
+      own.sort_by { |entry| -entry.sequence }.map do |entry|
+        entry.dup.tap do |copy|
+          copy.outcome = DeepCopy.call(entry.outcome)
+          copy.name = entry.name&.dup
+          copy.recorded_utc = entry.recorded_utc.dup
+        end
+      end
     end
 
     def count

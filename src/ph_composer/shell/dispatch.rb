@@ -12,8 +12,6 @@ module PhComposer
   class Dispatch
     include RequestChecks
 
-    REQUEST_KEYS = %w[sequence expected_revision proposal_digest].freeze
-
     def initialize(registry = Registry.current)
       @registry = registry
     end
@@ -146,6 +144,15 @@ module PhComposer
       coded_outcome(error, session)
     end
 
+    # This caller's retained change outcomes, newest first, one bounded page (OutcomeHistory). Needs the same
+    # grant as `outcome`, and lists nobody else's.
+    def outcomes(context, params, keys)
+      session, caller, = resolve(context, capability("action"), nil, nil)
+      OutcomeHistory.page(session, caller, params, keys)
+    rescue CodedError => error
+      coded_outcome(error, session)
+    end
+
     private
 
     def proposal_preview(context, name, params)
@@ -182,7 +189,7 @@ module PhComposer
       # the caller's sequence free.
       digest = request_digest(name, params, expected_revision, proposal_digest)
       caller.highest_sequence = sequence
-      session.outcomes.begin(caller.handle, sequence, digest)
+      session.outcomes.begin(caller.handle, sequence, digest, :name => action.name)
       outcome = session.exclusive do
         result = run(session, action, params, expected_revision, proposal_digest)
         session.outcomes.finish(caller.handle, sequence, result)
@@ -268,26 +275,6 @@ module PhComposer
       end
 
       [session, caller, declaration]
-    end
-
-    def read_request!(request, session)
-      unless request.is_a?(Hash) && (request.keys - REQUEST_KEYS).empty?
-        raise CodedError.new("request.malformed", "The request may hold only #{REQUEST_KEYS.join(' and ')}.")
-      end
-
-      sequence = request["sequence"]
-      expected_revision = request["expected_revision"]
-      unless sequence.is_a?(Integer) && sequence.positive? && expected_revision.is_a?(Integer)
-        raise CodedError.new("request.malformed", "The request needs a positive integer sequence and an " \
-                                                  "integer expected_revision.", "revision" => session.revision)
-      end
-
-      proposal_digest = request["proposal_digest"]
-      unless proposal_digest.nil? || proposal_digest.is_a?(String)
-        raise CodedError.new("request.malformed", "proposal_digest must be a string when supplied.")
-      end
-
-      [sequence, expected_revision, proposal_digest]
     end
 
     # A sequence at or below the caller's highest accepted one is a retry, never new work. The payload

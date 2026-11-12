@@ -143,8 +143,11 @@ module PhComposer
       end
 
       # Whether a call may have changed something, so an oversized answer is trimmed rather than refused: every
-      # tool but the reads, and not export_status with part, which reads what an ended task kept.
+      # tool but the reads, and not export_status with part, which reads what an ended task kept, nor the
+      # outcome list (outcome with neither sequence nor idempotency_key), which reads the history.
       def acts?(tool, arguments)
+        return false if tool.name == "outcome" && !arguments.key?("sequence") && !arguments.key?("idempotency_key")
+
         tool.capability != "read" && !(tool.name == "export_status" && arguments.key?("part"))
       end
 

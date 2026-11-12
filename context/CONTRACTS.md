@@ -123,6 +123,9 @@ are clients of it.
   as the libraries configured on this machine, and never the Model. No request, no Undo entry.
 - `invoke(context:, name:, params:, request:)`: a validated synchronous mutation.
 - `outcome(context:, request:)`: a retained mutation outcome, without rerunning it.
+- `outcomes(context:, limit:, cursor:, keys:)`: this caller's own retained outcomes, newest first, one
+  bounded page, each row a summary without value or params (`shell/outcome_history.rb`). `keys`, the
+  caller's own names for its sequences, come back on their rows. Needs `model_write`, as `outcome` does.
 - `export_file(context:, name:, params:)`: a registered synchronous FileExport, with an explicit
   `export` grant. It has no mutation sequence and opens no Model operation. Its owner performs the
   guarded file write. A FileExport or setup command that declares an `approval` needs a location

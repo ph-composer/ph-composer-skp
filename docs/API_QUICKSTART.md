@@ -110,7 +110,10 @@ stale["effect"]  # "none"
 If a response never arrives, send the same request again with the same sequence. The first outcome
 comes back and nothing is written twice. `PhComposer::API.outcome(context:, request: { "sequence" => n })`
 answers the same without resending. A request refused as `request.malformed` never took its
-sequence, so the corrected request may reuse it.
+sequence, so the corrected request may reuse it. `PhComposer::API.outcomes(context:, limit:, cursor:)`
+lists this context's own retained outcomes, newest first, in pages: each one's sequence, operation,
+status, effect, code, revision, time and first affected references, never its value or params. The
+session keeps up to 256 outcomes across every caller, each for 15 minutes.
 
 ## 7. Give the Face an Assembly
 

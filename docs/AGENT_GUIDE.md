@@ -186,6 +186,14 @@ that pages or fragments what was left out. Fragments join and check exactly as a
   `idempotency_key`, or send the same invoke again with the same key: the first outcome answers and
   the change is never applied twice. `request.outcome_unavailable` means it is too old to know;
   read the Model before doing anything else.
+- **Which of your changes ran.** Call `outcome` with neither `sequence` nor `idempotency_key` to list
+  this connection's own retained changes, newest first, in pages (`limit`, then `cursor` from
+  `next_cursor`). Each row gives the sequence, your key, the operation, status, effect, code, revision,
+  the time it was taken and its first affected references with their total; it never repeats a value or
+  params, and another connection's changes never appear. The session keeps up to 256 outcomes across
+  every caller for 15 minutes each, so an older change is gone from the list: read the Model for it. A
+  cursor read after a newer change was taken is refused as `query.cursor_expired`; start again from the
+  first page.
 - **A setup command, an export start or a path change whose reply was lost.** Read its state: the
   setup's own read, `latest_export`, or `context`.
 - **Disconnected or revoked.** A dropped connection changes nothing. A revoked token is refused at
