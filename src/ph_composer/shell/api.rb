@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 47
+    MINOR = 48
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -233,7 +233,11 @@ module PhComposer
       { "minor" => 47, "date" => "2026-11-11",
         "change" => "Every action also refuses session.busy while the Rotate tool is selected in SketchUp, idle " \
                     "or partway, since SketchUp does not report a turn in progress; context readiness and " \
-                    "discover's session busy say so." }
+                    "discover's session busy say so." },
+      { "minor" => 48, "date" => "2026-11-12",
+        "change" => "With more than one Model open, a change no PH-Composer operation owns advances every open " \
+                    "session's revision, since SketchUp does not say which Model an outside script changed; " \
+                    "an invoke resting on an earlier read of any of them refuses revision.stale." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

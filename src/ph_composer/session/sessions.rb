@@ -65,16 +65,28 @@ module PhComposer
         session
       end
 
-      # The session a transaction callback belongs to. SketchUp reports the transactions of an operation on a
+      # The session an Undo or Redo callback belongs to. SketchUp reports the transactions of an operation on a
       # Model it is not showing to the shown Model's observers, with the shown Model as the argument
       # (context/SKETCHUP_HOST_BEHAVIOR.md); a callback that arrives while another session is inside its own
       # operation (a change request or an `operating` block) is that session's, so neither Model's revision is
-      # misread.
+      # misread. Any other Undo or Redo is the named Model's: native Undo and Redo act on the shown Model only.
       def for_transaction(model)
-        own = sessions[model.object_id]
-        return own if own&.operating?
+        operating_session(model) || self.for(model)
+      end
 
-        sessions.values.find(&:operating?) || self.for(model)
+      # Publishes a commit callback. One that arrives while a session is inside its own operation is that
+      # session's. Any other commit may belong to any open Model, since an outside script's operation on a
+      # Model SketchUp is not showing reaches the shown Model's observers (context/SKETCHUP_HOST_BEHAVIOR.md):
+      # the named Model's session hears it as a host event, and every other open session counts it as an
+      # outside commit, so a later invoke on an earlier read of any of them is stale (context/CONTRACTS.md,
+      # "Revisions, transactions and host execution"). With one Model open, its session hears every commit.
+      def transaction_committed(model)
+        owner = operating_session(model)
+        return owner.host_event(:transaction_committed) if owner
+
+        named = self.for(model)
+        open_sessions.each { |session| session.outside_commit unless session.equal?(named) }
+        named.host_event(:transaction_committed)
       end
 
       # The open session with this id, or nil when it was never issued or its Model has closed.
@@ -158,6 +170,20 @@ module PhComposer
       end
 
       private
+
+      # The session inside its own operation: the named Model's first, else any other open one.
+      def operating_session(model)
+        own = sessions[model.object_id]
+        return own if own&.valid? && own.operating?
+
+        open_sessions.find(&:operating?)
+      end
+
+      # Inside a host callback the registry is read without pruning: detaching there is what `Sessions.all`
+      # does on the next ordinary read.
+      def open_sessions
+        sessions.values.select(&:valid?)
+      end
 
       def remove_observers(model, observers)
         model.remove_observer(observers.model) if observers.model && model.respond_to?(:remove_observer)

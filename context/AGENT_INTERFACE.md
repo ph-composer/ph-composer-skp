@@ -573,7 +573,11 @@ the worker asks before it queues the call and the pump again before it runs it
 only its sending side after the request reads as gone too. Its key was never given a
 sequence, so the same invoke sent again runs once. A sheet such as Make Component stops no timer and
 is not a busy state. Changes to a Model SketchUp is not showing run and land on that Model's Undo
-stack; moving its edit path is refused `session.inactive` (measured in the AW09M run, 2026-11-10). A change's commit
+stack; moving its edit path is refused `session.inactive` (measured in the AW09M run, 2026-11-10). With more
+than one Model open, a change no PH-Composer operation owns (the user's, another extension's, the Ruby
+console's) advances every open session's revision, because SketchUp reports it to the shown Model whichever
+Model it changed (#455, `context/CONTRACTS.md` "Revisions, transactions and host execution"); an invoke on
+an earlier read of any of them refuses `revision.stale`, so the agent reads `context` again (API 1.48). A change's commit
 cancels a native Move, Scale or Rotate partway through (`context/SKETCHUP_HOST_BEHAVIOR.md`), so every action refuses
 `session.busy` while a tool in `ModelSession::GESTURE_TOOLS` (MoveTool, ScaleTool; API 1.46 added ScaleTool) is in a state
 other than 0, or while a tool in `ModelSession::SELECTED_TOOLS` (RotateTool, API 1.47) is selected in any state, before it takes a sequence or key. A cancelled gesture leaves the revision as it was, so the same invoke then

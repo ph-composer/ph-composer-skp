@@ -166,7 +166,9 @@ that pages or fragments what was left out. Fragments join and check exactly as a
   different request under it conflicts, so use a new key for new work. `outcome` with the key says which:
   a key it does not know is free.
 - **`revision.stale` or `target.changed`.** The Model changed after you read it, often because the
-  user edited it. Read again, decide again, and send a new request.
+  user edited it. With more than one Model open, a change to any of them by the user or another
+  extension can make every open Model's revision stale, because SketchUp does not say which Model
+  changed. Read again, decide again, and send a new request.
 - **`session.busy`.** Another change is running, deferred work is settling, or the user has a tool
   in use. A change also waits while the user is partway through a Move or Scale, or has the Rotate tool
   selected at all, since its commit would cancel the gesture; reads still answer, and `context`'s
