@@ -618,7 +618,15 @@ that invoke bound is released (`Sequencer#release`) and the same key sent again 
 once; a key bound by an earlier send keeps its sequence whatever a later send under it is refused, so an accepted
 change never runs twice. Every `invoke` and `outcome`
 result carries `sequence`, an optional field of the published Outcome schema that only this route
-sets; `outcome` takes a sequence or a key. A lost reply is recovered by reading state: `outcome` for
+sets; `outcome` takes a sequence or a key. With neither, `outcome` lists this connection's own retained
+change outcomes, newest first, in `Pages.bounded` pages (API 1.50, `API.outcomes`, `shell/outcome_history.rb`):
+sequence, the key from the binding's `Sequencer`, operation name (recorded at acceptance), status, effect,
+code, revision, recorded time (UTC) and the first 10 affected references with their total; never `value`,
+`message`, `detail` or params. Rows come only from the caller's own handle, so another token's never
+appear, and the reply states the store's bound in `retention` and its message. A cursor binds the caller
+(another token's cursor is `params.invalid`) and its highest accepted sequence: a page asked for after a
+newer change was accepted refuses `query.cursor_expired`, while an eviction or expiry only shortens the tail. `limit` or `cursor` beside a
+sequence or key is `params.invalid`. A lost reply is recovered by reading state: `outcome` for
 an invoke, the setup's own read (such as `ph_composer.library.providers`) for a setup command,
 `latest_export` for a started export, and the `context` read for a path change. A client's
 `notifications/cancelled` is accepted and changes nothing: a call already handed to SketchUp runs to
@@ -740,8 +748,10 @@ stopped listener checks as well, and New token waits for a free port; each token
 launch is kept per token, apart from the recent-call ring, and shown beside it as calls finish.
 
 Keep a bounded operation history with caller identity, action, target references, outcome and
-revision for diagnosis. Avoid full payload or secret logging. Exact retention and user-visible
-controls remain design choices.
+revision for diagnosis. Avoid full payload or secret logging. Implemented for a caller's own changes
+(API 1.50): the listing `outcome` above reads the retained outcomes, so its retention is the store's
+(context/CONTRACTS.md, "Retries"), with no store or persistence of its own. A history across callers and
+any user-visible control remain design choices.
 
 ### Security posture
 

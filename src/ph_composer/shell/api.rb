@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 49
+    MINOR = 50
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -241,7 +241,12 @@ module PhComposer
       { "minor" => 49, "date" => "2026-11-12",
         "change" => "start_export takes expected_revision: a Model at another revision refuses revision.stale and " \
                     "starts nothing, and one that changes before the run has read it fails the task " \
-                    "revision.stale." }
+                    "revision.stale." },
+      { "minor" => 50, "date" => "2026-11-12",
+        "change" => "API.outcomes is new: the caller's own retained change outcomes, newest first and paged, " \
+                    "each with its sequence, operation, status, effect, code, revision, recorded time and first " \
+                    "affected references, never its value or params. The agent outcome tool lists them when " \
+                    "given neither sequence nor idempotency_key, with each row's key." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {
@@ -401,6 +406,13 @@ module PhComposer
 
     def outcome(context:, request:)
       Dispatch.new.outcome(context, request)
+    end
+
+    # This caller's retained change outcomes, newest first, a bounded page at a time: what each change was and
+    # how it ended, never its value or params. `keys`, the caller's own names for its sequences
+    # (sequence => key), come back on their rows as idempotency_key.
+    def outcomes(context:, limit: nil, cursor: nil, keys: {})
+      Dispatch.new.outcomes(context, { "limit" => limit, "cursor" => cursor }.compact, keys)
     end
 
     # `location` is `{"id" => ..., "replace" => true, "expected_destination" => ...}`: a destination the

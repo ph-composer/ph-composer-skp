@@ -37,6 +37,11 @@ module PhComposer
       def lookup(key)
         @keys[key]
       end
+
+      # Every key by the sequence it holds; a sequence holds at most one key.
+      def keys_by_sequence
+        @keys.invert
+      end
     end
   end
 end

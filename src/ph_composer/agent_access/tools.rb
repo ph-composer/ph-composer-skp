@@ -135,8 +135,19 @@ module PhComposer
         !caller.nil? && caller.highest_sequence >= sequence
       end
 
-      # The retained outcome of an invoke, by its sequence or by the key it was sent with.
+      # The retained outcome of an invoke, by its sequence or by the key it was sent with; with neither, this
+      # connection's own retained outcomes, newest first, a page at a time, each row with the key it was sent with.
       def outcome(context, arguments, sequencer)
+        paging = arguments.slice("limit", "cursor")
+        unless arguments.key?("sequence") || arguments.key?("idempotency_key")
+          return API.outcomes(:context => context, :keys => sequencer.keys_by_sequence,
+                              **paging.transform_keys(&:to_sym))
+        end
+        unless paging.empty?
+          return Outcome.refused("params.invalid", "limit and cursor page the list; leave out sequence and " \
+                                                   "idempotency_key to list.", :revision => nil)
+        end
+
         sequence = arguments["sequence"] || sequencer.lookup(arguments["idempotency_key"])
         unless sequence
           return Outcome.refused("request.outcome_unavailable", "This connection sent no change with that key; " \
@@ -228,9 +239,17 @@ module PhComposer
           invoke(context, arguments, sequencer)
         end,
         tool("outcome", "The outcome of an earlier invoke, by its sequence or idempotency_key, without running it " \
-                        "again: after a lost reply, read it here before deciding anything.",
+                        "again: after a lost reply, read it here before deciding anything. With neither, this " \
+                        "connection's own retained changes, newest first, in pages: each one's sequence, key, " \
+                        "operation, status, effect, code, revision, time and first affected references, never " \
+                        "its value or params. The session keeps up to #{OutcomeStore::CAPACITY} outcomes for " \
+                        "#{OutcomeStore::LIFETIME_SECONDS / 60} minutes.",
              object({ "session" => SESSION, "sequence" => { "type" => "integer", "minimum" => 1 },
-                      "idempotency_key" => KEY }, ["session"]),
+                      "idempotency_key" => KEY,
+                      "limit" => { "type" => "integer", "minimum" => 1, "maximum" => Pages::MAXIMUM_LIMIT,
+                                   "description" => "Listing only: rows per page, #{Pages::DEFAULT_LIMIT} when " \
+                                                    "absent." },
+                      "cursor" => string("Listing only: next_cursor from the previous page.") }, ["session"]),
              :session => true, :capability => "model_write",
              :annotations => READ_ONLY) do |context, arguments, _token, sequencer|
           outcome(context, arguments, sequencer)
