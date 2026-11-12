@@ -488,6 +488,13 @@ checks that only a run makes.
 `API.start_export`, `export_status`, `cancel_export` and `latest_export` require the separate `export`
 grant. A scripted start names an approved save destination as `location` and, to replace a pair,
 the state `export_preflight(location:)` reported (see "Locations only the user can choose").
+An optional `expected_revision` (API 1.49) binds the run to the revision the caller read. `Export::Tasks#start`
+settles deferred Model work and compares it on the main thread, where the run takes its source: another
+revision refuses `revision.stale` with effect `none` and invoke's outcome shape, and no task exists.
+Collection is deferred to timer slices, so each reading slice (`Task#tick`) compares it again before the
+content generation check: a change before the read finishes fails the task `revision.stale`, writing
+nothing. Without it, a start is bound to no revision and only a content change during the run stops it
+(`export.model_changed`).
 The native panel obtains the destination and consent through its Save sheet instead. `API.describe`
 answers each task method with its grant, keyword params, result schema and an example
 (`export/task_contract.rb`), so a client needs no hand-written signature.

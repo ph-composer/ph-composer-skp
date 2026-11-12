@@ -30,10 +30,12 @@ module PhComposer
 
       # `approval` is the NativeApproval::Granted for the destination: from the native Save sheet, or
       # resolved from an approved location, whose id and label the completed outcome names instead of
-      # a path.
-      def initialize(session, approval:, owner:, runtime_factory: nil)
+      # a path. `expected_revision`, when the caller gave one, is the revision the run must read
+      # (Tasks#start has checked it against the session's).
+      def initialize(session, approval:, owner:, expected_revision: nil, runtime_factory: nil)
         @session = session
         @owner = owner
+        @expected_revision = expected_revision
         @id = "export_#{SecureRandom.hex(12)}"
         @destination = File.expand_path(approval.path)
         @location = approval.location_id && { "id" => approval.location_id, "label" => approval.label }
@@ -122,6 +124,11 @@ module PhComposer
 
       def tick
         return if terminal?
+
+        # Before coherent!: a content edit moves the revision too, and a caller that named one is told so.
+        if @expected_revision && @session.revision != @expected_revision
+          raise Blocked.new("revision.stale", "The Model changed while the export read it; nothing was written.")
+        end
 
         coherent!
         @stage = "reading"

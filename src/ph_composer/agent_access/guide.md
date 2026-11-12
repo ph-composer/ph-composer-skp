@@ -458,7 +458,9 @@ in stored metadata: a passed-through `user_data` using a reserved key (`export.b
 data nothing installed can export (`extension.unavailable`, `export.relevance_unknown` and the like). Only
 the translation itself checks the HBJSON, so a clean preflight is not a promise. A pair already there
 is replaced only with `replace` and the reported `state` as `expected_destination`. `start_export` with a location's id, then
-`export_status` until the outcome arrives; poll with `compact`, which leaves the findings, result and
+`export_status` until the outcome arrives. Pass the `revision` you reviewed as `expected_revision` to export
+exactly that Model: if it changed, the start refuses `revision.stale` and starts nothing, and a change
+before the run has read the Model fails the task `revision.stale`. Poll with `compact`, which leaves the findings, result and
 report out. Every task names the `source` it read (the Model `revision` and content generation when it
 started) and, once it ends, its `diagnostics`: finding counts and the size and SHA-256 of the report and
 result it kept, or `report_absent` saying why it kept no report (`no_translation`: it stopped before the

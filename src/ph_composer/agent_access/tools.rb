@@ -251,7 +251,8 @@ module PhComposer
         tool("start_export", "Starts the HBJSON export of one Model to a destination the user approved; poll it " \
                              "with export_status.",
              task_schema("start_export"), :session => true, :capability => "export") do |context, arguments|
-          API.start_export(:context => context, :location => arguments.fetch("location"))
+          API.start_export(:context => context, :location => arguments.fetch("location"),
+                           **task_options("start_export", arguments))
         end,
         tool("export_status", "One export task's progress and, once it ends, its outcome; compact while polling. " \
                               "Once it ended, part reads what it kept: findings a page at a time, the report or " \

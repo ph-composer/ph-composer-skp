@@ -65290,7 +65290,7 @@ Example arguments:
 
 ### `PhComposer::API.start_export`
 
-Start one export of the canonical HBJSON and its report to a destination the user approved (ph_composer.locations.approve_destination). An existing pair is replaced only with replace and the expected_destination export_preflight reported; one task runs per Model at a time. Needs `export`.
+Start one export of the canonical HBJSON and its report to a destination the user approved (ph_composer.locations.approve_destination). An existing pair is replaced only with replace and the expected_destination export_preflight reported; one task runs per Model at a time. With expected_revision, a Model at another revision refuses revision.stale and starts nothing, and one that changes before the run has read it fails the task revision.stale. Needs `export`.
 
 Keyword arguments besides context:
 
@@ -65325,6 +65325,10 @@ Keyword arguments besides context:
         }
       },
       "description": "An approved location to use instead of asking the user. A native client asks instead."
+    },
+    "expected_revision": {
+      "type": "integer",
+      "description": "The revision the caller last read; the run exports that revision or none."
     }
   }
 }
@@ -65593,6 +65597,17 @@ Example arguments:
   "location": {
     "id": "location_AAAAAAAAAAAA"
   }
+}
+```
+
+Example arguments:
+
+```json
+{
+  "location": {
+    "id": "location_AAAAAAAAAAAA"
+  },
+  "expected_revision": 12
 }
 ```
 
@@ -66771,3 +66786,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.46 | 2026-11-11 | Every action also refuses session.busy while the user is partway through a Scale in SketchUp, as for a Move; context readiness and discover's session busy say so. |
 | 1.47 | 2026-11-11 | Every action also refuses session.busy while the Rotate tool is selected in SketchUp, idle or partway, since SketchUp does not report a turn in progress; context readiness and discover's session busy say so. |
 | 1.48 | 2026-11-12 | With more than one Model open, a change no PH-Composer operation owns advances every open session's revision, since SketchUp does not say which Model an outside script changed; an invoke resting on an earlier read of any of them refuses revision.stale. |
+| 1.49 | 2026-11-12 | start_export takes expected_revision: a Model at another revision refuses revision.stale and starts nothing, and one that changes before the run has read it fails the task revision.stale. |

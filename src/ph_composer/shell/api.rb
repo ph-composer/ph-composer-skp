@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 48
+    MINOR = 49
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -237,7 +237,11 @@ module PhComposer
       { "minor" => 48, "date" => "2026-11-12",
         "change" => "With more than one Model open, a change no PH-Composer operation owns advances every open " \
                     "session's revision, since SketchUp does not say which Model an outside script changed; " \
-                    "an invoke resting on an earlier read of any of them refuses revision.stale." }
+                    "an invoke resting on an earlier read of any of them refuses revision.stale." },
+      { "minor" => 49, "date" => "2026-11-12",
+        "change" => "start_export takes expected_revision: a Model at another revision refuses revision.stale and " \
+                    "starts nothing, and one that changes before the run has read it fails the task " \
+                    "revision.stale." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {
@@ -400,9 +404,10 @@ module PhComposer
     end
 
     # `location` is `{"id" => ..., "replace" => true, "expected_destination" => ...}`: a destination the
-    # user approved, never a path (ph_composer.locations.list).
-    def start_export(context:, location:)
-      Dispatch.new.export_task(context, :start, :location => location)
+    # user approved, never a path (ph_composer.locations.list). `expected_revision`, the revision the caller
+    # last read, refuses revision.stale when the Model is at another one (Export::Tasks#start).
+    def start_export(context:, location:, expected_revision: nil)
+      Dispatch.new.export_task(context, :start, :location => location, :expected_revision => expected_revision)
     end
 
     # `location`, an approved destination's id, adds what that destination holds to the result. `compact`

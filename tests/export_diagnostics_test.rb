@@ -152,7 +152,10 @@ class ExportDiagnosticsTest < PhComposerTestCase
     assert_equal "task.foreign", foreign.dig("structuredContent", "code")
 
     Runtime.closing = false
-    running = agent("start_export", "location" => { "id" => approved }).dig("value", "task_id")
+    stale = agent("start_export", "location" => { "id" => approved }, "expected_revision" => @session.revision - 1)
+    assert_equal "revision.stale", stale.fetch("code")
+    running = agent("start_export", "location" => { "id" => approved }, "expected_revision" => @session.revision)
+              .dig("value", "task_id")
     assert_equal "task.running", agent("export_status", "task_id" => running, "part" => "findings").fetch("code")
     PhComposer::RuntimeHost.stub(:new, ->(**args) { Runtime.new(**args) }) { UI.run_timers }
     cursor = agent("export_status", "task_id" => running, "part" => "findings", "limit" => 10).dig("value",
