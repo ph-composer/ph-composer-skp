@@ -1,7 +1,7 @@
 # GitHub open-issue sweep, November 2026
 
 DATE: 2026-11-11
-STATUS: Code complete 2026-11-11; host pass pending (#492)
+STATUS: Code complete and host pass run 2026-11-11; LH1 Cancel and two #455 measurements remain (#492)
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: one per row below
 
@@ -43,7 +43,7 @@ Codex review (gpt-6.1-sol; gpt-6-astra for #473) and every thread answered.
 | 7 | [#317](https://github.com/ph-composer/ph-composer-skp/issues/317) | Export Faces section: index Zone ownership once per export | Merged to main, PR #466 (`ebaf21c6`); offline 60.5 s to 0.53 s at 25,020 Faces |
 | 8 | [#438](https://github.com/ph-composer/ph-composer-skp/issues/438) | Model modified after save while a Space is open | Closed, host behavior: a plain group shows the same `modified?` after save (`context/SKETCHUP_HOST_BEHAVIOR.md`, `onSaveModel`) |
 | 9 | [#145](https://github.com/ph-composer/ph-composer-skp/issues/145) | Duplicate-identity design evidence | Merged to main, PR #469 (`8070bc47`); recommends keeping the three separate; open for Ed's decision |
-| 10 | [#492](https://github.com/ph-composer/ph-composer-skp/issues/492) | Native checks listed below | Scoped; needs Ed at the Mac |
+| 10 | [#492](https://github.com/ph-composer/ph-composer-skp/issues/492) | Native checks listed below | Run 2026-11-11 on main `a9d38726`: #437, #474, #468, #486, #456 pass; #154 measured (fails 200 ms); #455 Rotate/Scale measured, guard filed as #493; LH1 partial |
 
 ## Issues found and delivered during the sweep
 
@@ -79,3 +79,17 @@ Offline tests are the acceptance for every merged row; these native checks remai
 - #487, #486: native Undo for the copy watchers (recipe kept with the conductor's evidence).
 - #455: Rotate and Scale mid-gesture; `onActivePathChanged` routing (measure first); outside-script attribution.
 - #154: unit-switch timing in the HtmlDialog (Chromium 88).
+
+### Host pass results (2026-11-11, main `a9d38726`, SketchUp 26.1.188)
+
+Evidence stays in the private run folder `_private/host/hostpass-492/`; results are ticked in #492.
+
+- #437, #474, #468 Zones, #486 A and B: pass under one full-screen hold, fresh process per Undo case.
+- #456: pass by DOM read (three profiles on one token each show their own client).
+- #154: every row open 311 and 303 ms against the 200 ms target (fail); Zones open 169 ms. Engine Chrome 137.
+- #455: an agent write cancels Rotate and Scale mid-gesture; Rotate's partial result merges into the agent's
+  Undo step. Guard extension filed as #493.
+- LH1 (#332, #472): loading state, Cancel in place and the retry announcement observed; Cancel stopping a load
+  and the copy lock wait on a PH-Elements reconnect.
+- Recipe lesson: an empty `ModelOperation.perform` block leaves no Undo entry, so a host case that needs an
+  unrelated Undo step must write something.
