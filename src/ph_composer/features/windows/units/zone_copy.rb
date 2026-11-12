@@ -88,6 +88,7 @@ module PhComposer
             next if data.empty?
 
             old_id = update.before.fetch("id")
+            Records::Extension.check_copy_rules!(data, request.registry.catalog, "Window unit", old_id)
             refuse_ambiguous!(data, counts, old_id)
             mapping = shared.merge(old_id => update.after.fetch("id"))
             update.after["extension_data"] = Records::Extension.copy_data(data, request.registry.catalog, "Window unit",
@@ -98,9 +99,9 @@ module PhComposer
 
         def refuse_ambiguous!(data, counts, own_id)
           named = data.each_value.flat_map do |envelope|
-            Records::Extension.referenced_ids(envelope.fetch("payload"), envelope.fetch("references", [])).map(&:last)
+            Records::Extension.referenced_ids(envelope.fetch("payload"), envelope.fetch("references", []))
           end
-          return unless named.any? { |id| id != own_id && counts.fetch(id, 0) > 1 }
+          return unless named.any? { |kind, id| kind == REFERENCE_KIND && id != own_id && counts.fetch(id, 0) > 1 }
 
           raise CodedError.new("reference.invalid", "A copied Window's payload names an identity several copied " \
                                                     "Windows share, so its target is ambiguous.")

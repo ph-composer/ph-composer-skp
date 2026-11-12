@@ -280,6 +280,16 @@ class WindowZoneCopyTest < PhComposerTestCase
     assert_equal 2, @original.definition.instances.length, "storage is still shared"
   end
 
+  def test_an_unreadable_extension_envelope_on_a_copied_unit_keeps_its_copy_rule_refusal
+    unit = @original.entities.to_a.grep(Sketchup::ComponentInstance).first
+    U.write(unit, U.read(unit).merge("extension_data" => { "outside.vendor" => { "schema_version" => 2 } }))
+    copy = shared_copy(@original, 400)
+
+    result = invoke(MAKE_INDEPENDENT, { "zone_path" => [copy.persistent_id] })
+
+    assert_equal %w[refused copy.rule_missing none], result.values_at("status", "code", "effect"), result.inspect
+  end
+
   def test_undo_removes_the_unit_ids_with_the_zone_and_redo_repeats_them
     copy = shared_copy(@original, 400)
     invoke(MAKE_INDEPENDENT, { "zone_path" => [copy.persistent_id] })
