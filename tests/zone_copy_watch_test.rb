@@ -100,6 +100,29 @@ class ZoneCopyWatchTest < PhComposerTestCase
     assert_match(/^Undo also took back making the copied Zone independent/, @notices.last.first)
   end
 
+  # A copy made independent again by the row's command is no longer read only, so a later Undo of an
+  # unrelated change does not say it is.
+  def test_an_undo_after_the_explicit_repair_does_not_warn_again
+    copy = native_copy(@original, 400)
+    PhComposer::ModelOperation.perform(@model, "Move") do
+      @original.transformation = Geom::Transformation.translation([10, 0, 0])
+    end
+    UI.run_timers
+    assert @model.undo
+    UI.run_timers
+    result = invoke("ph_composer.zones.make_independent", { "zone_path" => [copy.persistent_id] })
+    assert_equal "completed", result.fetch("status"), result.inspect
+    PhComposer::ModelOperation.perform(@model, "Move") do
+      @original.transformation = Geom::Transformation.translation([20, 0, 0])
+    end
+    warnings = @notices.count { |_message, tone| tone == :warning }
+
+    assert @model.undo
+    UI.run_timers
+
+    assert_equal warnings, @notices.count { |_message, tone| tone == :warning }
+  end
+
   def test_a_copy_whose_faces_sit_in_a_child_group_is_made_independent_with_its_child
     faces = 3.times.map do |index|
       Sketchup::Face.new(1001 + index, {}, :points => [Geom::Point3d.new(0, 0, index), Geom::Point3d.new(2, 0, index),
