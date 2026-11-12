@@ -59,15 +59,15 @@ module PhComposer
           return if @running || @repaired.empty?
 
           live = occurrences.to_h
-          return if live.empty? # An unreadable Model is no evidence that the copies left; keep them.
-
-          # A copy no longer in the Model has nothing left to warn about; every other repair is kept, so a
-          # later Undo of an earlier batch, or another Undo after a Redo, still warns.
-          @repaired = @repaired.select { |path, _id| live.key?(path) }
+          # Every repair is kept until the session detaches, because Redo can bring back a copy that left
+          # through Undo and an unreadable Model is no evidence that one left. A copy not in the Model now is
+          # skipped, not dropped, so a later Undo of an earlier batch, or another Undo after a Redo, still warns.
           # Reverted: the copy lost the id it was given and shares one again. A copy the row's command
           # made independent since holds an id of its own and is not read only.
           held = live.values.tally
-          reverted = @repaired.select { |path, id| live.fetch(path) != id && held.fetch(live.fetch(path)) > 1 }
+          reverted = @repaired.select do |path, id|
+            live.key?(path) && live.fetch(path) != id && held.fetch(live.fetch(path)) > 1
+          end
           return if reverted.empty?
 
           count = reverted.length
