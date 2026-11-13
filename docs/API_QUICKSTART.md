@@ -1,15 +1,11 @@
 # API quickstart
 
-DATE: 2026-10-01
-STATUS: Implemented and merged to main for in-process Ruby clients. No external connection is
-supported yet; see [AGENT_ACCESS.md](AGENT_ACCESS.md).
+Use `PhComposer::API` from Ruby inside SketchUp. Open a scratch model and select a Group
+or loose geometry suitable for Make Zone. The examples create and edit records in that model.
+The [API reference](API_REFERENCE.md) lists operation schemas and examples. For a separate MCP
+client, use [Agent Access](AGENT_ACCESS.md).
 
-This walks one session from discovery to a verified edit using only the public interface. Every
-operation name, params schema and result schema it uses is in the generated
-[API_REFERENCE.md](API_REFERENCE.md), and `PhComposer::API.describe(name:)` answers the same at
-run time. A client needs nothing else: no feature module, store or dictionary name.
-
-The offline suite runs these steps as written (`tests/api_client_test.rb`).
+The [Ruby client test](../tests/api_client_test.rb) covers editing, retries, paging and export task setup.
 
 ## 1. Find the Model and connect
 
@@ -19,12 +15,10 @@ session = found["sessions"].find { |row| row["active"] }
 context = PhComposer::API.connect(session_id: session["id"], capabilities: %w[read view model_write export])
 ```
 
-Ask only for the grants you need; `export` is required for step 8 alone. `setup`, for loading
-and configuring libraries on this machine, is never granted unless asked for.
+Request the grants your script needs. This example uses `export` in step 8. Add `setup` only
+for library loading or changes to this computer's setup.
 
-`discover` lists the registered queries, actions, view commands, setup commands, file exports and
-record kinds by name.
-`describe` returns one of them in full:
+Use `discover` to list registrations. Use `describe` to read a declaration's schema and example.
 
 ```ruby
 PhComposer::API.describe(name: "ph_composer.zones.make")        # params, result, an example
@@ -39,8 +33,8 @@ ids from the root) and `ph_composer.context.root` move the edit path for you, an
 
 ## 2. Make a Zone from the selection
 
-The Zones read offers the params Make Zone takes for whatever the user has selected, or null.
-Preview first; the preview's digest makes the invoke refuse if the change would now differ.
+Read `make_zone` for the current selection. If it is null, select eligible geometry first.
+Preview the change and pass its digest to `invoke` to apply the reviewed proposal.
 
 ```ruby
 zones = PhComposer::API.query(context: context, name: "ph_composer.zones.list")
@@ -57,8 +51,8 @@ write is based on; the result's `revision` is the one to use next.
 
 ## 3. Read the Zone's Faces and classify one
 
-A Face is named by an occurrence reference, never by its SketchUp id alone. Send the values you read
-as `expected_values`, so a Face that changed in the meantime refuses rather than being overwritten.
+Use the Face's occurrence reference and pass its last-read values as `expected_values`.
+The write refuses if those values changed.
 
 ```ruby
 faces = PhComposer::API.query(context: context, name: "ph_composer.zones.faces.list")
@@ -107,13 +101,11 @@ stale["effect"]  # "none"
 
 ## 6. Retry after a lost response
 
-If a response never arrives, send the same request again with the same sequence. The first outcome
-comes back and nothing is written twice. `PhComposer::API.outcome(context:, request: { "sequence" => n })`
-answers the same without resending. A request refused as `request.malformed` never took its
-sequence, so the corrected request may reuse it. `PhComposer::API.outcomes(context:, limit:, cursor:)`
-lists this context's own retained outcomes, newest first, in pages: each one's sequence, operation,
-status, effect, code, revision, time and first affected references, never its value or params. The
-session keeps up to 256 outcomes across every caller, each for 15 minutes.
+If a reply is lost, retry the identical request with the same sequence to recover its outcome.
+Use `PhComposer::API.outcome(context:, request: { "sequence" => n })` to look it up without a retry.
+A request refused as `request.malformed` leaves the sequence available for the corrected request.
+Use `PhComposer::API.outcomes(context:, limit:, cursor:)` to page this caller's outcome summaries,
+newest first. The session retains up to 256 outcomes across callers for up to 15 minutes.
 
 ## 7. Give the Face an Assembly
 
@@ -170,25 +162,27 @@ page["value"]["faces"]        # reference and the two values, nothing else
 page["value"]["next_cursor"]  # nil on the last page
 ```
 
-Export is a task, not a Model change. It writes only to a destination the user approved once in the
-Libraries dialog, never to a path you pass. Read the approved destinations, preflight to see what
-blocks the export, then start it with the destination's id and poll until the status carries an
-outcome. An existing pair is replaced only with `replace: true` and the `expected_destination` that
-`export_preflight` reported for that location. To export exactly the Model you reviewed, also pass its
-revision as `expected_revision:`; a Model that changed since is refused with `revision.stale`.
+Approve a destination in Libraries or with **Allow agents to export here** in the Export tab.
+Use its ID to preflight the export and resolve any blocking findings. To replace an existing pair,
+send `replace: true` and the destination state reported by preflight as `expected_destination`.
+Pass the reviewed model revision as `expected_revision:` to catch intervening edits.
 
 ```ruby
 locations = PhComposer::API.query(context: context, name: "ph_composer.locations.list")["value"]["locations"]
 location = locations.find { |row| row["kind"] == "save_file" }
-PhComposer::API.export_preflight(context: context)["value"]["findings"]
-task = PhComposer::API.start_export(context: context, location: { "id" => location["id"] })["value"]
+destination = { "id" => location.fetch("id") }
+preflight = PhComposer::API.export_preflight(context: context, location: destination)
+preflight["value"]["findings"] # Resolve blockers and run preflight again before starting.
+task = PhComposer::API.start_export(context: context, location: destination,
+                                   expected_revision: preflight["revision"])["value"]
 status = PhComposer::API.export_status(context: context, task_id: task["task_id"])["value"]
 status["outcome"]             # nil while running; then completed, refused, failed or cancelled
 PhComposer::API.latest_export(context: context)
 ```
 
-When the outcome is `export.complete`, its `value.artifacts` says where the pair is, for you alone
-as the caller that started it. Read the file and check its hash before parsing it:
+Run the status call again after SketchUp processes the task. When the outcome code is
+`export.complete`, read the artifact receipt as the caller that started it. Verify the bytes
+before parsing.
 
 ```ruby
 written = status["outcome"]["value"]["artifacts"]["hbjson"]

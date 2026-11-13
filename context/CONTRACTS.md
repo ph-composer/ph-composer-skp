@@ -1,18 +1,11 @@
 # Core contracts
 
-The binding mechanics of the foundation: how capabilities register, how every client calls the
-public interface, what an outcome says, how revisions, transactions and retries behave, how
-records and extension data survive edits, how geometry targets are named, how Zones keep
-adjacency and identity honest, how library catalogs admit and copy records, and how translation
-sections compose. Code and tests cite these
-sections by name.
+These contracts govern registration, public operations and Model persistence. Code and tests
+cite the owning section by name.
 
-The policies these mechanics serve are in [EXTENSIBILITY.md](EXTENSIBILITY.md) (contributors,
-metadata, copy rules), [AGENT_INTERFACE.md](AGENT_INTERFACE.md) (external clients, writes, the
-export task, host lifecycle) and [TECH_STACK.md](TECH_STACK.md) (runtime, panel, export). This file
-was consolidated on 2026-09-30 from the archived Phase 0 and Phase 1 contract designs, and extended
-on 2026-10-01 with Phase 2's Window Unit storage and library mechanics. The archived designs remain
-in `planning/archive/` as the record of how each rule was reached.
+For contributor boundaries, see [Contributor architecture](EXTENSIBILITY.md). For the MCP
+adapter, see [Agent interface](AGENT_INTERFACE.md). For the runtime and host behavior, see
+[Technical architecture](TECH_STACK.md).
 
 ## Registration
 
@@ -38,11 +31,9 @@ root (`extension.rb`) lists features explicitly; there is no dynamic loader.
 
 The capability an operation needs follows from its kind: a query and a preview need `read`, a view
 command `view`, a setup command `setup`, an action and an outcome lookup `model_write`, and a
-FileExport or export task `export`. Library loading and provider setup are setup commands; this
-replaces the archived Phase 2 choice of view commands for them (refactor R03, 2026-10-01).
+FileExport or export task `export`. Library loading and provider setup require `setup`.
 
-Every declared name starts with its feature's id; a code instead starts with a noun only that
-feature declares. A feature id, declared name, wire kind or code is at most `Registry::ID_MAX_BYTES`
+Prefix a declaration with its feature ID. Prefix a refusal code with a noun its feature owns. A feature id, declared name, wire kind or code is at most `Registry::ID_MAX_BYTES`
 (1,024 bytes, ASCII) and a longer one is `registration.schema_invalid`, so a discover row, which never
 cuts an identifier, fits one agent reply (the arithmetic is in context/AGENT_INTERFACE.md, "Discover
 before acting"). Registrations are staged and validated together:

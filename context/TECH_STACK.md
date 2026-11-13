@@ -1,76 +1,32 @@
-# Technical working context
+# Technical architecture
 
-**DATE:** 2026-09-30
+Ruby owns the SketchUp Model and domain calculations. The JavaScript panel renders results and
+calls registered operations. Python translates the detached export contract into canonical HBJSON.
+Downstream exporters consume HBJSON. Model definitions use SketchUp attribute dictionaries and
+the [record contract](CONTRACTS.md#records-and-extension-data).
 
-The durable starting point for work in this repository. It carries the implementation rules the
-predecessor, PH-Navigator for SketchUp, learned at cost between 2026-09-06 and 2026-09-17, with
-every designPH rule removed, and adds the rules for the two seams this project introduces. The
-SketchUp facts behind these rules, with what pins each one, are in
-[`SKETCHUP_HOST_BEHAVIOR.md`](SKETCHUP_HOST_BEHAVIOR.md). Where a rule cites evidence, the evidence
-is in the predecessor's archive at `../../../ph-navigator-sketchup/planning/archive/`.
+Use the [contributor architecture](EXTENSIBILITY.md) to place code and register capabilities.
+The [agent interface](AGENT_INTERFACE.md) defines the external adapter and access grants.
+[Measured host behavior](SKETCHUP_HOST_BEHAVIOR.md) records the observations behind the host rules below.
 
-The Phase 0 foundation merged through PR #1: sessions, revisions, record transactions and the
-public operation contract, panel/UI kit and shared Units, the runtime shell and export contracts.
-Phase 1 merged through PR #3 and PR #6 on 2026-09-30. The build registers one building feature,
-`zones` (`src/ph_composer/features/zones/`), which owns Zones, their Faces and the adjacency between
-them, plus two foundation capabilities, `RecordQueries` and `ColourBy`, and the export run to
-canonical HBJSON and its report. No exporter beyond HBJSON ships. The archived
-[Phase 0](../planning/archive/phase-00-foundation/README.md) and
-[Phase 1](../planning/archive/phase-01-faces-and-zones/README.md) packets record implementation and host evidence.
-That overview records the merged Phase 1 baseline. The owning Phase 2 packets record subsequent
-implementation and acceptance; the library section below describes the current file-provider
-implementation. Proposed capabilities remain requirements until their owning packets land.
+## Runtime compatibility
 
-[EXTENSIBILITY.md](EXTENSIBILITY.md) owns the accepted contributor architecture, including the
-separation of pure Ruby domain behavior from SketchUp adapters, public scripting, metadata and
-registered extension data. `PhComposer::API` implements the public operations; each registered
-operation's schemas and example are in the generated [`docs/API_REFERENCE.md`](../docs/API_REFERENCE.md).
-
-[AGENT_INTERFACE.md](AGENT_INTERFACE.md) governs external clients of those public operations.
-Their results and confirmation handling must work without an open panel. The development eval
-bridge remains separate from the proposed shipped agent interface.
-
-## Proposed scope versus implemented contracts
-
-The product direction is in [`../docs/PRD.md`](../docs/PRD.md). Three technical decisions are
-settled from the predecessor and carry over: SKP-owned definition records exist and their
-attribute-dictionary layout is the record-kind pattern (`Records::RecordKind`, CONTRACTS.md,
-"Records and extension data"); the local calculation path is a
-Ruby thermal module for the panel with a Python recomputation at export; the panel is plain
-JavaScript and SVG on a shipped `workspace` toolkit, not React, with no local database. Optional
-external evidence is reserved in the records and hidden until its own feature. HBJSON and report
-export do not admit arbitrary local paths or attachment bytes.
-
-## Supported and proving environments
-
-- **SketchUp 2023 is the compatibility floor**, because window overlays use `Sketchup::Overlay`, a
-  2023.0 API. SketchUp 2023 embeds Ruby 2.7.2, so Ruby 2.7 is the source floor. No 2023 host has
-  been measured; the floor's own host proof is a pending gate.
-- **SketchUp Pro 2026.1 build 26.1.188** with embedded Ruby 3.2.2 is the current macOS proving host.
-- **The offline suite runs on both ends of that span.** Ruby 3 stopped splitting a bare trailing
-  hash between a positional parameter and keywords, and the predecessor's first run on 2.7.2
-  produced 559 errors that no amount of 3.2.2 runs could surface. CI runs `make ci` as one job per
-  version, and the test helper refuses anything outside 2.7 to 3.2.
-- **Pyodide and the wheel versions in `vendor/manifest.json`** are pinned runtime inputs, not
-  loose development dependencies. The shipped payload is Pyodide 0.24.1 and eight honeybee-stack
-  wheels for HBJSON translation. PHX and whatever its METr writer needs are added when the deferred
-  METr exporter resumes (see [the exporter seam](#the-exporter-seam)).
-- **The first release candidate is macOS-only.** Windows support is its own gate.
+- Target SketchUp 2023, which introduces [Sketchup::Overlay](https://ruby.sketchup.com/Sketchup/Overlay.html). Use Ruby 2.7 source and the
+  Chromium 88 panel baseline. Run the offline gate on Ruby 2.7.2 and 3.2.2.
+- The host evidence names the SketchUp version tested. The
+  [native case ledger](../planning/native-acceptance/README.md) records host and build identity.
+- The runtime manifest under `src/ph_composer/vendor/` pins Pyodide 0.24.1 and the eight
+  Python wheels used for HBJSON translation.
 
 ## Namespace
 
-The name checks closed on 2026-09-18. D8 confirms the following working development namespace; it
-does not settle the final public name or organization. The Ruby
-module is `PhComposer`, the attribute dictionaries are prefixed `ph_composer`, and the RBZ
-is `ph_composer.rbz`. Treat these as the working implementation namespace; changing the public
-name later requires an explicit migration decision rather than a partial rename.
+Use `PhComposer` for the Ruby module, `ph_composer` for attribute dictionaries and operation
+prefixes, and `ph_composer.rbz` for the package. Changes to stored names require a migration.
 
 ## SketchUp Model and transaction rules
 
-The Volume, Space and reconciler rules in this section and in the failure signatures below are the
-predecessor's, measured there and carried over for the Spaces feature. The two pieces they rest on
-are in `session/` and name no feature: `EditContext`, the one writer of `model.active_path`, and
-`DeferredWork`, the keyed coalesced pass. The Spaces reconciler that composes them is
+`session/edit_context.rb` owns writes to `model.active_path`. `DeferredWork` coalesces queued jobs by
+key. Spaces composes these mechanisms in
 `features/spaces/context/`: `Protection` (a Volume's own lock, written in a transparent operation
 that never aborts, and the EditContext boundary), `Reconciler` (the Volume last seen on the path, the
 queued exit protection, and the save rules below) and `Navigation` (the edit-context commands and
@@ -93,8 +49,7 @@ second job under the same key merges through the caller's block, and one zero-de
 job. A feature keeps one in its state object and forwards `pending?`, `settle` and `detach`, so a
 queued pass makes reads and writes wait (`ModelSession#busy_reason`) and a closing Model drops it.
 Queue a job only for work that may write: a pass that would find nothing to do should not make the
-session busy. The predecessor's `UndoLedger` is not carried over: it tracked a Volume the TFA
-transition created and entered automatically, and the explicit mark removed that transition.
+session busy.
 `session/host_observers.rb` only translates SketchUp callbacks into session host events (an opened
 file is `model_opened`, reported even to a session created before the file loaded), and
 `session/container_watch.rb` adds one: `container_added`, with the Group or ComponentInstance added to
@@ -142,15 +97,9 @@ Zones / Geometry settings are Model records, reached through registered reads an
 Suggest on Make defaults on, with roof/floor tilt thresholds of 60/130 degrees. Make and Suggest
 share one proposal, transaction and Undo step. A settings edit has its own named Undo step.
 
-Observer suppression must span commit, abort, Undo and Redo paths. Suppression is not a reason to
-skip explicit recovery. Leaving it set after an exception makes later edits appear randomly dead.
-
-Ed confirmed on 2026-09-18 that ordinary edits and batches submitted as one operation are
-all-or-nothing: validate every target, commit in one native Undo step, and roll back the whole
-operation if any target fails. Stale requests write nothing. Show a clear failure warning with
-the reason and confirmation that nothing changed. Panel and programmatic callers share this
-contract; structured failures must work with the panel closed. Any later exception for a long
-operation requires an explicit accepted contract in its owning plan.
+Keep observer suppression active through commit, abort, Undo and Redo. Clear it on every exit,
+including exceptions. Use the [transaction contract](CONTRACTS.md#revisions-transactions-and-host-execution)
+for validation, rollback and revision updates.
 
 `onPreSaveModel` is the bounded synchronous exception. SketchUp provides no cancellable save
 boundary, and an autosave fires the same callbacks, so a save must leave the user where they are.
@@ -189,15 +138,11 @@ SketchUp cut and paste can replace a `persistent_id`. PH-Composer's durable UUID
 survives the operation when the object is still logically the same, while placement references
 remain path-qualified. Session `entityID` is never durable identity.
 
-## Envelope: what PH-Composer owns that the predecessor did not
+## Envelope geometry
 
-The predecessor read envelope classification, TFA and shading from designPH and never wrote them.
-PH-Composer owns all of it, in its own attribute namespace, through its own tools. The unit
-that owns a face is the Zone, one Group per honeybee Room, with Spaces inside it. Closure is a
-consumer-specific validation rule, not a requirement for creating or exporting every Zone. The
-rules are the zones-and-adjacency packet's to settle
-(`../planning/archive/phase-01-zones-and-adjacency/PRD.md`); Phase 1 implemented them. The durable
-constraints:
+The `zones` feature owns Zone geometry and Face classification. One Zone Group maps to one
+Honeybee Room. A Space links to its Zone by record ID. See the
+[geometry contracts](CONTRACTS.md#geometry-records-and-occurrence-references).
 
 - One feature, `zones`, owns this whole lifecycle: Zone containment, Face identity, Zone stamps,
   Surface endpoints and the split and copy transitions between them. They change together, so a
@@ -212,7 +157,7 @@ constraints:
   at Model root does not cover. Test them before claiming face assignment works.
 - A Space's Zone is the `zone_id` on its record, never a stamp or a parent, and a Space Group is
   never kept inside a Zone Group (`CONTRACTS.md`, "Space membership").
-- Floor Segments are floor faces the user classifies as iCFA. There is no reduction factor.
+- Each Floor Segment carries a weighting factor and net area factor. See [Spaces terminology](UBIQUITOUS_LANGUAGE.md#spaces).
 - Face occurrence resolution walks the Model. A read phase with no write before its last resolve
   (a query, target resolution before a proposal, `ClassifyStep`) shares one `Zones::Index`, which
   walks once and is valid only while the Model is unchanged; a step that mutates and then reads its
@@ -284,10 +229,9 @@ A feature adds export coverage with `feature.export_contributor(name, section_ve
 report:, preflight:, requires:, projection:)` in its `install`, whose block returns the section's records, and a Python `Section` with
 the same id listed in `python/ph_composer_translation/composition.py`. The block reads through
 `Export::RecordReader`, which exports only declared values and named extension fields, passes
-`user_data` through where the owner asks (`user_data: true`: Zones, Faces, Window Units onto their
-Apertures, and Assemblies onto their Constructions, as Honeybee carries it) and leaves it out with a
-finding elsewhere, leaves `local_only` data out with a finding, and blocks on data whose export relevance is
-unknown or required but unexported. When the translator adds result fields for the feature, the
+`user_data` through for records whose owner requests `user_data: true`. The
+[metadata contract](EXTENSIBILITY.md#metadata-and-structured-extension-data) defines omissions
+and blockers. When the translator adds result fields for the feature, the
 contributor declares them in `result` and renders them in `report`; they arrive under the section's
 id. A feature whose translated objects sit inside another feature's, as Apertures sit in Faces,
 declares a Python `Attachment` instead of being imported by the host's section. The extraction
@@ -312,15 +256,12 @@ aside and the new pair is renamed into place; the next run to the same destinati
 interrupted one from the journal. Blocking findings write no canonical files, HBJSON and report are
 always selected together, and Export never saves the SKP (P1-Q4, confirmed 2026-09-29).
 
-The runtime installs only manifest-pinned local wheels on explicit export. There is no pip resolver,
-external download or system-Python fallback. The shipping composition supplies authored
-Assembly constructions and Window Apertures through their feature contributors. Missing or
-incomplete assigned definitions block normal export. The separately composed synthetic provider
-exists only in historical development acceptance and is never a shipping fallback.
+On export, the runtime installs the local wheels listed in the manifest. Feature contributors
+supply authored Assembly constructions and Window Apertures. Missing or incomplete required
+definitions block export.
 
 The privacy allowlist is the shell's fields plus every contributor's declaration under its section
-id, composed on each check, so a result field no declaration names fails the export at `checking`. The report embeds
-the translator's result document unchanged.
+id, composed on each check, so a result field no declaration names fails the export at `checking`. The report embeds the translator's result document unchanged.
 
 The canonical HBJSON is a string in that document, so the allowlist cannot see inside it. The
 guard (`export/hbjson_metadata.rb`, called from `Export::Privacy.validate!`) parses a copy: under a
@@ -332,14 +273,11 @@ any depth; every string passes the local-path check on its own. A refusal is
 `export.privacy_undeclared`. The bytes written are always the translator's, never re-serialized
 (Ed, R-D2, 2026-09-30).
 
-Ed confirmed explicit translation-section dependencies on 2026-09-18. Each section declares the
+Each translation section declares the
 typed results it needs from other sections. The coordinator orders execution and supplies those
 results without feature-specific logic. Missing or circular dependencies produce explicit errors.
 If a required result fails, dependent output receives an explicit finding rather than a substitute.
-The existing record-level and contract-level failure policy still applies. Phase 0 proved the
-contract with synthetic sections; Phase 1 composes the real `FaceSection` and `ZoneSection`, and
-later building sections land with their owning features. A
-section declares typed `Requirement`s; missing, mistyped, duplicate and cyclic requirements stop the
+Each section declares typed `Requirement`s. Missing, mistyped, duplicate and cyclic requirements stop the
 run before any record is read, and a record whose required object did not translate gets a
 `dependency.unavailable` finding and no object.
 
@@ -372,37 +310,24 @@ cannot report its own timeout (`export/task.rb`). Before `runtime.ready` it wait
 `boot_deadline_ms` plus 15 seconds, then fails with `runtime.boot_timeout`; once ready, a
 translation that sends nothing for 300 seconds fails with `runtime.unresponsive`. Both stop the
 runtime, write nothing and report effect `none`; a later answer applies nothing. Cancel stays
-available while translating. These are starting defaults until the proving host measures them.
+available while translating.
 
 ## The exporter seam
 
-HBJSON is the canonical interchange. An exporter is a second consumer of it that writes another
-format. It runs after the HBJSON translation, inside the same Pyodide runtime, and reads only the
-HBJSON document and the user's export choices. It never reads the export contract or the Model.
+The exporter contract consumes canonical HBJSON and the user's export options inside the same
+Pyodide runtime. Register the name, format, suffix, accepted options and `run(hbjson, options)`
+in `python/ph_composer_translation/composition.py`. The callback returns output and findings
+and receives a copy of its options.
 
-The METr exporter is the first. It calls PHX to build a PHX project from HBJSON and PHX's WUFI
-writer to produce the METr model. Two facts gate it:
-
-- [Phase 0 B1](../planning/archive/phase-00-foundation/evidence/spike-phx.md) proved PHX 1.57.1
-  conversion with nine pinned wheels installed without dependency resolution. The METr path
-  does not import the omitted dependencies. D12 defers METr integration and actual import until
-  further feature development. Phase 1 selects its HBJSON translation payload independently;
-  upstream dependency cleanup is not a prerequisite for the proven PHX route.
-- The payload budget. The predecessor shipped 20 MB. The manifest records the installed size of
-  every asset and CI enforces the budget; the METr exporter's cost is measured before it is
-  accepted.
-
-An exporter registers in `python/ph_composer_translation/composition.py`: a name, the format it
-writes, a file suffix, the options it accepts and a `run(hbjson, options)` that returns its output
-and findings. It receives a copy of the options and nothing else. No exporter is registered yet
-(`EXPORTERS` is empty); the Export report will list every exporter that ran and what each omitted. A third exporter adds one registration and no change to
-`export/`, the translation package or any feature.
+The [METr plan](../planning/features/unscheduled/metr-export/README.md) owns PHX integration
+and consumer verification. Use the [PHX runtime proof](../planning/archive/phase-00-foundation/evidence/spike-phx.md)
+when evaluating wheel dependencies. Measure any added payload against the manifest budget.
 
 ## The library provider seam
 
 The implemented library foundation supplies the file/folder provider, session catalogs, resolution
-and guarded copy. Materials supplies its own kind adapter. The model owns each editable copy;
-no provider is required or privileged. No provider address is a shipped default.
+and guarded copy. The feature that owns a definition registers its kind adapter. The SKP owns
+each editable copy. Users choose their providers and configure any connection address.
 
 A registered provider factory is called with the published registry and returns configured
 provider instances. Each
@@ -415,8 +340,7 @@ exceptions become code-only public failures; their text and causes do not enter 
 
 The file provider reads the neutral envelope in [LIBRARY_FILE_FORMAT.md](../docs/LIBRARY_FILE_FORMAT.md).
 It loads a single file or the immediate JSON files of a folder, with implemented bounds of 32 MiB
-per file, 64 MiB aggregate and 20,000 rows. Exact-limit and one-above offline checks cover these
-bounds; host budget measurement remains required. Admission validates wire schemas and omits
+per file, 64 MiB aggregate and 20,000 rows. Offline tests cover each limit and one above it. Admission validates wire schemas and omits
 undeclared fields before publishing a generation. Duplicate record ids withhold the affected
 library and kind rather than selecting a winner.
 
@@ -492,7 +416,7 @@ locations and agent tokens alone.
 
 ## Panel protocol
 
-Implemented in P0-E and extended in Phase 1. `shell/panel_messages.rb` declares every message
+`shell/panel_messages.rb` declares every message
 between the page and Ruby, with the payload keys each carries: `panel.ready`, `panel.diagnostic`,
 `panel.support`, `panel.undo`, `panel.redo` (the platform Undo and Redo shortcuts in the panel, stepping
 SketchUp's own Undo for the shown Model unless a text field being edited has focus), `panel.focus` (the
@@ -506,7 +430,7 @@ active), `panel.setup_entries` and `panel.setup_open` (the Setup view's entries,
 `panel.failure`; it refuses to publish an undeclared outbound key. `tests/panel_messages_test.rb`
 reads the page sources and fails when the page sends or handles a type the table does not declare.
 
-A `run` request unanswered after 20 seconds (`html/request.js`, a starting default) stays pending
+A `run` request unanswered after 20 seconds (`html/request.js`) stays pending
 and raises a warning. For an action the warning offers Check status, which sends `action.status`
 with the original request id (a transport may add `expected_revision`; status ignores it).
 `shell/panel_requests.rb` keeps the shown page's last 64 action request ids per session with their
@@ -534,12 +458,11 @@ The panel is one client of `PhComposer::API`, not the owner of any Model behavio
 `shell/panel.rb` owns the dialog and nothing else a feature reaches:
 
 - It shows the active Model. For each session it shows it connects once with its own caller
-  handle and gives the panel's mutations their own sequence numbers (CONTRACTS.md, "Retries"). The
+  handle and gives the panel's mutations their own sequence numbers ([Retries](CONTRACTS.md#retries)). The
   page's request ids only correlate a result with the view that asked.
 - `action.invoke` carries the session the page showed and the revision it last rendered. An action
   for a session the panel no longer shows is refused as `session.inactive` with nothing written.
-  The result is published after the authoritative snapshot (CONTRACTS.md, "Revisions, transactions
-  and host execution").
+  The result is published after the authoritative snapshot ([Revisions and transactions](CONTRACTS.md#revisions-transactions-and-host-execution)).
 - The page loads from the shipped file with `set_file`. The message callback is bound to its
   dialog, so a closed page's late message is ignored. The panel refreshes the shown Model's
   snapshot after committed changes, Undo, Redo, an edit-path change and activation, through the
@@ -597,26 +520,19 @@ label)`; `run(action, params, { onDone, onFail })` is single flight and pending 
 leaves, and `consume(state)` settles the action-result slot for that request once; `send` never
 refuses, for views that keep several requests in flight. Record forms are `record_form.js` specs,
 snapshot reads go through `snapshot.js`, and unit descriptors for stored fields are `fields.js`. The
-record table and inventory controls (`table.js`, `table.css`, `view_controls.js`) arrived with the
-Zones / Geometry screen, ported from the predecessor and trimmed to what it uses; neither names a feature.
-Inline cell drafts (the predecessor's `record_edits`) arrive with the first screen that edits
-record cells in place.
+record table and inventory controls (`table.js`, `table.css`, `view_controls.js`) are shared
+panel components. The owning screen handles inline drafts.
 
-**Browser floor: Chromium 88**, the engine SketchUp 2022 was measured on and the one assumed for
-the 2023 floor. Syntax is ES2020. Runtime APIs that arrived after Chromium 88 are refused by
-eslint. The 2023 host's CEF version is confirmed when a 2023 host is available.
+The panel targets Chromium 88 and ES2020. ESLint checks both syntax and the allowed runtime APIs.
 
 ## Display units
 
-- All persistence, every library file and wire format, and all calculation are SI, as in
-  honeybee-ph and PH-Navigator web. IP is a conversion for user-facing display and entry only.
+- Use SI for stored domain quantities, library data and calculations. Convert for display and input.
 - Stored fields stay in their canonical SI unit, named by the field. The SI/IP display preference
   changes presentation and the unit assumed for unsuffixed input only; it never dirties the SKP,
   adds an Undo step or touches `UnitsOptions`.
-- Every panel number is parsed and formatted through `html/units.js`. Do not add a second parser or
-  unit table. The length grammar, regional number formats and per-quantity factors are the
-  predecessor's U1 contracts C1 to C5 (`../../../ph-navigator-sketchup/planning/archive/units/PLAN.md`).
-  A native dialog outside the panel, such as a `UI.inputbox`, shows a value with `Units.format` and reads a
+- Parse and format panel values through `html/units.js`. A native dialog such as `UI.inputbox`
+  shows a value with `Units.format` and reads a
   number back with `Units.from_display` (`core/units.rb`); it accepts a plain number in the display unit.
 - The first keystroke or paste fixes a draft's starting profile, so a switch never reinterprets
   text already typed.
@@ -636,10 +552,6 @@ eslint. The 2023 host's CEF version is confirmed when a 2023 host is available.
   agreeing with the panel through `tests/support/units_vectors.json`.
 
 ## Rules for later features
-
-What a new feature owns and where each rule is enforced. The predecessor's restructuring made
-these true of every feature it had, so a new one that follows them needs no change to `shell/`,
-`session/` or another feature's folder. A composition-root registration is permitted.
 
 - **One folder.** `features/<name>/`, listed by hand in the composition root's `FEATURES`. Outside
   that registration, shared orchestration names no feature, and features name no other feature's
@@ -667,8 +579,7 @@ these true of every feature it had, so a new one that follows them needs no chan
   chooses the action, which applies to that selection (a right-click item, a panel action). Each
   attribute (face type, boundary condition, Assembly, Zone fields) is set on its own. A modal
   action-first tool (paint, place) is a secondary route, and it becomes the primary one only when a
-  feature's plan records why its UX is demonstrably better. Ed confirmed this rule on 2026-09-30
-  ([Phase 1 UX follow-ups](../planning/archive/phase-01-ux-followups/README.md)).
+  feature's plan records the user workflow that calls for it.
 
 ## Durable delivery rules
 
@@ -728,7 +639,7 @@ this foundation when their feature lands.
   permits in HBJSON. Its Python section is explicitly composed with declared requirements.
   Export reads the authored records; it never repairs or substitutes for missing definitions.
 
-### UI kit conventions carried over
+### UI kit conventions
 
 - `ui.pageHeader({ title, count, actions, primary })` for the header every pane opens with: title,
   muted count, secondary actions, then the one filled primary action at the right, and no caption.
@@ -792,20 +703,11 @@ Before changing or reviewing an HtmlDialog screen, load the UI polish skill name
 
 ## Fresh-process host loop
 
-An install is preparation, not host validation. Loader metadata, Ruby constants, toolbar state,
-the panel document and the Pyodide worker can all survive a partial reload. For an acceptance run:
-
-1. Run `make ci`.
-2. Run `make rbz`, `make rbz-check` and `make install`.
-3. Quit every SketchUp process and relaunch the supported host.
-4. Open the intended Model and confirm the exact Model path, extension version and active path.
-5. Run the user workflow, including Undo, save, close, reopen and recovery cases.
-6. Export the HBJSON and report pair, and the METr model when the exporter is in scope, and
-   reconcile Model storage, panel state and artifacts.
-7. Keep Model copies, paths, screenshots, raw attributes and artifacts under `_private/`.
-
-Steps 3 to 6 run from a terminal through the development host bridge; a person at the console is
-the exception.
+Loader metadata, Ruby constants, toolbar state, the panel document and the Pyodide worker can
+survive a partial reload. For install and fresh-process verification, follow the
+[development guide](../docs/DEVELOPMENT.md#test-in-sketchup) and the owning native case.
+Record the exact host, build, fixture and edit path before testing. Keep private models and
+raw captures under `_private/`.
 
 ## Common failure signatures
 

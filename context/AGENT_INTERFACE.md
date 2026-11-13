@@ -1,27 +1,12 @@
 # External agent interface
 
-DATE: 2026-09-30
-STATUS: Agent access is an accepted product priority. The in-process programming interface
-(`PhComposer::API`: discover, describe, connect, query, preview, invoke, outcome) merged through
-PR #1 from Phase 0 P0-D with a panel-closed synthetic client. Phase 1 (PR #3, PR #6) added `view`,
-the selection, reveal and camera verb; per-operation schemas and examples; bounded, filtered and
-projected reads; the export task methods; and in-process grants (`read`, `view`, `model_write`,
-`export`) enforced at dispatch. Phase 3a1 added the external path: a loopback MCP endpoint served
-from the extension with per-user bearer tokens granted in the Agent Access dialog; the Model context
-read and the edit-path commands; capability and declared terms in `describe`; and the bounded Spaces
-reads with candidate Faces. The write, setup, export and capture grants, client Connect and the
-agent scenarios followed and are implemented ("User-controlled local access"). The agent-workflows
-packet added bounded discovery sections and the operating guide served by topic (API 1.35) and
-selection-free candidate and path reads (API 1.36); what
-each section of this document marks "Implemented" is the current contract, and the rest is proposal.
+The local MCP adapter exposes PH-Composer's public operations from inside SketchUp.
+Use [Agent Access](../docs/AGENT_ACCESS.md) for client setup and the
+[operating guide](../docs/AGENT_GUIDE.md) for workflows.
 
-Users bring their own agents. PH-Composer supplies documented access to inspect, view and edit
-the authored model without requiring an agent to understand private Ruby internals or operate
-every control by pixels. PH-Composer does not build an agent, select an LLM, store model-provider
-keys or require an AI subscription. Hand authoring remains complete without agent access.
-
-This document extends [EXTENSIBILITY.md](EXTENSIBILITY.md). It owns external-agent contracts;
-[TECH_STACK.md](TECH_STACK.md) remains authoritative for host execution and transactions.
+This document owns the adapter, its grants and client-facing behavior. Follow the
+[core contracts](CONTRACTS.md) for outcomes and retries and the
+[technical architecture](TECH_STACK.md) for host transactions.
 
 ## One application interface, several clients
 
@@ -34,15 +19,9 @@ rendering, dialogs and notices are not the source of an external caller's result
 operation context and return a structured outcome. Keep confirmation policy separate from the
 panel's presentation of it so another client can satisfy the same requirements.
 
-Recommend a local MCP adapter as the first agent integration, backed by the same versioned JSON
-contract usable by a CLI or other clients. A local companion process could isolate MCP dependencies
-from SketchUp's Ruby runtime. This is a design option, not a selected runtime or packaging plan.
-Do not put an MCP implementation in every feature. Generate transport schemas and reference
-documentation from registered query/action definitions where practical; test their agreement.
-
-Keep the development host bridge separate. Arbitrary Ruby evaluation remains development tooling,
-excluded from the normal shipped agent interface. Third-party bridges may call public Ruby methods
-for experimentation, but that does not prove lifecycle correctness or confer supported-client status.
+The shipped listener uses the same versioned JSON declarations as Ruby clients. Generate
+transport schemas and reference documentation from the registered definitions. The
+[development host bridge](../tools/hostkit/.index.md) has its own install and is for testing.
 
 ## Discover before acting
 
@@ -336,25 +315,18 @@ equivalent preconditions for the affected records, geometry and edit context. Re
 at commit time. Reject stale or cross-model requests with a structured conflict and no mutation.
 Do not silently resolve a reference by its display name or by whatever happens to be selected.
 
-Use named model operations with existing validation and native Undo. Ed confirmed the default on
-2026-09-18: an ordinary edit, including a batch submitted as one operation, succeeds completely
-or has no effect. Validate all targets before committing, apply the changes in one native Undo
-step, and roll back the whole operation if any target fails. Refuse stale requests without writing.
-Failure produces a clear user warning explaining the reason and confirming that nothing changed;
-return the same outcome structurally to programmatic callers, without requiring the panel to open.
-
-A future long-running import may define a different contract explicitly in its owning plan;
-partial success is never the default. Failures distinguish no writes from a completed rollback,
-or a partial result only where that operation's accepted contract permits one. Never leave a model
-transaction open while waiting for an LLM or a person's response.
+Validate all targets before writing. Apply a committed edit in one native Undo step and roll back
+the whole operation on failure. Return the structured outcome to the caller. The `effect` field
+distinguishes a refusal before writing, a verified rollback and an unknown result. Finish user
+review and agent calls before opening a Model transaction.
 
 Metadata on authored entities is written the same way: `ph_composer.zones.update_metadata`,
 `ph_composer.zones.faces.update_metadata` and `ph_composer.windows.units.update_metadata` take a
 batch of explicit occurrences with the metadata last read, and refuse every target or none
 ([CONTRACTS.md](CONTRACTS.md), "Records and extension data"). A script that reads the exported
-HBJSON finds a Zone's, Face's, Window Unit's or Assembly's `user_data` on its Room, Face, Apertures
-or Construction, beside PH-Composer's own `ph_composer` entry; other records' `user_data` stays in
-the Model.
+HBJSON finds passed-through metadata on the owning Honeybee object. The
+[export recipe](../docs/AGENT_GUIDE.md#export) lists supported record kinds and explains the
+metadata findings.
 
 Provide a non-mutating proposal/preview for compound or destructive edits. It reports targets,
 changed values, affected references and validation findings. A proposal binds to its inputs and
@@ -548,10 +520,8 @@ state, such as the libraries configured on this machine; it is never in the defa
 at dispatch; an action description or a client-supplied confirmation flag is not authorization.
 Do not require renewed permission for every request already covered by a valid grant.
 
-Select authenticated local transport during implementation design. If using a loopback HTTP
-endpoint, binding locally alone is insufficient: authenticate requests and define browser-origin
-handling. Do not ship an unauthenticated eval endpoint or a default remote listener. Keep
-credentials out of model data, logs and agent results.
+Authenticate loopback requests and enforce the browser-origin rules below. Store credentials
+in per-machine configuration and redact them from Model data, logs and public results.
 
 Scope file operations to user-authorized inputs and destinations. Return explicit artifact handles
 or approved paths with format, completion status and relevant provenance. Do not expose unrelated
@@ -818,18 +788,13 @@ Decided and implemented; a change to any of these is a security decision, not a 
 
 ## Documentation and contributor obligations
 
-Maintain one vendor-neutral quickstart, generated API/schema reference and synthetic examples.
-Document discover, inspect, propose, apply and verify as one worked workflow, including conflict
-recovery and a lost-response retry. Provide concise installation and connection diagnostics.
-Client-specific configuration examples point to the same contract and state their tested versions.
-An optional operating skill for users' agents should be written against working APIs when they
-land; the repository architecture-review skill is for development and is not that operating guide.
+Update the [Ruby quickstart](../docs/API_QUICKSTART.md), the
+[agent guide](../docs/AGENT_GUIDE.md) or the generated [API reference](../docs/API_REFERENCE.md)
+when their operations change. Include conflict recovery and lost-response handling in worked
+examples. Record tested client and host versions. Prefer explicit references for programmatic
+operations that also have a viewport tool.
 
-For each feature, identify supported programmatic reads and writes. If an operation requires
-interactive geometry picking, document that limitation and the plan for an explicit-reference
-equivalent where feasible. Core data edits must not require UI scraping or arbitrary eval.
-
-Thermal bridges need no picking. `ph_composer.thermal_bridges.types.list` and `schedule.list` are the
+`ph_composer.thermal_bridges.types.list` and `schedule.list` are the
 bounded reads (`types.all` and `schedule.all` their whole forms, for the panel), and `edges.selection`
 reads the native selection as explicit Edge references with each one's Zone and write refusal.
 `edges.assign` and `edges.clear` write explicit references, one Undo step each, refusing as a whole
@@ -866,8 +831,7 @@ Face IDs. The Zones / Geometry inline dialog uses that public operation; scripts
 it with the panel closed. [Current-host evidence](../planning/archive/phase-01-faces-and-zones/evidence/p1-d-attached-zone-atomic.md)
 records validation, exact rollback and persistence checks.
 
-Phase 2 features, programmatic reads and writes. Each has a panel-closed walkthrough under
-`tools/examples/`.
+The following public operations have panel-closed walkthroughs.
 
 - **Assemblies** (`ph_composer.assemblies.*`). Reads: `materials.list`, `assemblies.list` (with
   thickness, U-values or the reason they are withheld, and row findings) and `export_preflight`.
@@ -911,10 +875,6 @@ Phase 2 features, programmatic reads and writes. Each has a panel-closed walkthr
 
 Discovery also lists read-only `reference_targets`; description returns their descriptor: ID, owner,
 label, schema version, values schema, occurrence-reference schema and declared core references.
-Every registered operation publishes specific params and result schemas and at least one worked
-example. [`docs/API_REFERENCE.md`](../docs/API_REFERENCE.md) is generated from the registrations by
-`make fixtures` and checked by the offline suite; [`docs/API_QUICKSTART.md`](../docs/API_QUICKSTART.md)
-is the public walkthrough a synthetic client test runs as written.
 Registered extensions can name `ph_composer.zones.zone` and `ph_composer.zones.faces.face`.
 Contributors resolve those identities through the shared record engine while the owning features
 retain entity writes. [The contract](EXTENSIBILITY.md#entity-owned-reference-targets) defines typed
@@ -924,12 +884,8 @@ records actual copy/split/Solve targets; the independent review of that work pas
 
 ## Delivery and acceptance
 
-Phase 0 established the shared programming interface and a synthetic client that discovers
-operations, reads records, performs validated writes and reads back results with the panel closed.
-Phase 3a1 and its successors selected and shipped the local MCP adapter described above; the tested
-clients and versions are in [AGENT_ACCESS](../docs/AGENT_ACCESS.md). A development build is not a
-release: public distribution, Windows and SketchUp 2023 keep their own gates. New agent-facing work
-is planned in its owning packet; this document does not authorize implementation.
+Use the [native case ledger](../planning/native-acceptance/README.md) to find verified builds,
+hosts and scenarios. [Agent Access](../docs/AGENT_ACCESS.md) lists the tested client setup.
 
 Required evidence for the implemented interface includes:
 
@@ -944,18 +900,3 @@ Required evidence for the implemented interface includes:
 - A visual capture is tied to the inspected model state; unsupported capture is explicit.
 - A reference adapter is exercised by at least two independently implemented clients before any
   cross-client support claim. Report exact tested clients, host versions and remaining limitations.
-
-## Sources and open choices
-
-Reviewed 2026-09-18:
-
-- [Claude Bridge repository](https://github.com/lairdubois/lairdubois-claude-bridge-sketchup-extension)
-  describes a development-only local HTTP Ruby evaluation server and explicitly excludes end-user
-  distribution. It is useful prior art for host access, not our supported public operation contract.
-- [MCP architecture](https://modelcontextprotocol.io/docs/2026-07-28/learn/architecture) describes
-  discovery, tools, resources and transport separation. These support the adapter recommendation;
-  they do not settle our application semantics or prove SketchUp compatibility.
-
-The transport (MCP served from Ruby inside SketchUp), protocol versions, grants, revision and
-idempotency lifetimes, task retention and capture were decided in their implementing phases and are
-recorded above. Remote or hosted transports and Windows client setup remain open choices.

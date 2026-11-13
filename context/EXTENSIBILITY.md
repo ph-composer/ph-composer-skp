@@ -1,26 +1,12 @@
 # Contributor architecture
 
-DATE: 2026-09-30
-STATUS: Accepted architectural direction. Registration, record kinds, metadata and extension data
-merged through PR #1 from Phase 0 P0-D; see the example under `tools/examples/foundation/`. Phase 1
-(PR #3, PR #6) added view commands, menu items, Colour-by modes, entity reference targets and
-descriptors, and the `zones` feature built on them. Phase 2 (PR #15, merge `c687a73`) added
-handler-side dependency reads, reference retargeters, table contributions, the library provider
-and kind adapter contracts, registered file exports, and the `assemblies` and `windows` features
-built on them.
+Use these contracts to add features, providers, tools and exporters. Keep each contribution
+readable in isolation. The owning feature declares its public operations, storage and dependencies.
+Built-in and third-party features use the same registration mechanisms.
 
-PH-Composer exists to support an open-source community in the Phius sphere. A contributor
-should be able to understand and extend one part without understanding the whole application.
-Optimize for the amount a reader must learn before making a safe, useful change. Prefer explicit
-code and stable boundaries even when they take more work or modestly more runtime resources.
-Correctness, native host behavior and usable response times remain requirements.
-
-This document owns contributor-facing architecture. [TECH_STACK.md](TECH_STACK.md) owns runtime
-and host mechanics; [CODING_STANDARDS.md](CODING_STANDARDS.md) owns code-level readability rules.
-Where a section below says it is implemented, the contract exists in code and is published in
-[`docs/API_REFERENCE.md`](../docs/API_REFERENCE.md); the rest are requirements for their future
-implementation, not claims that an API already exists. Feature scope and delivery order remain
-with the owning packets.
+[Core contracts](CONTRACTS.md) defines how declarations work. [Technical architecture](TECH_STACK.md)
+owns host and runtime rules. [Coding standards](CODING_STANDARDS.md) covers source review. Consult
+the generated [API reference](../docs/API_REFERENCE.md) for the installed composition.
 
 ## Organization and dependencies
 
@@ -54,7 +40,7 @@ part registers. Zone actions are `ph_composer.zones.*`; Face actions are `ph_com
 A feature that needs authored Face identity, such as window placement, depends on `zones` through
 its queries, actions, reference targets and descriptors, never through its stores.
 
-Features sit in three layers and depend only downward. Ed set this on 2026-10-01. The Ruby
+Features sit in three layers and depend only downward. The Ruby
 feature dependencies, export contributors and translation sections all follow it: a contributor
 reads another section only through `requires:`, which registration checks against the feature
 dependencies, and a translation section joins an object another section built through a declared
@@ -328,10 +314,8 @@ The effective list for `ph_composer.library.copy` includes every installed kind'
 `local_read` refusals. Discovery, generated references and the audit use the same projection.
 The coordinator lists its own failures and names no receiving feature.
 
-A composition-root registration or generated build inventory is permitted. Requiring a new
-feature branch inside shell, session, export orchestration or UI-kit internals is a contract
-defect. Explicit registration does not promise dynamic plugin loading, a marketplace or separate
-installation in the MVP.
+Add contributions through registration or the generated build inventory. Keep shell,
+session, export orchestration and the UI kit independent of feature identities.
 
 ### Records inside a Zone occurrence
 
@@ -1002,7 +986,7 @@ registered view command. The rules below come from Classify's host gate
 - **Bound the collection one past the limit** so the operation that owns the limit refuses, rather
   than the tool silently applying the first N of what the pointer crossed. The Classify limit is
   `GESTURE_FACE_LIMIT`, owned by the Face schema, and Mark floor's `FLOOR_GESTURE_LIMIT`, owned by the
-  Floor Segment schema; see [TECH_STACK.md](TECH_STACK.md#envelope-what-ph-composer-owns-that-the-predecessor-did-not).
+  Floor Segment schema; see [TECH_STACK.md](TECH_STACK.md#envelope-geometry).
 - **Talk to the status bar, not only the session.** The panel is the only subscriber to a session
   notice, and a viewport tool is used with the panel closed, so a refusal delivered only that way
   is silent exactly where it matters. Results and refusals reach both `Sketchup.status_text=`
@@ -1033,14 +1017,14 @@ and assignment records where applicable. Contributors use namespaced keys, for e
 Ordinary edits and supported persistence round trips preserve this metadata. Public operations
 read and update it without requiring raw dictionary access; updates participate in Undo. Catalog
 records take it through their kind's update action (`engine.propose_update`); Zones, Faces and
-Window Units, whose records live on entities, take it through their owner's `update_metadata`
-action, which applies the same rules ([CONTRACTS.md](CONTRACTS.md), "Records and extension data"). Core
+Window Units use their owner's `update_metadata` action, as do Spaces, Volumes and Floor Segments.
+All follow the same rules ([CONTRACTS.md](CONTRACTS.md), "Records and extension data"). Core
 calculations do not silently interpret arbitrary metadata. Absence in an older record is valid.
 
 Export inclusion is deliberate. A record's `user_data` passes through to the HBJSON object Honeybee
 gives it, uninterpreted, where the owner opts in (`reader.entity_record(..., user_data: true)` or
-`reader.records(kind, user_data: true)`): Zone to Room, Face to Face, Window Unit to each of its
-Apertures, Assembly to Construction (Ed, 2026-10-13). The translation writes it beside PH-Composer's
+`reader.records(kind, user_data: true)`). The [agent export guide](../docs/AGENT_GUIDE.md#export)
+lists the current kinds. The translation writes it beside PH-Composer's
 own reserved `ph_composer` key; a user key named `ph_composer`, or after any namespace an export
 contributor declares in `user_data_keys:`, blocks the export; every string and
 key still passes the local-path check, and the report counts the HBJSON objects that carry it. Elsewhere `user_data`
@@ -1065,7 +1049,7 @@ edits and refused for copy, migration and export until valid data replaces it. R
 missing capability explicitly when it affects export correctness. An unsupported schema must
 not be silently rewritten or dropped.
 
-Ed confirmed the following copy policy on 2026-09-18:
+Apply these rules when copying records.
 
 - Duplicating a distinct authored object creates a new identity and an independent copy of its
   `user_data`. References to shared definitions continue to name those definitions.
@@ -1078,7 +1062,7 @@ Ed confirmed the following copy policy on 2026-09-18:
 - Another placement of a shared component follows the owning feature's identity rules. It is not
   automatically a new authored definition.
 
-Ed also confirmed the unavailable-extension and unsupported-schema policy on 2026-09-18:
+Apply these rules to unavailable extensions and unsupported schemas.
 
 - Preserve the unrecognized payload unchanged through save/reopen. Allow unrelated edits only
   when they can safely leave it untouched.
@@ -1179,47 +1163,22 @@ A script can become a reusable operation, then acquire a button or editor, then 
 maintained feature. Each stage uses the same business operation. A contributor should not need
 to learn the UI framework to automate a model task.
 
-## Evidence that the architecture is extensible
+## Verify a contribution
 
-Prove implemented contracts with small synthetic examples and reusable contract tests:
+Use a synthetic example to exercise the entry point and public operations:
 
-- Update metadata through a console script.
-- Register a record kind and a simple editor.
-- Register an importer that proposes changes and applies them through model operations.
-- Register an exporter that consumes only HBJSON.
-- Register a provider from a separate extension. The [provider example](../docs/LIBRARY_PROVIDER_EXAMPLE.md)
-  proves the shared contract and public copy/read-back without editing core composition.
-- Register a Colour-by mode through the shared overlay interface. Phase 1's Face and Zone modes
-  register through the public `colour_mode` call
-  ([walkthrough](../tools/examples/authoring/colour_by_walkthrough.rb)).
+- [Foundation feature and editor](../tools/examples/foundation/README.md) demonstrates
+  record kinds, metadata, a panel section and translation.
+- [Library provider extension](../docs/LIBRARY_PROVIDER_EXAMPLE.md) demonstrates registration
+  outside core composition and a guarded copy with read-back.
+- [Colour-by walkthrough](../tools/examples/authoring/colour_by_walkthrough.rb) exercises registered
+  overlay modes.
+- [Exporter contract tests](../tests/python/test_exporters.py) check that a callback receives HBJSON
+  and a copy of its options.
 
-Each example has a short walkthrough identifying the entrypoint, relevant contract and required
-files. A newcomer should be able to trace one request through validation, mutation and its result.
-Check that these examples require no private hooks or special cases for their feature names.
-Persistence examples exercise metadata preservation, references, Undo/Redo and save/reopen;
-unavailable-extension examples distinguish retained data from validated behavior.
-
-Land each example with its owning capability. The foundation packet starts with a synthetic
-feature and record; this list does not authorize implementing later features during transplant.
-The first two merged through PR #1: the example feature's walkthrough (P0-D) and its
-synthetic editor (P0-E, `tools/examples/foundation/editor.js`), a panel section registered with
-`panel.section` that edits through `request.js` and the unit field. Adding the editor changed no
-file in `shell/`, `session/`, `core/` or `html/`; its development entry hands the script to the
-panel. P0-F added the example's export contributors (`export_contributor` in its `install`) and
-their Python sections (`tools/examples/foundation/example_translation.py`), checked end to end
-against one shared extraction and result fixture, and a test-only exporter that receives only the
-HBJSON text and a copy of its options (`tests/python/test_exporters.py`). Neither changed a file in
-`export/` or the translation package.
-Do not claim an extension point is ready until its example and required host gate pass.
-
-## API decisions settled and open
-
-Phase 1 settled the scripting methods and mutation contract (`PhComposer::API`: discover, describe,
-connect, query, view, preview, invoke, outcome and the export task methods), registration schemas
-and their validation at load, and the reference declaration and extension-data refusal policy for
-entity records. The compatibility policy across API major versions and the extension-data lifecycle
-for later record kinds remain for their owning plans. These are details within the accepted
-direction, not a reason to reopen the community goal or to invent all interfaces in advance.
+Verify persistence through Undo/Redo and save/reopen when the contribution writes records or
+references. Use the owning native case for host behavior. See the
+[versioning contract](CONTRACTS.md#registration) for changes to public declarations.
 
 ## Development review
 
