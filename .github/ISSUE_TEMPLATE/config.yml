@@ -3,6 +3,6 @@ contact_links:
   - name: PH-Composer help
     url: https://github.com/ph-composer/ph-composer-skp/blob/main/docs/HELP.md
     about: Installing, updating, messages you may see, and how to prepare a support report.
-  - name: Report a security problem privately
-    url: https://github.com/ph-composer/ph-composer-skp/security/advisories/new
-    about: Use this instead of a public issue for anything that could affect other users.
+  - name: Security policy
+    url: https://github.com/ph-composer/ph-composer-skp/security/policy
+    about: Read the vulnerability reporting instructions before sharing security details.

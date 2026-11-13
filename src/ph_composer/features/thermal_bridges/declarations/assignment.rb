@@ -213,7 +213,7 @@ module PhComposer
                       :examples => [{ "paths" => [[1201, 1205]] }]) { |request| Assignment::PathReads.at(request) }
         feature.query(Assignment::PathReads::CANDIDATES,
                       :description => "One bounded page of the Edges directly inside one container, the root when " \
-                                      "path is absent, by persistent id, in edges.at's rows: with assigned " \
+                                      "path is absent, by persistent id, using `edges.at` rows. With assigned " \
                                       "\"unassigned\", the Edges an assignment could start from. Needs no " \
                                       "selection; walks that container only.",
                       :refuses => (PATH_READ + %w[target.not_found target.wrong_kind]).uniq,

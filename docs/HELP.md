@@ -1,101 +1,75 @@
 # PH-Composer help
 
-This page ships inside PH-Composer and opens from Help & Diagnostics, so it works with no internet
-connection. Online help in Help & Diagnostics opens the same text for the build you have installed.
+Open this guide from Help & Diagnostics. The offline copy ships with your build.
 
-## Supported hosts
+## SketchUp compatibility
 
-PH-Composer is built and tested on SketchUp 2026 for macOS, and written for SketchUp 2023 and later
-on macOS. Windows is not supported yet. Help & Diagnostics shows the SketchUp version you are
-running and marks it not supported when it is older than 2023 or runs on Windows. A version newer
-than 2026 is not marked, but has not been tested.
+PH-Composer is tested on SketchUp 2026 for macOS. The code targets SketchUp 2023 and later
+on macOS. Use Help & Diagnostics to check the version and platform of the running host.
 
 ## Installing and updating
 
-PH-Composer is a single `.rbz` file. In SketchUp, open Extensions > Extension Manager, choose Install
-Extension, and pick the file. To update, install the newer file the same way; it replaces the old
-one. Restart SketchUp after installing.
+In SketchUp, open Extensions > Extension Manager, choose Install Extension and select the
+`.rbz` file. Use the same steps to replace an installed build. Restart SketchUp after installing.
 
-Current release: none yet. PH-Composer is in development and every build so far is a development
-build. Releases will be listed at https://github.com/ph-composer/ph-composer-skp/releases.
+Current release: none. Check https://github.com/ph-composer/ph-composer-skp/releases for published
+builds. Help & Diagnostics shows your installed version and build.
 
-PH-Composer does not check for updates. Help & Diagnostics shows the version and build you have
-installed; compare it with the releases page to see whether a newer one exists.
+## Checking the result of an edit
 
-## When a change is not confirmed
+After 20 seconds without a reply, the panel offers Check status. It asks for the original
+request's result and refreshes the panel.
 
-If PH-Composer has not answered an edit after 20 seconds, the panel shows a warning with Check
-status. Your change may have been applied, or only its answer may have been lost. Check status asks
-PH-Composer what happened to that change and refreshes the panel from the Model. It never sends the
-change a second time.
+- "PH-Composer did not receive that change": nothing was written. Repeat the edit if needed.
+- "PH-Composer can no longer tell whether that change was applied": inspect the model first.
 
-- "PH-Composer did not receive that change": nothing was written. Make the change again if you
-  still want it.
-- "PH-Composer can no longer tell whether that change was applied": look at the Model before you
-  make the change again.
-
-A warning about something other than an edit offers Stop waiting. Its result is then unknown, so
-check what it was meant to do before you try again.
+For a non-edit request, Stop waiting clears the wait. Check the result before repeating the request.
 
 ## When Export stops
 
-Export stops by itself if its runtime does not start within about half a minute, or stops
-answering for five minutes. Nothing is written in either case. Start Export again. If it keeps
-stopping, save a support report and report the problem.
+If the runtime takes about 30 seconds to start or stops responding for five minutes, Export ends
+before writing files. Try Export again. If it keeps stopping, save a support report.
 
 ## Messages you may see
 
-- `request.not_received`: PH-Composer never got the change. Nothing was written.
-- `request.outcome_unavailable`: PH-Composer cannot say whether the change was applied. Check the
-  Model.
-- `operation.rollback_unverified`: a change failed and PH-Composer could not confirm the Model is
-  unchanged. Check the Model before you continue.
-- `runtime.boot_timeout`, `runtime.unresponsive`: the export runtime did not start or stopped
-  answering. No files were written.
-- `runtime.conformance_failed`: the HBJSON did not pass its final check, so it was not written.
+- `request.not_received`: PH-Composer did not receive the change. Nothing was written.
+- `request.outcome_unavailable`: the result is unknown. Check the model.
+- `operation.rollback_unverified`: the change failed and rollback could not be confirmed.
+  Check the model before continuing.
+- `runtime.boot_timeout` or `runtime.unresponsive`: the runtime failed to start or stopped
+  responding. Nothing was written.
+- `runtime.conformance_failed`: HBJSON failed the final check. Nothing was written.
 
-A failure PH-Composer did not expect shows Get help, with a reference such as PHC-3FA9C1. Give that
-reference when you report the problem.
+If a message offers Get help and shows a reference such as PHC-3FA9C1, include the reference
+in your report.
 
 ## Fixing settings
 
-Help & Diagnostics has Reset display preferences in its More actions menu. It returns display
-units, remembered dimension formats, remembered table views and the remembered Colour-by mode to
-their defaults. Libraries, approved locations, agent tokens and your Models are not changed.
+In Help & Diagnostics, open More actions and choose Reset display preferences to restore the
+default units, dimension formats, table views and Colour-by mode. To recover a panel that has
+stopped drawing, choose Reopen panel. Apply any edits you want to keep before reopening.
 
-If the panel stops drawing, use Reopen panel in the same menu. An edit you have not saved in the
-panel is discarded; changes already applied to the Model stay.
-
-Library setup that cannot be read keeps its own reset, on the Libraries screen.
+Use the Libraries screen to reset unreadable library setup.
 
 ## Getting help
 
-Open Extensions > PH-Composer > Help and Diagnostics. It works when the panel is not drawing and
-needs no particular Model, but SketchUp turns extension menus off while no document is open: open
-or start any document first, or use the Help & Diagnostics link at the foot of the panel.
+Open any SketchUp document, then choose Extensions > PH-Composer > Help and Diagnostics.
+You can also open it from the bottom of the panel.
 
-1. Choose Copy diagnostics or Save support report. A preview shows exactly what will be copied or
-   saved. It holds the version, build, SketchUp version and recent log lines. It never holds Model
-   names or geometry, file paths, library contents, tokens or anything you typed.
-2. Choose Report a problem. It opens a public GitHub issue. Paste or attach the report there. Leave
-   out project names, screenshots and Model files unless you are willing to make them public.
+1. Choose Copy diagnostics or Save support report. Review the preview before sharing.
+2. Choose Report a problem to open a public GitHub issue. Share the report and steps to
+   reproduce the problem with a synthetic model.
 
-PH-Composer sends nothing by itself. Clear diagnostic history deletes the log on this computer;
-reports you saved are kept.
-
-If Help & Diagnostics itself cannot open, a message box shows the version, build, log folder and
-this page's online address.
+Clear diagnostic history removes the local log. Keep any reports you need before clearing it.
+If Help & Diagnostics cannot open, its fallback message shows the version, build and log folder.
 
 ## If SketchUp crashes
 
-PH-Composer cannot catch a SketchUp crash. When SketchUp shows its crash reporter, follow
-SketchUp's instructions at https://help.sketchup.com/en/sketchup/reporting-errors-bugsplat and keep
-the details it gives you. Then open Help & Diagnostics after restarting and save a support report.
-Mention both in your issue.
+Follow the SketchUp crash reporter's instructions at
+https://help.sketchup.com/en/sketchup/reporting-errors-bugsplat. Keep the crash details.
+After restarting, open Help & Diagnostics and save a report. Include both in your issue.
 
 ## If PH-Composer does not load
 
-SketchUp reports an extension that failed to load when it starts. PH-Composer records the failure in
-its log before SketchUp reports it. Reinstall the `.rbz`, restart SketchUp,
-and if it still fails, report the problem with the version you installed. The log folder is
-`PH-Composer/logs` inside SketchUp's support folder.
+Reinstall the `.rbz` and restart SketchUp. If loading still fails, report the version you
+installed and check `PH-Composer/logs` inside SketchUp's support folder.

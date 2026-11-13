@@ -1,8 +1,8 @@
 # Library file format
 
-The library file provider reads a UTF-8 JSON file, or the immediate JSON files in a folder. A
-library supplies definitions that the user copies into the SKP and edits locally. The implemented
-wire kinds are `materials`, `frames`, `glazings` and `psi_install_types`. Hosted libraries that sign in use a separate extension; this file format is unchanged by them.
+Use a UTF-8 JSON file or a folder of immediate JSON files to publish a library. PH-Composer
+copies definitions into the SKP as editable records. The built-in wire kinds are `materials`,
+`frames`, `glazings` and `psi_install_types`.
 
 ## Envelope
 
@@ -23,7 +23,7 @@ wire kinds are `materials`, `frames`, `glazings` and `psi_install_types`. Hosted
       "specific_heat_j_kgk": 1000.0,
       "emissivity": 0.9,
       "color": "#c8d8b0",
-      "notes": "Synthetic example, not a product specification.",
+      "notes": "Synthetic example.",
       "datasheet_links": []
     }]
   }
@@ -35,17 +35,14 @@ text. `exported_at` is an ISO 8601 timestamp with a timezone. Each `kinds` entry
 a version in `kind_schema_versions`. Every kind requires a row `id`, the provider's stable record
 identity; PH-Composer gives a copied record its own local identity.
 
-A row has no label field of its own. Each kind declares how a label is read from its values: the
-Materials and Window product kinds use `name`, and a kind without a `name` uses its own words, such
-as a designation. A row whose label is missing or blank is skipped with the warning
-`library.row_label_invalid`. Rows are listed by library, then label without regard to case, then
-label as written, then `id`, so equal labels with different ids are all kept.
+Each kind declares a display label from its values. The built-in kinds use `name`.
+A missing or blank label skips the row with `library.row_label_invalid`. PH-Composer sorts by
+library, case-insensitive label, original label and `id`, in that order.
 
 Exporting local definitions publishes each local id as the wire record id. The optional
 `record_origins` object groups informational origins by wire kind and exported record id.
-An origin contains `label`, `provider_kind`, `library_id` and `record_id`. The label is a sanitized
-provider-kind label. Origins contain no configured path, credentials or raw source snapshot;
-the reader ignores them and they do not affect semantic fingerprints.
+An origin contains a sanitized provider-kind `label`, `provider_kind`, `library_id` and
+`record_id`. Origins are informational. The reader and semantic fingerprint ignore them.
 
 The export form defaults to all supported local definitions. Selected scope uses explicit record
 ids and never derives its scope from a filter. New identity creates a library UUID; update keeps
@@ -54,10 +51,9 @@ records before a staged write replaces the destination. Cancellation or failure 
 
 ## Materials version 1
 
-Only `id` and `name` are required on a wire row. Supply SI numbers directly; PH-Composer never
-guesses a unit or converts a differently named IP field. Missing optional fields produce a
-structured warning and use the defaults below. A value that violates a declared wire field schema skips the row. Copy also checks the mapped
-Material value contract, including hexadecimal color syntax.
+Supply `id` and `name` on each row. Use SI numbers in the declared fields. Missing optional
+fields use the defaults below and produce a warning. Invalid wire values skip the row.
+Copy also validates the mapped Material, including hexadecimal color syntax.
 
 | Field | Type and unit | Missing value |
 | --- | --- | --- |
@@ -136,9 +132,7 @@ library id must also agree on its name.
 | All immediate candidate JSON files in a configured provider | 64 MiB, 67,108,864 bytes |
 | Rows across their kind arrays, including unsupported kinds and skipped rows in parsed files | 20,000 |
 
-The provider refuses an over-budget catalog rather than truncating it. These are implemented
-bounds with exact-limit and one-above offline checks. Current-host measurements meet all three
-limits; other hosts remain subject to their own acceptance checks.
+The provider refuses catalogs that exceed a limit.
 
 ## Copy and read back
 
@@ -154,9 +148,7 @@ with guarded authored values and metadata preservation. Optional assignment shar
 single Model transaction. Preview and invoke use the same revision-bound copy timestamp for that
 gesture. The timestamp is excluded from the semantic fingerprint.
 
-The [public API reference](API_REFERENCE.md) describes catalog reads and guarded copy operations.
-The [panel-closed walkthrough](../tools/examples/library/materials_walkthrough.rb) uses the
-[synthetic fixture](../tools/examples/library/materials.json) in a Model with empty Materials and
-Assemblies inventories. It removes its temporary provider configuration after read-back and
-leaves the copied Material in the SKP. Native Undo/Redo and save/reopen are separate acceptance
-checks.
+See [library kinds](API_REFERENCE.md#library-kinds) for wire schemas. The
+[copy walkthrough](../tools/examples/library/materials_walkthrough.rb) uses the
+[synthetic fixture](../tools/examples/library/materials.json) to load a catalog, copy a Material
+and read it back in a scratch model.

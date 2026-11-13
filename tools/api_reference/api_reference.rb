@@ -26,28 +26,33 @@ module PhComposerTools
       <<~MARKDOWN
         # PH-Composer API reference
 
-        Generated from the registered declarations. Do not edit by hand: `make fixtures` rewrites
-        this page, and the offline suite fails when it is stale. [API_QUICKSTART.md](API_QUICKSTART.md)
-        walks through one session from discovery to a verified edit.
+        Run `make fixtures` to regenerate this reference from the registered declarations. Start
+        with the [Ruby quickstart](API_QUICKSTART.md) or [agent setup](AGENT_ACCESS.md).
 
-        Every name below is what `PhComposer::API.describe(name:)` answers for. Params and results are
-        JSON Schema; a number's `x-unit` is the SI unit it is stored and exchanged in. Every call except
-        `discover`, `describe` and `connect` answers with one outcome shape:
+        - Data: [record kinds](#record-kinds), [library kinds](#library-kinds)
+        - Operations: [queries](#queries), [actions](#actions), [view commands](#view-commands),
+          [setup commands](#setup-commands), [file exports](#file-exports), [export tasks](#export-tasks)
+        - Contracts: [proposal participants](#proposal-participants), [common refusals](#common-refusals),
+          [feature codes](#feature-codes), [API changes](#api-changes)
+
+        Use `PhComposer::API.describe(name:)` to read a declaration in the running extension.
+        Params and results use JSON Schema. A number's `x-unit` gives its canonical SI unit.
+        Operation calls return an outcome with these fields.
 
         | Field | Meaning |
         | --- | --- |
         | `status` | `completed`, `refused`, `failed`, `busy`, `pending` or `cancelled` |
         | `code` | `ok`, or why the request did not complete, such as `revision.stale` or `target.changed` |
         | `effect` | What happened to the Model: `none`, `committed`, `rolled_back` or `unknown` |
-        | `revision` | The Model revision after the call; send it back as `expected_revision` |
+        | `revision` | The Model revision associated with the outcome. Use the revision of the read your edit relies on |
         | `value` | The operation's result, described below as its result schema; absent unless completed |
         | `affected` | Each record an action changed: `kind`, `id`, `change` and, for entities, `reference` |
         | `findings` | Advisory rows the operation reports without refusing |
         | `detail` | Structured data a caller needs to act on a refusal |
-        | `proposal_digest` | From a preview; send it with the invoke to refuse if the change is no longer the same |
+        | `proposal_digest` | Digest of the preview. Send it with invoke to apply the reviewed change |
 
-        A refused or failed action leaves the Model unchanged unless `effect` says otherwise. An action
-        whose value would change nothing completes with `effect` `none` and no Undo step.
+        Check `effect` before retrying a refusal or failure. A no-op completes with `effect` `none`
+        and adds no Undo step.
       MARKDOWN
     end
 

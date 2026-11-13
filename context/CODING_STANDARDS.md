@@ -1,17 +1,8 @@
-# Coding standards: PH-Composer
+# Coding standards
 
-**DATE:** 2026-09-30
-
-This file holds what is specific to this repository. Cross-repo rules live in the shared skills.
-Rules about the product and its language live in `../docs/` and this folder, chiefly
-[UBIQUITOUS_LANGUAGE.md](UBIQUITOUS_LANGUAGE.md), which governs names in code as well as in copy.
-Read [TECH_STACK.md](TECH_STACK.md) before work that touches observers, transactions, the pinned
-runtime or the real-host loop.
-
-The lint rule sets that enforce part of this are `.rubocop.yml` (Ruby layout, line length, size
-limits and two style cops), `eslint.config.mjs` and `[tool.ruff.lint]` in `pyproject.toml`;
-`make lint` runs all three. Everything below that a linter cannot express is here because a reader
-has to apply it.
+Use [project terminology](UBIQUITOUS_LANGUAGE.md) in code and UI text. Consult the
+[technical architecture](TECH_STACK.md) for SketchUp observers, transactions and runtime rules.
+Run `make lint` to check the rules in `.rubocop.yml`, `eslint.config.mjs` and `pyproject.toml`.
 
 ## Layering
 
@@ -19,26 +10,17 @@ Contributor-facing boundaries are governed by [EXTENSIBILITY.md](EXTENSIBILITY.m
 features use those same public contracts. Separate pure Ruby domain behavior from SketchUp
 adapters so calculations and validation can be exercised without the host.
 
-Four layers, one dependency direction. The founding brief names them; this is what each may do.
-
-- **JavaScript is the interface and UI layer.** The panel derives, formats and routes. It does not
-  calculate domain values. A number the user reads as a Passive House quantity was computed in
-  Ruby, travelled through the message contract, and the panel chose how to show it. This decides
-  where a new calculation goes before the question of which file is more convenient. The UI kit
-  depends on the request channel contract and nothing else, so it carries no honeybee dependency.
-- **Ruby is the Model layer and the business logic.** Attribute dictionaries, the record engine,
-  sessions, transactions, Undo, observers and every domain calculation the panel shows.
-- **The Python translation package owns only the HBJSON translation.** It reads the export
-  contract and writes honeybee objects. It does not read the Model.
-- **Exporters consume HBJSON.** The METr exporter, deferred and not yet built, will read the HBJSON
-  artifact and run PHX. An exporter never reads the export contract or the Model, so a second exporter needs nothing from
-  the layers above it.
+- Ruby owns Model state, transactions and domain calculations.
+- JavaScript renders domain values and routes public operations. The UI kit works through
+  the request channel.
+- Python translation reads the detached export contract and produces HBJSON.
+- Downstream exporters read HBJSON and the export options.
 
 ## Ruby
 
-- **The support floor is Ruby 2.7.** SketchUp 2023 embeds it. `Struct.new(keyword_init: true)` is
-  available; pattern matching, endless methods, `Hash#except` and `Data` are not. The offline suite
-  runs on 2.7.2 and 3.2.2, and a loop on one of them proves nothing about the other.
+- **Target Ruby 2.7.** SketchUp 2023 embeds Ruby 2.7.2. Use
+  `Struct.new(keyword_init: true)` for named fields. The offline suite runs on 2.7.2 and 3.2.2.
+  Keep experimental Ruby 2.7 features such as pattern matching out of shipping code.
 - **`fetch` for a required key, `dig` for an optional path.** `[]` on a shape the code requires
   turns a missing key into a `nil` that surfaces three frames away. One reader for a path every
   caller walks, `fetch` at each step, because a row missing any of them is unreadable and the
@@ -104,14 +86,10 @@ mechanical fragmentation or a golden update.
 
 ## JavaScript
 
-- **The floor is Chromium 88**, the HtmlDialog engine in SketchUp 2023, so `ecmaVersion: 2020`.
-  The panel files are scripts loaded by the dialog, not modules. The whole floor lives in
-  `eslint.config.mjs`: the parser refuses newer syntax, `no-undef` against the declared globals
-  refuses a newer global, and the `AFTER_CHROMIUM_88_*` lists refuse a method that arrived after
-  88 on a type the parser already knew. Adding a name to either list is a floor decision.
-- **ES2020 is the level; a file is one era.** `const`, arrows and template literals are legal.
-  Files transplanted from the predecessor are ES5 and may stay so. A file that mixes the two is
-  not acceptable: a reader should be able to tell a file's era from its first screen.
+- **Target Chromium 88 and ES2020.** HtmlDialog loads classic scripts. `eslint.config.mjs`
+  checks syntax, globals and methods introduced after Chromium 88.
+- **Use one syntax style per file.** Keep existing ES5 files consistent. Use `const`, arrow functions
+  and template literals where the file uses ES2020.
 - **`Array.prototype.forEach.call` over `NodeList.forEach`.** The panel's own collections are not
   all real `NodeList`s, and the borrowed call works on both.
 - **Sequenced statements do not share a line.** eslint cannot express this. A one-line function
@@ -121,11 +99,10 @@ mechanical fragmentation or a golden update.
 
 ## Python
 
-- Fully typed, `from __future__ import annotations`, dataclasses at the seams.
-  `disallow_untyped_defs` covers the translation package, the exporters and their tests.
-- honeybee, ladybug and PHX are imported only through one module each, on first use and in the
-  runtime's load order, so every other module of the package imports without the stack.
-- The tool scripts under `tools/` are `uv run` entry points with a PEP 723 block each.
+- Annotate parameters and returns. Use `from __future__ import annotations` and typed
+  dataclasses for values passed between translation sections. Ruff and ty check the configured files.
+- Load honeybee and ladybug through the translation package's `stack.load` on first use.
+- Run Python tools through `uv run` using the project's Python version and dependencies.
 
 ## Readability and public interfaces
 
@@ -175,8 +152,8 @@ rule for `src/` and `tests/`.
 - **A stub that deviates from the host says so in a comment and names the host fact** in
   `context/SKETCHUP_HOST_BEHAVIOR.md`. The SketchUp API stub and the DOM stub are deliberate
   approximations, and the places they diverge are where an offline pass can hide a host failure.
-- **The offline suite has no dependencies.** `make test` runs on a checkout with no bundler and no
-  `node_modules`. Lint tooling is separate and skips when absent.
+- **Test with the project runtimes.** `make test` uses Ruby, Node and the Python dependencies
+  managed by uv. Install the Ruby and JavaScript lint packages for the full offline gate.
 
 ## Line and size limits
 
