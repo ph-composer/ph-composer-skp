@@ -81,6 +81,7 @@ A record or a preview can be larger than one reply. These reads give all of it e
   `ph_composer.records.update_metadata` with the record's `kind` and `id` and the two maps you read as
   `expected_metadata`. `{}` clears the map. A change made since your read refuses the whole batch as
   `target.changed`, and nothing is written. The kinds' own `update` actions do not take `user_data`.
+  The [user data guide](USER_DATA.md) lists the read and write call for every object.
   Building Segments and Levels (`ph_composer.zones.building_segment` and `ph_composer.zones.level`) are
   written the same way, and each Zone's copy of its choices follows in the same Undo step. A locked Zone
   refuses the write as `target.locked`; a Zone awaiting adoption keeps its copy until it is adopted. Removing or merging an option keeps the survivor's map; the
@@ -530,7 +531,9 @@ Layer-Segments' maps go to their cell materials. Every other map stays in the Mo
 `export.metadata_omitted` finding per entity: a membrane Layer, the one Layer-Segment of an undivided
 Layer, Window Elements, Thermal Bridge Edges, Attached zones and the definitions (Materials, Frames,
 Glazings, Psi-Install Types, Window Types, Thermal Bridge Types, Building Segments and Levels). A
-`ph_composer` key in any map that leaves blocks the export. Read the export's findings rather than
+`ph_composer` key in any map that leaves blocks the export. The finding for a Layer, Layer-Segment
+or Window Element names the part in `object_id` and gives `reference`, the `{kind, id, part_ids}`
+to send to `ph_composer.records.update_metadata`. Read the export's findings rather than
 assume. An extension's data leaves with the extension that exports it: data marked local to the
 Model is left out with the same finding, and data whose effect on the export is required or unknown,
 with nothing installed to export it, blocks the export.

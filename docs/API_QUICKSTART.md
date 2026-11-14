@@ -5,7 +5,8 @@ or loose geometry suitable for Make Zone. The examples create and edit records i
 The [API reference](API_REFERENCE.md) lists operation schemas and examples. For a separate MCP
 client, use [Agent Access](AGENT_ACCESS.md).
 
-The [Ruby client test](../tests/api_client_test.rb) covers editing, retries, paging and export task setup.
+The [Ruby client test](../tests/api_client_test.rb) covers editing, retries, paging, export task setup
+and user data.
 
 ## 1. Find the Model and connect
 
@@ -197,3 +198,69 @@ findings name each one with the code `construction.missing`. Assign Assemblies w
 `ph_composer.zones.faces.assign_assembly` before starting a real export. An interior Face (a
 Surface pair) needs an Assembly only when its two Zones are in different Building-Segments.
 Assigning one side gives the other side the same Assembly, reversed.
+
+## 9. Attach your own data to a Face and a Material
+
+Every authored object carries `user_data`, a JSON object for your own notes, review states or
+outside ids. PH-Composer stores it, copies it and never reads it for a calculation. Put your data
+under one top-level key you own, such as `example_org`. You need no registration and no
+SketchUp dictionaries.
+
+Read the Face first. Its row carries `user_data` and `extension_data`, both `{}` until something
+is written. A read answers a copy, so changing the hash you hold changes nothing in the Model.
+
+```ruby
+faces = PhComposer::API.query(context: context, name: "ph_composer.zones.faces.list")
+face = faces["value"]["faces"].find { |row| row["values"]["face_type"] == "Wall" }
+mine = face["user_data"].merge("example_org" => { "review_status" => "needs_site_check", "detail" => "A-503/7" })
+tagged = PhComposer::API.invoke(
+  context: context, name: "ph_composer.zones.faces.update_metadata",
+  params: { "updates" => [{ "reference" => face["reference"], "user_data" => mine,
+                            "expected_metadata" => face.slice("user_data", "extension_data") }] },
+  request: { "sequence" => 9, "expected_revision" => faces["revision"] }
+)
+```
+
+The map you send replaces the whole stored map. Start from the map you read and change only your
+own key, so other people's keys stay. `expected_metadata` is the pair of maps you read: if anyone
+changed either one since, the write refuses `target.changed` and nothing is written. Read again
+and repeat. A write that sends what is already stored makes no Undo step.
+
+Definitions such as Materials, Assemblies, Window Types and Thermal Bridge Types use one action
+for every kind, `ph_composer.records.update_metadata`, with the record's `kind` and `id`:
+
+```ruby
+read = PhComposer::API.query(context: context, name: "ph_composer.records.list",
+                             params: { "kind" => "ph_composer.assemblies.material",
+                                       "ids" => [material["value"]["id"]] })
+row = read["value"]["records"].first
+noted = PhComposer::API.invoke(
+  context: context, name: "ph_composer.records.update_metadata",
+  params: { "updates" => [{ "reference" => { "kind" => row["kind"], "id" => row["id"] },
+                            "user_data" => row["user_data"].merge("example_org" => { "spec" => "07 21 00" }),
+                            "expected_metadata" => row.slice("user_data", "extension_data") }] },
+  request: { "sequence" => 10, "expected_revision" => read["revision"] }
+)
+```
+
+Read both again to check what was stored. To clear a map, send `{}` with the maps you just read:
+
+```ruby
+face = PhComposer::API.query(context: context, name: "ph_composer.zones.faces.list")["value"]["faces"]
+                      .find { |row| row["reference"] == face["reference"] }
+face["user_data"]  # {"example_org" => {"review_status" => "needs_site_check", "detail" => "A-503/7"}}
+cleared = PhComposer::API.invoke(
+  context: context, name: "ph_composer.zones.faces.update_metadata",
+  params: { "updates" => [{ "reference" => face["reference"], "user_data" => {},
+                            "expected_metadata" => face.slice("user_data", "extension_data") }] },
+  request: { "sequence" => 11, "expected_revision" => noted["revision"] }
+)
+```
+
+Each write is one Undo step, and a batch of `updates` is written together or not at all. Create
+actions for Materials and other definitions also take `user_data`. Zones, Faces, Spaces and
+Thermal Bridge Edges take it only after they exist: create the object, then call its owner's
+`update_metadata`. A Face needs a record first, which classifying it in step 3 gave this one, and
+an Edge needs a Thermal Bridge Type assigned. Nested parts, such as an Assembly's Layers or a Window Type's elements, take
+`part_ids` in the reference. The [user data guide](USER_DATA.md) lists the read and write call
+for every object, what copies and merges do with the map, and which maps reach the HBJSON export.

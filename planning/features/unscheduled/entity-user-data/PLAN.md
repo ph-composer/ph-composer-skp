@@ -13,30 +13,32 @@ entity through public operations, with the same guard, batch and Undo rules ever
 copies and save/reopen keep it. Every export and library boundary either carries it or says
 plainly that it does not. [PRD.md](PRD.md) owns the requirements and acceptance rows UD-01 to UD-10.
 
-## Inventory (UD-01, draft)
+## Inventory (UD-01)
 
-Read at `68919a8c` on 2026-11-14. Paths are relative to `src/ph_composer/`. "UD" is `user_data`.
-"Gap" names the stage that closes it.
+Read at `68919a8c` on 2026-11-14 and updated to the final state of the branch in EUD-08. Paths are
+relative to `src/ph_composer/`. "UD" is `user_data`. "Closed by" names the stage that closed each
+gap found at `68919a8c`; "none" means the entity already met the policy. The published coverage
+table is [docs/USER_DATA.md](../../../../docs/USER_DATA.md), one row per entity below.
 
-| Entity | Owner, storage, address | Schema allows UD | Read with UD | Write UD on an existing entity | HBJSON today | Library today | Gap |
+| Entity | Owner, storage, address | Schema allows UD | Read with UD | Write UD on an existing entity | HBJSON | Library | Closed by |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Material | assemblies; catalog; `mat_` | yes | `materials.list/all`, `records.*` | `materials.update` (no metadata pre-image) | omitted, finding | `library_materials`, omitted, finding | EUD-01 guard |
-| Assembly | assemblies; catalog; `asm_` | yes | `assemblies.list/all` | `assemblies.update` (no metadata pre-image) | OpaqueConstruction and reversed copy | not a library kind | EUD-01 guard |
-| Layer | Assembly record, `layers[]`; `lyr_` unique in its Assembly | no, closed (`assemblies/assembly/schema.rb`) | inside Assembly values | none | none | n/a | EUD-02, EUD-07 |
-| Layer-Segment | Layer, `segments[]`; `seg_` unique in its Layer | no, closed | inside Assembly values | none | none | n/a | EUD-02, EUD-07 |
-| Frame, Glazing, Psi-Install Type | windows; catalog | yes | `*.list/all` | `*.update`, `installs.save` | omitted, finding | `library_*`, omitted, finding | EUD-01 guard |
-| Window Type | windows; catalog; `wnt_` | yes | `types.list/all` | `types.update` | omitted, finding | not a library kind | EUD-01 guard |
-| Window Element | Window Type, `elements[]`; `wel_` unique in its Type | no, closed (`windows/types/schema.rb`) | `types.elements.list` | none | none | n/a | EUD-03 |
+| Model root | foundation; `ph_composer.model` ModelSettings dictionary; no address | yes | `model.detail` | `model.update_metadata` | HB Model `user_data` | n/a | EUD-06, EUD-07 |
+| Material | assemblies; catalog; `mat_` | yes | `materials.list/all`, `records.*` | `records.update_metadata` | omitted, finding | `library_materials`, omitted, finding; replace keeps the local map | EUD-01 |
+| Assembly | assemblies; catalog; `asm_` | yes | `assemblies.list/all`, `records.*` | `records.update_metadata` | OpaqueConstruction and reversed copy | not a library kind | EUD-01 |
+| Layer | Assembly record, `layers[]`; `part_ids [lyr_]` | yes, `Records::Part` | Assembly `values.layers` (`records.list/detail`); `layers.list` rows omit it | `records.update_metadata` with `part_ids` | its material (hybrid host when divided); membrane Layer omitted, finding with `reference` | n/a | EUD-02, EUD-07, EUD-08 |
+| Layer-Segment | Layer, `segments[]`; `part_ids [lyr_, seg_]` | yes, `Records::Part` | `segments.list` | `records.update_metadata` with `part_ids` | cell material when divided; otherwise omitted, finding with `reference` | n/a | EUD-02, EUD-07, EUD-08 |
+| Frame, Glazing, Psi-Install Type | windows; catalog | yes | `*.list/all`, `records.*` | `records.update_metadata` | omitted, finding | `library_*`, omitted, finding; replace keeps the local map | EUD-01 |
+| Window Type | windows; catalog; `wnt_` | yes | `types.list/all`, `records.*` | `records.update_metadata` | omitted, finding | not a library kind | EUD-01 |
+| Window Element | Window Type, `elements[]`; `part_ids [wel_]` | yes, `Records::Part` | `types.elements.list` | `records.update_metadata` with `part_ids` | omitted, finding with `reference` | n/a | EUD-03, EUD-07, EUD-08 |
 | Window Unit | windows; entity dict on a ComponentInstance; `{unit_id, entity_path}` | yes | `units.list/all/detail` | `units.update_metadata` | Aperture | n/a | none |
 | Zone | zones; entity dict on a Group; `{zone_id, zone_path}` | yes | `zones.list/all` | `zones.update_metadata` | Room | n/a | none (restore discloses loss) |
 | Face | zones; entity dict on a Face; `{zone_id, zone_path, entity_path, entity_id}` | yes | `faces.list/all` | `faces.update_metadata` | HB Face | n/a | none |
-| Attached zone | zones; catalog; `atz_` | yes | `records.*` only | `attached_zone.save` (whole map, no metadata pre-image) | not exported, **no finding** | no | EUD-01 guard, EUD-07 finding |
-| Building Segment, Level | zones; catalog; `{collection, id}`; full record copied into Zone `choice_evidence` | yes | `options.list/detail/all` | **none** (`options.update` stages values only) | omitted, finding | no | EUD-04 |
+| Attached zone | zones; catalog; `atz_` | yes | `records.*` | `records.update_metadata` | omitted, finding | no | EUD-01, EUD-07 |
+| Building Segment, Level | zones; catalog; `{collection, id}`; copied into Zone `choice_evidence` | yes | `options.list/detail/all` | `records.update_metadata`, rewriting the Zone copies in the same step | omitted, finding | no | EUD-04 |
 | Space, Volume, Floor Segment | spaces; entity dicts | yes | `spaces.all/list` with fields, `volumes.list`, `floor_segments.list` | `spaces.update_metadata` | Space, SpaceVolume, SpaceFloorSegment | n/a | none |
-| Space Floor | spaces; no record, `floor_id` (`flr_`) on its Volume | no | n/a | none | `volume.floor.identifier` only | n/a | EUD-06 |
-| Thermal Bridge Type | thermal_bridges; catalog | yes | `types.list/all` | `types.update` (no metadata pre-image) | omitted, finding | no | EUD-01 guard |
-| Thermal Bridge Edge assignment | thermal_bridges; entity dict on an Edge; `zone_path + entity_path + entity_id`; a `tbe_` id may repeat after a split or copy | yes | **no**, rows carry `values` only | **none**; `assign` keeps the map | none: runs aggregate several Edges | n/a | EUD-05, EUD-07 |
-| Model root | no record; settings live in feature `ModelSettings` dictionaries | no | n/a | none | HB Model gets no UD | n/a | EUD-06 |
+| Space Floor | spaces; Volume's `floor_user_data`; `{floor_id, entity_path}` | yes | Volume row `floor` (`volumes.list` field) | `spaces.update_metadata` by `floor_id` | SpaceFloor `user_data` | n/a | EUD-06, EUD-07 |
+| Thermal Bridge Type | thermal_bridges; catalog | yes | `types.list/all`, `records.*` | `records.update_metadata` | omitted, finding | no | EUD-01 |
+| Thermal Bridge Edge assignment | thermal_bridges; entity dict on an Edge; `zone_path + entity_path + entity_id`; a `tbe_` id may repeat after a split or copy | yes | Edge rows of `edges.selection/selection_all/at/candidates` | `edges.update_metadata` by occurrence | omitted, finding: runs aggregate several Edges | n/a | EUD-05, EUD-07 |
 
 Derived or internal, not independent authored entities: the Zone membership stamp (recovery
 evidence on Faces), Zone option settings, the Windows, Spaces and Zones settings dictionaries,

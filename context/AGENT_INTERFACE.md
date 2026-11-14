@@ -333,7 +333,9 @@ Segment or Level write also rewrites the copy each Zone keeps of it, in the same
 `ph_composer.model.detail`.
 A script that reads the exported HBJSON finds passed-through metadata on the owning Honeybee object. The
 [export recipe](../docs/AGENT_GUIDE.md#export) lists supported record kinds and explains the
-metadata findings.
+metadata findings; an `export.metadata_omitted` finding about a record part carries `reference`, the
+`{kind, id, part_ids}` that `ph_composer.records.update_metadata` takes (API 1.59). The
+[user data guide](../docs/USER_DATA.md) is the coverage table for every entity.
 
 Provide a non-mutating proposal/preview for compound or destructive edits. It reports targets,
 changed values, affected references and validation findings. A proposal binds to its inputs and

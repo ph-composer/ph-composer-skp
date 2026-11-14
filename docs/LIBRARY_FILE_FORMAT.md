@@ -88,7 +88,10 @@ The thirteen category ids are:
 
 An unknown category becomes Uncategorized locally. Its original text remains in the copied
 source snapshot. PH-Composer omits undeclared row fields with a warning. Wire records do not
-carry local `source`, `user_data` or extension payloads.
+carry local `source`, `user_data` or extension payloads. A Material copied from a library starts
+with an empty `user_data` map. Replacing a local Material from a library keeps its local map and
+extension payloads. When you export a Material whose record stores either one, the review before
+the write lists that field as omitted. The [user data guide](USER_DATA.md) covers the map on every object.
 
 ## Window products version 1
 
@@ -105,7 +108,9 @@ values refuse copying. Frame and Glazing colors use six-digit hexadecimal string
 | `psi_install_types` | `psi_w_mk`: signed W/mK | No manufacturer or color field |
 
 All three kinds also accept `notes` (empty string by default) and `datasheet_links` (empty array
-by default). Their semantic fingerprints exclude local identity, source attribution and
+by default). As for Materials, their wire rows carry no `user_data` or extension payloads: a copy
+starts with an empty map, a replacement keeps the local map, and an export lists the maps it
+leaves out. Their semantic fingerprints exclude local identity, source attribution and
 extension payloads. Export uses the same mapped values and retains local ids as wire row ids.
 The synthetic file at `tools/examples/library/materials.json` includes all four kinds.
 

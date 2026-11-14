@@ -387,6 +387,32 @@ export as `extension.invalid`. A payload without a usable declaration blocks ope
 invalidate its references and blocks export when its relevance is unknown. Never guess from a
 payload's text. Native SketchUp copy semantics are feature-owned.
 
+**User data shape and replacement.** Every authored object has one optional `user_data` map: the
+Model, every definition, geometry record, assignment and managed option, and every declared record
+part. The [user data guide](../docs/USER_DATA.md) is the one coverage table: each object's address,
+read, write route, copy behavior, HBJSON mapping and library boundary. A write replaces the whole map:
+an update without `user_data` leaves it, `{}` clears it and a map replaces it; nothing merges maps.
+Params that are not plain JSON (a non-finite number, a key that is not a string, a Ruby object) never
+reach a handler over the public API: the dispatcher refuses them as `request.malformed` before
+acceptance, so the sequence stays free. A map that is JSON but not an object fails the operation's
+schema as `params.invalid`. The engine's own `params.invalid` for a map that is not plain JSON
+(`Records::Metadata.checked_user_data`) answers only a Ruby caller staging through the engine directly.
+Creators of Zones, Faces, Spaces and Edge assignments take no `user_data`; the owner's metadata action
+follows the create.
+
+**Lifecycle policy.** One policy holds for every object and part. An edit that rebuilds an object
+keeps each surviving part's map at every depth. Duplicate makes independent deep copies under the
+owner's new ids and never reads a string in a map as a reference. A split copies the source's map into
+every piece. A merge, or a delete that names a replacement, keeps the survivor's map, never combines
+maps, and returns `removed_user_data`, each removed object or part whose map was not empty with its
+top-level keys (at most 50 entries of at most 50 keys, through `Records::Metadata.discarded_keys`),
+and `removed_user_data_total`; Undo restores the removed map. A new part starts without one. A restore
+or conversion that cannot recover a map starts it empty. Zone restore lists `user_data` as
+unrecoverable in its offer, and Edge repair reports the keys it discards; a Window Unit restored from
+orphaned panes, or converted from a plain component, has no record to copy and starts empty without a
+notice of its own, which the user data guide states. Deleting an object removes its map, and Undo
+restores it.
+
 **Catalog record metadata.** `ph_composer.records.update_metadata` is the one write route for the
 `user_data` and extension payloads of an existing catalog record of any kind `records.list` reads
 (`Engine#propose_metadata_update`); a kind's own update action edits values only, and create actions
@@ -413,7 +439,10 @@ its parts in one batch stage as one write. Owners keep a surviving part's map th
 it with the part, and start a new part without one. Splitting a part copies its map into every piece;
 merging parts keeps the survivor's map only, never combines maps, and reports each removed part whose map
 was not empty with its top-level keys (`Records::Metadata.discarded_keys`). Assembly Layers and
-Layer-Segments and Window Elements (`elements[]`) are parts.
+Layer-Segments and Window Elements (`elements[]`) are parts. Export leaves a part's map out unless the
+owner carries it to an HBJSON object of the part's own; the `export.metadata_omitted` finding names the
+part in `object_id` and carries `reference`, the `{kind, id, part_ids}` this action takes
+(`RecordReader#records`, or `entity_record(..., part:)` for an owner that reads its parts itself).
 
 **Entity-owned records.** Zones, Faces, Window Units and Thermal Bridge Edge assignments store their
 records on SketchUp entities, and the same rules hold for them (`Records::Metadata`, shared with the

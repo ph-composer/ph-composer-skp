@@ -1007,13 +1007,11 @@ registered view command. The rules below come from Classify's host gate
 
 ## Metadata and structured extension data
 
-The contract below is the target for every authored entity. Built-in coverage is not yet complete:
-some public metadata operations and nested authored parts are missing. The
-[entity user-data feature](../planning/features/unscheduled/entity-user-data/README.md) tracks the
-coverage inventory and completion; its scope is authorized for implementation and in progress.
-
-Every authored domain entity must support a JSON-compatible `user_data` mapping, including definitions
-and assignment records where applicable. Contributors use namespaced keys, for example:
+Every authored entity supports a JSON-compatible `user_data` mapping: the Model, definitions,
+geometry records, assignments, managed options and nested parts. The
+[user data guide](../docs/USER_DATA.md) is the coverage table, one row per entity, and a script's
+entry point is step 9 of the [API quickstart](../docs/API_QUICKSTART.md#9-attach-your-own-data-to-a-face-and-a-material).
+Contributors use namespaced keys, for example:
 
 ```json
 {"user_data": {"example_org": {"review_status": "needs_site_check"}}}
@@ -1026,10 +1024,25 @@ records of every kind take it through `ph_composer.records.update_metadata`
 objects carry their own map declares them as `parts:` (`Records::Part`, such as an Assembly's
 `layers[]`), and the same action writes a part's map by `part_ids`. A kind whose owner keeps
 copies of its records, as Zones copy their Building Segment and Level, declares `metadata_follow_up:`
-so the same action rewrites the copies in the same step. Zones, Faces and
-Window Units use their owner's `update_metadata` action, as do Spaces, Volumes and Floor Segments.
+so the same action rewrites the copies in the same step. Zones, Faces, Window Units and Thermal
+Bridge Edges use their owner's `update_metadata` action, as do Spaces, Volumes, Floor Segments and
+Space Floors (`spaces.update_metadata`); the Model's own maps use `ph_composer.model.update_metadata`.
 All follow the same rules ([CONTRACTS.md](CONTRACTS.md), "Records and extension data"). Core
 calculations do not silently interpret arbitrary metadata. Absence in an older record is valid.
+
+A contribution that adds an authored entity, including the future mechanical and climate entities,
+meets the same obligation before it is accepted:
+
+- Give it a `user_data` map: a catalog kind gets one from the engine; a nested object is declared as a
+  `Records::Part`; an entity-owned record keeps one through `Records::Metadata`.
+- Read it in the entity's ordinary reads, with `extension_data` and `extension_status`.
+- Write it through one guarded route: `ph_composer.records.update_metadata` for a catalog kind and its
+  parts, or one owner `update_metadata` action that follows `Records::Metadata` for an entity-owned
+  record. The kind's own update action edits values only.
+- Follow the lifecycle policy for its edits, copies, splits and merges, and test it.
+- Carry the map to the entity's own HBJSON object, or leave it out with an `export.metadata_omitted`
+  finding, and state which in the coverage table.
+- Add the entity's row to the [user data guide](../docs/USER_DATA.md).
 
 Export inclusion is deliberate. A record's `user_data` passes through to the HBJSON object Honeybee
 gives it, uninterpreted, where the owner opts in (`reader.entity_record(..., user_data: true)` or
@@ -1040,7 +1053,9 @@ contributor declares in `user_data_keys:`, blocks the export; every string and
 key still passes the local-path check, and the report counts the HBJSON objects that carry it. Elsewhere `user_data`
 is left out with a finding. A record part's map (`Records::Part`) is left out with a finding unless the
 contributor reads the parts itself (`reader.records(kind, parts: true)`) and passes each member through
-`reader.entity_record`, carrying it only where the part has an HBJSON object of its own. An export
+`reader.entity_record(..., part:)`, carrying it only where the part has an HBJSON object of its own.
+`part:` is the part's `{kind, id, part_ids}`; pass it on every part read, so a finding that leaves the
+map out names the record and path a user writes it by. An export
 contributor whose translation writes its own HBJSON `user_data` declares those keys at registration (`user_data_keys:`); under a declared namespace the
 artifact guard refuses any key no contributor declared. Do not promise lossless round trips through
 formats that cannot preserve it.

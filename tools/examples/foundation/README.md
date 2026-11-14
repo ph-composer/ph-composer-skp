@@ -4,6 +4,12 @@ A complete feature built only from PH-Composer's public contracts, for contribut
 It is development only: the shipping composition root does not list it and the RBZ builder refuses
 any `examples` path.
 
+To attach your own data to objects in a Model, you need none of this: step 9 of the
+[API quickstart](../../../docs/API_QUICKSTART.md#9-attach-your-own-data-to-a-face-and-a-material)
+writes `user_data` on a Face and a Material with two public calls, and the
+[user data guide](../../../docs/USER_DATA.md) lists every object. This example is the next step,
+for a maintained extension with its own record kinds and typed extension data.
+
 ## Files
 
 | File | What it shows |
@@ -112,6 +118,8 @@ uv run tools/hostkit/host_bridge.py eval \
 ```
 
 The result lists each step, what happened and whether it matches the contract. The steps: create
-two parts, read, update with expected values and metadata, read back, a second client refused on a
-stale revision, a retry that returns the first outcome, a duplicate that remaps an internal
-reference and keeps the shared definition, and a summary query.
+two parts, read, update with expected values and a review payload, read back, a second client
+refused on a stale revision, a retry that returns the first outcome, a tag that writes the Sill's
+`user_data` through `ph_composer.records.update_metadata` (the one write route for any record's
+map; `update_parts` edits values and the review only), a duplicate that remaps an internal
+reference, keeps the shared definition and copies the map, and a summary query.

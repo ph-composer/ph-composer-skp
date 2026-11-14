@@ -27,6 +27,9 @@ appear. See the [modeling guide](../docs/PRODUCT.md) for the current workflow.
 | Type | A reusable definition stored in the Model |
 | Instance | A particular use, placement, quantity or installed occurrence of a definition |
 | Assignment | The relationship between an authored object and the definition or system it uses |
+| User data | An authored object's optional `user_data` JSON map for a user's or tool's own data under its own top-level key. Stored, copied and exported where the object has an HBJSON object of its own; never read by a calculation. See the [user data guide](../docs/USER_DATA.md) |
+| Record part | A nested object inside a definition record that has its own id and `user_data`, addressed by `part_ids` from the record down: an Assembly's Layers and Layer-Segments, a Window Type's elements |
+| Derived object | Data PH-Composer calculates or generates from authored objects, such as thermal-bridge runs, schedules and generated Window geometry. It carries no user data of its own |
 | Local override | A proposed explicit deviation from a shared definition; supported fields require the owning interview |
 | Display units | The user's SI or IP choice for how the panel shows numbers and reads unsuffixed input. A local preference outside the SKP. It never changes stored values, geometry or SketchUp's own Model units |
 | Dimension format | A builder's choice of how lengths appear within the active display units: mm, cm or m in SI; decimal inches, decimal feet, feet and inches, or fractional inches in IP |
