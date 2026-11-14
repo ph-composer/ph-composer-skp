@@ -396,6 +396,16 @@ missing record `target.not_found`. A kind that declares `owner_writes_metadata` 
 Levels and Zone option settings, whose records Zones copy) refuses `target.wrong_kind`. Clearing the
 map of a record stored without one writes nothing.
 
+**Record parts.** A `RecordKind` may declare `parts:`, each a `Records::Part` with a label and a path
+of array fields (`layers[]`, `layers[].segments[]`) whose members are objects with an `id`, unique in
+their parent, and an optional `user_data` map; every shorter path is itself a part, and registration
+refuses any other shape. The kind refuses repeated part ids within a parent and validates part maps as it
+does the record's, and `describe` lists the parts. A target's `part_ids` names one part by the id path from the record down; an id path no part
+matches refuses `target.not_found`. A part takes `user_data` only: its `expected_metadata` reads
+`extension_data` as `{}` and `extension_payloads` refuses `params.invalid`. Entries for one record and
+its parts in one batch stage as one write. Owners keep a surviving part's map through every edit, copy
+it with the part, and start a new part without one. Assembly Layers and Layer-Segments are parts.
+
 **Entity-owned records.** Zones, Faces and Window Units store their records on SketchUp entities,
 and the same rules hold for them (`Records::Metadata`, shared with the engine). Their reads
 (`ph_composer.zones.list` and `.all`, `ph_composer.zones.faces.list` and `.all`,

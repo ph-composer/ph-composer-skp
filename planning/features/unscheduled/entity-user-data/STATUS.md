@@ -19,12 +19,12 @@ over the combined diff) and `--merge`.
 
 ## Next step
 
-EUD-02, then the stages in order.
+EUD-03, then the stages in order.
 
 | Stage | Status | Evidence |
 | --- | --- | --- |
 | EUD-01 | Implemented on branch | `ph_composer.records.update_metadata` (API 1.52); catalog `*.update`, installs.save update rows and `attached_zone.save` with `id` no longer take `user_data`. `tests/record_metadata_test.rb` 10 runs, 219 assertions, also on Ruby 2.7.2; `make ci` exit 0: Ruby suite 2,852 runs, 35,188 assertions, 0 failures; JS 876 pass, 0 fail; Python 264 passed; RuboCop 742 files, no offenses; RBZ verified. Sonnet adversarial read: 10 findings, 8 fixed, 2 left as follow-ups (below) |
-| EUD-02 | Scoped | |
+| EUD-02 | Implemented on branch | `Records::Part` and `RecordKind` `parts:` (validated at registration, part ids unique per parent, part maps JSON-checked, listed by `describe`); optional `user_data` on Assembly Layers and Layer-Segments at schema version 1; `records.update_metadata` takes `part_ids`, and entries for one record and its parts stage as one write (API 1.53). New tests in `record_metadata_test.rb` (14 runs, 312 assertions), `assembly_records_operations_test.rb` (23 runs, 397 assertions) and `registry_test.rb` (41 runs, 290 assertions), also on Ruby 2.7.2; `make ci` exit 0: Ruby suite 2,860 runs, 35,346 assertions, 0 failures; JS 876 pass, 0 fail; Python 264 passed; RuboCop 742 files, no offenses; RBZ verified. Assemblies panel JS checked: it clones stored values and builds no parts, unchanged. Sonnet adversarial read: 8 findings; a stale descriptor test, a vacuous copy-independence check, an untested registration branch, part-id uniqueness (now enforced in core), an unused projected read, the contributor doc and an error message fixed; the export guide now says part maps are not exported yet (EUD-07 maps them); 3 minor notes accepted as designed |
 | EUD-03 | Scoped | |
 | EUD-04 | Scoped | |
 | EUD-05 | Scoped | |
@@ -65,3 +65,4 @@ implementation gates have not run for a new code change.
 | 2026-11-14 | Ed asked for implementation through the pr-loop on `codex/entity-user-data`, merge on green delegated. Wrote PLAN.md and ten stage documents from a source inventory at `68919a8c`; decisions D-UD-1 to D-UD-8 put to Ed. |
 | 2026-11-14 | Ed answered D-UD-1 to D-UD-8 "All as recommended"; implementation authorized. |
 | 2026-11-14 | EUD-01 implemented on `codex/entity-user-data`: the core catalog metadata action, `RecordKind` `owner_writes_metadata` for Zone options, and `user_data` removed from catalog updates. |
+| 2026-11-14 | EUD-02 implemented on `codex/entity-user-data`: `RecordKind` part declarations, Assembly Layer and Layer-Segment maps, and part addressing in `records.update_metadata`. |

@@ -220,9 +220,17 @@ Values:
                           ],
                           "exclusiveMinimum": 0,
                           "x-unit": "mm"
+                        },
+                        "user_data": {
+                          "type": "object",
+                          "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                         }
                       }
                     }
+                  },
+                  "user_data": {
+                    "type": "object",
+                    "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                   }
                 }
               }
@@ -363,9 +371,17 @@ Values:
                   ],
                   "exclusiveMinimum": 0,
                   "x-unit": "mm"
+                },
+                "user_data": {
+                  "type": "object",
+                  "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                 }
               }
             }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
           }
         }
       }
@@ -2664,9 +2680,17 @@ Assignment target:
                               ],
                               "exclusiveMinimum": 0,
                               "x-unit": "mm"
+                            },
+                            "user_data": {
+                              "type": "object",
+                              "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                             }
                           }
                         }
+                      },
+                      "user_data": {
+                        "type": "object",
+                        "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                       }
                     }
                   }
@@ -2828,9 +2852,17 @@ Assignment target:
                       ],
                       "exclusiveMinimum": 0,
                       "x-unit": "mm"
+                    },
+                    "user_data": {
+                      "type": "object",
+                      "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                     }
                   }
                 }
+              },
+              "user_data": {
+                "type": "object",
+                "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
               }
             }
           }
@@ -4929,9 +4961,17 @@ Result:
                                     ],
                                     "exclusiveMinimum": 0,
                                     "x-unit": "mm"
+                                  },
+                                  "user_data": {
+                                    "type": "object",
+                                    "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                                   }
                                 }
                               }
+                            },
+                            "user_data": {
+                              "type": "object",
+                              "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                             }
                           }
                         }
@@ -5072,9 +5112,17 @@ Result:
                             ],
                             "exclusiveMinimum": 0,
                             "x-unit": "mm"
+                          },
+                          "user_data": {
+                            "type": "object",
+                            "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                           }
                         }
                       }
+                    },
+                    "user_data": {
+                      "type": "object",
+                      "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                     }
                   }
                 }
@@ -5739,9 +5787,17 @@ Result:
                                     ],
                                     "exclusiveMinimum": 0,
                                     "x-unit": "mm"
+                                  },
+                                  "user_data": {
+                                    "type": "object",
+                                    "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                                   }
                                 }
                               }
+                            },
+                            "user_data": {
+                              "type": "object",
+                              "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                             }
                           }
                         }
@@ -5882,9 +5938,17 @@ Result:
                             ],
                             "exclusiveMinimum": 0,
                             "x-unit": "mm"
+                          },
+                          "user_data": {
+                            "type": "object",
+                            "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                           }
                         }
                       }
+                    },
+                    "user_data": {
+                      "type": "object",
+                      "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                     }
                   }
                 }
@@ -6312,6 +6376,10 @@ Result:
                 ],
                 "exclusiveMinimum": 0,
                 "x-unit": "mm"
+              },
+              "user_data": {
+                "type": "object",
+                "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
               }
             },
             "description": "The Layer-Segment as stored."
@@ -30500,9 +30568,17 @@ Params:
                               ],
                               "exclusiveMinimum": 0,
                               "x-unit": "mm"
+                            },
+                            "user_data": {
+                              "type": "object",
+                              "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                             }
                           }
                         }
+                      },
+                      "user_data": {
+                        "type": "object",
+                        "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                       }
                     }
                   }
@@ -30643,9 +30719,17 @@ Params:
                       ],
                       "exclusiveMinimum": 0,
                       "x-unit": "mm"
+                    },
+                    "user_data": {
+                      "type": "object",
+                      "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                     }
                   }
                 }
+              },
+              "user_data": {
+                "type": "object",
+                "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
               }
             }
           }
@@ -30925,9 +31009,17 @@ Params:
                               ],
                               "exclusiveMinimum": 0,
                               "x-unit": "mm"
+                            },
+                            "user_data": {
+                              "type": "object",
+                              "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                             }
                           }
                         }
+                      },
+                      "user_data": {
+                        "type": "object",
+                        "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                       }
                     }
                   }
@@ -31089,9 +31181,17 @@ Params:
                       ],
                       "exclusiveMinimum": 0,
                       "x-unit": "mm"
+                    },
+                    "user_data": {
+                      "type": "object",
+                      "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                     }
                   }
                 }
+              },
+              "user_data": {
+                "type": "object",
+                "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
               }
             }
           }
@@ -31429,9 +31529,17 @@ Params:
                               ],
                               "exclusiveMinimum": 0,
                               "x-unit": "mm"
+                            },
+                            "user_data": {
+                              "type": "object",
+                              "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                             }
                           }
                         }
+                      },
+                      "user_data": {
+                        "type": "object",
+                        "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                       }
                     }
                   }
@@ -31593,9 +31701,17 @@ Params:
                       ],
                       "exclusiveMinimum": 0,
                       "x-unit": "mm"
+                    },
+                    "user_data": {
+                      "type": "object",
+                      "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                     }
                   }
                 }
+              },
+              "user_data": {
+                "type": "object",
+                "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
               }
             }
           }
@@ -31899,9 +32015,17 @@ Params:
                               ],
                               "exclusiveMinimum": 0,
                               "x-unit": "mm"
+                            },
+                            "user_data": {
+                              "type": "object",
+                              "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                             }
                           }
                         }
+                      },
+                      "user_data": {
+                        "type": "object",
+                        "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                       }
                     }
                   }
@@ -32063,9 +32187,17 @@ Params:
                       ],
                       "exclusiveMinimum": 0,
                       "x-unit": "mm"
+                    },
+                    "user_data": {
+                      "type": "object",
+                      "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                     }
                   }
                 }
+              },
+              "user_data": {
+                "type": "object",
+                "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
               }
             }
           }
@@ -32344,9 +32476,17 @@ Params:
                               ],
                               "exclusiveMinimum": 0,
                               "x-unit": "mm"
+                            },
+                            "user_data": {
+                              "type": "object",
+                              "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                             }
                           }
                         }
+                      },
+                      "user_data": {
+                        "type": "object",
+                        "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                       }
                     }
                   }
@@ -32508,9 +32648,17 @@ Params:
                       ],
                       "exclusiveMinimum": 0,
                       "x-unit": "mm"
+                    },
+                    "user_data": {
+                      "type": "object",
+                      "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                     }
                   }
                 }
+              },
+              "user_data": {
+                "type": "object",
+                "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
               }
             }
           }
@@ -32791,9 +32939,17 @@ Params:
                               ],
                               "exclusiveMinimum": 0,
                               "x-unit": "mm"
+                            },
+                            "user_data": {
+                              "type": "object",
+                              "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                             }
                           }
                         }
+                      },
+                      "user_data": {
+                        "type": "object",
+                        "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                       }
                     }
                   }
@@ -32955,9 +33111,17 @@ Params:
                       ],
                       "exclusiveMinimum": 0,
                       "x-unit": "mm"
+                    },
+                    "user_data": {
+                      "type": "object",
+                      "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                     }
                   }
                 }
+              },
+              "user_data": {
+                "type": "object",
+                "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
               }
             }
           }
@@ -33252,9 +33416,17 @@ Params:
                               ],
                               "exclusiveMinimum": 0,
                               "x-unit": "mm"
+                            },
+                            "user_data": {
+                              "type": "object",
+                              "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                             }
                           }
                         }
+                      },
+                      "user_data": {
+                        "type": "object",
+                        "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                       }
                     }
                   }
@@ -33416,9 +33588,17 @@ Params:
                       ],
                       "exclusiveMinimum": 0,
                       "x-unit": "mm"
+                    },
+                    "user_data": {
+                      "type": "object",
+                      "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                     }
                   }
                 }
+              },
+              "user_data": {
+                "type": "object",
+                "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
               }
             }
           }
@@ -33705,9 +33885,17 @@ Params:
                               ],
                               "exclusiveMinimum": 0,
                               "x-unit": "mm"
+                            },
+                            "user_data": {
+                              "type": "object",
+                              "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                             }
                           }
                         }
+                      },
+                      "user_data": {
+                        "type": "object",
+                        "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                       }
                     }
                   }
@@ -33869,9 +34057,17 @@ Params:
                       ],
                       "exclusiveMinimum": 0,
                       "x-unit": "mm"
+                    },
+                    "user_data": {
+                      "type": "object",
+                      "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                     }
                   }
                 }
+              },
+              "user_data": {
+                "type": "object",
+                "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
               }
             }
           }
@@ -34163,9 +34359,17 @@ Params:
                               ],
                               "exclusiveMinimum": 0,
                               "x-unit": "mm"
+                            },
+                            "user_data": {
+                              "type": "object",
+                              "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                             }
                           }
                         }
+                      },
+                      "user_data": {
+                        "type": "object",
+                        "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                       }
                     }
                   }
@@ -34327,9 +34531,17 @@ Params:
                       ],
                       "exclusiveMinimum": 0,
                       "x-unit": "mm"
+                    },
+                    "user_data": {
+                      "type": "object",
+                      "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                     }
                   }
                 }
+              },
+              "user_data": {
+                "type": "object",
+                "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
               }
             }
           }
@@ -34628,9 +34840,17 @@ Params:
                               ],
                               "exclusiveMinimum": 0,
                               "x-unit": "mm"
+                            },
+                            "user_data": {
+                              "type": "object",
+                              "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                             }
                           }
                         }
+                      },
+                      "user_data": {
+                        "type": "object",
+                        "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                       }
                     }
                   }
@@ -34792,9 +35012,17 @@ Params:
                       ],
                       "exclusiveMinimum": 0,
                       "x-unit": "mm"
+                    },
+                    "user_data": {
+                      "type": "object",
+                      "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                     }
                   }
                 }
+              },
+              "user_data": {
+                "type": "object",
+                "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
               }
             }
           }
@@ -35087,9 +35315,17 @@ Params:
                               ],
                               "exclusiveMinimum": 0,
                               "x-unit": "mm"
+                            },
+                            "user_data": {
+                              "type": "object",
+                              "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                             }
                           }
                         }
+                      },
+                      "user_data": {
+                        "type": "object",
+                        "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                       }
                     }
                   }
@@ -35251,9 +35487,17 @@ Params:
                       ],
                       "exclusiveMinimum": 0,
                       "x-unit": "mm"
+                    },
+                    "user_data": {
+                      "type": "object",
+                      "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                     }
                   }
                 }
+              },
+              "user_data": {
+                "type": "object",
+                "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
               }
             }
           }
@@ -35549,9 +35793,17 @@ Params:
                               ],
                               "exclusiveMinimum": 0,
                               "x-unit": "mm"
+                            },
+                            "user_data": {
+                              "type": "object",
+                              "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                             }
                           }
                         }
+                      },
+                      "user_data": {
+                        "type": "object",
+                        "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                       }
                     }
                   }
@@ -35713,9 +35965,17 @@ Params:
                       ],
                       "exclusiveMinimum": 0,
                       "x-unit": "mm"
+                    },
+                    "user_data": {
+                      "type": "object",
+                      "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                     }
                   }
                 }
+              },
+              "user_data": {
+                "type": "object",
+                "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
               }
             }
           }
@@ -35996,9 +36256,17 @@ Params:
                               ],
                               "exclusiveMinimum": 0,
                               "x-unit": "mm"
+                            },
+                            "user_data": {
+                              "type": "object",
+                              "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                             }
                           }
                         }
+                      },
+                      "user_data": {
+                        "type": "object",
+                        "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                       }
                     }
                   }
@@ -36160,9 +36428,17 @@ Params:
                       ],
                       "exclusiveMinimum": 0,
                       "x-unit": "mm"
+                    },
+                    "user_data": {
+                      "type": "object",
+                      "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                     }
                   }
                 }
+              },
+              "user_data": {
+                "type": "object",
+                "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
               }
             }
           }
@@ -36456,9 +36732,17 @@ Params:
                               ],
                               "exclusiveMinimum": 0,
                               "x-unit": "mm"
+                            },
+                            "user_data": {
+                              "type": "object",
+                              "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                             }
                           }
                         }
+                      },
+                      "user_data": {
+                        "type": "object",
+                        "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                       }
                     }
                   }
@@ -36620,9 +36904,17 @@ Params:
                       ],
                       "exclusiveMinimum": 0,
                       "x-unit": "mm"
+                    },
+                    "user_data": {
+                      "type": "object",
+                      "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                     }
                   }
                 }
+              },
+              "user_data": {
+                "type": "object",
+                "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
               }
             }
           }
@@ -36925,9 +37217,17 @@ Params:
                               ],
                               "exclusiveMinimum": 0,
                               "x-unit": "mm"
+                            },
+                            "user_data": {
+                              "type": "object",
+                              "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                             }
                           }
                         }
+                      },
+                      "user_data": {
+                        "type": "object",
+                        "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                       }
                     }
                   }
@@ -37089,9 +37389,17 @@ Params:
                       ],
                       "exclusiveMinimum": 0,
                       "x-unit": "mm"
+                    },
+                    "user_data": {
+                      "type": "object",
+                      "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                     }
                   }
                 }
+              },
+              "user_data": {
+                "type": "object",
+                "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
               }
             }
           }
@@ -37512,9 +37820,17 @@ Params:
                               ],
                               "exclusiveMinimum": 0,
                               "x-unit": "mm"
+                            },
+                            "user_data": {
+                              "type": "object",
+                              "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                             }
                           }
                         }
+                      },
+                      "user_data": {
+                        "type": "object",
+                        "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                       }
                     }
                   }
@@ -37676,9 +37992,17 @@ Params:
                       ],
                       "exclusiveMinimum": 0,
                       "x-unit": "mm"
+                    },
+                    "user_data": {
+                      "type": "object",
+                      "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                     }
                   }
                 }
+              },
+              "user_data": {
+                "type": "object",
+                "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
               }
             }
           }
@@ -38906,7 +39230,7 @@ Example params:
 
 ### `ph_composer.records.update_metadata`
 
-Replace the user_data and installed extension payloads of stored records of any kind ph_composer.records.list reads, guarded by the metadata last read. Values are not changed; a kind's own update action edits them. A kind whose owner writes its metadata itself refuses as target.wrong_kind. Owner: `ph_composer.records`.
+Replace the user_data and installed extension payloads of stored records of any kind ph_composer.records.list reads, or the user_data of a record's part, such as an Assembly's Layer or Layer-Segment, by part_ids; guarded by the metadata last read. Values are not changed; a kind's own update action edits them. A kind whose owner writes its metadata itself refuses as target.wrong_kind. Owner: `ph_composer.records`.
 
 Undo step: Edit Record Metadata. Rewrites only the named records' metadata.
 
@@ -38947,6 +39271,14 @@ Params:
               "id": {
                 "type": "string",
                 "description": "The record's id."
+              },
+              "part_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1,
+                "description": "One of the record's parts instead, by the ids from the record down, such as [Layer id, Layer-Segment id]; describe on the kind lists its parts. A part takes user_data only, and its expected extension_data is {}."
               }
             },
             "description": "The record to update, as a read returns it."
@@ -39024,6 +39356,14 @@ Result:
               "id": {
                 "type": "string",
                 "description": "The record's id."
+              },
+              "part_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1,
+                "description": "One of the record's parts instead, by the ids from the record down, such as [Layer id, Layer-Segment id]; describe on the kind lists its parts. A part takes user_data only, and its expected extension_data is {}."
               }
             }
           },
@@ -66958,3 +67298,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.50 | 2026-11-12 | API.outcomes is new: the caller's own retained change outcomes, newest first and paged, each with its sequence, operation, status, effect, code, revision, recorded time and first affected references, never its value or params. The agent outcome tool lists them when given neither sequence nor idempotency_key, with each row's key. |
 | 1.51 | 2026-11-12 | ph_composer.view.capture takes inline and then answers the PNG itself as inline_image, which the agent connection sends as an image content block outside the reply budget; capture.too_large names a smaller width and height. export_status takes part file for a completed task: the written HBJSON's text in fragments with the receipt's hash, refusing artifact.none for a task that wrote no file and artifact.changed for a file that no longer matches its receipt. |
 | 1.52 | 2026-11-14 | ph_composer.records.update_metadata is new: it replaces the user_data and installed extension payloads of records of any kind records.list reads, in one Undo step, guarded by expected_metadata, refusing target.wrong_kind for Building Segments, Levels and Zone option settings. The update actions of Materials, Assemblies, Frames, Glazings, Psi-Install Types, Window Types and Thermal Bridge Types, the update rows of windows.types.installs.save and an attached_zone.save with id no longer take user_data; their create actions still do. |
+| 1.53 | 2026-11-14 | Assembly Layers and Layer-Segments take an optional user_data map. A ph_composer.records.update_metadata reference takes part_ids to write the map of one part, such as [Layer id, Layer-Segment id]; a part takes user_data only. describe on a record kind lists its parts. Assembly gestures keep each surviving part's map, a new part starts without one, and Duplicate copies the maps under new part ids. |

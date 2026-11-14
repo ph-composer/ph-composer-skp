@@ -81,6 +81,13 @@ A record or a preview can be larger than one reply. These reads give all of it e
   `ph_composer.records.update_metadata` with the record's `kind` and `id` and the two maps you read as
   `expected_metadata`. `{}` clears the map. A change made since your read refuses the whole batch as
   `target.changed`, and nothing is written. The kinds' own `update` actions do not take `user_data`.
+- **Change a part's metadata.** An Assembly's Layers and Layer-Segments each keep their own
+  `user_data` (`describe` on a record kind lists its `parts`). Read the map from the record's
+  `values` (`records.list`, or `records.detail` with a path such as `["values", "layers"]`); `segments.list`
+  also returns each Layer-Segment as stored. Send it to `ph_composer.records.update_metadata` with
+  `part_ids` in the reference, the ids from the record down: `[Layer id]` or `[Layer id, Layer-Segment id]`.
+  `expected_metadata` is the part's `user_data` with `extension_data` `{}`; a part takes no extension
+  payloads. Edits keep each part's map, Duplicate copies it, and a new part starts without one.
 - **Read a definition's parts.** `ph_composer.assemblies.assemblies.layers.list` and
   `segments.list` page an Assembly's Layers and Layer-Segments; `ph_composer.windows.types.elements.list`
   pages a Window Type's elements with each one's thermal result, installation edges and findings, and
@@ -486,7 +493,8 @@ export to the same destination replaces it.
 Metadata is not exported just because it is stored. Where a feature exports a record's `user_data`
 (today Zones, Faces, Window Units, Assemblies, Spaces, Volumes and Floor Segments), it passes through
 to the HBJSON object, and the report counts those objects as `export.user_data_passed`; any other
-`user_data` stays in the Model with an `export.metadata_omitted` finding. Read the export's findings
+`user_data` stays in the Model with an `export.metadata_omitted` finding. Assembly Layer and
+Layer-Segment maps are not exported yet. Read the export's findings
 rather than assume. An extension's data leaves with the extension that exports it: data marked local to the
 Model is left out with the same finding, and data whose effect on the export is required or unknown,
 with nothing installed to export it, blocks the export.

@@ -78,11 +78,15 @@ module PhComposer
       "fragment" => Fragments::FRAGMENT, "next_cursor" => Pages::NEXT_CURSOR
     }).freeze
 
-    # One record of a registered catalog kind, as records.list names it.
+    # One record of a registered catalog kind, as records.list names it, or one of its parts.
     REFERENCE = SchemaShapes.object({
       "kind" => { "type" => "string", "description" => "Record kind id, as listed by discovery." },
-      "id" => { "type" => "string", "description" => "The record's id." }
-    }).freeze
+      "id" => { "type" => "string", "description" => "The record's id." },
+      "part_ids" => { "type" => "array", "items" => { "type" => "string" }, "minItems" => 1,
+                      "description" => "One of the record's parts instead, by the ids from the record down, such " \
+                                       "as [Layer id, Layer-Segment id]; describe on the kind lists its parts. A " \
+                                       "part takes user_data only, and its expected extension_data is {}." }
+    }, :optional => ["part_ids"]).freeze
     EXAMPLE_REFERENCE = { "kind" => "example.foundation.part", "id" => "prt_Ab12Cd34Ef56" }.freeze
     # A target's resolution and the Records::Metadata rules for its pre-image and payloads.
     UPDATE_REFUSES = %w[extension.invalid extension.migration_required extension.schema_unsupported
@@ -112,9 +116,10 @@ module PhComposer
       end
       feature.action(UPDATE_METADATA,
                      :description => "Replace the user_data and installed extension payloads of stored records of " \
-                                     "any kind #{LIST} reads, guarded by the metadata last read. Values are not " \
-                                     "changed; a kind's own update action edits them. A kind whose owner writes " \
-                                     "its metadata itself refuses as target.wrong_kind.",
+                                     "any kind #{LIST} reads, or the user_data of a record's part, such as an " \
+                                     "Assembly's Layer or Layer-Segment, by part_ids; guarded by the metadata last " \
+                                     "read. Values are not changed; a kind's own update action edits them. A kind " \
+                                     "whose owner writes its metadata itself refuses as target.wrong_kind.",
                      :refuses => UPDATE_REFUSES,
                      :params => SchemaShapes.metadata_updates(REFERENCE, Pages::MAXIMUM_LIMIT, :target => "record"),
                      :result => SchemaShapes.metadata_result(REFERENCE, :target => "record"),
@@ -163,12 +168,13 @@ module PhComposer
       entries.each do |update|
         kind_id, id = update.fetch("reference").values_at("kind", "id")
         check_owner!(engine.kind(kind_id))
-        engine.find(kind_id, id)
+        part_ids = update.fetch("reference")["part_ids"]
+        part_ids ? engine.find_part(kind_id, id, part_ids) : engine.find(kind_id, id)
       end
       rows = entries.map do |update|
         reference = update.fetch("reference")
-        after = engine.propose_metadata_update(reference.fetch("kind"), reference.fetch("id"), proposal, update)
-        { "reference" => reference, "extension_status" => Records::Metadata.status_map(after, catalog) }
+        written = engine.propose_metadata_update(reference.fetch("kind"), reference.fetch("id"), proposal, update)
+        { "reference" => reference, "extension_status" => Records::Metadata.status_map(written, catalog) }
       end
       { "updates" => rows }
     end

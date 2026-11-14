@@ -1022,7 +1022,9 @@ and assignment records where applicable. Contributors use namespaced keys, for e
 Ordinary edits and supported persistence round trips preserve this metadata. Public operations
 read and update it without requiring raw dictionary access; updates participate in Undo. Catalog
 records of every kind take it through `ph_composer.records.update_metadata`
-(`engine.propose_metadata_update`); built-in update actions edit values only. Zones, Faces and
+(`engine.propose_metadata_update`); built-in update actions edit values only. A kind whose nested
+objects carry their own map declares them as `parts:` (`Records::Part`, such as an Assembly's
+`layers[]`), and the same action writes a part's map by `part_ids`. Zones, Faces and
 Window Units use their owner's `update_metadata` action, as do Spaces, Volumes and Floor Segments.
 All follow the same rules ([CONTRACTS.md](CONTRACTS.md), "Records and extension data"). Core
 calculations do not silently interpret arbitrary metadata. Absence in an older record is valid.

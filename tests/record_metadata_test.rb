@@ -59,6 +59,23 @@ class RecordMetadataTest < PhComposerTestCase
       "expected_metadata" => expected || read(kind, id).slice("user_data", "extension_data") }
   end
 
+  # An Assembly part's entry, its pre-image read from the record's values: a part carries no extension data.
+  def part_entry(part_ids, user_data, expected = nil)
+    { "reference" => { "kind" => ASSEMBLY, "id" => @assembly, "part_ids" => part_ids }, "user_data" => user_data,
+      "expected_metadata" => expected || { "user_data" => part(part_ids).fetch("user_data", {}),
+                                           "extension_data" => {} } }
+  end
+
+  def part(part_ids)
+    layer = read(ASSEMBLY, @assembly).dig("values", "layers").find { |row| row.fetch("id") == part_ids.first }
+    part_ids.length == 1 ? layer : layer.fetch("segments").find { |row| row.fetch("id") == part_ids.last }
+  end
+
+  def layer_ids
+    layers = read(ASSEMBLY, @assembly).dig("values", "layers")
+    [layers.first.fetch("id"), layers.first.dig("segments", 0, "id")]
+  end
+
   def write(*entries)
     assignment_invoke(ACTION, "updates" => entries)
   end
@@ -223,6 +240,86 @@ class RecordMetadataTest < PhComposerTestCase
     assert_equal revision, @session.revision
     assert_equal({}, read(MATERIAL, @material).fetch("user_data"))
     assert_equal({}, read(PhComposer::Zones::Options::LEVEL_KIND, level_id).fetch("user_data"))
+  end
+
+  def test_a_layer_and_a_layer_segment_map_write_read_back_and_clear_by_id_path
+    layer, segment = layer_ids
+    values = read(ASSEMBLY, @assembly).fetch("values")
+    [[layer], [layer, segment]].each do |part_ids|
+      result = write(part_entry(part_ids, { "firm" => { "tag" => part_ids.last } }))
+      assert_equal "committed", result.fetch("effect"), result.inspect
+      assert_equal [{ "reference" => { "kind" => ASSEMBLY, "id" => @assembly, "part_ids" => part_ids },
+                      "extension_status" => {} }], result.dig("value", "updates")
+      assert_equal({ "firm" => { "tag" => part_ids.last } }, part(part_ids).fetch("user_data"))
+    end
+    assert_equal({}, read(ASSEMBLY, @assembly).fetch("user_data"), "a part map is not the record's")
+    rows = assignment_query("ph_composer.assemblies.assemblies.segments.list", "assembly_id" => @assembly)
+    assert_equal({ "firm" => { "tag" => segment } }, rows.dig("segments", 0, "segment", "user_data"))
+
+    [[layer], [layer, segment]].each { |part_ids| write(part_entry(part_ids, {})) }
+    assert_equal({}, part([layer]).fetch("user_data"))
+    assert_equal({}, part([layer, segment]).fetch("user_data"))
+    assert_equal values.fetch("layers").length, read(ASSEMBLY, @assembly).dig("values", "layers").length
+  end
+
+  def test_a_batch_writing_a_record_and_several_of_its_parts_is_one_undo_step
+    layer, segment = layer_ids
+    batch = write(entry(ASSEMBLY, @assembly, { "record" => 1 }), part_entry([layer], { "layer" => 2 }),
+                  part_entry([layer, segment], { "segment" => 3 }))
+    assert_equal "committed", batch.fetch("effect"), batch.inspect
+    assert_equal({ "record" => 1 }, read(ASSEMBLY, @assembly).fetch("user_data"))
+    assert_equal({ "layer" => 2 }, part([layer]).fetch("user_data"))
+    assert_equal({ "segment" => 3 }, part([layer, segment]).fetch("user_data"))
+    revision = @session.revision
+    same = write(part_entry([layer], { "layer" => 2 }), part_entry([layer, segment], { "segment" => 3 }))
+    assert_equal %w[completed none], same.values_at("status", "effect"), same.inspect
+    assert_equal revision, @session.revision
+    @model.undo
+    assert_equal({}, read(ASSEMBLY, @assembly).fetch("user_data"))
+    refute part([layer]).key?("user_data")
+    refute part([layer, segment]).key?("user_data")
+  end
+
+  def test_part_refusals_write_nothing_and_clearing_an_absent_part_map_is_a_no_op
+    layer, segment = layer_ids
+    stored = read(ASSEMBLY, @assembly)
+    revision = @session.revision
+    cleared = write(part_entry([layer], {}))
+    assert_equal %w[completed none], cleared.values_at("status", "effect"), cleared.inspect
+    refute part([layer]).key?("user_data"), "clearing a part stored without a map writes nothing"
+    stale = { "user_data" => { "old" => true }, "extension_data" => {} }
+    cases = {
+      "target.not_found" => [part_entry(["lyr_Zz99Zz99Zz99"], { "x" => 1 }, EMPTY),
+                             part_entry([layer, "seg_Zz99Zz99Zz99"], { "x" => 1 }, EMPTY),
+                             part_entry([segment], { "x" => 1 }, EMPTY),
+                             part_entry([layer, segment, segment], { "x" => 1 }, EMPTY),
+                             { "reference" => { "kind" => MATERIAL, "id" => @material, "part_ids" => [layer] },
+                               "user_data" => { "x" => 1 }, "expected_metadata" => EMPTY }],
+      "target.changed" => [part_entry([layer], { "x" => 1 }, stale)],
+      "params.invalid" => [part_entry([layer], { "x" => 1 }).merge("extension_payloads" => { REVIEW => {} })]
+    }
+    cases.each do |code, entries|
+      entries.each do |refused|
+        result = write(entry(MATERIAL, @material, { "first" => true }), refused)
+        assert_equal [code, "none"], result.values_at("code", "effect"), result.inspect
+      end
+    end
+    assert_equal revision, @session.revision
+    assert_equal stored, read(ASSEMBLY, @assembly)
+    assert_equal({}, read(MATERIAL, @material).fetch("user_data"))
+  end
+
+  def test_the_assembly_kind_publishes_its_parts_and_a_bad_part_map_is_unreadable
+    described = PhComposer::API.describe(:name => ASSEMBLY)
+    assert_equal [{ "label" => "Layer", "path" => "layers[]" },
+                  { "label" => "Layer-Segment", "path" => "layers[].segments[]" }], described.fetch("parts")
+    assert_equal [], PhComposer::API.describe(:name => MATERIAL).fetch("parts")
+    kind = PhComposer::Assemblies::Assembly::Schema::KIND
+    record = kind.store.read(@model, @assembly)
+    record["layers"][0]["segments"][0]["user_data"] = []
+    assert_includes kind.problems(record).join(" "), "user_data"
+    record["layers"][0]["segments"][0]["user_data"] = { "x" => Float::NAN }
+    assert_includes kind.problems(record).join(" "), "user_data"
   end
 
   def test_update_actions_refuse_user_data_and_create_actions_keep_it

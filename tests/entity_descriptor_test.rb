@@ -30,7 +30,8 @@ class EntityDescriptorTest < PhComposerTestCase
     assert_equal({
       "id" => MARKER, "label" => "Marker", "schema_version" => 1, "identity_field" => "id",
       "values" => MARKER_VALUES, "occurrence_reference" => OCCURRENCE,
-      "references" => [{ "key" => "definition_id", "target_kind" => DEFINITION.id, "cardinality" => "one" }]
+      "references" => [{ "key" => "definition_id", "target_kind" => DEFINITION.id, "cardinality" => "one" }],
+      "parts" => []
     }, marker_target.descriptor.to_h)
   end
 

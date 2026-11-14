@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 52
+    MINOR = 53
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -260,7 +260,13 @@ module PhComposer
                     "expected_metadata, refusing target.wrong_kind for Building Segments, Levels and Zone option " \
                     "settings. The update actions of Materials, Assemblies, Frames, Glazings, Psi-Install Types, " \
                     "Window Types and Thermal Bridge Types, the update rows of windows.types.installs.save and an " \
-                    "attached_zone.save with id no longer take user_data; their create actions still do." }
+                    "attached_zone.save with id no longer take user_data; their create actions still do." },
+      { "minor" => 53, "date" => "2026-11-14",
+        "change" => "Assembly Layers and Layer-Segments take an optional user_data map. A " \
+                    "ph_composer.records.update_metadata reference takes part_ids to write the map of one part, such " \
+                    "as [Layer id, Layer-Segment id]; a part takes user_data only. describe on a record kind lists " \
+                    "its parts. Assembly gestures keep each surviving part's map, a new part starts without one, " \
+                    "and Duplicate copies the maps under new part ids." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

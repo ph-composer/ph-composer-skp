@@ -43,6 +43,13 @@ module PhComposer
         @catalog.kind(kind_id)
       end
 
+      # The part of a stored record that `part_ids` names (Records::Part), as a detached object, or a
+      # refusal naming the missing part.
+      def find_part(kind_id, id, part_ids, change_set: nil)
+        kind = @catalog.kind(kind_id)
+        DeepCopy.call(located_part!(kind, find(kind_id, id, :change_set => change_set), part_ids).last)
+      end
+
       def ids(kind_id)
         @catalog.kind(kind_id).store.ids(@model)
       end
@@ -101,18 +108,29 @@ module PhComposer
       end
 
       # A metadata write under Records::Metadata's rules: `update` is one entry of an update_metadata
-      # batch, its `expected_metadata` checked against the stored record, its `user_data` and
-      # `extension_payloads` written, and every value left as stored. The kind validates the result.
-      # Returns the record as it will stand; a write of what is stored stages nothing.
+      # batch, its `expected_metadata` checked against the record, its `user_data` and `extension_payloads`
+      # written, and every value left as stored. A reference with `part_ids` names one of the record's parts
+      # (Records::Part) instead, which takes `user_data` only. The record is read as `change_set` leaves it,
+      # so several entries of one batch can write one record and its parts; the kind validates the result.
+      # Returns the record or part as it will stand; a write of what is stored stages nothing.
       def propose_metadata_update(kind_id, id, change_set, update)
         staging(change_set) do
           kind = @catalog.kind(kind_id)
-          before = find(kind_id, id)
-          after = Metadata.planned(self, @catalog, before, update, kind.label)
-          # A record stored without a map reads it as empty, so clearing that map changes nothing.
-          after.delete("user_data") if after["user_data"] == {} && !before.key?("user_data")
-          propose(kind, change_set, before, after)
-          after
+          staged = change_set.find(kind.id, id)
+          before = find(kind_id, id, :change_set => change_set)
+          after = DeepCopy.call(before)
+          label, target = metadata_target(kind, after, update)
+          planned = Metadata.planned(self, @catalog, target, update, label)
+          # A target stored without a map reads it as empty, so clearing that map changes nothing.
+          planned.delete("user_data") if planned["user_data"] == {} && !target.key?("user_data")
+          target.replace(planned)
+          if staged
+            check_valid!(kind, after)
+            change_set.restage(kind.id, id, :after => after)
+          else
+            propose(kind, change_set, before, after)
+          end
+          DeepCopy.call(target)
         end
       end
 
@@ -225,14 +243,40 @@ module PhComposer
       end
 
       def propose(kind, change_set, before, after, check_references: true)
-        problems = kind.problems(after)
-        unless problems.empty?
-          raise CodedError.new("validation.failed", "#{kind.label} #{after['id']} is not valid: #{problems.first}.",
-                               "findings" => problems)
-        end
-
+        check_valid!(kind, after)
         check_references!(kind, after, change_set) if check_references
         change_set.put(kind.id, :before => before, :after => after)
+      end
+
+      def check_valid!(kind, record)
+        problems = kind.problems(record)
+        return if problems.empty?
+
+        raise CodedError.new("validation.failed", "#{kind.label} #{record['id']} is not valid: #{problems.first}.",
+                             "findings" => problems)
+      end
+
+      # [label, object] for the metadata an update_metadata entry writes in `record`: the record itself, or
+      # the part its reference's `part_ids` names, which carries no extension data.
+      def metadata_target(kind, record, update)
+        part_ids = update.fetch("reference").fetch("part_ids", [])
+        return [kind.label, record] if part_ids.empty?
+
+        if update.key?("extension_payloads")
+          raise CodedError.new("params.invalid", "A part carries user_data only; send extension payloads to " \
+                                                 "its #{kind.label} record.")
+        end
+
+        part, member = located_part!(kind, record, part_ids)
+        [part.label, member]
+      end
+
+      def located_part!(kind, record, part_ids)
+        found = kind.part(record, part_ids)
+        return found if found
+
+        raise CodedError.new("target.not_found", "#{kind.label} #{record['id']} has no part at " \
+                                                 "#{part_ids.join(' / ')}.")
       end
 
       # One original with its new id, its references among the copied records pointed at their copies,

@@ -11,19 +11,21 @@ module PhComposer
       IDENTITY_FIELD = "id"
       ANY_OBJECT = { "type" => "object" }.freeze
 
-      attr_reader :kind, :label, :schema_version, :values_schema, :occurrence_schema, :references
+      attr_reader :kind, :label, :schema_version, :values_schema, :occurrence_schema, :references, :parts
 
       # `references` are Records::Reference declarations over top-level or nested record fields. `occurrence_schema`
-      # is nil for a catalog kind, whose records are named by id alone. The descriptor keeps frozen copies;
-      # `view_schema`, `patch_schema` and `to_h` hand out editable ones.
+      # is nil for a catalog kind, whose records are named by id alone. `parts` are a catalog kind's
+      # Records::Part declarations. The descriptor keeps frozen copies; `view_schema`, `patch_schema` and
+      # `to_h` hand out editable ones.
       def initialize(kind:, label:, schema_version: nil, values_schema: ANY_OBJECT, occurrence_schema: nil,
-                     references: [])
+                     references: [], parts: [])
         @kind = DeepCopy.frozen(kind)
         @label = DeepCopy.frozen(label)
         @schema_version = schema_version
         @values_schema = DeepCopy.frozen(values_schema)
         @occurrence_schema = DeepCopy.frozen(occurrence_schema)
         @references = references.map { |reference| Fields.detached(reference) }.freeze
+        @parts = parts.map { |part| Fields.detached(part) }.freeze
       end
 
       # [[target_kind, id], ...] for every core reference `record` holds.
@@ -63,7 +65,8 @@ module PhComposer
         end
         DeepCopy.call(
           "id" => kind, "label" => label, "schema_version" => schema_version, "identity_field" => IDENTITY_FIELD,
-          "values" => values_schema, "occurrence_reference" => occurrence_schema, "references" => reference_rows
+          "values" => values_schema, "occurrence_reference" => occurrence_schema, "references" => reference_rows,
+          "parts" => parts.map { |part| { "label" => part.label, "path" => part.path } }
         )
       end
     end

@@ -11,6 +11,11 @@ module PhComposer
     # A colour as six-digit hex, `#a1b2c3`. A stored value reaches the panel's style attributes, so the
     # pattern is what keeps anything else out of them.
     HEX_COLOUR = { "type" => "string", "pattern" => "^#[0-9A-Fa-f]{6}$" }.freeze
+    # The optional map a record kind's part (Records::Part) carries; absent reads as empty.
+    PART_USER_DATA = { "type" => "object",
+                       "description" => "Local JSON metadata of this part, written with " \
+                                        "ph_composer.records.update_metadata by part_ids. A new part has none." }
+                     .freeze
 
     # A closed object; every property is required unless `optional` names it.
     def object(properties, optional: [], description: nil)
