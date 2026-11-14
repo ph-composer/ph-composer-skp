@@ -1,7 +1,7 @@
 # Phase 4a: Programs
 
 DATE: 2026-11-14
-STATUS: Requested. Research complete 2026-11-14; interview next, then a UI prototype. No stage authorized.
+STATUS: Requested. Research complete and interviewed 2026-11-14; UI prototype next. No stage authorized.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -14,32 +14,48 @@ It is the "Zone loads packet" that [Phase 4](../phase-04-mechanical/README.md) d
 Q12 left occupancy, lighting and the non-appliance Room loads to it, and Spaces already shows a
 dash where a Zone's ventilation load should be inherited. Its place on the roadmap is Q4a-01.
 
-## Provisional scope
+## Scope
 
-From Ed's request, to be confirmed by the interview:
+From Ed's request and the 2026-11-14 interview ([answers](DECISIONS.md#answered)):
 
-- **Program and its loads**, matching honeybee-energy's ProgramType: occupancy (People), lighting,
-  ventilation, electric equipment, hot water, process loads and infiltration, each with its
-  schedule. Process is Room-only in honeybee (F4a-02, Q4a-03); gas equipment and setpoint are the
-  two ProgramType slots Ed did not list (Q4a-02).
-- **Schedules** as their own definitions, shared across loads and Programs (Q4a-09).
-- **A Program tab** with a section per load, for creating, editing and duplicating Programs and
-  Schedules.
-- **A Zones/Programs page** for assigning Programs to Zones and managing per-Zone values. The
-  Zone views contract already admits a view with no child rows for this.
+- **Program**, matching honeybee-energy's ProgramType with all eight slots fully editable:
+  occupancy (People), lighting, electric equipment, gas equipment, hot water, infiltration,
+  ventilation (four terms, method fixed to Sum) and setpoint (Q4a-02, Q4a-15). Zones choose a
+  Program and do not override its loads (Q4a-12).
+- **Schedules** as their own record kind, shared by id (Q4a-09). Authored in a PH form (hours,
+  fraction, days per week, weeks per year) that writes a honeybee ruleset with real weekday rules
+  and operating days (Q4a-07). An OpenStudio-style hourly editor is deferred but planned for.
+- **Equipment Sets**: honeybee-ph `PhEquipment` devices (appliances, Phius MEL and lighting,
+  custom annual loads) assigned to Zones, exported as honeybee-ph Process loads (Q4a-03, F4a-17).
+  This absorbs Phase 4's appliances (P4-12).
+- **Dwellings**: a Dwelling record with a unit count that Zones reference, plus bedrooms and
+  occupants per Zone, written to honeybee-ph's People extension (Q4a-11, F4a-19).
+- **A built-in default residential Program** for unassigned Zones, built from honeybee-ph's
+  Set Residential Program rules and schedules (Q4a-13, F4a-20). Some of its values are derived
+  per dwelling group at export.
+- **On the Building Segment**: the Phius category (Q4a-14), an airtightness test result (n50 or
+  q50) converted into each Zone's Infiltration (Q4a-06), and set points written from the Zones'
+  Program setpoints (Q4a-04).
+- **A Program tab** with a section per load, for creating, editing and duplicating Programs,
+  Schedules and Equipment Sets.
+- **A Zones/Programs page** for assigning Programs, Equipment Sets and Dwellings to Zones, with
+  each Zone's counts and the absolute equivalent of every per-area value; every per-area value
+  names its basis (Q4a-17).
+- **Starter library**: the residential default from the pinned honeybee-ph wheel, and Phius
+  non-residential programs as a PH-Composer library file (Q4a-10).
 - **Export**: Program, load and schedule objects in the HBJSON, plus the honeybee-ph extension
   fields PHX reads.
 
-The UI and UX are undecided. The plan is to prototype the GUI first and work back to the records,
-operations and exporter.
+The plan is to prototype the GUI first and work back to the records, operations and exporter.
 
 Out until decided otherwise: ExhaustAir (F4a-16), daylighting control, fans and internal masses,
-EnergyPlus simulation settings, equipment and appliances (Phase 4), Space Types.
+EnergyPlus simulation settings, Space Types (Q4a-16), and writing honeybee-ph operating periods
+until the cross-repo fix for F4a-13 ships (Q4a-08).
 
 ## Read order
 
-1. [DECISIONS.md](DECISIONS.md): findings F4a-01 to F4a-16 and the interview questions Q4a-01 to
-   Q4a-18. Start here.
+1. [DECISIONS.md](DECISIONS.md): findings F4a-01 to F4a-21, the interview questions Q4a-01 to
+   Q4a-18 and their answers. Start here.
 2. [research/honeybee-energy-programs.md](research/honeybee-energy-programs.md): the ProgramType,
    Room inheritance and overrides, Model emission, the program library, and the Honeybee
    Grasshopper affordances a Program tab should match.
@@ -53,9 +69,9 @@ EnergyPlus simulation settings, equipment and appliances (Phase 4), Space Types.
 
 ## Next
 
-1. Interview: answer Q4a-01 to Q4a-18, or the subset the prototype depends on (Q4a-02, Q4a-03,
-   Q4a-06, Q4a-07, Q4a-09, Q4a-11, Q4a-12, Q4a-13, Q4a-17).
-2. UI prototype of the Program tab and the Zones/Programs page in the UI preview, with the
+1. UI prototype of the Program tab and the Zones/Programs page in the UI preview, with the
    `ph-composer-ui-polish` skill.
-3. PRD, contracts and stages, worked back from the accepted prototype. Implementation needs
+2. PRD, contracts and stages, worked back from the accepted prototype. Implementation needs
    separate authorization.
+3. Separately: the honeybee-ph and PHX fix for F4a-13 (Q4a-08), in those repositories, starting
+   with a reproducing test in each.

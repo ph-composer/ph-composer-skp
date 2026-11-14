@@ -59,7 +59,7 @@ only when all three are done and its evidence file exists.
 | [P4-09](phases/p4-09-electric-heaters.md) | Electric heaters | Requested | P4-07; the interview | | | | | | M09 |
 | [P4-10](phases/p4-10-pumps.md) | Pumps | Requested | P4-07; the interview | | | | | | M10 |
 | [P4-11](phases/p4-11-fans.md) | Fans | Requested | P4-10; the interview | | | | | | M11 |
-| [P4-12](phases/p4-12-appliances.md) | Appliances | Requested | P4-07; the interview | | | | | | M12 |
+| [P4-12](phases/p4-12-appliances.md) | Appliances | Superseded by [Phase 4a](../phase-04a-program/README.md) (Q4a-03) | n/a | | | | | | M12 |
 | [P4-13](phases/p4-13-hot-water-piping.md) | Hot water piping | Requested | P4-06; Phase 3b edge stages; the interview | | | | | | M13 |
 | [P4-14](phases/p4-14-erv-ducting.md) | ERV ducting | Requested | P4-04, P4-13; Phase 3b edge stages; the interview | | | | | | M14 |
 | [P4-15](phases/p4-15-acceptance-and-handoff.md) | Acceptance and handoff | Scoped | all stages | | | | integration | | M15 |

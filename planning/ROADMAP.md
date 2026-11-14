@@ -138,7 +138,7 @@ Research is complete; its placement and name are question Q4a-01. No stage autho
 
 | # | Item | State | Note |
 | --- | --- | --- | --- |
-| 4a | [Programs](features/phase-04a-program/README.md) | Requested; research complete 2026-11-14, interview next | Supplies the Zone ventilation load Spaces inherits, the People load PHX needs, airtightness, and the per-Zone occupancy counts P4-12 reads |
+| 4a | [Programs](features/phase-04a-program/README.md) | Requested; research complete and interviewed 2026-11-14, UI prototype next | Supplies the Zone ventilation load Spaces inherits, the People load PHX needs, airtightness, dwellings and per-Zone occupancy counts, and the appliances (Equipment Sets) that Phase 4a Q4a-03 moved out of 4.6 |
 
 ## Phase 4: mechanical
 
@@ -153,7 +153,7 @@ to 7, piping and ducting are gate stubs until their interviews. No stage authori
 | 4.3 | Equipment: hot water system, tanks, heaters | Scoped: interviewed 2026-10-21 (H1 to H7) | The simplified piping methods wait on [honeybee_ph#135](https://github.com/PH-Tools/honeybee_ph/issues/135) (H5) |
 | 4.4 | [Hot water piping](features/phase-04-mechanical/hot-water-piping/README.md) | Requested; gate stub P4-13 | Needs 4.3 and Phase 3b's P3b-03, P3b-04, P3b-06, P3b-07 and P3b-08; lives under Systems per D4 |
 | 4.5 | Equipment: heat pumps, electric heaters | Requested, PRD drafted, re-baselined 2026-10-21 | |
-| 4.6 | Equipment: pumps, fans, appliances | Requested, PRD drafted, re-baselined 2026-10-21 | Appliances may be the Phius default set only; equipment Q12 gives appliances to this packet as Process loads and the other Room loads to [Phase 4a](features/phase-04a-program/README.md) |
+| 4.6 | Equipment: pumps, fans, appliances | Requested, PRD drafted, re-baselined 2026-10-21 | Appliances moved to [Phase 4a](features/phase-04a-program/README.md) as Equipment Sets on 2026-11-14 (Q4a-03, revising equipment Q12); pumps and fans remain here |
 
 ## Phase 5: post-MVP
 

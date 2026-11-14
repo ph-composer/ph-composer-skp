@@ -1,7 +1,7 @@
 # P4-12: appliances
 
 DATE: 2026-10-21
-STATUS: Requested. A gate stub: written in full after its interview.
+STATUS: Superseded 2026-11-14 by [Phase 4a](../../phase-04a-program/DECISIONS.md#answered) (Q4a-03): appliances become Zone Equipment Sets there. Kept as the record of the original scope.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
