@@ -14,7 +14,6 @@ module TestFeature
     "properties" => {
       "id" => { "type" => "string" },
       "values" => { "type" => "object" },
-      "user_data" => { "type" => "object" },
       "expected_values" => { "type" => "object" },
       "extension_payloads" => { "type" => "object" }
     }
@@ -86,7 +85,7 @@ module TestFeature
       request.params.fetch("edits").each do |edit|
         request.engine.propose_update(
           "#{ID}.part", edit.fetch("id"), changes,
-          :values => edit.fetch("values", {}), :user_data => edit["user_data"],
+          :values => edit.fetch("values", {}),
           :expected_values => edit.fetch("expected_values", {}),
           :extension_payloads => edit.fetch("extension_payloads", {})
         )

@@ -24,9 +24,12 @@ module PhComposer
     #   it is `required` or its relevance is unknown: nothing guesses from a payload's text.
     class RecordReader
       # `record_id` leaves as the wire's `object_id`; a member of that name would shadow Object#object_id.
-      Finding = Struct.new(:code, :section, :record_id, :message, keyword_init: true) do
+      # A finding about a record part (Records::Part) also carries `reference`, the
+      # `{"kind", "id", "part_ids"}` that ph_composer.records.update_metadata takes to write that part's map.
+      Finding = Struct.new(:code, :section, :record_id, :message, :reference, keyword_init: true) do
         def to_h
-          { "code" => code, "section" => section, "object_id" => record_id, "message" => message }
+          row = { "code" => code, "section" => section, "object_id" => record_id, "message" => message }
+          reference ? row.merge("reference" => DeepCopy.call(reference)) : row
         end
       end
 
@@ -73,9 +76,11 @@ module PhComposer
       # read passes its `target_kind`, so a claimed envelope is validated rather than left out. Only the
       # claim's source section passes the occurrence `path` as well, once per occurrence: that read
       # captures the row for the claimant; a shared read without `path` validates and captures nothing.
-      def entity_record(stored, fields:, target_kind: nil, path: nil, user_data: false)
+      # A contributor reading a record part (`records(..., parts: true)`) passes the part's `part:`
+      # reference, `{"kind", "id", "part_ids"}`, so a finding about its map names the record that holds it.
+      def entity_record(stored, fields:, target_kind: nil, path: nil, user_data: false, part: nil)
         id = stored.fetch("id")
-        passed = metadata(id, stored, user_data)
+        passed = metadata(id, stored, user_data, part)
         stored.fetch("extension_data", {}).each do |namespace, envelope|
           claimed = target_kind && @claims[[namespace, target_kind]]
           next leave_out(id, namespace, envelope) unless claimed
@@ -116,8 +121,9 @@ module PhComposer
       # or a warning about what it wrote. It joins the result's findings, and so the report.
       # A finding repeated by a second read of the same record, such as a Building-Segment two Zones name or
       # an Edge id a split left on two Edges, is listed once.
-      def note(code, id, message)
-        finding = Finding.new(:code => code, :section => @section, :record_id => id, :message => message)
+      def note(code, id, message, reference: nil)
+        finding = Finding.new(:code => code, :section => @section, :record_id => id, :message => message,
+                              :reference => reference)
         @findings << finding unless @findings.include?(finding)
       end
 
@@ -164,16 +170,18 @@ module PhComposer
         end
         kind = @engine.kind(kind_id)
         values = DeepCopy.call(kind.values(stored))
-        leave_out_parts(kind, values) unless parts
+        leave_out_parts(kind, id, values) unless parts
         { "id" => id }.merge(values).merge(exported.empty? ? {} : { "extensions" => exported }).merge(passed)
       end
 
       # Takes each part's map out of `values`, with a finding for one that is not empty.
-      def leave_out_parts(kind, values)
+      def leave_out_parts(kind, id, values)
         kind.parts.each do |part|
-          part.members(values).each do |member|
+          part.addressed_members(values).each do |part_ids, member|
             map = member.delete("user_data")
-            omit_metadata(member.fetch("id")) unless map.nil? || map.empty?
+            next if map.nil? || map.empty?
+
+            omit_metadata(member.fetch("id"), { "kind" => kind.id, "id" => id, "part_ids" => part_ids })
           end
         end
       end
@@ -189,13 +197,13 @@ module PhComposer
         note("export.metadata_omitted", id, "#{namespace} data is local to this Model and was not exported.")
       end
 
-      # `{"user_data" => ...}` to merge into the exported record, or `{}`.
-      def metadata(id, stored, pass)
+      # `{"user_data" => ...}` to merge into the exported record, or `{}`. `part` is a part's reference.
+      def metadata(id, stored, pass, part = nil)
         value = stored.fetch("user_data", {})
         return {} if value.empty?
 
         unless pass
-          omit_metadata(id)
+          omit_metadata(id, part)
           return {}
         end
 
@@ -203,8 +211,15 @@ module PhComposer
         { "user_data" => DeepCopy.call(value) }
       end
 
-      def omit_metadata(id)
-        note("export.metadata_omitted", id, "User data is local to this Model and was not exported.")
+      # A part's finding names the record holding it and the part's id path, as the write takes them.
+      def omit_metadata(id, part = nil)
+        unless part
+          return note("export.metadata_omitted", id, "User data is local to this Model and was not exported.")
+        end
+
+        note("export.metadata_omitted", id,
+             "User data on part #{part.fetch('part_ids').join(' / ')} of #{part.fetch('kind')} #{part.fetch('id')} " \
+             "is local to this Model and was not exported.", :reference => part)
       end
 
       def refuse(problem)

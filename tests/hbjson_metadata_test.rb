@@ -47,6 +47,19 @@ class HbjsonMetadataTest < PhComposerTestCase
     assert_match(/extension_data/, refusal_message(prohibited))
   end
 
+  # A record part's metadata_omitted finding carries the reference records.update_metadata takes; the result
+  # allowlist names it, and nothing else may ride inside it.
+  def test_a_part_findings_reference_passes_the_result_allowlist
+    document = result(File.read(FIXTURE))
+    reference = { "kind" => "ph_composer.windows.window_type", "id" => "wnt_AAAAAAAAAAAA", "part_ids" => ["wel_1"] }
+    document["findings"] << { "code" => "export.metadata_omitted", "section" => "s", "object_id" => "wel_1",
+                              "message" => "m", "blocks_export" => false, "reference" => reference }
+
+    assert Privacy.validate!(document)
+    document["findings"].last["reference"]["extra"] = 1
+    assert_equal "export.privacy_undeclared", assert_raises(PhComposer::CodedError) { Privacy.validate!(document) }.code
+  end
+
   def test_a_local_path_used_as_a_user_data_key_refuses
     home = model("user_data" => { "firm" => { "~/private/model.skp" => true } })
     unc = model("user_data" => { "\\\\server\\share\\model.skp" => true })

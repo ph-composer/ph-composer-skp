@@ -89,18 +89,17 @@ module PhComposer
         end
       end
 
-      # An ordinary edit. `values` replaces the named fields (nil removes an optional one); `user_data`,
-      # when given, replaces the whole mapping. Extension payloads the edit does not name are carried
-      # through as they were stored, whether or not their extension is installed. `expected_values`
-      # are the values the caller last read; any that differ now refuse the edit.
-      def propose_update(kind_id, id, change_set, values: {}, user_data: nil, extension_payloads: {},
-                         expected_values: {})
+      # An ordinary edit. `values` replaces the named fields (nil removes an optional one); `user_data` is
+      # kept as stored, since propose_metadata_update is its one write route on an existing record.
+      # Extension payloads the edit does not name are carried through as they were stored, whether or
+      # not their extension is installed. `expected_values` are the values the caller last read; any
+      # that differ now refuse the edit.
+      def propose_update(kind_id, id, change_set, values: {}, extension_payloads: {}, expected_values: {})
         staging(change_set) do
           kind = @catalog.kind(kind_id)
           before = find(kind_id, id)
           check_expected!(kind, before, expected_values)
-          after = Metadata.updated(before, @catalog, :user_data => user_data,
-                                                     :extension_payloads => extension_payloads)
+          after = Metadata.updated(before, @catalog, :extension_payloads => extension_payloads)
           check_value_keys!(kind, values)
           values.each { |key, value| value.nil? ? after.delete(key) : after[key] = DeepCopy.call(value) }
           propose(kind, change_set, before, after)

@@ -281,8 +281,14 @@ class ExportTest < PhComposerTestCase
                                    { "label" => "Head", "length_mm" => 1231.9 }])
       sill = created.dig("value", "part_ids", 0)
       invoke("example.foundation.update_parts",
-             "edits" => [{ "id" => sill, "user_data" => { "site" => "north" },
-                           "review" => { "review_status" => "checked" } }])
+             "edits" => [{ "id" => sill, "review" => { "review_status" => "checked" } }])
+      stored = PhComposer::Records::Engine.new(@model, PhComposer::Registry.current.catalog)
+                                          .find("example.foundation.part", sill)
+      invoke("ph_composer.records.update_metadata",
+             "updates" => [{ "reference" => { "kind" => "example.foundation.part", "id" => sill },
+                             "user_data" => { "site" => "north" },
+                             "expected_metadata" => { "user_data" => {},
+                                                      "extension_data" => stored.fetch("extension_data") } }])
     end
   end
 

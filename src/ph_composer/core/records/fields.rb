@@ -132,6 +132,17 @@ module PhComposer
         sibling_groups(record).flatten(1)
       end
 
+      # Every member at this path in `record` as `[part_ids, member]`, `part_ids` being its id path from
+      # the record down, as `find` takes it.
+      def addressed_members(record)
+        steps.reduce([[[], record]]) do |nodes, key|
+          nodes.flat_map do |ids, node|
+            list = node.is_a?(Hash) && node[key].is_a?(Array) ? node[key] : []
+            list.select { |member| member.is_a?(Hash) }.map { |member| [ids + [member["id"]], member] }
+          end
+        end
+      end
+
       # The members at this path in `record`, one list per parent, so ids can be checked within each.
       def sibling_groups(record)
         parents = steps[0...-1].reduce([record]) do |nodes, key|

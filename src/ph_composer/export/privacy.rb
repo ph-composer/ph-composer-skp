@@ -24,10 +24,13 @@ module PhComposer
         names.to_h { |name| [name.to_s, nil] }
       end
 
+      # A finding row; one about a record part also names the part's metadata write reference.
+      FINDING = fields(%w[code section object_id message blocks_export])
+                .merge("reference" => Optional.new(fields(%w[kind id part_ids]))).freeze
       SHELL = fields(%w[schema_version run_id state]).merge(
         "summary" => fields(%w[objects unavailable findings publishable]),
         "sections" => [fields(%w[id objects unavailable])],
-        "findings" => [fields(%w[code section object_id message blocks_export])],
+        "findings" => [FINDING],
         "failure" => Optional.new(fields(%w[stage code detail])),
         "canonical_model" => Optional.new(fields(%w[hbjson rooms faces surface_pairs]))
       ).freeze

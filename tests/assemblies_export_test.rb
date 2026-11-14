@@ -5,6 +5,7 @@ require_relative "test_helper"
 class AssembliesExportTest < PhComposerTestCase
   ROOT = File.join(TESTS_ROOT, "fixtures", "assemblies")
   SECTION = "ph_composer.assemblies.export.constructions"
+  ASSEMBLY = "ph_composer.assemblies.assembly"
   Assemblies = PhComposer::Assemblies
 
   def setup
@@ -57,11 +58,34 @@ class AssembliesExportTest < PhComposerTestCase
                                   .map { |segment| segment["user_data"] }
     refute rows.fetch("asm_Membrane0001").fetch("layers")[1].key?("user_data")
     assert_equal note, rows.fetch("asm_Default00001").dig("layers", 0, "segments", 0, "user_data")
-    omitted = extracted.findings.select { |row| row.fetch("code") == "export.metadata_omitted" }
-                       .map { |row| row.fetch("object_id") }
+    findings = extracted.findings.select { |row| row.fetch("code") == "export.metadata_omitted" }
+    omitted = findings.map { |row| row.fetch("object_id") }
     assert_equal 1, omitted.count("seg_000000000010")
     assert_equal 1, omitted.count("lyr_000000000007")
     assert_empty omitted & %w[lyr_000000000001 seg_000000000031 seg_000000000100]
+    # Each part's finding names its Assembly and id path, the reference records.update_metadata takes.
+    layer = single.dig("layers", 0)
+    assert_equal({ "kind" => ASSEMBLY, "id" => "asm_Single000001",
+                   "part_ids" => [layer.fetch("id"), "seg_000000000010"] },
+                 findings.find { |row| row.fetch("object_id") == "seg_000000000010" }.fetch("reference"))
+    assert_equal({ "kind" => ASSEMBLY, "id" => "asm_Membrane0001", "part_ids" => ["lyr_000000000007"] },
+                 findings.find { |row| row.fetch("object_id") == "lyr_000000000007" }.fetch("reference"))
+  end
+
+  # A reader that does not ask for parts takes every part map out, at any depth, with the part's write reference.
+  def test_a_reader_without_parts_omits_nested_maps_with_their_reference
+    assembly = @fixture.fetch("assemblies").find { |row| row.fetch("id") == "asm_Mixed0000001" }
+    layer = assembly.dig("layers", 0)
+    segment = layer.dig("segments", 1)
+    segment["user_data"] = { "firm" => { "check" => "ok" } }
+    Assemblies::Assembly::Schema::KIND.store.write(@model, assembly)
+    catalog = PhComposer::Registry.current.catalog
+    reader = PhComposer::Export::RecordReader.new(PhComposer::Records::Engine.new(@model, catalog), catalog)
+
+    row = reader.within(SECTION) { reader.records(ASSEMBLY) }.find { |found| found.fetch("id") == assembly["id"] }
+    refute row.dig("layers", 0, "segments", 1).key?("user_data")
+    assert_equal [{ "kind" => ASSEMBLY, "id" => assembly["id"], "part_ids" => [layer["id"], segment["id"]] }],
+                 reader.findings.map(&:to_h).filter_map { |finding| finding["reference"] }
   end
 
   def test_a_reserved_key_blocks_only_a_carried_part_map_and_the_preflight_names_it

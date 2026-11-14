@@ -173,7 +173,8 @@ class RecordsEngineTest < PhComposerTestCase
 
   def test_user_data_that_is_not_plain_json_is_refused
     error = assert_raises(PhComposer::CodedError) do
-      @engine.propose_update("test.fixture.part", seed_part, PhComposer::Records::ChangeSet.new,
+      @engine.propose_create("test.fixture.part", PhComposer::Records::ChangeSet.new,
+                             :values => { "label" => "Sill", "length_mm" => 900.0, "definition_id" => seed_part },
                              :user_data => { "org" => { "score" => Float::NAN } })
     end
 

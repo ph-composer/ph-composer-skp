@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 58
+    MINOR = 59
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -301,7 +301,14 @@ module PhComposer
                     "and the new ph_composer.model.export_preflight reports it for the Model. The extraction gains " \
                     "the ph_composer.model.export.model section and a Volume's floor_user_data. Window Element, " \
                     "Attached zone, membrane Layer and undivided Layer-Segment maps stay in the Model with an " \
-                    "export.metadata_omitted finding, and each finding is listed once." }
+                    "export.metadata_omitted finding, and each finding is listed once." },
+      { "minor" => 59, "date" => "2026-11-14",
+        "change" => "An export.metadata_omitted finding about a record part (an Assembly Layer or Layer-Segment, " \
+                    "or a Window Element) gains reference, the {kind, id, part_ids} " \
+                    "ph_composer.records.update_metadata takes, and its message names the record that holds the " \
+                    "part. A contributor's " \
+                    "Engine#propose_update no longer takes user_data: ph_composer.records.update_metadata " \
+                    "(Engine#propose_metadata_update) is the one write route for an existing record's map." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

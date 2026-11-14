@@ -29,11 +29,13 @@ module PhComposer
         materials = reader.records(MATERIAL_KIND).to_h { |row| [row.fetch("id"), row.slice(*MATERIAL_FIELDS)] }
         reader.records(ASSEMBLY_KIND, :user_data => true, :parts => true).map do |row|
           layers = row.fetch("layers").map do |layer|
+            layer_part = { "kind" => ASSEMBLY_KIND, "id" => row.fetch("id"), "part_ids" => [layer.fetch("id")] }
             segments = layer.fetch("segments").map do |segment|
-              reader.entity_record(segment, :fields => SEGMENT_FIELDS, :user_data => divided?(layer))
+              part = layer_part.merge("part_ids" => [layer.fetch("id"), segment.fetch("id")])
+              reader.entity_record(segment, :fields => SEGMENT_FIELDS, :user_data => divided?(layer), :part => part)
             end
-            reader.entity_record(layer, :fields => %w[thickness_mm], :user_data => carries_layer?(layer, materials))
-                  .merge("segments" => segments)
+            reader.entity_record(layer, :fields => %w[thickness_mm], :user_data => carries_layer?(layer, materials),
+                                        :part => layer_part).merge("segments" => segments)
           end
           used = layers.flat_map { |layer| layer.fetch("segments").map { |segment| segment["material_id"] } }.uniq
           row.slice("id", "name", "orientation", "user_data").merge(
