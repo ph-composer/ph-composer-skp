@@ -137,4 +137,4 @@ are not yet a library kind (roadmap 5.4).
 
 - `context/UBIQUITOUS_LANGUAGE.md` says a Zone carries "loads and schedules" and a Space carries
   "occupancy"; neither exists, and the glossary has no Program, Load or Schedule entry.
-- `planning/ROADMAP.md` (item 4.6) calls the Q12 boundary open; the equipment PRD records the answer.
+- `planning/ROADMAP.md` item 4.6 called the Q12 boundary open; corrected 2026-11-14.

@@ -153,7 +153,7 @@ to 7, piping and ducting are gate stubs until their interviews. No stage authori
 | 4.3 | Equipment: hot water system, tanks, heaters | Scoped: interviewed 2026-10-21 (H1 to H7) | The simplified piping methods wait on [honeybee_ph#135](https://github.com/PH-Tools/honeybee_ph/issues/135) (H5) |
 | 4.4 | [Hot water piping](features/phase-04-mechanical/hot-water-piping/README.md) | Requested; gate stub P4-13 | Needs 4.3 and Phase 3b's P3b-03, P3b-04, P3b-06, P3b-07 and P3b-08; lives under Systems per D4 |
 | 4.5 | Equipment: heat pumps, electric heaters | Requested, PRD drafted, re-baselined 2026-10-21 | |
-| 4.6 | Equipment: pumps, fans, appliances | Requested, PRD drafted, re-baselined 2026-10-21 | Appliances may be the Phius default set only; boundary with the undrafted Zone loads packet open (equipment Q12) |
+| 4.6 | Equipment: pumps, fans, appliances | Requested, PRD drafted, re-baselined 2026-10-21 | Appliances may be the Phius default set only; equipment Q12 gives appliances to this packet as Process loads and the other Room loads to [Phase 4a](features/phase-04a-program/README.md) |
 
 ## Phase 5: post-MVP
 
