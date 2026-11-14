@@ -9,6 +9,10 @@ module PhComposer
     FEATURE_ID = "ph_composer.model"
     DETAIL = "#{FEATURE_ID}.detail"
     UPDATE_METADATA = "#{FEATURE_ID}.update_metadata"
+    # The export section that carries the Model's user_data to the Honeybee Model's own user_data
+    # (python/ph_composer_translation/model_metadata.py), and its preflight.
+    SECTION = "#{FEATURE_ID}.export.model"
+    PREFLIGHT = "#{FEATURE_ID}.export_preflight"
     # What the Records::Metadata messages call the Model in place of a record id, after LABEL in place of a
     # kind's label: "The Model metadata changed since it was read.", "... data on Model ...".
     TARGET_ID = "Model"
@@ -61,6 +65,39 @@ module PhComposer
                      :side_effects => "Stores the maps in this SKP.") do |request, proposal|
         update_metadata(request, proposal, request.params)
       end
+      feature.export_contributor(SECTION, :section_version => 1, :preflight => PREFLIGHT) do |reader|
+        export_records(reader)
+      end
+      feature.query(PREFLIGHT, :description => "Whether the Model's own metadata can be exported.",
+                               :refuses => [], :params => SchemaShapes.object({}), :result => Export::PREFLIGHT_RESULT,
+                               :examples => [{}]) { |request| export_preflight(request) }
+    end
+
+    # The Model's user_data leaves on the Honeybee Model as one record, read from the export snapshot through the
+    # boundary every record passes: the reserved-key rule for its map and the left-out rules for its envelopes.
+    # A Model with no user_data leaves no record.
+    def export_records(reader)
+      maps = snapshot_maps(reader.snapshot).merge("id" => TARGET_ID)
+      exported = reader.entity_record(maps, :fields => [], :user_data => true)
+      exported.key?("user_data") ? [exported] : []
+    end
+
+    def snapshot_maps(snapshot)
+      text = snapshot.model_dictionaries.fetch(SETTINGS.store.dictionary, {})[SETTINGS.store.key]
+      SETTINGS.validate!(SETTINGS.effective(text.nil? ? nil : JSON.parse(text)))
+    rescue JSON::ParserError, CodedError
+      raise Export::Blocked.new("record.unreadable", "The Model metadata cannot be read, so it cannot be exported. " \
+                                                     "Nothing was written.")
+    end
+
+    # What `export_records` would refuse, as blocking rows.
+    def export_preflight(request)
+      maps = SETTINGS.read(request.model).merge("id" => TARGET_ID)
+      { "findings" => Export::MetadataCheck.findings(request, [maps], :section => SECTION, :user_data => true),
+        "repairs" => [] }
+    rescue CodedError => error
+      { "findings" => [{ "code" => error.code, "section" => SECTION, "object_id" => TARGET_ID,
+                         "message" => error.message, "blocks_export" => true }], "repairs" => [] }
     end
 
     def detail(model, catalog)

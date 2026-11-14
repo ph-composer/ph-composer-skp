@@ -520,12 +520,18 @@ fragments are one JSON string; parse it, and its UTF-8 bytes hash to `file.sha25
 or went since refuses `artifact.changed`, and a task that wrote no file refuses `artifact.none`. A later
 export to the same destination replaces it.
 
-Metadata is not exported just because it is stored. Where a feature exports a record's `user_data`
-(today Zones, Faces, Window Units, Assemblies, Spaces, Volumes and Floor Segments), it passes through
-to the HBJSON object, and the report counts those objects as `export.user_data_passed`; any other
-`user_data` stays in the Model with an `export.metadata_omitted` finding. Assembly Layer,
-Layer-Segment, Window Element, Space Floor and Model maps are not exported yet, and no finding names them. Read the export's findings
-rather than assume. An extension's data leaves with the extension that exports it: data marked local to the
+Metadata is not exported just because it is stored. Where an entity becomes an HBJSON object of its
+own, its `user_data` passes through to that object, and the report counts those objects as
+`export.user_data_passed`. The Model's map goes to the HBJSON Model, a Zone's to its Room, a Face's to
+its Face, a Window Unit's to each of its Apertures, an Assembly's to its construction, a Space's,
+Volume's, Space Floor's and Floor Segment's to the matching honeybee-ph object. An Assembly Layer's
+map goes to its material (the hybrid material when the Layer is divided), and a divided Layer's
+Layer-Segments' maps go to their cell materials. Every other map stays in the Model with one
+`export.metadata_omitted` finding per entity: a membrane Layer, the one Layer-Segment of an undivided
+Layer, Window Elements, Thermal Bridge Edges, Attached zones and the definitions (Materials, Frames,
+Glazings, Psi-Install Types, Window Types, Thermal Bridge Types, Building Segments and Levels). A
+`ph_composer` key in any map that leaves blocks the export. Read the export's findings rather than
+assume. An extension's data leaves with the extension that exports it: data marked local to the
 Model is left out with the same finding, and data whose effect on the export is required or unknown,
 with nothing installed to export it, blocks the export.
 

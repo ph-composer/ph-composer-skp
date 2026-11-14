@@ -128,6 +128,17 @@ class ExportTest < PhComposerTestCase
     refute @model.modified_since_mark? if @model.respond_to?(:modified_since_mark?)
   end
 
+  # A record read twice, as a Building-Segment two Zones name, gives its finding once.
+  def test_a_repeated_finding_is_listed_once
+    reader = Export::RecordReader.new(nil, nil)
+    reader.within("s") do
+      2.times { reader.note("export.metadata_omitted", "exp_1", "left out") }
+      reader.note("export.metadata_omitted", "exp_2", "left out")
+    end
+
+    assert_equal %w[exp_1 exp_2], reader.findings.map(&:record_id)
+  end
+
   def test_a_local_only_envelope_is_left_out_with_a_finding
     id = store_part("extension_data" => { "other.org.notes" => envelope("local_only") })
 

@@ -46,7 +46,7 @@ class ThermalBridgeExportTest < PhComposerTestCase
   def names
     [PhComposer::Zones::Faces::ExportProjection::SECTION, PhComposer::Zones::ExportProjection::SECTION,
      PhComposer::Assemblies::ExportProjection::SECTION, PhComposer::Assemblies::SourceReport::SECTION,
-     PhComposer::Spaces::ExportProjection::SECTION, X::SECTION]
+     PhComposer::Spaces::ExportProjection::SECTION, PhComposer::ModelMetadata::SECTION, X::SECTION]
   end
 
   # ACCEPTANCE's reference: Zone A spans x 0 to 5 m and Zone B x 5 to 9 m, each 4 m deep and 3 m high, each

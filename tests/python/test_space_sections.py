@@ -141,15 +141,21 @@ def test_user_data_passes_through_on_each_object_and_the_reserved_key_is_refused
     )
     record["volumes"][0]["user_data"] = {"note": "volume"}
     record["volumes"][0]["floor_segments"][0]["user_data"] = {"note": "segment"}
+    record["volumes"][0]["floor_user_data"] = {"note": "floor"}
     found = spaces_on(reloaded(run(record)), ZONE_A)[0]
-    assert (found.user_data, found.volumes[0].user_data, found.volumes[0].floor_segments[0].user_data) == (
+    volume_found = found.volumes[0]
+    assert (found.user_data, volume_found.user_data, volume_found.floor.user_data) == (
         {"client": "A"},
         {"note": "volume"},
-        {"note": "segment"},
+        {"note": "floor"},
     )
+    assert volume_found.floor_segments[0].user_data == {"note": "segment"}
     refused = copy.deepcopy(record)
     refused["user_data"] = {"ph_composer": 1}
     assert [finding["object_id"] for finding in run(refused)["findings"]] == ["spc_one"]
+    refused_floor = copy.deepcopy(record)
+    refused_floor["volumes"][0]["floor_user_data"] = {"ph_composer": 1}
+    assert [finding["object_id"] for finding in run(refused_floor)["findings"]] == ["spc_one"]
 
 
 def test_conformance_fails_when_a_reported_total_is_altered() -> None:

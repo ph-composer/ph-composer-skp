@@ -197,6 +197,8 @@ class WindowExportTest < PhComposerTestCase
   def test_public_preflight_and_two_contributors_share_projection_and_omit_local_metadata
     seed_export_records
     @type["user_data"] = { "private" => "local-only" }
+    # A reserved key in a map that stays local blocks nothing.
+    @type["elements"].first["user_data"] = { "ph_composer" => "element" }
     W::Types::KIND.store.write(@model, @type)
     U.write(@unit, U.read(@unit).merge("user_data" => { "private" => "local-only" }))
     session = PhComposer::Sessions.for(@model)
@@ -215,8 +217,11 @@ class WindowExportTest < PhComposerTestCase
     sections = extracted.document.fetch("sections")
     assert_equal 1, sections.fetch(X::CONSTRUCTIONS).fetch("records").length
     assert_equal 1, sections.fetch(X::APERTURES).fetch("records").length
-    # The Type's user_data stays local; the Unit's passes through to its Aperture.
-    assert_equal 1, extracted.findings.count { |row| row["code"] == "export.metadata_omitted" }
+    # The Type's and its Element's user_data stay local, one finding each; the Unit's passes through to its
+    # Aperture.
+    omitted = extracted.findings.select { |row| row["code"] == "export.metadata_omitted" }
+                       .map { |row| row["object_id"] }
+    assert_equal [@type["id"], @type["elements"].first["id"]].sort, omitted.sort
     assert_equal({ "private" => "local-only" }, sections.fetch(X::APERTURES).fetch("records").first["user_data"])
     wire = JSON.generate(sections.fetch(X::CONSTRUCTIONS))
     %w[user_data extension_data source entity_path provider private shading].each { |key| refute_includes wire, key }

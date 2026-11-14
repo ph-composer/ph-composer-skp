@@ -205,6 +205,7 @@ module PhComposer
         end
 
         def records(reader)
+          leave_out_attached_zone_maps(reader)
           zone_faces(reader.snapshot).filter_map do |entry|
             record = entry.record(FACE_DICTIONARY)
             next unless record
@@ -236,6 +237,22 @@ module PhComposer
           snapshot.entries.select { |entry| entry.kind == "face" }
         end
 
+        # An Attached zone leaves no object of its own (an AttachedZone Face carries only its boundary), so each
+        # readable one with a map gets a finding that it stayed in the Model. Only its map is read here: whether
+        # its envelopes let export go ahead is the preflight's (`attached_record_state`), and a record that cannot
+        # be read is that preflight's finding when a Face names it.
+        def leave_out_attached_zone_maps(reader)
+          kind = AttachedZone::RECORD_KIND
+          reader.snapshot.model_dictionaries.fetch(kind.store.dictionary, {}).sort.each do |_id, text|
+            record = text.is_a?(String) ? JSON.parse(text) : nil
+            next unless record.is_a?(Hash) && kind.problems(record).empty?
+
+            reader.entity_record(record.slice("id", "user_data"), :fields => [])
+          rescue JSON::ParserError
+            next
+          end
+        end
+
         def omission_reason(snapshot, entry, record)
           unless record["boundary_condition"]
             return ["face.boundary_unassigned", "Face has no assigned boundary condition."]
@@ -254,7 +271,7 @@ module PhComposer
           ["adjacency.stale", "Face has no current reciprocal Surface endpoint."]
         end
         private_class_method :face_findings, :issue, :assignment_issues, :attached_zone_issues, :attached_record_state,
-                             :omission_reason, :construction_issues, :zone_faces
+                             :omission_reason, :construction_issues, :zone_faces, :leave_out_attached_zone_maps
       end
     end
   end

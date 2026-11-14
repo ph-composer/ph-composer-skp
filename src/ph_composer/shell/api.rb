@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 57
+    MINOR = 58
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -293,7 +293,15 @@ module PhComposer
                     "replaced under expected_metadata in one Undo step. Volume rows carry floor, the Space Floor's " \
                     "reference and its own user_data (a ph_composer.spaces.volumes.list field, not a default), and " \
                     "spaces.update_metadata writes that map by floor_id. Clearing a map a record never stored writes " \
-                    "nothing in every owner's update_metadata." }
+                    "nothing in every owner's update_metadata." },
+      { "minor" => 58, "date" => "2026-11-14",
+        "change" => "Export carries the Model's user_data to the HBJSON Model, a Space Floor's to its SpaceFloor, " \
+                    "an Assembly Layer's to its material (the hybrid host when divided) and a divided Layer's " \
+                    "Layer-Segments' to their cell materials; a ph_composer key in any of them blocks the export, " \
+                    "and the new ph_composer.model.export_preflight reports it for the Model. The extraction gains " \
+                    "the ph_composer.model.export.model section and a Volume's floor_user_data. Window Element, " \
+                    "Attached zone, membrane Layer and undivided Layer-Segment maps stay in the Model with an " \
+                    "export.metadata_omitted finding, and each finding is listed once." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

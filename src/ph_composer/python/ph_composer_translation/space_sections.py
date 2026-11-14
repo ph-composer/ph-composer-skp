@@ -2,7 +2,8 @@
 
 One honeybee-ph `Space` per record, with a `SpaceVolume` per Volume (its prism as `geometry`) and a
 `SpaceFloorSegment` per Floor Segment (its projected loops as `geometry`, both factors as stored). Identifiers
-are the record ids. Each object carries its record's `user_data`; PH-Composer writes no reserved entry on them.
+are the record ids. Each object carries its record's `user_data`, and each `SpaceFloor` its Volume's
+`floor_user_data`; PH-Composer writes no reserved entry on them.
 The Zones section names nothing here."""
 
 from __future__ import annotations
@@ -74,6 +75,8 @@ class SpaceSection(Section[SpaceRecord, TranslatedSpace]):
                 if source.user_data:
                     volume.user_data = dict(source.user_data)
                 volume.floor.identifier = volume.floor.display_name = source.floor_id
+                if source.floor_user_data:
+                    volume.floor.user_data = dict(source.floor_user_data)
                 for item in source.floor_segments:
                     segment = space_module.SpaceFloorSegment()
                     segment.identifier = item.id

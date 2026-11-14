@@ -277,6 +277,21 @@ class AttachedZoneTest < PhComposerTestCase
     assert_equal({ "firm.note" => "keep" }, record.fetch("user_data"))
   end
 
+  # An Attached zone leaves no HBJSON object, so its map stays in the Model with one finding, whether or not a
+  # Face names it; a reserved key in a map that stays local blocks nothing.
+  def test_an_attached_zone_map_stays_local_with_one_finding
+    invoke("#{KIND}.save", { "values" => { "name" => "Garage", "kind" => "garage" },
+                             "user_data" => { "ph_composer" => { "firm" => 1 } } })
+    invoke("#{KIND}.save", { "values" => { "name" => "Attic", "kind" => "attic" } })
+    garage = records.find { |record| record.dig("values", "name") == "Garage" }.fetch("id")
+    section = PhComposer::Zones::Faces::ExportProjection::SECTION
+    extraction = PhComposer::Export::Collection.build(@model, :run_id => "atz", :contributors => [section])
+
+    assert_equal [["export.metadata_omitted", garage]],
+                 extraction.findings.map { |row| row.values_at("code", "object_id") }
+    refute_includes JSON.generate(extraction.document), "firm"
+  end
+
   private
 
   KIND_STORE = PhComposer::Zones::Faces::AttachedZone::RECORD_KIND.store

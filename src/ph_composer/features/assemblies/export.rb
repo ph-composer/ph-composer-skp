@@ -27,16 +27,39 @@ module PhComposer
 
       def records(reader)
         materials = reader.records(MATERIAL_KIND).to_h { |row| [row.fetch("id"), row.slice(*MATERIAL_FIELDS)] }
-        reader.records(ASSEMBLY_KIND, :user_data => true).map do |row|
+        reader.records(ASSEMBLY_KIND, :user_data => true, :parts => true).map do |row|
           layers = row.fetch("layers").map do |layer|
-            layer.slice("id", "thickness_mm").merge(
-              "segments" => layer.fetch("segments").map { |segment| segment.slice(*SEGMENT_FIELDS) }
-            )
+            segments = layer.fetch("segments").map do |segment|
+              reader.entity_record(segment, :fields => SEGMENT_FIELDS, :user_data => divided?(layer))
+            end
+            reader.entity_record(layer, :fields => %w[thickness_mm], :user_data => carries_layer?(layer, materials))
+                  .merge("segments" => segments)
           end
           used = layers.flat_map { |layer| layer.fetch("segments").map { |segment| segment["material_id"] } }.uniq
           row.slice("id", "name", "orientation", "user_data").merge(
             "layers" => layers, "materials" => used.compact.sort.filter_map { |id| materials[id] }
           )
+        end
+      end
+
+      # Whether the translation builds the Layer as a grid of cell materials under a hybrid host
+      # (constructions.py `LayerRecord.divided`): then each Layer-Segment has a material of its own for its map.
+      # An undivided Layer's one Layer-Segment shares its Layer's material, so its map stays in the Model.
+      def divided?(layer)
+        segments = layer.fetch("segments")
+        segments.length > 1 || !segments.first&.fetch("steel_stud_spacing_mm", nil).nil?
+      end
+
+      # A membrane Layer becomes no material (its Assembly's construction lists it in its own user_data), so its
+      # map stays in the Model. `materials` maps each Material id to a row with its `category`.
+      def carries_layer?(layer, materials)
+        !Materials::Schema.membrane_layer?(layer, materials)
+      end
+
+      # The Layers and Layer-Segments of `assembly` whose maps the translation carries, as the parts themselves.
+      def carried_parts(assembly, materials)
+        Array(assembly["layers"]).flat_map do |layer|
+          (carries_layer?(layer, materials) ? [layer] : []) + (divided?(layer) ? layer.fetch("segments") : [])
         end
       end
 
@@ -74,11 +97,16 @@ module PhComposer
       end
 
       # The metadata extraction refuses, read as `records` reads it: Materials alone, Assemblies with their
-      # user_data passed through.
+      # user_data passed through, and each Layer and Layer-Segment whose map the translation carries.
       def metadata_findings(request)
         check = Export::MetadataCheck
-        check.findings(request, check.definitions(request, MATERIAL_KIND), :section => SECTION) +
-          check.findings(request, check.definitions(request, ASSEMBLY_KIND), :section => SECTION, :user_data => true)
+        materials = check.definitions(request, MATERIAL_KIND)
+        assemblies = check.definitions(request, ASSEMBLY_KIND)
+        by_id = materials.to_h { |row| [row.fetch("id"), row] }
+        parts = assemblies.flat_map { |assembly| carried_parts(assembly, by_id) }
+        check.findings(request, materials, :section => SECTION) +
+          check.findings(request, assemblies, :section => SECTION, :user_data => true) +
+          check.findings(request, parts, :section => SECTION, :user_data => true)
       end
 
       def preflight_row(code, id, message, blocking)
@@ -120,7 +148,7 @@ module PhComposer
         )
         [Export::ReportHtml.section("Authored constructions", body)]
       end
-      private_class_method :preflight_row
+      private_class_method :preflight_row, :divided?, :carries_layer?, :carried_parts
     end
   end
 end

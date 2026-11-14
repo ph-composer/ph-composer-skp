@@ -1038,8 +1038,10 @@ lists the current kinds. The translation writes it beside PH-Composer's
 own reserved `ph_composer` key; a user key named `ph_composer`, or after any namespace an export
 contributor declares in `user_data_keys:`, blocks the export; every string and
 key still passes the local-path check, and the report counts the HBJSON objects that carry it. Elsewhere `user_data`
-is left out with a finding. An export contributor whose translation writes its own HBJSON
-`user_data` declares those keys at registration (`user_data_keys:`); under a declared namespace the
+is left out with a finding. A record part's map (`Records::Part`) is left out with a finding unless the
+contributor reads the parts itself (`reader.records(kind, parts: true)`) and passes each member through
+`reader.entity_record`, carrying it only where the part has an HBJSON object of its own. An export
+contributor whose translation writes its own HBJSON `user_data` declares those keys at registration (`user_data_keys:`); under a declared namespace the
 artifact guard refuses any key no contributor declared. Do not promise lossless round trips through
 formats that cannot preserve it.
 

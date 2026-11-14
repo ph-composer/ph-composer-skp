@@ -142,14 +142,16 @@ module PhComposer
                            "message" => error.message, "blocks_export" => true }], "repairs" => [] }
       end
 
-      # The metadata extraction refuses, read as `records` reads each Space, Volume and Floor Segment: user_data
-      # passed through, and the envelopes another contributor claims on each kind.
+      # The metadata extraction refuses, read as `records` reads each Space, Volume, Space Floor and Floor
+      # Segment: user_data passed through, and the envelopes another contributor claims on each kind.
       def metadata_findings(request)
+        check = Export::MetadataCheck
+        floors = check.entity_records(request.model, VOLUME_STORE).map { |volume| floor_part(volume) }
         { SPACE_STORE => SPACE_KIND, VOLUME_STORE => VOLUME_KIND, FLOOR_SEGMENT_STORE => FLOOR_SEGMENT_KIND }
           .flat_map do |store, kind|
-            Export::MetadataCheck.findings(request, Export::MetadataCheck.entity_records(request.model, store),
-                                           :section => SECTION, :user_data => true, :target_kind => kind)
-          end
+            check.findings(request, check.entity_records(request.model, store),
+                           :section => SECTION, :user_data => true, :target_kind => kind)
+          end + check.findings(request, floors, :section => SECTION, :user_data => true)
       end
 
       def finding_row(finding, reference, object_id)
@@ -271,9 +273,17 @@ module PhComposer
         own = segments_in.fetch(entry.path, [])
         rows = own.map { |segment| segment_record(reader, segment) }.sort_by { |row| row.fetch("id") }
         prisms = Prism.call(own.map { |segment, _| segment.geometry.loops_m }, height)
+        floor = reader.entity_record(floor_part(record), :fields => [], :user_data => true)
         reader.entity_record(record, :fields => %w[display_name avg_ceiling_height_m floor_id],
                                      :target_kind => VOLUME_KIND, :path => entry.path, :user_data => true)
+              .merge(floor.key?("user_data") ? { "floor_user_data" => floor.fetch("user_data") } : {})
               .merge("floor_segments" => rows, "geometry" => prisms.flat_map(&:polygons))
+      end
+
+      # A Volume's Space Floor as the part its map belongs to: it leaves on the honeybee-ph SpaceFloor, never on
+      # the Volume, under the same reserved-key rule.
+      def floor_part(volume)
+        { "id" => volume["floor_id"], "user_data" => volume.fetch("floor_user_data", {}) }
       end
 
       def segment_record(reader, (entry, record))

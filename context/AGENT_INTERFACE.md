@@ -470,6 +470,8 @@ Panel clients correlate
 slot. This operation is separate from the longer-lived HBJSON runtime task below.
 
 `API.export_preflight` requires `read` and returns feature-owned findings and explicit repair actions.
+The foundation adds one contributor of its own (API 1.58): `ph_composer.model.export_preflight` blocks on a
+reserved key in the Model's `user_data` or an envelope export cannot leave out, as extraction would.
 A caller invokes selected repairs through the ordinary `model_write` contract, then revalidates.
 Its bounded forms (`Export::DiagnosticPages`) leave every contributor's own preflight query as it is:
 `compact` counts by owner and code over the whole preflight, `part` pages findings or repairs with each

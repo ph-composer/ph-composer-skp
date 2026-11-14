@@ -42,6 +42,14 @@ class ModelMetadataTest < PhComposerTestCase
     assignment_query(DETAIL)
   end
 
+  def extract(section)
+    PhComposer::Export::Collection.build(@model, :run_id => "model", :contributors => [section])
+  end
+
+  def preflight
+    assignment_query(PhComposer::ModelMetadata::PREFLIGHT)
+  end
+
   def write(fields, expected = nil)
     assignment_invoke(ACTION, { "expected_metadata" => expected || detail.slice("user_data", "extension_data") }
                                 .merge(fields))
@@ -106,6 +114,27 @@ class ModelMetadataTest < PhComposerTestCase
     assert_equal({ REVIEW => "understood" }, read.fetch("extension_status"))
     assert_nil @model.attribute_dictionary("ph_composer.spaces_settings")
     assert_nil @model.attribute_dictionary("ph_composer.windows_settings")
+  end
+
+  # The map leaves as the one record of the Model's export section, for the HB Model's own user_data; the
+  # reserved key blocks the extraction and the preflight says so, and a Model without a map leaves no record.
+  def test_the_model_map_leaves_as_its_section_record_and_the_reserved_key_blocks
+    section = PhComposer::ModelMetadata::SECTION
+    assert_equal [], extract(section).document.dig("sections", section, "records")
+    write("user_data" => { "firm" => { "project" => "2611" } })
+    assert_equal [{ "id" => "Model", "user_data" => { "firm" => { "project" => "2611" } } }],
+                 extract(section).document.dig("sections", section, "records")
+    assert_empty preflight.fetch("findings")
+    # The Model's envelopes pass the boundary every record does: a local-only one stays with a finding.
+    write("extension_payloads" => { REVIEW => { "status" => "draft" } })
+    assert_equal [%w[export.metadata_omitted Model]],
+                 extract(section).findings.map { |row| row.values_at("code", "object_id") }
+
+    write("user_data" => { "ph_composer" => { "project" => "2611" } })
+    error = assert_raises(PhComposer::Export::Blocked) { extract(section) }
+    assert_equal "export.blocked", error.code
+    assert_equal [["export.blocked", "Model", true]],
+                 preflight.fetch("findings").map { |row| row.values_at("code", "object_id", "blocks_export") }
   end
 
   def test_stored_maps_that_are_not_plain_json_objects_refuse_the_read

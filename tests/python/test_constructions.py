@@ -198,6 +198,67 @@ def test_actual_model_references_share_authored_construction_and_exclude_unused_
         assert usage[identifier]["gross_area_m2"] == pytest.approx(sum(face.area for face in used))
 
 
+def test_layer_and_segment_maps_reload_on_their_own_materials_and_on_the_reversed_construction() -> None:
+    from ph_composer_translation.composition import SECTIONS
+
+    payload = model_document()
+    records = {row["id"]: row for row in payload["sections"][ConstructionSection.id]["records"]}
+    single, mixed = records["asm_Single000001"], records["asm_Mixed0000001"]
+    single["layers"][0]["user_data"] = {"firm": {"layer": "outer"}}
+    # A divided Layer with no map of its own: the host must not inherit its base cell's map.
+    mixed["layers"][0]["segments"][0]["user_data"] = {"firm": {"segment": "stud"}}
+    mixed["layers"][0]["segments"][1]["user_data"] = {"firm": {"segment": "cavity"}}
+    steel = records["asm_Steel0000001"]["layers"][0]
+    steel["user_data"] = {"firm": {"layer": "steel"}}
+    faces = payload["sections"]["ph_composer.zones.faces.export.faces"]["records"]
+    for index, face in enumerate(faces):
+        face["assembly_id"] = ("asm_Single000001", "asm_Mixed0000001", "asm_Steel0000001")[index % 3]
+    pair = {face["id"]: face for face in faces if face["boundary_condition"] == "Surface"}
+    for face in pair.values():
+        face["assembly_id"] = pair[face["adjacency"]["counterpart"]["entity_id"]]["assembly_id"] = "asm_Mixed0000001"
+    result = cast(dict[str, Any], translate(payload, SECTIONS).to_document())
+    assert result["summary"]["publishable"] is True
+    model = stack.load("honeybee.model").Model.from_dict(json.loads(result["canonical_model"]["hbjson"]))
+    constructions = {construction.identifier: construction for construction in model.properties.energy.constructions}
+
+    outer, inner = constructions["ph_composer_asm_Single000001"].materials
+    assert (outer.user_data, inner.user_data) == ({"firm": {"layer": "outer"}}, None)
+    for identifier in ("ph_composer_asm_Mixed0000001", "ph_composer_asm_Mixed0000001_reversed"):
+        host = constructions[identifier].materials[0]
+        assert host.user_data is None
+        cells = [cell.material.user_data for cell in host.properties.ph.divisions.cells]
+        assert cells == [{"firm": {"segment": "stud"}}, {"firm": {"segment": "cavity"}}]
+    steel_host = constructions["ph_composer_asm_Steel0000001"].materials[0]
+    assert steel_host.user_data == {"firm": {"layer": "steel"}}
+    assert [cell.material.user_data for cell in steel_host.properties.ph.divisions.cells] == [None, None]
+
+
+@pytest.mark.parametrize(
+    ("assembly", "change", "reason"),
+    [
+        ("asm_Single000001", lambda row: row["layers"][0].update(user_data={"ph_composer": 1}), "reserved key"),
+        (
+            "asm_Mixed0000001",
+            lambda row: row["layers"][0]["segments"][1].update(user_data={"ph_composer": 1}),
+            "reserved key",
+        ),
+        # Nothing carries these maps, so receiving one is a contract defect, not something to drop.
+        (
+            "asm_Single000001",
+            lambda row: row["layers"][0]["segments"][0].update(user_data={"firm": 1}),
+            "undivided Layer",
+        ),
+        ("asm_Membrane0001", lambda row: row["layers"][1].update(user_data={"firm": 1}), "membrane Layer"),
+    ],
+)
+def test_a_reserved_or_uncarried_part_map_costs_its_assembly(assembly: str, change: Any, reason: str) -> None:
+    payload = document()
+    change(next(row for row in payload["sections"][ConstructionSection.id]["records"] if row["id"] == assembly))
+    result = translate(payload, (ConstructionSection(),))
+    assert assembly in result.results[ConstructionSection.id].unavailable
+    assert any(finding.object_id == assembly and reason in finding.message for finding in result.findings)
+
+
 @pytest.mark.parametrize("unavailable", [None, "asm_Absent000001", "asm_OnlyFilm0001"])
 def test_unavailable_face_construction_costs_zone_and_keeps_independent_zone(
     unavailable: str | None,

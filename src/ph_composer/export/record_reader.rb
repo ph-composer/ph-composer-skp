@@ -13,6 +13,9 @@ module PhComposer
     #   carries it on the matching object; it is never interpreted, it may not use the reserved
     #   `ph_composer` key, and the export report counts what reached the HBJSON
     #   (HbjsonMetadata.passed). Elsewhere a record that has some gets a finding saying it was left out.
+    #   A record part's map (Records::Part) follows the same rule: `records` takes it out of the values
+    #   with a finding, unless the contributor reads the parts itself (`parts: true`) and passes each
+    #   member through `entity_record`, which carries or omits its map.
     # - An extension envelope the contributor names must be understood, and only the named payload
     #   fields go out.
     # - On an entity, an envelope another contributor claims (`entity_projections:`) must be understood;
@@ -57,10 +60,11 @@ module PhComposer
 
       # Every record of `kind_id`, in id order, as `{"id" => id, <values>..., "extensions" => {...}}`.
       # `extensions` maps a namespace to the payload fields to include; `user_data: true` passes each
-      # record's user_data through as `"user_data"`.
-      def records(kind_id, extensions: {}, user_data: false)
+      # record's user_data through as `"user_data"`. `parts: true` leaves each part's map in the values
+      # for the contributor to pass through `entity_record`; otherwise every part map is left out.
+      def records(kind_id, extensions: {}, user_data: false, parts: false)
         @engine.ids(kind_id).sort.map do |id|
-          record(kind_id, @engine.find(kind_id, id), extensions, user_data)
+          record(kind_id, @engine.find(kind_id, id), extensions, user_data, parts)
         end
       end
 
@@ -110,8 +114,11 @@ module PhComposer
 
       # A non-blocking finding the reading section discloses about `id`: something it left out of its records,
       # or a warning about what it wrote. It joins the result's findings, and so the report.
+      # A finding repeated by a second read of the same record, such as a Building-Segment two Zones name or
+      # an Edge id a split left on two Edges, is listed once.
       def note(code, id, message)
-        @findings << Finding.new(:code => code, :section => @section, :record_id => id, :message => message)
+        finding = Finding.new(:code => code, :section => @section, :record_id => id, :message => message)
+        @findings << finding unless @findings.include?(finding)
       end
 
       # A claimed row its claimant never read, including one captured after its read, would leave
@@ -144,7 +151,7 @@ module PhComposer
         @projected[[namespace, target_kind]] << row
       end
 
-      def record(kind_id, stored, extensions, user_data)
+      def record(kind_id, stored, extensions, user_data, parts)
         id = stored.fetch("id")
         passed = metadata(id, stored, user_data)
         exported = stored.fetch("extension_data", {}).each_with_object({}) do |(namespace, envelope), out|
@@ -155,8 +162,20 @@ module PhComposer
             leave_out(id, namespace, envelope)
           end
         end
-        values = DeepCopy.call(@engine.kind(kind_id).values(stored))
+        kind = @engine.kind(kind_id)
+        values = DeepCopy.call(kind.values(stored))
+        leave_out_parts(kind, values) unless parts
         { "id" => id }.merge(values).merge(exported.empty? ? {} : { "extensions" => exported }).merge(passed)
+      end
+
+      # Takes each part's map out of `values`, with a finding for one that is not empty.
+      def leave_out_parts(kind, values)
+        kind.parts.each do |part|
+          part.members(values).each do |member|
+            map = member.delete("user_data")
+            omit_metadata(member.fetch("id")) unless map.nil? || map.empty?
+          end
+        end
       end
 
       # The rules are MetadataCheck's, which a preflight runs too; extraction raises the first problem.

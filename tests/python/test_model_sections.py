@@ -7,11 +7,13 @@ from typing import Any, cast
 
 import pytest
 
+from ph_composer_translation import stack
 from ph_composer_translation.composition import SECTIONS
 from ph_composer_translation.constructions import ConstructionSection, TranslatedConstruction
 from ph_composer_translation.contract import RecordError
 from ph_composer_translation.coordinator import translate
 from ph_composer_translation.material_sources import MaterialSourcesSection
+from ph_composer_translation.model_metadata import ModelMetadataSection
 from ph_composer_translation.model_sections import FaceSection, ZoneSection
 from ph_composer_translation.sections import Inputs
 from ph_composer_translation.space_sections import SpaceSection
@@ -122,6 +124,7 @@ def test_model_sections_build_rooms_then_resolve_surface_pairs(monkeypatch: pyte
             WindowConstructionSection(),
             ApertureSection(),
             ZoneSection(),
+            ModelMetadataSection(),
             SpaceSection(),
             ThermalBridgeSection(),
         ),
@@ -150,6 +153,7 @@ def test_invalid_face_vocabulary_becomes_a_record_error(monkeypatch: pytest.Monk
             WindowConstructionSection(),
             ApertureSection(),
             ZoneSection(),
+            ModelMetadataSection(),
             SpaceSection(),
             ThermalBridgeSection(),
         ),
@@ -184,6 +188,7 @@ def test_surface_requires_an_available_reciprocal_counterpart(monkeypatch: pytes
             WindowConstructionSection(),
             ApertureSection(),
             ZoneSection(),
+            ModelMetadataSection(),
             SpaceSection(),
             ThermalBridgeSection(),
         ),
@@ -246,6 +251,7 @@ def test_explicit_and_reciprocal_omissions_preserve_inputs_and_publish_remaining
             WindowConstructionSection(),
             ApertureSection(),
             ZoneSection(),
+            ModelMetadataSection(),
             SpaceSection(),
             ThermalBridgeSection(),
         ),
@@ -291,6 +297,7 @@ def test_retired_face_with_no_boundary_is_a_nonblocking_reported_omission(monkey
                 WindowConstructionSection(),
                 ApertureSection(),
                 ZoneSection(),
+                ModelMetadataSection(),
                 SpaceSection(),
                 ThermalBridgeSection(),
             ),
@@ -343,6 +350,7 @@ def test_malformed_omission_metadata_remains_a_blocker(
                 WindowConstructionSection(),
                 ApertureSection(),
                 ZoneSection(),
+                ModelMetadataSection(),
                 SpaceSection(),
                 ThermalBridgeSection(),
             ),
@@ -369,6 +377,7 @@ def test_missing_boundary_without_explicit_omission_remains_a_blocker(monkeypatc
                 WindowConstructionSection(),
                 ApertureSection(),
                 ZoneSection(),
+                ModelMetadataSection(),
                 SpaceSection(),
                 ThermalBridgeSection(),
             ),
@@ -397,6 +406,7 @@ def test_omitted_face_invalid_classification_still_blocks(monkeypatch: pytest.Mo
                 WindowConstructionSection(),
                 ApertureSection(),
                 ZoneSection(),
+                ModelMetadataSection(),
                 SpaceSection(),
                 ThermalBridgeSection(),
             ),
@@ -429,6 +439,25 @@ def test_real_hbjson_reloads_with_omitted_surface_pair_and_counts_what_it_holds(
     assert all(face["boundary_condition"]["type"] != "Surface" for room in hbjson["rooms"] for face in room["faces"])
     with pytest.raises(ValueError, match="Surface accounting"):
         check({**canonical, "surface_pairs": 1})
+
+
+def test_the_model_map_reloads_on_the_honeybee_model_and_the_reserved_key_withholds_it() -> None:
+    from ph_composer_translation.model_metadata import MODEL_METADATA_SECTION_ID
+
+    document = load_fixture()
+    assert document["sections"][MODEL_METADATA_SECTION_ID] == {"version": 1, "records": []}
+    plain = cast(dict[str, Any], translate(document, SECTIONS).to_document())
+    assert json.loads(plain["canonical_model"]["hbjson"]).get("user_data") is None
+    record = {"id": "Model", "user_data": {"firm": {"project": "2611"}}}
+    document["sections"][MODEL_METADATA_SECTION_ID]["records"] = [record]
+    result = cast(dict[str, Any], translate(document, SECTIONS).to_document())
+    assert result["summary"]["publishable"] is True
+    model = stack.load("honeybee.model").Model.from_dict(json.loads(result["canonical_model"]["hbjson"]))
+    assert model.user_data == {"firm": {"project": "2611"}}
+    record["user_data"] = {"ph_composer": {"x": 1}}
+    refused = cast(dict[str, Any], translate(document, SECTIONS).to_document())
+    assert refused["summary"]["publishable"] is False
+    assert [finding["object_id"] for finding in refused["findings"]] == ["Model"]
 
 
 def test_a_failed_zone_costs_its_surface_partner_a_named_finding_and_withholds_the_model() -> None:

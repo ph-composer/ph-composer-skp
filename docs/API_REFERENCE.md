@@ -10301,6 +10301,128 @@ Example params:
 {}
 ```
 
+### `ph_composer.model.export_preflight`
+
+Whether the Model's own metadata can be exported. Owner: `ph_composer.model`.
+
+Refuses: only the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "findings",
+    "repairs"
+  ],
+  "properties": {
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "section",
+          "object_id",
+          "message",
+          "blocks_export"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "section": {
+            "type": "string"
+          },
+          "object_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The record the finding is about."
+          },
+          "message": {
+            "type": "string"
+          },
+          "blocks_export": {
+            "type": "boolean"
+          },
+          "locate": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "params"
+            ],
+            "description": "A view command that shows what the finding is about.",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "params": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "repairs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "checked",
+          "action",
+          "params"
+        ],
+        "description": "An action the export workflow offers to run before exporting.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "checked": {
+            "type": "boolean"
+          },
+          "action": {
+            "type": "string"
+          },
+          "params": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
 ### `ph_composer.records.detail`
 
 One value of one stored record, exactly, as canonical JSON text in fragments: join every fragment's text in order, check its sha256 and parse it. Pass next_cursor back for the next fragment. Owner: `ph_composer.records`.
@@ -68101,3 +68223,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.55 | 2026-11-14 | ph_composer.records.update_metadata writes Building Segment and Level maps and rewrites the copy each adopted Zone and member stamp keeps in the same Undo step; it may refuse target.locked. Zone option settings still refuse as target.wrong_kind. zones.options.manage, remove and merge keep the survivor's map and return removed_user_data, each removed option whose map was not empty with its top-level keys, and removed_user_data_total. A RecordKind may declare metadata_follow_up. |
 | 1.56 | 2026-11-14 | thermal_bridges.edges.selection, selection_all, at and candidates rows carry user_data, extension_data and extension_status. New ph_composer.thermal_bridges.edges.update_metadata replaces the metadata of assigned Edges by occurrence, guarded by expected_metadata, at most 250 Edges in one Undo step; an Edge with no assignment refuses. |
 | 1.57 | 2026-11-14 | ph_composer.model.detail and ph_composer.model.update_metadata are new: the Model's own user_data and extension_data, in the ph_composer.model dictionary, read as {} until written and replaced under expected_metadata in one Undo step. Volume rows carry floor, the Space Floor's reference and its own user_data (a ph_composer.spaces.volumes.list field, not a default), and spaces.update_metadata writes that map by floor_id. Clearing a map a record never stored writes nothing in every owner's update_metadata. |
+| 1.58 | 2026-11-14 | Export carries the Model's user_data to the HBJSON Model, a Space Floor's to its SpaceFloor, an Assembly Layer's to its material (the hybrid host when divided) and a divided Layer's Layer-Segments' to their cell materials; a ph_composer key in any of them blocks the export, and the new ph_composer.model.export_preflight reports it for the Model. The extraction gains the ph_composer.model.export.model section and a Volume's floor_user_data. Window Element, Attached zone, membrane Layer and undivided Layer-Segment maps stay in the Model with an export.metadata_omitted finding, and each finding is listed once. |

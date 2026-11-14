@@ -50,6 +50,8 @@ class ConstructionSection(Section[AssemblyRecord, TranslatedConstruction]):
         for index, layer in enumerate(record.layers):
             material = record.materials[layer.segments[0].material_id]
             if material.category == "membrane":
+                if layer.user_data:
+                    raise RecordError(f"assembly {record.id} membrane Layer {layer.id} has no material for user_data")
                 membranes.append(
                     {
                         "outside_index": index,
@@ -136,13 +138,19 @@ def _energy(material: MaterialRecord, thickness: float, identifier: str) -> Any:
 
 
 def _layer(assembly: AssemblyRecord, layer: LayerRecord) -> Any:
+    """The Layer's own material, carrying its user_data; a divided Layer's cells carry their Segments' maps.
+    The identifiers are scoped by Assembly and Layer (Layer ids are unique within their Assembly), so no two
+    Layers share a material object, and a reversed construction reuses these same objects."""
     prefix = f"ph_composer_{assembly.id}_{layer.id}"
-    if len(layer.segments) == 1 and layer.segments[0].steel_stud_spacing_mm is None:
-        return _energy(assembly.materials[layer.segments[0].material_id], layer.thickness_mm / 1000, prefix)
-    cells = [
-        _energy(assembly.materials[segment.material_id], layer.thickness_mm / 1000, f"{prefix}_s{index + 1}")
-        for index, segment in enumerate(layer.segments)
-    ]
+    if not layer.divided:
+        single = _energy(assembly.materials[layer.segments[0].material_id], layer.thickness_mm / 1000, prefix)
+        single.user_data = dict(layer.user_data) or None
+        return single
+    cells = []
+    for index, segment in enumerate(layer.segments):
+        cell = _energy(assembly.materials[segment.material_id], layer.thickness_mm / 1000, f"{prefix}_s{index + 1}")
+        cell.user_data = dict(segment.user_data) or None
+        cells.append(cell)
     grid = stack.load("honeybee_energy_ph.properties.materials.opaque").PhDivisionGrid()
     grid.set_row_heights([1.0])
     grid.set_column_widths([segment.width_mm / 1000 for segment in layer.segments])
@@ -158,6 +166,8 @@ def _layer(assembly: AssemblyRecord, layer: LayerRecord) -> Any:
     host.conductivity = grid.get_equivalent_conductivity()
     host.properties.ph.divisions = grid
     host.properties.ph.ph_color = base.properties.ph.ph_color
+    # The duplicate copied its base cell's map; the host carries the Layer's own.
+    host.user_data = dict(layer.user_data) or None
     return host
 
 

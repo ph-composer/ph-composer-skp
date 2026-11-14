@@ -591,9 +591,9 @@
       "sha256": "67985dfd66315fab3e7a75cbd5f4dfe323cfcbf8efb123ab13f46c6598776d06"
     },
     "python/ph_composer_translation/composition.py": {
-      "bytes": 988,
+      "bytes": 1112,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "7656cb6af9c931b901e888b7b69c1c972e65aa55380e5e875ac2ceef147da784"
+      "sha256": "5b82aef2b5d1c7da06ab65cfd761835bede18335f94ad0bc02e4ab4be4fd738c"
     },
     "python/ph_composer_translation/conformance.py": {
       "bytes": 2658,
@@ -601,9 +601,9 @@
       "sha256": "75c0da2af7b3a437ef349eb7ca4c3162ff109e74e71de3b73718e326ee190330"
     },
     "python/ph_composer_translation/constructions.py": {
-      "bytes": 8439,
+      "bytes": 9144,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "d07556340bf1063c51e4b8d2015393fa0980df0cf0a7ab49eb60f387b5c4236c"
+      "sha256": "bb9ebb913c75c4c958bfd0d9ac159733e1e13434838b04deeaa71ceea03f99a5"
     },
     "python/ph_composer_translation/contract/__init__.py": {
       "bytes": 2490,
@@ -611,14 +611,14 @@
       "sha256": "73514ef467c81e4a83f31900380deeb29a8b2e2fe838360d506a0e9d75c591a7"
     },
     "python/ph_composer_translation/contract/assembly_records.py": {
-      "bytes": 6886,
+      "bytes": 8013,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "ef4a5dc648dbd55da8020e7dd21e32604ecd476ee553953cfd5411a3f9e445e3"
+      "sha256": "6a1149dccb38a1eac635df6c736bdbb20eee16bb268446efe8330cae9769b5c0"
     },
     "python/ph_composer_translation/contract/space_records.py": {
-      "bytes": 5762,
+      "bytes": 5956,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "9536a474a64d3fe8445c23a5ae9690bf90cf476c5aa162820b0e65cdf9b91690"
+      "sha256": "47e0b3c8367d74422e79050122326aec2f1672dd59fabb5cda5a3f9f6c324966"
     },
     "python/ph_composer_translation/contract/thermal_bridge_records.py": {
       "bytes": 2908,
@@ -650,6 +650,11 @@
       "mime": "text/plain; charset=utf-8",
       "sha256": "81afd69d32d75db8e3e2b9f305fd568c4c000be8a8d0d37128bbf637ccfd734f"
     },
+    "python/ph_composer_translation/model_metadata.py": {
+      "bytes": 1484,
+      "mime": "text/plain; charset=utf-8",
+      "sha256": "c9185a0a20c6a2396a82a606174c3b1c30ab08b8b15226990cb39f05f94ac937"
+    },
     "python/ph_composer_translation/model_sections.py": {
       "bytes": 23885,
       "mime": "text/plain; charset=utf-8",
@@ -666,9 +671,9 @@
       "sha256": "8e5908a28c57dcda7e4781e073f504aacd6b80d0c300a5f7ff4f58b96cd01e4e"
     },
     "python/ph_composer_translation/space_sections.py": {
-      "bytes": 9949,
+      "bytes": 10120,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "a0150a919fd6ccfadc9000ff2f2fca737d0f075e1d13e5854d42f0ed0746a354"
+      "sha256": "6c42e889160dbe4b52b2879c3fda28a873a9c6428ef1593fdbf6dfc3fb4b5f4c"
     },
     "python/ph_composer_translation/stack.py": {
       "bytes": 1361,
@@ -897,6 +902,7 @@
     "python/ph_composer_translation/entry.py",
     "python/ph_composer_translation/exporters.py",
     "python/ph_composer_translation/material_sources.py",
+    "python/ph_composer_translation/model_metadata.py",
     "python/ph_composer_translation/model_sections.py",
     "python/ph_composer_translation/result.py",
     "python/ph_composer_translation/sections.py",

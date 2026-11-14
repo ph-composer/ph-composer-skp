@@ -448,8 +448,9 @@ Undo and no-op rules. A Space Floor's `user_data` is its Volume's optional `floo
 never report it as a Volume value but as the Volume row's `floor` (`reference` `{floor_id, entity_path}`
 and `user_data`), and `ph_composer.spaces.update_metadata` writes it by that reference under the
 Volume's write refusals. A Floor takes `user_data` only, as a part does; entries for a Volume and its
-Floor stage as one write. Copies and Make independent keep it with the Volume. Neither map is exported
-yet.
+Floor stage as one write. Copies and Make independent keep it with the Volume. Export carries the Model's
+map to the HBJSON Model's `user_data` (the foundation's `ph_composer.model.export.model` section) and the
+Floor's to its honeybee-ph `SpaceFloor` (translation sections, below).
 
 **Exporting a payload on another feature's entity.** The feature that owns an extension claims it on
 an entity kind in its export contributor: `entity_projections: [{"namespace", "target_kind",
@@ -1091,6 +1092,21 @@ alone: a Space with no rate stored writes none of `_v_sup`, `_v_eta`, `_v_tran`;
 all three, 0 for an unset rate, converted from m3/h to m3/s there and nowhere else. Its result fields
 total floor area, weighted area and net volume per Zone and per Building-Segment, and its
 conformance checks the reloaded Rooms' Spaces against the per-Zone totals.
+
+Record maps follow the object each entity becomes. The Model's own map leaves in the foundation's section
+`ph_composer.model.export.model` (Ruby `shell/model_metadata.rb`, Python `model_metadata.py`, attached at
+`MODEL`): one record, `{"id": "Model", "user_data"}`, only when the map is not empty; PH-Composer writes no
+reserved entry on the Model, and the Model's envelopes follow the left-out rules. A Volume record carries its Space
+Floor's map as `floor_user_data`, written on the `SpaceFloor`. An Assembly Layer's map rides on its own
+material, the single EnergyMaterial or, when the Layer is divided (more than one Layer-Segment, or a steel
+stud spacing), the hybrid host; each Layer-Segment of a divided Layer carries its map on its cell
+EnergyMaterial. Material identifiers are scoped by Assembly and Layer, so no two Layers share one, and the
+reversed construction reuses the same objects. A membrane Layer and an undivided Layer's Layer-Segment have
+no material of their own; their maps, Window Elements', Thermal Bridge Edges', Attached zones' and every
+definition's (Materials, Frames, Glazings, Psi-Install Types, Window Types, Thermal Bridge Types, Building
+Segments and Levels) stay in the Model with one `export.metadata_omitted` finding per entity: a finding
+repeated by a second read is listed once. Every carried map passes the reserved-key rule, extraction and
+preflight alike, and the artifact guard's local-path check.
 
 Thermal bridges are the first optional section: `ph_composer.thermal_bridges.export.thermal_bridges` (Ruby
 `features/thermal_bridges/export.rb`, Python `thermal_bridge_sections.py`) writes one record per run, built
