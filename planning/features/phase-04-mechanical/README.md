@@ -65,7 +65,7 @@ Colour-by modes, findings and HBJSON export; ERV ducting and hot water piping as
 types, schedules and export, once Phase 3b supplies the edge mechanics.
 
 Out: METr conversion, the simplified hot water methods until upstream carries the field, boilers,
-district heat and PV, equipment libraries, the Zone loads packet's loads, equipment geometry,
+district heat and PV, equipment libraries, the Zone loads packet's loads ([Phase 4a Programs](../phase-04a-program/README.md)), equipment geometry,
 sizing, schedules, SketchUp 2023 and Windows proof, public distribution.
 
 ## Rules for every stage

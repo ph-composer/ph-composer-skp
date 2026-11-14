@@ -129,6 +129,17 @@ It has its own agent/client acceptance boundary and does not invent a technical 
 thermal bridges. Coordinate their shared declarations, Zones context and export files before
 concurrent work. External-agent support and public distribution remain distinct claims.
 
+## Phase 4a: programs
+
+Ed proposed [Phase 4a Programs](features/phase-04a-program/README.md) on 2026-11-14 as the next
+work, ahead of the mechanical stages: honeybee-energy ProgramTypes with their loads and schedules,
+assigned to Zones and exported to HBJSON. It is the Zone loads packet equipment Q12 defers to.
+Research is complete; its placement and name are question Q4a-01. No stage authorized.
+
+| # | Item | State | Note |
+| --- | --- | --- | --- |
+| 4a | [Programs](features/phase-04a-program/README.md) | Requested; research complete 2026-11-14, interview next | Supplies the Zone ventilation load Spaces inherits, the People load PHX needs, airtightness, and the per-Zone occupancy counts P4-12 reads |
+
 ## Phase 4: mechanical
 
 The [Phase 4 coordinating packet](features/phase-04-mechanical/README.md) was planned in detail on

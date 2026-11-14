@@ -26,7 +26,7 @@ Out of this plan: METr conversion and import ([metr-export](../unscheduled/metr-
 owns every METr row, including whether PHX writes one device or three for a shared item), the
 simplified hot water methods until [honeybee_ph#135](https://github.com/PH-Tools/honeybee_ph/issues/135)
 lands (hot water H5), boilers, district heat and PV (Q7), equipment library kinds (Q8, roadmap 5.4),
-the Zone loads packet's occupancy and lighting (Q12), equipment geometry (Q5), sizing, schedules,
+the Zone loads packet's occupancy and lighting (Q12, now [Phase 4a Programs](../phase-04a-program/README.md)), equipment geometry (Q5), sizing, schedules,
 SketchUp 2023 and Windows host proof, public distribution.
 
 ## What earlier phases supply

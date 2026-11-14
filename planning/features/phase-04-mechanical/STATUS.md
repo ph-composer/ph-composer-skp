@@ -106,7 +106,7 @@ only when all three are done and its evidence file exists.
 | Boilers, wood boilers, district heat, PV (Q7) | Later scope; PV with roadmap 5.5 |
 | Equipment library kinds (Q8) | Roadmap 5.4 |
 | Ventilation and Heat pump views of the Zones tab (Q10) | After MS2, if wanted; the Zone views contract admits them |
-| Occupancy, lighting and the other Room loads (Q12) | The Zone loads packet, not drafted |
+| Occupancy, lighting and the other Room loads (Q12) | The Zone loads packet, now [Phase 4a Programs](../phase-04a-program/README.md): research complete 2026-11-14, interview next |
 
 ## Verification
 
