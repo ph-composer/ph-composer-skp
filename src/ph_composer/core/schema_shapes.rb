@@ -16,6 +16,10 @@ module PhComposer
                        "description" => "Local JSON metadata of this part, written with " \
                                         "ph_composer.records.update_metadata by part_ids. A new part has none." }
                      .freeze
+    # Whether a discard report (Records::Metadata.discard_report) left a removed map or a key out.
+    DISCARD_TRUNCATED = { "type" => "boolean",
+                          "description" => "True when removed_user_data leaves out a removed map or one of a " \
+                                           "listed map's keys, by its count or byte limit." }.freeze
 
     # A closed object; every property is required unless `optional` names it.
     def object(properties, optional: [], description: nil)
@@ -43,16 +47,18 @@ module PhComposer
         "part_ids" => list({ "type" => "string" }, :description => "For a part, its ids from the record down."),
         "user_data_keys" => list({ "type" => "string" },
                                  :description => "The map's first #{Records::Metadata::REPORT_LIMIT} top-level " \
-                                                 "keys, sorted."),
+                                                 "keys, sorted, while the report fits its byte limit."),
         "user_data_key_total" => count
       }, :optional => ["part_ids"])
       with(result, "removed_user_data" => list(removed, :description => "Each removed record, then each of its " \
                                                                         "parts, whose user_data was not empty, " \
                                                                         "the first " \
-                                                                        "#{Records::Metadata::REPORT_LIMIT}: the " \
-                                                                        "map is gone, a survivor keeps its own, " \
-                                                                        "and Undo brings it back."),
-                   "removed_user_data_total" => count)
+                                                                        "#{Records::Metadata::REPORT_LIMIT} " \
+                                                                        "within " \
+                                                                        "#{Records::Metadata::REPORT_BYTES} " \
+                                                                        "bytes: the map is gone, a survivor " \
+                                                                        "keeps its own, and Undo brings it back."),
+                   "removed_user_data_total" => count, "removed_user_data_truncated" => DISCARD_TRUNCATED)
     end
 
     # `schema` with what it means to a caller, for discovery.

@@ -86,7 +86,7 @@ A record or a preview can be larger than one reply. These reads give all of it e
   written the same way, and each Zone's copy of its choices follows in the same Undo step. A locked Zone
   refuses the write as `target.locked`; a Zone awaiting adoption keeps its copy until it is adopted. Removing or merging an option keeps the survivor's map; the
   result's `removed_user_data` names each removed option whose map was not empty, with its top-level
-  keys (the first 50, with `removed_user_data_total`), and Undo brings it back.
+  keys (as bounded under "Deleting a definition"), and Undo brings it back.
 - **Change a part's metadata.** An Assembly's Layers and Layer-Segments each keep their own
   `user_data` (`describe` on a record kind lists its `parts`). Read the map from the record's
   `values` (`records.list`, or `records.detail` with a path such as `["values", "layers"]`); `segments.list`
@@ -97,21 +97,25 @@ A record or a preview can be larger than one reply. These reads give all of it e
   A Window Type's elements are parts too: read each one's map from `windows.types.elements.list` and
   write it with `part_ids` `[element id]`. Splitting an element copies its map into every piece. Merging
   keeps only the top-left element's map; the result's `removed_user_data` names each other element whose
-  map was not empty, with its top-level keys (the first 50, with `removed_user_data_total`), and Undo
+  map was not empty, with its top-level keys (as bounded under "Deleting a definition"), and Undo
   brings them back. Removing a band deletes its elements with their maps. A `windows.types.update` that
   sends the whole `elements` array keeps each surviving element's map by its id, whether or not it sends
   it, and a new element starts without one; a map that differs from the stored one refuses
   `params.invalid`, since `records.update_metadata` is the one way to write it.
 - **Deleting a definition.** The delete of a Material, Assembly, Frame, Glazing, Psi-Install Type,
   Window Type, Thermal Bridge Type or Attached zone returns `removed_user_data`: the record, then each
-  of its parts with `part_ids`, whose map was not empty, with its top-level keys (the first 50, with
-  `removed_user_data_total`). A replacement keeps its own map, and Undo brings the removed maps back.
+  of its parts with `part_ids`, whose map was not empty, with its top-level keys. The report fits one
+  reply: it lists the first 50 maps, each with its `user_data_key_total`, and as many of their first 50
+  keys as fit in 8 KiB. `removed_user_data_total` counts every removed map, and
+  `removed_user_data_truncated` is true when a map or a key was left out. A replacement keeps its own
+  map, and Undo brings the removed maps back.
 - **Change the Model's or a Space Floor's metadata.** The Model has its own `user_data` and
   `extension_data`: read them with `ph_composer.model.detail` (both `{}` until something is written)
   and write them with `ph_composer.model.update_metadata`, which takes `user_data`,
   `extension_payloads` or both and the two maps you read as `expected_metadata`, as above, with no
-  reference, and answers each envelope's `extension_status`. For maps larger than one reply,
-  `model.detail` with `metadata` `"summary"` gives their sizes, and `ph_composer.model.fragment` reads
+  reference, and answers each envelope's `extension_status`. A record that a Model extension payload
+  names refuses deletion as `reference.in_use` until the payload no longer names it. For maps larger
+  than one reply, `model.detail` with `metadata` `"summary"` gives their sizes, and `ph_composer.model.fragment` reads
   any of them, such as `path` `["user_data"]`, in fragments that join as above. Each Space Floor has its own `user_data` too, kept apart from its Volume's. A Volume row's
   `floor` gives the Floor's `reference` (`floor_id` and the Volume's `entity_path`) and its `user_data`;
   `ph_composer.spaces.volumes.list` returns it when `fields` asks for `floor`. Send that reference to
@@ -539,8 +543,8 @@ its Face, a Window Unit's to each of its Apertures, an Assembly's to its constru
 Volume's, Space Floor's and Floor Segment's to the matching honeybee-ph object. An Assembly Layer's
 map goes to its material (the hybrid material when the Layer is divided), and a divided Layer's
 Layer-Segments' maps go to their cell materials. Every other map stays in the Model with one
-`export.metadata_omitted` finding per entity: a membrane Layer, the one Layer-Segment of an undivided
-Layer, Window Elements, Thermal Bridge Edges, Attached zones and the definitions (Materials, Frames,
+`export.metadata_omitted` finding per entity: a membrane Layer and its Layer-Segment, the one
+Layer-Segment of an undivided Layer, Window Elements, Thermal Bridge Edges, Attached zones and the definitions (Materials, Frames,
 Glazings, Psi-Install Types, Window Types, Thermal Bridge Types, Building Segments and Levels). A
 `ph_composer` key in any map that leaves blocks the export. The finding for a Layer, Layer-Segment
 or Window Element names the part in `object_id` and gives `reference`, the `{kind, id, part_ids}`

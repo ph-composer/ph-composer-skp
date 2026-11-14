@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 60
+    MINOR = 61
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -320,7 +320,15 @@ module PhComposer
                     "selection, at and candidates take metadata summary, and thermal_bridges.edges.detail is new. " \
                     "Export reports an unused Building Segment's or Level's map as omitted. A part declaration " \
                     "needs a required string id and an optional object user_data. Engine#propose_update takes " \
-                    "derived_part_maps and Engine#propose_delete returns the removal report." }
+                    "derived_part_maps and Engine#propose_delete returns the removal report." },
+      { "minor" => 61, "date" => "2026-11-14",
+        "change" => "Every delete and merge that returns removed_user_data also returns " \
+                    "removed_user_data_truncated, and its rows stay within 8192 bytes: each listed map keeps its " \
+                    "address and user_data_key_total, and its keys fill in while they fit. The new reference " \
+                    "target ph_composer.model.metadata puts the Model's extension payloads in the incoming-reference " \
+                    "check, so a record a Model payload names refuses deletion as reference.in_use. A membrane " \
+                    "Layer's Layer-Segment map stays in the Model with an export.metadata_omitted finding even " \
+                    "with a steel stud spacing." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

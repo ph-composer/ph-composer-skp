@@ -11,15 +11,18 @@ module PhComposer
           "id" => Shapes::ID,
           "user_data_keys" => Shapes.list({ "type" => "string" },
                                           :description => "The map's first #{Records::Metadata::REPORT_LIMIT} " \
-                                                          "top-level keys, sorted."),
+                                                          "top-level keys, sorted, while the report fits its " \
+                                                          "byte limit."),
           "user_data_key_total" => Shapes::COUNT
         }).freeze
         # manage, remove and merge also report the maps of the options they remove.
         MANAGE_RESULT = Shapes.with(RESULT, "removed_user_data" => Shapes.list(
           DISCARDED, :description => "Each removed option whose user_data was not empty, in id order, the first " \
-                                     "#{Records::Metadata::REPORT_LIMIT}: its map is gone, the survivor keeps its " \
-                                     "own, and Undo brings it back."
-        ), "removed_user_data_total" => Shapes::COUNT).freeze
+                                     "#{Records::Metadata::REPORT_LIMIT} within " \
+                                     "#{Records::Metadata::REPORT_BYTES} bytes: its map is gone, the survivor " \
+                                     "keeps its own, and Undo brings it back."
+        ), "removed_user_data_total" => Shapes::COUNT, "removed_user_data_truncated" => SchemaShapes::DISCARD_TRUNCATED)
+                              .freeze
         COLLECTION = { "type" => "string", "enum" => %w[building_segment level] }.freeze
         MANAGE = Shapes.object({
           "collection" => COLLECTION, "options" => Shapes.list(OPTION), "expected_options" => Shapes.list(OPTION),

@@ -332,7 +332,8 @@ Segment or Level write also rewrites the copy each Zone keeps of it, in the same
 `floor.reference`, and `ph_composer.model.update_metadata` writes the Model's own maps, read by
 `ph_composer.model.detail` and, for maps larger than a reply, `ph_composer.model.fragment`. Edge rows
 take `metadata` `"summary"`, and `thermal_bridges.edges.detail` reads one Edge's metadata in fragments.
-Catalog deletes report the maps they remove in `removed_user_data`.
+Catalog deletes and merges report the maps they remove in `removed_user_data`, bounded to fit one reply,
+with `removed_user_data_truncated`.
 A script that reads the exported HBJSON finds passed-through metadata on the owning Honeybee object. The
 [export recipe](../docs/AGENT_GUIDE.md#export) lists supported record kinds and explains the
 metadata findings; an `export.metadata_omitted` finding about a record part carries `reference`, the

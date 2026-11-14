@@ -130,18 +130,17 @@ module PhComposer
         cells.min_by { |cell| [cell["row_span"].first, cell["column_span"].first] }
       end
 
-      # What `merge` discards, for its result: each other selected element whose map is not empty, by id
-      # with the map's top-level keys, in grid order, the first Records::Metadata::REPORT_LIMIT of them
-      # and how many there are. Undo brings the elements back with their maps.
+      # What `merge` discards, for its result: each other selected element whose map is not empty, by
+      # element_id in grid order, as Records::Metadata.discard_report bounds them. Undo brings the elements
+      # back with their maps.
       def merge_discards(record, values)
         selected = cells(record, values.fetch("ids"))
         survivor = top_left(selected).fetch("id")
         discarded = selected.reject { |cell| cell.fetch("id") == survivor || cell.fetch("user_data", {}).empty? }
-        listed = discarded.sort_by { |cell| [cell["row_span"].first, cell["column_span"].first] }
-                          .first(Records::Metadata::REPORT_LIMIT).map do |cell|
-          { "element_id" => cell.fetch("id") }.merge(Records::Metadata.discarded_keys(cell["user_data"]))
-        end
-        { "removed_user_data" => listed, "removed_user_data_total" => discarded.length }
+        Records::Metadata.discard_report(
+          discarded.sort_by { |cell| [cell["row_span"].first, cell["column_span"].first] }
+                   .map { |cell| [{ "element_id" => cell.fetch("id") }, cell.fetch("user_data")] }
+        )
       end
 
       def merge_installs(selected, merged, rows, columns)

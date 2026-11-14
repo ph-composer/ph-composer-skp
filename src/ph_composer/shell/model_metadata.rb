@@ -22,6 +22,9 @@ module PhComposer
     # kind's label: "The Model metadata changed since it was read.", "... data on Model ...".
     TARGET_ID = "Model"
     LABEL = "The"
+    # The reference target that puts the Model's envelopes in the engine's incoming-reference inventory, so a
+    # record a Model payload names refuses deletion as reference.in_use, as it would from any record's payload.
+    REFERENCE_KIND = "#{FEATURE_ID}.metadata"
     MAP = { "type" => "object" }.freeze
     MAPS = SchemaShapes.object({ "user_data" => MAP, "extension_data" => MAP }).freeze
     SETTINGS = ModelSettings.new(:dictionary => "ph_composer.model",
@@ -99,12 +102,23 @@ module PhComposer
                      :side_effects => "Stores the maps in this SKP.") do |request, proposal|
         update_metadata(request, proposal, request.params)
       end
+      feature.reference_target(Records::ReferenceTarget.new(
+        :id => REFERENCE_KIND, :label => "Model metadata", :records => method(:reference_entries),
+        # SETTINGS.read refuses unreadable maps before an entry exists, so an entry has nothing left to find.
+        :validate => ->(_record) { [] }
+      ))
       feature.export_contributor(SECTION, :section_version => 1, :preflight => PREFLIGHT) do |reader|
         export_records(reader)
       end
       feature.query(PREFLIGHT, :description => "Whether the Model's own metadata can be exported.",
                                :refuses => [], :params => SchemaShapes.object({}), :result => Export::PREFLIGHT_RESULT,
                                :examples => [{}]) { |request| export_preflight(request) }
+    end
+
+    # The Model's maps as the one occurrence of REFERENCE_KIND, by TARGET_ID.
+    def reference_entries(model)
+      [Records::ReferenceEntry.new(:kind => REFERENCE_KIND, :key => TARGET_ID,
+                                   :record => SETTINGS.read(model).merge("id" => TARGET_ID))]
     end
 
     # The Model's user_data leaves on the Honeybee Model as one record, read from the export snapshot through the

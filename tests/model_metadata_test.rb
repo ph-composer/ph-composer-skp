@@ -14,6 +14,10 @@ class ModelMetadataTest < PhComposerTestCase
   DICTIONARY = "ph_composer.model"
   EMPTY = { "user_data" => {}, "extension_data" => {} }.freeze
   REVIEW = "probe.model.review"
+  USES = "probe.model.uses"
+  MATERIAL = PhComposer::Assemblies::MATERIAL_KIND
+  # A payload naming one Material by material_id.
+  USES_REFERENCES = [{ "path" => "$.material_id", "target_kind" => MATERIAL, "cardinality" => "one" }].freeze
 
   # An installed extension whose payload is valid when its status is draft or checked.
   module Review
@@ -29,6 +33,9 @@ class ModelMetadataTest < PhComposerTestCase
         :namespace => REVIEW, :schema_version => 1, :export_relevance => "local_only",
         :validate => ->(payload) { %w[draft checked].include?(payload["status"]) ? [] : ["status is unknown"] }
       ))
+      feature.extension(PhComposer::Records::Extension.new(:namespace => USES, :schema_version => 1,
+                                                           :references => USES_REFERENCES,
+                                                           :validate => ->(_payload) { [] }))
     end
   end
 
@@ -135,6 +142,28 @@ class ModelMetadataTest < PhComposerTestCase
     assert_equal "export.blocked", error.code
     assert_equal [["export.blocked", "Model", true]],
                  preflight.fetch("findings").map { |row| row.values_at("code", "object_id", "blocks_export") }
+  end
+
+  # The Model's envelopes are in the incoming-reference inventory: a Material an installed or an unavailable
+  # extension's Model payload names refuses deletion, and deletes once no payload names it.
+  def test_a_material_a_model_payload_names_refuses_deletion
+    created = assignment_invoke("ph_composer.assemblies.materials.create", "values" => { "name" => "Wool" })
+    material = created.dig("value", "id")
+    delete = -> { assignment_invoke("ph_composer.assemblies.materials.delete", "id" => material) }
+    write("extension_payloads" => { USES => { "material_id" => material } })
+    assert_equal "understood", detail.dig("extension_status", USES)
+    assert_equal %w[refused reference.in_use], delete.call.values_at("status", "code")
+
+    absent = PhComposer::Records::Extension.new(:namespace => "absent.uses", :schema_version => 1,
+                                                :references => USES_REFERENCES)
+    PhComposer::ModelMetadata::SETTINGS.store.write(@model, EMPTY.merge(
+      "extension_data" => { "absent.uses" => absent.envelope("material_id" => material) }
+    ))
+    assert_equal "unavailable", detail.dig("extension_status", "absent.uses")
+    assert_equal %w[refused reference.in_use], delete.call.values_at("status", "code")
+
+    PhComposer::ModelMetadata::SETTINGS.store.write(@model, EMPTY)
+    assert_equal "committed", delete.call.fetch("effect")
   end
 
   def test_stored_maps_that_are_not_plain_json_objects_refuse_the_read

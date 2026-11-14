@@ -9,10 +9,13 @@ module PhComposer
     module Metadata
       # The most top-level keys a report of a discarded map lists, and the most discarded maps it lists.
       REPORT_LIMIT = 50
+      # The most bytes a discard report's rows serialize to, so a delete or merge result and its outcome
+      # envelope fit one agent reply (Pages::REPLY_BYTES).
+      REPORT_BYTES = 8 * 1024
 
       module_function
 
-      # What an operation reports of a `user_data` map it discards, such as a merge's removed part: the
+      # What an operation reports of one `user_data` map it discards, such as a repaired Edge's: the
       # first REPORT_LIMIT top-level keys in sorted order, each cut to OccurrencePath::NAME_CHARACTERS, and
       # how many the map holds.
       def discarded_keys(map)
@@ -23,8 +26,7 @@ module PhComposer
 
       # What removing `records` of `kind` discards, for a merge or delete result (D-UD-5): each record, then
       # each of its declared parts (Records::Part), whose map was not empty, in the order given, by `id` and,
-      # for a part, `part_ids`, with the map's top-level keys; the first REPORT_LIMIT of them, and how many
-      # there are. Undo brings them back.
+      # for a part, `part_ids`, as `discard_report` bounds them. Undo brings them back.
       def removed_user_data(kind, records)
         mapped = records.flat_map do |record|
           address = { "id" => record.fetch("id") }
@@ -33,8 +35,45 @@ module PhComposer
           end
           [[address, record["user_data"]]].concat(parts).select { |_address, map| map.is_a?(Hash) && !map.empty? }
         end
-        listed = mapped.first(REPORT_LIMIT).map { |address, map| address.merge(discarded_keys(map)) }
-        { "removed_user_data" => listed, "removed_user_data_total" => mapped.length }
+        discard_report(mapped)
+      end
+
+      # The report every delete and merge makes of the non-empty maps it discards, given as [address, map]
+      # pairs in report order: removed_user_data lists the first REPORT_LIMIT, each by its address and key
+      # total, then fills in their sorted top-level keys, the first REPORT_LIMIT of each cut to
+      # OccurrencePath::NAME_CHARACTERS, in row order until the rows reach REPORT_BYTES; removed_user_data_total
+      # counts them all, and removed_user_data_truncated says whether a map or a key was left out.
+      def discard_report(addressed)
+        rows = []
+        used = 2
+        addressed.first(REPORT_LIMIT).each do |address, map|
+          row = address.merge("user_data_keys" => [], "user_data_key_total" => map.length)
+          size = JSON.generate(row).bytesize + (rows.empty? ? 0 : 1)
+          break if used + size > REPORT_BYTES
+
+          rows << row
+          used += size
+        end
+        fill_keys(rows, addressed.map(&:last), used)
+        cut = rows.length < addressed.length ||
+              rows.any? { |row| row.fetch("user_data_keys").length < row.fetch("user_data_key_total") }
+        { "removed_user_data" => rows, "removed_user_data_total" => addressed.length,
+          "removed_user_data_truncated" => cut }
+      end
+
+      # Adds each row's keys from its map, in row order, while the rows stay within REPORT_BYTES.
+      def fill_keys(rows, maps, used)
+        rows.zip(maps).each do |row, map|
+          keys = row.fetch("user_data_keys")
+          map.keys.sort.first(REPORT_LIMIT).each do |name|
+            key = name[0, OccurrencePath::NAME_CHARACTERS]
+            size = JSON.generate(key).bytesize + (keys.empty? ? 0 : 1)
+            return if used + size > REPORT_BYTES
+
+            keys << key
+            used += size
+          end
+        end
       end
 
       # Each envelope's status against what is installed (Extension::STATUSES), by namespace.
@@ -142,6 +181,7 @@ module PhComposer
         message = "#{namespace} data on #{id} uses a version the installed extension cannot read."
         raise CodedError.new("extension.schema_unsupported", message, "namespace" => namespace)
       end
+      private_class_method :fill_keys
     end
   end
 end

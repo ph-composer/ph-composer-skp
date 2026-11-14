@@ -192,6 +192,33 @@ class AssemblyRecordsOperationsTest < PhComposerTestCase
     assert_equal [[], 0], plain.fetch("value").values_at("removed_user_data", "removed_user_data_total")
   end
 
+  # Two Layers with 50 keys of 256 characters each report over one agent reply. The delete's report keeps
+  # both rows with their key totals, as many keys as its byte budget holds and the truncation flag, so the
+  # outcome reaches the agent whole.
+  def test_a_large_removal_report_fits_one_agent_reply
+    values = fixture_assembly([[12, [[1000, nil]]], [140, [[1000, nil]]]])
+    values["layers"].each_with_index do |layer, index|
+      layer["user_data"] = 50.times.to_h { |n| ["#{index}#{format('%02d', n)}".ljust(256, "k"), n] }
+    end
+    id = create("assemblies", Assemblies::Assembly::Schema::KIND.values(values))
+    agent = PhComposer::AgentAccess
+    issued = agent::Tokens.issue(:capabilities => %w[read model_write])
+    writer = agent::Tokens.snapshot.fetch(agent::Tokens.digest(issued.fetch("token")))
+    result = agent::Executor.new(:tools => agent::Tools::TABLE).call(
+      writer, "invoke", "session" => @session.id, "name" => "#{Assemblies::FEATURE_ID}.assemblies.delete",
+                        "params" => { "id" => id }, "expected_revision" => @session.revision
+    )
+    refute result["isError"], result.inspect
+    outcome = result.fetch("structuredContent")
+    assert_equal "committed", outcome.fetch("effect"), outcome.inspect
+    rows = outcome.dig("value", "removed_user_data")
+    assert_equal [[id, 50], [id, 50]], rows.map { |row| row.values_at("id", "user_data_key_total") }
+    assert_operator rows.sum { |row| row.fetch("user_data_keys").length }, :<, 100
+    assert_operator JSON.generate(rows).bytesize, :<=, PhComposer::Records::Metadata::REPORT_BYTES
+    assert_equal [2, true], outcome.fetch("value").values_at("removed_user_data_total", "removed_user_data_truncated")
+    assert_operator JSON.generate(outcome).bytesize, :<=, agent::Executor::MAX_RESULT_BYTES
+  end
+
   def test_a_duplicate_copies_part_maps_under_new_ids_as_independent_literal_json
     values = mapped_parts
     literal = values["layers"][0]["id"]

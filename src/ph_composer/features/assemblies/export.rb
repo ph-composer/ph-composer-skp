@@ -30,9 +30,10 @@ module PhComposer
         reader.records(ASSEMBLY_KIND, :user_data => true, :parts => true).map do |row|
           layers = row.fetch("layers").map do |layer|
             layer_part = { "kind" => ASSEMBLY_KIND, "id" => row.fetch("id"), "part_ids" => [layer.fetch("id")] }
+            carried = carries_segments?(layer, materials)
             segments = layer.fetch("segments").map do |segment|
               part = layer_part.merge("part_ids" => [layer.fetch("id"), segment.fetch("id")])
-              reader.entity_record(segment, :fields => SEGMENT_FIELDS, :user_data => divided?(layer), :part => part)
+              reader.entity_record(segment, :fields => SEGMENT_FIELDS, :user_data => carried, :part => part)
             end
             reader.entity_record(layer, :fields => %w[thickness_mm], :user_data => carries_layer?(layer, materials),
                                         :part => layer_part).merge("segments" => segments)
@@ -58,10 +59,17 @@ module PhComposer
         !Materials::Schema.membrane_layer?(layer, materials)
       end
 
+      # Whether each Layer-Segment's map leaves with its cell material: only a divided Layer that is not a
+      # membrane has cells, as a membrane Layer keeps a steel stud spacing yet becomes no material at all.
+      def carries_segments?(layer, materials)
+        carries_layer?(layer, materials) && divided?(layer)
+      end
+
       # The Layers and Layer-Segments of `assembly` whose maps the translation carries, as the parts themselves.
       def carried_parts(assembly, materials)
         Array(assembly["layers"]).flat_map do |layer|
-          (carries_layer?(layer, materials) ? [layer] : []) + (divided?(layer) ? layer.fetch("segments") : [])
+          (carries_layer?(layer, materials) ? [layer] : []) +
+            (carries_segments?(layer, materials) ? layer.fetch("segments") : [])
         end
       end
 
@@ -150,7 +158,7 @@ module PhComposer
         )
         [Export::ReportHtml.section("Authored constructions", body)]
       end
-      private_class_method :preflight_row, :divided?, :carries_layer?, :carried_parts
+      private_class_method :preflight_row, :divided?, :carries_layer?, :carries_segments?, :carried_parts
     end
   end
 end

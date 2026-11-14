@@ -28,8 +28,10 @@ and export.
   that differs from the stored one refuses `params.invalid`: write it with the core action.
 - Deleting a Material, Assembly, Frame, Glazing, Psi-Install Type, Window Type, Thermal Bridge Type or
   Attached zone returns `removed_user_data`: the record, then each part by `part_ids`, whose map was not
-  empty, with its top-level keys (the first 50, and `removed_user_data_total`). A replacement keeps its
-  own map, and Undo restores the removed ones.
+  empty, with its top-level keys. The report fits one reply: the first 50 maps, each with its key total,
+  and as many of their first 50 keys as fit in 8 KiB, with `removed_user_data_total` and
+  `removed_user_data_truncated`, true when a map or a key was left out. Merges report the same way. A
+  replacement keeps its own map, and Undo restores the removed ones.
 - An older Model with no stored map reads `{}` and is not rewritten by the read.
 - Over the API, params that are not plain JSON (`NaN`, `Infinity`, a key that is not a string)
   refuse `request.malformed` before any operation runs, and the sequence stays free for the
@@ -38,7 +40,8 @@ and export.
   send the corrected request with the next one.
 
 `extension_data` is a separate, typed route for maintained extensions, with schema versions and
-declared references. You do not need it for your own data.
+declared references. You do not need it for your own data. A record that an extension payload names,
+on another record or on the Model, cannot be deleted while the payload names it.
 
 ## Coverage
 
@@ -54,7 +57,7 @@ from the record down. "Omitted" means the map stays in the Model and the export 
 | Material | `{kind: "ph_composer.assemblies.material", id}` | `ph_composer.assemblies.materials.list`, `ph_composer.records.list` | Core action; create takes `user_data` | Duplicate copies the map | Omitted | Not in the wire row; replace keeps the local map |
 | Assembly | `{kind: "ph_composer.assemblies.assembly", id}` | `ph_composer.assemblies.assemblies.list`, `ph_composer.records.list` | Core action; create takes `user_data` | Duplicate copies the map and every part's map | Its construction, and the reversed copy | Not a library kind |
 | Layer | Assembly address with `part_ids: [layer id]` | The Assembly's `values.layers` in `ph_composer.records.list` or `ph_composer.records.detail` | Core action with `part_ids` | Edits keep it; a new Layer starts empty; Duplicate copies it under a new id | Its material, the hybrid material when divided; a membrane Layer is omitted | Not a library kind |
-| Layer-Segment | Assembly address with `part_ids: [layer id, segment id]` | `ph_composer.assemblies.assemblies.segments.list` | Core action with `part_ids` | As for a Layer | Its cell material when the Layer is divided; otherwise omitted | Not a library kind |
+| Layer-Segment | Assembly address with `part_ids: [layer id, segment id]` | `ph_composer.assemblies.assemblies.segments.list` | Core action with `part_ids` | As for a Layer | Its cell material when the Layer is divided and not a membrane; otherwise omitted | Not a library kind |
 | Frame, Glazing, Psi-Install Type | `{kind: "ph_composer.windows.frame", id}`, `glazing`, `psi_install_type` | `ph_composer.windows.frames.list` and its siblings, `ph_composer.records.list` | Core action; create takes `user_data` | Duplicate copies the map | Omitted | Not in the wire row; replace keeps the local map |
 | Window Type | `{kind: "ph_composer.windows.window_type", id}` | `ph_composer.windows.types.list`, `ph_composer.records.list` | Core action; create takes `user_data` | Duplicate copies the map and each element's map | Omitted | Not a library kind |
 | Window Element | Window Type address with `part_ids: [element id]` | `ph_composer.windows.types.elements.list` | Core action with `part_ids` | Split copies the map into each piece; merge keeps the top-left element's map and lists the others' keys in `removed_user_data`; an inserted element starts empty; an update sending the whole `elements` array keeps each map | Omitted | Not a library kind |

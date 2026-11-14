@@ -405,8 +405,11 @@ keeps each surviving part's map at every depth. Duplicate makes independent deep
 owner's new ids and never reads a string in a map as a reference. A split copies the source's map into
 every piece. A merge, or a delete that names a replacement, keeps the survivor's map, never combines
 maps, and returns `removed_user_data`, each removed object or part whose map was not empty with its
-top-level keys (at most 50 entries of at most 50 keys, through `Records::Metadata.discarded_keys`),
-and `removed_user_data_total`; Undo restores the removed map. Every catalog delete (Materials,
+top-level keys, `removed_user_data_total` and `removed_user_data_truncated`; Undo restores the removed
+map. `Records::Metadata.discard_report` builds every such report, so it fits one agent reply: it lists
+at most 50 entries, each with its address and `user_data_key_total`, then fills in their first 50 keys
+in order while the rows stay within `REPORT_BYTES` (8 KiB); the flag is true when an entry or a key was
+left out. Every catalog delete (Materials,
 Assemblies, Frames, Glazings, Psi-Install Types, Window Types, Thermal Bridge Types and Attached zones)
 returns the two fields whether or not it names a replacement, empty when nothing was annotated:
 `Engine#propose_delete` answers them through `Records::Metadata.removed_user_data`, the record first,
@@ -484,7 +487,12 @@ of every Edge write.
 `ph_composer.model` settings dictionary (below), read by `ph_composer.model.detail` (with `metadata`
 `"summary"`, only their sizes) and `ph_composer.model.fragment` (one part by `path`, in fragments), and
 written by `ph_composer.model.update_metadata`, one target with no reference under the same pre-image,
-payload, Undo and no-op rules, which answers `extension_status` only. A Space Floor's `user_data` is its Volume's optional `floor_user_data`: reads
+payload, Undo and no-op rules, which answers `extension_status` only. The foundation registers the
+Model's maps as the reference target `ph_composer.model.metadata`, one occurrence with id `Model`, so
+`Engine#incoming_references` scans its envelopes as it scans a record's, and a record a Model payload
+names, installed or unavailable, refuses deletion as `reference.in_use`. As with an unreadable record, an
+unreadable Model map (`record.unreadable`) or a Model envelope whose references cannot be established
+(`copy.rule_missing`) refuses every identity removal until it is repaired. A Space Floor's `user_data` is its Volume's optional `floor_user_data`: reads
 never report it as a Volume value but as the Volume row's `floor` (`reference` `{floor_id, entity_path}`
 and `user_data`), and `ph_composer.spaces.update_metadata` writes it by that reference under the
 Volume's write refusals. A Floor takes `user_data` only, as a part does; entries for a Volume and its
@@ -1141,8 +1149,9 @@ Floor's map as `floor_user_data`, written on the `SpaceFloor`. An Assembly Layer
 material, the single EnergyMaterial or, when the Layer is divided (more than one Layer-Segment, or a steel
 stud spacing), the hybrid host; each Layer-Segment of a divided Layer carries its map on its cell
 EnergyMaterial. Material identifiers are scoped by Assembly and Layer, so no two Layers share one, and the
-reversed construction reuses the same objects. A membrane Layer and an undivided Layer's Layer-Segment have
-no material of their own; their maps, Window Elements', Thermal Bridge Edges', Attached zones' and every
+reversed construction reuses the same objects. A membrane Layer, its Layer-Segment (even with a steel stud
+spacing) and an undivided Layer's Layer-Segment have no material of their own
+(`features/assemblies/export.rb`, extraction and preflight alike); their maps, Window Elements', Thermal Bridge Edges', Attached zones' and every
 definition's (Materials, Frames, Glazings, Psi-Install Types, Window Types, Thermal Bridge Types, Building
 Segments and Levels) stay in the Model with one `export.metadata_omitted` finding per entity, used or
 not: the Zone section passes every valid Building Segment and Level through the boundary once

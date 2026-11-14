@@ -72,6 +72,24 @@ class AssembliesExportTest < PhComposerTestCase
                  findings.find { |row| row.fetch("object_id") == "lyr_000000000007" }.fetch("reference"))
   end
 
+  # A membrane Layer becomes no material even with a steel stud spacing, so its one Layer-Segment's map stays
+  # in the Model with a finding, and a reserved key in it blocks neither the extraction nor the preflight.
+  def test_a_membrane_segment_with_a_stud_spacing_keeps_its_map_local
+    assembly = @fixture.fetch("assemblies").find { |row| row.fetch("id") == "asm_Membrane0001" }
+    layer = assembly.dig("layers", 1)
+    layer.dig("segments", 0).merge!("steel_stud_spacing_mm" => 600.0, "user_data" => { "ph_composer" => 1 })
+    Assemblies::Assembly::Schema::KIND.store.write(@model, assembly)
+
+    extracted = PhComposer::Export::Collection.build(@model, :run_id => "membrane", :contributors => [SECTION])
+    row = extracted.document.dig("sections", SECTION, "records").find { |found| found.fetch("id") == assembly["id"] }
+    refute row.dig("layers", 1, "segments", 0).key?("user_data")
+    references = extracted.findings.select { |finding| finding.fetch("object_id") == "seg_000000000070" }
+                          .map { |finding| finding.values_at("code", "reference") }
+    part = { "kind" => ASSEMBLY, "id" => assembly["id"], "part_ids" => [layer["id"], "seg_000000000070"] }
+    assert_equal [["export.metadata_omitted", part]], references
+    assert(preflight_findings.none? { |finding| finding.fetch("blocks_export") })
+  end
+
   # A reader that does not ask for parts takes every part map out, at any depth, with the part's write reference.
   def test_a_reader_without_parts_omits_nested_maps_with_their_reference
     assembly = @fixture.fetch("assemblies").find { |row| row.fetch("id") == "asm_Mixed0000001" }

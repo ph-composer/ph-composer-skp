@@ -19,16 +19,19 @@ module PhComposer
         "element_id" => Shapes::TEXT,
         "user_data_keys" => Shapes.list(Shapes::TEXT, :description => "The map's first " \
                                                                       "#{Records::Metadata::REPORT_LIMIT} " \
-                                                                      "top-level keys, sorted."),
+                                                                      "top-level keys, sorted, while the " \
+                                                                      "report fits its byte limit."),
         "user_data_key_total" => { "type" => "integer", "minimum" => 0 }
       }).freeze
       REMOVED = Shapes.list(DISCARDED, :description => "Each merged element but the top-left one whose user_data " \
                                                        "was not empty, in grid order, the first " \
-                                                       "#{Records::Metadata::REPORT_LIMIT}: its map is gone, " \
-                                                       "and Undo brings it back.").freeze
-      MERGE_RESULT = Shapes.with(Shapes::TYPE_RESULT, "removed_user_data" => REMOVED,
-                                                      "removed_user_data_total" => { "type" => "integer",
-                                                                                     "minimum" => 0 }).freeze
+                                                       "#{Records::Metadata::REPORT_LIMIT} within " \
+                                                       "#{Records::Metadata::REPORT_BYTES} bytes: its map is " \
+                                                       "gone, and Undo brings it back.").freeze
+      MERGE_RESULT = Shapes.with(Shapes::TYPE_RESULT,
+                                 "removed_user_data" => REMOVED,
+                                 "removed_user_data_total" => { "type" => "integer", "minimum" => 0 },
+                                 "removed_user_data_truncated" => SchemaShapes::DISCARD_TRUNCATED).freeze
 
       module_function
 

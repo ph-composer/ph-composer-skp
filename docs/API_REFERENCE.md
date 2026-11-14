@@ -620,6 +620,18 @@ Values:
 }
 ```
 
+### `ph_composer.model.metadata`
+
+Model metadata, a entity kind owned by `ph_composer.model`, schema version nil.
+
+Values:
+
+```json
+{
+  "type": "object"
+}
+```
+
 ### `ph_composer.spaces.floor_segment`
 
 Floor Segment, a entity kind owned by `ph_composer.spaces`, schema version 1.
@@ -32236,7 +32248,8 @@ Result:
   "required": [
     "id",
     "removed_user_data",
-    "removed_user_data_total"
+    "removed_user_data_total",
+    "removed_user_data_truncated"
   ],
   "properties": {
     "id": {
@@ -32269,7 +32282,7 @@ Result:
             "items": {
               "type": "string"
             },
-            "description": "The map's first 50 top-level keys, sorted."
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
           },
           "user_data_key_total": {
             "type": "integer",
@@ -32277,11 +32290,15 @@ Result:
           }
         }
       },
-      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50: the map is gone, a survivor keeps its own, and Undo brings it back."
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
     },
     "removed_user_data_total": {
       "type": "integer",
       "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
     }
   }
 }
@@ -39586,7 +39603,8 @@ Result:
   "required": [
     "id",
     "removed_user_data",
-    "removed_user_data_total"
+    "removed_user_data_total",
+    "removed_user_data_truncated"
   ],
   "properties": {
     "id": {
@@ -39619,7 +39637,7 @@ Result:
             "items": {
               "type": "string"
             },
-            "description": "The map's first 50 top-level keys, sorted."
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
           },
           "user_data_key_total": {
             "type": "integer",
@@ -39627,11 +39645,15 @@ Result:
           }
         }
       },
-      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50: the map is gone, a survivor keeps its own, and Undo brings it back."
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
     },
     "removed_user_data_total": {
       "type": "integer",
       "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
     }
   }
 }
@@ -43660,7 +43682,8 @@ Result:
   "required": [
     "id",
     "removed_user_data",
-    "removed_user_data_total"
+    "removed_user_data_total",
+    "removed_user_data_truncated"
   ],
   "properties": {
     "id": {
@@ -43693,7 +43716,7 @@ Result:
             "items": {
               "type": "string"
             },
-            "description": "The map's first 50 top-level keys, sorted."
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
           },
           "user_data_key_total": {
             "type": "integer",
@@ -43701,11 +43724,15 @@ Result:
           }
         }
       },
-      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50: the map is gone, a survivor keeps its own, and Undo brings it back."
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
     },
     "removed_user_data_total": {
       "type": "integer",
       "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
     }
   }
 }
@@ -44543,7 +44570,8 @@ Result:
   "required": [
     "id",
     "removed_user_data",
-    "removed_user_data_total"
+    "removed_user_data_total",
+    "removed_user_data_truncated"
   ],
   "properties": {
     "id": {
@@ -44576,7 +44604,7 @@ Result:
             "items": {
               "type": "string"
             },
-            "description": "The map's first 50 top-level keys, sorted."
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
           },
           "user_data_key_total": {
             "type": "integer",
@@ -44584,11 +44612,15 @@ Result:
           }
         }
       },
-      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50: the map is gone, a survivor keeps its own, and Undo brings it back."
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
     },
     "removed_user_data_total": {
       "type": "integer",
       "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
     }
   }
 }
@@ -45451,7 +45483,8 @@ Result:
   "required": [
     "id",
     "removed_user_data",
-    "removed_user_data_total"
+    "removed_user_data_total",
+    "removed_user_data_truncated"
   ],
   "properties": {
     "id": {
@@ -45484,7 +45517,7 @@ Result:
             "items": {
               "type": "string"
             },
-            "description": "The map's first 50 top-level keys, sorted."
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
           },
           "user_data_key_total": {
             "type": "integer",
@@ -45492,11 +45525,15 @@ Result:
           }
         }
       },
-      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50: the map is gone, a survivor keeps its own, and Undo brings it back."
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
     },
     "removed_user_data_total": {
       "type": "integer",
       "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
     }
   }
 }
@@ -46211,7 +46248,8 @@ Result:
   "required": [
     "id",
     "removed_user_data",
-    "removed_user_data_total"
+    "removed_user_data_total",
+    "removed_user_data_truncated"
   ],
   "properties": {
     "id": {
@@ -46244,7 +46282,7 @@ Result:
             "items": {
               "type": "string"
             },
-            "description": "The map's first 50 top-level keys, sorted."
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
           },
           "user_data_key_total": {
             "type": "integer",
@@ -46252,11 +46290,15 @@ Result:
           }
         }
       },
-      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50: the map is gone, a survivor keeps its own, and Undo brings it back."
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
     },
     "removed_user_data_total": {
       "type": "integer",
       "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
     }
   }
 }
@@ -47812,7 +47854,8 @@ Result:
   "required": [
     "id",
     "removed_user_data",
-    "removed_user_data_total"
+    "removed_user_data_total",
+    "removed_user_data_truncated"
   ],
   "properties": {
     "id": {
@@ -47845,7 +47888,7 @@ Result:
             "items": {
               "type": "string"
             },
-            "description": "The map's first 50 top-level keys, sorted."
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
           },
           "user_data_key_total": {
             "type": "integer",
@@ -47853,11 +47896,15 @@ Result:
           }
         }
       },
-      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50: the map is gone, a survivor keeps its own, and Undo brings it back."
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
     },
     "removed_user_data_total": {
       "type": "integer",
       "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
     }
   }
 }
@@ -50957,7 +51004,8 @@ Result:
     "id",
     "unit_count",
     "removed_user_data",
-    "removed_user_data_total"
+    "removed_user_data_total",
+    "removed_user_data_truncated"
   ],
   "properties": {
     "id": {
@@ -50986,7 +51034,7 @@ Result:
             "items": {
               "type": "string"
             },
-            "description": "The map's first 50 top-level keys, sorted."
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
           },
           "user_data_key_total": {
             "type": "integer",
@@ -50994,11 +51042,15 @@ Result:
           }
         }
       },
-      "description": "Each merged element but the top-left one whose user_data was not empty, in grid order, the first 50: its map is gone, and Undo brings it back."
+      "description": "Each merged element but the top-left one whose user_data was not empty, in grid order, the first 50 within 8192 bytes: its map is gone, and Undo brings it back."
     },
     "removed_user_data_total": {
       "type": "integer",
       "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
     }
   }
 }
@@ -59011,7 +59063,8 @@ Result:
     "id",
     "reassigned_faces",
     "removed_user_data",
-    "removed_user_data_total"
+    "removed_user_data_total",
+    "removed_user_data_truncated"
   ],
   "properties": {
     "id": {
@@ -59048,7 +59101,7 @@ Result:
             "items": {
               "type": "string"
             },
-            "description": "The map's first 50 top-level keys, sorted."
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
           },
           "user_data_key_total": {
             "type": "integer",
@@ -59056,11 +59109,15 @@ Result:
           }
         }
       },
-      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50: the map is gone, a survivor keeps its own, and Undo brings it back."
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
     },
     "removed_user_data_total": {
       "type": "integer",
       "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
     }
   }
 }
@@ -60447,7 +60504,8 @@ Result:
     "created_ids",
     "replacement_ids",
     "removed_user_data",
-    "removed_user_data_total"
+    "removed_user_data_total",
+    "removed_user_data_truncated"
   ],
   "properties": {
     "created_ids": {
@@ -60487,7 +60545,7 @@ Result:
             "items": {
               "type": "string"
             },
-            "description": "The map's first 50 top-level keys, sorted."
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
           },
           "user_data_key_total": {
             "type": "integer",
@@ -60495,11 +60553,15 @@ Result:
           }
         }
       },
-      "description": "Each removed option whose user_data was not empty, in id order, the first 50: its map is gone, the survivor keeps its own, and Undo brings it back."
+      "description": "Each removed option whose user_data was not empty, in id order, the first 50 within 8192 bytes: its map is gone, the survivor keeps its own, and Undo brings it back."
     },
     "removed_user_data_total": {
       "type": "integer",
       "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
     }
   }
 }
@@ -60568,7 +60630,8 @@ Result:
     "created_ids",
     "replacement_ids",
     "removed_user_data",
-    "removed_user_data_total"
+    "removed_user_data_total",
+    "removed_user_data_truncated"
   ],
   "properties": {
     "created_ids": {
@@ -60608,7 +60671,7 @@ Result:
             "items": {
               "type": "string"
             },
-            "description": "The map's first 50 top-level keys, sorted."
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
           },
           "user_data_key_total": {
             "type": "integer",
@@ -60616,11 +60679,15 @@ Result:
           }
         }
       },
-      "description": "Each removed option whose user_data was not empty, in id order, the first 50: its map is gone, the survivor keeps its own, and Undo brings it back."
+      "description": "Each removed option whose user_data was not empty, in id order, the first 50 within 8192 bytes: its map is gone, the survivor keeps its own, and Undo brings it back."
     },
     "removed_user_data_total": {
       "type": "integer",
       "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
     }
   }
 }
@@ -60688,7 +60755,8 @@ Result:
     "created_ids",
     "replacement_ids",
     "removed_user_data",
-    "removed_user_data_total"
+    "removed_user_data_total",
+    "removed_user_data_truncated"
   ],
   "properties": {
     "created_ids": {
@@ -60728,7 +60796,7 @@ Result:
             "items": {
               "type": "string"
             },
-            "description": "The map's first 50 top-level keys, sorted."
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
           },
           "user_data_key_total": {
             "type": "integer",
@@ -60736,11 +60804,15 @@ Result:
           }
         }
       },
-      "description": "Each removed option whose user_data was not empty, in id order, the first 50: its map is gone, the survivor keeps its own, and Undo brings it back."
+      "description": "Each removed option whose user_data was not empty, in id order, the first 50 within 8192 bytes: its map is gone, the survivor keeps its own, and Undo brings it back."
     },
     "removed_user_data_total": {
       "type": "integer",
       "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
     }
   }
 }
@@ -69186,3 +69258,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.58 | 2026-11-14 | Export carries the Model's user_data to the HBJSON Model, a Space Floor's to its SpaceFloor, an Assembly Layer's to its material (the hybrid host when divided) and a divided Layer's Layer-Segments' to their cell materials; a ph_composer key in any of them blocks the export, and the new ph_composer.model.export_preflight reports it for the Model. The extraction gains the ph_composer.model.export.model section and a Volume's floor_user_data. Window Element, Attached zone, membrane Layer and undivided Layer-Segment maps stay in the Model with an export.metadata_omitted finding, and each finding is listed once. |
 | 1.59 | 2026-11-14 | An export.metadata_omitted finding about a record part (an Assembly Layer or Layer-Segment, or a Window Element) gains reference, the {kind, id, part_ids} ph_composer.records.update_metadata takes, and its message names the record that holds the part. A contributor's Engine#propose_update no longer takes user_data: ph_composer.records.update_metadata (Engine#propose_metadata_update) is the one write route for an existing record's map. |
 | 1.60 | 2026-11-14 | An update that rebuilds a record's parts, such as windows.types.update with elements, keeps each surviving part's user_data by id whether or not it sends it, starts a new part without one, and refuses params.invalid for a part map that differs from the stored one. The deletes of Materials, Assemblies, Frames, Glazings, Psi-Install Types, Window Types, Thermal Bridge Types and Attached zones return removed_user_data and removed_user_data_total, each part listed by part_ids. ph_composer.model.detail takes metadata summary, ph_composer.model.fragment is new, and ph_composer.model.update_metadata returns extension_status only. thermal_bridges.edges.selection, at and candidates take metadata summary, and thermal_bridges.edges.detail is new. Export reports an unused Building Segment's or Level's map as omitted. A part declaration needs a required string id and an optional object user_data. Engine#propose_update takes derived_part_maps and Engine#propose_delete returns the removal report. |
+| 1.61 | 2026-11-14 | Every delete and merge that returns removed_user_data also returns removed_user_data_truncated, and its rows stay within 8192 bytes: each listed map keeps its address and user_data_key_total, and its keys fill in while they fit. The new reference target ph_composer.model.metadata puts the Model's extension payloads in the incoming-reference check, so a record a Model payload names refuses deletion as reference.in_use. A membrane Layer's Layer-Segment map stays in the Model with an export.metadata_omitted finding even with a steel stud spacing. |
