@@ -25,7 +25,9 @@ export, documentation beyond the generated reference and the agent guide entry.
    for options).
 3. The whole batch is one proposal, one step, one Undo entry; a batch that writes what is stored
    adds no step. Validate each record through its kind after the change.
-4. The existing `*.update` actions keep accepting `user_data` for compatibility of callers.
+4. Remove `user_data` from every catalog `*.update` and from the update side of
+   `attached_zone.save` and `installs.save`; create actions keep it. Library `replace` callbacks
+   already strip it and stay correct. Update their tests and the guide.
 5. Bump the API minor version with a change note; `make fixtures`; one recipe line in
    `docs/AGENT_GUIDE.md` and the shipped guide.
 
