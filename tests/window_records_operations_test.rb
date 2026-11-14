@@ -130,7 +130,9 @@ class WindowRecordsOperationsTest < PhComposerTestCase
     after = row("types", id)["values"]
     ids = after["elements"].map { |element| element["id"] }
     assert_equal 2, ids.uniq.length
-    preview_invoke("types.grid.merge", "id" => id, "ids" => ids, "expected_values" => after)
+    merge = preview_invoke("types.grid.merge", "id" => id, "ids" => ids, "expected_values" => after)
+    assert_equal [[], 0], merge.fetch("value").values_at("removed_user_data", "removed_user_data_total"),
+                 "elements without maps report nothing"
     merged = row("types", id)["values"]
     preview_invoke("types.grid.split", "id" => id, "element_id" => merged["elements"][0]["id"],
                                        "expected_values" => merged)
@@ -139,6 +141,112 @@ class WindowRecordsOperationsTest < PhComposerTestCase
     failure = invoke("types.grid.merge", "id" => id, "ids" => ["wel_MISSING00000"], "expected_values" => split)
     assert_equal "target.not_found", failure["code"]
     assert_equal split, row("types", id)["values"]
+  end
+
+  # A Window Element's user_data follows the lifecycle policy (D-UD-5): a kind change and a flip keep it,
+  # merge keeps the top-left survivor's and reports each other element's non-empty map by its top-level
+  # keys, Undo brings the removed element back with its map, split copies the map into every piece, an
+  # inserted element starts without one, and removing a band leaves the other elements' maps.
+  def test_element_maps_follow_the_grid_gesture_policy
+    id = create("types", "name" => "Mapped")
+    preview_invoke("types.grid.insert", "id" => id, "axis" => "columns_m", "index" => 1, "value" => 1.0,
+                                        "expected_values" => row("types", id)["values"])
+    left, right = elements(id).sort_by { |element| element["column_span"] }.map { |element| element["id"] }
+    maps = { left => { "firm" => { "detail" => "A-503/7", "zero" => 0, "no" => false, "none" => nil,
+                                   "list" => [] } },
+             right => { "firm" => {}, "audit" => "Fenêtre" } }
+    write_element_maps(id, maps)
+    %w[empty glazed].each do |kind|
+      preview_invoke("types.grid.kind", "id" => id, "ids" => [right], "kind" => kind,
+                                        "expected_values" => row("types", id)["values"])
+      assert_equal maps[right], element(id, right)["user_data"], "a kind change keeps the map"
+    end
+
+    merge = preview_invoke("types.grid.merge", "id" => id, "ids" => [right, left],
+                                               "expected_values" => row("types", id)["values"])
+    assert_equal [maps[left]], elements(id).map { |element| element["user_data"] }, "the top-left map survives"
+    assert_equal [{ "element_id" => right, "user_data_keys" => %w[audit firm], "user_data_key_total" => 2 }],
+                 merge.dig("value", "removed_user_data")
+    assert_equal 1, merge.dig("value", "removed_user_data_total")
+    @model.undo
+    assert_equal maps, [left, right].to_h { |element_id| [element_id, element(id, element_id)["user_data"]] }
+    @model.redo
+    preview_invoke("types.grid.split", "id" => id, "element_id" => elements(id).first["id"],
+                                       "expected_values" => row("types", id)["values"])
+    first, second = elements(id).map { |element| element["id"] }
+    assert_equal [maps[left], maps[left]], elements(id).map { |element| element["user_data"] }, "split copies the map"
+    write_element_maps(id, first => { "piece" => 1 })
+    assert_equal maps[left], element(id, second)["user_data"], "each piece holds its own copy"
+    preview_invoke("types.grid.flip", "id" => id, "expected_values" => row("types", id)["values"])
+    assert_equal [{ "piece" => 1 }, maps[left]], [first, second].map { |piece| element(id, piece)["user_data"] }
+    preview_invoke("types.grid.insert", "id" => id, "axis" => "rows_m", "index" => 0, "value" => 0.5,
+                                        "expected_values" => row("types", id)["values"])
+    inserted = elements(id).reject { |element| [first, second].include?(element["id"]) }
+    assert_equal 2, inserted.length
+    assert inserted.none? { |element| element.key?("user_data") }, "a new element starts without a map"
+    preview_invoke("types.grid.remove", "id" => id, "axis" => "rows_m", "index" => 0,
+                                        "expected_values" => row("types", id)["values"])
+    assert_equal [{ "piece" => 1 }, maps[left]], [first, second].map { |piece| element(id, piece)["user_data"] }
+  end
+
+  # The merge report lists each discarded non-empty map in grid order, each by at most REPORT_LIMIT keys cut
+  # to the name length, and at most REPORT_LIMIT maps with their total; the kind refuses repeated element ids.
+  def test_the_merge_report_is_bounded_and_repeated_element_ids_refuse
+    limit = PhComposer::Records::Metadata::REPORT_LIMIT
+    keys = (limit + 10).times.to_h { |n| [format("k%03d", n), n] }.merge("a" * 300 => true)
+    cells = (limit + 3).times.map do |column|
+      W::Types.blank(0, column, :identity => ->(_prefix) { format("wel_%012d", column) })
+              .merge("user_data" => { "n" => column })
+    end
+    cells[0]["user_data"] = { "survivor" => true }
+    cells[1].delete("user_data")
+    cells[2]["user_data"] = {}
+    cells[3]["user_data"] = keys
+    record = { "elements" => cells.reverse }
+    report = W::GridOperations.merge_discards(record, "ids" => cells.map { |cell| cell["id"] })
+    listed = report.fetch("removed_user_data")
+    assert_equal limit, listed.length
+    assert_equal limit, report.fetch("removed_user_data_total")
+    assert_equal cells[3, limit].map { |cell| cell["id"] }, listed.map { |row| row["element_id"] }
+    assert_equal limit + 11, listed.first["user_data_key_total"]
+    assert_equal keys.keys.sort.first(limit).map { |key| key[0, PhComposer::OccurrencePath::NAME_CHARACTERS] },
+                 listed.first["user_data_keys"]
+    assert_equal PhComposer::OccurrencePath::NAME_CHARACTERS, listed.first["user_data_keys"].first.length
+
+    id = create("types", "name" => "Repeated")
+    values = stored(W::Types::KIND, id)
+    values["columns_m"] = [0.5, 0.5]
+    values["elements"] << values["elements"].first.merge("column_span" => [1, 1])
+    assert_includes W::Types::KIND.problems(values), "Element ids must be unique within their Window Type."
+  end
+
+  # Installs save and Duplicate keep element maps, Duplicate under new element ids; a whole-array
+  # types.update stores the maps it sends, as any whole-value replacement does.
+  def test_installs_save_duplicate_and_a_whole_elements_update_keep_element_maps
+    id = create("types", "name" => "Kept")
+    element_id = elements(id).first["id"]
+    map = { "firm" => { "detail" => "A-503/7" } }
+    write_element_maps(id, element_id => map)
+    psi = create("psi_install_types", "name" => "Junction", "psi_w_mk" => 0.04)
+    preview_invoke("types.installs.save",
+                   "types" => [{ "id" => id, "expected_values" => row("types", id)["values"],
+                                 "installs" => [{ "element_id" => element_id,
+                                                  "sides" => W::Types::SIDES.to_h { |side| [side, psi] } }] }],
+                   "psi_install_types" => { "create" => [], "update" => [] }, "expected_settings" => settings)
+    assert_equal [psi], element(id, element_id)["installs"].values.uniq
+    assert_equal map, element(id, element_id)["user_data"], "installs save keeps the map"
+
+    copy_id = preview_invoke("types.duplicate", "id" => id).dig("value", "id")
+    copied = elements(copy_id).first
+    refute_equal element_id, copied["id"]
+    assert_equal map, copied["user_data"], "Duplicate copies the map under a new element id"
+
+    sent = elements(id)
+    sent.first["user_data"] = { "replaced" => true }
+    preview_invoke("types.update", "id" => id, "values" => { "elements" => sent },
+                                   "expected_values" => { "elements" => elements(id) })
+    assert_equal({ "replaced" => true }, element(id, element_id)["user_data"])
+    assert_equal map, elements(copy_id).first["user_data"], "the copy's map is its own"
   end
 
   # Each element field has its own action with a typed value, so describe teaches the shape; a Frame
@@ -222,6 +330,7 @@ class WindowRecordsOperationsTest < PhComposerTestCase
       incomplete = create(collection, "name" => "Missing #{collection}")
       type = window_values("name" => "Uses #{collection}")
       element = type.fetch("elements").first
+      element["user_data"] = { "firm" => collection }
       if collection == "frames"
         element["frames"] = W::Types::SIDES.to_h { |side| [side, first] }
       else
@@ -237,6 +346,7 @@ class WindowRecordsOperationsTest < PhComposerTestCase
       assert_equal "committed", invoke("#{collection}.delete", "id" => first, "replacement_id" => second)["effect"]
       refs = W::Types::KIND.references.select { |reference| reference.target_kind == W::Products::KINDS[collection].id }
       assert_equal [second], refs.flat_map { |reference| reference.ids(stored(W::Types::KIND, id)) }.uniq
+      assert_equal({ "firm" => collection }, elements(id).first["user_data"], "replacement keeps the element map")
     end
   end
 
@@ -394,5 +504,27 @@ class WindowRecordsOperationsTest < PhComposerTestCase
 
   def stored(kind, id)
     PhComposer::Records::Engine.new(@model, PhComposer::Registry.current.catalog).find(kind.id, id)
+  end
+
+  def elements(type_id)
+    row("types", type_id)["values"]["elements"]
+  end
+
+  def element(type_id, element_id)
+    elements(type_id).find { |element| element["id"] == element_id }
+  end
+
+  # Writes each element's map through the foundation's metadata action, by part address.
+  def write_element_maps(type_id, maps)
+    updates = maps.map do |element_id, map|
+      { "reference" => { "kind" => W::TYPE_KIND, "id" => type_id, "part_ids" => [element_id] }, "user_data" => map,
+        "expected_metadata" => { "user_data" => element(type_id, element_id).fetch("user_data", {}),
+                                 "extension_data" => {} } }
+    end
+    @sequence += 1
+    result = API.invoke(:context => @context, :name => "ph_composer.records.update_metadata",
+                        :params => { "updates" => updates },
+                        :request => { "sequence" => @sequence, "expected_revision" => @session.revision })
+    assert_equal "committed", result["effect"], result.inspect
   end
 end

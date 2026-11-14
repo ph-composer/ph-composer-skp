@@ -1,6 +1,6 @@
 # EUD-03: Window Elements
 
-STATUS: Scoped
+STATUS: Implemented on branch
 ISSUE: [#507](https://github.com/ph-composer/ph-composer-skp/issues/507)
 DECISIONS: D-UD-4, D-UD-5 ([plan](../PLAN.md#decisions-for-ed))
 

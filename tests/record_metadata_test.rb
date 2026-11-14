@@ -14,6 +14,7 @@ class RecordMetadataTest < PhComposerTestCase
   MATERIAL = PhComposer::Assemblies::MATERIAL_KIND
   ASSEMBLY = PhComposer::Assemblies::ASSEMBLY_KIND
   ATTACHED = PhComposer::Zones::Faces::AttachedZone::KIND_ID
+  WINDOW_TYPE = PhComposer::Windows::TYPE_KIND
   EMPTY = { "user_data" => {}, "extension_data" => {} }.freeze
   REVIEW = "probe.records.review"
 
@@ -307,6 +308,28 @@ class RecordMetadataTest < PhComposerTestCase
     assert_equal revision, @session.revision
     assert_equal stored, read(ASSEMBLY, @assembly)
     assert_equal({}, read(MATERIAL, @material).fetch("user_data"))
+  end
+
+  def test_a_window_element_map_writes_reads_back_and_clears_by_element_id
+    type = create("ph_composer.windows.types.create", "name" => "Window")
+    element = read(WINDOW_TYPE, type).dig("values", "elements", 0, "id")
+    map = { "firm" => { "detail" => "A-503/7", "note" => "Fenêtre à l'est", "zero" => 0, "no" => false,
+                        "none" => nil, "empty" => {}, "list" => [] } }
+    target = { "kind" => WINDOW_TYPE, "id" => type, "part_ids" => [element] }
+    result = write({ "reference" => target, "user_data" => map, "expected_metadata" => EMPTY })
+    assert_equal "committed", result.fetch("effect"), result.inspect
+    assert_equal map, read(WINDOW_TYPE, type).dig("values", "elements", 0, "user_data")
+    assert_equal({}, read(WINDOW_TYPE, type).fetch("user_data"), "an element map is not the Type's")
+    rows = assignment_query("ph_composer.windows.types.elements.list", "type_id" => type)
+    assert_equal map, rows.dig("elements", 0, "element", "user_data")
+    assert_equal [{ "label" => "Element", "path" => "elements[]" }],
+                 PhComposer::API.describe(:name => WINDOW_TYPE).fetch("parts")
+
+    stale = write({ "reference" => target, "user_data" => {}, "expected_metadata" => EMPTY })
+    assert_equal %w[target.changed none], stale.values_at("code", "effect"), stale.inspect
+    write({ "reference" => target, "user_data" => {},
+            "expected_metadata" => { "user_data" => map, "extension_data" => {} } })
+    assert_equal({}, read(WINDOW_TYPE, type).dig("values", "elements", 0, "user_data"))
   end
 
   def test_the_assembly_kind_publishes_its_parts_and_a_bad_part_map_is_unreadable

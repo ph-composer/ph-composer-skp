@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 53
+    MINOR = 54
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -266,7 +266,15 @@ module PhComposer
                     "ph_composer.records.update_metadata reference takes part_ids to write the map of one part, such " \
                     "as [Layer id, Layer-Segment id]; a part takes user_data only. describe on a record kind lists " \
                     "its parts. Assembly gestures keep each surviving part's map, a new part starts without one, " \
-                    "and Duplicate copies the maps under new part ids." }
+                    "and Duplicate copies the maps under new part ids." },
+      { "minor" => 54, "date" => "2026-11-14",
+        "change" => "Window Elements take an optional user_data map, written by " \
+                    "ph_composer.records.update_metadata with part_ids [element id] and read by " \
+                    "windows.types.elements.list. windows.types.grid.merge keeps the top-left element's map and " \
+                    "returns removed_user_data, each other merged element whose map was not empty with its " \
+                    "top-level keys, and removed_user_data_total. Split copies the map into every piece, a kind " \
+                    "change, flip, installs save, Duplicate and new_flipped_type keep it, and an inserted element " \
+                    "starts without one." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

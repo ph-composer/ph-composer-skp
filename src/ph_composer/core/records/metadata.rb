@@ -7,7 +7,19 @@ module PhComposer
     # under the envelope statuses, the status map a read reports, and the pre-image check an entity
     # owner's metadata action makes. Pure: detached records in, detached records or a CodedError out.
     module Metadata
+      # The most top-level keys a report of a discarded map lists, and the most discarded maps it lists.
+      REPORT_LIMIT = 50
+
       module_function
+
+      # What an operation reports of a `user_data` map it discards, such as a merge's removed part: the
+      # first REPORT_LIMIT top-level keys in sorted order, each cut to OccurrencePath::NAME_CHARACTERS, and
+      # how many the map holds.
+      def discarded_keys(map)
+        names = map.is_a?(Hash) ? map.keys.sort : []
+        { "user_data_keys" => names.first(REPORT_LIMIT).map { |key| key[0, OccurrencePath::NAME_CHARACTERS] },
+          "user_data_key_total" => names.length }
+      end
 
       # Each envelope's status against what is installed (Extension::STATUSES), by namespace.
       def status_map(record, catalog)

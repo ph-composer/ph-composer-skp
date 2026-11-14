@@ -404,7 +404,10 @@ does the record's, and `describe` lists the parts. A target's `part_ids` names o
 matches refuses `target.not_found`. A part takes `user_data` only: its `expected_metadata` reads
 `extension_data` as `{}` and `extension_payloads` refuses `params.invalid`. Entries for one record and
 its parts in one batch stage as one write. Owners keep a surviving part's map through every edit, copy
-it with the part, and start a new part without one. Assembly Layers and Layer-Segments are parts.
+it with the part, and start a new part without one. Splitting a part copies its map into every piece;
+merging parts keeps the survivor's map only, never combines maps, and reports each removed part whose map
+was not empty with its top-level keys (`Records::Metadata.discarded_keys`). Assembly Layers and
+Layer-Segments and Window Elements (`elements[]`) are parts.
 
 **Entity-owned records.** Zones, Faces and Window Units store their records on SketchUp entities,
 and the same rules hold for them (`Records::Metadata`, shared with the engine). Their reads
