@@ -5,8 +5,8 @@ module PhComposer
     module Assignment
       # Edges named by path rather than by the selection: explicit root-to-Edge paths, such as a schedule
       # run's `edge_paths`, and the Edges directly inside one container. Each row is the selection read's row
-      # (Selection.row: the Zone holding the Edge, its complete reference, its values as stored and the
-      # refusal a write meets) with the Edge's world endpoints, so assign, clear and a read back need no
+      # (Selection.row: the Zone holding the Edge, its complete reference, its values and metadata as stored
+      # and the refusal a write meets) with the Edge's world endpoints, so assign, clear and a read back need no
       # selection and no `runs.locate`. A path that names no Edge is a row with its reason, never a refusal of
       # the read. Reads only, a bounded page at a time; nothing is selected or written.
       module PathReads
@@ -65,10 +65,11 @@ module PhComposer
           edges = items.select(&:edge)
           reads = edges.map { |item| Target.read(item.edge) }
           copied = Selection.copied_ids(request.model, reads.map(&:first))
+          catalog = request.registry.catalog
           contained = Operations.contained(request, edges.map(&:path)).zip(reads, edges)
           by_path = contained.to_h do |containment, read, item|
-            row = Selection.row(containment, read, copied).merge("endpoints_m" => endpoints(item),
-                                                                 "hidden" => OccurrencePath.hidden?(item.edge))
+            row = Selection.row(containment, read, copied, :catalog => catalog)
+                           .merge("endpoints_m" => endpoints(item), "hidden" => OccurrencePath.hidden?(item.edge))
             [item.path, bounded_zone(row)]
           end
           items.map { |item| by_path.fetch(item.path) { absent(item) } }
@@ -94,8 +95,8 @@ module PhComposer
 
         def absent(item)
           { "path" => item.path, "reference" => nil, "zone" => nil, "reason" => item.reason, "values" => {},
-            "copied" => false, "record_problem" => nil, "write_refusal" => nil, "endpoints_m" => nil,
-            "hidden" => nil }
+            "copied" => false, "record_problem" => nil, "write_refusal" => nil, "user_data" => {},
+            "extension_data" => {}, "extension_status" => {}, "endpoints_m" => nil, "hidden" => nil }
         end
         private_class_method :find, :rows, :endpoints, :bounded_zone, :absent
       end

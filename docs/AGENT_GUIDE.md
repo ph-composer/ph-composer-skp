@@ -331,6 +331,15 @@ and refuses as a whole if any target changed or cannot be written. `ph_composer.
 removes the assignment. Each is one Undo step. An Edge split or copied in SketchUp keeps its
 assignment, and the pieces share one id, which reads mark `copied`; nothing needs repairing.
 
+Each Edge row also carries the assignment's `user_data`, `extension_data` and `extension_status`
+(`{}` for an Edge with no assignment). To change them, send the row's `reference` to
+`ph_composer.thermal_bridges.edges.update_metadata` with the whole `user_data` map to keep and the two
+maps you read as `expected_metadata`; `{}` clears the map. The reference's path names one Edge, so a
+piece that shares its id keeps its own map. An Edge needs a valid assignment first: one without refuses,
+one whose row shows a `record_problem` refuses as `validation.failed` until you clear or reassign it,
+and a change made since your read refuses the whole batch as `target.changed`. Reassigning keeps the map,
+and `edges.clear` removes it with the assignment; Undo brings both back.
+
 Two cases are beyond `edges.clear`: an assignment whose stored text is not a JSON object
 (`record.unreadable`), and a readable assignment on an Edge no Zone holds, which has no Edge reference.
 `ph_composer.thermal_bridges.edges.repair_candidates` lists both a page at a time, each with its root-to-Edge

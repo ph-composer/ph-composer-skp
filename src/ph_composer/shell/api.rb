@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 55
+    MINOR = 56
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -281,7 +281,12 @@ module PhComposer
                     "target.locked. Zone option settings still refuse as target.wrong_kind. " \
                     "zones.options.manage, remove and merge keep the survivor's map and return removed_user_data, " \
                     "each removed option whose map was not empty with its top-level keys, and " \
-                    "removed_user_data_total. A RecordKind may declare metadata_follow_up." }
+                    "removed_user_data_total. A RecordKind may declare metadata_follow_up." },
+      { "minor" => 56, "date" => "2026-11-14",
+        "change" => "thermal_bridges.edges.selection, selection_all, at and candidates rows carry user_data, " \
+                    "extension_data and extension_status. New ph_composer.thermal_bridges.edges.update_metadata " \
+                    "replaces the metadata of assigned Edges by occurrence, guarded by expected_metadata, at most " \
+                    "250 Edges in one Undo step; an Edge with no assignment refuses." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

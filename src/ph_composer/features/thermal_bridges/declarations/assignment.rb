@@ -12,6 +12,8 @@ module PhComposer
                         validation.failed].freeze
       ASSIGN = (TARGET_CODES + %w[gesture.too_large]).freeze
       CLEAR = (ASSIGN + %w[copy.rule_missing reference.in_use]).freeze
+      # A metadata write resolves as assign does, and refuses for each payload as every entity owner's does.
+      METADATA = (TARGET_CODES + Zones::Refuses::METADATA).freeze
       SELECTION = %w[gesture.too_large record.unreadable validation.failed].freeze
       SELECTION_PAGE = (SELECTION + %w[query.cursor_expired query.limit_invalid]).freeze
 
@@ -39,6 +41,13 @@ module PhComposer
                              "level" => { "type" => %w[string null] } })
                    .merge("type" => %w[object null], "description" => "The Zone holding the Edge, as " \
                                                                       "ph_composer.zones.containment reads it.")
+      # An Edge with an assignment, the only kind a metadata write can name.
+      RECORDED_EDGE = REFERENCE.merge(
+        "properties" => REFERENCE.fetch("properties").merge("entity_id" => { "type" => "string" })
+      ).freeze
+      EXTENSION_STATUS = { "type" => "object",
+                           "description" => "Each extension envelope's status against what is installed, by " \
+                                            "namespace; {} for an Edge with no assignment." }.freeze
       REFUSAL = Shapes.object({ "code" => Shapes::TEXT, "message" => Shapes::TEXT })
                       .merge("type" => %w[object null],
                              "description" => "The refusal a write to the Edge meets from its path, or null.")
@@ -60,7 +69,12 @@ module PhComposer
         "write_refusal" => REFUSAL.merge("description" => "The refusal a write to the Edge meets from its path, or " \
                                                           "else record.unreadable when its stored text is not a " \
                                                           "JSON object, which only edges.repair removes; null " \
-                                                          "otherwise.")
+                                                          "otherwise."),
+        "user_data" => { "type" => "object",
+                         "description" => "The assignment's user_data as stored; {} for an Edge with none. Write it " \
+                                          "with edges.update_metadata." },
+        "extension_data" => { "type" => "object", "description" => "The assignment's extension envelopes as stored." },
+        "extension_status" => EXTENSION_STATUS
       })
       SELECTION_ALL = Shapes.object({
         "edges" => Shapes.list(SELECTED_ROW),
@@ -253,6 +267,24 @@ module PhComposer
                          "entity_id" => "tbe_Ab12Cd34Ef56"
                        ) }] }]) do |request, proposal|
           Assignment::Operations.clear(request, proposal, :targets => request.params.fetch("targets"))
+        end
+        install_metadata(feature)
+      end
+
+      def install_metadata(feature)
+        example = { "reference" => EXAMPLE_REFERENCE.merge("entity_id" => "tbe_Ab12Cd34Ef56"), "user_data" => {},
+                    "expected_metadata" => { "user_data" => {}, "extension_data" => {} } }
+        feature.action("#{PREFIX}.update_metadata",
+                       :description => "Replace the user_data and installed extension payloads of assigned Edges, " \
+                                       "each named by its occurrence, guarded by the metadata last read. Other " \
+                                       "Edges sharing its assignment id after a split or copy keep theirs.",
+                       :refuses => METADATA,
+                       :params => Shapes.metadata_updates(RECORDED_EDGE, Assignment::GESTURE_EDGE_LIMIT),
+                       :result => Shapes.metadata_result(RECORDED_EDGE), :undo_name => "Edit Thermal Bridge Metadata",
+                       :preconditions => ["Each Edge has an assignment and is reached as edges.assign reaches it."],
+                       :side_effects => "Rewrites only the named Edges' assignment metadata.",
+                       :examples => [{ "updates" => [example] }]) do |request, proposal|
+          Assignment::Operations.update_metadata(request, proposal, :updates => request.params.fetch("updates"))
         end
       end
     end

@@ -321,7 +321,8 @@ distinguishes a refusal before writing, a verified rollback and an unknown resul
 review and agent calls before opening a Model transaction.
 
 Metadata on authored entities is written the same way: `ph_composer.zones.update_metadata`,
-`ph_composer.zones.faces.update_metadata` and `ph_composer.windows.units.update_metadata` take a
+`ph_composer.zones.faces.update_metadata`, `ph_composer.windows.units.update_metadata` and
+`ph_composer.thermal_bridges.edges.update_metadata` take a
 batch of explicit occurrences with the metadata last read, and refuse every target or none
 ([CONTRACTS.md](CONTRACTS.md), "Records and extension data"). `ph_composer.records.update_metadata`
 does the same for catalog records by `{kind, id}`, and for a record's declared parts, such as an

@@ -60,6 +60,17 @@ module PhComposer
         record ? RECORD_KIND.values(record) : {}
       end
 
+      # The record's user_data and extension_data as a read reports them, detached, with each envelope's
+      # status: {} for an Edge with no record, and for a map an invalid record holds as something other than
+      # a JSON object, so a read never refuses the record it is there to help clear.
+      def metadata(record, catalog)
+        maps = %w[user_data extension_data].to_h do |key|
+          value = record && record[key]
+          [key, value.is_a?(Hash) ? DeepCopy.call(value) : {}]
+        end
+        maps.merge("extension_status" => Records::Metadata.status_map(maps, catalog))
+      end
+
       def check_limit!(count)
         limit = gesture_edge_limit
         return if count <= limit

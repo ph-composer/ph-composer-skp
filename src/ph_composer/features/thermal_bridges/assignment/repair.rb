@@ -17,8 +17,9 @@ module PhComposer
         # The stored text a preview shows is cut to this many characters; the fingerprint covers all of it.
         EXCERPT = 256
         # A readable record's values a reply shows are cut so any record fits: text to a name's length, a
-        # value that is not text or a number to its size and digest, and key lists to this many.
-        MAX_KEYS = 50
+        # value that is not text or a number to its size and digest, and key lists to this many, the bound every
+        # report of a discarded map keeps.
+        MAX_KEYS = Records::Metadata::REPORT_LIMIT
         # A parsed JSON number has no size bound; one longer than this is given by size and digest.
         MAX_NUMBER_BYTES = 64
         # What ordinary clear serves, which this refuses so it never becomes a lax clear.
@@ -152,8 +153,8 @@ module PhComposer
                           "valid" => record ? RECORD_KIND.problems(record).empty? : false,
                           "excerpt" => stored.text.scrub[0, EXCERPT] },
             "discarded" => record && shown(record, %w[id thermal_bridge_type_id quantity]).merge(
-              keys(record["user_data"], "user_data_keys")
-            ).merge(keys(record["extension_data"], "extension_namespaces"))
+              Records::Metadata.discarded_keys(record["user_data"])
+            ).merge(namespaces(record["extension_data"]))
           }
         end
 
@@ -175,13 +176,14 @@ module PhComposer
           cut.empty? ? values : values.merge("truncated" => cut)
         end
 
-        # The first MAX_KEYS keys of a metadata map, each cut, and how many it holds.
-        def keys(map, name)
+        # The first MAX_KEYS extension namespaces, each cut, and how many there are, as
+        # Records::Metadata.discarded_keys reports a user_data map.
+        def namespaces(map)
           names = map.is_a?(Hash) ? map.keys.sort : []
-          { name => names.first(MAX_KEYS).map { |key| key[0, OccurrencePath::NAME_CHARACTERS] },
-            "#{name.chomp('s')}_total" => names.length }
+          { "extension_namespaces" => names.first(MAX_KEYS).map { |key| key[0, OccurrencePath::NAME_CHARACTERS] },
+            "extension_namespace_total" => names.length }
         end
-        private_class_method :row, :write_refusal, :check_references!, :disclosure, :shown, :keys
+        private_class_method :row, :write_refusal, :check_references!, :disclosure, :shown, :namespaces
       end
 
       # The one write a repair makes: re-resolve the Edge, refuse any stored text but the reviewed one, and

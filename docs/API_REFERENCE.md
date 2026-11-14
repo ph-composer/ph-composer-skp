@@ -14045,6 +14045,9 @@ Result:
           "copied",
           "record_problem",
           "write_refusal",
+          "user_data",
+          "extension_data",
+          "extension_status",
           "hidden",
           "endpoints_m"
         ],
@@ -14176,6 +14179,18 @@ Result:
               }
             },
             "description": "The refusal a write to the Edge meets from its path, or else record.unreadable when its stored text is not a JSON object, which only edges.repair removes; null otherwise."
+          },
+          "user_data": {
+            "type": "object",
+            "description": "The assignment's user_data as stored; {} for an Edge with none. Write it with edges.update_metadata."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "The assignment's extension envelopes as stored."
+          },
+          "extension_status": {
+            "type": "object",
+            "description": "Each extension envelope's status against what is installed, by namespace; {} for an Edge with no assignment."
           },
           "hidden": {
             "type": [
@@ -14324,6 +14339,9 @@ Result:
           "copied",
           "record_problem",
           "write_refusal",
+          "user_data",
+          "extension_data",
+          "extension_status",
           "hidden",
           "endpoints_m"
         ],
@@ -14455,6 +14473,18 @@ Result:
               }
             },
             "description": "The refusal a write to the Edge meets from its path, or else record.unreadable when its stored text is not a JSON object, which only edges.repair removes; null otherwise."
+          },
+          "user_data": {
+            "type": "object",
+            "description": "The assignment's user_data as stored; {} for an Edge with none. Write it with edges.update_metadata."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "The assignment's extension envelopes as stored."
+          },
+          "extension_status": {
+            "type": "object",
+            "description": "Each extension envelope's status against what is installed, by namespace; {} for an Edge with no assignment."
           },
           "hidden": {
             "type": [
@@ -14757,7 +14787,10 @@ Result:
           "values",
           "copied",
           "record_problem",
-          "write_refusal"
+          "write_refusal",
+          "user_data",
+          "extension_data",
+          "extension_status"
         ],
         "properties": {
           "path": {
@@ -14887,6 +14920,18 @@ Result:
               }
             },
             "description": "The refusal a write to the Edge meets from its path, or else record.unreadable when its stored text is not a JSON object, which only edges.repair removes; null otherwise."
+          },
+          "user_data": {
+            "type": "object",
+            "description": "The assignment's user_data as stored; {} for an Edge with none. Write it with edges.update_metadata."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "The assignment's extension envelopes as stored."
+          },
+          "extension_status": {
+            "type": "object",
+            "description": "Each extension envelope's status against what is installed, by namespace; {} for an Edge with no assignment."
           }
         }
       }
@@ -14990,7 +15035,10 @@ Result:
           "values",
           "copied",
           "record_problem",
-          "write_refusal"
+          "write_refusal",
+          "user_data",
+          "extension_data",
+          "extension_status"
         ],
         "properties": {
           "path": {
@@ -15120,6 +15168,18 @@ Result:
               }
             },
             "description": "The refusal a write to the Edge meets from its path, or else record.unreadable when its stored text is not a JSON object, which only edges.repair removes; null otherwise."
+          },
+          "user_data": {
+            "type": "object",
+            "description": "The assignment's user_data as stored; {} for an Edge with none. Write it with edges.update_metadata."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "The assignment's extension envelopes as stored."
+          },
+          "extension_status": {
+            "type": "object",
+            "description": "Each extension envelope's status against what is installed, by namespace; {} for an Edge with no assignment."
           }
         }
       }
@@ -41972,6 +42032,195 @@ Example params:
 }
 ```
 
+### `ph_composer.thermal_bridges.edges.update_metadata`
+
+Replace the user_data and installed extension payloads of assigned Edges, each named by its occurrence, guarded by the metadata last read. Other Edges sharing its assignment id after a split or copy keep theirs. Owner: `ph_composer.thermal_bridges`.
+
+Undo step: Edit Thermal Bridge Metadata. Rewrites only the named Edges' assignment metadata.
+
+Before calling: Each Edge has an assignment and is reached as edges.assign reaches it.
+
+Refuses: `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "updates"
+  ],
+  "properties": {
+    "updates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reference",
+          "expected_metadata"
+        ],
+        "properties": {
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path",
+              "entity_path",
+              "entity_id"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "entity_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1
+              },
+              "entity_id": {
+                "type": "string"
+              }
+            },
+            "description": "The occurrence to update, as a read returns it."
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Replaces the whole user_data map."
+          },
+          "extension_payloads": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            },
+            "description": "Replaces the payload of each named installed extension."
+          },
+          "expected_metadata": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "user_data",
+              "extension_data"
+            ],
+            "properties": {
+              "user_data": {
+                "type": "object"
+              },
+              "extension_data": {
+                "type": "object"
+              }
+            },
+            "description": "The user_data and extension_data last read; a change refuses."
+          }
+        }
+      },
+      "minItems": 1,
+      "maxItems": 250,
+      "description": "The occurrences to update, written in one step and one Undo."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "updates"
+  ],
+  "properties": {
+    "updates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reference",
+          "extension_status"
+        ],
+        "properties": {
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path",
+              "entity_path",
+              "entity_id"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "entity_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1
+              },
+              "entity_id": {
+                "type": "string"
+              }
+            }
+          },
+          "extension_status": {
+            "type": "object",
+            "description": "Each envelope's status after the update."
+          }
+        }
+      },
+      "description": "Each occurrence the batch names, in order."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "updates": [
+    {
+      "reference": {
+        "zone_id": "zon_Ab12Cd34Ef56",
+        "zone_path": [
+          1201
+        ],
+        "entity_path": [
+          1205
+        ],
+        "entity_id": "tbe_Ab12Cd34Ef56"
+      },
+      "user_data": {},
+      "expected_metadata": {
+        "user_data": {},
+        "extension_data": {}
+      }
+    }
+  ]
+}
+```
+
 ### `ph_composer.thermal_bridges.types.create`
 
 Create one Thermal Bridge Type. The group starts at 15-Ambient and the psi-value empty unless values give them. Owner: `ph_composer.thermal_bridges`.
@@ -67625,3 +67874,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.53 | 2026-11-14 | Assembly Layers and Layer-Segments take an optional user_data map. A ph_composer.records.update_metadata reference takes part_ids to write the map of one part, such as [Layer id, Layer-Segment id]; a part takes user_data only. describe on a record kind lists its parts. Assembly gestures keep each surviving part's map, a new part starts without one, and Duplicate copies the maps under new part ids. |
 | 1.54 | 2026-11-14 | Window Elements take an optional user_data map, written by ph_composer.records.update_metadata with part_ids [element id] and read by windows.types.elements.list. windows.types.grid.merge keeps the top-left element's map and returns removed_user_data, each other merged element whose map was not empty with its top-level keys, and removed_user_data_total. Split copies the map into every piece, a kind change, flip, installs save, Duplicate and new_flipped_type keep it, and an inserted element starts without one. |
 | 1.55 | 2026-11-14 | ph_composer.records.update_metadata writes Building Segment and Level maps and rewrites the copy each adopted Zone and member stamp keeps in the same Undo step; it may refuse target.locked. Zone option settings still refuse as target.wrong_kind. zones.options.manage, remove and merge keep the survivor's map and return removed_user_data, each removed option whose map was not empty with its top-level keys, and removed_user_data_total. A RecordKind may declare metadata_follow_up. |
+| 1.56 | 2026-11-14 | thermal_bridges.edges.selection, selection_all, at and candidates rows carry user_data, extension_data and extension_status. New ph_composer.thermal_bridges.edges.update_metadata replaces the metadata of assigned Edges by occurrence, guarded by expected_metadata, at most 250 Edges in one Undo step; an Edge with no assignment refuses. |
