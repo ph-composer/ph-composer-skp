@@ -293,7 +293,6 @@
     if (g.category === "res" && p.source !== "default" && p.equip.wpa > 0)
       f.push(p.name + "'s electric equipment, " + fmt(p.equip.wpa, 1) + " W/m², does not reach WUFI or METr in a residential Building Segment: PHX reads only Equipment Set devices there. Model it as a device instead.");
     if (g.category === "nonres" && !z.program) f.push("Uses the residential default in a non-residential Building Segment. Choose a Program.");
-    if (p.source !== "default" && p.source !== "custom" && (p.vent.pa === null)) f.push("Ventilation is not in the Phius data for " + p.name + ". Set it on the Program, or give each Space its airflows.");
     return f;
   }
   function segFindings(g) {

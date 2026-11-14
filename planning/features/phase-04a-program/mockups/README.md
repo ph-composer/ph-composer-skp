@@ -11,16 +11,16 @@ holds a synthetic model per journey. Phius program values come from honeybee-ph'
 
 Open it from the worktree in a browser (`open -a Vivaldi programs.html`) or through the UI preview
 server. The dark strip at the top picks a journey and says what to try; Reset restarts it.
-`?journey=N` opens one, `&do=` replays the steps the PNGs show.
+`?journey=N` opens one, `&do=` replays the steps each PNG shows (listed below). PNGs are 1280 × 800, and 420 × 732 where marked.
 
 | Journey | What to try | PNGs |
 | --- | --- | --- |
-| 1. Single-family home, five Zones, one dwelling | Check every Zone, Dwelling: One shared dwelling, then bedrooms on the bedroom rows. Click the House chip | `j1-start`, `j1-dwelling`, `j1-default-program` |
-| 2. Apartments, one Zone each | Check every Zone, Dwelling: One dwelling each | `j2-checked`, `j2-dwellings` |
-| 3. Apartments plus corridors, lobby, stair, office, gym | Apartments as in 2; pick Phius Multifamily Programs for the rest from the Program choice | `j3-corridors-checked`, `j3-common-areas`, `j3-common-areas-420` |
-| 4. Non-residential school | Unassigned Zones are flagged; assign from Phius Non-Residential, or browse the library sidebar | `j4-start`, `j4-assigned`, `j4-library` |
-| 5. Custom lab programs | Programs tab, + on the rail, set loads, open a schedule chip | `j5-program`, `j5-program-420`, `j5-schedule` |
-| Equipment Sets | Programs tab, Equipment Sets | `equipment-sets` |
+| 1. Single-family home, five Zones, one dwelling | Check every Zone, Dwelling: One shared dwelling, then bedrooms on the bedroom rows. Click the House chip | `j1-start` (`journey=1`), `j1-dwelling` (`journey=1&do=shared,beds,bubble`), `j1-default-program` (`journey=1&do=shared,beds,pdefault`) |
+| 2. Apartments, one Zone each | Check every Zone, Dwelling: One dwelling each | `j2-checked` (`journey=2&do=checkall`), `j2-dwellings` (`journey=2&do=each,beds`) |
+| 3. Apartments plus corridors, lobby, stair, office, gym | Apartments as in 2; pick Phius Multifamily Programs for the rest from the Program choice | `j3-corridors-checked` (`journey=3&do=each,beds,checkcorr`), `j3-common-areas` and `-420` (`journey=3&do=each,beds,common`) |
+| 4. Non-residential school | Unassigned Zones are flagged; assign from Phius Non-Residential, or browse the library sidebar | `j4-start` (`journey=4`), `j4-assigned` (`journey=4&do=school`), `j4-library` (`journey=4&do=school,libnr`) |
+| 5. Custom lab programs | Programs tab, + on the rail, set loads, open a schedule chip | `j5-program` and `-420` (`journey=5&do=custom`), `j5-schedule` (`journey=5&do=custom,customsched`) |
+| Equipment Sets | Programs tab, Equipment Sets | `equipment-sets` (`journey=1&do=sets`) |
 
 ## What the prototype proposes
 
@@ -41,6 +41,10 @@ server. The dark strip at the top picks a journey and says what to try; Reset re
 - **The selection bar** assigns Program, Dwelling (one shared, one each, not a dwelling, add to an
   existing one) and Equipment Set to the checked Zones. Choosing a library Program copies it into
   the file and assigns it in one step.
+
+Two labels are placeholders, not proposals: apartments inherit "Phius single-family default" as
+their Equipment Set (honeybee-ph also has a multifamily set), and the Equipment Sets subtitle says one
+Set serves a dwelling while Q4a-21 is open.
 
 ## Questions the prototype raised
 
