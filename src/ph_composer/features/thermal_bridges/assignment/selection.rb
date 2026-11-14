@@ -26,6 +26,7 @@ module PhComposer
         # as the revision, since selecting changes no revision.
         def page(request)
           rows, others = rows(request)
+          rows = rows.map { |row| Assignment.summarized(row, request.params["metadata"]) }
           binding = "#{request.revision}/#{CanonicalJson.digest(rows.map { |row| row.fetch('path') })}"
           page, cursor = Pages.bounded(request, PAGED, rows, :key => ->(row) { row.fetch("path") },
                                                              :revision => binding)

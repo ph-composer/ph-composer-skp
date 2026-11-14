@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 59
+    MINOR = 60
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -308,7 +308,19 @@ module PhComposer
                     "ph_composer.records.update_metadata takes, and its message names the record that holds the " \
                     "part. A contributor's " \
                     "Engine#propose_update no longer takes user_data: ph_composer.records.update_metadata " \
-                    "(Engine#propose_metadata_update) is the one write route for an existing record's map." }
+                    "(Engine#propose_metadata_update) is the one write route for an existing record's map." },
+      { "minor" => 60, "date" => "2026-11-14",
+        "change" => "An update that rebuilds a record's parts, such as windows.types.update with elements, keeps " \
+                    "each surviving part's user_data by id whether or not it sends it, starts a new part without " \
+                    "one, and refuses params.invalid for a part map that differs from the stored one. The deletes of " \
+                    "Materials, Assemblies, Frames, Glazings, Psi-Install Types, Window Types, Thermal Bridge Types " \
+                    "and Attached zones return removed_user_data and removed_user_data_total, each part listed by " \
+                    "part_ids. ph_composer.model.detail takes metadata summary, ph_composer.model.fragment is new, " \
+                    "and ph_composer.model.update_metadata returns extension_status only. thermal_bridges.edges." \
+                    "selection, at and candidates take metadata summary, and thermal_bridges.edges.detail is new. " \
+                    "Export reports an unused Building Segment's or Level's map as omitted. A part declaration " \
+                    "needs a required string id and an optional object user_data. Engine#propose_update takes " \
+                    "derived_part_maps and Engine#propose_delete returns the removal report." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

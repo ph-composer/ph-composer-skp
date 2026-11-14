@@ -406,7 +406,11 @@ owner's new ids and never reads a string in a map as a reference. A split copies
 every piece. A merge, or a delete that names a replacement, keeps the survivor's map, never combines
 maps, and returns `removed_user_data`, each removed object or part whose map was not empty with its
 top-level keys (at most 50 entries of at most 50 keys, through `Records::Metadata.discarded_keys`),
-and `removed_user_data_total`; Undo restores the removed map. A new part starts without one. A restore
+and `removed_user_data_total`; Undo restores the removed map. Every catalog delete (Materials,
+Assemblies, Frames, Glazings, Psi-Install Types, Window Types, Thermal Bridge Types and Attached zones)
+returns the two fields whether or not it names a replacement, empty when nothing was annotated:
+`Engine#propose_delete` answers them through `Records::Metadata.removed_user_data`, the record first,
+then each part by `id` and `part_ids`. A new part starts without one. A restore
 or conversion that cannot recover a map starts it empty. Zone restore lists `user_data` as
 unrecoverable in its offer, and Edge repair reports the keys it discards; a Window Unit restored from
 orphaned panes, or converted from a plain component, has no record to copy and starts empty without a
@@ -429,14 +433,18 @@ options keeps the survivor's map and reports each removed option whose map was n
 top-level keys, as merging parts does. Clearing the map of a record stored without one writes nothing.
 
 **Record parts.** A `RecordKind` may declare `parts:`, each a `Records::Part` with a label and a path
-of array fields (`layers[]`, `layers[].segments[]`) whose members are objects with an `id`, unique in
-their parent, and an optional `user_data` map; every shorter path is itself a part, and registration
-refuses any other shape. The kind refuses repeated part ids within a parent and validates part maps as it
+of array fields (`layers[]`, `layers[].segments[]`) whose members are objects with a required string
+`id`, unique in their parent, and an optional object `user_data`; every shorter path is itself a part,
+and registration refuses any other shape. The kind refuses repeated part ids within a parent and validates part maps as it
 does the record's, and `describe` lists the parts. A target's `part_ids` names one part by the id path from the record down; an id path no part
 matches refuses `target.not_found`. A part takes `user_data` only: its `expected_metadata` reads
 `extension_data` as `{}` and `extension_payloads` refuses `params.invalid`. Entries for one record and
 its parts in one batch stage as one write. Owners keep a surviving part's map through every edit, copy
-it with the part, and start a new part without one. Splitting a part copies its map into every piece;
+it with the part, and start a new part without one. `Engine#propose_update` enforces it for any value
+edit that rebuilds parts, such as `windows.types.update` with the whole `elements` array: a part that keeps
+its id path keeps its stored map whether or not the values send it, a new part has none, and a sent map
+that differs from the stored one refuses `params.invalid` naming this action. Only a gesture that derives
+each part's map from the stored record itself (a Window grid split) passes `derived_part_maps: true`. Splitting a part copies its map into every piece;
 merging parts keeps the survivor's map only, never combines maps, and reports each removed part whose map
 was not empty with its top-level keys (`Records::Metadata.discarded_keys`). Assembly Layers and
 Layer-Segments and Window Elements (`elements[]`) are parts. Export leaves a part's map out unless the
@@ -450,7 +458,9 @@ engine). Their reads (`ph_composer.zones.list` and `.all`, `ph_composer.zones.fa
 `.all`, `ph_composer.windows.units.list`, and the Edge rows of
 `ph_composer.thermal_bridges.edges.selection`, `.selection_all`, `.at` and `.candidates`) report
 `extension_status` beside `extension_data`, in the words a catalog read uses; a Face or Edge with no
-record reports `{}`. Each owner has one metadata action: `ph_composer.zones.update_metadata`,
+record reports `{}`. A Unit or Edge read with `metadata` `"summary"` gives the maps' sizes in their place
+(`RecordQueries.summarize`), and `windows.units.detail` and `thermal_bridges.edges.detail` read one part
+of one row in fragments, so a map larger than a reply never blocks an inventory read. Each owner has one metadata action: `ph_composer.zones.update_metadata`,
 `ph_composer.zones.faces.update_metadata`, `ph_composer.windows.units.update_metadata` and
 `ph_composer.thermal_bridges.edges.update_metadata`. It takes a batch of occurrences, each with the
 whole `user_data` map to write, payloads for installed extensions, or both, and `expected_metadata`,
@@ -471,9 +481,10 @@ reassigned: with a valid `tbe_` id it refuses `validation.failed`, and without o
 of every Edge write.
 
 **Model root and Space Floor.** Neither has a record of its own. The Model's maps live in the
-`ph_composer.model` settings dictionary (below), read by `ph_composer.model.detail` and written by
-`ph_composer.model.update_metadata`, one target with no reference under the same pre-image, payload,
-Undo and no-op rules. A Space Floor's `user_data` is its Volume's optional `floor_user_data`: reads
+`ph_composer.model` settings dictionary (below), read by `ph_composer.model.detail` (with `metadata`
+`"summary"`, only their sizes) and `ph_composer.model.fragment` (one part by `path`, in fragments), and
+written by `ph_composer.model.update_metadata`, one target with no reference under the same pre-image,
+payload, Undo and no-op rules, which answers `extension_status` only. A Space Floor's `user_data` is its Volume's optional `floor_user_data`: reads
 never report it as a Volume value but as the Volume row's `floor` (`reference` `{floor_id, entity_path}`
 and `user_data`), and `ph_composer.spaces.update_metadata` writes it by that reference under the
 Volume's write refusals. A Floor takes `user_data` only, as a part does; entries for a Volume and its
@@ -1133,8 +1144,9 @@ EnergyMaterial. Material identifiers are scoped by Assembly and Layer, so no two
 reversed construction reuses the same objects. A membrane Layer and an undivided Layer's Layer-Segment have
 no material of their own; their maps, Window Elements', Thermal Bridge Edges', Attached zones' and every
 definition's (Materials, Frames, Glazings, Psi-Install Types, Window Types, Thermal Bridge Types, Building
-Segments and Levels) stay in the Model with one `export.metadata_omitted` finding per entity: a finding
-repeated by a second read is listed once. Every carried map passes the reserved-key rule, extraction and
+Segments and Levels) stay in the Model with one `export.metadata_omitted` finding per entity, used or
+not: the Zone section passes every valid Building Segment and Level through the boundary once
+(`Zones::ExportProjection.exported_choices`), and a finding repeated by a second read is listed once. Every carried map passes the reserved-key rule, extraction and
 preflight alike, and the artifact guard's local-path check.
 
 Thermal bridges are the first optional section: `ph_composer.thermal_bridges.export.thermal_bridges` (Ruby

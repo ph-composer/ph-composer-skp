@@ -57,9 +57,9 @@ module PhComposer
             replace_in_types(request, proposal, collection, current, replacement)
             plan = request.retarget_references(kind.id, :from => id, :to => replacement_id)
           end
-          request.engine.propose_delete(kind.id, id, proposal,
-                                        :expected_values => expected_values, :reference_plan => plan)
-          { "id" => id }
+          { "id" => id }.merge(request.engine.propose_delete(kind.id, id, proposal,
+                                                             :expected_values => expected_values,
+                                                             :reference_plan => plan))
         end
 
         # Every Window Type element using `current` takes `replacement` instead, or none when it is nil.

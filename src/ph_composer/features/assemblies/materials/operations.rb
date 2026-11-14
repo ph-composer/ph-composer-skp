@@ -59,8 +59,8 @@ module PhComposer
                                             :expected_values => { "layers" => record.fetch("layers") })
             end
           end
-          request.engine.propose_delete(MATERIAL_KIND, id, proposal, :expected_values => expected_values)
-          { "id" => id }
+          { "id" => id }.merge(request.engine.propose_delete(MATERIAL_KIND, id, proposal,
+                                                             :expected_values => expected_values))
         end
       end
     end

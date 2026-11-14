@@ -72,7 +72,7 @@ class ModelMetadataTest < PhComposerTestCase
     written = write("user_data" => note)
     assert_equal "committed", written.fetch("effect"), written.inspect
     assert_equal operations + 1, @model.operations.length
-    assert_equal note, written.dig("value", "user_data")
+    assert_equal({ "extension_status" => {} }, written.fetch("value"), "a write answers the statuses only")
     read = detail
     assert_equal note, read.fetch("user_data")
     read.fetch("user_data").clear

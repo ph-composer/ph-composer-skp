@@ -60,6 +60,15 @@ module PhComposer
         record ? RECORD_KIND.values(record) : {}
       end
 
+      # An Edge row as a read with `metadata` "summary" answers it: what its user_data, extension_data and
+      # extension_status hold, in place of them (RecordQueries.summarize), so an Edge with a large map never
+      # fills a reply; edges.detail reads them whole. Any other `metadata` leaves the row as it is.
+      def summarized(row, metadata)
+        return row unless metadata == "summary"
+
+        RecordQueries.summarize(row.dup, row.fetch("values"))
+      end
+
       # The record's user_data and extension_data as a read reports them, detached, with each envelope's
       # status: {} for an Edge with no record, and for a map an invalid record holds as something other than
       # a JSON object, so a read never refuses the record it is there to help clear.

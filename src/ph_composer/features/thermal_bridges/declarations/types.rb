@@ -115,7 +115,7 @@ module PhComposer
         feature.action("#{PREFIX}.delete",
                        :description => "Delete one #{kind.label}; a type still in use refuses unless a replacement, " \
                                        "or null to clear, is given.",
-                       :refuses => DELETE, :params => delete, :result => Shapes::RESULT,
+                       :refuses => DELETE, :params => delete, :result => Shapes.with_removed_user_data(Shapes::RESULT),
                        :undo_name => "Delete #{kind.label}",
                        :side_effects => "Deletes one definition; with replacement_id, rewrites or clears every Edge " \
                                         "using it in the same step.",

@@ -20,6 +20,16 @@ and export.
 - A batch of `updates` is one Undo step and is written whole or not at all. A batch that sends what
   is already stored makes no Undo step.
 - A read answers a copy. Changing the hash or object you hold changes nothing in the Model.
+- A map larger than one reply reads in parts: the list's `metadata` `"summary"` gives its size, and
+  the matching detail read returns it in fragments, as the [agent guide](AGENT_GUIDE.md#large-records-and-previews)
+  describes.
+- An edit that sends a definition's parts, such as a Window Type's whole `elements` array, keeps each
+  surviving part's map by its id whether or not it sends it. A new part starts without one, and a map
+  that differs from the stored one refuses `params.invalid`: write it with the core action.
+- Deleting a Material, Assembly, Frame, Glazing, Psi-Install Type, Window Type, Thermal Bridge Type or
+  Attached zone returns `removed_user_data`: the record, then each part by `part_ids`, whose map was not
+  empty, with its top-level keys (the first 50, and `removed_user_data_total`). A replacement keeps its
+  own map, and Undo restores the removed ones.
 - An older Model with no stored map reads `{}` and is not rewritten by the read.
 - Over the API, params that are not plain JSON (`NaN`, `Infinity`, a key that is not a string)
   refuse `request.malformed` before any operation runs, and the sequence stays free for the
@@ -40,23 +50,23 @@ from the record down. "Omitted" means the map stays in the Model and the export 
 
 | Object | Address | Read | Write | Copies, splits and merges | HBJSON export | Library file |
 | --- | --- | --- | --- | --- | --- | --- |
-| Model | none, one per Model | `ph_composer.model.detail` | `ph_composer.model.update_metadata` | Not copied | The HBJSON Model's `user_data` | Not a library kind |
+| Model | none, one per Model | `ph_composer.model.detail`, `ph_composer.model.fragment` | `ph_composer.model.update_metadata` | Not copied | The HBJSON Model's `user_data` | Not a library kind |
 | Material | `{kind: "ph_composer.assemblies.material", id}` | `ph_composer.assemblies.materials.list`, `ph_composer.records.list` | Core action; create takes `user_data` | Duplicate copies the map | Omitted | Not in the wire row; replace keeps the local map |
 | Assembly | `{kind: "ph_composer.assemblies.assembly", id}` | `ph_composer.assemblies.assemblies.list`, `ph_composer.records.list` | Core action; create takes `user_data` | Duplicate copies the map and every part's map | Its construction, and the reversed copy | Not a library kind |
 | Layer | Assembly address with `part_ids: [layer id]` | The Assembly's `values.layers` in `ph_composer.records.list` or `ph_composer.records.detail` | Core action with `part_ids` | Edits keep it; a new Layer starts empty; Duplicate copies it under a new id | Its material, the hybrid material when divided; a membrane Layer is omitted | Not a library kind |
 | Layer-Segment | Assembly address with `part_ids: [layer id, segment id]` | `ph_composer.assemblies.assemblies.segments.list` | Core action with `part_ids` | As for a Layer | Its cell material when the Layer is divided; otherwise omitted | Not a library kind |
 | Frame, Glazing, Psi-Install Type | `{kind: "ph_composer.windows.frame", id}`, `glazing`, `psi_install_type` | `ph_composer.windows.frames.list` and its siblings, `ph_composer.records.list` | Core action; create takes `user_data` | Duplicate copies the map | Omitted | Not in the wire row; replace keeps the local map |
 | Window Type | `{kind: "ph_composer.windows.window_type", id}` | `ph_composer.windows.types.list`, `ph_composer.records.list` | Core action; create takes `user_data` | Duplicate copies the map and each element's map | Omitted | Not a library kind |
-| Window Element | Window Type address with `part_ids: [element id]` | `ph_composer.windows.types.elements.list` | Core action with `part_ids` | Split copies the map into each piece; merge keeps the top-left element's map and lists the others' keys in `removed_user_data`; an inserted element starts empty | Omitted | Not a library kind |
+| Window Element | Window Type address with `part_ids: [element id]` | `ph_composer.windows.types.elements.list` | Core action with `part_ids` | Split copies the map into each piece; merge keeps the top-left element's map and lists the others' keys in `removed_user_data`; an inserted element starts empty; an update sending the whole `elements` array keeps each map | Omitted | Not a library kind |
 | Window Unit | the row's `reference` | `ph_composer.windows.units.list`, `ph_composer.windows.units.detail` | Owner action; place takes `user_data` | Swap and flip keep it; a Unit restored from orphaned panes, or converted from a plain component, starts empty | Each of its Apertures | Not a library kind |
 | Zone | the row's `reference` | `ph_composer.zones.list` | Owner action | Restore cannot recover it and says so in its offer | Its Room | Not a library kind |
 | Face | the row's `reference` | `ph_composer.zones.faces.list` | Owner action, once the Face has a record | An adjacency split copies the map to each piece | Its Face | Not a library kind |
 | Attached zone | `{kind: "ph_composer.zones.faces.attached_zone", id}` | `ph_composer.records.list` | Core action; create takes `user_data` | Duplicate copies the map | Omitted | Not a library kind |
-| Building Segment, Level | `{kind: "ph_composer.zones.building_segment", id}`, `level` | `ph_composer.zones.options.list`, `ph_composer.zones.options.detail` | Core action, which also updates each Zone's copy in the same step; create takes `user_data` | Merge and remove keep the survivor's map and list the removed options' keys in `removed_user_data` | Omitted | Not a library kind |
+| Building Segment, Level | `{kind: "ph_composer.zones.building_segment", id}`, `level` | `ph_composer.zones.options.list`, `ph_composer.zones.options.detail` | Core action, which also updates each Zone's copy in the same step; create takes `user_data` | Merge and remove keep the survivor's map and list the removed options' keys in `removed_user_data` | Omitted, whether a Zone uses the option or not | Not a library kind |
 | Space, Volume, Floor Segment | the row's `reference` | `ph_composer.spaces.list`, `ph_composer.spaces.volumes.list`, `ph_composer.spaces.floor_segments.list`, `ph_composer.spaces.detail` | `ph_composer.spaces.update_metadata` | Copies keep the map | Space, SpaceVolume and SpaceFloorSegment | Not a library kind |
 | Space Floor | the Volume row's `floor.reference` | `ph_composer.spaces.volumes.list` with `fields` naming `floor` | `ph_composer.spaces.update_metadata` | Travels with its Volume | Its SpaceFloor | Not a library kind |
 | Thermal Bridge Type | `{kind: "ph_composer.thermal_bridges.type", id}` | `ph_composer.thermal_bridges.types.list`, `ph_composer.records.list` | Core action; create takes `user_data` | Duplicate copies the map | Omitted | Not a library kind |
-| Thermal Bridge Edge | the Edge row's `reference` | `ph_composer.thermal_bridges.edges.selection`, `selection_all`, `at`, `candidates` | Owner action, once the Edge has an assignment | A split or copied Edge keeps a copy on each piece, written separately by path; reassigning keeps it; repair removes it and lists its keys | Omitted, since a run joins several Edges | Not a library kind |
+| Thermal Bridge Edge | the Edge row's `reference` | `ph_composer.thermal_bridges.edges.selection`, `selection_all`, `at`, `candidates`, `edges.detail` | Owner action, once the Edge has an assignment | A split or copied Edge keeps a copy on each piece, written separately by path; reassigning keeps it; repair removes it and lists its keys | Omitted, since a run joins several Edges | Not a library kind |
 
 Definitions and Attached zones are records stored in the Model. Zones, Faces, Window Units, Spaces
 and Thermal Bridge Edge assignments are stored on their SketchUp entities, so a copy made in

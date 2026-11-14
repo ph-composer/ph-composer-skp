@@ -449,6 +449,37 @@ class RegistryTest < PhComposerTestCase
     refute Registry.installed?("probe.parts")
   end
 
+  # A part needs a required string id to be addressable and an optional object map to be writable.
+  def test_a_part_must_require_a_string_id_and_take_an_optional_object_map
+    shapes = {
+      "wrong_types" => PhComposer::SchemaShapes.object({ "id" => { "type" => "integer" },
+                                                         "user_data" => { "type" => "string" } },
+                                                       :optional => ["user_data"]),
+      "optional_id" => PhComposer::SchemaShapes.object({ "id" => { "type" => "string" },
+                                                         "user_data" => { "type" => "object" } },
+                                                       :optional => %w[id user_data]),
+      "required_map" => PhComposer::SchemaShapes.object({ "id" => { "type" => "string" },
+                                                          "user_data" => { "type" => "object" } })
+    }
+    fields = shapes.map do |key, member|
+      PhComposer::Records::Field.new(:key => key, :schema => { "type" => "array", "items" => member },
+                                     :required => true)
+    end
+    kind = PhComposer::Records::RecordKind.new(
+      :id => "probe.typed.kind", :label => "Kind", :schema_version => 1, :id_prefix => "ptk", :fields => fields,
+      :parts => shapes.keys.map { |key| PhComposer::Records::Part.new(:label => "Row", :path => "#{key}[]") }
+    )
+    diagnostics = refused(feature { |r| r.feature("probe.typed", :contract_version => 1).record_kind(kind) })
+
+    assert_equal ["registration.schema_invalid"], diagnostics.map(&:code).uniq
+    assert_equal ["probe.typed.kind: part wrong_types[] members must require a string id.",
+                  "probe.typed.kind: part wrong_types[] members must take user_data as an optional object.",
+                  "probe.typed.kind: part optional_id[] members must require a string id.",
+                  "probe.typed.kind: part required_map[] members must take user_data as an optional object."],
+                 diagnostics.map(&:message)
+    refute Registry.installed?("probe.typed")
+  end
+
   def test_a_metadata_follow_up_must_be_callable
     name = PhComposer::Records::Field.new(:key => "name", :schema => { "type" => "string" }, :required => true)
     kind = PhComposer::Records::RecordKind.new(:id => "probe.follow.kind", :label => "Kind", :schema_version => 1,

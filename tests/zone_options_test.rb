@@ -605,6 +605,26 @@ class ZoneOptionsTest < PhComposerTestCase
                  "an option without a map is not reported"
   end
 
+  # Every Building-Segment and Level map stays in the Model with one finding, whether a Zone names the option
+  # or not.
+  def test_used_and_unused_option_maps_are_each_reported_as_omitted
+    group, face = add_zone
+    Z::Faces::FACE_STORE.write(face, "id" => "fac_AAAAAAAAAAAA", "schema_version" => 1)
+    adopt
+    segment_id = Z::ZONE_STORE.read(group).fetch("building_segment_id")
+    unused = invoke("#{O::PREFIX}.create", "collection" => "level", "values" => { "name" => "Attic",
+                                                                                  "colour" => "#1F7478" },
+                                           "user_data" => { "firm" => { "floor" => "attic" } })
+    assert_equal "completed", unused.fetch("status"), unused.inspect
+    write_metadata(metadata_entry(O::SEGMENT_KIND, segment_id, { "firm" => { "block" => "A" } }))
+
+    extraction = PhComposer::Export::Collection.build(@model, :run_id => "options",
+                                                              :contributors => [Z::ExportProjection::SECTION])
+    omitted = extraction.findings.select { |row| row.fetch("code") == "export.metadata_omitted" }
+    assert_equal [segment_id, unused.dig("value", "id")].sort, omitted.map { |row| row.fetch("object_id") }.sort
+    refute_includes JSON.generate(extraction.document), "attic"
+  end
+
   def test_adopting_a_copied_zone_rebuilds_its_options_with_their_maps
     group, face = add_zone
     adopt

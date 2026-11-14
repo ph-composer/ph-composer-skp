@@ -50,9 +50,9 @@ module PhComposer
         # rewrote those records in this proposal passes them as `reference_plan`, so the check reads them
         # as they will stand.
         def delete(request, proposal, id:, expected_values: {}, reference_plan: nil)
-          request.engine.propose_delete(TYPE_KIND, id, proposal, :expected_values => expected_values,
-                                                                 :reference_plan => reference_plan)
-          { "id" => id }
+          { "id" => id }.merge(request.engine.propose_delete(TYPE_KIND, id, proposal,
+                                                             :expected_values => expected_values,
+                                                             :reference_plan => reference_plan))
         end
       end
     end

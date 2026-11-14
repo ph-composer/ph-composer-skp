@@ -21,6 +21,22 @@ module PhComposer
           "user_data_key_total" => names.length }
       end
 
+      # What removing `records` of `kind` discards, for a merge or delete result (D-UD-5): each record, then
+      # each of its declared parts (Records::Part), whose map was not empty, in the order given, by `id` and,
+      # for a part, `part_ids`, with the map's top-level keys; the first REPORT_LIMIT of them, and how many
+      # there are. Undo brings them back.
+      def removed_user_data(kind, records)
+        mapped = records.flat_map do |record|
+          address = { "id" => record.fetch("id") }
+          parts = kind.parts.flat_map do |part|
+            part.addressed_members(record).map { |ids, member| [address.merge("part_ids" => ids), member["user_data"]] }
+          end
+          [[address, record["user_data"]]].concat(parts).select { |_address, map| map.is_a?(Hash) && !map.empty? }
+        end
+        listed = mapped.first(REPORT_LIMIT).map { |address, map| address.merge(discarded_keys(map)) }
+        { "removed_user_data" => listed, "removed_user_data_total" => mapped.length }
+      end
+
       # Each envelope's status against what is installed (Extension::STATUSES), by namespace.
       def status_map(record, catalog)
         record.fetch("extension_data", {}).to_h do |namespace, envelope|

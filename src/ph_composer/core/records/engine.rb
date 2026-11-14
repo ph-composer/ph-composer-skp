@@ -94,7 +94,14 @@ module PhComposer
       # Extension payloads the edit does not name are carried through as they were stored, whether or
       # not their extension is installed. `expected_values` are the values the caller last read; any
       # that differ now refuse the edit.
-      def propose_update(kind_id, id, change_set, values: {}, extension_payloads: {}, expected_values: {})
+      #
+      # The same holds for each declared part (Records::Part) the values rebuild: a part that keeps its id
+      # path keeps its stored map whether or not the values carry it, a new part starts without one, and a
+      # map that differs from what is stored refuses (`keep_part_maps!`). Only a gesture that derives every
+      # part's map from the stored record itself, as a Window grid split copies it into each piece, passes
+      # `derived_part_maps: true` to store the maps its values carry.
+      def propose_update(kind_id, id, change_set, values: {}, extension_payloads: {}, expected_values: {},
+                         derived_part_maps: false)
         staging(change_set) do
           kind = @catalog.kind(kind_id)
           before = find(kind_id, id)
@@ -102,6 +109,7 @@ module PhComposer
           after = Metadata.updated(before, @catalog, :extension_payloads => extension_payloads)
           check_value_keys!(kind, values)
           values.each { |key, value| value.nil? ? after.delete(key) : after[key] = DeepCopy.call(value) }
+          keep_part_maps!(kind, before, after) unless derived_part_maps
           propose(kind, change_set, before, after)
         end
       end
@@ -132,6 +140,8 @@ module PhComposer
 
       # `reference_plan`, when given, is the entity records the same proposal rewrites first (a
       # feature moving every Face off the record it deletes); the reference check reads them as planned.
+      # Returns what the delete discards of the record's and its parts' maps (Metadata.removed_user_data),
+      # which a delete action reports.
       def propose_delete(kind_id, id, change_set, expected_values: {}, reference_plan: nil)
         staging(change_set) do
           kind = @catalog.kind(kind_id)
@@ -139,6 +149,7 @@ module PhComposer
           check_expected!(kind, before, expected_values)
           change_set.delete(kind.id, :before => before)
           check_identity_removal!(kind.id, id, :change_set => change_set, :reference_plan => reference_plan)
+          Metadata.removed_user_data(kind, [before])
         end
       end
 
@@ -298,6 +309,27 @@ module PhComposer
         end
         targets.each do |target_kind, id|
           resolve_reference(target_kind, id, :change_set => change_set)
+        end
+      end
+
+      # Puts each part's stored map back on `after`, by id path from the record down: a part whose path is
+      # in `before` keeps its map (an absent one stays absent), and any other part has none. A part that
+      # sends a map other than the stored one (absent reading as {}) refuses, since a value edit never
+      # writes metadata; ph_composer.records.update_metadata does.
+      def keep_part_maps!(kind, before, after)
+        kind.parts.each do |part|
+          part.addressed_members(after).each do |part_ids, member|
+            stored = part.find(before, part_ids)
+            kept = stored.is_a?(Hash) ? stored["user_data"] : nil
+            sent = member["user_data"]
+            unless sent.nil? || sent == (kept || {})
+              raise CodedError.new("params.invalid", "#{part.label} #{part_ids.join(' / ')} of #{kind.label} " \
+                                                     "#{after['id']}: an edit keeps each part's user_data as " \
+                                                     "stored; write it with ph_composer.records.update_metadata.")
+            end
+
+            kept.nil? ? member.delete("user_data") : member["user_data"] = DeepCopy.call(kept)
+          end
         end
       end
 

@@ -48,9 +48,9 @@ module PhComposer
 
             plan = request.retarget_references(ASSEMBLY_KIND, :from => id, :to => replacement_id)
           end
-          request.engine.propose_delete(ASSEMBLY_KIND, id, proposal, :expected_values => expected_values,
-                                                                     :reference_plan => plan)
-          { "id" => id }
+          { "id" => id }.merge(request.engine.propose_delete(ASSEMBLY_KIND, id, proposal,
+                                                             :expected_values => expected_values,
+                                                             :reference_plan => plan))
         end
 
         # One Builder gesture on one Assembly: the block returns the command result for the stored record.

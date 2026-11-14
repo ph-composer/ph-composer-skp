@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "record_queries"
+
 module PhComposer
   # The Model's own metadata: one `user_data` map and one `extension_data` map for the building as a whole,
   # under the Records::Metadata rules every record follows (context/CONTRACTS.md, "Model settings"). It lives
@@ -8,6 +10,9 @@ module PhComposer
   module ModelMetadata
     FEATURE_ID = "ph_composer.model"
     DETAIL = "#{FEATURE_ID}.detail"
+    FRAGMENT = "#{FEATURE_ID}.fragment"
+    # The parts of the detail answer FRAGMENT reaches.
+    PARTS = %w[user_data extension_data extension_status].freeze
     UPDATE_METADATA = "#{FEATURE_ID}.update_metadata"
     # The export section that carries the Model's user_data to the Honeybee Model's own user_data
     # (python/ph_composer_translation/model_metadata.py), and its preflight.
@@ -27,12 +32,30 @@ module PhComposer
       values.flat_map { |key, map| JsonValue.problems(map).map { |problem| "#{key} #{problem}" } }
     end
 
-    RESULT = SchemaShapes.object({
+    STATUS = { "type" => "object", "description" => "Each extension envelope's status against what is installed." }
+             .freeze
+    DETAIL_PARAMS = SchemaShapes.object({
+      "metadata" => { "type" => "string", "enum" => %w[full summary],
+                      "description" => "full (the default): user_data, extension_data and extension_status as " \
+                                       "stored. summary: none of them, but their sizes, digests and status counts in " \
+                                       "metadata; read any of them whole with #{FRAGMENT}." }
+    }, :optional => ["metadata"]).freeze
+    DETAIL_RESULT = SchemaShapes.object({
       "user_data" => SchemaShapes.described(MAP, "Contributor metadata, preserved as written; {} when none."),
       "extension_data" => SchemaShapes.described(MAP, "Versioned payloads registered extensions own."),
-      "extension_status" => { "type" => "object",
-                              "description" => "Each extension envelope's status against what is installed." }
-    }).freeze
+      "extension_status" => STATUS,
+      "metadata" => RecordQueries::METADATA
+    }, :optional => %w[user_data extension_data extension_status metadata],
+       :description => "The three maps, or with metadata summary what they hold in metadata.").freeze
+    FRAGMENT_PARAMS = SchemaShapes.object({
+      "path" => Fragments.path_param(PARTS, "[\"user_data\"], [\"user_data\", \"notes\"]"),
+      "cursor" => Pages::CURSOR
+    }, :optional => ["cursor"]).freeze
+    FRAGMENT_RESULT = SchemaShapes.object({ "type" => Fragments::TYPE, "fragment" => Fragments::FRAGMENT,
+                                            "next_cursor" => Pages::NEXT_CURSOR }).freeze
+    # A write answers the statuses only, so a map of any size never makes its own reply too large; read the
+    # maps back with DETAIL or FRAGMENT.
+    RESULT = SchemaShapes.object({ "extension_status" => STATUS }).freeze
     PARAMS = SchemaShapes.object({
       "user_data" => { "type" => "object", "description" => "Replaces the whole user_data map; {} clears it." },
       "extension_payloads" => { "type" => "object", "additionalProperties" => { "type" => "object" },
@@ -49,10 +72,21 @@ module PhComposer
     def install(registry)
       feature = registry.feature(FEATURE_ID, :contract_version => Declarations::CONTRACT_VERSION)
       feature.query(DETAIL, :description => "The Model's own user_data and extension_data, with each envelope's " \
-                                            "status. A Model that never had any reads both as {}, without a write.",
-                            :refuses => %w[record.unreadable], :params => SchemaShapes.object({}), :result => RESULT,
-                            :examples => [{}]) do |request|
-        detail(request.model, request.registry.catalog)
+                                            "status. A Model that never had any reads both as {}, without a write. " \
+                                            "With metadata summary, only their sizes, for maps larger than a reply.",
+                            :refuses => %w[record.unreadable], :params => DETAIL_PARAMS, :result => DETAIL_RESULT,
+                            :examples => [{}, { "metadata" => "summary" }]) do |request|
+        view = detail(request.model, request.registry.catalog)
+        request.params["metadata"] == "summary" ? RecordQueries.summarize(view, {}).slice("metadata") : view
+      end
+      feature.query(FRAGMENT, :description => "One part of #{DETAIL}'s answer, exactly, as canonical JSON text in " \
+                                              "fragments: join every fragment's text in order, check its sha256 and " \
+                                              "parse it. Pass next_cursor back for the next fragment.",
+                              :refuses => %w[query.cursor_expired record.unreadable target.not_found],
+                              :params => FRAGMENT_PARAMS, :result => FRAGMENT_RESULT,
+                              :examples => [{ "path" => ["user_data"] }]) do |request|
+        Fragments.detail(request, FRAGMENT, detail(request.model, request.registry.catalog),
+                         request.params.fetch("path"), :parts => PARTS)
       end
       feature.action(UPDATE_METADATA,
                      :description => "Replace the Model's own user_data, installed extension payloads or both, " \
@@ -117,7 +151,7 @@ module PhComposer
       planned = Records::Metadata.planned(request.engine, catalog, before.merge("id" => TARGET_ID), params, LABEL)
       after = SETTINGS.propose(request.model, proposal, :values => planned.slice("user_data", "extension_data"),
                                                         :expected_values => before)
-      after.merge("extension_status" => Records::Metadata.status_map(after, catalog))
+      { "extension_status" => Records::Metadata.status_map(after, catalog) }
     end
   end
 end

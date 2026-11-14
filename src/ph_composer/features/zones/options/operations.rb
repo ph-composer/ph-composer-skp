@@ -137,12 +137,7 @@ module PhComposer
       # many there are. A survivor keeps its own map; maps are never combined (D-UD-5). Undo brings the
       # removed options back with their maps.
       def removed_user_data(engine, kind, removed)
-        mapped = removed.sort.map { |id| engine.find(kind.id, id) }
-                        .reject { |record| record.fetch("user_data", {}).empty? }
-        listed = mapped.first(Records::Metadata::REPORT_LIMIT).map do |record|
-          { "id" => record.fetch("id") }.merge(Records::Metadata.discarded_keys(record.fetch("user_data")))
-        end
-        { "removed_user_data" => listed, "removed_user_data_total" => mapped.length }
+        Records::Metadata.removed_user_data(kind, removed.sort.map { |id| engine.find(kind.id, id) })
       end
 
       # Each removed option id and the final option its users move to, or nil. A used option needs an

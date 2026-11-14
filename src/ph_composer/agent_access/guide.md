@@ -99,12 +99,20 @@ A record or a preview can be larger than one reply. These reads give all of it e
   keeps only the top-left element's map; the result's `removed_user_data` names each other element whose
   map was not empty, with its top-level keys (the first 50, with `removed_user_data_total`), and Undo
   brings them back. Removing a band deletes its elements with their maps. A `windows.types.update` that
-  sends the whole `elements` array stores the maps it sends.
+  sends the whole `elements` array keeps each surviving element's map by its id, whether or not it sends
+  it, and a new element starts without one; a map that differs from the stored one refuses
+  `params.invalid`, since `records.update_metadata` is the one way to write it.
+- **Deleting a definition.** The delete of a Material, Assembly, Frame, Glazing, Psi-Install Type,
+  Window Type, Thermal Bridge Type or Attached zone returns `removed_user_data`: the record, then each
+  of its parts with `part_ids`, whose map was not empty, with its top-level keys (the first 50, with
+  `removed_user_data_total`). A replacement keeps its own map, and Undo brings the removed maps back.
 - **Change the Model's or a Space Floor's metadata.** The Model has its own `user_data` and
   `extension_data`: read them with `ph_composer.model.detail` (both `{}` until something is written)
   and write them with `ph_composer.model.update_metadata`, which takes `user_data`,
   `extension_payloads` or both and the two maps you read as `expected_metadata`, as above, with no
-  reference. Each Space Floor has its own `user_data` too, kept apart from its Volume's. A Volume row's
+  reference, and answers each envelope's `extension_status`. For maps larger than one reply,
+  `model.detail` with `metadata` `"summary"` gives their sizes, and `ph_composer.model.fragment` reads
+  any of them, such as `path` `["user_data"]`, in fragments that join as above. Each Space Floor has its own `user_data` too, kept apart from its Volume's. A Volume row's
   `floor` gives the Floor's `reference` (`floor_id` and the Volume's `entity_path`) and its `user_data`;
   `ph_composer.spaces.volumes.list` returns it when `fields` asks for `floor`. Send that reference to
   `ph_composer.spaces.update_metadata` with `expected_metadata` the Floor's `user_data` and
@@ -342,7 +350,10 @@ removes the assignment. Each is one Undo step. An Edge split or copied in Sketch
 assignment, and the pieces share one id, which reads mark `copied`; nothing needs repairing.
 
 Each Edge row also carries the assignment's `user_data`, `extension_data` and `extension_status`
-(`{}` for an Edge with no assignment). To change them, send the row's `reference` to
+(`{}` for an Edge with no assignment). With `metadata` `"summary"`, `edges.selection`, `edges.at` and
+`edges.candidates` give their sizes in `metadata` instead, so an Edge with a large map never fills a
+reply, and `ph_composer.thermal_bridges.edges.detail` reads one of them whole by the row's `path` as
+`edge_path` and a `path` such as `["user_data"]`, in fragments that join as above. To change them, send the row's `reference` to
 `ph_composer.thermal_bridges.edges.update_metadata` with the whole `user_data` map to keep and the two
 maps you read as `expected_metadata`; `{}` clears the map. The reference's path names one Edge, so a
 piece that shares its id keeps its own map. An Edge needs a valid assignment first: one without refuses.

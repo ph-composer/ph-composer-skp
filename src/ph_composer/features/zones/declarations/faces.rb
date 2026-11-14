@@ -191,7 +191,9 @@ module PhComposer
              :description => "Where the Faces naming it go: to another Attached zone, or reclassified to a " \
                              "boundary condition.")
         }).freeze
-        ATTACHED_ZONE_DELETE_RESULT = Shapes.object({ "id" => Shapes::ID, "reassigned_faces" => Shapes::COUNT }).freeze
+        ATTACHED_ZONE_DELETE_RESULT = Shapes.with_removed_user_data(
+          Shapes.object({ "id" => Shapes::ID, "reassigned_faces" => Shapes::COUNT })
+        ).freeze
         ATTACHED_ZONE_DUPLICATE_PARAMS = Shapes.object({
           "ids" => { "type" => "array", "items" => Shapes::ID, "minItems" => 1,
                      "description" => "The Attached zones to copy, each under a new id and a numbered name." }

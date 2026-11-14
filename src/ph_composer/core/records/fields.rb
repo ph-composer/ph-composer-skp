@@ -172,9 +172,24 @@ module PhComposer
         end
         properties = shape && shape["properties"]
         return ["part #{path} must name an array of objects in the values schema"] unless properties
-        return [] if properties.key?("id") && properties.key?("user_data")
+        return ["part #{path} members must declare id and user_data"] unless properties.key?("id") &&
+                                                                             properties.key?("user_data")
 
-        ["part #{path} members must declare id and user_data"]
+        member_problems(shape)
+      end
+
+      # A part is addressed by a string id every member has, and its map is an object a member may lack,
+      # since a member starts without one and an older record has none.
+      def member_problems(shape)
+        required = Array(shape["required"])
+        problems = []
+        unless Array(shape.dig("properties", "id", "type")) == ["string"] && required.include?("id")
+          problems << "part #{path} members must require a string id"
+        end
+        unless Array(shape.dig("properties", "user_data", "type")) == ["object"] && !required.include?("user_data")
+          problems << "part #{path} members must take user_data as an optional object"
+        end
+        problems
       end
     end
   end

@@ -167,6 +167,31 @@ class AssemblyRecordsOperationsTest < PhComposerTestCase
     assert_equal before, part_maps(record(Assemblies::ASSEMBLY_KIND, id)), "a Material replacement keeps every map"
   end
 
+  # A delete with a replacement reports the deleted record's map, then its parts' maps by address in
+  # declaration order (every Layer, then every Layer-Segment); the survivor keeps its own, Undo brings them
+  # back, and a record without maps reports none.
+  def test_a_delete_with_replacement_reports_the_record_and_part_maps_it_removes
+    values = Assemblies::Assembly::Schema::KIND.values(mapped_parts)
+    removed = create("assemblies", values, "firm" => { "zeta" => 1, "alpha" => 2 })
+    survivor = create("assemblies", values.merge("name" => "Survivor"), "firm" => { "keep" => true })
+    layers = record(Assemblies::ASSEMBLY_KIND, removed)["layers"]
+    result = invoke("assemblies.delete", "id" => removed, "replacement_id" => survivor)
+    assert_equal "committed", result["effect"], result.inspect
+    parts = layers.map { |layer| [layer["id"]] } +
+            layers.flat_map { |layer| layer["segments"].map { |segment| [layer["id"], segment["id"]] } }
+    entry = { "id" => removed, "user_data_keys" => ["firm"], "user_data_key_total" => 1 }
+    expected = [entry] + parts.map { |ids| entry.merge("part_ids" => ids) }
+    assert_equal [expected, 6], result.fetch("value").values_at("removed_user_data", "removed_user_data_total")
+    assert_equal({ "firm" => { "keep" => true } }, record(Assemblies::ASSEMBLY_KIND, survivor)["user_data"])
+    @model.undo
+    assert_equal({ "firm" => { "zeta" => 1, "alpha" => 2 } }, record(Assemblies::ASSEMBLY_KIND, removed)["user_data"])
+    assert_equal layers, record(Assemblies::ASSEMBLY_KIND, removed)["layers"]
+
+    old, replacement, = seed_repeated_uses
+    plain = invoke("materials.delete", "id" => old, "replacement_id" => replacement)
+    assert_equal [[], 0], plain.fetch("value").values_at("removed_user_data", "removed_user_data_total")
+  end
+
   def test_a_duplicate_copies_part_maps_under_new_ids_as_independent_literal_json
     values = mapped_parts
     literal = values["layers"][0]["id"]

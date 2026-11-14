@@ -82,9 +82,9 @@ module PhComposer
           end
           proposal.add_step(ClassifyStep.new(:updates => updates), :scopes => scopes)
         end
-        request.engine.propose_delete(AttachedZone::KIND_ID, id, proposal,
-                                      :reference_plan => reassignment_plan(updates))
-        { "id" => id, "reassigned_faces" => updates.length }
+        removed = request.engine.propose_delete(AttachedZone::KIND_ID, id, proposal,
+                                                :reference_plan => reassignment_plan(updates))
+        { "id" => id, "reassigned_faces" => updates.length }.merge(removed)
       end
 
       def validate_replacement!(request, replacement, deleted_id)

@@ -10252,7 +10252,7 @@ Example params:
 
 ### `ph_composer.model.detail`
 
-The Model's own user_data and extension_data, with each envelope's status. A Model that never had any reads both as {}, without a write. Owner: `ph_composer.model`.
+The Model's own user_data and extension_data, with each envelope's status. A Model that never had any reads both as {}, without a write. With metadata summary, only their sizes, for maps larger than a reply. Owner: `ph_composer.model`.
 
 Refuses: `record.unreadable`, and the `query` common set.
 
@@ -10263,7 +10263,16 @@ Params:
   "type": "object",
   "additionalProperties": false,
   "required": [],
-  "properties": {}
+  "properties": {
+    "metadata": {
+      "type": "string",
+      "enum": [
+        "full",
+        "summary"
+      ],
+      "description": "full (the default): user_data, extension_data and extension_status as stored. summary: none of them, but their sizes, digests and status counts in metadata; read any of them whole with ph_composer.model.fragment."
+    }
+  }
 }
 ```
 
@@ -10273,11 +10282,7 @@ Result:
 {
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "user_data",
-    "extension_data",
-    "extension_status"
-  ],
+  "required": [],
   "properties": {
     "user_data": {
       "type": "object",
@@ -10290,8 +10295,73 @@ Result:
     "extension_status": {
       "type": "object",
       "description": "Each extension envelope's status against what is installed."
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "user_data",
+        "extension_data"
+      ],
+      "properties": {
+        "user_data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "bytes",
+            "sha256",
+            "keys"
+          ],
+          "properties": {
+            "bytes": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "sha256": {
+              "type": "string"
+            },
+            "keys": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "extension_data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "bytes",
+            "sha256",
+            "namespaces",
+            "statuses"
+          ],
+          "properties": {
+            "bytes": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "sha256": {
+              "type": "string"
+            },
+            "namespaces": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "statuses": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "description": "How many envelopes read each status, such as unavailable."
+            }
+          }
+        }
+      },
+      "description": "With metadata summary: what user_data, extension_data and extension_status hold, in place of them; read any of them whole with ph_composer.records.detail."
     }
-  }
+  },
+  "description": "The three maps, or with metadata summary what they hold in metadata."
 }
 ```
 
@@ -10299,6 +10369,14 @@ Example params:
 
 ```json
 {}
+```
+
+Example params:
+
+```json
+{
+  "metadata": "summary"
+}
 ```
 
 ### `ph_composer.model.export_preflight`
@@ -10421,6 +10499,131 @@ Example params:
 
 ```json
 {}
+```
+
+### `ph_composer.model.fragment`
+
+One part of ph_composer.model.detail's answer, exactly, as canonical JSON text in fragments: join every fragment's text in order, check its sha256 and parse it. Pass next_cursor back for the next fragment. Owner: `ph_composer.model`.
+
+Refuses: `query.cursor_expired`, `record.unreadable`, `target.not_found`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "path"
+  ],
+  "properties": {
+    "path": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": {
+        "type": [
+          "string",
+          "integer"
+        ]
+      },
+      "description": "Keys and array indexes into the view, starting at user_data, extension_data, extension_status: [\"user_data\"], [\"user_data\", \"notes\"]."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "fragment",
+    "next_cursor"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "object",
+        "array",
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ],
+      "description": "The JSON type of the value at path; a stored null or false is a value."
+    },
+    "fragment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "encoding",
+        "offset",
+        "bytes",
+        "total_bytes",
+        "sha256",
+        "text"
+      ],
+      "properties": {
+        "encoding": {
+          "type": "string",
+          "enum": [
+            "json"
+          ],
+          "description": "The fragments joined in order are the value's canonical JSON text."
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Where this fragment starts, in UTF-8 bytes of the whole text."
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "This fragment's length in UTF-8 bytes."
+        },
+        "total_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The whole text's UTF-8 length."
+        },
+        "sha256": {
+          "type": "string",
+          "description": "SHA-256 of the whole text's UTF-8 bytes, hex."
+        },
+        "text": {
+          "type": "string",
+          "description": "This fragment: whole characters, never a split one."
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "path": [
+    "user_data"
+  ]
+}
 ```
 
 ### `ph_composer.records.detail`
@@ -14253,6 +14456,14 @@ Params:
       "maxItems": 500,
       "description": "Root-to-Edge persistent-id paths, such as a schedule run's edge_paths; answered in this order."
     },
+    "metadata": {
+      "type": "string",
+      "enum": [
+        "full",
+        "summary"
+      ],
+      "description": "full (the default): each row's user_data, extension_data and extension_status as stored. summary: none of them, but their sizes, digests and status counts in metadata and each value's size in value_bytes; read any of them whole with ph_composer.thermal_bridges.edges.detail."
+    },
     "limit": {
       "type": "number",
       "description": "Page size, 1 to 500; 100 when absent."
@@ -14292,9 +14503,6 @@ Result:
           "copied",
           "record_problem",
           "write_refusal",
-          "user_data",
-          "extension_data",
-          "extension_status",
           "hidden",
           "endpoints_m"
         ],
@@ -14438,6 +14646,74 @@ Result:
           "extension_status": {
             "type": "object",
             "description": "Each extension envelope's status against what is installed, by namespace; {} for an Edge with no assignment."
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "user_data",
+              "extension_data"
+            ],
+            "properties": {
+              "user_data": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "bytes",
+                  "sha256",
+                  "keys"
+                ],
+                "properties": {
+                  "bytes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "sha256": {
+                    "type": "string"
+                  },
+                  "keys": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              },
+              "extension_data": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "bytes",
+                  "sha256",
+                  "namespaces",
+                  "statuses"
+                ],
+                "properties": {
+                  "bytes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "sha256": {
+                    "type": "string"
+                  },
+                  "namespaces": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "statuses": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "description": "How many envelopes read each status, such as unavailable."
+                  }
+                }
+              }
+            },
+            "description": "With metadata summary: what user_data, extension_data and extension_status hold, in place of them; read any of them whole with ph_composer.records.detail."
+          },
+          "value_bytes": {
+            "type": "object",
+            "description": "With metadata summary: each value's stored size."
           },
           "hidden": {
             "type": [
@@ -14546,6 +14822,14 @@ Params:
       ],
       "description": "Only Edges with an assignment record, or only those without; any when absent."
     },
+    "metadata": {
+      "type": "string",
+      "enum": [
+        "full",
+        "summary"
+      ],
+      "description": "full (the default): each row's user_data, extension_data and extension_status as stored. summary: none of them, but their sizes, digests and status counts in metadata and each value's size in value_bytes; read any of them whole with ph_composer.thermal_bridges.edges.detail."
+    },
     "limit": {
       "type": "number",
       "description": "Page size, 1 to 500; 100 when absent."
@@ -14586,9 +14870,6 @@ Result:
           "copied",
           "record_problem",
           "write_refusal",
-          "user_data",
-          "extension_data",
-          "extension_status",
           "hidden",
           "endpoints_m"
         ],
@@ -14733,6 +15014,74 @@ Result:
             "type": "object",
             "description": "Each extension envelope's status against what is installed, by namespace; {} for an Edge with no assignment."
           },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "user_data",
+              "extension_data"
+            ],
+            "properties": {
+              "user_data": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "bytes",
+                  "sha256",
+                  "keys"
+                ],
+                "properties": {
+                  "bytes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "sha256": {
+                    "type": "string"
+                  },
+                  "keys": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              },
+              "extension_data": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "bytes",
+                  "sha256",
+                  "namespaces",
+                  "statuses"
+                ],
+                "properties": {
+                  "bytes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "sha256": {
+                    "type": "string"
+                  },
+                  "namespaces": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "statuses": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "description": "How many envelopes read each status, such as unavailable."
+                  }
+                }
+              }
+            },
+            "description": "With metadata summary: what user_data, extension_data and extension_status hold, in place of them; read any of them whole with ph_composer.records.detail."
+          },
+          "value_bytes": {
+            "type": "object",
+            "description": "With metadata summary: each value's stored size."
+          },
           "hidden": {
             "type": [
               "boolean",
@@ -14835,6 +15184,144 @@ Example params:
     1201
   ],
   "assigned": "unassigned"
+}
+```
+
+### `ph_composer.thermal_bridges.edges.detail`
+
+One part of the edges.at row of one Edge, exactly, as canonical JSON text in fragments: join every fragment's text in order, check its sha256 and parse it. Pass next_cursor back for the next fragment. For an Edge whose metadata is larger than a reply. Owner: `ph_composer.thermal_bridges`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.not_found`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "edge_path",
+    "path"
+  ],
+  "properties": {
+    "edge_path": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "minItems": 1,
+      "description": "The Edge's root-to-Edge persistent-id path, as a row's path gives it."
+    },
+    "path": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": {
+        "type": [
+          "string",
+          "integer"
+        ]
+      },
+      "description": "Keys and array indexes into the view, starting at values, user_data, extension_data, extension_status: [\"user_data\"], [\"user_data\", \"notes\"]."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "fragment",
+    "next_cursor"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "object",
+        "array",
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ],
+      "description": "The JSON type of the value at path; a stored null or false is a value."
+    },
+    "fragment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "encoding",
+        "offset",
+        "bytes",
+        "total_bytes",
+        "sha256",
+        "text"
+      ],
+      "properties": {
+        "encoding": {
+          "type": "string",
+          "enum": [
+            "json"
+          ],
+          "description": "The fragments joined in order are the value's canonical JSON text."
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Where this fragment starts, in UTF-8 bytes of the whole text."
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "This fragment's length in UTF-8 bytes."
+        },
+        "total_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The whole text's UTF-8 length."
+        },
+        "sha256": {
+          "type": "string",
+          "description": "SHA-256 of the whole text's UTF-8 bytes, hex."
+        },
+        "text": {
+          "type": "string",
+          "description": "This fragment: whole characters, never a split one."
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "edge_path": [
+    1201,
+    1205
+  ],
+  "path": [
+    "user_data"
+  ]
 }
 ```
 
@@ -15002,6 +15489,14 @@ Params:
     "cursor": {
       "type": "string",
       "description": "next_cursor from the previous page of the same query and filter."
+    },
+    "metadata": {
+      "type": "string",
+      "enum": [
+        "full",
+        "summary"
+      ],
+      "description": "full (the default): each row's user_data, extension_data and extension_status as stored. summary: none of them, but their sizes, digests and status counts in metadata and each value's size in value_bytes; read any of them whole with ph_composer.thermal_bridges.edges.detail."
     }
   }
 }
@@ -15034,10 +15529,7 @@ Result:
           "values",
           "copied",
           "record_problem",
-          "write_refusal",
-          "user_data",
-          "extension_data",
-          "extension_status"
+          "write_refusal"
         ],
         "properties": {
           "path": {
@@ -15179,6 +15671,74 @@ Result:
           "extension_status": {
             "type": "object",
             "description": "Each extension envelope's status against what is installed, by namespace; {} for an Edge with no assignment."
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "user_data",
+              "extension_data"
+            ],
+            "properties": {
+              "user_data": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "bytes",
+                  "sha256",
+                  "keys"
+                ],
+                "properties": {
+                  "bytes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "sha256": {
+                    "type": "string"
+                  },
+                  "keys": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              },
+              "extension_data": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "bytes",
+                  "sha256",
+                  "namespaces",
+                  "statuses"
+                ],
+                "properties": {
+                  "bytes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "sha256": {
+                    "type": "string"
+                  },
+                  "namespaces": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "statuses": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "description": "How many envelopes read each status, such as unavailable."
+                  }
+                }
+              }
+            },
+            "description": "With metadata summary: what user_data, extension_data and extension_status hold, in place of them; read any of them whole with ph_composer.records.detail."
+          },
+          "value_bytes": {
+            "type": "object",
+            "description": "With metadata summary: each value's stored size."
           }
         }
       }
@@ -15234,7 +15794,8 @@ Example params:
 
 ```json
 {
-  "limit": 50
+  "limit": 50,
+  "metadata": "summary"
 }
 ```
 
@@ -15282,10 +15843,7 @@ Result:
           "values",
           "copied",
           "record_problem",
-          "write_refusal",
-          "user_data",
-          "extension_data",
-          "extension_status"
+          "write_refusal"
         ],
         "properties": {
           "path": {
@@ -15427,6 +15985,74 @@ Result:
           "extension_status": {
             "type": "object",
             "description": "Each extension envelope's status against what is installed, by namespace; {} for an Edge with no assignment."
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "user_data",
+              "extension_data"
+            ],
+            "properties": {
+              "user_data": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "bytes",
+                  "sha256",
+                  "keys"
+                ],
+                "properties": {
+                  "bytes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "sha256": {
+                    "type": "string"
+                  },
+                  "keys": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              },
+              "extension_data": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "bytes",
+                  "sha256",
+                  "namespaces",
+                  "statuses"
+                ],
+                "properties": {
+                  "bytes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "sha256": {
+                    "type": "string"
+                  },
+                  "namespaces": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "statuses": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "description": "How many envelopes read each status, such as unavailable."
+                  }
+                }
+              }
+            },
+            "description": "With metadata summary: what user_data, extension_data and extension_status hold, in place of them; read any of them whole with ph_composer.records.detail."
+          },
+          "value_bytes": {
+            "type": "object",
+            "description": "With metadata summary: each value's stored size."
           }
         }
       }
@@ -31608,11 +32234,54 @@ Result:
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "id"
+    "id",
+    "removed_user_data",
+    "removed_user_data_total"
   ],
   "properties": {
     "id": {
       "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
     }
   }
 }
@@ -38915,11 +39584,54 @@ Result:
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "id"
+    "id",
+    "removed_user_data",
+    "removed_user_data_total"
   ],
   "properties": {
     "id": {
       "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
     }
   }
 }
@@ -39644,19 +40356,9 @@ Result:
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "user_data",
-    "extension_data",
     "extension_status"
   ],
   "properties": {
-    "user_data": {
-      "type": "object",
-      "description": "Contributor metadata, preserved as written; {} when none."
-    },
-    "extension_data": {
-      "type": "object",
-      "description": "Versioned payloads registered extensions own."
-    },
     "extension_status": {
       "type": "object",
       "description": "Each extension envelope's status against what is installed."
@@ -42956,11 +43658,54 @@ Result:
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "id"
+    "id",
+    "removed_user_data",
+    "removed_user_data_total"
   ],
   "properties": {
     "id": {
       "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
     }
   }
 }
@@ -43796,11 +44541,54 @@ Result:
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "id"
+    "id",
+    "removed_user_data",
+    "removed_user_data_total"
   ],
   "properties": {
     "id": {
       "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
     }
   }
 }
@@ -44661,11 +45449,54 @@ Result:
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "id"
+    "id",
+    "removed_user_data",
+    "removed_user_data_total"
   ],
   "properties": {
     "id": {
       "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
     }
   }
 }
@@ -45378,11 +46209,54 @@ Result:
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "id"
+    "id",
+    "removed_user_data",
+    "removed_user_data_total"
   ],
   "properties": {
     "id": {
       "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
     }
   }
 }
@@ -46936,11 +47810,54 @@ Result:
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "id"
+    "id",
+    "removed_user_data",
+    "removed_user_data_total"
   ],
   "properties": {
     "id": {
       "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
     }
   }
 }
@@ -58092,13 +59009,56 @@ Result:
   "additionalProperties": false,
   "required": [
     "id",
-    "reassigned_faces"
+    "reassigned_faces",
+    "removed_user_data",
+    "removed_user_data_total"
   ],
   "properties": {
     "id": {
       "type": "string"
     },
     "reassigned_faces": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
       "type": "integer",
       "minimum": 0
     }
@@ -68225,3 +69185,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.57 | 2026-11-14 | ph_composer.model.detail and ph_composer.model.update_metadata are new: the Model's own user_data and extension_data, in the ph_composer.model dictionary, read as {} until written and replaced under expected_metadata in one Undo step. Volume rows carry floor, the Space Floor's reference and its own user_data (a ph_composer.spaces.volumes.list field, not a default), and spaces.update_metadata writes that map by floor_id. Clearing a map a record never stored writes nothing in every owner's update_metadata. |
 | 1.58 | 2026-11-14 | Export carries the Model's user_data to the HBJSON Model, a Space Floor's to its SpaceFloor, an Assembly Layer's to its material (the hybrid host when divided) and a divided Layer's Layer-Segments' to their cell materials; a ph_composer key in any of them blocks the export, and the new ph_composer.model.export_preflight reports it for the Model. The extraction gains the ph_composer.model.export.model section and a Volume's floor_user_data. Window Element, Attached zone, membrane Layer and undivided Layer-Segment maps stay in the Model with an export.metadata_omitted finding, and each finding is listed once. |
 | 1.59 | 2026-11-14 | An export.metadata_omitted finding about a record part (an Assembly Layer or Layer-Segment, or a Window Element) gains reference, the {kind, id, part_ids} ph_composer.records.update_metadata takes, and its message names the record that holds the part. A contributor's Engine#propose_update no longer takes user_data: ph_composer.records.update_metadata (Engine#propose_metadata_update) is the one write route for an existing record's map. |
+| 1.60 | 2026-11-14 | An update that rebuilds a record's parts, such as windows.types.update with elements, keeps each surviving part's user_data by id whether or not it sends it, starts a new part without one, and refuses params.invalid for a part map that differs from the stored one. The deletes of Materials, Assemblies, Frames, Glazings, Psi-Install Types, Window Types, Thermal Bridge Types and Attached zones return removed_user_data and removed_user_data_total, each part listed by part_ids. ph_composer.model.detail takes metadata summary, ph_composer.model.fragment is new, and ph_composer.model.update_metadata returns extension_status only. thermal_bridges.edges.selection, at and candidates take metadata summary, and thermal_bridges.edges.detail is new. Export reports an unused Building Segment's or Level's map as omitted. A part declaration needs a required string id and an optional object user_data. Engine#propose_update takes derived_part_maps and Engine#propose_delete returns the removal report. |

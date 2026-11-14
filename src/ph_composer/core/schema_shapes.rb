@@ -35,6 +35,26 @@ module PhComposer
                  "properties" => base.fetch("properties").merge(properties))
     end
 
+    # `result` with what a merge or delete reports of the maps it removes (Records::Metadata.removed_user_data).
+    def with_removed_user_data(result)
+      count = { "type" => "integer", "minimum" => 0 }
+      removed = object({
+        "id" => { "type" => "string", "description" => "The removed record, or the record holding the part." },
+        "part_ids" => list({ "type" => "string" }, :description => "For a part, its ids from the record down."),
+        "user_data_keys" => list({ "type" => "string" },
+                                 :description => "The map's first #{Records::Metadata::REPORT_LIMIT} top-level " \
+                                                 "keys, sorted."),
+        "user_data_key_total" => count
+      }, :optional => ["part_ids"])
+      with(result, "removed_user_data" => list(removed, :description => "Each removed record, then each of its " \
+                                                                        "parts, whose user_data was not empty, " \
+                                                                        "the first " \
+                                                                        "#{Records::Metadata::REPORT_LIMIT}: the " \
+                                                                        "map is gone, a survivor keeps its own, " \
+                                                                        "and Undo brings it back."),
+                   "removed_user_data_total" => count)
+    end
+
     # `schema` with what it means to a caller, for discovery.
     def described(schema, description)
       schema.merge("description" => description)

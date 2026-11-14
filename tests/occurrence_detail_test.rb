@@ -82,6 +82,30 @@ class OccurrenceDetailTest < PhComposerTestCase
                  targets.map { |target| unit_detail(target, ["user_data"]) }
   end
 
+  # A Model map larger than one reply: the whole read refuses, the summary gives its size, the fragments join
+  # to it exactly, and a guarded write built from them fits a reply and commits.
+  def test_a_model_map_larger_than_a_reply_reads_in_fragments_and_takes_a_guarded_write
+    large = { "notes" => (TEXT * 1200)[0, 30_000], "nothing" => nil }
+    written = agent("invoke", "name" => "#{P}.model.update_metadata", "expected_revision" => @session.revision,
+                              "params" => { "user_data" => large, "expected_metadata" => { "user_data" => {},
+                                                                                           "extension_data" => {} } })
+    assert_equal %w[completed committed], written.values_at("status", "effect"), written.inspect
+
+    assert_equal "request.response_too_large", query("#{P}.model.detail", {}).fetch("code")
+    summary = completed(query("#{P}.model.detail", "metadata" => "summary"))
+    assert_equal({ "keys" => 2 }.merge(PhComposer::Fragments.summary(large)), summary.dig("metadata", "user_data"))
+    read = ->(path) { fragments_of("#{P}.model.fragment", "path" => path) }
+    assert_equal large, read.call(["user_data"])
+    assert_equal large.fetch("notes"), read.call(%w[user_data notes])
+
+    expected = { "user_data" => read.call(["user_data"]), "extension_data" => read.call(["extension_data"]) }
+    edited = agent("invoke", "name" => "#{P}.model.update_metadata", "expected_revision" => @session.revision,
+                             "params" => { "user_data" => expected.fetch("user_data").merge("edited" => true),
+                                           "expected_metadata" => expected })
+    assert_equal %w[completed committed], edited.values_at("status", "effect"), edited.inspect
+    assert_equal large.merge("edited" => true), read.call(["user_data"])
+  end
+
   def test_a_host_with_450_holes_reads_its_extent_holes_and_loops_in_pages
     outer = [[0, 0, 0], [1000, 0, 0], [1000, 1000, 0], [0, 1000, 0]].map { |xyz| Geom::Point3d.new(*xyz) }
     holes = Array.new(450) do |index|
@@ -248,6 +272,47 @@ class OccurrenceDetailTest < PhComposerTestCase
                                            "identifier" => "tb_gone").fetch("code")
     assert_equal "target.not_found", query("#{P}.thermal_bridges.runs.members.list",
                                            "identifier" => row.fetch("identifier"), "finding" => 9).fetch("code")
+  end
+
+  # An Edge whose assignment holds a map larger than one reply: its full rows refuse, the summary rows fit and
+  # size it, edges.detail joins it exactly, and a guarded write built from those fragments commits.
+  def test_an_edge_with_a_map_larger_than_a_reply_reads_compactly_and_takes_a_guarded_write
+    type_id = created("#{P}.thermal_bridges.types.create", "values" => { "name" => "Sill", "group" => "15-Ambient" })
+              .fetch("id")
+    large = { "notes" => (TEXT * 1200)[0, 30_000], "nothing" => nil }
+    edge = Sketchup::Edge.new(5000, Sketchup::Vertex.new(Geom::Point3d.new(0, 0, 0)),
+                              Sketchup::Vertex.new(Geom::Point3d.new(40, 0, 0)))
+    TB::Assignment::STORE.write(edge, "id" => "tbe_#{'L' * 12}", "schema_version" => 1,
+                                      "thermal_bridge_type_id" => type_id, "quantity" => 1, "user_data" => large,
+                                      "extension_data" => {})
+    @model.entities << zone_group(100, "Z", [edge])
+    @model.selection.add([edge])
+    at = { "paths" => [[100, 5000]] }
+
+    assert_equal "request.response_too_large", query("#{P}.thermal_bridges.edges.at", at).fetch("code")
+    assert_equal "request.response_too_large", query("#{P}.thermal_bridges.edges.selection", {}).fetch("code")
+    summary = { "keys" => 2 }.merge(PhComposer::Fragments.summary(large))
+    %w[at selection candidates].each do |read|
+      params = { "at" => at, "selection" => {}, "candidates" => { "path" => [100] } }.fetch(read)
+      row = completed(query("#{P}.thermal_bridges.edges.#{read}", params.merge("metadata" => "summary")))
+            .dig("edges", 0)
+      refute row.key?("user_data"), read
+      assert_equal summary, row.dig("metadata", "user_data"), read
+    end
+    detail = ->(path) { fragments_of("#{P}.thermal_bridges.edges.detail", "edge_path" => [100, 5000], "path" => path) }
+    assert_equal large, detail.call(["user_data"])
+    assert_equal "target.not_found", query("#{P}.thermal_bridges.edges.detail", "edge_path" => [100, 9999],
+                                                                                "path" => ["user_data"]).fetch("code")
+
+    reference = completed(query("#{P}.thermal_bridges.edges.at", at.merge("metadata" => "summary")))
+                .dig("edges", 0, "reference")
+    expected = { "user_data" => detail.call(["user_data"]), "extension_data" => detail.call(["extension_data"]) }
+    update = { "reference" => reference, "user_data" => expected.fetch("user_data").merge("edited" => true),
+               "expected_metadata" => expected }
+    written = agent("invoke", "name" => "#{P}.thermal_bridges.edges.update_metadata",
+                              "params" => { "updates" => [update] }, "expected_revision" => @session.revision)
+    assert_equal %w[completed committed], written.values_at("status", "effect"), written.inspect
+    assert_equal large.merge("edited" => true), detail.call(["user_data"])
   end
 
   def test_runs_sharing_an_identifier_and_long_type_names_stay_readable

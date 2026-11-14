@@ -82,7 +82,8 @@ module PhComposer
         feature.action("#{prefix}.delete",
                        :description => "Delete #{kind.label}; live references require replacement.",
                        :refuses => Refuses::DELETE,
-                       :params => delete_params(kind, replacement), :result => Shapes::RESULT,
+                       :params => delete_params(kind, replacement),
+                       :result => Shapes.with_removed_user_data(Shapes::RESULT),
                        :undo_name => "Delete #{kind.label}",
                        :side_effects => Shapes.side_effects("Rewrites referring definitions and defaults, then " \
                                                             "deletes atomically."),
@@ -147,7 +148,8 @@ module PhComposer
         feature.action("#{prefix}.delete",
                        :description => "Delete #{kind.label}; live references require replacement.",
                        :refuses => Refuses::TYPE_DELETE,
-                       :params => delete_params(kind, replacement), :result => Shapes::RESULT,
+                       :params => delete_params(kind, replacement),
+                       :result => Shapes.with_removed_user_data(Shapes::RESULT),
                        :undo_name => "Delete #{kind.label}",
                        :side_effects => Shapes.side_effects("Rewrites referring definitions and defaults, then " \
                                                             "deletes atomically."),

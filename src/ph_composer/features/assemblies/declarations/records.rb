@@ -47,7 +47,7 @@ module PhComposer
                        :description => "Delete #{kind.label}; remaining references refuse.",
                        :refuses => Refuses::DELETE,
                        :params => Shapes.object(properties, :optional => %w[expected_values replacement_id]),
-                       :result => Shapes::RESULT, :undo_name => "Delete #{kind.label}",
+                       :result => Shapes.with_removed_user_data(Shapes::RESULT), :undo_name => "Delete #{kind.label}",
                        :side_effects => "Replacement or explicit clearing rewrites uses and deletes atomically.",
                        :examples => [{ "id" => example_id }], &handler)
       end

@@ -221,7 +221,8 @@ class WindowRecordsOperationsTest < PhComposerTestCase
   end
 
   # Installs save and Duplicate keep element maps, Duplicate under new element ids; a whole-array
-  # types.update stores the maps it sends, as any whole-value replacement does.
+  # types.update keeps each surviving element's map whether it sends it or not, and refuses one that
+  # changes a map or gives a new element one, so records.update_metadata stays the one write route.
   def test_installs_save_duplicate_and_a_whole_elements_update_keep_element_maps
     id = create("types", "name" => "Kept")
     element_id = elements(id).first["id"]
@@ -241,11 +242,21 @@ class WindowRecordsOperationsTest < PhComposerTestCase
     refute_equal element_id, copied["id"]
     assert_equal map, copied["user_data"], "Duplicate copies the map under a new element id"
 
-    sent = elements(id)
-    sent.first["user_data"] = { "replaced" => true }
-    preview_invoke("types.update", "id" => id, "values" => { "elements" => sent },
+    omitted = elements(id).map { |cell| cell.reject { |key, _value| key == "user_data" }.merge("name" => "Edited") }
+    preview_invoke("types.update", "id" => id, "values" => { "elements" => omitted },
                                    "expected_values" => { "elements" => elements(id) })
-    assert_equal({ "replaced" => true }, element(id, element_id)["user_data"])
+    assert_equal ["Edited", map], element(id, element_id).values_at("name", "user_data"), "an omitted map is kept"
+
+    changed = elements(id)
+    changed.first["user_data"] = { "replaced" => true }
+    added = elements(id).map { |cell| cell.merge("id" => "wel_#{'N' * 12}", "user_data" => map) }
+    [changed, added].each do |sent|
+      refused = invoke("types.update", "id" => id, "values" => { "elements" => sent },
+                                       "expected_values" => { "elements" => elements(id) })
+      assert_equal %w[refused params.invalid none], refused.values_at("status", "code", "effect"), refused.inspect
+      assert_match(/ph_composer\.records\.update_metadata/, refused.fetch("message"))
+    end
+    assert_equal map, element(id, element_id)["user_data"]
     assert_equal map, elements(copy_id).first["user_data"], "the copy's map is its own"
   end
 
