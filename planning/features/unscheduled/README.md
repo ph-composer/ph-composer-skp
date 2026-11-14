@@ -10,6 +10,7 @@ requests. A packet moves into a phase directory when it is scheduled.
 
 | Packet | Kind | State |
 | --- | --- | --- |
+| [entity-user-data](entity-user-data/README.md) | feature | Scoped; consistent metadata across all authored entities and clear documentation; implementation not authorized |
 | [metr-export](metr-export/README.md) | feature | Deferred by D12; return milestone unscheduled. Holds every "Through PHX" acceptance step |
 | [library-skipped-rows](library-skipped-rows.md) | feature | Implemented on branch; host case pending (#379) |
 | [sketchup-2023-floor](sketchup-2023-floor/README.md) | host gate | Requested |

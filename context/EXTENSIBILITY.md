@@ -1007,7 +1007,12 @@ registered view command. The rules below come from Classify's host gate
 
 ## Metadata and structured extension data
 
-Every authored domain entity supports a JSON-compatible `user_data` mapping, including definitions
+The contract below is the target for every authored entity. Built-in coverage is not yet complete:
+some public metadata operations and nested authored parts are missing. The
+[entity user-data feature](../planning/features/unscheduled/entity-user-data/README.md) tracks the
+coverage inventory and completion; its scope is approved for planning, not implemented.
+
+Every authored domain entity must support a JSON-compatible `user_data` mapping, including definitions
 and assignment records where applicable. Contributors use namespaced keys, for example:
 
 ```json
