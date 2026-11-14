@@ -100,6 +100,22 @@ module PhComposer
         end
       end
 
+      # A metadata write under Records::Metadata's rules: `update` is one entry of an update_metadata
+      # batch, its `expected_metadata` checked against the stored record, its `user_data` and
+      # `extension_payloads` written, and every value left as stored. The kind validates the result.
+      # Returns the record as it will stand; a write of what is stored stages nothing.
+      def propose_metadata_update(kind_id, id, change_set, update)
+        staging(change_set) do
+          kind = @catalog.kind(kind_id)
+          before = find(kind_id, id)
+          after = Metadata.planned(self, @catalog, before, update, kind.label)
+          # A record stored without a map reads it as empty, so clearing that map changes nothing.
+          after.delete("user_data") if after["user_data"] == {} && !before.key?("user_data")
+          propose(kind, change_set, before, after)
+          after
+        end
+      end
+
       # `reference_plan`, when given, is the entity records the same proposal rewrites first (a
       # feature moving every Face off the record it deletes); the reference check reads them as planned.
       def propose_delete(kind_id, id, change_set, expected_values: {}, reference_plan: nil)

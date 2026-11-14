@@ -259,8 +259,13 @@ class AttachedZoneTest < PhComposerTestCase
 
   def test_an_edit_preserves_user_data_and_refuses_a_stale_expected_value
     garage = create_zone_record("Garage")
-    invoke("#{KIND}.save", { "id" => garage, "values" => { "notes" => "Detached" },
-                             "user_data" => { "firm.note" => "keep" } })
+    metadata = { "reference" => { "kind" => KIND, "id" => garage }, "user_data" => { "firm.note" => "keep" },
+                 "expected_metadata" => { "user_data" => {}, "extension_data" => {} } }
+    invoke("ph_composer.records.update_metadata", { "updates" => [metadata] })
+    edited = invoke("#{KIND}.save", { "id" => garage, "values" => { "notes" => "Detached" },
+                                      "user_data" => { "firm.note" => "replaced" } })
+    assert_equal %w[refused params.invalid], edited.values_at("status", "code"), "an edit does not take user_data"
+    invoke("#{KIND}.save", { "id" => garage, "values" => { "notes" => "Detached" } })
 
     stale = invoke("#{KIND}.save", { "id" => garage, "values" => { "name" => "Carport" },
                                      "expected_values" => { "name" => "Garage " } })

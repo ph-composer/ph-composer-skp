@@ -76,6 +76,11 @@ A record or a preview can be larger than one reply. These reads give all of it e
   `text` in order, check the joined text's UTF-8 length and SHA-256 against `total_bytes` and
   `sha256`, then parse it. A path that names nothing is refused as `target.not_found`; a stored
   `null` or `false` is a value.
+- **Change a record's metadata.** Read its `user_data` and `extension_data` (`records.list`, or
+  `records.detail` for a large map), change your own key, then send the whole map to
+  `ph_composer.records.update_metadata` with the record's `kind` and `id` and the two maps you read as
+  `expected_metadata`. `{}` clears the map. A change made since your read refuses the whole batch as
+  `target.changed`, and nothing is written. The kinds' own `update` actions do not take `user_data`.
 - **Read a definition's parts.** `ph_composer.assemblies.assemblies.layers.list` and
   `segments.list` page an Assembly's Layers and Layer-Segments; `ph_composer.windows.types.elements.list`
   pages a Window Type's elements with each one's thermal result, installation edges and findings, and

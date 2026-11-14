@@ -16,11 +16,10 @@ module PhComposer
         Products::Operations.create(request, proposal, collection, :values => values, :user_data => user_data)
       end
 
-      def update_product(request, proposal, collection, id:, values:, expected_values:, user_data: nil)
+      def update_product(request, proposal, collection, id:, values:, expected_values:)
         Units::Mutation.prepare(request, proposal)
         Products::Operations.update(request, proposal, collection, :id => id, :values => values,
-                                                                   :expected_values => expected_values,
-                                                                   :user_data => user_data)
+                                                                   :expected_values => expected_values)
       end
 
       def duplicate_product(request, proposal, collection, id:, name: nil, copy_datasheets: false)
@@ -42,11 +41,11 @@ module PhComposer
         Types::Operations.create(request, proposal, :values => values, :user_data => user_data)
       end
 
-      def update_type(request, proposal, id:, values:, expected_values:, user_data: nil)
+      def update_type(request, proposal, id:, values:, expected_values:)
         Units::Mutation.prepare(request, proposal)
         before = request.engine.find(TYPE_KIND, id)
         Types::Operations.update(request, proposal, :id => id, :values => values,
-                                                    :expected_values => expected_values, :user_data => user_data)
+                                                    :expected_values => expected_values)
         follow_type(request, proposal, before)
       end
 

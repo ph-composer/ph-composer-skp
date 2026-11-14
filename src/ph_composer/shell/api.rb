@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 51
+    MINOR = 52
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -253,7 +253,14 @@ module PhComposer
                     "capture.too_large names a smaller width and height. export_status takes part file for a " \
                     "completed task: the written HBJSON's text in fragments with the receipt's hash, refusing " \
                     "artifact.none for a task that wrote no file and artifact.changed for a file that no longer " \
-                    "matches its receipt." }
+                    "matches its receipt." },
+      { "minor" => 52, "date" => "2026-11-14",
+        "change" => "ph_composer.records.update_metadata is new: it replaces the user_data and installed extension " \
+                    "payloads of records of any kind records.list reads, in one Undo step, guarded by " \
+                    "expected_metadata, refusing target.wrong_kind for Building Segments, Levels and Zone option " \
+                    "settings. The update actions of Materials, Assemblies, Frames, Glazings, Psi-Install Types, " \
+                    "Window Types and Thermal Bridge Types, the update rows of windows.types.installs.save and an " \
+                    "attached_zone.save with id no longer take user_data; their create actions still do." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

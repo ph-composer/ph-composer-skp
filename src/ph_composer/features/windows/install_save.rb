@@ -60,8 +60,7 @@ module PhComposer
           end
           request.engine.propose_update(PSI_INSTALL_KIND, row.fetch("id"), proposal,
                                         :values => values,
-                                        :expected_values => row.fetch("expected_values"),
-                                        :user_data => row["user_data"])
+                                        :expected_values => row.fetch("expected_values"))
         end
       end
 

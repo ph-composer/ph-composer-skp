@@ -323,8 +323,9 @@ review and agent calls before opening a Model transaction.
 Metadata on authored entities is written the same way: `ph_composer.zones.update_metadata`,
 `ph_composer.zones.faces.update_metadata` and `ph_composer.windows.units.update_metadata` take a
 batch of explicit occurrences with the metadata last read, and refuse every target or none
-([CONTRACTS.md](CONTRACTS.md), "Records and extension data"). A script that reads the exported
-HBJSON finds passed-through metadata on the owning Honeybee object. The
+([CONTRACTS.md](CONTRACTS.md), "Records and extension data"). `ph_composer.records.update_metadata`
+does the same for catalog records by `{kind, id}`; their update actions no longer take `user_data`.
+A script that reads the exported HBJSON finds passed-through metadata on the owning Honeybee object. The
 [export recipe](../docs/AGENT_GUIDE.md#export) lists supported record kinds and explains the
 metadata findings.
 

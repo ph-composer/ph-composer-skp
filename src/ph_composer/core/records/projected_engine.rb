@@ -79,6 +79,11 @@ module PhComposer
                                :extension_payloads => extension_payloads, :expected_values => expected_values)
       end
 
+      def propose_metadata_update(kind_id, id, change_set, update)
+        writable!(kind_id, change_set)
+        @engine.propose_metadata_update(kind_id, id, change_set, update)
+      end
+
       def propose_delete(kind_id, id, change_set, expected_values: {}, reference_plan: nil)
         writable!(kind_id, change_set)
         @engine.propose_delete(kind_id, id, change_set, :expected_values => expected_values,

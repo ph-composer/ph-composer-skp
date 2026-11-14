@@ -58,8 +58,7 @@ module PhComposer
           Authoring.update_product(request, proposal, collection,
                                    :id => params.fetch("id"),
                                    :values => params.fetch("values"),
-                                   :expected_values => params.fetch("expected_values"),
-                                   :user_data => params["user_data"])
+                                   :expected_values => params.fetch("expected_values"))
         end
         declare_product_copy_and_delete(feature, prefix, collection, kind)
       end
@@ -122,8 +121,7 @@ module PhComposer
           params = request.params
           Authoring.update_type(request, proposal,
                                 :id => params.fetch("id"), :values => params.fetch("values"),
-                                :expected_values => params.fetch("expected_values"),
-                                :user_data => params["user_data"])
+                                :expected_values => params.fetch("expected_values"))
         end
         declare_type_copy_and_delete(feature, prefix, kind)
       end

@@ -18,7 +18,7 @@ module PhComposer
 
         # `source` is the library coordinator's provenance, never a value a client edits: the editable
         # allowlist in Commands excludes it, and only the library replace callback supplies it here.
-        def update(request, proposal, id:, values:, expected_values:, user_data: nil, source: nil)
+        def update(request, proposal, id:, values:, expected_values:, source: nil)
           record = request.engine.find(MATERIAL_KIND, id)
           if values["name"]
             Records::Names.unique!(values["name"], Definitions.records(request, MATERIAL_KIND), :except => id)
@@ -27,8 +27,7 @@ module PhComposer
           changes = Definitions.changed_values(Schema::KIND, record, result.record)
           changes["source"] = DeepCopy.call(source) unless source.nil?
           request.engine.propose_update(MATERIAL_KIND, id, proposal,
-                                        :values => changes, :expected_values => expected_values,
-                                        :user_data => user_data)
+                                        :values => changes, :expected_values => expected_values)
           { "id" => id }
         end
 

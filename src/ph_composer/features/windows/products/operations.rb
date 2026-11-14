@@ -17,7 +17,7 @@ module PhComposer
           { "id" => id }
         end
 
-        def update(request, proposal, collection, id:, values:, expected_values:, user_data: nil)
+        def update(request, proposal, collection, id:, values:, expected_values:)
           kind = KINDS.fetch(collection)
           request.engine.find(kind.id, id)
           values = DeepCopy.call(values)
@@ -27,7 +27,7 @@ module PhComposer
           end
           request.engine.propose_update(kind.id, id, proposal,
                                         :values => values,
-                                        :expected_values => expected_values, :user_data => user_data)
+                                        :expected_values => expected_values)
           { "id" => id }
         end
 

@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module PhComposer
-  # The foundation's own read of stored records, registered through the same interface a feature uses.
-  # It serves every record kind, so a new kind is readable by every client without adding a query.
+  # The foundation's own read of stored records, and its one metadata write for them, registered through
+  # the same interface a feature uses. Both serve every record kind, so a new kind is readable, and its
+  # metadata writable, by every client without adding an operation; a kind whose owner writes its own
+  # metadata (RecordKind#owner_writes_metadata?) is readable only.
   #
   # Pages are bound to the revision they were read at (context/CONTRACTS.md, "Public interface"), and
   # to the session, query and filter (shell/pages.rb): a cursor from anything else is refused. A page is
@@ -13,6 +15,7 @@ module PhComposer
     FEATURE_ID = "ph_composer.records"
     LIST = "#{FEATURE_ID}.list"
     DETAIL = "#{FEATURE_ID}.detail"
+    UPDATE_METADATA = "#{FEATURE_ID}.update_metadata"
     # The parts of a record's view `detail` reaches; kind, id and schema_version are in every list row.
     PARTS = %w[values user_data extension_data extension_status].freeze
     # An unreadable row's message names what is wrong, which can quote stored text of any length; the row is
@@ -75,6 +78,17 @@ module PhComposer
       "fragment" => Fragments::FRAGMENT, "next_cursor" => Pages::NEXT_CURSOR
     }).freeze
 
+    # One record of a registered catalog kind, as records.list names it.
+    REFERENCE = SchemaShapes.object({
+      "kind" => { "type" => "string", "description" => "Record kind id, as listed by discovery." },
+      "id" => { "type" => "string", "description" => "The record's id." }
+    }).freeze
+    EXAMPLE_REFERENCE = { "kind" => "example.foundation.part", "id" => "prt_Ab12Cd34Ef56" }.freeze
+    # A target's resolution and the Records::Metadata rules for its pre-image and payloads.
+    UPDATE_REFUSES = %w[extension.invalid extension.migration_required extension.schema_unsupported
+                        extension.unavailable record.unreadable reference.invalid target.changed
+                        target.not_found target.wrong_kind validation.failed].freeze
+
     module_function
 
     def install(registry)
@@ -95,6 +109,22 @@ module PhComposer
                             :examples => [{ "kind" => "example.foundation.part", "id" => "prt_Ab12Cd34Ef56",
                                             "path" => %w[user_data] }]) do |request|
         detail(request)
+      end
+      feature.action(UPDATE_METADATA,
+                     :description => "Replace the user_data and installed extension payloads of stored records of " \
+                                     "any kind #{LIST} reads, guarded by the metadata last read. Values are not " \
+                                     "changed; a kind's own update action edits them. A kind whose owner writes " \
+                                     "its metadata itself refuses as target.wrong_kind.",
+                     :refuses => UPDATE_REFUSES,
+                     :params => SchemaShapes.metadata_updates(REFERENCE, Pages::MAXIMUM_LIMIT, :target => "record"),
+                     :result => SchemaShapes.metadata_result(REFERENCE, :target => "record"),
+                     :undo_name => "Edit Record Metadata",
+                     :examples => [{ "updates" => [{ "reference" => EXAMPLE_REFERENCE,
+                                                     "user_data" => { "example_org" => { "status" => "checked" } },
+                                                     "expected_metadata" => { "user_data" => {},
+                                                                              "extension_data" => {} } }] }],
+                     :side_effects => "Rewrites only the named records' metadata.") do |request, proposal|
+        update_metadata(request, proposal, request.params.fetch("updates"))
       end
     end
 
@@ -120,6 +150,34 @@ module PhComposer
       view = request.engine.view(kind.id, request.engine.find(kind.id, params.fetch("id")))
       { "kind" => kind.id, "id" => params.fetch("id") }
         .merge(Fragments.detail(request, DETAIL, view, params.fetch("path"), :parts => PARTS))
+    end
+
+    # Every target resolves before any is staged, so a missing record or an owner-written kind refuses
+    # before anything is planned. The batch is one proposal and so one Undo entry; a refusal while staging
+    # refuses the whole proposal, and an entry writing what is stored stages nothing, so a batch of them
+    # commits nothing (context/CONTRACTS.md, "Records and extension data").
+    def update_metadata(request, proposal, updates)
+      engine = request.engine
+      catalog = request.registry.catalog
+      entries = Records::Metadata.distinct_updates(updates)
+      entries.each do |update|
+        kind_id, id = update.fetch("reference").values_at("kind", "id")
+        check_owner!(engine.kind(kind_id))
+        engine.find(kind_id, id)
+      end
+      rows = entries.map do |update|
+        reference = update.fetch("reference")
+        after = engine.propose_metadata_update(reference.fetch("kind"), reference.fetch("id"), proposal, update)
+        { "reference" => reference, "extension_status" => Records::Metadata.status_map(after, catalog) }
+      end
+      { "updates" => rows }
+    end
+
+    def check_owner!(kind)
+      return unless kind.owner_writes_metadata?
+
+      raise CodedError.new("target.wrong_kind", "#{kind.label} metadata is written by its owner's own actions, " \
+                                                "not #{UPDATE_METADATA}. Nothing was written.")
     end
 
     def check_fields!(kind, fields)

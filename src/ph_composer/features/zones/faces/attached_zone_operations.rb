@@ -9,18 +9,23 @@ module PhComposer
 
       module_function
 
-      # Without `id` it creates a record; with it, `values` patches that record.
+      # Without `id` it creates a record, with `user_data` if given; with it, `values` patches that record and
+      # its metadata stays as stored, written only through ph_composer.records.update_metadata.
       def save_attached_zone(request, proposal, values:, id: nil, expected_values: {}, user_data: nil)
         patch = values
         if id
+          unless user_data.nil?
+            raise CodedError.new("params.invalid", "An Attached zone edit does not take user_data; write it with " \
+                                                   "ph_composer.records.update_metadata. Nothing was written.")
+          end
+
           # `values` is a partial patch, so the findings have to read the record the save will leave
           # behind. Reading the patch alone drops the low-factor warning on every edit that does not
           # happen to name the factor.
           values = merged_values(request.engine.kind(AttachedZone::KIND_ID)
                                    .values(request.engine.find(AttachedZone::KIND_ID, id)), patch)
           request.engine.propose_update(AttachedZone::KIND_ID, id, proposal,
-                                        :values => patch,
-                                        :user_data => user_data, :expected_values => expected_values)
+                                        :values => patch, :expected_values => expected_values)
         else
           values = { "temperature_reduction_factor" => AttachedZone::DEFAULT_FACTOR }.merge(patch)
           id = request.engine.propose_create(AttachedZone::KIND_ID, proposal, :values => values,

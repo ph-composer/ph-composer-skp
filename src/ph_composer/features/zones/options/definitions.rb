@@ -20,12 +20,14 @@ module PhComposer
         :id => SEGMENT_KIND, :label => "Building Segment", :schema_version => 1, :id_prefix => "bsg",
         :fields => FIELDS + [Records::Field.new(:key => "export_identifier", :required => true,
                                                 :schema => { "type" => "string", "pattern" => "^bseg_[a-zA-Z0-9_]+$",
-                                                             "maxLength" => 100 })]
+                                                             "maxLength" => 100 })],
+        :owner_writes_metadata => true
       )
       LEVELS = Records::RecordKind.new(:id => LEVEL_KIND, :label => "Level", :schema_version => 1,
-                                       :id_prefix => "lvl", :fields => FIELDS)
+                                       :id_prefix => "lvl", :fields => FIELDS, :owner_writes_metadata => true)
       SETTINGS = Records::RecordKind.new(
         :id => SETTINGS_KIND, :label => "Zone option settings", :schema_version => 1, :id_prefix => "zop",
+        :owner_writes_metadata => true,
         :fields => [Records::Reference.new(:key => "default_segment_id", :target_kind => SEGMENT_KIND,
                                            :cardinality => "one", :required => true),
                     Records::Field.new(:key => "source_model_id", :required => true,

@@ -159,7 +159,9 @@ module PhComposer
           "id" => { "type" => "string", "description" => "The record to edit; absent creates one." },
           "values" => ATTACHED_ZONE.patch_schema.merge("description" => "The Attached zone values to write; only " \
                                                                         "those given change."),
-          "user_data" => USER_DATA,
+          "user_data" => USER_DATA.merge("description" => "Only when creating, without id. " \
+                                                          "#{USER_DATA.fetch('description')} Edit an existing " \
+                                                          "record's map with ph_composer.records.update_metadata."),
           "expected_values" => ATTACHED_ZONE.patch_schema.merge("description" => "The values last read.")
         }, :optional => %w[id user_data expected_values]).freeze
         ATTACHED_ZONE_ID_RESULT = Shapes.object({ "id" => Shapes::ID }).freeze

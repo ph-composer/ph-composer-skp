@@ -37203,7 +37203,7 @@ Example params:
 
 Edit one Assembly; changed expected values refuse. Owner: `ph_composer.assemblies`.
 
-Undo step: Edit Assembly. Updates values and optional metadata.
+Undo step: Edit Assembly. Updates values; metadata stays as stored.
 
 Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
 
@@ -37716,10 +37716,6 @@ Params:
         }
       },
       "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
-    },
-    "user_data": {
-      "type": "object",
-      "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
     }
   }
 }
@@ -38319,7 +38315,7 @@ Example params:
 
 Edit one Material; changed expected values refuse. Owner: `ph_composer.assemblies`.
 
-Undo step: Edit Material. Updates values and optional metadata.
+Undo step: Edit Material. Updates values; metadata stays as stored.
 
 Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
 
@@ -38623,10 +38619,6 @@ Params:
         }
       },
       "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
-    },
-    "user_data": {
-      "type": "object",
-      "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
     }
   }
 }
@@ -38909,6 +38901,165 @@ Example params:
   "library_id": "synthetic",
   "record_id": "one",
   "choice": "create"
+}
+```
+
+### `ph_composer.records.update_metadata`
+
+Replace the user_data and installed extension payloads of stored records of any kind ph_composer.records.list reads, guarded by the metadata last read. Values are not changed; a kind's own update action edits them. A kind whose owner writes its metadata itself refuses as target.wrong_kind. Owner: `ph_composer.records`.
+
+Undo step: Edit Record Metadata. Rewrites only the named records' metadata.
+
+Refuses: `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `record.unreadable`, `reference.invalid`, `target.changed`, `target.not_found`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "updates"
+  ],
+  "properties": {
+    "updates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reference",
+          "expected_metadata"
+        ],
+        "properties": {
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "id"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "description": "Record kind id, as listed by discovery."
+              },
+              "id": {
+                "type": "string",
+                "description": "The record's id."
+              }
+            },
+            "description": "The record to update, as a read returns it."
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Replaces the whole user_data map."
+          },
+          "extension_payloads": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            },
+            "description": "Replaces the payload of each named installed extension."
+          },
+          "expected_metadata": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "user_data",
+              "extension_data"
+            ],
+            "properties": {
+              "user_data": {
+                "type": "object"
+              },
+              "extension_data": {
+                "type": "object"
+              }
+            },
+            "description": "The user_data and extension_data last read; a change refuses."
+          }
+        }
+      },
+      "minItems": 1,
+      "maxItems": 500,
+      "description": "The records to update, written in one step and one Undo."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "updates"
+  ],
+  "properties": {
+    "updates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reference",
+          "extension_status"
+        ],
+        "properties": {
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "id"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "description": "Record kind id, as listed by discovery."
+              },
+              "id": {
+                "type": "string",
+                "description": "The record's id."
+              }
+            }
+          },
+          "extension_status": {
+            "type": "object",
+            "description": "Each envelope's status after the update."
+          }
+        }
+      },
+      "description": "Each record the batch names, in order."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "updates": [
+    {
+      "reference": {
+        "kind": "example.foundation.part",
+        "id": "prt_Ab12Cd34Ef56"
+      },
+      "user_data": {
+        "example_org": {
+          "status": "checked"
+        }
+      },
+      "expected_metadata": {
+        "user_data": {},
+        "extension_data": {}
+      }
+    }
+  ]
 }
 ```
 
@@ -42138,10 +42289,6 @@ Params:
         }
       },
       "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
-    },
-    "user_data": {
-      "type": "object",
-      "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
     }
   }
 }
@@ -43061,10 +43208,6 @@ Params:
         }
       },
       "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
-    },
-    "user_data": {
-      "type": "object",
-      "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
     }
   }
 }
@@ -43882,10 +44025,6 @@ Params:
         }
       },
       "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
-    },
-    "user_data": {
-      "type": "object",
-      "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
     }
   }
 }
@@ -44513,10 +44652,6 @@ Params:
         }
       },
       "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
-    },
-    "user_data": {
-      "type": "object",
-      "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
     }
   }
 }
@@ -54047,10 +54182,6 @@ Params:
                   }
                 },
                 "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
-              },
-              "user_data": {
-                "type": "object",
-                "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
               }
             }
           }
@@ -54993,10 +55124,6 @@ Params:
         }
       },
       "description": "Any of the record's values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
-    },
-    "user_data": {
-      "type": "object",
-      "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
     }
   }
 }
@@ -56972,7 +57099,7 @@ Params:
     },
     "user_data": {
       "type": "object",
-      "description": "Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding."
+      "description": "Only when creating, without id. Local JSON metadata kept with the record in the Model. Export needs an explicit mapping; arbitrary metadata is left out with a finding. Edit an existing record's map with ph_composer.records.update_metadata."
     },
     "expected_values": {
       "type": "object",
@@ -66830,3 +66957,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.49 | 2026-11-12 | start_export takes expected_revision: a Model at another revision refuses revision.stale and starts nothing, and one that changes before the run has read it fails the task revision.stale. |
 | 1.50 | 2026-11-12 | API.outcomes is new: the caller's own retained change outcomes, newest first and paged, each with its sequence, operation, status, effect, code, revision, recorded time and first affected references, never its value or params. The agent outcome tool lists them when given neither sequence nor idempotency_key, with each row's key. |
 | 1.51 | 2026-11-12 | ph_composer.view.capture takes inline and then answers the PNG itself as inline_image, which the agent connection sends as an image content block outside the reply budget; capture.too_large names a smaller width and height. export_status takes part file for a completed task: the written HBJSON's text in fragments with the receipt's hash, refusing artifact.none for a task that wrote no file and artifact.changed for a file that no longer matches its receipt. |
+| 1.52 | 2026-11-14 | ph_composer.records.update_metadata is new: it replaces the user_data and installed extension payloads of records of any kind records.list reads, in one Undo step, guarded by expected_metadata, refusing target.wrong_kind for Building Segments, Levels and Zone option settings. The update actions of Materials, Assemblies, Frames, Glazings, Psi-Install Types, Window Types and Thermal Bridge Types, the update rows of windows.types.installs.save and an attached_zone.save with id no longer take user_data; their create actions still do. |

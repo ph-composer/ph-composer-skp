@@ -387,6 +387,15 @@ export as `extension.invalid`. A payload without a usable declaration blocks ope
 invalidate its references and blocks export when its relevance is unknown. Never guess from a
 payload's text. Native SketchUp copy semantics are feature-owned.
 
+**Catalog record metadata.** `ph_composer.records.update_metadata` is the one write route for the
+`user_data` and extension payloads of an existing catalog record of any kind `records.list` reads
+(`Engine#propose_metadata_update`); a kind's own update action edits values only, and create actions
+still take `user_data`. Its batch, `expected_metadata`, refusal, one-step Undo and no-op rules are the
+entity owners' below, and each target is `{kind, id}`: an unknown kind refuses `params.invalid`, a
+missing record `target.not_found`. A kind that declares `owner_writes_metadata` (Building Segments,
+Levels and Zone option settings, whose records Zones copy) refuses `target.wrong_kind`. Clearing the
+map of a record stored without one writes nothing.
+
 **Entity-owned records.** Zones, Faces and Window Units store their records on SketchUp entities,
 and the same rules hold for them (`Records::Metadata`, shared with the engine). Their reads
 (`ph_composer.zones.list` and `.all`, `ph_composer.zones.faces.list` and `.all`,

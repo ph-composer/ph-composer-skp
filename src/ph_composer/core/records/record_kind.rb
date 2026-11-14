@@ -20,7 +20,12 @@ module PhComposer
 
       # `validate`, when given, is `->(values) { [finding, ...] }` for rules a schema cannot express. The kind
       # keeps frozen copies of its id, label, prefix and fields; `validate` and `store` are kept as given.
-      def initialize(id:, label:, schema_version:, id_prefix:, fields:, validate: nil, store: nil, references: [])
+      #
+      # `owner_writes_metadata` is true for a kind whose owner keeps copies of its records elsewhere, such as
+      # Zone options copied into each Zone's evidence: only the owner's own actions may change its metadata,
+      # so ph_composer.records.update_metadata refuses it as target.wrong_kind.
+      def initialize(id:, label:, schema_version:, id_prefix:, fields:, validate: nil, store: nil, references: [],
+                     owner_writes_metadata: false)
         @id = DeepCopy.frozen(id)
         @label = DeepCopy.frozen(label)
         @schema_version = schema_version
@@ -30,6 +35,11 @@ module PhComposer
         @validate = validate
         @store = store || DictionaryStore.new(id)
         @id_pattern = Identity.pattern(id_prefix)
+        @owner_writes_metadata = owner_writes_metadata
+      end
+
+      def owner_writes_metadata?
+        @owner_writes_metadata
       end
 
       def references

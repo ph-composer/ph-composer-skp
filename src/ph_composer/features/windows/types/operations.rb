@@ -16,7 +16,7 @@ module PhComposer
           { "id" => id }
         end
 
-        def update(request, proposal, id:, values:, expected_values:, user_data: nil)
+        def update(request, proposal, id:, values:, expected_values:)
           request.engine.find(TYPE_KIND, id)
           values = DeepCopy.call(values)
           if values["name"]
@@ -25,7 +25,7 @@ module PhComposer
           end
           request.engine.propose_update(TYPE_KIND, id, proposal,
                                         :values => values,
-                                        :expected_values => expected_values, :user_data => user_data)
+                                        :expected_values => expected_values)
           { "id" => id }
         end
 

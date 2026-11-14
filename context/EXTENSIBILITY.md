@@ -83,7 +83,7 @@ dependency reads" and "Compound proposals", for schemas, refusals and final-stat
 A feature's operations take their inputs as named arguments, beside the request that supplies the
 engine, Model, session and revision. The declaration block unpacks `request.params` once and calls
 the operation, for example
-`Materials::Operations.update(request, proposal, id:, values:, expected_values:, user_data:)`. Anything
+`Materials::Operations.update(request, proposal, id:, values:, expected_values:)`. Anything
 else that needs the same change, such as a library kind's assignment, calls the same operation with
 its own values. A handler request is frozen. Only the foundation derives one (`request.with`), for a
 nested read, a retargeter or a library callback; feature code never copies or alters a request, and
@@ -1021,7 +1021,8 @@ and assignment records where applicable. Contributors use namespaced keys, for e
 
 Ordinary edits and supported persistence round trips preserve this metadata. Public operations
 read and update it without requiring raw dictionary access; updates participate in Undo. Catalog
-records take it through their kind's update action (`engine.propose_update`); Zones, Faces and
+records of every kind take it through `ph_composer.records.update_metadata`
+(`engine.propose_metadata_update`); built-in update actions edit values only. Zones, Faces and
 Window Units use their owner's `update_metadata` action, as do Spaces, Volumes and Floor Segments.
 All follow the same rules ([CONTRACTS.md](CONTRACTS.md), "Records and extension data"). Core
 calculations do not silently interpret arbitrary metadata. Absence in an older record is valid.

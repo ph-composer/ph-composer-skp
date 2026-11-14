@@ -82,7 +82,6 @@ module PhComposer
 
       def replace
         params = Shapes.update(Materials::Schema::KIND, FIELDS, :labelled => Materials::Schema::LABELLED_FIELDS)
-        params.fetch("properties").delete("user_data")
         params.fetch("properties").fetch("values").fetch("properties")["source"] =
           Materials::Schema::KIND.values_schema.fetch("properties").fetch("source")
         # The ordinary Material update, with the copy's provenance passed apart from the edited values.

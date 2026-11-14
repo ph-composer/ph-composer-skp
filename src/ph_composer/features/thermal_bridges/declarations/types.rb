@@ -77,8 +77,7 @@ module PhComposer
           params = request.params
           Type::Operations.update(request, proposal,
                                   :id => params.fetch("id"), :values => params.fetch("values"),
-                                  :expected_values => params.fetch("expected_values"),
-                                  :user_data => params["user_data"])
+                                  :expected_values => params.fetch("expected_values"))
         end
       end
 
