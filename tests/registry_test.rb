@@ -449,6 +449,18 @@ class RegistryTest < PhComposerTestCase
     refute Registry.installed?("probe.parts")
   end
 
+  def test_a_metadata_follow_up_must_be_callable
+    name = PhComposer::Records::Field.new(:key => "name", :schema => { "type" => "string" }, :required => true)
+    kind = PhComposer::Records::RecordKind.new(:id => "probe.follow.kind", :label => "Kind", :schema_version => 1,
+                                               :id_prefix => "pfk", :fields => [name],
+                                               :metadata_follow_up => "rewrite copies")
+    diagnostics = refused(feature { |r| r.feature("probe.follow", :contract_version => 1).record_kind(kind) })
+
+    assert_equal [["registration.schema_invalid", "probe.follow.kind: metadata_follow_up must be callable."]],
+                 diagnostics.map { |diagnostic| [diagnostic.code, diagnostic.message] }
+    refute Registry.installed?("probe.follow")
+  end
+
   def test_schemas_confirmation_references_sections_and_host_events_are_checked
     kind = PhComposer::Records::RecordKind.new(
       :id => "probe.one.part", :label => "Part", :schema_version => 1, :id_prefix => "prp",

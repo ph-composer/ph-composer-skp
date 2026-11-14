@@ -39282,11 +39282,11 @@ Example params:
 
 ### `ph_composer.records.update_metadata`
 
-Replace the user_data and installed extension payloads of stored records of any kind ph_composer.records.list reads, or the user_data of a record's part, such as an Assembly's Layer or Layer-Segment, by part_ids; guarded by the metadata last read. Values are not changed; a kind's own update action edits them. A kind whose owner writes its metadata itself refuses as target.wrong_kind. Owner: `ph_composer.records`.
+Replace the user_data and installed extension payloads of stored records of any kind ph_composer.records.list reads, or the user_data of a record's part, such as an Assembly's Layer or Layer-Segment, by part_ids; guarded by the metadata last read. Values are not changed; a kind's own update action edits them. A Building Segment or Level write also rewrites the copy each Zone and member stamp keeps, in the same Undo step. An internal kind, such as Zone option settings, refuses as target.wrong_kind. Owner: `ph_composer.records`.
 
-Undo step: Edit Record Metadata. Rewrites only the named records' metadata.
+Undo step: Edit Record Metadata. Rewrites the named records' metadata, and the copies their owner keeps of them.
 
-Refuses: `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `record.unreadable`, `reference.invalid`, `target.changed`, `target.not_found`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+Refuses: `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `record.unreadable`, `reference.invalid`, `target.changed`, `target.locked`, `target.not_found`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -58889,7 +58889,9 @@ Result:
   "additionalProperties": false,
   "required": [
     "created_ids",
-    "replacement_ids"
+    "replacement_ids",
+    "removed_user_data",
+    "removed_user_data_total"
   ],
   "properties": {
     "created_ids": {
@@ -58909,6 +58911,39 @@ Result:
           "null"
         ]
       }
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed option whose user_data was not empty, in id order, the first 50: its map is gone, the survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
     }
   }
 }
@@ -58975,7 +59010,9 @@ Result:
   "additionalProperties": false,
   "required": [
     "created_ids",
-    "replacement_ids"
+    "replacement_ids",
+    "removed_user_data",
+    "removed_user_data_total"
   ],
   "properties": {
     "created_ids": {
@@ -58995,6 +59032,39 @@ Result:
           "null"
         ]
       }
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed option whose user_data was not empty, in id order, the first 50: its map is gone, the survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
     }
   }
 }
@@ -59060,7 +59130,9 @@ Result:
   "additionalProperties": false,
   "required": [
     "created_ids",
-    "replacement_ids"
+    "replacement_ids",
+    "removed_user_data",
+    "removed_user_data_total"
   ],
   "properties": {
     "created_ids": {
@@ -59080,6 +59152,39 @@ Result:
           "null"
         ]
       }
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed option whose user_data was not empty, in id order, the first 50: its map is gone, the survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
     }
   }
 }
@@ -67519,3 +67624,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.52 | 2026-11-14 | ph_composer.records.update_metadata is new: it replaces the user_data and installed extension payloads of records of any kind records.list reads, in one Undo step, guarded by expected_metadata, refusing target.wrong_kind for Building Segments, Levels and Zone option settings. The update actions of Materials, Assemblies, Frames, Glazings, Psi-Install Types, Window Types and Thermal Bridge Types, the update rows of windows.types.installs.save and an attached_zone.save with id no longer take user_data; their create actions still do. |
 | 1.53 | 2026-11-14 | Assembly Layers and Layer-Segments take an optional user_data map. A ph_composer.records.update_metadata reference takes part_ids to write the map of one part, such as [Layer id, Layer-Segment id]; a part takes user_data only. describe on a record kind lists its parts. Assembly gestures keep each surviving part's map, a new part starts without one, and Duplicate copies the maps under new part ids. |
 | 1.54 | 2026-11-14 | Window Elements take an optional user_data map, written by ph_composer.records.update_metadata with part_ids [element id] and read by windows.types.elements.list. windows.types.grid.merge keeps the top-left element's map and returns removed_user_data, each other merged element whose map was not empty with its top-level keys, and removed_user_data_total. Split copies the map into every piece, a kind change, flip, installs save, Duplicate and new_flipped_type keep it, and an inserted element starts without one. |
+| 1.55 | 2026-11-14 | ph_composer.records.update_metadata writes Building Segment and Level maps and rewrites the copy each adopted Zone and member stamp keeps in the same Undo step; it may refuse target.locked. Zone option settings still refuse as target.wrong_kind. zones.options.manage, remove and merge keep the survivor's map and return removed_user_data, each removed option whose map was not empty with its top-level keys, and removed_user_data_total. A RecordKind may declare metadata_follow_up. |

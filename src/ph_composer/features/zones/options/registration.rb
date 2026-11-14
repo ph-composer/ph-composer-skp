@@ -7,6 +7,19 @@ module PhComposer
         OPTION = Shapes.object({ "id" => Shapes::ID, "name" => NAME, "colour" => COLOUR }).freeze
         MAP = { "type" => "object", "additionalProperties" => { "type" => %w[string null] } }.freeze
         RESULT = Shapes.object({ "created_ids" => MAP, "replacement_ids" => MAP }).freeze
+        DISCARDED = Shapes.object({
+          "id" => Shapes::ID,
+          "user_data_keys" => Shapes.list({ "type" => "string" },
+                                          :description => "The map's first #{Records::Metadata::REPORT_LIMIT} " \
+                                                          "top-level keys, sorted."),
+          "user_data_key_total" => Shapes::COUNT
+        }).freeze
+        # manage, remove and merge also report the maps of the options they remove.
+        MANAGE_RESULT = Shapes.with(RESULT, "removed_user_data" => Shapes.list(
+          DISCARDED, :description => "Each removed option whose user_data was not empty, in id order, the first " \
+                                     "#{Records::Metadata::REPORT_LIMIT}: its map is gone, the survivor keeps its " \
+                                     "own, and Undo brings it back."
+        ), "removed_user_data_total" => Shapes::COUNT).freeze
         COLLECTION = { "type" => "string", "enum" => %w[building_segment level] }.freeze
         MANAGE = Shapes.object({
           "collection" => COLLECTION, "options" => Shapes.list(OPTION), "expected_options" => Shapes.list(OPTION),
@@ -126,7 +139,7 @@ module PhComposer
 
         def install_actions(feature)
           feature.action("#{PREFIX}.manage", :description => "Save one complete guarded collection draft atomically.",
-                                             :params => describe_params(MANAGE), :result => RESULT,
+                                             :params => describe_params(MANAGE), :result => MANAGE_RESULT,
                                              :refuses => REFUSALS,
                                              :undo_name => "Manage Zone Options", :examples => [manage_example],
                                              :side_effects => "Writes choices and all references atomically.") do |

@@ -230,7 +230,7 @@ module PhComposer
             require_kind(owner, kind.id, reference.target_kind)
             check_shape(owner, kind.id, reference.declaration_problems(kind.values_schema))
           end
-          check_shape(owner, kind.id, kind.part_declaration_problems)
+          check_shape(owner, kind.id, kind.part_declaration_problems + kind.follow_up_problems)
         end
       end
 

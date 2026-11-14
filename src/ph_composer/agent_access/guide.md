@@ -81,6 +81,11 @@ A record or a preview can be larger than one reply. These reads give all of it e
   `ph_composer.records.update_metadata` with the record's `kind` and `id` and the two maps you read as
   `expected_metadata`. `{}` clears the map. A change made since your read refuses the whole batch as
   `target.changed`, and nothing is written. The kinds' own `update` actions do not take `user_data`.
+  Building Segments and Levels (`ph_composer.zones.building_segment` and `ph_composer.zones.level`) are
+  written the same way, and each Zone's copy of its choices follows in the same Undo step. A locked Zone
+  refuses the write as `target.locked`; a Zone awaiting adoption keeps its copy until it is adopted. Removing or merging an option keeps the survivor's map; the
+  result's `removed_user_data` names each removed option whose map was not empty, with its top-level
+  keys (the first 50, with `removed_user_data_total`), and Undo brings it back.
 - **Change a part's metadata.** An Assembly's Layers and Layer-Segments each keep their own
   `user_data` (`describe` on a record kind lists its `parts`). Read the map from the record's
   `values` (`records.list`, or `records.detail` with a path such as `["values", "layers"]`); `segments.list`

@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 54
+    MINOR = 55
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -274,7 +274,14 @@ module PhComposer
                     "returns removed_user_data, each other merged element whose map was not empty with its " \
                     "top-level keys, and removed_user_data_total. Split copies the map into every piece, a kind " \
                     "change, flip, installs save, Duplicate and new_flipped_type keep it, and an inserted element " \
-                    "starts without one." }
+                    "starts without one." },
+      { "minor" => 55, "date" => "2026-11-14",
+        "change" => "ph_composer.records.update_metadata writes Building Segment and Level maps and rewrites the " \
+                    "copy each adopted Zone and member stamp keeps in the same Undo step; it may refuse " \
+                    "target.locked. Zone option settings still refuse as target.wrong_kind. " \
+                    "zones.options.manage, remove and merge keep the survivor's map and return removed_user_data, " \
+                    "each removed option whose map was not empty with its top-level keys, and " \
+                    "removed_user_data_total. A RecordKind may declare metadata_follow_up." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

@@ -475,4 +475,155 @@ class ZoneOptionsTest < PhComposerTestCase
     assert @model.entities.grep(Sketchup::Group).all? { |group| Z::ZONE_STORE.read(group).fetch("level_id") == target }
     assert_equal 1, query.fetch("levels").length
   end
+
+  # ---------------------------------------------------------------- option metadata (EUD-04)
+
+  def metadata_entry(kind, id, user_data)
+    stored = query("ph_composer.records.list", "kind" => kind, "ids" => [id]).fetch("records").first
+    { "reference" => { "kind" => kind, "id" => id }, "user_data" => user_data,
+      "expected_metadata" => stored.slice("user_data", "extension_data") }
+  end
+
+  def write_metadata(*entries)
+    invoke("ph_composer.records.update_metadata", "updates" => entries)
+  end
+
+  def option_map(kind, id)
+    query("ph_composer.records.list", "kind" => kind, "ids" => [id]).dig("records", 0, "user_data")
+  end
+
+  def zones_and_stamps
+    @model.entities.grep(Sketchup::Group).sort_by { |group| Z::ZONE_STORE.read(group).fetch("id") }.flat_map do |group|
+      [Z::ZONE_STORE.read(group), Z::STAMP_STORE.read(group.entities.to_a.first)]
+    end
+  end
+
+  def test_option_maps_rewrite_every_zone_evidence_and_member_stamp_in_one_undo_step
+    group, = add_zone
+    add_zone(200, legacy("zon_BBBBBBBBBBBB"))
+    adopt
+    before = zones_and_stamps
+    segment_id, level_id = Z::ZONE_STORE.read(group).values_at("building_segment_id", "level_id")
+    level_map = { "firm" => { "floor" => "1", "flags" => [nil, false, 0, {}], "name" => "Étage" } }
+    segment_map = { "firm" => { "block" => "A" } }
+    result = write_metadata(metadata_entry(O::LEVEL_KIND, level_id, level_map),
+                            metadata_entry(O::SEGMENT_KIND, segment_id, segment_map))
+    assert_equal %w[completed committed], result.values_at("status", "effect"), result.inspect
+    after = zones_and_stamps
+    assert_equal 4, after.length
+    after.each do |record|
+      assert_equal level_map, record.dig("choice_evidence", "level", "user_data")
+      assert_equal segment_map, record.dig("choice_evidence", "building_segment", "user_data")
+    end
+    assert_equal before.map { |record| record.reject { |key, _| key == "choice_evidence" } },
+                 after.map { |record| record.reject { |key, _| key == "choice_evidence" } }
+    assert_equal level_map, option_map(O::LEVEL_KIND, level_id)
+    unchanged = write_metadata(metadata_entry(O::LEVEL_KIND, level_id, level_map))
+    assert_equal %w[completed none], unchanged.values_at("status", "effect"), unchanged.inspect
+
+    @model.undo
+    assert_equal before, zones_and_stamps
+    assert_equal({}, option_map(O::LEVEL_KIND, level_id))
+    assert_equal({}, option_map(O::SEGMENT_KIND, segment_id))
+    @model.redo
+    assert_equal after, zones_and_stamps
+    assert_equal segment_map, option_map(O::SEGMENT_KIND, segment_id)
+  end
+
+  def test_option_map_write_leaves_zones_awaiting_adoption_as_they_are
+    group, = add_zone
+    adopt
+    level_id = Z::ZONE_STORE.read(group).fetch("level_id")
+    level = O::LEVELS.store.read(@model, level_id)
+    # Pasted from another Model: its Segment is not here, and it names this Model's Level by coincidence.
+    segment = { "id" => "bsg_ZZZZZZZZZZZZ", "schema_version" => 1, "name" => "Shed", "colour" => "#123456",
+                "export_identifier" => O.export_identifier("Shed") }
+    copied = { "id" => "zon_BBBBBBBBBBBB", "schema_version" => 2, "name" => "Copied", "ground_depth_mm" => 0.0,
+               "building_segment_id" => segment.fetch("id"), "level_id" => level_id,
+               "choice_evidence" => { "source_model_id" => "foreign", "building_segment" => segment,
+                                      "level" => level } }
+    pasted, pasted_face = add_zone(200, copied)
+    add_zone(300, legacy("zon_CCCCCCCCCCCC", "Barn", "Level 1"))
+    pasted_records = [Z::ZONE_STORE.read(pasted), Z::STAMP_STORE.read(pasted_face)]
+    result = write_metadata(metadata_entry(O::LEVEL_KIND, level_id, { "firm" => 1 }))
+    assert_equal %w[completed committed], result.values_at("status", "effect"), result.inspect
+    assert_equal({ "firm" => 1 }, Z::ZONE_STORE.read(group).dig("choice_evidence", "level", "user_data"))
+    assert_equal pasted_records, [Z::ZONE_STORE.read(pasted), Z::STAMP_STORE.read(pasted_face)]
+  end
+
+  def test_option_map_write_refuses_a_locked_zone_atomically
+    group, = add_zone
+    adopt
+    level_id = Z::ZONE_STORE.read(group).fetch("level_id")
+    before = zones_and_stamps
+    revision = @session.revision
+    group.locked = true
+    result = write_metadata(metadata_entry(O::LEVEL_KIND, level_id, { "firm" => 1 }))
+    assert_equal %w[refused target.locked none], result.values_at("status", "code", "effect"), result.inspect
+    assert_equal revision, @session.revision
+    assert_equal before, zones_and_stamps
+    assert_equal({}, option_map(O::LEVEL_KIND, level_id))
+  end
+
+  def test_merge_and_remove_keep_the_survivor_map_and_report_the_removed_maps
+    house, = add_zone(100, legacy("zon_AAAAAAAAAAAA", "House", "Lower"))
+    garage, = add_zone(200, legacy("zon_BBBBBBBBBBBB", "Garage", "Upper"))
+    adopt
+    house_id, lower_id = Z::ZONE_STORE.read(house).values_at("building_segment_id", "level_id")
+    garage_id, upper_id = Z::ZONE_STORE.read(garage).values_at("building_segment_id", "level_id")
+    write_metadata(metadata_entry(O::SEGMENT_KIND, house_id, { "keep" => { "a" => 1 } }),
+                   metadata_entry(O::SEGMENT_KIND, garage_id, { "zeta" => 1, "alpha" => [2] }),
+                   metadata_entry(O::LEVEL_KIND, upper_id, { "level_note" => "x" }))
+
+    before_merge = zones_and_stamps
+    merged = invoke("#{O::PREFIX}.merge", "collection" => "building_segment", "id" => garage_id,
+                                          "target_id" => house_id)
+    assert_equal "completed", merged.fetch("status"), merged.inspect
+    assert_equal [{ "id" => garage_id, "user_data_keys" => %w[alpha zeta], "user_data_key_total" => 2 }],
+                 merged.dig("value", "removed_user_data")
+    assert_equal 1, merged.dig("value", "removed_user_data_total")
+    assert_equal({ "keep" => { "a" => 1 } }, option_map(O::SEGMENT_KIND, house_id), "maps are never combined")
+    garage_zone = Z::ZONE_STORE.read(@model.entities.grep(Sketchup::Group).last)
+    assert_equal house_id, garage_zone.fetch("building_segment_id")
+    assert_equal({ "keep" => { "a" => 1 } }, garage_zone.dig("choice_evidence", "building_segment", "user_data"))
+    @model.undo
+    assert_equal({ "zeta" => 1, "alpha" => [2] }, option_map(O::SEGMENT_KIND, garage_id))
+    assert_equal before_merge, zones_and_stamps, "Undo restores each Zone's choice and evidence"
+
+    removed = invoke("#{O::PREFIX}.remove", "collection" => "level", "id" => upper_id, "replacement_id" => lower_id)
+    assert_equal "completed", removed.fetch("status"), removed.inspect
+    assert_equal({ "removed_user_data" => [{ "id" => upper_id, "user_data_keys" => ["level_note"],
+                                             "user_data_key_total" => 1 }], "removed_user_data_total" => 1 },
+                 removed.fetch("value").slice("removed_user_data", "removed_user_data_total"))
+    @model.undo
+    assert_equal({ "level_note" => "x" }, option_map(O::LEVEL_KIND, upper_id))
+    assert_equal before_merge, zones_and_stamps
+    @model.redo
+    plain = invoke("#{O::PREFIX}.remove", "collection" => "level", "id" => lower_id, "replacement_id" => nil)
+    assert_equal "completed", plain.fetch("status"), plain.inspect
+    assert_equal [[], 0], plain.fetch("value").values_at("removed_user_data", "removed_user_data_total"),
+                 "an option without a map is not reported"
+  end
+
+  def test_adopting_a_copied_zone_rebuilds_its_options_with_their_maps
+    group, face = add_zone
+    adopt
+    segment_id, level_id = Z::ZONE_STORE.read(group).values_at("building_segment_id", "level_id")
+    write_metadata(metadata_entry(O::SEGMENT_KIND, segment_id, { "firm" => { "block" => "A" } }),
+                   metadata_entry(O::LEVEL_KIND, level_id, { "firm" => { "floor" => 1 } }))
+    copy_record = Z::ZONE_STORE.read(group)
+    copy_stamp = Z::STAMP_STORE.read(face)
+    @model = Sketchup::Model.new
+    Sketchup.active_model = @model
+    @session = PhComposer::Sessions.for(@model)
+    @context = API.connect(:session_id => @session.id)
+    group, face = add_zone(200, copy_record)
+    Z::STAMP_STORE.write(face, copy_stamp)
+    adopt
+    adopted = Z::ZONE_STORE.read(group)
+    refute_equal segment_id, adopted.fetch("building_segment_id")
+    assert_equal({ "firm" => { "block" => "A" } }, option_map(O::SEGMENT_KIND, adopted.fetch("building_segment_id")))
+    assert_equal({ "firm" => { "floor" => 1 } }, option_map(O::LEVEL_KIND, adopted.fetch("level_id")))
+    assert_equal({ "firm" => { "floor" => 1 } }, adopted.dig("choice_evidence", "level", "user_data"))
+  end
 end

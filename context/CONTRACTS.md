@@ -392,9 +392,15 @@ payload's text. Native SketchUp copy semantics are feature-owned.
 (`Engine#propose_metadata_update`); a kind's own update action edits values only, and create actions
 still take `user_data`. Its batch, `expected_metadata`, refusal, one-step Undo and no-op rules are the
 entity owners' below, and each target is `{kind, id}`: an unknown kind refuses `params.invalid`, a
-missing record `target.not_found`. A kind that declares `owner_writes_metadata` (Building Segments,
-Levels and Zone option settings, whose records Zones copy) refuses `target.wrong_kind`. Clearing the
-map of a record stored without one writes nothing.
+missing record `target.not_found`. An internal kind that declares `owner_writes_metadata` (Zone
+option settings) refuses `target.wrong_kind`. A kind whose owner keeps copies of its records declares
+`metadata_follow_up`, a callable taking the request and the proposal: once every entry is staged, the
+action calls each distinct follow-up of the kinds the batch changed, once, under the kind's owner, and
+the follow-up adds the owner's dependent steps or refuses the batch. Building Segments and Levels share
+one, which rewrites the choice evidence of every adopted Zone and member stamp in the same Undo step
+(a locked one refuses `target.locked`); a Zone awaiting adoption is left as it is. Removing or merging
+options keeps the survivor's map and reports each removed option whose map was not empty with its
+top-level keys, as merging parts does. Clearing the map of a record stored without one writes nothing.
 
 **Record parts.** A `RecordKind` may declare `parts:`, each a `Records::Part` with a label and a path
 of array fields (`layers[]`, `layers[].segments[]`) whose members are objects with an `id`, unique in

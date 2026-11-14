@@ -35,6 +35,33 @@ class RecordMetadataTest < PhComposerTestCase
     end
   end
 
+  # Two probe kinds sharing one follow-up that records each call, and a third with none.
+  module FollowUp
+    CALLS = [] # rubocop:disable Style/MutableConstant
+    RECORD = ->(request, proposal) { CALLS << [request.owner, proposal.writes.map(&:id).sort] }
+    KINDS = { "one" => "pfo", "two" => "pft", "three" => "pfh" }.freeze
+
+    module_function
+
+    def name
+      "FollowUp"
+    end
+
+    def kind(name)
+      "probe.follow.#{name}"
+    end
+
+    def install(registry)
+      feature = registry.feature("probe.follow", :contract_version => 1)
+      KINDS.each do |name, prefix|
+        feature.record_kind(PhComposer::Records::RecordKind.new(
+          :id => kind(name), :label => name.capitalize, :schema_version => 1, :id_prefix => prefix, :fields => [],
+          :metadata_follow_up => name == "three" ? nil : RECORD
+        ))
+      end
+    end
+  end
+
   def setup
     super
     assignment_setup
@@ -223,15 +250,17 @@ class RecordMetadataTest < PhComposerTestCase
   end
 
   def test_unknown_kinds_missing_records_and_owner_written_kinds_refuse
-    level = assignment_invoke("ph_composer.zones.options.create",
-                              "collection" => "level", "values" => { "name" => "L1", "colour" => "#1F7478" })
-    assert_equal "committed", level.fetch("effect"), level.inspect
-    level_id = level.dig("value", "id")
+    values = { "name" => "Block", "colour" => "#1F7478" }
+    segment = assignment_invoke("ph_composer.zones.options.create",
+                                "collection" => "building_segment", "values" => values)
+    assert_equal "committed", segment.fetch("effect"), segment.inspect
+    settings = PhComposer::Zones::Options::SETTINGS_KIND
+    settings_id = PhComposer::Zones::Options::SETTINGS_ID
     revision = @session.revision
     cases = {
       "params.invalid" => entry("probe.unknown.kind", @material, {}, EMPTY),
       "target.not_found" => entry(MATERIAL, "mat_Zz99Zz99Zz99", {}, EMPTY),
-      "target.wrong_kind" => entry(PhComposer::Zones::Options::LEVEL_KIND, level_id, { "x" => 1 }, EMPTY)
+      "target.wrong_kind" => entry(settings, settings_id, { "x" => 1 }, EMPTY)
     }
     cases.each do |code, refused|
       result = write(entry(MATERIAL, @material, { "first" => true }), refused)
@@ -240,7 +269,29 @@ class RecordMetadataTest < PhComposerTestCase
     end
     assert_equal revision, @session.revision
     assert_equal({}, read(MATERIAL, @material).fetch("user_data"))
-    assert_equal({}, read(PhComposer::Zones::Options::LEVEL_KIND, level_id).fetch("user_data"))
+    assert_equal({}, read(settings, settings_id).fetch("user_data"))
+  end
+
+  def test_a_shared_follow_up_runs_once_per_batch_that_changes_its_kinds_under_their_owner
+    PhComposer::Registry.install([FollowUp])
+    ids = FollowUp::KINDS.to_h do |name, prefix|
+      id = "#{prefix}_Ab12Cd34Ef56"
+      PhComposer::Registry.current.catalog.kind(FollowUp.kind(name)).store
+                          .write(@model, { "id" => id, "schema_version" => 1 })
+      [name, id]
+    end
+    FollowUp::CALLS.clear
+    both = write(entry(FollowUp.kind("one"), ids["one"], { "a" => 1 }, EMPTY),
+                 entry(FollowUp.kind("two"), ids["two"], { "b" => 1 }, EMPTY))
+    assert_equal "committed", both.fetch("effect"), both.inspect
+    assert_equal [["probe.follow", ids.values_at("one", "two").sort]], FollowUp::CALLS
+
+    FollowUp::CALLS.clear
+    unchanged = write(entry(FollowUp.kind("one"), ids["one"], { "a" => 1 }))
+    assert_equal "none", unchanged.fetch("effect"), unchanged.inspect
+    other = write(entry(FollowUp.kind("three"), ids["three"], { "c" => 1 }, EMPTY))
+    assert_equal "committed", other.fetch("effect"), other.inspect
+    assert_empty FollowUp::CALLS, "a batch that changes nothing, or no kind with a follow-up, calls none"
   end
 
   def test_a_layer_and_a_layer_segment_map_write_read_back_and_clear_by_id_path

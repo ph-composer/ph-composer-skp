@@ -124,11 +124,25 @@ module PhComposer
         mapping = replacement_mapping(inventory, collection, removed, replacements, created, final_ids)
         stage_default_segment(request, proposal, collection, created.fetch(default_segment_id, default_segment_id),
                               expected_default_segment_id, final_ids)
+        discarded = removed_user_data(request.engine, kind, removed)
         reference_plan = rewrite(request, proposal, collection, mapping, inventory)
         removed.each do |id|
           request.engine.propose_delete(kind.id, id, proposal, :reference_plan => reference_plan)
         end
-        { "created_ids" => created, "replacement_ids" => mapping }
+        { "created_ids" => created, "replacement_ids" => mapping }.merge(discarded)
+      end
+
+      # What removing options discards, for the result: each removed option whose map was not empty, by id
+      # with the map's top-level keys, in id order, the first Records::Metadata::REPORT_LIMIT of them, and how
+      # many there are. A survivor keeps its own map; maps are never combined (D-UD-5). Undo brings the
+      # removed options back with their maps.
+      def removed_user_data(engine, kind, removed)
+        mapped = removed.sort.map { |id| engine.find(kind.id, id) }
+                        .reject { |record| record.fetch("user_data", {}).empty? }
+        listed = mapped.first(Records::Metadata::REPORT_LIMIT).map do |record|
+          { "id" => record.fetch("id") }.merge(Records::Metadata.discarded_keys(record.fetch("user_data")))
+        end
+        { "removed_user_data" => listed, "removed_user_data_total" => mapped.length }
       end
 
       # Each removed option id and the final option its users move to, or nil. A used option needs an
@@ -176,6 +190,17 @@ module PhComposer
           end
         end
         created
+      end
+
+      # The metadata follow-up of both option kinds (RecordKind#metadata_follow_up): each Zone and member
+      # stamp keeps a full copy of its options as choice evidence, so a metadata write rebuilds that evidence
+      # from the staged records in the same step. A legacy or copied Zone awaiting adoption names no option of
+      # this Model and is left as it is; adoption builds its evidence later. An empty mapping moves no reference.
+      def rewrite_evidence(request, proposal)
+        adopted = Inventory.rows(request.model).reject do |row|
+          Adoption.needs_adoption?(request.engine, row.fetch(:record))
+        end
+        rewrite(request, proposal, "building_segment", {}, adopted)
       end
 
       def rewrite(request, proposal, collection, mapping, inventory = Inventory.rows(request.model))
