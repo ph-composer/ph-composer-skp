@@ -1,7 +1,7 @@
 # Phase 4a: findings and open questions
 
 DATE: 2026-11-14
-STATUS: Findings F4a-01 to F4a-21 recorded. Interviewed 2026-11-14: fifteen questions answered, Q4a-08 decided by Claude on Ed's delegation; Q4a-01, Q4a-16 and Q4a-18 open (none gates the prototype).
+STATUS: Findings F4a-01 to F4a-23 recorded. Interviewed 2026-11-14: fifteen questions answered, Q4a-08 decided by Claude on Ed's delegation; Q4a-01, Q4a-16 and Q4a-18 open (none gates the prototype). The GUI prototype raised Q4a-19 to Q4a-25.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -34,6 +34,8 @@ question carries a leaning where the research points one way; a leaning is not a
 | F4a-19 | honeybee-ph occupancy: a dwelling is a `PhDwellings` object (identifier, `num_dwellings`) on each Room's `People.properties.ph`. Rooms that form one unit share the object; one Room can hold N units. A Room with `num_dwellings < 1` is untagged and groups alone. `number_bedrooms` and `number_people` are set per Room. Set Res Occupancy derives `people_per_area` per dwelling group: Σ occupants ÷ occupancy-schedule mean ÷ group floor area. Dwelling identity never goes on `Room.zone`, which honeybee-energy reads as an EnergyPlus zone merge. PHX counts units over unique dwelling identifiers | `honeybee_energy_ph/dwellings.py`, `properties/load/people.py`; `honeybee_grasshopper_ph` `program/set_dwelling.py`, `set_res_occupancy.py`, `get_res_occupancy.py` |
 | F4a-20 | honeybee-ph's Set Residential Program builds a whole residential program per dwelling group: People from occupants over gross floor area; Lighting from the Phius RESNET interior formula over net Space-weighted area, carrying a `PhPhiusLightingInterior`; ElectricEquipment at 0 W/m² (all MEL through Process devices); Infiltration 0.0003 m³/s·m²; Ventilation 0.4 ACH; Setpoint from the SFH heating and cooling schedules with 60 % dehumidification; hot water from Building America Table 11 by bedrooms; plus the eight-device Phius default set as Processes. Its schedules (`hbph_sfh_*.json`: occupant presence and activity, lighting, MEL, five appliances, combined hot water, heating and cooling setpoints) and `default_elec_equip` ship in the pinned honeybee-ph wheel. The shower term in its code is `1.17 × Nbr`; its docstring and the cited table say `4.67 × Nbr` | `honeybee_grasshopper_ph` `program/set_res_program.py`; pinned `honeybee_ph_standards/schedules/`, `programtypes/default_elec_equip.py` |
 | F4a-21 | REVIVE uses the same shape: a template program and schedules loaded by name from its standards package, then loads set from building totals. Its Phius occupancy rule is `(bedrooms ÷ dwellings + 1) × dwellings`. Its residential program sets `watts_per_area` to annual kWh ÷ iCFA with no hours term; check the units before reusing that math | `honeybee_REVIVE_grasshopper` `standards/create_revive_residential_program.py`, `resiliency/set_resiliency_program.py` |
+| F4a-22 | A Phius Multifamily common-area Program that carries electric equipment (Common Office 42.3 W/m², Workout Room 12.04 W/m²) loses that load in a residential Building Segment: PHX's residential path reads only `PhEquipment` devices and skips the Program's ElectricEquipment and Process watts | PHX `from_HBJSON/create_variant.py` (`add_elec_equip_from_hb_room`), `create_process_loads.py` (`is_phius_non_residential`); values from honeybee-ph `PHIUS_programs.py` |
+| F4a-23 | The Phius program data carries only people, lighting and electric equipment, each with its schedule. Ventilation, infiltration, hot water and setpoints come from the `2019::` base programs, so a library file built without those bases has no values for them | honeybee-ph `PHIUS_programs.py`, `library/programtypes.py` (`build_hb_program_from_Phius_data`) |
 
 ## Questions for the interview
 
@@ -85,3 +87,18 @@ F4a-17 to F4a-21.
 Still open, none of them gating the prototype: Q4a-01 (roadmap placement; the roadmap already
 carries Phase 4a before Phase 4), Q4a-16 (Space Types; leaning: always inherit for now) and Q4a-18
 (GitHub issue; leaning: open it now that scope is real).
+
+## Questions the prototype raised
+
+From the [GUI prototype](mockups/README.md), 2026-11-14. Each carries what the prototype shows now;
+none is decided.
+
+| Id | Question | The prototype shows |
+| --- | --- | --- |
+| Q4a-19 | How are the Phius programs packaged: a PH-Composer library file, or a language-neutral standards package that honeybee-ph and PH-Composer both read? (Ed, 2026-11-14) | Two built-in library sources, Phius Multifamily and Phius Non-Residential, values read from honeybee-ph |
+| Q4a-20 | Do the honeybee-energy standards (the DOE programs by vintage) sit beside the Phius sources, and how: shipped, an optional library source the user adds, or not at all? (Ed, 2026-11-14) | A third source, "not added", with a disabled Add button |
+| Q4a-21 | Does an Equipment Set belong to the Dwelling or to the Zone? Before choosing, check how PHX counts one device carried by every Room of a dwelling (`merge_process_loads` sums `quantity` per Room) | One Set per dwelling in a residential Segment; common-area Zones carry none; non-residential Segments show none (F4a-17) |
+| Q4a-22 | Does choosing a library Program on a Zone copy it into the file at once, or must it be added from the Programs tab first? | Copied and assigned in one step, with a notice |
+| Q4a-23 | Is the residential default editable in place, or locked with Duplicate as the way to change it? | Editable; the rail shows it under Default |
+| Q4a-24 | Bedrooms and occupants per Zone (Q4a-11) make a house of several Zones awkward. Keep per-Zone entry, or enter on the Dwelling when it spans several Zones? | Per Zone, summed in the Dwelling bubble and the Segment row |
+| Q4a-25 | Who supplies the values the Phius data lacks (F4a-23): PH-Composer defaults in the library file, Ed's office standards, or the user each time? | Amber "?" on ventilation and hot water for every library Program; Space airflows replace ventilation where set |

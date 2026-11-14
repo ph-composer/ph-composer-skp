@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Programs prototype</title>
+<!-- Clickable prototype for the Phase 4a GUI discussion. Links the panel's real stylesheets and reuses
+     its class names; the script below is a throwaway state machine, not panel code. All model data is
+     synthetic; Phius program values are read from honeybee-ph's PHIUS_programs.py. -->
+<link rel="stylesheet" href="../../../../src/ph_composer/html/base.css">
+<link rel="stylesheet" href="../../../../src/ph_composer/html/overlay.css">
+<link rel="stylesheet" href="../../../../src/ph_composer/html/shell.css">
+<link rel="stylesheet" href="../../../../src/ph_composer/html/table.css">
+<link rel="stylesheet" href="../../../../src/ph_composer/html/features/zones/zones.css">
+<link rel="stylesheet" href="../../../../src/ph_composer/html/library/library.css">
+<link rel="stylesheet" href="../../../../src/ph_composer/html/features/assemblies/assembly.css">
+<link rel="stylesheet" href="../../../../src/ph_composer/html/features/windows/windows.css">
+<style>
+  /* ---- Mockup chrome: the journey strip is not part of the panel. ---- */
+  .mk-strip { display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; padding:6px 12px; background:#1d2b30; color:#e8eef0; font:12px/1.3 system-ui, sans-serif; }
+  .mk-strip b { color:#fff; }
+  .mk-strip button { min-height:24px; padding:2px 9px; border:1px solid #4b5f66; border-radius:12px; background:transparent; color:#e8eef0; font-size:12px; cursor:pointer; }
+  .mk-strip button[aria-pressed="true"] { background:#c8930a; border-color:#c8930a; color:#fff; }
+  .mk-hint { flex:1 1 100%; color:#c9d6da; }
+  .mk-hint em { color:#ffd66b; font-style:normal; }
+  /* ---- Programs tab layout: rail, editor, library sidebar (the Window Types arrangement). ---- */
+  .pgm-layout { display:grid; grid-template-columns:210px minmax(0,1fr) 260px; min-height:calc(100vh - 190px); }
+  .pgm-layout.no-library { grid-template-columns:210px minmax(0,1fr); }
+  .pgm-main { min-width:0; overflow:auto; padding:0 18px 24px; }
+  .pgm-library { border-left:1px solid var(--line); min-width:0; overflow:auto; }
+  .pgm-head { display:flex; align-items:flex-start; gap:16px; padding:16px 0 12px; border-bottom:1px solid var(--line); }
+  .pgm-head h2 { margin:0; font-size:var(--text-xl); font-weight:600; }
+  .pgm-head .pgm-sub { color:var(--muted); font-size:12px; margin-top:4px; }
+  .pgm-head .pgm-tools { margin-left:auto; display:flex; gap:4px; align-items:center; }
+  .pgm-badge { display:inline-flex; align-items:center; gap:4px; margin-left:8px; padding:1px 7px; border-radius:10px; background:var(--surface-alt); color:var(--muted-strong); font-size:11px; font-weight:600; vertical-align:middle; }
+  .pgm-badge.is-lib { background:#e6f0f3; color:#0b5360; }
+  .pgm-loads { display:grid; grid-template-columns:repeat(auto-fill, minmax(330px, 1fr)); gap:12px; padding-top:14px; }
+  .pgm-card { border:1px solid var(--line); border-radius:var(--radius-sm); background:#fff; }
+  .pgm-card-head { display:flex; align-items:center; gap:8px; min-height:34px; padding:4px 10px; border-bottom:1px solid var(--line); background:var(--surface-alt); border-radius:var(--radius-sm) var(--radius-sm) 0 0; }
+  .pgm-card-head svg { color:var(--muted-strong); flex:none; }
+  .pgm-card-head strong { font-size:13px; }
+  .pgm-tag { margin-left:auto; padding:1px 6px; border-radius:9px; background:#eef1f3; color:var(--muted); font-size:11px; white-space:nowrap; }
+  .pgm-tag.is-note { background:#e6f0f3; color:#0b5360; }
+  .pgm-rows { display:grid; grid-template-columns:minmax(0,1fr) 118px; }
+  .pgm-row { display:contents; }
+  .pgm-row > span, .pgm-row > div { display:flex; align-items:center; min-height:30px; padding:2px 10px; border-bottom:1px solid #eef1f3; font-size:12px; }
+  .pgm-row > span:first-child { color:var(--muted-strong); }
+  .pgm-row .unit { color:var(--muted); margin-left:4px; }
+  .pgm-row input { width:100%; min-height:24px; padding:2px 6px; text-align:right; font-variant-numeric:tabular-nums; border-color:transparent; background:transparent; }
+  .pgm-row input:hover, .pgm-row input:focus { border-color:var(--line-strong); background:#fff; }
+  .pgm-row select { width:100%; min-height:24px; font-size:12px; }
+  .pgm-row.is-missing > span, .pgm-row.is-missing > div { background:var(--warning-surface); }
+  .pgm-row.is-missing input { color:var(--warning-ink); font-weight:600; }
+  .pgm-rule { grid-column:1 / -1; display:flex; gap:8px; align-items:flex-start; padding:8px 10px; border-bottom:1px solid #eef1f3; font-size:12px; color:var(--muted-strong); background:#f3f8f9; }
+  .pgm-rule svg { flex:none; color:#0b5360; margin-top:1px; }
+  .pgm-rule b { color:var(--ink); font-weight:600; }
+  .pgm-replaced { grid-column:1 / -1; padding:6px 10px; font-size:12px; color:#0b5360; background:#e6f0f3; border-bottom:1px solid #d5e5ea; }
+  .pgm-sched { display:flex; gap:6px; align-items:center; grid-column:1 / -1; padding:6px 10px; font-size:12px; color:var(--muted-strong); }
+  .pgm-sched button { min-height:24px; padding:1px 8px; font-size:12px; border-radius:12px; display:inline-flex; gap:5px; align-items:center; }
+  .pgm-more { grid-column:1 / -1; padding:4px 10px 6px; font-size:11px; color:var(--muted); }
+  .pgm-metrics { display:flex; gap:22px; margin-top:8px; }
+  .pgm-metric small { display:block; color:var(--muted); font-size:11px; }
+  .pgm-metric strong { font-size:15px; font-variant-numeric:tabular-nums; }
+  .phc-workspace .window-type-row.selected > button:first-child { background:var(--interaction-highlight-tint); color:var(--interaction-highlight); font-weight:600; }
+  .window-type-row .pgm-row-note { padding-right:8px; color:var(--muted); font-size:11px; }
+  .lib-row-add { margin-left:auto; }
+  .library-sidebar-row { display:flex; align-items:center; }
+  .library-sidebar-row .library-sidebar-row-button { flex:1; min-width:0; }
+  .lib-unavailable { margin:8px 10px; padding:8px; border:1px dashed var(--line-strong); border-radius:var(--radius-sm); color:var(--muted); font-size:12px; }
+  .lib-meta { color:var(--muted); font-size:11px; margin-left:6px; white-space:nowrap; }
+  /* ---- Schedules ---- */
+  .sch-form { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:10px 14px; padding:14px 0; max-width:760px; }
+  .sch-form label input, .sch-form label select { min-height:28px; }
+  .sch-strip { margin:6px 0 14px; }
+  .sch-strip svg { display:block; }
+  .sch-caption { color:var(--muted); font-size:11px; margin:12px 0 4px; }
+  .sch-advanced { display:flex; gap:8px; align-items:center; margin-top:14px; padding-top:12px; border-top:1px solid var(--line); color:var(--muted); font-size:12px; }
+  /* ---- Zones / Programs table ---- */
+  .zp-table td, .zp-table th { text-align:left; }
+  .zp-table td.num, .zp-table th.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .zp-table th.num .phc-header-label-row { justify-content:flex-end; }
+  .zp-table td { font-size:12px; }
+  .zp-table select.phc-enum-cell { max-width:100%; }
+  .zp-table .is-default { color:var(--muted); font-style:italic; }
+  .zp-table td input.phc-cell-input { text-align:right; }
+  .zp-muted { color:var(--muted); }
+  .zp-amber { color:var(--warning-ink); font-weight:600; }
+  .zp-cell-flag { display:inline-flex; vertical-align:middle; margin-left:4px; color:#9a6b00; cursor:help; }
+  .zp-dwelling { display:inline-flex; align-items:center; gap:4px; min-height:22px; padding:0 8px; border:1px solid var(--line); border-radius:11px; background:#f4f1fa; font-size:12px; cursor:pointer; white-space:nowrap; }
+  .zp-dwelling.is-none { background:transparent; color:var(--muted); border-style:dashed; }
+  .zp-seg td { background:var(--surface-alt); font-weight:600; }
+  .zp-seg td .zp-muted { font-weight:400; }
+  .zp-seg select { font-weight:400; }
+  .zp-bubble { position:absolute; z-index:40; width:260px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#fff; box-shadow:0 6px 24px #0b1f2626; font-size:12px; }
+  .zp-bubble h3 { margin:0 0 8px; font-size:13px; }
+  .zp-bubble dl { display:grid; grid-template-columns:auto 1fr; gap:4px 10px; margin:0; }
+  .zp-bubble dt { color:var(--muted); }
+  .zp-bubble dd { margin:0; text-align:right; font-variant-numeric:tabular-nums; }
+  .zp-tip { position:fixed; z-index:60; max-width:300px; padding:6px 8px; border-radius:6px; background:#1d2b30; color:#fff; font-size:12px; line-height:1.35; pointer-events:none; }
+  .zp-notice { position:fixed; left:50%; bottom:56px; transform:translateX(-50%); z-index:70; display:flex; gap:10px; align-items:center; padding:9px 14px; border:1px solid var(--line); border-radius:8px; background:#fff; box-shadow:0 6px 24px #0b1f2626; font-size:13px; }
+  .zp-notice svg { color:#1f7a4d; }
+  .phc-selection-bar select { min-height:28px; max-width:220px; }
+  .panel-panes { position:relative; }
+  #pane { padding:0 var(--page-gutter); }
+  @media (max-width: 900px) {
+    .pgm-layout, .pgm-layout.no-library { grid-template-columns:minmax(0,1fr); }
+    .pgm-layout .window-rail { border-right:0; border-bottom:1px solid var(--line); max-height:170px; }
+    .pgm-library { border-left:0; border-top:1px solid var(--line); }
+    .pgm-main { padding:0 0 18px; }
+    .pgm-loads { grid-template-columns:minmax(0,1fr); }
+  }
+  .zp-cellflex { display:flex; align-items:center; gap:4px; }
+  .zp-cellflex select { flex:1; min-width:0; }
+  .pgm-library .library-sidebar-heading { display:flex; align-items:center; gap:4px; padding:12px 10px 6px; }
+  .pgm-library .library-sidebar-toggle { flex:1; text-align:left; }
+  .pgm-library .library-sidebar-content { padding:0 10px 12px; display:flex; flex-direction:column; gap:6px; }
+</style>
+</head>
+<body class="phc-workspace live-panel">
+<div class="mk-strip" id="mk-strip"></div>
+<div class="phc-app-header">
+  <nav class="phc-tabs" aria-label="Sections" id="app-tabs"></nav>
+  <div class="phc-unit-toggle" role="group" aria-label="Display units">
+    <button type="button" aria-pressed="false">IP</button><button type="button" aria-pressed="true">SI</button>
+  </div>
+</div>
+<main class="panel-panes"><div class="phc-pane-main" id="pane"></div></main>
+<footer class="phc-footer"><span>PH-Composer · Programs prototype</span><span>Editing: Model</span></footer>
+<div id="tip" class="zp-tip" hidden></div>
+
+<script>
+(function () {
+  "use strict";
+  // ---------------------------------------------------------------- icons (Lucide, ISC licence)
+  var I = {
+    add: '<path d="M12 4v16M4 12h16"/>',
+    sidebar: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/>',
+    duplicate: '<path d="M8 8h12v12H8zM4 4h12v4M4 4v12h4"/>',
+    del: '<path d="M4 6h16M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7m4-7v7"/>',
+    pencil: '<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>',
+    more: '<circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none"/>',
+    settings: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M4.9 4.9l2.1 2.1m10 10 2.1 2.1M4.9 19.1 7 17m10-10 2.1-2.1"/>',
+    alert: '<path d="M12 4 3 20h18Z"/><path d="M12 10v4m0 3v.01"/>',
+    info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+    clear: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+    locate: '<circle cx="12" cy="12" r="6"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/>',
+    check: '<circle cx="12" cy="12" r="9"/><path d="m7 12 3 3 7-7"/>',
+    users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    light: '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+    plug: '<path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/>',
+    flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+    droplet: '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>',
+    wind: '<path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/>',
+    waves: '<path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>',
+    thermo: '<path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/>',
+    calendar: '<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
+    sigma: '<path d="M18 7V5a1 1 0 0 0-1-1H6.5a.5.5 0 0 0-.4.8l4.5 6a2 2 0 0 1 0 2.4l-4.5 6a.5.5 0 0 0 .4.8H17a1 1 0 0 0 1-1v-2"/>',
+    home: '<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+    lock: '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>'
+  };
+  function svg(n, s) { s = s || 16; return '<svg width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + I[n] + '</svg>'; }
+  function esc(t) { return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"); }
+  function iconBtn(n, label, act, extra) { return '<button type="button" class="phc-icon-button assembly-tool-icon" aria-label="' + esc(label) + '" data-tip="' + esc(label) + '"' + (act ? ' data-act="' + act + '"' : '') + (extra || "") + '>' + svg(n, 18) + '</button>'; }
+  function flag(text) { return '<span class="zp-cell-flag" role="img" aria-label="' + esc(text) + '" data-tip="' + esc(text) + '">' + svg("alert", 14) + '</span>'; }
+  function fmt(v, d) { if (v === null || v === undefined || isNaN(v)) return "—"; return Number(v).toLocaleString("en-US", { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 }); }
+
+  // ---------------------------------------------------------------- Phius library (values from PHIUS_programs.py)
+  // [name, people/m2, occ start, occ end, days/a, occ fraction, lighting W/m2, lighting h/d, equipment W/m2]
+  var PHIUS = {
+    mf: [["Indoor Corridor", 0, 0, 24, 365, 1, 5.38, 24, 0], ["Indoor Stair", 0, 0, 24, 365, 0, 5.27, 24, 0], ["Common Laundry", 0.1125, 0, 24, 365, 1, 7.53, 24, 0],
+      ["Common Mail", 0.1125, 6, 18, 365, 1, 30.14, 12, 0], ["Common Office", 0.0113, 7.5, 16.5, 365, 1, 10.76, 9, 42.3], ["Elevator", 0, 0, 24, 365, 1, 13.45, 24, 0],
+      ["Multi-Purpose", 0.5382, 6, 18, 365, 1, 11.84, 12, 0], ["Storage/Equip Room", 0, 0, 1, 365, 1, 16.15, 1, 0], ["Workout Room", 0.3229, 6, 22, 365, 1, 9.69, 16, 12.04],
+      ["Central Restroom", 0.0307, 11.2, 12.8, 365, 1, 9.69, 1.6, 0]],
+    nr: [["Office Workspace Open", 0.0565, 7, 18, 250, 1, 6.57, 11, 7.64], ["Office Workspace Closed", 0.0511, 7, 18, 250, 0.7, 7.97, 11, 6.89], ["Office Meeting Room", 0.5382, 7, 18, 250, 0.5, 10.44, 11, 3.98],
+      ["Hallway", 0, 7, 18, 250, 0.2, 5.38, 11, 0], ["Restroom Public", 0, 7, 18, 250, 0.1, 6.78, 11, 2.91], ["Classroom", 0.2691, 8, 15, 200, 0.75, 7.64, 7, 15.0],
+      ["Canteen", 0.7535, 8, 15, 250, 1, 6.46, 7, 116.79], ["Gym", 0.2146, 8, 23, 300, 0.7, 9.69, 15, 18.62], ["Library Reading Room", 0.1076, 8, 20, 300, 1, 8.93, 12, 10.01],
+      ["Hotel Bedroom", 0.0384, 21, 8, 365, 0.25, 4.41, 11, 6.75], ["Kitchen Commercial Cooking", 0.0538, 10, 23, 300, 1, 11.73, 13, 403.97], ["Server Room", 0, 0, 24, 365, 0.5, 4.63, 24, 2.91],
+      ["Storage Archive", 0, 7, 18, 250, 0.02, 7.43, 11, 0], ["School Auditorium", 1.6146, 8, 18, 150, 0.75, 6.57, 12, 4.95], ["Restaurant", 0.7535, 10, 24, 300, 1, 6.46, 14, 64.93],
+      ["Manufacturing Workshop", 0.0538, 7, 16, 250, 1, 14.32, 11, 43.06]]
+  };
+  var SOURCES = { mf: "Phius Multifamily", nr: "Phius Non-Residential" };
+
+  // ---------------------------------------------------------------- state
+  var S;
+  var uid = 0;
+  function id(p) { uid += 1; return p + uid; }
+  function sched(name, kind, ph, hourly, src) { return { id: id("sch"), name: name, kind: kind, ph: ph, hourly: hourly, source: src || "file" }; }
+  function profile(arr) { return arr; }
+
+  function baseState(j) {
+    uid = 0;
+    var s = { journey: j, tab: "zones", ptab: "programs", selProgram: null, selSchedule: null, selSet: null, checked: {}, lib: "mf", libQuery: "", notice: null, bubble: null,
+      programs: [], schedules: [], sets: [], dwellings: [], segments: [], zones: [] };
+    // honeybee-ph single-family schedules (hbph_sfh_*.json): hourly profiles, illustrative values here.
+    var presence = sched("SFH occupant presence", "Fractional", null, profile([1, 1, 1, 1, 1, 1, .9, .6, .4, .3, .3, .3, .3, .3, .3, .4, .5, .7, .9, .9, .9, 1, 1, 1]), "hbph");
+    var activity = sched("SFH occupant activity", "Activity level", null, profile([95, 95, 95, 95, 95, 95, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 95, 95]), "hbph");
+    var lighting = sched("SFH lighting", "Fractional", null, profile([.05, .05, .05, .05, .05, .1, .3, .4, .2, .1, .1, .1, .1, .1, .1, .1, .2, .5, .8, .9, .8, .6, .3, .1]), "hbph");
+    var hotwater = sched("SFH combined hot water", "Fractional", null, profile([.02, .01, .01, .01, .02, .1, .5, .7, .6, .4, .3, .3, .3, .2, .2, .2, .3, .5, .7, .6, .5, .4, .2, .1]), "hbph");
+    var heat = sched("SFH heating setpoint", "Temperature", null, profile(new Array(24).fill(20)), "hbph");
+    var cool = sched("SFH cooling setpoint", "Temperature", null, profile(new Array(24).fill(25)), "hbph");
+    var always = sched("Always On", "Fractional", { start: 0, end: 24, frac: 1, base: 0, days: 7, weeks: 52 }, null, "builtin");
+    s.schedules.push(presence, activity, lighting, hotwater, heat, cool, always);
+    s.programs.push({ id: "pgm_default", name: "Residential (default)", source: "default",
+      people: { rule: true, sched: presence.id, act: activity.id }, lighting: { rule: true, sched: lighting.id },
+      equip: { wpa: 0, sched: always.id }, gas: { wpa: 0, sched: always.id }, shw: { rule: true, temp: 43.3, sched: hotwater.id },
+      infil: { flow: 0.0003, sched: always.id }, vent: { pp: 0, pa: 0, pz: 0, ach: 0.4, sched: always.id },
+      setpoint: { heat: 20, cool: 25, hs: heat.id, cs: cool.id, dehum: 60 } });
+    s.sets.push({ id: "set_sfh", name: "Phius single-family default", devices: [
+      ["Fridge-freezer", 1, "1.0 kWh/d rated"], ["Dishwasher", 1, "269 kWh/a"], ["Clothes washer", 1, "120 kWh/a"], ["Clothes dryer", 1, "CEF 3.93"],
+      ["Cooktop", 1, "0.2 kWh/use"], ["Phius MEL", 1, "Phius rule: bedrooms, iCFA"], ["Phius exterior lighting", 1, "Phius rule: iCFA"], ["Phius garage lighting", 1, "Phius rule: per dwelling"]] });
+    s.selProgram = "pgm_default"; s.selSchedule = presence.id; s.selSet = "set_sfh";
+
+    function seg(name, cat, air) { var g = { id: id("seg"), name: name, category: cat, air: air }; s.segments.push(g); return g.id; }
+    function zone(name, segId, area, icfa) { s.zones.push({ id: id("zn"), name: name, seg: segId, area: area, icfa: icfa, program: null, dwelling: null, beds: null, occ: null, set: null }); }
+    if (j === 1) {
+      var h = seg("House", "res", { kind: "n50", value: 0.6 });
+      zone("Living-Kitchen", h, 48, 45.6); zone("Bedroom 1", h, 14, 13.3); zone("Bedroom 2", h, 12, 11.4); zone("Bath", h, 7, 6.6); zone("Hall and stair", h, 10, 6.0);
+    } else if (j === 2) {
+      var b = seg("Building", "res", { kind: "q50", value: 1.1 });
+      ["101", "102", "103", "104", "201", "202", "203", "204"].forEach(function (n, i) { zone("Apt " + n, b, [62, 78, 55, 81][i % 4], [58.9, 74.1, 52.3, 77.0][i % 4]); });
+    } else if (j === 3) {
+      var m = seg("Building", "res", { kind: "q50", value: 1.1 });
+      ["101", "102", "103", "201", "202", "203"].forEach(function (n, i) { zone("Apt " + n, m, [62, 78, 55][i % 3], [58.9, 74.1, 52.3][i % 3]); });
+      zone("Corridor L1", m, 36, 36); zone("Corridor L2", m, 36, 36); zone("Lobby and mail", m, 28, 28); zone("Stair A", m, 18, 9); zone("Super's office", m, 12, 12); zone("Fitness room", m, 24, 24);
+    } else if (j === 4) {
+      var sc = seg("School", "nonres", { kind: "n50", value: 0.6 });
+      zone("Classroom 101", sc, 70, 70); zone("Classroom 102", sc, 70, 70); zone("Classroom 103", sc, 70, 70); zone("Hallway", sc, 64, 64); zone("Restrooms", sc, 22, 22);
+      zone("Admin office", sc, 30, 30); zone("Gym", sc, 180, 180); zone("Canteen", sc, 95, 95);
+    } else {
+      var lab = seg("Lab building", "nonres", { kind: "n50", value: 0.6 });
+      zone("Wet lab", lab, 120, 120); zone("Write-up", lab, 60, 60); zone("Freezer farm", lab, 25, 25); zone("Corridor", lab, 40, 40);
+    }
+    return s;
+  }
+
+  function phiusProgram(src, row) {
+    var occ = sched(row[0] + " occupancy", "Fractional", { start: row[2], end: row[3], frac: row[5], base: 0, days: Math.min(7, Math.round(row[4] / 52)), weeks: 52, daysYear: row[4] }, null, "file");
+    var lgt = sched(row[0] + " lighting", "Fractional", { start: Math.max(0, row[2]), end: Math.min(24, row[2] + row[7]), frac: 1, base: 0, days: Math.min(7, Math.round(row[4] / 52)), weeks: 52, daysYear: row[4] }, null, "file");
+    S.schedules.push(occ, lgt);
+    var always = S.schedules.filter(function (x) { return x.name === "Always On"; })[0];
+    return { id: id("pgm"), name: row[0], source: src, people: { ppa: row[1], sched: occ.id }, lighting: { wpa: row[6], sched: lgt.id },
+      equip: { wpa: row[8], sched: occ.id }, gas: { wpa: 0, sched: always.id }, shw: { lph: null, temp: 60, sched: occ.id },
+      infil: { flow: 0.0003, sched: always.id }, vent: { pp: null, pa: null, pz: 0, ach: null, sched: occ.id },
+      setpoint: { heat: 20, cool: 25, hs: null, cs: null, dehum: null } };
+  }
+  function programByName(name) { return S.programs.filter(function (p) { return p.name === name; })[0]; }
+  function addFromLibrary(src, name) {
+    var have = programByName(name); if (have) return have;
+    var row = PHIUS[src].filter(function (r) { return r[0] === name; })[0];
+    var p = phiusProgram(src, row); S.programs.push(p); return p;
+  }
+  function prog(pid) { return S.programs.filter(function (p) { return p.id === pid; })[0]; }
+  function schedById(sid) { return S.schedules.filter(function (x) { return x.id === sid; })[0]; }
+  function seg(sid) { return S.segments.filter(function (g) { return g.id === sid; })[0]; }
+  function dw(did) { return S.dwellings.filter(function (d) { return d.id === did; })[0]; }
+  function setById(sid) { return S.sets.filter(function (x) { return x.id === sid; })[0]; }
+  function zonesOfDwelling(did) { return S.zones.filter(function (z) { return z.dwelling === did; }); }
+
+  // ---------------------------------------------------------------- derived values (illustrative)
+  function schedMean(sc) {
+    if (!sc) return 1;
+    if (sc.hourly) { var t = 0; sc.hourly.forEach(function (v) { t += v; }); return t / 24; }
+    var p = sc.ph, hrs = p.end > p.start ? p.end - p.start : 24 - p.start + p.end;
+    return (hrs * p.frac + (24 - hrs) * p.base) / 24;
+  }
+  function effectiveProgram(z) { return prog(z.program || "pgm_default"); }
+  function dwellingTotals(did) {
+    var zs = zonesOfDwelling(did), d = dw(did), beds = 0, occSet = 0, anyOcc = false, area = 0, icfa = 0;
+    zs.forEach(function (z) { beds += z.beds || 0; if (z.occ !== null) { anyOcc = true; occSet += z.occ; } area += z.area; icfa += z.icfa; });
+    var occ = anyOcc ? occSet : beds + d.units; // Phius: (bedrooms / units + 1) x units
+    return { zones: zs.length, beds: beds, occ: occ, occRule: !anyOcc, area: area, icfa: icfa, units: d.units };
+  }
+  function derived(z) {
+    var p = effectiveProgram(z), out = { people: null, lighting: null, vent: null, ventMissing: false };
+    if (p.people.rule) {
+      if (z.dwelling) {
+        var t = dwellingTotals(z.dwelling), peak = t.occ / schedMean(schedById(p.people.sched));
+        out.people = peak * z.area / t.area;
+      } else out.people = null;
+    } else out.people = p.people.ppa * z.area;
+    if (p.lighting.rule) {
+      var units = z.dwelling ? dwellingTotals(z.dwelling).units : 1, icfaDw = z.dwelling ? dwellingTotals(z.dwelling).icfa : z.icfa;
+      var kwh = (0.2 + 0.8 * (4 - 3) / 3.7) * (455 * units + 0.8 * icfaDw * 10.764) * 0.8;
+      out.lighting = kwh * 1000 / (schedMean(schedById(p.lighting.sched)) * 8760) * z.icfa / icfaDw;
+    } else out.lighting = p.lighting.wpa * z.area;
+    var v = p.vent;
+    if (v.pa === null || v.pp === null || v.ach === null) out.ventMissing = true;
+    else out.vent = (v.pp * (out.people || 0)) + v.pa * z.area + v.pz + v.ach * z.area * 2.7;
+    return out;
+  }
+  function zoneFindings(z) {
+    var p = effectiveProgram(z), g = seg(z.seg), f = [];
+    if (g.category === "res" && p.source !== "default" && p.equip.wpa > 0)
+      f.push(p.name + "'s electric equipment, " + fmt(p.equip.wpa, 1) + " W/m², does not reach WUFI or METr in a residential Building Segment: PHX reads only Equipment Set devices there. Model it as a device instead.");
+    if (g.category === "nonres" && !z.program) f.push("Uses the residential default in a non-residential Building Segment. Choose a Program.");
+    if (p.source !== "default" && p.source !== "custom" && (p.vent.pa === null)) f.push("Ventilation is not in the Phius data for " + p.name + ". Set it on the Program, or give each Space its airflows.");
+    return f;
+  }
+  function segFindings(g) {
+    var zs = S.zones.filter(function (z) { return z.seg === g.id; }), anyDw = zs.some(function (z) { return z.dwelling; }), f = [];
+    if (g.category === "nonres" && anyDw) f.push("Non-residential, but some of its Zones are dwellings.");
+    if (g.category === "res" && !anyDw) f.push("Residential, but none of its Zones is a dwelling yet. PHX counts dwellings for the Phius targets.");
+    return f;
+  }
+
+  // ---------------------------------------------------------------- journeys
+  var JOURNEYS = {
+    1: { title: "Single-family home", hint: "Five Zones are one house. <em>Check every Zone</em> (header box) → Dwelling: <em>One shared dwelling</em>. Then type bedrooms on the two bedroom rows. The Program needs nothing: every Zone already uses the residential default." },
+    2: { title: "Apartments", hint: "Each Zone is one apartment. <em>Check every Zone</em> → Dwelling: <em>One dwelling each</em>. Then fill Bedrooms per row." },
+    3: { title: "Apartments + common areas", hint: "Make the six apartments <em>one dwelling each</em>. Then check the two corridors → Program: <em>Indoor Corridor</em> (Phius Multifamily, copied into the file on choice). Do the same for the stair, lobby, office and fitness room, and look at the amber flags." },
+    4: { title: "Non-residential school", hint: "The Building Segment is non-residential, so every unassigned Zone is flagged. Check Zones and pick from <em>Phius Non-Residential</em> in the Program choice, or open the <em>Programs</em> tab and browse the library sidebar." },
+    5: { title: "Custom lab programs", hint: "Nothing in the library fits. Open <em>Programs</em> → <em>+</em> on the rail to make a new Program, set its loads, then open a load's schedule chip to edit the Schedule in the PH form. Assign it on Zones → Programs." }
+  };
+  function renderStrip() {
+    var h = '<b>Programs prototype</b><span>Journey:</span>';
+    for (var k = 1; k <= 5; k += 1) h += '<button type="button" data-act="journey" data-v="' + k + '" aria-pressed="' + (S.journey === k) + '">' + k + ' · ' + JOURNEYS[k].title + '</button>';
+    h += '<button type="button" data-act="reset">Reset</button><span class="mk-hint">' + JOURNEYS[S.journey].hint + '</span>';
+    document.getElementById("mk-strip").innerHTML = h;
+  }
+  function renderTabs() {
+    var tabs = [["zones", "Zones"], ["", "Assemblies"], ["", "Window Types"], ["programs", "Programs"], ["", "Thermal Bridges"], ["", "Library"], ["", "Export"], ["", "Systems"]];
+    document.getElementById("app-tabs").innerHTML = tabs.map(function (t) {
+      var on = t[0] && t[0] === S.tab;
+      return '<button type="button"' + (t[0] ? ' data-act="tab" data-v="' + t[0] + '"' : ' disabled') + ' aria-pressed="' + on + '"' + (on ? ' class="is-active" aria-selected="true"' : '') + '>' + t[1] + '</button>';
+    }).join("");
+  }
+
+  // ---------------------------------------------------------------- Zones / Programs view
+  function programOptions(current, withDefault, mixed) {
+    var h = mixed ? '<option value="" selected disabled>Mixed</option>' : "";
+    h += '<optgroup label="In this file">';
+    S.programs.forEach(function (p) {
+      var label = p.id === "pgm_default" ? "Residential (default)" : p.name;
+      h += '<option value="pgm:' + p.id + '"' + (!mixed && current === p.id ? " selected" : "") + '>' + esc(label) + '</option>';
+    });
+    h += '</optgroup>';
+    ["mf", "nr"].forEach(function (src) {
+      var rows = PHIUS[src].filter(function (r) { return !programByName(r[0]); });
+      if (!rows.length) return;
+      h += '<optgroup label="' + SOURCES[src] + ' (copies into this file)">' + rows.map(function (r) { return '<option value="lib:' + src + ':' + esc(r[0]) + '">' + esc(r[0]) + '</option>'; }).join("") + '</optgroup>';
+    });
+    return h;
+  }
+  function renderZones() {
+    var h = '<div class="phc-heading"><h1>Zones</h1><div class="phc-heading-actions">' + iconBtn("settings", "Programs settings") + '</div></div>';
+    h += '<nav class="phc-subtabs" role="tablist" aria-label="Zone views"><button type="button" role="tab" aria-selected="false" aria-pressed="false" disabled>Geometry</button><button type="button" role="tab" aria-selected="false" aria-pressed="false" disabled>Spaces</button><button type="button" role="tab" aria-selected="true" aria-pressed="true">Programs</button></nav>';
+    var nChecked = Object.keys(S.checked).length;
+    h += '<div class="phc-inventory-controls"><label class="phc-view-control"><input type="search" placeholder="Zone, Program or dwelling" aria-label="Filter Zones"></label>' +
+      '<span class="phc-view-count">' + S.zones.length + ' Zones · ' + S.dwellings.length + ' dwellings</span></div>';
+    var COLS = [["name", "Name", 140], ["program", "Program", 190], ["dwelling", "Dwelling", 120], ["beds", "Bedrooms", 72, 1], ["occ", "Occupants", 80, 1], ["set", "Equipment Set", 170],
+      ["area", "Floor area m²", 84, 1], ["icfa", "iCFA m²", 70, 1], ["people", "People peak", 76, 1], ["light", "Lighting W", 80, 1], ["vent", "Ventilation m³/h", 96, 1]];
+    var tips = { area: "Gross Zone floor area: the basis honeybee divides per-area loads by.", icfa: "Weighted Space floor area (iCFA): the basis of the Phius residential rules.",
+      people: "Peak people. Residential default: the dwelling's occupants ÷ the presence schedule's mean, shared by gross floor area.", light: "Installed lighting. Per-area Programs: W/m² × gross floor area. Residential default: Phius interior lighting from iCFA and dwellings.",
+      vent: "Program ventilation for this Zone. Space airflows, where set, replace it at export.", occ: "Average occupants (honeybee-ph number_people). Left empty, the dwelling uses the Phius rule: bedrooms + 1 per unit." };
+    var width = 64 + COLS.reduce(function (a, c) { return a + c[2]; }, 0);
+    h += '<div class="phc-table-mount" style="--row-actions-width:64px; position:relative"><table class="phc-table is-tree reveals-row-actions zp-table" style="min-width:' + width + 'px"><colgroup><col style="width:64px">' + COLS.map(function (c) { return '<col style="width:' + c[2] + 'px">'; }).join("") + '</colgroup><thead><tr>' +
+      '<th class="col-actions"><span class="phc-header-label-row"><input class="row-check" type="checkbox" data-act="check-all" aria-label="Check every Zone"' + (nChecked === S.zones.length ? " checked" : "") + '></span></th>' +
+      COLS.map(function (c) { return '<th class="' + (c[3] ? "num" : "") + '"' + (tips[c[0]] ? ' data-tip="' + esc(tips[c[0]]) + '"' : "") + '><span class="phc-header-label-row"><span class="phc-th-label">' + c[1] + '</span></span></th>'; }).join("") + '</tr></thead><tbody>';
+    S.segments.forEach(function (g) {
+      var zs = S.zones.filter(function (z) { return z.seg === g.id; });
+      var sum = { beds: 0, occ: 0, area: 0, icfa: 0, people: 0, light: 0, vent: 0, ventMissing: false };
+      var seenDw = {};
+      zs.forEach(function (z) {
+        var d = derived(z); sum.area += z.area; sum.icfa += z.icfa; sum.people += d.people || 0; sum.light += d.lighting || 0; if (d.ventMissing) sum.ventMissing = true; else sum.vent += d.vent;
+        if (z.dwelling && !seenDw[z.dwelling]) { seenDw[z.dwelling] = 1; var t = dwellingTotals(z.dwelling); sum.beds += t.beds; sum.occ += t.occ; }
+      });
+      var sf = segFindings(g);
+      var air = g.air ? g.air.kind + " " + fmt(g.air.value, 2) + (g.air.kind === "n50" ? " /h" : " m³/h·m²") : "No test result";
+      var setp = setpointsFor(g);
+      h += '<tr class="tier-0 zp-seg"><td class="col-actions"></td><td colspan="3"><div style="display:flex;align-items:center;gap:8px">Building Segment: ' + esc(g.name) +
+        '<select class="phc-enum-cell" style="width:auto" data-act="category" data-v="' + g.id + '" aria-label="Phius category of ' + esc(g.name) + '" data-tip="Phius building category. PHX reads Equipment Set devices for residential and Program watts for non-residential."><option value="res"' + (g.category === "res" ? " selected" : "") + '>Residential</option><option value="nonres"' + (g.category === "nonres" ? " selected" : "") + '>Non-residential</option></select>' + (sf.length ? flag(sf.join(" ")) : "") + '</div>' +
+        '<div class="zp-muted" style="margin-top:3px">Airtightness <button type="button" class="zp-dwelling" data-act="air" data-v="' + g.id + '" data-tip="Test result. Converted into each Zone\'s Infiltration at export, replacing the Program\'s value.">' + air + '</button> · Set points ' + setp + '</div></td>' +
+        '<td class="num">' + (Object.keys(seenDw).length ? fmt(sum.beds) : "") + '</td><td class="num">' + (Object.keys(seenDw).length ? fmt(sum.occ, 1) : "") + '</td><td></td>' +
+        '<td class="num">' + fmt(sum.area, 1) + '</td><td class="num">' + fmt(sum.icfa, 1) + '</td><td class="num">' + fmt(sum.people, 1) + '</td><td class="num">' + fmt(sum.light) + '</td><td class="num">' + (sum.ventMissing ? '<span class="zp-amber">?</span>' : fmt(sum.vent)) + '</td></tr>';
+      zs.forEach(function (z) { h += zoneRow(z); });
+    });
+    h += '</tbody></table></div>';
+    if (nChecked) h += selectionBar(nChecked);
+    if (S.bubble) h += S.bubble.html;
+    return h;
+  }
+  function setpointsFor(g) {
+    var zs = S.zones.filter(function (z) { return z.seg === g.id; }), heats = {}, cools = {};
+    zs.forEach(function (z) { var p = effectiveProgram(z); heats[p.setpoint.heat] = 1; cools[p.setpoint.cool] = 1; });
+    var hk = Object.keys(heats), ck = Object.keys(cools);
+    var txt = hk.join("/") + " / " + ck.join("/") + " °C";
+    if (hk.length > 1 || ck.length > 1) return '<span class="zp-amber">' + txt + '</span>' + flag("The Zones in this Building Segment use Programs with different setpoints. PHX takes one winter and one summer value per Segment.");
+    return '<span data-tip="Written from the Zones\' Program setpoints at export (Q4a-04).">' + txt + '</span>';
+  }
+  function zoneRow(z) {
+    var p = effectiveProgram(z), d = derived(z), f = zoneFindings(z), checked = !!S.checked[z.id];
+    var progCell = '<select class="phc-enum-cell' + (z.program ? "" : " is-default") + '" data-act="zone-program" data-v="' + z.id + '" aria-label="Program for ' + esc(z.name) + '"' +
+      (z.program ? "" : ' data-tip="Unassigned: uses the residential default (Q4a-13)."') + '>' + programOptions(z.program || "pgm_default") + '</select>' + (f.length ? flag(f.join(" ")) : "");
+    var dwl = z.dwelling ? dw(z.dwelling) : null;
+    var dwCell = dwl ? '<button type="button" class="zp-dwelling" data-act="dwelling" data-v="' + dwl.id + '">' + svg("home", 12) + esc(dwl.name) + (dwl.units > 1 ? " ×" + dwl.units : "") + '</button>'
+      : '<button type="button" class="zp-dwelling is-none" data-act="noop" data-tip="Not a dwelling. Check Zones and choose a Dwelling in the selection bar.">None</button>';
+    var occTip = z.dwelling ? "Empty: the dwelling uses the Phius rule, bedrooms + 1 per unit." : "Only dwellings carry occupants.";
+    var shared = dwl && zonesOfDwelling(dwl.id).length > 1;
+    var setVal = z.set || (z.dwelling ? (dwl.set || null) : null);
+    var setDefault = !setVal && p.source === "default" && z.dwelling;
+    var setCell;
+    if (seg(z.seg).category === "nonres") setCell = '<span class="zp-muted" data-tip="Non-residential Building Segment: PHX reads the Program\'s equipment watts and drops Equipment Set devices.">—</span>';
+    else if (!z.dwelling) setCell = '<span class="zp-muted" data-tip="Equipment Sets apply per dwelling in a residential Building Segment. Common-area devices: assign a Set here once Zones without dwellings can carry one (open question).">—</span>';
+    else {
+      var opts = '<option value="">' + (setDefault ? "Phius single-family default" : "None") + '</option>' + S.sets.map(function (x) { return '<option value="' + x.id + '"' + (setVal === x.id ? " selected" : "") + '>' + esc(x.name) + '</option>'; }).join("");
+      setCell = '<select class="phc-enum-cell' + (setVal ? "" : " is-default") + '" data-act="zone-set" data-v="' + z.id + '" aria-label="Equipment Set for ' + esc(z.name) + '"' +
+        (shared ? ' data-tip="Shared by the dwelling ' + esc(dwl.name) + ': one Set per dwelling, not per Zone."' : (setDefault ? ' data-tip="The residential default brings the Phius single-family device set."' : "")) + '>' + opts + '</select>';
+    }
+    return '<tr class="tier-1' + (checked ? " is-checked" : "") + '"' + (checked ? ' aria-selected="true"' : "") + '><td class="col-actions"><input class="row-check" type="checkbox" data-act="check" data-v="' + z.id + '"' + (checked ? " checked" : "") + ' aria-label="Check ' + esc(z.name) + '"></td>' +
+      '<td>' + esc(z.name) + '</td><td class="phc-editable-cell"><div class="zp-cellflex">' + progCell + '</div></td><td>' + dwCell + '</td>' +
+      '<td class="num phc-editable-cell">' + (z.dwelling ? '<input class="phc-cell-input" data-act="beds" data-v="' + z.id + '" value="' + (z.beds === null ? "" : z.beds) + '" placeholder="0" aria-label="Bedrooms in ' + esc(z.name) + '">' : '<span class="zp-muted">—</span>') + '</td>' +
+      '<td class="num phc-editable-cell"' + (z.dwelling ? ' data-tip="' + occTip + '"' : "") + '>' + (z.dwelling ? '<input class="phc-cell-input" data-act="occ" data-v="' + z.id + '" value="' + (z.occ === null ? "" : z.occ) + '" placeholder="—" aria-label="Occupants in ' + esc(z.name) + '">' : '<span class="zp-muted">—</span>') + '</td>' +
+      '<td class="phc-editable-cell">' + setCell + '</td>' +
+      '<td class="num">' + fmt(z.area, 1) + '</td><td class="num">' + fmt(z.icfa, 1) + '</td>' +
+      '<td class="num">' + (d.people === null ? '<span class="zp-amber" data-tip="The residential default derives people from the dwelling. Make this Zone part of a dwelling.">?</span>' : fmt(d.people, 2)) + '</td>' +
+      '<td class="num">' + fmt(d.lighting) + '</td>' +
+      '<td class="num">' + (d.ventMissing ? '<span class="zp-amber" data-tip="The Program has no ventilation rates yet.">?</span>' : fmt(d.vent)) + '</td></tr>';
+  }
+  function selectionBar(n) {
+    var ids = Object.keys(S.checked), zs = S.zones.filter(function (z) { return S.checked[z.id]; });
+    var progs = {}; zs.forEach(function (z) { progs[z.program || "pgm_default"] = 1; });
+    var pk = Object.keys(progs);
+    var dws = {}; zs.forEach(function (z) { dws[z.dwelling || "none"] = 1; });
+    var dwOpts = '<option value="" selected disabled>' + (Object.keys(dws).length > 1 ? "Mixed" : (zs[0].dwelling ? dw(zs[0].dwelling).name : "Not a dwelling")) + '</option>' +
+      '<option value="shared">One shared dwelling</option><option value="each">One dwelling each</option><option value="none">Not a dwelling</option>' +
+      (S.dwellings.length ? '<optgroup label="Add to">' + S.dwellings.map(function (d) { return '<option value="to:' + d.id + '">' + esc(d.name) + '</option>'; }).join("") + '</optgroup>' : "");
+    var setOpts = '<option value="" selected disabled>Choose…</option><option value="none">None</option>' + S.sets.map(function (x) { return '<option value="' + x.id + '">' + esc(x.name) + '</option>'; }).join("");
+    return '<div class="phc-selection-bar" role="region" aria-label="Checked Zones" style="position:fixed; bottom:44px"><span class="phc-selection-bar-count">' + n + ' Zone' + (n > 1 ? "s" : "") + ' selected</span><div class="phc-selection-bar-controls">' +
+      '<label class="phc-selection-field"><span>Program</span><select data-act="bulk-program" aria-label="Program for checked Zones">' + programOptions(pk.length === 1 ? pk[0] : null, false, pk.length > 1) + '</select></label>' +
+      '<label class="phc-selection-field"><span>Dwelling</span><select data-act="bulk-dwelling" aria-label="Dwelling for checked Zones">' + dwOpts + '</select></label>' +
+      '<label class="phc-selection-field"><span>Equipment Set</span><select data-act="bulk-set" aria-label="Equipment Set for checked Zones">' + setOpts + '</select></label></div>' +
+      iconBtn("clear", "Clear selection", "clear-checked", ' style="width:28px;height:28px"') + '</div>';
+  }
+
+  // ---------------------------------------------------------------- Programs tab
+  function renderPrograms() {
+    var h = '<section class="window-workspace"><div class="phc-heading phc-context-heading"><h1>Programs</h1><div class="phc-heading-actions"></div></div>';
+    h += '<nav class="phc-subtabs" role="tablist" aria-label="Programs sections">' + [["programs", "Programs"], ["schedules", "Schedules"], ["sets", "Equipment Sets"]].map(function (t) {
+      return '<button type="button" role="tab" data-act="ptab" data-v="' + t[0] + '" aria-selected="' + (S.ptab === t[0]) + '" aria-pressed="' + (S.ptab === t[0]) + '">' + t[1] + '</button>'; }).join("") + '</nav>';
+    if (S.ptab === "programs") h += programsSurface();
+    else if (S.ptab === "schedules") h += schedulesSurface();
+    else h += setsSurface();
+    return h + '</section>';
+  }
+  function railRow(label, idv, act, selected, note) {
+    return '<div class="window-type-row' + (selected ? " selected" : "") + '"><button type="button" data-act="' + act + '" data-v="' + idv + '">' + esc(label) + '</button>' + (note ? '<span class="pgm-row-note">' + note + '</span>' : "") + '</div>';
+  }
+  function usedBy(pid) { return S.zones.filter(function (z) { return (z.program || "pgm_default") === pid; }).length; }
+  function programsSurface() {
+    var h = '<div class="pgm-layout"><aside class="window-rail"><div class="window-rail-content"><div class="window-rail-tools">' + iconBtn("add", "New Program", "new-program") + iconBtn("sidebar", "Collapse Programs sidebar", "noop", ' style="margin-left:auto"') + '</div><div class="window-type-list">';
+    h += '<div class="window-group">Default</div>' + railRow("Residential (default)", "pgm_default", "sel-program", S.selProgram === "pgm_default", usedBy("pgm_default") || "");
+    var others = S.programs.filter(function (p) { return p.id !== "pgm_default"; });
+    h += '<div class="window-group">In this file</div>';
+    if (!others.length) h += '<div class="pgm-row-note" style="padding:6px 10px">No other Programs yet. Choose + or add one from the library.</div>';
+    others.forEach(function (p) { h += railRow(p.name, p.id, "sel-program", S.selProgram === p.id, usedBy(p.id) || ""); });
+    h += '</div></div></aside><div class="pgm-main">' + programEditor(prog(S.selProgram)) + '</div>' + librarySidebar() + '</div>';
+    return h;
+  }
+  function programEditor(p) {
+    var src = p.source === "default" ? '<span class="pgm-badge">' + svg("home", 11) + 'Unassigned Zones use this</span>' : (SOURCES[p.source] ? '<span class="pgm-badge is-lib">From ' + SOURCES[p.source] + '</span>' : "");
+    var h = '<div class="pgm-head"><div><h2>' + esc(p.name) + src + '</h2><div class="pgm-metrics">' +
+      metric("Used by", usedBy(p.id) + " Zones") +
+      (p.people.rule ? metric("People", "Phius rule") : metric("People [ppl/m²]", fmt(p.people.ppa, 3))) +
+      (p.lighting.rule ? metric("Lighting", "Phius rule") : metric("Lighting [W/m²]", fmt(p.lighting.wpa, 2))) +
+      metric("Equipment [W/m²]", fmt(p.equip.wpa, 2)) + '</div></div><div class="pgm-tools">' +
+      iconBtn("pencil", "Rename " + p.name, "noop") + iconBtn("duplicate", "Duplicate " + p.name, "dup-program") + iconBtn("more", "More Program actions", "noop") + '</div></div>';
+    var segInfo = S.segments[0];
+    h += '<div class="pgm-loads">';
+    h += card("users", "Occupancy", "", p.people.rule ? rule("Phius residential rule", "Average occupants come from each dwelling (bedrooms + 1 per unit, or the Zone's Occupants). Peak people = occupants ÷ the presence schedule's mean, shared across the dwelling's Zones by gross floor area.")
+      : num(p, "people", "ppa", "People per area", "ppl/m²", 4), schedRow(p.people.sched, "Occupancy") + (p.people.act ? schedRow(p.people.act, "Activity") : "") + more("Radiant and latent fractions"));
+    h += card("light", "Lighting", "", p.lighting.rule ? rule("Phius RESNET interior lighting", "(0.2 + 0.8 × (4 − 3 × high-efficacy fraction) / 3.7) × (455 × units + 0.8 × iCFA ft²) × 0.8 kWh/a per dwelling, as a peak W/m² over the lighting schedule. Carries honeybee-ph's interior lighting device for the residential WUFI path.")
+      : num(p, "lighting", "wpa", "Lighting power", "W/m²", 2), schedRow(p.lighting.sched, "Lighting") + more("Return air, radiant and visible fractions"));
+    h += card("plug", "Electric equipment", p.source === "default" ? '<span class="pgm-tag is-note">Devices come from the Equipment Set</span>' : "", num(p, "equip", "wpa", "Equipment power", "W/m²", 2), schedRow(p.equip.sched, "Equipment") + more("Radiant, latent and lost fractions"));
+    h += card("flame", "Gas equipment", '<span class="pgm-tag">EnergyPlus only</span>', num(p, "gas", "wpa", "Gas power", "W/m²", 2), schedRow(p.gas.sched, "Gas"));
+    h += card("droplet", "Hot water", '<span class="pgm-tag">EnergyPlus only</span>', (p.shw.rule ? rule("Building America by bedrooms", "Daily gallons from the dwelling's bedrooms (Building America 2014, Table 11), as L/h per m² of floor.") : num(p, "shw", "lph", "Flow per area", "L/h·m²", 4)) + num(p, "shw", "temp", "Target temperature", "°C", 1), schedRow(p.shw.sched, "Hot water"));
+    var air = segInfo.air;
+    h += card("waves", "Infiltration", "", num(p, "infil", "flow", "Flow per exterior area at 4 Pa", "m³/s·m²", 5) + (air ? '<div class="pgm-replaced">Replaced at export: Building Segment ' + esc(segInfo.name) + ' has a test result, ' + air.kind + " " + fmt(air.value, 2) + '.</div>' : ""), schedRow(p.infil.sched, "Infiltration"));
+    h += card("wind", "Ventilation", '<span class="pgm-tag" data-tip="PHX sums the four terms, so the method is fixed to Sum (Q4a-15).">Sum of terms</span>',
+      num(p, "vent", "pp", "Per person", "m³/h·person", 1) + num(p, "vent", "pa", "Per floor area", "m³/h·m²", 2) + num(p, "vent", "pz", "Per Zone", "m³/h", 0) + num(p, "vent", "ach", "Air changes", "1/h", 2) +
+      '<div class="pgm-more">Space airflows, where set, replace this at export.</div>', schedRow(p.vent.sched, "Ventilation"));
+    h += card("thermo", "Setpoint", '<span class="pgm-tag is-note" data-tip="Export writes each Building Segment\'s set points from its Zones\' Programs (Q4a-04).">Sets the Segment</span>',
+      num(p, "setpoint", "heat", "Heating", "°C", 1) + num(p, "setpoint", "cool", "Cooling", "°C", 1) + num(p, "setpoint", "dehum", "Dehumidify above", "% RH", 0),
+      (p.setpoint.hs ? schedRow(p.setpoint.hs, "Heating") + schedRow(p.setpoint.cs, "Cooling") : '<div class="pgm-more">Constant setpoints. Choose schedules for setbacks.</div>'));
+    return h + '</div>';
+  }
+  function metric(l, v) { return '<div class="pgm-metric"><small>' + l + '</small><strong>' + v + '</strong></div>'; }
+  function card(icon, title, tag, rows, foot) { return '<section class="pgm-card"><div class="pgm-card-head">' + svg(icon, 16) + '<strong>' + title + '</strong>' + tag + '</div><div class="pgm-rows">' + rows + (foot || "") + '</div></section>'; }
+  function rule(title, text) { return '<div class="pgm-rule">' + svg("sigma", 15) + '<div><b>' + title + '</b><br>' + text + '</div></div>'; }
+  function more(text) { return '<div class="pgm-more">More: ' + text + '</div>'; }
+  function num(p, load, key, label, unit, d) {
+    var v = p[load][key], missing = v === null || v === undefined;
+    return '<div class="pgm-row' + (missing ? " is-missing" : "") + '"><span>' + label + '<span class="unit">' + unit + '</span>' + (missing ? flag("Set " + label.toLowerCase() + ": not in the library data") : "") + '</span><div><input data-act="load-value" data-load="' + load + '" data-key="' + key + '" value="' + (missing ? "?" : fmt(v, d).replace(/,/g, "")) + '" aria-label="' + label + '"></div></div>';
+  }
+  function schedRow(sid, label) {
+    var sc = schedById(sid);
+    return '<div class="pgm-sched">' + svg("calendar", 14) + label + ' schedule <button type="button" data-act="open-schedule" data-v="' + (sc ? sc.id : "") + '">' + (sc ? esc(sc.name) : "Choose…") + ' ▾</button></div>';
+  }
+  function librarySidebar() {
+    var h = '<aside class="library-sidebar-root pgm-library" aria-label="Program Library"><div class="library-sidebar-heading"><button type="button" class="library-sidebar-toggle" aria-expanded="true">Program Library</button>' + iconBtn("settings", "Library setup…", "noop") + '</div><div class="library-sidebar-content">';
+    h += '<select class="library-sidebar-source" data-act="lib-source" aria-label="Library source">' +
+      '<option value="mf"' + (S.lib === "mf" ? " selected" : "") + '>Phius Multifamily (built in)</option>' +
+      '<option value="nr"' + (S.lib === "nr" ? " selected" : "") + '>Phius Non-Residential (built in)</option>' +
+      '<option value="hbe"' + (S.lib === "hbe" ? " selected" : "") + '>honeybee-energy standards</option></select>';
+    if (S.lib === "hbe") return h + '<div class="lib-unavailable"><b>Not added.</b> The DOE reference programs (about 12 MB) are not shipped. Add them as a library source to browse office, school, hotel and retail programs by vintage. <br><br><button type="button" disabled data-tip="Q4a-20: open question">Add honeybee-energy standards…</button></div></div></aside>';
+    h += '<input type="search" data-act="lib-search" value="' + esc(S.libQuery) + '" placeholder="Search Programs" aria-label="Search Program library">';
+    var rows = PHIUS[S.lib].filter(function (r) { return r[0].toLowerCase().indexOf(S.libQuery.toLowerCase()) >= 0; });
+    h += '<small class="muted">' + rows.length + ' shown · values from honeybee-ph</small><div class="library-sidebar-list"><section class="library-sidebar-group">';
+    rows.forEach(function (r) {
+      var inFile = !!programByName(r[0]);
+      h += '<div class="library-sidebar-row"><button type="button" class="library-sidebar-row-button" data-tip="' + esc(r[0] + ": " + fmt(r[1], 3) + " ppl/m², lighting " + fmt(r[6], 1) + " W/m², equipment " + fmt(r[8], 1) + " W/m², occupied " + r[2] + "–" + r[3] + " h, " + r[4] + " d/a. Ventilation, hot water and setpoints are not in the Phius data.") + '"><span class="library-sidebar-name">' + esc(r[0]) + '</span><span class="lib-meta">' + fmt(r[6], 1) + ' W/m²</span></button>' +
+        (inFile ? '<span class="lib-meta" data-tip="Already in this file">' + svg("check", 14) + '</span>' : iconBtn("add", "Add " + r[0] + " to this file", "lib-add", ' data-v="' + esc(r[0]) + '"')) + '</div>';
+    });
+    return h + '</section></div></div></aside>';
+  }
+
+  // ---------------------------------------------------------------- Schedules
+  function schedulesSurface() {
+    var groups = {};
+    S.schedules.forEach(function (x) { (groups[x.kind] = groups[x.kind] || []).push(x); });
+    var h = '<div class="pgm-layout no-library"><aside class="window-rail"><div class="window-rail-content"><div class="window-rail-tools">' + iconBtn("add", "New Schedule", "new-schedule") + '</div><div class="window-type-list">';
+    Object.keys(groups).forEach(function (k) { h += '<div class="window-group">' + k + '</div>'; groups[k].forEach(function (x) { h += railRow(x.name, x.id, "sel-schedule", S.selSchedule === x.id); }); });
+    h += '</div></div></aside><div class="pgm-main">' + scheduleEditor(schedById(S.selSchedule)) + '</div></div>';
+    return h;
+  }
+  var LOAD_LABEL = { people: "Occupancy", lighting: "Lighting", equip: "Electric equipment", gas: "Gas equipment", shw: "Hot water", infil: "Infiltration", vent: "Ventilation" };
+  function schedUsers(sid) {
+    var out = [];
+    S.programs.forEach(function (p) { ["people", "lighting", "equip", "gas", "shw", "infil", "vent"].forEach(function (l) { if (p[l].sched === sid || p[l].act === sid) out.push(p.name + " · " + LOAD_LABEL[l]); }); if (p.setpoint.hs === sid || p.setpoint.cs === sid) out.push(p.name + " · Setpoint"); });
+    return out;
+  }
+  function hours(sc) {
+    if (sc.hourly) return sc.hourly;
+    var p = sc.ph, a = [];
+    for (var hr = 0; hr < 24; hr += 1) { var on = p.end > p.start ? (hr >= p.start && hr < p.end) : (hr >= p.start || hr < p.end); a.push(on ? p.frac : p.base); }
+    return a;
+  }
+  function strip(sc) {
+    var a = hours(sc), max = sc.kind === "Fractional" ? 1 : Math.max.apply(null, a) * 1.1, w = 22, H = 70, s = '<svg width="' + (w * 24 + 30) + '" height="' + (H + 22) + '" role="img" aria-label="24-hour profile">';
+    s += '<line x1="28" y1="' + H + '" x2="' + (28 + w * 24) + '" y2="' + H + '" stroke="#c9d3d7"/>';
+    a.forEach(function (v, i) { var bh = max ? v / max * (H - 4) : 0; s += '<rect x="' + (29 + i * w) + '" y="' + (H - bh) + '" width="' + (w - 2) + '" height="' + bh + '" fill="#9cc3cc"><title>' + i + ':00 ' + v + '</title></rect>'; if (i % 3 === 0) s += '<text x="' + (29 + i * w) + '" y="' + (H + 14) + '" font-size="10" fill="#6b7b80">' + i + '</text>'; });
+    s += '<text x="0" y="10" font-size="10" fill="#6b7b80">' + (sc.kind === "Fractional" ? "1.0" : fmt(max, 0)) + '</text><text x="0" y="' + H + '" font-size="10" fill="#6b7b80">0</text>';
+    return s + '</svg>';
+  }
+  function scheduleEditor(sc) {
+    var users = schedUsers(sc.id), a = hours(sc), mean = a.reduce(function (t, v) { return t + v; }, 0) / 24;
+    var daysYear = sc.ph ? (sc.ph.daysYear || sc.ph.days * sc.ph.weeks) : 365;
+    var flh = sc.kind === "Fractional" ? (sc.ph ? a.reduce(function (t, v) { return t + v; }, 0) * daysYear : mean * 8760) : null;
+    var h = '<div class="pgm-head"><div><h2>' + esc(sc.name) + (sc.source === "hbph" ? '<span class="pgm-badge is-lib">From honeybee-ph</span>' : "") + '</h2><div class="pgm-metrics">' +
+      metric("Type", sc.kind) + (flh !== null ? metric("Full-load hours [h/a]", fmt(flh)) : metric("Mean value", fmt(mean, 1))) + metric("Used by", users.length + " loads") + '</div></div><div class="pgm-tools">' +
+      iconBtn("pencil", "Rename", "noop") + iconBtn("duplicate", "Duplicate", "noop") + iconBtn("more", "More Schedule actions", "noop") + '</div></div>';
+    if (sc.ph) {
+      var p = sc.ph;
+      h += '<div class="sch-form">' + field("Starts at", "start", p.start, "h") + field("Ends at", "end", p.end, "h") + field("Fraction while operating", "frac", p.frac, "") + field("Fraction otherwise", "base", p.base, "") +
+        field("Days per week", "days", p.days, "") + field("Weeks per year", "weeks", p.weeks, "") + '</div>';
+      h += '<div class="sch-caption">Weekday profile (weekends off when days per week is under 7). Written as a honeybee ruleset with real weekday rules; honeybee-ph operating periods wait for the F4a-13 fix.</div>';
+    } else {
+      h += '<div class="sch-caption" style="margin-top:14px">Hourly profile from honeybee-ph (values illustrative in this mockup). The PH form cannot describe it; the hourly editor will.</div>';
+    }
+    h += '<div class="sch-strip">' + strip(sc) + '</div>';
+    if (sc.ph && sc.ph.days < 7) {
+      h += '<div class="sch-caption">Week</div><div style="display:flex;gap:3px">' + ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(function (d, i) { var on = i < sc.ph.days; return '<span style="padding:3px 8px;border-radius:4px;font-size:11px;background:' + (on ? "#9cc3cc" : "#eef1f3") + '">' + d + '</span>'; }).join("") + '</div>';
+    }
+    h += '<div class="sch-caption">Used by</div><div style="font-size:12px">' + (users.length ? users.map(esc).join("<br>") : '<span class="zp-muted">Nothing yet.</span>') + '</div>';
+    h += '<div class="sch-advanced"><button type="button" disabled data-tip="Planned, deferred: an hourly day-profile, weekday-rule and date-range editor modelled on the OpenStudio Application\'s schedule editor (Q4a-07).">Hourly editor…</button>Day profiles, weekday rules and date ranges, for schedules the PH form cannot describe.</div>';
+    return h;
+  }
+  function field(label, key, v, unit) { return '<label>' + label + (unit ? " [" + unit + "]" : "") + '<input data-act="sched-value" data-key="' + key + '" value="' + v + '"></label>'; }
+
+  // ---------------------------------------------------------------- Equipment Sets
+  function setsSurface() {
+    var h = '<div class="pgm-layout no-library"><aside class="window-rail"><div class="window-rail-content"><div class="window-rail-tools">' + iconBtn("add", "New Equipment Set", "new-set") + '</div><div class="window-type-list"><div class="window-group">In this file</div>';
+    S.sets.forEach(function (x) { h += railRow(x.name, x.id, "sel-set", S.selSet === x.id); });
+    var x = setById(S.selSet);
+    h += '</div></div></aside><div class="pgm-main"><div class="pgm-head"><div><h2>' + esc(x.name) + '</h2><div class="pgm-sub">honeybee-ph devices, exported as Process loads with each device\'s watts worked out per dwelling at export. One Set serves a dwelling, not each of its Zones.</div></div><div class="pgm-tools">' +
+      iconBtn("add", "Add device", "noop") + iconBtn("duplicate", "Duplicate", "noop") + iconBtn("more", "More", "noop") + '</div></div>';
+    h += '<div class="phc-table-mount" style="margin-top:12px"><table class="phc-table zp-table"><thead><tr><th>Device</th><th class="num">Quantity</th><th>Energy demand</th><th>In conditioned space</th><th>Reference quantity</th></tr></thead><tbody>' +
+      x.devices.map(function (d) { var r = /Phius rule/.test(d[2]); return '<tr><td>' + esc(d[0]) + '</td><td class="num">' + d[1] + '</td><td>' + (r ? '<span style="color:#0b5360">' + svg("sigma", 12) + ' ' + esc(d[2]) + '</span>' : esc(d[2])) + '</td><td>' + (/exterior|garage/i.test(d[0]) ? "No" : "Yes") + '</td><td class="zp-muted">' + (r ? "Bedrooms / floor area" : "Zone occupants") + '</td></tr>'; }).join("") + '</tbody></table></div></div></div>';
+    return h;
+  }
+
+  // ---------------------------------------------------------------- render + events
+  function render() {
+    renderStrip(); renderTabs();
+    var pane = document.getElementById("pane");
+    pane.innerHTML = S.tab === "zones" ? renderZones() : renderPrograms();
+    var old = document.querySelector(".zp-notice"); if (old) old.remove();
+    if (S.notice) {
+      var n = document.createElement("div"); n.className = "zp-notice"; n.setAttribute("role", "status"); n.innerHTML = svg("check", 16) + '<span>' + S.notice + '</span>';
+      document.body.appendChild(n); var t = S.notice; setTimeout(function () { if (S.notice === t) { S.notice = null; n.remove(); } }, 3500);
+    }
+  }
+  function notify(t) { S.notice = t; }
+  function assignProgram(zs, value) {
+    var p;
+    if (value.indexOf("lib:") === 0) { var parts = value.split(":"); p = addFromLibrary(parts[1], parts.slice(2).join(":")); notify("Added " + p.name + " to this file and assigned it to " + zs.length + " Zone" + (zs.length > 1 ? "s" : "") + "."); }
+    else { p = prog(value.slice(4)); notify(p.name + " assigned to " + zs.length + " Zone" + (zs.length > 1 ? "s" : "") + "."); }
+    zs.forEach(function (z) { z.program = p.id === "pgm_default" ? null : p.id; });
+  }
+  function nextDwellingName() { return "Dwelling " + (S.dwellings.length + 1); }
+  function assignDwelling(zs, v) {
+    if (v === "none") { zs.forEach(function (z) { z.dwelling = null; z.beds = null; z.occ = null; }); notify(zs.length + " Zones are no longer dwellings."); }
+    else if (v === "shared") { var d = { id: id("dw"), name: S.journey === 1 ? "House" : nextDwellingName(), units: 1 }; S.dwellings.push(d); zs.forEach(function (z) { z.dwelling = d.id; }); notify(zs.length + " Zones now make up one dwelling, " + d.name + "."); }
+    else if (v === "each") { zs.forEach(function (z) { var d = { id: id("dw"), name: z.name, units: 1 }; S.dwellings.push(d); z.dwelling = d.id; }); notify(zs.length + " dwellings, one per Zone."); }
+    else if (v.indexOf("to:") === 0) { var t = dw(v.slice(3)); zs.forEach(function (z) { z.dwelling = t.id; }); notify(zs.length + " Zones added to " + t.name + "."); }
+    S.dwellings = S.dwellings.filter(function (d) { return S.zones.some(function (z) { return z.dwelling === d.id; }); });
+  }
+  function dwellingBubble(did, anchor) {
+    var d = dw(did), t = dwellingTotals(did), r = anchor.getBoundingClientRect(), pr = document.getElementById("pane").getBoundingClientRect();
+    var html = '<div class="zp-bubble" style="left:' + (r.left - pr.left) + 'px; top:' + (r.bottom - pr.top + 4) + 'px" role="dialog" aria-label="' + esc(d.name) + '"><h3>' + svg("home", 13) + ' ' + esc(d.name) + '</h3><dl>' +
+      '<dt>Units</dt><dd><input data-act="units" data-v="' + d.id + '" value="' + d.units + '" style="width:60px;text-align:right"></dd><dt>Zones</dt><dd>' + t.zones + '</dd><dt>Bedrooms</dt><dd>' + t.beds + '</dd>' +
+      '<dt>Occupants</dt><dd>' + fmt(t.occ, 1) + (t.occRule ? ' <span class="zp-muted">(Phius: bedrooms + units)</span>' : "") + '</dd><dt>iCFA</dt><dd>' + fmt(t.icfa, 1) + ' m²</dd></dl>' +
+      '<p class="zp-muted" style="margin:8px 0 0">One unit count for several Zones, or several units in one Zone. Bedrooms and occupants are entered per Zone and summed here.</p></div>';
+    S.bubble = { html: html };
+  }
+
+  document.addEventListener("click", function (e) {
+    var el = e.target.closest("[data-act]"); if (!el) { if (S.bubble && !e.target.closest(".zp-bubble")) { S.bubble = null; render(); } return; }
+    var a = el.getAttribute("data-act"), v = el.getAttribute("data-v");
+    if (el.tagName === "SELECT" || el.tagName === "INPUT" && el.type !== "checkbox") return;
+    if (a === "journey") { S = baseState(+v); }
+    else if (a === "reset") { S = baseState(S.journey); }
+    else if (a === "tab") { S.tab = v; S.bubble = null; }
+    else if (a === "ptab") { S.ptab = v; }
+    else if (a === "check") { if (el.checked) S.checked[v] = 1; else delete S.checked[v]; }
+    else if (a === "check-all") { S.checked = {}; if (el.checked) S.zones.forEach(function (z) { S.checked[z.id] = 1; }); }
+    else if (a === "clear-checked") { S.checked = {}; }
+    else if (a === "sel-program") { S.selProgram = v; }
+    else if (a === "sel-schedule") { S.selSchedule = v; }
+    else if (a === "sel-set") { S.selSet = v; }
+    else if (a === "lib-add") { var p = addFromLibrary(S.lib, v); S.selProgram = p.id; notify("Added " + p.name + " to this file."); }
+    else if (a === "new-program") {
+      var always = S.schedules.filter(function (x) { return x.name === "Always On"; })[0];
+      var np = { id: id("pgm"), name: "Program " + (S.programs.length), source: "custom", people: { ppa: null, sched: null }, lighting: { wpa: null, sched: null }, equip: { wpa: null, sched: null }, gas: { wpa: 0, sched: always.id },
+        shw: { lph: 0, temp: 60, sched: always.id }, infil: { flow: 0.0003, sched: always.id }, vent: { pp: null, pa: null, pz: 0, ach: 0, sched: always.id }, setpoint: { heat: 20, cool: 25, hs: null, cs: null, dehum: 60 } };
+      S.programs.push(np); S.selProgram = np.id; notify(np.name + " created. Rename it from its title.");
+    }
+    else if (a === "dup-program") { var src = prog(S.selProgram), cp = JSON.parse(JSON.stringify(src)); cp.id = id("pgm"); cp.name = src.name + " (copy)"; cp.source = "custom"; S.programs.push(cp); S.selProgram = cp.id; notify("Duplicated as " + cp.name + "."); }
+    else if (a === "new-schedule") { var ns = sched("Schedule " + S.schedules.length, "Fractional", { start: 8, end: 18, frac: 1, base: 0, days: 5, weeks: 52 }, null, "file"); S.schedules.push(ns); S.selSchedule = ns.id; }
+    else if (a === "open-schedule") {
+      if (!v) { var s2 = sched("Schedule " + S.schedules.length, "Fractional", { start: 8, end: 18, frac: 1, base: 0, days: 5, weeks: 52 }, null, "file"); S.schedules.push(s2); v = s2.id;
+        var cur = prog(S.selProgram); var lbl = el.closest(".pgm-sched").textContent; var map = { Occupancy: "people", Lighting: "lighting", Equipment: "equip" }; Object.keys(map).forEach(function (k) { if (lbl.indexOf(k) === 0) cur[map[k]].sched = v; }); }
+      S.ptab = "schedules"; S.selSchedule = v;
+    }
+    else if (a === "new-set") { var ns2 = { id: id("set"), name: "Equipment Set " + (S.sets.length + 1), devices: [] }; S.sets.push(ns2); S.selSet = ns2.id; }
+    else if (a === "dwelling") { dwellingBubble(v, el); }
+    else if (a === "air") { var g = seg(v); var val = prompt("Airtightness test result for " + g.name + " (" + g.air.kind + ")", g.air.value); if (val !== null) g.air.value = parseFloat(val) || g.air.value; }
+    else return;
+    render();
+  });
+  document.addEventListener("change", function (e) {
+    var el = e.target, a = el.getAttribute("data-act"), v = el.getAttribute("data-v"); if (!a) return;
+    if (a === "zone-program") assignProgram(S.zones.filter(function (z) { return z.id === v; }), el.value);
+    else if (a === "bulk-program") assignProgram(S.zones.filter(function (z) { return S.checked[z.id]; }), el.value);
+    else if (a === "bulk-dwelling") assignDwelling(S.zones.filter(function (z) { return S.checked[z.id]; }), el.value);
+    else if (a === "bulk-set") { var zs = S.zones.filter(function (z) { return S.checked[z.id]; }); zs.forEach(function (z) { z.set = el.value === "none" ? null : el.value; if (z.dwelling) dw(z.dwelling).set = z.set; }); notify("Equipment Set changed on " + zs.length + " Zones."); }
+    else if (a === "zone-set") { var z = S.zones.filter(function (x) { return x.id === v; })[0]; z.set = el.value || null; if (z.dwelling) { dw(z.dwelling).set = z.set; zonesOfDwelling(z.dwelling).forEach(function (o) { o.set = z.set; }); } }
+    else if (a === "beds" || a === "occ") { var zz = S.zones.filter(function (x) { return x.id === v; })[0]; zz[a] = el.value === "" ? null : parseFloat(el.value); }
+    else if (a === "category") { seg(v).category = el.value; }
+    else if (a === "units") { dw(v).units = Math.max(1, parseInt(el.value, 10) || 1); S.bubble = null; }
+    else if (a === "lib-source") { S.lib = el.value; }
+    else if (a === "load-value") { var p = prog(S.selProgram); p[el.getAttribute("data-load")][el.getAttribute("data-key")] = el.value === "" || el.value === "?" ? null : parseFloat(el.value); }
+    else if (a === "sched-value") { var sc = schedById(S.selSchedule); sc.ph[el.getAttribute("data-key")] = parseFloat(el.value); if (el.getAttribute("data-key") === "days") sc.ph.daysYear = null; }
+    else return;
+    render();
+  });
+  document.addEventListener("input", function (e) {
+    if (e.target.getAttribute("data-act") === "lib-search") { S.libQuery = e.target.value; var pos = e.target.selectionStart; render(); var i = document.querySelector('[data-act="lib-search"]'); i.focus(); i.setSelectionRange(pos, pos); }
+  });
+  var tip = document.getElementById("tip");
+  document.addEventListener("mouseover", function (e) {
+    var el = e.target.closest("[data-tip]"); if (!el) { tip.hidden = true; return; }
+    tip.textContent = el.getAttribute("data-tip"); tip.hidden = false; var r = el.getBoundingClientRect();
+    tip.style.left = Math.min(window.innerWidth - 310, Math.max(4, r.left)) + "px"; tip.style.top = (r.bottom + 6 + 60 > window.innerHeight ? r.top - tip.offsetHeight - 6 : r.bottom + 6) + "px";
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") { if (S.bubble) S.bubble = null; else S.checked = {}; render(); } });
+
+  // ---------------------------------------------------------------- boot from the query string
+  var q = location.search;
+  S = baseState(+((q.match(/journey=(\d)/) || [])[1] || 1));
+  var view = (q.match(/view=(\w+)/) || [])[1];
+  if (view && view !== "zones") { S.tab = "programs"; S.ptab = view; }
+  // Scripted states for the README screenshots: &do=<step>
+  var steps = (q.match(/do=([\w,-]+)/) || [])[1];
+  if (steps) steps.split(",").forEach(function (st) {
+    var all = S.zones;
+    if (st === "checkall") all.forEach(function (z) { S.checked[z.id] = 1; });
+    if (st === "shared") { assignDwelling(all, "shared"); S.checked = {}; }
+    if (st === "each") { assignDwelling(all.filter(function (z) { return /^Apt/.test(z.name); }), "each"); }
+    if (st === "beds") all.forEach(function (z, i) { if (/^Bedroom/.test(z.name)) z.beds = 1; if (/^Apt/.test(z.name)) z.beds = [1, 2, 1, 2][i % 4]; });
+    if (st === "common") {
+      assignProgram(all.filter(function (z) { return /Corridor/.test(z.name); }), "lib:mf:Indoor Corridor");
+      assignProgram(all.filter(function (z) { return /Stair/.test(z.name); }), "lib:mf:Indoor Stair");
+      assignProgram(all.filter(function (z) { return /Lobby/.test(z.name); }), "lib:mf:Common Mail");
+      assignProgram(all.filter(function (z) { return /office/.test(z.name); }), "lib:mf:Common Office");
+      assignProgram(all.filter(function (z) { return /Fitness/.test(z.name); }), "lib:mf:Workout Room");
+    }
+    if (st === "checkcorr") all.forEach(function (z) { if (/Corridor/.test(z.name)) S.checked[z.id] = 1; });
+    if (st === "school") {
+      assignProgram(all.filter(function (z) { return /Classroom/.test(z.name); }), "lib:nr:Classroom");
+      assignProgram(all.filter(function (z) { return /Hallway/.test(z.name); }), "lib:nr:Hallway");
+      assignProgram(all.filter(function (z) { return /Restroom/.test(z.name); }), "lib:nr:Restroom Public");
+      assignProgram(all.filter(function (z) { return /office/.test(z.name); }), "lib:nr:Office Workspace Closed");
+      assignProgram(all.filter(function (z) { return /Gym/.test(z.name); }), "lib:nr:Gym");
+    }
+    if (st === "libnr") { S.tab = "programs"; S.ptab = "programs"; S.lib = "nr"; var cl = programByName("Classroom"); if (cl) S.selProgram = cl.id; }
+    if (st === "custom") { S.tab = "programs"; S.ptab = "programs"; var cp = phiusProgram("custom", ["Wet lab", 0.05, 7, 19, 250, 0.8, 9, 12, 25]); cp.name = "Wet lab"; cp.vent = { pp: 30, pa: 3.6, pz: 0, ach: 0, sched: cp.people.sched }; S.programs.push(cp); S.selProgram = cp.id; }
+    if (st === "customsched") { S.ptab = "schedules"; S.selSchedule = prog(S.selProgram).people.sched; }
+    if (st === "pdefault") { S.tab = "programs"; S.ptab = "programs"; S.selProgram = "pgm_default"; }
+    if (st === "sets") { S.tab = "programs"; S.ptab = "sets"; }
+    if (st === "bubble") { setTimeout(function () { var b = document.querySelector('[data-act="dwelling"]'); if (b) { dwellingBubble(b.getAttribute("data-v"), b); render(); } }, 50); }
+  });
+  S.notice = null;
+  render();
+})();
+</script>
+</body>
+</html>

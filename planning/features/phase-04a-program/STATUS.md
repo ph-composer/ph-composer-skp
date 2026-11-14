@@ -1,7 +1,7 @@
 # Phase 4a status
 
 DATE: 2026-11-14
-STATUS: Requested. Research complete and interviewed; UI prototype next.
+STATUS: Requested. Research complete and interviewed; UI prototype in review.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -17,7 +17,7 @@ The one place this packet's progress is read from.
 | Findings and interview questions | Complete | 2026-11-14 | [DECISIONS.md](DECISIONS.md) |
 | Interview | Complete | 2026-11-14 | [answers](DECISIONS.md#answered): 15 answered, Q4a-08 decided on delegation; Q4a-01, Q4a-16, Q4a-18 open and non-gating |
 | Research after redirects: honeybee-ph Process, occupancy and residential program | Complete | 2026-11-14 | F4a-17 to F4a-21 |
-| UI prototype: Program tab, Zones/Programs page | Requested | | |
+| UI prototype: Program tab, Zones/Programs page | In review | 2026-11-14 | [mockups/](mockups/README.md): five journeys, Q4a-19 to Q4a-25 raised |
 | PRD, contracts, stages | Requested | | |
 | GitHub issue | Requested | | Q4a-18 |
 | honeybee-ph and PHX fix for F4a-13 | Requested | | Q4a-08; cross-repo, own authorization |

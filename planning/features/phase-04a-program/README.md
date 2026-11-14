@@ -1,7 +1,7 @@
 # Phase 4a: Programs
 
 DATE: 2026-11-14
-STATUS: Requested. Research complete and interviewed 2026-11-14; UI prototype next. No stage authorized.
+STATUS: Requested. Research complete and interviewed 2026-11-14; UI prototype in review. No stage authorized.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -54,8 +54,8 @@ until the cross-repo fix for F4a-13 ships (Q4a-08).
 
 ## Read order
 
-1. [DECISIONS.md](DECISIONS.md): findings F4a-01 to F4a-21, the interview questions Q4a-01 to
-   Q4a-18 and their answers. Start here.
+1. [DECISIONS.md](DECISIONS.md): findings F4a-01 to F4a-23, the interview questions Q4a-01 to
+   Q4a-25 and the answers so far. Start here. The [GUI prototype](mockups/README.md) shows them.
 2. [research/honeybee-energy-programs.md](research/honeybee-energy-programs.md): the ProgramType,
    Room inheritance and overrides, Model emission, the program library, and the Honeybee
    Grasshopper affordances a Program tab should match.
@@ -69,8 +69,7 @@ until the cross-repo fix for F4a-13 ships (Q4a-08).
 
 ## Next
 
-1. UI prototype of the Program tab and the Zones/Programs page in the UI preview, with the
-   `ph-composer-ui-polish` skill.
+1. Review the [GUI prototype](mockups/README.md) and answer Q4a-19 to Q4a-25; iterate.
 2. PRD, contracts and stages, worked back from the accepted prototype. Implementation needs
    separate authorization.
 3. Separately: the honeybee-ph and PHX fix for F4a-13 (Q4a-08), in those repositories, starting
