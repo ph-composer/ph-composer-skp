@@ -17,7 +17,7 @@ The one place this packet's progress is read from.
 | Findings and interview questions | Complete | 2026-11-14 | [DECISIONS.md](DECISIONS.md) |
 | Interview | Complete | 2026-11-14 | [answers](DECISIONS.md#answered): 15 answered, Q4a-08 decided on delegation; Q4a-01, Q4a-16, Q4a-18 open and non-gating |
 | Research after redirects: honeybee-ph Process, occupancy and residential program | Complete | 2026-11-14 | F4a-17 to F4a-21 |
-| UI prototype: Program tab, Zones/Programs page | In review | 2026-11-14 | [mockups/](mockups/README.md): five journeys, Q4a-19 to Q4a-25 raised |
+| UI prototype: Program tab, Zones/Programs page | In review | 2026-11-14 | [mockups/](mockups/README.md): five journeys, Q4a-19 to Q4a-28 raised. First review 2026-11-14: shape accepted; Q4a-19, Q4a-20 and Q4a-26 (Single dwelling switch) answered and prototyped |
 | PRD, contracts, stages | Requested | | |
 | GitHub issue | Requested | | Q4a-18 |
 | honeybee-ph and PHX fix for F4a-13 | Requested | | Q4a-08; cross-repo, own authorization |
@@ -29,6 +29,8 @@ The one place this packet's progress is read from.
 - Phase 4 P4-12 (appliances) is superseded: this packet owns appliances as Equipment Sets
   (Q4a-03). Nothing in Phase 4 mechanical blocks this packet.
 - Before implementation: choose the honeybee-ph pin for `PhEquipment` (F4a-18).
+- The Phius program library files live in the planned [ph-composer-standards](../unscheduled/ph-composer-standards/README.md)
+  repository (Q4a-19) and wait on Ed's confirmation that the values may be published (Q4a-28).
 
 ## Verification
 

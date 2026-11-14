@@ -41,8 +41,11 @@ From Ed's request and the 2026-11-14 interview ([answers](DECISIONS.md#answered)
 - **A Zones/Programs page** for assigning Programs, Equipment Sets and Dwellings to Zones, with
   each Zone's counts and the absolute equivalent of every per-area value; every per-area value
   names its basis (Q4a-17).
-- **Starter library**: the residential default from the pinned honeybee-ph wheel, and Phius
-  non-residential programs as a PH-Composer library file (Q4a-10).
+- **Starter library**: the residential default from the pinned honeybee-ph wheel, built in; Phius
+  Multifamily and Non-Residential programs as library files in the planned ph-composer-standards
+  repository, added through Library setup (Q4a-10, Q4a-19).
+- **A Single dwelling switch** on the Zones/Programs page: every Zone one dwelling with the
+  residential default, the table locked, bedrooms entered once (Q4a-26).
 - **Export**: Program, load and schedule objects in the HBJSON, plus the honeybee-ph extension
   fields PHX reads.
 
@@ -55,7 +58,7 @@ until the cross-repo fix for F4a-13 ships (Q4a-08).
 ## Read order
 
 1. [DECISIONS.md](DECISIONS.md): findings F4a-01 to F4a-23, the interview questions Q4a-01 to
-   Q4a-25 and the answers so far. Start here. The [GUI prototype](mockups/README.md) shows them.
+   Q4a-28 and the answers so far. Start here. The [GUI prototype](mockups/README.md) shows them.
 2. [research/honeybee-energy-programs.md](research/honeybee-energy-programs.md): the ProgramType,
    Room inheritance and overrides, Model emission, the program library, and the Honeybee
    Grasshopper affordances a Program tab should match.
@@ -69,7 +72,8 @@ until the cross-repo fix for F4a-13 ships (Q4a-08).
 
 ## Next
 
-1. Review the [GUI prototype](mockups/README.md) and answer Q4a-19 to Q4a-25; iterate.
+1. Review the [GUI prototype](mockups/README.md) and answer Q4a-21 to Q4a-25, Q4a-27 and Q4a-28; iterate.
+   Q4a-19, Q4a-20 and Q4a-26 were answered in the first review.
 2. PRD, contracts and stages, worked back from the accepted prototype. Implementation needs
    separate authorization.
 3. Separately: the honeybee-ph and PHX fix for F4a-13 (Q4a-08), in those repositories, starting

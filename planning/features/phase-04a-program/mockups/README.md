@@ -1,7 +1,7 @@
 # Programs prototype
 
 DATE: 2026-11-14
-STATUS: Draft for Ed's review. Clickable mockup, not a screen; no panel code.
+STATUS: In review. First review 2026-11-14 added the Single dwelling switch and library files. Clickable mockup, not a screen; no panel code.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -15,8 +15,8 @@ server. The dark strip at the top picks a journey and says what to try; Reset re
 
 | Journey | What to try | PNGs |
 | --- | --- | --- |
-| 1. Single-family home, five Zones, one dwelling | Check every Zone, Dwelling: One shared dwelling, then bedrooms on the bedroom rows. Click the House chip | `j1-start` (`journey=1`), `j1-dwelling` (`journey=1&do=shared,beds,bubble`), `j1-default-program` (`journey=1&do=shared,beds,pdefault`) |
-| 2. Apartments, one Zone each | Check every Zone, Dwelling: One dwelling each | `j2-checked` (`journey=2&do=checkall`), `j2-dwellings` (`journey=2&do=each,beds`) |
+| 1. Single-family home, five Zones, one dwelling | Single dwelling is on: type the bedrooms on the Building Segment row. Uncheck it, then click the House chip | `j1-start` (`journey=1`), `j1-bedrooms` (`journey=1&do=house3`), `j1-unlocked` (`journey=1&do=house3,unsingle,bubble`), `j1-default-program` (`journey=1&do=pdefault`) |
+| 2. Apartments, one Zone each | Check every Zone, Dwelling: One dwelling each. Then check Single dwelling to see its confirmation | `j2-checked` (`journey=2&do=checkall`), `j2-dwellings` (`journey=2&do=each,beds`), `j2-single-confirm` (`journey=2&do=each,beds,trysingle`) |
 | 3. Apartments plus corridors, lobby, stair, office, gym | Apartments as in 2; pick Phius Multifamily Programs for the rest from the Program choice | `j3-corridors-checked` (`journey=3&do=each,beds,checkcorr`), `j3-common-areas` and `-420` (`journey=3&do=each,beds,common`) |
 | 4. Non-residential school | Unassigned Zones are flagged; assign from Phius Non-Residential, or browse the library sidebar | `j4-start` (`journey=4`), `j4-assigned` (`journey=4&do=school`), `j4-library` (`journey=4&do=school,libnr`) |
 | 5. Custom lab programs | Programs tab, + on the rail, set loads, open a schedule chip | `j5-program` and `-420` (`journey=5&do=custom`), `j5-schedule` (`journey=5&do=custom,customsched`) |
@@ -25,14 +25,23 @@ server. The dark strip at the top picks a journey and says what to try; Reset re
 ## What the prototype proposes
 
 - **Programs tab** with Programs, Schedules and Equipment Sets subtabs, laid out like Window Types:
-  a rail of records, the editor, and for Programs a Program Library sidebar whose sources are
-  Phius Multifamily, Phius Non-Residential and honeybee-energy standards (not added).
+  a rail of records, the editor, and for Programs a Program Library sidebar. Its sources are library
+  files from ph-composer-standards that the user added through Library setup (Q4a-19): Phius
+  Multifamily and Phius Non-Residential, with honeybee-energy standards shown as not added
+  (Q4a-20). Journeys 3 and 4 assume both Phius files were added.
 - **A Program** is eight load cards. A derived value shows its rule instead of a number (the
   residential default's Occupancy, Lighting and Hot water). Values the library lacks are amber "?".
   Infiltration says when the Segment's test result replaces it; Setpoint says it sets the Segment.
 - **A Schedule** is the PH form (start, end, fraction while operating and otherwise, days per
   week, weeks per year) over a 24-hour strip and a week row. The hourly editor is a disabled
   button marked as planned.
+- **Single dwelling**, a checkbox at the top of Zones → Programs (Q4a-26). When on, every Zone is
+  one dwelling, House, with the residential default, in one residential Building Segment. The rows
+  are locked and show their values muted. The Building Segment row becomes the house row: bedrooms,
+  occupants (Phius rule when empty) and the Equipment Set are its only inputs. Unchecking keeps
+  everything it set as ordinary assignments, with the counts on the dwelling. Checking it over
+  per-Zone assignments opens a confirmation naming what gives way. The real switch would also put
+  every Zone in one Building Segment from the Geometry view; every journey here has one already.
 - **Zones → Programs**, a third Zone view: one row per Zone under a Building Segment heading row
   that holds the Phius category, the airtightness test result and the set points derived from the
   Programs, with summed bedrooms, occupants, people, lighting and ventilation. Per row: Program,
@@ -48,6 +57,7 @@ Set serves a dwelling while Q4a-21 is open.
 
 ## Questions the prototype raised
 
-Recorded as Q4a-19 to Q4a-25 in [DECISIONS.md](../DECISIONS.md#questions-the-prototype-raised).
+Recorded as Q4a-19 to Q4a-28 in [DECISIONS.md](../DECISIONS.md#questions-the-prototype-raised);
+Q4a-19, Q4a-20 and Q4a-26 are [answered](../DECISIONS.md#answered).
 The new words on screen (Program, Schedule, Equipment Set, Dwelling) enter
 `context/UBIQUITOUS_LANGUAGE.md` with the PRD.

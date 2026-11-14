@@ -1,7 +1,7 @@
 # Phase 4a: findings and open questions
 
 DATE: 2026-11-14
-STATUS: Findings F4a-01 to F4a-23 recorded. Interviewed 2026-11-14: fifteen questions answered, Q4a-08 decided by Claude on Ed's delegation; Q4a-01, Q4a-16 and Q4a-18 open (none gates the prototype). The GUI prototype raised Q4a-19 to Q4a-25.
+STATUS: Findings F4a-01 to F4a-23 recorded. Interviewed 2026-11-14: fifteen questions answered, Q4a-08 decided by Claude on Ed's delegation; Q4a-01, Q4a-16 and Q4a-18 open (none gates the prototype). The GUI prototype raised Q4a-19 to Q4a-28; Ed's first review answered Q4a-19, Q4a-20 and Q4a-26.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -76,13 +76,23 @@ F4a-17 to F4a-21.
 | Q4a-07 | **A PH form by default, an hourly editor later.** Users enter operating hours, fraction, days per week and weeks per year. An advanced EnergyPlus-style hourly editor, modelled on the OpenStudio Application's schedule editor, is in scope as deferred, mainly for non-residential work | The form-to-ruleset mapping is PH-Composer's to define. It must write weekday rules and operating days, not honeybee-ph's constant 8,760-hour shape, or EnergyPlus loses the days (F4a-13). The `ph` operating-period block is written only once Q4a-08's fix ships |
 | Q4a-08 | **Fix in honeybee-ph, then PHX.** Ed delegated the choice and asked for the most upstream real fix. Claude chose: the defect is honeybee-ph's `annual_average_operating_fraction`, which neither consumer reads correctly (F4a-13) | honeybee-ph gains properties with explicit meaning (the in-window fraction Σ(hours × fraction) ÷ Σ hours, and a true annual average over 8,760 h), and its Phius program builder emits rulesets whose weekday rules and days agree with the `ph` block. PHX's occupancy and lighting builders switch to the in-window fraction. Other readers to migrate: honeybee-ph `library/programtypes.py` and honeybee_grasshopper_ph `program/create_vent_schd.py`. Step one is a reproducing test in each repo built from the F4a-13 run ([recipe](research/ph-stack-consumption.md#3-schedules-into-utilization-patterns)). Before changing PHX output, confirm the in-window meaning of WUFI's RelativeAbsenteeism against WUFI's own help, since F4a-13 rests on PHX's DIN V 18599-10 citation. This is cross-repo work needing its own authorization |
 | Q4a-09 | **A Schedule is its own record kind**, shared by id | One schedule can drive occupancy, lighting and ventilation across Programs |
-| Q4a-10 | **honeybee-ph plus a library file.** The residential default is seeded from the pinned honeybee-ph schedules and rules (F4a-20); the Phius non-residential programs become a PH-Composer library file, without the `2019::` bases, through the existing provider seam | The library file needs values for the slots the `2019::` bases supplied (ventilation, infiltration, setpoint, hot water) |
+| Q4a-10 | **honeybee-ph plus a library file.** The residential default is seeded from the pinned honeybee-ph schedules and rules (F4a-20); the Phius non-residential programs become a PH-Composer library file, without the `2019::` bases, through the existing provider seam | The library file needs values for the slots the `2019::` bases supplied (ventilation, infiltration, setpoint, hot water). Q4a-19 puts the file in ph-composer-standards |
 | Q4a-11 | **A Dwelling record plus per-Zone counts**, matching honeybee-ph (F4a-19). A Dwelling record carries the unit count and Zones reference it; bedrooms and occupants are entered per Zone | Export writes `People.properties.ph` per Room and derives `people_per_area` per dwelling group as Set Res Occupancy does. Dwellings never use `Room.zone`. P4-12's question is answered |
 | Q4a-12 | **Program only.** A Zone picks a Program; its only per-Zone values are the residential counts (Q4a-11) and the existing Space airflows | A different value means a duplicate Program |
 | Q4a-13 | **An unassigned Zone gets a built-in default residential Program**, modelled on honeybee-ph's Set Residential Program and REVIVE's template pattern (F4a-20, F4a-21), reusing honeybee-ph's loads and schedules | Claude's inference from Set Residential Program, to confirm in the prototype: some of its load values are derived per dwelling group at export (people density, Phius lighting, hot water by bedrooms), so a load can hold a Phius rule instead of a number. Whether a Segment or the Model can name a different default is open for the prototype |
 | Q4a-14 | **The Building Segment carries the Phius category**, residential or non-residential | A finding when it disagrees with the Segment's dwellings. The category decides which Process path PHX reads (F4a-08, F4a-17) |
 | Q4a-15 | **Four ventilation terms, method fixed to Sum**, with a note | WUFI, METr and EnergyPlus then agree (F4a-10) |
 | Q4a-17 | **Label the basis.** Every per-area value names its basis (gross Zone floor area or iCFA), and the Zones/Programs page shows each Zone's absolute equivalent (people, W, m³/h) | |
+
+Ed reviewed the [GUI prototype](mockups/README.md) on 2026-11-14 and accepted its division of
+work: the Programs tab defines Programs, Schedules and Equipment Sets, and Zones → Programs assigns
+them. He answered three of the questions it raised:
+
+| Id | Answer | What follows |
+| --- | --- | --- |
+| Q4a-19 | **Library files in a new `ph-composer-standards` repository.** Not a separate language-neutral package, and not inside the extension. Programs follow the library pattern of Materials, Window Types and Assemblies: local library files added through Library setup, and remote Connections such as PH-Elements. Only the residential default is built in. The Phius Multifamily and Non-Residential files are generated from honeybee-ph's `PHIUS_programs.py`, so the values have one source | The [standards repository plan](../unscheduled/ph-composer-standards/README.md) also moves `starter-library/` there. Choosing a library Program copies it, with the Schedules it references, into the SKP as editable records, as an Assembly brings its Materials. The Phius files wait on Q4a-28 |
+| Q4a-20 | **An optional library file** in the same repository, generated from honeybee-energy-standards' DOE programs and never shipped with the extension | The user adds it in Library setup like any other file |
+| Q4a-26 | **A Single dwelling switch** at the top of Zones → Programs. When it is on, every Zone is one dwelling with the residential default Program, in one residential Building Segment, and the table is locked: a single-family user enters the bedrooms once and is done. Switching it off opens per-Zone assignment | Claude's design, to confirm in the prototype: the switch is a Model setting and the locked values derive from it rather than being written to each Zone, so a new Zone joins the house without action. The house row takes bedrooms, occupants (Phius rule when empty) and the Equipment Set. Switching off keeps the house dwelling, its counts and the default Program as ordinary assignments. Switching on over per-Zone assignments confirms first and names what gives way: Programs chosen per Zone, extra dwellings, a non-residential category, other Building Segments; per-Zone bedrooms are added up. Forcing one Building Segment overrides the Geometry view's Segment assignment, which the mockup cannot show. Counts held on the dwelling bear on Q4a-24 |
 
 Still open, none of them gating the prototype: Q4a-01 (roadmap placement; the roadmap already
 carries Phase 4a before Phase 4), Q4a-16 (Space Types; leaning: always inherit for now) and Q4a-18
@@ -91,14 +101,17 @@ carries Phase 4a before Phase 4), Q4a-16 (Space Types; leaning: always inherit f
 ## Questions the prototype raised
 
 From the [GUI prototype](mockups/README.md), 2026-11-14. Each carries what the prototype shows now;
-none is decided.
+Q4a-19, Q4a-20 and Q4a-26 are answered above; the rest are open.
 
 | Id | Question | The prototype shows |
 | --- | --- | --- |
-| Q4a-19 | How are the Phius programs packaged: a PH-Composer library file, or a language-neutral standards package that honeybee-ph and PH-Composer both read? (Ed, 2026-11-14) | Two built-in library sources, Phius Multifamily and Phius Non-Residential, values read from honeybee-ph |
-| Q4a-20 | Do the honeybee-energy standards (the DOE programs by vintage) sit beside the Phius sources, and how: shipped, an optional library source the user adds, or not at all? (Ed, 2026-11-14) | A third source, "not added", with a disabled Add button |
+| Q4a-19 | How are the Phius programs packaged: a PH-Composer library file, or a language-neutral standards package that honeybee-ph and PH-Composer both read? (Ed, 2026-11-14) | Answered above. The sidebar lists the two Phius files as library sources the user has added |
+| Q4a-20 | Do the honeybee-energy standards (the DOE programs by vintage) sit beside the Phius sources, and how: shipped, an optional library source the user adds, or not at all? (Ed, 2026-11-14) | Answered above. A third source, "not added", pointing to Library setup |
 | Q4a-21 | Does an Equipment Set belong to the Dwelling or to the Zone? Before choosing, check how PHX counts one device carried by every Room of a dwelling (`merge_process_loads` sums `quantity` per Room) | One Set per dwelling in a residential Segment; common-area Zones carry none; non-residential Segments show none (F4a-17) |
 | Q4a-22 | Does choosing a library Program on a Zone copy it into the file at once, or must it be added from the Programs tab first? | Copied and assigned in one step, with a notice |
 | Q4a-23 | Is the residential default editable in place, or locked with Duplicate as the way to change it? | Editable; the rail shows it under Default |
-| Q4a-24 | Bedrooms and occupants per Zone (Q4a-11) make a house of several Zones awkward. Keep per-Zone entry, or enter on the Dwelling when it spans several Zones? | Per Zone, summed in the Dwelling bubble and the Segment row |
+| Q4a-24 | Bedrooms and occupants per Zone (Q4a-11) make a house of several Zones awkward. Keep per-Zone entry, or enter on the Dwelling when it spans several Zones? | Per Zone, summed in the Dwelling bubble and the Segment row. Under Single dwelling (Q4a-26) they are entered once for the house and stay on the dwelling when the switch is turned off, a working preview of counts on the Dwelling |
 | Q4a-25 | Who supplies the values the Phius data lacks (F4a-23): PH-Composer defaults in the library file, Ed's office standards, or the user each time? | Amber "?" on ventilation and hot water for every library Program; Space airflows replace ventilation where set |
+| Q4a-26 | Ed's Single dwelling switch (2026-11-14) | Answered above |
+| Q4a-27 | Is Single dwelling on by default for a new Model? | On in journey 1, off in journeys 2 to 5. A user modelling apartments switches it off once |
+| Q4a-28 | May the Phius program values be published in the public ph-composer-standards repository, with a note of their source and terms? honeybee-ph already publishes them; Phius's terms decide. Ed to confirm | Not shown. Gates the Phius standards files, not the prototype |
