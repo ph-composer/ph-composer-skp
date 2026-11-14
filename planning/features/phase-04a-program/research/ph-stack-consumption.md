@@ -147,8 +147,17 @@ program (occupancy 07:00 to 18:00 at 0.5 on 250 days; lighting 11 h at 1.0) come
 | Lighting full-load hours | 250 × 11 × (11/24) = 1,260 | 2,750 |
 
 The PHX characterization test `tests/test_from_HBJSON/test_create_schedules/test_hb_style_fallback.py`
-pins the current output, not a specification. Which side is the specification is Ed's call
-([DECISIONS.md](../DECISIONS.md), Q4a-08). The SFH default schedules carry no operating periods, so
+pins the current output, not a specification. Decided 2026-11-14: fix honeybee-ph's property, then
+PHX ([DECISIONS.md](../DECISIONS.md#answered), Q4a-08).
+
+**Reproduction, run 2026-11-14** (PHX venv: PHX 1.56.104 editable, honeybee-ph 1.33.68,
+honeybee-energy 1.117.10). Build People and Lighting from
+`PHIUS_programs.PHIUS_library["2021::PHIUS_NR::Office_Meeting_Room"]` with honeybee-ph's
+`library/programtypes.py` `build_hb_people_from_Phius_data` and `build_hb_lighting_from_Phius_data`,
+set them on `Room.from_box`, and call PHX `from_HBJSON/create_schedules.py`
+`build_occupancy_schedule_from_hb_room` and `build_lighting_schedule_from_hb_room`. Result:
+occupancy 07:00 to 18:00, 250 days, factor 0.2292; lighting factor 0.4583, 1,260.4 full-load hours
+against 2,750 operating hours; the EnergyPlus occupancy schedule is a constant 0.2292 over 8,760 h. The SFH default schedules carry no operating periods, so
 they take the HB-style path and are unaffected.
 
 Also: the constant schedules honeybee-ph builds for Phius programs apply the daily fraction to all
