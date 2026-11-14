@@ -335,9 +335,10 @@ Each Edge row also carries the assignment's `user_data`, `extension_data` and `e
 (`{}` for an Edge with no assignment). To change them, send the row's `reference` to
 `ph_composer.thermal_bridges.edges.update_metadata` with the whole `user_data` map to keep and the two
 maps you read as `expected_metadata`; `{}` clears the map. The reference's path names one Edge, so a
-piece that shares its id keeps its own map. An Edge needs a valid assignment first: one without refuses,
-one whose row shows a `record_problem` refuses as `validation.failed` until you clear or reassign it,
-and a change made since your read refuses the whole batch as `target.changed`. Reassigning keeps the map,
+piece that shares its id keeps its own map. An Edge needs a valid assignment first: one without refuses.
+One whose row shows a `record_problem` cannot take metadata until you clear or reassign it: with an
+assignment id it refuses as `validation.failed`, and without one its `entity_id` is null, which this
+action does not accept. A change made since your read refuses the whole batch as `target.changed`. Reassigning keeps the map,
 and `edges.clear` removes it with the assignment; Undo brings both back.
 
 Two cases are beyond `edges.clear`: an assignment whose stored text is not a JSON object

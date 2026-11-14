@@ -435,8 +435,10 @@ target is checked before any step is built, the batch writes in one step and one
 batch that writes what is stored adds no step. The Window action runs the copied-identity repair
 first, as every Windows action does. A Face must already have a record, and an Edge an assignment.
 An Edge is named by its occurrence path, since a split or copy leaves one `tbe_` id on several
-Edges; the others keep their maps. An invalid assignment refuses `validation.failed` until it is
-cleared or reassigned. Its batch takes at most 250 entries, the bound of every Edge write.
+Edges; the others keep their maps. An invalid assignment takes no metadata until it is cleared or
+reassigned: with a valid `tbe_` id it refuses `validation.failed`, and without one its reference's
+`entity_id` is null, which the action's params refuse. Its batch takes at most 250 entries, the bound
+of every Edge write.
 
 **Exporting a payload on another feature's entity.** The feature that owns an extension claims it on
 an entity kind in its export contributor: `entity_projections: [{"namespace", "target_kind",
