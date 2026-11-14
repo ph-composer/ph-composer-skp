@@ -7,6 +7,7 @@ class SpacesOperationsTest < PhComposerTestCase
   include SpaceFixtures
 
   API = PhComposer::API
+  EMPTY_METADATA = { "user_data" => {}, "extension_data" => {} }.freeze
   ROTATION = Geom::Transformation.new([0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1, 0, 5, 0, 0, 1])
 
   def setup
@@ -383,6 +384,107 @@ class SpacesOperationsTest < PhComposerTestCase
       "expected_metadata" => { "user_data" => {}, "extension_data" => {} }
     }])
     assert_equal %w[refused target.changed], stale.values_at("status", "code")
+  end
+
+  def floor_update(floor, user_data, expected = nil, **extra)
+    invoke("ph_composer.spaces.update_metadata", "updates" => [{
+      "reference" => floor.fetch("reference"), "user_data" => user_data,
+      "expected_metadata" => expected || { "user_data" => floor.fetch("user_data"), "extension_data" => {} }
+    }.merge(extra)])
+  end
+
+  # D-UD-2: the logical Space Floor keeps its map on its Volume, addressed by floor_id and read apart from the
+  # Volume's own map.
+  def test_a_space_floor_map_writes_reads_back_apart_from_its_volume_and_undoes
+    zone_with_outlines
+    create([@living])
+    volume = spaces.first.dig("volumes", 0)
+    floor = volume.fetch("floor")
+    assert_equal({ "floor_id" => volume.dig("values", "floor_id"),
+                   "entity_path" => volume.dig("reference", "entity_path") }, floor.fetch("reference"))
+    assert_equal({}, floor.fetch("user_data"))
+    refute volume.fetch("values").key?("floor_user_data"), "the Floor's map is not a Volume value"
+    revision = @session.revision
+    cleared = floor_update(floor, {})
+    assert_equal %w[completed none], cleared.values_at("status", "effect"), "clearing an absent map writes nothing"
+    assert_equal revision, @session.revision
+
+    note = { "example_org" => { "finish" => "screed" } }
+    written = floor_update(floor, note)
+    assert_equal "committed", written["effect"], written.inspect
+    volume = spaces.first.dig("volumes", 0)
+    assert_equal [note, {}], [volume.dig("floor", "user_data"), volume.fetch("user_data")]
+    listed = query("ph_composer.spaces.volumes.list", "space" => spaces.first.fetch("reference"),
+                                                      "fields" => %w[floor]).dig("volumes", 0)
+    assert_equal note, listed.dig("floor", "user_data")
+    refute query("ph_composer.spaces.volumes.list", "space" => spaces.first.fetch("reference"))
+      .dig("volumes", 0).key?("floor"), "a default row leaves the Floor's map out, as it does the Volume's"
+
+    own = invoke("ph_composer.spaces.update_metadata", "updates" => [{
+      "reference" => volume.fetch("reference"), "user_data" => { "own" => true },
+      "expected_metadata" => { "user_data" => {}, "extension_data" => {} }
+    }])
+    assert_equal "committed", own["effect"], own.inspect
+    assert_equal [note, { "own" => true }],
+                 spaces.first.dig("volumes", 0).then { |row| [row.dig("floor", "user_data"), row.fetch("user_data")] }
+
+    @model.undo
+    volume = spaces.first.dig("volumes", 0)
+    assert_equal [note, {}], [volume.dig("floor", "user_data"), volume.fetch("user_data")]
+    @model.undo
+    volume = spaces.first.dig("volumes", 0)
+    assert_equal [{}, {}], [volume.dig("floor", "user_data"), volume.fetch("user_data")]
+  end
+
+  # A Volume and its Floor in one batch stage as one write of the Volume record, each entry checked against
+  # what was read, so a stale second entry refuses both.
+  def test_a_volume_and_its_floor_in_one_batch_write_one_step_or_nothing
+    zone_with_outlines
+    create([@living])
+    volume = spaces.first.dig("volumes", 0)
+    entries = [{ "reference" => volume.dig("floor", "reference"), "user_data" => { "f" => 1 },
+                 "expected_metadata" => EMPTY_METADATA },
+               { "reference" => volume.fetch("reference"), "user_data" => { "v" => 1 },
+                 "expected_metadata" => EMPTY_METADATA }]
+    revision = @session.revision
+    stale = entries.last.merge("expected_metadata" => { "user_data" => { "old" => 1 }, "extension_data" => {} })
+    refused = invoke("ph_composer.spaces.update_metadata", "updates" => [entries.first, stale])
+    assert_equal %w[refused target.changed], refused.values_at("status", "code"), refused.inspect
+    assert_equal revision, @session.revision
+
+    operations = @model.operations.length
+    written = invoke("ph_composer.spaces.update_metadata", "updates" => entries.reverse)
+    assert_equal "committed", written["effect"], written.inspect
+    assert_equal operations + 1, @model.operations.length
+    volume = spaces.first.dig("volumes", 0)
+    assert_equal [{ "f" => 1 }, { "v" => 1 }], [volume.dig("floor", "user_data"), volume.fetch("user_data")]
+    detail = query("ph_composer.spaces.detail", "volume" => volume.fetch("reference"),
+                                                "path" => %w[floor user_data f])
+    assert_equal "1", detail.dig("fragment", "text")
+  end
+
+  def test_space_floor_refusals_write_nothing
+    zone_with_outlines
+    create([@living])
+    floor = spaces.first.dig("volumes", 0, "floor")
+    reference = floor.fetch("reference")
+    revision = @session.revision
+    stale = { "user_data" => { "old" => true }, "extension_data" => {} }
+    refusals = {
+      "target.changed" => [floor_update(floor, { "x" => 1 }, stale),
+                           floor_update(floor.merge("reference" => reference.merge("floor_id" => "flr_Zz99Zz99Zz99")),
+                                        { "x" => 1 })],
+      "target.not_found" => [floor_update(floor.merge("reference" => reference.merge("entity_path" => [90, 1])),
+                                          { "x" => 1 })],
+      "params.invalid" => [floor_update(floor, { "x" => 1 }, nil, "extension_payloads" => { "a.b" => {} }),
+                           floor_update(floor.merge("reference" => reference.merge("volume_id" => "vol_x")),
+                                        { "x" => 1 })]
+    }
+    refusals.each do |code, results|
+      results.each { |result| assert_equal ["refused", code], result.values_at("status", "code"), result.inspect }
+    end
+    assert_equal revision, @session.revision
+    assert_equal({}, spaces.first.dig("volumes", 0, "floor", "user_data"))
   end
 
   def test_remove_volume_and_delete_space

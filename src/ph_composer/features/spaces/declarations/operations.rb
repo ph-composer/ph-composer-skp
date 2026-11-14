@@ -16,6 +16,13 @@ module PhComposer
                                   "floor_segment_id" => Shapes::TEXT, "entity_path" => PATH },
                                 :optional => %w[space_id volume_id floor_segment_id],
                                 :description => "A Space, Volume or Floor Segment reference, as list returns it.")
+      # What update_metadata names: any one of the three references, or a Space Floor by its Volume's floor_id
+      # and path.
+      METADATA_REFERENCE = Shapes.object(REFERENCE.fetch("properties").merge("floor_id" => Shapes::TEXT),
+                                         :optional => %w[space_id volume_id floor_segment_id floor_id],
+                                         :description => "A Space, Volume or Floor Segment reference, as list " \
+                                                         "returns it, or a Volume row's floor.reference for its " \
+                                                         "Space Floor.")
       FACTOR = Schema.factor("The weighting factor to write, 0 to 1; 1 counts the whole area.")
       # Every editable field of the three kinds, typed from its definition with its unit, and the kinds that
       # take it. An optional field accepts null, which removes it. Runtime still refuses a field the
@@ -195,11 +202,13 @@ module PhComposer
         }, ->(request, proposal, params) { Authoring.remove(request, proposal, :space => params.fetch("space")) }],
         ["update_metadata", {
           :description => "Replace the user_data and installed extension payloads of explicit Spaces, Volumes and " \
-                          "Floor Segments, guarded by the metadata last read.",
+                          "Floor Segments, or the user_data of a Volume's Space Floor by its floor.reference, " \
+                          "guarded by the metadata last read. A Space Floor's map is its own, never the " \
+                          "Volume's, and takes no extension payloads.",
           :refuses => (TARGET + %w[extension.invalid extension.migration_required extension.schema_unsupported
                                    extension.unavailable reference.invalid]).uniq,
-          :params => Shapes.metadata_updates(REFERENCE, Pages::MAXIMUM_LIMIT),
-          :result => Shapes.metadata_result(REFERENCE), :undo_name => "Edit Space Metadata",
+          :params => Shapes.metadata_updates(METADATA_REFERENCE, Pages::MAXIMUM_LIMIT),
+          :result => Shapes.metadata_result(METADATA_REFERENCE), :undo_name => "Edit Space Metadata",
           :side_effects => "Rewrites only the named records' metadata.",
           :examples => [{ "updates" => [{ "reference" => EXAMPLE_SPACE,
                                           "user_data" => { "example" => { "note" => "kept" } },

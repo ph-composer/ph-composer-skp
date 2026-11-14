@@ -158,7 +158,8 @@ module PhComposer
         end
         row = Spaces.view(volume.record).merge(
           "extension_status" => Records::Metadata.status_map(volume.record, catalog),
-          "reference" => volume.reference, "nested" => volume.nested,
+          "reference" => volume.reference, "floor" => Spaces.floor(volume.record, volume.path),
+          "nested" => volume.nested,
           "open" => EditContext.current_ids(model)[0, volume.path.length] == volume.path,
           "protected" => volume.entity.locked?,
           "moved" => Navigation.moved?(model, volume),

@@ -99,6 +99,15 @@ A record or a preview can be larger than one reply. These reads give all of it e
   map was not empty, with its top-level keys (the first 50, with `removed_user_data_total`), and Undo
   brings them back. Removing a band deletes its elements with their maps. A `windows.types.update` that
   sends the whole `elements` array stores the maps it sends.
+- **Change the Model's or a Space Floor's metadata.** The Model has its own `user_data` and
+  `extension_data`: read them with `ph_composer.model.detail` (both `{}` until something is written)
+  and write them with `ph_composer.model.update_metadata`, which takes `user_data`,
+  `extension_payloads` or both and the two maps you read as `expected_metadata`, as above, with no
+  reference. Each Space Floor has its own `user_data` too, kept apart from its Volume's. A Volume row's
+  `floor` gives the Floor's `reference` (`floor_id` and the Volume's `entity_path`) and its `user_data`;
+  `ph_composer.spaces.volumes.list` returns it when `fields` asks for `floor`. Send that reference to
+  `ph_composer.spaces.update_metadata` with `expected_metadata` the Floor's `user_data` and
+  `extension_data` `{}`; a Floor takes no extension payloads. Copying a Volume copies its Floor's map.
 - **Read a definition's parts.** `ph_composer.assemblies.assemblies.layers.list` and
   `segments.list` page an Assembly's Layers and Layer-Segments; `ph_composer.windows.types.elements.list`
   pages a Window Type's elements with each one's thermal result, installation edges and findings, and
@@ -515,7 +524,7 @@ Metadata is not exported just because it is stored. Where a feature exports a re
 (today Zones, Faces, Window Units, Assemblies, Spaces, Volumes and Floor Segments), it passes through
 to the HBJSON object, and the report counts those objects as `export.user_data_passed`; any other
 `user_data` stays in the Model with an `export.metadata_omitted` finding. Assembly Layer,
-Layer-Segment and Window Element maps are not exported yet, and no finding names them. Read the export's findings
+Layer-Segment, Window Element, Space Floor and Model maps are not exported yet, and no finding names them. Read the export's findings
 rather than assume. An extension's data leaves with the extension that exports it: data marked local to the
 Model is left out with the same finding, and data whose effect on the export is required or unknown,
 with nothing installed to export it, blocks the export.

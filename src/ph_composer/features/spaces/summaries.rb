@@ -8,12 +8,15 @@ module PhComposer
     #
     # `fields` names what a row carries beyond its identity (`id`, `schema_version`, `reference`); absent,
     # a row carries the default fields and never the metadata (`user_data`, `extension_data`,
-    # `extension_status`) or a Floor Segment's loops, which can be large.
+    # `extension_status`, a Volume's `floor` with its Space Floor's map) or a Floor Segment's loops, which can
+    # be large.
     module Summaries
       METADATA = %w[user_data extension_data extension_status].freeze
+      FLOOR = %w[floor].freeze
       SPACE_FIELDS = (%w[values metrics zone building_segment state nested airflow_mode airflows volume_count
                          floor_segment_count finding_counts] + METADATA).freeze
-      VOLUME_FIELDS = (%w[values metrics nested open protected moved floor_segment_count findings] + METADATA).freeze
+      VOLUME_FIELDS = (%w[values metrics nested open protected moved floor_segment_count findings] + METADATA +
+                       FLOOR).freeze
       LOOPS = %w[loops_m].freeze
       SEGMENT_FIELDS = (%w[values metrics weighting_band findings] + LOOPS + METADATA).freeze
       IDENTITY = %w[id schema_version reference].freeze
@@ -59,7 +62,7 @@ module PhComposer
       end
 
       def project(row, fields, allowed)
-        row.slice(*(IDENTITY + (fields || (allowed - METADATA - LOOPS))))
+        row.slice(*(IDENTITY + (fields || (allowed - METADATA - FLOOR - LOOPS))))
       end
     end
   end

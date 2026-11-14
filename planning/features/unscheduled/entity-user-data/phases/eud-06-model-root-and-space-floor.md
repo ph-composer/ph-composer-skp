@@ -1,6 +1,6 @@
 # EUD-06: Model root and Space Floor
 
-STATUS: Scoped
+STATUS: Implemented on branch
 ISSUE: [#507](https://github.com/ph-composer/ph-composer-skp/issues/507)
 DECISIONS: D-UD-1, D-UD-2 ([plan](../PLAN.md#decisions-for-ed))
 

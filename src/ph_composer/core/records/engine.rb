@@ -120,10 +120,7 @@ module PhComposer
           before = find(kind_id, id, :change_set => change_set)
           after = DeepCopy.call(before)
           label, target = metadata_target(kind, after, update)
-          planned = Metadata.planned(self, @catalog, target, update, label)
-          # A target stored without a map reads it as empty, so clearing that map changes nothing.
-          planned.delete("user_data") if planned["user_data"] == {} && !target.key?("user_data")
-          target.replace(planned)
+          target.replace(Metadata.planned(self, @catalog, target, update, label))
           if staged
             check_valid!(kind, after)
             change_set.restage(kind.id, id, :after => after)

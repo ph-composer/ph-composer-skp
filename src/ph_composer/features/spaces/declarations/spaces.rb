@@ -43,15 +43,24 @@ module PhComposer
       ZONE_REFERENCE = Shapes.object({ "zone_id" => Shapes::TEXT, "zone_path" => Shapes::ZONE_PATH })
 
       def self.row(kind, extra)
-        Shapes.with(kind.descriptor.view_schema, { "extension_status" => EXTENSION_STATUS }.merge(extra))
+        view = kind.descriptor.view_schema
+        view.fetch("properties")["values"] = Spaces.values_schema(kind)
+        Shapes.with(view, { "extension_status" => EXTENSION_STATUS }.merge(extra))
       end
+
+      FLOOR = Shapes.object({
+        "reference" => FLOOR_REFERENCE,
+        "user_data" => { "type" => "object",
+                         "description" => "The Space Floor's own map, apart from the Volume's; {} when none." }
+      }, :description => "The Volume's logical Space Floor: write its user_data with " \
+                         "ph_composer.spaces.update_metadata by this reference.")
 
       SEGMENT_ROW = row(FLOOR_SEGMENT, "reference" => FLOOR_SEGMENT_REFERENCE, "metrics" => SEGMENT_METRICS,
                                        "findings" => FINDINGS,
                                        "weighting_band" => { "type" => "string",
                                                              "description" => "The weighting factor as By weighting " \
                                                                               "factor's legend and a filter key it." })
-      VOLUME_ROW = row(VOLUME, "reference" => VOLUME_REFERENCE, "nested" => { "type" => "boolean" },
+      VOLUME_ROW = row(VOLUME, "reference" => VOLUME_REFERENCE, "floor" => FLOOR, "nested" => { "type" => "boolean" },
                                "open" => { "type" => "boolean", "description" => "Open for editing on the path." },
                                "protected" => { "type" => "boolean", "description" => "Locked, so the Space " \
                                                                                       "selects it whole." },
@@ -178,6 +187,8 @@ module PhComposer
                         } }.freeze
       SCOPED_FINDING = Shapes.with(FINDING, "reference" => { "type" => "object",
                                                              "description" => "What the finding is about." })
+      # The parts of a row spaces.detail names first; a Volume row's floor holds its Space Floor's map.
+      DETAIL_PARTS = %w[values metrics loops_m user_data floor].freeze
       # What the Spaces walk refuses, and what the Zones read it depends on can.
       READ = %w[geometry.invalid record.unreadable target.wrong_kind validation.failed].freeze
 
@@ -190,7 +201,7 @@ module PhComposer
           .map do |kind, reference, occurrences|
           Records::ReferenceTarget.new(
             :id => kind.id, :label => kind.label, :schema_version => kind.schema_version,
-            :values => kind.values_schema, :occurrence => reference, :references => kind.references,
+            :values => Spaces.values_schema(kind), :occurrence => reference, :references => kind.references,
             :validate => ->(record) { kind.problems(record) },
             # The inventory answers which ids exist. A record that does not read cannot be a reference's
             # target or a holder of one, so it is left out rather than refusing every resolution in the
@@ -245,8 +256,7 @@ module PhComposer
                       :params => Shapes.object({ "space" => scope(SPACE_REFERENCE, "Space"),
                                                  "volume" => scope(VOLUME_REFERENCE, "Volume"),
                                                  "floor_segment" => scope(FLOOR_SEGMENT_REFERENCE, "Floor Segment"),
-                                                 "path" => Fragments.path_param(%w[values metrics loops_m user_data],
-                                                                                "[\"loops_m\", 0]"),
+                                                 "path" => Fragments.path_param(DETAIL_PARTS, "[\"loops_m\", 0]"),
                                                  "cursor" => Pages::CURSOR },
                                                :optional => %w[space volume floor_segment cursor]),
                       :result => Shapes.object({ "type" => Fragments::TYPE, "fragment" => Fragments::FRAGMENT,

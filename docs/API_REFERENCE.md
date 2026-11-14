@@ -10250,6 +10250,57 @@ Example params:
 {}
 ```
 
+### `ph_composer.model.detail`
+
+The Model's own user_data and extension_data, with each envelope's status. A Model that never had any reads both as {}, without a write. Owner: `ph_composer.model`.
+
+Refuses: `record.unreadable`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "user_data",
+    "extension_data",
+    "extension_status"
+  ],
+  "properties": {
+    "user_data": {
+      "type": "object",
+      "description": "Contributor metadata, preserved as written; {} when none."
+    },
+    "extension_data": {
+      "type": "object",
+      "description": "Versioned payloads registered extensions own."
+    },
+    "extension_status": {
+      "type": "object",
+      "description": "Each extension envelope's status against what is installed."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
 ### `ph_composer.records.detail`
 
 One value of one stored record, exactly, as canonical JSON text in fragments: join every fragment's text in order, check its sha256 and parse it. Pass next_cursor back for the next fragment. Owner: `ph_composer.records`.
@@ -10823,6 +10874,7 @@ Result:
                 "extension_data",
                 "extension_status",
                 "reference",
+                "floor",
                 "nested",
                 "open",
                 "protected",
@@ -10908,6 +10960,42 @@ Result:
                       "description": "The root-to-entity persistent-id path."
                     }
                   }
+                },
+                "floor": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "reference",
+                    "user_data"
+                  ],
+                  "properties": {
+                    "reference": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "floor_id",
+                        "entity_path"
+                      ],
+                      "properties": {
+                        "floor_id": {
+                          "type": "string"
+                        },
+                        "entity_path": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          },
+                          "minItems": 1,
+                          "description": "The root-to-entity persistent-id path."
+                        }
+                      }
+                    },
+                    "user_data": {
+                      "type": "object",
+                      "description": "The Space Floor's own map, apart from the Volume's; {} when none."
+                    }
+                  },
+                  "description": "The Volume's logical Space Floor: write its user_data with ph_composer.spaces.update_metadata by this reference."
                 },
                 "nested": {
                   "type": "boolean"
@@ -12080,7 +12168,7 @@ Params:
           "integer"
         ]
       },
-      "description": "Keys and array indexes into the view, starting at values, metrics, loops_m, user_data: [\"loops_m\", 0]."
+      "description": "Keys and array indexes into the view, starting at values, metrics, loops_m, user_data, floor: [\"loops_m\", 0]."
     },
     "cursor": {
       "type": "string",
@@ -13643,7 +13731,8 @@ Params:
           "findings",
           "user_data",
           "extension_data",
-          "extension_status"
+          "extension_status",
+          "floor"
         ]
       },
       "description": "What each row carries beside its id and reference. Absent, every field but the metadata (user_data, extension_data, extension_status) and loops_m."
@@ -13759,6 +13848,42 @@ Result:
                 "description": "The root-to-entity persistent-id path."
               }
             }
+          },
+          "floor": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "reference",
+              "user_data"
+            ],
+            "properties": {
+              "reference": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "floor_id",
+                  "entity_path"
+                ],
+                "properties": {
+                  "floor_id": {
+                    "type": "string"
+                  },
+                  "entity_path": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "minItems": 1,
+                    "description": "The root-to-entity persistent-id path."
+                  }
+                }
+              },
+              "user_data": {
+                "type": "object",
+                "description": "The Space Floor's own map, apart from the Volume's; {} when none."
+              }
+            },
+            "description": "The Volume's logical Space Floor: write its user_data with ph_composer.spaces.update_metadata by this reference."
           },
           "nested": {
             "type": "boolean"
@@ -39340,6 +39465,100 @@ Example params:
 }
 ```
 
+### `ph_composer.model.update_metadata`
+
+Replace the Model's own user_data, installed extension payloads or both, guarded by the metadata last read, in one Undo step; writing what is stored adds none. Feature settings are not touched. Owner: `ph_composer.model`.
+
+Undo step: Edit Model Metadata. Stores the maps in this SKP.
+
+Refuses: `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `record.unreadable`, `reference.invalid`, `target.changed`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "expected_metadata"
+  ],
+  "properties": {
+    "user_data": {
+      "type": "object",
+      "description": "Replaces the whole user_data map; {} clears it."
+    },
+    "extension_payloads": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object"
+      },
+      "description": "Replaces the payload of each named installed extension."
+    },
+    "expected_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "user_data",
+        "extension_data"
+      ],
+      "properties": {
+        "user_data": {
+          "type": "object"
+        },
+        "extension_data": {
+          "type": "object"
+        }
+      },
+      "description": "The user_data and extension_data last read; a change refuses."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "user_data",
+    "extension_data",
+    "extension_status"
+  ],
+  "properties": {
+    "user_data": {
+      "type": "object",
+      "description": "Contributor metadata, preserved as written; {} when none."
+    },
+    "extension_data": {
+      "type": "object",
+      "description": "Versioned payloads registered extensions own."
+    },
+    "extension_status": {
+      "type": "object",
+      "description": "Each extension envelope's status against what is installed."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "user_data": {
+    "example_org": {
+      "project_number": "2611"
+    }
+  },
+  "expected_metadata": {
+    "user_data": {},
+    "extension_data": {}
+  }
+}
+```
+
 ### `ph_composer.records.update_metadata`
 
 Replace the user_data and installed extension payloads of stored records of any kind ph_composer.records.list reads, or the user_data of a record's part, such as an Assembly's Layer or Layer-Segment, by part_ids; guarded by the metadata last read. Values are not changed; a kind's own update action edits them. A Building Segment or Level write also rewrites the copy each Zone and member stamp keeps, in the same Undo step. An internal kind, such as Zone option settings, refuses as target.wrong_kind. Owner: `ph_composer.records`.
@@ -40927,7 +41146,7 @@ Example params:
 
 ### `ph_composer.spaces.update_metadata`
 
-Replace the user_data and installed extension payloads of explicit Spaces, Volumes and Floor Segments, guarded by the metadata last read. Owner: `ph_composer.spaces`.
+Replace the user_data and installed extension payloads of explicit Spaces, Volumes and Floor Segments, or the user_data of a Volume's Space Floor by its floor.reference, guarded by the metadata last read. A Space Floor's map is its own, never the Volume's, and takes no extension payloads. Owner: `ph_composer.spaces`.
 
 Undo step: Edit Space Metadata. Rewrites only the named records' metadata.
 
@@ -40976,6 +41195,9 @@ Params:
                 },
                 "minItems": 1,
                 "description": "The root-to-entity persistent-id path."
+              },
+              "floor_id": {
+                "type": "string"
               }
             },
             "description": "The occurrence to update, as a read returns it."
@@ -41061,9 +41283,12 @@ Result:
                 },
                 "minItems": 1,
                 "description": "The root-to-entity persistent-id path."
+              },
+              "floor_id": {
+                "type": "string"
               }
             },
-            "description": "A Space, Volume or Floor Segment reference, as list returns it."
+            "description": "A Space, Volume or Floor Segment reference, as list returns it, or a Volume row's floor.reference for its Space Floor."
           },
           "extension_status": {
             "type": "object",
@@ -67875,3 +68100,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.54 | 2026-11-14 | Window Elements take an optional user_data map, written by ph_composer.records.update_metadata with part_ids [element id] and read by windows.types.elements.list. windows.types.grid.merge keeps the top-left element's map and returns removed_user_data, each other merged element whose map was not empty with its top-level keys, and removed_user_data_total. Split copies the map into every piece, a kind change, flip, installs save, Duplicate and new_flipped_type keep it, and an inserted element starts without one. |
 | 1.55 | 2026-11-14 | ph_composer.records.update_metadata writes Building Segment and Level maps and rewrites the copy each adopted Zone and member stamp keeps in the same Undo step; it may refuse target.locked. Zone option settings still refuse as target.wrong_kind. zones.options.manage, remove and merge keep the survivor's map and return removed_user_data, each removed option whose map was not empty with its top-level keys, and removed_user_data_total. A RecordKind may declare metadata_follow_up. |
 | 1.56 | 2026-11-14 | thermal_bridges.edges.selection, selection_all, at and candidates rows carry user_data, extension_data and extension_status. New ph_composer.thermal_bridges.edges.update_metadata replaces the metadata of assigned Edges by occurrence, guarded by expected_metadata, at most 250 Edges in one Undo step; an Edge with no assignment refuses. |
+| 1.57 | 2026-11-14 | ph_composer.model.detail and ph_composer.model.update_metadata are new: the Model's own user_data and extension_data, in the ph_composer.model dictionary, read as {} until written and replaced under expected_metadata in one Undo step. Volume rows carry floor, the Space Floor's reference and its own user_data (a ph_composer.spaces.volumes.list field, not a default), and spaces.update_metadata writes that map by floor_id. Clearing a map a record never stored writes nothing in every owner's update_metadata. |

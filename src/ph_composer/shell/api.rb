@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 56
+    MINOR = 57
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -286,7 +286,14 @@ module PhComposer
         "change" => "thermal_bridges.edges.selection, selection_all, at and candidates rows carry user_data, " \
                     "extension_data and extension_status. New ph_composer.thermal_bridges.edges.update_metadata " \
                     "replaces the metadata of assigned Edges by occurrence, guarded by expected_metadata, at most " \
-                    "250 Edges in one Undo step; an Edge with no assignment refuses." }
+                    "250 Edges in one Undo step; an Edge with no assignment refuses." },
+      { "minor" => 57, "date" => "2026-11-14",
+        "change" => "ph_composer.model.detail and ph_composer.model.update_metadata are new: the Model's own " \
+                    "user_data and extension_data, in the ph_composer.model dictionary, read as {} until written and " \
+                    "replaced under expected_metadata in one Undo step. Volume rows carry floor, the Space Floor's " \
+                    "reference and its own user_data (a ph_composer.spaces.volumes.list field, not a default), and " \
+                    "spaces.update_metadata writes that map by floor_id. Clearing a map a record never stored writes " \
+                    "nothing in every owner's update_metadata." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

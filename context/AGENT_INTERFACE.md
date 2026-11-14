@@ -328,6 +328,9 @@ batch of explicit occurrences with the metadata last read, and refuse every targ
 does the same for catalog records by `{kind, id}`, and for a record's declared parts, such as an
 Assembly's Layers, by `part_ids`; their update actions no longer take `user_data`. A Building
 Segment or Level write also rewrites the copy each Zone keeps of it, in the same Undo step.
+`ph_composer.spaces.update_metadata` also writes a Space Floor's own map by a Volume row's
+`floor.reference`, and `ph_composer.model.update_metadata` writes the Model's own maps, read by
+`ph_composer.model.detail`.
 A script that reads the exported HBJSON finds passed-through metadata on the owning Honeybee object. The
 [export recipe](../docs/AGENT_GUIDE.md#export) lists supported record kinds and explains the
 metadata findings.

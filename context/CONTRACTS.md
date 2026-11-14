@@ -432,13 +432,24 @@ owner's `target.*` code; a payload follows the engine's rules (`extension.unavai
 `.migration_required`, `.schema_unsupported`, a failed validator as `validation.failed`) and every
 record it names must resolve (`reference.invalid`); the owner then validates the whole record. Every
 target is checked before any step is built, the batch writes in one step and one Undo entry, and a
-batch that writes what is stored adds no step. The Window action runs the copied-identity repair
+batch that writes what is stored adds no step; clearing a map the record never stored is such a batch
+(`Records::Metadata.updated` leaves it absent). The Window action runs the copied-identity repair
 first, as every Windows action does. A Face must already have a record, and an Edge an assignment.
 An Edge is named by its occurrence path, since a split or copy leaves one `tbe_` id on several
 Edges; the others keep their maps. An invalid assignment takes no metadata until it is cleared or
 reassigned: with a valid `tbe_` id it refuses `validation.failed`, and without one its reference's
 `entity_id` is null, which the action's params refuse. Its batch takes at most 250 entries, the bound
 of every Edge write.
+
+**Model root and Space Floor.** Neither has a record of its own. The Model's maps live in the
+`ph_composer.model` settings dictionary (below), read by `ph_composer.model.detail` and written by
+`ph_composer.model.update_metadata`, one target with no reference under the same pre-image, payload,
+Undo and no-op rules. A Space Floor's `user_data` is its Volume's optional `floor_user_data`: reads
+never report it as a Volume value but as the Volume row's `floor` (`reference` `{floor_id, entity_path}`
+and `user_data`), and `ph_composer.spaces.update_metadata` writes it by that reference under the
+Volume's write refusals. A Floor takes `user_data` only, as a part does; entries for a Volume and its
+Floor stage as one write. Copies and Make independent keep it with the Volume. Neither map is exported
+yet.
 
 **Exporting a payload on another feature's entity.** The feature that owns an extension claims it on
 an entity kind in its export contributor: `entity_projections: [{"namespace", "target_kind",
@@ -475,6 +486,10 @@ reference to `ph_composer.windows.psi_install_type`, or null), `default_psi_inst
 otherwise `default_psi_install_w_mk`; a default Type no longer in the Model resolves to nothing, never
 to that value. A field the stored dictionary does not hold reads its default, without a write.
 
+The foundation's `ph_composer.model` dictionary holds the Model's own `user_data` and `extension_data`
+(`shell/model_metadata.rb`), both `{}` by default; it is building metadata, not a feature's
+configuration, and no feature settings dictionary carries either map.
+
 ## Geometry records and occurrence references
 
 Records are canonical JSON under registered `ph_composer.*` dictionaries. A read never creates a
@@ -493,7 +508,7 @@ access and never fall back to selection, display name, proximity or the active M
 | Window definition mark | `ph_composer.window_definition` | The generated ComponentDefinition | `window_type_id`, plus optional derived `generated_size_m` (`width_m`, `height_m`) used only to repair a Unit whose Type is gone |
 | Pane stamp | `ph_composer.window_pane` | Each pane Face inside the definition | None; `window_type_id` and `element_id` as recovery data for Restore |
 | Space | `ph_composer.space` | The Space Group | `spc_` id; `name`, `number`, `default_height_m`, `next_volume_sequence`, and the optional airflows `v_sup_m3h`, `v_eta_m3h`, `v_tran_m3h` (absent is unset, distinct from 0) |
-| Volume | `ph_composer.space_volume` | A Volume Group directly inside a Space | `vol_` id; `number`, `display_name`, optional `avg_ceiling_height_m`, `floor_id` (the logical Space Floor, `flr_`), optional `home_transform` |
+| Volume | `ph_composer.space_volume` | A Volume Group directly inside a Space | `vol_` id; `number`, `display_name`, optional `avg_ceiling_height_m`, `floor_id` (the logical Space Floor, `flr_`), optional `home_transform`, optional `floor_user_data` (the Space Floor's own map) |
 | Floor Segment | `ph_composer.floor_segment` | A Face directly inside a Volume | `fsg_` id; `display_name`, `weighting_factor` and `net_area_factor`, each 0 to 1 |
 | Spaces settings | `ph_composer.spaces_settings` | Model | None; `last_height_m`, the height new Spaces take, null until entered |
 | Primary definition index | `ph_composer.window_definitions`, key `index` | Model | None; `{ "schema_version": 1, "definitions": { "wnt_...": persistent_id } }` |

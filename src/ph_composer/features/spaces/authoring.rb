@@ -338,23 +338,55 @@ module PhComposer
       end
 
       # Replaces whole `user_data` maps and installed extension payloads on explicit Spaces, Volumes and
-      # Floor Segments (Records::Metadata), in one step; a batch that writes what is stored adds none.
+      # Floor Segments (Records::Metadata), and the `user_data` of a Space Floor, which its Volume stores as
+      # `floor_user_data`, in one step; a batch that writes what is stored adds none. A Volume and its Floor
+      # named in one batch stage as one write of the Volume record, each checked against what was read.
       def update_metadata(request, proposal, updates:)
         scan = Occurrences.scan(request.model)
         catalog = request.registry.catalog
+        staged = {}
         rows = Records::Metadata.distinct_updates(updates).map do |update|
           reference = update.fetch("reference")
-          occurrence = Resolve.occurrence(scan, reference, :mutable => true)
-          kind = Resolve.kind_of(reference)
-          after = Records::Metadata.planned(request.engine, catalog, occurrence.record, update, KINDS[kind].label)
-          [reference, kind, occurrence, Spaces.validate!(KINDS.fetch(kind), after)]
+          floor = reference.key?("floor_id")
+          kind = floor ? VOLUME_KIND : Resolve.kind_of(reference)
+          occurrence = floor ? Resolve.floor(scan, reference, :mutable => true) : Resolve.occurrence(scan, reference,
+                                                                                                     :mutable => true)
+          key = [kind, occurrence.path]
+          record = staged.key?(key) ? staged.fetch(key).last : occurrence.record
+          after = if floor
+                    planned_floor(request.engine, catalog, occurrence.record, record, update)
+                  else
+                    Records::Metadata.planned(request.engine, catalog, record, update, KINDS.fetch(kind).label,
+                                              :stored => occurrence.record)
+                  end
+          staged[key] = [occurrence, Spaces.validate!(KINDS.fetch(kind), after)]
+          { "reference" => reference,
+            "extension_status" => floor ? {} : Records::Metadata.status_map(after, catalog) }
         end
-        rows.each do |_reference, kind, occurrence, after|
-          record_step(proposal, kind, occurrence.path, occurrence.record, after) unless occurrence.record == after
+        staged.each do |(kind, path), (occurrence, after)|
+          record_step(proposal, kind, path, occurrence.record, after) unless occurrence.record == after
         end
-        { "updates" => rows.map do |reference, _kind, _occurrence, after|
-          { "reference" => reference, "extension_status" => Records::Metadata.status_map(after, catalog) }
-        end }
+        { "updates" => rows }
+      end
+
+      # The Volume `record` with its Space Floor's map written under the Records::Metadata rules, read as a
+      # record of its own: `user_data` only, its pre-image checked against `stored`, the Volume as read.
+      def planned_floor(engine, catalog, stored, record, update)
+        if update.key?("extension_payloads")
+          raise CodedError.new("params.invalid", "A Space Floor carries user_data only; send extension payloads " \
+                                                 "to its Volume.")
+        end
+
+        planned = Records::Metadata.planned(engine, catalog, floor_record(record), update, "Space Floor",
+                                            :stored => floor_record(stored))
+        after = record.reject { |key, _value| key == FLOOR_USER_DATA }
+        planned.key?("user_data") ? after.merge(FLOOR_USER_DATA => planned.fetch("user_data")) : after
+      end
+
+      # The Space Floor as a record of its own: its id and, when the Volume stores one, its map.
+      def floor_record(volume)
+        floor = { "id" => volume.fetch("floor_id") }
+        volume.key?(FLOOR_USER_DATA) ? floor.merge("user_data" => volume.fetch(FLOOR_USER_DATA)) : floor
       end
 
       def space_root_faces(model, occurrence, faces)

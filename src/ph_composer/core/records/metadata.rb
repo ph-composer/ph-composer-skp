@@ -29,10 +29,12 @@ module PhComposer
       end
 
       # The record after the update. Keys the update does not name are untouched, so a legacy record
-      # without user_data stays without it.
+      # without user_data stays without it; a record stored without a map reads it as empty, so clearing
+      # that map leaves it absent and the update changes nothing.
       def updated(record, catalog, user_data: nil, extension_payloads: {})
         after = DeepCopy.call(record)
         after["user_data"] = checked_user_data(user_data) unless user_data.nil?
+        after.delete("user_data") if after["user_data"] == {} && !record.key?("user_data")
         extension_payloads.each { |namespace, payload| set_extension_payload(after, namespace, payload, catalog) }
         after
       end
