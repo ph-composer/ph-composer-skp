@@ -1,7 +1,7 @@
 # Consistent entity user data: status
 
 DATE: 2026-11-14
-STATUS: Scoped
+STATUS: In progress
 AUTHOR: Ed May, BLDGTYP, with Codex
 ISSUE: [#507](https://github.com/ph-composer/ph-composer-skp/issues/507)
 
@@ -19,17 +19,24 @@ over the combined diff) and `--merge`.
 
 ## Next step
 
-Ed answers D-UD-1 to D-UD-8 in [PLAN.md](PLAN.md#decisions-for-ed). Then EUD-01 starts.
+EUD-01, then the stages in order.
 
 | Stage | Status | Evidence |
 | --- | --- | --- |
-| EUD-01 to EUD-10 | Scoped | |
+| EUD-01 | Scoped | |
+| EUD-02 | Scoped | |
+| EUD-03 | Scoped | |
+| EUD-04 | Scoped | |
+| EUD-05 | Scoped | |
+| EUD-06 | Scoped | |
+| EUD-07 | Scoped | |
+| EUD-08 | Scoped | |
+| EUD-09 | Scoped | |
+| EUD-10 | Scoped | |
 
 ## Blockers and open decisions
 
-D-UD-1 to D-UD-8 await Ed's answers: Model root and Space Floor storage, nested-part writes,
-nested schema version, merge and split, new HBJSON mappings, library interchange and create-time
-maps. Any answer that excludes an authored entity or narrows the affordance is Ed's call.
+None. Ed answered D-UD-1 to D-UD-8 as recommended on 2026-11-14.
 
 ## Verification
 
@@ -50,3 +57,4 @@ implementation gates have not run for a new code change.
 | 2026-11-14 | Ed confirmed universal entity consistency and documentation as the feature goals; authorized the planning write-up. Created the scoped PRD and linked it from the planning indexes. |
 | 2026-11-14 | Created tracking issue [#507](https://github.com/ph-composer/ph-composer-skp/issues/507). Added a current-coverage qualification to the contributor contract; runtime code is unchanged. |
 | 2026-11-14 | Ed asked for implementation through the pr-loop on `codex/entity-user-data`, merge on green delegated. Wrote PLAN.md and ten stage documents from a source inventory at `68919a8c`; decisions D-UD-1 to D-UD-8 put to Ed. |
+| 2026-11-14 | Ed answered D-UD-1 to D-UD-8 "All as recommended"; implementation authorized. |

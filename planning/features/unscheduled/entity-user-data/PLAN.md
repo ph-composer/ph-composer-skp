@@ -1,9 +1,8 @@
 # Consistent entity user data: delivery plan
 
 DATE: 2026-11-14
-STATUS: Scoped. Stages EUD-01 to EUD-10 planned from the source inventory at `68919a8c`;
-decisions D-UD-1 to D-UD-8 carry recommendations and await Ed's answers. Implementation was
-requested on 2026-11-14 and starts once the decisions are answered.
+STATUS: Authorized. Stages EUD-01 to EUD-10 planned from the source inventory at `68919a8c`;
+Ed answered D-UD-1 to D-UD-8 "All as recommended" on 2026-11-14 and authorized implementation.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#507](https://github.com/ph-composer/ph-composer-skp/issues/507)
 
@@ -74,8 +73,7 @@ These rules apply to every row above and are what the stages test:
 
 ## Decisions for Ed
 
-Each has one recommendation. The stages are written to the recommendation; a different answer
-changes the stage named.
+Ed answered every decision "All as recommended" on 2026-11-14. The stages are written to them.
 
 | ID | Question | Recommendation | Stage |
 | --- | --- | --- | --- |

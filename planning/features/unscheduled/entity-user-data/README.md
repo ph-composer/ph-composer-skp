@@ -1,7 +1,7 @@
 # Consistent entity user data
 
 DATE: 2026-11-14
-STATUS: Scoped
+STATUS: In progress
 AUTHOR: Ed May, BLDGTYP, with Codex
 ISSUE: [#507](https://github.com/ph-composer/ph-composer-skp/issues/507)
 
