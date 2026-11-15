@@ -132,7 +132,6 @@
   .zp-seg-line1 { display:flex; align-items:center; gap:6px; min-height:24px; }
   .zp-seg-title { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .zp-seg-line2 { display:flex; align-items:center; gap:10px; min-height:22px; font-weight:400; font-size:12px; color:var(--muted); }
-  .zp-seg-line2 .zp-seg-count { font-size:12px; }
   .zp-seg td.col-actions { vertical-align:top; padding-top:6px; }
   .zp-seg.is-none td { color:var(--muted); }
   .zp-out td { color:var(--muted); }
@@ -431,7 +430,7 @@
     return h;
   }
   // The Building Segment heading: the name alone on the first line (Delete on hover; rename in settings), then a
-  // second line with the Default tag, Zone count and category and Single dwelling. Its actions sit in the
+  // second line with the Default tag and Single dwelling. Its actions sit in the
   // row's Actions cell, revealed on hover as in Geometry and Spaces.
   function segActions(g) {
     var only = S.segments.length === 1;
@@ -445,7 +444,6 @@
       (S.renaming === g.id ? name : '<span class="zp-seg-title" data-tip="' + esc(g.name) + '">' + name + '</span>') + (sf.length ? flag(sf.join(" ")) : "") + '</div>' +
       '<div class="zp-seg-line2">' +
       (g.id === S.defaultSeg ? '<span class="zp-seg-tag" data-tip="New Zones join this Building Segment. Change it in Settings.">Default</span>' : "") +
-      '<span class="zp-seg-count">' + n + ' Zone' + (n === 1 ? "" : "s") + ' · ' + (g.category === "res" ? "Residential" : "Non-residential") + '</span>' +
       '<label class="zp-seg-single" data-tip="' + esc(SINGLE_TIP) + '"><input type="checkbox" data-act="single" data-v="' + g.id + '"' + (g.single ? " checked" : "") + '>Single dwelling</label></div></div>';
   }
   var SINGLE_TIP = "Every Zone in this Building Segment is one dwelling with the residential default Program. Bedrooms, occupants and the Equipment Set are entered once, on this row. Uncheck to assign per Zone; everything it set stays.";

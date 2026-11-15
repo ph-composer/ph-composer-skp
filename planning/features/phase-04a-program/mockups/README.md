@@ -46,8 +46,8 @@ server. The dark strip at the top picks a journey and says what to try; Reset re
   house and an ADU as two single-dwelling Segments.
 - **Building Segments** ([plan](../../unscheduled/building-segments/README.md), BS-1 to BS-6 answered). The
   heading takes two lines: the name alone on the first (a long name truncates, full name in its
-  tooltip, `j4-long-name`), with a findings flag; then the Default tag, Zone count and category,
-  and Single dwelling. Settings and Delete sit in the row's Actions cell, revealed on hover as in
+  tooltip, `j4-long-name`), with a findings flag; then the Default tag and Single dwelling (no
+  Zone count or category subtitle). Settings and Delete sit in the row's Actions cell, revealed on hover as in
   Geometry and Spaces (`j1-segment-actions`); Delete is disabled on the last Segment, and the name is
   edited in settings.
   Airtightness, category and certification moved into the Building Segment settings dialog. The
