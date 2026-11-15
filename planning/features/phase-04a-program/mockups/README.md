@@ -22,21 +22,27 @@ server. The dark strip at the top picks a journey and says what to try; Reset re
 | 4. Non-residential school | Unassigned Zones are flagged; assign from Phius Non-Residential, or browse the library sidebar | `j4-start` (`journey=4`), `j4-assigned` (`journey=4&do=school`), `j4-library` (`journey=4&do=school,libnr`), `j4-long-name` (`journey=4&do=school,longname`) |
 | 5. Custom lab programs | Programs tab, + on the rail, set loads, open a schedule chip | `j5-program` and `-420` (`journey=5&do=custom`), `j5-schedule` (`journey=5&do=custom,customsched`) |
 | Equipment Sets | Programs tab, Equipment Sets | `equipment-sets` (`journey=1&do=sets`) |
+| Program cards and the ventilation Schedule | Open and close the load cards; Schedules, SFH ventilation, change the hours | `j4-program-cards` (`journey=4&do=school,libnr,cards`), `j1-vent-schedule` (`journey=1&do=ventsched`) |
 | Zones → Spaces (journey 1, then 3) | Zones, Spaces subtab. Type a Supply, Extract or Transfer rate on a Space and its Zone turns detailed; hover the Zone for From Program. Then compare Zones → Programs' Ventilation | `j1-spaces` (`journey=1&do=house3,spaces`), `j1-spaces-cascade` (`…,spaces,cascade`), `j3-spaces` (`journey=3&do=each,beds,common,spaces,cascade`) |
 
 ## What the prototype proposes
 
 - **Programs tab** with Programs, Schedules and Equipment Sets subtabs, laid out like Window Types:
-  a rail of records, the editor, and for Programs a Program Library sidebar. Its sources are library
-  files from ph-composer-standards that the user added through Library setup (Q4a-19): Phius
-  Multifamily and Phius Non-Residential, with honeybee-energy standards shown as not added
-  (Q4a-20). Journeys 3 and 4 assume both Phius files were added.
-- **A Program** is eight load cards. A derived value shows its rule instead of a number (the
-  residential default's Occupancy, Lighting and Hot water). Values the library lacks are amber "?".
-  Infiltration says when the Segment's test result replaces it; Setpoint says it sets the Segment.
+  a rail of records, the editor, and for Programs only a Program Library sidebar (Q4a-35). Its
+  sources are library files from ph-composer-standards that the user added through Library setup
+  (Q4a-19): Phius Multifamily and Phius Non-Residential, with honeybee-energy standards shown as
+  not added (Q4a-20). Journeys 3 and 4 assume both Phius files were added.
+- **A Program** is a column of full-width accordion cards (Q4a-34, `j4-program-cards`): closed,
+  each shows its values and schedule on one line; open, its values on the left and its Schedules on
+  the right. Order: Occupancy, Lighting, Ventilation, Electric equipment, Setpoint, Infiltration,
+  then Gas equipment and Hot water under "EnergyPlus only". A derived value shows its rule (the
+  residential default's Occupancy, Lighting and Hot water); the lighting rule exposes its
+  high-efficacy fraction. Library Programs arrive complete, with the slots the Phius data lacks
+  filled from their 2019 base program and labelled (Q4a-25).
 - **A Schedule** is the PH form (start, end, fraction while operating and otherwise, days per
-  week, weeks per year) over a 24-hour strip and a week row. The hourly editor is a disabled
-  button marked as planned.
+  week, weeks per year) over a 24-hour strip and a week row. A **ventilation** Schedule is four
+  rows, high, standard, basic and minimum, each hours per day and a fraction, totalling 24 h
+  (Q4a-33, `j1-vent-schedule`). The hourly editor is a disabled button marked as planned.
 - **Single dwelling**, a setting of each Building Segment, switched in its settings dialog (Q4a-26
   as revised by BS-3). The heading shows a "Single dwelling" tag only where it is on. Clicking a
   locked cell or the tag opens a bubble explaining the lock with one **Open settings**

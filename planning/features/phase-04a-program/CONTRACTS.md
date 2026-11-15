@@ -45,7 +45,7 @@ global (`core/records/catalog.rb`), so each payload gets its own:
 
 | Section | Namespace | Payload |
 | --- | --- | --- |
-| Occupancy | `ph_composer.programs.segment` | `single_dwelling` (bool, default true when the extension is absent), `dwelling_id` (reference to `programs.dwelling`, set while single), `default_program_id` (reference to `programs.program`; null is the built-in default) |
+| Occupancy | `ph_composer.programs.segment` | `single_dwelling` (bool, default true when the extension is absent), `dwelling_id` (reference to `programs.dwelling`, set while single), `default_program_id` (reference to `programs.program`; null means the Model's default Program) |
 | Phius certification | `ph_composer.certification.segment` | `category` (`residential`, `non_residential`), `program`, `use`, `status`, `type`, each an enum mapped to honeybee-ph `PhiusCertification` |
 | Airtightness | `ph_composer.programs.airtightness` | `basis` (`n50`, `q50`), `value` (number or null), `wind_exposure` (the seven `PhWindExposureType` values) |
 | Comfort | none, read only | Set points derived from the Zones' Programs |
@@ -130,13 +130,27 @@ interview; the Programs tab review may change them.
 | Kind | Prefix | Holds |
 | --- | --- | --- |
 | `ph_composer.programs.program` | `pgm_` | Name, notes, source; eight load sections (People, Lighting, Electric equipment, Gas equipment, Service hot water, Infiltration, Ventilation with four terms and method fixed to Sum, Setpoint), each with its values and Schedule references (Q4a-02, Q4a-15) |
-| `ph_composer.programs.schedule` | `sch_` | Name, type (fractional, activity level, temperature), the PH form (start, end, fraction while operating and otherwise, days per week, weeks per year) and its honeybee ruleset (Q4a-07, Q4a-09) |
+| `ph_composer.programs.schedule` | `sch_` | Name, type (fractional, activity level, temperature, ventilation) and its PH form: for fractional and activity, start, end, fraction while operating and otherwise; for ventilation, the four periods high, standard, basic and minimum, each hours per day and a fraction (totalling 24 h, Q4a-33); for both, days per week and weeks per year. Writes its honeybee ruleset (Q4a-07, Q4a-09) |
 | `ph_composer.programs.equipment_set` | `eqs_` | Name; devices as `Records::Part`s, each a honeybee-ph `PhEquipment` type with its values (Q4a-03) |
-| `ph_composer.programs.dwelling` | `dwl_` | Name, `units` (integer ≥ 1), `bedrooms` (number or null), `occupants` (number or null), `equipment_set_id` (reference or null) |
+| `ph_composer.programs.dwelling` | `dwl_` | Name, `units` (integer ≥ 1), `bedrooms` and `occupants` (number or null; set only under Single dwelling, Q4a-24), `equipment_set_id` (reference or null, Q4a-21) |
 
-**The residential default Program is built in, not a record** (Q4a-13): a frozen definition in
-code, seeded from the pinned honeybee-ph rules and schedules, addressed as program id null.
-Whether it can be edited in place is Q4a-23.
+**The residential default is seeded into each Model as an ordinary Program record** (Q4a-13,
+Q4a-23): the first time a Model needs it, Programs writes it from a frozen definition in code, built
+from the pinned honeybee-ph rules and schedules, with `source` naming PH-Composer's default. The
+user may edit it like any Program. A Reset to PH-Composer default action rewrites it from the
+definition, one Undo step. A Programs Model setting, `default_program_id` (never null), names the
+Program unassigned Zones and Single dwelling use; deleting that Program refuses while it is the
+default.
+
+**Phius-rule loads** (People, Lighting and Hot water on the residential default) carry a `rule`
+marker instead of a per-area value, with the rule's own inputs (the lighting high-efficacy
+fraction). Their values are worked out per Dwelling at export by honeybee-ph's
+`phius_residential` formulas and the People and occupancy rules (F4a-20); the user may switch a rule
+load to a fixed value. This follows honeybee-REVIVE's residence programs, which hold those loads at
+zero in the ProgramType and calculate them per dwelling (Q4a-25).
+
+**Library Programs are complete** (Q4a-25): every slot filled, the slots the Phius data lacks
+taken from the paired 2019 base program, each such load carrying its source.
 
 **Per-Zone assignment: a structured extension on the Zone record**, namespace
 `ph_composer.programs.zone_assignment`: `program_id`, `dwelling_id`, `equipment_set_id` (references
@@ -156,7 +170,7 @@ reproduces the same rules for HBJSON.
 
 | Value | Rule |
 | --- | --- |
-| Effective Program of a Zone | Under effective Single dwelling, the built-in default; else the Zone's `program_id`; else its Segment's `default_program_id`; else the built-in default |
+| Effective Program of a Zone | Under effective Single dwelling, the Model's default Program; else the Zone's `program_id`; else its Segment's `default_program_id`; else the Model's default Program |
 | Dwelling of a Zone | Under effective Single dwelling, the Segment's `dwelling_id` (created when first needed); else the Zone's `dwelling_id` |
 | Dwelling bedrooms and occupants | The Dwelling's own value when set; else the sum over its Zones; occupants with neither use the Phius rule, bedrooms + units (F4a-20) |
 | Zone people | Residential default: the Dwelling's occupants over its presence schedule mean, shared by gross floor area. Other Programs: people per area × floor area |
@@ -174,7 +188,7 @@ reproduces the same rules for HBJSON.
 | Space airflows | `SpacePhProperties._v_*` per section 4 | Spaces |
 | Effective Program | The Room's honeybee `ProgramType` with its loads and Schedules | Programs |
 | Dwelling and counts | honeybee-ph People extension per Room (F4a-19) | Programs |
-| Equipment Set | honeybee-ph `PhEquipment` Process loads, by Dwelling (F4a-17, Q4a-21) | Programs |
+| Equipment Set | honeybee-ph `PhEquipment` Process loads: a Dwelling's Set by Dwelling; a non-dwelling Zone's own Set by Zone (F4a-17, Q4a-21) | Programs |
 | Segment set points | `BldgSegment.set_points` | Programs |
 
 **PHX in tests.** PHX is not a dependency today (`pyproject.toml`; the research read a local

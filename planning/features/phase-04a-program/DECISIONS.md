@@ -1,7 +1,7 @@
 # Phase 4a: findings and open questions
 
 DATE: 2026-11-14
-STATUS: Findings F4a-01 to F4a-23 recorded. Interviewed 2026-11-14: fifteen questions answered, Q4a-08 decided by Claude on Ed's delegation; Q4a-01, Q4a-16 and Q4a-18 open (none gates the prototype). The GUI prototype raised Q4a-19 to Q4a-28; Ed's first review answered Q4a-19, Q4a-20 and Q4a-26; he answered Q4a-27 to Q4a-32 on 2026-11-15.
+STATUS: Findings F4a-01 to F4a-23 recorded. Interviewed 2026-11-14: fifteen questions answered, Q4a-08 decided by Claude on Ed's delegation; Q4a-01, Q4a-16 and Q4a-18 open (none gates the prototype). The GUI prototype raised Q4a-19 to Q4a-28; Ed's first review answered Q4a-19, Q4a-20 and Q4a-26; he answered Q4a-27 to Q4a-32 on 2026-11-15, and the Programs tab review answered Q4a-21, Q4a-23 to Q4a-25 and Q4a-33 to Q4a-35 the same day. Q4a-22 remains open.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -87,7 +87,7 @@ F4a-17 to F4a-21.
 
 Ed reviewed the [GUI prototype](mockups/README.md) on 2026-11-14 and accepted its division of
 work: the Programs tab defines Programs, Schedules and Equipment Sets, and Zones → Programs assigns
-them. He answered three of the questions it raised, and Q4a-27 to Q4a-32 on 2026-11-15:
+them. He answered three of the questions it raised, Q4a-27 to Q4a-32 on 2026-11-15, and the Programs tab review's Q4a-21, Q4a-23 to Q4a-25 and Q4a-33 to Q4a-35 the same day:
 
 | Id | Answer | What follows |
 | --- | --- | --- |
@@ -100,6 +100,13 @@ them. He answered three of the questions it raised, and Q4a-27 to Q4a-32 on 2026
 | Q4a-30 | **Detailed airflows are a Zone mode.** Once any Space in a Zone has a rate, every Space in it exports its own rates, 0 where blank; no Program shares in that Zone. Supersedes F4a-25 for PH-Composer | Moves the existing any-set rule from the Space to the Zone in the Spaces feature and its export. The first entry says so in a notice; From Program on the Zone row clears it |
 | Q4a-31 | **The Program's Ventilation load for EnergyPlus**, unchanged, for now | Space rates are never folded into the Room (F4a-29) |
 | Q4a-32 | **A Zone with no Spaces is an export warning, not an error** | Confirmed by a PHX round trip (F4a-28): the file opens with iCFA 0 and no ventilation rooms |
+| Q4a-21 | **On the Dwelling.** A Zone that is not a dwelling (laundry, elevator lobby) may carry its own Set for common-area devices (Programs tab review, Ed, 2026-11-15) | Fills the gap the Zones / Programs view showed as a dash |
+| Q4a-23 | **Editable.** The residential default is the starting point: once it is in a Model the user can edit it however they want | Claude agreed, with three conditions recorded in [CONTRACTS](CONTRACTS.md#5-programs-records-programs-p4a-07-and-p4a-08-provisional): it is seeded into each Model as an ordinary Program record; a Reset to PH-Composer default restores it; its Phius-rule loads stay rules with their inputs editable (the high-efficacy lighting fraction) and can be switched to fixed values |
+| Q4a-24 | **Per Zone, auto-totalled** (Q4a-11 stands). With detailed rooms it is easier to draw each bedroom Zone and mark it 1 | The Dwelling holds its own counts only under Single dwelling, and keeps them when it is switched off |
+| Q4a-25 | **Library Programs arrive complete**, following honeybee-ph `honeybee_energy_ph/load/phius_residential.py` and honeybee-REVIVE `honeybee_revive_standards/programtypes/rv2024_programs_abridged.json`: every slot filled (the slots the Phius data lacks from the paired 2019 base program), Schedules supplied beside them, and the per-dwelling Phius loads (MEL, interior, exterior and garage lighting, cooktop) left at zero in the Program and calculated per Dwelling by the `phius_residential` formulas | The standards generator fills the slots and labels their source; the Program editor names it on each such card |
+| Q4a-33 | **A ventilation schedule is its own PH form**: four rows, high, standard, basic and minimum, each hours per day and a fraction of design flow, totalling 24 h, plus days per week and weeks per year (PHX requires the four names, `create_vent_schd.py`) | Schedules gain a Ventilation type beside Fractional, Activity level and Temperature |
+| Q4a-34 | **The Program editor is a column of full-width accordion cards**: closed, each shows its values and schedule on one line; open, the load's values on the left and its Schedules on the right; clear borders and a header band separate them. Order: Occupancy, Lighting, Ventilation, Electric equipment, Setpoint, Infiltration, then Gas equipment and Hot water under "EnergyPlus only" | Prototype `j4-program-cards` |
+| Q4a-35 | **Only Programs gets a library sidebar**, as a trial. A library Program brings its Schedules; Equipment Sets come from library files through the Library tab | Revisit after use |
 
 **Revised 2026-11-15 by the [Building Segments plan](building-segments/PRD.md#decisions-ed-2026-11-15)
 (BS-3):** Single dwelling is an attribute and control of each Building Segment, not of the Model.
@@ -113,17 +120,17 @@ carries Phase 4a before Phase 4), Q4a-16 (Space Types; leaning: always inherit f
 ## Questions the prototype raised
 
 From the [GUI prototype](mockups/README.md), 2026-11-14. Each carries what the prototype shows now;
-Q4a-19, Q4a-20 and Q4a-26 to Q4a-32 are answered above; Q4a-21 to Q4a-25 are open.
+Q4a-19 to Q4a-35 are answered above except Q4a-22, which the prototype assumes (copy on choice).
 
 | Id | Question | The prototype shows |
 | --- | --- | --- |
 | Q4a-19 | How are the Phius programs packaged: a PH-Composer library file, or a language-neutral standards package that honeybee-ph and PH-Composer both read? (Ed, 2026-11-14) | Answered above. The sidebar lists the two Phius files as library sources the user has added |
 | Q4a-20 | Do the honeybee-energy standards (the DOE programs by vintage) sit beside the Phius sources, and how: shipped, an optional library source the user adds, or not at all? (Ed, 2026-11-14) | Answered above. A third source, "not added", pointing to Library setup |
-| Q4a-21 | Does an Equipment Set belong to the Dwelling or to the Zone? Before choosing, check how PHX counts one device carried by every Room of a dwelling (`merge_process_loads` sums `quantity` per Room) | One Set per dwelling in a residential Segment; common-area Zones carry none; non-residential Segments show none (F4a-17) |
+| Q4a-21 | Does an Equipment Set belong to the Dwelling or to the Zone? Before choosing, check how PHX counts one device carried by every Room of a dwelling (`merge_process_loads` sums `quantity` per Room) | Answered above |
 | Q4a-22 | Does choosing a library Program on a Zone copy it into the file at once, or must it be added from the Programs tab first? | Copied and assigned in one step, with a notice |
-| Q4a-23 | Is the residential default editable in place, or locked with Duplicate as the way to change it? | Editable; the rail shows it under Default |
-| Q4a-24 | Bedrooms and occupants per Zone (Q4a-11) make a house of several Zones awkward. Keep per-Zone entry, or enter on the Dwelling when it spans several Zones? | Per Zone, summed in the Dwelling bubble and the Segment row. Under Single dwelling (Q4a-26) they are entered once for the house and stay on the dwelling when the switch is turned off, a working preview of counts on the Dwelling |
-| Q4a-25 | Who supplies the values the Phius data lacks (F4a-23): PH-Composer defaults in the library file, Ed's office standards, or the user each time? | Amber "?" on ventilation and hot water for every library Program; Space airflows replace ventilation where set |
+| Q4a-23 | Is the residential default editable in place, or locked with Duplicate as the way to change it? | Answered above |
+| Q4a-24 | Bedrooms and occupants per Zone (Q4a-11) make a house of several Zones awkward. Keep per-Zone entry, or enter on the Dwelling when it spans several Zones? | Answered above |
+| Q4a-25 | Who supplies the values the Phius data lacks (F4a-23): PH-Composer defaults in the library file, Ed's office standards, or the user each time? | Answered above |
 | Q4a-26 | Ed's Single dwelling switch (2026-11-14) | Answered above; revised by BS-3 to a per-Segment switch |
 | Q4a-27 | Is Single dwelling on by default for a new Model? | Answered above. On in journey 1; journeys 2 to 5 start with it off because they model other buildings |
 | Q4a-28 | May the Phius program values be published in the public ph-composer-standards repository, with a note of their source and terms? honeybee-ph already publishes them; Phius's terms decide. Ed to confirm | Answered above |

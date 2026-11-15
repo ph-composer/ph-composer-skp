@@ -138,14 +138,34 @@ honeybee-ph People extension per Dwelling; Equipment Set devices as `PhEquipment
 infiltration from the Segment's test result; Segment set points from the Programs. Writing
 honeybee-ph operating periods waits on the honeybee-ph and PHX fix for F4a-13 (Q4a-08).
 
-## Programs tab (to be specified)
+## Programs tab (P4a-11; reviewed 2026-11-15)
 
-The prototype's shape, for the review that follows this plan: Programs, Schedules and Equipment
-Sets subtabs; a rail of records with the built-in default under Default; a Program editor of eight
-load cards; a PH-form Schedule editor over a 24-hour strip and week row, with the hourly editor
-planned; a Program Library sidebar listing added library sources. Open: Q4a-21 (Equipment Set on
-the Dwelling or the Zone), Q4a-22 (copy on choice), Q4a-23 (editing the residential default),
-Q4a-24 (counts per Zone or per Dwelling), Q4a-25 (who supplies values the Phius data lacks).
+Subtabs Programs, Schedules and Equipment Sets, on the Window Types layout: a rail of records, the
+editor, and for Programs only a Program Library sidebar listing the library files the user has
+added (Q4a-35, a trial). Prototype: `j4-program-cards`, `j1-vent-schedule`, `j5-program`,
+`equipment-sets`.
+
+- **Program editor** (Q4a-34): the header names the Program, its source and its users, with People,
+  Lighting and Equipment as headline values. Below it, one full-width accordion card per load, in
+  this order: Occupancy, Lighting, Ventilation, Electric equipment, Setpoint, Infiltration, then
+  Gas equipment and Hot water under "EnergyPlus only". A closed card shows its values and schedule
+  on one line, with an amber flag when a value is missing; an open card shows the load's values on
+  the left and its Schedules on the right. Notes stay on their card: Ventilation's Sum of terms,
+  Setpoint's "Sets the Segment", Infiltration's replacement by a Segment test result, the source
+  of a value filled from a base program.
+- **The residential default** (Q4a-23) is an ordinary, editable Program in each Model, listed under
+  Default; Reset to PH-Composer default sits in its overflow menu. Its Phius-rule cards show the
+  rule and its inputs, and can be switched to a fixed value.
+- **Schedule editor**: the PH form by type. Fractional and activity: start, end, fraction while
+  operating and otherwise, days per week, weeks per year, over a 24-hour strip and a week row.
+  **Ventilation** (Q4a-33): four rows, high, standard, basic and minimum, each hours per day and a
+  fraction of design flow, a running total that turns amber unless it is 24 h, days per week and
+  weeks per year. Every Schedule lists the loads that use it. The hourly editor is planned (Q4a-07).
+- **Equipment Sets**: a device grid (device, quantity, energy demand, in conditioned space,
+  reference quantity) with Phius-rule devices marked. A Set is assigned to a Dwelling, or to a Zone
+  that is not a dwelling (Q4a-21).
+- **Library Programs** copy into the Model with their Schedules when chosen (Q4a-22, still to
+  confirm) and arrive complete (Q4a-25).
 
 ## Decisions
 

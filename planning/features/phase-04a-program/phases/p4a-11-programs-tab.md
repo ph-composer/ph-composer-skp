@@ -7,7 +7,7 @@ ISSUE: none (local planning draft)
 
 ## Entry and scope
 
-Requires G1 and P4a-07. The authoring screen for Programs, Schedules and Equipment Sets. Specified after the Programs tab review; the prototype's shape is summarised in the [Phase 4a PRD](../PRD.md#programs-tab-to-be-specified).
+Requires G1 and P4a-07. The authoring screen for Programs, Schedules and Equipment Sets. Specified after the Programs tab review; the prototype's shape is summarised in the [Phase 4a PRD](../PRD.md#programs-tab-p4a-11-reviewed-2026-11-15).
 
 ## Outline
 
@@ -17,7 +17,7 @@ Requires G1 and P4a-07. The authoring screen for Programs, Schedules and Equipme
 
 ## Settle at G1
 
-The whole stage.
+Reviewed 2026-11-15: layout and card order (Q4a-34), ventilation schedule form (Q4a-33), editable default (Q4a-23), library sidebar on Programs only (Q4a-35). The stage document is rewritten from the [PRD](../PRD.md#programs-tab-p4a-11-reviewed-2026-11-15) before authorization.
 
 ## Host gate
 

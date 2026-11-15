@@ -12,13 +12,13 @@ Requires G1. Adds the three catalog kinds, the built-in residential default and 
 ## Outline
 
 1. Kinds `programs.program` (`pgm_`), `programs.schedule` (`sch_`), `programs.equipment_set` (`eqs_`, devices as parts), each with operations, reads, `user_data` and the duplicate rules.
-2. The residential default as a frozen definition seeded from the pinned honeybee-ph rules and schedules (F4a-20).
+2. The residential default: a frozen definition, seeded into each Model as an ordinary record on first need, with Reset to PH-Composer default and the `default_program_id` Model setting (CONTRACTS section 5).
 3. Library kinds so library files and Connections supply them; choosing one copies it and its Schedules (Q4a-19, Q4a-22).
 4. The PH-form schedule writes a honeybee ruleset; operating periods wait on F4a-13 (Q4a-08).
 
 ## Settle at G1
 
-Field lists (eight load sections, Schedule types), Q4a-22, Q4a-23, Q4a-25.
+Answered at the review: Q4a-23 (the default is a seeded, editable record with Reset), Q4a-25 (complete library Programs; Phius-rule loads per Dwelling), Q4a-33 (the ventilation Schedule type). Still open: Q4a-22 (copy on choice) and the exact field lists.
 
 ## Host gate
 
