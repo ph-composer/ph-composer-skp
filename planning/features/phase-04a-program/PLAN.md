@@ -1,7 +1,7 @@
 # Phase 4a delivery plan: Building Segments and Programs on the Zones tab
 
 DATE: 2026-11-15
-STATUS: Scoped. The Programs tab review (G1) is done; P4a-01 to P4a-08 and P4a-11 are written and ready to authorize; P4a-09 and P4a-10 are outlines. No stage authorized.
+STATUS: Scoped. The Programs tab review (G1) is done; P4a-01 to P4a-11 are written and ready to authorize; P4a-12 is the closing outline. No stage authorized.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft; one issue per stage group when Ed authorizes)
 

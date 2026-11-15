@@ -1,7 +1,7 @@
 # Phase 4a acceptance register
 
 DATE: 2026-11-15
-STATUS: Scoped. PG01 to PG08 and PG11 are written; PG09, PG10 and PG12 follow their stages.
+STATUS: Scoped. PG01 to PG11 are written; PG12 follows the closing stage.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -25,8 +25,8 @@ closed; `manage` reports `removed_extensions`. Host: delete, move, Undo, Redo, s
 | PG06 | Programs, export, P4a-06 | The feature installs with its dependencies; the Airtightness section round trips; an entered n50 and an entered q50 each read back from the WUFI XML and METr JSON within 0.01; with no test result the Program's Infiltration (or PHX's default) exports; wind exposure reaches `BldgSegment` | Not started |
 | PG07 | Programs, P4a-07 | Each kind round trips; a ventilation Schedule must total 24 h; a rule load keeps its inputs across a switch to a value and back; the residential default reads without a write, materializes once on first edit, resets, and refuses delete while default; guarded delete and delete with replacement; a library Program copies with its Schedules and a second copy reuses them; `user_data` survives edit, duplicate, Undo/Redo and reopen; the panel-closed walkthrough | Not started |
 | PG08 | Programs, P4a-08 | Each assign action is one Undo step; an emptied Dwelling goes; a Dwelling across Segments refuses; Single dwelling on creates the Dwelling, sums bedrooms and clears Zones, off keeps the Dwelling and default Program, both one Undo step; an absent payload reads as on and a non-residential Segment is never a single dwelling; derivations match hand values on the house and apartment references. Host: on and off, Undo/Redo, copy a Zone | Not started |
-| PG09 | Programs, UI kit, P4a-09 | Written after G1 | Not started |
-| PG10 | Programs, export, P4a-10 | Written after G1; includes a round trip of the five prototype journeys | Not started |
+| PG09 | Programs, UI kit, P4a-09 | The view registers on the Zone views host; journeys 1 to 4 in the browser (locked house and bedrooms, unlocking from settings, one dwelling each, library Programs copied on choice and reused, the school's flags and assignments); Dwelling and lock bubbles; the selection bar; every edit one Undo step; IP and SI; 420 px. UI polish review recorded; Ed at the mouse | Not started |
+| PG10 | Programs, export, P4a-10 | The `PhEquipment` pin chosen; contract records match hand values per Dwelling; rulesets carry weekday rules and the weeks-off range, ventilation Schedules their four periods; the HBJSON reloads with one ProgramType per Dwelling group for a rule Program, People extension and Process devices on the right Rooms and set points on each Segment; the PHX round trip of the five journeys reads back occupancy, lighting, equipment, ventilation and set points | Not started |
 | PG11 | Programs, UI kit, P4a-11 | The three subtabs with the right sidebar (sources, open, copy with Schedules), accordion cards, rule switch, Reset on the default, the ventilation total warning, Equipment Set devices, New, Duplicate, Delete with replacement, IP and SI; every edit one Undo step. UI polish review recorded; Ed at the mouse | Not started |
 | PG12 | Integration, P4a-12 | Both offline Ruby gates, coverage, browser and runtime checks; packaged footprint against the current baseline; the integrated run from a fresh process; context, docs and glossary folded | Not started |
 

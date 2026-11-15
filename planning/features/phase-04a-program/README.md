@@ -62,7 +62,7 @@ until the cross-repo fix for F4a-13 ships (Q4a-08).
    [building-segments/PRD.md](building-segments/PRD.md), the Building Segment work it stands on.
    The [GUI prototype](mockups/README.md) shows both.
 2. [CONTRACTS.md](CONTRACTS.md): records, ownership, seams and export mapping, with open contract
-   questions C4a-2, C4a-3, C4a-4 and C4a-6, which settle in their stages.
+   questions C4a-2, C4a-3, C4a-4, C4a-6, C4a-9 and C4a-10, which settle in their stages.
 3. [PLAN.md](PLAN.md), the stages under [phases/](phases), and [ACCEPTANCE.md](ACCEPTANCE.md).
 4. [DECISIONS.md](DECISIONS.md): findings F4a-01 to F4a-29 and questions Q4a-01 to Q4a-32 with
    every answer.
@@ -81,7 +81,6 @@ until the cross-repo fix for F4a-13 ships (Q4a-08).
 
 ## Next
 
-1. P4a-01 to P4a-08 and P4a-11 are ready; each needs Ed's go.
-2. Rewrite P4a-09 (Zones / Programs view) and P4a-10 (Program export) from the PRD before they are authorized.
-3. Separately: the honeybee-ph and PHX fix for F4a-13 (Q4a-08), in those repositories, starting
+1. P4a-01 to P4a-11 are ready; each needs Ed's go.
+2. Separately: the honeybee-ph and PHX fix for F4a-13 (Q4a-08), in those repositories, starting
    with a reproducing test in each.

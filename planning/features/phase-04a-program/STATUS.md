@@ -21,7 +21,7 @@ The one place this packet's progress is read from.
 | Research: Zone ventilation and Space airflows | Complete | 2026-11-15 | [ventilation](research/ventilation.md): F4a-24 to F4a-29; Q4a-29 to Q4a-32 raised |
 | UI prototype: Building Segments, Single dwelling per Segment, Zones / Spaces airflows | Complete | 2026-11-15 | [mockups/](mockups/README.md); BS-1 to BS-6 and Q4a-27 to Q4a-32 answered |
 | PRD, contracts, plan and stages for the Zones tab | Scoped | 2026-11-15 | [PRD](PRD.md), [Building Segments PRD](building-segments/PRD.md), [CONTRACTS](CONTRACTS.md), [PLAN](PLAN.md), [ACCEPTANCE](ACCEPTANCE.md), [phases/](phases); C4a-5, C4a-7, C4a-8 answered; C4a-2, C4a-3, C4a-4, C4a-6 settle in their stages |
-| P4a-01 to P4a-08, P4a-11 | Scoped | 2026-11-15 | Ready to authorize; P4a-09 and P4a-10 are outlines |
+| P4a-01 to P4a-11 | Scoped | 2026-11-15 | Ready to authorize; P4a-12 is the closing outline |
 | Programs tab review (G1) | Complete | 2026-11-15 | Q4a-21 to Q4a-25 and Q4a-33 to Q4a-35 answered; C4a-5, C4a-7, C4a-8 answered |
 | GitHub issue | Requested | | Q4a-18 |
 | honeybee-ph and PHX fix for F4a-13 | Requested | | Q4a-08; cross-repo, own authorization |
