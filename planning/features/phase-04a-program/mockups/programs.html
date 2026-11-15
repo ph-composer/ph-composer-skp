@@ -24,8 +24,7 @@
   .mk-hint { flex:1 1 100%; color:#c9d6da; }
   .mk-hint em { color:#ffd66b; font-style:normal; }
   /* ---- Programs tab layout: rail, editor, library sidebar (the Window Types arrangement). ---- */
-  .pgm-layout { display:grid; grid-template-columns:210px minmax(0,1fr) 260px; min-height:calc(100vh - 190px); }
-  .pgm-layout.no-library { grid-template-columns:210px minmax(0,1fr); }
+  .pgm-layout { display:grid; grid-template-columns:minmax(0,1fr) 270px; min-height:calc(100vh - 190px); }
   .pgm-main { min-width:0; overflow:auto; padding:0 18px 24px; }
   .pgm-library { border-left:1px solid var(--line); min-width:0; overflow:auto; }
   .pgm-head { display:flex; align-items:flex-start; gap:16px; padding:16px 0 12px; border-bottom:1px solid var(--line); }
@@ -82,6 +81,13 @@
   .phc-workspace .window-type-row.selected > button:first-child { background:var(--interaction-highlight-tint); color:var(--interaction-highlight); font-weight:600; }
   .window-type-row .pgm-row-note { padding-right:8px; color:var(--muted); font-size:11px; }
   .lib-row-add { margin-left:auto; }
+  .library-sidebar-row.is-selected { background:var(--interaction-highlight-tint); }
+  .library-sidebar-row.is-selected .library-sidebar-name { color:var(--interaction-highlight); font-weight:600; }
+  .lib-group-caption { display:flex; justify-content:space-between; margin:8px 0 2px; padding-bottom:2px; border-bottom:1px solid var(--line); color:var(--muted); font-size:11px; }
+  .pgm-library button.lib-new { align-self:flex-start; width:auto; min-height:0; height:auto; border:0; border-radius:0; box-shadow:none; background:transparent; padding:2px 0; color:var(--interaction-highlight); font:inherit; font-size:13px; cursor:pointer; }
+  .pgm-library button.lib-new:hover { text-decoration:underline; background:transparent; }
+  .pgm-library .library-sidebar-row-button { display:flex; align-items:center; }
+  .pgm-library .library-sidebar-row-button .library-sidebar-name { flex:1; min-width:0; text-align:left; }
   .library-sidebar-row { display:flex; align-items:center; }
   .library-sidebar-row .library-sidebar-row-button { flex:1; min-width:0; }
   .lib-unavailable { margin:8px 10px; padding:8px; border:1px dashed var(--line-strong); border-radius:var(--radius-sm); color:var(--muted); font-size:12px; }
@@ -130,8 +136,7 @@
   .panel-panes { position:relative; }
   #pane { padding:0 var(--page-gutter); }
   @media (max-width: 900px) {
-    .pgm-layout, .pgm-layout.no-library { grid-template-columns:minmax(0,1fr); }
-    .pgm-layout .window-rail { border-right:0; border-bottom:1px solid var(--line); max-height:170px; }
+    .pgm-layout { grid-template-columns:minmax(0,1fr); }
     .pgm-library { border-left:0; border-top:1px solid var(--line); }
     .pgm-main { padding:0 0 18px; }
     .pgm-loads { grid-template-columns:minmax(0,1fr); }
@@ -268,7 +273,7 @@
   }
   function baseState(j) {
     uid = 0;
-    var s = { journey: j, ztab: "programs", openCards: {}, tab: "zones", ptab: "programs", selProgram: null, selSchedule: null, selSet: null, checked: {}, lib: "mf", libQuery: "", notice: null, bubble: null,
+    var s = { journey: j, ztab: "programs", openCards: {}, tab: "zones", ptab: "programs", selProgram: null, selSchedule: null, selSet: null, checked: {}, lib: "file", libQuery: "", notice: null, bubble: null,
       programs: [], schedules: [], sets: [], dwellings: [], segments: [], zones: [] };
     // honeybee-ph single-family schedules (hbph_sfh_*.json): hourly profiles, illustrative values here.
     var presence = sched("SFH occupant presence", "Fractional", null, profile([1, 1, 1, 1, 1, 1, .9, .6, .4, .3, .3, .3, .3, .3, .3, .4, .5, .7, .9, .9, .9, 1, 1, 1]), "hbph");
@@ -426,7 +431,7 @@
     2: { title: "Apartments", hint: "Each Zone is one apartment. <em>Check every Zone</em> → Dwelling: <em>One dwelling each</em>. Then fill Bedrooms per row. Then open the Building's <em>settings</em> (hover its row) and check <em>Single dwelling</em> to see what it would replace." },
     3: { title: "Apartments + common areas", hint: "Make the six apartments <em>one dwelling each</em>. Then check the two corridors → Program: <em>Indoor Corridor</em> (Phius Multifamily, copied into the file on choice). Do the same for the stair, lobby, office and fitness room, and look at the amber flags. Then check the <em>Bike shed</em> → Building Segment: <em>No Building Segment</em>, and open a Segment's <em>settings</em> from its row." },
     4: { title: "Non-residential school", hint: "The Building Segment is non-residential, so every unassigned Zone is flagged. Check Zones and pick from <em>Phius Non-Residential</em> in the Program choice, or open the <em>Programs</em> tab and browse the library sidebar." },
-    5: { title: "Custom lab programs", hint: "Nothing in the library fits. Open <em>Programs</em> → <em>+</em> on the rail to make a new Program, set its loads, then open a load's schedule chip to edit the Schedule in the PH form. Assign it on Zones → Programs." }
+    5: { title: "Custom lab programs", hint: "Nothing in the library fits. Open <em>Programs</em> → <em>+ New Program</em> in the sidebar to make one, set its loads, then open a load's schedule chip to edit the Schedule in the PH form. Assign it on Zones → Programs." }
   };
   function renderStrip() {
     var h = '<b>Programs prototype</b><span>Journey:</span>';
@@ -833,18 +838,9 @@
     else h += setsSurface();
     return h + '</section>';
   }
-  function railRow(label, idv, act, selected, note) {
-    return '<div class="window-type-row' + (selected ? " selected" : "") + '"><button type="button" data-act="' + act + '" data-v="' + idv + '">' + esc(label) + '</button>' + (note ? '<span class="pgm-row-note">' + note + '</span>' : "") + '</div>';
-  }
   function usedBy(pid) { return S.zones.filter(function (z) { return (z.program || "pgm_default") === pid; }).length; }
   function programsSurface() {
-    var h = '<div class="pgm-layout"><aside class="window-rail"><div class="window-rail-content"><div class="window-rail-tools">' + iconBtn("add", "New Program", "new-program") + iconBtn("sidebar", "Collapse Programs sidebar", "noop", ' style="margin-left:auto"') + '</div><div class="window-type-list">';
-    h += '<div class="window-group">Default</div>' + railRow("Residential (default)", "pgm_default", "sel-program", S.selProgram === "pgm_default", usedBy("pgm_default") || "");
-    var others = S.programs.filter(function (p) { return p.id !== "pgm_default"; });
-    h += '<div class="window-group">In this file</div>';
-    if (!others.length) h += '<div class="pgm-row-note" style="padding:6px 10px">No other Programs yet. Choose + or add one from the library.</div>';
-    others.forEach(function (p) { h += railRow(p.name, p.id, "sel-program", S.selProgram === p.id, usedBy(p.id) || ""); });
-    h += '</div></div></aside><div class="pgm-main">' + programEditor(prog(S.selProgram)) + '</div>' + librarySidebar() + '</div>';
+    var h = '<div class="pgm-layout"><div class="pgm-main">' + programEditor(prog(S.selProgram)) + '</div>' + librarySidebar() + '</div>';
     return h;
   }
   function programEditor(p) {
@@ -915,20 +911,44 @@
     var sc = schedById(sid);
     return '<div class="pgm-sched">' + svg("calendar", 14) + label + ' schedule <button type="button" data-act="open-schedule" data-v="' + (sc ? sc.id : "") + '">' + (sc ? esc(sc.name) : "Choose…") + ' ▾</button></div>';
   }
+  // The right sidebar, as in the Assembly and Window Type Builders: its source select starts with this file's
+  // records, then each added library. Choosing a record in this file opens it in the editor.
+  function fileRow(label, idv, act, selected, note) {
+    return '<div class="library-sidebar-row' + (selected ? " is-selected" : "") + '"><button type="button" class="library-sidebar-row-button" data-act="' + act + '" data-v="' + idv + '"' + (selected ? ' aria-pressed="true"' : "") + '><span class="library-sidebar-name">' + esc(label) + '</span>' + (note !== undefined && note !== "" ? '<span class="lib-meta" data-tip="Zones using it">' + note + '</span>' : "") + '</button></div>';
+  }
+  function caption(text, n) { return '<div class="lib-group-caption"><span>' + text + '</span><span>' + n + '</span></div>'; }
+  function sidebarFrame(title, selectHtml, body) {
+    return '<aside class="library-sidebar-root pgm-library" aria-label="' + title + '"><div class="library-sidebar-heading"><button type="button" class="library-sidebar-toggle" aria-expanded="true">' + title + '</button>' + iconBtn("settings", "Library setup…", "noop") + '</div><div class="library-sidebar-content">' + selectHtml + body + '</div></aside>';
+  }
+  function simpleSidebar(title, fileLabel, newAct, newLabel, groupsHtml, count) {
+    return sidebarFrame(title, '<select class="library-sidebar-source" aria-label="Source" data-tip="No added library holds these yet. Library Programs bring their Schedules with them."><option>' + fileLabel + '</option></select>',
+      '<button type="button" class="lib-new" data-act="' + newAct + '">+ ' + newLabel + '</button><input type="search" placeholder="Search" aria-label="Search">' +
+      '<small class="muted">' + count + ' in this file</small><div class="library-sidebar-list">' + groupsHtml + '</div>');
+  }
   function librarySidebar() {
     var h = '<aside class="library-sidebar-root pgm-library" aria-label="Program Library"><div class="library-sidebar-heading"><button type="button" class="library-sidebar-toggle" aria-expanded="true">Program Library</button>' + iconBtn("settings", "Library setup…", "noop") + '</div><div class="library-sidebar-content">';
     h += '<select class="library-sidebar-source" data-act="lib-source" aria-label="Library source">' +
+      '<option value="file"' + (S.lib === "file" ? " selected" : "") + '>Programs in this file</option>' +
       '<option value="mf"' + (S.lib === "mf" ? " selected" : "") + '>Phius Multifamily · phius-multifamily.json</option>' +
       '<option value="nr"' + (S.lib === "nr" ? " selected" : "") + '>Phius Non-Residential · phius-non-residential.json</option>' +
       '<option value="hbe"' + (S.lib === "hbe" ? " selected" : "") + '>honeybee-energy standards (not added)</option></select>';
     if (S.lib === "hbe") return h + '<div class="lib-unavailable"><b>Not added.</b> An optional library file from ph-composer-standards, generated from the DOE reference programs: office, school, hotel and retail programs by vintage. Add it in Library setup, like any other library file. <br><br><button type="button" data-act="noop">Library setup…</button></div></div></aside>';
+    if (S.lib === "file") {
+      var others = S.programs.filter(function (p) { return p.id !== "pgm_default"; });
+      h += '<button type="button" class="lib-new" data-act="new-program">+ New Program</button><input type="search" placeholder="Search Programs" aria-label="Search Programs in this file">' +
+        '<small class="muted">' + S.programs.length + ' in this file</small><div class="library-sidebar-list">' + caption("Default", 1) +
+        fileRow("Residential (default)", "pgm_default", "sel-program", S.selProgram === "pgm_default", usedBy("pgm_default")) + caption("In this file", others.length) +
+        (others.length ? others.map(function (p) { return fileRow(p.name, p.id, "sel-program", S.selProgram === p.id, usedBy(p.id)); }).join("") : '<div class="pgm-row-note" style="padding:6px 0">No other Programs yet. Choose + New Program, or a library above.</div>') + '</div>';
+      return h + '</div></aside>';
+    }
     h += '<input type="search" data-act="lib-search" value="' + esc(S.libQuery) + '" placeholder="Search Programs" aria-label="Search Program library">';
     var rows = PHIUS[S.lib].filter(function (r) { return r[0].toLowerCase().indexOf(S.libQuery.toLowerCase()) >= 0; });
     h += '<small class="muted">' + rows.length + ' shown · from ph-composer-standards, generated from honeybee-ph</small><div class="library-sidebar-list"><section class="library-sidebar-group">';
     rows.forEach(function (r) {
       var inFile = !!programByName(r[0]);
-      h += '<div class="library-sidebar-row"><button type="button" class="library-sidebar-row-button" data-tip="' + esc(r[0] + ": " + fmt(r[1], 3) + " ppl/m², lighting " + fmt(r[6], 1) + " W/m², equipment " + fmt(r[8], 1) + " W/m², occupied " + r[2] + "–" + r[3] + " h, " + r[4] + " d/a. Ventilation, hot water and setpoints are not in the Phius data.") + '"><span class="library-sidebar-name">' + esc(r[0]) + '</span><span class="lib-meta">' + fmt(r[6], 1) + ' W/m²</span></button>' +
-        (inFile ? '<span class="lib-meta" data-tip="Already in this file">' + svg("check", 14) + '</span>' : iconBtn("add", "Add " + r[0] + " to this file", "lib-add", ' data-v="' + esc(r[0]) + '"')) + '</div>';
+      var local = programByName(r[0]);
+      h += '<div class="library-sidebar-row' + (local && S.selProgram === local.id ? " is-selected" : "") + '"><button type="button" class="library-sidebar-row-button"' + (local ? ' data-act="sel-program" data-v="' + local.id + '"' : "") + ' data-tip="' + esc(r[0] + ": " + fmt(r[1], 3) + " ppl/m², lighting " + fmt(r[6], 1) + " W/m², equipment " + fmt(r[8], 1) + " W/m², occupied " + r[2] + "–" + r[3] + " h, " + r[4] + " d/a. Ventilation, infiltration, hot water and set points come from its 2019 base program.") + '"><span class="library-sidebar-name">' + esc(r[0]) + '</span><span class="lib-meta">' + fmt(r[6], 1) + ' W/m²</span></button>' +
+        (inFile ? '<span class="lib-meta" data-tip="In this file: choose the row to open the local copy">' + svg("check", 14) + '</span>' : iconBtn("add", "Add " + r[0] + " to this file", "lib-add", ' data-v="' + esc(r[0]) + '"')) + '</div>';
     });
     return h + '</section></div></div></aside>';
   }
@@ -937,9 +957,8 @@
   function schedulesSurface() {
     var groups = {};
     S.schedules.forEach(function (x) { (groups[x.kind] = groups[x.kind] || []).push(x); });
-    var h = '<div class="pgm-layout no-library"><aside class="window-rail"><div class="window-rail-content"><div class="window-rail-tools">' + iconBtn("add", "New Schedule", "new-schedule") + '</div><div class="window-type-list">';
-    Object.keys(groups).forEach(function (k) { h += '<div class="window-group">' + k + '</div>'; groups[k].forEach(function (x) { h += railRow(x.name, x.id, "sel-schedule", S.selSchedule === x.id); }); });
-    h += '</div></div></aside><div class="pgm-main">' + scheduleEditor(schedById(S.selSchedule)) + '</div></div>';
+    var g = Object.keys(groups).map(function (k) { return caption(k, groups[k].length) + groups[k].map(function (x) { return fileRow(x.name, x.id, "sel-schedule", S.selSchedule === x.id); }).join(""); }).join("");
+    var h = '<div class="pgm-layout"><div class="pgm-main">' + scheduleEditor(schedById(S.selSchedule)) + '</div>' + simpleSidebar("Schedule Library", "Schedules in this file", "new-schedule", "New Schedule", g, S.schedules.length) + '</div>';
     return h;
   }
   var LOAD_LABEL = { people: "Occupancy", lighting: "Lighting", equip: "Electric equipment", gas: "Gas equipment", shw: "Hot water", infil: "Infiltration", vent: "Ventilation" };
@@ -997,13 +1016,12 @@
 
   // ---------------------------------------------------------------- Equipment Sets
   function setsSurface() {
-    var h = '<div class="pgm-layout no-library"><aside class="window-rail"><div class="window-rail-content"><div class="window-rail-tools">' + iconBtn("add", "New Equipment Set", "new-set") + '</div><div class="window-type-list"><div class="window-group">In this file</div>';
-    S.sets.forEach(function (x) { h += railRow(x.name, x.id, "sel-set", S.selSet === x.id); });
     var x = setById(S.selSet);
-    h += '</div></div></aside><div class="pgm-main"><div class="pgm-head"><div><h2>' + esc(x.name) + '</h2><div class="pgm-sub">honeybee-ph devices, exported as Process loads with each device\'s watts worked out per dwelling at export. One Set serves a dwelling, not each of its Zones.</div></div><div class="pgm-tools">' +
+    var h = '<div class="pgm-layout"><div class="pgm-main"><div class="pgm-head"><div><h2>' + esc(x.name) + '</h2><div class="pgm-sub">honeybee-ph devices, exported as Process loads with each device\'s watts worked out per dwelling at export. One Set serves a dwelling, not each of its Zones.</div></div><div class="pgm-tools">' +
       iconBtn("add", "Add device", "noop") + iconBtn("duplicate", "Duplicate", "noop") + iconBtn("more", "More", "noop") + '</div></div>';
     h += '<div class="phc-table-mount" style="margin-top:12px"><table class="phc-table zp-table"><thead><tr><th>Device</th><th class="num">Quantity</th><th>Energy demand</th><th>In conditioned space</th><th>Reference quantity</th></tr></thead><tbody>' +
-      x.devices.map(function (d) { var r = /Phius rule/.test(d[2]); return '<tr><td>' + esc(d[0]) + '</td><td class="num">' + d[1] + '</td><td>' + (r ? '<span style="color:#0b5360">' + svg("sigma", 12) + ' ' + esc(d[2]) + '</span>' : esc(d[2])) + '</td><td>' + (/exterior|garage/i.test(d[0]) ? "No" : "Yes") + '</td><td class="zp-muted">' + (r ? "Bedrooms / floor area" : "Zone occupants") + '</td></tr>'; }).join("") + '</tbody></table></div></div></div>';
+      x.devices.map(function (d) { var r = /Phius rule/.test(d[2]); return '<tr><td>' + esc(d[0]) + '</td><td class="num">' + d[1] + '</td><td>' + (r ? '<span style="color:#0b5360">' + svg("sigma", 12) + ' ' + esc(d[2]) + '</span>' : esc(d[2])) + '</td><td>' + (/exterior|garage/i.test(d[0]) ? "No" : "Yes") + '</td><td class="zp-muted">' + (r ? "Bedrooms / floor area" : "Zone occupants") + '</td></tr>'; }).join("") + '</tbody></table></div></div>' +
+      simpleSidebar("Equipment Set Library", "Equipment Sets in this file", "new-set", "New Equipment Set", caption("In this file", S.sets.length) + S.sets.map(function (y) { return fileRow(y.name, y.id, "sel-set", S.selSet === y.id); }).join(""), S.sets.length) + '</div>';
     return h;
   }
 

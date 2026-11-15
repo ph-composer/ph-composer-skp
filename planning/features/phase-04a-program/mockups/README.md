@@ -27,11 +27,13 @@ server. The dark strip at the top picks a journey and says what to try; Reset re
 
 ## What the prototype proposes
 
-- **Programs tab** with Programs, Schedules and Equipment Sets subtabs, laid out like Window Types:
-  a rail of records, the editor, and for Programs only a Program Library sidebar (Q4a-35). Its
-  sources are library files from ph-composer-standards that the user added through Library setup
-  (Q4a-19): Phius Multifamily and Phius Non-Residential, with honeybee-energy standards shown as
-  not added (Q4a-20). Journeys 3 and 4 assume both Phius files were added.
+- **Programs tab** with Programs, Schedules and Equipment Sets subtabs. Each is the editor and one
+  right sidebar, as in the Assembly and Window Type Builders (Q4a-35): no left rail; the source
+  select starts with "Programs in this file" (or Schedules, Equipment Sets) and then the added
+  library files, Phius Multifamily and Phius Non-Residential from ph-composer-standards, with
+  honeybee-energy standards shown as not added (Q4a-20). Choosing a record in this file opens it;
+  a library row ends in a plus that copies it, or a check when it is already in this file.
+  Journeys 3 and 4 assume both Phius files were added.
 - **A Program** is a column of full-width accordion cards (Q4a-34, `j4-program-cards`): closed,
   each shows its values and schedule on one line; open, its values on the left and its Schedules on
   the right. Order: Occupancy, Lighting, Ventilation, Electric equipment, Setpoint, Infiltration,

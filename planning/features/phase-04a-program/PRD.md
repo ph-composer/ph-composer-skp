@@ -140,9 +140,12 @@ honeybee-ph operating periods waits on the honeybee-ph and PHX fix for F4a-13 (Q
 
 ## Programs tab (P4a-11; reviewed 2026-11-15)
 
-Subtabs Programs, Schedules and Equipment Sets, on the Window Types layout: a rail of records, the
-editor, and for Programs only a Program Library sidebar listing the library files the user has
-added (Q4a-35, a trial). Prototype: `j4-program-cards`, `j1-vent-schedule`, `j5-program`,
+Subtabs Programs, Schedules and Equipment Sets, each the editor with one right sidebar, the
+Assembly and Window Type Builders' pattern (Q4a-35): no left rail; the sidebar's source select
+starts with "Programs in this file" (or Schedules, Equipment Sets), with + New, search and the
+records grouped (Default and In this file; Schedules by type), and lists the added library files
+after it. Choosing a record in this file opens it; a library row ends in a plus that copies it.
+Schedules and Equipment Sets show only their records in this file for now. Prototype: `j4-program-cards`, `j1-vent-schedule`, `j5-program`,
 `equipment-sets`.
 
 - **Program editor** (Q4a-34): the header names the Program, its source and its users, with People,
