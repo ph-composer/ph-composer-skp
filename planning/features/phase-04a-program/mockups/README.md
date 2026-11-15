@@ -22,6 +22,7 @@ server. The dark strip at the top picks a journey and says what to try; Reset re
 | 4. Non-residential school | Unassigned Zones are flagged; assign from Phius Non-Residential, or browse the library sidebar | `j4-start` (`journey=4`), `j4-assigned` (`journey=4&do=school`), `j4-library` (`journey=4&do=school,libnr`), `j4-long-name` (`journey=4&do=school,longname`) |
 | 5. Custom lab programs | Programs tab, + on the rail, set loads, open a schedule chip | `j5-program` and `-420` (`journey=5&do=custom`), `j5-schedule` (`journey=5&do=custom,customsched`) |
 | Equipment Sets | Programs tab, Equipment Sets | `equipment-sets` (`journey=1&do=sets`) |
+| Zones → Spaces (journey 1, then 3) | Zones, Spaces subtab. Type a Supply, Extract or Transfer rate on a Space; hover a specified Space for From Program | `j1-spaces` (`journey=1&do=house3,spaces`), `j1-spaces-cascade` (`…,spaces,cascade`), `j3-spaces` (`journey=3&do=each,beds,common,spaces,cascade`) |
 
 ## What the prototype proposes
 
@@ -61,6 +62,15 @@ server. The dark strip at the top picks a journey and says what to try; Reset re
   with summed bedrooms, occupants, people, lighting and ventilation. Per row: Program,
   Dwelling, Bedrooms, Occupants, Equipment Set, both floor areas, and the absolute loads. An
   unassigned Zone shows the residential default in italics.
+- **Zones → Spaces** ([ventilation research](../research/ventilation.md)): Building Segment, Zone
+  and Space rows with floor area, iCFA, net volume and Supply, Extract and Transfer. Every row shows
+  the airflow it exports. A Space with no rate entered is *From Program*: a muted italic number, its
+  floor share of the Zone's Program ventilation, named in the tooltip. Typing any rate makes it
+  *Specified*, its blank rates 0 (Q4a-29); From Program in its Actions cell clears them. The Zone row
+  names its Program and always shows its sums; an (i) explains a partly specified Zone, whose other
+  Spaces keep their full share (F4a-25). Transfer's header says it reaches PHPP only (F4a-27). A
+  Zone with no Spaces shows a finding (F4a-28). Shares are illustrative: the residential default's
+  people come from the Dwelling, and that calculation is not built.
 - **The Dwelling cell** opens a bubble anchored to it: first the Zone's dwelling (an existing
   one, New dwelling, or Not a dwelling), then that dwelling's units, Zones, bedrooms, occupants and
   iCFA. A "None" cell opens the same chooser (`j1-unlocked` shows it on House).

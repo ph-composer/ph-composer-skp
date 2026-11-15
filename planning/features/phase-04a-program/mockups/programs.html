@@ -93,6 +93,15 @@
   .zp-seg select { font-weight:400; }
   .zp-bubble { position:absolute; z-index:40; width:260px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#fff; box-shadow:0 6px 24px #0b1f2626; font-size:12px; }
   .zp-bubble h3 { margin:0 0 8px; font-size:13px; }
+  .zp-spaces tr.zp-zone-row td { font-weight:600; }
+  .zp-spaces tr.zp-zone-row td .zp-info { font-weight:400; margin-left:6px; }
+  .zp-sp-name { padding-left:18px; display:inline-flex; align-items:center; gap:4px; }
+  .zp-src { color:var(--muted); }
+  .zp-src.is-specified { color:var(--ink); }
+  .zp-src-prog { font-weight:400; color:var(--muted); }
+  .zp-table input.zp-flow.is-inherit::placeholder { color:var(--muted); font-style:italic; opacity:1; }
+  .zp-table input.zp-flow::placeholder { color:var(--muted); opacity:1; }
+  .zp-nospace td { color:var(--warning-ink); }
   .zp-info { display:inline-flex; vertical-align:-2px; color:var(--muted); cursor:help; }
   .zp-dw-choose { display:grid; gap:4px; color:var(--muted); }
   .zp-dw-choose select { font:inherit; font-size:12px; height:26px; color:var(--ink); }
@@ -198,6 +207,7 @@
     calendar: '<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
     sigma: '<path d="M18 7V5a1 1 0 0 0-1-1H6.5a.5.5 0 0 0-.4.8l4.5 6a2 2 0 0 1 0 2.4l-4.5 6a.5.5 0 0 0 .4.8H17a1 1 0 0 0 1-1v-2"/>',
     home: '<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+    reset: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
     lock: '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>'
   };
   function svg(n, s) { s = s || 16; return '<svg width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + I[n] + '</svg>'; }
@@ -237,7 +247,7 @@
   }
   function baseState(j) {
     uid = 0;
-    var s = { journey: j, tab: "zones", ptab: "programs", selProgram: null, selSchedule: null, selSet: null, checked: {}, lib: "mf", libQuery: "", notice: null, bubble: null,
+    var s = { journey: j, ztab: "programs", tab: "zones", ptab: "programs", selProgram: null, selSchedule: null, selSet: null, checked: {}, lib: "mf", libQuery: "", notice: null, bubble: null,
       programs: [], schedules: [], sets: [], dwellings: [], segments: [], zones: [] };
     // honeybee-ph single-family schedules (hbph_sfh_*.json): hourly profiles, illustrative values here.
     var presence = sched("SFH occupant presence", "Fractional", null, profile([1, 1, 1, 1, 1, 1, .9, .6, .4, .3, .3, .3, .3, .3, .3, .4, .5, .7, .9, .9, .9, 1, 1, 1]), "hbph");
@@ -282,7 +292,23 @@
       var lab = seg("Lab building", "nonres", { kind: "n50", value: 0.6 });
       zone("Wet lab", lab, 120, 120); zone("Write-up", lab, 60, 60); zone("Freezer farm", lab, 25, 25); zone("Corridor", lab, 40, 40);
     }
+    addSpaces(s);
     return s;
+  }
+  // Synthetic Spaces per Zone: name and share of the Zone's floor area. The Bike shed has none.
+  function addSpaces(s) {
+    s.zones.forEach(function (z, zi) {
+      var parts;
+      if (/^Apt/.test(z.name)) parts = [["Living", .4], ["Bedroom", .3], ["Kitchen", .15], ["Bath", .15]];
+      else if (z.name === "Living-Kitchen") parts = [["Living", .62], ["Kitchen", .38]];
+      else if (z.name === "Hall and stair") parts = [["Hall", .6], ["Stair", .4]];
+      else if (z.name === "Bike shed") parts = [];
+      else parts = [[z.name, 1]];
+      z.spaces = parts.map(function (p, i) {
+        var a = z.area * .94 * p[1];
+        return { id: id("sp"), num: (zi + 1) + "." + ("0" + (i + 1)).slice(-2), name: p[0], area: a, icfa: z.icfa * p[1], vol: a * 2.5, sup: null, eta: null, tran: null };
+      });
+    });
   }
 
   function phiusProgram(src, row) {
@@ -369,7 +395,7 @@
   function renderStrip() {
     var h = '<b>Programs prototype</b><span>Journey:</span>';
     for (var k = 1; k <= 5; k += 1) h += '<button type="button" data-act="journey" data-v="' + k + '" aria-pressed="' + (S.journey === k) + '">' + k + ' · ' + JOURNEYS[k].title + '</button>';
-    h += '<button type="button" data-act="reset">Reset</button><span class="mk-hint">' + JOURNEYS[S.journey].hint + '</span>';
+    h += '<button type="button" data-act="reset">Reset</button><span class="mk-hint">' + (S.tab === "zones" && S.ztab === "spaces" ? SPACES_HINT : JOURNEYS[S.journey].hint) + '</span>';
     document.getElementById("mk-strip").innerHTML = h;
   }
   function renderTabs() {
@@ -398,12 +424,13 @@
   }
   function renderZones() {
     var h = '<div class="phc-heading"><h1>Zones</h1><div class="phc-heading-actions">' + iconBtn("settings", "Programs settings") + '</div></div>';
-    h += '<nav class="phc-subtabs" role="tablist" aria-label="Zone views"><button type="button" role="tab" aria-selected="false" aria-pressed="false" disabled>Geometry</button><button type="button" role="tab" aria-selected="false" aria-pressed="false" disabled>Spaces</button><button type="button" role="tab" aria-selected="true" aria-pressed="true">Programs</button></nav>';
+    h += '<nav class="phc-subtabs" role="tablist" aria-label="Zone views"><button type="button" role="tab" aria-selected="false" aria-pressed="false" disabled>Geometry</button>' + ["spaces", "programs"].map(function (k) { var on = S.ztab === k; return '<button type="button" role="tab" data-act="ztab" data-v="' + k + '" aria-selected="' + on + '" aria-pressed="' + on + '">' + (k === "spaces" ? "Spaces" : "Programs") + '</button>'; }).join("") + '</nav>';
     var nChecked = Object.keys(S.checked).length;
     h += '<div class="phc-inventory-controls">' +
       '<label class="phc-view-control"><input type="search" placeholder="Zone, Program or dwelling" aria-label="Filter Zones"></label>' +
       '<span class="phc-view-count">' + S.segments.length + ' Building Segment' + (S.segments.length > 1 ? "s" : "") + ' · ' + S.zones.length + ' Zones · ' + S.dwellings.length + ' dwellings</span>' +
       iconBtn("add", "New Building Segment", "new-seg") + '</div>';
+    if (S.ztab === "spaces") return h + spacesTable() + (S.bubble ? S.bubble.html : "");
     var COLS = [["name", "Name", 140], ["program", "Program", 190], ["dwelling", "Dwelling", 120], ["beds", "Bedrooms", 72, 1], ["occ", "Occupants", 80, 1], ["set", "Equipment Set", 170],
       ["area", "Floor area m²", 84, 1], ["icfa", "iCFA m²", 70, 1], ["people", "People peak", 76, 1], ["light", "Lighting W", 80, 1], ["vent", "Ventilation m³/h", 96, 1]];
     var tips = { area: "Gross Zone floor area: the basis honeybee divides per-area loads by.", icfa: "Weighted Space floor area (iCFA): the basis of the Phius residential rules.",
@@ -577,6 +604,75 @@
     });
     dlg.addEventListener("cancel", function () { dlg.remove(); render(); });
     dlg.showModal();
+  }
+  // ---------------------------------------------------------------- Zones / Spaces view: airflow per Space
+  // A Space with no rate entered takes its floor share of the Zone's Program ventilation (PHX's split);
+  // a Space with any rate entered is specified, and its blank rates count as 0. The schedule is always the Program's.
+  function spMode(sp) { return sp.sup === null && sp.eta === null && sp.tran === null ? "program" : "specified"; }
+  function spShare(z, sp) { var tot = z.spaces.reduce(function (a, x) { return a + x.area; }, 0); return tot ? sp.area / tot : 0; }
+  function zoneVent(z) { var d = derived(z); return d.ventMissing ? null : d.vent; }
+  function spFlow(z, sp) {
+    if (spMode(sp) === "specified") return { sup: sp.sup || 0, eta: sp.eta || 0, tran: sp.tran || 0 };
+    var v = zoneVent(z); if (v === null) return { sup: null, eta: null, tran: 0 };
+    return { sup: v * spShare(z, sp), eta: v * spShare(z, sp), tran: 0 };
+  }
+  function findSpace(spid) { var hit = null; S.zones.forEach(function (z) { (z.spaces || []).forEach(function (sp) { if (sp.id === spid) hit = { z: z, sp: sp }; }); }); return hit; }
+  function info(text) { return '<span class="zp-info" role="img" aria-label="' + esc(text) + '" data-tip="' + esc(text) + '">' + svg("info", 13) + '</span>'; }
+  function flowSum(v, any) { return any ? '<span class="zp-amber" data-tip="The Program has no ventilation rates yet.">?</span>' : fmt(v); }
+  var SPACES_HINT = "<em>Spaces</em>: every row shows the airflow it exports. Muted numbers come from the Zone's Program, split by floor area; <em>type a rate</em> to specify a Space (its blank rates become 0). Hover a specified Space for <em>From Program</em>.";
+  function spacesTable() {
+    var COLS = [["name", "Name", 190], ["src", "Airflow", 170], ["area", "Floor area m²", 90, 1], ["icfa", "iCFA m²", 76, 1], ["vol", "Net volume m³", 96, 1], ["sup", "Supply m³/h", 92, 1], ["eta", "Extract m³/h", 92, 1], ["tran", "Transfer m³/h", 98, 1]];
+    var tips = { src: "Where each Space's airflow comes from. From Program: the Zone's Program ventilation, split by Space floor area. Specified: the rates entered here. The Program's schedule applies either way.",
+      area: "Space floor area, unweighted: the basis the Program's ventilation is split by.", tran: "Transfer air reaches PHPP only. WUFI-Passive and METr receive supply and extract." };
+    var width = 72 + COLS.reduce(function (a, c) { return a + c[2]; }, 0);
+    var h = '<div class="phc-table-mount" style="--row-actions-width:72px; position:relative"><table class="phc-table is-tree reveals-row-actions zp-table zp-spaces" style="min-width:' + width + 'px"><colgroup><col style="width:72px">' + COLS.map(function (c) { return '<col style="width:' + c[2] + 'px">'; }).join("") + '</colgroup><thead><tr><th class="col-actions"></th>' +
+      COLS.map(function (c) { return '<th class="' + (c[3] ? "num" : "") + '"' + (tips[c[0]] ? ' data-tip="' + esc(tips[c[0]]) + '"' : "") + '><span class="phc-header-label-row"><span class="phc-th-label">' + c[1] + '</span></span></th>'; }).join("") + '</tr></thead><tbody>';
+    function sums(zs) {
+      var o = { area: 0, icfa: 0, vol: 0, sup: 0, eta: 0, tran: 0, unknown: false };
+      zs.forEach(function (z) { z.spaces.forEach(function (sp) { var f = spFlow(z, sp); o.area += sp.area; o.icfa += sp.icfa; o.vol += sp.vol; if (f.sup === null) o.unknown = true; else { o.sup += f.sup; o.eta += f.eta; } o.tran += f.tran; }); });
+      return o;
+    }
+    function numCells(o) { return '<td class="num">' + fmt(o.area, 1) + '</td><td class="num">' + fmt(o.icfa, 1) + '</td><td class="num">' + fmt(o.vol, 1) + '</td><td class="num">' + flowSum(o.sup, o.unknown) + '</td><td class="num">' + flowSum(o.eta, o.unknown) + '</td><td class="num">' + fmt(o.tran) + '</td>'; }
+    function zoneRows(z, exported) {
+      var p = effectiveProgram(z), o = sums([z]), out = '';
+      var spec = z.spaces.filter(function (sp) { return spMode(sp) === "specified"; }), fromP = z.spaces.length - spec.length, pv = zoneVent(z);
+      var note = "";
+      if (exported && spec.length && fromP) {
+        var a = 0, b = 0; z.spaces.forEach(function (sp) { var f = spFlow(z, sp); if (spMode(sp) === "specified") a += f.sup; else b += f.sup || 0; });
+        note = info("Supply: " + fmt(a) + " m³/h specified, plus " + fmt(b) + " m³/h from the Program for the other Spaces, each at its full floor share. The Program alone gives this Zone " + (pv === null ? "?" : fmt(pv)) + " m³/h.");
+      } else if (exported && spec.length) note = info("Every Space is specified, so the Program's flow is not used. Its schedule still applies.");
+      out += '<tr class="tier-1 zp-zone-row' + (exported ? "" : " zp-out") + '"><td class="col-actions"></td><td>' + esc(z.name) + '</td>' +
+        '<td>' + (exported ? '<span class="zp-src-prog" data-tip="Ventilation from ' + esc(p.name) + ': its flow, split by Space floor area, for Spaces with no rates, and its schedule for every Space.">' + esc(p.name) + '</span>' + note : "Not exported") + '</td>' + numCells(o) + '</tr>';
+      if (!z.spaces.length) out += '<tr class="tier-2 zp-nospace"><td class="col-actions"></td><td colspan="' + COLS.length + '"><span class="zp-sp-name">' + flag("No Spaces: PHX builds ventilation rooms from Spaces, so this Zone would export no ventilation and no iCFA to WUFI-Passive or METr. To confirm (F4a-28, Q4a-32).") + ' No Spaces</span></td></tr>';
+      z.spaces.forEach(function (sp) {
+        var mode = spMode(sp), f = spFlow(z, sp), share = Math.round(spShare(z, sp) * 100);
+        var inheritTip = "From " + p.name + ": " + share + " % of this Zone's Space floor area. Type a rate to specify this Space; its blank rates then count as 0.";
+        function cell(k) {
+          if (!exported) return '<td class="num zp-muted">—</td>';
+          if (mode === "program") {
+            var ph = k === "tran" ? "0" : (f[k] === null ? "?" : fmt(f[k]));
+            return '<td class="num phc-editable-cell"><input class="phc-cell-input zp-flow is-inherit" data-act="sp-flow" data-v="' + sp.id + '" data-k="' + k + '" value="" placeholder="' + ph + '" aria-label="' + esc(sp.name) + ' ' + k + '" data-tip="' + esc(k === "tran" ? "No transfer air from the Program. " + inheritTip : inheritTip) + '"></td>';
+          }
+          return '<td class="num phc-editable-cell"><input class="phc-cell-input zp-flow" data-act="sp-flow" data-v="' + sp.id + '" data-k="' + k + '" value="' + (sp[k] === null ? "" : sp[k]) + '" placeholder="0" aria-label="' + esc(sp.name) + ' ' + k + '"' + (sp[k] === null ? ' data-tip="Blank counts as 0: this Space is specified."' : "") + '></td>';
+        }
+        out += '<tr class="tier-2"><td class="col-actions">' + (exported && mode === "specified" ? '<button type="button" class="phc-icon-button row-icon" data-row-action="reset" data-act="sp-reset" data-v="' + sp.id + '" aria-label="From Program: clear ' + esc(sp.name) + '\'s rates" data-tip="From Program: clear the three rates">' + svg("reset", 16) + '</button>' : "") + '</td>' +
+          '<td><span class="zp-sp-name">' + sp.num + ' ' + esc(sp.name) + '</span></td>' +
+          '<td class="zp-src' + (mode === "specified" ? " is-specified" : "") + '">' + (exported ? (mode === "specified" ? "Specified" : "From Program") : "") + '</td>' +
+          '<td class="num">' + fmt(sp.area, 1) + '</td><td class="num">' + fmt(sp.icfa, 1) + '</td><td class="num">' + fmt(sp.vol, 1) + '</td>' + cell("sup") + cell("eta") + cell("tran") + '</tr>';
+      });
+      return out;
+    }
+    S.segments.forEach(function (g) {
+      var zs = S.zones.filter(function (z) { return z.seg === g.id; });
+      h += '<tr class="tier-0 zp-seg"><td class="col-actions">' + segActions(g) + '</td><td colspan="2">' + segHead(g, zs.length, []) + '</td>' + (zs.length ? numCells(sums(zs)) : '<td colspan="6"></td>') + '</tr>';
+      zs.forEach(function (z) { h += zoneRows(z, true); });
+    });
+    var out = S.zones.filter(function (z) { return !z.seg; });
+    if (out.length) {
+      h += '<tr class="tier-0 zp-seg is-none"><td class="col-actions"></td><td colspan="' + COLS.length + '"><div class="zp-seg-name" data-tip="Zones in no Building Segment are left out of export.">No Building Segment<span class="zp-seg-count">' + out.length + ' Zone' + (out.length > 1 ? "s" : "") + ' · left out of export</span></div></td></tr>';
+      out.forEach(function (z) { h += zoneRows(z, false); });
+    }
+    return h + '</tbody></table></div>';
   }
   // Single dwelling: the Building Segment row is the house row. Its Bedrooms, Occupants and Equipment Set
   // cells are the only inputs on the page.
@@ -899,6 +995,8 @@
     if (a === "journey") { S = baseState(+v); }
     else if (a === "reset") { S = baseState(S.journey); }
     else if (a === "tab") { S.tab = v; S.bubble = null; }
+    else if (a === "ztab") { S.ztab = v; S.checked = {}; S.bubble = null; }
+    else if (a === "sp-reset") { var hs = findSpace(v); hs.sp.sup = hs.sp.eta = hs.sp.tran = null; notify(hs.sp.num + " " + hs.sp.name + " uses its Zone's Program airflow again."); }
     else if (a === "ptab") { S.ptab = v; }
     else if (a === "check") { if (el.checked) S.checked[v] = 1; else delete S.checked[v]; }
     else if (a === "check-all") { S.checked = {}; if (el.checked) checkable().forEach(function (z) { S.checked[z.id] = 1; }); }
@@ -934,6 +1032,7 @@
     var el = e.target, a = el.getAttribute("data-act"), v = el.getAttribute("data-v"); if (!a) return;
     if (a === "zone-program") assignProgram(S.zones.filter(function (z) { return z.id === v; }), el.value);
     else if (a === "bulk-program") assignProgram(S.zones.filter(function (z) { return S.checked[z.id]; }), el.value);
+    else if (a === "sp-flow") { var hf = findSpace(v); hf.sp[el.getAttribute("data-k")] = el.value === "" ? null : Math.max(0, parseFloat(el.value) || 0); }
     else if (a === "zone-dwelling") { assignDwelling(S.zones.filter(function (z) { return z.id === v; }), el.value); S.bubble = null; }
     else if (a === "bulk-dwelling") assignDwelling(S.zones.filter(function (z) { return S.checked[z.id]; }), el.value);
     else if (a === "bulk-set") { var zs = S.zones.filter(function (z) { return S.checked[z.id]; }); zs.forEach(function (z) { z.set = el.value === "none" ? null : el.value; if (z.dwelling) dw(z.dwelling).set = z.set; }); notify("Equipment Set changed on " + zs.length + " Zones."); }
@@ -1004,6 +1103,14 @@
     if (st === "pdefault") { S.tab = "programs"; S.ptab = "programs"; S.selProgram = "pgm_default"; }
     if (st === "sets") { S.tab = "programs"; S.ptab = "sets"; }
     if (st === "lockinfo") { setTimeout(function () { var c = document.querySelector('.zp-locked'); if (c) { lockBubble(c.getAttribute("data-v"), c); render(); } }, 50); }
+    if (st === "spaces") S.ztab = "spaces";
+    if (st === "cascade") S.zones.forEach(function (z) {
+      if (S.journey === 3 && z.name !== "Apt 101") return;
+      z.spaces.forEach(function (sp) {
+        if (sp.name === "Living") sp.sup = 40; else if (/^Bedroom/.test(sp.name)) sp.sup = 30;
+        else if (sp.name === "Kitchen") sp.eta = 60; else if (sp.name === "Bath") sp.eta = 40; else if (sp.name === "Hall") sp.tran = 30;
+      });
+    });
     if (st === "longname") { S.segments[0].name = "Elementary School, Building A (classrooms, gym and canteen)"; }
     if (st === "moveshed") { S.zones.forEach(function (z) { if (z.name === "Bike shed") z.seg = null; }); }
     if (st === "checkshed") { S.zones.forEach(function (z) { if (z.name === "Bike shed") S.checked[z.id] = 1; }); }

@@ -67,6 +67,9 @@ honeybee-energy 1.123.23 (pinned wheel), PHX 1.59.1 (local checkout), honeybee_g
 5. **Transfer column tooltip:** PHPP only; WUFI-Passive and METr do not read it.
 6. **A Zone with no Spaces** gets an export finding once F4a-28 is confirmed by a round trip.
 
+The [Programs prototype](../mockups/README.md) shows items 1, 3, 5 and 6 in Zones → Spaces
+(`j1-spaces`, `j1-spaces-cascade`, `j3-spaces`).
+
 ## Open questions
 
 | Id | Question | Recommendation |
