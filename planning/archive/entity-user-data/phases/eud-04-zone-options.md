@@ -1,6 +1,6 @@
 # EUD-04: Building Segments and Levels
 
-STATUS: Scoped
+STATUS: Complete
 ISSUE: [#507](https://github.com/ph-composer/ph-composer-skp/issues/507)
 DECISIONS: D-UD-3, D-UD-5 ([plan](../PLAN.md#decisions-for-ed))
 

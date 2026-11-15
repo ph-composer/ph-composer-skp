@@ -1,7 +1,7 @@
 # Consistent entity user data
 
 DATE: 2026-11-14
-STATUS: In progress
+STATUS: Complete. Archived 2026-11-15
 AUTHOR: Ed May, BLDGTYP, with Codex
 ISSUE: [#507](https://github.com/ph-composer/ph-composer-skp/issues/507)
 
@@ -21,6 +21,6 @@ The feature is unscheduled. Its scope includes a complete entity inventory, cons
 read/write/copy/persistence behavior, explicit interchange policies, beginner scripting examples
 and contributor guidance. It adds no requirement for a general metadata editor or plugin loader.
 
-Owning contracts: [metadata and extension data](../../../../context/EXTENSIBILITY.md#metadata-and-structured-extension-data),
-[record lifecycle](../../../../context/CONTRACTS.md#records-and-extension-data) and
-[public API](../../../../context/CONTRACTS.md#public-interface).
+Owning contracts: [metadata and extension data](../../../context/EXTENSIBILITY.md#metadata-and-structured-extension-data),
+[record lifecycle](../../../context/CONTRACTS.md#records-and-extension-data) and
+[public API](../../../context/CONTRACTS.md#public-interface).

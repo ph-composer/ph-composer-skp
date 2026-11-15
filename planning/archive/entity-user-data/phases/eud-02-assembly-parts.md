@@ -1,6 +1,6 @@
 # EUD-02: Assembly Layers and Layer-Segments
 
-STATUS: Implemented on branch
+STATUS: Complete
 ISSUE: [#507](https://github.com/ph-composer/ph-composer-skp/issues/507)
 DECISIONS: D-UD-3, D-UD-4 ([plan](../PLAN.md#decisions-for-ed))
 

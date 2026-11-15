@@ -1,6 +1,6 @@
 # EUD-01: one metadata action for catalog records
 
-STATUS: Implemented on branch
+STATUS: Complete
 ISSUE: [#507](https://github.com/ph-composer/ph-composer-skp/issues/507)
 DECISIONS: D-UD-3 ([plan](../PLAN.md#decisions-for-ed))
 

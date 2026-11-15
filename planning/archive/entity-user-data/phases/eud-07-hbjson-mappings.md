@@ -1,6 +1,6 @@
 # EUD-07: HBJSON mappings
 
-STATUS: Scoped
+STATUS: Complete
 ISSUE: [#507](https://github.com/ph-composer/ph-composer-skp/issues/507)
 DECISIONS: D-UD-6 ([plan](../PLAN.md#decisions-for-ed))
 

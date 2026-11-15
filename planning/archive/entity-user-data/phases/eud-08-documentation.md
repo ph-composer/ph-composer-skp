@@ -1,6 +1,6 @@
 # EUD-08: documentation and coverage table
 
-STATUS: Scoped
+STATUS: Complete
 ISSUE: [#507](https://github.com/ph-composer/ph-composer-skp/issues/507)
 DECISIONS: D-UD-7, D-UD-8 ([plan](../PLAN.md#decisions-for-ed))
 

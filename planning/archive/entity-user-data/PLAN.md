@@ -1,7 +1,7 @@
 # Consistent entity user data: delivery plan
 
 DATE: 2026-11-14
-STATUS: Authorized. Stages EUD-01 to EUD-10 planned from the source inventory at `68919a8c`;
+STATUS: Complete. Stages EUD-01 to EUD-10 delivered by PR #508; archived 2026-11-15. Planned from the source inventory at `68919a8c`;
 Ed answered D-UD-1 to D-UD-8 "All as recommended" on 2026-11-14 and authorized implementation.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#507](https://github.com/ph-composer/ph-composer-skp/issues/507)
@@ -18,7 +18,7 @@ plainly that it does not. [PRD.md](PRD.md) owns the requirements and acceptance 
 Read at `68919a8c` on 2026-11-14 and updated to the final state of the branch in EUD-08. Paths are
 relative to `src/ph_composer/`. "UD" is `user_data`. "Closed by" names the stage that closed each
 gap found at `68919a8c`; "none" means the entity already met the policy. The published coverage
-table is [docs/USER_DATA.md](../../../../docs/USER_DATA.md), one row per entity below.
+table is [docs/USER_DATA.md](../../../docs/USER_DATA.md), one row per entity below.
 
 | Entity | Owner, storage, address | Schema allows UD | Read with UD | Write UD on an existing entity | HBJSON | Library | Closed by |
 | --- | --- | --- | --- | --- | --- | --- | --- |

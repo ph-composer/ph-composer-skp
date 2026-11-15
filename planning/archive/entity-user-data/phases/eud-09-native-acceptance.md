@@ -1,6 +1,6 @@
 # EUD-09: native acceptance
 
-STATUS: Scoped
+STATUS: Complete
 ISSUE: [#507](https://github.com/ph-composer/ph-composer-skp/issues/507)
 
 ## Scope

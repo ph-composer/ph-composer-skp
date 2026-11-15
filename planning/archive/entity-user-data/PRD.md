@@ -1,7 +1,7 @@
 # Consistent entity user data
 
 DATE: 2026-11-14
-STATUS: Scoped
+STATUS: Complete. Delivered by PR #508; archived 2026-11-15
 AUTHOR: Ed May, BLDGTYP, with Codex
 ISSUE: [#507](https://github.com/ph-composer/ph-composer-skp/issues/507)
 
@@ -33,17 +33,17 @@ completed inventory or acceptance of this feature.
 
 | Area | Observed behavior | Owning source |
 | --- | --- | --- |
-| Record foundation | Optional mapping, plain JSON validation, detached reads, whole-map replacement and recursive copy preservation already exist | [RecordKind](../../../../src/ph_composer/core/records/record_kind.rb), [Engine](../../../../src/ph_composer/core/records/engine.rb), [Metadata](../../../../src/ph_composer/core/records/metadata.rb) |
-| Model-owned definitions | Materials, Assemblies, window products and Types, Attached zones and Thermal Bridge Types use the shared record system; audit every public route rather than infer coverage from storage | [Feature registration](../../../../src/ph_composer/features), [definition pattern](../../../../context/TECH_STACK.md#a-definition-record-end-to-end) |
-| Zones, Faces and Window Units | Owner metadata actions already exist, with expected metadata and transactional batches | [Entity metadata tests](../../../../tests/entity_metadata_test.rb) |
-| Spaces, Volumes and Floor Segments | Shared metadata rules and a public metadata action already exist | [Spaces authoring](../../../../src/ph_composer/features/spaces/authoring.rb), [schema](../../../../src/ph_composer/features/spaces/schema.rb) |
-| Thermal Bridge Edge assignments | Records accept metadata and reassignment preserves it; normal public reads omit the maps and there is no equivalent metadata update action | [Assignment declarations](../../../../src/ph_composer/features/thermal_bridges/declarations/assignment.rb), [operations](../../../../src/ph_composer/features/thermal_bridges/assignment/operations.rb) |
-| Building Segments and Levels | Create accepts `user_data`, reads expose it, but the existing-option update does not accept it | [Option commands](../../../../src/ph_composer/features/zones/options/commands.rb) |
-| Assembly Layers and Layer-Segments | Authored nested objects with identities; their closed schemas have no `user_data` | [Assembly schema](../../../../src/ph_composer/features/assemblies/assembly/schema.rb) |
-| Window Elements | Authored nested objects with identities; their closed schema has no `user_data` | [Window Type schema](../../../../src/ph_composer/features/windows/types/schema.rb) |
-| Model root and logical entities | Model-level settings are not a universal Model metadata API. A Space Floor has an identity on its Volume but no independent stored record. Both need an explicit ownership decision | [ModelSettings](../../../../src/ph_composer/core/model_settings.rb), [Spaces schema](../../../../src/ph_composer/features/spaces/schema.rb), [terminology](../../../../context/UBIQUITOUS_LANGUAGE.md) |
-| HBJSON | Pass-through exists for Zones, Faces, Window Units, Assemblies, Spaces, Volumes and Floor Segments; other data may remain local with a finding | [Export guide](../../../../docs/AGENT_GUIDE.md#export), [record reader](../../../../src/ph_composer/export/record_reader.rb) |
-| Library interchange | Built-in wire schemas omit local metadata. Export reports omissions; admission trims undeclared fields. Updating an existing local definition preserves its local metadata | [File format](../../../../docs/LIBRARY_FILE_FORMAT.md), [export projection](../../../../src/ph_composer/library/export_projection.rb), [admission](../../../../src/ph_composer/library/library_file.rb), [replacement tests](../../../../tests/library_coordinator_test.rb) |
+| Record foundation | Optional mapping, plain JSON validation, detached reads, whole-map replacement and recursive copy preservation already exist | [RecordKind](../../../src/ph_composer/core/records/record_kind.rb), [Engine](../../../src/ph_composer/core/records/engine.rb), [Metadata](../../../src/ph_composer/core/records/metadata.rb) |
+| Model-owned definitions | Materials, Assemblies, window products and Types, Attached zones and Thermal Bridge Types use the shared record system; audit every public route rather than infer coverage from storage | [Feature registration](../../../src/ph_composer/features), [definition pattern](../../../context/TECH_STACK.md#a-definition-record-end-to-end) |
+| Zones, Faces and Window Units | Owner metadata actions already exist, with expected metadata and transactional batches | [Entity metadata tests](../../../tests/entity_metadata_test.rb) |
+| Spaces, Volumes and Floor Segments | Shared metadata rules and a public metadata action already exist | [Spaces authoring](../../../src/ph_composer/features/spaces/authoring.rb), [schema](../../../src/ph_composer/features/spaces/schema.rb) |
+| Thermal Bridge Edge assignments | Records accept metadata and reassignment preserves it; normal public reads omit the maps and there is no equivalent metadata update action | [Assignment declarations](../../../src/ph_composer/features/thermal_bridges/declarations/assignment.rb), [operations](../../../src/ph_composer/features/thermal_bridges/assignment/operations.rb) |
+| Building Segments and Levels | Create accepts `user_data`, reads expose it, but the existing-option update does not accept it | [Option commands](../../../src/ph_composer/features/zones/options/commands.rb) |
+| Assembly Layers and Layer-Segments | Authored nested objects with identities; their closed schemas have no `user_data` | [Assembly schema](../../../src/ph_composer/features/assemblies/assembly/schema.rb) |
+| Window Elements | Authored nested objects with identities; their closed schema has no `user_data` | [Window Type schema](../../../src/ph_composer/features/windows/types/schema.rb) |
+| Model root and logical entities | Model-level settings are not a universal Model metadata API. A Space Floor has an identity on its Volume but no independent stored record. Both need an explicit ownership decision | [ModelSettings](../../../src/ph_composer/core/model_settings.rb), [Spaces schema](../../../src/ph_composer/features/spaces/schema.rb), [terminology](../../../context/UBIQUITOUS_LANGUAGE.md) |
+| HBJSON | Pass-through exists for Zones, Faces, Window Units, Assemblies, Spaces, Volumes and Floor Segments; other data may remain local with a finding | [Export guide](../../../docs/AGENT_GUIDE.md#export), [record reader](../../../src/ph_composer/export/record_reader.rb) |
+| Library interchange | Built-in wire schemas omit local metadata. Export reports omissions; admission trims undeclared fields. Updating an existing local definition preserves its local metadata | [File format](../../../docs/LIBRARY_FILE_FORMAT.md), [export projection](../../../src/ph_composer/library/export_projection.rb), [admission](../../../src/ph_composer/library/library_file.rb), [replacement tests](../../../tests/library_coordinator_test.rb) |
 
 The initial review ran 276 focused Ruby tests (2,665 assertions) and 52 Python tests successfully,
 including metadata edits, supported copies and reloaded Honeybee objects. These checks establish
@@ -165,14 +165,14 @@ Documentation is part of acceptance, with examples checked against the actual pu
 
 | Surface | Required change |
 | --- | --- |
-| [API quickstart](../../../../docs/API_QUICKSTART.md) and a short user-data guide if needed | A beginner recipe on an existing Face or Material: discover/read, change one namespace, guarded write, read back, clear; explain detached views and whole-map replacement. No custom feature registration or raw dictionary writes |
-| [Documentation index](../../../../docs/.index.md) | An obvious route to the recipe and its coverage/export table |
-| [Agent guide](../../../../docs/AGENT_GUIDE.md) and generated [API reference](../../../../docs/API_REFERENCE.md) | Actual operation names, nested addressing, guards, large-map reads, examples and honest export limits; regenerate from declarations rather than hand-edit generated schemas |
-| [Contributor architecture](../../../../context/EXTENSIBILITY.md#metadata-and-structured-extension-data) | Universal entity requirement, small-script entry point, distinction from structured extension data, and an obligation for new contributions |
-| [Core contracts](../../../../context/CONTRACTS.md#records-and-extension-data) | One owner for value shape, replacement, copy, lifecycle and compatibility rules; explicit nested/root ownership and split/merge behavior |
-| [Technical architecture](../../../../context/TECH_STACK.md), [terminology](../../../../context/UBIQUITOUS_LANGUAGE.md) and [context index](../../../../context/.index.md) | Storage/export ownership and links only where affected; name authored versus derived objects consistently |
-| [Library format](../../../../docs/LIBRARY_FILE_FORMAT.md) and export documentation | Exact preserved/omitted fields and applicable versions after the format decision |
-| [Foundation example](../../../../tools/examples/foundation/README.md) | Link to the small recipe; keep the maintained-extension example as the next step |
+| [API quickstart](../../../docs/API_QUICKSTART.md) and a short user-data guide if needed | A beginner recipe on an existing Face or Material: discover/read, change one namespace, guarded write, read back, clear; explain detached views and whole-map replacement. No custom feature registration or raw dictionary writes |
+| [Documentation index](../../../docs/.index.md) | An obvious route to the recipe and its coverage/export table |
+| [Agent guide](../../../docs/AGENT_GUIDE.md) and generated [API reference](../../../docs/API_REFERENCE.md) | Actual operation names, nested addressing, guards, large-map reads, examples and honest export limits; regenerate from declarations rather than hand-edit generated schemas |
+| [Contributor architecture](../../../context/EXTENSIBILITY.md#metadata-and-structured-extension-data) | Universal entity requirement, small-script entry point, distinction from structured extension data, and an obligation for new contributions |
+| [Core contracts](../../../context/CONTRACTS.md#records-and-extension-data) | One owner for value shape, replacement, copy, lifecycle and compatibility rules; explicit nested/root ownership and split/merge behavior |
+| [Technical architecture](../../../context/TECH_STACK.md), [terminology](../../../context/UBIQUITOUS_LANGUAGE.md) and [context index](../../../context/.index.md) | Storage/export ownership and links only where affected; name authored versus derived objects consistently |
+| [Library format](../../../docs/LIBRARY_FILE_FORMAT.md) and export documentation | Exact preserved/omitted fields and applicable versions after the format decision |
+| [Foundation example](../../../tools/examples/foundation/README.md) | Link to the small recipe; keep the maintained-extension example as the next step |
 
 Publish an entity coverage table with the supported operations and interchange behavior. Until
 the work lands, describe the current gaps honestly rather than presenting this PRD as an
