@@ -128,7 +128,13 @@
   .zp-seg-count { font-weight:400; color:var(--muted); }
   .zp-seg-single { display:inline-flex; align-items:center; gap:4px; font-weight:400; font-size:12px; white-space:nowrap; }
   .zp-seg-single input { margin:0; }
-  .zp-seg-tools { display:inline-flex; gap:2px; margin-left:auto; }
+  .zp-seg-head { max-width:430px; }
+  .zp-seg-line1 { display:flex; align-items:center; gap:6px; min-height:24px; }
+  .zp-seg-title { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .zp-seg-line2 { display:flex; align-items:center; gap:10px; min-height:22px; font-weight:400; font-size:12px; color:var(--muted); }
+  .zp-seg-line2 .zp-seg-count { font-size:12px; }
+  .zp-seg-gear { width:22px; height:22px; margin-left:-4px; }
+  .zp-seg-tools { display:inline-flex; gap:2px; margin-left:auto; flex:none; }
   .zp-seg-tools .phc-icon-button { width:24px; height:24px; }
   .zp-seg-tools .zp-hover { visibility:hidden; }
   .zp-seg:hover .zp-seg-tools .zp-hover, .zp-seg:focus-within .zp-seg-tools .zp-hover { visibility:visible; }
@@ -428,18 +434,21 @@
     if (S.bubble) h += S.bubble.html;
     return h;
   }
-  // The Building Segment heading row: name, tags, findings, then Settings (always shown) and Rename and Delete (on hover).
+  // The Building Segment heading: the name alone on the first line (Rename and Delete on hover), then a
+  // second line with the Default tag, Zone count and category, Single dwelling and the settings icon.
   function segHead(g, n, sf) {
     var name = S.renaming === g.id ? '<input class="zp-seg-rename" data-act="seg-rename" data-v="' + g.id + '" value="' + esc(g.name) + '" aria-label="Building Segment name">' : esc(g.name);
     var only = S.segments.length === 1;
     var del = only ? '<span class="zp-hover" data-tip="A model keeps at least one Building Segment."><button type="button" class="phc-icon-button assembly-tool-icon" disabled aria-label="Delete ' + esc(g.name) + '">' + svg("del", 16) + '</button></span>'
       : iconBtn("del", "Delete " + g.name, "seg-delete", ' data-v="' + g.id + '"').replace('class="', 'class="zp-hover ');
-    return '<div class="zp-seg-name">' + name +
+    return '<div class="zp-seg-head"><div class="zp-seg-line1">' +
+      (S.renaming === g.id ? name : '<span class="zp-seg-title" data-tip="' + esc(g.name) + '">' + name + '</span>') + (sf.length ? flag(sf.join(" ")) : "") +
+      '<span class="zp-seg-tools">' + iconBtn("pencil", "Rename " + g.name, "seg-rename-start", ' data-v="' + g.id + '"').replace('class="', 'class="zp-hover ') + del + '</span></div>' +
+      '<div class="zp-seg-line2">' +
       (g.id === S.defaultSeg ? '<span class="zp-seg-tag" data-tip="New Zones join this Building Segment. Change it in Settings.">Default</span>' : "") +
-      '<span class="zp-seg-count">' + n + ' Zone' + (n === 1 ? "" : "s") + ' · ' + (g.category === "res" ? "Residential" : "Non-residential") + '</span>' + (sf.length ? flag(sf.join(" ")) : "") +
+      '<span class="zp-seg-count">' + n + ' Zone' + (n === 1 ? "" : "s") + ' · ' + (g.category === "res" ? "Residential" : "Non-residential") + '</span>' +
       '<label class="zp-seg-single" data-tip="' + esc(SINGLE_TIP) + '"><input type="checkbox" data-act="single" data-v="' + g.id + '"' + (g.single ? " checked" : "") + '>Single dwelling</label>' +
-      '<span class="zp-seg-tools">' + iconBtn("settings", "Building Segment settings", "seg-settings", ' data-v="' + g.id + '"') +
-      iconBtn("pencil", "Rename " + g.name, "seg-rename-start", ' data-v="' + g.id + '"').replace('class="', 'class="zp-hover ') + del + '</span></div>';
+      iconBtn("settings", "Building Segment settings", "seg-settings", ' data-v="' + g.id + '"').replace('class="', 'class="zp-seg-gear ') + '</div></div>';
   }
   var SINGLE_TIP = "Every Zone in this Building Segment is one dwelling with the residential default Program. Bedrooms, occupants and the Equipment Set are entered once, on this row. Uncheck to assign per Zone; everything it set stays.";
   // Zones a check can select: those in a Single dwelling Segment are locked.
@@ -966,6 +975,7 @@
     if (st === "customsched") { S.ptab = "schedules"; S.selSchedule = prog(S.selProgram).people.sched; }
     if (st === "pdefault") { S.tab = "programs"; S.ptab = "programs"; S.selProgram = "pgm_default"; }
     if (st === "sets") { S.tab = "programs"; S.ptab = "sets"; }
+    if (st === "longname") { S.segments[0].name = "Elementary School, Building A (classrooms, gym and canteen)"; }
     if (st === "moveshed") { S.zones.forEach(function (z) { if (z.name === "Bike shed") z.seg = null; }); }
     if (st === "checkshed") { S.zones.forEach(function (z) { if (z.name === "Bike shed") S.checked[z.id] = 1; }); }
     if (st === "newseg") { newSegment(); }

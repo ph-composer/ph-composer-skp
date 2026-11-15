@@ -153,8 +153,8 @@ again while building:
 - The WUFI writer writes `KindAttachedZone` and `TemperatureReductionFactorUserDefined`. The METr
   zone writer writes the zone type; no reduction factor field turned up there. To verify.
 
-Claude's proposal, to confirm: moving a Zone out of every Segment offers to make it the Attached
-zone for the Faces it shares with exported Zones, so the user does not assign them one by one.
+Accepted 2026-11-15: moving a Zone out of every Segment offers to make it the Attached zone for
+the Faces it shares with exported Zones, so the user does not assign them one by one.
 
 ## Answers (Ed, 2026-11-15)
 
@@ -165,4 +165,4 @@ zone for the Faces it shares with exported Zones, so the user does not assign th
 | BS-3 | **Single dwelling is a Building Segment attribute and control** (above). Supersedes Q4a-26's one-Segment rule |
 | BS-4 | **Drop the Manage Building Segments dialog.** Colour moves into settings; merging is Delete with "move its Zones to" |
 | BS-5 | **Before Phase 4a's implementation**, as its own PR stage |
-| BS-6 | **An Attached zone** where one is assigned, else a refusal naming the Face. Review how `PhAdditionalZone` flows through PHX while building (above) |
+| BS-6 | **An Attached zone** where one is assigned, else a refusal naming the Face. Moving a Zone out of every Segment offers to make it that Attached zone. Review how `PhAdditionalZone` flows through PHX while building (above) |
