@@ -1,7 +1,7 @@
 # Phase 4a contracts: records, ownership and seams
 
 DATE: 2026-11-15
-STATUS: Scoped for P4a-01 to P4a-08 and P4a-11; revised the same day after an independent review against the code (14 findings folded in) and after the Programs tab review. Ed answered C4a-5, C4a-7 and C4a-8; C4a-2, C4a-3, C4a-4, C4a-6, C4a-9 and C4a-10 settle in their stages.
+STATUS: Scoped for P4a-01 to P4a-08 and P4a-11; revised the same day after an independent review against the code (14 findings folded in) and after the Programs tab review. Ed answered C4a-5, C4a-7 and C4a-8; Ed answered C4a-9 and C4a-10 the same day; C4a-2, C4a-3, C4a-4 and C4a-6 settle in their stages.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -220,6 +220,6 @@ round-trip tests skip when it is absent and run in each stage's host gate with i
 | C4a-5 | Which feature owns mechanical cooling and the mechanical room temperature | **Answered (Ed, 2026-11-15): Phase 4 mechanical**; listed under Planned until then | Answered |
 | C4a-6 | Keep a per-Space `airflow_mode` copy for agents | Yes, derived from the Zone, for one API minor version | P4a-05 |
 | C4a-7 | Single dwelling's default: on for every Segment whose extension is absent, or on only for the first | **Answered (Ed, 2026-11-15): on for every Segment**, effective only while residential | Answered |
-| C4a-9 | Weeks per year below 52: where the weeks off fall in the honeybee ruleset | One contiguous block centred on 1 August | P4a-10 |
-| C4a-10 | Operating periods before the F4a-13 fix | Write them for ventilation Schedules now (F4a-13 affects only occupancy and lighting); occupancy and lighting stay rulesets only until the fix | P4a-10 |
+| C4a-9 | Weeks per year below 52: where the weeks off fall in the honeybee ruleset | **Answered (Ed, 2026-11-15): one contiguous block centred on 1 August** | Answered |
+| C4a-10 | Operating periods before the F4a-13 fix | **Answered (Ed, 2026-11-15): write them for ventilation Schedules now** (F4a-13 affects only occupancy and lighting); occupancy and lighting stay rulesets only until the fix | Answered |
 | C4a-8 | Moving a Zone back into a Segment after its shared Faces were reclassified to an Attached zone | **Answered (Ed, 2026-11-15): they stay Attached zone**; the move-back notice says to re-run Solve | Answered |

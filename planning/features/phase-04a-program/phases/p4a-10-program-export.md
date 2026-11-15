@@ -59,12 +59,12 @@ Q4a-25, Q4a-31, Q4a-33. Paths are relative to `src/ph_composer/`.
 10. **Docs.** The agent guide's export section; the user data guide rows for Programs, Schedules,
     Equipment Sets and Dwellings (whether each `user_data` map reaches HBJSON); glossary.
 
-## Settle in this stage
+## Decided (Ed, 2026-11-15)
 
-| Id | Question | Recommendation |
-| --- | --- | --- |
-| C4a-9 | Weeks per year below 52: where the weeks off fall in the ruleset | One contiguous block centred on 1 August (a school year); EnergyPlus sees summer closure. PHX's fallback ignores it until the F4a-13 fix writes operating periods |
-| C4a-10 | Operating periods before the F4a-13 fix | Write them for ventilation Schedules now: F4a-13 affects only occupancy and lighting, and without periods PHX builds the ventilation pattern from a histogram that mixes in per-person flow. Occupancy and lighting stay rulesets only until the fix (Q4a-08) |
+| Id | Decision |
+| --- | --- |
+| C4a-9 | Weeks per year below 52: the weeks off are one contiguous block centred on 1 August (a school year), so EnergyPlus sees a summer closure. PHX's fallback ignores it until the F4a-13 fix writes occupancy and lighting operating periods |
+| C4a-10 | Ventilation Schedules write honeybee-ph operating periods now: F4a-13 affects only occupancy and lighting, and without periods PHX builds the ventilation pattern from a histogram that mixes in per-person flow. Occupancy and lighting stay rulesets only until the fix (Q4a-08) |
 
 ## Tests (write first)
 
@@ -82,4 +82,4 @@ PG10: the packaged RBZ exports the five journeys; the round trip reads them back
 
 ## Done when
 
-PG10 passes and C4a-9 and C4a-10 are recorded in CONTRACTS.
+PG10 passes.
