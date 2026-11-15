@@ -1,7 +1,7 @@
 # Building Segments: membership, management and settings
 
 DATE: 2026-11-15
-STATUS: Requested. Plan and prototype for review; no implementation authorized.
+STATUS: Scoped. Ed answered BS-1 to BS-6 on 2026-11-15; schedule before Phase 4a's implementation (BS-5). No implementation authorized.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft; open one when Ed schedules it)
 
@@ -44,7 +44,7 @@ view (journey 3 for moving, adding and deleting; journey 1 for the dialog under 
 5. **Segment-level values move into one Building Segment settings dialog.** The heading row keeps
    only the name, its sums and a findings flag.
 
-## Proposed UX (Claude's recommendation)
+## UX (BS-1, accepted)
 
 **One Segment heading row in every Zone view.** Membership matters in all three views: Geometry is
 where a Zone's envelope and thermal bridges are counted per Segment, Spaces totals iCFA and volume
@@ -79,7 +79,7 @@ One dialog, opened from the heading row in any Zone view. Fields from honeybee-p
 | --- | --- | --- |
 | General | Name, colour, "New Zones join this Segment" | The default flag moves here from the Manage dialog |
 | Phius certification | Building category (residential or non-residential), certification program, building status, building type | Category is Q4a-14. The rest map to `PhiusCertification` enums, whose program list in the pinned honeybee-ph stops at Phius 2021 CORE and ZERO |
-| Occupancy | Default Program for its Zones; under Single dwelling, the house's bedrooms, occupants and Equipment Set | A Segment naming its default Program answers the open half of Q4a-13 |
+| Occupancy | Single dwelling (switched on the Segment row, BS-3); default Program for its Zones; under Single dwelling, the dwelling's bedrooms, occupants and Equipment Set | A Segment naming its default Program answers the open half of Q4a-13 |
 | Airtightness | Test result (n50 or q50), wind exposure | Q4a-06: converted at export into each Zone's Infiltration, which is where PHX reads it (`cleanup.merge_infiltrations`) |
 | Comfort | Winter and summer set points, read only; mechanical cooling; mechanical room temperature | Set points come from the Zones' Programs (Q4a-04) |
 | Derived, read only | Floor levels (from Levels), dwelling units (from Dwellings) | `num_floor_levels`, `num_dwelling_units` |
@@ -93,11 +93,15 @@ airtightness). The Segment record stays atomic, matching the onion rule.
 
 ## Export rules
 
+Checked only when the user exports to HBJSON; the Zone tables never flag them (BS-2).
+
+- **The minimum is one Zone in one Building Segment.** Export refuses with less.
 - A Zone in no Segment is left out, with its Faces, Spaces and thermal-bridge Edges. One info
   finding names the Zones and counts what went with them.
-- **Export refuses when no Zone is in any Segment**: there is nothing to certify.
-- **An empty Segment** (no Zones) is a warning and is left out; it does not block export.
-- Refusals and warnings appear in the Export tab's preflight like other findings.
+- **An empty Segment** (no Zones) is left out, with an info line in the export report.
+- A Face whose Surface counterpart is in a Zone left out exports with that Zone's Attached zone
+  (`PhAdditionalZone`); with none assigned, export refuses and names the Face (BS-6, below).
+- Refusals and findings appear in the Export tab's preflight like other findings.
 
 ## Files the change touches
 
@@ -115,13 +119,50 @@ airtightness). The Segment record stays atomic, matching the onion rule.
 There are no users, so no migration: the Zone record's schema version moves and existing test
 fixtures are rewritten.
 
-## Open questions
+## Single dwelling per Building Segment (BS-3)
 
-| Id | Question | Recommendation |
-| --- | --- | --- |
-| BS-1 | One Segment heading row in every Zone view, or grouping in Programs only? | Every view (above) |
-| BS-2 | "At least one Zone in a Segment" read as: export refuses when no Zone is in any Segment; an extra empty Segment is a warning. Right reading? | Yes, to confirm |
-| BS-3 | Single dwelling (Q4a-26) forces one Building Segment. Keep that, or make Single dwelling a setting of each Segment, so a house and an ADU can each be one dwelling in two Segments? | Per Segment. It removes the conflict between the switch and Segment management, and the default Model (one Segment, single dwelling) looks the same |
-| BS-4 | Does the "Manage Building Segments…" dialog survive? Heading rows cover add, rename and delete; the dialog still offers recolour and merge in one place | Drop it: colour moves into settings, merge is Delete with "move its Zones to" |
-| BS-5 | Schedule this before Phase 4a's implementation, or inside it? 4a's Segment row, category and airtightness depend on it | Before, as its own PR stage |
-| BS-6 | A Zone in a Segment shares a wall with a Zone in none (Ed's adjoining structure). What does the exported Zone's Surface Face become: Outdoors, Adiabatic, or an Attached zone boundary with a reduction factor (the garage case)? And a thermal-bridge Edge on that line: counted on the exported Zone, or dropped? Today's pairing in `model_sections.py` has not been tested against a counterpart that leaves export | Attached zone when the user has made one, else a refusal naming the Face, so nothing exports with an unpaired Surface. To decide |
+Single dwelling becomes an attribute and control of each Building Segment, replacing Q4a-26's
+Model-level switch that forced one Segment. A house and an ADU can then be one dwelling each, in
+two Segments.
+
+- The switch sits on the Segment's heading row, in every Zone view, and shows in its settings.
+  When on, that Segment's Zones are one dwelling, named for the Segment, with the residential
+  default; its rows are locked and its heading row takes the bedrooms, occupants and Equipment Set.
+- A new Model starts with one Segment with Single dwelling on (Q4a-27). Claude's choice, to
+  confirm: a Segment the user adds starts with it off.
+- Moving a Zone into a Single dwelling Segment makes it part of that dwelling; moving it out
+  leaves the dwelling. Switching on over per-Zone assignments confirms first, naming what gives
+  way in that Segment only.
+
+## Attached zones and PhAdditionalZone (BS-6)
+
+Ed's answer: a Face shared with a Zone outside every Segment exports with an Attached zone, which
+PH-Composer already writes as honeybee-ph's `PhAdditionalZone`
+(`honeybee_energy_ph/boundarycondition.py`). How PHX carries it, read 2026-11-15, to be checked
+again while building:
+
+- `PhAdditionalZone` subclasses honeybee-energy's `OtherSideTemperature` and carries a zone name,
+  type and five temperature reduction factors (heating demand, the default, plus heating load,
+  cooling demand, cooling load and passive cooling, each falling back to heating demand).
+- PHX maps it to a Surface exterior exposure with the attached zone's id number
+  (`create_building._hb_ext_exposure_to_phx_enum`).
+- `create_building.create_attached_zones_from_hb_room` makes one attached `PhxZone` (kind
+  unheated space) per distinct boundary identifier **per Room**, carrying only the heating-demand
+  factor. `PhxBuilding.add_zones` appends without merging, so one Attached zone shared by two
+  Rooms may reach WUFI twice. Not tested; test it before relying on it.
+- The WUFI writer writes `KindAttachedZone` and `TemperatureReductionFactorUserDefined`. The METr
+  zone writer writes the zone type; no reduction factor field turned up there. To verify.
+
+Claude's proposal, to confirm: moving a Zone out of every Segment offers to make it the Attached
+zone for the Faces it shares with exported Zones, so the user does not assign them one by one.
+
+## Answers (Ed, 2026-11-15)
+
+| Id | Answer |
+| --- | --- |
+| BS-1 | **One Segment heading row in every Zone view.** The Geometry Building-Segment column goes |
+| BS-2 | **Checked at export only.** One Zone in one Building Segment is the minimum for HBJSON export; nothing is flagged in the tables before then |
+| BS-3 | **Single dwelling is a Building Segment attribute and control** (above). Supersedes Q4a-26's one-Segment rule |
+| BS-4 | **Drop the Manage Building Segments dialog.** Colour moves into settings; merging is Delete with "move its Zones to" |
+| BS-5 | **Before Phase 4a's implementation**, as its own PR stage |
+| BS-6 | **An Attached zone** where one is assigned, else a refusal naming the Face. Review how `PhAdditionalZone` flows through PHX while building (above) |

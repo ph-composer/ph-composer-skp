@@ -44,8 +44,9 @@ From Ed's request and the 2026-11-14 interview ([answers](DECISIONS.md#answered)
 - **Starter library**: the residential default from the pinned honeybee-ph wheel, built in; Phius
   Multifamily and Non-Residential programs as library files in the planned ph-composer-standards
   repository, added through Library setup (Q4a-10, Q4a-19).
-- **A Single dwelling switch** on the Zones/Programs page: every Zone one dwelling with the
-  residential default, the table locked, bedrooms entered once (Q4a-26).
+- **A Single dwelling switch** on each Building Segment: its Zones one dwelling with the
+  residential default, their rows locked, bedrooms entered once (Q4a-26, revised by
+  [BS-3](../unscheduled/building-segments/README.md#single-dwelling-per-building-segment-bs-3)).
 - **Export**: Program, load and schedule objects in the HBJSON, plus the honeybee-ph extension
   fields PHX reads.
 

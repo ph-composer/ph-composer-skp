@@ -126,6 +126,8 @@
   .zp-seg-name { display:flex; align-items:center; gap:8px; min-height:24px; }
   .zp-seg-tag { font-weight:400; font-size:11px; color:var(--muted); border:1px solid var(--line); border-radius:9px; padding:0 6px; }
   .zp-seg-count { font-weight:400; color:var(--muted); }
+  .zp-seg-single { display:inline-flex; align-items:center; gap:4px; font-weight:400; font-size:12px; white-space:nowrap; }
+  .zp-seg-single input { margin:0; }
   .zp-seg-tools { display:inline-flex; gap:2px; margin-left:auto; }
   .zp-seg-tools .phc-icon-button { width:24px; height:24px; }
   .zp-seg-tools .zp-hover { visibility:hidden; }
@@ -218,11 +220,12 @@
   // A Building Segment and the settings its dialog edits. Field names follow honeybee-ph BldgSegment and PhiusCertification.
   function segRecord(name, cat, air) {
     return { id: id("seg"), name: name, category: cat, air: air || { kind: "n50", value: null }, cert: "Phius 2021 CORE", use: cat === "res" ? "Residential" : "School",
-      status: "In planning", type: "New construction", wind: "Several sides exposed, no screening", mechCool: false, mechRoom: 20, defProgram: null };
+      status: "In planning", type: "New construction", wind: "Several sides exposed, no screening", mechCool: false, mechRoom: 20, defProgram: null,
+      single: false, house: null };
   }
   function baseState(j) {
     uid = 0;
-    var s = { journey: j, single: j === 1, tab: "zones", ptab: "programs", selProgram: null, selSchedule: null, selSet: null, checked: {}, lib: "mf", libQuery: "", notice: null, bubble: null,
+    var s = { journey: j, tab: "zones", ptab: "programs", selProgram: null, selSchedule: null, selSet: null, checked: {}, lib: "mf", libQuery: "", notice: null, bubble: null,
       programs: [], schedules: [], sets: [], dwellings: [], segments: [], zones: [] };
     // honeybee-ph single-family schedules (hbph_sfh_*.json): hourly profiles, illustrative values here.
     var presence = sched("SFH occupant presence", "Fractional", null, profile([1, 1, 1, 1, 1, 1, .9, .6, .4, .3, .3, .3, .3, .3, .3, .4, .5, .7, .9, .9, .9, 1, 1, 1]), "hbph");
@@ -251,6 +254,7 @@
       // Single dwelling is on: the switch makes every Zone one dwelling, House, with counts on the dwelling.
       s.dwellings.push({ id: "dw_house", name: "House", units: 1, beds: null, occ: null, set: null });
       s.zones.forEach(function (z) { z.dwelling = "dw_house"; });
+      s.segments[0].single = true; s.segments[0].house = "dw_house";
     } else if (j === 2) {
       var b = seg("Building", "res", { kind: "q50", value: 1.1 });
       ["101", "102", "103", "104", "201", "202", "203", "204"].forEach(function (n, i) { zone("Apt " + n, b, [62, 78, 55, 81][i % 4], [58.9, 74.1, 52.3, 77.0][i % 4]); });
@@ -344,8 +348,8 @@
 
   // ---------------------------------------------------------------- journeys
   var JOURNEYS = {
-    1: { title: "Single-family home", hint: "<em>Single dwelling</em> is on, as for every new model: all five Zones are one house with the residential default, so the table is locked. <em>Type the bedrooms</em> on the Building Segment row. That is all. Uncheck <em>Single dwelling</em> to assign per Zone; what it set stays." },
-    2: { title: "Apartments", hint: "Each Zone is one apartment. <em>Check every Zone</em> → Dwelling: <em>One dwelling each</em>. Then fill Bedrooms per row. Then check <em>Single dwelling</em> to see what it would replace." },
+    1: { title: "Single-family home", hint: "The House Building Segment has <em>Single dwelling</em> on, as every new model does: all five Zones are one house with the residential default, so its rows are locked. <em>Type the bedrooms</em> on the Segment row. That is all. Uncheck <em>Single dwelling</em> on that row to assign per Zone; what it set stays." },
+    2: { title: "Apartments", hint: "Each Zone is one apartment. <em>Check every Zone</em> → Dwelling: <em>One dwelling each</em>. Then fill Bedrooms per row. Then check <em>Single dwelling</em> on the Building row to see what it would replace." },
     3: { title: "Apartments + common areas", hint: "Make the six apartments <em>one dwelling each</em>. Then check the two corridors → Program: <em>Indoor Corridor</em> (Phius Multifamily, copied into the file on choice). Do the same for the stair, lobby, office and fitness room, and look at the amber flags. Then check the <em>Bike shed</em> → Building Segment: <em>No Building Segment</em>, and open a Segment's <em>settings</em> from its row." },
     4: { title: "Non-residential school", hint: "The Building Segment is non-residential, so every unassigned Zone is flagged. Check Zones and pick from <em>Phius Non-Residential</em> in the Program choice, or open the <em>Programs</em> tab and browse the library sidebar." },
     5: { title: "Custom lab programs", hint: "Nothing in the library fits. Open <em>Programs</em> → <em>+</em> on the rail to make a new Program, set its loads, then open a load's schedule chip to edit the Schedule in the PH form. Assign it on Zones → Programs." }
@@ -384,11 +388,10 @@
     var h = '<div class="phc-heading"><h1>Zones</h1><div class="phc-heading-actions">' + iconBtn("settings", "Programs settings") + '</div></div>';
     h += '<nav class="phc-subtabs" role="tablist" aria-label="Zone views"><button type="button" role="tab" aria-selected="false" aria-pressed="false" disabled>Geometry</button><button type="button" role="tab" aria-selected="false" aria-pressed="false" disabled>Spaces</button><button type="button" role="tab" aria-selected="true" aria-pressed="true">Programs</button></nav>';
     var nChecked = Object.keys(S.checked).length;
-    var singleTip = "Every Zone is one dwelling with the residential default Program, in one residential Building Segment. Bedrooms and occupants are entered once, on the Building Segment row. Uncheck to assign Programs, dwellings and Equipment Sets per Zone; everything it set stays.";
-    h += '<div class="phc-inventory-controls"><label class="phc-view-control zp-single" data-tip="' + esc(singleTip) + '"><input type="checkbox" data-act="single"' + (S.single ? " checked" : "") + '>Single dwelling</label>' +
+    h += '<div class="phc-inventory-controls">' +
       '<label class="phc-view-control"><input type="search" placeholder="Zone, Program or dwelling" aria-label="Filter Zones"></label>' +
       '<span class="phc-view-count">' + S.segments.length + ' Building Segment' + (S.segments.length > 1 ? "s" : "") + ' · ' + S.zones.length + ' Zones · ' + S.dwellings.length + ' dwellings</span>' +
-      (S.single ? '<span data-tip="Single dwelling keeps one Building Segment. Uncheck it to add another."><button type="button" class="phc-icon-button assembly-tool-icon" disabled aria-label="New Building Segment">' + svg("add", 18) + '</button></span>' : iconBtn("add", "New Building Segment", "new-seg")) + '</div>';
+      iconBtn("add", "New Building Segment", "new-seg") + '</div>';
     var COLS = [["name", "Name", 140], ["program", "Program", 190], ["dwelling", "Dwelling", 120], ["beds", "Bedrooms", 72, 1], ["occ", "Occupants", 80, 1], ["set", "Equipment Set", 170],
       ["area", "Floor area m²", 84, 1], ["icfa", "iCFA m²", 70, 1], ["people", "People peak", 76, 1], ["light", "Lighting W", 80, 1], ["vent", "Ventilation m³/h", 96, 1]];
     var tips = { area: "Gross Zone floor area: the basis honeybee divides per-area loads by.", icfa: "Weighted Space floor area (iCFA): the basis of the Phius residential rules.",
@@ -396,7 +399,7 @@
       vent: "Program ventilation for this Zone. Space airflows, where set, replace it at export.", occ: "Average occupants (honeybee-ph number_people). Left empty, the dwelling uses the Phius rule: bedrooms + 1 per unit." };
     var width = 64 + COLS.reduce(function (a, c) { return a + c[2]; }, 0);
     h += '<div class="phc-table-mount" style="--row-actions-width:64px; position:relative"><table class="phc-table is-tree reveals-row-actions zp-table" style="min-width:' + width + 'px"><colgroup><col style="width:64px">' + COLS.map(function (c) { return '<col style="width:' + c[2] + 'px">'; }).join("") + '</colgroup><thead><tr>' +
-      '<th class="col-actions"><span class="phc-header-label-row">' + (S.single ? "" : '<input class="row-check" type="checkbox" data-act="check-all" aria-label="Check every Zone"' + (nChecked === S.zones.length ? " checked" : "") + '>') + '</span></th>' +
+      '<th class="col-actions"><span class="phc-header-label-row">' + '<input class="row-check" type="checkbox" data-act="check-all" aria-label="Check every Zone"' + (nChecked && nChecked === checkable().length ? " checked" : "") + '>' + '</span></th>' +
       COLS.map(function (c) { return '<th class="' + (c[3] ? "num" : "") + '"' + (tips[c[0]] ? ' data-tip="' + esc(tips[c[0]]) + '"' : "") + '><span class="phc-header-label-row"><span class="phc-th-label">' + c[1] + '</span></span></th>'; }).join("") + '</tr></thead><tbody>';
     S.segments.forEach(function (g) {
       var zs = S.zones.filter(function (z) { return z.seg === g.id; });
@@ -407,11 +410,10 @@
         if (z.dwelling && !seenDw[z.dwelling]) { seenDw[z.dwelling] = 1; var t = dwellingTotals(z.dwelling); sum.beds += t.beds; sum.occ += t.occ; }
       });
       var sf = segFindings(g);
-      if (!zs.length) sf = ["No Zones: this Building Segment is left out of export. Move Zones into it from the selection bar, or delete it."];
       h += '<tr class="tier-0 zp-seg"><td class="col-actions"></td><td colspan="3">' + segHead(g, zs.length, sf) + '</td>' +
-        (S.single ? houseCells() : '<td class="num">' + (Object.keys(seenDw).length ? fmt(sum.beds) : "") + '</td><td class="num">' + (Object.keys(seenDw).length ? fmt(sum.occ, 1) : "") + '</td><td></td>') +
-        '<td class="num">' + fmt(sum.area, 1) + '</td><td class="num">' + fmt(sum.icfa, 1) + '</td><td class="num">' + fmt(sum.people, 1) + '</td><td class="num">' + fmt(sum.light) + '</td><td class="num">' + (sum.ventMissing ? '<span class="zp-amber">?</span>' : fmt(sum.vent)) + '</td></tr>';
-      zs.forEach(function (z) { h += S.single ? frozenRow(z) : zoneRow(z); });
+        (g.single ? houseCells(g) : '<td class="num">' + (Object.keys(seenDw).length ? fmt(sum.beds) : "") + '</td><td class="num">' + (Object.keys(seenDw).length ? fmt(sum.occ, 1) : "") + '</td><td></td>') +
+        (zs.length ? '<td class="num">' + fmt(sum.area, 1) + '</td><td class="num">' + fmt(sum.icfa, 1) + '</td><td class="num">' + fmt(sum.people, 1) + '</td><td class="num">' + fmt(sum.light) + '</td><td class="num">' + (sum.ventMissing ? '<span class="zp-amber">?</span>' : fmt(sum.vent)) + '</td>' : '<td colspan="5"></td>') + '</tr>';
+      zs.forEach(function (z) { h += g.single ? frozenRow(z) : zoneRow(z); });
     });
     var out = S.zones.filter(function (z) { return !z.seg; });
     if (out.length) {
@@ -422,7 +424,7 @@
       });
     }
     h += '</tbody></table></div>';
-    if (nChecked && !S.single) h += selectionBar(nChecked);
+    if (nChecked) h += selectionBar(nChecked);
     if (S.bubble) h += S.bubble.html;
     return h;
   }
@@ -435,14 +437,24 @@
     return '<div class="zp-seg-name">' + name +
       (g.id === S.defaultSeg ? '<span class="zp-seg-tag" data-tip="New Zones join this Building Segment. Change it in Settings.">Default</span>' : "") +
       '<span class="zp-seg-count">' + n + ' Zone' + (n === 1 ? "" : "s") + ' · ' + (g.category === "res" ? "Residential" : "Non-residential") + '</span>' + (sf.length ? flag(sf.join(" ")) : "") +
+      '<label class="zp-seg-single" data-tip="' + esc(SINGLE_TIP) + '"><input type="checkbox" data-act="single" data-v="' + g.id + '"' + (g.single ? " checked" : "") + '>Single dwelling</label>' +
       '<span class="zp-seg-tools">' + iconBtn("settings", "Building Segment settings", "seg-settings", ' data-v="' + g.id + '"') +
-      (S.single ? "" : iconBtn("pencil", "Rename " + g.name, "seg-rename-start", ' data-v="' + g.id + '"').replace('class="', 'class="zp-hover ')) + (S.single ? "" : del) + '</span></div>';
+      iconBtn("pencil", "Rename " + g.name, "seg-rename-start", ' data-v="' + g.id + '"').replace('class="', 'class="zp-hover ') + del + '</span></div>';
   }
+  var SINGLE_TIP = "Every Zone in this Building Segment is one dwelling with the residential default Program. Bedrooms, occupants and the Equipment Set are entered once, on this row. Uncheck to assign per Zone; everything it set stays.";
+  // Zones a check can select: those in a Single dwelling Segment are locked.
+  function checkable() { return S.zones.filter(function (z) { return !(z.seg && seg(z.seg).single); }); }
   function freeSegName() { var n = S.segments.length + 1, nm; do { nm = "Building Segment " + n; n += 1; } while (S.segments.some(function (g) { return g.name === nm; })); return nm; }
   function newSegment() { var g = segRecord(freeSegName(), "res"); S.segments.push(g); S.renaming = g.id; return g; }
   function moveZones(zs, v) {
     var target = v === "new" ? newSegment() : v === "none" ? null : seg(v);
-    zs.forEach(function (z) { z.seg = target ? target.id : null; });
+    zs.forEach(function (z) {
+      var from = z.seg ? seg(z.seg) : null;
+      if (from && from.single && from !== target) { z.dwelling = null; }
+      z.seg = target ? target.id : null;
+      if (target && target.single) { z.dwelling = target.house; z.program = null; z.set = null; z.beds = null; z.occ = null; }
+    });
+    S.dwellings = S.dwellings.filter(function (d) { return S.zones.some(function (z) { return z.dwelling === d.id; }); });
     S.checked = {};
     notify(zs.length + " Zone" + (zs.length > 1 ? "s" : "") + (target ? " moved to " + target.name + "." : (zs.length > 1 ? " are" : " is") + " now in no Building Segment and left out of export."));
   }
@@ -451,7 +463,7 @@
   function openSegSettings(gid) {
     var g = seg(gid), zs = S.zones.filter(function (z) { return z.seg === gid; }), units = 0, seen = {};
     zs.forEach(function (z) { if (z.dwelling && !seen[z.dwelling]) { seen[z.dwelling] = 1; units += dw(z.dwelling).units; } });
-    var isDefault = g.id === S.defaultSeg, hd = S.single ? house() : null;
+    var isDefault = g.id === S.defaultSeg, hd = g.single ? house(g) : null;
     var progOpts = S.programs.map(function (p) { return opt(p.id, g.defProgram || "pgm_default", p.name); }).join("");
     var winds = ["Several sides exposed, no screening", "Several sides exposed, moderate screening", "Several sides exposed, high screening", "One side exposed, no screening", "One side exposed, moderate screening", "One side exposed, high screening", "User defined"];
     var dlg = document.createElement("dialog");
@@ -463,13 +475,14 @@
         row("New Zones join this Segment", '<input type="checkbox" name="isDefault"' + (isDefault ? " checked disabled" : "") + '>' + (isDefault ? ' <span class="zp-muted">To change it, make another Segment the default.</span>' : "")) +
         row("Zones", zs.length + (zs.length ? "" : ' <span class="zp-amber">: left out of export</span>')) + '</div></section>' +
       '<section><h3>Phius certification</h3><div class="zp-grid">' +
-        row("Building category", '<select name="category"' + (S.single ? ' disabled data-tip="Residential: set by Single dwelling."' : "") + '>' + opt("res", g.category, "Residential") + opt("nonres", g.category, "Non-residential") + '</select>') +
+        row("Building category", '<select name="category"' + (g.single ? ' disabled data-tip="Residential: set by Single dwelling."' : "") + '>' + opt("res", g.category, "Residential") + opt("nonres", g.category, "Non-residential") + '</select>') +
         row("Certification program", '<select name="cert">' + ["Phius 2021 CORE", "Phius 2021 ZERO", "Phius 2018 CORE", "Phius 2018 ZERO"].map(function (x) { return opt(x, g.cert); }).join("") + '</select>') +
         row("Building use", '<select name="use">' + ["Residential", "Office / administrative", "School", "Other"].map(function (x) { return opt(x, g.use); }).join("") + '</select>') +
         row("Building status", '<select name="status">' + ["In planning", "Under construction", "Complete"].map(function (x) { return opt(x, g.status); }).join("") + '</select>') +
         row("Building type", '<select name="type">' + ["New construction", "Retrofit", "Mixed"].map(function (x) { return opt(x, g.type); }).join("") + '</select>') + '</div></section>' +
       '<section><h3>Occupancy</h3><div class="zp-grid">' +
-        row("Default Program for its Zones", '<select name="defProgram"' + (S.single ? ' disabled data-tip="Single dwelling uses the residential default."' : ' data-tip="Zones with no Program of their own use this one."') + '>' + progOpts + '</select>') +
+        row("Single dwelling", (g.single ? "On" : "Off") + ' <span class="zp-muted">Switch it on the Segment row.</span>') +
+        row("Default Program for its Zones", '<select name="defProgram"' + (g.single ? ' disabled data-tip="Single dwelling uses the residential default."' : ' data-tip="Zones with no Program of their own use this one."') + '>' + progOpts + '</select>') +
         (hd ? row("Bedrooms in " + esc(hd.name), '<input class="zp-num" name="beds" value="' + (hd.beds === null ? "" : hd.beds) + '" placeholder="?">') +
               row("Occupants", '<input class="zp-num" name="occ" value="' + (hd.occ === null ? "" : hd.occ) + '" placeholder="Phius rule">') +
               row("Equipment Set", '<select name="set">' + opt("", hd.set || "", "Phius single-family default") + S.sets.filter(function (x) { return x.id !== "set_sfh"; }).map(function (x) { return opt(x.id, hd.set || "", x.name); }).join("") + '</select>')
@@ -496,7 +509,7 @@
       if (b.getAttribute("data-dlg") === "ok") {
         g.name = val("name").trim() || g.name;
         if (val("isDefault")) S.defaultSeg = g.id;
-        if (!S.single) { g.category = val("category"); g.defProgram = val("defProgram") === "pgm_default" ? null : val("defProgram"); }
+        if (!g.single) { g.category = val("category"); g.defProgram = val("defProgram") === "pgm_default" ? null : val("defProgram"); }
         g.cert = val("cert"); g.use = val("use"); g.status = val("status"); g.type = val("type"); g.wind = val("wind"); g.mechCool = val("mechCool");
         g.air = { kind: val("airKind"), value: val("airValue") === "" ? null : parseFloat(val("airValue")) };
         g.mechRoom = parseFloat(val("mechRoom")) || g.mechRoom;
@@ -534,17 +547,17 @@
   }
   // Single dwelling: the Building Segment row is the house row. Its Bedrooms, Occupants and Equipment Set
   // cells are the only inputs on the page.
-  function house() { return S.dwellings[0]; }
-  function houseCells() {
-    var d = house(), t = dwellingTotals(d.id);
+  function house(g) { return dw(g.house); }
+  function houseCells(g) {
+    var d = house(g), t = dwellingTotals(d.id);
     var setOpts = '<option value="">Phius single-family default</option>' + S.sets.filter(function (x) { return x.id !== "set_sfh"; }).map(function (x) { return '<option value="' + x.id + '"' + (d.set === x.id ? " selected" : "") + '>' + esc(x.name) + '</option>'; }).join("");
-    return '<td class="num phc-editable-cell"><input class="phc-cell-input' + (d.beds === null ? " zp-need" : "") + '" data-act="house-beds" value="' + (d.beds === null ? "" : d.beds) + '" placeholder="?" aria-label="Bedrooms in ' + esc(d.name) + '" data-tip="' + (d.beds === null ? "Set the number of bedrooms in the house." : "Bedrooms in the whole house.") + '"></td>' +
-      '<td class="num phc-editable-cell"><input class="phc-cell-input" data-act="house-occ" value="' + (d.occ === null ? "" : d.occ) + '" placeholder="' + fmt(t.occ, 1) + '" aria-label="Occupants in ' + esc(d.name) + '" data-tip="Average occupants. Left empty: the Phius rule, bedrooms + 1."></td>' +
-      '<td class="phc-editable-cell"><select class="phc-enum-cell" data-act="house-set" aria-label="Equipment Set for ' + esc(d.name) + '" data-tip="The house\'s appliances and Phius devices. Edit the devices in Programs → Equipment Sets.">' + setOpts + '</select></td>';
+    return '<td class="num phc-editable-cell"><input class="phc-cell-input' + (d.beds === null ? " zp-need" : "") + '" data-act="house-beds" data-v="' + g.id + '" value="' + (d.beds === null ? "" : d.beds) + '" placeholder="?" aria-label="Bedrooms in ' + esc(d.name) + '" data-tip="' + (d.beds === null ? "Set the number of bedrooms in the house." : "Bedrooms in the whole house.") + '"></td>' +
+      '<td class="num phc-editable-cell"><input class="phc-cell-input" data-act="house-occ" data-v="' + g.id + '" value="' + (d.occ === null ? "" : d.occ) + '" placeholder="' + fmt(t.occ, 1) + '" aria-label="Occupants in ' + esc(d.name) + '" data-tip="Average occupants. Left empty: the Phius rule, bedrooms + 1."></td>' +
+      '<td class="phc-editable-cell"><select class="phc-enum-cell" data-act="house-set" data-v="' + g.id + '" aria-label="Equipment Set for ' + esc(d.name) + '" data-tip="The house\'s appliances and Phius devices. Edit the devices in Programs → Equipment Sets.">' + setOpts + '</select></td>';
   }
   function frozen(text, tipText) { return '<span class="zp-frozen" data-tip="' + esc(tipText) + '">' + text + '</span>'; }
   function frozenRow(z) {
-    var d = derived(z), lockTip = "Set by Single dwelling. Uncheck it to choose per Zone.", hd = house();
+    var d = derived(z), lockTip = "Set by Single dwelling on its Building Segment. Uncheck it there to choose per Zone.", hd = house(seg(z.seg));
     var setName = hd.set ? setById(hd.set).name : "Phius single-family default";
     return '<tr class="tier-1"><td class="col-actions"></td><td>' + esc(z.name) + '</td>' +
       '<td>' + frozen("Residential (default)", lockTip) + '</td>' +
@@ -555,45 +568,46 @@
       '<td class="num">' + fmt(z.area, 1) + '</td><td class="num">' + fmt(z.icfa, 1) + '</td>' +
       '<td class="num">' + fmt(d.people, 2) + '</td><td class="num">' + fmt(d.lighting) + '</td><td class="num">' + fmt(d.vent) + '</td></tr>';
   }
-  function singleChanges() {
-    var out = [], assigned = S.zones.filter(function (z) { return z.program; });
+  function singleChanges(g) {
+    var zs = S.zones.filter(function (z) { return z.seg === g.id; }), out = [], assigned = zs.filter(function (z) { return z.program; });
     if (assigned.length) {
       var names = {}; assigned.forEach(function (z) { names[prog(z.program).name] = 1; });
       out.push("Program choices on " + assigned.length + " Zone" + (assigned.length > 1 ? "s" : "") + " (" + Object.keys(names).join(", ") + ") give way to the residential default.");
     }
-    var loose = S.zones.filter(function (z) { return !z.dwelling; }).length;
-    if (S.dwellings.length > 1) out.push(S.dwellings.length + " dwellings become one, House.");
-    else if (loose && S.dwellings.length) out.push(loose + " Zones that are not dwellings join " + S.dwellings[0].name + ".");
-    if (S.segments.length > 1) out.push("Zones in " + S.segments.length + " Building Segments move into " + S.segments[0].name + ".");
-    var noSeg = S.zones.filter(function (z) { return !z.seg; }).length;
-    if (noSeg) out.push(noSeg + " Zone" + (noSeg > 1 ? "s" : "") + " in no Building Segment join the house and are exported.");
-    S.segments.forEach(function (g) { if (g.category !== "res") out.push("Building Segment " + g.name + " becomes Residential."); });
-    if (S.zones.some(function (z) { return z.set; }) && S.dwellings.length > 1) out.push("Per-dwelling Equipment Sets give way to one Set for the house.");
+    var dws = {}; zs.forEach(function (z) { if (z.dwelling) dws[z.dwelling] = 1; });
+    var nDw = Object.keys(dws).length, loose = zs.filter(function (z) { return !z.dwelling; }).length;
+    if (nDw > 1) out.push(nDw + " dwellings become one, " + g.name + ".");
+    else if (loose && nDw) out.push(loose + " Zones that are not dwellings join " + dw(Object.keys(dws)[0]).name + ".");
+    if (g.category !== "res") out.push(g.name + " becomes Residential.");
+    if (g.defProgram) out.push("Its default Program, " + prog(g.defProgram).name + ", gives way to the residential default.");
+    if (zs.some(function (z) { return z.set; }) && nDw > 1) out.push("Per-dwelling Equipment Sets give way to one Set for the dwelling.");
     return out;
   }
-  function applySingle() {
-    var beds = 0, any = false;
-    S.zones.forEach(function (z) { if (z.beds !== null) { beds += z.beds; any = true; } });
-    S.dwellings.forEach(function (d) { if (d.beds !== null && d.beds !== undefined) { beds += d.beds; any = true; } });
-    var h = S.dwellings.length === 1 ? S.dwellings[0] : { id: id("dw"), name: "House", units: 1, set: null };
+  // Single dwelling on one Building Segment: its Zones become one dwelling, named for the Segment.
+  function applySingle(g) {
+    var zs = S.zones.filter(function (z) { return z.seg === g.id; }), beds = 0, any = false, dws = {};
+    zs.forEach(function (z) { if (z.beds !== null) { beds += z.beds; any = true; } if (z.dwelling) dws[z.dwelling] = 1; });
+    Object.keys(dws).forEach(function (k) { var d = dw(k); if (d.beds !== null && d.beds !== undefined) { beds += d.beds; any = true; } });
+    var keep = Object.keys(dws).length === 1 && zonesOfDwelling(Object.keys(dws)[0]).every(function (z) { return z.seg === g.id; }) ? dw(Object.keys(dws)[0]) : null;
+    var h = keep || { id: id("dw"), name: g.name, units: 1, set: null };
+    if (!keep) S.dwellings.push(h);
     h.units = 1; h.beds = any ? beds : null; h.occ = null;
-    S.dwellings = [h];
-    var g0 = S.segments[0]; g0.category = "res"; g0.defProgram = null; S.segments = [g0]; S.defaultSeg = g0.id;
-    S.zones.forEach(function (z) { z.dwelling = h.id; z.program = null; z.set = null; z.beds = null; z.occ = null; z.seg = g0.id; });
-    S.single = true; S.checked = {}; S.bubble = null;
-    notify("Single dwelling: every Zone is now part of " + h.name + ", with the residential default." + (any ? " Bedrooms moved to the house: " + beds + "." : ""));
+    zs.forEach(function (z) { z.dwelling = h.id; z.program = null; z.set = null; z.beds = null; z.occ = null; delete S.checked[z.id]; });
+    S.dwellings = S.dwellings.filter(function (d) { return S.zones.some(function (z) { return z.dwelling === d.id; }); });
+    g.category = "res"; g.defProgram = null; g.single = true; g.house = h.id; S.bubble = null;
+    notify(g.name + " is a single dwelling: its Zones are one dwelling, " + h.name + ", with the residential default." + (any ? " Bedrooms moved to it: " + beds + "." : ""));
   }
-  function confirmSingle(changes) {
+  function confirmSingle(g, changes) {
     var dlg = document.createElement("dialog");
     dlg.className = "phc-dialog phc-confirm-dialog zp-confirm";
-    dlg.innerHTML = '<button type="button" class="phc-dialog-close" aria-label="Close" data-dlg="cancel">' + svg("clear", 18) + '</button><h2>Make this model a single dwelling?</h2>' +
+    dlg.innerHTML = '<button type="button" class="phc-dialog-close" aria-label="Close" data-dlg="cancel">' + svg("clear", 18) + '</button><h2>Make ' + esc(g.name) + ' a single dwelling?</h2>' +
       '<p>This replaces what you assigned per Zone:</p><ul>' + changes.map(function (c) { return '<li>' + esc(c) + '</li>'; }).join("") + '</ul>' +
-      '<p class="zp-muted">Bedrooms entered per Zone are added up for the house. Undo restores the rest.</p>' +
+      '<p class="zp-muted">Bedrooms entered per Zone are added up for the dwelling. Undo restores the rest.</p>' +
       '<div class="phc-dialog-actions"><button type="button" data-dlg="cancel">Cancel</button><button type="button" class="primary" data-dlg="ok">Make single dwelling</button></div>';
     document.body.appendChild(dlg);
     dlg.addEventListener("click", function (e) {
       var b = e.target.closest("[data-dlg]"); if (!b) return;
-      if (b.getAttribute("data-dlg") === "ok") applySingle();
+      if (b.getAttribute("data-dlg") === "ok") applySingle(g);
       dlg.close(); dlg.remove(); render();
     });
     dlg.addEventListener("cancel", function () { dlg.remove(); render(); });
@@ -847,7 +861,7 @@
     else if (a === "tab") { S.tab = v; S.bubble = null; }
     else if (a === "ptab") { S.ptab = v; }
     else if (a === "check") { if (el.checked) S.checked[v] = 1; else delete S.checked[v]; }
-    else if (a === "check-all") { S.checked = {}; if (el.checked) S.zones.forEach(function (z) { S.checked[z.id] = 1; }); }
+    else if (a === "check-all") { S.checked = {}; if (el.checked) checkable().forEach(function (z) { S.checked[z.id] = 1; }); }
     else if (a === "clear-checked") { S.checked = {}; }
     else if (a === "sel-program") { S.selProgram = v; }
     else if (a === "sel-schedule") { S.selSchedule = v; }
@@ -869,8 +883,9 @@
     else if (a === "new-set") { var ns2 = { id: id("set"), name: "Equipment Set " + (S.sets.length + 1), devices: [] }; S.sets.push(ns2); S.selSet = ns2.id; }
     else if (a === "dwelling") { dwellingBubble(v, el); }
     else if (a === "single") {
-      if (!el.checked) { S.single = false; notify("Single dwelling is off. House and the residential default stay; assign per Zone now."); }
-      else { var ch = singleChanges(); if (ch.length) { render(); confirmSingle(ch); return; } applySingle(); }
+      var sg = seg(v);
+      if (!el.checked) { sg.single = false; notify("Single dwelling is off for " + sg.name + ". Its dwelling and the residential default stay; assign per Zone now."); }
+      else { var ch = singleChanges(sg); if (ch.length) { render(); confirmSingle(sg, ch); return; } applySingle(sg); }
     }
     else if (a === "new-seg") { var ng = newSegment(); notify(ng.name + " created. Move Zones into it from the selection bar."); }
     else if (a === "seg-settings") { openSegSettings(v); return; }
@@ -889,9 +904,9 @@
     else if (a === "beds" || a === "occ") { var zz = S.zones.filter(function (x) { return x.id === v; })[0]; zz[a] = el.value === "" ? null : parseFloat(el.value); }
     else if (a === "bulk-seg") { moveZones(S.zones.filter(function (z) { return S.checked[z.id]; }), el.value); }
     else if (a === "seg-rename") { if (S.renaming !== v) return; var nm = el.value.trim(); if (nm) seg(v).name = nm; S.renaming = null; }
-    else if (a === "house-beds") { house().beds = el.value === "" ? null : parseFloat(el.value); }
-    else if (a === "house-occ") { house().occ = el.value === "" ? null : parseFloat(el.value); }
-    else if (a === "house-set") { house().set = el.value || null; }
+    else if (a === "house-beds") { house(seg(v)).beds = el.value === "" ? null : parseFloat(el.value); }
+    else if (a === "house-occ") { house(seg(v)).occ = el.value === "" ? null : parseFloat(el.value); }
+    else if (a === "house-set") { house(seg(v)).set = el.value || null; }
     else if (a === "dw-beds") { dw(v).beds = el.value === "" ? null : parseFloat(el.value); S.bubble = null; }
     else if (a === "units") { dw(v).units = Math.max(1, parseInt(el.value, 10) || 1); S.bubble = null; }
     else if (a === "lib-source") { S.lib = el.value; }
@@ -924,9 +939,10 @@
   if (steps) steps.split(",").forEach(function (st) {
     var all = S.zones;
     if (st === "checkall") all.forEach(function (z) { S.checked[z.id] = 1; });
-    if (st === "house3") house().beds = 3;
-    if (st === "unsingle") S.single = false;
-    if (st === "trysingle") setTimeout(function () { confirmSingle(singleChanges()); }, 50);
+    if (st === "house3") house(S.segments[0]).beds = 3;
+    if (st === "unsingle") S.segments[0].single = false;
+    if (st === "trysingle") setTimeout(function () { confirmSingle(S.segments[0], singleChanges(S.segments[0])); }, 50);
+    if (st === "adu") { var ag = newSegment(); ag.name = "ADU"; S.renaming = null; S.zones.push({ id: id("zn"), name: "ADU studio", seg: ag.id, area: 38, icfa: 35.2, program: null, dwelling: null, beds: null, occ: null, set: null }, { id: id("zn"), name: "ADU bath", seg: ag.id, area: 6, icfa: 5.6, program: null, dwelling: null, beds: null, occ: null, set: null }); applySingle(ag); house(ag).beds = 1; }
     if (st === "shared") { assignDwelling(all, "shared"); S.checked = {}; }
     if (st === "each") { assignDwelling(all.filter(function (z) { return /^Apt/.test(z.name); }), "each"); }
     if (st === "beds") all.forEach(function (z, i) { if (/^Bedroom/.test(z.name)) z.beds = 1; if (/^Apt/.test(z.name)) z.beds = [1, 2, 1, 2][i % 4]; });
