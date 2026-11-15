@@ -69,11 +69,13 @@ until the cross-repo fix for F4a-13 ships (Q4a-08).
    what PHX reads for each load, into which WUFI, METr and PHPP fields.
 5. [research/ph-composer-current-state.md](research/ph-composer-current-state.md): what exists today
    and the record, assignment, export, UI and library seams to build on.
-6. [STATUS.md](STATUS.md): the ledger.
+6. [research/ventilation.md](research/ventilation.md): Zone ventilation and Space airflows across
+   honeybee-ph, the Grasshopper path, PHX and its writers (F4a-24 to F4a-29, Q4a-29 to Q4a-32).
+7. [STATUS.md](STATUS.md): the ledger.
 
 ## Next
 
-1. Review the [GUI prototype](mockups/README.md) and answer Q4a-21 to Q4a-25; iterate.
+1. Review the [GUI prototype](mockups/README.md) and answer Q4a-21 to Q4a-25 and Q4a-29 to Q4a-32; iterate.
    Q4a-19, Q4a-20 and Q4a-26 were answered in the first review, Q4a-27 and Q4a-28 on 2026-11-15.
 2. PRD, contracts and stages, worked back from the accepted prototype. Implementation needs
    separate authorization.

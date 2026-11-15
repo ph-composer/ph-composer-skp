@@ -36,6 +36,7 @@ question carries a leaning where the research points one way; a leaning is not a
 | F4a-21 | REVIVE uses the same shape: a template program and schedules loaded by name from its standards package, then loads set from building totals. Its Phius occupancy rule is `(bedrooms ÷ dwellings + 1) × dwellings`. Its residential program sets `watts_per_area` to annual kWh ÷ iCFA with no hours term; check the units before reusing that math | `honeybee_REVIVE_grasshopper` `standards/create_revive_residential_program.py`, `resiliency/set_resiliency_program.py` |
 | F4a-22 | A Phius Multifamily common-area Program that carries electric equipment (Common Office 42.3 W/m², Workout Room 12.04 W/m²) loses that load in a residential Building Segment: PHX's residential path reads only `PhEquipment` devices and skips the Program's ElectricEquipment and Process watts | PHX `from_HBJSON/create_variant.py` (`add_elec_equip_from_hb_room`), `create_process_loads.py` (`is_phius_non_residential`); values from honeybee-ph `PHIUS_programs.py` |
 | F4a-23 | The Phius program data carries only people, lighting and electric equipment, each with its schedule. Ventilation, infiltration, hot water and setpoints come from the `2019::` base programs, so a library file built without those bases has no values for them | honeybee-ph `PHIUS_programs.py`, `library/programtypes.py` (`build_hb_program_from_Phius_data`) |
+| F4a-24 to F4a-29 | Zone ventilation and Space airflows: PHX already applies the Program's flow by Space floor share, lets each Space `_v_*` override it, and always uses the Program's schedule. Transfer air reaches PHPP only; overriding some Spaces leaves the others their full share | [ventilation](research/ventilation.md#findings) |
 
 ## Questions for the interview
 
@@ -122,3 +123,7 @@ Q4a-19, Q4a-20, Q4a-26, Q4a-27 and Q4a-28 are answered above; the rest are open.
 | Q4a-26 | Ed's Single dwelling switch (2026-11-14) | Answered above; revised by BS-3 to a per-Segment switch |
 | Q4a-27 | Is Single dwelling on by default for a new Model? | Answered above. On in journey 1; journeys 2 to 5 start with it off because they model other buildings |
 | Q4a-28 | May the Phius program values be published in the public ph-composer-standards repository, with a note of their source and terms? honeybee-ph already publishes them; Phius's terms decide. Ed to confirm | Answered above |
+| Q4a-29 | Space airflows: keep the any-set rule, or let each rate override on its own? (Ed, 2026-11-15, [ventilation](research/ventilation.md#open-questions)) | Not shown. Recommendation: keep the any-set rule |
+| Q4a-30 | In a partly specified Zone, inheriting Spaces get their floor share of the full Program flow. Accept and show it, or split only the remainder? | Not shown. Recommendation: accept and show it in the Spaces view |
+| Q4a-31 | Should the Room's honeybee Ventilation reflect Space overrides for EnergyPlus, as the Grasshopper path does? | Not shown. Recommendation: not now |
+| Q4a-32 | A Zone with no Spaces: an export finding, or a default Space? | Not shown. Confirm F4a-28 by a round trip first |

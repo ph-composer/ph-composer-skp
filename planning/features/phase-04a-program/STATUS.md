@@ -18,6 +18,7 @@ The one place this packet's progress is read from.
 | Interview | Complete | 2026-11-14 | [answers](DECISIONS.md#answered): 15 answered, Q4a-08 decided on delegation; Q4a-01, Q4a-16, Q4a-18 open and non-gating |
 | Research after redirects: honeybee-ph Process, occupancy and residential program | Complete | 2026-11-14 | F4a-17 to F4a-21 |
 | UI prototype: Program tab, Zones/Programs page | In review | 2026-11-14 | [mockups/](mockups/README.md): five journeys, Q4a-19 to Q4a-28 raised. First review 2026-11-14: shape accepted; Q4a-19, Q4a-20 and Q4a-26 (Single dwelling switch) answered and prototyped; Q4a-27 (switch on by default) and Q4a-28 (Phius values may be published) answered 2026-11-15 |
+| Research: Zone ventilation and Space airflows | Complete | 2026-11-15 | [ventilation](research/ventilation.md): F4a-24 to F4a-29; Q4a-29 to Q4a-32 raised |
 | PRD, contracts, stages | Requested | | |
 | GitHub issue | Requested | | Q4a-18 |
 | honeybee-ph and PHX fix for F4a-13 | Requested | | Q4a-08; cross-repo, own authorization |
