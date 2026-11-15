@@ -82,8 +82,8 @@ One dialog, opened from the heading row in any Zone view. Fields from honeybee-p
 | Section | Fields | Notes |
 | --- | --- | --- |
 | General | Name, colour, "New Zones join this Segment" | The default flag moves here from the Manage dialog |
-| Phius certification | Building category (residential or non-residential), certification program, building status, building type | Category is Q4a-14. The rest map to `PhiusCertification` enums, whose program list in the pinned honeybee-ph stops at Phius 2021 CORE and ZERO |
 | Occupancy | Single dwelling (its only switch, BS-3; residential Segments only); default Program for its Zones; under Single dwelling, the dwelling's bedrooms, occupants and Equipment Set | A Segment naming its default Program answers the open half of Q4a-13 |
+| Phius certification | Building category (residential or non-residential), certification program, building status, building type | Category is Q4a-14. The rest map to `PhiusCertification` enums, whose program list in the pinned honeybee-ph stops at Phius 2021 CORE and ZERO |
 | Airtightness | Test result (n50 or q50), wind exposure | Q4a-06: converted at export into each Zone's Infiltration, which is where PHX reads it (`cleanup.merge_infiltrations`) |
 | Comfort | Winter and summer set points, read only; mechanical cooling; mechanical room temperature | Set points come from the Zones' Programs (Q4a-04) |
 | Derived, read only | Floor levels (from Levels), dwelling units (from Dwellings) | `num_floor_levels`, `num_dwelling_units` |

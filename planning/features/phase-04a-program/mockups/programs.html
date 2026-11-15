@@ -495,12 +495,6 @@
         row("Name", '<input name="name" value="' + esc(g.name) + '">') +
         row("New Zones join this Segment", '<input type="checkbox" name="isDefault"' + (isDefault ? " checked disabled" : "") + '>' + (isDefault ? ' <span class="zp-muted">To change it, make another Segment the default.</span>' : "")) +
         row("Zones", zs.length + (zs.length ? "" : ' <span class="zp-amber">: left out of export</span>')) + '</div></section>' +
-      '<section><h3>Phius certification</h3><div class="zp-grid">' +
-        row("Building category", '<select name="category"' + (g.single ? ' disabled data-tip="Residential: set by Single dwelling."' : "") + '>' + opt("res", g.category, "Residential") + opt("nonres", g.category, "Non-residential") + '</select>') +
-        row("Certification program", '<select name="cert">' + ["Phius 2021 CORE", "Phius 2021 ZERO", "Phius 2018 CORE", "Phius 2018 ZERO"].map(function (x) { return opt(x, g.cert); }).join("") + '</select>') +
-        row("Building use", '<select name="use">' + ["Residential", "Office / administrative", "School", "Other"].map(function (x) { return opt(x, g.use); }).join("") + '</select>') +
-        row("Building status", '<select name="status">' + ["In planning", "Under construction", "Complete"].map(function (x) { return opt(x, g.status); }).join("") + '</select>') +
-        row("Building type", '<select name="type">' + ["New construction", "Retrofit", "Mixed"].map(function (x) { return opt(x, g.type); }).join("") + '</select>') + '</div></section>' +
       '<section><h3>Occupancy</h3><div class="zp-grid">' +
         row("Single dwelling", '<input type="checkbox" name="single"' + (g.single ? " checked" : "") + (g.category === "nonres" && !g.single ? ' disabled' : "") + '> <span class="zp-muted">' +
           (g.category === "nonres" && !g.single ? "Residential Building Segments only." : "Its Zones are one dwelling with the residential default.") + '</span>') +
@@ -510,6 +504,12 @@
               row("Equipment Set", '<select name="set">' + opt("", hd.set || "", "Phius single-family default") + S.sets.filter(function (x) { return x.id !== "set_sfh"; }).map(function (x) { return opt(x.id, hd.set || "", x.name); }).join("") + '</select>')
             : row("Bedrooms and appliances", '<span class="zp-muted">Per dwelling, in the Zones table.</span>')) +
         row("Dwelling units", '<span data-tip="Counted from the dwellings its Zones make up (num_dwelling_units).">' + units + '</span>') + '</div></section>' +
+      '<section><h3>Phius certification</h3><div class="zp-grid">' +
+        row("Building category", '<select name="category"' + (g.single ? ' disabled data-tip="Residential: set by Single dwelling."' : "") + '>' + opt("res", g.category, "Residential") + opt("nonres", g.category, "Non-residential") + '</select>') +
+        row("Certification program", '<select name="cert">' + ["Phius 2021 CORE", "Phius 2021 ZERO", "Phius 2018 CORE", "Phius 2018 ZERO"].map(function (x) { return opt(x, g.cert); }).join("") + '</select>') +
+        row("Building use", '<select name="use">' + ["Residential", "Office / administrative", "School", "Other"].map(function (x) { return opt(x, g.use); }).join("") + '</select>') +
+        row("Building status", '<select name="status">' + ["In planning", "Under construction", "Complete"].map(function (x) { return opt(x, g.status); }).join("") + '</select>') +
+        row("Building type", '<select name="type">' + ["New construction", "Retrofit", "Mixed"].map(function (x) { return opt(x, g.type); }).join("") + '</select>') + '</div></section>' +
       '<section><h3>Airtightness</h3><div class="zp-grid">' +
         row("Test result", '<select name="airKind" style="width:70px">' + opt("n50", g.air.kind) + opt("q50", g.air.kind) + '</select> <input class="zp-num" name="airValue" value="' + (g.air.value === null ? "" : g.air.value) + '" placeholder="?"> <span class="zp-muted">' + (g.air.kind === "n50" ? "1/h" : "m³/h·m²") + '</span>') +
         row("Wind exposure", '<select name="wind">' + winds.map(function (x) { return opt(x, g.wind); }).join("") + '</select>') + '</div>' +
