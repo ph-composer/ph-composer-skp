@@ -1,7 +1,7 @@
 # ph-composer-standards: one home for library content
 
 DATE: 2026-11-14
-STATUS: Requested. Plan only; creating the repository and changing this one each need Ed's go.
+STATUS: Requested. Plan only; creating the repository and changing this one each need Ed's go. Publishing the Phius values cleared 2026-11-15 (Q4a-28).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft; open one when Ed authorizes the repository)
 
@@ -66,14 +66,18 @@ ph-composer-standards/
    README and LICENSE moved unchanged, and file validation in CI. Needs Ed's go.
 2. **Point this repository at it**: the removals and doc changes above, as one PR.
 3. **Phius Programs** (Phase 4a): the generator and the two files, once PH-Composer registers the
-   Program and Schedule kinds and Q4a-28 is answered.
+   Program and Schedule kinds.
 4. Later, on need: DOE Programs (Q4a-20), starter frames and glazings, equipment.
 
 ## Gates
 
 - Ed's go to create a public repository.
-- Q4a-28: Ed confirms the Phius program values may be published with a note of their source and
-  terms. honeybee-ph already publishes them.
+- Q4a-28, answered 2026-11-15: the Phius values may be published. They come from public documents
+  and are not Phius's intellectual property: the non-residential programs from the Phius
+  Certification Guidebook, the multifamily space types from the Phius Multifamily Lighting and Misc
+  Load Calculator. Each `phius/` README names the document and edition. honeybee-ph cites Guidebook
+  v3.02 Table N-10 and the calculator of 2021-03-23; check both against the current editions
+  before stage 3.
 - Verify, before stage 3 and 4, the licenses of honeybee-ph and honeybee-energy-standards and what
   they mean for data generated from them. Not checked for this plan.
 

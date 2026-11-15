@@ -1,7 +1,7 @@
 # Phase 4a: findings and open questions
 
 DATE: 2026-11-14
-STATUS: Findings F4a-01 to F4a-23 recorded. Interviewed 2026-11-14: fifteen questions answered, Q4a-08 decided by Claude on Ed's delegation; Q4a-01, Q4a-16 and Q4a-18 open (none gates the prototype). The GUI prototype raised Q4a-19 to Q4a-28; Ed's first review answered Q4a-19, Q4a-20 and Q4a-26.
+STATUS: Findings F4a-01 to F4a-23 recorded. Interviewed 2026-11-14: fifteen questions answered, Q4a-08 decided by Claude on Ed's delegation; Q4a-01, Q4a-16 and Q4a-18 open (none gates the prototype). The GUI prototype raised Q4a-19 to Q4a-28; Ed's first review answered Q4a-19, Q4a-20 and Q4a-26; he answered Q4a-27 and Q4a-28 on 2026-11-15.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -86,13 +86,15 @@ F4a-17 to F4a-21.
 
 Ed reviewed the [GUI prototype](mockups/README.md) on 2026-11-14 and accepted its division of
 work: the Programs tab defines Programs, Schedules and Equipment Sets, and Zones → Programs assigns
-them. He answered three of the questions it raised:
+them. He answered three of the questions it raised, and two more on 2026-11-15:
 
 | Id | Answer | What follows |
 | --- | --- | --- |
 | Q4a-19 | **Library files in a new `ph-composer-standards` repository.** Not a separate language-neutral package, and not inside the extension. Programs follow the library pattern of Materials, Window Types and Assemblies: local library files added through Library setup, and remote Connections such as PH-Elements. Only the residential default is built in. The Phius Multifamily and Non-Residential files are generated from honeybee-ph's `PHIUS_programs.py`, so the values have one source | The [standards repository plan](../unscheduled/ph-composer-standards/README.md) also moves `starter-library/` there. Choosing a library Program copies it, with the Schedules it references, into the SKP as editable records, as an Assembly brings its Materials. The Phius files wait on Q4a-28 |
 | Q4a-20 | **An optional library file** in the same repository, generated from honeybee-energy-standards' DOE programs and never shipped with the extension | The user adds it in Library setup like any other file |
 | Q4a-26 | **A Single dwelling switch** at the top of Zones → Programs. When it is on, every Zone is one dwelling with the residential default Program, in one residential Building Segment, and the table is locked: a single-family user enters the bedrooms once and is done. Switching it off opens per-Zone assignment | Claude's design, to confirm in the prototype: the switch is a Model setting and the locked values derive from it rather than being written to each Zone, so a new Zone joins the house without action. The house row takes bedrooms, occupants (Phius rule when empty) and the Equipment Set. Switching off keeps the house dwelling, its counts and the default Program as ordinary assignments. Switching on over per-Zone assignments confirms first and names what gives way: Programs chosen per Zone, extra dwellings, a non-residential category, other Building Segments; per-Zone bedrooms are added up. Forcing one Building Segment overrides the Geometry view's Segment assignment, which the mockup cannot show. Counts held on the dwelling bear on Q4a-24 |
+| Q4a-27 | **On for every new Model.** Single-family is the app's default state | A user modelling apartments or a non-residential building switches it off once. The default belongs to the Model setting (Q4a-26), so nothing is written to a Zone until the user switches it off |
+| Q4a-28 | **Yes, publish them.** The values come from public documents and are not Phius's intellectual property: the non-residential programs from the Phius Certification Guidebook, and the multifamily space types from the Phius Multifamily Lighting and Misc Load Calculator. ph-composer-standards may carry both | Each `phius/` file names its source document and edition. honeybee-ph's `PHIUS_programs.py` cites Guidebook v3.02 Table N-10 and the Multi-Family Calculator of 2021-03-23; check those against the current editions before the files are generated |
 
 Still open, none of them gating the prototype: Q4a-01 (roadmap placement; the roadmap already
 carries Phase 4a before Phase 4), Q4a-16 (Space Types; leaning: always inherit for now) and Q4a-18
@@ -101,7 +103,7 @@ carries Phase 4a before Phase 4), Q4a-16 (Space Types; leaning: always inherit f
 ## Questions the prototype raised
 
 From the [GUI prototype](mockups/README.md), 2026-11-14. Each carries what the prototype shows now;
-Q4a-19, Q4a-20 and Q4a-26 are answered above; the rest are open.
+Q4a-19, Q4a-20, Q4a-26, Q4a-27 and Q4a-28 are answered above; the rest are open.
 
 | Id | Question | The prototype shows |
 | --- | --- | --- |
@@ -113,5 +115,5 @@ Q4a-19, Q4a-20 and Q4a-26 are answered above; the rest are open.
 | Q4a-24 | Bedrooms and occupants per Zone (Q4a-11) make a house of several Zones awkward. Keep per-Zone entry, or enter on the Dwelling when it spans several Zones? | Per Zone, summed in the Dwelling bubble and the Segment row. Under Single dwelling (Q4a-26) they are entered once for the house and stay on the dwelling when the switch is turned off, a working preview of counts on the Dwelling |
 | Q4a-25 | Who supplies the values the Phius data lacks (F4a-23): PH-Composer defaults in the library file, Ed's office standards, or the user each time? | Amber "?" on ventilation and hot water for every library Program; Space airflows replace ventilation where set |
 | Q4a-26 | Ed's Single dwelling switch (2026-11-14) | Answered above |
-| Q4a-27 | Is Single dwelling on by default for a new Model? | On in journey 1, off in journeys 2 to 5. A user modelling apartments switches it off once |
-| Q4a-28 | May the Phius program values be published in the public ph-composer-standards repository, with a note of their source and terms? honeybee-ph already publishes them; Phius's terms decide. Ed to confirm | Not shown. Gates the Phius standards files, not the prototype |
+| Q4a-27 | Is Single dwelling on by default for a new Model? | Answered above. On in journey 1; journeys 2 to 5 start with it off because they model other buildings |
+| Q4a-28 | May the Phius program values be published in the public ph-composer-standards repository, with a note of their source and terms? honeybee-ph already publishes them; Phius's terms decide. Ed to confirm | Answered above |

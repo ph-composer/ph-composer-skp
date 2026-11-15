@@ -72,8 +72,8 @@ until the cross-repo fix for F4a-13 ships (Q4a-08).
 
 ## Next
 
-1. Review the [GUI prototype](mockups/README.md) and answer Q4a-21 to Q4a-25, Q4a-27 and Q4a-28; iterate.
-   Q4a-19, Q4a-20 and Q4a-26 were answered in the first review.
+1. Review the [GUI prototype](mockups/README.md) and answer Q4a-21 to Q4a-25; iterate.
+   Q4a-19, Q4a-20 and Q4a-26 were answered in the first review, Q4a-27 and Q4a-28 on 2026-11-15.
 2. PRD, contracts and stages, worked back from the accepted prototype. Implementation needs
    separate authorization.
 3. Separately: the honeybee-ph and PHX fix for F4a-13 (Q4a-08), in those repositories, starting

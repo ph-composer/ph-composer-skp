@@ -36,7 +36,8 @@ server. The dark strip at the top picks a journey and says what to try; Reset re
   week, weeks per year) over a 24-hour strip and a week row. The hourly editor is a disabled
   button marked as planned.
 - **Single dwelling**, a checkbox at the top of Zones → Programs (Q4a-26). When on, every Zone is
-  one dwelling, House, with the residential default, in one residential Building Segment. The rows
+  one dwelling, House, with the residential default, in one residential Building Segment. It is on
+  for every new Model (Q4a-27). The rows
   are locked and show their values muted. The Building Segment row becomes the house row: bedrooms,
   occupants (Phius rule when empty) and the Equipment Set are its only inputs. Unchecking keeps
   everything it set as ordinary assignments, with the counts on the dwelling. Checking it over
@@ -58,6 +59,6 @@ Set serves a dwelling while Q4a-21 is open.
 ## Questions the prototype raised
 
 Recorded as Q4a-19 to Q4a-28 in [DECISIONS.md](../DECISIONS.md#questions-the-prototype-raised);
-Q4a-19, Q4a-20 and Q4a-26 are [answered](../DECISIONS.md#answered).
+Q4a-19, Q4a-20, Q4a-26, Q4a-27 and Q4a-28 are [answered](../DECISIONS.md#answered).
 The new words on screen (Program, Schedule, Equipment Set, Dwelling) enter
 `context/UBIQUITOUS_LANGUAGE.md` with the PRD.
