@@ -25,7 +25,7 @@ module PhComposer
                        :description => "Edit one #{kind.label}; changed expected values refuse.",
                        :refuses => Refuses::EDIT,
                        :params => Shapes.update(kind, editable, :labelled => labelled), :result => Shapes::RESULT,
-                       :undo_name => "Edit #{kind.label}", :side_effects => "Updates values and optional metadata.",
+                       :undo_name => "Edit #{kind.label}", :side_effects => "Updates values; metadata stays as stored.",
                        :examples => [{ "id" => example_id, "values" => { "name" => "Edited" },
                                        "expected_values" => { "name" => "Original" } }], &handler)
       end
@@ -47,7 +47,7 @@ module PhComposer
                        :description => "Delete #{kind.label}; remaining references refuse.",
                        :refuses => Refuses::DELETE,
                        :params => Shapes.object(properties, :optional => %w[expected_values replacement_id]),
-                       :result => Shapes::RESULT, :undo_name => "Delete #{kind.label}",
+                       :result => Shapes.with_removed_user_data(Shapes::RESULT), :undo_name => "Delete #{kind.label}",
                        :side_effects => "Replacement or explicit clearing rewrites uses and deletes atomically.",
                        :examples => [{ "id" => example_id }], &handler)
       end
@@ -66,8 +66,7 @@ module PhComposer
           params = request.params
           Materials::Operations.update(request, proposal,
                                        :id => params.fetch("id"), :values => params.fetch("values"),
-                                       :expected_values => params.fetch("expected_values"),
-                                       :user_data => params["user_data"])
+                                       :expected_values => params.fetch("expected_values"))
         end
         duplicate = {
           "id" => Shapes.id(kind.id_prefix, "The #{kind.label} to copy."),
@@ -106,8 +105,7 @@ module PhComposer
           params = request.params
           Assembly::Operations.update(request, proposal,
                                       :id => params.fetch("id"), :values => params.fetch("values"),
-                                      :expected_values => params.fetch("expected_values"),
-                                      :user_data => params["user_data"])
+                                      :expected_values => params.fetch("expected_values"))
         end
         duplicate = { "id" => Shapes.id(kind.id_prefix, "The #{kind.label} to copy.") }
         duplicate_action(feature, prefix, kind, duplicate, example_id) do |request, proposal|

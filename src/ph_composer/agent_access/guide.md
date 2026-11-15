@@ -76,6 +76,51 @@ A record or a preview can be larger than one reply. These reads give all of it e
   `text` in order, check the joined text's UTF-8 length and SHA-256 against `total_bytes` and
   `sha256`, then parse it. A path that names nothing is refused as `target.not_found`; a stored
   `null` or `false` is a value.
+- **Change a record's metadata.** Read its `user_data` and `extension_data` (`records.list`, or
+  `records.detail` for a large map), change your own key, then send the whole map to
+  `ph_composer.records.update_metadata` with the record's `kind` and `id` and the two maps you read as
+  `expected_metadata`. `{}` clears the map. A change made since your read refuses the whole batch as
+  `target.changed`, and nothing is written. The kinds' own `update` actions do not take `user_data`.
+  The [user data guide](USER_DATA.md) lists the read and write call for every object.
+  Building Segments and Levels (`ph_composer.zones.building_segment` and `ph_composer.zones.level`) are
+  written the same way, and each Zone's copy of its choices follows in the same Undo step. A locked Zone
+  refuses the write as `target.locked`; a Zone awaiting adoption keeps its copy until it is adopted. Removing or merging an option keeps the survivor's map; the
+  result's `removed_user_data` names each removed option whose map was not empty, with its top-level
+  keys (as bounded under "Deleting a definition"), and Undo brings it back.
+- **Change a part's metadata.** An Assembly's Layers and Layer-Segments each keep their own
+  `user_data` (`describe` on a record kind lists its `parts`). Read the map from the record's
+  `values` (`records.list`, or `records.detail` with a path such as `["values", "layers"]`); `segments.list`
+  also returns each Layer-Segment as stored. Send it to `ph_composer.records.update_metadata` with
+  `part_ids` in the reference, the ids from the record down: `[Layer id]` or `[Layer id, Layer-Segment id]`.
+  `expected_metadata` is the part's `user_data` with `extension_data` `{}`; a part takes no extension
+  payloads. Edits keep each part's map, Duplicate copies it, and a new part starts without one.
+  A Window Type's elements are parts too: read each one's map from `windows.types.elements.list` and
+  write it with `part_ids` `[element id]`. Splitting an element copies its map into every piece. Merging
+  keeps only the top-left element's map; the result's `removed_user_data` names each other element whose
+  map was not empty, with its top-level keys (as bounded under "Deleting a definition"), and Undo
+  brings them back. Removing a band deletes its elements with their maps. A `windows.types.update` that
+  sends the whole `elements` array keeps each surviving element's map by its id, whether or not it sends
+  it, and a new element starts without one; a map that differs from the stored one refuses
+  `params.invalid`, since `records.update_metadata` is the one way to write it.
+- **Deleting a definition.** The delete of a Material, Assembly, Frame, Glazing, Psi-Install Type,
+  Window Type, Thermal Bridge Type or Attached zone returns `removed_user_data`: the record, then each
+  of its parts with `part_ids`, whose map was not empty, with its top-level keys. The report fits one
+  reply: it lists the first 50 maps, each with its `user_data_key_total`, and as many of their first 50
+  keys as fit in 8 KiB. `removed_user_data_total` counts every removed map, and
+  `removed_user_data_truncated` is true when a map or a key was left out. A replacement keeps its own
+  map, and Undo brings the removed maps back.
+- **Change the Model's or a Space Floor's metadata.** The Model has its own `user_data` and
+  `extension_data`: read them with `ph_composer.model.detail` (both `{}` until something is written)
+  and write them with `ph_composer.model.update_metadata`, which takes `user_data`,
+  `extension_payloads` or both and the two maps you read as `expected_metadata`, as above, with no
+  reference, and answers each envelope's `extension_status`. A record that a Model extension payload
+  names refuses deletion as `reference.in_use` until the payload no longer names it. For maps larger
+  than one reply, `model.detail` with `metadata` `"summary"` gives their sizes, and `ph_composer.model.fragment` reads
+  any of them, such as `path` `["user_data"]`, in fragments that join as above. Each Space Floor has its own `user_data` too, kept apart from its Volume's. A Volume row's
+  `floor` gives the Floor's `reference` (`floor_id` and the Volume's `entity_path`) and its `user_data`;
+  `ph_composer.spaces.volumes.list` returns it when `fields` asks for `floor`. Send that reference to
+  `ph_composer.spaces.update_metadata` with `expected_metadata` the Floor's `user_data` and
+  `extension_data` `{}`; a Floor takes no extension payloads. Copying a Volume copies its Floor's map.
 - **Read a definition's parts.** `ph_composer.assemblies.assemblies.layers.list` and
   `segments.list` page an Assembly's Layers and Layer-Segments; `ph_composer.windows.types.elements.list`
   pages a Window Type's elements with each one's thermal result, installation edges and findings, and
@@ -308,6 +353,19 @@ and refuses as a whole if any target changed or cannot be written. `ph_composer.
 removes the assignment. Each is one Undo step. An Edge split or copied in SketchUp keeps its
 assignment, and the pieces share one id, which reads mark `copied`; nothing needs repairing.
 
+Each Edge row also carries the assignment's `user_data`, `extension_data` and `extension_status`
+(`{}` for an Edge with no assignment). With `metadata` `"summary"`, `edges.selection`, `edges.at` and
+`edges.candidates` give their sizes in `metadata` instead, so an Edge with a large map never fills a
+reply, and `ph_composer.thermal_bridges.edges.detail` reads one of them whole by the row's `path` as
+`edge_path` and a `path` such as `["user_data"]`, in fragments that join as above. To change them, send the row's `reference` to
+`ph_composer.thermal_bridges.edges.update_metadata` with the whole `user_data` map to keep and the two
+maps you read as `expected_metadata`; `{}` clears the map. The reference's path names one Edge, so a
+piece that shares its id keeps its own map. An Edge needs a valid assignment first: one without refuses.
+One whose row shows a `record_problem` cannot take metadata until you clear or reassign it: with an
+assignment id it refuses as `validation.failed`, and without one its `entity_id` is null, which this
+action does not accept. A change made since your read refuses the whole batch as `target.changed`. Reassigning keeps the map,
+and `edges.clear` removes it with the assignment; Undo brings both back.
+
 Two cases are beyond `edges.clear`: an assignment whose stored text is not a JSON object
 (`record.unreadable`), and a readable assignment on an Edge no Zone holds, which has no Edge reference.
 `ph_composer.thermal_bridges.edges.repair_candidates` lists both a page at a time, each with its root-to-Edge
@@ -478,11 +536,20 @@ fragments are one JSON string; parse it, and its UTF-8 bytes hash to `file.sha25
 or went since refuses `artifact.changed`, and a task that wrote no file refuses `artifact.none`. A later
 export to the same destination replaces it.
 
-Metadata is not exported just because it is stored. Where a feature exports a record's `user_data`
-(today Zones, Faces, Window Units, Assemblies, Spaces, Volumes and Floor Segments), it passes through
-to the HBJSON object, and the report counts those objects as `export.user_data_passed`; any other
-`user_data` stays in the Model with an `export.metadata_omitted` finding. Read the export's findings
-rather than assume. An extension's data leaves with the extension that exports it: data marked local to the
+Metadata is not exported just because it is stored. Where an entity becomes an HBJSON object of its
+own, its `user_data` passes through to that object, and the report counts those objects as
+`export.user_data_passed`. The Model's map goes to the HBJSON Model, a Zone's to its Room, a Face's to
+its Face, a Window Unit's to each of its Apertures, an Assembly's to its construction, a Space's,
+Volume's, Space Floor's and Floor Segment's to the matching honeybee-ph object. An Assembly Layer's
+map goes to its material (the hybrid material when the Layer is divided), and a divided Layer's
+Layer-Segments' maps go to their cell materials. Every other map stays in the Model with one
+`export.metadata_omitted` finding per entity: a membrane Layer and its Layer-Segment, the one
+Layer-Segment of an undivided Layer, Window Elements, Thermal Bridge Edges, Attached zones and the definitions (Materials, Frames,
+Glazings, Psi-Install Types, Window Types, Thermal Bridge Types, Building Segments and Levels). A
+`ph_composer` key in any map that leaves blocks the export. The finding for a Layer, Layer-Segment
+or Window Element names the part in `object_id` and gives `reference`, the `{kind, id, part_ids}`
+to send to `ph_composer.records.update_metadata`. Read the export's findings rather than
+assume. An extension's data leaves with the extension that exports it: data marked local to the
 Model is left out with the same finding, and data whose effect on the export is required or unknown,
 with nothing installed to export it, blocks the export.
 

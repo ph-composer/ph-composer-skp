@@ -60,7 +60,7 @@ module PhComposer
         object({ "id" => id(kind.id_prefix, "The #{kind.label} to edit."),
                  "values" => described(editable_patch(kind, fields, :labelled => labelled),
                                        "The values to change; any not given stay."),
-                 "expected_values" => expected(kind), "user_data" => USER_DATA }, :optional => ["user_data"])
+                 "expected_values" => expected(kind) })
       end
     end
   end

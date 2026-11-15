@@ -61,7 +61,7 @@ class AgentAccessDiscoveryTest < PhComposerTestCase
       [section, document.fetch(section).reject { |row| row.fetch("owner") == TestFeature::ID }.length]
     end
 
-    assert_equal({ "record_kinds" => 11, "reference_targets" => 9 }, shipped)
+    assert_equal({ "record_kinds" => 11, "reference_targets" => 10 }, shipped)
     DESCRIBED_BY.each do |section, key|
       rows = all_rows(section)
       unless section == "operations"

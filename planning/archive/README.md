@@ -1,6 +1,6 @@
 # Planning archive
 
-DATE: 2026-11-12
+DATE: 2026-11-15
 STATUS: Index of completed and superseded planning work, newest first.
 AUTHOR: Ed May, BLDGTYP
 
@@ -9,6 +9,7 @@ reached.
 
 | Slug | Date | Outcome | Issue or PR |
 | --- | --- | --- | --- |
+| [entity-user-data](entity-user-data/README.md) | 2026-11-15 | Complete: `user_data` on every authored entity through public operations (EUD-01 to EUD-10, API 1.52 to 1.61): one guarded `records.update_metadata` for catalog records and their declared parts (Assembly Layers, Layer-Segments, Window Elements), Building Segment and Level writes with the Zone evidence rewrite, Thermal Bridge Edge metadata by occurrence, the Model's own map and Space Floor maps, one lifecycle policy (split copies, merge keeps the survivor and reports removed maps), HBJSON carriage for 1:1 objects with one omission finding for the rest; `docs/USER_DATA.md` holds the coverage table. Native `EUD09` and `EUD09X` pass. Library wire formats stay without metadata (D-UD-7) | [#507](https://github.com/ph-composer/ph-composer-skp/issues/507); [PR #508](https://github.com/ph-composer/ph-composer-skp/pull/508) |
 | [agent-access-optional-slices](agent-access-optional-slices.md) | 2026-11-12 | The four deferred agent-access slices: expected revision on `start_export` (PR #501, API 1.49), caller-scoped operation history through `outcome` (PR #502, 1.50), inline capture images and written HBJSON through `export_status` part `file` (PR #503, 1.51); overlay capture closed by measurement (needs a macOS Screen Recording grant), limit in AGENT_INTERFACE | [#458](https://github.com/ph-composer/ph-composer-skp/issues/458) |
 | [duplicate-identity-contract](duplicate-identity-contract.md) | 2026-11-12 | Design evidence: Zones, Windows and Spaces duplicate-identity repair side by side (six keeper rules, three finding shapes, three binding strategies). Ed decided keep separate; no foundation contract, the optional helpers packet not taken. Four divergences resolved in #468 | [#145](https://github.com/ph-composer/ph-composer-skp/issues/145) |
 | [agent-workflows-2026-11](agent-workflows-2026-11/README.md) | 2026-11-11 | Complete: the review's findings delivered as stages AW-01 to AW-10, one PR each through Codex review and a host gate: safe targets and creation receipts, bounded discovery and an installed guide, candidates without selection, complete definition, occurrence, library and QA reads by page and fragment, failed-run diagnostics and explicit repair, client profiles with Repair, host-readiness guards, and a Move guard (`session.busy` while a native Move is partway through, API 1.43). Fresh Claude Code and Codex clients ran the integrated scenario (`AW10`); `AW10G` passed 3 of 3. A14 and A16 deferred, optional; follow-ups listed in its STATUS | [#439](https://github.com/ph-composer/ph-composer-skp/issues/439); PRs [#440](https://github.com/ph-composer/ph-composer-skp/pull/440) to [#453](https://github.com/ph-composer/ph-composer-skp/pull/453) |

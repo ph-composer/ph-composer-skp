@@ -229,7 +229,8 @@ A feature adds export coverage with `feature.export_contributor(name, section_ve
 report:, preflight:, requires:, projection:)` in its `install`, whose block returns the section's records, and a Python `Section` with
 the same id listed in `python/ph_composer_translation/composition.py`. The block reads through
 `Export::RecordReader`, which exports only declared values and named extension fields, passes
-`user_data` through for records whose owner requests `user_data: true`. The
+`user_data` through for records whose owner requests `user_data: true` and takes record part maps out
+unless it requests `parts: true`. The
 [metadata contract](EXTENSIBILITY.md#metadata-and-structured-extension-data) defines omissions
 and blockers. When the translator adds result fields for the feature, the
 contributor declares them in `result` and renders them in `report`; they arrive under the section's
@@ -620,7 +621,10 @@ this foundation when their feature lands.
   values schema. Ids use a kind prefix and twelve random alphanumeric characters. There is no
   automatic common name/notes/source/timestamp field set or per-kind migration machinery.
 - **Metadata.** `user_data` and `extension_data` are reserved engine fields. Ordinary edits
-  preserve unrelated metadata and unavailable extension payloads. Provenance is an optional
+  preserve unrelated metadata and unavailable extension payloads. A nested object with its own map
+  is a `Records::Part`; `ph_composer.records.update_metadata` is the one write route for a catalog
+  record's or part's map, and each entity owner has one `update_metadata` action. The
+  [user data guide](../docs/USER_DATA.md) maps every entity to its storage and export. Provenance is an optional
   feature-declared field, validated by that feature; the foundation does not interpret it.
 - **Commands and Undo.** A registered action reads through its request's engine and proposes
   creates, updates or deletes into `Operations::Proposal`. Dispatch validates the proposal and

@@ -5,7 +5,8 @@ require "tmpdir"
 
 # Offline: a client that knows only the public interface and docs/API_QUICKSTART.md makes a Zone,
 # reads its Faces, classifies one, previews and makes an edit, verifies what changed, recovers from a
-# stale revision, retries a lost response and gives the Face an Assembly. It names no feature module;
+# stale revision, retries a lost response, gives the Face an Assembly and attaches user_data to the Face and
+# its Material. It names no feature module;
 # the host side of the test only draws geometry and selects it, as a user would.
 class ApiClientTest < PhComposerTestCase
   API = PhComposer::API
@@ -46,8 +47,9 @@ class ApiClientTest < PhComposerTestCase
     assert_equal updated, API.outcome(:context => context, :request => { "sequence" => 3 })
     assert_equal undo_steps, Sketchup.active_model.instance_variable_get(:@undo_stack).length
 
-    assign_an_assembly(context, updated)
+    material = assign_an_assembly(context, updated)
     read_in_pages_and_export(context)
+    attach_user_data(context, material)
   end
 
   def test_the_client_names_no_feature_module
@@ -101,6 +103,71 @@ class ApiClientTest < PhComposerTestCase
                  [material, assembly, filled, assigned].map { |outcome| outcome["effect"] }
     assert_equal assembly_id, faces(context).find { |row| row["reference"] == face["reference"] }
                                             .dig("values", "assembly_id")
+    material
+  end
+
+  # 9. Attach your own data to a Face and a Material: read, change one key, guarded write, read back, clear.
+  def attach_user_data(context, material)
+    read = API.query(:context => context, :name => "ph_composer.zones.faces.list")
+    face = read["value"]["faces"].find { |row| row["values"]["face_type"] == "Wall" }
+    assert_equal [{}, {}], face.values_at("user_data", "extension_data")
+    mine = face["user_data"].merge("example_org" => { "review_status" => "needs_site_check", "detail" => "A-503/7" })
+    tagged = write_face_metadata(context, face, mine, 9, read["revision"])
+    assert_equal "committed", tagged["effect"], tagged.inspect
+    steps = undo_steps
+    noted = note_material(context, material)
+    assert_equal steps + 1, undo_steps, "one write, one Undo step"
+
+    face = faces(context).find { |found| found["reference"] == face["reference"] }
+    assert_equal({ "example_org" => { "review_status" => "needs_site_check", "detail" => "A-503/7" } },
+                 face["user_data"])
+    cleared = write_face_metadata(context, face, {}, 11, noted["revision"])
+    assert_equal "committed", cleared["effect"], cleared.inspect
+    assert_equal({}, faces(context).find { |found| found["reference"] == face["reference"] }["user_data"])
+    # A write guarded by maps that changed since they were read refuses and writes nothing.
+    stale = write_face_metadata(context, face, { "late" => true }, 12, cleared["revision"])
+    assert_equal %w[target.changed none], stale.values_at("code", "effect")
+    # Clearing it again sends what is stored: no Undo step.
+    cleared_face = faces(context).find { |found| found["reference"] == face["reference"] }
+    steps = undo_steps
+    again = write_face_metadata(context, cleared_face, {}, 13, cleared["revision"])
+    assert_equal %w[completed none], again.values_at("status", "effect")
+    assert_equal steps, undo_steps
+  end
+
+  # The core action writes any definition kind's map by {kind, id}.
+  def note_material(context, material)
+    params = { "kind" => "ph_composer.assemblies.material", "ids" => [material["value"]["id"]] }
+    read = API.query(:context => context, :name => "ph_composer.records.list", :params => params)
+    row = read["value"]["records"].first
+    noted = API.invoke(
+      :context => context, :name => "ph_composer.records.update_metadata",
+      :params => { "updates" => [{ "reference" => { "kind" => row["kind"], "id" => row["id"] },
+                                   "user_data" => row["user_data"].merge("example_org" => { "spec" => "07 21 00" }),
+                                   "expected_metadata" => row.slice("user_data", "extension_data") }] },
+      :request => { "sequence" => 10, "expected_revision" => read["revision"] }
+    )
+    assert_equal "committed", noted["effect"], noted.inspect
+    back = API.query(:context => context, :name => "ph_composer.records.list", :params => params)
+    # A read is a copy: changing the row read changes nothing stored.
+    back.dig("value", "records", 0, "user_data", "example_org")["spec"] = "changed in the script only"
+    again = API.query(:context => context, :name => "ph_composer.records.list", :params => params)
+    assert_equal({ "example_org" => { "spec" => "07 21 00" } }, again.dig("value", "records", 0, "user_data"))
+    noted
+  end
+
+  def undo_steps
+    Sketchup.active_model.instance_variable_get(:@undo_stack).length
+  end
+
+  # The whole map to keep, guarded by the Face's two maps as `face` read them.
+  def write_face_metadata(context, face, user_data, sequence, revision)
+    API.invoke(
+      :context => context, :name => "ph_composer.zones.faces.update_metadata",
+      :params => { "updates" => [{ "reference" => face["reference"], "user_data" => user_data,
+                                   "expected_metadata" => face.slice("user_data", "extension_data") }] },
+      :request => { "sequence" => sequence, "expected_revision" => revision }
+    )
   end
 
   # 8. Read in pages, and export. The task is cancelled before its runtime starts, as the offline suite

@@ -16,16 +16,21 @@ module PhComposer
       NAME = { "type" => "string", "minLength" => 1 }.freeze
       FIELDS = [Records::Field.new(:key => "name", :schema => NAME, :required => true),
                 Records::Field.new(:key => "colour", :schema => COLOUR, :required => true)].freeze
+      # Both option kinds share one follow-up, so a batch writing a Segment and a Level rewrites each Zone once.
+      EVIDENCE_FOLLOW_UP = ->(request, proposal) { Options.rewrite_evidence(request, proposal) }
       SEGMENTS = Records::RecordKind.new(
         :id => SEGMENT_KIND, :label => "Building Segment", :schema_version => 1, :id_prefix => "bsg",
         :fields => FIELDS + [Records::Field.new(:key => "export_identifier", :required => true,
                                                 :schema => { "type" => "string", "pattern" => "^bseg_[a-zA-Z0-9_]+$",
-                                                             "maxLength" => 100 })]
+                                                             "maxLength" => 100 })],
+        :metadata_follow_up => EVIDENCE_FOLLOW_UP
       )
       LEVELS = Records::RecordKind.new(:id => LEVEL_KIND, :label => "Level", :schema_version => 1,
-                                       :id_prefix => "lvl", :fields => FIELDS)
+                                       :id_prefix => "lvl", :fields => FIELDS,
+                                       :metadata_follow_up => EVIDENCE_FOLLOW_UP)
       SETTINGS = Records::RecordKind.new(
         :id => SETTINGS_KIND, :label => "Zone option settings", :schema_version => 1, :id_prefix => "zop",
+        :owner_writes_metadata => true,
         :fields => [Records::Reference.new(:key => "default_segment_id", :target_kind => SEGMENT_KIND,
                                            :cardinality => "one", :required => true),
                     Records::Field.new(:key => "source_model_id", :required => true,

@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 51
+    MINOR = 61
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -253,7 +253,82 @@ module PhComposer
                     "capture.too_large names a smaller width and height. export_status takes part file for a " \
                     "completed task: the written HBJSON's text in fragments with the receipt's hash, refusing " \
                     "artifact.none for a task that wrote no file and artifact.changed for a file that no longer " \
-                    "matches its receipt." }
+                    "matches its receipt." },
+      { "minor" => 52, "date" => "2026-11-14",
+        "change" => "ph_composer.records.update_metadata is new: it replaces the user_data and installed extension " \
+                    "payloads of records of any kind records.list reads, in one Undo step, guarded by " \
+                    "expected_metadata, refusing target.wrong_kind for Building Segments, Levels and Zone option " \
+                    "settings. The update actions of Materials, Assemblies, Frames, Glazings, Psi-Install Types, " \
+                    "Window Types and Thermal Bridge Types, the update rows of windows.types.installs.save and an " \
+                    "attached_zone.save with id no longer take user_data; their create actions still do." },
+      { "minor" => 53, "date" => "2026-11-14",
+        "change" => "Assembly Layers and Layer-Segments take an optional user_data map. A " \
+                    "ph_composer.records.update_metadata reference takes part_ids to write the map of one part, such " \
+                    "as [Layer id, Layer-Segment id]; a part takes user_data only. describe on a record kind lists " \
+                    "its parts. Assembly gestures keep each surviving part's map, a new part starts without one, " \
+                    "and Duplicate copies the maps under new part ids." },
+      { "minor" => 54, "date" => "2026-11-14",
+        "change" => "Window Elements take an optional user_data map, written by " \
+                    "ph_composer.records.update_metadata with part_ids [element id] and read by " \
+                    "windows.types.elements.list. windows.types.grid.merge keeps the top-left element's map and " \
+                    "returns removed_user_data, each other merged element whose map was not empty with its " \
+                    "top-level keys, and removed_user_data_total. Split copies the map into every piece, a kind " \
+                    "change, flip, installs save, Duplicate and new_flipped_type keep it, and an inserted element " \
+                    "starts without one." },
+      { "minor" => 55, "date" => "2026-11-14",
+        "change" => "ph_composer.records.update_metadata writes Building Segment and Level maps and rewrites the " \
+                    "copy each adopted Zone and member stamp keeps in the same Undo step; it may refuse " \
+                    "target.locked. Zone option settings still refuse as target.wrong_kind. " \
+                    "zones.options.manage, remove and merge keep the survivor's map and return removed_user_data, " \
+                    "each removed option whose map was not empty with its top-level keys, and " \
+                    "removed_user_data_total. A RecordKind may declare metadata_follow_up." },
+      { "minor" => 56, "date" => "2026-11-14",
+        "change" => "thermal_bridges.edges.selection, selection_all, at and candidates rows carry user_data, " \
+                    "extension_data and extension_status. New ph_composer.thermal_bridges.edges.update_metadata " \
+                    "replaces the metadata of assigned Edges by occurrence, guarded by expected_metadata, at most " \
+                    "250 Edges in one Undo step; an Edge with no assignment refuses." },
+      { "minor" => 57, "date" => "2026-11-14",
+        "change" => "ph_composer.model.detail and ph_composer.model.update_metadata are new: the Model's own " \
+                    "user_data and extension_data, in the ph_composer.model dictionary, read as {} until written and " \
+                    "replaced under expected_metadata in one Undo step. Volume rows carry floor, the Space Floor's " \
+                    "reference and its own user_data (a ph_composer.spaces.volumes.list field, not a default), and " \
+                    "spaces.update_metadata writes that map by floor_id. Clearing a map a record never stored writes " \
+                    "nothing in every owner's update_metadata." },
+      { "minor" => 58, "date" => "2026-11-14",
+        "change" => "Export carries the Model's user_data to the HBJSON Model, a Space Floor's to its SpaceFloor, " \
+                    "an Assembly Layer's to its material (the hybrid host when divided) and a divided Layer's " \
+                    "Layer-Segments' to their cell materials; a ph_composer key in any of them blocks the export, " \
+                    "and the new ph_composer.model.export_preflight reports it for the Model. The extraction gains " \
+                    "the ph_composer.model.export.model section and a Volume's floor_user_data. Window Element, " \
+                    "Attached zone, membrane Layer and undivided Layer-Segment maps stay in the Model with an " \
+                    "export.metadata_omitted finding, and each finding is listed once." },
+      { "minor" => 59, "date" => "2026-11-14",
+        "change" => "An export.metadata_omitted finding about a record part (an Assembly Layer or Layer-Segment, " \
+                    "or a Window Element) gains reference, the {kind, id, part_ids} " \
+                    "ph_composer.records.update_metadata takes, and its message names the record that holds the " \
+                    "part. A contributor's " \
+                    "Engine#propose_update no longer takes user_data: ph_composer.records.update_metadata " \
+                    "(Engine#propose_metadata_update) is the one write route for an existing record's map." },
+      { "minor" => 60, "date" => "2026-11-14",
+        "change" => "An update that rebuilds a record's parts, such as windows.types.update with elements, keeps " \
+                    "each surviving part's user_data by id whether or not it sends it, starts a new part without " \
+                    "one, and refuses params.invalid for a part map that differs from the stored one. The deletes of " \
+                    "Materials, Assemblies, Frames, Glazings, Psi-Install Types, Window Types, Thermal Bridge Types " \
+                    "and Attached zones return removed_user_data and removed_user_data_total, each part listed by " \
+                    "part_ids. ph_composer.model.detail takes metadata summary, ph_composer.model.fragment is new, " \
+                    "and ph_composer.model.update_metadata returns extension_status only. thermal_bridges.edges." \
+                    "selection, at and candidates take metadata summary, and thermal_bridges.edges.detail is new. " \
+                    "Export reports an unused Building Segment's or Level's map as omitted. A part declaration " \
+                    "needs a required string id and an optional object user_data. Engine#propose_update takes " \
+                    "derived_part_maps and Engine#propose_delete returns the removal report." },
+      { "minor" => 61, "date" => "2026-11-14",
+        "change" => "Every delete and merge that returns removed_user_data also returns " \
+                    "removed_user_data_truncated, and its rows stay within 8192 bytes: each listed map keeps its " \
+                    "address and user_data_key_total, and its keys fill in while they fit. The new reference " \
+                    "target ph_composer.model.metadata puts the Model's extension payloads in the incoming-reference " \
+                    "check, so a record a Model payload names refuses deletion as reference.in_use. A membrane " \
+                    "Layer's Layer-Segment map stays in the Model with an export.metadata_omitted finding even " \
+                    "with a steel stud spacing." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

@@ -321,12 +321,24 @@ distinguishes a refusal before writing, a verified rollback and an unknown resul
 review and agent calls before opening a Model transaction.
 
 Metadata on authored entities is written the same way: `ph_composer.zones.update_metadata`,
-`ph_composer.zones.faces.update_metadata` and `ph_composer.windows.units.update_metadata` take a
+`ph_composer.zones.faces.update_metadata`, `ph_composer.windows.units.update_metadata` and
+`ph_composer.thermal_bridges.edges.update_metadata` take a
 batch of explicit occurrences with the metadata last read, and refuse every target or none
-([CONTRACTS.md](CONTRACTS.md), "Records and extension data"). A script that reads the exported
-HBJSON finds passed-through metadata on the owning Honeybee object. The
+([CONTRACTS.md](CONTRACTS.md), "Records and extension data"). `ph_composer.records.update_metadata`
+does the same for catalog records by `{kind, id}`, and for a record's declared parts, such as an
+Assembly's Layers, by `part_ids`; their update actions no longer take `user_data`. A Building
+Segment or Level write also rewrites the copy each Zone keeps of it, in the same Undo step.
+`ph_composer.spaces.update_metadata` also writes a Space Floor's own map by a Volume row's
+`floor.reference`, and `ph_composer.model.update_metadata` writes the Model's own maps, read by
+`ph_composer.model.detail` and, for maps larger than a reply, `ph_composer.model.fragment`. Edge rows
+take `metadata` `"summary"`, and `thermal_bridges.edges.detail` reads one Edge's metadata in fragments.
+Catalog deletes and merges report the maps they remove in `removed_user_data`, bounded to fit one reply,
+with `removed_user_data_truncated`.
+A script that reads the exported HBJSON finds passed-through metadata on the owning Honeybee object. The
 [export recipe](../docs/AGENT_GUIDE.md#export) lists supported record kinds and explains the
-metadata findings.
+metadata findings; an `export.metadata_omitted` finding about a record part carries `reference`, the
+`{kind, id, part_ids}` that `ph_composer.records.update_metadata` takes (API 1.59). The
+[user data guide](../docs/USER_DATA.md) is the coverage table for every entity.
 
 Provide a non-mutating proposal/preview for compound or destructive edits. It reports targets,
 changed values, affected references and validation findings. A proposal binds to its inputs and
@@ -463,6 +475,8 @@ Panel clients correlate
 slot. This operation is separate from the longer-lived HBJSON runtime task below.
 
 `API.export_preflight` requires `read` and returns feature-owned findings and explicit repair actions.
+The foundation adds one contributor of its own (API 1.58): `ph_composer.model.export_preflight` blocks on a
+reserved key in the Model's `user_data` or an envelope export cannot leave out, as extraction would.
 A caller invokes selected repairs through the ordinary `model_write` contract, then revalidates.
 Its bounded forms (`Export::DiagnosticPages`) leave every contributor's own preflight query as it is:
 `compact` counts by owner and code over the whole preflight, `part` pages findings or repairs with each

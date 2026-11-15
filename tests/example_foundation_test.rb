@@ -15,7 +15,8 @@ class ExampleFoundationTest < PhComposerTestCase
 
     failed = result.fetch("steps").reject { |step| step.fetch("passed") }
     assert_empty failed
-    assert_equal ["create", "read", "update", "read back", "stale second client", "retry", "duplicate", "summary"],
+    assert_equal ["create", "read", "update", "read back", "stale second client", "retry", "tag", "duplicate",
+                  "summary"],
                  result.fetch("steps").map { |step| step.fetch("step") }
   end
 

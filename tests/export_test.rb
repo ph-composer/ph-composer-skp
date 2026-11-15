@@ -128,6 +128,32 @@ class ExportTest < PhComposerTestCase
     refute @model.modified_since_mark? if @model.respond_to?(:modified_since_mark?)
   end
 
+  # A record read twice, as a Building-Segment two Zones name, gives its finding once.
+  def test_a_repeated_finding_is_listed_once
+    reader = Export::RecordReader.new(nil, nil)
+    reader.within("s") do
+      2.times { reader.note("export.metadata_omitted", "exp_1", "left out") }
+      reader.note("export.metadata_omitted", "exp_2", "left out")
+    end
+
+    assert_equal %w[exp_1 exp_2], reader.findings.map(&:record_id)
+  end
+
+  # A Material read by its constructions section and its sources section gives one omitted-map finding,
+  # named by the first section; other codes stay per section.
+  def test_an_omitted_map_read_by_two_sections_is_listed_once
+    reader = Export::RecordReader.new(nil, nil)
+    %w[first second].each do |section|
+      reader.within(section) do
+        reader.note("export.metadata_omitted", "mat_1", "left out")
+        reader.note("export.other", "mat_1", "warned")
+      end
+    end
+
+    assert_equal [%w[export.metadata_omitted first], %w[export.other first], %w[export.other second]],
+                 reader.findings.map { |finding| [finding.code, finding.section] }
+  end
+
   def test_a_local_only_envelope_is_left_out_with_a_finding
     id = store_part("extension_data" => { "other.org.notes" => envelope("local_only") })
 
@@ -270,8 +296,14 @@ class ExportTest < PhComposerTestCase
                                    { "label" => "Head", "length_mm" => 1231.9 }])
       sill = created.dig("value", "part_ids", 0)
       invoke("example.foundation.update_parts",
-             "edits" => [{ "id" => sill, "user_data" => { "site" => "north" },
-                           "review" => { "review_status" => "checked" } }])
+             "edits" => [{ "id" => sill, "review" => { "review_status" => "checked" } }])
+      stored = PhComposer::Records::Engine.new(@model, PhComposer::Registry.current.catalog)
+                                          .find("example.foundation.part", sill)
+      invoke("ph_composer.records.update_metadata",
+             "updates" => [{ "reference" => { "kind" => "example.foundation.part", "id" => sill },
+                             "user_data" => { "site" => "north" },
+                             "expected_metadata" => { "user_data" => {},
+                                                      "extension_data" => stored.fetch("extension_data") } }])
     end
   end
 

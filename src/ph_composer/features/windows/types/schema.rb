@@ -4,6 +4,9 @@ module PhComposer
   module Windows
     # Inclusive bands describe one rectangular, fully covered layout; dimensions may be missing in
     # an incomplete saved type. Geometry and placement depend on these definitions, never vice versa.
+    # Elements are the kind's part (Records::Part): each may carry its own `user_data`, which a kind change,
+    # flip, installs save, Duplicate and the flipped Type keep, split copies into every piece and merge keeps
+    # only on the top-left survivor (GridOperations.merge); a new element starts without a map.
     module Types
       # Edge order everywhere a Type lists its sides: top and bottom at even indexes, right and left at odd.
       SIDES = %w[top right bottom left].freeze
@@ -22,8 +25,9 @@ module PhComposer
         "id" => { "type" => "string" }, "name" => { "type" => "string" },
         "kind" => { "type" => "string", "enum" => %w[glazed empty] },
         "row_span" => SPAN, "column_span" => SPAN, "glazing_id" => ID,
-        "frames" => SIDE_SCHEMA, "installs" => SIDE_SCHEMA, "operation" => OPERATION
-      }).freeze
+        "frames" => SIDE_SCHEMA, "installs" => SIDE_SCHEMA, "operation" => OPERATION,
+        "user_data" => SchemaShapes::PART_USER_DATA
+      }, :optional => ["user_data"]).freeze
       BANDS = { "type" => "array", "minItems" => 1, "maxItems" => 40,
                 "items" => { "type" => %w[number null], "exclusiveMinimum" => 0, "x-unit" => "m" } }.freeze
 
@@ -42,13 +46,12 @@ module PhComposer
           "product_photos" => [] }.merge(Fields.defaults(values))
       end
 
-      # Whether the elements tile the grid exactly once, with valid ids, spans and operations.
+      # Whether the elements tile the grid exactly once, with valid ids, spans and operations. The kind
+      # refuses repeated element ids, as it does for every part.
       def layout_problems(values)
         found = []
         coverage = {}
-        ids = []
         values.fetch("elements").each do |element|
-          ids << element.fetch("id")
           found << "Element id is invalid." unless Records::Identity.pattern("wel").match?(element.fetch("id"))
           spans = %w[row_span column_span].map.with_index do |key, axis|
             span = element.fetch(key)
@@ -62,7 +65,6 @@ module PhComposer
           found.concat(cover(coverage, *spans)) if spans.none?(&:nil?)
           found.concat(element_problems(element))
         end
-        found << "Element ids must be unique." unless ids.uniq == ids
         if coverage.length != values.fetch("rows_m").length * values.fetch("columns_m").length
           found << "Every grid cell must be covered."
         end
@@ -120,9 +122,11 @@ module PhComposer
         Fields.problems(values) + Fields.source_problems(values["source"], SNAPSHOT_SCHEMA) + layout_problems(values)
       end
 
+      PARTS = [Records::Part.new(:label => "Element", :path => "elements[]")].freeze
+
       KIND = Records::RecordKind.new(:id => TYPE_KIND, :label => "Window Type", :schema_version => 1,
                                      :id_prefix => "wnt", :fields => FIELDS, :references => REFERENCES,
-                                     :validate => method(:record_problems))
+                                     :parts => PARTS, :validate => method(:record_problems))
 
       def references(record)
         KIND.references.flat_map { |reference| reference.ids(record).map { |id| [reference.target_kind, id] } }.uniq

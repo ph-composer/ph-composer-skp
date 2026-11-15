@@ -387,23 +387,118 @@ export as `extension.invalid`. A payload without a usable declaration blocks ope
 invalidate its references and blocks export when its relevance is unknown. Never guess from a
 payload's text. Native SketchUp copy semantics are feature-owned.
 
-**Entity-owned records.** Zones, Faces and Window Units store their records on SketchUp entities,
-and the same rules hold for them (`Records::Metadata`, shared with the engine). Their reads
-(`ph_composer.zones.list` and `.all`, `ph_composer.zones.faces.list` and `.all`,
-`ph_composer.windows.units.list`) report `extension_status` beside `extension_data`, in the words a
-catalog read uses; a Face with no record reports `{}`. Each owner has one metadata action:
-`ph_composer.zones.update_metadata`, `ph_composer.zones.faces.update_metadata` and
-`ph_composer.windows.units.update_metadata`. It takes a batch of occurrences, each with the whole
-`user_data` map to write, payloads for installed extensions, or both, and `expected_metadata`, the
-two maps as last read; any difference refuses `target.changed`. Identical entries collapse; two
-entries for one occurrence that differ, or an entry naming nothing to write, refuse `params.invalid`.
-Each target resolves through its owner's writable resolver and refuses with the owner's `target.*`
-code; a payload follows the engine's rules (`extension.unavailable`, `.migration_required`,
-`.schema_unsupported`, a failed validator as `validation.failed`) and every record it names must
-resolve (`reference.invalid`); the owner then validates the whole record. Every target is checked
-before any step is built, the batch writes in one step and one Undo entry, and a batch that writes
-what is stored adds no step. The Window action runs the copied-identity repair first, as every
-Windows action does. A Face must already have a record.
+**User data shape and replacement.** Every authored object has one optional `user_data` map: the
+Model, every definition, geometry record, assignment and managed option, and every declared record
+part. The [user data guide](../docs/USER_DATA.md) is the one coverage table: each object's address,
+read, write route, copy behavior, HBJSON mapping and library boundary. A write replaces the whole map:
+an update without `user_data` leaves it, `{}` clears it and a map replaces it; nothing merges maps.
+Params that are not plain JSON (a non-finite number, a key that is not a string, a Ruby object) never
+reach a handler over the public API: the dispatcher refuses them as `request.malformed` before
+acceptance, so the sequence stays free. A map that is JSON but not an object fails the operation's
+schema as `params.invalid`. The engine's own `params.invalid` for a map that is not plain JSON
+(`Records::Metadata.checked_user_data`) answers only a Ruby caller staging through the engine directly.
+Creators of Zones, Faces, Spaces and Edge assignments take no `user_data`; the owner's metadata action
+follows the create.
+
+**Lifecycle policy.** One policy holds for every object and part. An edit that rebuilds an object
+keeps each surviving part's map at every depth. Duplicate makes independent deep copies under the
+owner's new ids and never reads a string in a map as a reference. A split copies the source's map into
+every piece. A merge, or a delete that names a replacement, keeps the survivor's map, never combines
+maps, and returns `removed_user_data`, each removed object or part whose map was not empty with its
+top-level keys, `removed_user_data_total` and `removed_user_data_truncated`; Undo restores the removed
+map. `Records::Metadata.discard_report` builds every such report, so it fits one agent reply: it lists
+at most 50 entries, each with its address and `user_data_key_total`, then fills in their first 50 keys
+in order while the rows stay within `REPORT_BYTES` (8 KiB); the flag is true when an entry or a key was
+left out. Every catalog delete (Materials,
+Assemblies, Frames, Glazings, Psi-Install Types, Window Types, Thermal Bridge Types and Attached zones)
+returns the two fields whether or not it names a replacement, empty when nothing was annotated:
+`Engine#propose_delete` answers them through `Records::Metadata.removed_user_data`, the record first,
+then each part by `id` and `part_ids`. A new part starts without one. A restore
+or conversion that cannot recover a map starts it empty. Zone restore lists `user_data` as
+unrecoverable in its offer, and Edge repair reports the keys it discards; a Window Unit restored from
+orphaned panes, or converted from a plain component, has no record to copy and starts empty without a
+notice of its own, which the user data guide states. Deleting an object removes its map, and Undo
+restores it.
+
+**Catalog record metadata.** `ph_composer.records.update_metadata` is the one write route for the
+`user_data` and extension payloads of an existing catalog record of any kind `records.list` reads
+(`Engine#propose_metadata_update`); a kind's own update action edits values only, and create actions
+still take `user_data`. Its batch, `expected_metadata`, refusal, one-step Undo and no-op rules are the
+entity owners' below, and each target is `{kind, id}`: an unknown kind refuses `params.invalid`, a
+missing record `target.not_found`. An internal kind that declares `owner_writes_metadata` (Zone
+option settings) refuses `target.wrong_kind`. A kind whose owner keeps copies of its records declares
+`metadata_follow_up`, a callable taking the request and the proposal: once every entry is staged, the
+action calls each distinct follow-up of the kinds the batch changed, once, under the kind's owner, and
+the follow-up adds the owner's dependent steps or refuses the batch. Building Segments and Levels share
+one, which rewrites the choice evidence of every adopted Zone and member stamp in the same Undo step
+(a locked one refuses `target.locked`); a Zone awaiting adoption is left as it is. Removing or merging
+options keeps the survivor's map and reports each removed option whose map was not empty with its
+top-level keys, as merging parts does. Clearing the map of a record stored without one writes nothing.
+
+**Record parts.** A `RecordKind` may declare `parts:`, each a `Records::Part` with a label and a path
+of array fields (`layers[]`, `layers[].segments[]`) whose members are objects with a required string
+`id`, unique in their parent, and an optional object `user_data`; every shorter path is itself a part,
+and registration refuses any other shape. The kind refuses repeated part ids within a parent and validates part maps as it
+does the record's, and `describe` lists the parts. A target's `part_ids` names one part by the id path from the record down; an id path no part
+matches refuses `target.not_found`. A part takes `user_data` only: its `expected_metadata` reads
+`extension_data` as `{}` and `extension_payloads` refuses `params.invalid`. Entries for one record and
+its parts in one batch stage as one write. Owners keep a surviving part's map through every edit, copy
+it with the part, and start a new part without one. `Engine#propose_update` enforces it for any value
+edit that rebuilds parts, such as `windows.types.update` with the whole `elements` array: a part that keeps
+its id path keeps its stored map whether or not the values send it, a new part has none, and a sent map
+that differs from the stored one refuses `params.invalid` naming this action. Only a gesture that derives
+each part's map from the stored record itself (a Window grid split) passes `derived_part_maps: true`. Splitting a part copies its map into every piece;
+merging parts keeps the survivor's map only, never combines maps, and reports each removed part whose map
+was not empty with its top-level keys (`Records::Metadata.discarded_keys`). Assembly Layers and
+Layer-Segments and Window Elements (`elements[]`) are parts. Export leaves a part's map out unless the
+owner carries it to an HBJSON object of the part's own; the `export.metadata_omitted` finding names the
+part in `object_id` and carries `reference`, the `{kind, id, part_ids}` this action takes
+(`RecordReader#records`, or `entity_record(..., part:)` for an owner that reads its parts itself).
+
+**Entity-owned records.** Zones, Faces, Window Units and Thermal Bridge Edge assignments store their
+records on SketchUp entities, and the same rules hold for them (`Records::Metadata`, shared with the
+engine). Their reads (`ph_composer.zones.list` and `.all`, `ph_composer.zones.faces.list` and
+`.all`, `ph_composer.windows.units.list`, and the Edge rows of
+`ph_composer.thermal_bridges.edges.selection`, `.selection_all`, `.at` and `.candidates`) report
+`extension_status` beside `extension_data`, in the words a catalog read uses; a Face or Edge with no
+record reports `{}`. A Unit or Edge read with `metadata` `"summary"` gives the maps' sizes in their place
+(`RecordQueries.summarize`), and `windows.units.detail` and `thermal_bridges.edges.detail` read one part
+of one row in fragments, so a map larger than a reply never blocks an inventory read. Each owner has one metadata action: `ph_composer.zones.update_metadata`,
+`ph_composer.zones.faces.update_metadata`, `ph_composer.windows.units.update_metadata` and
+`ph_composer.thermal_bridges.edges.update_metadata`. It takes a batch of occurrences, each with the
+whole `user_data` map to write, payloads for installed extensions, or both, and `expected_metadata`,
+the two maps as last read; any difference refuses `target.changed`. Identical entries collapse; two
+entries for one occurrence that differ, or an entry naming nothing to write, refuse
+`params.invalid`. Each target resolves through its owner's writable resolver and refuses with the
+owner's `target.*` code; a payload follows the engine's rules (`extension.unavailable`,
+`.migration_required`, `.schema_unsupported`, a failed validator as `validation.failed`) and every
+record it names must resolve (`reference.invalid`); the owner then validates the whole record. Every
+target is checked before any step is built, the batch writes in one step and one Undo entry, and a
+batch that writes what is stored adds no step; clearing a map the record never stored is such a batch
+(`Records::Metadata.updated` leaves it absent). The Window action runs the copied-identity repair
+first, as every Windows action does. A Face must already have a record, and an Edge an assignment.
+An Edge is named by its occurrence path, since a split or copy leaves one `tbe_` id on several
+Edges; the others keep their maps. An invalid assignment takes no metadata until it is cleared or
+reassigned: with a valid `tbe_` id it refuses `validation.failed`, and without one its reference's
+`entity_id` is null, which the action's params refuse. Its batch takes at most 250 entries, the bound
+of every Edge write.
+
+**Model root and Space Floor.** Neither has a record of its own. The Model's maps live in the
+`ph_composer.model` settings dictionary (below), read by `ph_composer.model.detail` (with `metadata`
+`"summary"`, only their sizes) and `ph_composer.model.fragment` (one part by `path`, in fragments), and
+written by `ph_composer.model.update_metadata`, one target with no reference under the same pre-image,
+payload, Undo and no-op rules, which answers `extension_status` only. The foundation registers the
+Model's maps as the reference target `ph_composer.model.metadata`, one occurrence with id `Model`, so
+`Engine#incoming_references` scans its envelopes as it scans a record's, and a record a Model payload
+names, installed or unavailable, refuses deletion as `reference.in_use`. As with an unreadable record, an
+unreadable Model map (`record.unreadable`) or a Model envelope whose references cannot be established
+(`copy.rule_missing`) refuses every identity removal until it is repaired. A Space Floor's `user_data` is its Volume's optional `floor_user_data`: reads
+never report it as a Volume value but as the Volume row's `floor` (`reference` `{floor_id, entity_path}`
+and `user_data`), and `ph_composer.spaces.update_metadata` writes it by that reference under the
+Volume's write refusals. A Floor takes `user_data` only, as a part does; entries for a Volume and its
+Floor stage as one write. Copies and Make independent keep it with the Volume. Export carries the Model's
+map to the HBJSON Model's `user_data` (the foundation's `ph_composer.model.export.model` section) and the
+Floor's to its honeybee-ph `SpaceFloor` (translation sections, below).
 
 **Exporting a payload on another feature's entity.** The feature that owns an extension claims it on
 an entity kind in its export contributor: `entity_projections: [{"namespace", "target_kind",
@@ -440,6 +535,10 @@ reference to `ph_composer.windows.psi_install_type`, or null), `default_psi_inst
 otherwise `default_psi_install_w_mk`; a default Type no longer in the Model resolves to nothing, never
 to that value. A field the stored dictionary does not hold reads its default, without a write.
 
+The foundation's `ph_composer.model` dictionary holds the Model's own `user_data` and `extension_data`
+(`shell/model_metadata.rb`), both `{}` by default; it is building metadata, not a feature's
+configuration, and no feature settings dictionary carries either map.
+
 ## Geometry records and occurrence references
 
 Records are canonical JSON under registered `ph_composer.*` dictionaries. A read never creates a
@@ -458,7 +557,7 @@ access and never fall back to selection, display name, proximity or the active M
 | Window definition mark | `ph_composer.window_definition` | The generated ComponentDefinition | `window_type_id`, plus optional derived `generated_size_m` (`width_m`, `height_m`) used only to repair a Unit whose Type is gone |
 | Pane stamp | `ph_composer.window_pane` | Each pane Face inside the definition | None; `window_type_id` and `element_id` as recovery data for Restore |
 | Space | `ph_composer.space` | The Space Group | `spc_` id; `name`, `number`, `default_height_m`, `next_volume_sequence`, and the optional airflows `v_sup_m3h`, `v_eta_m3h`, `v_tran_m3h` (absent is unset, distinct from 0) |
-| Volume | `ph_composer.space_volume` | A Volume Group directly inside a Space | `vol_` id; `number`, `display_name`, optional `avg_ceiling_height_m`, `floor_id` (the logical Space Floor, `flr_`), optional `home_transform` |
+| Volume | `ph_composer.space_volume` | A Volume Group directly inside a Space | `vol_` id; `number`, `display_name`, optional `avg_ceiling_height_m`, `floor_id` (the logical Space Floor, `flr_`), optional `home_transform`, optional `floor_user_data` (the Space Floor's own map) |
 | Floor Segment | `ph_composer.floor_segment` | A Face directly inside a Volume | `fsg_` id; `display_name`, `weighting_factor` and `net_area_factor`, each 0 to 1 |
 | Spaces settings | `ph_composer.spaces_settings` | Model | None; `last_height_m`, the height new Spaces take, null until entered |
 | Primary definition index | `ph_composer.window_definitions`, key `index` | Model | None; `{ "schema_version": 1, "definitions": { "wnt_...": persistent_id } }` |
@@ -1041,6 +1140,23 @@ alone: a Space with no rate stored writes none of `_v_sup`, `_v_eta`, `_v_tran`;
 all three, 0 for an unset rate, converted from m3/h to m3/s there and nowhere else. Its result fields
 total floor area, weighted area and net volume per Zone and per Building-Segment, and its
 conformance checks the reloaded Rooms' Spaces against the per-Zone totals.
+
+Record maps follow the object each entity becomes. The Model's own map leaves in the foundation's section
+`ph_composer.model.export.model` (Ruby `shell/model_metadata.rb`, Python `model_metadata.py`, attached at
+`MODEL`): one record, `{"id": "Model", "user_data"}`, only when the map is not empty; PH-Composer writes no
+reserved entry on the Model, and the Model's envelopes follow the left-out rules. A Volume record carries its Space
+Floor's map as `floor_user_data`, written on the `SpaceFloor`. An Assembly Layer's map rides on its own
+material, the single EnergyMaterial or, when the Layer is divided (more than one Layer-Segment, or a steel
+stud spacing), the hybrid host; each Layer-Segment of a divided Layer carries its map on its cell
+EnergyMaterial. Material identifiers are scoped by Assembly and Layer, so no two Layers share one, and the
+reversed construction reuses the same objects. A membrane Layer, its Layer-Segment (even with a steel stud
+spacing) and an undivided Layer's Layer-Segment have no material of their own
+(`features/assemblies/export.rb`, extraction and preflight alike); their maps, Window Elements', Thermal Bridge Edges', Attached zones' and every
+definition's (Materials, Frames, Glazings, Psi-Install Types, Window Types, Thermal Bridge Types, Building
+Segments and Levels) stay in the Model with one `export.metadata_omitted` finding per entity, used or
+not: the Zone section passes every valid Building Segment and Level through the boundary once
+(`Zones::ExportProjection.exported_choices`), and a finding repeated by a second read is listed once. Every carried map passes the reserved-key rule, extraction and
+preflight alike, and the artifact guard's local-path check.
 
 Thermal bridges are the first optional section: `ph_composer.thermal_bridges.export.thermal_bridges` (Ruby
 `features/thermal_bridges/export.rb`, Python `thermal_bridge_sections.py`) writes one record per run, built

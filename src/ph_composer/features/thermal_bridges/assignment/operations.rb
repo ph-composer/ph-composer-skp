@@ -54,6 +54,40 @@ module PhComposer
           { "cleared" => updates.length }
         end
 
+        # The user_data and installed extension payloads of assigned Edges, guarded by the two maps as last
+        # read, in one step (context/CONTRACTS.md, "Records and extension data"). The reference's path names
+        # the occurrence, so of several Edges sharing one `tbe_` id after a split or copy only the one named
+        # changes. An Edge with no assignment has no record to hold a map and refuses as resolving it does; an
+        # invalid one refuses before its pre-image is compared, since its read shows a map that is not a JSON
+        # object as {}. Clear or reassign it first.
+        def update_metadata(request, proposal, updates:)
+          catalog = request.registry.catalog
+          index = request.locate_index(EDGE_KIND)
+          rows = distinct_occurrences(updates).map do |entry|
+            located = request.locate(EDGE_KIND, entry.fetch("reference"), :index => index)
+            before = Assignment.validate!(STORE.read(located.entity))
+            after = Records::Metadata.planned(request.engine, catalog, before, entry, "Edge assignment")
+            update(located, before, Assignment.validate!(after))
+          end
+          propose(proposal, rows.reject { |row| row.fetch("before") == row.fetch("after") })
+          { "updates" => rows.map do |row|
+            { "reference" => row.fetch("reference"),
+              "extension_status" => Records::Metadata.status_map(row.fetch("after"), catalog) }
+          end }
+        end
+
+        # The metadata batch with identical repeats collapsed; two entries for one occurrence that differ
+        # refuse. The params schema bounds the batch at GESTURE_EDGE_LIMIT entries.
+        def distinct_occurrences(updates)
+          distinct = Records::Metadata.distinct_updates(updates)
+          occurrences = distinct.group_by { |entry| entry.fetch("reference").values_at("zone_path", "entity_path") }
+          if occurrences.values.any? { |group| group.length > 1 }
+            raise CodedError.new("params.invalid", "Two updates name one Edge differently.")
+          end
+
+          distinct
+        end
+
         # Adds one finding naming the Edges whose stored text is not a JSON object, which `action` leaves as
         # they are and could not read for references, and returns their root-to-Edge paths. Such text names
         # nothing, so passing it over is safe; edges.repair is the route that removes it.

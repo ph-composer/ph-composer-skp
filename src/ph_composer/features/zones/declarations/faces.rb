@@ -159,7 +159,9 @@ module PhComposer
           "id" => { "type" => "string", "description" => "The record to edit; absent creates one." },
           "values" => ATTACHED_ZONE.patch_schema.merge("description" => "The Attached zone values to write; only " \
                                                                         "those given change."),
-          "user_data" => USER_DATA,
+          "user_data" => USER_DATA.merge("description" => "Only when creating, without id. " \
+                                                          "#{USER_DATA.fetch('description')} Edit an existing " \
+                                                          "record's map with ph_composer.records.update_metadata."),
           "expected_values" => ATTACHED_ZONE.patch_schema.merge("description" => "The values last read.")
         }, :optional => %w[id user_data expected_values]).freeze
         ATTACHED_ZONE_ID_RESULT = Shapes.object({ "id" => Shapes::ID }).freeze
@@ -189,7 +191,9 @@ module PhComposer
              :description => "Where the Faces naming it go: to another Attached zone, or reclassified to a " \
                              "boundary condition.")
         }).freeze
-        ATTACHED_ZONE_DELETE_RESULT = Shapes.object({ "id" => Shapes::ID, "reassigned_faces" => Shapes::COUNT }).freeze
+        ATTACHED_ZONE_DELETE_RESULT = Shapes.with_removed_user_data(
+          Shapes.object({ "id" => Shapes::ID, "reassigned_faces" => Shapes::COUNT })
+        ).freeze
         ATTACHED_ZONE_DUPLICATE_PARAMS = Shapes.object({
           "ids" => { "type" => "array", "items" => Shapes::ID, "minItems" => 1,
                      "description" => "The Attached zones to copy, each under a new id and a numbered name." }

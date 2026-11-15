@@ -34,15 +34,13 @@ module ExampleWalkthrough
 
     edit = { "edits" => [{
       "id" => sill, "values" => { "length_mm" => 950 }, "expected_values" => { "length_mm" => 1200 },
-      "user_data" => { "example_org" => { "review_status" => "needs_site_check" } },
       "review" => { "review_status" => "draft", "checked_against" => head }
     }] }
     updated = invoke(first, "#{ID}.update_parts", edit, 2, read_revision)
     steps << step("update", updated, updated["effect"] == "committed" && updated["revision"] > read_revision)
 
     back = parts(first, [sill]).dig("value", "records", 0)
-    steps << step("read back", updated, back.dig("values", "length_mm") == 950 &&
-                                        back.dig("user_data", "example_org", "review_status") == "needs_site_check")
+    steps << step("read back", updated, back.dig("values", "length_mm") == 950)
 
     stale = invoke(second, "#{ID}.update_parts", { "edits" => [{ "id" => sill, "values" => { "length_mm" => 800 } }] },
                    1, read_revision)
@@ -52,7 +50,12 @@ module ExampleWalkthrough
     retried = invoke(first, "#{ID}.update_parts", edit, 2, read_revision)
     steps << step("retry", retried, retried == updated)
 
-    duplicated = invoke(first, "#{ID}.duplicate_parts", { "ids" => [sill, head] }, 3, revision(first))
+    # Every kind's user_data is written by the core metadata action, guarded by the maps last read.
+    tagged = invoke(first, "ph_composer.records.update_metadata", tag_params(sill, back), 3, revision(first))
+    back = parts(first, [sill]).dig("value", "records", 0)
+    steps << step("tag", tagged, back.dig("user_data", "example_org", "review_status") == "needs_site_check")
+
+    duplicated = invoke(first, "#{ID}.duplicate_parts", { "ids" => [sill, head] }, 4, revision(first))
     mapping = duplicated.dig("value", "mapping") || {}
     copy = parts(first, [mapping[sill]].compact).dig("value", "records", 0) || {}
     remapped = copy.dig("extension_data", ExampleFoundation::REVIEW, "payload", "checked_against") == mapping[head]
@@ -202,6 +205,15 @@ module ExampleWalkthrough
   def create_params
     { "definition_label" => "Frame",
       "parts" => [{ "label" => "Sill", "length_mm" => 1200 }, { "label" => "Head", "length_mm" => 1200 }] }
+  end
+
+  # The whole map to keep, with the part's user_data and extension_data as read.
+  def tag_params(id, read)
+    { "updates" => [{ "reference" => { "kind" => PART, "id" => id },
+                      "user_data" => read.fetch("user_data").merge(
+                        "example_org" => { "review_status" => "needs_site_check" }
+                      ),
+                      "expected_metadata" => read.slice("user_data", "extension_data") }] }
   end
 
   def invoke(context, name, params, sequence, expected_revision)

@@ -133,12 +133,16 @@ class ThermalBridgeAssignmentTest < PhComposerTestCase
 
   def test_a_stored_value_of_the_wrong_type_still_reads_and_clears
     STORE.write(@edges.first, "id" => "tbe_BADBADBADBAD", "schema_version" => 1,
-                              "thermal_bridge_type_id" => @parapet, "quantity" => "two", "invented" => true)
+                              "thermal_bridge_type_id" => @parapet, "quantity" => "two", "invented" => true,
+                              "user_data" => "note", "extension_data" => [1])
     @model.active_path = [@zone_a]
     @model.selection.add([@edges.first])
     row = selection.fetch("edges").first
     assert_equal "two", row.dig("values", "quantity")
+    assert_equal [{}, {}, {}], row.values_at("user_data", "extension_data", "extension_status")
     refute_nil row.fetch("record_problem")
+    refused = metadata_update([edge_metadata(row, "user_data" => {})])
+    assert_equal %w[refused validation.failed], refused.values_at("status", "code"), "not target.changed"
     cleared = invoke("edges.clear", "targets" => [{ "reference" => row.fetch("reference"),
                                                     "expected_values" => row.fetch("values") }])
     assert_equal "committed", cleared["effect"], cleared.inspect
@@ -275,6 +279,109 @@ class ThermalBridgeAssignmentTest < PhComposerTestCase
     assert_equal [record.fetch("id")] * 2, [@edges.first, piece].map { |entity| STORE.read(entity)["id"] }
   end
 
+  # One tbe_ id on two Edges after a split: the metadata action names one occurrence by its path, and the
+  # other keeps its record exactly as it was.
+  def test_metadata_is_written_read_and_cleared_on_one_occurrence_of_a_shared_id
+    assign([target(@edges.first)], @parapet)
+    piece = edge(104)
+    STORE.write(piece, STORE.read(@edges.first))
+    @zone_a.entities << piece
+    untouched = piece.get_attribute(STORE.dictionary, STORE.key)
+    row = path_read("edges.at", "paths" => [[100, 101]]).dig("edges", 0)
+    assert_equal [{}, {}, {}], row.values_at("user_data", "extension_data", "extension_status")
+
+    note = { "example_org" => { "detail" => "A-503/7", "checked" => false, "count" => 0, "none" => nil,
+                                "list" => [], "label" => "Žluť" } }
+    written = metadata_update([edge_metadata(row, "user_data" => note)])
+    assert_equal "committed", written["effect"], written.inspect
+    assert_equal [{ "reference" => row.fetch("reference"), "extension_status" => {} }],
+                 written.dig("value", "updates")
+    back = path_read("edges.at", "paths" => [[100, 101], [100, 104]]).fetch("edges")
+    assert_equal [note, {}], back.map { |read| read.fetch("user_data") }
+    assert_equal({ "thermal_bridge_type_id" => @parapet, "quantity" => 1 }, back.first.fetch("values"))
+    assert_equal untouched, piece.get_attribute(STORE.dictionary, STORE.key)
+
+    back.first.fetch("user_data").clear
+    fresh = path_read("edges.at", "paths" => [[100, 101]]).dig("edges", 0)
+    assert_equal note, fresh.fetch("user_data"), "a read hands out a detached map"
+    cleared = metadata_update([edge_metadata(fresh, "user_data" => {})])
+    assert_equal "committed", cleared["effect"], cleared.inspect
+    assert_equal({}, STORE.read(live(100, 101)).fetch("user_data"))
+    assert_equal untouched, live(100, 104).get_attribute(STORE.dictionary, STORE.key)
+  end
+
+  def test_a_stale_unassigned_unwritable_or_conflicting_metadata_update_refuses_and_writes_nothing
+    assign(@edges.first(2).map { |entity| target(entity) }, @parapet)
+    STORE.write(live(100, 130, 131), STORE.read(@edges[1]).merge("id" => "tbe_LOCKEDLOCKED"))
+    paths = [[100, 101], [100, 102], [100, 103], [100, 130, 131]]
+    first, second, unassigned, locked = path_read("edges.at", "paths" => paths).fetch("edges")
+    stored = -> { paths.map { |path| live(*path).get_attribute(STORE.dictionary, STORE.key) } }
+    before = stored.call
+    stale = edge_metadata(first, "user_data" => { "a" => 1 })
+    stale["expected_metadata"] = { "user_data" => { "other" => true }, "extension_data" => {} }
+    named = edge_metadata(unassigned, "user_data" => { "a" => 1 })
+    named["reference"] = named.fetch("reference").merge("entity_id" => "tbe_UNASSIGNED00")
+    entry = edge_metadata(second, "user_data" => { "a" => 1 })
+    other_id = entry.merge("reference" => entry.fetch("reference").merge("entity_id" => "tbe_OTHEROTHER00"))
+    cases = [["stale", "target.changed", [entry, stale]],
+             ["unassigned, null id (schema)", "params.invalid",
+              [entry, edge_metadata(unassigned, "user_data" => { "a" => 1 })]],
+             ["unassigned, named id", "target.not_found", [entry, named]],
+             ["locked", "target.locked", [entry, edge_metadata(locked, "user_data" => { "a" => 1 })]],
+             ["conflicting maps", "params.invalid", [entry, entry.merge("user_data" => { "a" => 2 })]],
+             ["one Edge under two ids", "params.invalid", [entry, other_id]],
+             ["nothing to write", "params.invalid", [entry.reject { |key, _value| key == "user_data" }]],
+             ["uninstalled extension", "extension.unavailable",
+              [entry, edge_metadata(first, "extension_payloads" => { "absent.extension" => {} })]],
+             ["over the bound (schema)", "params.invalid", [entry] * 251]]
+    cases.each do |label, code, updates|
+      result = metadata_update(updates)
+      assert_equal ["refused", code, "none"], result.values_at("status", "code", "effect"), label
+      assert_equal before, stored.call, label
+    end
+
+    assert_equal "committed", metadata_update([entry, entry])["effect"], "identical repeats collapse"
+    assert_equal [{ "a" => 1 }, {}], [[100, 102], [100, 101]].map { |path| STORE.read(live(*path))["user_data"] }
+    revision = @session.revision
+    again = edge_metadata(second, "user_data" => { "a" => 1 })
+    again["expected_metadata"] = { "user_data" => { "a" => 1 }, "extension_data" => {} }
+    assert_equal "none", metadata_update([again])["effect"], "writing what is stored opens no step"
+    assert_equal revision, @session.revision
+  end
+
+  def test_a_legacy_record_without_maps_reads_them_as_empty_and_the_read_writes_nothing
+    STORE.write(@edges.first, "id" => "tbe_LEGACYLEGACY", "schema_version" => 1,
+                              "thermal_bridge_type_id" => @parapet, "quantity" => 1)
+    text = @edges.first.get_attribute(STORE.dictionary, STORE.key)
+    revision = @session.revision
+    row = path_read("edges.at", "paths" => [[100, 101]]).dig("edges", 0)
+    assert_equal [{}, {}, {}], row.values_at("user_data", "extension_data", "extension_status")
+    assert_equal [text, revision], [@edges.first.get_attribute(STORE.dictionary, STORE.key), @session.revision]
+  end
+
+  def test_reassign_keeps_the_map_and_clear_then_undo_restores_it
+    assign([target(@edges.first)], @parapet)
+    extension_data = { "absent.extension" => { "schema_version" => 1, "payload" => {}, "references" => [],
+                                               "export_relevance" => "local_only" } }
+    STORE.write(@edges.first, STORE.read(@edges.first).merge("extension_data" => extension_data))
+    row = path_read("edges.at", "paths" => [[100, 101]]).dig("edges", 0)
+    assert_equal({ "absent.extension" => "unavailable" }, row.fetch("extension_status"))
+    note = { "example_org" => { "review_status" => "needs_site_check" } }
+    assert_equal "committed", metadata_update([edge_metadata(row, "user_data" => note)])["effect"]
+
+    reassigned = assign([target(@edges.first)], @slab, :quantity => 2)
+    assert_equal "committed", reassigned["effect"], reassigned.inspect
+    stored = STORE.read(@edges.first)
+    assert_equal [note, extension_data, @slab],
+                 stored.values_at("user_data", "extension_data", "thermal_bridge_type_id")
+
+    assert_equal "committed", invoke("edges.clear", "targets" => [target(@edges.first)])["effect"]
+    assert_nil STORE.read(live(100, 101))
+    @model.undo
+    assert_equal stored, STORE.read(live(100, 101))
+    assert_equal note, path_read("edges.at", "paths" => [[100, 101]]).dig("edges", 0, "user_data")
+  end
+
   # With no selection: the unassigned Edges of a Zone in a rotated wrapper, assigned from their row, read back
   # by path, cleared and read again; a schedule run's edge_paths read the same way, with no runs.locate.
   def test_path_reads_find_assign_read_back_and_clear_an_edge_without_a_selection
@@ -407,6 +514,16 @@ class ThermalBridgeAssignmentTest < PhComposerTestCase
   def reference_target(path)
     { "reference" => { "zone_id" => "zon_AAAAAAAAAAAA", "zone_path" => [path.first], "entity_path" => path[1..-1],
                        "entity_id" => nil } }
+  end
+
+  # One metadata update entry from an edges row: its reference and the maps it read as expected_metadata.
+  def edge_metadata(row, fields)
+    { "reference" => row.fetch("reference"),
+      "expected_metadata" => row.slice("user_data", "extension_data") }.merge(fields)
+  end
+
+  def metadata_update(updates)
+    invoke("edges.update_metadata", "updates" => updates)
   end
 
   def assign(targets, type_id, quantity: 1)

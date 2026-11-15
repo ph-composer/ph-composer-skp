@@ -74,7 +74,6 @@ module ExampleFoundation
       "id" => { "type" => "string", "description" => "The part to edit." },
       "values" => { "type" => "object", "description" => "Values to set; null removes an optional one." },
       "expected_values" => { "type" => "object", "description" => "The values last read; a change refuses." },
-      "user_data" => { "type" => "object", "description" => "Replaces the part's user_data." },
       "review" => { "type" => "object", "description" => "Sets the #{REVIEW} payload." }
     }
   }.freeze
@@ -161,7 +160,7 @@ module ExampleFoundation
   # All edits succeed together or none is written.
   def declare_update(feature)
     feature.action(
-      "#{ID}.update_parts", :description => "Edit parts' values, user_data or review, all or none.",
+      "#{ID}.update_parts", :description => "Edit parts' values or review, all or none.",
                             :params => { "type" => "object", "required" => ["edits"], "additionalProperties" => false,
                                          "properties" => { "edits" => { "type" => "array", "items" => EDIT,
                                                                         "minItems" => 1 } } },
@@ -177,7 +176,6 @@ module ExampleFoundation
         request.engine.propose_update(
           PART, edit.fetch("id"), changes,
           :values => edit.fetch("values", {}), :expected_values => edit.fetch("expected_values", {}),
-          :user_data => edit["user_data"],
           :extension_payloads => edit.key?("review") ? { REVIEW => edit["review"] } : {}
         )
       end

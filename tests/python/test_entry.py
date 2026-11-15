@@ -22,7 +22,7 @@ def test_a_document_translates_with_the_given_sections() -> None:
     assert result["state"] == "complete" and result["summary"]["objects"] == 5
 
 
-def test_the_product_build_lists_authored_report_face_zone_space_thermal_bridge_sections_and_no_exporter() -> None:
+def test_the_product_build_lists_every_feature_section_and_the_model_section_and_no_exporter() -> None:
     assert [section.id for section in SECTIONS] == [
         "ph_composer.assemblies.export.constructions",
         "ph_composer.assemblies.export.material_sources",
@@ -30,6 +30,7 @@ def test_the_product_build_lists_authored_report_face_zone_space_thermal_bridge_
         "ph_composer.windows.export.window_constructions",
         "ph_composer.windows.export.apertures",
         "ph_composer.zones.export.zones",
+        "ph_composer.model.export.model",
         "ph_composer.spaces.export.spaces",
         "ph_composer.thermal_bridges.export.thermal_bridges",
     ]

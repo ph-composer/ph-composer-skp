@@ -87,7 +87,6 @@ module PhComposer
 
         def replace
           params = Shapes.update(kind)
-          params.fetch("properties").delete("user_data")
           params.fetch("properties").fetch("values").fetch("properties")["source"] =
             kind.values_schema.fetch("properties").fetch("source")
           callback(params, Shapes::RESULT, :refuses => Refuses::EDIT) do |request, proposal|

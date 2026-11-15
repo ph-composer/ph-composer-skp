@@ -16,7 +16,7 @@ module PhComposer
           { "id" => id }
         end
 
-        def update(request, proposal, id:, values:, expected_values:, user_data: nil)
+        def update(request, proposal, id:, values:, expected_values:)
           record = request.engine.find(ASSEMBLY_KIND, id)
           if values["name"]
             Records::Names.unique!(values["name"], Definitions.records(request, ASSEMBLY_KIND), :except => id)
@@ -24,7 +24,7 @@ module PhComposer
           result = Commands.update_assembly(record, :values => values, :materials => Definitions.materials(request))
           request.engine.propose_update(ASSEMBLY_KIND, id, proposal,
                                         :values => Definitions.changed_values(Schema::KIND, record, result.record),
-                                        :expected_values => expected_values, :user_data => user_data)
+                                        :expected_values => expected_values)
           { "id" => id }
         end
 
@@ -48,9 +48,9 @@ module PhComposer
 
             plan = request.retarget_references(ASSEMBLY_KIND, :from => id, :to => replacement_id)
           end
-          request.engine.propose_delete(ASSEMBLY_KIND, id, proposal, :expected_values => expected_values,
-                                                                     :reference_plan => plan)
-          { "id" => id }
+          { "id" => id }.merge(request.engine.propose_delete(ASSEMBLY_KIND, id, proposal,
+                                                             :expected_values => expected_values,
+                                                             :reference_plan => plan))
         end
 
         # One Builder gesture on one Assembly: the block returns the command result for the stored record.

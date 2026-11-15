@@ -16,7 +16,7 @@ module PhComposer
           { "id" => id }
         end
 
-        def update(request, proposal, id:, values:, expected_values:, user_data: nil)
+        def update(request, proposal, id:, values:, expected_values:)
           request.engine.find(TYPE_KIND, id)
           values = DeepCopy.call(values)
           if values["name"]
@@ -25,7 +25,7 @@ module PhComposer
           end
           request.engine.propose_update(TYPE_KIND, id, proposal,
                                         :values => values,
-                                        :expected_values => expected_values, :user_data => user_data)
+                                        :expected_values => expected_values)
           { "id" => id }
         end
 
@@ -55,20 +55,23 @@ module PhComposer
             request.engine.find(TYPE_KIND, replacement_id) if replacement_id
             plan = request.retarget_references(TYPE_KIND, :from => id, :to => replacement_id)
           end
-          request.engine.propose_delete(TYPE_KIND, id, proposal,
-                                        :expected_values => expected_values, :reference_plan => plan)
-          { "id" => id }
+          { "id" => id }.merge(request.engine.propose_delete(TYPE_KIND, id, proposal,
+                                                             :expected_values => expected_values,
+                                                             :reference_plan => plan))
         end
 
         # One grid gesture on one Window Type. The block takes the stored record and an id allocator
         # and returns the edited record, as a GridOperations function does. `gesture` names it in
-        # the allocator's inputs, so two gestures with equal params derive different ids.
+        # the allocator's inputs, so two gestures with equal params derive different ids. The gesture
+        # decides each element's map from the stored record (a split copies it into every piece), so
+        # the engine stores the maps it returns.
         def grid(request, proposal, gesture:, id:, values:, expected_values:)
           before = request.engine.find(TYPE_KIND, id)
           after = yield before, Records::Identity.allocator(request, values.merge("command" => gesture, "id" => id))
           changed = KIND.values(after).select { |key, value| before[key] != value }
           request.engine.propose_update(TYPE_KIND, id, proposal, :values => changed,
-                                                                 :expected_values => expected_values)
+                                                                 :expected_values => expected_values,
+                                                                 :derived_part_maps => true)
           { "id" => id }
         end
       end

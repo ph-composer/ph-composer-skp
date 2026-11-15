@@ -12,6 +12,8 @@ module PhComposer
                         validation.failed].freeze
       ASSIGN = (TARGET_CODES + %w[gesture.too_large]).freeze
       CLEAR = (ASSIGN + %w[copy.rule_missing reference.in_use]).freeze
+      # A metadata write resolves as assign does, and refuses for each payload as every entity owner's does.
+      METADATA = (TARGET_CODES + Zones::Refuses::METADATA).freeze
       SELECTION = %w[gesture.too_large record.unreadable validation.failed].freeze
       SELECTION_PAGE = (SELECTION + %w[query.cursor_expired query.limit_invalid]).freeze
 
@@ -39,6 +41,22 @@ module PhComposer
                              "level" => { "type" => %w[string null] } })
                    .merge("type" => %w[object null], "description" => "The Zone holding the Edge, as " \
                                                                       "ph_composer.zones.containment reads it.")
+      # An Edge with an assignment, the only kind a metadata write can name.
+      RECORDED_EDGE = REFERENCE.merge(
+        "properties" => REFERENCE.fetch("properties").merge("entity_id" => { "type" => "string" })
+      ).freeze
+      EXTENSION_STATUS = { "type" => "object",
+                           "description" => "Each extension envelope's status against what is installed, by " \
+                                            "namespace; {} for an Edge with no assignment." }.freeze
+      # A row carries user_data, extension_data and extension_status, or with metadata "summary" metadata and
+      # value_bytes in their place (Assignment.summarized).
+      SUMMARY_SWAP = %w[user_data extension_data extension_status metadata value_bytes].freeze
+      METADATA_PARAM = { "type" => "string", "enum" => %w[full summary],
+                         "description" => "full (the default): each row's user_data, extension_data and " \
+                                          "extension_status as stored. summary: none of them, but their sizes, " \
+                                          "digests and status counts in metadata and each value's size in " \
+                                          "value_bytes; read any of them whole with #{Assignment::PathReads::DETAIL}." }
+                       .freeze
       REFUSAL = Shapes.object({ "code" => Shapes::TEXT, "message" => Shapes::TEXT })
                       .merge("type" => %w[object null],
                              "description" => "The refusal a write to the Edge meets from its path, or null.")
@@ -60,8 +78,15 @@ module PhComposer
         "write_refusal" => REFUSAL.merge("description" => "The refusal a write to the Edge meets from its path, or " \
                                                           "else record.unreadable when its stored text is not a " \
                                                           "JSON object, which only edges.repair removes; null " \
-                                                          "otherwise.")
-      })
+                                                          "otherwise."),
+        "user_data" => { "type" => "object",
+                         "description" => "The assignment's user_data as stored; {} for an Edge with none. Write it " \
+                                          "with edges.update_metadata." },
+        "extension_data" => { "type" => "object", "description" => "The assignment's extension envelopes as stored." },
+        "extension_status" => EXTENSION_STATUS,
+        "metadata" => RecordQueries::METADATA,
+        "value_bytes" => { "type" => "object", "description" => "With metadata summary: each value's stored size." }
+      }, :optional => SUMMARY_SWAP)
       SELECTION_ALL = Shapes.object({
         "edges" => Shapes.list(SELECTED_ROW),
         "ignored" => Shapes.list(Shapes.object({ "persistent_id" => { "type" => "integer" }, "type" => Shapes::TEXT }))
@@ -74,6 +99,8 @@ module PhComposer
       SELECTION_PAGE_RESULT = Shapes.object(SELECTION_ALL.fetch("properties").merge(PAGE_PROPERTIES))
       SELECTION_PARAMS = Shapes.object({ "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR },
                                        :optional => %w[limit cursor])
+      SELECTED_PARAMS = Shapes.object(SELECTION_PARAMS.fetch("properties").merge("metadata" => METADATA_PARAM),
+                                      :optional => %w[limit cursor metadata])
       POINT = { "type" => "array", "items" => { "type" => "number" }, "minItems" => 3, "maxItems" => 3,
                 "x-unit" => "m" }.freeze
       PATH_ROW = Shapes.object(SELECTED_ROW.fetch("properties").merge(
@@ -89,7 +116,7 @@ module PhComposer
         "truncated" => { "type" => "array", "items" => { "type" => "string" },
                          "description" => "Zone labels cut to #{OccurrencePath::NAME_CHARACTERS} characters, such as " \
                                           "zone.name; absent when none was." }
-      ), :optional => ["truncated"])
+      ), :optional => ["truncated"] + SUMMARY_SWAP)
       PATH_PAGE = { "edges" => Shapes.list(PATH_ROW), "next_cursor" => Pages::NEXT_CURSOR, "total" => Pages::TOTAL,
                     "units" => Shapes.object({ "endpoints_m" => { "type" => "string", "enum" => ["m"] } }) }.freeze
       AT_PARAMS = Shapes.object({
@@ -97,16 +124,26 @@ module PhComposer
                          .merge("minItems" => 1, "maxItems" => Pages::MAXIMUM_LIMIT,
                                 "description" => "Root-to-Edge persistent-id paths, such as a schedule run's " \
                                                  "edge_paths; answered in this order."),
-        "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR
-      }, :optional => %w[limit cursor]).freeze
+        "metadata" => METADATA_PARAM, "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR
+      }, :optional => %w[metadata limit cursor]).freeze
       CANDIDATE_PARAMS = Shapes.object({
         "path" => Assignment::Target::PATH.merge("description" => "The root-to-container path, a Zone's or a Group's " \
                                                                   "inside it; [] or absent for the Model root."),
         "assigned" => { "type" => "string", "enum" => Assignment::PathReads::ASSIGNED,
                         "description" => "Only Edges with an assignment record, or only those without; any when " \
                                          "absent." },
-        "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR
-      }, :optional => %w[path assigned limit cursor]).freeze
+        "metadata" => METADATA_PARAM, "limit" => Pages::LIMIT, "cursor" => Pages::CURSOR
+      }, :optional => %w[path assigned metadata limit cursor]).freeze
+      DETAIL_PARAMS = Shapes.object({
+        "edge_path" => Assignment::Target::PATH.merge("minItems" => 1,
+                                                      "description" => "The Edge's root-to-Edge persistent-id path, " \
+                                                                       "as a row's path gives it."),
+        "path" => Fragments.path_param(Assignment::PathReads::DETAIL_PARTS, "[\"user_data\"], " \
+                                                                            "[\"user_data\", \"notes\"]"),
+        "cursor" => Pages::CURSOR
+      }, :optional => ["cursor"]).freeze
+      DETAIL_RESULT = Shapes.object({ "type" => Fragments::TYPE, "fragment" => Fragments::FRAGMENT,
+                                      "next_cursor" => Pages::NEXT_CURSOR }).freeze
       CONTAINER = Shapes.object({ "path" => Assignment::Target::PATH,
                                   "locked" => { "type" => "boolean", "description" => "A step on the path is locked." },
                                   "hidden" => { "type" => "boolean", "description" => "A step on the path is hidden." },
@@ -164,8 +201,10 @@ module PhComposer
                       :description => "One bounded page of the selected Edges under the active path, each with the " \
                                       "Zone holding it, its assignment and the refusal a write meets; other " \
                                       "entities are reported as ignored.",
-                      :refuses => SELECTION_PAGE, :params => SELECTION_PARAMS, :result => SELECTION_PAGE_RESULT,
-                      :examples => [{}, { "limit" => 50 }]) { |request| Assignment::Selection.page(request) }
+                      :refuses => SELECTION_PAGE, :params => SELECTED_PARAMS, :result => SELECTION_PAGE_RESULT,
+                      :examples => [{}, { "limit" => 50, "metadata" => "summary" }]) do |request|
+          Assignment::Selection.page(request)
+        end
         feature.query("#{PREFIX}.selection_all",
                       :description => "Every selected Edge in one read, for the panel and the menu route.",
                       :response => { "bounded" => false, "prefer" => "#{PREFIX}.selection" },
@@ -222,6 +261,16 @@ module PhComposer
                       :examples => [{ "path" => [1201], "assigned" => "unassigned" }]) do |request|
           Assignment::PathReads.candidates(request)
         end
+        feature.query(Assignment::PathReads::DETAIL,
+                      :description => "One part of the edges.at row of one Edge, exactly, as canonical JSON text in " \
+                                      "fragments: join every fragment's text in order, check its sha256 and parse " \
+                                      "it. Pass next_cursor back for the next fragment. For an Edge whose metadata " \
+                                      "is larger than a reply.",
+                      :refuses => (PATH_READ + %w[target.not_found]).uniq,
+                      :params => DETAIL_PARAMS, :result => DETAIL_RESULT,
+                      :examples => [{ "edge_path" => [1201, 1205], "path" => ["user_data"] }]) do |request|
+          Assignment::PathReads.detail(request)
+        end
       end
 
       def install_writes(feature)
@@ -253,6 +302,24 @@ module PhComposer
                          "entity_id" => "tbe_Ab12Cd34Ef56"
                        ) }] }]) do |request, proposal|
           Assignment::Operations.clear(request, proposal, :targets => request.params.fetch("targets"))
+        end
+        install_metadata(feature)
+      end
+
+      def install_metadata(feature)
+        example = { "reference" => EXAMPLE_REFERENCE.merge("entity_id" => "tbe_Ab12Cd34Ef56"), "user_data" => {},
+                    "expected_metadata" => { "user_data" => {}, "extension_data" => {} } }
+        feature.action("#{PREFIX}.update_metadata",
+                       :description => "Replace the user_data and installed extension payloads of assigned Edges, " \
+                                       "each named by its occurrence, guarded by the metadata last read. Other " \
+                                       "Edges sharing its assignment id after a split or copy keep theirs.",
+                       :refuses => METADATA,
+                       :params => Shapes.metadata_updates(RECORDED_EDGE, Assignment::GESTURE_EDGE_LIMIT),
+                       :result => Shapes.metadata_result(RECORDED_EDGE), :undo_name => "Edit Thermal Bridge Metadata",
+                       :preconditions => ["Each Edge has an assignment and is reached as edges.assign reaches it."],
+                       :side_effects => "Rewrites only the named Edges' assignment metadata.",
+                       :examples => [{ "updates" => [example] }]) do |request, proposal|
+          Assignment::Operations.update_metadata(request, proposal, :updates => request.params.fetch("updates"))
         end
       end
     end

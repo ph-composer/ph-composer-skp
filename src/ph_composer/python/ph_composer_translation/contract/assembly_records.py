@@ -78,6 +78,8 @@ class SegmentRecord:
     width_mm: float
     material_id: str
     steel_stud_spacing_mm: float | None
+    #: Present only when its Layer is divided: the map rides on this Segment's own cell material.
+    user_data: JSONObject = field(default_factory=dict)
 
     @classmethod
     def read(cls, raw: Mapping[str, object], location: str = "Layer") -> SegmentRecord:
@@ -85,11 +87,13 @@ class SegmentRecord:
             material_id = as_text(raw.get("material_id"), "segment material id")
         except RecordError as error:
             raise RecordError(f"{location}: choose a Material for each Layer-Segment.") from error
+        identifier = as_text(raw.get("id"), "segment id")
         return cls(
-            as_text(raw.get("id"), "segment id"),
+            identifier,
             positive(raw.get("width_mm"), "segment width"),
             material_id,
             optional_number(raw.get("steel_stud_spacing_mm"), "steel stud spacing"),
+            user_data(raw.get("user_data"), f"segment {identifier}"),
         )
 
 
@@ -98,6 +102,14 @@ class LayerRecord:
     id: str
     thickness_mm: float
     segments: tuple[SegmentRecord, ...]
+    #: Rides on the Layer's own material: its single EnergyMaterial, or the hybrid host when it is divided.
+    user_data: JSONObject = field(default_factory=dict)
+
+    @property
+    def divided(self) -> bool:
+        """Whether the Layer is built as a grid of cell materials under a hybrid host. The Ruby contributor
+        passes Segment maps only for such a Layer (features/assemblies/export.rb, `divided?`)."""
+        return len(self.segments) > 1 or self.segments[0].steel_stud_spacing_mm is not None
 
     @classmethod
     def read(cls, raw: Mapping[str, object], location: str = "Layer") -> LayerRecord:
@@ -106,7 +118,15 @@ class LayerRecord:
             raise RecordError("a Layer needs a Layer-Segment")
         if sum(segment.steel_stud_spacing_mm is not None for segment in segments) > 1:
             raise RecordError("a Layer can carry only one steel stud spacing")
-        return cls(as_text(raw.get("id"), "layer id"), positive(raw.get("thickness_mm"), "layer thickness"), segments)
+        if len(segments) == 1 and segments[0].steel_stud_spacing_mm is None and segments[0].user_data:
+            raise RecordError("an undivided Layer's Layer-Segment has no material of its own for its user_data")
+        identifier = as_text(raw.get("id"), "layer id")
+        return cls(
+            identifier,
+            positive(raw.get("thickness_mm"), "layer thickness"),
+            segments,
+            user_data(raw.get("user_data"), f"layer {identifier}"),
+        )
 
 
 @dataclass(frozen=True)

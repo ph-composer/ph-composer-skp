@@ -26,6 +26,7 @@ module PhComposer
         # as the revision, since selecting changes no revision.
         def page(request)
           rows, others = rows(request)
+          rows = rows.map { |row| Assignment.summarized(row, request.params["metadata"]) }
           binding = "#{request.revision}/#{CanonicalJson.digest(rows.map { |row| row.fetch('path') })}"
           page, cursor = Pages.bounded(request, PAGED, rows, :key => ->(row) { row.fetch("path") },
                                                              :revision => binding)
@@ -51,7 +52,11 @@ module PhComposer
           paths = edges.map { |edge| (parent + [edge]).map(&:persistent_id) }
           reads = edges.map { |edge| Target.read(edge) }
           copied = copied_ids(model, reads.map(&:first))
-          [Operations.contained(request, paths).zip(reads).map { |row, read| row(row, read, copied) }, others]
+          catalog = request.registry.catalog
+          found = Operations.contained(request, paths).zip(reads).map do |containment, read|
+            row(containment, read, copied, :catalog => catalog)
+          end
+          [found, others]
         end
 
         # The Edge reference a `zones.containment` row and the Edge's stored record make, or nil when no Zone
@@ -64,9 +69,10 @@ module PhComposer
 
         # One Edge's row from its `zones.containment` row, its stored record as Target.read gives it and the ids
         # copies share; the path reads (PathReads) answer the same row. Text that is not a JSON object reads
-        # with no values, its problem and, past its path's own, the refusal `edges.assign` meets on it; an
-        # invalid record reads with its first problem and can still be cleared or reassigned.
-        def row(containment, read, copied)
+        # with no values or metadata, its problem and, past its path's own, the refusal `edges.assign` meets
+        # on it; an invalid record reads with its first problem and can still be cleared or reassigned.
+        # `catalog` gives each extension envelope's status.
+        def row(containment, read, copied, catalog:)
           record, problem = read
           reference = reference(containment, record)
           { "path" => containment.fetch("path"), "reference" => reference,
@@ -74,6 +80,7 @@ module PhComposer
             "values" => Assignment.values(record), "copied" => !record.nil? && copied.include?(record["id"]),
             "record_problem" => problem || (record && Assignment::RECORD_KIND.problems(record).first),
             "write_refusal" => containment.fetch("write_refusal") || (problem && Target.unreadable_refusal) }
+            .merge(Assignment.metadata(record, catalog))
         end
 
         # The ids among `records` that more than one Edge in the Model carries. A walk of every tagged Edge,

@@ -7,7 +7,74 @@ module PhComposer
     # under the envelope statuses, the status map a read reports, and the pre-image check an entity
     # owner's metadata action makes. Pure: detached records in, detached records or a CodedError out.
     module Metadata
+      # The most top-level keys a report of a discarded map lists, and the most discarded maps it lists.
+      REPORT_LIMIT = 50
+      # The most bytes a discard report's rows serialize to, so a delete or merge result and its outcome
+      # envelope fit one agent reply (Pages::REPLY_BYTES).
+      REPORT_BYTES = 8 * 1024
+
       module_function
+
+      # What an operation reports of one `user_data` map it discards, such as a repaired Edge's: the
+      # first REPORT_LIMIT top-level keys in sorted order, each cut to OccurrencePath::NAME_CHARACTERS, and
+      # how many the map holds.
+      def discarded_keys(map)
+        names = map.is_a?(Hash) ? map.keys.sort : []
+        { "user_data_keys" => names.first(REPORT_LIMIT).map { |key| key[0, OccurrencePath::NAME_CHARACTERS] },
+          "user_data_key_total" => names.length }
+      end
+
+      # What removing `records` of `kind` discards, for a merge or delete result (D-UD-5): each record, then
+      # each of its declared parts (Records::Part), whose map was not empty, in the order given, by `id` and,
+      # for a part, `part_ids`, as `discard_report` bounds them. Undo brings them back.
+      def removed_user_data(kind, records)
+        mapped = records.flat_map do |record|
+          address = { "id" => record.fetch("id") }
+          parts = kind.parts.flat_map do |part|
+            part.addressed_members(record).map { |ids, member| [address.merge("part_ids" => ids), member["user_data"]] }
+          end
+          [[address, record["user_data"]]].concat(parts).select { |_address, map| map.is_a?(Hash) && !map.empty? }
+        end
+        discard_report(mapped)
+      end
+
+      # The report every delete and merge makes of the non-empty maps it discards, given as [address, map]
+      # pairs in report order: removed_user_data lists the first REPORT_LIMIT, each by its address and key
+      # total, then fills in their sorted top-level keys, the first REPORT_LIMIT of each cut to
+      # OccurrencePath::NAME_CHARACTERS, in row order until the rows reach REPORT_BYTES; removed_user_data_total
+      # counts them all, and removed_user_data_truncated says whether a map or a key was left out.
+      def discard_report(addressed)
+        rows = []
+        used = 2
+        addressed.first(REPORT_LIMIT).each do |address, map|
+          row = address.merge("user_data_keys" => [], "user_data_key_total" => map.length)
+          size = JSON.generate(row).bytesize + (rows.empty? ? 0 : 1)
+          break if used + size > REPORT_BYTES
+
+          rows << row
+          used += size
+        end
+        fill_keys(rows, addressed.map(&:last), used)
+        cut = rows.length < addressed.length ||
+              rows.any? { |row| row.fetch("user_data_keys").length < row.fetch("user_data_key_total") }
+        { "removed_user_data" => rows, "removed_user_data_total" => addressed.length,
+          "removed_user_data_truncated" => cut }
+      end
+
+      # Adds each row's keys from its map, in row order, while the rows stay within REPORT_BYTES.
+      def fill_keys(rows, maps, used)
+        rows.zip(maps).each do |row, map|
+          keys = row.fetch("user_data_keys")
+          map.keys.sort.first(REPORT_LIMIT).each do |name|
+            key = name[0, OccurrencePath::NAME_CHARACTERS]
+            size = JSON.generate(key).bytesize + (keys.empty? ? 0 : 1)
+            return if used + size > REPORT_BYTES
+
+            keys << key
+            used += size
+          end
+        end
+      end
 
       # Each envelope's status against what is installed (Extension::STATUSES), by namespace.
       def status_map(record, catalog)
@@ -17,10 +84,12 @@ module PhComposer
       end
 
       # The record after the update. Keys the update does not name are untouched, so a legacy record
-      # without user_data stays without it.
+      # without user_data stays without it; a record stored without a map reads it as empty, so clearing
+      # that map leaves it absent and the update changes nothing.
       def updated(record, catalog, user_data: nil, extension_payloads: {})
         after = DeepCopy.call(record)
         after["user_data"] = checked_user_data(user_data) unless user_data.nil?
+        after.delete("user_data") if after["user_data"] == {} && !record.key?("user_data")
         extension_payloads.each { |namespace, payload| set_extension_payload(after, namespace, payload, catalog) }
         after
       end
@@ -112,6 +181,7 @@ module PhComposer
         message = "#{namespace} data on #{id} uses a version the installed extension cannot read."
         raise CodedError.new("extension.schema_unsupported", message, "namespace" => namespace)
       end
+      private_class_method :fill_keys
     end
   end
 end

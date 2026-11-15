@@ -228,8 +228,9 @@ module PhComposer
           end
           kind.references.each do |reference|
             require_kind(owner, kind.id, reference.target_kind)
-            check_reference_shape(owner, kind.id, reference, kind.values_schema)
+            check_shape(owner, kind.id, reference.declaration_problems(kind.values_schema))
           end
+          check_shape(owner, kind.id, kind.part_declaration_problems + kind.follow_up_problems)
         end
       end
 
@@ -237,7 +238,7 @@ module PhComposer
         @staging.declared_reference_targets.each do |target|
           target.descriptor.references.each do |reference|
             require_kind(owner(target.id), target.id, reference.target_kind)
-            check_reference_shape(owner(target.id), target.id, reference, target.descriptor.values_schema)
+            check_shape(owner(target.id), target.id, reference.declaration_problems(target.descriptor.values_schema))
           end
           next if target.label.is_a?(String) && !target.label.empty? &&
                   target.provider.respond_to?(:call) && target.validator.respond_to?(:call)
@@ -247,10 +248,9 @@ module PhComposer
         end
       end
 
-      def check_reference_shape(owner, subject, reference, values_schema)
-        reference.declaration_problems(values_schema).each do |message|
-          add("registration.schema_invalid", owner, subject, "#{subject}: #{message}.")
-        end
+      # Each problem a Reference or Part declaration reports against its values schema.
+      def check_shape(owner, subject, problems)
+        problems.each { |message| add("registration.schema_invalid", owner, subject, "#{subject}: #{message}.") }
       end
 
       def check_extensions

@@ -227,6 +227,24 @@ class EntityMetadataTest < PhComposerTestCase
     assert_equal revision, @session.revision
   end
 
+  # Every owner's update_metadata plans through Records::Metadata.planned, so one owner shows the rule: a
+  # record stored without user_data reads it as {}, and clearing it changes nothing.
+  def test_clearing_a_map_a_legacy_record_never_stored_writes_nothing
+    entity = PhComposer::Zones::Occurrences.resolve_face(@model, face.fetch("reference")).entity
+    legacy = PhComposer::Zones::Faces::FACE_STORE.read(entity)
+                                                 .reject { |key, _| %w[user_data extension_data].include?(key) }
+    store = PhComposer::Zones::Faces::FACE_STORE
+    store.write(entity, legacy)
+    text = entity.get_attribute(store.dictionary, store.key)
+    revision = @session.revision
+    result = update("#{ZONES}.faces.update_metadata", face.fetch("reference"), EMPTY, :user_data => {})
+    assert_equal %w[completed none], result.values_at("status", "effect"), result.inspect
+    assert_equal text, entity.get_attribute(store.dictionary, store.key)
+    assert_equal revision, @session.revision
+    kept = PhComposer::Records::Metadata.updated({ "user_data" => {} }, nil, :user_data => {})
+    assert_equal({ "user_data" => {} }, kept, "a stored empty map stays stored")
+  end
+
   def test_the_unit_action_repairs_a_copied_unit_first
     original = PhComposer::Windows::Units::Occurrences.all(@model).first
     copy = @group.entities.add_instance(original.entity.definition,

@@ -4,7 +4,8 @@ module PhComposer
   module Windows
     # One action per Window Type grid gesture. Each carries its own description and Undo name,
     # written for an agent reading describe, and `change`: the GridOperations function it makes,
-    # called with the stored record, the gesture's own params and an id allocator.
+    # called with the stored record, the gesture's own params and an id allocator. A gesture with a
+    # `report` adds what it returns, from the same record and params, to the result `result` declares.
     module GridRegistration
       AXIS = { "type" => "string", "enum" => %w[rows_m columns_m],
                "description" => "rows_m for a horizontal band, columns_m for a vertical one." }.freeze
@@ -12,7 +13,25 @@ module PhComposer
       EXAMPLE_ID = "wnt_Ab12Cd34Ef56"
       EXAMPLE_ELEMENT = "wel_Ab12Cd34Ef56"
       ELEMENT_ID = "The element, by its id within this Window Type."
-      Gesture = Struct.new(:description, :undo_name, :properties, :example, :change, keyword_init: true)
+      Gesture = Struct.new(:description, :undo_name, :properties, :example, :change, :report, :result,
+                           keyword_init: true)
+      DISCARDED = Shapes.object({
+        "element_id" => Shapes::TEXT,
+        "user_data_keys" => Shapes.list(Shapes::TEXT, :description => "The map's first " \
+                                                                      "#{Records::Metadata::REPORT_LIMIT} " \
+                                                                      "top-level keys, sorted, while the " \
+                                                                      "report fits its byte limit."),
+        "user_data_key_total" => { "type" => "integer", "minimum" => 0 }
+      }).freeze
+      REMOVED = Shapes.list(DISCARDED, :description => "Each merged element but the top-left one whose user_data " \
+                                                       "was not empty, in grid order, the first " \
+                                                       "#{Records::Metadata::REPORT_LIMIT} within " \
+                                                       "#{Records::Metadata::REPORT_BYTES} bytes: its map is " \
+                                                       "gone, and Undo brings it back.").freeze
+      MERGE_RESULT = Shapes.with(Shapes::TYPE_RESULT,
+                                 "removed_user_data" => REMOVED,
+                                 "removed_user_data_total" => { "type" => "integer", "minimum" => 0 },
+                                 "removed_user_data_truncated" => SchemaShapes::DISCARD_TRUNCATED).freeze
 
       module_function
 
@@ -50,14 +69,18 @@ module PhComposer
         ),
         "merge" => Gesture.new(
           :description => "Merge two or more elements of one kind that cover one rectangle into a single " \
-                          "element under a new id.",
+                          "element under a new id. It keeps the top-left element's user_data and reports each " \
+                          "other element's non-empty map; maps are never combined.",
           :undo_name => "Merge Window Elements",
           :properties => { "ids" => elements("The elements to merge.") },
           :example => { "ids" => [EXAMPLE_ELEMENT] },
-          :change => ->(record, values, identity) { GridOperations.merge(record, values, identity) }
+          :change => ->(record, values, identity) { GridOperations.merge(record, values, identity) },
+          :report => ->(record, values) { GridOperations.merge_discards(record, values) },
+          :result => MERGE_RESULT
         ),
         "split" => Gesture.new(
-          :description => "Split one merged element back into one element per grid cell, each under a new id.",
+          :description => "Split one merged element back into one element per grid cell, each under a new id " \
+                          "with a copy of its user_data.",
           :undo_name => "Split Window Element",
           :properties => { "element_id" => element("The merged element to split.") },
           :example => { "element_id" => EXAMPLE_ELEMENT },
@@ -140,18 +163,22 @@ module PhComposer
           feature.action("#{FEATURE_ID}.types.grid.#{name}",
                          :description => gesture.description,
                          :refuses => Refuses::TYPE_EDIT,
-                         :params => Shapes.object(properties), :result => Shapes::TYPE_RESULT,
+                         :params => Shapes.object(properties), :result => gesture.result || Shapes::TYPE_RESULT,
                          :undo_name => gesture.undo_name,
                          :side_effects => Shapes.side_effects("Changes this Window Type; its placed Windows follow."),
                          :examples => [gesture.example.merge("id" => EXAMPLE_ID,
                                                              "expected_values" => {})]) do |request, proposal|
             params = request.params
             values = params.reject { |key, _| %w[id expected_values].include?(key) }
-            Authoring.grid(request, proposal,
-                           :gesture => name, :id => params.fetch("id"), :values => values,
-                           :expected_values => params.fetch("expected_values")) do |record, identity|
-              gesture.change.call(record, values, identity)
+            report = {}
+            result = Authoring.grid(request, proposal,
+                                    :gesture => name, :id => params.fetch("id"), :values => values,
+                                    :expected_values => params.fetch("expected_values")) do |record, identity|
+              edited = gesture.change.call(record, values, identity)
+              report = gesture.report.call(record, values) if gesture.report
+              edited
             end
+            result.merge(report)
           end
         end
       end

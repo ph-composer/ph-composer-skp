@@ -130,6 +130,31 @@ class SpacesIdentityTest < PhComposerTestCase
     assert_equal 2, segments.map { |segment| segment["id"] }.uniq.length
   end
 
+  # D-UD-2: the Space Floor's map travels with its Volume, so a copy made independent keeps an independent one
+  # under its new floor_id.
+  def test_a_volume_made_independent_keeps_an_independent_copy_of_its_floors_map
+    note = { "example_org" => { "finish" => "screed" } }
+    SPACES::VOLUME_STORE.write(@volume, volume_record("A").merge("floor_user_data" => note))
+    native_copy(@volume, 113, @space)
+    shared = invoke("ph_composer.spaces.update_metadata", "updates" => [{
+      "reference" => { "floor_id" => "flr_AAAAAAAAAAAA", "entity_path" => [100, 110, 113] }, "user_data" => {},
+      "expected_metadata" => { "user_data" => note, "extension_data" => {} }
+    }])
+    assert_equal %w[refused target.ambiguous], shared.values_at("status", "code"), shared.inspect
+    result = make_independent("volume_id" => "vol_AAAAAAAAAAAA", "entity_path" => [100, 110, 113])
+    assert_equal "completed", result["status"], result.inspect
+    floors = spaces.first.fetch("volumes").map { |volume| volume.fetch("floor") }
+    assert_equal [note, note], floors.map { |floor| floor.fetch("user_data") }
+    assert_equal 2, floors.map { |floor| floor.dig("reference", "floor_id") }.uniq.length
+    copy = floors.find { |floor| floor.dig("reference", "entity_path").last == 113 }
+    written = invoke("ph_composer.spaces.update_metadata", "updates" => [{
+      "reference" => copy.fetch("reference"), "user_data" => { "copy" => true },
+      "expected_metadata" => { "user_data" => note, "extension_data" => {} }
+    }])
+    assert_equal "completed", written["status"], written.inspect
+    assert_equal note, SPACES::VOLUME_STORE.read(@volume).fetch("floor_user_data"), "the original is untouched"
+  end
+
   # A Space inside a Group copied with it shares storage above the Space: the finding says so, and Make
   # independent refuses rather than making the parent unique.
   def test_a_space_repeated_through_shared_storage_has_no_repair

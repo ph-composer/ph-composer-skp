@@ -76,10 +76,10 @@ class EntityReferencesTest < PhComposerTestCase
   end
 
   def test_staged_catalog_reference_results_cannot_change_what_apply_persists
-    before = attached("atz_000000000001")
+    before = attached("atz_000000000001").merge("user_data" => { "tags" => ["original"] })
+    ATTACHED.store.write(@model, before)
     changes = R::ChangeSet.new
-    @engine.propose_update(ATTACHED.id, before.fetch("id"), changes,
-                           :values => { "name" => "Updated" }, :user_data => { "tags" => ["original"] })
+    @engine.propose_update(ATTACHED.id, before.fetch("id"), changes, :values => { "name" => "Updated" })
     expected = PhComposer::DeepCopy.call(changes.writes.first.after)
 
     found = @engine.resolve_reference(ATTACHED.id, before.fetch("id"), :change_set => changes)
@@ -531,7 +531,8 @@ class EntityReferencesTest < PhComposerTestCase
     inventory = PhComposer::API.discover.fetch("reference_targets")
     assert_equal [FACE::REFERENCE_KIND, ZONES::REFERENCE_KIND, ZONES::Options::STAMP_KIND,
                   PhComposer::Windows::Settings::KIND, PhComposer::Windows::Units::REFERENCE_KIND,
-                  *PhComposer::Spaces::KINDS.keys, PhComposer::ThermalBridges::EDGE_KIND].sort,
+                  *PhComposer::Spaces::KINDS.keys, PhComposer::ThermalBridges::EDGE_KIND,
+                  PhComposer::ModelMetadata::REFERENCE_KIND].sort,
                  inventory.map { |target| target.fetch("id") }.sort
     found = PhComposer::API.describe(:name => FACE::REFERENCE_KIND)
     assert_equal "reference_target", found.fetch("kind")

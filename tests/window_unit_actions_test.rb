@@ -574,6 +574,10 @@ class WindowUnitActionsTest < PhComposerTestCase
     item.entity.transformation *= Geom::Transformation.scaling(-1, 1, 1)
     item = U::Occurrences.all(@model).first
     pane = U::WorldGeometry.map(U::DefinitionPlan.build(type), item.transform.to_a).panes.first.polygon_m
+    map = { "firm" => { "detail" => "A-503/7" } }
+    source = type
+    source["elements"].first["user_data"] = map
+    W::Types::KIND.store.write(@model, source)
     scope = U::MutationScope.new(:definition_ids => [item.entity.definition.persistent_id])
     before = scope.capture(@model)
     result = assignment_invoke("#{PREFIX}.units.new_flipped_type", "unit" => item.reference)
@@ -590,6 +594,8 @@ class WindowUnitActionsTest < PhComposerTestCase
     end
     assert_equal "head_right", changed.record.fetch("anchor")
     assert_equal({ "note" => ["retain"] }, changed.record.fetch("user_data"))
+    refute_equal source["elements"].first["id"], target["elements"].first["id"]
+    assert_equal [map], target["elements"].map { |element| element["user_data"] }, "the flipped Type keeps element maps"
     assert_empty units.first.fetch("findings")
     after = scope.capture(@model)
     @model.undo

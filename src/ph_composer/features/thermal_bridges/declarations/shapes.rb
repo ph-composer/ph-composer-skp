@@ -40,7 +40,7 @@ module PhComposer
         object({ "id" => id(kind.id_prefix, "The #{kind.label} to edit."),
                  "values" => described(patch, "The values to change; any not given stay. A null color returns " \
                                               "the type to its default colour."),
-                 "expected_values" => expected(kind), "user_data" => USER_DATA }, :optional => ["user_data"])
+                 "expected_values" => expected(kind) })
       end
 
       def view(kind)

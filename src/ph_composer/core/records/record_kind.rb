@@ -16,11 +16,26 @@ module PhComposer
     class RecordKind
       RESERVED_KEYS = %w[id schema_version user_data extension_data].freeze
 
-      attr_reader :id, :label, :schema_version, :id_prefix, :fields, :store
+      attr_reader :id, :label, :schema_version, :id_prefix, :fields, :store, :parts, :metadata_follow_up
 
       # `validate`, when given, is `->(values) { [finding, ...] }` for rules a schema cannot express. The kind
-      # keeps frozen copies of its id, label, prefix and fields; `validate` and `store` are kept as given.
-      def initialize(id:, label:, schema_version:, id_prefix:, fields:, validate: nil, store: nil, references: [])
+      # keeps frozen copies of its id, label, prefix and fields; `validate`, `store` and `metadata_follow_up`
+      # are kept as given.
+      #
+      # `owner_writes_metadata` is true for an internal kind no script annotates, such as Zone option
+      # settings: ph_composer.records.update_metadata refuses it as target.wrong_kind.
+      #
+      # `metadata_follow_up`, when given, is `->(request, proposal) { ... }`, for a kind whose owner keeps
+      # copies of its records elsewhere, such as Zone options copied into each Zone's evidence. After
+      # ph_composer.records.update_metadata stages a batch that changes a record of the kind, it calls the
+      # follow-up once with the operation's request and proposal; the follow-up reads the staged records
+      # through the proposal, adds the owner's dependent steps to it, or refuses the whole batch. Kinds that
+      # share one follow-up object are followed up once per batch. The kind itself never calls it.
+      #
+      # `parts` are the Records::Part declarations of nested objects that carry their own `user_data`, such as
+      # an Assembly's Layers and Layer-Segments; the kind validates each part's map as it does the record's.
+      def initialize(id:, label:, schema_version:, id_prefix:, fields:, validate: nil, store: nil, references: [],
+                     owner_writes_metadata: false, metadata_follow_up: nil, parts: [])
         @id = DeepCopy.frozen(id)
         @label = DeepCopy.frozen(label)
         @schema_version = schema_version
@@ -30,6 +45,13 @@ module PhComposer
         @validate = validate
         @store = store || DictionaryStore.new(id)
         @id_pattern = Identity.pattern(id_prefix)
+        @owner_writes_metadata = owner_writes_metadata
+        @metadata_follow_up = metadata_follow_up
+        @parts = parts.map { |part| Fields.detached(part) }.freeze
+      end
+
+      def owner_writes_metadata?
+        @owner_writes_metadata
       end
 
       def references
@@ -52,7 +74,30 @@ module PhComposer
 
       def descriptor
         Descriptor.new(:kind => id, :label => label, :schema_version => schema_version,
-                       :values_schema => values_schema, :references => references)
+                       :values_schema => values_schema, :references => references, :parts => parts)
+      end
+
+      # Every reason a `parts` declaration does not fit this kind's values schema, for registration.
+      def part_declaration_problems
+        paths = parts.map(&:path)
+        parts.flat_map { |part| part.declaration_problems(values_schema, paths) }
+      end
+
+      # Why `metadata_follow_up` cannot serve, for registration: empty when it is absent or callable.
+      def follow_up_problems
+        return [] if @metadata_follow_up.nil? || @metadata_follow_up.respond_to?(:call)
+
+        ["metadata_follow_up must be callable"]
+      end
+
+      # [part, member] for the part `part_ids` names in `record`, the member being the object inside
+      # `record`; nil when no declared part has a member at that id path.
+      def part(record, part_ids)
+        parts.each do |part|
+          member = part.find(record, part_ids)
+          return [part, member] if member
+        end
+        nil
       end
 
       # [[target_kind, id], ...] for every core reference `record` holds (Descriptor#referenced_targets
@@ -88,11 +133,30 @@ module PhComposer
         %w[user_data extension_data].each do |key|
           next unless record.key?(key)
 
-          value = record[key]
-          found << "#{key} must be a JSON object" unless value.is_a?(Hash)
-          found.concat(JsonValue.problems(value).map { |problem| "#{key} #{problem}" })
+          found.concat(map_problems(record[key], key))
+        end
+        parts.each { |part| found.concat(part_problems(part, record)) }
+        found
+      end
+
+      # A part's members are named by an id unique within their parent, and any map they carry is plain JSON.
+      def part_problems(part, record)
+        parent = parts.find { |candidate| part.path.start_with?("#{candidate.path}.") }&.label || label
+        found = []
+        part.sibling_groups(record).each do |members|
+          ids = members.map { |member| member["id"] }
+          found << "#{part.label} ids must be unique within their #{parent}." unless ids.uniq.length == ids.length
+          members.select { |member| member.key?("user_data") }.each do |member|
+            found.concat(map_problems(member["user_data"], "#{part.label} #{member['id']} user_data"))
+          end
         end
         found
+      end
+
+      def map_problems(value, name)
+        found = []
+        found << "#{name} must be a JSON object" unless value.is_a?(Hash)
+        found.concat(JsonValue.problems(value).map { |problem| "#{name} #{problem}" })
       end
     end
   end

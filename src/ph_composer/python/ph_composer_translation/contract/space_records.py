@@ -96,6 +96,8 @@ class VolumeRecord:
     geometry: tuple[Polygon, ...]
     floor_segments: tuple[FloorSegmentRecord, ...]
     user_data: JSONObject = field(default_factory=dict)
+    #: The Volume's Space Floor's own map, never the Volume's.
+    floor_user_data: JSONObject = field(default_factory=dict)
 
     @classmethod
     def read(cls, value: object) -> VolumeRecord:
@@ -113,6 +115,7 @@ class VolumeRecord:
             tuple(polygon(item, f"{label} geometry") for item in rows(row.get("geometry"), f"{label} geometry")),
             tuple(FloorSegmentRecord.read(item) for item in rows(row.get("floor_segments"), f"{label} segments")),
             user_data(row.get("user_data"), label),
+            user_data(row.get("floor_user_data"), f"{label} floor"),
         )
 
 

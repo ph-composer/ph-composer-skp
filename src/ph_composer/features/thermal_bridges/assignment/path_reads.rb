@@ -5,13 +5,16 @@ module PhComposer
     module Assignment
       # Edges named by path rather than by the selection: explicit root-to-Edge paths, such as a schedule
       # run's `edge_paths`, and the Edges directly inside one container. Each row is the selection read's row
-      # (Selection.row: the Zone holding the Edge, its complete reference, its values as stored and the
-      # refusal a write meets) with the Edge's world endpoints, so assign, clear and a read back need no
+      # (Selection.row: the Zone holding the Edge, its complete reference, its values and metadata as stored
+      # and the refusal a write meets) with the Edge's world endpoints, so assign, clear and a read back need no
       # selection and no `runs.locate`. A path that names no Edge is a row with its reason, never a refusal of
       # the read. Reads only, a bounded page at a time; nothing is selected or written.
       module PathReads
         AT = "#{FEATURE_ID}.edges.at".freeze
         CANDIDATES = "#{FEATURE_ID}.edges.candidates".freeze
+        DETAIL = "#{FEATURE_ID}.edges.detail".freeze
+        # The parts of an Edge row edges.detail reaches.
+        DETAIL_PARTS = %w[values user_data extension_data extension_status].freeze
         ASSIGNED = %w[any assigned unassigned].freeze
         UNITS = { "endpoints_m" => "m" }.freeze
 
@@ -24,7 +27,11 @@ module PhComposer
         def at(request)
           model = request.model
           paths = request.params.fetch("paths").map { |path| OccurrencePath.integer_path(path) }
-          build = ->(indices) { rows(request, indices.map { |index| find(model, paths[index]) }) }
+          metadata = request.params["metadata"]
+          build = lambda do |indices|
+            rows(request, indices.map { |index| find(model, paths[index]) })
+              .map { |row| Assignment.summarized(row, metadata) }
+          end
           page, next_cursor = Pages.bounded(request, AT, paths.each_index.to_a, :key => ->(index) { [index] },
                                                                                 :prepare => build)
           { "edges" => page, "next_cursor" => next_cursor, "total" => paths.length, "units" => UNITS }
@@ -42,11 +49,25 @@ module PhComposer
           found = edges.sort_by(&:persistent_id).map do |edge|
             Found.new(:path => container.path + [edge.persistent_id], :edge => edge, :transform => container.transform)
           end
+          prepare = lambda do |items|
+            rows(request, items).map { |row| Assignment.summarized(row, params["metadata"]) }
+          end
           page, next_cursor = Pages.bounded(request, CANDIDATES, found, :key => ->(item) { item.path },
-                                                                        :prepare => ->(items) { rows(request, items) })
+                                                                        :prepare => prepare)
           { "container" => { "path" => container.path, "locked" => container.locked, "hidden" => container.hidden,
                              "shared" => container.shared },
             "edges" => page, "next_cursor" => next_cursor, "total" => found.length, "units" => UNITS }
+        end
+
+        # One part of the Edge row at one root-to-Edge path, exactly, in fragments (shell/fragments.rb). A path
+        # naming no Edge refuses, since its row holds nothing to read.
+        def detail(request)
+          params = request.params
+          Fragments.check_start!(params.fetch("path"), DETAIL_PARTS)
+          found = find(request.model, OccurrencePath.integer_path(params.fetch("edge_path")))
+          raise CodedError.new("target.not_found", "No Edge is at that path (#{found.reason}).") unless found.edge
+
+          Fragments.detail(request, DETAIL, rows(request, [found]).first, params.fetch("path"), :parts => DETAIL_PARTS)
         end
 
         def find(model, path)
@@ -65,10 +86,11 @@ module PhComposer
           edges = items.select(&:edge)
           reads = edges.map { |item| Target.read(item.edge) }
           copied = Selection.copied_ids(request.model, reads.map(&:first))
+          catalog = request.registry.catalog
           contained = Operations.contained(request, edges.map(&:path)).zip(reads, edges)
           by_path = contained.to_h do |containment, read, item|
-            row = Selection.row(containment, read, copied).merge("endpoints_m" => endpoints(item),
-                                                                 "hidden" => OccurrencePath.hidden?(item.edge))
+            row = Selection.row(containment, read, copied, :catalog => catalog)
+                           .merge("endpoints_m" => endpoints(item), "hidden" => OccurrencePath.hidden?(item.edge))
             [item.path, bounded_zone(row)]
           end
           items.map { |item| by_path.fetch(item.path) { absent(item) } }
@@ -94,8 +116,8 @@ module PhComposer
 
         def absent(item)
           { "path" => item.path, "reference" => nil, "zone" => nil, "reason" => item.reason, "values" => {},
-            "copied" => false, "record_problem" => nil, "write_refusal" => nil, "endpoints_m" => nil,
-            "hidden" => nil }
+            "copied" => false, "record_problem" => nil, "write_refusal" => nil, "user_data" => {},
+            "extension_data" => {}, "extension_status" => {}, "endpoints_m" => nil, "hidden" => nil }
         end
         private_class_method :find, :rows, :endpoints, :bounded_zone, :absent
       end

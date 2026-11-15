@@ -122,13 +122,13 @@ module PhComposer
           end
           remove = Shapes.object(identity.fetch("properties").merge("replacement_id" => { "type" => %w[string null] }),
                                  :optional => ["replacement_id"])
-          action(feature, "remove", remove, Registration::RESULT, [example]) do |request, proposal|
+          action(feature, "remove", remove, Registration::MANAGE_RESULT, [example]) do |request, proposal|
             Commands.remove(request, proposal, request.params.fetch("collection"), request.params.fetch("id"),
                             request.params["replacement_id"], request.params.key?("replacement_id"))
           end
           merge = Shapes.with(identity, "target_id" => Shapes::ID)
-          action(feature, "merge", merge, Registration::RESULT, [example.merge("target_id" => "lvl_Zz12Cd34Ef56")]) do |
-                      request, proposal|
+          merge_example = example.merge("target_id" => "lvl_Zz12Cd34Ef56")
+          action(feature, "merge", merge, Registration::MANAGE_RESULT, [merge_example]) do |request, proposal|
             Commands.remove(request, proposal, request.params.fetch("collection"), request.params.fetch("id"),
                             request.params.fetch("target_id"), true)
           end

@@ -2,9 +2,9 @@
 
 module PhComposer
   module Windows
-    # Pure grid gestures from the predecessor, one public function per gesture. Each takes the
-    # stored record and the gesture's own params and returns detached authored values; the record
-    # schema checks final coverage and references at the proposal boundary.
+    # Pure grid gestures from the predecessor, one public function per gesture, and merge_discards for
+    # what a merge reports. Each gesture takes the stored record and its own params and returns detached
+    # authored values; the record schema checks final coverage and references at the proposal boundary.
     module GridOperations
       module_function
 
@@ -117,11 +117,30 @@ module PhComposer
         unless area == (rows.last - rows.first + 1) * (columns.last - columns.first + 1)
           refuse("Selection must cover one rectangle without gaps.")
         end
-        merged = DeepCopy.call(selected.min_by { |cell| [cell["row_span"].first, cell["column_span"].first] })
+        merged = DeepCopy.call(top_left(selected))
         merge_installs(selected, merged, rows, columns)
         merged.merge!("id" => identity.call("wel"), "row_span" => rows, "column_span" => columns)
         record["elements"] = record.fetch("elements").reject { |cell| values["ids"].include?(cell["id"]) } + [merged]
         record
+      end
+
+      # The merged element is the top-left one's copy under a new id, so it keeps that element's map and
+      # only that one (D-UD-5): maps are never combined.
+      def top_left(cells)
+        cells.min_by { |cell| [cell["row_span"].first, cell["column_span"].first] }
+      end
+
+      # What `merge` discards, for its result: each other selected element whose map is not empty, by
+      # element_id in grid order, as Records::Metadata.discard_report bounds them. Undo brings the elements
+      # back with their maps.
+      def merge_discards(record, values)
+        selected = cells(record, values.fetch("ids"))
+        survivor = top_left(selected).fetch("id")
+        discarded = selected.reject { |cell| cell.fetch("id") == survivor || cell.fetch("user_data", {}).empty? }
+        Records::Metadata.discard_report(
+          discarded.sort_by { |cell| [cell["row_span"].first, cell["column_span"].first] }
+                   .map { |cell| [{ "element_id" => cell.fetch("id") }, cell.fetch("user_data")] }
+        )
       end
 
       def merge_installs(selected, merged, rows, columns)

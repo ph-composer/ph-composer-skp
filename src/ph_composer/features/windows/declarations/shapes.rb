@@ -54,7 +54,7 @@ module PhComposer
       def update(kind)
         object({ "id" => id(kind.id_prefix, "The #{kind.label} to edit."),
                  "values" => described(patch(kind), "The values to change; any not given stay."),
-                 "expected_values" => expected(kind), "user_data" => USER_DATA }, :optional => ["user_data"])
+                 "expected_values" => expected(kind) })
       end
 
       def view(kind)

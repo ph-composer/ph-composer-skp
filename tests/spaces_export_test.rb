@@ -60,6 +60,25 @@ class SpacesExportTest < PhComposerTestCase
     assert_raises(PhComposer::Export::Blocked) { records }
   end
 
+  # The Space Floor's map leaves beside its Volume's, never as it, and the reserved key in it blocks; the
+  # preflight names the Floor.
+  def test_the_floor_map_leaves_with_its_volume_and_the_reserved_key_blocks
+    reference_model
+    volume_group = @model.entities.to_a.first.entities.to_a.first.entities.to_a.first
+    record = PhComposer::Spaces::VOLUME_STORE.read(volume_group)
+    PhComposer::Spaces::VOLUME_STORE.write(volume_group, record.merge("floor_user_data" => { "firm" => "floor" }))
+    volume = records.find { |row| row["name"] == "Living" }.fetch("volumes").first
+    assert_equal({ "firm" => "floor" }, volume.fetch("floor_user_data"))
+    refute volume.key?("user_data")
+
+    PhComposer::Spaces::VOLUME_STORE.write(volume_group, record.merge("floor_user_data" => { "ph_composer" => 1 }))
+    assert_raises(PhComposer::Export::Blocked) { records }
+    result = API.query(:context => @context, :name => X::PREFLIGHT)
+    blocking = result.dig("value", "findings").select { |row| row["blocks_export"] }
+    assert_equal [["export.blocked", record.fetch("floor_id")]],
+                 blocking.map { |row| row.values_at("code", "object_id") }
+  end
+
   def host(group, zone_id)
     PhComposer::Spaces::SPACE_STORE.write(group, space_record("R", :number => "1").merge("zone_id" => zone_id))
   end

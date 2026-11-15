@@ -58,8 +58,7 @@ module PhComposer
           Authoring.update_product(request, proposal, collection,
                                    :id => params.fetch("id"),
                                    :values => params.fetch("values"),
-                                   :expected_values => params.fetch("expected_values"),
-                                   :user_data => params["user_data"])
+                                   :expected_values => params.fetch("expected_values"))
         end
         declare_product_copy_and_delete(feature, prefix, collection, kind)
       end
@@ -83,7 +82,8 @@ module PhComposer
         feature.action("#{prefix}.delete",
                        :description => "Delete #{kind.label}; live references require replacement.",
                        :refuses => Refuses::DELETE,
-                       :params => delete_params(kind, replacement), :result => Shapes::RESULT,
+                       :params => delete_params(kind, replacement),
+                       :result => Shapes.with_removed_user_data(Shapes::RESULT),
                        :undo_name => "Delete #{kind.label}",
                        :side_effects => Shapes.side_effects("Rewrites referring definitions and defaults, then " \
                                                             "deletes atomically."),
@@ -122,8 +122,7 @@ module PhComposer
           params = request.params
           Authoring.update_type(request, proposal,
                                 :id => params.fetch("id"), :values => params.fetch("values"),
-                                :expected_values => params.fetch("expected_values"),
-                                :user_data => params["user_data"])
+                                :expected_values => params.fetch("expected_values"))
         end
         declare_type_copy_and_delete(feature, prefix, kind)
       end
@@ -149,7 +148,8 @@ module PhComposer
         feature.action("#{prefix}.delete",
                        :description => "Delete #{kind.label}; live references require replacement.",
                        :refuses => Refuses::TYPE_DELETE,
-                       :params => delete_params(kind, replacement), :result => Shapes::RESULT,
+                       :params => delete_params(kind, replacement),
+                       :result => Shapes.with_removed_user_data(Shapes::RESULT),
                        :undo_name => "Delete #{kind.label}",
                        :side_effects => Shapes.side_effects("Rewrites referring definitions and defaults, then " \
                                                             "deletes atomically."),

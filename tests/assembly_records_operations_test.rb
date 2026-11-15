@@ -132,6 +132,136 @@ class AssemblyRecordsOperationsTest < PhComposerTestCase
     assert_equal({}, copy["photo_collections"])
   end
 
+  def test_every_gesture_keeps_surviving_part_maps_and_a_new_part_starts_without_one
+    wool = create("materials", "name" => "Wool", "conductivity_w_mk" => 0.04)
+    fibre = create("materials", "name" => "Fibre", "conductivity_w_mk" => 0.036)
+    id = create("assemblies", Assemblies::Assembly::Schema::KIND.values(mapped_parts))
+    original = part_maps(record(Assemblies::ASSEMBLY_KIND, id))
+    gestures = [
+      ->(layers) { ["assemblies.layers.reorder", { "layer_id" => layers.last["id"], "index" => 0 }] },
+      ->(layers) { ["assemblies.layers.move", { "layer_id" => layers.first["id"], "direction" => "inward" }] },
+      ->(_layers) { ["assemblies.layers.flip", {}] },
+      ->(_layers) { ["assemblies.layers.flip_orientation", {}] },
+      ->(_layers) { ["assemblies.segments.mirror", {}] },
+      ->(layers) { ["assemblies.layers.update", { "layer_id" => layers.first["id"], "thickness_mm" => 90 }] },
+      ->(layers) { ["assemblies.layers.set_air_barrier", { "layer_id" => layers.first["id"], "face" => "interior" }] },
+      ->(layers) { segment_gesture("update", layers, "values" => { "width_mm" => 700 }) },
+      ->(layers) { segment_gesture("set_material", layers, "material_id" => wool) },
+      ->(_layers) { ["assemblies.update", { "values" => { "name" => "Renamed" } }] },
+      ->(layers) { ["assemblies.segments.add", { "layer_id" => layers.last["id"] }] },
+      ->(_layers) { ["assemblies.layers.add", {}] },
+      ->(layers) { segment_gesture("remove", layers) },
+      ->(layers) { ["assemblies.layers.remove", { "layer_id" => layers.first["id"] }] }
+    ]
+    gestures.each do |gesture|
+      name, params = gesture.call(record(Assemblies::ASSEMBLY_KIND, id)["layers"])
+      result = invoke(name, params.merge("id" => id, "expected_values" => {}))
+      assert_equal "committed", result["effect"], "#{name}: #{result.inspect}"
+      current = part_maps(record(Assemblies::ASSEMBLY_KIND, id))
+      assert_equal current.keys.to_h { |part_id| [part_id, original[part_id]] }, current, name
+    end
+    before = part_maps(record(Assemblies::ASSEMBLY_KIND, id))
+    refute_empty before.values.compact
+    replaced = invoke("materials.delete", "id" => wool, "replacement_id" => fibre)
+    assert_equal "committed", replaced["effect"], replaced.inspect
+    assert_equal before, part_maps(record(Assemblies::ASSEMBLY_KIND, id)), "a Material replacement keeps every map"
+  end
+
+  # A delete with a replacement reports the deleted record's map, then its parts' maps by address in
+  # declaration order (every Layer, then every Layer-Segment); the survivor keeps its own, Undo brings them
+  # back, and a record without maps reports none.
+  def test_a_delete_with_replacement_reports_the_record_and_part_maps_it_removes
+    values = Assemblies::Assembly::Schema::KIND.values(mapped_parts)
+    removed = create("assemblies", values, "firm" => { "zeta" => 1, "alpha" => 2 })
+    survivor = create("assemblies", values.merge("name" => "Survivor"), "firm" => { "keep" => true })
+    layers = record(Assemblies::ASSEMBLY_KIND, removed)["layers"]
+    result = invoke("assemblies.delete", "id" => removed, "replacement_id" => survivor)
+    assert_equal "committed", result["effect"], result.inspect
+    parts = layers.map { |layer| [layer["id"]] } +
+            layers.flat_map { |layer| layer["segments"].map { |segment| [layer["id"], segment["id"]] } }
+    entry = { "id" => removed, "user_data_keys" => ["firm"], "user_data_key_total" => 1 }
+    expected = [entry] + parts.map { |ids| entry.merge("part_ids" => ids) }
+    assert_equal [expected, 6], result.fetch("value").values_at("removed_user_data", "removed_user_data_total")
+    assert_equal({ "firm" => { "keep" => true } }, record(Assemblies::ASSEMBLY_KIND, survivor)["user_data"])
+    @model.undo
+    assert_equal({ "firm" => { "zeta" => 1, "alpha" => 2 } }, record(Assemblies::ASSEMBLY_KIND, removed)["user_data"])
+    assert_equal layers, record(Assemblies::ASSEMBLY_KIND, removed)["layers"]
+
+    old, replacement, = seed_repeated_uses
+    plain = invoke("materials.delete", "id" => old, "replacement_id" => replacement)
+    assert_equal [[], 0], plain.fetch("value").values_at("removed_user_data", "removed_user_data_total")
+  end
+
+  # Two Layers with 50 keys of 256 characters each report over one agent reply. The delete's report keeps
+  # both rows with their key totals, as many keys as its byte budget holds and the truncation flag, so the
+  # outcome reaches the agent whole.
+  def test_a_large_removal_report_fits_one_agent_reply
+    values = fixture_assembly([[12, [[1000, nil]]], [140, [[1000, nil]]]])
+    values["layers"].each_with_index do |layer, index|
+      layer["user_data"] = 50.times.to_h { |n| ["#{index}#{format('%02d', n)}".ljust(256, "k"), n] }
+    end
+    id = create("assemblies", Assemblies::Assembly::Schema::KIND.values(values))
+    agent = PhComposer::AgentAccess
+    issued = agent::Tokens.issue(:capabilities => %w[read model_write])
+    writer = agent::Tokens.snapshot.fetch(agent::Tokens.digest(issued.fetch("token")))
+    result = agent::Executor.new(:tools => agent::Tools::TABLE).call(
+      writer, "invoke", "session" => @session.id, "name" => "#{Assemblies::FEATURE_ID}.assemblies.delete",
+                        "params" => { "id" => id }, "expected_revision" => @session.revision
+    )
+    refute result["isError"], result.inspect
+    outcome = result.fetch("structuredContent")
+    assert_equal "committed", outcome.fetch("effect"), outcome.inspect
+    rows = outcome.dig("value", "removed_user_data")
+    assert_equal [[id, 50], [id, 50]], rows.map { |row| row.values_at("id", "user_data_key_total") }
+    assert_operator rows.sum { |row| row.fetch("user_data_keys").length }, :<, 100
+    assert_operator JSON.generate(rows).bytesize, :<=, PhComposer::Records::Metadata::REPORT_BYTES
+    assert_equal [2, true], outcome.fetch("value").values_at("removed_user_data_total", "removed_user_data_truncated")
+    assert_operator JSON.generate(outcome).bytesize, :<=, agent::Executor::MAX_RESULT_BYTES
+  end
+
+  def test_a_duplicate_copies_part_maps_under_new_ids_as_independent_literal_json
+    values = mapped_parts
+    literal = values["layers"][0]["id"]
+    values["layers"][0]["segments"][0]["user_data"] = { "links" => { "layer" => literal } }
+    id = create("assemblies", Assemblies::Assembly::Schema::KIND.values(values))
+    original = record(Assemblies::ASSEMBLY_KIND, id)
+    result = invoke("assemblies.duplicate", "id" => id)
+    assert_equal "committed", result["effect"], result.inspect
+    copy = record(Assemblies::ASSEMBLY_KIND, result.dig("value", "id"))
+    assert_empty part_maps(original).keys & part_maps(copy).keys
+    assert_equal part_maps(original).values, part_maps(copy).values
+    assert_equal literal, copy.dig("layers", 0, "segments", 0, "user_data", "links", "layer"),
+                 "an id inside a map is literal text, never remapped"
+    layer = copy.dig("layers", 0)
+    @sequence += 1
+    written = API.invoke(:context => @context, :name => "ph_composer.records.update_metadata",
+                         :params => { "updates" => [{
+                           "reference" => { "kind" => Assemblies::ASSEMBLY_KIND, "id" => copy["id"],
+                                            "part_ids" => [layer["id"]] },
+                           "user_data" => { "firm" => { "layer" => "changed" } },
+                           "expected_metadata" => { "user_data" => layer["user_data"], "extension_data" => {} }
+                         }] },
+                         :request => { "sequence" => @sequence, "expected_revision" => @session.revision })
+    assert_equal "committed", written["effect"], written.inspect
+    assert_equal "changed", record(Assemblies::ASSEMBLY_KIND, copy["id"]).dig("layers", 0, "user_data", "firm", "layer")
+    assert_equal part_maps(original), part_maps(record(Assemblies::ASSEMBLY_KIND, id)), "the original keeps its maps"
+  end
+
+  def test_an_assembly_stored_without_part_maps_reads_and_validates_unchanged
+    values = fixture_assembly([[12, [[1000, nil]]], [140, [[850, nil], [150, nil]]]])
+    id = create("assemblies", Assemblies::Assembly::Schema::KIND.values(values))
+    kind = Assemblies::Assembly::Schema::KIND
+    stored = kind.store.read(@model, id)
+    assert_empty kind.problems(stored)
+    revision = @session.revision
+    row = query("assemblies")["records"].find { |entry| entry["id"] == id }
+    assert_equal kind.values(stored), row["values"]
+    refute(row["values"]["layers"].any? { |layer| [layer, *layer["segments"]].any? { |part| part.key?("user_data") } })
+    assert_equal [revision, stored], [@session.revision, kind.store.read(@model, id)]
+    stored["layers"][1]["segments"][1]["id"] = stored["layers"][1]["segments"][0]["id"]
+    assert_includes kind.problems(stored), "Layer-Segment ids must be unique within their Layer."
+  end
+
   def test_unknown_extension_payload_survives_edit_and_copy_refuses_missing_rules
     id = create("assemblies", "name" => "Unknown payload")
     kind = Assemblies::Assembly::Schema::KIND
@@ -359,6 +489,29 @@ class AssemblyRecordsOperationsTest < PhComposerTestCase
   end
 
   private
+
+  # Two Layers, the second with two Layer-Segments, each part carrying its own map.
+  def mapped_parts
+    values = fixture_assembly([[12, [[1000, nil]]], [140, [[850, nil], [150, nil]]]])
+    values["layers"].each_with_index do |layer, index|
+      layer["user_data"] = { "firm" => { "layer" => index } }
+      layer["segments"].each_with_index do |segment, position|
+        segment["user_data"] = { "firm" => { "segment" => [index, position] } }
+      end
+    end
+    values
+  end
+
+  # Each part's map by id, nil for a part without one, outside Layer first.
+  def part_maps(record)
+    record["layers"].flat_map { |layer| [layer, *layer["segments"]] }.to_h { |part| [part["id"], part["user_data"]] }
+  end
+
+  def segment_gesture(name, layers, params = {})
+    layer = layers.find { |entry| entry["segments"].length > 1 } || layers.first
+    segment_id = layer["segments"].first["id"]
+    ["assemblies.segments.#{name}", params.merge("layer_id" => layer["id"], "segment_id" => segment_id)]
+  end
 
   def layered_values(options)
     { "name" => options.fetch("name"), "orientation" => "first_layer_outside",

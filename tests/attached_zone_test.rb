@@ -259,8 +259,13 @@ class AttachedZoneTest < PhComposerTestCase
 
   def test_an_edit_preserves_user_data_and_refuses_a_stale_expected_value
     garage = create_zone_record("Garage")
-    invoke("#{KIND}.save", { "id" => garage, "values" => { "notes" => "Detached" },
-                             "user_data" => { "firm.note" => "keep" } })
+    metadata = { "reference" => { "kind" => KIND, "id" => garage }, "user_data" => { "firm.note" => "keep" },
+                 "expected_metadata" => { "user_data" => {}, "extension_data" => {} } }
+    invoke("ph_composer.records.update_metadata", { "updates" => [metadata] })
+    edited = invoke("#{KIND}.save", { "id" => garage, "values" => { "notes" => "Detached" },
+                                      "user_data" => { "firm.note" => "replaced" } })
+    assert_equal %w[refused params.invalid], edited.values_at("status", "code"), "an edit does not take user_data"
+    invoke("#{KIND}.save", { "id" => garage, "values" => { "notes" => "Detached" } })
 
     stale = invoke("#{KIND}.save", { "id" => garage, "values" => { "name" => "Carport" },
                                      "expected_values" => { "name" => "Garage " } })
@@ -270,6 +275,21 @@ class AttachedZoneTest < PhComposerTestCase
 
     assert_equal "Garage", record.dig("values", "name")
     assert_equal({ "firm.note" => "keep" }, record.fetch("user_data"))
+  end
+
+  # An Attached zone leaves no HBJSON object, so its map stays in the Model with one finding, whether or not a
+  # Face names it; a reserved key in a map that stays local blocks nothing.
+  def test_an_attached_zone_map_stays_local_with_one_finding
+    invoke("#{KIND}.save", { "values" => { "name" => "Garage", "kind" => "garage" },
+                             "user_data" => { "ph_composer" => { "firm" => 1 } } })
+    invoke("#{KIND}.save", { "values" => { "name" => "Attic", "kind" => "attic" } })
+    garage = records.find { |record| record.dig("values", "name") == "Garage" }.fetch("id")
+    section = PhComposer::Zones::Faces::ExportProjection::SECTION
+    extraction = PhComposer::Export::Collection.build(@model, :run_id => "atz", :contributors => [section])
+
+    assert_equal [["export.metadata_omitted", garage]],
+                 extraction.findings.map { |row| row.values_at("code", "object_id") }
+    refute_includes JSON.generate(extraction.document), "firm"
   end
 
   private

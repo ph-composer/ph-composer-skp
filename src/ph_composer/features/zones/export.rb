@@ -6,6 +6,9 @@ module PhComposer
       SECTION = "ph_composer.zones.export.zones"
       # The Assemblies section whose definitions name the constructions this report counts.
       CONSTRUCTIONS = "ph_composer.assemblies.export.constructions"
+      # The option kinds a Zone names, and what the section exports of each choice.
+      CHOICE_KINDS = [Options::SEGMENTS, Options::LEVELS].freeze
+      CHOICE_FIELDS = %w[name colour export_identifier].freeze
 
       module_function
 
@@ -67,16 +70,13 @@ module PhComposer
       end
 
       # The metadata extraction refuses, read as `records` reads it: each Zone with its user_data passed
-      # through, and alone each Building-Segment and Level choice a Zone names, the only ones it reads.
+      # through, and alone every valid Building-Segment and Level choice, named by a Zone or not.
       def metadata_findings(request, zones)
         check = Export::MetadataCheck
-        records = zones.map(&:record)
-        named = { Options::SEGMENTS => "building_segment_id", Options::LEVELS => "level_id" }
-        check.findings(request, records, :section => SECTION, :user_data => true, :target_kind => REFERENCE_KIND) +
-          named.flat_map do |kind, field|
-            ids = records.select { |record| record["schema_version"] == 2 }.filter_map { |record| record[field] }
-            chosen = check.definitions(request, kind.id).select { |choice| ids.include?(choice["id"]) }
-            check.findings(request, chosen, :section => SECTION)
+        check.findings(request, zones.map(&:record), :section => SECTION, :user_data => true,
+                                                     :target_kind => REFERENCE_KIND) +
+          CHOICE_KINDS.flat_map do |kind|
+            check.findings(request, check.definitions(request, kind.id), :section => SECTION)
           end
       end
 
@@ -166,23 +166,32 @@ module PhComposer
       # The Model's Building-Segment and Level options by kind id, read once per export.
       def option_choices(reader)
         reader.projection(:zone_option_definitions) do
-          [Options::SEGMENTS, Options::LEVELS].to_h do |kind|
+          CHOICE_KINDS.to_h do |kind|
             dictionary = reader.snapshot.model_dictionaries.fetch(kind.store.dictionary, {})
             [kind.id, dictionary.to_h { |id, text| [id, JSON.parse(text)] }]
           end
         end
       end
 
-      def export_choice(reader, choices, kind, id)
-        record = choices.fetch(kind.id)[id]
-        unless record && kind.problems(record).empty?
+      # Every valid Building-Segment and Level choice as the section exports it, by kind id and id. Each passes
+      # the metadata boundary once, whether a Zone names it or not, so an unused option's map is reported as
+      # omitted as a used one's is. An invalid choice is left out, and refuses only when a Zone names it.
+      def exported_choices(reader)
+        choices = option_choices(reader)
+        CHOICE_KINDS.to_h do |kind|
+          valid = choices.fetch(kind.id).sort.select { |_id, record| kind.problems(record).empty? }
+          [kind.id, valid.to_h { |id, record| [id, reader.entity_record(record, :fields => CHOICE_FIELDS)] }]
+        end
+      end
+
+      def export_choice(choices, kind, id)
+        choices.fetch(kind.id).fetch(id) do
           raise Export::Blocked.new("reference.invalid", "Choose a valid #{kind.label} before export.")
         end
-
-        reader.entity_record(record, :fields => %w[name colour export_identifier])
       end
 
       def records(reader)
+        choices = exported_choices(reader)
         zone_occurrences(reader).map do |entry, record|
           record = Names.project(record, entry.native_name)
           Schema.validate!(record)
@@ -198,9 +207,8 @@ module PhComposer
                                                   :target_kind => REFERENCE_KIND, :path => entry.path,
                                                   :user_data => true)
           if record.fetch("schema_version") == 2
-            choices = option_choices(reader)
-            segment = export_choice(reader, choices, Options::SEGMENTS, record.fetch("building_segment_id"))
-            level = record["level_id"] && export_choice(reader, choices, Options::LEVELS, record.fetch("level_id"))
+            segment = export_choice(choices, Options::SEGMENTS, record.fetch("building_segment_id"))
+            level = record["level_id"] && export_choice(choices, Options::LEVELS, record.fetch("level_id"))
             exported.merge!("building_segment_id" => segment.fetch("id"),
                             "building_segment_export_identifier" => segment.fetch("export_identifier"),
                             "building_segment" => segment.fetch("name"), "level" => level&.fetch("name"))

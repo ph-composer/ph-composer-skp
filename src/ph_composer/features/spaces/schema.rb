@@ -5,7 +5,8 @@ module PhComposer
   # user marked as Floor Segments. Each of the three stores its record on its own entity, so the
   # durable identity travels with the geometry (context/CONTRACTS.md, "Geometry records and occurrence
   # references"). A Space's Zone is the `zone_id` on its record, wherever its Group sits. The Space Floor
-  # is logical: one per Volume, named by the Volume's `floor_id`.
+  # is logical: one per Volume, named by the Volume's `floor_id`, and its own `user_data` map is the
+  # Volume's `floor_user_data`, which reads report as the Floor's and never as a Volume value.
   module Spaces
     FEATURE_ID = "ph_composer.spaces"
     ZONE_KIND = "ph_composer.zones.zone"
@@ -16,6 +17,7 @@ module PhComposer
     VOLUME_STORE = Records::EntityStore.new("ph_composer.space_volume", :claims_entity => true)
     FLOOR_SEGMENT_STORE = Records::EntityStore.new("ph_composer.floor_segment", :claims_entity => true)
     FLOOR_PREFIX = "flr"
+    FLOOR_USER_DATA = "floor_user_data"
     AIRFLOWS = %w[v_sup_m3h v_eta_m3h v_tran_m3h].freeze
     DEFAULT_HEIGHT_M = 2.5
 
@@ -43,9 +45,14 @@ module PhComposer
           "description" => "#{description} Absent is unset, distinct from 0." }
       end
 
-      def kind(id, label, prefix, fields)
+      def kind(id, label, prefix, fields, validate: nil)
         Records::RecordKind.new(:id => id, :label => label, :schema_version => 1, :id_prefix => prefix,
-                                :fields => fields)
+                                :fields => fields, :validate => validate)
+      end
+
+      # The Space Floor's map is plain JSON, as every user_data map is (Records::RecordKind checks those).
+      def floor_problems(values)
+        JsonValue.problems(values.fetch(FLOOR_USER_DATA, {})).map { |problem| "#{FLOOR_USER_DATA} #{problem}" }
       end
 
       def reference(id_key)
@@ -76,8 +83,11 @@ module PhComposer
                    { "type" => "array", "items" => { "type" => "number" },
                      "minItems" => 16, "maxItems" => 16,
                      "description" => "The Volume's transform relative to its Space at " \
-                                      "the last reconcile, for Restore position." })
-    ])
+                                      "the last reconcile, for Restore position." }),
+      Schema.field(FLOOR_USER_DATA, { "type" => "object",
+                                      "description" => "The Space Floor's own user_data, written by its floor_id " \
+                                                       "and read as the Floor's map." })
+    ], :validate => ->(values) { Schema.floor_problems(values) })
     FLOOR_SEGMENT = Schema.kind(FLOOR_SEGMENT_KIND, "Floor Segment", "fsg", [
       Schema.field("display_name", { "type" => "string" }, :required => true),
       Schema.field("weighting_factor",
@@ -108,6 +118,8 @@ module PhComposer
     SPACE_REFERENCE = Schema.reference("space_id")
     VOLUME_REFERENCE = Schema.reference("volume_id")
     FLOOR_SEGMENT_REFERENCE = Schema.reference("floor_segment_id")
+    # A Space Floor: its Volume's `floor_id` and the Volume's path. It names the Floor's metadata only.
+    FLOOR_REFERENCE = Schema.reference("floor_id")
 
     module_function
 
@@ -119,13 +131,29 @@ module PhComposer
                            "findings" => found)
     end
 
+    # A Volume's stored values without its Space Floor's map, as every read reports them.
+    def values_schema(kind)
+      schema = kind.values_schema
+      schema.fetch("properties").delete(FLOOR_USER_DATA)
+      schema
+    end
+
     def view(record)
       {
         "id" => record.fetch("id"), "schema_version" => record.fetch("schema_version"),
-        "values" => record.reject { |key, _value| Records::RecordKind::RESERVED_KEYS.include?(key) },
+        "values" => record.reject do |key, _value|
+          Records::RecordKind::RESERVED_KEYS.include?(key) || key == FLOOR_USER_DATA
+        end,
         "user_data" => DeepCopy.call(record.fetch("user_data", {})),
         "extension_data" => DeepCopy.call(record.fetch("extension_data", {}))
       }
+    end
+
+    # The logical Space Floor of the Volume `record` at `path`: the reference its metadata is written by, and
+    # its own map, absent as {}.
+    def floor(record, path)
+      { "reference" => { "floor_id" => record.fetch("floor_id"), "entity_path" => path },
+        "user_data" => DeepCopy.call(record.fetch(FLOOR_USER_DATA, {})) }
     end
   end
 end

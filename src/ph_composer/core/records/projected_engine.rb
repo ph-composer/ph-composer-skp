@@ -71,12 +71,18 @@ module PhComposer
         @engine.propose_create(kind_id, change_set, :values => values, :user_data => user_data)
       end
 
-      def propose_update(kind_id, id, change_set, values: {}, user_data: nil, extension_payloads: {},
-                         expected_values: {})
+      def propose_update(kind_id, id, change_set, values: {}, extension_payloads: {}, expected_values: {},
+                         derived_part_maps: false)
         writable!(kind_id, change_set)
-        @engine.propose_update(kind_id, id, change_set,
-                               :values => values, :user_data => user_data,
-                               :extension_payloads => extension_payloads, :expected_values => expected_values)
+        @engine.propose_update(kind_id, id, change_set, :values => values,
+                                                        :extension_payloads => extension_payloads,
+                                                        :expected_values => expected_values,
+                                                        :derived_part_maps => derived_part_maps)
+      end
+
+      def propose_metadata_update(kind_id, id, change_set, update)
+        writable!(kind_id, change_set)
+        @engine.propose_metadata_update(kind_id, id, change_set, update)
       end
 
       def propose_delete(kind_id, id, change_set, expected_values: {}, reference_plan: nil)
