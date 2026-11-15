@@ -61,6 +61,9 @@ server. The dark strip at the top picks a journey and says what to try; Reset re
   with summed bedrooms, occupants, people, lighting and ventilation. Per row: Program,
   Dwelling, Bedrooms, Occupants, Equipment Set, both floor areas, and the absolute loads. An
   unassigned Zone shows the residential default in italics.
+- **The Dwelling cell** opens a bubble anchored to it: first the Zone's dwelling (an existing
+  one, New dwelling, or Not a dwelling), then that dwelling's units, Zones, bedrooms, occupants and
+  iCFA. A "None" cell opens the same chooser (`j1-unlocked` shows it on House).
 - **The selection bar** assigns Program, Dwelling (one shared, one each, not a dwelling, add to an
   existing one) and Equipment Set to the checked Zones. Choosing a library Program copies it into
   the file and assigns it in one step.

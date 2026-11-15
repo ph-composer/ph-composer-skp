@@ -93,6 +93,9 @@
   .zp-seg select { font-weight:400; }
   .zp-bubble { position:absolute; z-index:40; width:260px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#fff; box-shadow:0 6px 24px #0b1f2626; font-size:12px; }
   .zp-bubble h3 { margin:0 0 8px; font-size:13px; }
+  .zp-dw-choose { display:grid; gap:4px; color:var(--muted); }
+  .zp-dw-choose select { font:inherit; font-size:12px; height:26px; color:var(--ink); }
+  .zp-bubble h3.zp-dw-head { margin:10px 0 8px; padding-top:10px; border-top:1px solid var(--line); }
   .zp-bubble dl { display:grid; grid-template-columns:auto 1fr; gap:4px 10px; margin:0; }
   .zp-bubble dt { color:var(--muted); }
   .zp-bubble dd { margin:0; text-align:right; font-variant-numeric:tabular-nums; }
@@ -655,8 +658,8 @@
     var progCell = '<select class="phc-enum-cell' + (z.program ? "" : " is-default") + '" data-act="zone-program" data-v="' + z.id + '" aria-label="Program for ' + esc(z.name) + '"' +
       (z.program ? "" : ' data-tip="Unassigned: uses its Building Segment\'s default Program."') + '>' + programOptions(z.program || segDefaultProgram(z)) + '</select>' + (f.length ? flag(f.join(" ")) : "");
     var dwl = z.dwelling ? dw(z.dwelling) : null;
-    var dwCell = dwl ? '<button type="button" class="zp-dwelling" data-act="dwelling" data-v="' + dwl.id + '">' + svg("home", 12) + esc(dwl.name) + (dwl.units > 1 ? " ×" + dwl.units : "") + '</button>'
-      : '<button type="button" class="zp-dwelling is-none" data-act="noop" data-tip="Not a dwelling. Check Zones and choose a Dwelling in the selection bar.">None</button>';
+    var dwCell = dwl ? '<button type="button" class="zp-dwelling" data-act="dwelling" data-v="' + z.id + '">' + svg("home", 12) + esc(dwl.name) + (dwl.units > 1 ? " ×" + dwl.units : "") + '</button>'
+      : '<button type="button" class="zp-dwelling is-none" data-act="dwelling" data-v="' + z.id + '">None</button>';
     var occTip = z.dwelling ? "Empty: the dwelling uses the Phius rule, bedrooms + 1 per unit." : "Only dwellings carry occupants.";
     var shared = dwl && zonesOfDwelling(dwl.id).length > 1;
     var setVal = z.set || (z.dwelling ? (dwl.set || null) : null);
@@ -865,16 +868,24 @@
     zs.forEach(function (z) { z.program = p.id === "pgm_default" ? null : p.id; });
   }
   function nextDwellingName() { return "Dwelling " + (S.dwellings.length + 1); }
+  function zn(n) { return n + " Zone" + (n === 1 ? "" : "s"); }
   function assignDwelling(zs, v) {
-    if (v === "none") { zs.forEach(function (z) { z.dwelling = null; z.beds = null; z.occ = null; }); notify(zs.length + " Zones are no longer dwellings."); }
-    else if (v === "shared") { var d = { id: id("dw"), name: S.journey === 1 ? "House" : nextDwellingName(), units: 1 }; S.dwellings.push(d); zs.forEach(function (z) { z.dwelling = d.id; }); notify(zs.length + " Zones now make up one dwelling, " + d.name + "."); }
+    if (v === "none") { zs.forEach(function (z) { z.dwelling = null; z.beds = null; z.occ = null; }); notify((zs.length === 1 ? zs[0].name + " is" : zn(zs.length) + " are") + " no longer part of a dwelling."); }
+    else if (v === "shared") { var d = { id: id("dw"), name: S.journey === 1 ? "House" : nextDwellingName(), units: 1 }; S.dwellings.push(d); zs.forEach(function (z) { z.dwelling = d.id; }); notify(zs.length > 1 ? zs.length + " Zones now make up one dwelling, " + d.name + "." : zs[0].name + " is now a dwelling, " + d.name + "."); }
     else if (v === "each") { zs.forEach(function (z) { var d = { id: id("dw"), name: z.name, units: 1 }; S.dwellings.push(d); z.dwelling = d.id; }); notify(zs.length + " dwellings, one per Zone."); }
-    else if (v.indexOf("to:") === 0) { var t = dw(v.slice(3)); zs.forEach(function (z) { z.dwelling = t.id; }); notify(zs.length + " Zones added to " + t.name + "."); }
+    else if (v.indexOf("to:") === 0) { var t = dw(v.slice(3)); zs.forEach(function (z) { z.dwelling = t.id; }); notify((zs.length === 1 ? zs[0].name : zn(zs.length)) + " added to " + t.name + "."); }
     S.dwellings = S.dwellings.filter(function (d) { return S.zones.some(function (z) { return z.dwelling === d.id; }); });
   }
-  function dwellingBubble(did, anchor) {
-    var d = dw(did), t = dwellingTotals(did), r = anchor.getBoundingClientRect(), pr = document.getElementById("pane").getBoundingClientRect();
-    var html = '<div class="zp-bubble" style="left:' + (r.left - pr.left) + 'px; top:' + (r.bottom - pr.top + 4) + 'px" role="dialog" aria-label="' + esc(d.name) + '"><h3>' + svg("home", 13) + ' ' + esc(d.name) + '</h3><dl>' +
+  // The Dwelling cell's bubble: which dwelling this Zone belongs to, then that dwelling's own values.
+  function dwellingBubble(zid, anchor) {
+    var z = S.zones.filter(function (x) { return x.id === zid; })[0], r = anchor.getBoundingClientRect(), pr = document.getElementById("pane").getBoundingClientRect();
+    var choose = '<label class="zp-dw-choose"><span>Dwelling of ' + esc(z.name) + '</span><select data-act="zone-dwelling" data-v="' + z.id + '" aria-label="Dwelling of ' + esc(z.name) + '">' +
+      S.dwellings.map(function (o) { return '<option value="to:' + o.id + '"' + (z.dwelling === o.id ? " selected" : "") + '>' + esc(o.name) + '</option>'; }).join("") +
+      '<option value="shared">New dwelling</option><option value="none"' + (z.dwelling ? "" : " selected") + '>Not a dwelling</option></select></label>';
+    var pos = 'style="left:' + Math.min(r.left - pr.left, pr.width - 280) + 'px; top:' + (r.bottom - pr.top + 4) + 'px"';
+    if (!z.dwelling) { S.bubble = { html: '<div class="zp-bubble" ' + pos + ' role="dialog" aria-label="Dwelling of ' + esc(z.name) + '">' + choose + '<p class="zp-muted" style="margin:8px 0 0">Not part of a dwelling: no bedrooms, occupants or Equipment Set.</p></div>' }; return; }
+    var did = z.dwelling, d = dw(did), t = dwellingTotals(did);
+    var html = '<div class="zp-bubble" ' + pos + ' role="dialog" aria-label="Dwelling of ' + esc(z.name) + '">' + choose + '<h3 class="zp-dw-head">' + svg("home", 13) + ' ' + esc(d.name) + '</h3><dl>' +
       '<dt>Units</dt><dd><input data-act="units" data-v="' + d.id + '" value="' + d.units + '" style="width:60px;text-align:right"></dd><dt>Zones</dt><dd>' + t.zones + '</dd><dt>Bedrooms</dt><dd>' + (d.beds !== null && d.beds !== undefined ? '<input data-act="dw-beds" data-v="' + d.id + '" value="' + d.beds + '" style="width:60px;text-align:right">' : t.beds) + '</dd>' +
       '<dt>Occupants</dt><dd>' + fmt(t.occ, 1) + (t.occRule ? ' <span class="zp-muted">(Phius: bedrooms + units)</span>' : "") + '</dd><dt>iCFA</dt><dd>' + fmt(t.icfa, 1) + ' m²</dd></dl>' +
       '<p class="zp-muted" style="margin:8px 0 0">' + (d.beds !== null && d.beds !== undefined ? 'Bedrooms were entered once for the whole dwelling under Single dwelling, and stay here.' : 'One unit count for several Zones, or several units in one Zone. Bedrooms and occupants are entered per Zone and summed here.') + '</p></div>';
@@ -923,6 +934,7 @@
     var el = e.target, a = el.getAttribute("data-act"), v = el.getAttribute("data-v"); if (!a) return;
     if (a === "zone-program") assignProgram(S.zones.filter(function (z) { return z.id === v; }), el.value);
     else if (a === "bulk-program") assignProgram(S.zones.filter(function (z) { return S.checked[z.id]; }), el.value);
+    else if (a === "zone-dwelling") { assignDwelling(S.zones.filter(function (z) { return z.id === v; }), el.value); S.bubble = null; }
     else if (a === "bulk-dwelling") assignDwelling(S.zones.filter(function (z) { return S.checked[z.id]; }), el.value);
     else if (a === "bulk-set") { var zs = S.zones.filter(function (z) { return S.checked[z.id]; }); zs.forEach(function (z) { z.set = el.value === "none" ? null : el.value; if (z.dwelling) dw(z.dwelling).set = z.set; }); notify("Equipment Set changed on " + zs.length + " Zones."); }
     else if (a === "zone-set") { var z = S.zones.filter(function (x) { return x.id === v; })[0]; z.set = el.value || null; if (z.dwelling) { dw(z.dwelling).set = z.set; zonesOfDwelling(z.dwelling).forEach(function (o) { o.set = z.set; }); } }
@@ -998,7 +1010,7 @@
     if (st === "newseg") { newSegment(); }
     if (st === "segsettings") { setTimeout(function () { openSegSettings(S.segments[0].id); }, 50); }
     if (st === "trydelete") { S.renaming = null; setTimeout(function () { confirmDeleteSeg(S.segments[0].id); }, 50); }
-    if (st === "bubble") { setTimeout(function () { var b = document.querySelector('[data-act="dwelling"]'); if (b) { dwellingBubble(b.getAttribute("data-v"), b); render(); } }, 50); }
+    if (st === "bubble") { setTimeout(function () { var b = document.querySelector('.zp-dwelling[data-act="dwelling"]:not(.is-none)'); if (b) { dwellingBubble(b.getAttribute("data-v"), b); render(); } }, 50); }
   });
   S.notice = null;
   render();
