@@ -50,10 +50,14 @@ sections 1 to 8 and 10. Paths are relative to `src/ph_composer/`.
    Each section may carry `source` (the base program a library value came from, Q4a-25). A rule
    load may be switched to a fixed value and back; the rule's inputs are kept.
 4. **Equipment Set kind** `ph_composer.programs.equipment_set` (`eqs_`): `name`; `devices` as
-   `Records::Part`s, each a honeybee-ph `PhEquipment` type (fridge-freezer, dishwasher, clothes
-   washer, clothes dryer, cooktop, Phius MEL, Phius interior, exterior and garage lighting, custom
-   annual or per-use electric) with its type's fields, `quantity` and `in_conditioned_space`.
-   Field lists from the pinned honeybee-ph `ph_equipment.py`.
+   `Records::Part`s, each one of the 14 honeybee-ph `PhEquipment` types (dishwasher, clothes washer,
+   clothes dryer, refrigerator, freezer, fridge-freezer, cooktop, Phius MEL, Phius interior,
+   exterior and garage lighting, custom annual electric, lighting and MEL) with the common fields
+   and its type's own (CONTRACTS section 5, Q4a-36). A per-type field table in
+   `features/programs/equipment_types.rb`, from the pinned honeybee-ph `ph_equipment.py` and
+   honeybee_grasshopper_ph `create_elec_equip.py`, drives validation, the dialog and export. Device
+   operations: `equipment_sets.add_device`, `update_device` (type fixed), `delete_device`, each one
+   Undo step, addressed by part id.
 5. **Residential default and the Model default.** A frozen definition in code
    (`features/programs/default_program.rb`), from the pinned honeybee-ph rules and schedules. Reads
    never write: while the Model holds no default Program record, reads answer the frozen definition

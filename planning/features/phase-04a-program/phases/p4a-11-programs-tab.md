@@ -40,8 +40,13 @@ Q4a-33, Q4a-34, Q4a-35 (revised). Prototype: `j4-program-cards`, `j4-library`,
    periods with a running total that turns amber unless it is 24 h), days per week and weeks per
    year, the 24-hour strip and week row, full-load hours, Used by, and the hourly editor as a
    disabled button marked planned.
-5. **Equipment Set editor**: the device grid (device, quantity, energy demand, in conditioned
-   space, reference quantity), Add device by type, Phius-rule devices marked, per-device remove.
+5. **Equipment Set editor** (Q4a-36): the device grid (device, with its type when renamed;
+   quantity; energy demand; in conditioned space; reference quantity), Phius-rule devices marked.
+   Edit and Delete in each row's Actions cell, revealed on hover; a row click also edits; **Add
+   device** is the Set's primary action. Add and Edit share one form dialog (`formDialog`) laid
+   out from the per-type field table: Device, Energy, the type's own fields (shown only when they
+   apply, such as a gas dryer's gas fields), PHPP only. The type is chosen on Add and fixed on Edit.
+   Delete confirms in the shared dialog, naming the Set and the dwellings using it.
 6. **Record lifecycle** per the UI polish rules: New acts at once under a free name and opens the
    title for renaming; Duplicate the same; Delete confirms in the shared dialog and, when the record
    is used, asks for a replacement.
@@ -54,7 +59,8 @@ Q4a-33, Q4a-34, Q4a-35 (revised). Prototype: `j4-program-cards`, `j4-library`,
 
 1. Browser checks: sidebar sources and rows on each subtab, open from a row, copy from a library
    with its Schedules, accordion open and close and keyboard, card summaries, missing-value flags,
-   rule switch, Reset on the default, ventilation total warning, device add and remove, New,
+   rule switch, Reset on the default, ventilation total warning, device add, edit (each type's
+   fields, the gas dryer's extra fields) and delete, New,
    Duplicate, Delete with replacement, IP and SI.
 2. Every edit is one registered action and one Undo step; a stale value refuses and the field
    returns to the Model's value.

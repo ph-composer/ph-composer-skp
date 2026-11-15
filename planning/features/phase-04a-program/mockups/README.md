@@ -21,7 +21,7 @@ server. The dark strip at the top picks a journey and says what to try; Reset re
 | Building Segments (journey 3, then 1) | Check the Bike shed, Building Segment: No Building Segment or New Building Segment. Hover a Segment row: Settings and Delete appear in its Actions cell; settings is where it is renamed | `j3-no-segment` (`…,common,moveshed`), `j3-move-segment` (`…,common,checkshed`), `j3-new-segment` (`…,common,newseg`), `j3-segment-settings` (`…,common,segsettings`), `j3-delete-segment` (`…,common,newseg,trydelete`), `j1-segment-settings` (`journey=1&do=house3,segsettings`), `j1-adu` (`journey=1&do=house3,adu`), `j1-lock-bubble` (`journey=1&do=house3,lockinfo`), `j1-segment-actions` (the ADU row hovered) |
 | 4. Non-residential school | Unassigned Zones are flagged; assign from Phius Non-Residential, or browse the library sidebar | `j4-start` (`journey=4`), `j4-assigned` (`journey=4&do=school`), `j4-library` (`journey=4&do=school,libnr`), `j4-long-name` (`journey=4&do=school,longname`) |
 | 5. Custom lab programs | Programs tab, + on the rail, set loads, open a schedule chip | `j5-program` and `-420` (`journey=5&do=custom`), `j5-schedule` (`journey=5&do=custom,customsched`) |
-| Equipment Sets | Programs tab, Equipment Sets | `equipment-sets` (`journey=1&do=sets`) |
+| Equipment Sets | Programs tab, Equipment Sets: hover a device for Edit and Delete; Add device | `equipment-sets` (`journey=1&do=sets`), `device-edit` (`…,sets,devedit`), `device-add` (`…,sets,devadd`, type Phius interior lighting) |
 | Program cards and the ventilation Schedule | Open and close the load cards; Schedules, SFH ventilation, change the hours | `j4-program-cards` (`journey=4&do=school,libnr,cards`), `j1-vent-schedule` (`journey=1&do=ventsched`) |
 | Zones → Spaces (journey 1, then 3) | Zones, Spaces subtab. Type a Supply, Extract or Transfer rate on a Space and its Zone turns detailed; hover the Zone for From Program. Then compare Zones → Programs' Ventilation | `j1-spaces` (`journey=1&do=house3,spaces`), `j1-spaces-cascade` (`…,spaces,cascade`), `j3-spaces` (`journey=3&do=each,beds,common,spaces,cascade`) |
 
@@ -45,6 +45,11 @@ server. The dark strip at the top picks a journey and says what to try; Reset re
   week, weeks per year) over a 24-hour strip and a week row. A **ventilation** Schedule is four
   rows, high, standard, basic and minimum, each hours per day and a fraction, totalling 24 h
   (Q4a-33, `j1-vent-schedule`). The hourly editor is a disabled button marked as planned.
+- **Equipment Set devices** (Q4a-36, `equipment-sets`, `device-edit`, `device-add`): Edit and
+  Delete in each row's Actions cell, a row click also edits, **Add device** as the Set's primary
+  action. One form dialog per device, laid out by its honeybee-ph type: Device, Energy (reference
+  quantity limited to the type's codes; energy demand or its Phius rule), the type's own fields, and
+  PHPP only. The type is chosen on Add and fixed on Edit; Delete confirms.
 - **Single dwelling**, a setting of each Building Segment, switched in its settings dialog (Q4a-26
   as revised by BS-3). The heading shows a "Single dwelling" tag only where it is on. Clicking a
   locked cell or the tag opens a bubble explaining the lock with one **Open settings**

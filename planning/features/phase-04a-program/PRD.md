@@ -165,8 +165,14 @@ Schedules and Equipment Sets show only their records in this file for now. Proto
   fraction of design flow, a running total that turns amber unless it is 24 h, days per week and
   weeks per year. Every Schedule lists the loads that use it. The hourly editor is planned (Q4a-07).
 - **Equipment Sets**: a device grid (device, quantity, energy demand, in conditioned space,
-  reference quantity) with Phius-rule devices marked. A Set is assigned to a Dwelling, or to a Zone
-  that is not a dwelling (Q4a-21).
+  reference quantity) with Phius-rule devices marked. Devices are added, edited and deleted one at
+  a time (Q4a-36): Edit and Delete in each row's Actions cell, a row click also edits, and **Add
+  device** as the Set's primary action. Add and Edit share one form dialog laid out by the device's
+  honeybee-ph type: Device (type, chosen on Add and fixed on Edit; name; quantity; in conditioned
+  space; comment), Energy (reference quantity, limited to the codes the type allows; energy demand,
+  or the Phius rule for a rule device), the type's own fields (a dryer's type, field utilization
+  factor and, for a gas dryer, gas consumption), and PHPP only. Delete confirms. A Set is assigned
+  to a Dwelling, or to a Zone that is not a dwelling (Q4a-21).
 - **Library Programs** copy into the Model with their Schedules when used, the same protocol as
   Materials, Frames and Glazings (Q4a-22), and arrive complete (Q4a-25).
 

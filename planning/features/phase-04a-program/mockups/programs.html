@@ -50,6 +50,11 @@
   .pgm-col-head { padding:6px 10px 4px; font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
   .pgm-col .pgm-sched { padding:6px 10px; }
   .pgm-src { padding:6px 10px; font-size:11px; color:var(--muted); }
+  .zp-devices tbody tr { cursor:pointer; }
+  .zp-devices td.col-actions { white-space:nowrap; overflow:visible; text-overflow:clip; }
+  .zp-devdlg .zp-grid { grid-template-columns:230px 1fr; }
+  .zp-devdlg-error { min-height:1em; margin:6px 0 0; }
+  .pgm-tools button.primary { display:inline-flex; align-items:center; gap:4px; white-space:nowrap; }
   .vent-form { display:grid; grid-template-columns:120px 140px 140px; gap:6px 12px; align-items:center; margin-top:14px; font-size:12px; }
   .vent-form > b { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
   .vent-form input { width:100%; min-height:28px; padding:2px 8px; text-align:right; }
@@ -265,6 +270,51 @@
     return x;
   }
 
+  // ---------------------------------------------------------------- Equipment Set devices
+  // One entry per honeybee-ph PhEquipment type PHX reads (honeybee_grasshopper_ph create_elec_equip.py). `rq` lists
+  // the WUFI/METr reference quantity codes valid for the type; `demand` its energy demand; `extra` its own fields.
+  var REFQ = { 1: "PH-case occupants", 2: "Zone occupants", 3: "Bedrooms", 4: "PH-case units", 5: "User defined", 6: "PH-case floor area", 7: "Zone floor area", 8: "n.a." };
+  var WATER = ["DHW connection", "Cold water connection"];
+  var FRIDGE = { rq: [1, 2, 5], norms: ["Per day", "Per year"], demand: { label: "Energy demand (rated)", unit: "kWh", def: 1.0 }, perUse: { label: "Energy per day", unit: "kWh/d", def: 1.0 } };
+  var DEVICE_TYPES = [
+    { id: "dishwasher", label: "Dishwasher", rq: [1, 2, 5], norms: ["Per year"], demand: { label: "Annual energy use rating", unit: "kWh/a", def: 269 }, perUse: { label: "Energy per use", unit: "kWh/use", def: 1.1 },
+      extra: [{ k: "capacity_type", label: "Capacity, preselection", options: ["Standard"] }, { k: "capacity", label: "Capacity", unit: "place settings", def: 12 }, { k: "water", label: "Water connection", options: WATER }] },
+    { id: "washer", label: "Clothes washer", rq: [1, 2, 5], norms: ["Per year"], demand: { label: "Annual energy use", unit: "kWh/a", def: 120 }, perUse: { label: "Energy per use", unit: "kWh/use", def: 1.1 },
+      extra: [{ k: "capacity", label: "Capacity", unit: "m³", def: 0.1274 }, { k: "mef", label: "MEF, modified energy factor", unit: "", def: 2.7 }, { k: "util", label: "Utilization factor", unit: "", def: 1.0 }, { k: "water", label: "Water connection", options: WATER }] },
+    { id: "dryer", label: "Clothes dryer", rq: [1, 2, 5], norms: ["CEF"], demand: { label: "CEF, combined energy factor", unit: "lb/kWh", def: 3.93 }, perUse: { label: "Energy per use", unit: "kWh/use", def: 3.5 },
+      extra: [{ k: "dryer_type", label: "Dryer type", options: ["Clothes line", "Drying closet (cold)", "Drying closet (cold) in extract air", "Condensation dryer", "Electric exhaust air dryer", "Gas exhaust air dryer", "Heat pump dryer"], def: "Condensation dryer" },
+        { k: "gas", label: "Gas consumption", unit: "kWh", def: 0, when: "Gas exhaust air dryer" }, { k: "gas_cef", label: "CEF, gas", unit: "", def: 2.67, when: "Gas exhaust air dryer" },
+        { k: "fuf_type", label: "Field utilization factor, preselection", options: ["Timer controls", "Moisture sensing"] }, { k: "fuf", label: "Field utilization factor", unit: "", def: 1.18 }] },
+    { id: "fridge", label: "Refrigerator", rq: FRIDGE.rq, norms: FRIDGE.norms, demand: FRIDGE.demand, perUse: FRIDGE.perUse },
+    { id: "freezer", label: "Freezer", rq: FRIDGE.rq, norms: FRIDGE.norms, demand: FRIDGE.demand, perUse: FRIDGE.perUse },
+    { id: "fridge_freezer", label: "Fridge-freezer", rq: FRIDGE.rq, norms: FRIDGE.norms, demand: FRIDGE.demand, perUse: FRIDGE.perUse },
+    { id: "cooktop", label: "Cooktop", rq: [1, 2, 5], norms: ["Per use"], demand: { label: "Energy demand (rated)", unit: "kWh/use", def: 0.2 }, perUse: { label: "Energy per use", unit: "kWh/use", def: 0.25 },
+      extra: [{ k: "fuel", label: "Cooktop type", options: ["Electricity", "Natural gas", "LPG"] }] },
+    { id: "mel", label: "Phius MEL", rq: [3, 5], rule: "Phius rule: bedrooms and iCFA" },
+    { id: "light_int", label: "Phius interior lighting", rq: [6, 7, 5], rule: "Phius rule: iCFA", extra: [{ k: "hef", label: "High-efficacy fraction", unit: "0 to 1", def: 1.0 }] },
+    { id: "light_ext", label: "Phius exterior lighting", rq: [6, 7, 5], rule: "Phius rule: iCFA", extra: [{ k: "hef", label: "High-efficacy fraction", unit: "0 to 1", def: 1.0 }] },
+    { id: "light_garage", label: "Phius garage lighting", rq: [8], rule: "Phius rule: per dwelling", extra: [{ k: "hef", label: "High-efficacy fraction", unit: "0 to 1", def: 1.0 }] },
+    { id: "custom_elec", label: "Custom electric, annual", rq: [5], norms: ["Per year"], demand: { label: "Annual energy use", unit: "kWh/a", def: 100 } },
+    { id: "custom_light", label: "Custom lighting, annual", rq: [5], norms: ["Per year"], demand: { label: "Annual energy use", unit: "kWh/a", def: 100 } },
+    { id: "custom_mel", label: "Custom MEL, annual", rq: [5], norms: ["Per year"], demand: { label: "Annual energy use", unit: "kWh/a", def: 100 } }
+  ];
+  function devType(id) { return DEVICE_TYPES.filter(function (d) { return d.id === id; })[0]; }
+  function newDevice(typeId, name) {
+    var ty = devType(typeId), d = { type: typeId, name: name || ty.label, qty: 1, inside: !/ext|garage/.test(typeId), ref: ty.rq[0], norm: ty.norms ? ty.norms[0] : null, comment: "" };
+    if (ty.demand) d.demand = ty.demand.def;
+    if (ty.perUse) d.perUse = ty.perUse.def;
+    (ty.extra || []).forEach(function (x) { d[x.k] = x.options ? (x.def || x.options[0]) : x.def; });
+    return d;
+  }
+  function deviceDemand(d) {
+    var ty = devType(d.type);
+    if (ty.rule) return ty.rule;
+    if (d.type === "dryer") return "CEF " + fmt(d.demand, 2) + " lb/kWh";
+    if (ty.id === "cooktop") return fmt(d.demand, 2) + " kWh/use";
+    if (/fridge|freezer/.test(ty.id)) return fmt(d.demand, 1) + (d.norm === "Per day" ? " kWh/d" : " kWh/a");
+    return fmt(d.demand) + " kWh/a";
+  }
+
   // A Building Segment and the settings its dialog edits. Field names follow honeybee-ph BldgSegment and PhiusCertification.
   function segRecord(name, cat, air) {
     return { id: id("seg"), name: name, category: cat, air: air || { kind: "n50", value: null }, cert: "Phius 2021 CORE", use: cat === "res" ? "Residential" : "School",
@@ -292,9 +342,8 @@
       equip: { wpa: 0, sched: always.id }, gas: { wpa: 0, sched: always.id }, shw: { rule: true, temp: 43.3, sched: hotwater.id },
       infil: { flow: 0.0003, sched: always.id }, vent: { pp: 0, pa: 0, pz: 0, ach: 0.4, sched: ventRes.id },
       setpoint: { heat: 20, cool: 25, hs: heat.id, cs: cool.id, dehum: 60 } });
-    s.sets.push({ id: "set_sfh", name: "Phius single-family default", devices: [
-      ["Fridge-freezer", 1, "1.0 kWh/d rated"], ["Dishwasher", 1, "269 kWh/a"], ["Clothes washer", 1, "120 kWh/a"], ["Clothes dryer", 1, "CEF 3.93"],
-      ["Cooktop", 1, "0.2 kWh/use"], ["Phius MEL", 1, "Phius rule: bedrooms, iCFA"], ["Phius exterior lighting", 1, "Phius rule: iCFA"], ["Phius garage lighting", 1, "Phius rule: per dwelling"]] });
+    s.sets.push({ id: "set_sfh", name: "Phius single-family default", devices: [newDevice("fridge_freezer"), newDevice("dishwasher"), newDevice("washer"), newDevice("dryer"),
+      newDevice("cooktop"), newDevice("mel"), newDevice("light_ext"), newDevice("light_garage")] });
     s.selProgram = "pgm_default"; s.selSchedule = presence.id; s.selSet = "set_sfh";
 
     function seg(name, cat, air) { var g = segRecord(name, cat, air); if (!s.defaultSeg) s.defaultSeg = g.id; s.segments.push(g); return g.id; }
@@ -617,6 +666,86 @@
           applySingle(g); render(); return;
         }
       }
+      dlg.close(); dlg.remove(); render();
+    });
+    dlg.addEventListener("cancel", function () { dlg.remove(); render(); });
+    dlg.showModal();
+  }
+  function deviceDialog(setId, idx) {
+    var x = setById(setId), adding = idx === null, d = adding ? newDevice("dishwasher") : JSON.parse(JSON.stringify(x.devices[idx]));
+    var dlg = document.createElement("dialog");
+    dlg.className = "phc-dialog zp-segdlg zp-devdlg";
+    function num(k, label, unit, v, tip) { return row(label + (unit ? " [" + unit + "]" : ""), '<input class="zp-num" name="' + k + '" value="' + (v === undefined || v === null ? "" : v) + '"' + (tip ? ' data-tip="' + esc(tip) + '"' : "") + '>'); }
+    function sel(k, label, opts, v) { return row(label, '<select name="' + k + '">' + opts.map(function (o) { var val = typeof o === "object" ? o[0] : o, lab = typeof o === "object" ? o[1] : o; return '<option value="' + esc(val) + '"' + (String(val) === String(v) ? " selected" : "") + '>' + esc(lab) + '</option>'; }).join("") + '</select>'); }
+    function body() {
+      var ty = devType(d.type);
+      var h = '<section><h3>Device</h3><div class="zp-grid">' +
+        (adding ? sel("type", "Type", DEVICE_TYPES.map(function (y) { return [y.id, y.label]; }), d.type) : row("Type", esc(ty.label) + ' <span class="zp-muted">To change the type, delete and add.</span>')) +
+        row("Name", '<input name="name" value="' + esc(d.name) + '">') +
+        num("qty", "Quantity", "", d.qty, "The number of units; the energy demand is for one unit.") +
+        row("In conditioned space", '<input type="checkbox" name="inside"' + (d.inside ? " checked" : "") + '> <span class="zp-muted">Its waste heat counts as an internal gain.</span>') +
+        row("Comment", '<input name="comment" value="' + esc(d.comment || "") + '" placeholder="Shown in WUFI-Passive and METr">') + '</div></section>';
+      h += '<section><h3>Energy</h3><div class="zp-grid">' +
+        sel("ref", "Reference quantity", ty.rq.map(function (c) { return [c, REFQ[c]]; }), d.ref);
+      if (ty.rule) h += row("Energy demand", '<span style="color:#0b5360">' + svg("sigma", 12) + ' ' + esc(ty.rule) + '</span> <span class="zp-muted">Calculated by WUFI-Passive and METr from the reference quantity.</span>');
+      else {
+        if (ty.norms && ty.norms.length > 1) h += sel("norm", "Energy demand per", ty.norms, d.norm);
+        h += num("demand", ty.demand.label, /fridge|freezer/.test(ty.id) ? (d.norm === "Per day" ? "kWh/d" : "kWh/a") : ty.demand.unit, d.demand);
+      }
+      h += '</div></section>';
+      var extra = (ty.extra || []).filter(function (e) { return !e.when || d.dryer_type === e.when; });
+      if (extra.length) h += '<section><h3>' + esc(ty.label) + '</h3><div class="zp-grid">' + extra.map(function (e) { return e.options ? sel(e.k, e.label, e.options, d[e.k]) : num(e.k, e.label, e.unit, d[e.k]); }).join("") + '</div></section>';
+      if (ty.perUse) h += '<section><h3>PHPP only</h3><div class="zp-grid">' + num("perUse", ty.perUse.label, ty.perUse.unit, d.perUse, "PHPP reads this; WUFI-Passive and METr ignore it.") + '</div></section>';
+      return h;
+    }
+    function paint() {
+      dlg.innerHTML = '<button type="button" class="phc-dialog-close" aria-label="Close" data-dlg="cancel">' + svg("clear", 18) + '</button><h2>' + (adding ? "Add device to " + esc(x.name) : "Edit " + esc(d.name)) + '</h2>' +
+        '<div class="zp-segdlg-body">' + body() + '</div><p class="cell-error zp-devdlg-error" role="status"></p><div class="phc-dialog-actions"><button type="button" data-dlg="cancel">Cancel</button><button type="button" class="primary" data-dlg="ok">' + (adding ? "Add device" : "Save") + '</button></div>';
+    }
+    function read() {
+      var q = function (n) { return dlg.querySelector('[name="' + n + '"]'); };
+      Array.prototype.forEach.call(dlg.querySelectorAll("[name]"), function (el) {
+        var n = el.getAttribute("name"); if (n === "type") return;
+        if (el.type === "checkbox") d.inside = el.checked;
+        else if (el.tagName === "SELECT") d[n] = n === "ref" ? +el.value : el.value;
+        else if (n === "name" || n === "comment") d[n] = el.value;
+        else d[n] = el.value === "" ? null : parseFloat(el.value);
+      });
+      return q;
+    }
+    paint();
+    document.body.appendChild(dlg);
+    dlg.addEventListener("change", function (e) {
+      var n = e.target.getAttribute("name");
+      if (n === "type") { var nm = d.name; var was = devType(d.type).label; d = newDevice(e.target.value); if (nm && nm !== was) d.name = nm; paint(); }
+      else if (n === "norm" || n === "dryer_type") { read(); paint(); }
+    });
+    dlg.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-dlg]"); if (!b) return;
+      if (b.getAttribute("data-dlg") === "ok") {
+        read();
+        var bad = !d.name.trim() ? "Enter a name." : !(d.qty >= 1) ? "Quantity is a whole number of at least 1." : (d.demand !== undefined && !(d.demand >= 0)) ? "Enter the energy demand." : null;
+        if (bad) { dlg.querySelector(".zp-devdlg-error").textContent = bad; return; }
+        d.qty = Math.round(d.qty);
+        if (adding) x.devices.push(d); else x.devices[idx] = d;
+        notify((adding ? "Added " : "Saved ") + d.name + (adding ? " to " + x.name + "." : "."));
+      }
+      dlg.close(); dlg.remove(); render();
+    });
+    dlg.addEventListener("cancel", function () { dlg.remove(); render(); });
+    dlg.showModal();
+  }
+  function confirmDeleteDevice(setId, idx) {
+    var x = setById(setId), d = x.devices[idx], users = S.dwellings.filter(function (w) { return w.set === setId; }).length;
+    var dlg = document.createElement("dialog");
+    dlg.className = "phc-dialog phc-confirm-dialog zp-confirm";
+    dlg.innerHTML = '<button type="button" class="phc-dialog-close" aria-label="Close" data-dlg="cancel">' + svg("clear", 18) + '</button><h2>Delete ' + esc(d.name) + '?</h2>' +
+      '<p>It is removed from ' + esc(x.name) + (users ? ", and from the " + users + " dwelling" + (users > 1 ? "s" : "") + " that use it" : "") + '.</p>' +
+      '<div class="phc-dialog-actions"><button type="button" data-dlg="cancel">Cancel</button><button type="button" class="primary" data-dlg="ok">Delete</button></div>';
+    document.body.appendChild(dlg);
+    dlg.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-dlg]"); if (!b) return;
+      if (b.getAttribute("data-dlg") === "ok") { x.devices.splice(idx, 1); notify("Deleted " + d.name + " from " + x.name + "."); }
       dlg.close(); dlg.remove(); render();
     });
     dlg.addEventListener("cancel", function () { dlg.remove(); render(); });
@@ -1018,9 +1147,17 @@
   function setsSurface() {
     var x = setById(S.selSet);
     var h = '<div class="pgm-layout"><div class="pgm-main"><div class="pgm-head"><div><h2>' + esc(x.name) + '</h2><div class="pgm-sub">honeybee-ph devices, exported as Process loads with each device\'s watts worked out per dwelling at export. One Set serves a dwelling, not each of its Zones.</div></div><div class="pgm-tools">' +
-      iconBtn("add", "Add device", "noop") + iconBtn("duplicate", "Duplicate", "noop") + iconBtn("more", "More", "noop") + '</div></div>';
-    h += '<div class="phc-table-mount" style="margin-top:12px"><table class="phc-table zp-table"><thead><tr><th>Device</th><th class="num">Quantity</th><th>Energy demand</th><th>In conditioned space</th><th>Reference quantity</th></tr></thead><tbody>' +
-      x.devices.map(function (d) { var r = /Phius rule/.test(d[2]); return '<tr><td>' + esc(d[0]) + '</td><td class="num">' + d[1] + '</td><td>' + (r ? '<span style="color:#0b5360">' + svg("sigma", 12) + ' ' + esc(d[2]) + '</span>' : esc(d[2])) + '</td><td>' + (/exterior|garage/i.test(d[0]) ? "No" : "Yes") + '</td><td class="zp-muted">' + (r ? "Bedrooms / floor area" : "Zone occupants") + '</td></tr>'; }).join("") + '</tbody></table></div></div>' +
+      '<button type="button" class="primary" data-act="device-add" data-v="' + x.id + '">' + svg("add", 14) + ' Add device</button>' + iconBtn("duplicate", "Duplicate", "noop") + iconBtn("more", "More", "noop") + '</div></div>';
+    h += '<div class="phc-table-mount" style="margin-top:12px; --row-actions-width:76px"><table class="phc-table zp-table reveals-row-actions zp-devices"><thead><tr><th class="col-actions"></th><th>Device</th><th class="num">Quantity</th><th>Energy demand</th><th>In conditioned space</th><th>Reference quantity</th></tr></thead><tbody>' +
+      (x.devices.length ? x.devices.map(function (d, i) {
+        var ty = devType(d.type);
+        return '<tr data-act="device-edit" data-v="' + x.id + '" data-i="' + i + '"><td class="col-actions">' +
+          '<button type="button" class="phc-icon-button row-icon" data-row-action="edit" data-act="device-edit" data-v="' + x.id + '" data-i="' + i + '" aria-label="Edit ' + esc(d.name) + '" data-tip="Edit ' + esc(d.name) + '">' + svg("pencil", 16) + '</button>' +
+          '<button type="button" class="phc-icon-button row-icon row-delete" data-row-action="delete" data-act="device-delete" data-v="' + x.id + '" data-i="' + i + '" aria-label="Delete ' + esc(d.name) + '" data-tip="Delete ' + esc(d.name) + '">' + svg("del", 16) + '</button></td>' +
+          '<td>' + esc(d.name) + (d.name !== ty.label ? ' <span class="zp-muted">· ' + esc(ty.label) + '</span>' : "") + '</td><td class="num">' + d.qty + '</td>' +
+          '<td>' + (ty.rule ? '<span style="color:#0b5360">' + svg("sigma", 12) + ' ' + esc(ty.rule) + '</span>' : esc(deviceDemand(d))) + '</td>' +
+          '<td>' + (d.inside ? "Yes" : "No") + '</td><td class="zp-muted">' + esc(REFQ[d.ref]) + '</td></tr>';
+      }).join("") : '<tr><td></td><td colspan="5" class="zp-muted">No devices yet. Choose Add device.</td></tr>') + '</tbody></table></div></div>' +
       simpleSidebar("Equipment Set Library", "Equipment Sets in this file", "new-set", "New Equipment Set", caption("In this file", S.sets.length) + S.sets.map(function (y) { return fileRow(y.name, y.id, "sel-set", S.selSet === y.id); }).join(""), S.sets.length) + '</div>';
     return h;
   }
@@ -1075,6 +1212,9 @@
     if (a === "journey") { S = baseState(+v); }
     else if (a === "reset") { S = baseState(S.journey); }
     else if (a === "tab") { S.tab = v; S.bubble = null; }
+    else if (a === "device-add") { deviceDialog(v, null); return; }
+    else if (a === "device-edit") { deviceDialog(v, +el.getAttribute("data-i")); return; }
+    else if (a === "device-delete") { confirmDeleteDevice(v, +el.getAttribute("data-i")); return; }
     else if (a === "card-toggle") { S.openCards[v] = !S.openCards[v]; }
     else if (a === "ztab") { S.ztab = v; S.checked = {}; S.bubble = null; }
     else if (a === "zone-reset") { var rz = S.zones.filter(function (z) { return z.id === v; })[0]; rz.spaces.forEach(function (sp) { sp.sup = sp.eta = sp.tran = null; }); notify(rz.name + " uses its Program's airflow again."); }
@@ -1192,6 +1332,8 @@
     if (st === "sets") { S.tab = "programs"; S.ptab = "sets"; }
     if (st === "lockinfo") { setTimeout(function () { var c = document.querySelector('.zp-locked'); if (c) { lockBubble(c.getAttribute("data-v"), c); render(); } }, 50); }
     if (st === "spaces") S.ztab = "spaces";
+    if (st === "devedit") setTimeout(function () { deviceDialog("set_sfh", 3); }, 50);
+    if (st === "devadd") setTimeout(function () { deviceDialog("set_sfh", null); }, 50);
     if (st === "cards") { S.openCards.people = true; S.openCards.vent = true; }
     if (st === "ventsched") { S.tab = "programs"; S.ptab = "schedules"; S.selSchedule = S.schedules.filter(function (x) { return x.name === "SFH ventilation"; })[0].id; }
     if (st === "cascade") S.zones.forEach(function (z) {
