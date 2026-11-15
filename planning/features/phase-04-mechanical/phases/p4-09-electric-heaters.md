@@ -1,7 +1,7 @@
 # P4-09: electric heaters
 
 DATE: 2026-10-21
-STATUS: Requested. A gate stub: written in full after its interview.
+STATUS: Requested. A gate stub: written in full after its interview. Table shape and columns settled 2026-11-15 (D4-13, D4-20); the interview is otherwise open. See [DECISIONS, Part 3](../DECISIONS.md#part-3-wireframe-review-2026-11-15).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 

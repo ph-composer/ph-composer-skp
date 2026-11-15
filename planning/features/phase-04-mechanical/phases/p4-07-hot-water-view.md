@@ -1,7 +1,7 @@
 # P4-07: the Hot water view
 
 DATE: 2026-10-21
-STATUS: Scoped
+STATUS: Scoped. To be re-planned against D4-13 and D4-17 (2026-11-15): three flat tables under the Hot Water subtab, not system rows with child rows. See [DECISIONS, Part 3](../DECISIONS.md#part-3-wireframe-review-2026-11-15).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 

@@ -1,7 +1,7 @@
 # P4-08: heat pumps
 
 DATE: 2026-10-21
-STATUS: Requested. A gate stub: written in full after its interview.
+STATUS: Requested. A gate stub: written in full after its interview. Interview settled at the wireframe review of 2026-11-15 (D4-14 to D4-16); the full document is owed and the stage also waits on Climate. See [DECISIONS, Part 3](../DECISIONS.md#part-3-wireframe-review-2026-11-15).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 

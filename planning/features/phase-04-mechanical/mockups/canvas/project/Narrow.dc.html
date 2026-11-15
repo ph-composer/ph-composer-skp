@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mechanical: Ventilators at 420 px</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/phcomposer/tokens.css">
+<link rel="stylesheet" href="ds/phcomposer/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+.nx{width:420px;height:732px;display:flex;flex-direction:column;overflow:hidden;background:#fff;color:#132a2b;font:13px/18px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--page-gutter:8px}
+.nx .phc-app-header{display:flex;align-items:flex-start;justify-content:space-between;flex:none}
+.nx .panel-panes{flex:1;min-height:0;overflow:hidden;padding:0}
+.nx .phc-heading{min-height:48px;padding:8px 0 6px}
+.nx .phc-heading h1{font-size:17px}
+.nx .phc-subtabs{flex-wrap:nowrap;overflow:hidden}
+.phc-workspace.nx .phc-subtabs button{flex:none}
+.nx .seg{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 8px}
+.phc-workspace.nx .seg button{height:28px;min-height:28px;padding:0 12px;border:1px solid #c9d2d7;border-radius:999px;background:#fff;color:#46565e;font-size:12px}
+.phc-workspace.nx .seg button[aria-pressed="true"]{background:#e3eff1;border-color:#075360;color:#075360;font-weight:600}
+.phc-workspace.nx .seg button:disabled{color:#7b878e;border-style:dashed}
+.nx .ctl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 8px}
+.nx .z{display:inline-block;height:22px;line-height:22px;padding:0 9px;margin:0 4px 0 0;border-radius:999px;background:#edf1f2;font-size:12px;white-space:nowrap}
+.nx .z.w{background:#ffe6a0;color:#785400}
+.phc-workspace.nx .phc-table td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.phc-workspace.nx .phc-table td.l,.phc-workspace.nx .phc-table th.l{text-align:left}
+.phc-workspace.nx .phc-table td.r,.phc-workspace.nx .phc-table th.r{text-align:right}
+.phc-workspace.nx .phc-table .pin{box-shadow:1px 0 0 #c9d2d7}
+.nx .ro{color:#5d6b73}
+</style>
+</helmet>
+<div class="nx phc-workspace live-panel">
+<div class="phc-app-header">
+<nav class="phc-tabs" aria-label="Sections">
+<button type="button">Zones</button>
+<button type="button">Assemblies</button>
+<button type="button">Window Types</button>
+<button type="button">Thermal Bridges</button>
+<button type="button" aria-pressed="true">Mechanical</button>
+<button type="button">Library</button>
+<button type="button">Export</button>
+</nav>
+</div>
+<main class="panel-panes">
+<div data-pane="mechanical">
+<section>
+<div class="phc-heading"><h1>Mechanical</h1><div class="phc-heading-actions"><button type="button" class="primary">+ New Ventilator</button></div></div>
+<nav class="phc-subtabs" role="tablist" aria-label="Mechanical systems">
+<button type="button" role="tab" aria-selected="true">Ventilation</button>
+<button type="button" role="tab" aria-selected="false">Heat Pumps</button>
+<button type="button" role="tab" aria-selected="false">Hot Water</button>
+<button type="button" role="tab" aria-selected="false">Pumps</button>
+<button type="button" role="tab" aria-selected="false">Fans</button>
+<button type="button" role="tab" aria-selected="false">Electric Heating</button>
+</nav>
+<div class="seg" role="group" aria-label="Ventilation tables">
+<button type="button" aria-pressed="true">Ventilators</button>
+<button type="button" disabled>Ducting · planned</button>
+</div>
+<div class="ctl">
+<div class="phc-inventory-controls"><label class="phc-view-control"><input type="search" placeholder="Tag, model or Zone" aria-label="Filter Ventilators"></label></div>
+<span class="phc-view-count">4 Ventilators · 1 serves no Zone</span>
+</div>
+<div class="phc-table-scroll phc-inventory-table" style="overflow:hidden">
+<table class="phc-table" style="table-layout:fixed;width:620px">
+<thead><tr>
+<th class="l pin" style="width:126px"><span class="phc-th-label">Tag</span></th>
+<th class="r" style="width:40px"><span class="phc-th-label">Qty</span></th>
+<th class="r" style="width:72px"><span class="phc-th-label">Sensible %</span></th>
+<th class="r" style="width:64px"><span class="phc-th-label">Latent %</span></th>
+<th class="r" style="width:84px"><span class="phc-th-label">Elec. Wh/m³</span></th>
+<th class="l" style="width:234px"><span class="phc-th-label">Serves</span></th>
+</tr></thead>
+<tbody>
+<tr><td class="l pin">ERV-1 Apartments</td><td class="r">4</td><td class="r">84</td><td class="r">73</td><td class="r">0.24</td><td class="l"><span class="z">Apt 1A</span><span class="z">Apt 1B</span><span class="z">+2</span></td></tr>
+<tr><td class="l pin">ERV-2 Common</td><td class="r">1</td><td class="r">82</td><td class="r">70</td><td class="r">0.28</td><td class="l"><span class="z">Corridor L1</span><span class="z">Lobby</span></td></tr>
+<tr><td class="l pin">ERV-3 Retail</td><td class="r">1</td><td class="r">80</td><td class="r">0</td><td class="r">0.45</td><td class="l"><span class="z">Retail</span></td></tr>
+<tr><td class="l pin">ERV-4 Spare</td><td class="r">1</td><td class="r">84</td><td class="r">73</td><td class="r">0.24</td><td class="l"><span class="z w">Serves no Zone</span></td></tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</main>
+<footer class="phc-footer"><span>Editing: Model</span></footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":420,"height":732}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

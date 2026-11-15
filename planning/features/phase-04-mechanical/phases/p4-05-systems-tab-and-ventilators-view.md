@@ -1,7 +1,7 @@
 # P4-05: the Systems tab and the Ventilators view
 
 DATE: 2026-10-21
-STATUS: Scoped
+STATUS: Scoped. To be re-planned against D4-13 and D4-20 (2026-11-15): the tab is Mechanical, with a subtab per system and a pill row, not an Equipment subtab with a family select. See [DECISIONS, Part 3](../DECISIONS.md#part-3-wireframe-review-2026-11-15).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 

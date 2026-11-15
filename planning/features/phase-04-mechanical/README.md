@@ -1,7 +1,7 @@
 # Phase 4: mechanical
 
 DATE: 2026-10-21
-STATUS: Scoped. Interviewed (equipment shared shape, Ventilators, hot water) and planned as P4-01 to P4-15 on 2026-10-21; families 3 to 7, piping and ducting are gate stubs until their interviews; D4-01 to D4-12 answered as recommended the same day; no stage authorized.
+STATUS: Scoped. Interviewed (equipment shared shape, Ventilators, hot water) and planned as P4-01 to P4-15 on 2026-10-21; families 3 to 7, piping and ducting are gate stubs until their interviews; D4-01 to D4-12 answered as recommended the same day; no stage authorized. Wireframes reviewed 2026-11-15: D4-13 to D4-20 answered in DECISIONS Part 3; bindings and stages P4-05 to P4-11 owe re-planning.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -22,7 +22,9 @@ stages, the bindings, the open decisions and the one ledger.
 2. [STATUS.md](STATUS.md): the tracking ledger. One row per stage, the entry gates, the decisions
    and what each stage still owes. The one place completeness is read from.
 3. [DECISIONS.md](DECISIONS.md): what the code and the stack say beyond the PRDs (F1 to F14) and
-   the twelve plan decisions D4-01 to D4-12, answered as recommended on 2026-10-21.
+   the twelve plan decisions D4-01 to D4-12, answered as recommended on 2026-10-21. Part 3 holds
+   the wireframe review of 2026-11-15 (F15 to F19, D4-13 to D4-20), which revises D4-08 and five
+   interview answers; the [wireframes](mockups/README.md) illustrate it.
 4. [PLAN.md](PLAN.md): the stages, their order, owners, gates and the files shared with Phase 3b.
 5. [CONTRACTS.md](CONTRACTS.md): feature id, records, operations, seams, foundation additions A1
    to A5, findings and the export sections. Proposed until P4-01 confirms them against code.

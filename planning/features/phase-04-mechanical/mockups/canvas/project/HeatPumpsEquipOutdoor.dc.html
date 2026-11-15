@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mechanical: Heat pump outdoor equipment</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/phcomposer/tokens.css">
+<link rel="stylesheet" href="ds/phcomposer/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+.mx{width:1280px;height:800px;display:flex;flex-direction:column;overflow:hidden;background:#fff;color:#132a2b;font:13px/18px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.mx .phc-app-header{display:flex;align-items:center;justify-content:space-between;flex:none}
+.mx .panel-panes{flex:1;min-height:0;overflow:hidden;padding:0}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 10px}
+.phc-workspace .seg button{height:28px;min-height:28px;padding:0 12px;border:1px solid #c9d2d7;border-radius:999px;background:#fff;color:#46565e;font-size:12px}
+.phc-workspace .seg button[aria-pressed="true"]{background:#e3eff1;border-color:#075360;color:#075360;font-weight:600}
+.phc-workspace .seg button:disabled{color:#7b878e;border-style:dashed}
+.ctl{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.z{display:inline-block;height:22px;line-height:22px;padding:0 9px;margin:0 4px 0 0;border-radius:999px;background:#edf1f2;font-size:12px;white-space:nowrap}
+.z.w{background:#ffe6a0;color:#785400}
+.phc-workspace .phc-table td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.phc-workspace .phc-table td.l,.phc-workspace .phc-table th.l{text-align:left}
+.phc-workspace .phc-table td.r,.phc-workspace .phc-table th.r{text-align:right}
+.ro{color:#5d6b73}
+</style>
+</helmet>
+<div class="mx phc-workspace live-panel">
+<div class="phc-app-header">
+<nav class="phc-tabs" aria-label="Sections">
+<button type="button">Zones</button>
+<button type="button">Assemblies</button>
+<button type="button">Window Types</button>
+<button type="button">Thermal Bridges</button>
+<button type="button" aria-pressed="true">Mechanical</button>
+<button type="button">Library</button>
+<button type="button">Export</button>
+</nav>
+<div class="phc-app-tools"><div class="phc-unit-toggle" role="group" aria-label="Display units"><button type="button" aria-pressed="false">IP</button><button type="button" aria-pressed="true">SI</button></div></div>
+</div>
+<main class="panel-panes">
+<div data-pane="mechanical">
+<section>
+<div class="phc-heading"><h1>Mechanical</h1><div class="phc-heading-actions"><button type="button" class="primary">+ New Outdoor Equipment</button></div></div>
+<nav class="phc-subtabs" role="tablist" aria-label="Mechanical systems">
+<button type="button" role="tab" aria-selected="false">Ventilation</button>
+<button type="button" role="tab" aria-selected="true">Heat Pumps</button>
+<button type="button" role="tab" aria-selected="false">Hot Water</button>
+<button type="button" role="tab" aria-selected="false">Pumps</button>
+<button type="button" role="tab" aria-selected="false">Fans</button>
+<button type="button" role="tab" aria-selected="false">Electric Heating</button>
+</nav>
+<div class="seg" role="group" aria-label="Heat pump tables">
+<button type="button" aria-pressed="true">Equipment · Outdoor</button>
+<button type="button" aria-pressed="false">Equipment · Indoor</button>
+<button type="button" aria-pressed="false">Units · Outdoor</button>
+<button type="button" aria-pressed="false">Units · Indoor</button>
+<button type="button" aria-pressed="false">Blended result</button>
+</div>
+<div class="ctl">
+<div class="phc-inventory-controls">
+<label class="phc-view-control"><input type="search" placeholder="Tag, maker or model" aria-label="Filter outdoor equipment"></label>
+<label class="phc-view-control phc-view-group">Group by<select aria-label="Group by"><option>None</option></select></label>
+</div>
+<span class="phc-view-count">3 outdoor models · used by 3 outdoor units</span>
+</div>
+<div class="phc-table-scroll phc-inventory-table" style="overflow:hidden">
+<table class="phc-table" style="table-layout:fixed;width:1238px">
+<thead><tr>
+<th class="l" style="width:78px"><span class="phc-th-label">Tag</span></th>
+<th class="l" style="width:100px"><span class="phc-th-label">Manufacturer</span></th>
+<th class="l" style="width:110px"><span class="phc-th-label">Model number</span></th>
+<th class="l" style="width:100px"><span class="phc-th-label">Paired indoor</span></th>
+<th class="r" style="width:74px"><span class="phc-th-label">Heat cap. 17 °F kW</span></th>
+<th class="r" style="width:74px"><span class="phc-th-label">Heat cap. 47 °F kW</span></th>
+<th class="l" style="width:92px"><span class="phc-th-label">Heating data</span></th>
+<th class="r" style="width:64px"><span class="phc-th-label">COP 17 °F</span></th>
+<th class="r" style="width:64px"><span class="phc-th-label">COP 47 °F</span></th>
+<th class="r" style="width:64px"><span class="phc-th-label">HSPF2</span></th>
+<th class="r" style="width:74px"><span class="phc-th-label">Cool cap. 95 °F kW</span></th>
+<th class="l" style="width:104px"><span class="phc-th-label">Cooling data</span></th>
+<th class="r" style="width:60px"><span class="phc-th-label">EER2</span></th>
+<th class="r" style="width:60px"><span class="phc-th-label">SEER2</span></th>
+<th class="r" style="width:60px"><span class="phc-th-label">IEER</span></th>
+<th class="l" style="width:60px"><span class="phc-th-label">Notes</span></th>
+</tr></thead>
+<tbody>
+<tr><td class="l">ODU-A</td><td class="l">Kaltwerk</td><td class="l">MXZ-3C24</td><td class="l"><span class="z">IDU-W09</span></td><td class="r">6.4</td><td class="r">7.3</td><td class="l"><span class="z">COPs</span></td><td class="r">2.4</td><td class="r">3.9</td><td class="r ro">—</td><td class="r">6.4</td><td class="l"><span class="z">EER2/SEER2</span></td><td class="r">12.5</td><td class="r">20.0</td><td class="r ro">—</td><td class="l"></td></tr>
+<tr><td class="l">ODU-B</td><td class="l">Kaltwerk</td><td class="l">MUZ-12NA</td><td class="l"><span class="z">IDU-W12</span></td><td class="r">3.1</td><td class="r">3.8</td><td class="l"><span class="z">HSPF2</span></td><td class="r ro">—</td><td class="r ro">—</td><td class="r">10.0</td><td class="r">3.5</td><td class="l"><span class="z">EER2/SEER2</span></td><td class="r">13.0</td><td class="r">22.5</td><td class="r ro">—</td><td class="l"></td></tr>
+<tr><td class="l">ODU-C</td><td class="l">Borealis</td><td class="l">VRF-096</td><td class="l"><span class="z w">Not paired</span></td><td class="r">21.0</td><td class="r">28.1</td><td class="l"><span class="z">COPs</span></td><td class="r">2.1</td><td class="r">3.6</td><td class="r ro">—</td><td class="r">28.1</td><td class="l"><span class="z">IEER</span></td><td class="r ro">—</td><td class="r ro">—</td><td class="r">21.4</td><td class="l">Common areas</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</main>
+<footer class="phc-footer"><span>PH-Composer</span><span>Editing: Model</span></footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

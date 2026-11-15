@@ -1,0 +1,191 @@
+{
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-15T15:00:00Z"
+  },
+  "title": "PH-Composer Mechanical Tab Wireframes",
+  "launch": {
+    "view": "canvas"
+  },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1280,
+      "h": 800,
+      "title": "1 · Ventilation › Ventilators"
+    },
+    "HeatPumpsEquipOutdoor.dc.html": {
+      "x": 1360,
+      "y": 0,
+      "w": 1280,
+      "h": 800,
+      "title": "2 · Heat Pumps › Equipment · Outdoor"
+    },
+    "HeatPumpsEquipIndoor.dc.html": {
+      "x": 2720,
+      "y": 0,
+      "w": 1280,
+      "h": 800,
+      "title": "3 · Heat Pumps › Equipment · Indoor"
+    },
+    "HeatPumpsUnitsIndoor.dc.html": {
+      "x": 4080,
+      "y": 0,
+      "w": 1280,
+      "h": 800,
+      "title": "4 · Heat Pumps › Units · Indoor"
+    },
+    "HeatPumpsBlended.dc.html": {
+      "x": 5440,
+      "y": 0,
+      "w": 1280,
+      "h": 1480,
+      "title": "5 · Heat Pumps › Blended result"
+    },
+    "HotWaterSystems.dc.html": {
+      "x": 0,
+      "y": 1640,
+      "w": 1280,
+      "h": 800,
+      "title": "6 · Hot Water › Systems"
+    },
+    "HotWater.dc.html": {
+      "x": 1360,
+      "y": 1640,
+      "w": 1280,
+      "h": 800,
+      "title": "7 · Hot Water › Heaters"
+    },
+    "HotWaterTanks.dc.html": {
+      "x": 2720,
+      "y": 1640,
+      "w": 1280,
+      "h": 800,
+      "title": "8 · Hot Water › Tanks"
+    },
+    "Pumps.dc.html": {
+      "x": 4080,
+      "y": 1640,
+      "w": 1280,
+      "h": 800,
+      "title": "9 · Pumps (also the Fans and Electric Heating pattern)"
+    },
+    "Narrow.dc.html": {
+      "x": 5440,
+      "y": 1640,
+      "w": 420,
+      "h": 732,
+      "title": "10 · Ventilation at 420 px"
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "HeatPumpsEquipOutdoor.dc.html",
+    "HeatPumpsEquipIndoor.dc.html",
+    "HeatPumpsUnitsIndoor.dc.html",
+    "HeatPumpsBlended.dc.html",
+    "HotWaterSystems.dc.html",
+    "HotWater.dc.html",
+    "HotWaterTanks.dc.html",
+    "Pumps.dc.html",
+    "Narrow.dc.html"
+  ],
+  "notes": {
+    "title": {
+      "x": 0,
+      "y": -300,
+      "text": "Mechanical tab · wireframes v1",
+      "kind": "title1",
+      "maxW": 4000
+    },
+    "n1": {
+      "x": 0,
+      "y": 850,
+      "w": 620,
+      "fill": "green",
+      "text": "SETTLED 2026-11-15 · Navigation\nThe tab is named Mechanical. Subtabs are by system: Ventilation, Heat Pumps, Hot Water, Pumps, Fans, Electric Heating, each its own subtab. A pill row picks one table inside a system. Ducting and Piping become pills under Ventilation and Hot Water.\nThis replaces D4-08 and the Systems name in U1; neither document is edited yet."
+    },
+    "n1b": {
+      "x": 660,
+      "y": 850,
+      "w": 620,
+      "fill": "green",
+      "text": "SETTLED 2026-11-15 · Columns on every Mechanical table\nIdentity (Tag, Manufacturer, Model, Notes) plus the fields that export, with Serves. Tag is the row's name. Identity columns sit after the export fields and can be hidden. No Status, files, photos or links in the MVP; documentation fields come in a later stage, so records must accept added fields.\nNot drawn: the row disclosure for subsoil and preheat (V3), row actions."
+    },
+    "n2": {
+      "x": 1360,
+      "y": 850,
+      "w": 620,
+      "fill": "green",
+      "text": "SETTLED 2026-11-15 · Heat pump tables\nFour tables, as PH-Navigator; Q4 (one record with a quantity) stays for the other families. Outdoor equipment stores the Phius estimator fields. Paired indoor stays: for many systems the rated values hold only for one outdoor and indoor combination."
+    },
+    "n2b": {
+      "x": 2720,
+      "y": 850,
+      "w": 620,
+      "fill": "green",
+      "text": "REVISED 2026-11-15 · Indoor equipment is identity only: Tag, Manufacturer, Model number, Paired outdoor, Notes. The later \"identity and export fields only\" answer replaces the earlier full PH-Navigator set, because the Phius estimator takes outdoor units only and nothing on an indoor model exports. Capacities, fan airflow, install type and efficiencies return with the documentation stage."
+    },
+    "n3": {
+      "x": 4080,
+      "y": 850,
+      "w": 620,
+      "fill": "green",
+      "text": "SETTLED 2026-11-15 · Serves and export\nServes sits on the indoor unit and names Zones. Export is one blended air-source heat pump for the building, computed by mirroring the Phius Heat Pump Performance Estimator from the outdoor equipment rows and quantities; HSPF rows convert as Phius does.\nDEPENDS ON · a Climate feature, built first and planned separately; this work assumes it supplies the location data and design temperatures the derating needs.\nVersion 1 leaves out fans and pumps tied to the heat pump (no WUFI run-time step) and covers air-source only. The calculation is written in the public repo from the published method; the Phius workbook stays out, with a private comparison test.\nNOT DRAWN · where the blended result is shown.\nLinked ERV and the per-unit capacities are dropped with the documentation columns."
+    },
+    "n3b": {
+      "x": 6800,
+      "y": 0,
+      "w": 560,
+      "fill": "green",
+      "text": "SETTLED 2026-11-15 · Blended result is a fifth read-only pill, laid out like the Phius Heat Pump Performance Estimator v25.1.2: Inputs for Energy Model, Climate Information, 1. Pumps or Fans, 2. Performance Data, Weighted Value Calculations, with the estimator's own labels. Shown in IP because the estimator is IP only.\nNumbers are synthetic. Italic values are placeholders for the climate derating, which is not written yet. The coil temperature is honeybee-ph's default, not checked against the estimator."
+    },
+    "n4": {
+      "x": 0,
+      "y": 2490,
+      "w": 620,
+      "fill": "green",
+      "text": "SETTLED 2026-11-15 · Hot water\nFlat Heaters and Tanks tables plus a Systems table; replaces H1 and H7. A Hot Water System is one record that serves Zones, like a Ventilator: it exports as one shared honeybee-ph system on those Rooms, as Grasshopper's Apply does. A Model may hold several, with a warning that WUFI and METr pool them and keep one tap-point count.\nRecirculation temperature and hours are read-only, from the recirculation pipes (60 °C, 24 h with none); revises H4."
+    },
+    "n4b": {
+      "x": 1360,
+      "y": 2490,
+      "w": 620,
+      "fill": "green",
+      "text": "SETTLED 2026-11-15 · Heater Type picks which efficiency field is live: UEF for a heat pump inside, a COP pair for an outdoor heat pump, an annual COP for the annual kind, none for electric. Size, Amps, Volts and Watts are reference only. The Phius heat pump water heater estimators are later scope."
+    },
+    "n4c": {
+      "x": 2720,
+      "y": 2490,
+      "w": 620,
+      "fill": "gray",
+      "text": "Tanks: Role fills honeybee-ph's four fixed slots (tank 1, tank 2, buffer, solar) per D4-07. A tank with no slot left is flagged and does not export."
+    },
+    "n5": {
+      "x": 4080,
+      "y": 2490,
+      "w": 620,
+      "fill": "green",
+      "text": "SETTLED 2026-11-15 · Pumps, Fans and Electric Heating are one flat table each, identity plus export fields.\nFans: Tag, Qty, Type, Airflow, Runtime, Watts, Serves, Manufacturer, Model, Notes.\nElectric Heating: Tag, Coverage, Serves, Manufacturer, Model, Notes.\nPH-Navigator's Use, Volts, Phase, Amps and Horse Power are left out."
+    },
+    "n6": {
+      "x": 5440,
+      "y": 2490,
+      "w": 420,
+      "fill": "gray",
+      "text": "At 420 px the subtabs scroll sideways, the pills wrap and the Tag column stays pinned while the table scrolls."
+    }
+  },
+  "designSystems": [
+    {
+      "title": "PH-Composer Design System",
+      "namespace": "phcomposer",
+      "artifact": "https://claude.ai/artifact/77GLrkZxtkxo9TksTbvodL",
+      "version": "1794782248-c753",
+      "copiedAt": "2026-11-15T15:00:00Z"
+    }
+  ]
+}

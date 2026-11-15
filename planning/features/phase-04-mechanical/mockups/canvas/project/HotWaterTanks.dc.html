@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mechanical: Hot water tanks</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/phcomposer/tokens.css">
+<link rel="stylesheet" href="ds/phcomposer/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+.mx{width:1280px;height:800px;display:flex;flex-direction:column;overflow:hidden;background:#fff;color:#132a2b;font:13px/18px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.mx .phc-app-header{display:flex;align-items:center;justify-content:space-between;flex:none}
+.mx .panel-panes{flex:1;min-height:0;overflow:hidden;padding:0}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 10px}
+.phc-workspace .seg button{height:28px;min-height:28px;padding:0 12px;border:1px solid #c9d2d7;border-radius:999px;background:#fff;color:#46565e;font-size:12px}
+.phc-workspace .seg button[aria-pressed="true"]{background:#e3eff1;border-color:#075360;color:#075360;font-weight:600}
+.phc-workspace .seg button:disabled{color:#7b878e;border-style:dashed}
+.ctl{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.z{display:inline-block;height:22px;line-height:22px;padding:0 9px;margin:0 4px 0 0;border-radius:999px;background:#edf1f2;font-size:12px;white-space:nowrap}
+.z.w{background:#ffe6a0;color:#785400}
+.z.k{background:#fff;border:1px solid #c9d2d7;line-height:20px}
+.phc-workspace .phc-table td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.phc-workspace .phc-table td.l,.phc-workspace .phc-table th.l{text-align:left}
+.phc-workspace .phc-table td.r,.phc-workspace .phc-table th.r{text-align:right}
+.ro{color:#5d6b73}
+</style>
+</helmet>
+<div class="mx phc-workspace live-panel">
+<div class="phc-app-header">
+<nav class="phc-tabs" aria-label="Sections">
+<button type="button">Zones</button>
+<button type="button">Assemblies</button>
+<button type="button">Window Types</button>
+<button type="button">Thermal Bridges</button>
+<button type="button" aria-pressed="true">Mechanical</button>
+<button type="button">Library</button>
+<button type="button">Export</button>
+</nav>
+<div class="phc-app-tools"><div class="phc-unit-toggle" role="group" aria-label="Display units"><button type="button" aria-pressed="false">IP</button><button type="button" aria-pressed="true">SI</button></div></div>
+</div>
+<main class="panel-panes">
+<div data-pane="mechanical">
+<section>
+<div class="phc-heading"><h1>Mechanical</h1><div class="phc-heading-actions"><button type="button" class="primary">+ New Tank</button></div></div>
+<nav class="phc-subtabs" role="tablist" aria-label="Mechanical systems">
+<button type="button" role="tab" aria-selected="false">Ventilation</button>
+<button type="button" role="tab" aria-selected="false">Heat Pumps</button>
+<button type="button" role="tab" aria-selected="true">Hot Water</button>
+<button type="button" role="tab" aria-selected="false">Pumps</button>
+<button type="button" role="tab" aria-selected="false">Fans</button>
+<button type="button" role="tab" aria-selected="false">Electric Heating</button>
+</nav>
+<div class="seg" role="group" aria-label="Hot water tables">
+<button type="button" aria-pressed="false">Systems</button>
+<button type="button" aria-pressed="false">Heaters</button>
+<button type="button" aria-pressed="true">Tanks</button>
+<button type="button" disabled>Piping · planned</button>
+</div>
+<div class="ctl">
+<div class="phc-inventory-controls">
+<label class="phc-view-control"><input type="search" placeholder="Tag, type or system" aria-label="Filter tanks"></label>
+<label class="phc-view-control phc-view-group">Group by<select aria-label="Group by"><option>None</option></select></label>
+</div>
+<span class="phc-view-count">3 Tanks · 1 will not export</span>
+</div>
+<div class="phc-table-scroll phc-inventory-table" style="overflow:hidden">
+<table class="phc-table" style="table-layout:fixed;width:1238px">
+<thead><tr>
+<th class="l" style="width:80px"><span class="phc-th-label">Tag</span></th>
+<th class="r" style="width:44px"><span class="phc-th-label">Qty</span></th>
+<th class="l" style="width:130px"><span class="phc-th-label">Type</span></th>
+<th class="l" style="width:96px"><span class="phc-th-label">Role</span></th>
+<th class="l" style="width:130px"><span class="phc-th-label">System</span></th>
+<th class="l" style="width:110px"><span class="phc-th-label">Export slot</span></th>
+<th class="l" style="width:90px"><span class="phc-th-label">Location</span></th>
+<th class="r" style="width:86px"><span class="phc-th-label">Location temp. °C</span></th>
+<th class="r" style="width:80px"><span class="phc-th-label">Water temp. °C</span></th>
+<th class="r" style="width:70px"><span class="phc-th-label">Size L</span></th>
+<th class="r" style="width:90px"><span class="phc-th-label">Heat loss rate W/K</span></th>
+<th class="l" style="width:104px"><span class="phc-th-label">Manufacturer</span></th>
+<th class="l" style="width:128px"><span class="phc-th-label">Model</span></th>
+</tr></thead>
+<tbody>
+<tr><td class="l">T-1</td><td class="r">2</td><td class="l"><span class="z" style="background:#cdecff">DHW only</span></td><td class="l"><span class="z">Storage</span></td><td class="l"><span class="z k">DHW-1 Central</span></td><td class="l ro">Tank 1</td><td class="l"><span class="z" style="background:#e3eff1">Inside</span></td><td class="r">20</td><td class="r">60</td><td class="r">450</td><td class="r">2.1</td><td class="l">Sanvik</td><td class="l">ST-450</td></tr>
+<tr><td class="l">T-2</td><td class="r">1</td><td class="l"><span class="z" style="background:#cdecff">DHW only</span></td><td class="l"><span class="z" style="background:#f9eccc">Buffer</span></td><td class="l"><span class="z k">DHW-1 Central</span></td><td class="l ro">Buffer tank</td><td class="l"><span class="z" style="background:#e3eff1">Inside</span></td><td class="r">20</td><td class="r">55</td><td class="r">200</td><td class="r">1.4</td><td class="l">Sanvik</td><td class="l">BT-200</td></tr>
+<tr><td class="l">T-3</td><td class="r">1</td><td class="l"><span class="z" style="background:#cdecff">DHW only</span></td><td class="l"><span class="z" style="background:#f9eccc">Buffer</span></td><td class="l"><span class="z k">DHW-1 Central</span></td><td class="l"><span class="z w">No slot left</span></td><td class="l"><span class="z" style="background:#e3eff1">Inside</span></td><td class="r">20</td><td class="r">55</td><td class="r">200</td><td class="r">1.4</td><td class="l">Sanvik</td><td class="l">BT-200</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</main>
+<footer class="phc-footer"><span>PH-Composer</span><span>Editing: Model</span></footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mechanical: Blended heat pump result</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/phcomposer/tokens.css">
+<link rel="stylesheet" href="ds/phcomposer/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+.mx{width:1280px;height:1480px;display:flex;flex-direction:column;overflow:hidden;background:#fff;color:#132a2b;font:13px/18px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.mx .phc-app-header{display:flex;align-items:center;justify-content:space-between;flex:none}
+.mx .panel-panes{flex:1;min-height:0;overflow:hidden;padding:0}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 10px}
+.phc-workspace .seg button{height:28px;min-height:28px;padding:0 12px;border:1px solid #c9d2d7;border-radius:999px;background:#fff;color:#46565e;font-size:12px}
+.phc-workspace .seg button[aria-pressed="true"]{background:#e3eff1;border-color:#075360;color:#075360;font-weight:600}
+.z{display:inline-block;height:22px;line-height:22px;padding:0 9px;margin:0 4px 0 0;border-radius:999px;background:#edf1f2;font-size:12px;white-space:nowrap}
+.z.k{background:#fff;border:1px solid #c9d2d7;line-height:20px}
+.phc-workspace .phc-table td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.phc-workspace .phc-table td.l,.phc-workspace .phc-table th.l{text-align:left}
+.phc-workspace .phc-table td.r,.phc-workspace .phc-table th.r{text-align:right}
+.phc-workspace .phc-table th.c{text-align:center}
+.phc-workspace .phc-table tr.t td{background:#f6f8f9;font-weight:600}
+.phc-workspace .phc-table td.res{font-weight:600;color:#075360}
+.ro{color:#5d6b73}
+.dv{color:#5d6b73;font-style:italic}
+.lede{margin:0 0 4px;color:#5d6b73}
+.mx h2.sec{margin:18px 0 8px;font-size:15px;line-height:20px;font-weight:600}
+.mx h3.sub{margin:14px 0 6px;font-size:13px;font-weight:600;color:#46565e}
+.two{display:flex;gap:16px}
+.two > div{flex:1;min-width:0}
+.fold{display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid #e1e6e9;border-radius:7px;color:#5d6b73}
+.fold b{color:#132a2b;font-weight:600}
+.note{margin:14px 0 0;padding:8px 12px;border:1px solid #d8b45c;border-radius:7px;background:#fff0c2;color:#785400}
+</style>
+</helmet>
+<div class="mx phc-workspace live-panel">
+<div class="phc-app-header">
+<nav class="phc-tabs" aria-label="Sections">
+<button type="button">Zones</button>
+<button type="button">Assemblies</button>
+<button type="button">Window Types</button>
+<button type="button">Thermal Bridges</button>
+<button type="button" aria-pressed="true">Mechanical</button>
+<button type="button">Library</button>
+<button type="button">Export</button>
+</nav>
+<div class="phc-app-tools"><div class="phc-unit-toggle" role="group" aria-label="Display units"><button type="button" aria-pressed="true">IP</button><button type="button" aria-pressed="false">SI</button></div></div>
+</div>
+<main class="panel-panes">
+<div data-pane="mechanical">
+<section>
+<div class="phc-heading"><h1>Mechanical</h1><div class="phc-heading-actions"><button type="button">Copy rows for the Phius estimator</button></div></div>
+<nav class="phc-subtabs" role="tablist" aria-label="Mechanical systems">
+<button type="button" role="tab" aria-selected="false">Ventilation</button>
+<button type="button" role="tab" aria-selected="true">Heat Pumps</button>
+<button type="button" role="tab" aria-selected="false">Hot Water</button>
+<button type="button" role="tab" aria-selected="false">Pumps</button>
+<button type="button" role="tab" aria-selected="false">Fans</button>
+<button type="button" role="tab" aria-selected="false">Electric Heating</button>
+</nav>
+<div class="seg" role="group" aria-label="Heat pump tables">
+<button type="button" aria-pressed="false">Equipment · Outdoor</button>
+<button type="button" aria-pressed="false">Equipment · Indoor</button>
+<button type="button" aria-pressed="false">Units · Outdoor</button>
+<button type="button" aria-pressed="false">Units · Indoor</button>
+<button type="button" aria-pressed="true">Blended result</button>
+</div>
+<p class="lede">One heat pump is exported for the building, on 5 Zones. This page follows the Phius Heat Pump Performance Estimator section by section; it is read-only, and the rows come from Equipment · Outdoor and Units · Outdoor.</p>
+
+<h2 class="sec">Inputs for Energy Model</h2>
+<div class="two">
+<div>
+<h3 class="sub">Combined Cooling System Inputs · Cooling via Recirculation Air</h3>
+<div class="phc-table-scroll phc-inventory-table" style="overflow:hidden">
+<table class="phc-table" style="table-layout:fixed;width:100%">
+<tbody>
+<tr><td class="l">Number of Systems Needed</td><td class="r res" style="width:90px">1</td><td class="l ro" style="width:80px"></td></tr>
+<tr><td class="l">Space Cooling Coverage</td><td class="r res">100</td><td class="l ro">%</td></tr>
+<tr><td class="l">Minimum Temperature of Cooling Coil</td><td class="r res">53.6</td><td class="l ro">°F</td></tr>
+<tr><td class="l">Recirculation Air Flow Rate</td><td class="r res">3,240</td><td class="l ro">cfm</td></tr>
+<tr><td class="l">Recirculation Air Cooling Capacity</td><td class="r res">129.6</td><td class="l ro">kBtu/h</td></tr>
+<tr><td class="l">Weighted Recirculation Cooling COP</td><td class="r res">5.86</td><td class="l ro"></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div>
+<h3 class="sub">Heat Pump · rated monthly COP: ASHP</h3>
+<div class="phc-table-scroll phc-inventory-table" style="overflow:hidden">
+<table class="phc-table" style="table-layout:fixed;width:100%">
+<tbody>
+<tr><td class="l">Space Heating Coverage</td><td class="r res" style="width:90px">100</td><td class="l ro" style="width:80px">%</td></tr>
+<tr><td class="l">Weighted ASHP Heating COP 1</td><td class="r res">2.18</td><td class="l ro"></td></tr>
+<tr><td class="l">Ambient Temperature 1</td><td class="r res">17</td><td class="l ro">°F</td></tr>
+<tr><td class="l">Weighted ASHP Heating COP 2</td><td class="r res">3.65</td><td class="l ro"></td></tr>
+<tr><td class="l">Ambient Temperature 2</td><td class="r res">47</td><td class="l ro">°F</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+<h2 class="sec">Climate Information</h2>
+<div class="fold"><b>Typical</b><span>USA · NY</span><span class="z k">Synthetic City</span><span>from the Model's Climate</span></div>
+
+<h2 class="sec">Air Source Heat Pump System Information</h2>
+<h3 class="sub">1. Pumps or Fans associated with the ASHP system</h3>
+<div class="fold"><b>Not included</b><span>Fans and pumps tied to the heat pump system are left out of this version, so no run-time estimate is needed.</span></div>
+
+<h3 class="sub">2. Air Source Heat Pump Performance Data</h3>
+<div class="phc-table-scroll phc-inventory-table" style="overflow:hidden">
+<table class="phc-table" style="table-layout:fixed;width:1238px">
+<thead>
+<tr><th class="l" rowspan="2" style="width:200px"><span class="phc-th-label">Device(s)</span></th><th class="r" rowspan="2" style="width:50px"><span class="phc-th-label">Qty</span></th><th class="c" colspan="6"><span class="phc-th-label">Heating Data</span></th><th class="c" colspan="5"><span class="phc-th-label">Cooling Data</span></th></tr>
+<tr><th class="l" style="width:104px"><span class="phc-th-label">Heating Data Type</span></th><th class="r" style="width:92px"><span class="phc-th-label">Capacity 17 °F kBtu/h</span></th><th class="r" style="width:92px"><span class="phc-th-label">Capacity 47 °F kBtu/h</span></th><th class="r" style="width:76px"><span class="phc-th-label">COP 17 °F</span></th><th class="r" style="width:76px"><span class="phc-th-label">COP 47 °F</span></th><th class="r" style="width:76px"><span class="phc-th-label">or HSPF</span></th><th class="l" style="width:112px"><span class="phc-th-label">Cooling Data Type</span></th><th class="r" style="width:100px"><span class="phc-th-label">Capacity 95 °F kBtu/h</span></th><th class="r" style="width:76px"><span class="phc-th-label">EER</span></th><th class="r" style="width:76px"><span class="phc-th-label">SEER</span></th><th class="r" style="width:108px"><span class="phc-th-label">or IEER</span></th></tr>
+</thead>
+<tbody>
+<tr><td class="l">ODU-A [IDU-W09]</td><td class="r">1</td><td class="l"><span class="z">COPs</span></td><td class="r">21.8</td><td class="r">24.9</td><td class="r">2.40</td><td class="r">3.90</td><td class="r ro">—</td><td class="l"><span class="z">EER2/SEER2</span></td><td class="r">21.8</td><td class="r">12.5</td><td class="r">20.0</td><td class="r ro">—</td></tr>
+<tr><td class="l">ODU-B [IDU-W12]</td><td class="r">1</td><td class="l"><span class="z">HSPF2</span></td><td class="r">10.6</td><td class="r">13.0</td><td class="r ro">—</td><td class="r ro">—</td><td class="r">10.0</td><td class="l"><span class="z">EER2/SEER2</span></td><td class="r">11.9</td><td class="r">13.0</td><td class="r">22.5</td><td class="r ro">—</td></tr>
+<tr><td class="l">ODU-C</td><td class="r">1</td><td class="l"><span class="z">COPs</span></td><td class="r">71.7</td><td class="r">95.9</td><td class="r">2.10</td><td class="r">3.60</td><td class="r ro">—</td><td class="l"><span class="z">IEER</span></td><td class="r">95.9</td><td class="r ro">—</td><td class="r ro">—</td><td class="r">21.4</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 class="sub">Weighted Value Calculations (Informative)</h3>
+<div class="phc-table-scroll phc-inventory-table" style="overflow:hidden">
+<table class="phc-table" style="table-layout:fixed;width:1238px">
+<thead>
+<tr><th class="l" rowspan="2" style="width:170px"><span class="phc-th-label">Device Name</span></th><th class="c" colspan="3"><span class="phc-th-label">Capacity Fraction</span></th><th class="c" colspan="4"><span class="phc-th-label">Heating Performance</span></th><th class="c" colspan="5"><span class="phc-th-label">Cooling Performance</span></th></tr>
+<tr><th class="r" style="width:76px"><span class="phc-th-label">Recirc</span></th><th class="r" style="width:84px"><span class="phc-th-label">Capacity 17 °F</span></th><th class="r" style="width:84px"><span class="phc-th-label">Capacity 47 °F</span></th><th class="r" style="width:84px"><span class="phc-th-label">COP 17 °F</span></th><th class="r" style="width:84px"><span class="phc-th-label">COP 47 °F</span></th><th class="r" style="width:76px"><span class="phc-th-label">HSPF</span></th><th class="r" style="width:92px"><span class="phc-th-label">Derated HSPF</span></th><th class="r" style="width:76px"><span class="phc-th-label">EER</span></th><th class="r" style="width:76px"><span class="phc-th-label">SEER</span></th><th class="r" style="width:92px"><span class="phc-th-label">Derated SEER</span></th><th class="r" style="width:76px"><span class="phc-th-label">IEER</span></th><th class="r" style="width:92px"><span class="phc-th-label">COP</span></th></tr>
+</thead>
+<tbody>
+<tr><td class="l">ODU-A [IDU-W09]</td><td class="r">0.17</td><td class="r">0.21</td><td class="r">0.19</td><td class="r">0.50</td><td class="r">0.73</td><td class="r ro">—</td><td class="r ro">—</td><td class="r">2.1</td><td class="r">3.4</td><td class="r dv">3.1</td><td class="r ro">—</td><td class="r dv">0.77</td></tr>
+<tr><td class="l">ODU-B [IDU-W12]</td><td class="r">0.09</td><td class="r">0.10</td><td class="r">0.10</td><td class="r dv">0.23</td><td class="r dv">0.34</td><td class="r">11.2</td><td class="r dv">9.0</td><td class="r">1.2</td><td class="r">2.0</td><td class="r dv">1.9</td><td class="r ro">—</td><td class="r dv">0.45</td></tr>
+<tr><td class="l">ODU-C</td><td class="r">0.74</td><td class="r">0.69</td><td class="r">0.71</td><td class="r">1.45</td><td class="r">2.58</td><td class="r ro">—</td><td class="r ro">—</td><td class="r ro">—</td><td class="r ro">—</td><td class="r ro">—</td><td class="r">15.8</td><td class="r">4.64</td></tr>
+<tr class="t"><td class="l">Weighted total</td><td class="r">1.00</td><td class="r">1.00</td><td class="r">1.00</td><td class="r">2.18</td><td class="r">3.65</td><td class="r"></td><td class="r"></td><td class="r"></td><td class="r"></td><td class="r"></td><td class="r"></td><td class="r">5.86</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 class="sub">Totals</h3>
+<div class="phc-table-scroll phc-inventory-table" style="overflow:hidden;width:620px">
+<table class="phc-table" style="table-layout:fixed;width:100%">
+<thead><tr><th class="l"><span class="phc-th-label"></span></th><th class="r" style="width:150px"><span class="phc-th-label">Total Capacity kBtu/h</span></th><th class="r" style="width:150px"><span class="phc-th-label">Input Power kBtu/h</span></th></tr></thead>
+<tbody>
+<tr><td class="l">Cooling</td><td class="r">129.6</td><td class="r">22.1</td></tr>
+<tr><td class="l">Heating at 17 °F</td><td class="r">104.1</td><td class="r">47.8</td></tr>
+<tr><td class="l">Heating at 47 °F</td><td class="r">133.8</td><td class="r">36.7</td></tr>
+</tbody>
+</table>
+</div>
+<p class="note" role="status">Values in italics depend on the climate derating.</p>
+</section>
+</div>
+</main>
+<footer class="phc-footer"><span>PH-Composer</span><span>Editing: Model</span></footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1480}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

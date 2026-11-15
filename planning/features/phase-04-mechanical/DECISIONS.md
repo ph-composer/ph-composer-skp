@@ -1,7 +1,7 @@
 # Phase 4, mechanical: findings from source, and the decisions that follow
 
 DATE: 2026-10-21
-STATUS: Scoped. Part 1 is findings read from source on `main` at `420c783a` and the honeybee-ph and PHX checkouts on 2026-10-21. Part 2 was answered by Ed on 2026-10-21, every row as recommended; see "Ed's answers". The interviews (Q1 to Q12, V1 to V6, hot water H1 to H7) are answered and live in the equipment PRD.
+STATUS: Scoped. Part 1 is findings read from source on `main` at `420c783a` and the honeybee-ph and PHX checkouts on 2026-10-21. Part 2 was answered by Ed on 2026-10-21, every row as recommended; see "Ed's answers". The interviews (Q1 to Q12, V1 to V6, hot water H1 to H7) are answered and live in the equipment PRD. Part 3 records the wireframe review of 2026-11-15: findings F15 to F19 and decisions D4-13 to D4-20, several revising earlier answers.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -83,9 +83,71 @@ A row here supersedes the recommendation in Part 2; none differs.
 | D4-11 | As recommended: `electric_efficiency`, `volume_l`, `temperature` | 2026-10-21 |
 | D4-12 | As recommended: A nullable record field, written only when the loaded class accepts it | 2026-10-21 |
 
+## Part 3: wireframe review, 2026-11-15
+
+Ed reviewed the [Mechanical tab wireframes](mockups/README.md) on 2026-11-15 and answered the
+questions below against them. A row that revises an earlier answer says which; the earlier row
+stays as the record of what was first decided. Findings continue from F14 and decisions from
+D4-12. CONTRACTS, ACCEPTANCE and the stage documents P4-05 to P4-11 are not yet re-bound to these
+answers; [STATUS](STATUS.md) lists what each owes.
+
+### Findings
+
+"Read from source" as in Part 1. The Phius workbook was read outside this repository and is not
+part of it.
+
+| # | Finding | Consequence |
+| --- | --- | --- |
+| F15 | The Phius Heat Pump Performance Estimator v25.1.2 takes outdoor compressors and condensing units only, and says not to include interior heads or air handling units. Per row: quantity, heating capacity at 17 and 47 °F with either two COPs or an HSPF, cooling capacity at 95 °F with either EER and SEER or IEER. Indoor fans enter only as watts, and only when the rating excludes fan power | Nothing on an indoor model exports as performance (D4-15, D4-20) |
+| F16 | The estimator's results are one rated-monthly heat pump (coverage, two weighted COPs at 17 and 47 °F) and one recirculation-air cooling set (number of systems, capacity, air flow, coil temperature, weighted COP), split across systems above 682 kBtu/h. It derates HSPF and SEER by climate, citing FSEC-PF-413-04, and takes fan run-time from WUFI's monthly demands. Ground-source and water-source have their own sections | The results map onto `PhHeatPumpRatedMonthly` and `PhHeatPumpCoolingParams_Recirculation` in the pinned wheel. The blend needs climate data (D4-15) |
+| F17 | In the pinned wheel `PhHotWaterSystem.recirc_temp` and `recirc_hours` are read-only properties: length-weighted averages over the recirculation piping, 60.0 and 24 with none. `number_tap_points` is settable and otherwise counts branch fixtures | A System cannot carry typed recirculation values (D4-18). CONTRACTS section 2's `recirc_temp_c` and `recirc_hours` fields go |
+| F18 | honeybee_grasshopper_ph builds one `PhHotWaterSystem` and sets the same instance on each chosen Room (`gh_compo_io/shw/create_system.py`, `apply_shw.py`), and gives a Room with no service hot water load a nominal one. PHX adds each tank and heater once by key, sets tap points from the last Room read without summing, and keeps one recirculation setting (`from_HBJSON/create_variant.py`, read from the PHX checkout) | One System record serving Zones is the stack's own shape (D4-17). Several Systems pool downstream. The nominal hot water load is a [Phase 4a](../phase-04a-program/README.md) question |
+| F19 | `honeybee_energy_ph/hvac/hot_water.py` and `properties/hot_water/hw_system.py` are deprecated stubs that raise; the live classes are in `honeybee_phhvac` | Sections use `honeybee_phhvac` only |
+
+### Decisions
+
+| ID | Kind | Answer, 2026-11-15 | Revises | Blocks |
+| --- | --- | --- | --- | --- |
+| D4-13 | UI | The primary tab is named Mechanical. Its subtabs are by system: Ventilation, Heat Pumps, Hot Water, Pumps, Fans, Electric Heating, each its own subtab. A pill row under the subtabs picks one table inside a system. Ducting is a pill under Ventilation and Piping a pill under Hot Water | D4-08; equipment Q9; UI baseline U1's "Systems" tab and its Equipment, ERV ducting and Hot-water piping subtabs | P4-05, P4-07, P4-13, P4-14 |
+| D4-14 | Code, UI | Heat pumps are four tables, as PH-Navigator has them: Equipment · Outdoor, Equipment · Indoor, Units · Outdoor, Units · Indoor. Outdoor equipment stores the estimator's inputs (F15). An outdoor model may name one paired indoor model, because many ratings hold only for that combination | Equipment Q4, for family 3 only | P4-08 |
+| D4-15 | Code | Serves sits on the indoor unit and names Zones. Export is one blended air-source heat pump for the building, on every Room an indoor unit serves, computed by the estimator's method from the outdoor equipment rows and their unit counts (F16). An HSPF or HSPF2 row converts as the estimator does. Version 1 leaves out fans and pumps tied to the heat pump, so it needs no WUFI run-time step, and covers air-source only. The calculation is written in this repository from the published method with synthetic test cases; the workbook stays out, and a private comparison test skips when it is absent | Family 3's open question | P4-08 |
+| D4-16 | UI | The blended result is a fifth, read-only pill in Heat Pumps, laid out in the estimator's sections and labels: Inputs for Energy Model, Climate Information, Pumps or Fans, Performance Data, Weighted Value Calculations. A header action copies the rows in the estimator's layout | | P4-08 |
+| D4-17 | Code, UI | Hot water is three tables: Systems, Heaters, Tanks. A Hot Water System is one record that serves Zones, as a Ventilator does; heaters and tanks are flat rows that each name their System. A Model may hold several Systems, with a non-blocking note that WUFI and METr pool them and keep one tap-point count (F18). Tank roles and slots stay as D4-07 | Hot water H1 and H7; H3's list becomes the Tanks table | P4-06, P4-07 |
+| D4-18 | Code | Recirculation temperature and hours are read-only on the Systems table, read from the recirculation pipes (F17). Tap points stay a System value | Hot water H4, for temperature and hours | P4-06, P4-13 |
+| D4-19 | Code | A heater's Type picks which efficiency input is live: the energy factor for a heat pump inside, a COP pair for an outdoor heat pump, the annual performance value for the annual kind, none for electric. Phius's product-specific heat pump water heater estimators are later scope | | P4-06 |
+| D4-20 | UI, Code | Every Mechanical table carries Tag, Manufacturer, Model and Notes, the fields that export, and Serves. Tag is the record's name. Export fields come first; the identity columns follow and can be hidden. No Status, attached files, photos or links in the MVP. Documentation fields come in a later stage, so the kinds must accept added fields | Ventilators V3's column list gains Manufacturer and Model | P4-02, P4-05 to P4-11 |
+
+### Entry gate added
+
+D4-15 needs the Model's climate: a Phius location, or the ASHRAE 99% and 1% design temperatures
+with the monthly values the derating reads. Ed, 2026-11-15: Climate is built first and planned in
+its own thread, and this packet assumes it supplies that data.
+[Climate data](../phase-05-post-mvp/climate-data/README.md) is the existing packet, drafted as a
+post-MVP request.
+
+### Open after the review
+
+1. Equipment · Indoor. Ed first chose PH-Navigator's full column set, then answered D4-20
+   (identity and export fields only). The wireframe draws identity only, since F15 leaves nothing
+   on an indoor model to export. Ed has not confirmed that reading.
+2. D4-20 asks that kinds accept added fields. CONTRACTS section 2 fixes each kind at
+   `schema_version` 1 with its final field set because the engine has no migrations. How a later
+   stage adds documentation fields is unanswered.
+3. The HSPF conversion and the climate derating are not written. Every derived number on the
+   Blended result wireframe is a placeholder. The cooling coil temperature shown is honeybee-ph's
+   default and was not checked against the estimator, and the estimator's split above 682 kBtu/h
+   has no agreed handling.
+4. Not drawn: Units · Outdoor's columns, row actions, the New-record forms, the Ventilator
+   disclosure for the two optional fields (V3), and the 360 x 520 panel size.
+5. Pumps, Fans and Electric Heating have their table shape and columns from D4-13 and D4-20.
+   Their interviews are otherwise open; Q6 still describes the Fan record.
+6. A served Room needs a service hot water load before its system means anything downstream
+   (F18). Phase 4a owns loads.
+
 ## Ledger
 
 | Date | Event |
 | --- | --- |
 | 2026-10-21 | Drafted from `420c783a` and the three interviews of the same day: fourteen findings, twelve decisions. None answered. |
 | 2026-10-21 | Ed answered D4-01 to D4-12, all as recommended. The bindings in CONTRACTS stand as drafted. |
+| 2026-11-15 | Wireframe review with Ed: findings F15 to F19, decisions D4-13 to D4-20 (Part 3). D4-08 and the interview answers Q4 (heat pumps), Q9, H1, H4 and H7 are revised. Bindings and stages not yet re-planned. |

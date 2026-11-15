@@ -1,7 +1,7 @@
 # Phase 4 acceptance register: mechanical
 
 DATE: 2026-10-21
-STATUS: Scoped. No row has evidence. M08 to M14 are filled in when their stages are planned after their interviews.
+STATUS: Scoped. No row has evidence. M08 to M14 are filled in when their stages are planned after their interviews. M05 to M08 predate the wireframe decisions of 2026-11-15 (D4-13 to D4-20) and are re-written with their stages.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 

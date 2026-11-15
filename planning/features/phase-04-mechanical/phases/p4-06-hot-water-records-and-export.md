@@ -1,7 +1,7 @@
 # P4-06: Hot Water System records and export
 
 DATE: 2026-10-21
-STATUS: Scoped
+STATUS: Scoped. To be re-planned against D4-17 to D4-19 (2026-11-15): Systems, Heaters and Tanks are three kinds, and recirculation temperature and hours are read from piping. See [DECISIONS, Part 3](../DECISIONS.md#part-3-wireframe-review-2026-11-15).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 

@@ -1,7 +1,7 @@
 # Equipment
 
 DATE: 2026-10-21
-STATUS: Scoped. Shared shape (Q1 to Q12), Ventilators (V1 to V6) and hot water (H1 to H7) interviewed 2026-10-21; families 3 to 7 not yet interviewed. Re-baselined against `main` at `420c783a` the same day.
+STATUS: Scoped. Shared shape (Q1 to Q12), Ventilators (V1 to V6) and hot water (H1 to H7) interviewed 2026-10-21; families 3 to 7 not yet interviewed. Re-baselined against `main` at `420c783a` the same day. Wireframes reviewed 2026-11-15: heat pumps and the table layout are settled in the phase's DECISIONS Part 3 (D4-13 to D4-20), which revises Q4 for heat pumps, Q9, H1, H4 and H7.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -83,7 +83,9 @@ a Space inherits it. Appliances are the exception, see family 7.
 ### Behaviors
 
 - The Equipment subtab under the primary Systems tab (D4) has a family selector, one family's
-  inventory table at a time (Q9), with inline edit, Add, Duplicate and Delete.
+  inventory table at a time (Q9), with inline edit, Add, Duplicate and Delete. Revised
+  2026-11-15 by [D4-13](../DECISIONS.md#part-3-wireframe-review-2026-11-15): the tab is Mechanical, with a subtab per system and a pill row for
+  the tables inside it.
 - A "Serves" column lists Zones as chips. Editing it opens a Zone picker.
 - The other side of the relation, which items serve a Zone, is read from the Serves column
   alone (Q10). A Ventilation or Heat pump view of the Zones tab can follow later through the
@@ -170,13 +172,13 @@ Interviewed 2026-10-21; Ed answered each as recommended except H3:
 
 | # | Question | Answer, 2026-10-21 |
 | --- | --- | --- |
-| H1 | Code. One system record with children, or separate Tank and Heater records? | One Hot Water System record; tanks and heaters are its children. One id to assign, copy and delete |
+| H1 | Code. One system record with children, or separate Tank and Heater records? | One Hot Water System record; tanks and heaters are its children. One id to assign, copy and delete. **Revised 2026-11-15** by [D4-17](../DECISIONS.md#part-3-wireframe-review-2026-11-15): Systems, Heaters and Tanks are three flat tables; a System is still the one record that serves Zones |
 | H2 | Scope. Which heater variants first? | Electric and the three heat pump variants (annual, monthly, inside). Boilers and district stay out, as Q7 says |
 | H3 | Code. Keep honeybee-ph's four fixed tank slots? | No: a free list of tanks on the system, slotted into `tank_1`, `tank_2`, `tank_buffer`, `tank_solar` at export in list order, with a warning past four. Departs from the recommendation; the slot each tank lands in is decided at planning (by tank type, or by order) |
-| H4 | Code. Where do tap points, recirculation temperature and hours live? | On the system record; the piping packet reads them for the recirculation loop. Two systems that disagree get a warning naming PHX's fallback |
+| H4 | Code. Where do tap points, recirculation temperature and hours live? | On the system record; the piping packet reads them for the recirculation loop. Two systems that disagree get a warning naming PHX's fallback. **Revised 2026-11-15** by [D4-18](../DECISIONS.md#part-3-wireframe-review-2026-11-15): honeybee-ph derives recirculation temperature and hours from the recirculation pipes, so they are read-only; tap points stay on the System |
 | H5 | Code. Piping Q5 wants the simplified methods as a choice on the system, and honeybee-ph has no field for it | Add the field upstream first: [honeybee_ph#135](https://github.com/PH-Tools/honeybee_ph/issues/135), filed 2026-10-21, asks for the calculation method and the simplified-method inputs on `PhHotWaterSystem`, read by PHX. PH-Composer stores the choice and exports it once the pinned wheel carries it; until then only drawn pipes export |
 | H6 | Code. One system per Zone | Yes, the Ventilator rules: a second assignment replaces the first after a refusal names it; an unserved Zone warns and does not block |
-| H7 | UI. How are tanks and heaters edited? | Child rows under the system row, opened by its chevron, edited in place, with Add tank and Add heater on the system row |
+| H7 | UI. How are tanks and heaters edited? | Child rows under the system row, opened by its chevron, edited in place, with Add tank and Add heater on the system row. **Revised 2026-11-15** by [D4-17](../DECISIONS.md#part-3-wireframe-review-2026-11-15): flat Heaters and Tanks tables, each row naming its System |
 
 ## Family 3: Heat pumps
 
@@ -189,6 +191,12 @@ Recirculation carries `capacity`, `min_coil_temp`, `flow_rate_m3_hr`, `flow_rate
 
 Open: whether the editor shows all four cooling sub-blocks or only Recirculation, which is the
 mini-split case and nearly every project.
+
+Settled at the wireframe review of 2026-11-15, recorded in the phase's
+[DECISIONS, Part 3](../DECISIONS.md#part-3-wireframe-review-2026-11-15): four tables as PH-Navigator has them (D4-14); Serves on the indoor
+unit and one blended air-source heat pump for the building, computed by the Phius Heat Pump
+Performance Estimator's method, with recirculation cooling only (D4-15); the blended result as
+its own read-only view (D4-16). The stage needs the Model's climate.
 
 ## Family 4: Electric heaters
 
@@ -263,12 +271,12 @@ the interview record.
 | Q1 | One packet with seven family phases, or seven packets? | One packet, one PRD section and one phase per family. The shape is shared and the families are small | One packet |
 | Q2 | Family order? | Ventilators, hot water, heat pumps, electric heaters, pumps, appliances, fans | As recommended |
 | Q3 | Code. Where is assignment stored? | Changed 2026-10-21. Not on the Zone record: Zones names no feature. An entity-owned record on the Zone Group in this feature's dictionary, following Windows and Spaces, so a copied Zone keeps what serves it; the Model-level alternative is recorded above | A record on the Zone Group |
-| Q4 | A product definition reused with different installed quantities: two records, or a type and instances? | One record with a `quantity`. No type and instance split. Duplicate covers the rest. Q1 of the predecessor asked this and the honeybee-ph classes answer it | One record with `quantity` |
+| Q4 | A product definition reused with different installed quantities: two records, or a type and instances? | One record with a `quantity`. No type and instance split. Duplicate covers the rest. Q1 of the predecessor asked this and the honeybee-ph classes answer it | One record with `quantity`. **Revised 2026-11-15** by [D4-14](../DECISIONS.md#part-3-wireframe-review-2026-11-15) for heat pumps only: four tables, equipment and units |
 | Q5 | Is equipment placed in the model as geometry? | No. Records only. A Ventilator has no position. Ducts and pipes give the lengths that matter | No, records only |
 | Q6 | Code. Fans: exhaust ventilators, supportive devices, or both? Re-asked after tracing the stack (family 6) | One record: an exhaust ventilator with an optional electric block exported as a linked supportive device. The first draft's "anything else is a Pumps-tab Other device" still holds for a bare fan with no exhaust air | Exhaust ventilator with an optional electric block that exports as a linked type 10 supportive device |
 | Q7 | Boilers, wood boilers, district heat and PV are in honeybee-ph and not on the list. In or out? | Out for MVP, recorded as later. PV waits for the climate and site packet | Out for MVP |
 | Q8 | Are equipment items a library kind? | Later. The libraries interview named Ventilators and Heat Pumps as likely future kinds (libraries Q2; roadmap 5.4) | Later, roadmap 5.4 |
-| Q9 | One Equipment tab with sub-tabs, or the predecessor's reserved "HVAC" tab plus others? | Confirmed in D4: one Systems primary tab, with Equipment, ERV ducting and Hot-water piping as peer subtabs. Equipment owns the seven family views. The tab is new in `index.html` | Family selector, one table at a time |
+| Q9 | One Equipment tab with sub-tabs, or the predecessor's reserved "HVAC" tab plus others? | Confirmed in D4: one Systems primary tab, with Equipment, ERV ducting and Hot-water piping as peer subtabs. Equipment owns the seven family views. The tab is new in `index.html` | Family selector, one table at a time. **Revised 2026-11-15** by [D4-13](../DECISIONS.md#part-3-wireframe-review-2026-11-15): a Mechanical tab, subtabs by system, a pill row for the tables inside one |
 | Q10 | UI. Added 2026-10-21. Where does a Zone show what serves it: a Ventilation view and a Heat pump view of the Zones tab, or only the Systems table listing the Zones each unit serves? | The Systems table alone, first. A Zone view costs a module per family and the shipped Zone views contract admits it later without touching Zones | The Systems table alone, first |
 | Q11 | UI. Added 2026-10-21. Where is the balance by ventilator shown? | On the Ventilator's row in the Systems table: served Zones' supply and extract sums and the 10 percent marker, a dash while any served Space inherits. Spaces keeps balance by Zone | On the Ventilator's row |
 | Q12 | Code. Added 2026-10-21. Does family 7 own the Room's electric equipment load, or does the undrafted Zone loads packet? Appliances now travel as Process loads in honeybee-ph | This packet owns the appliance records and their default set, exported as Process loads; the Zone loads packet, when drafted, owns occupancy, lighting and the non-appliance loads and reuses the same Room-load section | This packet, exported as Process loads. **Revised 2026-11-14** by [Phase 4a Q4a-03](../../phase-04a-program/DECISIONS.md#answered): appliance records and the default set move to Phase 4a as Zone Equipment Sets; P4-12 is superseded |

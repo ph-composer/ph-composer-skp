@@ -155,7 +155,9 @@ Face types and boundary conditions follow Honeybee. A Zone owns its Face assignm
 
 | Term | Meaning |
 | --- | --- |
-| Equipment | Model-local records of the ventilators, hot water systems, heat pumps, heaters, pumps, fans and appliances a Phius model needs. One record per item with a quantity; there is no separate product definition. An item serves one or more Zones |
+| Equipment | Model-local records of the ventilators, hot water systems, heat pumps, heaters, pumps, fans and appliances a Phius model needs. One record per item with a quantity; there is no separate product definition, except heat pumps, which separate an equipment model from its installed units. An item serves one or more Zones. Shown on the Mechanical tab |
+| Hot Water System | The planned record that groups heaters and tanks and serves Zones. Heaters and tanks are their own rows and each names its System |
+| Blended heat pump | The planned single air-source heat pump exported for a building, computed from every outdoor unit by the Phius heat pump estimator's method |
 | Piping / Ducting | Modeled runs, their segments and the systems they serve |
 
 ### Site and climate

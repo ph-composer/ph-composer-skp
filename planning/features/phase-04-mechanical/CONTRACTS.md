@@ -1,7 +1,7 @@
 # Phase 4 contract bindings: equipment
 
 DATE: 2026-10-21
-STATUS: Scoped. Proposed bindings for the shared shape and families 1 and 2, drafted from source at `420c783a` and the interviews of 2026-10-21. P4-01 confirms the questions in section 7 by test and runs the architecture review before any feature stage starts. Families 3 to 7, piping and ducting bind their names after their interviews.
+STATUS: Scoped. Proposed bindings for the shared shape and families 1 and 2, drafted from source at `420c783a` and the interviews of 2026-10-21. P4-01 confirms the questions in section 7 by test and runs the architecture review before any feature stage starts. Families 3 to 7, piping and ducting bind their names after their interviews. Not yet re-bound to the wireframe decisions of 2026-11-15 (D4-13 to D4-20): the Hot Water System shape, its recirculation fields, the heat pump kinds, the tab name and the column set below are superseded where they disagree with [DECISIONS, Part 3](DECISIONS.md#part-3-wireframe-review-2026-11-15); [STATUS](STATUS.md) lists what is owed.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 

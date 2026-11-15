@@ -64,6 +64,12 @@ Zones / Faces, Spaces, Assemblies, Window Types, Thermal Bridges · Planned, Sys
 Library, Export. D4 confirms Equipment, ERV ducting and Hot-water piping as peer subtabs under
 Systems, with one work surface at a time. Do not add separate primary Ducting or Piping tabs.
 
+Revised 2026-11-15 by Phase 4's
+[D4-13](../features/phase-04-mechanical/DECISIONS.md#part-3-wireframe-review-2026-11-15): the
+tab is named Mechanical; its subtabs are by system (Ventilation, Heat Pumps, Hot Water, Pumps,
+Fans, Electric Heating); a pill row under the subtabs picks one table inside a system, with
+Ducting under Ventilation and Piping under Hot Water. Still no primary Ducting or Piping tab.
+
 ## 1. Spaces
 
 Superseded in part on 2026-10-15 by the Spaces packet's D3a-16 and D3a-17: Spaces is a view of the
@@ -207,7 +213,7 @@ in the polish skill's `patterns.md` once Ed accepts it.
 | Window Schedule for our own units | The predecessor's Schedule layout, minus adoption | window-types |
 | Preferences / Libraries | The predecessor's Library setup surface | libraries |
 | Attached zones subtab and its inline creation from the boundary condition chip | A Library subtab with `formDialog` | face-assignment Q20, Q21 |
-| Systems: Equipment, ERV ducting and Hot-water piping peer subtabs | Shared subtabs nav, one work surface at a time | confirmed by D4; equipment Q9, ducting Q8, piping Q12 |
+| Systems: Equipment, ERV ducting and Hot-water piping peer subtabs | Shared subtabs nav, one work surface at a time | confirmed by D4; equipment Q9, ducting Q8, piping Q12. Revised 2026-11-15 by Phase 4 D4-13: the Mechanical tab, subtabs by system, a pill row for the tables inside one |
 
 ## Decisions recorded
 
@@ -215,7 +221,7 @@ in the polish skill's `patterns.md` once Ed accepts it.
 
 | # | Decision | Answer |
 | --- | --- | --- |
-| U1 | Primary tab row | Zones / Faces, Spaces, Assemblies, Window Types, Thermal Bridges · Planned, Systems · Planned, Library, Export. The Zone tree and faces table live under Zones / Faces. Systems contains Equipment, ERV ducting and Hot-water piping peer subtabs; no extra primary tab is proposed |
+| U1 | Primary tab row | Zones / Faces, Spaces, Assemblies, Window Types, Thermal Bridges · Planned, Systems · Planned, Library, Export. The Zone tree and faces table live under Zones / Faces. Systems contains Equipment, ERV ducting and Hot-water piping peer subtabs; no extra primary tab is proposed. Revised 2026-11-15 by Phase 4 D4-13: Systems is named Mechanical and its subtabs are by system |
 | U2 | Chip words | Chips show the palette's short words, such as Roof. Records hold honeybee's, such as `RoofCeiling` |
 | U3 | U-value in the Assemblies inventory | One column, with films. Both values appear in the Builder header |
 | U1a | Overview renamed | 2026-09-30: the Overview tab becomes **Zones / Faces**, with tab settings behind a gear icon in its action bar. Implemented and accepted in [Phase 1 UX follow-ups](../archive/phase-01-ux-followups/README.md) Z5 |
