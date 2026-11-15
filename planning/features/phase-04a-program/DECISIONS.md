@@ -101,7 +101,7 @@ them. He answered three of the questions it raised, and Q4a-27 to Q4a-32 on 2026
 | Q4a-31 | **The Program's Ventilation load for EnergyPlus**, unchanged, for now | Space rates are never folded into the Room (F4a-29) |
 | Q4a-32 | **A Zone with no Spaces is an export warning, not an error** | Confirmed by a PHX round trip (F4a-28): the file opens with iCFA 0 and no ventilation rooms |
 
-**Revised 2026-11-15 by the [Building Segments plan](../unscheduled/building-segments/README.md#answers-ed-2026-11-15)
+**Revised 2026-11-15 by the [Building Segments plan](building-segments/PRD.md#decisions-ed-2026-11-15)
 (BS-3):** Single dwelling is an attribute and control of each Building Segment, not of the Model.
 It no longer forces one Building Segment: a house and an ADU can be single dwellings in two
 Segments. The rest of Q4a-26 stands, applied per Segment.

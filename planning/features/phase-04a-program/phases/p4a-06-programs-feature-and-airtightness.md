@@ -1,0 +1,50 @@
+# P4a-06: The Programs feature and Segment airtightness
+
+DATE: 2026-11-15
+STATUS: Scoped. Not authorized.
+AUTHOR: Ed May, BLDGTYP, with Claude
+ISSUE: none (local planning draft)
+
+## Entry and scope
+
+Requires P4a-02 (the seam) and P4a-04 (Programs requires Certification). Creates
+`ph_composer.programs` with its first contribution: the Airtightness section of the Segment
+settings and its export into each Room's Infiltration, so PHX reads back the entered test result.
+No Program records yet.
+
+Behavior: [Phase 4a PRD](../PRD.md), "Segment settings sections Programs owns". Names:
+[CONTRACTS](../CONTRACTS.md) sections 2, 3 and 7. Research: F4a-09 and
+[PH stack](../research/ph-stack-consumption.md#infiltration-and-airtightness).
+
+## Steps
+
+1. **Feature.** `features/programs/install.rb`, `requires: ["ph_composer.zones",
+   "ph_composer.spaces", "ph_composer.certification"]`, listed in `extension.rb`.
+2. **Extension.** Namespace `ph_composer.programs` on the Segment: `airtightness_basis` (`n50`,
+   `q50`), `airtightness_value` (number or null), `wind_exposure` (seven values). The Occupancy
+   fields join this namespace in P4a-08 with a schema version bump.
+3. **Section and participant.** The Airtightness section: basis select, value with its unit, wind
+   exposure; `programs.segment_settings.write`.
+4. **Conversion (C4a-4).** Read PHX's back-conversion in the pinned PHX (`from_HBJSON/cleanup.py`,
+   the exposed-area rule; exponent 0.65; n50 by net volume) and implement its inverse: a Room
+   `Infiltration` `flow_per_exterior_area` at 4 Pa such that PHX reports the entered value for the
+   Segment. Pure Ruby for the panel's preview; the same rule in the Python section.
+5. **Export.** Contributor and Python section: each Room of a Segment with a test result gets that
+   Infiltration; `BldgSegment.wind_exposure_type`; a Segment without a result leaves the Room's
+   Infiltration to its Program (P4a-10) or PHX's default.
+6. **Docs.** Glossary; agent guide; API minor bump.
+
+## Tests (write first)
+
+1. Extension round trip and copy; section validation (a negative or zero value refuses).
+2. Conversion: unit tests of the inverse against the PHX formula, both bases.
+3. PHX round trip: an n50 and a q50 Segment each read back from the WUFI XML and METr JSON within
+   0.01.
+
+## Host gate
+
+PG06.
+
+## Done when
+
+PG06 passes and C4a-4's answer is recorded in CONTRACTS.

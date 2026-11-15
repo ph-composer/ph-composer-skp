@@ -47,7 +47,7 @@ server. The dark strip at the top picks a journey and says what to try; Reset re
   dwelling. Checking it over per-Zone assignments opens a confirmation naming what gives way in
   that Segment. Moving a Zone into a Single dwelling Segment joins its dwelling. `j1-adu` shows a
   house and an ADU as two single-dwelling Segments.
-- **Building Segments** ([plan](../../unscheduled/building-segments/README.md), BS-1 to BS-6 answered). The
+- **Building Segments** ([PRD](../building-segments/PRD.md), BS-1 to BS-6 answered). The
   heading takes two lines: the name alone on the first (a long name truncates, full name in its
   tooltip, `j4-long-name`), with a findings flag; then the Default and Single dwelling tags where
   they apply (no Zone count or category subtitle). Settings and Delete sit in the row's Actions cell, revealed on hover as in

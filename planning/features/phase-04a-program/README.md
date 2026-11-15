@@ -1,7 +1,7 @@
 # Phase 4a: Programs
 
 DATE: 2026-11-14
-STATUS: Requested. Research complete and interviewed 2026-11-14; UI prototype in review. No stage authorized.
+STATUS: Scoped for the Zones tab (2026-11-15): PRD, contracts, plan and stages written; the Programs tab is specified after its review. No stage authorized.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -46,7 +46,7 @@ From Ed's request and the 2026-11-14 interview ([answers](DECISIONS.md#answered)
   repository, added through Library setup (Q4a-10, Q4a-19).
 - **A Single dwelling switch** on each Building Segment: its Zones one dwelling with the
   residential default, their rows locked, bedrooms entered once (Q4a-26, revised by
-  [BS-3](../unscheduled/building-segments/README.md#single-dwelling-per-building-segment-bs-3)).
+  [BS-3](building-segments/PRD.md#decisions-ed-2026-11-15)).
 - **Export**: Program, load and schedule objects in the HBJSON, plus the honeybee-ph extension
   fields PHX reads.
 
@@ -58,26 +58,30 @@ until the cross-repo fix for F4a-13 ships (Q4a-08).
 
 ## Read order
 
-1. [DECISIONS.md](DECISIONS.md): findings F4a-01 to F4a-23, the interview questions Q4a-01 to
-   Q4a-28 and the answers so far. Start here. The [GUI prototype](mockups/README.md) shows them.
-2. [research/honeybee-energy-programs.md](research/honeybee-energy-programs.md): the ProgramType,
+1. [PRD.md](PRD.md): the Zones tab behaviour this phase builds, and
+   [building-segments/PRD.md](building-segments/PRD.md), the Building Segment work it stands on.
+   The [GUI prototype](mockups/README.md) shows both.
+2. [CONTRACTS.md](CONTRACTS.md): records, ownership, seams and export mapping, with open contract
+   questions C4a-1 to C4a-6.
+3. [PLAN.md](PLAN.md), the stages under [phases/](phases), and [ACCEPTANCE.md](ACCEPTANCE.md).
+4. [DECISIONS.md](DECISIONS.md): findings F4a-01 to F4a-29 and questions Q4a-01 to Q4a-32 with
+   every answer.
+5. [research/honeybee-energy-programs.md](research/honeybee-energy-programs.md): the ProgramType,
    Room inheritance and overrides, Model emission, the program library, and the Honeybee
    Grasshopper affordances a Program tab should match.
-3. [research/loads-and-schedules.md](research/loads-and-schedules.md): every load and schedule class,
+6. [research/loads-and-schedules.md](research/loads-and-schedules.md): every load and schedule class,
    field by field, with units, validation and HBJSON dicts.
-4. [research/ph-stack-consumption.md](research/ph-stack-consumption.md): what honeybee-ph adds and
+7. [research/ph-stack-consumption.md](research/ph-stack-consumption.md): what honeybee-ph adds and
    what PHX reads for each load, into which WUFI, METr and PHPP fields.
-5. [research/ph-composer-current-state.md](research/ph-composer-current-state.md): what exists today
+8. [research/ph-composer-current-state.md](research/ph-composer-current-state.md): what exists today
    and the record, assignment, export, UI and library seams to build on.
-6. [research/ventilation.md](research/ventilation.md): Zone ventilation and Space airflows across
+9. [research/ventilation.md](research/ventilation.md): Zone ventilation and Space airflows across
    honeybee-ph, the Grasshopper path, PHX and its writers (F4a-24 to F4a-29, Q4a-29 to Q4a-32).
-7. [STATUS.md](STATUS.md): the ledger.
+10. [STATUS.md](STATUS.md): the ledger.
 
 ## Next
 
-1. Review the [GUI prototype](mockups/README.md) and answer Q4a-21 to Q4a-25; iterate. Q4a-29 to Q4a-32 were answered on 2026-11-15.
-   Q4a-19, Q4a-20 and Q4a-26 were answered in the first review, Q4a-27 and Q4a-28 on 2026-11-15.
-2. PRD, contracts and stages, worked back from the accepted prototype. Implementation needs
-   separate authorization.
+1. Ed reads the PRDs, CONTRACTS (C4a-1 to C4a-6) and PLAN; P4a-01 to P4a-06 need his go.
+2. The Programs tab review (gate G1): answer Q4a-21 to Q4a-25, then rewrite P4a-07 to P4a-11.
 3. Separately: the honeybee-ph and PHX fix for F4a-13 (Q4a-08), in those repositories, starting
    with a reproducing test in each.

@@ -1,7 +1,7 @@
 # Phase 4a status
 
 DATE: 2026-11-14
-STATUS: Requested. Research complete and interviewed; UI prototype in review.
+STATUS: Scoped for the Zones tab (2026-11-15). No stage authorized.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -19,7 +19,10 @@ The one place this packet's progress is read from.
 | Research after redirects: honeybee-ph Process, occupancy and residential program | Complete | 2026-11-14 | F4a-17 to F4a-21 |
 | UI prototype: Program tab, Zones/Programs page | In review | 2026-11-14 | [mockups/](mockups/README.md): five journeys, Q4a-19 to Q4a-28 raised. First review 2026-11-14: shape accepted; Q4a-19, Q4a-20 and Q4a-26 (Single dwelling switch) answered and prototyped; Q4a-27 (switch on by default) and Q4a-28 (Phius values may be published) answered 2026-11-15 |
 | Research: Zone ventilation and Space airflows | Complete | 2026-11-15 | [ventilation](research/ventilation.md): F4a-24 to F4a-29; Q4a-29 to Q4a-32 raised |
-| PRD, contracts, stages | Requested | | |
+| UI prototype: Building Segments, Single dwelling per Segment, Zones / Spaces airflows | Complete | 2026-11-15 | [mockups/](mockups/README.md); BS-1 to BS-6 and Q4a-27 to Q4a-32 answered |
+| PRD, contracts, plan and stages for the Zones tab | Scoped | 2026-11-15 | [PRD](PRD.md), [Building Segments PRD](building-segments/PRD.md), [CONTRACTS](CONTRACTS.md), [PLAN](PLAN.md), [ACCEPTANCE](ACCEPTANCE.md), [phases/](phases); C4a-1 to C4a-6 open |
+| P4a-01 to P4a-06 | Scoped | 2026-11-15 | Ready to authorize |
+| Programs tab review (G1) | Requested | | Q4a-21 to Q4a-25; then P4a-07 to P4a-11 are rewritten |
 | GitHub issue | Requested | | Q4a-18 |
 | honeybee-ph and PHX fix for F4a-13 | Requested | | Q4a-08; cross-repo, own authorization |
 
@@ -31,8 +34,9 @@ The one place this packet's progress is read from.
   (Q4a-03). Nothing in Phase 4 mechanical blocks this packet.
 - Before implementation: choose the honeybee-ph pin for `PhEquipment` (F4a-18).
 - Building Segment management, the Segment settings dialog and Zones outside every Segment are
-  planned in [building-segments](../unscheduled/building-segments/README.md) (2026-11-15). This
-  packet's Segment row, category (Q4a-14) and airtightness (Q4a-06) depend on it (BS-5).
+  stages P4a-01 to P4a-04 ([building-segments](building-segments/PRD.md)), ahead of the Programs
+  stages (BS-5).
+- P4a-07 to P4a-11 wait on the Programs tab review (G1).
 - The Phius program library files live in the planned [ph-composer-standards](../unscheduled/ph-composer-standards/README.md)
   repository (Q4a-19). Ed cleared publishing them on 2026-11-15 (Q4a-28); they wait on the repository
   and on the Program and Schedule kinds.

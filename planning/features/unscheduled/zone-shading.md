@@ -8,7 +8,7 @@ ISSUE: none (local planning draft)
 ## Why
 
 A Zone may sit outside every Building Segment
-([Building Segments plan](building-segments/README.md)). Until this packet lands, export leaves such
+([Building Segments PRD](../phase-04a-program/building-segments/PRD.md)). Until this packet lands, export leaves such
 a Zone out. Ed wants it to reach WUFI-Passive and METr as shading instead: an accessory structure,
 an adjoining building, a neighbouring wing that is not part of the certified envelope but shades it.
 

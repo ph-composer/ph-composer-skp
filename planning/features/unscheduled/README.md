@@ -17,6 +17,5 @@ requests. A packet moves into a phase directory when it is scheduled.
 | [legend-hover-highlight](legend-hover-highlight/README.md) | feature | Requested |
 | [zones-entry-points](zones-entry-points/README.md) | feature | Requested |
 | [panel-keyboard-focus](panel-keyboard-focus/README.md) | feature | Requested |
-| [ph-composer-standards](ph-composer-standards/README.md) | workflow | Requested; plan only, from the Phase 4a review (Q4a-19) |
-| [building-segments](building-segments/README.md) | feature | Scoped; BS-1 to BS-6 answered 2026-11-15; ahead of Phase 4a implementation |
+| [ph-composer-standards](ph-composer-standards/README.md) | workflow | Scoped 2026-11-15: PRD and stages S1 to S4; repository needs Ed's go |
 | [zone-shading](zone-shading.md) | feature | Requested; brief only (2026-11-15) |
