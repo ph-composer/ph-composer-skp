@@ -13,6 +13,9 @@ Ed's desired behaviour (2026-11-15):
 3. Without Space airflows, the Program's airflow applies.
 4. The Program's ventilation schedule applies in every case.
 
+Read here as the Ventilation section of the Zone's Program (Q4a-12: a Zone picks a Program, no
+per-Zone loads), not a separate Ventilation record assigned per Zone.
+
 **PHX already does all four.** PH-Composer already writes rule 2 correctly. What Phase 4a adds is
 the Program's Ventilation load on every exported Room, and a Spaces view that shows what each Space
 will actually get. Baseline: honeybee-ph 1.33.65 (pinned wheel, Space fields checked against it),
@@ -46,7 +49,9 @@ honeybee-energy 1.123.23 (pinned wheel), PHX 1.59.1 (local checkout), honeybee_g
 ## Proposal
 
 1. **Keep the any-set rule.** A Space is either *From Program* or *Specified*; once one rate is
-   entered, the other two are 0. It matches the Grasshopper component and avoids F4a-24's mixing.
+   entered, the other two are 0. That is the PH design cascade: a bedroom is a supply room, a bath an
+   extract room, a hall a transfer room, so a Space given only supply should have extract 0, not a
+   Program-derived extract. It also matches the Grasshopper component and avoids F4a-24's mixing.
 2. **Every exported Room carries its Program's Ventilation load, unchanged.** The residential default
    has one, so rule 4 always has a schedule. Never fold Space overrides into the Room (F4a-29).
 3. **The Spaces view shows the effective airflow on every row.** An inheriting Space shows its
@@ -55,7 +60,10 @@ honeybee-energy 1.123.23 (pinned wheel), PHX 1.59.1 (local checkout), honeybee_g
    visible instead of hidden behind a dash. A "From Program" action on a specified Space clears all
    three rates.
 4. **One Ruby calculation**, matching PHX (four terms summed, split by unweighted Space floor area),
-   feeds both the Programs view's Zone column and the Spaces view's Space shares.
+   feeds both the Programs view's Zone column and the Spaces view's Space shares. Its per-person
+   term needs the Zone's people, which for the residential default come from its Dwelling
+   (bedrooms + 1, F4a-20). So the occupancy derivation must live in Ruby, not only in the Python
+   translation, and the Spaces view's shares follow Programs and Dwellings in the build order.
 5. **Transfer column tooltip:** PHPP only; WUFI-Passive and METr do not read it.
 6. **A Zone with no Spaces** gets an export finding once F4a-28 is confirmed by a round trip.
 
@@ -63,7 +71,7 @@ honeybee-energy 1.123.23 (pinned wheel), PHX 1.59.1 (local checkout), honeybee_g
 
 | Id | Question | Recommendation |
 | --- | --- | --- |
-| Q4a-29 | Keep the any-set rule, or let each rate override on its own, as PHX allows? | Keep the any-set rule |
+| Q4a-29 | Keep the any-set rule, or let each rate override on its own, as PHX allows? | Keep the any-set rule: supply, extract and transfer rooms are designed as a set, so an unentered rate means 0 |
 | Q4a-30 | In a partly specified Zone, inheriting Spaces get their floor share of the full Program flow (PHX today). Accept that and show it, or ask PHX to split only the remainder? | Accept and show it; a remainder rule is a PHX change and less predictable per Space |
 | Q4a-31 | EnergyPlus: should the Room's honeybee Ventilation reflect Space overrides, as the Grasshopper path does? It conflicts with PHX's split (F4a-29) | Not now. Room keeps the Program's load; revisit with an EnergyPlus exporter |
 | Q4a-32 | A Zone with no Spaces: export finding only, or write a default Space covering the Zone? | Confirm F4a-28 first; then a finding |
