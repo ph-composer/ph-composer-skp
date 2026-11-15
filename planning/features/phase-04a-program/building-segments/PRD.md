@@ -91,7 +91,7 @@ one Undo step across every section. Sections, in this order:
 The certification program list follows the pinned honeybee-ph `PhiusBuildingCertificationProgram`
 enum, which stops at Phius 2021 CORE and ZERO. Mechanical cooling and mechanical room temperature,
 shown in the prototype's Comfort section, move to Phase 4 mechanical, which owns the systems they
-describe (Claude's change, to confirm).
+describe (C4a-5, Ed, 2026-11-15).
 
 ### Export rules (P4a-03, BS-2, BS-6)
 

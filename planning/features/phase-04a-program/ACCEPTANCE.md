@@ -1,7 +1,7 @@
 # Phase 4a acceptance register
 
 DATE: 2026-11-15
-STATUS: Scoped. PG01 to PG06 are ready; PG07 to PG12 are rewritten after the Programs tab review (G1).
+STATUS: Scoped. PG01 to PG08 and PG11 are written; PG09, PG10 and PG12 follow their stages.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -23,11 +23,11 @@ closed; `manage` reports `removed_extensions`. Host: delete, move, Undo, Redo, s
 | PG04 | Certification, P4a-04 | With a `required` Segment extension present, export still runs (the projection claims it); the section's values round trip, copy with the Segment and go with it on delete; export writes each to `BldgSegment.phius_certification` and PHX reads them back into the WUFI XML | Not started |
 | PG05 | Spaces, P4a-05 | A Zone with no rates reads By Program and exports `None`; one entered rate makes every Space in the Zone export its rates with 0 for blanks; the notice on the first entry; From Program clears the Zone in one Undo step; Zone sums; the No Spaces warning in preflight; the agent reads per the C4a-6 answer. Ed at the mouse | Not started |
 | PG06 | Programs, export, P4a-06 | The feature installs with its dependencies; the Airtightness section round trips; an entered n50 and an entered q50 each read back from the WUFI XML and METr JSON within 0.01; with no test result the Program's Infiltration (or PHX's default) exports; wind exposure reaches `BldgSegment` | Not started |
-| PG07 | Programs, P4a-07 | Written after G1 | Not started |
-| PG08 | Programs, P4a-08 | Written after G1 | Not started |
+| PG07 | Programs, P4a-07 | Each kind round trips; a ventilation Schedule must total 24 h; a rule load keeps its inputs across a switch to a value and back; the residential default reads without a write, materializes once on first edit, resets, and refuses delete while default; guarded delete and delete with replacement; a library Program copies with its Schedules and a second copy reuses them; `user_data` survives edit, duplicate, Undo/Redo and reopen; the panel-closed walkthrough | Not started |
+| PG08 | Programs, P4a-08 | Each assign action is one Undo step; an emptied Dwelling goes; a Dwelling across Segments refuses; Single dwelling on creates the Dwelling, sums bedrooms and clears Zones, off keeps the Dwelling and default Program, both one Undo step; an absent payload reads as on and a non-residential Segment is never a single dwelling; derivations match hand values on the house and apartment references. Host: on and off, Undo/Redo, copy a Zone | Not started |
 | PG09 | Programs, UI kit, P4a-09 | Written after G1 | Not started |
 | PG10 | Programs, export, P4a-10 | Written after G1; includes a round trip of the five prototype journeys | Not started |
-| PG11 | Programs, UI kit, P4a-11 | Written after G1 | Not started |
+| PG11 | Programs, UI kit, P4a-11 | The three subtabs with the right sidebar (sources, open, copy with Schedules), accordion cards, rule switch, Reset on the default, the ventilation total warning, Equipment Set devices, New, Duplicate, Delete with replacement, IP and SI; every edit one Undo step. UI polish review recorded; Ed at the mouse | Not started |
 | PG12 | Integration, P4a-12 | Both offline Ruby gates, coverage, browser and runtime checks; packaged footprint against the current baseline; the integrated run from a fresh process; context, docs and glossary folded | Not started |
 
 ## Synthetic reference models

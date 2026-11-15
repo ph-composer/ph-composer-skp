@@ -1,7 +1,7 @@
 # Phase 4a contracts: records, ownership and seams
 
 DATE: 2026-11-15
-STATUS: Scoped for P4a-01 to P4a-06; revised the same day after an independent review against the code (14 findings folded in). Sections 5 to 7 are provisional until the Programs tab review. Open contract questions C4a-2 to C4a-8 at the end.
+STATUS: Scoped for P4a-01 to P4a-08 and P4a-11; revised the same day after an independent review against the code (14 findings folded in) and after the Programs tab review. Ed answered C4a-5, C4a-7 and C4a-8; C4a-2, C4a-3, C4a-4 and C4a-6 settle in their stages.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -83,6 +83,13 @@ panel.segmentSettingsSection(namespace, {
 })
 ```
 
+Zones also exposes the staging route as a proposal participant, `ph_composer.zones.stage_extension`
+(a namespace and payload for named Zone or Segment records), so Programs' own actions, which may
+call Zones because Programs requires it, write the per-Zone assignment the same way (P4a-08).
+Side effects of a section's change that belong to its owner (switching Single dwelling on creates
+a Dwelling and clears Zone assignments) run as that owner's transition contributor on Zones'
+save, in the same Undo step.
+
 Zones owns the dialog frame, the General section and Save. P4a-02 adds the seam to
 `context/EXTENSIBILITY.md` with a working development example.
 
@@ -134,9 +141,10 @@ interview; the Programs tab review may change them.
 | `ph_composer.programs.equipment_set` | `eqs_` | Name; devices as `Records::Part`s, each a honeybee-ph `PhEquipment` type with its values (Q4a-03) |
 | `ph_composer.programs.dwelling` | `dwl_` | Name, `units` (integer ≥ 1), `bedrooms` and `occupants` (number or null; set only under Single dwelling, Q4a-24), `equipment_set_id` (reference or null, Q4a-21) |
 
-**The residential default is seeded into each Model as an ordinary Program record** (Q4a-13,
-Q4a-23): the first time a Model needs it, Programs writes it from a frozen definition in code, built
-from the pinned honeybee-ph rules and schedules, with `source` naming PH-Composer's default. The
+**The residential default becomes an ordinary Program record in each Model** (Q4a-13, Q4a-23).
+Reads never write: until a write touches it, reads answer a frozen definition in code (built from
+the pinned honeybee-ph rules and schedules) under a reserved id, and the first write that touches it
+materializes it as a record with its Schedules, `source` naming PH-Composer's default. The
 user may edit it like any Program. A Reset to PH-Composer default action rewrites it from the
 definition, one Undo step. A Programs Model setting, `default_program_id` (never null), names the
 Program unassigned Zones and Single dwelling use; deleting that Program refuses while it is the
@@ -208,7 +216,7 @@ round-trip tests skip when it is absent and run in each stage's host gate with i
 | C4a-2 | A copied Zone shares its source's Dwelling: does it stay in it? | Yes, until the user chooses One dwelling each; a finding when a Dwelling spans Segments | P4a-08 |
 | C4a-3 | A Dwelling's Zones in two Segments | Refused by Programs' actions; a finding on generic routes | P4a-08 |
 | C4a-4 | The n50/q50 conversion's exposed area: PH-Composer's envelope sum, or PHX's `cleanup` rule exactly | Match PHX, proven by a round trip reading back the entered value | P4a-06 |
-| C4a-5 | Which feature owns mechanical cooling and the mechanical room temperature | Phase 4 mechanical; listed under Planned until then | Ed, with this plan |
+| C4a-5 | Which feature owns mechanical cooling and the mechanical room temperature | **Answered (Ed, 2026-11-15): Phase 4 mechanical**; listed under Planned until then | Answered |
 | C4a-6 | Keep a per-Space `airflow_mode` copy for agents | Yes, derived from the Zone, for one API minor version | P4a-05 |
-| C4a-7 | Single dwelling's default: on for every Segment whose extension is absent (so a new Model's first Segment and every added Segment start on), or on only for the first | On for every Segment, effective only while residential. It needs no Segment-created transition and fits Q4a-27; it replaces the earlier proposal that added Segments start off | Ed, with this plan |
-| C4a-8 | Moving a Zone back into a Segment after its shared Faces were reclassified to an Attached zone | Leave them as Attached zone; the user re-runs Solve to restore Surface pairs, and the move-back notice says so | Ed, with this plan |
+| C4a-7 | Single dwelling's default: on for every Segment whose extension is absent, or on only for the first | **Answered (Ed, 2026-11-15): on for every Segment**, effective only while residential | Answered |
+| C4a-8 | Moving a Zone back into a Segment after its shared Faces were reclassified to an Attached zone | **Answered (Ed, 2026-11-15): they stay Attached zone**; the move-back notice says to re-run Solve | Answered |

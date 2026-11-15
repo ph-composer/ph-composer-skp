@@ -82,7 +82,7 @@ settings, Occupancy section, and only on a residential Segment.
    moved in joins without action. The heading row becomes the house row: its Bedrooms, Occupants
    and Equipment Set cells are the only inputs; bedrooms show an amber "?" until entered.
 2. **Default:** on for every residential Segment until switched off, so a new Model's one Segment
-   starts as a single dwelling (Q4a-27) and so does a Segment the user adds (C4a-7, to confirm). A
+   starts as a single dwelling (Q4a-27) and so does a Segment the user adds (C4a-7, Ed, 2026-11-15). A
    non-residential Segment is never a single dwelling.
 3. **The heading shows a "Single dwelling" tag** with a lock. A locked cell, or the tag, opens a
    bubble anchored to it: "<Segment> is a single dwelling", why, and one **Open settings** button.
