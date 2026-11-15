@@ -66,6 +66,22 @@ The ellipsis menu is not a dumping ground. Keep actions visible when their curre
 
 Window placement and thermal bridge assignment have no accepted screen pattern; face assignment's (the Overview and the Classify tool) is recorded in `references/patterns.md`. They work in the SketchUp viewport with a native tool as much as in the panel. When designing one, start from the rules above, reuse the drawing-tool state rule (pressed button, icon and cursor change together; Escape unwinds one layer), and record the new pattern in `references/patterns.md` once the owner accepts it. Do not invent a second interaction grammar for the viewport.
 
+## Prototype-first planning
+
+When the owner is shaping a feature, the first deliverable is a clickable mockup, not a text spec: the owner finds
+reviewing a screen much faster than reviewing prose. Start it with `make mockup-new
+MOCKUP_DIR=planning/features/<slug>/mockups` and build on the mockup kit (`tools/ui-preview/.index.md`,
+"Mockup kit"), which loads the panel's own stylesheets, so the rules above apply to the mockup as to the panel.
+
+- Open it in the browser pane on the preview server and leave it open. The owner clicks an element and says
+  what to change; apply each pick as one small edit, reload the pane, and confirm in a line.
+- Ask open questions one at a time, or show them as states in the mockup (a disabled control with its
+  reason, an amber "?" pill), not as a numbered list.
+- Record each decision in the packet's `DECISIONS.md` as it lands.
+- Add a scene to `scenes.js` for each state worth keeping. Recapture with `make ui-gallery MOCKUP=...` and
+  push once per topic, when the owner moves on, not after every pick.
+- Write the PRD and phase plans from the reviewed mockup, and link its scene table from them.
+
 ## Verify the result
 
 1. Add deterministic tests for structure, accessible names, state transitions, and preserved commands. Test the behavior rather than exact decorative markup.
