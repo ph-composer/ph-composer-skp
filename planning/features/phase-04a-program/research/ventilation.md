@@ -58,18 +58,18 @@ honeybee-energy 1.123.23 (pinned wheel), PHX 1.59.1 (local checkout), honeybee_g
 2. **Every exported Room carries its Program's Ventilation load, unchanged (Q4a-31).** It is the
    schedule for every Space, the flow for a From Program Zone, and EnergyPlus's ventilation either
    way. Never fold Space rates into the Room (F4a-29).
-3. **The Spaces view shows the effective airflow on every row.** In a From Program Zone each Space
-   shows its share as a muted number, with a tooltip naming the Program and the floor share. In a
-   detailed Zone each Space shows what was entered and a muted 0 where blank. The Zone row shows a
-   "Detailed" tag and its Program as the schedule source; Zone sums are always shown. Entering the
-   first rate in a Zone says so in a notice ("its other 3 Spaces export 0 until you enter theirs").
-   **From Program** sits on the Zone row and clears every Space's rates in that Zone; clearing the
-   last rate by hand does the same.
-4. **One Ruby calculation**, matching PHX (four terms summed, split by unweighted Space floor area),
-   feeds both the Programs view's Zone column and the Spaces view's Space shares. Its per-person
-   term needs the Zone's people, which for the residential default come from its Dwelling
-   (bedrooms + 1, F4a-20). So the occupancy derivation must live in Ruby, not only in the Python
-   translation, and the Spaces view's shares follow Programs and Dwellings in the build order.
+3. **The Spaces view keeps today's pattern, no Airflow column (Ed, 2026-11-15).** In a Zone with no
+   rates, every airflow cell reads **By Program** (today's "Zone"), with a tooltip naming the
+   Program. Typing any rate switches the Zone to detailed airflows: every blank cell in that Zone
+   reads a muted 0, a notice says so, and **From Program** in the Zone row's Actions cell clears
+   every rate. Zone sums show a dash while By Program and real sums once detailed. The placeholder
+   rule moves from the Space to the Zone (`cells.js`).
+4. **Zones → Programs' Ventilation column has two sources.** For a By Program Zone it is the
+   Program's flow (four terms summed, split by Space floor area, as PHX does); for a detailed Zone,
+   the larger of its Spaces' entered supply and extract sums. The cell's tooltip names the source.
+   The Program's flow needs the Zone's people, which for the residential default come from its
+   Dwelling (bedrooms + 1, F4a-20), so that derivation lives in Ruby. The Spaces view no longer
+   computes Program shares, so it does not wait on it.
 5. **Transfer column tooltip:** PHPP only; WUFI-Passive and METr do not read it.
 6. **A Zone with no Spaces is an export warning, not an error (Q4a-32).** WUFI-Passive and METr open
    such a file; it will not calculate until Spaces are added. The Spaces view flags the Zone.
