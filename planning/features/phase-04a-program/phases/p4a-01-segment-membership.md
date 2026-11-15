@@ -23,8 +23,10 @@ Behavior: [Building Segments PRD](../building-segments/PRD.md), "Membership". Na
    `zone.option_last_segment` (declare in `codes.rb`); deleting the default sets it to the
    destination or the first remaining Segment. Levels unchanged.
 3. **Commands.** `options/commands.rb` `remove` accepts a null destination for Segments.
-4. **New action** `ph_composer.zones.set_building_segment`: Zone references and a Segment id or
-   null; guarded `expected_values`; one Undo step; refuses locked Zones as today.
+4. **Assigning.** Extend `ph_composer.zones.update_field` (`declarations/selection.rb`,
+   `zone/selection.rb`) so `field: building_segment` accepts null, with its guarded
+   `expected_values` and one Undo step. No new action. `manage` and `remove` results add
+   `removed_extensions` (CONTRACTS section 1).
 5. **Make Zone and Restore Zone.** New Zones take the default; Restore recovers null as null; the
    membership stamp and `choice_evidence` carry null.
 6. **Colour-by.** `colour_modes.rb` "by Building Segment" gives no-Segment Zones a neutral swatch
@@ -37,7 +39,8 @@ Behavior: [Building Segments PRD](../building-segments/PRD.md), "Membership". Na
 
 | File | Disposition |
 | --- | --- |
-| `features/zones/options/definitions.rb`, `operations.rb`, `commands.rb`, `adoption.rb`, `registration.rb` | Change |
+| `features/zones/options/definitions.rb`, `operations.rb`, `commands.rb`, `adoption.rb`, `registration.rb` | Change. `Options.resolve` calls `engine.find` on nil; `Adoption.needs_adoption?` rescues to true, so a no-Segment Zone would read as needing adoption; the `schema_version == 2` branches in `operations.rb` |
+| `features/zones/zone/schema.rb`, `zone/operations.rb`, `zone/selection.rb` | Change: the `[1, 2].include?` version check, `evidence_matches?`, `stamp?` requiring a String, the `== 2` branch in `operations.rb` |
 | `features/zones/declarations/zone.rb`, `selection.rb` | Change shapes |
 | `features/zones/colour_modes.rb` | Change |
 | `html/features/zones/option_dialog.js` | Keep working until P4a-02 removes it; offer No Building Segment as a destination |
@@ -45,7 +48,7 @@ Behavior: [Building Segments PRD](../building-segments/PRD.md), "Membership". Na
 ## Tests (write first)
 
 1. Schema 3 round trip; schema 2 fixture reads; an unknown version refuses.
-2. `set_building_segment` to null and back; stale expected value refuses and writes nothing.
+2. `update_field` to a null Segment and back; stale expected value refuses and writes nothing.
 3. Management: last Segment refuses; used Segment to null; default moves to destination, else first.
 4. Make Zone joins the default; Restore keeps null.
 5. Agent walkthrough with the panel closed: create a second Segment, move a Zone out, delete a

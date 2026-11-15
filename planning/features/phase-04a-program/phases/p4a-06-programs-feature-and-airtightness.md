@@ -20,11 +20,11 @@ Behavior: [Phase 4a PRD](../PRD.md), "Segment settings sections Programs owns". 
 
 1. **Feature.** `features/programs/install.rb`, `requires: ["ph_composer.zones",
    "ph_composer.spaces", "ph_composer.certification"]`, listed in `extension.rb`.
-2. **Extension.** Namespace `ph_composer.programs` on the Segment: `airtightness_basis` (`n50`,
-   `q50`), `airtightness_value` (number or null), `wind_exposure` (seven values). The Occupancy
-   fields join this namespace in P4a-08 with a schema version bump.
-3. **Section and participant.** The Airtightness section: basis select, value with its unit, wind
-   exposure; `programs.segment_settings.write`.
+2. **Extension.** Namespace `ph_composer.programs.airtightness` on the Segment: `basis` (`n50`,
+   `q50`), `value` (number or null), `wind_exposure` (seven values), `export_relevance: required`,
+   exported through P4a-04's projection.
+3. **Section.** The Airtightness section: basis select, value with its unit, wind exposure; Zones'
+   Save stages it.
 4. **Conversion (C4a-4).** Read PHX's back-conversion in the pinned PHX (`from_HBJSON/cleanup.py`,
    the exposed-area rule; exponent 0.65; n50 by net volume) and implement its inverse: a Room
    `Infiltration` `flow_per_exterior_area` at 4 Pa such that PHX reports the entered value for the
@@ -38,8 +38,8 @@ Behavior: [Phase 4a PRD](../PRD.md), "Segment settings sections Programs owns". 
 
 1. Extension round trip and copy; section validation (a negative or zero value refuses).
 2. Conversion: unit tests of the inverse against the PHX formula, both bases.
-3. PHX round trip: an n50 and a q50 Segment each read back from the WUFI XML and METr JSON within
-   0.01.
+3. PHX round trip (the `phx` group; skips without it): an n50 and a q50 Segment each read back
+   from the WUFI XML and METr JSON within 0.01.
 
 ## Host gate
 

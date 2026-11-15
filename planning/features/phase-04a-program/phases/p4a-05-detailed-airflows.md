@@ -18,14 +18,17 @@ section 4. Research: [ventilation](../research/ventilation.md). Prototype: `j1-s
 
 ## Steps
 
-1. **Rule.** `features/spaces/scan/metrics.rb`: `airflow_mode` per Zone (`by_program`,
-   `detailed`); Space `airflows` 0 for blanks in a detailed Zone, null in a By Program Zone; Zone
-   sums null while By Program. `reads.rb` and `summaries.rb` shapes; C4a-6 for the per-Space copy.
-2. **Export.** `python/ph_composer_translation/space_sections.py` `airflow_rates` takes the Zone's
-   mode; the contract record carries it.
+1. **Rule.** `features/spaces/scan/metrics.rb`: `airflow_mode` per Zone, values `by_program` and
+   `detailed` (today `inheriting`, `user_specified`); Space `airflows` 0 for blanks in a detailed
+   Zone, null in a By Program Zone; Zone sums null while By Program. `reads.rb` and `summaries.rb`
+   shapes; C4a-6 for the per-Space copy. The old values also live in `colour_modes.rb` and the table
+   export (`features/spaces/export.rb`, whose "Zone" becomes "By Program").
+2. **Export.** The Space export contract carries the Zone's mode; the Python Space section moves to
+   version 2 (`space_sections.py`, today `versions = frozenset({1})`) and `airflow_rates` takes it.
 3. **Action.** `ph_composer.spaces.clear_zone_airflows`, one Undo step.
-4. **Panel.** `html/features/spaces/cells.js`: placeholder "By Program" or "0" by the Zone's mode,
-   tooltips; `view.js`: Zone sums dash while By Program, From Program in a detailed Zone row's
+4. **Panel.** `html/features/spaces/cells.js`: placeholder "By Program" or "0" by the Zone's mode;
+   the By Program tooltip says "the Zone's Program ventilation" until Programs exist (P4a-08 names
+   it); `view.js`: Zone sums dash while By Program, From Program in a detailed Zone row's
    Actions cell, the notice when an edit switches the mode; Transfer header tooltip.
 5. **No Spaces.** Spaces' preflight warning naming each Zone with no Spaces (not blocking); the
    amber row in the view.

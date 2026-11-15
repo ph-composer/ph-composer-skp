@@ -30,10 +30,9 @@ Paths are relative to `src/ph_composer/`. Planning baseline `origin/main` at `a4
 | Existing | Reused as | Still required |
 | --- | --- | --- |
 | `features/zones/options/` Segment and Level records, management, adoption | Segment membership and its rules | Nullable membership, last-Segment refusal, optional survivor (P4a-01) |
-| `html/features/zones/overview.js`, `zone_cells.js`, `option_dialog.js` | Geometry view | Segment heading rows; the column and Manage dialog removed (P4a-02) |
+| `html/features/zones/overview.js` (the Zone views host), `faces_view.js` (Geometry), `zone_cells.js`, `option_dialog.js`; the `table_views` contract | Every Zone view | Segment heading rows in the host with a per-view sums hook; the Building-Segment column and Manage dialog removed (P4a-02) |
 | `html/features/spaces/view.js`, `cells.js`, `selection.js` | Spaces view | Segment heading rows, Zone rows in the selection, per-Zone airflow mode (P4a-02, P4a-05) |
-| `core/records/extension.rb`, structured extension envelopes | Segment settings and per-Zone assignments (CONTRACTS sections 2 and 5) | The foreign-extension write route (C4a-1) |
-| Proposal participants and compound proposals | One Undo step for the settings dialog | One participant per section owner |
+| `core/records/extension.rb`, structured extension envelopes, `engine.propose_metadata_update` | Segment settings and per-Zone assignments, staged by Zones (CONTRACTS sections 2 and 5) | Evidence narrowed to Segment values (P4a-02); an export projection for extensions on catalog records and a `segment` attachment host (P4a-04) |
 | `features/zones/faces/attached_zone.rb`, `PhAdditionalZone` export | Shared Faces of Zones left out | The move-out offer; PHX duplicate check (P4a-03) |
 | `python/ph_composer_translation/` sections, shared `BldgSegment` per Segment | Leaving Zones out; certification, airtightness and Program sections | New sections per stage |
 | Library providers, file provider, library kinds (Materials, frames, glazings) | Program, Schedule and Equipment Set library kinds | P4a-07 |
@@ -43,10 +42,10 @@ Paths are relative to `src/ph_composer/`. Planning baseline `origin/main` at `a4
 
 | Stage | Delivers | Depends on | Code owner | Host gate |
 | --- | --- | --- | --- | --- |
-| [P4a-01](phases/p4a-01-segment-membership.md) | Zone schema 3 (nullable Segment), last-Segment and default rules, Segment delete with destination, `set_building_segment` | Ed's go | zones | Delete, move and Undo/Redo in a real Model; reopen |
+| [P4a-01](phases/p4a-01-segment-membership.md) | Zone schema 3 (nullable Segment), last-Segment and default rules, Segment delete with destination, `update_field` accepting null | Ed's go | zones | Delete, move and Undo/Redo in a real Model; reopen |
 | [P4a-02](phases/p4a-02-segment-rows-and-settings.md) | Segment heading rows in Geometry and Spaces; New, Delete and Move from the tables; the settings dialog, General section and section seam; Manage dialog and Geometry column removed | P4a-01 | zones, spaces, UI | Panel gestures with Ed |
-| [P4a-03](phases/p4a-03-segment-export-rules.md) | Export minimum, Zones left out, empty Segments, Attached zone on shared Faces, the move-out offer, PHX round trip of `PhAdditionalZone` | P4a-01 | zones, spaces, thermal_bridges, export | RBZ export; WUFI XML and METr JSON read back |
-| [P4a-04](phases/p4a-04-segment-certification.md) | `ph_composer.certification`: Phius certification section and its export to `BldgSegment` | P4a-02 | certification (new) | Exported values read back in PHX |
+| [P4a-03](phases/p4a-03-segment-export-rules.md) | Export minimum, Zones left out, empty Segments, the shared-Face refusal, the move-out offer, the optional PHX test group, PHX round trip of `PhAdditionalZone` | P4a-02 | zones, spaces, thermal_bridges, export | RBZ export; WUFI XML and METr JSON read back |
+| [P4a-04](phases/p4a-04-segment-certification.md) | The export projection for Segment extensions; `ph_composer.certification`: Phius certification section and its export to `BldgSegment` | P4a-02, P4a-03 (PHX test group) | certification (new) | Exported values read back in PHX |
 | [P4a-05](phases/p4a-05-detailed-airflows.md) | Per-Zone airflow mode, By Program, From Program, the notice, No Spaces warning | P4a-02 for the Zone-row action | spaces, UI | Spaces gestures with Ed; export round trip |
 | [P4a-06](phases/p4a-06-programs-feature-and-airtightness.md) | `ph_composer.programs` with the Airtightness section and infiltration export | P4a-02, P4a-04 | programs (new), export | Entered n50 and q50 read back in PHX |
 | G1 | **Programs tab review with Ed**; P4a-07 to P4a-11 are rewritten to its answers | P4a-06 merged or not | | |
@@ -58,14 +57,13 @@ Paths are relative to `src/ph_composer/`. Planning baseline `origin/main` at `a4
 | [P4a-12](phases/p4a-12-acceptance-and-handoff.md) | Register closed; context, docs, glossary; handoff to Phase 4 | all above | integration | Fresh-process integrated run |
 
 ```
-P4a-01 ─┬─ P4a-02 ─┬─ P4a-04 ─ P4a-06 ─ G1 ─ P4a-07 ─┬─ P4a-08 ─┬─ P4a-09 ─┐
-        │          │                                  │          └─ P4a-10 ─┤
-        │          └─ P4a-05 (also feeds P4a-09)      └─ P4a-11 ────────────┼─ P4a-12
-        └─ P4a-03 ──────────────────────────────────────────────────────────┘
+P4a-01 ── P4a-02 ─┬─ P4a-03 ── P4a-04 ── P4a-06 ── G1 ── P4a-07 ─┬─ P4a-08 ─┬─ P4a-09 ─┐
+                  │                                              │          └─ P4a-10 ─┤
+                  └─ P4a-05 (also feeds P4a-09)                  └─ P4a-11 ────────────┴─ P4a-12
 ```
 
-P4a-03, P4a-04 and P4a-05 can run in parallel once their dependency merges; they touch different
-features. P4a-06 follows P4a-04, which it requires. Each stage is one PR through the pr-loop ([stage brief](../../../.agents/stage-brief.md)),
+P4a-03 and P4a-05 can run in parallel once P4a-02 merges; P4a-04 follows P4a-03 (it reuses its
+PHX test group) and P4a-06 follows P4a-04, which it requires. Each stage is one PR through the pr-loop ([stage brief](../../../.agents/stage-brief.md)),
 with one Sonnet read-through and one Codex review; P4a-01, P4a-02 (the new seam) and P4a-07 (the
 record kinds) take the stronger review lane.
 
@@ -75,7 +73,8 @@ record kinds) take the stronger review lane.
   or Python changes, goldens reviewed against the contract.
 - Every stage that adds or reshapes an operation bumps the API minor version and regenerates
   `docs/API_REFERENCE.md` with `make fixtures`.
-- Every export stage ends with a PHX round trip through the pinned stack that reads back the value
-  the user entered, as P4a-03 and P4a-06 define.
+- Every export stage ends with a PHX round trip that reads back the value the user entered, using
+  the optional `phx` dependency group P4a-03 adds; those tests skip without it and run in the host
+  gate with it.
 - Host gates follow the [native acceptance skill](../../../.agents/skills/ph-composer-native-acceptance/SKILL.md)
   and record ledger receipts during the run.

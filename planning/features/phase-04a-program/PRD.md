@@ -81,8 +81,9 @@ settings, Occupancy section, and only on a residential Segment.
    default. The locked values derive from the setting and are not written to each Zone, so a Zone
    moved in joins without action. The heading row becomes the house row: its Bedrooms, Occupants
    and Equipment Set cells are the only inputs; bedrooms show an amber "?" until entered.
-2. **New Model:** its one Segment has Single dwelling on (Q4a-27). A Segment the user adds starts
-   with it off (Claude's choice, to confirm).
+2. **Default:** on for every residential Segment until switched off, so a new Model's one Segment
+   starts as a single dwelling (Q4a-27) and so does a Segment the user adds (C4a-7, to confirm). A
+   non-residential Segment is never a single dwelling.
 3. **The heading shows a "Single dwelling" tag** with a lock. A locked cell, or the tag, opens a
    bubble anchored to it: "<Segment> is a single dwelling", why, and one **Open settings** button.
 4. **Switching on** over per-Zone assignments in that Segment confirms first, listing what gives
@@ -105,7 +106,8 @@ settings, Occupancy section, and only on a residential Segment.
 The shipping view keeps its columns; no Airflow column (Ed, 2026-11-15).
 
 1. A Zone with no Space rates is **By Program**: every airflow cell reads "By Program", with a
-   tooltip naming the Program. Zone sums show a dash.
+   tooltip naming the Program once Programs exist (P4a-08) and saying "the Zone's Program
+   ventilation" before then. Zone sums show a dash.
 2. **Typing any rate on any Space makes its Zone detailed** (Q4a-29, Q4a-30): every Space in that
    Zone exports its own rates and every blank reads a muted 0. The first entry says so in a notice
    ("Hall and stair now uses detailed airflows: its other Space exports 0 until you enter its

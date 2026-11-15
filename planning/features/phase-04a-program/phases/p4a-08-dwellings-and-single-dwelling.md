@@ -19,7 +19,7 @@ Requires P4a-07. Adds Dwellings, the per-Zone assignment extension, the Ruby der
 
 ## Settle at G1
 
-Q4a-21 (Equipment Set on the Dwelling or the Zone), Q4a-24 (counts per Zone or per Dwelling), the default for an added Segment.
+Q4a-21 (Equipment Set on the Dwelling or the Zone), Q4a-24 (counts per Zone or per Dwelling); C4a-7 (Single dwelling's default) if Ed has not answered it with this plan.
 
 ## Host gate
 

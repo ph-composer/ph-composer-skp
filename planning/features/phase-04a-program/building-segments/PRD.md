@@ -1,7 +1,7 @@
 # Building Segments: membership, management and settings
 
 DATE: 2026-11-15
-STATUS: Scoped. Interviewed 2026-11-15 (BS-1 to BS-6 answered, below). Built as Phase 4a stages P4a-01 to P4a-04 ([PLAN](../PLAN.md)). No stage authorized.
+STATUS: Scoped. Interviewed 2026-11-15 (BS-1 to BS-6 answered, below); revised the same day after an independent review. Built as Phase 4a stages P4a-01 to P4a-04; the Programs-owned settings sections arrive in P4a-06, P4a-08 and P4a-10 ([PLAN](../PLAN.md)). No stage authorized.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft; open one when Ed authorizes P4a-01)
 
@@ -47,7 +47,8 @@ These enter `context/UBIQUITOUS_LANGUAGE.md` in P4a-01 (membership) and P4a-02 (
 2. The Model keeps at least one Segment. Deleting the last one is refused; the Delete control says
    why before the click.
 3. Deleting a Segment that holds Zones asks where they go: another Segment or No Building Segment.
-   Its settings records go with it (each feature's own record, deleted in the same Undo step).
+   Its settings, stored as extensions on the Segment, go with it in the same Undo step; the
+   confirmation names them.
 4. The default can never be none. Deleting the default makes the Segment its Zones moved to the
    default, else the first remaining one.
 5. Merging two Segments is Delete with "move its Zones to" the survivor (BS-4).
@@ -70,8 +71,8 @@ These enter `context/UBIQUITOUS_LANGUAGE.md` in P4a-01 (membership) and P4a-02 (
 5. **Moving Zones**: check Zone rows, then Building Segment in the selection bar: each Segment, New
    Building Segment (created, named, and the checked Zones moved in), or No Building Segment. No
    drag and drop. The Spaces view's selection bar gains Zone rows for this.
-6. The Geometry view's Building-Segment column and the Manage Building Segments dialog go. The
-   Level column and its dialog stay.
+6. The Building-Segment column (in Geometry and in Spaces) and the Manage Building Segments dialog
+   go. The Level column and its dialog stay.
 
 ### Building Segment settings (P4a-02 frame; sections in later stages)
 
@@ -101,11 +102,14 @@ Checked when the user exports; the Zone tables never flag them.
    finding names those Zones and counts what went with them. Later they export as shading
    ([zone-shading](../../unscheduled/zone-shading.md)).
 3. An empty Segment is left out, with an info line in the export report.
-4. A Face whose Surface counterpart is in a Zone left out exports with the Attached zone assigned to
-   it (`PhAdditionalZone`). With none assigned, export refuses and names the Face.
+4. A Surface Face whose partner Zone is left out refuses export and names the Face. A Face can
+   hold an Attached zone only on the Attached zone boundary (`features/zones/faces/schema.rb`), so
+   the fix is to reclassify it, which the offer below does.
 5. **Moving a Zone out of every Segment offers to make it the Attached zone** for the Faces it
-   shares with exported Zones: one confirmation names the Faces and creates or reuses an Attached
-   zone named for the Zone, as one Undo step (BS-6, accepted 2026-11-15).
+   shares with exported Zones: one confirmation names the Faces, reclassifies them from Surface to
+   Attached zone (leaving their Surface pairs) and creates or reuses an Attached zone named for the
+   Zone, as one Undo step (BS-6, accepted 2026-11-15). Moving the Zone back leaves them as Attached
+   zone; re-running Solve restores the Surface pairs, and the move-back notice says so (C4a-8).
 
 ## How PhAdditionalZone reaches PHX (read 2026-11-15; P4a-03 tests it)
 
@@ -137,8 +141,8 @@ Zone count or category subtitle.
 
 ## Records and contracts
 
-[CONTRACTS](../CONTRACTS.md), sections 1 and 2: Zone schema 3, the Segment transitions other
-features answer, and the settings-section seam.
+[CONTRACTS](../CONTRACTS.md), sections 1 and 2: Zone schema 3, Segment settings as structured
+extensions staged by Zones' Save, the settings-section seam and the export projection they need.
 
 ## Out of scope
 
