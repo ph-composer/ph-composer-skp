@@ -18,7 +18,7 @@ server. The dark strip at the top picks a journey and says what to try; Reset re
 | 1. Single-family home, five Zones, one dwelling | Single dwelling is on: type the bedrooms on the Building Segment row. Uncheck it, then click the House chip | `j1-start` (`journey=1`), `j1-bedrooms` (`journey=1&do=house3`), `j1-unlocked` (`journey=1&do=house3,unsingle,bubble`), `j1-default-program` (`journey=1&do=pdefault`) |
 | 2. Apartments, one Zone each | Check every Zone, Dwelling: One dwelling each. Then check Single dwelling to see its confirmation | `j2-checked` (`journey=2&do=checkall`), `j2-dwellings` (`journey=2&do=each,beds`), `j2-single-confirm` (`journey=2&do=each,beds,trysingle`) |
 | 3. Apartments plus corridors, lobby, stair, office, gym | Apartments as in 2; pick Phius Multifamily Programs for the rest from the Program choice | `j3-corridors-checked` (`journey=3&do=each,beds,checkcorr`), `j3-common-areas` and `-420` (`journey=3&do=each,beds,common`) |
-| Building Segments (journey 3, then 1) | Check the Bike shed, Building Segment: No Building Segment or New Building Segment. Hover a Segment row for Rename and Delete; its settings icon opens the dialog | `j3-no-segment` (`…,common,moveshed`), `j3-move-segment` (`…,common,checkshed`), `j3-new-segment` (`…,common,newseg`), `j3-segment-settings` (`…,common,segsettings`), `j3-delete-segment` (`…,common,newseg,trydelete`), `j1-segment-settings` (`journey=1&do=house3,segsettings`), `j1-adu` (`journey=1&do=house3,adu`) |
+| Building Segments (journey 3, then 1) | Check the Bike shed, Building Segment: No Building Segment or New Building Segment. Hover a Segment row for Delete; its settings icon opens the dialog, where it is renamed | `j3-no-segment` (`…,common,moveshed`), `j3-move-segment` (`…,common,checkshed`), `j3-new-segment` (`…,common,newseg`), `j3-segment-settings` (`…,common,segsettings`), `j3-delete-segment` (`…,common,newseg,trydelete`), `j1-segment-settings` (`journey=1&do=house3,segsettings`), `j1-adu` (`journey=1&do=house3,adu`) |
 | 4. Non-residential school | Unassigned Zones are flagged; assign from Phius Non-Residential, or browse the library sidebar | `j4-start` (`journey=4`), `j4-assigned` (`journey=4&do=school`), `j4-library` (`journey=4&do=school,libnr`), `j4-long-name` (`journey=4&do=school,longname`) |
 | 5. Custom lab programs | Programs tab, + on the rail, set loads, open a schedule chip | `j5-program` and `-420` (`journey=5&do=custom`), `j5-schedule` (`journey=5&do=custom,customsched`) |
 | Equipment Sets | Programs tab, Equipment Sets | `equipment-sets` (`journey=1&do=sets`) |
@@ -46,8 +46,8 @@ server. The dark strip at the top picks a journey and says what to try; Reset re
   house and an ADU as two single-dwelling Segments.
 - **Building Segments** ([plan](../../unscheduled/building-segments/README.md), BS-1 to BS-6 answered). The
   heading takes two lines: the name alone on the first (a long name truncates, full name in its
-  tooltip, `j4-long-name`), with a findings flag and, on hover, Rename and Delete (Delete disabled
-  on the last Segment); then the Default tag, Zone count and category, Single dwelling and the
+  tooltip, `j4-long-name`), with a findings flag and, on hover, Delete (disabled on the last
+  Segment); no Rename icon, the name is edited in settings; then the Default tag, Zone count and category, Single dwelling and the
   settings icon.
   Airtightness, category and certification moved into the Building Segment settings dialog. The
   selection bar moves checked Zones to a Segment, a new one (named, then renamed in place) or No

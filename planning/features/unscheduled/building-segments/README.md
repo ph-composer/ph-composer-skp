@@ -34,7 +34,7 @@ view (journey 3 for moving, adding and deleting; journey 1 for the dialog under 
 
 1. **A Zone may be in no Building Segment.** Export leaves it out for now, with a finding that names
    it. Later it exports as shading ([zone-shading](../zone-shading.md)).
-2. **Management stays, its rules change.** Add, rename and delete Segments from the Zone tables.
+2. **Management stays, its rules change.** Add and delete Segments from the Zone tables; rename in settings.
    The Model always keeps at least one Segment: deleting the last one is refused, with the reason
    on the control. Deleting a used Segment asks where its Zones go: another Segment or no Segment.
    The default Segment can never be "no Segment"; deleting the default moves the default to the
@@ -52,9 +52,11 @@ per Segment for certification, and Programs sets loads per Segment category. Gro
 membership visible without a column, shows an empty Segment as an empty group, and gives the
 settings dialog one home: a settings icon on the heading row, the same in every view.
 
-- The heading row carries the Segment name, a "Default" tag on the default one, the Zone count,
-  the view's own sums (Geometry: envelope areas; Spaces: iCFA, volume; Programs: bedrooms, people),
-  a findings flag, and, on hover, Settings, Rename and Delete icons, as record rows do elsewhere.
+- The heading takes two lines. First, the Segment name alone (truncated, full name in its
+  tooltip), a findings flag and, on hover, Delete. Second, a "Default" tag on the default one, the
+  Zone count and category, Single dwelling and the settings icon. The view's own sums (Geometry:
+  envelope areas; Spaces: iCFA, volume; Programs: bedrooms, people) sit in its columns. No Rename
+  icon (Ed, 2026-11-15): the name is edited in settings, and a new Segment opens its name in place.
 - **No Building Segment** is a last, muted group, shown only when it holds a Zone. Its tooltip says
   its Zones are left out of export.
 - **Moving Zones:** check Zones, then Building Segment in the selection bar: each Segment, New

@@ -434,7 +434,7 @@
     if (S.bubble) h += S.bubble.html;
     return h;
   }
-  // The Building Segment heading: the name alone on the first line (Rename and Delete on hover), then a
+  // The Building Segment heading: the name alone on the first line (Delete on hover; rename in settings), then a
   // second line with the Default tag, Zone count and category, Single dwelling and the settings icon.
   function segHead(g, n, sf) {
     var name = S.renaming === g.id ? '<input class="zp-seg-rename" data-act="seg-rename" data-v="' + g.id + '" value="' + esc(g.name) + '" aria-label="Building Segment name">' : esc(g.name);
@@ -443,7 +443,7 @@
       : iconBtn("del", "Delete " + g.name, "seg-delete", ' data-v="' + g.id + '"').replace('class="', 'class="zp-hover ');
     return '<div class="zp-seg-head"><div class="zp-seg-line1">' +
       (S.renaming === g.id ? name : '<span class="zp-seg-title" data-tip="' + esc(g.name) + '">' + name + '</span>') + (sf.length ? flag(sf.join(" ")) : "") +
-      '<span class="zp-seg-tools">' + iconBtn("pencil", "Rename " + g.name, "seg-rename-start", ' data-v="' + g.id + '"').replace('class="', 'class="zp-hover ') + del + '</span></div>' +
+      '<span class="zp-seg-tools">' + del + '</span></div>' +
       '<div class="zp-seg-line2">' +
       (g.id === S.defaultSeg ? '<span class="zp-seg-tag" data-tip="New Zones join this Building Segment. Change it in Settings.">Default</span>' : "") +
       '<span class="zp-seg-count">' + n + ' Zone' + (n === 1 ? "" : "s") + ' · ' + (g.category === "res" ? "Residential" : "Non-residential") + '</span>' +
@@ -898,7 +898,6 @@
     }
     else if (a === "new-seg") { var ng = newSegment(); notify(ng.name + " created. Move Zones into it from the selection bar."); }
     else if (a === "seg-settings") { openSegSettings(v); return; }
-    else if (a === "seg-rename-start") { S.renaming = v; }
     else if (a === "seg-delete") { confirmDeleteSeg(v); return; }
     else return;
     render();
