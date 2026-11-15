@@ -93,6 +93,7 @@
   .zp-seg select { font-weight:400; }
   .zp-bubble { position:absolute; z-index:40; width:260px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#fff; box-shadow:0 6px 24px #0b1f2626; font-size:12px; }
   .zp-bubble h3 { margin:0 0 8px; font-size:13px; }
+  .zp-info { display:inline-flex; vertical-align:-2px; color:var(--muted); cursor:help; }
   .zp-dw-choose { display:grid; gap:4px; color:var(--muted); }
   .zp-dw-choose select { font:inherit; font-size:12px; height:26px; color:var(--ink); }
   .zp-bubble h3.zp-dw-head { margin:10px 0 8px; padding-top:10px; border-top:1px solid var(--line); }
@@ -887,7 +888,7 @@
     var did = z.dwelling, d = dw(did), t = dwellingTotals(did);
     var html = '<div class="zp-bubble" ' + pos + ' role="dialog" aria-label="Dwelling of ' + esc(z.name) + '">' + choose + '<h3 class="zp-dw-head">' + svg("home", 13) + ' ' + esc(d.name) + '</h3><dl>' +
       '<dt>Units</dt><dd><input data-act="units" data-v="' + d.id + '" value="' + d.units + '" style="width:60px;text-align:right"></dd><dt>Zones</dt><dd>' + t.zones + '</dd><dt>Bedrooms</dt><dd>' + (d.beds !== null && d.beds !== undefined ? '<input data-act="dw-beds" data-v="' + d.id + '" value="' + d.beds + '" style="width:60px;text-align:right">' : t.beds) + '</dd>' +
-      '<dt>Occupants</dt><dd>' + fmt(t.occ, 1) + (t.occRule ? ' <span class="zp-muted">(Phius: bedrooms + units)</span>' : "") + '</dd><dt>iCFA</dt><dd>' + fmt(t.icfa, 1) + ' m²</dd></dl>' +
+      '<dt>Occupants</dt><dd>' + fmt(t.occ, 1) + (t.occRule ? ' <span class="zp-info" role="img" aria-label="Phius rule: bedrooms + units" data-tip="No occupants entered, so the Phius rule applies: bedrooms + 1 per unit.">' + svg("info", 13) + '</span>' : "") + '</dd><dt>iCFA</dt><dd>' + fmt(t.icfa, 1) + ' m²</dd></dl>' +
       '<p class="zp-muted" style="margin:8px 0 0">' + (d.beds !== null && d.beds !== undefined ? 'Bedrooms were entered once for the whole dwelling under Single dwelling, and stay here.' : 'One unit count for several Zones, or several units in one Zone. Bedrooms and occupants are entered per Zone and summed here.') + '</p></div>';
     S.bubble = { html: html };
   }
