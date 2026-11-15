@@ -15,7 +15,7 @@ server. The dark strip at the top picks a journey and says what to try; Reset re
 
 | Journey | What to try | PNGs |
 | --- | --- | --- |
-| 1. Single-family home, five Zones, one dwelling | Single dwelling is on: type the bedrooms on the Building Segment row. Click a locked cell, Assign per Zone, then click the House chip | `j1-start` (`journey=1`), `j1-bedrooms` (`journey=1&do=house3`), `j1-unlocked` (`journey=1&do=house3,unsingle,bubble`), `j1-default-program` (`journey=1&do=pdefault`) |
+| 1. Single-family home, five Zones, one dwelling | Single dwelling is on: type the bedrooms on the Building Segment row. Click a locked cell, Open settings, uncheck Single dwelling, then click the House chip | `j1-start` (`journey=1`), `j1-bedrooms` (`journey=1&do=house3`), `j1-unlocked` (`journey=1&do=house3,unsingle,bubble`), `j1-default-program` (`journey=1&do=pdefault`) |
 | 2. Apartments, one Zone each | Check every Zone, Dwelling: One dwelling each. Then check Single dwelling in the Building's settings to see its confirmation | `j2-checked` (`journey=2&do=checkall`), `j2-dwellings` (`journey=2&do=each,beds`), `j2-single-confirm` (`journey=2&do=each,beds,trysingle`) |
 | 3. Apartments plus corridors, lobby, stair, office, gym | Apartments as in 2; pick Phius Multifamily Programs for the rest from the Program choice | `j3-corridors-checked` (`journey=3&do=each,beds,checkcorr`), `j3-common-areas` and `-420` (`journey=3&do=each,beds,common`) |
 | Building Segments (journey 3, then 1) | Check the Bike shed, Building Segment: No Building Segment or New Building Segment. Hover a Segment row: Settings and Delete appear in its Actions cell; settings is where it is renamed | `j3-no-segment` (`…,common,moveshed`), `j3-move-segment` (`…,common,checkshed`), `j3-new-segment` (`…,common,newseg`), `j3-segment-settings` (`…,common,segsettings`), `j3-delete-segment` (`…,common,newseg,trydelete`), `j1-segment-settings` (`journey=1&do=house3,segsettings`), `j1-adu` (`journey=1&do=house3,adu`), `j1-lock-bubble` (`journey=1&do=house3,lockinfo`), `j1-segment-actions` (the ADU row hovered) |
@@ -38,8 +38,8 @@ server. The dark strip at the top picks a journey and says what to try; Reset re
   button marked as planned.
 - **Single dwelling**, a setting of each Building Segment, switched in its settings dialog (Q4a-26
   as revised by BS-3). The heading shows a "Single dwelling" tag only where it is on. Clicking a
-  locked cell or the tag opens a bubble explaining the lock with **Assign per Zone**
-  (`j1-lock-bubble`). When on, that Segment's Zones are one dwelling, named for the Segment, with the
+  locked cell or the tag opens a bubble explaining the lock with one **Open settings**
+  button (`j1-lock-bubble`). When on, that Segment's Zones are one dwelling, named for the Segment, with the
   residential default. A new Model's one Segment has it on (Q4a-27). Its rows are locked and show
   their values muted; its heading row takes the bedrooms, occupants (Phius rule when empty) and the
   Equipment Set. Switching it off keeps everything it set as ordinary assignments, with the counts on the

@@ -134,9 +134,10 @@ two Segments.
   named for the Segment, with the residential default; its rows are locked and its heading row
   takes the bedrooms, occupants and Equipment Set.
 - The heading shows a "Single dwelling" tag only where it is on. **A locked value is not a dead
-  end:** clicking any locked cell, or the tag, opens a bubble anchored to it that says why and
-  offers **Assign per Zone**, which switches it off in one click and keeps what it set. A new user
-  who tries to change a Program meets the explanation and the way out on that cell.
+  end:** clicking any locked cell, or the tag, opens a bubble anchored to it that says why, with
+  one **Open settings** button (Ed, 2026-11-15: no shortcut to switch it off from the bubble). A
+  new user who tries to change a Program meets the explanation and the way to settings on that
+  cell. Switching it off keeps what it set.
 - A new Model starts with one Segment with Single dwelling on (Q4a-27). Claude's choice, to
   confirm: a Segment the user adds starts with it off.
 - Moving a Zone into a Single dwelling Segment makes it part of that dwelling; moving it out

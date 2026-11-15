@@ -356,7 +356,7 @@
 
   // ---------------------------------------------------------------- journeys
   var JOURNEYS = {
-    1: { title: "Single-family home", hint: "The House Building Segment has <em>Single dwelling</em> on, as every new model does: all five Zones are one house with the residential default, so its rows are locked. <em>Type the bedrooms</em> on the Segment row. That is all. To assign per Zone, <em>click any locked cell</em> → Assign per Zone; what it set stays." },
+    1: { title: "Single-family home", hint: "The House Building Segment has <em>Single dwelling</em> on, as every new model does: all five Zones are one house with the residential default, so its rows are locked. <em>Type the bedrooms</em> on the Segment row. That is all. To assign per Zone, <em>click any locked cell</em> → Open settings and uncheck <em>Single dwelling</em>." },
     2: { title: "Apartments", hint: "Each Zone is one apartment. <em>Check every Zone</em> → Dwelling: <em>One dwelling each</em>. Then fill Bedrooms per row. Then open the Building's <em>settings</em> (hover its row) and check <em>Single dwelling</em> to see what it would replace." },
     3: { title: "Apartments + common areas", hint: "Make the six apartments <em>one dwelling each</em>. Then check the two corridors → Program: <em>Indoor Corridor</em> (Phius Multifamily, copied into the file on choice). Do the same for the stair, lobby, office and fitness room, and look at the amber flags. Then check the <em>Bike shed</em> → Building Segment: <em>No Building Segment</em>, and open a Segment's <em>settings</em> from its row." },
     4: { title: "Non-residential school", hint: "The Building Segment is non-residential, so every unassigned Zone is flagged. Check Zones and pick from <em>Phius Non-Residential</em> in the Program choice, or open the <em>Programs</em> tab and browse the library sidebar." },
@@ -453,7 +453,7 @@
         (g.id === S.defaultSeg ? '<span class="zp-seg-tag" data-tip="New Zones join this Building Segment. Change it in Settings.">Default</span>' : "") +
         (g.single ? '<button type="button" class="zp-seg-tag zp-lock-tag" data-act="lock-info" data-v="' + g.id + '">' + svg("lock", 11) + 'Single dwelling</button>' : "") + '</div>' : "") + '</div>';
   }
-  // A locked value in a Single dwelling Segment: muted, and a click explains the lock and offers the way out.
+  // A locked value in a Single dwelling Segment: muted, and a click explains the lock and opens the Segment's settings.
   function locked(text, g, extraClass) { return '<button type="button" class="zp-frozen zp-locked' + (extraClass ? " " + extraClass : "") + '" data-act="lock-info" data-v="' + g.id + '">' + text + '</button>'; }
   function lockBubble(gid, anchor) {
     var g = seg(gid), r = anchor.getBoundingClientRect(), pr = document.getElementById("pane").getBoundingClientRect();
@@ -461,8 +461,7 @@
     S.bubble = { html: '<div class="zp-bubble zp-lock-bubble" style="left:' + left + 'px; top:' + (r.bottom - pr.top + 4) + 'px" role="dialog" aria-label="' + esc(g.name) + ' is a single dwelling">' +
       '<h3>' + svg("home", 13) + ' ' + esc(g.name) + ' is a single dwelling</h3>' +
       '<p>Its Zones are one dwelling with the residential default Program. Bedrooms, occupants and the Equipment Set are entered once, on the Segment row.</p>' +
-      '<div class="zp-bubble-actions"><button type="button" class="primary" data-act="unlock" data-v="' + g.id + '">Assign per Zone</button></div>' +
-      '<p class="zp-muted" style="margin:6px 0 0">Keeps what it set. Switch it back on in the Segment\'s settings.</p></div>' };
+      '<div class="zp-bubble-actions"><button type="button" class="primary" data-act="lock-settings" data-v="' + g.id + '">Open settings</button></div></div>' };
   }
   // Zones a check can select: those in a Single dwelling Segment are locked.
   function checkable() { return S.zones.filter(function (z) { return !(z.seg && seg(z.seg).single); }); }
@@ -913,7 +912,7 @@
     else if (a === "new-set") { var ns2 = { id: id("set"), name: "Equipment Set " + (S.sets.length + 1), devices: [] }; S.sets.push(ns2); S.selSet = ns2.id; }
     else if (a === "dwelling") { dwellingBubble(v, el); }
     else if (a === "lock-info") { lockBubble(v, el); }
-    else if (a === "unlock") { var sg = seg(v); sg.single = false; S.bubble = null; notify(sg.name + " is assigned per Zone now. Its dwelling and the residential default stay."); }
+    else if (a === "lock-settings") { S.bubble = null; render(); openSegSettings(v); return; }
     else if (a === "new-seg") { var ng = newSegment(); notify(ng.name + " created. Move Zones into it from the selection bar."); }
     else if (a === "seg-settings") { openSegSettings(v); return; }
     else if (a === "seg-delete") { if (el.getAttribute("aria-disabled") === "true") return; confirmDeleteSeg(v); return; }
