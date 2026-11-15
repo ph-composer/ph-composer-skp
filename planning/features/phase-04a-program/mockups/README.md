@@ -15,10 +15,10 @@ server. The dark strip at the top picks a journey and says what to try; Reset re
 
 | Journey | What to try | PNGs |
 | --- | --- | --- |
-| 1. Single-family home, five Zones, one dwelling | Single dwelling is on: type the bedrooms on the Building Segment row. Uncheck it, then click the House chip | `j1-start` (`journey=1`), `j1-bedrooms` (`journey=1&do=house3`), `j1-unlocked` (`journey=1&do=house3,unsingle,bubble`), `j1-default-program` (`journey=1&do=pdefault`) |
-| 2. Apartments, one Zone each | Check every Zone, Dwelling: One dwelling each. Then check Single dwelling to see its confirmation | `j2-checked` (`journey=2&do=checkall`), `j2-dwellings` (`journey=2&do=each,beds`), `j2-single-confirm` (`journey=2&do=each,beds,trysingle`) |
+| 1. Single-family home, five Zones, one dwelling | Single dwelling is on: type the bedrooms on the Building Segment row. Click a locked cell, Assign per Zone, then click the House chip | `j1-start` (`journey=1`), `j1-bedrooms` (`journey=1&do=house3`), `j1-unlocked` (`journey=1&do=house3,unsingle,bubble`), `j1-default-program` (`journey=1&do=pdefault`) |
+| 2. Apartments, one Zone each | Check every Zone, Dwelling: One dwelling each. Then check Single dwelling in the Building's settings to see its confirmation | `j2-checked` (`journey=2&do=checkall`), `j2-dwellings` (`journey=2&do=each,beds`), `j2-single-confirm` (`journey=2&do=each,beds,trysingle`) |
 | 3. Apartments plus corridors, lobby, stair, office, gym | Apartments as in 2; pick Phius Multifamily Programs for the rest from the Program choice | `j3-corridors-checked` (`journey=3&do=each,beds,checkcorr`), `j3-common-areas` and `-420` (`journey=3&do=each,beds,common`) |
-| Building Segments (journey 3, then 1) | Check the Bike shed, Building Segment: No Building Segment or New Building Segment. Hover a Segment row: Settings and Delete appear in its Actions cell; settings is where it is renamed | `j3-no-segment` (`…,common,moveshed`), `j3-move-segment` (`…,common,checkshed`), `j3-new-segment` (`…,common,newseg`), `j3-segment-settings` (`…,common,segsettings`), `j3-delete-segment` (`…,common,newseg,trydelete`), `j1-segment-settings` (`journey=1&do=house3,segsettings`), `j1-adu` (`journey=1&do=house3,adu`), `j1-segment-actions` (the ADU row hovered) |
+| Building Segments (journey 3, then 1) | Check the Bike shed, Building Segment: No Building Segment or New Building Segment. Hover a Segment row: Settings and Delete appear in its Actions cell; settings is where it is renamed | `j3-no-segment` (`…,common,moveshed`), `j3-move-segment` (`…,common,checkshed`), `j3-new-segment` (`…,common,newseg`), `j3-segment-settings` (`…,common,segsettings`), `j3-delete-segment` (`…,common,newseg,trydelete`), `j1-segment-settings` (`journey=1&do=house3,segsettings`), `j1-adu` (`journey=1&do=house3,adu`), `j1-lock-bubble` (`journey=1&do=house3,lockinfo`), `j1-segment-actions` (the ADU row hovered) |
 | 4. Non-residential school | Unassigned Zones are flagged; assign from Phius Non-Residential, or browse the library sidebar | `j4-start` (`journey=4`), `j4-assigned` (`journey=4&do=school`), `j4-library` (`journey=4&do=school,libnr`), `j4-long-name` (`journey=4&do=school,longname`) |
 | 5. Custom lab programs | Programs tab, + on the rail, set loads, open a schedule chip | `j5-program` and `-420` (`journey=5&do=custom`), `j5-schedule` (`journey=5&do=custom,customsched`) |
 | Equipment Sets | Programs tab, Equipment Sets | `equipment-sets` (`journey=1&do=sets`) |
@@ -36,18 +36,20 @@ server. The dark strip at the top picks a journey and says what to try; Reset re
 - **A Schedule** is the PH form (start, end, fraction while operating and otherwise, days per
   week, weeks per year) over a 24-hour strip and a week row. The hourly editor is a disabled
   button marked as planned.
-- **Single dwelling**, a checkbox on each Building Segment's heading row (Q4a-26 as revised by
-  BS-3). When on, that Segment's Zones are one dwelling, named for the Segment, with the
+- **Single dwelling**, a setting of each Building Segment, switched in its settings dialog (Q4a-26
+  as revised by BS-3). The heading shows a "Single dwelling" tag only where it is on. Clicking a
+  locked cell or the tag opens a bubble explaining the lock with **Assign per Zone**
+  (`j1-lock-bubble`). When on, that Segment's Zones are one dwelling, named for the Segment, with the
   residential default. A new Model's one Segment has it on (Q4a-27). Its rows are locked and show
   their values muted; its heading row takes the bedrooms, occupants (Phius rule when empty) and the
-  Equipment Set. Unchecking keeps everything it set as ordinary assignments, with the counts on the
+  Equipment Set. Switching it off keeps everything it set as ordinary assignments, with the counts on the
   dwelling. Checking it over per-Zone assignments opens a confirmation naming what gives way in
   that Segment. Moving a Zone into a Single dwelling Segment joins its dwelling. `j1-adu` shows a
   house and an ADU as two single-dwelling Segments.
 - **Building Segments** ([plan](../../unscheduled/building-segments/README.md), BS-1 to BS-6 answered). The
   heading takes two lines: the name alone on the first (a long name truncates, full name in its
-  tooltip, `j4-long-name`), with a findings flag; then the Default tag and Single dwelling (no
-  Zone count or category subtitle). Settings and Delete sit in the row's Actions cell, revealed on hover as in
+  tooltip, `j4-long-name`), with a findings flag; then the Default and Single dwelling tags where
+  they apply (no Zone count or category subtitle). Settings and Delete sit in the row's Actions cell, revealed on hover as in
   Geometry and Spaces (`j1-segment-actions`); Delete is disabled on the last Segment, and the name is
   edited in settings.
   Airtightness, category and certification moved into the Building Segment settings dialog. The

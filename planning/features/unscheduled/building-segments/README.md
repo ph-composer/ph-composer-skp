@@ -53,7 +53,8 @@ membership visible without a column, shows an empty Segment as an empty group, a
 settings dialog one home: a settings icon on the heading row, the same in every view.
 
 - The heading takes two lines. First, the Segment name alone (truncated, full name in its
-  tooltip) and a findings flag. Second, a "Default" tag on the default one and Single dwelling.
+  tooltip) and a findings flag. Second, a "Default" tag on the default one and a "Single dwelling" tag where it is on; the
+  line is absent when neither applies.
   No Zone count or category subtitle (Ed, 2026-11-15); the category is in settings. Settings and Delete sit in the row's left Actions cell, revealed on
   hover, as row actions are in Geometry and Spaces. The view's own sums (Geometry:
   envelope areas; Spaces: iCFA, volume; Programs: bedrooms, people) sit in its columns. No Rename
@@ -82,7 +83,7 @@ One dialog, opened from the heading row in any Zone view. Fields from honeybee-p
 | --- | --- | --- |
 | General | Name, colour, "New Zones join this Segment" | The default flag moves here from the Manage dialog |
 | Phius certification | Building category (residential or non-residential), certification program, building status, building type | Category is Q4a-14. The rest map to `PhiusCertification` enums, whose program list in the pinned honeybee-ph stops at Phius 2021 CORE and ZERO |
-| Occupancy | Single dwelling (switched on the Segment row, BS-3); default Program for its Zones; under Single dwelling, the dwelling's bedrooms, occupants and Equipment Set | A Segment naming its default Program answers the open half of Q4a-13 |
+| Occupancy | Single dwelling (its only switch, BS-3; residential Segments only); default Program for its Zones; under Single dwelling, the dwelling's bedrooms, occupants and Equipment Set | A Segment naming its default Program answers the open half of Q4a-13 |
 | Airtightness | Test result (n50 or q50), wind exposure | Q4a-06: converted at export into each Zone's Infiltration, which is where PHX reads it (`cleanup.merge_infiltrations`) |
 | Comfort | Winter and summer set points, read only; mechanical cooling; mechanical room temperature | Set points come from the Zones' Programs (Q4a-04) |
 | Derived, read only | Floor levels (from Levels), dwelling units (from Dwellings) | `num_floor_levels`, `num_dwelling_units` |
@@ -128,9 +129,14 @@ Single dwelling becomes an attribute and control of each Building Segment, repla
 Model-level switch that forced one Segment. A house and an ADU can then be one dwelling each, in
 two Segments.
 
-- The switch sits on the Segment's heading row, in every Zone view, and shows in its settings.
-  When on, that Segment's Zones are one dwelling, named for the Segment, with the residential
-  default; its rows are locked and its heading row takes the bedrooms, occupants and Equipment Set.
+- The switch lives in the Segment's settings (Ed, 2026-11-15: rarely changed, and a checkbox on
+  every row cluttered non-residential Segments). When on, that Segment's Zones are one dwelling,
+  named for the Segment, with the residential default; its rows are locked and its heading row
+  takes the bedrooms, occupants and Equipment Set.
+- The heading shows a "Single dwelling" tag only where it is on. **A locked value is not a dead
+  end:** clicking any locked cell, or the tag, opens a bubble anchored to it that says why and
+  offers **Assign per Zone**, which switches it off in one click and keeps what it set. A new user
+  who tries to change a Program meets the explanation and the way out on that cell.
 - A new Model starts with one Segment with Single dwelling on (Q4a-27). Claude's choice, to
   confirm: a Segment the user adds starts with it off.
 - Moving a Zone into a Single dwelling Segment makes it part of that dwelling; moving it out
