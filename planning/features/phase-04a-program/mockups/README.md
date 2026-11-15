@@ -1,7 +1,7 @@
 # Programs prototype
 
 DATE: 2026-11-14
-STATUS: In review. First review 2026-11-14 added the Single dwelling switch and library files. Clickable mockup, not a screen; no panel code.
+STATUS: In review. First review 2026-11-14 added the Single dwelling switch and library files; 2026-11-15 added Building Segment management. Clickable mockup, not a screen; no panel code.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -18,6 +18,7 @@ server. The dark strip at the top picks a journey and says what to try; Reset re
 | 1. Single-family home, five Zones, one dwelling | Single dwelling is on: type the bedrooms on the Building Segment row. Uncheck it, then click the House chip | `j1-start` (`journey=1`), `j1-bedrooms` (`journey=1&do=house3`), `j1-unlocked` (`journey=1&do=house3,unsingle,bubble`), `j1-default-program` (`journey=1&do=pdefault`) |
 | 2. Apartments, one Zone each | Check every Zone, Dwelling: One dwelling each. Then check Single dwelling to see its confirmation | `j2-checked` (`journey=2&do=checkall`), `j2-dwellings` (`journey=2&do=each,beds`), `j2-single-confirm` (`journey=2&do=each,beds,trysingle`) |
 | 3. Apartments plus corridors, lobby, stair, office, gym | Apartments as in 2; pick Phius Multifamily Programs for the rest from the Program choice | `j3-corridors-checked` (`journey=3&do=each,beds,checkcorr`), `j3-common-areas` and `-420` (`journey=3&do=each,beds,common`) |
+| Building Segments (journey 3, then 1) | Check the Bike shed, Building Segment: No Building Segment or New Building Segment. Hover a Segment row for Rename and Delete; its settings icon opens the dialog | `j3-no-segment` (`…,common,moveshed`), `j3-move-segment` (`…,common,checkshed`), `j3-new-segment` (`…,common,newseg`), `j3-segment-settings` (`…,common,segsettings`), `j3-delete-segment` (`…,common,newseg,trydelete`), `j1-segment-settings` (`journey=1&do=house3,segsettings`) |
 | 4. Non-residential school | Unassigned Zones are flagged; assign from Phius Non-Residential, or browse the library sidebar | `j4-start` (`journey=4`), `j4-assigned` (`journey=4&do=school`), `j4-library` (`journey=4&do=school,libnr`) |
 | 5. Custom lab programs | Programs tab, + on the rail, set loads, open a schedule chip | `j5-program` and `-420` (`journey=5&do=custom`), `j5-schedule` (`journey=5&do=custom,customsched`) |
 | Equipment Sets | Programs tab, Equipment Sets | `equipment-sets` (`journey=1&do=sets`) |
@@ -43,9 +44,16 @@ server. The dark strip at the top picks a journey and says what to try; Reset re
   everything it set as ordinary assignments, with the counts on the dwelling. Checking it over
   per-Zone assignments opens a confirmation naming what gives way. The real switch would also put
   every Zone in one Building Segment from the Geometry view; every journey here has one already.
+- **Building Segments** ([plan](../../unscheduled/building-segments/README.md), BS-1 to BS-5). The
+  heading row holds the name, a Default tag, the Zone count and category, a findings flag and a
+  settings icon; Rename and Delete appear on hover, and Delete is disabled on the last Segment.
+  Airtightness, category and certification moved into the Building Segment settings dialog. The
+  selection bar moves checked Zones to a Segment, a new one (named, then renamed in place) or No
+  Building Segment, a muted last group left out of export. Deleting a used Segment asks where its
+  Zones go. The plan recommends the same heading row in Geometry and Spaces; only Programs is
+  mocked.
 - **Zones → Programs**, a third Zone view: one row per Zone under a Building Segment heading row
-  that holds the Phius category, the airtightness test result and the set points derived from the
-  Programs, with summed bedrooms, occupants, people, lighting and ventilation. Per row: Program,
+  with summed bedrooms, occupants, people, lighting and ventilation. Per row: Program,
   Dwelling, Bedrooms, Occupants, Equipment Set, both floor areas, and the absolute loads. An
   unassigned Zone shows the residential default in italics.
 - **The selection bar** assigns Program, Dwelling (one shared, one each, not a dwelling, add to an

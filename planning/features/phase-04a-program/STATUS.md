@@ -29,6 +29,9 @@ The one place this packet's progress is read from.
 - Phase 4 P4-12 (appliances) is superseded: this packet owns appliances as Equipment Sets
   (Q4a-03). Nothing in Phase 4 mechanical blocks this packet.
 - Before implementation: choose the honeybee-ph pin for `PhEquipment` (F4a-18).
+- Building Segment management, the Segment settings dialog and Zones outside every Segment are
+  planned in [building-segments](../unscheduled/building-segments/README.md) (2026-11-15). This
+  packet's Segment row, category (Q4a-14) and airtightness (Q4a-06) depend on it (BS-5).
 - The Phius program library files live in the planned [ph-composer-standards](../unscheduled/ph-composer-standards/README.md)
   repository (Q4a-19). Ed cleared publishing them on 2026-11-15 (Q4a-28); they wait on the repository
   and on the Program and Schedule kinds.

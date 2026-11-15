@@ -123,6 +123,25 @@
   .zp-seg td input.phc-cell-input { font-weight:600; background:#fff; border:1px solid var(--line); }
   .zp-confirm ul { margin:0; padding-left:18px; }
   .zp-confirm li { margin-bottom:6px; }
+  .zp-seg-name { display:flex; align-items:center; gap:8px; min-height:24px; }
+  .zp-seg-tag { font-weight:400; font-size:11px; color:var(--muted); border:1px solid var(--line); border-radius:9px; padding:0 6px; }
+  .zp-seg-count { font-weight:400; color:var(--muted); }
+  .zp-seg-tools { display:inline-flex; gap:2px; margin-left:auto; }
+  .zp-seg-tools .phc-icon-button { width:24px; height:24px; }
+  .zp-seg-tools .zp-hover { visibility:hidden; }
+  .zp-seg:hover .zp-seg-tools .zp-hover, .zp-seg:focus-within .zp-seg-tools .zp-hover { visibility:visible; }
+  .zp-seg.is-none td { color:var(--muted); }
+  .zp-out td { color:var(--muted); }
+  .zp-seg-rename { font:inherit; font-weight:600; width:180px; padding:1px 6px; }
+  .zp-segdlg { width:600px; max-width:calc(100vw - 32px); }
+  .zp-segdlg-body { max-height:62vh; overflow:auto; margin:0 -4px; padding:0 4px; }
+  .zp-segdlg section { padding:10px 0 12px; border-top:1px solid var(--line); }
+  .zp-segdlg h3 { margin:0 0 8px; font-size:13px; }
+  .zp-grid { display:grid; grid-template-columns:210px 1fr; gap:6px 12px; align-items:center; font-size:12px; }
+  .zp-grid > span:nth-child(odd) { color:var(--muted); }
+  .zp-grid input:not([type=checkbox]), .zp-grid select { font:inherit; font-size:12px; height:26px; }
+  .zp-grid input.zp-num { width:90px; text-align:right; }
+  .zp-later { color:var(--muted); font-size:12px; }
 </style>
 </head>
 <body class="phc-workspace live-panel">
@@ -196,6 +215,11 @@
   function sched(name, kind, ph, hourly, src) { return { id: id("sch"), name: name, kind: kind, ph: ph, hourly: hourly, source: src || "file" }; }
   function profile(arr) { return arr; }
 
+  // A Building Segment and the settings its dialog edits. Field names follow honeybee-ph BldgSegment and PhiusCertification.
+  function segRecord(name, cat, air) {
+    return { id: id("seg"), name: name, category: cat, air: air || { kind: "n50", value: null }, cert: "Phius 2021 CORE", use: cat === "res" ? "Residential" : "School",
+      status: "In planning", type: "New construction", wind: "Several sides exposed, no screening", mechCool: false, mechRoom: 20, defProgram: null };
+  }
   function baseState(j) {
     uid = 0;
     var s = { journey: j, single: j === 1, tab: "zones", ptab: "programs", selProgram: null, selSchedule: null, selSet: null, checked: {}, lib: "mf", libQuery: "", notice: null, bubble: null,
@@ -219,7 +243,7 @@
       ["Cooktop", 1, "0.2 kWh/use"], ["Phius MEL", 1, "Phius rule: bedrooms, iCFA"], ["Phius exterior lighting", 1, "Phius rule: iCFA"], ["Phius garage lighting", 1, "Phius rule: per dwelling"]] });
     s.selProgram = "pgm_default"; s.selSchedule = presence.id; s.selSet = "set_sfh";
 
-    function seg(name, cat, air) { var g = { id: id("seg"), name: name, category: cat, air: air }; s.segments.push(g); return g.id; }
+    function seg(name, cat, air) { var g = segRecord(name, cat, air); if (!s.defaultSeg) s.defaultSeg = g.id; s.segments.push(g); return g.id; }
     function zone(name, segId, area, icfa) { s.zones.push({ id: id("zn"), name: name, seg: segId, area: area, icfa: icfa, program: null, dwelling: null, beds: null, occ: null, set: null }); }
     if (j === 1) {
       var h = seg("House", "res", { kind: "n50", value: 0.6 });
@@ -233,7 +257,7 @@
     } else if (j === 3) {
       var m = seg("Building", "res", { kind: "q50", value: 1.1 });
       ["101", "102", "103", "201", "202", "203"].forEach(function (n, i) { zone("Apt " + n, m, [62, 78, 55][i % 3], [58.9, 74.1, 52.3][i % 3]); });
-      zone("Corridor L1", m, 36, 36); zone("Corridor L2", m, 36, 36); zone("Lobby and mail", m, 28, 28); zone("Stair A", m, 18, 9); zone("Super's office", m, 12, 12); zone("Fitness room", m, 24, 24);
+      zone("Corridor L1", m, 36, 36); zone("Corridor L2", m, 36, 36); zone("Lobby and mail", m, 28, 28); zone("Stair A", m, 18, 9); zone("Super's office", m, 12, 12); zone("Fitness room", m, 24, 24); zone("Bike shed", m, 15, 0);
     } else if (j === 4) {
       var sc = seg("School", "nonres", { kind: "n50", value: 0.6 });
       zone("Classroom 101", sc, 70, 70); zone("Classroom 102", sc, 70, 70); zone("Classroom 103", sc, 70, 70); zone("Hallway", sc, 64, 64); zone("Restrooms", sc, 22, 22);
@@ -275,7 +299,8 @@
     var p = sc.ph, hrs = p.end > p.start ? p.end - p.start : 24 - p.start + p.end;
     return (hrs * p.frac + (24 - hrs) * p.base) / 24;
   }
-  function effectiveProgram(z) { return prog(z.program || "pgm_default"); }
+  function segDefaultProgram(z) { var g = z.seg ? seg(z.seg) : null; return (g && g.defProgram) || "pgm_default"; }
+  function effectiveProgram(z) { return prog(z.program || segDefaultProgram(z)); }
   function dwellingTotals(did) {
     var zs = zonesOfDwelling(did), d = dw(did), beds = 0, occSet = 0, anyOcc = false, area = 0, icfa = 0;
     zs.forEach(function (z) { beds += z.beds || 0; if (z.occ !== null) { anyOcc = true; occSet += z.occ; } area += z.area; icfa += z.icfa; });
@@ -321,7 +346,7 @@
   var JOURNEYS = {
     1: { title: "Single-family home", hint: "<em>Single dwelling</em> is on, as for every new model: all five Zones are one house with the residential default, so the table is locked. <em>Type the bedrooms</em> on the Building Segment row. That is all. Uncheck <em>Single dwelling</em> to assign per Zone; what it set stays." },
     2: { title: "Apartments", hint: "Each Zone is one apartment. <em>Check every Zone</em> → Dwelling: <em>One dwelling each</em>. Then fill Bedrooms per row. Then check <em>Single dwelling</em> to see what it would replace." },
-    3: { title: "Apartments + common areas", hint: "Make the six apartments <em>one dwelling each</em>. Then check the two corridors → Program: <em>Indoor Corridor</em> (Phius Multifamily, copied into the file on choice). Do the same for the stair, lobby, office and fitness room, and look at the amber flags." },
+    3: { title: "Apartments + common areas", hint: "Make the six apartments <em>one dwelling each</em>. Then check the two corridors → Program: <em>Indoor Corridor</em> (Phius Multifamily, copied into the file on choice). Do the same for the stair, lobby, office and fitness room, and look at the amber flags. Then check the <em>Bike shed</em> → Building Segment: <em>No Building Segment</em>, and open a Segment's <em>settings</em> from its row." },
     4: { title: "Non-residential school", hint: "The Building Segment is non-residential, so every unassigned Zone is flagged. Check Zones and pick from <em>Phius Non-Residential</em> in the Program choice, or open the <em>Programs</em> tab and browse the library sidebar." },
     5: { title: "Custom lab programs", hint: "Nothing in the library fits. Open <em>Programs</em> → <em>+</em> on the rail to make a new Program, set its loads, then open a load's schedule chip to edit the Schedule in the PH form. Assign it on Zones → Programs." }
   };
@@ -362,7 +387,8 @@
     var singleTip = "Every Zone is one dwelling with the residential default Program, in one residential Building Segment. Bedrooms and occupants are entered once, on the Building Segment row. Uncheck to assign Programs, dwellings and Equipment Sets per Zone; everything it set stays.";
     h += '<div class="phc-inventory-controls"><label class="phc-view-control zp-single" data-tip="' + esc(singleTip) + '"><input type="checkbox" data-act="single"' + (S.single ? " checked" : "") + '>Single dwelling</label>' +
       '<label class="phc-view-control"><input type="search" placeholder="Zone, Program or dwelling" aria-label="Filter Zones"></label>' +
-      '<span class="phc-view-count">' + S.zones.length + ' Zones · ' + S.dwellings.length + ' dwellings</span></div>';
+      '<span class="phc-view-count">' + S.segments.length + ' Building Segment' + (S.segments.length > 1 ? "s" : "") + ' · ' + S.zones.length + ' Zones · ' + S.dwellings.length + ' dwellings</span>' +
+      (S.single ? '<span data-tip="Single dwelling keeps one Building Segment. Uncheck it to add another."><button type="button" class="phc-icon-button assembly-tool-icon" disabled aria-label="New Building Segment">' + svg("add", 18) + '</button></span>' : iconBtn("add", "New Building Segment", "new-seg")) + '</div>';
     var COLS = [["name", "Name", 140], ["program", "Program", 190], ["dwelling", "Dwelling", 120], ["beds", "Bedrooms", 72, 1], ["occ", "Occupants", 80, 1], ["set", "Equipment Set", 170],
       ["area", "Floor area m²", 84, 1], ["icfa", "iCFA m²", 70, 1], ["people", "People peak", 76, 1], ["light", "Lighting W", 80, 1], ["vent", "Ventilation m³/h", 96, 1]];
     var tips = { area: "Gross Zone floor area: the basis honeybee divides per-area loads by.", icfa: "Weighted Space floor area (iCFA): the basis of the Phius residential rules.",
@@ -381,19 +407,130 @@
         if (z.dwelling && !seenDw[z.dwelling]) { seenDw[z.dwelling] = 1; var t = dwellingTotals(z.dwelling); sum.beds += t.beds; sum.occ += t.occ; }
       });
       var sf = segFindings(g);
-      var air = g.air ? g.air.kind + " " + fmt(g.air.value, 2) + (g.air.kind === "n50" ? " /h" : " m³/h·m²") : "No test result";
-      var setp = setpointsFor(g);
-      h += '<tr class="tier-0 zp-seg"><td class="col-actions"></td><td colspan="3"><div style="display:flex;align-items:center;gap:8px">Building Segment: ' + esc(g.name) +
-        '<select class="phc-enum-cell" style="width:auto" data-act="category" data-v="' + g.id + '" aria-label="Phius category of ' + esc(g.name) + '"' + (S.single ? ' disabled data-tip="Residential: set by Single dwelling."' : ' data-tip="Phius building category. PHX reads Equipment Set devices for residential and Program watts for non-residential."') + '><option value="res"' + (g.category === "res" ? " selected" : "") + '>Residential</option><option value="nonres"' + (g.category === "nonres" ? " selected" : "") + '>Non-residential</option></select>' + (sf.length ? flag(sf.join(" ")) : "") + '</div>' +
-        '<div class="zp-muted" style="margin-top:3px">Airtightness <button type="button" class="zp-dwelling" data-act="air" data-v="' + g.id + '" data-tip="Test result. Converted into each Zone\'s Infiltration at export, replacing the Program\'s value.">' + air + '</button> · Set points ' + setp + '</div></td>' +
+      if (!zs.length) sf = ["No Zones: this Building Segment is left out of export. Move Zones into it from the selection bar, or delete it."];
+      h += '<tr class="tier-0 zp-seg"><td class="col-actions"></td><td colspan="3">' + segHead(g, zs.length, sf) + '</td>' +
         (S.single ? houseCells() : '<td class="num">' + (Object.keys(seenDw).length ? fmt(sum.beds) : "") + '</td><td class="num">' + (Object.keys(seenDw).length ? fmt(sum.occ, 1) : "") + '</td><td></td>') +
         '<td class="num">' + fmt(sum.area, 1) + '</td><td class="num">' + fmt(sum.icfa, 1) + '</td><td class="num">' + fmt(sum.people, 1) + '</td><td class="num">' + fmt(sum.light) + '</td><td class="num">' + (sum.ventMissing ? '<span class="zp-amber">?</span>' : fmt(sum.vent)) + '</td></tr>';
       zs.forEach(function (z) { h += S.single ? frozenRow(z) : zoneRow(z); });
     });
+    var out = S.zones.filter(function (z) { return !z.seg; });
+    if (out.length) {
+      h += '<tr class="tier-0 zp-seg is-none"><td class="col-actions"></td><td colspan="' + COLS.length + '"><div class="zp-seg-name" data-tip="Zones in no Building Segment are left out of export, with their Spaces and thermal bridges. Planned: export them as shading.">No Building Segment<span class="zp-seg-count">' + out.length + ' Zone' + (out.length > 1 ? "s" : "") + ' · left out of export</span></div></td></tr>';
+      out.forEach(function (z) {
+        var c = !!S.checked[z.id];
+        h += '<tr class="tier-1 zp-out' + (c ? " is-checked" : "") + '"><td class="col-actions"><input class="row-check" type="checkbox" data-act="check" data-v="' + z.id + '"' + (c ? " checked" : "") + ' aria-label="Check ' + esc(z.name) + '"></td><td>' + esc(z.name) + '</td><td colspan="5">Not exported</td><td class="num">' + fmt(z.area, 1) + '</td><td class="num">' + fmt(z.icfa, 1) + '</td><td colspan="3"></td></tr>';
+      });
+    }
     h += '</tbody></table></div>';
     if (nChecked && !S.single) h += selectionBar(nChecked);
     if (S.bubble) h += S.bubble.html;
     return h;
+  }
+  // The Building Segment heading row: name, tags, findings, then Settings (always shown) and Rename and Delete (on hover).
+  function segHead(g, n, sf) {
+    var name = S.renaming === g.id ? '<input class="zp-seg-rename" data-act="seg-rename" data-v="' + g.id + '" value="' + esc(g.name) + '" aria-label="Building Segment name">' : esc(g.name);
+    var only = S.segments.length === 1;
+    var del = only ? '<span class="zp-hover" data-tip="A model keeps at least one Building Segment."><button type="button" class="phc-icon-button assembly-tool-icon" disabled aria-label="Delete ' + esc(g.name) + '">' + svg("del", 16) + '</button></span>'
+      : iconBtn("del", "Delete " + g.name, "seg-delete", ' data-v="' + g.id + '"').replace('class="', 'class="zp-hover ');
+    return '<div class="zp-seg-name">' + name +
+      (g.id === S.defaultSeg ? '<span class="zp-seg-tag" data-tip="New Zones join this Building Segment. Change it in Settings.">Default</span>' : "") +
+      '<span class="zp-seg-count">' + n + ' Zone' + (n === 1 ? "" : "s") + ' · ' + (g.category === "res" ? "Residential" : "Non-residential") + '</span>' + (sf.length ? flag(sf.join(" ")) : "") +
+      '<span class="zp-seg-tools">' + iconBtn("settings", "Building Segment settings", "seg-settings", ' data-v="' + g.id + '"') +
+      (S.single ? "" : iconBtn("pencil", "Rename " + g.name, "seg-rename-start", ' data-v="' + g.id + '"').replace('class="', 'class="zp-hover ')) + (S.single ? "" : del) + '</span></div>';
+  }
+  function freeSegName() { var n = S.segments.length + 1, nm; do { nm = "Building Segment " + n; n += 1; } while (S.segments.some(function (g) { return g.name === nm; })); return nm; }
+  function newSegment() { var g = segRecord(freeSegName(), "res"); S.segments.push(g); S.renaming = g.id; return g; }
+  function moveZones(zs, v) {
+    var target = v === "new" ? newSegment() : v === "none" ? null : seg(v);
+    zs.forEach(function (z) { z.seg = target ? target.id : null; });
+    S.checked = {};
+    notify(zs.length + " Zone" + (zs.length > 1 ? "s" : "") + (target ? " moved to " + target.name + "." : (zs.length > 1 ? " are" : " is") + " now in no Building Segment and left out of export."));
+  }
+  function opt(v, cur, label) { return '<option value="' + esc(v) + '"' + (v === cur ? " selected" : "") + '>' + esc(label || v) + '</option>'; }
+  function row(label, control) { return '<span>' + label + '</span><span>' + control + '</span>'; }
+  function openSegSettings(gid) {
+    var g = seg(gid), zs = S.zones.filter(function (z) { return z.seg === gid; }), units = 0, seen = {};
+    zs.forEach(function (z) { if (z.dwelling && !seen[z.dwelling]) { seen[z.dwelling] = 1; units += dw(z.dwelling).units; } });
+    var isDefault = g.id === S.defaultSeg, hd = S.single ? house() : null;
+    var progOpts = S.programs.map(function (p) { return opt(p.id, g.defProgram || "pgm_default", p.name); }).join("");
+    var winds = ["Several sides exposed, no screening", "Several sides exposed, moderate screening", "Several sides exposed, high screening", "One side exposed, no screening", "One side exposed, moderate screening", "One side exposed, high screening", "User defined"];
+    var dlg = document.createElement("dialog");
+    dlg.className = "phc-dialog zp-segdlg";
+    dlg.innerHTML = '<button type="button" class="phc-dialog-close" aria-label="Close" data-dlg="cancel">' + svg("clear", 18) + '</button><h2>Building Segment settings</h2>' +
+      '<div class="zp-segdlg-body">' +
+      '<section><h3>General</h3><div class="zp-grid">' +
+        row("Name", '<input name="name" value="' + esc(g.name) + '">') +
+        row("New Zones join this Segment", '<input type="checkbox" name="isDefault"' + (isDefault ? " checked disabled" : "") + '>' + (isDefault ? ' <span class="zp-muted">To change it, make another Segment the default.</span>' : "")) +
+        row("Zones", zs.length + (zs.length ? "" : ' <span class="zp-amber">: left out of export</span>')) + '</div></section>' +
+      '<section><h3>Phius certification</h3><div class="zp-grid">' +
+        row("Building category", '<select name="category"' + (S.single ? ' disabled data-tip="Residential: set by Single dwelling."' : "") + '>' + opt("res", g.category, "Residential") + opt("nonres", g.category, "Non-residential") + '</select>') +
+        row("Certification program", '<select name="cert">' + ["Phius 2021 CORE", "Phius 2021 ZERO", "Phius 2018 CORE", "Phius 2018 ZERO"].map(function (x) { return opt(x, g.cert); }).join("") + '</select>') +
+        row("Building use", '<select name="use">' + ["Residential", "Office / administrative", "School", "Other"].map(function (x) { return opt(x, g.use); }).join("") + '</select>') +
+        row("Building status", '<select name="status">' + ["In planning", "Under construction", "Complete"].map(function (x) { return opt(x, g.status); }).join("") + '</select>') +
+        row("Building type", '<select name="type">' + ["New construction", "Retrofit", "Mixed"].map(function (x) { return opt(x, g.type); }).join("") + '</select>') + '</div></section>' +
+      '<section><h3>Occupancy</h3><div class="zp-grid">' +
+        row("Default Program for its Zones", '<select name="defProgram"' + (S.single ? ' disabled data-tip="Single dwelling uses the residential default."' : ' data-tip="Zones with no Program of their own use this one."') + '>' + progOpts + '</select>') +
+        (hd ? row("Bedrooms in " + esc(hd.name), '<input class="zp-num" name="beds" value="' + (hd.beds === null ? "" : hd.beds) + '" placeholder="?">') +
+              row("Occupants", '<input class="zp-num" name="occ" value="' + (hd.occ === null ? "" : hd.occ) + '" placeholder="Phius rule">') +
+              row("Equipment Set", '<select name="set">' + opt("", hd.set || "", "Phius single-family default") + S.sets.filter(function (x) { return x.id !== "set_sfh"; }).map(function (x) { return opt(x.id, hd.set || "", x.name); }).join("") + '</select>')
+            : row("Bedrooms and appliances", '<span class="zp-muted">Per dwelling, in the Zones table.</span>')) +
+        row("Dwelling units", '<span data-tip="Counted from the dwellings its Zones make up (num_dwelling_units).">' + units + '</span>') + '</div></section>' +
+      '<section><h3>Airtightness</h3><div class="zp-grid">' +
+        row("Test result", '<select name="airKind" style="width:70px">' + opt("n50", g.air.kind) + opt("q50", g.air.kind) + '</select> <input class="zp-num" name="airValue" value="' + (g.air.value === null ? "" : g.air.value) + '" placeholder="?"> <span class="zp-muted">' + (g.air.kind === "n50" ? "1/h" : "m³/h·m²") + '</span>') +
+        row("Wind exposure", '<select name="wind">' + winds.map(function (x) { return opt(x, g.wind); }).join("") + '</select>') + '</div>' +
+        '<p class="zp-later" style="margin:8px 0 0">Converted at export into each Zone\'s Infiltration, replacing the Program\'s value.</p></section>' +
+      '<section><h3>Comfort</h3><div class="zp-grid">' +
+        row("Set points, winter / summer", (zs.length ? setpointsFor(g) : "—") + ' <span class="zp-muted">from the Zones\' Programs</span>') +
+        row("Mechanical cooling", '<input type="checkbox" name="mechCool"' + (g.mechCool ? " checked" : "") + '>') +
+        row("Mechanical room temperature [°C]", '<input class="zp-num" name="mechRoom" value="' + g.mechRoom + '">') + '</div></section>' +
+      '<section><h3>Planned</h3><div class="zp-grid">' +
+        row("Floor levels", '<span class="zp-later">Counted from Levels</span>') +
+        row("Site and climate", '<span class="zp-later">Phase 5.1</span>') +
+        row("Summer ventilation", '<span class="zp-later">Phase 4</span>') +
+        row("Source energy and CO₂ factors", '<span class="zp-later">Not scheduled</span>') + '</div></section>' +
+      '</div><div class="phc-dialog-actions"><button type="button" data-dlg="cancel">Cancel</button><button type="button" class="primary" data-dlg="ok">Save</button></div>';
+    document.body.appendChild(dlg);
+    function val(n) { var el = dlg.querySelector('[name="' + n + '"]'); return el ? (el.type === "checkbox" ? el.checked : el.value) : undefined; }
+    dlg.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-dlg]"); if (!b) return;
+      if (b.getAttribute("data-dlg") === "ok") {
+        g.name = val("name").trim() || g.name;
+        if (val("isDefault")) S.defaultSeg = g.id;
+        if (!S.single) { g.category = val("category"); g.defProgram = val("defProgram") === "pgm_default" ? null : val("defProgram"); }
+        g.cert = val("cert"); g.use = val("use"); g.status = val("status"); g.type = val("type"); g.wind = val("wind"); g.mechCool = val("mechCool");
+        g.air = { kind: val("airKind"), value: val("airValue") === "" ? null : parseFloat(val("airValue")) };
+        g.mechRoom = parseFloat(val("mechRoom")) || g.mechRoom;
+        if (hd) { hd.beds = val("beds") === "" ? null : parseFloat(val("beds")); hd.occ = val("occ") === "" ? null : parseFloat(val("occ")); hd.set = val("set") || null; }
+        notify(g.name + " saved.");
+      }
+      dlg.close(); dlg.remove(); render();
+    });
+    dlg.addEventListener("cancel", function () { dlg.remove(); render(); });
+    dlg.showModal();
+  }
+  function confirmDeleteSeg(gid) {
+    var g = seg(gid), zs = S.zones.filter(function (z) { return z.seg === gid; }), others = S.segments.filter(function (o) { return o.id !== gid; });
+    var pick = (S.defaultSeg !== gid ? S.defaultSeg : others[0].id);
+    var dlg = document.createElement("dialog");
+    dlg.className = "phc-dialog phc-confirm-dialog zp-confirm";
+    dlg.innerHTML = '<button type="button" class="phc-dialog-close" aria-label="Close" data-dlg="cancel">' + svg("clear", 18) + '</button><h2>Delete ' + esc(g.name) + '?</h2>' +
+      (zs.length ? '<p><label>Its ' + zs.length + ' Zone' + (zs.length > 1 ? "s move" : " moves") + ' to <select name="to">' + others.map(function (o) { return opt(o.id, pick, o.name); }).join("") + '<option value="none">No Building Segment (left out of export)</option></select></label></p>' : '<p>It holds no Zones.</p>') +
+      '<p class="zp-muted">Its settings go with it: certification, airtightness and comfort values.' + (g.id === S.defaultSeg ? " New Zones will join the Segment its Zones move to." : "") + '</p>' +
+      '<div class="phc-dialog-actions"><button type="button" data-dlg="cancel">Cancel</button><button type="button" class="primary" data-dlg="ok">Delete</button></div>';
+    document.body.appendChild(dlg);
+    dlg.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-dlg]"); if (!b) return;
+      if (b.getAttribute("data-dlg") === "ok") {
+        var sel = dlg.querySelector('[name="to"]'), to = sel ? sel.value : pick;
+        zs.forEach(function (z) { z.seg = to === "none" ? null : to; });
+        S.segments = others;
+        if (S.defaultSeg === gid) S.defaultSeg = to !== "none" ? to : others[0].id;
+        notify(g.name + " deleted." + (zs.length ? " Its Zones moved to " + (to === "none" ? "no Building Segment." : seg(to).name + ".") : ""));
+      }
+      dlg.close(); dlg.remove(); render();
+    });
+    dlg.addEventListener("cancel", function () { dlg.remove(); render(); });
+    dlg.showModal();
   }
   // Single dwelling: the Building Segment row is the house row. Its Bedrooms, Occupants and Equipment Set
   // cells are the only inputs on the page.
@@ -428,6 +565,8 @@
     if (S.dwellings.length > 1) out.push(S.dwellings.length + " dwellings become one, House.");
     else if (loose && S.dwellings.length) out.push(loose + " Zones that are not dwellings join " + S.dwellings[0].name + ".");
     if (S.segments.length > 1) out.push("Zones in " + S.segments.length + " Building Segments move into " + S.segments[0].name + ".");
+    var noSeg = S.zones.filter(function (z) { return !z.seg; }).length;
+    if (noSeg) out.push(noSeg + " Zone" + (noSeg > 1 ? "s" : "") + " in no Building Segment join the house and are exported.");
     S.segments.forEach(function (g) { if (g.category !== "res") out.push("Building Segment " + g.name + " becomes Residential."); });
     if (S.zones.some(function (z) { return z.set; }) && S.dwellings.length > 1) out.push("Per-dwelling Equipment Sets give way to one Set for the house.");
     return out;
@@ -439,7 +578,7 @@
     var h = S.dwellings.length === 1 ? S.dwellings[0] : { id: id("dw"), name: "House", units: 1, set: null };
     h.units = 1; h.beds = any ? beds : null; h.occ = null;
     S.dwellings = [h];
-    var g0 = S.segments[0]; g0.category = "res"; S.segments = [g0];
+    var g0 = S.segments[0]; g0.category = "res"; g0.defProgram = null; S.segments = [g0]; S.defaultSeg = g0.id;
     S.zones.forEach(function (z) { z.dwelling = h.id; z.program = null; z.set = null; z.beds = null; z.occ = null; z.seg = g0.id; });
     S.single = true; S.checked = {}; S.bubble = null;
     notify("Single dwelling: every Zone is now part of " + h.name + ", with the residential default." + (any ? " Bedrooms moved to the house: " + beds + "." : ""));
@@ -471,7 +610,7 @@
   function zoneRow(z) {
     var p = effectiveProgram(z), d = derived(z), f = zoneFindings(z), checked = !!S.checked[z.id];
     var progCell = '<select class="phc-enum-cell' + (z.program ? "" : " is-default") + '" data-act="zone-program" data-v="' + z.id + '" aria-label="Program for ' + esc(z.name) + '"' +
-      (z.program ? "" : ' data-tip="Unassigned: uses the residential default (Q4a-13)."') + '>' + programOptions(z.program || "pgm_default") + '</select>' + (f.length ? flag(f.join(" ")) : "");
+      (z.program ? "" : ' data-tip="Unassigned: uses its Building Segment\'s default Program."') + '>' + programOptions(z.program || segDefaultProgram(z)) + '</select>' + (f.length ? flag(f.join(" ")) : "");
     var dwl = z.dwelling ? dw(z.dwelling) : null;
     var dwCell = dwl ? '<button type="button" class="zp-dwelling" data-act="dwelling" data-v="' + dwl.id + '">' + svg("home", 12) + esc(dwl.name) + (dwl.units > 1 ? " ×" + dwl.units : "") + '</button>'
       : '<button type="button" class="zp-dwelling is-none" data-act="noop" data-tip="Not a dwelling. Check Zones and choose a Dwelling in the selection bar.">None</button>';
@@ -505,8 +644,12 @@
     var dwOpts = '<option value="" selected disabled>' + (Object.keys(dws).length > 1 ? "Mixed" : (zs[0].dwelling ? dw(zs[0].dwelling).name : "Not a dwelling")) + '</option>' +
       '<option value="shared">One shared dwelling</option><option value="each">One dwelling each</option><option value="none">Not a dwelling</option>' +
       (S.dwellings.length ? '<optgroup label="Add to">' + S.dwellings.map(function (d) { return '<option value="to:' + d.id + '">' + esc(d.name) + '</option>'; }).join("") + '</optgroup>' : "");
+    var segs = {}; zs.forEach(function (z) { segs[z.seg || "none"] = 1; });
+    var segOpts = '<option value="" selected disabled>' + (Object.keys(segs).length > 1 ? "Mixed" : (zs[0].seg ? seg(zs[0].seg).name : "No Building Segment")) + '</option>' +
+      S.segments.map(function (g) { return '<option value="' + g.id + '">' + esc(g.name) + '</option>'; }).join("") + '<option value="new">New Building Segment</option><option value="none">No Building Segment</option>';
     var setOpts = '<option value="" selected disabled>Choose…</option><option value="none">None</option>' + S.sets.map(function (x) { return '<option value="' + x.id + '">' + esc(x.name) + '</option>'; }).join("");
     return '<div class="phc-selection-bar" role="region" aria-label="Checked Zones" style="position:fixed; bottom:44px"><span class="phc-selection-bar-count">' + n + ' Zone' + (n > 1 ? "s" : "") + ' selected</span><div class="phc-selection-bar-controls">' +
+      '<label class="phc-selection-field"><span>Building Segment</span><select data-act="bulk-seg" aria-label="Building Segment for checked Zones">' + segOpts + '</select></label>' +
       '<label class="phc-selection-field"><span>Program</span><select data-act="bulk-program" aria-label="Program for checked Zones">' + programOptions(pk.length === 1 ? pk[0] : null, false, pk.length > 1) + '</select></label>' +
       '<label class="phc-selection-field"><span>Dwelling</span><select data-act="bulk-dwelling" aria-label="Dwelling for checked Zones">' + dwOpts + '</select></label>' +
       '<label class="phc-selection-field"><span>Equipment Set</span><select data-act="bulk-set" aria-label="Equipment Set for checked Zones">' + setOpts + '</select></label></div>' +
@@ -664,6 +807,7 @@
     renderStrip(); renderTabs();
     var pane = document.getElementById("pane");
     pane.innerHTML = S.tab === "zones" ? renderZones() : renderPrograms();
+    var rn = document.querySelector('[data-act="seg-rename"]'); if (rn) { rn.focus(); rn.select(); }
     var old = document.querySelector(".zp-notice"); if (old) old.remove();
     if (S.notice) {
       var n = document.createElement("div"); n.className = "zp-notice"; n.setAttribute("role", "status"); n.innerHTML = svg("check", 16) + '<span>' + S.notice + '</span>';
@@ -728,7 +872,10 @@
       if (!el.checked) { S.single = false; notify("Single dwelling is off. House and the residential default stay; assign per Zone now."); }
       else { var ch = singleChanges(); if (ch.length) { render(); confirmSingle(ch); return; } applySingle(); }
     }
-    else if (a === "air") { var g = seg(v); var val = prompt("Airtightness test result for " + g.name + " (" + g.air.kind + ")", g.air.value); if (val !== null) g.air.value = parseFloat(val) || g.air.value; }
+    else if (a === "new-seg") { var ng = newSegment(); notify(ng.name + " created. Move Zones into it from the selection bar."); }
+    else if (a === "seg-settings") { openSegSettings(v); return; }
+    else if (a === "seg-rename-start") { S.renaming = v; }
+    else if (a === "seg-delete") { confirmDeleteSeg(v); return; }
     else return;
     render();
   });
@@ -740,7 +887,8 @@
     else if (a === "bulk-set") { var zs = S.zones.filter(function (z) { return S.checked[z.id]; }); zs.forEach(function (z) { z.set = el.value === "none" ? null : el.value; if (z.dwelling) dw(z.dwelling).set = z.set; }); notify("Equipment Set changed on " + zs.length + " Zones."); }
     else if (a === "zone-set") { var z = S.zones.filter(function (x) { return x.id === v; })[0]; z.set = el.value || null; if (z.dwelling) { dw(z.dwelling).set = z.set; zonesOfDwelling(z.dwelling).forEach(function (o) { o.set = z.set; }); } }
     else if (a === "beds" || a === "occ") { var zz = S.zones.filter(function (x) { return x.id === v; })[0]; zz[a] = el.value === "" ? null : parseFloat(el.value); }
-    else if (a === "category") { seg(v).category = el.value; }
+    else if (a === "bulk-seg") { moveZones(S.zones.filter(function (z) { return S.checked[z.id]; }), el.value); }
+    else if (a === "seg-rename") { if (S.renaming !== v) return; var nm = el.value.trim(); if (nm) seg(v).name = nm; S.renaming = null; }
     else if (a === "house-beds") { house().beds = el.value === "" ? null : parseFloat(el.value); }
     else if (a === "house-occ") { house().occ = el.value === "" ? null : parseFloat(el.value); }
     else if (a === "house-set") { house().set = el.value || null; }
@@ -761,7 +909,10 @@
     tip.textContent = el.getAttribute("data-tip"); tip.hidden = false; var r = el.getBoundingClientRect();
     tip.style.left = Math.min(window.innerWidth - 310, Math.max(4, r.left)) + "px"; tip.style.top = (r.bottom + 6 + 60 > window.innerHeight ? r.top - tip.offsetHeight - 6 : r.bottom + 6) + "px";
   });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") { if (S.bubble) S.bubble = null; else S.checked = {}; render(); } });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && e.target.getAttribute("data-act") === "seg-rename") { e.target.blur(); return; }
+    if (e.key === "Escape") { if (S.renaming) S.renaming = null; else if (S.bubble) S.bubble = null; else S.checked = {}; render(); }
+  });
 
   // ---------------------------------------------------------------- boot from the query string
   var q = location.search;
@@ -799,6 +950,11 @@
     if (st === "customsched") { S.ptab = "schedules"; S.selSchedule = prog(S.selProgram).people.sched; }
     if (st === "pdefault") { S.tab = "programs"; S.ptab = "programs"; S.selProgram = "pgm_default"; }
     if (st === "sets") { S.tab = "programs"; S.ptab = "sets"; }
+    if (st === "moveshed") { S.zones.forEach(function (z) { if (z.name === "Bike shed") z.seg = null; }); }
+    if (st === "checkshed") { S.zones.forEach(function (z) { if (z.name === "Bike shed") S.checked[z.id] = 1; }); }
+    if (st === "newseg") { newSegment(); }
+    if (st === "segsettings") { setTimeout(function () { openSegSettings(S.segments[0].id); }, 50); }
+    if (st === "trydelete") { S.renaming = null; setTimeout(function () { confirmDeleteSeg(S.segments[0].id); }, 50); }
     if (st === "bubble") { setTimeout(function () { var b = document.querySelector('[data-act="dwelling"]'); if (b) { dwellingBubble(b.getAttribute("data-v"), b); render(); } }, 50); }
   });
   S.notice = null;
