@@ -1,7 +1,7 @@
 # Phase 4a contracts: records, ownership and seams
 
 DATE: 2026-11-15
-STATUS: Scoped for P4a-01 to P4a-08 and P4a-11; revised the same day after an independent review against the code (14 findings folded in) and after the Programs tab review. Ed answered C4a-5, C4a-7 and C4a-8; Ed answered C4a-9 and C4a-10 the same day; C4a-2, C4a-3, C4a-4 and C4a-6 settle in their stages.
+STATUS: Scoped for P4a-01 to P4a-11; revised after an independent review against the code (14 findings), the Programs tab review and a consistency sweep, all 2026-11-15. Ed answered C4a-5 and C4a-7 to C4a-10; C4a-2, C4a-3, C4a-4 and C4a-6 settle in their stages.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -60,9 +60,9 @@ owner requires Zones, so Zones cannot call its participants). This answers the e
 **Rules that span namespaces are findings, not refusals, on generic routes.** A namespace
 validator sees only its own payload, and `ph_composer.records.update_metadata` writes any installed
 payload. So "Single dwelling needs a residential Segment" and "a Dwelling lies in one Segment" are
-read findings and export preflight rows, enforced as refusals only in Programs' own actions. The
-dialog keeps them consistent in the draft: checking Single dwelling sets the certification draft's
-category to residential. **Effective Single dwelling** is `single_dwelling` and a residential
+read findings and export preflight rows, enforced as refusals only in Programs' own actions. In
+the dialog, Single dwelling is disabled while the certification draft's category is
+non-residential; no section writes another's draft. **Effective Single dwelling** is `single_dwelling` and a residential
 category; a non-residential Segment is never a single dwelling, whatever its payload says.
 
 **Zone evidence carries Segment values, not extensions.** Today `Options.evidence` copies the whole
@@ -129,10 +129,10 @@ No record change: Space records keep `v_sup_m3h`, `v_eta_m3h`, `v_tran_m3h`, eac
   step (the Zone row's From Program).
 - Room ventilation is never written from Space rates (F4a-29, Q4a-31).
 
-## 5. Programs records (Programs; P4a-07 and P4a-08; provisional)
+## 5. Programs records (Programs; P4a-07 and P4a-08)
 
 Field lists follow [loads and schedules](research/loads-and-schedules.md) and the answered
-interview; the Programs tab review may change them.
+interview; P4a-07 fixes them.
 
 | Kind | Prefix | Holds |
 | --- | --- | --- |
@@ -146,9 +146,14 @@ Reads never write: until a write touches it, reads answer a frozen definition in
 the pinned honeybee-ph rules and schedules) under a reserved id, and the first write that touches it
 materializes it as a record with its Schedules, `source` naming PH-Composer's default. The
 user may edit it like any Program. A Reset to PH-Composer default action rewrites it from the
-definition, one Undo step. A Programs Model setting, `default_program_id` (never null), names the
-Program unassigned Zones and Single dwelling use; deleting that Program refuses while it is the
-default.
+definition, one Undo step. A Programs Model setting, `ph_composer.programs.settings`, holds
+`default_program_id` (never null), the Program unassigned Zones and Single dwelling use; deleting
+that Program refuses while it is the default.
+
+**The default Equipment Set follows the same pattern**: the Phius single-family device set (the
+eight honeybee-ph Phius defaults, F4a-20) is a frozen definition until first written, then an
+ordinary editable Set with Reset, and the same settings record holds `default_equipment_set_id`. A
+Dwelling with no Set of its own uses it, so a single dwelling exports its appliances and MEL.
 
 **Phius-rule loads** (People, Lighting and Hot water on the residential default) carry a `rule`
 marker instead of a per-area value, with the rule's own inputs (the lighting high-efficacy
@@ -203,7 +208,7 @@ rule (P4a-10).
 | Space airflows | `SpacePhProperties._v_*` per section 4 | Spaces |
 | Effective Program | The Room's honeybee `ProgramType` with its loads and Schedules | Programs |
 | Dwelling and counts | honeybee-ph People extension per Room (F4a-19) | Programs |
-| Equipment Set | honeybee-ph `PhEquipment` Process loads: a Dwelling's Set by Dwelling; a non-dwelling Zone's own Set by Zone (F4a-17, Q4a-21) | Programs |
+| Equipment Set | honeybee-ph `PhEquipment` Process loads (F4a-17, Q4a-21). A Dwelling's Set, or the default Set, once per Dwelling on its largest Room, each device's `quantity` its own times the Dwelling's units, so PHX's merge across Rooms (by identifier, summing `quantity`) counts it once. A non-dwelling Zone's own Set on that Zone's Room; two such Zones sharing a Set each carry its devices, as two laundry rooms each have a washer | Programs |
 | Segment set points | `BldgSegment.set_points` | Programs |
 
 **PHX in tests.** PHX is not a dependency today (`pyproject.toml`; the research read a local

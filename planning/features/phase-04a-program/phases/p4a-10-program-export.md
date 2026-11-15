@@ -7,7 +7,7 @@ ISSUE: none (local planning draft)
 
 ## Entry and scope
 
-Requires P4a-08 (and, through it, P4a-06's airtightness and P4a-05's airflows). Writes everything
+Requires P4a-08, which brings P4a-05's airflows and P4a-06's airtightness. Writes everything
 Programs owns into the HBJSON and adds the read-only Comfort section. Ruby derives every value
 (AGENTS.md: domain calculations in Ruby); the Python section builds honeybee objects from the
 contract record and computes nothing of its own beyond honeybee's own conversions.
@@ -19,9 +19,6 @@ Q4a-25, Q4a-31, Q4a-33. Paths are relative to `src/ph_composer/`.
 
 ## Steps
 
-0. **Pin.** Choose the honeybee-ph pin for `PhEquipment` (F4a-18: `quantity` defaults and the custom
-   types differ between 1.33.65 and 1.33.68) and record it in `pyproject.toml` and the vendored
-   wheels.
 1. **Contributor** (`features/programs/export.rb`): one contract record per exported Room with its
    effective Program's loads, already resolved per Dwelling, the Schedules they use, the Room's
    People extension values and its Process devices; plus each exported Segment's set points.
@@ -39,9 +36,11 @@ Q4a-25, Q4a-31, Q4a-33. Paths are relative to `src/ph_composer/`.
 4. **People extension** per Room (F4a-19): the shared `PhDwellings` object per Dwelling with its
    units, and `number_bedrooms` and `number_people` from the Zone's counts (per Zone, Q4a-24); a
    Dwelling's own counts under Single dwelling go on its largest Room. Never `Room.zone`.
-5. **Equipment Sets** as honeybee-ph `PhEquipment` Process loads (F4a-17): a Dwelling's Set once per
-   Dwelling, on its largest Room, `quantity` the Dwelling's units, since PHX merges devices across
-   Rooms by identifier and sums `quantity`; a non-dwelling Zone's own Set on its Room (Q4a-21). In a
+5. **Equipment Sets** as honeybee-ph `PhEquipment` Process loads (F4a-17), using the pin P4a-07
+   chose: a Dwelling's Set, or the Model's default Set, once per Dwelling on its largest Room, each
+   device's `quantity` its own times the Dwelling's units, since PHX merges devices across Rooms by
+   identifier and sums `quantity`; a non-dwelling Zone's own Set on that Zone's Room, so two such
+   Zones sharing a Set each carry its devices (Q4a-21). In a
    non-residential Segment, PHX reads the Program's equipment watts and drops devices; preflight
    warns when a Set is assigned there.
 6. **Ventilation and infiltration.** The Room's honeybee `Ventilation` is its Program's, unchanged

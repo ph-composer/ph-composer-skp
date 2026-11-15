@@ -1,7 +1,7 @@
 # Phase 4a: Programs
 
 DATE: 2026-11-14
-STATUS: Scoped for the Zones tab (2026-11-15): PRD, contracts, plan and stages written; the Programs tab is specified after its review. No stage authorized.
+STATUS: Scoped (2026-11-15): PRDs, contracts, plan, acceptance and stages P4a-01 to P4a-12 written; P4a-01 to P4a-11 ready to authorize. No stage authorized.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -53,8 +53,8 @@ From Ed's request and the 2026-11-14 interview ([answers](DECISIONS.md#answered)
 The plan is to prototype the GUI first and work back to the records, operations and exporter.
 
 Out until decided otherwise: ExhaustAir (F4a-16), daylighting control, fans and internal masses,
-EnergyPlus simulation settings, Space Types (Q4a-16), and writing honeybee-ph operating periods
-until the cross-repo fix for F4a-13 ships (Q4a-08).
+EnergyPlus simulation settings, Space Types (Q4a-16), and writing occupancy and lighting operating
+periods until the cross-repo fix for F4a-13 ships (Q4a-08; ventilation periods are written, C4a-10).
 
 ## Read order
 
@@ -64,7 +64,7 @@ until the cross-repo fix for F4a-13 ships (Q4a-08).
 2. [CONTRACTS.md](CONTRACTS.md): records, ownership, seams and export mapping, with open contract
    questions C4a-2, C4a-3, C4a-4 and C4a-6, which settle in their stages.
 3. [PLAN.md](PLAN.md), the stages under [phases/](phases), and [ACCEPTANCE.md](ACCEPTANCE.md).
-4. [DECISIONS.md](DECISIONS.md): findings F4a-01 to F4a-29 and questions Q4a-01 to Q4a-32 with
+4. [DECISIONS.md](DECISIONS.md): findings F4a-01 to F4a-29 and questions Q4a-01 to Q4a-36 with
    every answer.
 5. [research/honeybee-energy-programs.md](research/honeybee-energy-programs.md): the ProgramType,
    Room inheritance and overrides, Model emission, the program library, and the Honeybee

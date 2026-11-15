@@ -1,7 +1,7 @@
 # Phase 4a: Programs on the Zones tab
 
 DATE: 2026-11-15
-STATUS: Scoped for the Zones tab. Interviewed 2026-11-14 and 2026-11-15; prototype reviewed (Q4a-01 to Q4a-32, BS-1 to BS-6). The Programs tab section is a placeholder until its review. No stage authorized.
+STATUS: Scoped. Interviewed 2026-11-14 and 2026-11-15; prototype and Programs tab reviewed (Q4a-01 to Q4a-36, BS-1 to BS-6, C4a-5, C4a-7 to C4a-10). Stages P4a-01 to P4a-11 written. No stage authorized.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -17,8 +17,7 @@ detailed ventilation design needs airflows per Space.
 This PRD covers everything on the **Zones tab**: the new Zones / Programs view, the changes to
 Zones / Spaces, the Segment settings sections Programs owns, and the export they feed. The
 Building Segment work it builds on is its own [PRD](building-segments/PRD.md). The **Programs
-tab** (authoring Programs, Schedules and Equipment Sets) is summarised at the end and specified
-after its review.
+tab** (authoring Programs, Schedules and Equipment Sets), reviewed the same day, closes this PRD.
 
 ## Vocabulary
 
@@ -53,10 +52,12 @@ floor area or iCFA, in its header tooltip (Q4a-17).
 - **Dwelling**: a chip naming the Dwelling (×units when more than one), or "None". Clicking it
   opens the Dwelling bubble (below). A chip in a Single dwelling Segment is locked.
 - **Bedrooms, Occupants**: per Zone (Q4a-11), shown only on a Zone in a Dwelling. Occupants left
-  empty use the Phius rule. When the Dwelling holds its own count, the Zone cell reads "in
-  <Dwelling>" (Q4a-24 open).
-- **Equipment Set**: one per Dwelling in a residential Segment (Q4a-21 open). A Zone that is not a
-  Dwelling, or any Zone in a non-residential Segment, shows a dash with the reason.
+  empty use the Phius rule. Counts are per Zone and auto-totalled per Dwelling (Q4a-24); only a
+  Single dwelling's Dwelling holds its own count, and then the Zone cell reads "in <Dwelling>".
+- **Equipment Set**: one per Dwelling, shared by its Zones, or a Zone's own when it is not a
+  Dwelling (Q4a-21). A Dwelling with none uses the Model's default Equipment Set (below). Any Zone
+  in a non-residential Segment shows a dash with the reason: PHX reads the Program's equipment
+  watts there.
 - **People, Lighting, Ventilation**: the absolute values the export will write, from
   [CONTRACTS](CONTRACTS.md#6-derived-values-programs-ruby-p4a-08-and-p4a-09) section 6.
   **Ventilation has two sources**: the Program's flow for a By Program Zone, or the larger of its
@@ -87,12 +88,20 @@ settings, Occupancy section, and only on a residential Segment.
 3. **The heading shows a "Single dwelling" tag** with a lock. A locked cell, or the tag, opens a
    bubble anchored to it: "<Segment> is a single dwelling", why, and one **Open settings** button.
 4. **Switching on** over per-Zone assignments in that Segment confirms first, listing what gives
-   way: Program choices, extra Dwellings, a non-residential category, per-Dwelling Equipment Sets.
-   Per-Zone bedrooms are summed into the Dwelling.
+   way: Program choices, extra Dwellings, per-Dwelling Equipment Sets. Per-Zone bedrooms are summed
+   into the Dwelling. On a non-residential Segment the checkbox is disabled, with the reason; the
+   user changes the category in the same dialog's Phius certification section first.
 5. **Switching off** keeps everything it set as ordinary assignments: the Dwelling, its counts on
    the Dwelling and the residential default.
 
 ### Dwellings (P4a-08)
+
+- **The default Equipment Set.** Like the residential default Program, the Phius single-family
+  device set (honeybee-ph's eight Phius defaults: fridge-freezer, dishwasher, clothes washer,
+  clothes dryer, cooktop, Phius MEL, exterior and garage lighting, F4a-20) is built in, becomes an
+  ordinary editable Equipment Set in the Model on first write, and has Reset to PH-Composer default.
+  A Model setting names the default Set; a Dwelling with no Set of its own uses it, so a single
+  dwelling exports its appliances and MEL with nothing but its bedrooms entered.
 
 - The Dwelling cell's bubble starts with **Dwelling of <Zone>**: a select of the Model's
   Dwellings, New dwelling and Not a dwelling, applied at once. Below it, for a Zone in a Dwelling:
@@ -106,8 +115,8 @@ settings, Occupancy section, and only on a residential Segment.
 The shipping view keeps its columns; no Airflow column (Ed, 2026-11-15).
 
 1. A Zone with no Space rates is **By Program**: every airflow cell reads "By Program", with a
-   tooltip naming the Program once Programs exist (P4a-08) and saying "the Zone's Program
-   ventilation" before then. Zone sums show a dash.
+   tooltip saying the Zone's Program ventilation applies, split by floor area, with its schedule
+   (Zones / Programs names the Program). Zone sums show a dash.
 2. **Typing any rate on any Space makes its Zone detailed** (Q4a-29, Q4a-30): every Space in that
    Zone exports its own rates and every blank reads a muted 0. The first entry says so in a notice
    ("Hall and stair now uses detailed airflows: its other Space exports 0 until you enter its
@@ -135,8 +144,9 @@ Program's Infiltration load exports.
 Per [CONTRACTS](CONTRACTS.md#7-export-mapping-p4a-03-p4a-04-p4a-06-p4a-10) section 7: each Room
 carries its effective Program as a honeybee `ProgramType` with its loads and Schedules; the
 honeybee-ph People extension per Dwelling; Equipment Set devices as `PhEquipment` Process loads;
-infiltration from the Segment's test result; Segment set points from the Programs. Writing
-honeybee-ph operating periods waits on the honeybee-ph and PHX fix for F4a-13 (Q4a-08).
+infiltration from the Segment's test result; Segment set points from the Programs. Ventilation
+Schedules also write honeybee-ph operating periods (C4a-10); occupancy and lighting Schedules write
+them only once the honeybee-ph and PHX fix for F4a-13 ships (Q4a-08).
 
 ## Programs tab (P4a-11; reviewed 2026-11-15)
 
@@ -172,14 +182,16 @@ Schedules and Equipment Sets show only their records in this file for now. Proto
   space; comment), Energy (reference quantity, limited to the codes the type allows; energy demand,
   or the Phius rule for a rule device), the type's own fields (a dryer's type, field utilization
   factor and, for a gas dryer, gas consumption), and PHPP only. Delete confirms. A Set is assigned
-  to a Dwelling, or to a Zone that is not a dwelling (Q4a-21).
+  to a Dwelling, or to a Zone that is not a dwelling (Q4a-21). The Model's default Set is listed
+  under Default, with Reset to PH-Composer default in its overflow menu, as the default Program is.
 - **Library Programs** copy into the Model with their Schedules when used, the same protocol as
   Materials, Frames and Glazings (Q4a-22), and arrive complete (Q4a-25).
 
 ## Decisions
 
 [DECISIONS.md](DECISIONS.md#answered) holds every answer: the interview (Q4a-01 to Q4a-18), the
-prototype reviews (Q4a-19 to Q4a-32) and the findings F4a-01 to F4a-29. The Building Segment
+prototype and Programs tab reviews (Q4a-19 to Q4a-36) and the findings F4a-01 to F4a-29. Contract
+questions C4a-2 to C4a-10 are in [CONTRACTS](CONTRACTS.md#open-contract-questions). The Building Segment
 answers are in the [Building Segments PRD](building-segments/PRD.md#decisions-ed-2026-11-15).
 
 ## Out of scope

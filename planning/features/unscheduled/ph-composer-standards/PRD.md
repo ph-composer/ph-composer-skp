@@ -57,7 +57,7 @@ ph-composer-standards/
 | `materials` | Today | `starter/materials.json` (S1) |
 | `frames`, `glazings`, `psi_install_types` | Today | When someone needs starter records |
 | Programs and Schedules | Phase 4a P4a-07 | `phius/multifamily.json`, `phius/non_residential.json` (S3); `doe/*.json` (S4). Each Program complete, as honeybee-REVIVE's `honeybee_revive_standards/programtypes/` with its `schedules/` beside it: every slot filled, the slots the Phius data lacks from the paired 2019 base program with their source named (Q4a-25) |
-| Equipment Sets | Phase 4a P4a-07 | Phius single-family and multifamily defaults, if the review keeps them as library content |
+| Equipment Sets | Phase 4a P4a-07 | The Phius single-family default Set is built into PH-Composer (PRD, "Dwellings"); a Phius multifamily default Set may come here later |
 | Mechanical equipment | Phase 4 | Later |
 
 ## Questions

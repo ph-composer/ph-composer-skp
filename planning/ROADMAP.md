@@ -134,11 +134,11 @@ concurrent work. External-agent support and public distribution remain distinct 
 Ed proposed [Phase 4a Programs](features/phase-04a-program/README.md) on 2026-11-14 as the next
 work, ahead of the mechanical stages: honeybee-energy ProgramTypes with their loads and schedules,
 assigned to Zones and exported to HBJSON. It is the Zone loads packet equipment Q12 defers to.
-Scoped for the Zones tab on 2026-11-15, including the Building Segment work it stands on; the Programs tab follows its own review. Its placement and name are question Q4a-01. No stage authorized.
+Scoped on 2026-11-15, including the Building Segment work it stands on and the Programs tab. Its placement and name are question Q4a-01. No stage authorized.
 
 | # | Item | State | Note |
 | --- | --- | --- | --- |
-| 4a | [Programs](features/phase-04a-program/README.md) | Scoped 2026-11-15: [PLAN](features/phase-04a-program/PLAN.md) stages P4a-01 to P4a-12; P4a-01 to P4a-06 ready | Supplies the Zone ventilation load Spaces inherits, the People load PHX needs, airtightness, dwellings and per-Zone occupancy counts, and the appliances (Equipment Sets) that Phase 4a Q4a-03 moved out of 4.6 |
+| 4a | [Programs](features/phase-04a-program/README.md) | Scoped 2026-11-15: [PLAN](features/phase-04a-program/PLAN.md) stages P4a-01 to P4a-12; P4a-01 to P4a-11 ready | Supplies the Zone ventilation load Spaces inherits, the People load PHX needs, airtightness, dwellings and per-Zone occupancy counts, and the appliances (Equipment Sets) that Phase 4a Q4a-03 moved out of 4.6 |
 
 ## Phase 4: mechanical
 

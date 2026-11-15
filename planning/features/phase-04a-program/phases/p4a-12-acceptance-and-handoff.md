@@ -16,9 +16,9 @@ Requires every stage above. Closes the register and folds what landed into `cont
 3. `context/CONTRACTS.md`, `context/EXTENSIBILITY.md`, `context/UBIQUITOUS_LANGUAGE.md`, `docs/PRODUCT.md`, the user data guide and the agent guide brought up to date.
 4. Handoff to Phase 4 mechanical: mechanical cooling and room temperature (C4a-5), the ventilation unit link per Space.
 
-## Settle at G1
+## Open
 
-Nothing beyond the stages' own answers.
+Nothing beyond the stages' own contract questions.
 
 ## Host gate
 

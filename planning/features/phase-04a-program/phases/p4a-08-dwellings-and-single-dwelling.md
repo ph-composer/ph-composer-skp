@@ -7,7 +7,7 @@ ISSUE: none (local planning draft)
 
 ## Entry and scope
 
-Requires P4a-07. Owns Dwellings, the per-Zone assignment extension, the derivations in Ruby,
+Requires P4a-07, and P4a-05 (detailed airflows feed the ventilation derivation). Owns Dwellings, the per-Zone assignment extension, the derivations in Ruby,
 Single dwelling per Building Segment and the Segment settings' Occupancy section. No Zones /
 Programs view (P4a-09) and no export (P4a-10).
 
@@ -20,10 +20,11 @@ revised by BS-3), Q4a-27, C4a-7. Paths are relative to `src/ph_composer/`.
 1. **Dwelling kind** `ph_composer.programs.dwelling` (`dwl_`): `name`, `units` (integer, at least
    1), `bedrooms` and `occupants` (number or null; set only by Single dwelling, Q4a-24),
    `equipment_set_id` (reference or null, Q4a-21). Operations as P4a-07's kinds.
-2. **Zones' extension participant.** `ph_composer.zones.stage_extension`: Zones stages a named
-   namespace's payload on Zone or Segment records after that namespace's installed validator
-   accepts it. Programs requires Zones, so its actions may call it (CONTRACTS section 2). P4a-02's
-   Save uses the same staging code.
+2. **Zones' extension participant.** Expose P4a-02's staging route as the participant
+   `ph_composer.zones.stage_extension`: Zones stages a named namespace's payload on Zone or Segment
+   records after that namespace's installed validator accepts it. Programs requires Zones, so its
+   actions may call it (CONTRACTS section 2). Extend P4a-07's delete guards with the references this
+   stage adds: Zone assignments and Dwellings naming a Program or Equipment Set.
 3. **Zone assignment extension** `ph_composer.programs.zone_assignment`: `program_id`,
    `dwelling_id`, `equipment_set_id` (references or null), `bedrooms`, `occupants` (number or
    null). Absent reads as unassigned. Programs' actions, each one Undo step:
@@ -37,11 +38,11 @@ revised by BS-3), Q4a-27, C4a-7. Paths are relative to `src/ph_composer/`.
    true when absent, C4a-7), `dwelling_id`, `default_program_id`. **Effective Single dwelling** is
    `single_dwelling` on a residential Segment (Certification's category).
 5. **Switching Single dwelling** (Occupancy section, through Zones' Save). Programs registers a
-   transition contributor on Zones' settings save, so the switch's side effects land in the same
-   Undo step:
+   transition contributor on P4a-02's `zones.segment_settings_saved`, so the switch's side effects
+   land in the same Undo step. The checkbox is disabled on a non-residential Segment, with the
+   reason; nothing here changes the category.
    - **on**: create the Segment's Dwelling, named for the Segment, or reuse its one Dwelling; sum
      the Zones' bedrooms into it; clear the Zones' Program, Dwelling, counts and Equipment Set;
-     set the certification draft's category to residential;
    - **off**: write each Zone's Dwelling as the Segment's Dwelling, keeping its counts on the
      Dwelling and the default Program.
    `programs.single_dwelling_preview(segment)` lists what switching on replaces, for the
@@ -55,7 +56,10 @@ revised by BS-3), Q4a-27, C4a-7. Paths are relative to `src/ph_composer/`.
 7. **Reads and findings.** `programs.zones`: one row per Zone with its assignment, effective values
    and findings; `programs.dwellings`. Findings: a Dwelling across Segments, Single dwelling on a
    non-residential Segment (it has no effect), a residential Segment with no Dwelling, a
-   non-residential Segment with Dwellings, a Program with equipment watts in a residential Segment.
+   non-residential Segment with Dwellings, an unassigned Zone in a non-residential Segment, a
+   Program with equipment watts in a residential Segment. A Dwelling with no Equipment Set uses the
+   Model's default Set (P4a-07). Programs registers P4a-02's `segmentHeading` hook for the Single
+   dwelling tag and these findings on Segment headings in every Zone view.
 8. **Occupancy section** of the Segment settings: Single dwelling (residential only, with the
    reason when disabled), default Program for its Zones, and under Single dwelling the Dwelling's
    bedrooms, occupants and Equipment Set; dwelling units read only.

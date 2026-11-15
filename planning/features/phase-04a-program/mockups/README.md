@@ -1,7 +1,7 @@
 # Programs prototype
 
 DATE: 2026-11-14
-STATUS: In review. First review 2026-11-14 added the Single dwelling switch and library files; 2026-11-15 added Building Segment management. Clickable mockup, not a screen; no panel code.
+STATUS: Reviewed. First review 2026-11-14; Building Segments, Spaces airflows and the Programs tab reviewed 2026-11-15. The [PRD](../PRD.md) is the behaviour; this mockup illustrates it. Clickable mockup, not a screen; no panel code.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -20,7 +20,7 @@ server. The dark strip at the top picks a journey and says what to try; Reset re
 | 3. Apartments plus corridors, lobby, stair, office, gym | Apartments as in 2; pick Phius Multifamily Programs for the rest from the Program choice | `j3-corridors-checked` (`journey=3&do=each,beds,checkcorr`), `j3-common-areas` and `-420` (`journey=3&do=each,beds,common`) |
 | Building Segments (journey 3, then 1) | Check the Bike shed, Building Segment: No Building Segment or New Building Segment. Hover a Segment row: Settings and Delete appear in its Actions cell; settings is where it is renamed | `j3-no-segment` (`…,common,moveshed`), `j3-move-segment` (`…,common,checkshed`), `j3-new-segment` (`…,common,newseg`), `j3-segment-settings` (`…,common,segsettings`), `j3-delete-segment` (`…,common,newseg,trydelete`), `j1-segment-settings` (`journey=1&do=house3,segsettings`), `j1-adu` (`journey=1&do=house3,adu`), `j1-lock-bubble` (`journey=1&do=house3,lockinfo`), `j1-segment-actions` (the ADU row hovered) |
 | 4. Non-residential school | Unassigned Zones are flagged; assign from Phius Non-Residential, or browse the library sidebar | `j4-start` (`journey=4`), `j4-assigned` (`journey=4&do=school`), `j4-library` (`journey=4&do=school,libnr`), `j4-long-name` (`journey=4&do=school,longname`) |
-| 5. Custom lab programs | Programs tab, + on the rail, set loads, open a schedule chip | `j5-program` and `-420` (`journey=5&do=custom`), `j5-schedule` (`journey=5&do=custom,customsched`) |
+| 5. Custom lab programs | Programs tab, + New Program in the sidebar, set loads, open a schedule | `j5-program` and `-420` (`journey=5&do=custom`), `j5-schedule` (`journey=5&do=custom,customsched`) |
 | Equipment Sets | Programs tab, Equipment Sets: hover a device for Edit and Delete; Add device | `equipment-sets` (`journey=1&do=sets`), `device-edit` (`…,sets,devedit`), `device-add` (`…,sets,devadd`, type Phius interior lighting) |
 | Program cards and the ventilation Schedule | Open and close the load cards; Schedules, SFH ventilation, change the hours | `j4-program-cards` (`journey=4&do=school,libnr,cards`), `j1-vent-schedule` (`journey=1&do=ventsched`) |
 | Zones → Spaces (journey 1, then 3) | Zones, Spaces subtab. Type a Supply, Extract or Transfer rate on a Space and its Zone turns detailed; hover the Zone for From Program. Then compare Zones → Programs' Ventilation | `j1-spaces` (`journey=1&do=house3,spaces`), `j1-spaces-cascade` (`…,spaces,cascade`), `j3-spaces` (`journey=3&do=each,beds,common,spaces,cascade`) |
@@ -90,13 +90,13 @@ server. The dark strip at the top picks a journey and says what to try; Reset re
   existing one) and Equipment Set to the checked Zones. Choosing a library Program copies it into
   the file and assigns it in one step.
 
-Two labels are placeholders, not proposals: apartments inherit "Phius single-family default" as
-their Equipment Set (honeybee-ph also has a multifamily set), and the Equipment Sets subtitle says one
-Set serves a dwelling while Q4a-21 is open.
+One label is a placeholder, not a proposal: apartments show "Phius single-family default" as their
+Equipment Set because it is the Model's default Set (PRD, "Dwellings"); a multifamily default Set,
+which honeybee-ph also has, can come later as a library file.
 
 ## Questions the prototype raised
 
-Recorded as Q4a-19 to Q4a-28 in [DECISIONS.md](../DECISIONS.md#questions-the-prototype-raised);
-Q4a-19, Q4a-20, Q4a-26, Q4a-27 and Q4a-28 are [answered](../DECISIONS.md#answered).
+Recorded as Q4a-19 to Q4a-36 in [DECISIONS.md](../DECISIONS.md#answered), all answered, with the
+Building Segment answers BS-1 to BS-6 in the [Building Segments PRD](../building-segments/PRD.md).
 The new words on screen (Program, Schedule, Equipment Set, Dwelling) enter
 `context/UBIQUITOUS_LANGUAGE.md` with the PRD.

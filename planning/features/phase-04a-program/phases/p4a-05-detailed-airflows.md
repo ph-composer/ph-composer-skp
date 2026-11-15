@@ -27,8 +27,8 @@ section 4. Research: [ventilation](../research/ventilation.md). Prototype: `j1-s
    version 2 (`space_sections.py`, today `versions = frozenset({1})`) and `airflow_rates` takes it.
 3. **Action.** `ph_composer.spaces.clear_zone_airflows`, one Undo step.
 4. **Panel.** `html/features/spaces/cells.js`: placeholder "By Program" or "0" by the Zone's mode;
-   the By Program tooltip says "the Zone's Program ventilation" until Programs exist (P4a-08 names
-   it); `view.js`: Zone sums dash while By Program, From Program in a detailed Zone row's
+   the By Program tooltip says "this Zone's Program ventilation, split by floor area, with its
+   schedule" (Spaces does not depend on Programs, so it does not name the Program); `view.js`: Zone sums dash while By Program, From Program in a detailed Zone row's
    Actions cell, the notice when an edit switches the mode; Transfer header tooltip.
 5. **No Spaces.** Spaces' preflight warning naming each Zone with no Spaces (not blocking); the
    amber row in the view.

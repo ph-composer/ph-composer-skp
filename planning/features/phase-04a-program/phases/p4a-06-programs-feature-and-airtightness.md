@@ -28,7 +28,8 @@ Behavior: [Phase 4a PRD](../PRD.md), "Segment settings sections Programs owns". 
 4. **Conversion (C4a-4).** Read PHX's back-conversion in the pinned PHX (`from_HBJSON/cleanup.py`,
    the exposed-area rule; exponent 0.65; n50 by net volume) and implement its inverse: a Room
    `Infiltration` `flow_per_exterior_area` at 4 Pa such that PHX reports the entered value for the
-   Segment. Pure Ruby for the panel's preview; the same rule in the Python section.
+   Segment. Pure Ruby, used by the panel's preview and the contributor; the Python section takes
+   `flow_per_exterior_area` from the contract record and computes nothing (P4a-10's rule).
 5. **Export.** Contributor and Python section: each Room of a Segment with a test result gets that
    Infiltration; `BldgSegment.wind_exposure_type`; a Segment without a result leaves the Room's
    Infiltration to its Program (P4a-10) or PHX's default.

@@ -25,16 +25,22 @@ Segment settings". Names: [CONTRACTS](../CONTRACTS.md) section 2. Prototype: `j3
 2. **Save action.** `ph_composer.zones.save_segment_settings`: General values (name, colour,
    default) and a payload per namespace. Zones checks each payload with its installed validator
    (`Extension#problems`) and stages it with `engine.propose_metadata_update`: one proposal, one Undo
-   step, stale-value guard (CONTRACTS section 2).
+   step, stale-value guard (CONTRACTS section 2). Build the staging as one internal route, which
+   P4a-08 exposes to Programs as the `ph_composer.zones.stage_extension` participant. Save emits a
+   transition, `zones.segment_settings_saved` (the Segment and the namespaces whose payload changed),
+   that a section's owner answers with a transition contributor to add its own side effects in the
+   same Undo step (P4a-08's Single dwelling).
 3. **Seam.** `panel.segmentSettingsSection(namespace, {...})` in the panel kit, `readOnly` for a
    section that collects nothing. Add it to `context/EXTENSIBILITY.md` as a panel seam, with a
    development example under `tools/examples/` that registers a namespace and a section.
 4. **Heading rows in the host.** `html/features/zones/overview.js`, the Zone views host, renders
    Segment heading rows and the No Building Segment group for every view: two-line heading, tags,
    findings flag, Settings and Delete in the Actions cell (Delete `aria-disabled` with its reason on
-   the last Segment). A new `table_views` hook, `segmentSums(rows)`, lets each view fill its own
-   columns; Geometry (`faces_view.js`) and Spaces (`html/features/spaces/view.js`) supply theirs.
-   Update `context/EXTENSIBILITY.md`, "Zone views".
+   the last Segment). Two new hooks: `segmentSums(rows)` on a `table_views` view fills that view's
+   columns (Geometry, `faces_view.js`, and Spaces, `html/features/spaces/view.js`, supply theirs);
+   `segmentHeading(segment)`, registered by any feature on the host, adds tags and findings to the
+   heading in every view (Zones adds Default; Programs adds Single dwelling and its findings in
+   P4a-08). Update `context/EXTENSIBILITY.md`, "Zone views".
 5. **Control row and selection bars.** New Building Segment icon in each view; Building Segment in
    the Geometry selection bar and in the Spaces selection bar, which gains Zone rows
    (`html/features/spaces/selection.js`).

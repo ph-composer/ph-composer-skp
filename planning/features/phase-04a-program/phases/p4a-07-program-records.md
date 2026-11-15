@@ -19,6 +19,9 @@ sections 1 to 8 and 10. Paths are relative to `src/ph_composer/`.
 
 ## Steps
 
+0. **Pin.** Choose the honeybee-ph pin for `PhEquipment` (F4a-18: `quantity` defaults and the custom
+   types differ between 1.33.65 and 1.33.68) and record it in `pyproject.toml` and the vendored
+   wheels, before the per-type field table is built from it.
 1. **Units.** Store every value in the honeybee SI unit its HBJSON field uses (people per m²,
    W/m², m³/s per person and per m², m³/s per Zone, 1/h, m³/s per m² of exterior area at 4 Pa,
    L/h per m², °C), each field with its `x-unit`, so P4a-10 writes values without conversion. The
@@ -62,14 +65,17 @@ sections 1 to 8 and 10. Paths are relative to `src/ph_composer/`.
    (`features/programs/default_program.rb`), from the pinned honeybee-ph rules and schedules. Reads
    never write: while the Model holds no default Program record, reads answer the frozen definition
    under its reserved id. **The first write that touches it materializes it** as an ordinary record
-   with `source` naming PH-Composer's default, with its Schedules. A Programs Model setting
-   (`ph_composer.programs_settings`, `default_program_id`) names the default; absent means the
-   frozen one. Deleting the default Program refuses `programs.default_in_use`.
-   `ph_composer.programs.reset_default` rewrites it from the definition, one Undo step (Q4a-23).
+   with `source` naming PH-Composer's default, with its Schedules. A Programs Model setting,
+   `ph_composer.programs.settings`, holds `default_program_id` and `default_equipment_set_id`;
+   absent means the frozen ones. **The default Equipment Set** (the eight honeybee-ph Phius
+   defaults, F4a-20) follows the same pattern. Deleting either default refuses
+   `programs.default_in_use`. `ph_composer.programs.reset_default` rewrites either from its
+   definition, one Undo step (Q4a-23).
 6. **Operations** for each kind: create (a free name: "Program 2"), update with guarded
    `expected_values`, rename, duplicate (a "(copy)" name; Schedules shared, not copied), delete
-   (guarded by incoming references: Zone assignments, Segment `default_program_id`, the Model
-   default, Programs using a Schedule; delete with a named replacement rewrites them). One Undo
+   (guarded by the incoming references that exist at this stage: Segment `default_program_id`,
+   the Model defaults, Programs using a Schedule; P4a-08 adds Zone assignments and Dwellings; delete
+   with a named replacement rewrites them). One Undo
    step each. Reads: `programs.all`, `schedules.all`, `equipment_sets.all` with used-by counts.
 7. **Library kinds** (Q4a-19, Q4a-22): wire kinds `programs`, `schedules`, `equipment_sets` in
    `docs/LIBRARY_FILE_FORMAT.md`, each with its `kind_descriptor`, wire mapping, fingerprint and

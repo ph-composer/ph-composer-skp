@@ -48,15 +48,15 @@ honeybee-energy 1.123.23 (pinned wheel), PHX 1.59.1 (local checkout), honeybee_g
 
 ## Proposal
 
-1. **Detailed airflows are a Zone mode (Q4a-29, Q4a-30).** A Zone is *From Program* until any of
+1. **Detailed airflows are a Zone mode (Q4a-29, Q4a-30).** A Zone is *By Program* until any of
    its Spaces has a rate. Then it uses detailed airflows: every Space in it exports its own rates,
    0 where blank, and none takes a Program share. This replaces PH-Composer's per-Space any-set rule
    and makes F4a-25 moot for PH-Composer. It follows the PH design cascade (a bedroom supplies, a
    bath extracts, a hall transfers): a user who enters the bedroom's rate expects the hall's to be
    its own, 0 until entered. Export writes `_v_sup`, `_v_eta` and `_v_tran` on every Space of a
-   detailed Zone and `None` on every Space of a From Program Zone, so PHX never mixes the two.
+   detailed Zone and `None` on every Space of a By Program Zone, so PHX never mixes the two.
 2. **Every exported Room carries its Program's Ventilation load, unchanged (Q4a-31).** It is the
-   schedule for every Space, the flow for a From Program Zone, and EnergyPlus's ventilation either
+   schedule for every Space, the flow for a By Program Zone, and EnergyPlus's ventilation either
    way. Never fold Space rates into the Room (F4a-29).
 3. **The Spaces view keeps today's pattern, no Airflow column (Ed, 2026-11-15).** In a Zone with no
    rates, every airflow cell reads **By Program** (today's "Zone"), with a tooltip naming the

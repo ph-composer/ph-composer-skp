@@ -20,7 +20,7 @@ register: [ACCEPTANCE](ACCEPTANCE.md). Library files: the
 P4a-07.
 
 Out of this plan: the items the PRDs list as out of scope, the honeybee-ph and PHX fix for F4a-13
-(its own authorization; P4a-10 writes rulesets until it ships), SketchUp 2023 and Windows host
+(its own authorization; until it ships, P4a-10 writes occupancy and lighting Schedules as rulesets only, while ventilation Schedules carry their operating periods, C4a-10), SketchUp 2023 and Windows host
 proof, public distribution.
 
 ## What earlier phases supply
@@ -48,19 +48,20 @@ Paths are relative to `src/ph_composer/`. Planning baseline `origin/main` at `a4
 | [P4a-04](phases/p4a-04-segment-certification.md) | The export projection for Segment extensions; `ph_composer.certification`: Phius certification section and its export to `BldgSegment` | P4a-02, P4a-03 (PHX test group) | certification (new) | Exported values read back in PHX |
 | [P4a-05](phases/p4a-05-detailed-airflows.md) | Per-Zone airflow mode, By Program, From Program, the notice, No Spaces warning | P4a-02 for the Zone-row action | spaces, UI | Spaces gestures with Ed; export round trip |
 | [P4a-06](phases/p4a-06-programs-feature-and-airtightness.md) | `ph_composer.programs` with the Airtightness section and infiltration export | P4a-02, P4a-04 | programs (new), export | Entered n50 and q50 read back in PHX |
-| G1 | **Programs tab review with Ed**: done 2026-11-15 (Q4a-21 to Q4a-25, Q4a-33 to Q4a-35) | | | |
-| [P4a-07](phases/p4a-07-program-records.md) | Program, Schedule and Equipment Set kinds, the residential default and the Model default, library kinds with dependency copy | P4a-06 | programs | Panel-closed script, Undo/Redo, reopen |
-| [P4a-08](phases/p4a-08-dwellings-and-single-dwelling.md) | Dwellings, per-Zone assignment extension, derivations, Single dwelling, Occupancy section | P4a-07 | programs | Single dwelling on and off, Undo/Redo, copy a Zone |
+| G1 | **Programs tab review with Ed**: done 2026-11-15 (Q4a-21 to Q4a-25, Q4a-33 to Q4a-36; C4a-5, C4a-7 to C4a-10) | | | |
+| [P4a-07](phases/p4a-07-program-records.md) | The `PhEquipment` pin; Program, Schedule and Equipment Set kinds with device editing; the default Program and default Equipment Set; library kinds with dependency copy | P4a-06 | programs | Panel-closed script, Undo/Redo, reopen |
+| [P4a-08](phases/p4a-08-dwellings-and-single-dwelling.md) | Dwellings, per-Zone assignment extension, derivations, Single dwelling, Occupancy section, the Segment heading contribution | P4a-07, P4a-05 | programs | Single dwelling on and off, Undo/Redo, copy a Zone |
 | [P4a-09](phases/p4a-09-zones-programs-view.md) | Zones / Programs view, selection bar, Dwelling and lock bubbles | P4a-08, P4a-05 | programs, UI | Panel gestures with Ed |
 | [P4a-10](phases/p4a-10-program-export.md) | ProgramType, People, Process and set point export; Comfort section | P4a-08 | programs, export | Round trip of the five prototype journeys |
 | [P4a-11](phases/p4a-11-programs-tab.md) | The Programs tab | P4a-07, P4a-08 | programs, UI | Panel gestures with Ed |
 | [P4a-12](phases/p4a-12-acceptance-and-handoff.md) | Register closed; context, docs, glossary; handoff to Phase 4 | all above | integration | Fresh-process integrated run |
 
 ```
-P4a-01 ── P4a-02 ─┬─ P4a-03 ── P4a-04 ── P4a-06 ── P4a-07 ── P4a-08 ─┬─ P4a-09 ─┐
-                  │                                                 ├─ P4a-10 ─┤
-                  └─ P4a-05 (also feeds P4a-09)                     └─ P4a-11 ─┴─ P4a-12
+P4a-01 ── P4a-02 ─┬─ P4a-03 ── P4a-04 ── P4a-06 ── P4a-07 ──┬─ P4a-08 ─┬─ P4a-09 ─┐
+                  │                                         │          ├─ P4a-10 ─┤
+                  └─ P4a-05 ────────────────────────────────┘          └─ P4a-11 ─┴─ P4a-12
 ```
+P4a-05 feeds P4a-08 (and through it P4a-09 and P4a-10).
 
 P4a-03 and P4a-05 can run in parallel once P4a-02 merges; P4a-04 follows P4a-03 (it reuses its
 PHX test group) and P4a-06 follows P4a-04, which it requires. Each stage is one PR through the pr-loop ([stage brief](../../../.agents/stage-brief.md)),
