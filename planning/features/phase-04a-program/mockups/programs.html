@@ -133,11 +133,7 @@
   .zp-seg-title { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .zp-seg-line2 { display:flex; align-items:center; gap:10px; min-height:22px; font-weight:400; font-size:12px; color:var(--muted); }
   .zp-seg-line2 .zp-seg-count { font-size:12px; }
-  .zp-seg-gear { width:22px; height:22px; margin-left:-4px; }
-  .zp-seg-tools { display:inline-flex; gap:2px; margin-left:auto; flex:none; }
-  .zp-seg-tools .phc-icon-button { width:24px; height:24px; }
-  .zp-seg-tools .zp-hover { visibility:hidden; }
-  .zp-seg:hover .zp-seg-tools .zp-hover, .zp-seg:focus-within .zp-seg-tools .zp-hover { visibility:visible; }
+  .zp-seg td.col-actions { vertical-align:top; padding-top:6px; }
   .zp-seg.is-none td { color:var(--muted); }
   .zp-out td { color:var(--muted); }
   .zp-seg-rename { font:inherit; font-weight:600; width:180px; padding:1px 6px; }
@@ -403,8 +399,8 @@
     var tips = { area: "Gross Zone floor area: the basis honeybee divides per-area loads by.", icfa: "Weighted Space floor area (iCFA): the basis of the Phius residential rules.",
       people: "Peak people. Residential default: the dwelling's occupants ÷ the presence schedule's mean, shared by gross floor area.", light: "Installed lighting. Per-area Programs: W/m² × gross floor area. Residential default: Phius interior lighting from iCFA and dwellings.",
       vent: "Program ventilation for this Zone. Space airflows, where set, replace it at export.", occ: "Average occupants (honeybee-ph number_people). Left empty, the dwelling uses the Phius rule: bedrooms + 1 per unit." };
-    var width = 64 + COLS.reduce(function (a, c) { return a + c[2]; }, 0);
-    h += '<div class="phc-table-mount" style="--row-actions-width:64px; position:relative"><table class="phc-table is-tree reveals-row-actions zp-table" style="min-width:' + width + 'px"><colgroup><col style="width:64px">' + COLS.map(function (c) { return '<col style="width:' + c[2] + 'px">'; }).join("") + '</colgroup><thead><tr>' +
+    var width = 72 + COLS.reduce(function (a, c) { return a + c[2]; }, 0);
+    h += '<div class="phc-table-mount" style="--row-actions-width:72px; position:relative"><table class="phc-table is-tree reveals-row-actions zp-table" style="min-width:' + width + 'px"><colgroup><col style="width:72px">' + COLS.map(function (c) { return '<col style="width:' + c[2] + 'px">'; }).join("") + '</colgroup><thead><tr>' +
       '<th class="col-actions"><span class="phc-header-label-row">' + '<input class="row-check" type="checkbox" data-act="check-all" aria-label="Check every Zone"' + (nChecked && nChecked === checkable().length ? " checked" : "") + '>' + '</span></th>' +
       COLS.map(function (c) { return '<th class="' + (c[3] ? "num" : "") + '"' + (tips[c[0]] ? ' data-tip="' + esc(tips[c[0]]) + '"' : "") + '><span class="phc-header-label-row"><span class="phc-th-label">' + c[1] + '</span></span></th>'; }).join("") + '</tr></thead><tbody>';
     S.segments.forEach(function (g) {
@@ -416,7 +412,7 @@
         if (z.dwelling && !seenDw[z.dwelling]) { seenDw[z.dwelling] = 1; var t = dwellingTotals(z.dwelling); sum.beds += t.beds; sum.occ += t.occ; }
       });
       var sf = segFindings(g);
-      h += '<tr class="tier-0 zp-seg"><td class="col-actions"></td><td colspan="3">' + segHead(g, zs.length, sf) + '</td>' +
+      h += '<tr class="tier-0 zp-seg"><td class="col-actions">' + segActions(g) + '</td><td colspan="3">' + segHead(g, zs.length, sf) + '</td>' +
         (g.single ? houseCells(g) : '<td class="num">' + (Object.keys(seenDw).length ? fmt(sum.beds) : "") + '</td><td class="num">' + (Object.keys(seenDw).length ? fmt(sum.occ, 1) : "") + '</td><td></td>') +
         (zs.length ? '<td class="num">' + fmt(sum.area, 1) + '</td><td class="num">' + fmt(sum.icfa, 1) + '</td><td class="num">' + fmt(sum.people, 1) + '</td><td class="num">' + fmt(sum.light) + '</td><td class="num">' + (sum.ventMissing ? '<span class="zp-amber">?</span>' : fmt(sum.vent)) + '</td>' : '<td colspan="5"></td>') + '</tr>';
       zs.forEach(function (z) { h += g.single ? frozenRow(z) : zoneRow(z); });
@@ -435,20 +431,22 @@
     return h;
   }
   // The Building Segment heading: the name alone on the first line (Delete on hover; rename in settings), then a
-  // second line with the Default tag, Zone count and category, Single dwelling and the settings icon.
+  // second line with the Default tag, Zone count and category and Single dwelling. Its actions sit in the
+  // row's Actions cell, revealed on hover as in Geometry and Spaces.
+  function segActions(g) {
+    var only = S.segments.length === 1;
+    return '<button type="button" class="phc-icon-button row-icon" data-row-action="settings" data-act="seg-settings" data-v="' + g.id + '" aria-label="Building Segment settings" data-tip="Building Segment settings">' + svg("settings", 16) + '</button>' +
+      '<button type="button" class="phc-icon-button row-icon row-delete" data-row-action="delete" data-act="seg-delete" data-v="' + g.id + '" aria-label="Delete ' + esc(g.name) + '"' +
+      (only ? ' aria-disabled="true" data-tip="A model keeps at least one Building Segment."' : ' data-tip="Delete ' + esc(g.name) + '"') + '>' + svg("del", 16) + '</button>';
+  }
   function segHead(g, n, sf) {
     var name = S.renaming === g.id ? '<input class="zp-seg-rename" data-act="seg-rename" data-v="' + g.id + '" value="' + esc(g.name) + '" aria-label="Building Segment name">' : esc(g.name);
-    var only = S.segments.length === 1;
-    var del = only ? '<span class="zp-hover" data-tip="A model keeps at least one Building Segment."><button type="button" class="phc-icon-button assembly-tool-icon" disabled aria-label="Delete ' + esc(g.name) + '">' + svg("del", 16) + '</button></span>'
-      : iconBtn("del", "Delete " + g.name, "seg-delete", ' data-v="' + g.id + '"').replace('class="', 'class="zp-hover ');
     return '<div class="zp-seg-head"><div class="zp-seg-line1">' +
-      (S.renaming === g.id ? name : '<span class="zp-seg-title" data-tip="' + esc(g.name) + '">' + name + '</span>') + (sf.length ? flag(sf.join(" ")) : "") +
-      '<span class="zp-seg-tools">' + del + '</span></div>' +
+      (S.renaming === g.id ? name : '<span class="zp-seg-title" data-tip="' + esc(g.name) + '">' + name + '</span>') + (sf.length ? flag(sf.join(" ")) : "") + '</div>' +
       '<div class="zp-seg-line2">' +
       (g.id === S.defaultSeg ? '<span class="zp-seg-tag" data-tip="New Zones join this Building Segment. Change it in Settings.">Default</span>' : "") +
       '<span class="zp-seg-count">' + n + ' Zone' + (n === 1 ? "" : "s") + ' · ' + (g.category === "res" ? "Residential" : "Non-residential") + '</span>' +
-      '<label class="zp-seg-single" data-tip="' + esc(SINGLE_TIP) + '"><input type="checkbox" data-act="single" data-v="' + g.id + '"' + (g.single ? " checked" : "") + '>Single dwelling</label>' +
-      iconBtn("settings", "Building Segment settings", "seg-settings", ' data-v="' + g.id + '"').replace('class="', 'class="zp-seg-gear ') + '</div></div>';
+      '<label class="zp-seg-single" data-tip="' + esc(SINGLE_TIP) + '"><input type="checkbox" data-act="single" data-v="' + g.id + '"' + (g.single ? " checked" : "") + '>Single dwelling</label></div></div>';
   }
   var SINGLE_TIP = "Every Zone in this Building Segment is one dwelling with the residential default Program. Bedrooms, occupants and the Equipment Set are entered once, on this row. Uncheck to assign per Zone; everything it set stays.";
   // Zones a check can select: those in a Single dwelling Segment are locked.
@@ -898,7 +896,7 @@
     }
     else if (a === "new-seg") { var ng = newSegment(); notify(ng.name + " created. Move Zones into it from the selection bar."); }
     else if (a === "seg-settings") { openSegSettings(v); return; }
-    else if (a === "seg-delete") { confirmDeleteSeg(v); return; }
+    else if (a === "seg-delete") { if (el.getAttribute("aria-disabled") === "true") return; confirmDeleteSeg(v); return; }
     else return;
     render();
   });

@@ -53,8 +53,9 @@ membership visible without a column, shows an empty Segment as an empty group, a
 settings dialog one home: a settings icon on the heading row, the same in every view.
 
 - The heading takes two lines. First, the Segment name alone (truncated, full name in its
-  tooltip), a findings flag and, on hover, Delete. Second, a "Default" tag on the default one, the
-  Zone count and category, Single dwelling and the settings icon. The view's own sums (Geometry:
+  tooltip) and a findings flag. Second, a "Default" tag on the default one, the Zone count and
+  category, and Single dwelling. Settings and Delete sit in the row's left Actions cell, revealed on
+  hover, as row actions are in Geometry and Spaces. The view's own sums (Geometry:
   envelope areas; Spaces: iCFA, volume; Programs: bedrooms, people) sit in its columns. No Rename
   icon (Ed, 2026-11-15): the name is edited in settings, and a new Segment opens its name in place.
 - **No Building Segment** is a last, muted group, shown only when it holds a Zone. Its tooltip says
