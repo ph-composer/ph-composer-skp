@@ -164,8 +164,8 @@ added (Q4a-35, a trial). Prototype: `j4-program-cards`, `j1-vent-schedule`, `j5-
 - **Equipment Sets**: a device grid (device, quantity, energy demand, in conditioned space,
   reference quantity) with Phius-rule devices marked. A Set is assigned to a Dwelling, or to a Zone
   that is not a dwelling (Q4a-21).
-- **Library Programs** copy into the Model with their Schedules when chosen (Q4a-22, still to
-  confirm) and arrive complete (Q4a-25).
+- **Library Programs** copy into the Model with their Schedules when used, the same protocol as
+  Materials, Frames and Glazings (Q4a-22), and arrive complete (Q4a-25).
 
 ## Decisions
 

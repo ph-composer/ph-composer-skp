@@ -1,7 +1,7 @@
 # Phase 4a: findings and open questions
 
 DATE: 2026-11-14
-STATUS: Findings F4a-01 to F4a-23 recorded. Interviewed 2026-11-14: fifteen questions answered, Q4a-08 decided by Claude on Ed's delegation; Q4a-01, Q4a-16 and Q4a-18 open (none gates the prototype). The GUI prototype raised Q4a-19 to Q4a-28; Ed's first review answered Q4a-19, Q4a-20 and Q4a-26; he answered Q4a-27 to Q4a-32 on 2026-11-15, and the Programs tab review answered Q4a-21, Q4a-23 to Q4a-25 and Q4a-33 to Q4a-35 the same day. Q4a-22 remains open.
+STATUS: Findings F4a-01 to F4a-23 recorded. Interviewed 2026-11-14: fifteen questions answered, Q4a-08 decided by Claude on Ed's delegation; Q4a-01, Q4a-16 and Q4a-18 open (none gates the prototype). The GUI prototype raised Q4a-19 to Q4a-28; Ed's first review answered Q4a-19, Q4a-20 and Q4a-26; he answered Q4a-27 to Q4a-32 on 2026-11-15, and the Programs tab review answered Q4a-21, Q4a-23 to Q4a-25 and Q4a-33 to Q4a-35 the same day, then Q4a-22.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -87,7 +87,7 @@ F4a-17 to F4a-21.
 
 Ed reviewed the [GUI prototype](mockups/README.md) on 2026-11-14 and accepted its division of
 work: the Programs tab defines Programs, Schedules and Equipment Sets, and Zones → Programs assigns
-them. He answered three of the questions it raised, Q4a-27 to Q4a-32 on 2026-11-15, and the Programs tab review's Q4a-21, Q4a-23 to Q4a-25 and Q4a-33 to Q4a-35 the same day:
+them. He answered three of the questions it raised, Q4a-27 to Q4a-32 on 2026-11-15, and the Programs tab review's Q4a-21 to Q4a-25 and Q4a-33 to Q4a-35 the same day:
 
 | Id | Answer | What follows |
 | --- | --- | --- |
@@ -107,6 +107,7 @@ them. He answered three of the questions it raised, Q4a-27 to Q4a-32 on 2026-11-
 | Q4a-33 | **A ventilation schedule is its own PH form**: four rows, high, standard, basic and minimum, each hours per day and a fraction of design flow, totalling 24 h, plus days per week and weeks per year (PHX requires the four names, `create_vent_schd.py`) | Schedules gain a Ventilation type beside Fractional, Activity level and Temperature |
 | Q4a-34 | **The Program editor is a column of full-width accordion cards**: closed, each shows its values and schedule on one line; open, the load's values on the left and its Schedules on the right; clear borders and a header band separate them. Order: Occupancy, Lighting, Ventilation, Electric equipment, Setpoint, Infiltration, then Gas equipment and Hot water under "EnergyPlus only" | Prototype `j4-program-cards` |
 | Q4a-35 | **Only Programs gets a library sidebar**, as a trial. A library Program brings its Schedules; Equipment Sets come from library files through the Library tab | Revisit after use |
+| Q4a-22 | **Copy on use, the same protocol as Materials, Frames, Glazings and Psi-Install Types** (Ed, 2026-11-15). Choosing a library Program copies it into the Model as a local record with its source attribution and assigns it, one native transaction (`context/TECH_STACK.md`, "Copy plus assignment commits as one native transaction"; `html/library/copy.js`). A later use finds the local copy by source identity ("In this file"); the copy keeps working offline and when the source changes; Review offers keep local or use the library copy | New for Programs: a Program references Schedules, so the copy brings them along and reuses local Schedules from the same source. Today's library kinds are all single records and the coordinator copies one record per use; P4a-07 adds dependency copying (the glossary's Bookshelfing already names it) |
 
 **Revised 2026-11-15 by the [Building Segments plan](building-segments/PRD.md#decisions-ed-2026-11-15)
 (BS-3):** Single dwelling is an attribute and control of each Building Segment, not of the Model.
@@ -120,14 +121,14 @@ carries Phase 4a before Phase 4), Q4a-16 (Space Types; leaning: always inherit f
 ## Questions the prototype raised
 
 From the [GUI prototype](mockups/README.md), 2026-11-14. Each carries what the prototype shows now;
-Q4a-19 to Q4a-35 are answered above except Q4a-22, which the prototype assumes (copy on choice).
+Q4a-19 to Q4a-35 are answered above.
 
 | Id | Question | The prototype shows |
 | --- | --- | --- |
 | Q4a-19 | How are the Phius programs packaged: a PH-Composer library file, or a language-neutral standards package that honeybee-ph and PH-Composer both read? (Ed, 2026-11-14) | Answered above. The sidebar lists the two Phius files as library sources the user has added |
 | Q4a-20 | Do the honeybee-energy standards (the DOE programs by vintage) sit beside the Phius sources, and how: shipped, an optional library source the user adds, or not at all? (Ed, 2026-11-14) | Answered above. A third source, "not added", pointing to Library setup |
 | Q4a-21 | Does an Equipment Set belong to the Dwelling or to the Zone? Before choosing, check how PHX counts one device carried by every Room of a dwelling (`merge_process_loads` sums `quantity` per Room) | Answered above |
-| Q4a-22 | Does choosing a library Program on a Zone copy it into the file at once, or must it be added from the Programs tab first? | Copied and assigned in one step, with a notice |
+| Q4a-22 | Does choosing a library Program on a Zone copy it into the file at once, or must it be added from the Programs tab first? | Answered above |
 | Q4a-23 | Is the residential default editable in place, or locked with Duplicate as the way to change it? | Answered above |
 | Q4a-24 | Bedrooms and occupants per Zone (Q4a-11) make a house of several Zones awkward. Keep per-Zone entry, or enter on the Dwelling when it spans several Zones? | Answered above |
 | Q4a-25 | Who supplies the values the Phius data lacks (F4a-23): PH-Composer defaults in the library file, Ed's office standards, or the user each time? | Answered above |

@@ -159,8 +159,14 @@ unassigned. Zones never reads it. Programs' own actions write it through Zones' 
 same rule as section 2) and refuse cross-record violations; the generic metadata routes can write
 it too, so the same rules are also findings.
 
-**Library kinds.** Program, Schedule and Equipment Set register library kinds; choosing a library
-Program copies it and the Schedules it references into the Model (Q4a-19, Q4a-22). The file layout
+**Library kinds.** Program, Schedule and Equipment Set register library kinds with the existing
+neutral library coordinator, exactly as Materials, Frames, Glazings and Psi-Install Types do:
+using a library record copies it into the Model with its source attribution and, when the use is an
+assignment, assigns it in the same native transaction; later uses reuse the local copy by source
+identity (Q4a-19, Q4a-22). **New here: dependencies.** Every library kind today is a single
+record, and the coordinator copies one record per use. A Program references Schedules, so P4a-07
+extends the coordinator to copy a record's referenced records in the same transaction, reusing a
+local copy of each from the same source (the glossary's Bookshelfing). The file layout
 is the [ph-composer-standards PRD](../unscheduled/ph-composer-standards/PRD.md).
 
 ## 6. Derived values (Programs, Ruby; P4a-08 and P4a-09)
