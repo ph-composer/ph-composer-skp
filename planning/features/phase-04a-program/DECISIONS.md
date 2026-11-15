@@ -1,7 +1,7 @@
 # Phase 4a: findings and open questions
 
 DATE: 2026-11-14
-STATUS: Findings F4a-01 to F4a-23 recorded. Interviewed 2026-11-14: fifteen questions answered, Q4a-08 decided by Claude on Ed's delegation; Q4a-01, Q4a-16 and Q4a-18 open (none gates the prototype). The GUI prototype raised Q4a-19 to Q4a-28; Ed's first review answered Q4a-19, Q4a-20 and Q4a-26; he answered Q4a-27 and Q4a-28 on 2026-11-15.
+STATUS: Findings F4a-01 to F4a-23 recorded. Interviewed 2026-11-14: fifteen questions answered, Q4a-08 decided by Claude on Ed's delegation; Q4a-01, Q4a-16 and Q4a-18 open (none gates the prototype). The GUI prototype raised Q4a-19 to Q4a-28; Ed's first review answered Q4a-19, Q4a-20 and Q4a-26; he answered Q4a-27 to Q4a-32 on 2026-11-15.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -87,7 +87,7 @@ F4a-17 to F4a-21.
 
 Ed reviewed the [GUI prototype](mockups/README.md) on 2026-11-14 and accepted its division of
 work: the Programs tab defines Programs, Schedules and Equipment Sets, and Zones → Programs assigns
-them. He answered three of the questions it raised, and two more on 2026-11-15:
+them. He answered three of the questions it raised, and Q4a-27 to Q4a-32 on 2026-11-15:
 
 | Id | Answer | What follows |
 | --- | --- | --- |
@@ -96,6 +96,10 @@ them. He answered three of the questions it raised, and two more on 2026-11-15:
 | Q4a-26 | **A Single dwelling switch** at the top of Zones → Programs. When it is on, every Zone is one dwelling with the residential default Program, in one residential Building Segment, and the table is locked: a single-family user enters the bedrooms once and is done. Switching it off opens per-Zone assignment | Claude's design, to confirm in the prototype: the switch is a Model setting and the locked values derive from it rather than being written to each Zone, so a new Zone joins the house without action. The house row takes bedrooms, occupants (Phius rule when empty) and the Equipment Set. Switching off keeps the house dwelling, its counts and the default Program as ordinary assignments. Switching on over per-Zone assignments confirms first and names what gives way: Programs chosen per Zone, extra dwellings, a non-residential category, other Building Segments; per-Zone bedrooms are added up. Forcing one Building Segment overrides the Geometry view's Segment assignment, which the mockup cannot show. Counts held on the dwelling bear on Q4a-24 |
 | Q4a-27 | **On for every new Model.** Single-family is the app's default state | A user modelling apartments or a non-residential building switches it off once. The default belongs to the setting (Q4a-26), so nothing is written to a Zone until the user switches it off. Since BS-3 it is the new Model's one Building Segment that starts with it on |
 | Q4a-28 | **Yes, publish them.** The values come from public documents and are not Phius's intellectual property: the non-residential programs from the Phius Certification Guidebook, and the multifamily space types from the Phius Multifamily Lighting and Misc Load Calculator. ph-composer-standards may carry both | Each `phius/` file names its source document and edition. honeybee-ph's `PHIUS_programs.py` cites Guidebook v3.02 Table N-10 and the Multi-Family Calculator of 2021-03-23; check those against the current editions before the files are generated |
+| Q4a-29 | **Blank rates export 0 once rates are entered**, applied per Zone (Q4a-30) | [ventilation](research/ventilation.md#answers-ed-2026-11-15) |
+| Q4a-30 | **Detailed airflows are a Zone mode.** Once any Space in a Zone has a rate, every Space in it exports its own rates, 0 where blank; no Program shares in that Zone. Supersedes F4a-25 for PH-Composer | Moves the existing any-set rule from the Space to the Zone in the Spaces feature and its export. The first entry says so in a notice; From Program on the Zone row clears it |
+| Q4a-31 | **The Program's Ventilation load for EnergyPlus**, unchanged, for now | Space rates are never folded into the Room (F4a-29) |
+| Q4a-32 | **A Zone with no Spaces is an export warning, not an error** | Confirmed by a PHX round trip (F4a-28): the file opens with iCFA 0 and no ventilation rooms |
 
 **Revised 2026-11-15 by the [Building Segments plan](../unscheduled/building-segments/README.md#answers-ed-2026-11-15)
 (BS-3):** Single dwelling is an attribute and control of each Building Segment, not of the Model.
@@ -109,7 +113,7 @@ carries Phase 4a before Phase 4), Q4a-16 (Space Types; leaning: always inherit f
 ## Questions the prototype raised
 
 From the [GUI prototype](mockups/README.md), 2026-11-14. Each carries what the prototype shows now;
-Q4a-19, Q4a-20, Q4a-26, Q4a-27 and Q4a-28 are answered above; the rest are open.
+Q4a-19, Q4a-20 and Q4a-26 to Q4a-32 are answered above; Q4a-21 to Q4a-25 are open.
 
 | Id | Question | The prototype shows |
 | --- | --- | --- |
@@ -123,7 +127,7 @@ Q4a-19, Q4a-20, Q4a-26, Q4a-27 and Q4a-28 are answered above; the rest are open.
 | Q4a-26 | Ed's Single dwelling switch (2026-11-14) | Answered above; revised by BS-3 to a per-Segment switch |
 | Q4a-27 | Is Single dwelling on by default for a new Model? | Answered above. On in journey 1; journeys 2 to 5 start with it off because they model other buildings |
 | Q4a-28 | May the Phius program values be published in the public ph-composer-standards repository, with a note of their source and terms? honeybee-ph already publishes them; Phius's terms decide. Ed to confirm | Answered above |
-| Q4a-29 | Space airflows: keep the any-set rule, or let each rate override on its own? (Ed, 2026-11-15, [ventilation](research/ventilation.md#open-questions)) | Not shown. Recommendation: keep the any-set rule |
-| Q4a-30 | In a partly specified Zone, inheriting Spaces get their floor share of the full Program flow. Accept and show it, or split only the remainder? | Not shown. Recommendation: accept and show it in the Spaces view |
-| Q4a-31 | Should the Room's honeybee Ventilation reflect Space overrides for EnergyPlus, as the Grasshopper path does? | Not shown. Recommendation: not now |
-| Q4a-32 | A Zone with no Spaces: an export finding, or a default Space? | Not shown. Confirm F4a-28 by a round trip first |
+| Q4a-29 | Space airflows: keep the any-set rule, or let each rate override on its own? (Ed, 2026-11-15, [ventilation](research/ventilation.md#open-questions)) | Answered above |
+| Q4a-30 | In a partly specified Zone, inheriting Spaces get their floor share of the full Program flow. Accept and show it, or split only the remainder? | Answered above |
+| Q4a-31 | Should the Room's honeybee Ventilation reflect Space overrides for EnergyPlus, as the Grasshopper path does? | Answered above |
+| Q4a-32 | A Zone with no Spaces: an export finding, or a default Space? | Answered above |

@@ -606,9 +606,13 @@
     dlg.showModal();
   }
   // ---------------------------------------------------------------- Zones / Spaces view: airflow per Space
-  // A Space with no rate entered takes its floor share of the Zone's Program ventilation (PHX's split);
-  // a Space with any rate entered is specified, and its blank rates count as 0. The schedule is always the Program's.
-  function spMode(sp) { return sp.sup === null && sp.eta === null && sp.tran === null ? "program" : "specified"; }
+  // Q4a-29/30: a Zone is From Program until any of its Spaces has a rate; then it uses detailed airflows and every
+  // Space exports its own rates, 0 where blank. From Program, each Space takes its floor share of the Program's
+  // ventilation (PHX's split). The schedule is always the Program's.
+  function hasRate(sp) { return !(sp.sup === null && sp.eta === null && sp.tran === null); }
+  function zoneDetailed(z) { return (z.spaces || []).some(hasRate); }
+  function zoneOf(sp) { var hit = null; S.zones.forEach(function (z) { if ((z.spaces || []).indexOf(sp) >= 0) hit = z; }); return hit; }
+  function spMode(sp) { return zoneDetailed(zoneOf(sp)) ? "specified" : "program"; }
   function spShare(z, sp) { var tot = z.spaces.reduce(function (a, x) { return a + x.area; }, 0); return tot ? sp.area / tot : 0; }
   function zoneVent(z) { var d = derived(z); return d.ventMissing ? null : d.vent; }
   function spFlow(z, sp) {
@@ -617,9 +621,8 @@
     return { sup: v * spShare(z, sp), eta: v * spShare(z, sp), tran: 0 };
   }
   function findSpace(spid) { var hit = null; S.zones.forEach(function (z) { (z.spaces || []).forEach(function (sp) { if (sp.id === spid) hit = { z: z, sp: sp }; }); }); return hit; }
-  function info(text) { return '<span class="zp-info" role="img" aria-label="' + esc(text) + '" data-tip="' + esc(text) + '">' + svg("info", 13) + '</span>'; }
   function flowSum(v, any) { return any ? '<span class="zp-amber" data-tip="The Program has no ventilation rates yet.">?</span>' : fmt(v); }
-  var SPACES_HINT = "<em>Spaces</em>: every row shows the airflow it exports. Muted numbers come from the Zone's Program, split by floor area; <em>type a rate</em> to specify a Space (its blank rates become 0). Hover a specified Space for <em>From Program</em>.";
+  var SPACES_HINT = "<em>Spaces</em>: every row shows the airflow it exports. Muted numbers come from the Zone's Program, split by floor area. <em>Type a rate</em> on any Space and its Zone switches to detailed airflows: every Space in it exports its own rates, 0 where blank. Hover a detailed Zone for <em>From Program</em>.";
   function spacesTable() {
     var COLS = [["name", "Name", 190], ["src", "Airflow", 170], ["area", "Floor area m²", 90, 1], ["icfa", "iCFA m²", 76, 1], ["vol", "Net volume m³", 96, 1], ["sup", "Supply m³/h", 92, 1], ["eta", "Extract m³/h", 92, 1], ["tran", "Transfer m³/h", 98, 1]];
     var tips = { src: "Where each Space's airflow comes from. From Program: the Zone's Program ventilation, split by Space floor area. Specified: the rates entered here. The Program's schedule applies either way.",
@@ -635,27 +638,25 @@
     function numCells(o) { return '<td class="num">' + fmt(o.area, 1) + '</td><td class="num">' + fmt(o.icfa, 1) + '</td><td class="num">' + fmt(o.vol, 1) + '</td><td class="num">' + flowSum(o.sup, o.unknown) + '</td><td class="num">' + flowSum(o.eta, o.unknown) + '</td><td class="num">' + fmt(o.tran) + '</td>'; }
     function zoneRows(z, exported) {
       var p = effectiveProgram(z), o = sums([z]), out = '';
-      var spec = z.spaces.filter(function (sp) { return spMode(sp) === "specified"; }), fromP = z.spaces.length - spec.length, pv = zoneVent(z);
-      var note = "";
-      if (exported && spec.length && fromP) {
-        var a = 0, b = 0; z.spaces.forEach(function (sp) { var f = spFlow(z, sp); if (spMode(sp) === "specified") a += f.sup; else b += f.sup || 0; });
-        note = info("Supply: " + fmt(a) + " m³/h specified, plus " + fmt(b) + " m³/h from the Program for the other Spaces, each at its full floor share. The Program alone gives this Zone " + (pv === null ? "?" : fmt(pv)) + " m³/h.");
-      } else if (exported && spec.length) note = info("Every Space is specified, so the Program's flow is not used. Its schedule still applies.");
-      out += '<tr class="tier-1 zp-zone-row' + (exported ? "" : " zp-out") + '"><td class="col-actions"></td><td>' + esc(z.name) + '</td>' +
-        '<td>' + (exported ? '<span class="zp-src-prog" data-tip="Ventilation from ' + esc(p.name) + ': its flow, split by Space floor area, for Spaces with no rates, and its schedule for every Space.">' + esc(p.name) + '</span>' + note : "Not exported") + '</td>' + numCells(o) + '</tr>';
-      if (!z.spaces.length) out += '<tr class="tier-2 zp-nospace"><td class="col-actions"></td><td colspan="' + COLS.length + '"><span class="zp-sp-name">' + flag("No Spaces: PHX builds ventilation rooms from Spaces, so this Zone would export no ventilation and no iCFA to WUFI-Passive or METr. To confirm (F4a-28, Q4a-32).") + ' No Spaces</span></td></tr>';
+      var detailed = zoneDetailed(z), pv = zoneVent(z);
+      var src = !exported ? "Not exported" : detailed
+        ? '<span class="zp-seg-tag" data-tip="Detailed airflows: a Space in this Zone has a rate, so every Space exports its own rates, 0 where blank. ' + esc(p.name) + ' still gives the schedule; its flow alone would be ' + (pv === null ? "?" : fmt(pv)) + ' m³/h.">Detailed</span> <span class="zp-src-prog">' + esc(p.name) + '</span>'
+        : '<span class="zp-src-prog" data-tip="Ventilation from ' + esc(p.name) + ': its flow, split by Space floor area, and its schedule.">' + esc(p.name) + '</span>';
+      out += '<tr class="tier-1 zp-zone-row' + (exported ? "" : " zp-out") + '"><td class="col-actions">' + (exported && detailed ? '<button type="button" class="phc-icon-button row-icon" data-row-action="reset" data-act="zone-reset" data-v="' + z.id + '" aria-label="From Program: clear every Space\'s rates in ' + esc(z.name) + '" data-tip="From Program: clear every Space\'s rates">' + svg("reset", 16) + '</button>' : "") + '</td><td>' + esc(z.name) + '</td>' +
+        '<td>' + src + '</td>' + numCells(o) + '</tr>';
+      if (!z.spaces.length) out += '<tr class="tier-2 zp-nospace"><td class="col-actions"></td><td colspan="' + COLS.length + '"><span class="zp-sp-name">' + flag("No Spaces: this Zone exports its geometry to WUFI-Passive and METr with no iCFA, net volume or ventilation. Allowed, with an export warning (Q4a-32). Add Spaces before calculating.") + ' No Spaces</span></td></tr>';
       z.spaces.forEach(function (sp) {
         var mode = spMode(sp), f = spFlow(z, sp), share = Math.round(spShare(z, sp) * 100);
-        var inheritTip = "From " + p.name + ": " + share + " % of this Zone's Space floor area. Type a rate to specify this Space; its blank rates then count as 0.";
+        var inheritTip = "From " + p.name + ": " + share + " % of this Zone's Space floor area. Type a rate and this Zone switches to detailed airflows: every Space exports its own rates, 0 where blank.";
         function cell(k) {
           if (!exported) return '<td class="num zp-muted">—</td>';
           if (mode === "program") {
             var ph = k === "tran" ? "0" : (f[k] === null ? "?" : fmt(f[k]));
             return '<td class="num phc-editable-cell"><input class="phc-cell-input zp-flow is-inherit" data-act="sp-flow" data-v="' + sp.id + '" data-k="' + k + '" value="" placeholder="' + ph + '" aria-label="' + esc(sp.name) + ' ' + k + '" data-tip="' + esc(k === "tran" ? "No transfer air from the Program. " + inheritTip : inheritTip) + '"></td>';
           }
-          return '<td class="num phc-editable-cell"><input class="phc-cell-input zp-flow" data-act="sp-flow" data-v="' + sp.id + '" data-k="' + k + '" value="' + (sp[k] === null ? "" : sp[k]) + '" placeholder="0" aria-label="' + esc(sp.name) + ' ' + k + '"' + (sp[k] === null ? ' data-tip="Blank counts as 0: this Space is specified."' : "") + '></td>';
+          return '<td class="num phc-editable-cell"><input class="phc-cell-input zp-flow" data-act="sp-flow" data-v="' + sp.id + '" data-k="' + k + '" value="' + (sp[k] === null ? "" : sp[k]) + '" placeholder="0" aria-label="' + esc(sp.name) + ' ' + k + '"' + (sp[k] === null ? ' data-tip="Blank exports 0: this Zone uses detailed airflows."' : "") + '></td>';
         }
-        out += '<tr class="tier-2"><td class="col-actions">' + (exported && mode === "specified" ? '<button type="button" class="phc-icon-button row-icon" data-row-action="reset" data-act="sp-reset" data-v="' + sp.id + '" aria-label="From Program: clear ' + esc(sp.name) + '\'s rates" data-tip="From Program: clear the three rates">' + svg("reset", 16) + '</button>' : "") + '</td>' +
+        out += '<tr class="tier-2"><td class="col-actions"></td>' +
           '<td><span class="zp-sp-name">' + sp.num + ' ' + esc(sp.name) + '</span></td>' +
           '<td class="zp-src' + (mode === "specified" ? " is-specified" : "") + '">' + (exported ? (mode === "specified" ? "Specified" : "From Program") : "") + '</td>' +
           '<td class="num">' + fmt(sp.area, 1) + '</td><td class="num">' + fmt(sp.icfa, 1) + '</td><td class="num">' + fmt(sp.vol, 1) + '</td>' + cell("sup") + cell("eta") + cell("tran") + '</tr>';
@@ -996,7 +997,7 @@
     else if (a === "reset") { S = baseState(S.journey); }
     else if (a === "tab") { S.tab = v; S.bubble = null; }
     else if (a === "ztab") { S.ztab = v; S.checked = {}; S.bubble = null; }
-    else if (a === "sp-reset") { var hs = findSpace(v); hs.sp.sup = hs.sp.eta = hs.sp.tran = null; notify(hs.sp.num + " " + hs.sp.name + " uses its Zone's Program airflow again."); }
+    else if (a === "zone-reset") { var rz = S.zones.filter(function (z) { return z.id === v; })[0]; rz.spaces.forEach(function (sp) { sp.sup = sp.eta = sp.tran = null; }); notify(rz.name + " uses its Program's airflow again."); }
     else if (a === "ptab") { S.ptab = v; }
     else if (a === "check") { if (el.checked) S.checked[v] = 1; else delete S.checked[v]; }
     else if (a === "check-all") { S.checked = {}; if (el.checked) checkable().forEach(function (z) { S.checked[z.id] = 1; }); }
@@ -1032,7 +1033,13 @@
     var el = e.target, a = el.getAttribute("data-act"), v = el.getAttribute("data-v"); if (!a) return;
     if (a === "zone-program") assignProgram(S.zones.filter(function (z) { return z.id === v; }), el.value);
     else if (a === "bulk-program") assignProgram(S.zones.filter(function (z) { return S.checked[z.id]; }), el.value);
-    else if (a === "sp-flow") { var hf = findSpace(v); hf.sp[el.getAttribute("data-k")] = el.value === "" ? null : Math.max(0, parseFloat(el.value) || 0); }
+    else if (a === "sp-flow") {
+      var hf = findSpace(v), was = zoneDetailed(hf.z);
+      hf.sp[el.getAttribute("data-k")] = el.value === "" ? null : Math.max(0, parseFloat(el.value) || 0);
+      var others = hf.z.spaces.filter(function (x) { return x !== hf.sp && !hasRate(x); }).length;
+      if (!was && zoneDetailed(hf.z)) notify(hf.z.name + " now uses detailed airflows" + (others ? ": its other " + (others === 1 ? "Space exports" : others + " Spaces export") + " 0 until you enter " + (others === 1 ? "its rates." : "theirs.") : "."));
+      else if (was && !zoneDetailed(hf.z)) notify(hf.z.name + " uses its Program's airflow again.");
+    }
     else if (a === "zone-dwelling") { assignDwelling(S.zones.filter(function (z) { return z.id === v; }), el.value); S.bubble = null; }
     else if (a === "bulk-dwelling") assignDwelling(S.zones.filter(function (z) { return S.checked[z.id]; }), el.value);
     else if (a === "bulk-set") { var zs = S.zones.filter(function (z) { return S.checked[z.id]; }); zs.forEach(function (z) { z.set = el.value === "none" ? null : el.value; if (z.dwelling) dw(z.dwelling).set = z.set; }); notify("Equipment Set changed on " + zs.length + " Zones."); }

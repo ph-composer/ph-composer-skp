@@ -1,7 +1,7 @@
 # Research: Zone ventilation and Space airflows
 
 DATE: 2026-11-15
-STATUS: Research complete; proposal for review (Q4a-29 to Q4a-32). Read from source, not run.
+STATUS: Research complete. Ed answered Q4a-29 to Q4a-32 on 2026-11-15. F4a-28 confirmed by a PHX round trip; the rest read from source.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -43,29 +43,36 @@ honeybee-energy 1.123.23 (pinned wheel), PHX 1.59.1 (local checkout), honeybee_g
 | F4a-25 | **In a Zone with some Spaces overridden, the others still get their floor share of the whole Program flow, not what is left.** The Zone's exported total is the overrides plus the inheriting shares, and can exceed or fall short of the Program total |
 | F4a-26 | The schedule always comes from the Room's Ventilation load (rule 4 holds today). A Room with no Ventilation load exports zero flow on a constant default pattern, even where its Spaces carry overrides they keep |
 | F4a-27 | Transfer air reaches PHPP only. WUFI-Passive and METr receive supply and extract |
-| F4a-28 | PHX builds ventilation rooms only from Spaces (`create_building.py` maps each Space; `cleanup.check_room_has_spaces` is a no-op). A Zone with no Spaces would export no ventilation and no iCFA. Read, not run: test before relying on it |
+| F4a-28 | PHX builds ventilation rooms only from Spaces (`create_building.py` maps each Space; `cleanup.check_room_has_spaces` is a no-op). **Confirmed 2026-11-15** by a round trip through PHX 1.59.1 (a 6 × 5 × 3 m honeybee Room, no Spaces): the WUFI XML and METr JSON build without error and without a Space warning; one Zone with its 3 components and gross volume 90 m³, but iCFA 0, `NetVolume` 0 and `<RoomsVentilation count="0"/>`. The Grasshopper WUFI writer (`gh_compo_io/write_wuif_xml.py`) runs the same PHX conversion and surfaces only its WARNING lines |
 | F4a-29 | The Grasshopper hosting step folds Space overrides into the Room's honeybee Ventilation. If PH-Composer did the same, PHX would then split that folded total among the inheriting Spaces (F4a-25) and count the overrides twice. Read, not run |
 
 ## Proposal
 
-1. **Keep the any-set rule.** A Space is either *From Program* or *Specified*; once one rate is
-   entered, the other two are 0. That is the PH design cascade: a bedroom is a supply room, a bath an
-   extract room, a hall a transfer room, so a Space given only supply should have extract 0, not a
-   Program-derived extract. It also matches the Grasshopper component and avoids F4a-24's mixing.
-2. **Every exported Room carries its Program's Ventilation load, unchanged.** The residential default
-   has one, so rule 4 always has a schedule. Never fold Space overrides into the Room (F4a-29).
-3. **The Spaces view shows the effective airflow on every row.** An inheriting Space shows its
-   Program share as a muted number, not the word "Zone", with a tooltip naming the Program and the
-   floor share. A specified Space shows what was entered. Zone sums are always shown, so F4a-25 is
-   visible instead of hidden behind a dash. A "From Program" action on a specified Space clears all
-   three rates.
+1. **Detailed airflows are a Zone mode (Q4a-29, Q4a-30).** A Zone is *From Program* until any of
+   its Spaces has a rate. Then it uses detailed airflows: every Space in it exports its own rates,
+   0 where blank, and none takes a Program share. This replaces PH-Composer's per-Space any-set rule
+   and makes F4a-25 moot for PH-Composer. It follows the PH design cascade (a bedroom supplies, a
+   bath extracts, a hall transfers): a user who enters the bedroom's rate expects the hall's to be
+   its own, 0 until entered. Export writes `_v_sup`, `_v_eta` and `_v_tran` on every Space of a
+   detailed Zone and `None` on every Space of a From Program Zone, so PHX never mixes the two.
+2. **Every exported Room carries its Program's Ventilation load, unchanged (Q4a-31).** It is the
+   schedule for every Space, the flow for a From Program Zone, and EnergyPlus's ventilation either
+   way. Never fold Space rates into the Room (F4a-29).
+3. **The Spaces view shows the effective airflow on every row.** In a From Program Zone each Space
+   shows its share as a muted number, with a tooltip naming the Program and the floor share. In a
+   detailed Zone each Space shows what was entered and a muted 0 where blank. The Zone row shows a
+   "Detailed" tag and its Program as the schedule source; Zone sums are always shown. Entering the
+   first rate in a Zone says so in a notice ("its other 3 Spaces export 0 until you enter theirs").
+   **From Program** sits on the Zone row and clears every Space's rates in that Zone; clearing the
+   last rate by hand does the same.
 4. **One Ruby calculation**, matching PHX (four terms summed, split by unweighted Space floor area),
    feeds both the Programs view's Zone column and the Spaces view's Space shares. Its per-person
    term needs the Zone's people, which for the residential default come from its Dwelling
    (bedrooms + 1, F4a-20). So the occupancy derivation must live in Ruby, not only in the Python
    translation, and the Spaces view's shares follow Programs and Dwellings in the build order.
 5. **Transfer column tooltip:** PHPP only; WUFI-Passive and METr do not read it.
-6. **A Zone with no Spaces** gets an export finding once F4a-28 is confirmed by a round trip.
+6. **A Zone with no Spaces is an export warning, not an error (Q4a-32).** WUFI-Passive and METr open
+   such a file; it will not calculate until Spaces are added. The Spaces view flags the Zone.
 
 The [Programs prototype](../mockups/README.md) shows items 1, 3, 5 and 6 in Zones → Spaces
 (`j1-spaces`, `j1-spaces-cascade`, `j3-spaces`).
@@ -78,3 +85,17 @@ The [Programs prototype](../mockups/README.md) shows items 1, 3, 5 and 6 in Zone
 | Q4a-30 | In a partly specified Zone, inheriting Spaces get their floor share of the full Program flow (PHX today). Accept that and show it, or ask PHX to split only the remainder? | Accept and show it; a remainder rule is a PHX change and less predictable per Space |
 | Q4a-31 | EnergyPlus: should the Room's honeybee Ventilation reflect Space overrides, as the Grasshopper path does? It conflicts with PHX's split (F4a-29) | Not now. Room keeps the Program's load; revisit with an EnergyPlus exporter |
 | Q4a-32 | A Zone with no Spaces: export finding only, or write a default Space covering the Zone? | Confirm F4a-28 first; then a finding |
+
+## Answers (Ed, 2026-11-15)
+
+| Id | Answer |
+| --- | --- |
+| Q4a-29 | **Yes:** blank rates export 0 once rates are entered, now applied per Zone (Q4a-30) |
+| Q4a-30 | **No remainder split, and no floor shares in a partly specified Zone:** once any Space in a Zone has a rate, the Zone uses detailed airflows and every Space exports its own rates, 0 where blank. This supersedes F4a-25 for PH-Composer. Claude agreed, with the notice on the first entry and a Zone-level From Program as the safeguards |
+| Q4a-31 | **The Program's Ventilation load for EnergyPlus**, unchanged, for now |
+| Q4a-32 | **A warning, not an error.** Confirmed allowed by the round trip (F4a-28); the file opens and does not calculate until Spaces are added |
+
+What changes in the existing Spaces feature: the any-set rule moves from the Space to the Zone in
+`features/spaces/scan/metrics.rb` (`airflow_mode`, `airflows`, Zone sums),
+`python/ph_composer_translation/space_sections.py` (`airflow_rates`) and the Spaces view
+(`html/features/spaces/cells.js`, `view.js`: placeholders, tooltips, the Zone sums' dash).
