@@ -120,11 +120,13 @@ module PhComposer
       # A non-blocking finding the reading section discloses about `id`: something it left out of its records,
       # or a warning about what it wrote. It joins the result's findings, and so the report.
       # A finding repeated by a second read of the same record, such as a Building-Segment two Zones name or
-      # an Edge id a split left on two Edges, is listed once.
+      # an Edge id a split left on two Edges, is listed once. A record's omitted map is one finding however
+      # many sections read the record (a Material read for its constructions and for its sources); the first
+      # section to read it names it.
       def note(code, id, message, reference: nil)
         finding = Finding.new(:code => code, :section => @section, :record_id => id, :message => message,
                               :reference => reference)
-        @findings << finding unless @findings.include?(finding)
+        @findings << finding unless @findings.any? { |kept| same_finding?(kept, finding) }
       end
 
       # A claimed row its claimant never read, including one captured after its read, would leave
@@ -220,6 +222,12 @@ module PhComposer
         note("export.metadata_omitted", id,
              "User data on part #{part.fetch('part_ids').join(' / ')} of #{part.fetch('kind')} #{part.fetch('id')} " \
              "is local to this Model and was not exported.", :reference => part)
+      end
+
+      def same_finding?(kept, finding)
+        return kept == finding unless finding.code == "export.metadata_omitted"
+
+        kept.to_h.reject { |key, _| key == "section" } == finding.to_h.reject { |key, _| key == "section" }
       end
 
       def refuse(problem)

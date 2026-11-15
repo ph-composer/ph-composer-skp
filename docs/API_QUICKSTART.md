@@ -164,7 +164,7 @@ page["value"]["next_cursor"]  # nil on the last page
 ```
 
 Approve a destination in Libraries or with **Allow agents to export here** in the Export tab.
-Use its ID to preflight the export and resolve any blocking findings. To replace an existing pair,
+Preflight takes its ID and start takes `{ "id" => ID }`; resolve any blocking findings first. To replace an existing pair,
 send `replace: true` and the destination state reported by preflight as `expected_destination`.
 Pass the reviewed model revision as `expected_revision:` to catch intervening edits.
 
@@ -172,7 +172,7 @@ Pass the reviewed model revision as `expected_revision:` to catch intervening ed
 locations = PhComposer::API.query(context: context, name: "ph_composer.locations.list")["value"]["locations"]
 location = locations.find { |row| row["kind"] == "save_file" }
 destination = { "id" => location.fetch("id") }
-preflight = PhComposer::API.export_preflight(context: context, location: destination)
+preflight = PhComposer::API.export_preflight(context: context, location: location.fetch("id"))
 preflight["value"]["findings"] # Resolve blockers and run preflight again before starting.
 task = PhComposer::API.start_export(context: context, location: destination,
                                    expected_revision: preflight["revision"])["value"]

@@ -139,6 +139,21 @@ class ExportTest < PhComposerTestCase
     assert_equal %w[exp_1 exp_2], reader.findings.map(&:record_id)
   end
 
+  # A Material read by its constructions section and its sources section gives one omitted-map finding,
+  # named by the first section; other codes stay per section.
+  def test_an_omitted_map_read_by_two_sections_is_listed_once
+    reader = Export::RecordReader.new(nil, nil)
+    %w[first second].each do |section|
+      reader.within(section) do
+        reader.note("export.metadata_omitted", "mat_1", "left out")
+        reader.note("export.other", "mat_1", "warned")
+      end
+    end
+
+    assert_equal [%w[export.metadata_omitted first], %w[export.other first], %w[export.other second]],
+                 reader.findings.map { |finding| [finding.code, finding.section] }
+  end
+
   def test_a_local_only_envelope_is_left_out_with_a_finding
     id = store_part("extension_data" => { "other.org.notes" => envelope("local_only") })
 
