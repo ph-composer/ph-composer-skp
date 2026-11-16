@@ -10,8 +10,8 @@ assign a type. The exporter measures the edges and writes one honeybee-ph therma
 assigned run. New work: the predecessor never built it.
 
 This packet also owns the rules for tagging a SketchUp edge, which
-[hot-water-piping](../../features/phase-04-mechanical/hot-water-piping/README.md) and
-[erv-ducting](../../features/phase-04-mechanical/erv-ducting/README.md) reuse.
+[hot-water-piping](../../features/phase-07-mechanical/hot-water-piping/README.md) and
+[erv-ducting](../../features/phase-07-mechanical/erv-ducting/README.md) reuse.
 
 Phase 3 is split into two independent sub-phases, each one flat packet:
 [3a Spaces](../phase-03a-spaces/README.md) and 3b thermal bridges (this folder). Phase 3 ends when

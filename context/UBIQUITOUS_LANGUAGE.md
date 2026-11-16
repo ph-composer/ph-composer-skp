@@ -164,6 +164,9 @@ Face types and boundary conditions follow Honeybee. A Zone owns its Face assignm
 
 | Term | Meaning |
 | --- | --- |
+| Climate data folder | A planned per-computer setting: a folder of climate files the user is licensed to use, read where it is and never copied into a Model |
+| Station | One location in a climate data folder, read from one file. Attaching it copies its values into the Model |
+| Design temperatures | The planned typed ASHRAE 99% heating and 1% cooling dry-bulb temperatures for the site |
 | Climate snapshot | The model-owned monthly and, when supplied, peak-load climate values plus provenance. It remains readable without its source file or provider |
 | EPW-derived monthly climate | Preliminary monthly climate produced by honeybee-ph from a user-selected annual EPW |
 | Monthly-demand ready | The climate has the complete monthly values required by preliminary demand calculations and overlays |

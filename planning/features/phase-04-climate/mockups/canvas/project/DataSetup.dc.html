@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Climate: Climate data on this computer</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/phcomposer/tokens.css">
+<link rel="stylesheet" href="ds/phcomposer/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+.mx{position:relative;width:1280px;height:800px;display:flex;flex-direction:column;overflow:hidden;background:#fff;color:#132a2b;font:13px/18px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.mx .phc-app-header{display:flex;align-items:center;justify-content:space-between;flex:none}
+.mx .panel-panes{flex:1;min-height:0;overflow:hidden;padding:0}
+.z{display:inline-block;height:22px;line-height:22px;padding:0 9px;margin:0 4px 0 0;border-radius:999px;background:#edf1f2;font-size:12px;white-space:nowrap}
+.z.w{background:#ffe6a0;color:#785400}
+.z.ok{background:#d9efe4;color:#0b5a3c}
+.phc-workspace .phc-table td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.phc-workspace .phc-table td.l,.phc-workspace .phc-table th.l{text-align:left}
+.phc-workspace .phc-table td.r,.phc-workspace .phc-table th.r{text-align:right}
+.ro{color:#5d6b73}
+.scrim{position:absolute;left:0;top:0;right:0;bottom:0;background:#132a2b33}
+.dlg{position:absolute;left:150px;top:110px;width:980px;padding:18px 20px;border:1px solid #c9d2d7;border-radius:10px;background:#fff;box-shadow:0 16px 48px #10242c24,0 2px 6px #10242c14}
+.dlg h2{margin:0 0 4px;font-size:20px;line-height:24px;font-weight:600}
+.dlg p{margin:0 0 12px;color:#46565e}
+.dlg .acts{display:flex;align-items:center;gap:8px;margin-top:14px}
+.kept{display:grid;grid-template-columns:200px 1fr;gap:6px 12px;margin:16px 0 0;padding:12px 14px;border-radius:7px;background:#f6f8f9}
+.kept dt{color:#5d6b73}
+.kept dd{margin:0}
+</style>
+</helmet>
+<div class="mx phc-workspace live-panel">
+<div class="phc-app-header">
+<nav class="phc-tabs" aria-label="Sections">
+<button type="button" aria-pressed="true">Climate</button>
+<button type="button">Zones</button>
+<button type="button">Assemblies</button>
+<button type="button">Window Types</button>
+<button type="button">Thermal Bridges</button>
+<button type="button">Programs</button>
+<button type="button">Mechanical</button>
+<button type="button">Library</button>
+<button type="button">Export</button>
+</nav>
+<div class="phc-app-tools"><div class="phc-unit-toggle" role="group" aria-label="Display units"><button type="button" aria-pressed="false">IP</button><button type="button" aria-pressed="true">SI</button></div></div>
+</div>
+<main class="panel-panes">
+<div data-pane="climate">
+<section>
+<div class="phc-heading"><h1>Climate</h1><div class="phc-heading-actions"><button type="button">Climate Data on This Computer…</button></div></div>
+</section>
+</div>
+</main>
+<footer class="phc-footer"><span>PH-Composer</span><span>Editing: Model</span></footer>
+<div class="scrim" aria-hidden="true"></div>
+<div class="dlg" role="dialog" aria-label="Climate data on this computer">
+<h2>Climate data on this computer</h2>
+<p>Folders of climate files you are licensed to use. PH-Composer reads them here and never copies or shares them.</p>
+<div class="phc-table-scroll phc-inventory-table" style="overflow:hidden">
+<table class="phc-table" style="table-layout:fixed;width:100%">
+<thead><tr>
+<th class="l" style="width:110px"><span class="phc-th-label">Name</span></th>
+<th class="l"><span class="phc-th-label">Folder</span></th>
+<th class="l" style="width:190px"><span class="phc-th-label">Format found</span></th>
+<th class="r" style="width:80px"><span class="phc-th-label">Stations</span></th>
+<th class="r" style="width:70px"><span class="phc-th-label">States</span></th>
+<th class="l" style="width:110px"><span class="phc-th-label">Not recognised</span></th>
+<th class="l" style="width:150px"><span class="phc-th-label"></span></th>
+</tr></thead>
+<tbody>
+<tr><td class="l">Phius 2022</td><td class="l ro">~/Climate/Phius 2022/USA</td><td class="l"><span class="z ok">Phius monthly station files</span></td><td class="r">1,007</td><td class="r">51</td><td class="l"><span class="z w">3 files</span></td><td class="l"><button type="button">Rescan</button> <button type="button">Remove</button></td></tr>
+<tr><td class="l">Custom sets</td><td class="l ro">~/Climate/Custom</td><td class="l"><span class="z ok">Phius monthly station files</span></td><td class="r">2</td><td class="r">1</td><td class="l ro">—</td><td class="l"><button type="button">Rescan</button> <button type="button">Remove</button></td></tr>
+</tbody>
+</table>
+</div>
+<dl class="kept">
+<dt>Kept on this computer</dt><dd>Each folder's location and the name you give it, in a PH-Composer settings file in your user folder. Every SketchUp version on this computer reads it. Not shared with a Model or with anyone who opens it.</dd>
+<dt>Read when needed</dt><dd>Station files, each time the station picker opens. Rescan after you add or change files.</dd>
+<dt>Kept in a Model</dt><dd>Only the station you attach: its values, the dataset name and the station name. Never a folder location.</dd>
+</dl>
+<div class="acts"><button type="button" class="primary">Add Folder…</button><span class="ro">Station files are found in subfolders. A station's state is the name of the folder it sits in.</span><button type="button" style="margin-left:auto">Done</button></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -65,7 +65,7 @@ Library, Export. D4 confirms Equipment, ERV ducting and Hot-water piping as peer
 Systems, with one work surface at a time. Do not add separate primary Ducting or Piping tabs.
 
 Revised 2026-11-15 by Phase 4's
-[D4-13](../features/phase-04-mechanical/DECISIONS.md#part-3-wireframe-review-2026-11-15): the
+[D4-13](../features/phase-07-mechanical/DECISIONS.md#part-3-wireframe-review-2026-11-15): the
 tab is named Mechanical; its subtabs are by system (Ventilation, Heat Pumps, Hot Water, Pumps,
 Fans, Electric Heating); a pill row under the subtabs picks one table inside a system, with
 Ducting under Ventilation and Piping under Hot Water. Still no primary Ducting or Piping tab.

@@ -42,12 +42,20 @@ record kind exists, so it is shaped against a real kind and then reused by the n
 | 1 | Walking skeleton | A two-Zone model with assigned faces exports a coherent HBJSON/report pair and reloads in honeybee |
 | 2 | Envelope | Real assemblies and real windows on that model, with a file library |
 | 3 | Rooms and junctions | Spaces and thermal bridges. The model matches what a designPH export gave |
-| 4 | Mechanical | Equipment, ducting and piping. METr needs no hand entry before its first run |
-| 5 | Post-MVP | Climate, sun path, window overlays, further providers |
+| 4 | Climate | The Model carries a site and a climate chosen from the user's own data |
+| 5 | Shading | Not scoped; a placeholder |
+| 6 | Programs | ProgramTypes, loads and schedules on Zones |
+| 7 | Mechanical | Equipment, ducting and piping. METr needs no hand entry before its first run |
+| 8 | Post-MVP | Sun path, window overlays, further providers |
+
+Phases 4 to 8 were re-ordered by Ed on 2026-11-15: Climate was promoted from post-MVP, Shading was
+reserved, and Programs (was 4a), Mechanical (was 4) and Post-MVP (was 5) took the numbers after
+them. Stage, decision, register and roadmap item ids keep their original prefixes (P4-, D4-, P4a-,
+4.1 to 4.6, 5.1 to 5.5), so an id's number no longer says which phase it sits in.
 
 Phase 3 closing is the first internal envelope-model release candidate. A consultant can replace
-designPH's authoring role with it, but still enters mechanical systems downstream. Phase 4 closing
-is the complete MVP Ed described. Ed confirmed both boundaries in D1 on 2026-09-18.
+designPH's authoring role with it, but still enters mechanical systems downstream. The Mechanical
+phase closing (Phase 7 since 2026-11-15, Phase 4 when D1 was confirmed) is the complete MVP Ed described. Ed confirmed both boundaries in D1 on 2026-09-18.
 
 ## Phase 0: gates and foundation
 
@@ -131,40 +139,43 @@ concurrent work. External-agent support and public distribution remain distinct 
 
 ## Phase 4a: programs
 
-Ed proposed [Phase 4a Programs](features/phase-04a-program/README.md) on 2026-11-14 as the next
+Ed proposed [Phase 4a Programs](features/phase-06-program/README.md) on 2026-11-14 as the next
 work, ahead of the mechanical stages: honeybee-energy ProgramTypes with their loads and schedules,
 assigned to Zones and exported to HBJSON. It is the Zone loads packet equipment Q12 defers to.
 Scoped on 2026-11-15, including the Building Segment work it stands on and the Programs tab. Its placement and name are question Q4a-01. No stage authorized.
 
 | # | Item | State | Note |
 | --- | --- | --- | --- |
-| 4a | [Programs](features/phase-04a-program/README.md) | Scoped 2026-11-15: [PLAN](features/phase-04a-program/PLAN.md) stages P4a-01 to P4a-12; P4a-01 to P4a-11 ready | Supplies the Zone ventilation load Spaces inherits, the People load PHX needs, airtightness, dwellings and per-Zone occupancy counts, and the appliances (Equipment Sets) that Phase 4a Q4a-03 moved out of 4.6 |
+| 4a | [Programs](features/phase-06-program/README.md) | Scoped 2026-11-15: [PLAN](features/phase-06-program/PLAN.md) stages P4a-01 to P4a-12; P4a-01 to P4a-11 ready | Supplies the Zone ventilation load Spaces inherits, the People load PHX needs, airtightness, dwellings and per-Zone occupancy counts, and the appliances (Equipment Sets) that Phase 4a Q4a-03 moved out of 4.6 |
 
-## Phase 4: mechanical
+## Phase 7: mechanical (was Phase 4; items 4.1 to 4.6)
 
-The [Phase 4 coordinating packet](features/phase-04-mechanical/README.md) was planned in detail on
+The [Phase 4 coordinating packet](features/phase-07-mechanical/README.md) was planned in detail on
 2026-10-21: stages P4-01 to P4-15, decisions D4-01 to D4-12 answered as recommended, register M01 to M15. Families 3
 to 7, piping and ducting are gate stubs until their interviews. No stage authorized.
 
 | # | Item | State | Note |
 | --- | --- | --- | --- |
-| 4.1 | [Equipment](features/phase-04-mechanical/equipment/README.md): shared shape and Ventilators | Scoped: shared shape, Ventilators and hot water interviewed 2026-10-21 | Closes the HBJSON half of the two-Zone, two-ventilator proof; the PHX half is metr-export's. Owns the balance by ventilator (Spaces shows balance by Zone only). No Phase 3b dependency |
-| 4.2 | [ERV ducting](features/phase-04-mechanical/erv-ducting/README.md) | Requested; gate stub P4-14 | Needs 4.1 and Phase 3b's P3b-03, P3b-06, P3b-07 and P3b-08; lives under Systems per D4 |
+| 4.1 | [Equipment](features/phase-07-mechanical/equipment/README.md): shared shape and Ventilators | Scoped: shared shape, Ventilators and hot water interviewed 2026-10-21 | Closes the HBJSON half of the two-Zone, two-ventilator proof; the PHX half is metr-export's. Owns the balance by ventilator (Spaces shows balance by Zone only). No Phase 3b dependency |
+| 4.2 | [ERV ducting](features/phase-07-mechanical/erv-ducting/README.md) | Requested; gate stub P4-14 | Needs 4.1 and Phase 3b's P3b-03, P3b-06, P3b-07 and P3b-08; lives under Systems per D4 |
 | 4.3 | Equipment: hot water system, tanks, heaters | Scoped: interviewed 2026-10-21 (H1 to H7) | The simplified piping methods wait on [honeybee_ph#135](https://github.com/PH-Tools/honeybee_ph/issues/135) (H5) |
-| 4.4 | [Hot water piping](features/phase-04-mechanical/hot-water-piping/README.md) | Requested; gate stub P4-13 | Needs 4.3 and Phase 3b's P3b-03, P3b-04, P3b-06, P3b-07 and P3b-08; lives under Systems per D4 |
+| 4.4 | [Hot water piping](features/phase-07-mechanical/hot-water-piping/README.md) | Requested; gate stub P4-13 | Needs 4.3 and Phase 3b's P3b-03, P3b-04, P3b-06, P3b-07 and P3b-08; lives under Systems per D4 |
 | 4.5 | Equipment: heat pumps, electric heaters | Requested, PRD drafted, re-baselined 2026-10-21 | |
-| 4.6 | Equipment: pumps, fans, appliances | Requested, PRD drafted, re-baselined 2026-10-21 | Appliances moved to [Phase 4a](features/phase-04a-program/README.md) as Equipment Sets on 2026-11-14 (Q4a-03, revising equipment Q12); pumps and fans remain here |
+| 4.6 | Equipment: pumps, fans, appliances | Requested, PRD drafted, re-baselined 2026-10-21 | Appliances moved to [Phase 4a](features/phase-06-program/README.md) as Equipment Sets on 2026-11-14 (Q4a-03, revising equipment Q12); pumps and fans remain here |
 
-## Phase 5: post-MVP
+## Phase 8: post-MVP (was Phase 5; items 5.1 to 5.5)
+
+Climate data (5.1) is now [Phase 4](features/phase-04-climate/README.md) and
+[Phase 5: shading](features/phase-05-shading/README.md) is a placeholder; neither has a section above yet.
 
 | # | Item | State | Note |
 | --- | --- | --- | --- |
-| 5.1 | [Climate data](features/phase-05-post-mvp/climate-data/README.md) | Requested, PRD drafted | Ships no datasets. Reuses honeybee-ph EPW-to-monthly conversion for preliminary work; user-supplied peak loads are required for climate-bearing METr export per D9 |
-| 5.2 | [Sun-path view](features/phase-05-post-mvp/sun-path-view/README.md) | Requested, PRD drafted | Can ship on SketchUp geolocation alone, before 5.1 |
-| 5.3 | [Window performance overlays](features/phase-05-post-mvp/window-performance-overlays/README.md) | Requested, PRD drafted | Needs 5.1 for radiation. A U-w ramp needs nothing and could come earlier |
+| 5.1 | [Climate data](features/phase-04-climate/README.md) | Promoted to Phase 4 on 2026-11-15; Requested, PRD drafted, wireframes drawn | Ships no datasets. Reuses honeybee-ph EPW-to-monthly conversion for preliminary work; user-supplied peak loads are required for climate-bearing METr export per D9 |
+| 5.2 | [Sun-path view](features/phase-08-post-mvp/sun-path-view/README.md) | Requested, PRD drafted | Can ship on SketchUp geolocation alone, before 5.1 |
+| 5.3 | [Window performance overlays](features/phase-08-post-mvp/window-performance-overlays/README.md) | Requested, PRD drafted | Needs 5.1 for radiation. A U-w ramp needs nothing and could come earlier |
 | 5.4 | Further library kinds and providers | Not drafted | Thermal Bridge Types, Pipe and Duct Types, equipment, climates |
 | 5.5 | PV and site | Not drafted | Named in the founding brief |
-| 2.5 | [Libraries: generic connection seam](features/phase-05-post-mvp/phases/p2-16-connection-provider.md) | Un-deferred by D5-1, 2026-11-02: generic connection seam, merged to main the same day (PR #329); the PH-Elements connector is the first extension | [#328](https://github.com/ph-composer/ph-composer-skp/issues/328); deferred by D2-8 on 2026-10-01 |
+| 2.5 | [Libraries: generic connection seam](features/phase-08-post-mvp/phases/p2-16-connection-provider.md) | Un-deferred by D5-1, 2026-11-02: generic connection seam, merged to main the same day (PR #329); the PH-Elements connector is the first extension | [#328](https://github.com/ph-composer/ph-composer-skp/issues/328); deferred by D2-8 on 2026-10-01 |
 
 ## Production-support release prerequisite
 
@@ -259,3 +270,4 @@ prerequisites and carried B1/B2 conditions into the next phase.
 | 2026-10-21 | Ed answered D4-01 to D4-12, all as recommended. Phase 4 waits on its issue and the go on P4-01. |
 | 2026-10-26 | Thermal bridges P3b-01 to P3b-09 merged (PRs #302, #308 to #315), T01 to T09 pass; the packet is archived as `phase-03b-thermal-bridges`, with geometry-contribution-contracts. Both Phase 3 sub-phases are complete, so Phase 3 closes. |
 | 2026-11-15 | Phase 4 Mechanical tab wireframes reviewed with Ed: D4-13 to D4-20 answered (a Mechanical tab with subtabs by system, heat pumps as four tables with one blended export by the Phius estimator's method, hot water as Systems, Heaters and Tanks). Heat pumps now need Climate first; Phase 4's bindings and stages P4-05 to P4-11 owe re-planning. |
+| 2026-11-15 | Ed re-ordered the later phases and their folders: Climate promoted to `phase-04-climate`, `phase-05-shading` reserved as a placeholder, Programs to `phase-06-program` (was 4a), Mechanical to `phase-07-mechanical` (was 4), Post-MVP to `phase-08-post-mvp` (was 5). Ids keep their prefixes. Climate tab wireframes drawn the same day, not reviewed. |

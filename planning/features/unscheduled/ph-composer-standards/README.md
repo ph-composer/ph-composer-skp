@@ -12,7 +12,7 @@ it; users add its files in Library setup.
 
 ## Why
 
-Ed proposed it on 2026-11-14 in the [Phase 4a](../../phase-04a-program/DECISIONS.md#answered)
+Ed proposed it on 2026-11-14 in the [Phase 4a](../../phase-06-program/DECISIONS.md#answered)
 review (Q4a-19, Q4a-20). Programs, Window Types, Assemblies and later Mechanical Equipment follow
 one rule: content arrives as a library file or a remote Connection and is copied into the SKP as
 editable records; only behaviour, such as Phase 4a's residential default, stays in the extension.

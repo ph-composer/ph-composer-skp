@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Climate tab wireframes</title>
+<!-- Local viewer for the wireframe artboards under canvas/project/. Open through `make ui-preview`:
+     http://127.0.0.1:8765/planning/features/phase-04-climate/mockups/ (add ?board=Main for one board).
+     The same artboard files are published to the Design canvas; this page only frames them with the
+     panel's own stylesheets. Synthetic data throughout. -->
+<link rel="stylesheet" href="/src/ph_composer/html/base.css">
+<link rel="stylesheet" href="/src/ph_composer/html/overlay.css">
+<link rel="stylesheet" href="/src/ph_composer/html/shell.css">
+<link rel="stylesheet" href="/src/ph_composer/html/table.css">
+<link rel="stylesheet" href="/src/ph_composer/html/features/zones/zones.css">
+<style>
+  html, body { height: auto; }
+  body { margin: 0; padding: 24px; background: #dfe4e7; font: 13px/18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .board { margin: 0 0 40px; }
+  .board > h2 { margin: 0 0 8px; color: #46565e; font-size: 13px; font-weight: 600; }
+  .board > .frame { display: inline-block; border: 1px solid #c9d2d7; box-shadow: 0 6px 20px #10242c1a; }
+  .board > p { max-width: 900px; margin: 10px 0 0; padding: 10px 12px; border-radius: 7px; background: #fff0c2; color: #132a2b; white-space: pre-line; }
+</style>
+</head>
+<body>
+<script>
+  (async function () {
+    var only = new URLSearchParams(location.search).get("board");
+    var canvas = await (await fetch("canvas/project/canvas.json")).json();
+    var notes = Object.keys(canvas.notes).map(function (key) { return canvas.notes[key]; });
+    for (var name of canvas.order) {
+      if (only && name !== only + ".dc.html") continue;
+      var board = canvas.boards[name];
+      var doc = new DOMParser().parseFromString(await (await fetch("canvas/project/" + name)).text(), "text/html");
+      var root = doc.querySelector("x-dc");
+      var style = document.createElement("style");
+      style.textContent = root.querySelector("helmet style").textContent.replace("body{margin:0}", "");
+      document.head.appendChild(style);
+      root.querySelector("helmet").remove();
+      var section = document.createElement("section");
+      section.className = "board";
+      var title = document.createElement("h2");
+      title.textContent = board.title;
+      var frame = document.createElement("div");
+      frame.className = "frame";
+      frame.append.apply(frame, Array.from(root.children));
+      // Every board's stylesheet lands in one page, so a later board's root size would win: pin each to its own frame.
+      if (frame.firstElementChild) { frame.firstElementChild.style.width = board.w + "px"; frame.firstElementChild.style.height = board.h + "px"; }
+      section.append(title, frame);
+      notes.filter(function (note) { return !note.kind && note.x >= board.x && note.x < board.x + board.w && note.y > board.y && note.y < board.y + board.h + 400; })
+        .forEach(function (note) { var p = document.createElement("p"); p.textContent = note.text; section.append(p); });
+      document.body.append(section);
+    }
+  })();
+</script>
+</body>
+</html>

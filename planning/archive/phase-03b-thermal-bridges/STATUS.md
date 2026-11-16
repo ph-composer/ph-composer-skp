@@ -135,7 +135,7 @@ answers". D3b-22 and D3b-23 were added by the re-baseline of 2026-10-21 and answ
 | --- | --- |
 | METr thermal-bridge rows and PHX's treatment of `quantity` (F18, unreproduced) | [metr-export](../../features/unscheduled/metr-export/README.md) |
 | Thermal Bridge Types as a library kind (Q8) | Roadmap 5.4 |
-| A Model-level edge registry for identity-bearing assignments (D3b-01) | [hot-water-piping](../../features/phase-04-mechanical/hot-water-piping/README.md), [erv-ducting](../../features/phase-04-mechanical/erv-ducting/README.md) |
+| A Model-level edge registry for identity-bearing assignments (D3b-01) | [hot-water-piping](../../features/phase-07-mechanical/hot-water-piping/README.md), [erv-ducting](../../features/phase-07-mechanical/erv-ducting/README.md) |
 | Moving the run builder to `core/` | When piping or ducting needs the same chain rule |
 | A toolbar button for the edge tool | [zones-entry-points](../../features/unscheduled/zones-entry-points/README.md) E1 |
 | A compact default `fields` projection for every catalog `.list` (Assemblies, Materials, Window products and Types, Thermal Bridge Types), so one record over the agent reply budget cannot stop a page walk (Codex review of PR #308) | Unscheduled; needs its own issue |

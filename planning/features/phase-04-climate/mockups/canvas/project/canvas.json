@@ -1,0 +1,153 @@
+{
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-15T19:00:00Z"
+  },
+  "title": "PH-Composer Climate Tab Wireframes",
+  "launch": {
+    "view": "canvas"
+  },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1280,
+      "h": 800,
+      "title": "1 · Climate › Site location, Set Location open"
+    },
+    "PhiusEmpty.dc.html": {
+      "x": 1360,
+      "y": 0,
+      "w": 1280,
+      "h": 800,
+      "title": "2 · Phius climate data, none on this computer"
+    },
+    "DataSetup.dc.html": {
+      "x": 2720,
+      "y": 0,
+      "w": 1280,
+      "h": 800,
+      "title": "3 · Climate data on this computer"
+    },
+    "Picker.dc.html": {
+      "x": 4080,
+      "y": 0,
+      "w": 1280,
+      "h": 800,
+      "title": "4 · Set Phius Climate Data"
+    },
+    "PhiusAttached.dc.html": {
+      "x": 0,
+      "y": 1300,
+      "w": 1280,
+      "h": 1250,
+      "title": "5 · Phius climate data attached"
+    },
+    "OtherComputer.dc.html": {
+      "x": 1360,
+      "y": 1300,
+      "w": 1280,
+      "h": 800,
+      "title": "6 · The same Model on a computer without the folder"
+    },
+    "Narrow.dc.html": {
+      "x": 2720,
+      "y": 1300,
+      "w": 420,
+      "h": 732,
+      "title": "7 · Climate at 420 px"
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "PhiusEmpty.dc.html",
+    "DataSetup.dc.html",
+    "Picker.dc.html",
+    "PhiusAttached.dc.html",
+    "OtherComputer.dc.html",
+    "Narrow.dc.html"
+  ],
+  "notes": {
+    "title": {
+      "x": 0,
+      "y": -300,
+      "text": "Climate tab · wireframes v1",
+      "kind": "title1",
+      "maxW": 4000
+    },
+    "c1": {
+      "x": 0,
+      "y": 850,
+      "w": 620,
+      "fill": "orange",
+      "text": "DECIDE · Location without a network\nThe panel reaches no network, so there is no address search and no elevation or climate-zone lookup. Latitude, longitude, elevation and climate zone are typed, or read once from SketchUp's geolocation. Nothing is written back to SketchUp."
+    },
+    "c1b": {
+      "x": 660,
+      "y": 850,
+      "w": 620,
+      "fill": "green",
+      "text": "SETTLED 2026-11-16 · The map\nAn outline map shipped with the extension: world countries, plus state and province borders for the US and Canada, from public-domain data. No web tiles; the panel's no-network rule stands. On it: pan and zoom, click a station to select it, hover for its details, and in Set Location click to place the site. The outline drawn here is a rough placeholder."
+    },
+    "c2": {
+      "x": 1360,
+      "y": 850,
+      "w": 620,
+      "fill": "green",
+      "text": "SETTLED 2026-11-16 · Climate sources\nSeparate cards, as PH-Navigator: Phius climate data and Hourly weather file. No PHI for now. In the first version Phius climate data is the only climate and the one that exports: pick a station from the folder, or type and paste the values by hand. The Hourly weather file card is shown as Planned.\nDesign temperatures (ASHRAE 99% heating and 1% cooling dry bulb) are typed on their own card. Export does not wait on them; only the blended heat pump does."
+    },
+    "c3": {
+      "x": 2720,
+      "y": 850,
+      "w": 620,
+      "fill": "green",
+      "text": "SETTLED 2026-11-15 · The per-computer setting\nEach folder's location and its name are kept in PH-Composer's own settings file in the user's folder, shared by every SketchUp version; not in SketchUp's preferences and never in a Model. No list of stations is stored: the folder is read when the picker opens. You type the dataset name, prefilled from the folder's name. Reached from the Climate tab and listed in the Setup view. The first version recognises Phius station files only."
+    },
+    "c4": {
+      "x": 4080,
+      "y": 850,
+      "w": 620,
+      "fill": "gray",
+      "text": "Every recognised station file under the folder is a marker; the state is its parent folder's name. The verdict follows Phius: within 50 mi (80 km) and 400 ft (122 m) of the site. Find Nearest sorts by distance."
+    },
+    "c5": {
+      "x": 0,
+      "y": 2600,
+      "w": 620,
+      "fill": "green",
+      "text": "SETTLED 2026-11-16 · What the Model keeps, and what a station lacks\nA full copy of the chosen station: location, monthly values and peak loads, with the dataset name, station name and a checksum. No folder path.\nA Phius station gives three peak-load cases; that is the complete set, and Cooling 2 stays empty. Ground temperatures stay empty and unflagged. Average wind speed is typed, prefilled with the mean of the file's January and July values. Values may be edited after attaching; the source is then marked as edited. Charts are not drawn."
+    },
+    "c6": {
+      "x": 1360,
+      "y": 2150,
+      "w": 620,
+      "fill": "gray",
+      "text": "The same Model opened where no climate folder is set: every value reads from the Model's copy. Only replacing the station needs the folder."
+    },
+    "c7": {
+      "x": 2720,
+      "y": 2082,
+      "w": 420,
+      "fill": "gray",
+      "text": "At 420 px the source list becomes one select above the content, and tables scroll sideways. Nine tabs wrap to three rows at this width.\nSETTLED 2026-11-16 · Climate is the first tab, before Zones. OPEN · which tab the panel opens on."
+    },
+    "c3b": {
+      "x": 3380,
+      "y": 850,
+      "w": 620,
+      "fill": "green",
+      "text": "SETTLED 2026-11-16 · Code decisions\nClimate is its own feature, not a Library kind. A Model holds one site and one Phius climate, which is what exports; replacing the station is one Undo step. One built-in Phius reader now; a shared plug-in contract for formats waits until the hourly weather file gives a second example."
+    }
+  },
+  "designSystems": [
+    {
+      "title": "PH-Composer Design System",
+      "namespace": "phcomposer",
+      "artifact": "https://claude.ai/artifact/77GLrkZxtkxo9TksTbvodL",
+      "version": "1794782248-c753",
+      "copiedAt": "2026-11-15T19:00:00Z"
+    }
+  ]
+}

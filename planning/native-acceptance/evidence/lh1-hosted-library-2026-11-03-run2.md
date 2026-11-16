@@ -5,7 +5,7 @@ STATUS: Pass. All sixteen assertions observed on the build that includes the pai
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/328
 
 Second host run of case `LH1` in [cases.json](../cases.json), the
-[P2-16 host gate](../../features/phase-05-post-mvp/phases/p2-16-connection-provider.md#host-gate-case-lh1),
+[P2-16 host gate](../../features/phase-08-post-mvp/phases/p2-16-connection-provider.md#host-gate-case-lh1),
 after [run 1](lh1-hosted-library-2026-11-03.md) failed only on the pairing display. Same synthetic firm
 Library on the PH-Elements service. Steps, read-backs and exports stay in gitignored
 `_private/host/phe-0608-20261103-r2/`.

@@ -21,9 +21,9 @@ The [modeling guide](PRODUCT.md) describes the tools in the current build. The
 
 | Area | Requirements | Plan |
 | --- | --- | --- |
-| Mechanical systems | Define equipment, model duct and pipe runs, and associate them with the building systems they serve | [Mechanical](../planning/features/phase-04-mechanical/README.md) |
+| Mechanical systems | Define equipment, model duct and pipe runs, and associate them with the building systems they serve | [Mechanical](../planning/features/phase-07-mechanical/README.md) |
 | METr handoff | Convert HBJSON with PHX and verify the resulting model in METr | [METr export](../planning/features/unscheduled/metr-export/README.md) |
-| Site and climate | Store a model-owned site and monthly climate snapshot from user data or an EPW. Use supplied peak-load data for the METr handoff | [Climate data](../planning/features/phase-05-post-mvp/climate-data/README.md) |
+| Site and climate | Store a model-owned site and monthly climate snapshot from user data or an EPW. Use supplied peak-load data for the METr handoff | [Climate data](../planning/features/phase-04-climate/README.md) |
 
 The roadmap also tracks [sun-path and window performance views](../planning/ROADMAP.md#phase-5-post-mvp),
 additional library kinds and PV.

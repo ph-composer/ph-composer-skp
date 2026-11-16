@@ -142,7 +142,7 @@ Register ids S01 to S12 are in [ACCEPTANCE.md](ACCEPTANCE.md).
 | "Through PHX" and METr room checks | [metr-export](../../features/unscheduled/metr-export/README.md) |
 | Height drag handle (Q6) | Spaces PRD, non-goals |
 | Toolbar buttons for Classify, Place and Mark floor | [zones-entry-points](../../features/unscheduled/zones-entry-points/README.md) E1 |
-| Airflow balance by ventilator; by-unit and by-system modes; the Ventilation and Heat pump assignment views, or Systems tabs listing the Zones each unit serves | [equipment](../../features/phase-04-mechanical/equipment/README.md) |
+| Airflow balance by ventilator; by-unit and by-system modes; the Ventilation and Heat pump assignment views, or Systems tabs listing the Zones each unit serves | [equipment](../../features/phase-07-mechanical/equipment/README.md) |
 | Occupancy, Electric loads and appliances, Lighting and Hot water Zone views | The Zone loads packet, not yet drafted; P3a-06's contract admits a view with no child rows |
 | Inherited airflow values from Zone loads | The Zone loads packet, not yet drafted |
 | One shared duplicate-identity contract across Zones, Windows and Spaces | [#145](https://github.com/bldgtyp/ph-composer/issues/145) (D3a-3), recorded as P3a-04 closed |

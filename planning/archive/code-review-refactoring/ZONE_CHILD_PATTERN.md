@@ -92,7 +92,7 @@ Equipment is an example of an adopter, not an accepted copy policy. A pipe/duct 
 cannot be handled correctly by inventing a generic deep-copy rule here. Likewise, deletion, movement
 and rehosting require their own declared transitions and product decisions when introduced.
 
-The current [equipment draft](../../features/phase-04-mechanical/equipment/PRD.md#the-shared-shape)
+The current [equipment draft](../../features/phase-07-mechanical/equipment/PRD.md#the-shared-shape)
 describes an item that serves one or several Zones through assignments; it does not require a physical
 child Group. Apply the ownership split to that relationship too. A served-by association need not be
 represented as native containment, and a copied Zone does not automatically duplicate its shared ERV.

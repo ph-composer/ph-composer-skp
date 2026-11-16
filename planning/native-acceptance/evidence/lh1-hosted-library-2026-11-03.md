@@ -5,7 +5,7 @@ STATUS: Fail on one clause. Fourteen assertions pass; Composer does not show the
 ISSUE: https://github.com/ph-composer/ph-composer-skp/issues/328
 
 Synthetic summary of the first host run of case `LH1` in [cases.json](../cases.json), the
-[P2-16 host gate](../../features/phase-05-post-mvp/phases/p2-16-connection-provider.md#host-gate-case-lh1),
+[P2-16 host gate](../../features/phase-08-post-mvp/phases/p2-16-connection-provider.md#host-gate-case-lh1),
 with the first hosted extension (the PH-Elements connector) against a synthetic firm Library on the
 PH-Elements service. Steps, read-backs and exports stay in gitignored `_private/host/phe-0608-20261103/`.
 

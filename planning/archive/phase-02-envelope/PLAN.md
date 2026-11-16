@@ -58,7 +58,7 @@ tests to write first, the host gate and the done condition.
 | P2-13 | Place tool, Schedule, the Window Type Colour-by mode | P2-12, P2-11 | windows | Place on wall and flat roof; Move-copy; resize a used type |
 | P2-14 | Aperture export, window findings, net opaque area | P2-13, P2-06 | windows, zones | Normal RBZ exports; frame elements read back |
 | P2-15 | Frame, Glazing and Psi-Install library kinds | P2-11, P2-08 | windows | Copy each kind from a file; assign a product by drag |
-| P2-16 | [Generic connection provider and sign-in](../../features/phase-05-post-mvp/phases/p2-16-connection-provider.md) | Deferred to Phase 5 by D2-8 | library | Scope unchanged; production endpoint lacks the neutral envelope |
+| P2-16 | [Generic connection provider and sign-in](../../features/phase-08-post-mvp/phases/p2-16-connection-provider.md) | Deferred to Phase 5 by D2-8 | library | Scope unchanged; production endpoint lacks the neutral envelope |
 | P2-17 | Acceptance register closed; packets and context updated | all in scope | integration | Fresh-process integrated run |
 
 ```
