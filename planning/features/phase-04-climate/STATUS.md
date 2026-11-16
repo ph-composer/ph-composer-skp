@@ -1,7 +1,7 @@
 # Climate data: status
 
 DATE: 2026-09-18
-STATUS: Requested. Wireframes reviewed with Ed by 2026-11-16 and the PRD revised to their nine answers (W1 to W9) the same day. Nine items are open or owed before planning (PRD, "Open"); nothing is planned or authorized. The Mechanical phase's heat pump stage waits on this packet.
+STATUS: Requested. Wireframes reviewed with Ed by 2026-11-16 and the PRD revised to their nine answers (W1 to W9) the same day. Ten items are open or owed before planning (PRD, "Open"); nothing is planned or authorized. The Mechanical phase's heat pump stage waits on this packet.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (no remote)
 
@@ -64,3 +64,4 @@ None. Nothing is implemented.
 | 2026-11-16 | Ed settled the tab's position: Climate is the first primary tab, before Zones. Open: which tab the panel opens on, and the nine-tab row at the 420 px and 360 px panel widths. The Mechanical wireframes' tab rows predate this and show neither Climate nor Programs. |
 | 2026-11-16 | Ed settled the code shape: Climate is its own feature, not a Library kind; a Model holds one site and one Phius climate; one built-in Phius reader now, with a format contract deferred until a second reader exists. All nine wireframe questions are now answered. The PRD is not yet revised. |
 | 2026-11-16 | PRD revised to the wireframe review: a Climate tab, climate data folders per computer, a station picker on an outline map, one climate per Model, typed design temperatures, the hourly weather file and PHI deferred. Q1 to Q9 kept with what the review did to each; W1 to W9 added; nine items listed as open or owed before planning. |
+| 2026-11-16 | Recorded the private development corpus: Ed's licensed Phius 2022 dataset, held outside the repository, located only in gitignored `_private/climate/MANIFEST.md`, never to be distributed. Its layout (from names only) is in the PRD. It shows a second, `.xls` format that alone covers Canada and Japan; added as open item 10. |

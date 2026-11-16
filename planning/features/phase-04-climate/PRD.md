@@ -75,6 +75,26 @@ file content is in this repository, and public fixtures are synthetic files of t
 It does not hold: a dataset name or year, a climate zone, a second cooling case, monthly ground
 temperatures, one annual wind speed, or any ASHRAE design temperature.
 
+### A private corpus for development
+
+Ed holds a licensed Phius 2022 dataset on his own computer, outside this repository. It may be
+used to develop and test this feature and must never be distributed: none of it, and no value from
+it, enters the repository, a public fixture, a planning document or a published wireframe. Its
+location is recorded only in the gitignored `_private/climate/MANIFEST.md`, as the repository's
+rule for private test corpora requires; a test that reads it skips when it is absent, and the
+public fixtures are synthetic files of the same shape.
+
+Its layout, from folder and file names only (2026-11-16), is what a real climate data folder looks
+like:
+
+- a text-file tree, `USA/<ST>/<STATION>-mon.txt`: 1,007 stations in 50 state folders, the format
+  the first version reads;
+- a few stray files in that tree whose names do not end `-mon.txt` (a second copy, an edited
+  copy), which a scan should count as not recognised and not as stations;
+- a second tree of one `.xls` workbook per station, for the USA and also for Canada and Japan,
+  which have no text-file equivalent;
+- two folders of older `.xls` station workbooks.
+
 ## Vocabulary
 
 Proposed. `context/UBIQUITOUS_LANGUAGE.md`, "Site and climate", carries the planned terms.
@@ -240,6 +260,9 @@ illustrate these.
    in progress, a folder that has moved, a changed source file, charts, the 360 x 520 panel size.
 9. What the blended heat pump reads beyond the two design temperatures. The Phius estimator also
    uses the monthly mean temperatures, which the climate holds; the Mechanical phase binds this.
+10. Stations outside the USA. The private corpus has Canadian and Japanese stations only as `.xls`
+    workbooks, which the first version does not read (W5), so they cannot be attached except by
+    typing values in. Whether an `.xls` reader joins the first version is not asked.
 
 ## Deferred
 
