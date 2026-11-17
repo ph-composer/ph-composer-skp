@@ -312,7 +312,12 @@ weather file gives a second reader to shape it against.
 - An incomplete climate is left out with a finding (J4). So is a climate in a Model with no
   site: no `Site` is written, and the finding says the site is not set (R2). The design temperatures are reported
   and not written to the HBJSON (J5).
-- A Model with no climate exports without one, as today.
+- A Model with no climate exports without one, as today. "As today" and "no `Site` is written"
+  both mean that honeybee-ph's own default `Site` stays in the HBJSON: honeybee-ph builds one for
+  every Building Segment and cannot load a segment without it. PH-Composer matches honeybee-ph
+  and its Grasshopper components here and says nothing about the default (E1). A site with no
+  climate is written as its `Location` over honeybee-ph's default `Climate` (E2). Both are Ed's
+  answers of 2026-11-17, in [DECISIONS](DECISIONS.md).
 
 ## Decisions
 
@@ -448,7 +453,8 @@ restore the folder and replace the station in one Undo step; edit a value and se
 marked as edited; type a climate by hand on a second model; enter and clear the design
 temperatures; export and find `Site` in the HBJSON with the dataset and station named in the
 report and no folder location anywhere. Open the same Model under a second SketchUp version and
-find the folder still set.
+find the folder still set. (Deferred on 2026-11-17: Ed tests on SketchUp 2026 only for now, E3 in
+[DECISIONS](DECISIONS.md).)
 
 ## Prior art and evidence
 

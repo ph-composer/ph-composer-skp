@@ -22,6 +22,12 @@ No 2023 host has been measured. Until one is, "supports SketchUp 2023" is an unv
 | Point-merge tolerance 0.0254 mm and split/Undo/reopen behavior match | SKETCHUP_HOST_BEHAVIOR; P1-A |
 | Observer ordering on edit-path change (commit then `active_path_changed`) | P1-E navigation correction |
 
+## Carried from later phases
+
+| Item | From | What is owed |
+| --- | --- | --- |
+| Preferences and the settings file across two SketchUp versions | [Climate](../../phase-04-climate/PLAN.md#deferred-out-of-this-packet), E3, 2026-11-17 | With a second supported version installed beside the current one: write a preference with `Sketchup.write_default` in one and read it in the other, and confirm a climate data folder added in one is listed in the other |
+
 ## Acceptance shape
 
 On SketchUp 2023 (macOS first): install the RBZ; rerun the P1-A native probe; rerun the P1-F

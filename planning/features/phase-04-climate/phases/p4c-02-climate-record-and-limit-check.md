@@ -7,7 +7,7 @@ ISSUE: none (local planning draft)
 
 ## Entry and scope
 
-Requires P4c-01. Owns the Model's one climate record, its as-read copy and source, the operations
+Requires P4c-01. Owns the Model's one climate record, its as-read copy and provenance, the operations
 that need no file (save values, restore, clear), completeness, edited cells and the limit check.
 Panel closed. Attaching from a station file is P4c-04; the grid that calls `save_values` is
 P4c-11.
@@ -36,12 +36,14 @@ produce. Paths are relative to `src/ph_composer/`.
    - `limit_check.rb`: CONTRACTS section 4, with the two limits as named constants and their
      source in a comment.
 3. **Operations**: `climate.get` with the derived fields; `climate.save_values` (creates a
-   hand-entered climate with `origin: "hand"`, null `as_read` and `source`, or changes the
-   values of the existing one and leaves `as_read` and `source` alone); `climate.restore_original`;
+   hand-entered climate with `origin: "hand"`, a null `as_read` and a `user_defined` provenance,
+   or changes the values of the existing one, leaves `as_read` alone and rewrites the provenance's
+   source type and edited values in the same step, D4c-03); `climate.restore_original`, which
+   does the same;
    `climate.clear`. Undo names: "Enter Climate Values", "Edit Climate Values", "Restore Climate
    Values", "Clear Climate". Codes: `climate.no_original`, `climate.not_found`.
 4. **A builder** the reader will call in P4c-04: `Climate::Record.from_station(parsed, source)`,
-   pure, returning the record with `as_read`, `source` and the wind-speed mean. Tested here with
+   pure, returning the record with `as_read`, `provenance` and the wind-speed mean. Tested here with
    a hand-built parsed station.
 5. **Site preview.** `site.preview_limit_check` (query): the verdict the attached station would
    get at a proposed latitude, longitude and elevation. `site.update`'s result gains the limit
@@ -73,6 +75,8 @@ produce. Paths are relative to `src/ph_composer/`.
    121.92 m passes and more fails; each limit fails alone; no site and no station coordinates
    each read Not checked with their reason. Distances match hand values for three synthetic pairs.
 5. `save_values` creates, updates and saves with gaps, each one Undo step; a stale record refuses.
+   An edit to a station climate turns its stored source type to `user_defined` and lists the
+   edit in `assumptions`; Restore and one Undo each turn it back with the values.
 6. `restore_original` returns every cell and refuses for a hand-entered climate; `clear` deletes
    the climate and leaves the settings untouched.
 7. `Record.from_station` sets the wind speed to the January and July mean and copies the values

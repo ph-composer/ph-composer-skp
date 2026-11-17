@@ -26,3 +26,4 @@ None on Windows.
 | Date | Event |
 | --- | --- |
 | 2026-09-30 | Packet created from the Phase 1 separate-gate list. |
+| 2026-11-17 | The Climate phase deferred all Windows path work here (Ed's answer E3): the per-computer settings file's Windows location is to be chosen, written and tested in this packet. See the PRD, "Carried from later phases". |

@@ -1,14 +1,16 @@
 # P4c-05: Export of the site and climate
 
 DATE: 2026-11-17
-STATUS: Scoped. Not authorized. E1 and E2 in DECISIONS need Ed's answer first.
+STATUS: Scoped. Not authorized.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
 ## Entry and scope
 
-Requires P4c-02, owed check 6, and Ed's answers to E1 and E2. Writes the Model's site and climate
-into the HBJSON as honeybee-ph `Site`, with its findings and the Export report's climate section.
+Requires P4c-02 and owed check 6. Writes the Model's site and climate into the HBJSON as
+honeybee-ph `Site`, with its findings and the Export report's climate section. Ed's rule (E1, E2
+in [DECISIONS](../DECISIONS.md)) is to match honeybee-ph and its Grasshopper components: a part
+the Model does not supply keeps honeybee-ph's default, and nothing is said about it.
 Ruby decides everything (what is written, what is left out, the provenance, Cooling 2); the
 Python section builds honeybee-ph objects from the contract record and computes nothing.
 
@@ -16,8 +18,8 @@ It does not need the reader: tests build climate records directly. It can run be
 P4c-04.
 
 Behavior: [PRD](../PRD.md), "What honeybee-ph and METr take" and "Export". Names:
-[CONTRACTS](../CONTRACTS.md) section 7. Answers: W4, W8, J4, J5, J8, R2, R5, R6, R7; D4c-03,
-D4c-07, D4c-14. Board: 18 (`ExportReport`), for the report section's content. Paths are relative
+[CONTRACTS](../CONTRACTS.md) section 7. Answers: W4, W8, J4, J5, J8, R2, R5, R6, R7; E1, E2;
+D4c-03, D4c-07, D4c-14. Board: 18 (`ExportReport`), for the report section's content. Paths are relative
 to `src/ph_composer/`.
 
 This stage takes the stronger review lane: serialization.
@@ -33,8 +35,8 @@ the repository's `.venv`:
 2. Record what arrives: the four peak-load cases with Cooling 2 equal to Cooling 1; the monthly
    ground row; an empty hours from UTC; climate zone 1; that a provenance with both availability
    flags true converts and one without is refused.
-3. Record what honeybee-ph's default `Site` becomes in both outputs. That is today's export, and
-   it is what E1 asks about.
+3. Record what honeybee-ph's default `Site` becomes in both outputs, and what a real `Location`
+   over the default `Climate` becomes. Those are the no-climate exports of E1 and E2.
 4. Choose the released PHX version for the `phx` test group (D4c-14); if the Programs packet's
    P4a-03 has added the group, use its pin.
 
@@ -52,27 +54,32 @@ id, and this one's id sorts before Zones', so the order must come from the decla
 
 1. **Contributor** (`features/climate/export.rb`): section `ph_composer.climate.export.site`,
    version 1, requiring the Zones section. It emits the one record of CONTRACTS section 7:
-   `status`, `location`, `climate` with `cool_2` added, the derived provenance and the report
-   block. It reads the settings and the record through `Export::RecordReader` and the snapshot,
+   `location`, `climate` with `cool_2` added, `climate_left_out`, the stored provenance and the
+   report block. It reads the settings and the record through `Export::RecordReader` and the snapshot,
    as `shell/model_metadata.rb` does, never the live Model.
-2. **Left-out rules**, in Ruby: no climate; an incomplete climate; no site (R2); and, per E2, a
-   site with no climate.
+2. **What is written**, in Ruby, by the table of CONTRACTS section 7: the `Location` whenever
+   the site is set; the `Climate` only when the site is set and the climate is complete; nothing
+   when a climate has no site (R2).
 3. **Preflight** (`ph_composer.climate.export_preflight`): the findings of CONTRACTS section 7,
-   all non-blocking, each with its code declared in `codes.rb`. Add the E1 finding if Ed agrees.
+   all non-blocking, each with its code declared in `codes.rb`. A Model with no climate gives
+   none (E1, E2).
 4. **Python section** (`python/ph_composer_translation/site_sections.py`, `SiteSection`), listed
    in `composition.py` after `ZoneSection`, attached at `MODEL`, optional for export. `translate`
    builds `Location`, the monthly collections, the four `Climate_PeakLoadValueSet`s,
    `ClimateProvenance` and `Site`; `attach` sets that `Site` on each distinct `ph_bldg_segment`.
-   A `left_out` record builds nothing. Ground temperatures are not touched.
+   A null `location` or `climate` is passed to `Site` as `None`, so honeybee-ph supplies its
+   default for that part; with both null nothing is set. Ground temperatures are not touched.
 5. **Result fields and privacy.** The fields of CONTRACTS section 7 declared through
    `Export::Privacy`; none is named or holds a path, and the artifact hygiene check stays green.
-6. **Conformance.** The reloaded HBJSON: every Building Segment carries the same `Site`; the
-   location and the climate equal the record; Cooling 2 equals Cooling 1; no `source_uri`.
+6. **Conformance.** The reloaded HBJSON: every Building Segment carries the same `Site`; each
+   part the record carries equals it and each part it does not is honeybee-ph's default; Cooling
+   2 equals Cooling 1; no `source_uri`.
 7. **Report section** (`report:` on the contributor), in the order of board 18: site; dataset
    and station; limit check; edited values with their as-read values; peak loads with the
    Cooling 2 line; wind speed; design temperatures and their source note, marked as kept in the
    Model. Rendered through `export/report_html.rb` and `Units`, in the display profile the run
-   captured. A left-out climate renders its reason in the same section.
+   captured. A climate left out for a reason renders it in the same section; a Model with no
+   climate reads "No climate" and no more.
 8. **PHX round trip.** Through the `phx` group: export the reference Models, convert to WUFI XML
    and METr JSON, and read back latitude, both elevations, climate zone, the monthly rows and the
    four peak-load cases. Skipped without the group.
@@ -95,14 +102,19 @@ id, and this one's id sorts before Zones', so the order must come from the decla
 
 ## Tests (write first)
 
-1. Contract record: a complete station climate with a set site is `written` with Cooling 2 equal
-   to Cooling 1; each left-out case is `left_out` with its reason.
-2. Provenance: unedited station, edited station and hand-entered climate give the three
-   expected source types, names and checksums; assumptions carry the coordinates and the edits.
+1. Contract record, one case per row of the table in CONTRACTS section 7: a complete station
+   climate with a set site carries both parts with Cooling 2 equal to Cooling 1; a site alone
+   carries the location and no climate, with no reason; an incomplete climate and a climate with
+   no site each carry their reason.
+2. Provenance: unedited station, edited station and hand-entered climate are passed through as
+   stored, with the three expected source types, names and checksums; assumptions carry the
+   coordinates and the edits, and the Cooling 2 line is added.
 3. Preflight: each code on its case, none blocking; an unset zone and an unset offset each give
-   one finding and the export still writes.
+   one finding and the export still writes; no site and no climate, and a site with no climate,
+   each give none.
 4. Python: the HBJSON reloads in the pinned stack; a two-Segment Model has the same `Site` on
-   both; a `left_out` record leaves honeybee-ph's default in place.
+   both; a site alone gives the typed `Location` over honeybee-ph's default `Climate` with no
+   provenance; a record with neither part leaves honeybee-ph's default `Site` in place.
 5. Conformance fails when a segment's `Site` is altered after assembly.
 6. Report: every line of board 18 for an edited station with one finding; the design
    temperatures and note; IP and SI; no folder location anywhere in the HBJSON, the report or

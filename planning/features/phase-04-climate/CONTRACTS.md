@@ -92,20 +92,28 @@ peak_loads               { heat_1, heat_2, cool_1 }                    each
                              rad_west_w_m2, rad_global_w_m2 }          each number | null
 as_read                  null for origin "hand"; for a station, the file's own
                            { station_elevation_m, daily_temp_swing_k, monthly, peak_loads }
-source                   null for origin "hand"; for a station
-                           { dataset_name, station_name, state, checksum_sha256 }
+provenance               { dataset_name, station_name, state,      these three and
+                             the checksum are null for origin "hand"
+                             source_type, source_name, source_version, source_checksum,
+                             conversion_method, conversion_method_version,
+                             is_certification_approved,
+                             monthly_data_available, peak_load_data_available,
+                             assumptions }
 user_data, extension_data, schema_version                              as every record
 ```
 
 Rules:
 
-- **No path.** The record holds no folder location, and `source` is all the Model knows of the
-  file (the PRD's snapshot rule).
+- **No path.** The record holds no folder location, and `provenance` is all the Model knows of
+  the file (the PRD's snapshot rule). honeybee-ph's `source_uri` is not a field of the record.
 - **No ground temperatures and no second cooling case** are stored (W8). Export supplies both
   (section 7).
-- **Provenance is derived, not stored** (D4c-03): the honeybee-ph `ClimateProvenance` fields are
-  worked out at export from `origin`, `source` and the edited cells, so they cannot disagree with
-  the values.
+- **Provenance is stored, in honeybee-ph's shape** (D4c-03, Ed's ruling): the fields after
+  `state` are honeybee-ph's `ClimateProvenance`, with the values of the table in section 7, and
+  export passes them through. `attach_station`, `save_values` and `restore_original` each write
+  the values and the provenance together in one Undo step, so the source type and the list of
+  edited values in `assumptions` cannot disagree with the values. `source_checksum` is the
+  file's SHA-256.
 - **Wind speed**: attaching a station sets it to the mean of the file's January and July values;
   hand entry leaves it null. A wind-speed change is never an edit (W8, J7).
 - **Edited cells** are derived: every `monthly`, `peak_loads`, `daily_temp_swing_k` and
@@ -135,7 +143,8 @@ A pure Ruby function of the site and the station; never stored (J7).
 - Distance: great-circle (haversine) on a sphere of mean radius 6,371.0088 km.
 - Elevation difference: the absolute difference of `elevation_m` and `station_elevation_m`.
 - Limits (D4c-04): 50 miles and 400 feet, held in SI as their exact conversions, 80.4672 km and
-  121.92 m. At or inside both passes. The PRD's "80 km" and "122 m" are the rounded labels.
+  121.92 m. At or inside both passes. Phius states the limits in miles and feet, so IP is the
+  reference; the PRD's "80 km" and "122 m" are display labels (confirmed by Ed).
 - Result: `{ verdict, distance_km, elevation_difference_m, distance_ok, elevation_ok }`, where
   `verdict` is `pass`, `fail` or `not_checked`. `not_checked` carries a reason: `no_site`, or
   `no_station_coordinates` for a hand-entered climate without them (J4).
@@ -145,14 +154,19 @@ The limits are Phius's (PRD, "Choosing a station"). The New York City exception 
 ## 5. This computer: the settings file (P4c-03)
 
 A foundation service, `shell/computer_settings.rb` (D4c-05): one JSON file for PH-Composer on this
-computer, read by every SketchUp version, holding one section per feature id. Climate is its
+computer, placed outside SketchUp's versioned folders so that every SketchUp version can read it,
+holding one section per feature id. Climate is its
 first user. The Library's setup store, the approved locations and the display preferences stay in
 SketchUp's preferences where they are.
 
 - **Location**: a `PH-Composer` folder in the user's application-support folder, outside
-  SketchUp's own folders: on macOS under `~/Library/Application Support/`, on Windows under
-  `%APPDATA%`. Owed check 1 confirms both. `Diagnostics.data_root` is not it: that sits inside
-  SketchUp's versioned folder.
+  SketchUp's own folders: on macOS under `~/Library/Application Support/`. Owed check 1 confirms
+  it. `Diagnostics.data_root` is not it: that sits inside SketchUp's versioned folder.
+- **macOS only for now** (E3). The Windows location is not chosen, written or tested in this
+  packet. On any other platform the service reports `climate.settings_unavailable` and the
+  folder commands refuse with it; that behaviour is the plan's proposal, not part of Ed's
+  answer. Choosing and verifying the Windows location is future work in
+  the [Windows support](../unscheduled/windows-support/README.md) packet.
 - **Shape**: `{ "schema_version": 1, "sections": { "<feature id>": { ... } } }`.
 - **Writes**: read the file, change one section, write beside it and rename into place. Two
   SketchUp versions may be open at once; the last write wins for a section and never damages
@@ -215,7 +229,7 @@ One action writes the Model:
 
 | Name | Does |
 | --- | --- |
-| `ph_composer.climate.climate.attach_station` | Params: folder id and station key. Ruby reads the file, builds the record of section 3 with `as_read`, `source` and the wind-speed prefill, and writes it in one Undo step. With a climate already in the Model it replaces it (Replace, and Update from File with the matched source). Refuses when the site is not set (J3), the file is gone or the file does not parse |
+| `ph_composer.climate.climate.attach_station` | Params: folder id and station key. Ruby reads the file, builds the record of section 3 with `as_read`, `provenance` and the wind-speed prefill, and writes it in one Undo step. With a climate already in the Model it replaces it (Replace, and Update from File with the matched source). Refuses when the site is not set (J3), the file is gone or the file does not parse |
 
 The station's values go from the file to the Model inside Ruby. They do not pass through the
 panel, so attach works with the panel closed and an agent can drive it.
@@ -231,29 +245,45 @@ honeybee-ph holds `Site` on each `BldgSegment`, builds a default one for every s
 serializes it (read). Today the translation leaves that default in place, so every exported
 HBJSON already carries a `site` with honeybee-ph's defaults: latitude 40.6, longitude -73.8, hours
 from UTC -4, climate zone 1, a climate named "New York" with zero values and no provenance (run).
-"No `Site` is written" in the PRD therefore means "honeybee-ph's default is left in place". See
-"For Ed" in [DECISIONS](DECISIONS.md).
+"No `Site` is written" in the PRD therefore means "honeybee-ph's default is left in place". The
+`Site` cannot be removed: a Building Segment with no `site` key fails to load with
+`KeyError: 'location'` (run).
+
+Ed's rule (E1, E2 in [DECISIONS](DECISIONS.md)) is to match honeybee-ph and its Grasshopper
+components, where each part of a `Site` that is not supplied keeps honeybee-ph's default and
+nothing is said about it:
+
+| The Model has | `Location` | `Climate` | Finding |
+| --- | --- | --- | --- |
+| No site, no climate | honeybee-ph's default | honeybee-ph's default | None |
+| A site, no climate | Written | honeybee-ph's default, no provenance | None |
+| A site, an incomplete climate | Written | honeybee-ph's default, no provenance | `climate.incomplete` (J4) |
+| A site, a complete climate | Written | Written, with its provenance | None for this |
+| A climate, no site | honeybee-ph's default | honeybee-ph's default | `climate.site_not_set` (R2) |
 
 **Contributor**: `ph_composer.climate.export.site`, section version 1, `requires:` the Zones
 section. It emits one record:
 
 ```
 { id: "Site",
-  status: "written" | "left_out",          left_out with a reason code
-  location:  { latitude_deg, longitude_deg, elevation_m, climate_zone, hours_from_utc },
-  climate:   the record of section 3, values only, with cool_2 added as a copy of cool_1,
-  provenance: { source_type, source_name, source_checksum, assumptions },
+  location:  { latitude_deg, longitude_deg, elevation_m, climate_zone, hours_from_utc } | null,
+  climate:   the record of section 3, values only, with cool_2 added as a copy of cool_1, | null,
+  climate_left_out: null | "site_not_set" | "incomplete",
+  provenance: the record's provenance, honeybee-ph's fields only, | null,
   report:    { limit_check, edited_cells, design_temperatures, design_temperature_source } }
 ```
 
-`status` is `left_out` when there is no climate, when it is incomplete (J4), or when the site is
-not set (R2). C4c-4 settles whether a `left_out` record is emitted or the report reads those
-facts another way.
+`location` is null when the site is not set. `climate` and `provenance` are null when there is no
+climate, when it is incomplete (J4), or when the site is not set (R2); `climate_left_out` gives
+the reason in the last two cases and is null when the Model simply has no climate. C4c-4 settles
+whether a record with both null is emitted or the report reads those facts another way.
 
 **Python section**: `SiteSection` in `python/ph_composer_translation/site_sections.py`, listed in
 `composition.py` after `ZoneSection`, attached at `MODEL`, `required_for_export = False`
-(D4c-07). In `attach` it builds one honeybee-ph `Site` and sets it on every distinct
-`ph_bldg_segment` the Rooms share. A Model holds one site, so every Building Segment gets the
+(D4c-07). In `attach` it builds one honeybee-ph `Site` from the parts the record carries,
+`Site(location, climate)` with `None` for a null part so that honeybee-ph supplies its default,
+and sets it on every distinct `ph_bldg_segment` the Rooms share. With both parts null it sets
+nothing. A Model holds one site, so every Building Segment gets the
 same one. It does not use the `segment` attachment host the Programs packet plans; Climate lands
 first.
 
@@ -271,29 +301,30 @@ Mapping:
 | `monthly` radiation | `monthly_radiation.north`, `.east`, `.south`, `.west`, `.glob` | kWh/m² |
 | `peak_loads.heat_1`, `.heat_2`, `.cool_1` | `peak_loads.heat_load_1`, `.heat_load_2`, `.cooling_load_1` | W/m² |
 | a copy of `cool_1` | `peak_loads.cooling_load_2` | J8, R5. The report says so |
-| derived | `Climate.provenance` | Below |
+| `provenance` | `Climate.provenance` | Below. Passed through as stored (D4c-03) |
 
-Provenance (`ClimateProvenance`, read):
+Provenance (`ClimateProvenance`, read), as the record stores it and the export writes it:
 
-| Field | Written |
+| Field | Value |
 | --- | --- |
 | `source_type` | `phius_approved` for an unedited station; `user_defined` for an edited station or a hand-entered climate (J8) |
 | `source_name` | Dataset name and station name; the typed name for a hand-entered climate |
 | `source_checksum` | The file's SHA-256; null for a hand-entered climate |
-| `source_uri`, `source_version`, `conversion_method` | Never written (J8) |
+| `source_uri` | Not a field of the record and never written (J8) |
+| `source_version`, `conversion_method`, `conversion_method_version` | Null (J8) |
 | `is_certification_approved` | Left `None`, unknown (J8) |
 | `monthly_data_available`, `peak_load_data_available` | Both `True`. Once a climate carries a provenance, PHX refuses the conversion unless both are true and every monthly and peak value is finite (PHX, read; honeybee-ph's two readiness lists come back empty for this shape, run) |
-| `assumptions` | `{ "ph_composer": { station_latitude_deg, station_longitude_deg, edited_values, cooling_load_2: "repeats cooling_load_1" } }`. A dict of this shape round trips (run) |
+| `assumptions` | `{ "ph_composer": { station_latitude_deg, station_longitude_deg, edited_values, cooling_load_2: "repeats cooling_load_1" } }`. A dict of this shape round trips (run). Export adds the `cooling_load_2` line, since the second cooling case is itself added at export; the rest is stored |
 
 **Findings.** All are non-blocking (`blocks_export: false`): a Model exports without a climate,
-as it does today. Codes are declared in `features/climate/codes.rb` under the noun `climate`:
+as it does today. A Model with no climate, with or without a site, gives no finding (E1, E2). Codes are declared in `features/climate/codes.rb` under the noun `climate`:
 
 | Code | When |
 | --- | --- |
-| `climate.site_not_set` | A climate is in the Model and the site is not set. The climate is left out (R2) |
-| `climate.incomplete` | The climate has gaps. It is left out; the message counts what is missing (J4) |
-| `climate.zone_not_set` | Climate zone unset; written as Not defined (J8) |
-| `climate.utc_offset_not_set` | Hours from UTC unset; written empty. Informational (R6) |
+| `climate.site_not_set` | A climate is in the Model and the site is not set. The climate is left out and honeybee-ph's default `Site` stays (R2) |
+| `climate.incomplete` | The climate has gaps. It is left out; the `Location` is still written when the site is set. The message counts what is missing (J4) |
+| `climate.zone_not_set` | The site is set and its climate zone is not; written as Not defined (J8) |
+| `climate.utc_offset_not_set` | The site is set and its hours from UTC is not; written empty. Informational (R6) |
 | `climate.outside_phius_limits` | The attached station fails the limit check (J3) |
 | `climate.not_checked` | A hand-entered climate without coordinates: "Not checked, entered by hand" (J4) |
 
@@ -306,13 +337,16 @@ the Climate tab at the card that repairs the finding, after checking what a `loc
 the report renders: the location, the climate's name, dataset and station names, source type,
 the limit check, the edited cell list, the wind speed, the four peak-load temperatures, and the
 count of Building Segments written. No field is named `path` or holds one. Conformance: in the
-reloaded HBJSON every Building Segment's `site` equals the record, and Cooling 2 equals Cooling 1.
+reloaded HBJSON every Building Segment's `site` equals the record in each part the record
+carries and honeybee-ph's default in each part it does not, and Cooling 2 equals Cooling 1.
 
 **The report's climate section** (board 18), rendered in Ruby by the contributor's `report:`:
 site; dataset and station; the limit check; edited values, each with its as-read value; the three
 peak-load cases and the line that Cooling 2 repeats Cooling 1; the wind speed; the design
 temperatures with their source note, marked as kept in the Model and not written to the HBJSON
-(J5). When the climate is left out the section says why. A folder location never appears.
+(J5). When the climate is left out for a reason (`climate_left_out`) the section says why. With
+no climate in the Model the section shows the site, if set, and "No climate", with no remark on
+what honeybee-ph supplies in its place (E1). A folder location never appears.
 
 **PHX in tests.** PHX is not a dependency (`pyproject.toml`). The round trip uses an optional
 `phx` dependency group pinned to a released PHX, added here or by the Programs packet's P4a-03,
@@ -352,6 +386,6 @@ Latitude and longitude are decimal degrees in both profiles.
 | C4c-1 | Board 3 shows each folder's location. `Library::Setup.providers` strips paths from its read | Answer a display location shortened to the user's home (`~/...`), never an absolute path, and keep the full path out of every result and log | P4c-03 |
 | C4c-2 | Is a station's matching name the file name's stem or the name in its header? | The file name's stem with the state folder: it is what the user sees in the folder and it is unique there | P4c-04 |
 | C4c-3 | The Setup view runs a native menu item's Ruby handler; the climate data dialog is in the panel | The handler asks the panel to open the Climate tab with the dialog as its intent, through the same route `panel.navigate` uses | P4c-08 |
-| C4c-4 | What the report callable receives when the section wrote no `Site` | Always emit the one record with `status`, so the report and the findings read one source | P4c-05 |
+| C4c-4 | What the report callable receives when the section wrote no `Site` | Always emit the one record, with `location` and `climate` null when not written and `climate_left_out` giving the reason, so the report and the findings read one source | P4c-05 |
 | C4c-5 | The map's projection and level of detail | An equirectangular projection scaled at the view's centre latitude, borders simplified to the size owed check 2 allows | P4c-07 |
 | C4c-6 | Is `Digest::SHA256` available in SketchUp's Ruby on the supported hosts? | Check at P4c-04's entry; it is Ruby standard library | P4c-04 |

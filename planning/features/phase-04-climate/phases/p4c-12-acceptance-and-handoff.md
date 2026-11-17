@@ -23,8 +23,8 @@ folds what landed into `context/` and `docs/`. No new behavior.
    step; edit a value and see the mark; type a climate by hand on a second Model; enter and
    clear the design temperatures; export, and find `Site` in the HBJSON, the dataset and station
    in the report, and no folder location anywhere.
-3. **A second SketchUp version**: open the same Model and find the folder still set (E3 names
-   the version).
+3. **A second SketchUp version** is not run: Ed tests on SketchUp 2026 only for now (E3). The
+   two-version checks are carried to the 2023 floor packet.
 4. `context/CONTRACTS.md`, `context/EXTENSIBILITY.md` (the settings file, the map kit part, the
    second Setup entry), `context/TECH_STACK.md`, `context/SKETCHUP_HOST_BEHAVIOR.md` (owed checks
    1, 3 and 4) and `context/UBIQUITOUS_LANGUAGE.md` ("Site and climate" with no "planned" left on
@@ -34,12 +34,13 @@ folds what landed into `context/` and `docs/`. No new behavior.
 6. **Handoff to Mechanical**: confirm `climate.get` and `design_temperatures.get` give the heat
    pump stage the twelve monthly means and the two design temperatures with their state
    (CONTRACTS section 9), and record in the Mechanical packet that its entry gate is met.
-7. Carry forward what did not close: the Windows half of owed check 1 to the Windows support
-   packet; the Deferred table unchanged.
+7. Carry forward what did not close: confirm the Windows settings-file item is in the Windows
+   support packet and the two-version checks are in the 2023 floor packet (both recorded there
+   on 2026-11-17); the Deferred table unchanged.
 
 ## Open
 
-Nothing beyond the stages' own contract questions and E3.
+Nothing beyond the stages' own contract questions.
 
 ## Host gate
 

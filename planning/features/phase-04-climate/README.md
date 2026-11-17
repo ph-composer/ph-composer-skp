@@ -9,7 +9,7 @@ the Model reads anywhere.
 
 Read [PRD.md](PRD.md) for the behavior, [PLAN.md](PLAN.md) for the twelve stages (P4c-01 to
 P4c-12) under [phases/](phases), [CONTRACTS.md](CONTRACTS.md) for the records and seams,
-[DECISIONS.md](DECISIONS.md) for the answers and the three items open for Ed,
+[DECISIONS.md](DECISIONS.md) for the answers and Ed's rulings of 2026-11-17,
 [ACCEPTANCE.md](ACCEPTANCE.md) for each stage's gate, then [STATUS.md](STATUS.md). Planned
 2026-11-17; no stage is authorized.
 

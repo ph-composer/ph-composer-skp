@@ -23,6 +23,15 @@ platform, not only on SketchUp.
 | Installed footprint and extension paths | Plugins folder location, user-profile paths with non-ASCII names |
 | Measured tolerances and observer ordering | Should match, but are host claims until measured |
 
+## Carried from later phases
+
+Windows work that a later phase left out on purpose. Each is built and tested here, not in the
+phase that named it.
+
+| Item | From | What is owed |
+| --- | --- | --- |
+| The per-computer settings file on Windows | [Climate](../../phase-04-climate/PLAN.md#deferred-out-of-this-packet), E3, 2026-11-17 | The Climate phase builds `shell/computer_settings.rb` for macOS only; on Windows the service is unavailable and the climate data folder commands refuse. Owed: choose the Windows folder (the user's roaming application-data folder is the candidate, unverified), write the rule and its tests, and confirm on a host that the file is created, survives a restart and sits outside SketchUp's versioned folder. Then the Climate packet's folder cases CM03, CM04 and CM08 on Windows |
+
 ## Acceptance shape
 
 On a named SketchUp build on Windows 10/11: install the RBZ; rerun the P1-A native probe; rerun

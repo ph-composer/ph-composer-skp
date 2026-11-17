@@ -9,7 +9,8 @@ ISSUE: none (local planning draft)
 
 Requires P4c-01 and owed check 1. Owns PH-Composer's per-computer settings file and Climate's
 section of it: the list of climate data folders and the last dataset used, with the setup
-commands that change them and the Setup view's summary line. Panel closed. Reading station files is
+commands that change them and the Setup view's summary line. Panel closed. macOS only: the
+Windows location is future work in the Windows support packet (E3). Reading station files is
 P4c-04; the dialog is P4c-08.
 
 Behavior: [PRD](../PRD.md), "How it works" and "Climate data on this computer". Names:
@@ -24,14 +25,21 @@ SketchUp's preferences.
 
 **Owed check 1.** Run on the host before any code, and record under `evidence/`:
 
-1. Write a value with `Sketchup.write_default` in one installed SketchUp version and read it in
-   a second. Record whether preferences are per version. If they are shared, the separate file
-   still stands on J1's other reason, and the evidence says so.
-2. On macOS, confirm the user's application-support folder as Ruby sees it inside SketchUp, that
-   a `PH-Composer` folder there is writable, and that it is the same folder from both versions.
-3. The Windows location, `%APPDATA%`, is written from Ruby's documented environment variable and
-   marked unverified; no Windows host is in this plan (E3).
-4. Fold the facts into `context/SKETCHUP_HOST_BEHAVIOR.md`, "Saving, dialogs and the panel".
+1. On macOS in SketchUp 2026, confirm the user's application-support folder as Ruby sees it
+   inside SketchUp, that a `PH-Composer` folder there is writable, and that it sits outside
+   SketchUp's versioned folder.
+2. Record where `Sketchup.write_default` keeps its values on this host and whether that place is
+   named for the SketchUp version. That is as far as one installed version can show.
+3. Fold the facts into `context/SKETCHUP_HOST_BEHAVIOR.md`, "Saving, dialogs and the panel".
+
+Not run in this packet (E3), and listed in [PLAN](../PLAN.md#deferred-out-of-this-packet):
+
+- **Two SketchUp versions.** Ed tests on SketchUp 2026 only for now. Writing a preference in one
+  version and reading it in another, and reading the same settings file from both, wait for a
+  second supported version to be installed; the 2023 floor packet is where that first happens.
+  The separate file does not wait on the answer: J1 gives a second reason for it, that the
+  extension's folder is replaced on reinstall.
+- **Windows.** No Windows location is chosen, written or tested here.
 
 Also read `library/setup.rb`, `shell/preferences.rb` and `shell/native_approval.rb` for the
 failure rules and the approval route this stage follows, and settle C4c-1 (the display location).
@@ -39,8 +47,8 @@ failure rules and the approval route this stage follows, and settle C4c-1 (the d
 ## Steps
 
 1. **`shell/computer_settings.rb`.** A foundation service naming no feature: the folder rule
-   (macOS and Windows, with an injectable directory for tests, as `agent_access/connections.rb`
-   has), `read(section)`, and `write(section) { |values| ... }` that re-reads the file, changes
+   (macOS only, with an injectable directory for tests, as `agent_access/connections.rb` has;
+   on any other platform the service answers `climate.settings_unavailable`), `read(section)`, and `write(section) { |values| ... }` that re-reads the file, changes
    one section, writes a sibling file and renames it into place. Shape and failure rules as
    CONTRACTS section 5. A size bound on the file, as `Library::Setup` has.
 2. **Climate's section.** `features/climate/folders/store.rb`: rows `{ id, name, location }` and
@@ -83,6 +91,7 @@ failure rules and the approval route this stage follows, and settle C4c-1 (the d
 6. Overlapping folders refuse.
 7. No absolute path in params, results or logs.
 8. The summary reads each state: no folder, one, several, and an unreadable settings file.
+9. On a platform other than macOS the service is unavailable and the folder commands refuse.
 
 ## Host gate
 
@@ -94,4 +103,5 @@ P4c-04 reads the folders this stage lists. P4c-08 builds the dialog and register
 
 ## Done when
 
-CM03 passes, owed check 1 is recorded and folded into `context/`, and C4c-1 is answered.
+CM03 passes, the macOS half of owed check 1 is recorded and folded into `context/`, and C4c-1 is
+answered.

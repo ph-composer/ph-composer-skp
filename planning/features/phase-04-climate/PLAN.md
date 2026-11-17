@@ -57,8 +57,8 @@ then the screens (D4c-12).
 | Stage | Delivers | Depends on | Code owner | Host gate |
 | --- | --- | --- | --- | --- |
 | [P4c-01](phases/p4c-01-feature-site-and-design-temperatures.md) | `ph_composer.climate`; the new unit quantities; the site and the design temperatures as Model settings with their operations and reads | Ed's go | climate (new), units | Panel-closed script, Undo/Redo, save and reopen |
-| [P4c-02](phases/p4c-02-climate-record-and-limit-check.md) | The climate record with its as-read copy and source; save, restore and clear; completeness; edited cells; the Phius limit check | P4c-01 | climate | Panel-closed script, Undo/Redo, save and reopen |
-| [P4c-03](phases/p4c-03-settings-file-and-climate-folders.md) | PH-Composer's per-computer settings file; climate data folders: add, name, locate, remove; the Setup summary line | P4c-01; owed check 1 | shell, climate | The file survives a restart and is read by a second SketchUp version |
+| [P4c-02](phases/p4c-02-climate-record-and-limit-check.md) | The climate record with its as-read copy and provenance; save, restore and clear; completeness; edited cells; the Phius limit check | P4c-01 | climate | Panel-closed script, Undo/Redo, save and reopen |
+| [P4c-03](phases/p4c-03-settings-file-and-climate-folders.md) | PH-Composer's per-computer settings file; climate data folders: add, name, locate, remove; the Setup summary line | P4c-01; owed check 1 | shell, climate | The file survives a restart on SketchUp 2026, macOS |
 | [P4c-04](phases/p4c-04-station-reader-and-attach.md) | The Phius station reader; folder counts; the station list with distance and verdict; attach, replace and update from file; source status | P4c-02, P4c-03; owed check 3 | climate | Real-size folder read time; attach with the panel closed |
 | [P4c-05](phases/p4c-05-site-export.md) | The export contributor, findings, the Python `Site` section, conformance, the report's climate section, the PHX round trip | P4c-02; owed check 6 | climate, export | RBZ export; WUFI XML and METr JSON read back |
 | [P4c-06](phases/p4c-06-climate-tab-site-and-design-temperatures.md) | The Climate tab, its sidebar cards, the Site location pane and Set Location with typed fields and the geolocation read, the Design temperatures pane | P4c-01; owed check 4 | climate, UI | Panel gestures with Ed |
@@ -67,7 +67,7 @@ then the screens (D4c-12).
 | [P4c-09](phases/p4c-09-station-picker.md) | Set Phius Climate Data: the map, the list, filters, the verdict, Attach and Replace | P4c-04, P4c-07, P4c-08 | climate, UI | Panel gestures with Ed |
 | [P4c-10](phases/p4c-10-attached-climate-pane.md) | The pane of an attached climate: limit check, tables, Where this lives, edited marks, Restore, source status, Update from File, Clear | P4c-09 | climate, UI | Panel gestures with Ed |
 | [P4c-11](phases/p4c-11-hand-entry-and-edit-values.md) | Enter Phius Climate Values and Edit Values: the grid, one paste, gaps and Incomplete | P4c-10; owed check 5 | climate, UI | Paste from a real workbook and text file |
-| [P4c-12](phases/p4c-12-acceptance-and-handoff.md) | Register closed; context, docs, glossary; handoff to Mechanical | all above | integration | Fresh-process integrated run; second SketchUp version |
+| [P4c-12](phases/p4c-12-acceptance-and-handoff.md) | Register closed; context, docs, glossary; handoff to Mechanical | all above | integration | Fresh-process integrated run on SketchUp 2026 |
 
 ```
 P4c-01 ─┬─ P4c-02 ─┬─ P4c-05 ─────────────────────────────────────────┐
@@ -96,12 +96,23 @@ folded into `context/SKETCHUP_HOST_BEHAVIOR.md` when it is a host fact.
 
 | # | Check | Stage | If it fails |
 | --- | --- | --- | --- |
-| 1 | SketchUp's preferences are per SketchUp version; where the settings file sits on macOS and Windows | P4c-03 | If preferences are shared across versions the separate file still stands (J1 gives a second reason: the extension's folder is replaced on reinstall). The Windows half cannot be run here; see "For Ed" in [DECISIONS](DECISIONS.md) |
+| 1 | SketchUp's preferences are per SketchUp version; where the settings file sits on macOS and Windows | P4c-03 | If preferences are shared across versions the separate file still stands (J1 gives a second reason: the extension's folder is replaced on reinstall). Only the macOS half is run, on SketchUp 2026. The Windows location and the two-version checks are deferred (E3 in [DECISIONS](DECISIONS.md)) |
 | 2 | The outline map: data source and licence, size in the RBZ, drawing on Chromium 88, loading under the panel's content policy | P4c-07 | Coarser borders or fewer countries until the size fits; no network in any case |
 | 3 | Read time when the picker opens: Ruby inside SketchUp, and a cloud-synced folder whose files are not downloaded | P4c-04 | The read is sliced, and a cache is added only if a warm read is still slow (J1, D4c-11) |
 | 4 | SketchUp geolocation: what an ungeolocated Model reports, whether `Model#georeferenced?` tells the two apart, whether `TZOffset` is a usable offset, whether an elevation is exposed | P4c-06 | Board 22 is redrawn to what the host reports; the read fills only what is proven |
 | 5 | The paste: one block copied from a real Phius `.xls` workbook and from a text file fills the grid | P4c-11 | The grid's row order follows the source; a second accepted layout is added only if the workbook differs |
 | 6 | PHX's handling of the exported `Site` end to end: four peak-load cases, the ground row, an empty hours from UTC | P4c-05 | The export is corrected to what PHX reads, or the gap is recorded as a finding and a PHX issue |
+
+## Deferred out of this packet
+
+Ed's answer E3 (2026-11-17). Each item is future work in the packet named, and no stage here
+builds or tests it.
+
+| Item | Why | Goes to |
+| --- | --- | --- |
+| The Windows location of the settings file: choose it, write it, test it | All Windows path work is deferred; a large body of Windows testing is still to come and this joins it | [Windows support](../unscheduled/windows-support/README.md) |
+| Preferences per SketchUp version: write in one version, read in another | Ed tests on SketchUp 2026 only for now | [2023 floor](../unscheduled/sketchup-2023-floor/README.md) |
+| One settings file read by two SketchUp versions | The same | [2023 floor](../unscheduled/sketchup-2023-floor/README.md) |
 
 ## Trace: PRD behaviors to stages
 

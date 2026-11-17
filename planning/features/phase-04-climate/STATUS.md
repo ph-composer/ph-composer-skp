@@ -1,7 +1,7 @@
 # Climate data: status
 
 DATE: 2026-09-18
-STATUS: Scoped (2026-11-17). The PRD is settled (W1 to W9, J1 to J8, R1 to R9) and the stages are planned: P4c-01 to P4c-11 ready to authorize, P4c-12 the closing outline. No stage authorized. Three items are open for Ed (E1 to E3 in DECISIONS). The Mechanical phase's heat pump stage waits on P4c-02.
+STATUS: Scoped (2026-11-17). The PRD is settled (W1 to W9, J1 to J8, R1 to R9) and the stages are planned: P4c-01 to P4c-11 ready to authorize, P4c-12 the closing outline. No stage authorized. Ed answered E1 to E3 and ruled on D4c-03, D4c-04 and D4c-10 on 2026-11-17. Nothing is open for Ed. The Mechanical phase's heat pump stage waits on P4c-02.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft; one issue per stage group when Ed authorizes)
 
@@ -36,14 +36,14 @@ D7 (no datasets ship) and the snapshot rule stand, and the proposal depends on b
 ## Next step
 
 The stages are planned (2026-11-17): [PLAN](PLAN.md), [CONTRACTS](CONTRACTS.md), [DECISIONS](DECISIONS.md),
-[ACCEPTANCE](ACCEPTANCE.md) and [phases/](phases). Next: Ed reads the plan and answers E1 to E3, then
+[ACCEPTANCE](ACCEPTANCE.md) and [phases/](phases). Next: Ed
 authorizes stages one at a time, starting with P4c-01. Implementation needs that separate
 authorization.
 
 ## Blockers
 
-- E1 and E2 (what the HBJSON carries when no climate is written) need Ed's answer before P4c-05.
-- E3 (the Windows half of owed check 1, and which second SketchUp version) before P4c-03 closes.
+- Windows and a second SketchUp version are out of this packet (E3): the settings file is built
+  and verified on macOS in SketchUp 2026 only.
 - The six owed checks are entry checks of P4c-03 to P4c-07 and P4c-11 ([PLAN](PLAN.md#owed-checks-each-an-entry-check)).
 - The hourly weather file and its D9 peak-load gate are deferred, so nothing here waits on them.
 - No GitHub issue yet; one per stage group when Ed authorizes.
@@ -83,3 +83,4 @@ them. `make lint-paths lint-citations` pass on the packet.
 | 2026-11-17 | Eighth and last journey walked with Ed (J8, export): Cooling 2 repeats Cooling 1, because honeybee-ph cannot leave it empty and would write zeros (run in the pinned 1.33.65); unset climate zone and UTC offset export unset with findings; an edited station and a hand-entered climate export as user-defined; coordinates and edits travel in the provenance's assumptions. Board 18 added. Open item 5 settled, item 7 narrowed. Item 18 added (export with a climate and no site). Eighteen items are listed; 2, 5 and 6 are settled. |
 | 2026-11-17 | Ed answered the open items one at a time (R1 to R9): the panel opens on Zones; a climate with no site is left out of export; no `.xls` reader and no new-station notice in the first version; Cooling 2 equals Cooling 1 in WUFI and METr; hours from UTC is not used by METr as far as Ed knows; the ten zone codes are the full set and the Model stores the WUFI code; a custom Phius dataset comes as the same text and `.xls` files; METr's two design-temperature fields are parked. Six measurements and confirmations remain as stage entry checks. Boards 19 to 23 added. Ed asked for the stage planning next. |
 | 2026-11-17 | Stages planned: the coordinating packet and twelve stage documents, P4c-01 to P4c-12, with each owed check an entry check of a named stage. Ids use `P4c-`, `D4c-`, `C4c-` and `CM` because `P4-` and `D4-` are the Mechanical packet's. Found while planning: honeybee-ph serializes a default `Site` on every Building Segment, so an export with no climate already carries a placeholder (E1). Three items open for Ed. Nothing authorized. |
+| 2026-11-17 | Ed answered E1 to E3 and ruled on two planning decisions, after a review of honeybee-ph 1.33.65 (run) and the Grasshopper components (read). His rule: match honeybee-ph and honeybee-grasshopper-ph. E1: a Model with no site and no climate writes nothing, honeybee-ph's default `Site` stays, with no finding and no remark. E2: a site with no climate is written as its `Location` over honeybee-ph's default `Climate`. E3: all Windows path work is deferred to the Windows support packet, and acceptance runs on SketchUp 2026 only, so the two-version checks move to the 2023 floor packet. D4c-03 overturned: the record stores provenance in honeybee-ph's shape and export passes it through. D4c-04 confirmed: the exact conversions of 50 miles and 400 feet. Found: a Building Segment with no `site` key does not load. D4c-10 confirmed: Add Folder opens the chooser first, then the name. An earlier set of picks relayed from another session chose the first recommendations; Ed said these stand. Nothing authorized. |
