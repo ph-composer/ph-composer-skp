@@ -15,7 +15,7 @@ class HostHelpersTest < PhComposerTestCase
     assert_equal "ph_composer", extension.fetch("id")
     assert_equal PhComposer::VERSION, extension.fetch("version")
     assert_equal %w[PhComposer::Assemblies PhComposer::Zones PhComposer::Windows PhComposer::Spaces
-                    PhComposer::ThermalBridges],
+                    PhComposer::ThermalBridges PhComposer::Climate],
                  extension.fetch("features")
     assert_equal "synthetic.skp", state.fetch("model").fetch("file_name")
     assert_equal 0, state.fetch("model").fetch("active_path_depth")

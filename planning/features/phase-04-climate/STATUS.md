@@ -1,9 +1,9 @@
 # Climate data: status
 
 DATE: 2026-09-18
-STATUS: Scoped (2026-11-17). The PRD is settled (W1 to W9, J1 to J8, R1 to R9) and the stages are planned: P4c-01 to P4c-11 ready to authorize, P4c-12 the closing outline. No stage authorized. Ed answered E1 to E3 and ruled on D4c-03, D4c-04 and D4c-10 on 2026-11-17. Nothing is open for Ed. The Mechanical phase's heat pump stage waits on P4c-02.
+STATUS: In progress (2026-11-17). The PRD is settled (W1 to W9, J1 to J8, R1 to R9) and the stages are planned, P4c-01 to P4c-12. Ed authorized every stage on 2026-11-17: "Use the 'pr-loop' skill protocol for all reviews. Use a new branch for each phase of the work, and cleanup all branches and worktrees as you go. You are authorized to merge all PRs once the repo CI is green and all reviewer comments are addressed and resolved." P4c-01 is implemented on branch; CM01 is not run. Ed answered E1 to E3 and ruled on D4c-03, D4c-04 and D4c-10 on 2026-11-17. Nothing is open for Ed. The Mechanical phase's heat pump stage waits on P4c-02.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft; one issue per stage group when Ed authorizes)
+ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
 
 ## State
 
@@ -33,12 +33,21 @@ changed yet. A review would revise:
 
 D7 (no datasets ship) and the snapshot rule stand, and the proposal depends on both.
 
+## Authorization
+
+Ed authorized every Climate stage on 2026-11-17: "Use the 'pr-loop' skill protocol for all reviews. Use a new branch for each phase of the work, and cleanup all branches and worktrees as you go. You are authorized to merge all PRs once the repo CI is green and all reviewer comments are addressed and resolved."
+
+## Stages
+
+| Stage | State | Evidence |
+| --- | --- | --- |
+| [P4c-01](phases/p4c-01-feature-site-and-design-temperatures.md) | Implemented on branch `feature/climate-p4c-01` | `make ci` on the branch, 2026-11-17: RuboCop 755 files, no offenses; Ruby suite 2917 runs, 36459 assertions, 0 failures; JavaScript 877 tests pass; Python 271 passed; hostkit Ruby 48 runs, 0 failures. New: `tests/climate_settings_test.rb` (14 runs), `tests/climate_site_walkthrough_test.rb` (1 run), climate quantities in `tests/units_test.rb` and `tests/units_test.js`. CM01 not run: case added, [recipe](evidence/cm01-recipe.md) |
+| P4c-02 to P4c-12 | Scoped | |
+
 ## Next step
 
-The stages are planned (2026-11-17): [PLAN](PLAN.md), [CONTRACTS](CONTRACTS.md), [DECISIONS](DECISIONS.md),
-[ACCEPTANCE](ACCEPTANCE.md) and [phases/](phases). Next: Ed
-authorizes stages one at a time, starting with P4c-01. Implementation needs that separate
-authorization.
+P4c-01 merges through the pr-loop; the conductor then runs CM01 from the
+[recipe](evidence/cm01-recipe.md). P4c-02 follows.
 
 ## Blockers
 
@@ -46,7 +55,6 @@ authorization.
   and verified on macOS in SketchUp 2026 only.
 - The six owed checks are entry checks of P4c-03 to P4c-07 and P4c-11 ([PLAN](PLAN.md#owed-checks-each-an-entry-check)).
 - The hourly weather file and its D9 peak-load gate are deferred, so nothing here waits on them.
-- No GitHub issue yet; one per stage group when Ed authorizes.
 
 ## Verification
 
@@ -84,3 +92,4 @@ them. `make lint-paths lint-citations` pass on the packet.
 | 2026-11-17 | Ed answered the open items one at a time (R1 to R9): the panel opens on Zones; a climate with no site is left out of export; no `.xls` reader and no new-station notice in the first version; Cooling 2 equals Cooling 1 in WUFI and METr; hours from UTC is not used by METr as far as Ed knows; the ten zone codes are the full set and the Model stores the WUFI code; a custom Phius dataset comes as the same text and `.xls` files; METr's two design-temperature fields are parked. Six measurements and confirmations remain as stage entry checks. Boards 19 to 23 added. Ed asked for the stage planning next. |
 | 2026-11-17 | Stages planned: the coordinating packet and twelve stage documents, P4c-01 to P4c-12, with each owed check an entry check of a named stage. Ids use `P4c-`, `D4c-`, `C4c-` and `CM` because `P4-` and `D4-` are the Mechanical packet's. Found while planning: honeybee-ph serializes a default `Site` on every Building Segment, so an export with no climate already carries a placeholder (E1). Three items open for Ed. Nothing authorized. |
 | 2026-11-17 | Ed answered E1 to E3 and ruled on two planning decisions, after a review of honeybee-ph 1.33.65 (run) and the Grasshopper components (read). His rule: match honeybee-ph and honeybee-grasshopper-ph. E1: a Model with no site and no climate writes nothing, honeybee-ph's default `Site` stays, with no finding and no remark. E2: a site with no climate is written as its `Location` over honeybee-ph's default `Climate`. E3: all Windows path work is deferred to the Windows support packet, and acceptance runs on SketchUp 2026 only, so the two-version checks move to the 2023 floor packet. D4c-03 overturned: the record stores provenance in honeybee-ph's shape and export passes it through. D4c-04 confirmed: the exact conversions of 50 miles and 400 feet. Found: a Building Segment with no `site` key does not load. D4c-10 confirmed: Add Folder opens the chooser first, then the name. An earlier set of picks relayed from another session chose the first recommendations; Ed said these stand. Nothing authorized. |
+| 2026-11-17 | Issue [#511](https://github.com/ph-composer/ph-composer-skp/issues/511) opened for the packet. Ed authorized every stage: "Use the 'pr-loop' skill protocol for all reviews. Use a new branch for each phase of the work, and cleanup all branches and worktrees as you go. You are authorized to merge all PRs once the repo CI is green and all reviewer comments are addressed and resolved." P4c-01 implemented on branch: the `ph_composer.climate` feature, the site and the design temperatures in two settings dictionaries (D4c-02 amended at its entry check), the climate unit quantities, the walkthrough and the CM01 case and recipe. CM01 not run. |

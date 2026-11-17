@@ -4804,6 +4804,22 @@
         "src/ph_composer/python/ph_composer_translation/contract/space_records.py"
       ],
       "native_control_required": false
+    },
+    {
+      "id": "CM01",
+      "label": "Climate site and design temperatures with the panel closed, on the installed RBZ in a fresh synthetic Model: the walkthrough reads the site Not set, sets it with Set Site Location, then sets the heating and cooling design temperatures and the source note as three Change Design Temperature steps, all through registered operations; native Undo and Redo of each step through the Edit menu with its name; save, fresh-process reopen and the same site and design temperatures read back",
+      "mode": "mixed",
+      "authority": "planning/features/phase-04-climate/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/climate/*",
+        "src/ph_composer/features/climate/site/*",
+        "src/ph_composer/features/climate/declarations/*",
+        "src/ph_composer/core/model_settings.rb",
+        "src/ph_composer/core/records/entity_store.rb",
+        "tools/examples/climate/site_walkthrough.rb",
+        "tools/examples/authoring/client.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }

@@ -36,8 +36,9 @@ from the contract record and computes nothing.
 
 ## 2. The site and the design temperatures (P4c-01)
 
-One `ModelSettings` dictionary, `ph_composer.climate_settings` (D4c-02). Every field is nullable
-and defaults to null; reads never write.
+Two `ModelSettings` dictionaries (D4c-02, amended at P4c-01): `ph_composer.climate_site` holds the
+first five fields and `ph_composer.climate_design_temperatures` the last three, so each update guards
+only its own fields. Every field is nullable and defaults to null; reads never write.
 
 | Field | Type | Unit | Rule |
 | --- | --- | --- | --- |
@@ -68,7 +69,7 @@ Operations. Each is one Undo step, guarded by the values last read (`expected_va
 | `ph_composer.climate.site.preview_limit_check` | query | The limit check the attached station would get at a proposed site, for Set Location's warning (J7) |
 | `ph_composer.climate.design_temperatures.get` | query | The two values, the note, the state and the warning |
 | `ph_composer.climate.design_temperatures.update` | action | Sets any of the three; null unsets one |
-| `ph_composer.climate.summary` | snapshot section | The three cards' states, for the sidebar |
+| `ph_composer.climate.summary` | snapshot section | The three cards' states, for the sidebar, backed by the query `ph_composer.climate.summary.get` |
 
 ## 3. The climate record (P4c-02)
 

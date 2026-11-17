@@ -7552,6 +7552,295 @@ Example params:
 }
 ```
 
+### `ph_composer.climate.design_temperatures.get`
+
+The ASHRAE 99% heating and 1% cooling dry bulbs, the source note, the state and the warning. A new Model reads not_set and nothing is written. Owner: `ph_composer.climate`.
+
+Refuses: `record.unreadable`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "heating_99_c",
+    "cooling_1_c",
+    "design_temperature_source",
+    "state",
+    "warning"
+  ],
+  "properties": {
+    "heating_99_c": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-unit": "degC",
+      "description": "The ASHRAE 99% heating dry bulb; null when unset."
+    },
+    "cooling_1_c": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-unit": "degC",
+      "description": "The ASHRAE 1% cooling dry bulb; null when unset."
+    },
+    "design_temperature_source": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Where the two values come from, as free text; null when there is no note."
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "not_set",
+        "incomplete",
+        "set"
+      ],
+      "description": "incomplete when one of the two design temperatures is present."
+    },
+    "warning": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "climate.heating_not_below_cooling",
+        null
+      ],
+      "description": "climate.heating_not_below_cooling when heating is at or above cooling; the values still save."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.climate.site.get`
+
+The Model's site: latitude, longitude, elevation, climate zone and hours from UTC, with the site state. A new Model reads not_set and nothing is written. Owner: `ph_composer.climate`.
+
+Refuses: `record.unreadable`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "latitude_deg",
+    "longitude_deg",
+    "elevation_m",
+    "climate_zone",
+    "hours_from_utc",
+    "climate_zone_label",
+    "state"
+  ],
+  "properties": {
+    "latitude_deg": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": -90,
+      "maximum": 90,
+      "x-unit": "deg",
+      "description": "Decimal degrees, north positive; null until the site is set."
+    },
+    "longitude_deg": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": -180,
+      "maximum": 180,
+      "x-unit": "deg",
+      "description": "Decimal degrees, east positive; null until the site is set."
+    },
+    "elevation_m": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-unit": "m",
+      "description": "Elevation above sea level; null until the site is set."
+    },
+    "climate_zone": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "enum": [
+        1,
+        11,
+        12,
+        13,
+        14,
+        141,
+        15,
+        16,
+        17,
+        18,
+        null
+      ],
+      "description": "The WUFI-Passive climate-zone code: 1 Not defined, 11 to 18 for US zones 1 to 8, 141 for 4C; null when unset."
+    },
+    "hours_from_utc": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": -12,
+      "maximum": 14,
+      "x-unit": "h",
+      "description": "The offset from UTC as typed; never derived from longitude. Null when unset."
+    },
+    "climate_zone_label": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Not defined",
+        "1",
+        "2",
+        "3",
+        "4",
+        "4C",
+        "5",
+        "6",
+        "7",
+        "8",
+        null
+      ],
+      "description": "The zone as the panel and the Export report show it; null when unset."
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "not_set",
+        "set"
+      ],
+      "description": "set when latitude, longitude and elevation are all present."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.climate.summary.get`
+
+The state of the site and design-temperature cards. Owner: `ph_composer.climate`.
+
+Refuses: `record.unreadable`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "site",
+    "design_temperatures"
+  ],
+  "properties": {
+    "site": {
+      "type": "string",
+      "enum": [
+        "not_set",
+        "set"
+      ],
+      "description": "set when latitude, longitude and elevation are all present."
+    },
+    "design_temperatures": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "warning"
+      ],
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "not_set",
+            "incomplete",
+            "set"
+          ],
+          "description": "incomplete when one of the two design temperatures is present."
+        },
+        "warning": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "climate.heating_not_below_cooling",
+            null
+          ],
+          "description": "climate.heating_not_below_cooling when heating is at or above cooling; the values still save."
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
 ### `ph_composer.colour_by.state`
 
 The active Colour-by mode, every registered mode and the legend. Owner: `ph_composer.colour_by`.
@@ -40072,6 +40361,459 @@ Example params:
 }
 ```
 
+### `ph_composer.climate.design_temperatures.update`
+
+Set any of the two design temperatures and the source note; null unsets one. Each field given is guarded by its value in expected_values, which names the same fields; fields not given keep what is stored. Owner: `ph_composer.climate`.
+
+Undo step: Change Design Temperature. Stores the design temperatures in this SKP.
+
+Refuses: `record.unreadable`, `target.changed`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "values",
+    "expected_values"
+  ],
+  "properties": {
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "heating_99_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "degC",
+          "description": "The ASHRAE 99% heating dry bulb; null when unset."
+        },
+        "cooling_1_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "degC",
+          "description": "The ASHRAE 1% cooling dry bulb; null when unset."
+        },
+        "design_temperature_source": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Where the two values come from, as free text; null when there is no note."
+        }
+      },
+      "description": "The fields to set."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "heating_99_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "degC",
+          "description": "The ASHRAE 99% heating dry bulb; null when unset."
+        },
+        "cooling_1_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "degC",
+          "description": "The ASHRAE 1% cooling dry bulb; null when unset."
+        },
+        "design_temperature_source": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Where the two values come from, as free text; null when there is no note."
+        }
+      },
+      "description": "The same fields as last read; a change refuses."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "heating_99_c",
+    "cooling_1_c",
+    "design_temperature_source",
+    "state",
+    "warning"
+  ],
+  "properties": {
+    "heating_99_c": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-unit": "degC",
+      "description": "The ASHRAE 99% heating dry bulb; null when unset."
+    },
+    "cooling_1_c": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-unit": "degC",
+      "description": "The ASHRAE 1% cooling dry bulb; null when unset."
+    },
+    "design_temperature_source": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Where the two values come from, as free text; null when there is no note."
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "not_set",
+        "incomplete",
+        "set"
+      ],
+      "description": "incomplete when one of the two design temperatures is present."
+    },
+    "warning": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "climate.heating_not_below_cooling",
+        null
+      ],
+      "description": "climate.heating_not_below_cooling when heating is at or above cooling; the values still save."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "values": {
+    "heating_99_c": -12.2
+  },
+  "expected_values": {
+    "heating_99_c": null
+  }
+}
+```
+
+### `ph_composer.climate.site.update`
+
+Set the five site fields together, guarded by the five last read. Latitude, longitude and elevation are all given or all null; climate zone and hours from UTC may be null with the site set. Owner: `ph_composer.climate`.
+
+Undo step: Set Site Location. Stores the site in this SKP.
+
+Refuses: `record.unreadable`, `target.changed`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "values",
+    "expected_values"
+  ],
+  "properties": {
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "latitude_deg",
+        "longitude_deg",
+        "elevation_m",
+        "climate_zone",
+        "hours_from_utc"
+      ],
+      "properties": {
+        "latitude_deg": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -90,
+          "maximum": 90,
+          "x-unit": "deg",
+          "description": "Decimal degrees, north positive; null until the site is set."
+        },
+        "longitude_deg": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -180,
+          "maximum": 180,
+          "x-unit": "deg",
+          "description": "Decimal degrees, east positive; null until the site is set."
+        },
+        "elevation_m": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "m",
+          "description": "Elevation above sea level; null until the site is set."
+        },
+        "climate_zone": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "enum": [
+            1,
+            11,
+            12,
+            13,
+            14,
+            141,
+            15,
+            16,
+            17,
+            18,
+            null
+          ],
+          "description": "The WUFI-Passive climate-zone code: 1 Not defined, 11 to 18 for US zones 1 to 8, 141 for 4C; null when unset."
+        },
+        "hours_from_utc": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": -12,
+          "maximum": 14,
+          "x-unit": "h",
+          "description": "The offset from UTC as typed; never derived from longitude. Null when unset."
+        }
+      },
+      "description": "The five new site fields."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "latitude_deg",
+        "longitude_deg",
+        "elevation_m",
+        "climate_zone",
+        "hours_from_utc"
+      ],
+      "properties": {
+        "latitude_deg": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -90,
+          "maximum": 90,
+          "x-unit": "deg",
+          "description": "Decimal degrees, north positive; null until the site is set."
+        },
+        "longitude_deg": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -180,
+          "maximum": 180,
+          "x-unit": "deg",
+          "description": "Decimal degrees, east positive; null until the site is set."
+        },
+        "elevation_m": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "m",
+          "description": "Elevation above sea level; null until the site is set."
+        },
+        "climate_zone": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "enum": [
+            1,
+            11,
+            12,
+            13,
+            14,
+            141,
+            15,
+            16,
+            17,
+            18,
+            null
+          ],
+          "description": "The WUFI-Passive climate-zone code: 1 Not defined, 11 to 18 for US zones 1 to 8, 141 for 4C; null when unset."
+        },
+        "hours_from_utc": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": -12,
+          "maximum": 14,
+          "x-unit": "h",
+          "description": "The offset from UTC as typed; never derived from longitude. Null when unset."
+        }
+      },
+      "description": "The five site fields last read; a change refuses."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "latitude_deg",
+    "longitude_deg",
+    "elevation_m",
+    "climate_zone",
+    "hours_from_utc",
+    "climate_zone_label",
+    "state"
+  ],
+  "properties": {
+    "latitude_deg": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": -90,
+      "maximum": 90,
+      "x-unit": "deg",
+      "description": "Decimal degrees, north positive; null until the site is set."
+    },
+    "longitude_deg": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": -180,
+      "maximum": 180,
+      "x-unit": "deg",
+      "description": "Decimal degrees, east positive; null until the site is set."
+    },
+    "elevation_m": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-unit": "m",
+      "description": "Elevation above sea level; null until the site is set."
+    },
+    "climate_zone": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "enum": [
+        1,
+        11,
+        12,
+        13,
+        14,
+        141,
+        15,
+        16,
+        17,
+        18,
+        null
+      ],
+      "description": "The WUFI-Passive climate-zone code: 1 Not defined, 11 to 18 for US zones 1 to 8, 141 for 4C; null when unset."
+    },
+    "hours_from_utc": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": -12,
+      "maximum": 14,
+      "x-unit": "h",
+      "description": "The offset from UTC as typed; never derived from longitude. Null when unset."
+    },
+    "climate_zone_label": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Not defined",
+        "1",
+        "2",
+        "3",
+        "4",
+        "4C",
+        "5",
+        "6",
+        "7",
+        "8",
+        null
+      ],
+      "description": "The zone as the panel and the Export report show it; null when unset."
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "not_set",
+        "set"
+      ],
+      "description": "set when latitude, longitude and elevation are all present."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "values": {
+    "latitude_deg": 40.6782,
+    "longitude_deg": -73.9442,
+    "elevation_m": 10.0,
+    "climate_zone": 14,
+    "hours_from_utc": -5
+  },
+  "expected_values": {
+    "latitude_deg": null,
+    "longitude_deg": null,
+    "elevation_m": null,
+    "climate_zone": null,
+    "hours_from_utc": null
+  }
+}
+```
+
 ### `ph_composer.library.copy`
 
 Copy or reuse one library record with optional assignment. Owner: `ph_composer.library`.
@@ -69036,6 +69778,12 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `material.specific_heat_too_low` | A Material's specific heat is below the Honeybee minimum. |
 | `material.thermal_mass_defaulted` | A Material has no density or specific heat; export uses disclosed defaults. |
 
+### `ph_composer.climate`
+
+| Code | Meaning |
+| --- | --- |
+| `climate.heating_not_below_cooling` | The heating design temperature is at or above the cooling one; both still save. |
+
 ### `ph_composer.spaces`
 
 | Code | Meaning |
@@ -69259,3 +70007,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.59 | 2026-11-14 | An export.metadata_omitted finding about a record part (an Assembly Layer or Layer-Segment, or a Window Element) gains reference, the {kind, id, part_ids} ph_composer.records.update_metadata takes, and its message names the record that holds the part. A contributor's Engine#propose_update no longer takes user_data: ph_composer.records.update_metadata (Engine#propose_metadata_update) is the one write route for an existing record's map. |
 | 1.60 | 2026-11-14 | An update that rebuilds a record's parts, such as windows.types.update with elements, keeps each surviving part's user_data by id whether or not it sends it, starts a new part without one, and refuses params.invalid for a part map that differs from the stored one. The deletes of Materials, Assemblies, Frames, Glazings, Psi-Install Types, Window Types, Thermal Bridge Types and Attached zones return removed_user_data and removed_user_data_total, each part listed by part_ids. ph_composer.model.detail takes metadata summary, ph_composer.model.fragment is new, and ph_composer.model.update_metadata returns extension_status only. thermal_bridges.edges.selection, at and candidates take metadata summary, and thermal_bridges.edges.detail is new. Export reports an unused Building Segment's or Level's map as omitted. A part declaration needs a required string id and an optional object user_data. Engine#propose_update takes derived_part_maps and Engine#propose_delete returns the removal report. |
 | 1.61 | 2026-11-14 | Every delete and merge that returns removed_user_data also returns removed_user_data_truncated, and its rows stay within 8192 bytes: each listed map keeps its address and user_data_key_total, and its keys fill in while they fit. The new reference target ph_composer.model.metadata puts the Model's extension payloads in the incoming-reference check, so a record a Model payload names refuses deletion as reference.in_use. A membrane Layer's Layer-Segment map stays in the Model with an export.metadata_omitted finding even with a steel stud spacing. |
+| 1.62 | 2026-11-17 | The ph_composer.climate feature is new, requiring ph_composer.zones. ph_composer.climate.site.get and site.update read and set the Model's site (latitude, longitude and elevation together, a climate-zone code and hours from UTC); ph_composer.climate.design_temperatures.get and design_temperatures.update read and set the ASHRAE 99% heating and 1% cooling dry bulbs and a source note, any field alone; ph_composer.climate.summary.get backs the ph_composer.climate.summary snapshot section. climate.heating_not_below_cooling is new, a warning the design-temperature read carries. |

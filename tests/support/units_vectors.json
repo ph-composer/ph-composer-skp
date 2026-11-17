@@ -16,5 +16,9 @@
   { "quantity": "temperature_difference", "canonical_unit": "k", "canonical_value": 1.0, "expected_ip_value": 1.8, "tolerance": 1e-12 },
   { "quantity": "air_permeance", "canonical_unit": "l_s_m2_75pa", "canonical_value": 1.0, "expected_ip_value": 0.19685039370078736, "tolerance": 1e-12 },
   { "quantity": "vapor_sd", "canonical_unit": "sd_m", "canonical_value": 3.496, "expected_ip_value": 1.0, "tolerance": 1e-12 },
-  { "quantity": "vapor_diffusion_resistance", "canonical_unit": "mu", "canonical_value": 137.6, "expected_ip_value": 1.0, "tolerance": 1e-12 }
+  { "quantity": "vapor_diffusion_resistance", "canonical_unit": "mu", "canonical_value": 137.6, "expected_ip_value": 1.0, "tolerance": 1e-12 },
+  { "quantity": "irradiation", "canonical_unit": "kwh_m2", "canonical_value": 1.0, "expected_ip_value": 0.3169983306281505, "tolerance": 1e-12 },
+  { "quantity": "irradiance", "canonical_unit": "w_m2", "canonical_value": 1.0, "expected_ip_value": 0.3169983306281505, "tolerance": 1e-12 },
+  { "quantity": "wind_speed", "canonical_unit": "m_s", "canonical_value": 1.0, "expected_ip_value": 2.236936292054402, "tolerance": 1e-12 },
+  { "quantity": "distance", "canonical_unit": "km", "canonical_value": 80.4672, "expected_ip_value": 50.0, "tolerance": 1e-12 }
 ]

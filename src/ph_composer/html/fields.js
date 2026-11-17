@@ -20,6 +20,12 @@ PhComposerUI.define("fields", [], function () {
   var HEAT_LOSS = descriptor("heat_loss_rate", "w_k");
   var DENSITY = descriptor("density", "kg_m3");
   var SPECIFIC_HEAT = descriptor("specific_heat", "j_kgk");
+  var TEMPERATURE_C = descriptor("temperature", "c");
+  var TEMPERATURE_DIFFERENCE_K = descriptor("temperature_difference", "k");
+  var IRRADIATION_KWH_M2 = descriptor("irradiation", "kwh_m2");
+  var IRRADIANCE_W_M2 = descriptor("irradiance", "w_m2");
+  var WIND_SPEED_M_S = descriptor("wind_speed", "m_s");
+  var DISTANCE_KM = descriptor("distance", "km");
 
   /* A copy of a descriptor with a screen's own settings (label, scope, allowBlank, allowZero). */
   function withSettings(base, settings) {
@@ -28,5 +34,8 @@ PhComposerUI.define("fields", [], function () {
 
   return { FRACTION: FRACTION, LENGTH_M: LENGTH_M, LENGTH_MM: LENGTH_MM, WIDTH_M_AS_MM: WIDTH_M_AS_MM, AREA_M2: AREA_M2,
     VOLUME_M3: VOLUME_M3, AIRFLOW_M3H: AIRFLOW_M3H, U_VALUE: U_VALUE, R_VALUE: R_VALUE, CONDUCTIVITY: CONDUCTIVITY,
-    LINEAR_PSI: LINEAR_PSI, HEAT_LOSS: HEAT_LOSS, DENSITY: DENSITY, SPECIFIC_HEAT: SPECIFIC_HEAT, with: withSettings };
+    LINEAR_PSI: LINEAR_PSI, HEAT_LOSS: HEAT_LOSS, DENSITY: DENSITY, SPECIFIC_HEAT: SPECIFIC_HEAT,
+    TEMPERATURE_C: TEMPERATURE_C, TEMPERATURE_DIFFERENCE_K: TEMPERATURE_DIFFERENCE_K,
+    IRRADIATION_KWH_M2: IRRADIATION_KWH_M2, IRRADIANCE_W_M2: IRRADIANCE_W_M2, WIND_SPEED_M_S: WIND_SPEED_M_S,
+    DISTANCE_KM: DISTANCE_KM, with: withSettings };
 });

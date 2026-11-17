@@ -11,7 +11,8 @@ Read [PRD.md](PRD.md) for the behavior, [PLAN.md](PLAN.md) for the twelve stages
 P4c-12) under [phases/](phases), [CONTRACTS.md](CONTRACTS.md) for the records and seams,
 [DECISIONS.md](DECISIONS.md) for the answers and Ed's rulings of 2026-11-17,
 [ACCEPTANCE.md](ACCEPTANCE.md) for each stage's gate, then [STATUS.md](STATUS.md). Planned
-2026-11-17; no stage is authorized.
+2026-11-17; Ed authorized every stage the same day, tracked in
+[#511](https://github.com/ph-composer/ph-composer-skp/issues/511).
 
 Stage and decision ids here are `P4c-` and `D4c-`. `P4-` and `D4-` belong to the
 [Mechanical packet](../phase-07-mechanical/README.md), which kept its ids when the phases were
