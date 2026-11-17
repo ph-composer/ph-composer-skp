@@ -1,5 +1,5 @@
 .PHONY: ci syntax lint lint-ruby lint-js lint-python lint-citations lint-paths test fixtures fixtures-check coverage hostkit-test python-check \
-        panel-manifest panel-manifest-check ui-preview ui-deps ui-checks ui-gallery rbz rbz-check install clean bridge-install \
+        panel-manifest panel-manifest-check ui-preview ui-deps ui-checks ui-gallery mockup-new rbz rbz-check install clean bridge-install \
         bridge-uninstall runtime-check runtime-pin-check runtime-manifest runtime-browser-check phase-one-proof \
         hooks hooks-auto help help-check
 
@@ -214,9 +214,22 @@ ui-checks:
 
 # Full-size screenshots of every tab, subtab and key container at each panel size, for a design review
 # (tools/ui-preview/.index.md). A capture, not a check: UI_GALLERY_OUT names the folder (a temporary
-# folder by default), UI_GALLERY_SIZES and UI_GALLERY_FIXTURES narrow the run.
+# folder by default), UI_GALLERY_SIZES and UI_GALLERY_FIXTURES narrow the run. With MOCKUP naming a planning
+# mockup built on the mockup kit, it shoots that page's scenes beside it and rewrites its README scene table
+# instead (UI_GALLERY_SCENES narrows the run).
+export MOCKUP
 ui-gallery:
-	@$(MAKE) --no-print-directory ui-checks UI_CHECKS=tools/ui-preview/gallery/gallery.cjs
+	@$(MAKE) --no-print-directory ui-checks UI_CHECKS=tools/ui-preview/gallery/$(if $(MOCKUP),mockup_gallery.cjs,gallery.cjs)
+
+# A new planning mockup from the mockup kit's starter (tools/ui-preview/.index.md, "Mockup kit"): copies
+# tools/ui-preview/mockup/starter/ into MOCKUP_DIR and points its page at the kit.
+mockup-new:
+	@test -n "$(MOCKUP_DIR)" || { echo "mockup-new: set MOCKUP_DIR=planning/features/<slug>/mockups"; exit 1; }
+	@test ! -e "$(MOCKUP_DIR)/mockup.html" || { echo "mockup-new: $(MOCKUP_DIR)/mockup.html already exists"; exit 1; }
+	@mkdir -p "$(MOCKUP_DIR)" && cp tools/ui-preview/mockup/starter/* "$(MOCKUP_DIR)/"
+	@python3 -c 'import os, pathlib, sys; d = pathlib.Path(sys.argv[1]); p = d / "mockup.html"; \
+	  p.write_text(p.read_text().replace("\"../mockup.js\"", "\"%s/mockup.js\"" % os.path.relpath("tools/ui-preview/mockup", d)))' "$(MOCKUP_DIR)"
+	@echo "mockup-new: $(MOCKUP_DIR)/mockup.html; capture with make ui-gallery MOCKUP=$(MOCKUP_DIR)/mockup.html"
 
 # The development host bridge and helpers: Ruby tests against the stub, then the Python client. Some Python
 # tests run Ruby they generate; when the floor's Ruby (2.7) is installed they run again under it, so syntax

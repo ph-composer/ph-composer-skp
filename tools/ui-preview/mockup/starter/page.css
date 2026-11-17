@@ -1,0 +1,5 @@
+/* The mockup's own rules, on top of the panel stylesheets and the kit's mockup.css. */
+.panel-panes { position:relative; }
+#pane { padding:0 var(--page-gutter); }
+.phc-table .mk-name { width:60%; text-align:left; }
+.zp-flag { color:#a86b00; vertical-align:-2px; }

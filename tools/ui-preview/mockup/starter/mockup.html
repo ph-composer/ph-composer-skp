@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Starter mockup</title>
+<!-- A planning mockup on the mockup kit (tools/ui-preview/.index.md, "Mockup kit"). `make mockup-new`
+     copies this folder and points the script below at the kit. data-panel-css names the feature stylesheets
+     under src/ph_composer/html/ that the screen needs; base, overlay, shell and table always load. -->
+<script src="../mockup.js" data-panel-css="features/zones/zones.css"></script>
+<link rel="stylesheet" href="page.css">
+</head>
+<body class="phc-workspace live-panel">
+<div class="phc-app-header">
+  <nav class="phc-tabs" aria-label="Sections" id="app-tabs"></nav>
+</div>
+<main class="panel-panes"><div class="phc-pane-main" id="pane"></div></main>
+<footer class="phc-footer"><span>PH-Composer · Starter mockup</span><span>Editing: Model</span></footer>
+<script src="app.js"></script>
+<script src="scenes.js"></script>
+<script>
+  Mockup.start({ title: "Starter mockup", journeys: JOURNEYS, init: init, render: render, steps: STEPS, scenes: SCENES });
+</script>
+</body>
+</html>
