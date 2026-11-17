@@ -1,7 +1,7 @@
 # Climate data: status
 
 DATE: 2026-09-18
-STATUS: Requested. Wireframes reviewed with Ed by 2026-11-16 and the PRD revised to their nine answers (W1 to W9) the same day. Eighteen items are listed as open or owed before planning (PRD, "Open"); all eight user-journey walkthroughs are recorded (J1 to J8); nothing is planned or authorized. The Mechanical phase's heat pump stage waits on this packet.
+STATUS: Requested. Wireframes reviewed with Ed by 2026-11-16 and the PRD revised to their nine answers (W1 to W9) the same day. All eight user-journey walkthroughs are recorded (J1 to J8) and Ed answered the open items on 2026-11-17 (R1 to R9); six checks remain, each tied to a stage (PRD, "Open"). Twenty-three boards are drawn. Nothing is planned or authorized. The Mechanical phase's heat pump stage waits on this packet.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (no remote)
 
@@ -35,7 +35,7 @@ D7 (no datasets ship) and the snapshot rule stand, and the proposal depends on b
 
 ## Next step
 
-The journey walkthroughs are done (J1 to J8, 2026-11-17). Next: put the PRD's open items to Ed, draw the screens still missing, and plan the stages. Earlier next step, superseded by the Phase 4 dependency: none until the MVP packets have plans, then interview the remaining feature-local questions and
+The journeys, the open items and the screens are done (2026-11-17). Next: plan the stages, at Ed's request of 2026-11-17: the coordinating packet and one stage document per stage. Implementation needs separate authorization. Earlier next step, superseded by the Phase 4 dependency: none until the MVP packets have plans, then interview the remaining feature-local questions and
 plan the peak-load entry, readiness and repair-route behavior already fixed by D9.
 
 ## Blockers
@@ -73,3 +73,4 @@ None. Nothing is implemented.
 | 2026-11-17 | Sixth journey walked with Ed (J6, another computer): the Model reads in full with no notice; the source is matched by station name, state and checksum across every folder, not by dataset name; Replace stays enabled and explains when there is no folder; a folder not found keeps its setting and offers Locate and Remove. Board 6 corrected and board 14 added. |
 | 2026-11-17 | Seventh journey walked with Ed (J7, replacing and editing): the Model keeps the as-read values so edited cells are marked, listed in the Export report and restorable anywhere; Replace shows a summary comparison and is one Undo step; a changed source file offers Update from File; the verdict is recomputed on a site change and Set Location warns first. Boards 15 to 17 added. |
 | 2026-11-17 | Eighth and last journey walked with Ed (J8, export): Cooling 2 repeats Cooling 1, because honeybee-ph cannot leave it empty and would write zeros (run in the pinned 1.33.65); unset climate zone and UTC offset export unset with findings; an edited station and a hand-entered climate export as user-defined; coordinates and edits travel in the provenance's assumptions. Board 18 added. Open item 5 settled, item 7 narrowed. Item 18 added (export with a climate and no site). Eighteen items are listed; 2, 5 and 6 are settled. |
+| 2026-11-17 | Ed answered the open items one at a time (R1 to R9): the panel opens on Zones; a climate with no site is left out of export; no `.xls` reader and no new-station notice in the first version; Cooling 2 equals Cooling 1 in WUFI and METr; hours from UTC is not used by METr as far as Ed knows; the ten zone codes are the full set and the Model stores the WUFI code; a custom Phius dataset comes as the same text and `.xls` files; METr's two design-temperature fields are parked. Six measurements and confirmations remain as stage entry checks. Boards 19 to 23 added. Ed asked for the stage planning next. |

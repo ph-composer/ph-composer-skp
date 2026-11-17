@@ -5,7 +5,7 @@ STATUS: Reviewed. Drawn 2026-11-15 from Ed's request for a Climate tab that work
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
-Eighteen static artboards. The [PRD](../PRD.md) is the behaviour; these illustrate it. All station names, coordinates and values are synthetic; no
+Twenty-three static artboards. The [PRD](../PRD.md) is the behaviour; these illustrate it. All station names, coordinates and values are synthetic; no
 licensed climate data is in this folder.
 
 ## Viewing
@@ -40,8 +40,15 @@ licensed climate data is in this folder.
 | 16 | `PickerReplace.dc.html` | Replace: the current and the new station side by side, and the edits that will be lost. Added for journey J7 |
 | 17 | `SourceChanged.dc.html` | The station file has changed since it was attached: the mark and Update from File. Added for journey J7 |
 | 18 | `ExportReport.dc.html` | The Export report's climate section, for an edited station with one finding. Its content, not the Export tab's layout. Added for journey J8 |
+| 19 | `PhiusFailAttached.dc.html` | An attached station outside the Phius limits (J3) |
+| 20 | `HandEnteredPane.dc.html` | The pane of a hand-entered climate saved with gaps: Incomplete, what is missing, the check not run (J4) |
+| 21 | `SetLocationAttached.dc.html` | Set Location with a station attached: the station, its ring and the warning before a move that would make it fail (J7) |
+| 22 | `GeoUnavailable.dc.html` | Set Location on a SketchUp model with no geolocation. Provisional |
+| 23 | `Small.dc.html` | The tab at 360 x 520, the panel's smallest size |
 
-Not drawn: Read from SketchUp Geolocation on a Model with no geolocation, an attached station that fails, the pane of a hand-entered or incomplete climate, scanning in progress, Set Location with a station attached, charts, and the 360 x 520 size.
+Not drawn, by choice: scanning in progress (the read is fast where measured), charts, and the
+Export tab's own layout around the report's climate section. Board 22 is provisional until
+SketchUp's geolocation is measured on a host.
 
 ## How it is meant to work
 
@@ -88,5 +95,5 @@ the outline map with its markers, ring, zoom buttons and hover tip, and the stat
 
 ## Checked
 
-Every board loaded in the local viewer at its own size with no console error on 2026-11-15; boards 1 and 8 were checked again on 2026-11-17 after journey J2, boards 9 to 11 after journey J3, board 12 after journey J4, board 13 after journey J5, boards 6 and 14 after journey J6, boards 15 to 17 after journey J7, and board 18 after journey J8. The Design canvas
+Every board loaded in the local viewer at its own size with no console error on 2026-11-15; boards 1 and 8 were checked again on 2026-11-17 after journey J2, boards 9 to 11 after journey J3, board 12 after journey J4, board 13 after journey J5, boards 6 and 14 after journey J6, boards 15 to 17 after journey J7, board 18 after journey J8, and boards 19 to 23 on 2026-11-17. The Design canvas
 rendering was not checked.

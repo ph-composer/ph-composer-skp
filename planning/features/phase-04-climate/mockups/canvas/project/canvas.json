@@ -135,6 +135,41 @@
       "w": 1280,
       "h": 800,
       "title": "18 · Export report, the climate section"
+    },
+    "PhiusFailAttached.dc.html": {
+      "x": 5440,
+      "y": 3100,
+      "w": 1280,
+      "h": 800,
+      "title": "19 · An attached station outside the Phius limits"
+    },
+    "HandEnteredPane.dc.html": {
+      "x": 6800,
+      "y": 3100,
+      "w": 1280,
+      "h": 800,
+      "title": "20 · A hand-entered climate, incomplete"
+    },
+    "SetLocationAttached.dc.html": {
+      "x": 8160,
+      "y": 3100,
+      "w": 1280,
+      "h": 800,
+      "title": "21 · Set Location with a station attached"
+    },
+    "GeoUnavailable.dc.html": {
+      "x": 9520,
+      "y": 3100,
+      "w": 1280,
+      "h": 800,
+      "title": "22 · Set Location, no SketchUp geolocation"
+    },
+    "Small.dc.html": {
+      "x": 10880,
+      "y": 3100,
+      "w": 360,
+      "h": 520,
+      "title": "23 · Climate at 360 x 520"
     }
   },
   "order": [
@@ -155,7 +190,12 @@
     "PhiusEdited.dc.html",
     "PickerReplace.dc.html",
     "SourceChanged.dc.html",
-    "ExportReport.dc.html"
+    "ExportReport.dc.html",
+    "PhiusFailAttached.dc.html",
+    "HandEnteredPane.dc.html",
+    "SetLocationAttached.dc.html",
+    "GeoUnavailable.dc.html",
+    "Small.dc.html"
   ],
   "notes": {
     "title": {
@@ -304,6 +344,41 @@
       "w": 620,
       "fill": "green",
       "text": "SETTLED 2026-11-17 · Journey 8, export\nThe report's climate section: site, dataset and station, the limit check, edited values, peak loads, wind speed and the design temperatures. This board shows its content, not the Export tab's layout.\nCooling 2 repeats Cooling 1 at export, as honeybee-ph's Grasshopper Phius-file component does; left alone honeybee-ph would write 0 °C and zero radiation. An unset climate zone exports as Not defined and an unset UTC offset as empty, each with a finding. An edited station and a hand-entered climate export as user-defined; an unedited station as Phius-approved. The station's coordinates and the edits travel in the provenance's assumptions. No folder location is written anywhere."
+    },
+    "c19": {
+      "x": 5440,
+      "y": 3950,
+      "w": 620,
+      "fill": "gray",
+      "text": "Journey 3: a station outside the limits stays attached and says so on the card, the pane and in the Export report. Nothing is blocked."
+    },
+    "c20": {
+      "x": 6800,
+      "y": 3950,
+      "w": 620,
+      "fill": "gray",
+      "text": "Journey 4: a hand-entered climate saved with gaps. The card and pane read Incomplete, the pane lists what is missing, and with no coordinates the limit check reads Not checked. Export leaves it out until it is complete."
+    },
+    "c21": {
+      "x": 8160,
+      "y": 3950,
+      "w": 620,
+      "fill": "gray",
+      "text": "Journey 7: Set Location shows the attached station and its 50 mile ring. Moving the site outside it warns before Set; the station stays attached and then reads Fail."
+    },
+    "c22": {
+      "x": 9520,
+      "y": 3950,
+      "w": 620,
+      "fill": "orange",
+      "text": "PROVISIONAL · waits on a host measurement\nRead from SketchUp Geolocation on a Model with no geolocation. Drawn as unavailable with the reason beside it. Whether PH-Composer can tell such a Model apart is still to be measured in SketchUp."
+    },
+    "c23": {
+      "x": 10880,
+      "y": 3670,
+      "w": 360,
+      "fill": "orange",
+      "text": "OPEN for planning · the panel's smallest size\nAt 360 px nine tabs wrap and take much of the height, so little of the pane shows. The tab row at this width is the shell's question, not Climate's; the pane itself scrolls."
     }
   },
   "designSystems": [

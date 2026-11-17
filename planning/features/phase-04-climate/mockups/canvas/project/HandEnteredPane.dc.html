@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Climate: A hand-entered climate, incomplete</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/phcomposer/tokens.css">
+<link rel="stylesheet" href="ds/phcomposer/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+.mx{position:relative;width:1280px;height:800px;display:flex;flex-direction:column;overflow:hidden;background:#fff;color:#132a2b;font:13px/18px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.mx .phc-app-header{display:flex;align-items:center;justify-content:space-between;flex:none}
+.mx .panel-panes{flex:1;min-height:0;overflow:hidden;padding:0}
+.two{display:flex;gap:20px;align-items:flex-start}
+.side{flex:0 0 264px;display:flex;flex-direction:column;gap:8px}
+.pane{flex:1;min-width:0}
+.phc-workspace button.card{display:block;width:100%;height:auto;padding:10px 12px;border:1px solid #e1e6e9;border-radius:7px;background:#fff;text-align:left}
+.phc-workspace button.card[aria-current="true"]{border-color:#075360;background:#e3eff1}
+.card b{display:block;font-weight:600}
+.card small{display:block;margin-top:2px;color:#5d6b73;font-size:12px}
+.sep{margin:8px 0 0;color:#5d6b73;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.z{display:inline-block;height:22px;line-height:22px;padding:0 9px;margin:4px 4px 0 0;border-radius:999px;background:#edf1f2;font-size:12px;white-space:nowrap}
+.z.w{background:#ffe6a0;color:#785400}
+.z.ok{background:#d9efe4;color:#0b5a3c}
+.phc-workspace .phc-table td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.phc-workspace .phc-table td.l,.phc-workspace .phc-table th.l{text-align:left}
+.phc-workspace .phc-table td.r,.phc-workspace .phc-table th.r{text-align:right}
+.ro{color:#5d6b73}
+.miss{margin:0 0 10px;padding:8px 12px;border-radius:7px;background:#ffe6a0;color:#5c4000}
+.top{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.top h2{margin:0;font-size:15px;line-height:20px;font-weight:600}
+.mx h3.sub{margin:18px 0 6px;font-size:13px;font-weight:600;color:#46565e}
+.lives{display:grid;grid-template-columns:160px 1fr;gap:6px 12px;margin:0;padding:12px 14px;border-radius:7px;background:#f6f8f9}
+.lives dt{color:#5d6b73}
+.lives dd{margin:0}
+</style>
+</helmet>
+<div class="mx phc-workspace live-panel">
+<div class="phc-app-header">
+<nav class="phc-tabs" aria-label="Sections">
+<button type="button" aria-pressed="true">Climate</button>
+<button type="button">Zones</button>
+<button type="button">Assemblies</button>
+<button type="button">Window Types</button>
+<button type="button">Thermal Bridges</button>
+<button type="button">Programs</button>
+<button type="button">Mechanical</button>
+<button type="button">Library</button>
+<button type="button">Export</button>
+</nav>
+<div class="phc-app-tools"><div class="phc-unit-toggle" role="group" aria-label="Display units"><button type="button" aria-pressed="false">IP</button><button type="button" aria-pressed="true">SI</button></div></div>
+</div>
+<main class="panel-panes">
+<div data-pane="climate">
+<section>
+<div class="phc-heading"><h1>Climate</h1><div class="phc-heading-actions"><button type="button">Climate Data on This Computer…</button></div></div>
+<div class="two">
+<div class="side">
+<button type="button" class="card"><b>Site location</b><small>42.750° N, 73.800° W · 84 m</small><small>Climate zone 5 · UTC −5</small></button>
+<div class="sep">Climate sources</div>
+<button type="button" class="card" aria-current="true"><b>Phius climate data</b><small>Custom dataset, Elm Street · entered by hand</small><span class="z w">Incomplete</span></button>
+<button type="button" class="card"><b>Design temperatures</b><small>99% heating −17.2 °C · 1% cooling 30.1 °C</small><span class="z ok">Set</span></button>
+<button type="button" class="card" disabled style="opacity:.6"><b>Hourly weather file</b><span class="z">Planned</span></button>
+</div>
+<div class="pane">
+<div class="top"><h2>Custom dataset, Elm Street</h2><span class="ro">Entered by hand · 92 m</span><span class="z w" style="margin:0">Incomplete</span><span style="margin-left:auto"></span><button type="button">Choose Station…</button><button type="button">Edit Values…</button><button type="button">Clear</button></div>
+<div class="miss" role="status">Missing: Sky temperature (12 months and 3 design values) and the average wind speed. Export leaves the climate out until it is complete. <button type="button" style="margin-left:6px">Edit Values…</button></div>
+<div class="phc-table-scroll phc-inventory-table" style="overflow:hidden">
+<table class="phc-table" style="table-layout:fixed;width:100%">
+<thead><tr><th class="l"><span class="phc-th-label">Metric</span></th><th class="r" style="width:240px"><span class="phc-th-label">Site and station differ by</span></th><th class="r" style="width:160px"><span class="phc-th-label">Phius limit</span></th><th class="l" style="width:120px"><span class="phc-th-label">Result</span></th></tr></thead>
+<tbody>
+<tr><td class="l">Distance</td><td class="r ro">—</td><td class="r ro">80 km</td><td class="l ro">Not checked</td></tr>
+<tr><td class="l">Elevation</td><td class="r ro">—</td><td class="r ro">122 m</td><td class="l ro">Not checked</td></tr>
+</tbody>
+</table>
+</div>
+<h3 class="sub">Monthly temperatures °C</h3>
+<div class="phc-table-scroll phc-inventory-table" style="overflow:hidden">
+<table class="phc-table" style="table-layout:fixed;width:100%">
+<thead><tr><th class="l" style="width:110px"><span class="phc-th-label"></span></th><th class="r"><span class="phc-th-label">Jan</span></th><th class="r"><span class="phc-th-label">Feb</span></th><th class="r"><span class="phc-th-label">Mar</span></th><th class="r"><span class="phc-th-label">Apr</span></th><th class="r"><span class="phc-th-label">May</span></th><th class="r"><span class="phc-th-label">Jun</span></th><th class="r"><span class="phc-th-label">Jul</span></th><th class="r"><span class="phc-th-label">Aug</span></th><th class="r"><span class="phc-th-label">Sep</span></th><th class="r"><span class="phc-th-label">Oct</span></th><th class="r"><span class="phc-th-label">Nov</span></th><th class="r"><span class="phc-th-label">Dec</span></th></tr></thead>
+<tbody>
+<tr><td class="l">Air</td><td class="r">−5.1</td><td class="r">−3.6</td><td class="r">1.4</td><td class="r">8.2</td><td class="r">14.5</td><td class="r">19.3</td><td class="r">22.0</td><td class="r">21.0</td><td class="r">16.6</td><td class="r">10.1</td><td class="r">4.2</td><td class="r">−2.0</td></tr>
+<tr><td class="l">Dewpoint</td><td class="r">−9.8</td><td class="r">−9.0</td><td class="r">−4.9</td><td class="r">0.6</td><td class="r">7.4</td><td class="r">13.1</td><td class="r">15.9</td><td class="r">15.4</td><td class="r">11.5</td><td class="r">5.0</td><td class="r">−0.4</td><td class="r">−6.3</td></tr>
+<tr><td class="l">Sky</td><td class="r ro" colspan="12" style="text-align:left">Not entered</td></tr>
+<tr><td class="l">Ground</td><td class="r ro" colspan="12" style="text-align:left">Not part of a Phius climate</td></tr>
+</tbody>
+</table>
+</div>
+<h3 class="sub">Wind</h3>
+<div style="display:flex;align-items:center;gap:10px"><label style="display:flex;align-items:center;gap:6px;color:#5d6b73">Average wind speed m/s<input type="text" value="" style="width:70px;text-align:right"></label><span class="ro">Not entered.</span></div>
+<h3 class="sub">Where this lives</h3>
+<dl class="lives">
+<dt>In this Model</dt><dd>The values above, entered by hand. There is no source file and no checksum.</dd>
+<dt>On this computer</dt><dd><span class="z" style="margin:0 6px 0 0">No source</span>Entered by hand. No coordinates were given, so the Phius limit check reads Not checked.</dd>
+<dt>Ready for</dt><dd><span class="z w" style="margin:0 6px 0 0">Monthly demand: incomplete</span><span class="z w" style="margin:0 6px 0 0">Peak loads: incomplete</span></dd>
+</dl>
+</div>
+</div>
+</section>
+</div>
+</main>
+<footer class="phc-footer"><span>PH-Composer</span><span>Editing: Model</span></footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

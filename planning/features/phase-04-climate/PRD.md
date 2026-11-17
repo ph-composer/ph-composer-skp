@@ -141,8 +141,8 @@ This computer  climate data folders  [ { name, folder location } ]   in PH-Compo
 
 A Model holds one site, one climate and one pair of design temperatures (W6). A site is set when
 it has a latitude, a longitude and an elevation; `climate_zone` and `hours_from_utc` may be unset
-(J2). `climate_zone` is one of the ten codes the honeybee-ph Grasshopper component allows; whether
-the Model stores the code (15) or the zone (5) is a planning decision. The climate is a
+(J2). `climate_zone` is stored as the WUFI code (1 for Not defined, 11 to 18 for US zones 1 to 8,
+141 for 4C), which is the full set and what export writes (R7). The climate is a
 copy: the Model never needs the source again to be read. A Phius station's three peak-load cases
 are the complete set; the second cooling case and the monthly ground temperatures stay empty and
 are not flagged (W8). The station's latitude and longitude are kept so the limit check can be
@@ -160,7 +160,8 @@ weather file gives a second reader to shape it against.
 
 ### The tab
 
-- Climate is a primary tab, first in the row, before Zones (W7).
+- Climate is a primary tab, first in the row, before Zones (W7). The panel still opens on Zones
+  (R1).
 - A sidebar lists Site location, then under "Climate sources" the cards Phius climate data, Design
   temperatures and Hourly weather file. The Hourly weather file card is shown as Planned and does
   nothing in the first version (W3). Each card shows its state; the pane beside it shows the
@@ -181,7 +182,7 @@ weather file gives a second reader to shape it against.
   letter, because the export cannot carry one (J2).
 - Hours from UTC is typed. It is never guessed from the longitude (J2).
 - Read from SketchUp Geolocation fills latitude and longitude once, and hours from UTC if the
-  host supplies a usable offset (open item 13). It does not fill elevation: SketchUp's API
+  host supplies a usable offset (owed check 4). It does not fill elevation: SketchUp's API
   reference documents none. Nothing is written back to SketchUp, and nothing syncs on its own (Q5, Q6).
 - There is no address search and no elevation or climate-zone lookup: the panel reaches no network.
 
@@ -308,7 +309,8 @@ weather file gives a second reader to shape it against.
   and station, and the checksum is the file's. The station's coordinates and the list of edited
   values go in its assumptions. `source_uri` is never written, and `is_certification_approved`
   stays unknown (J8).
-- An incomplete climate is left out with a finding (J4). The design temperatures are reported
+- An incomplete climate is left out with a finding (J4). So is a climate in a Model with no
+  site: no `Site` is written, and the finding says the site is not set (R2). The design temperatures are reported
   and not written to the HBJSON (J5).
 - A Model with no climate exports without one, as today.
 
@@ -350,7 +352,7 @@ The journey walkthroughs. One journey at a time, with Ed.
 | # | Journey | Kind | Answer |
 | --- | --- | --- | --- |
 | J1 | A new user points PH-Composer at the climate files on their computer, 2026-11-17 | UI, Code | Done from the Climate tab's empty state, or the Climate Data on This Computer dialog, or the Setup view: choose a folder, name it, see what was found. Set once per computer, for every Model. Files are read in place and never copied; new and changed files show the next time the picker opens; no Rescan. The settings file sits in a PH-Composer folder under the user's application-support folder, outside SketchUp's versioned folders. Files not read are reported by kind. A cache of what was read, refreshed by each file's modified date and never managed by the user, is added only if reading proves slow |
-| J2 | Setting the site location, 2026-11-17 | UI, Code | A new Model has no site; the card reads Not set. Set Location holds the map: click to place, or type. Latitude, longitude and elevation are needed to set the site; climate zone and hours from UTC are for export and may be unset. Climate zone is the ten integer codes the honeybee-ph Grasshopper component allows (Not defined, 1 to 8, 4C), with no moisture letter. Hours from UTC is a typed field, never guessed from longitude. Read from SketchUp Geolocation fills latitude and longitude, and hours from UTC if the host supplies an offset (open item 13); it does not fill elevation. The pane's "Set by" line is dropped: no field records it. What a site change does to an attached station's verdict is left to J7 |
+| J2 | Setting the site location, 2026-11-17 | UI, Code | A new Model has no site; the card reads Not set. Set Location holds the map: click to place, or type. Latitude, longitude and elevation are needed to set the site; climate zone and hours from UTC are for export and may be unset. Climate zone is the ten integer codes the honeybee-ph Grasshopper component allows (Not defined, 1 to 8, 4C), with no moisture letter. Hours from UTC is a typed field, never guessed from longitude. Read from SketchUp Geolocation fills latitude and longitude, and hours from UTC if the host supplies an offset (owed check 4); it does not fill elevation. The pane's "Set by" line is dropped: no field records it. What a site change does to an attached station's verdict is left to J7 |
 | J3 | Choosing and attaching a station, 2026-11-17 | UI, Code | The site comes first: with none, the Phius climate data pane asks for it and the picker does not open. The picker opens sorted by distance, framed on the 50 mile ring, on one dataset at a time (the attached station's, else the last used on this computer). A failing station can be attached with no confirm; the picker, the card, the pane and the Export report say it is outside the Phius limits. The Model keeps the station's latitude and longitude so the check shows without the folder. Both limits are cited from the Phius guidebook |
 | J4 | Entering values by hand, 2026-11-17 | UI, Code | One grid in the order of a Phius climate file (eight series rows, twelve months, three design columns), filled by one paste from a Phius workbook or typed. It saves with gaps and is marked Incomplete; export leaves an incomplete climate out, with a finding. Name and station elevation are needed; latitude and longitude are optional, and without them the limit check reads "Not checked, entered by hand". Wind speed has no prefill. The same editor serves Edit Values on an attached station |
 | J5 | The design temperatures, 2026-11-17 | UI, Code | Typed in the card's pane, each field saved as it is committed, with an optional source note the Export report repeats. Not set, Incomplete or Set; a heating value at or above the cooling value warns and still saves. Stored in °C, shown by the unit toggle. Model only for now: nothing goes to METr, and the two METr fields PHX writes fixed values to are an open item |
@@ -362,54 +364,54 @@ Every journey listed on 2026-11-17 is walked.
 
 ## Open, and owed before planning
 
-1. Which tab the panel opens on now that Climate is first. Zones is where most work happens.
-2. Settled by J3: a failing station can be attached, and is reported as outside the Phius limits.
-3. To verify on a host: that SketchUp's preferences are kept per SketchUp version, which was the
-   reason for a separate settings file; and where that file sits on macOS and Windows.
-4. The outline map: its data source and licence confirmed, its size in the RBZ, and how it draws
+Ed answered the open items on 2026-11-17 (R1 to R9 below). What is left is measurement and
+confirmation, each tied to the stage that needs it, and one item the Mechanical phase binds.
+
+| # | Kind | Item | Answer, 2026-11-17 |
+| --- | --- | --- | --- |
+| R1 | UI | Which tab the panel opens on, now that Climate is first | Zones, always. Climate is first because it comes first in the workflow |
+| R2 | Code | Export with a climate and no site; honeybee-ph's `Location` has a default of its own | The climate is left out and no `Site` is written, with a finding that the site is not set |
+| R3 | Scope | Stations outside the USA, which the private corpus holds only as `.xls` workbooks | No `.xls` reader in the first version. One paste into the hand-entry grid covers them; they export as user-defined |
+| R4 | UI, Code | A notice when a folder gains stations | None. Nothing is remembered; the dialog shows the current count |
+| R5 | Code | What WUFI-Passive and METr hold in the second cooling case for a Phius dataset | The same as Cooling 1 (Ed). J8 is confirmed |
+| R6 | Code | Whether METr uses hours from UTC | Not as far as Ed knows. The field stays optional and its unset finding is informational |
+| R7 | Code | Whether the ten climate-zone codes are the full set | Yes (Ed): Not defined, US 1 to 8 and 4C. The Model stores the WUFI code (1, 11 to 18, 141) so export writes it unchanged |
+| R8 | Scope | The format of a custom dataset bought from Phius | The same text and `.xls` files as a standard station (Ed). The text file goes in a climate data folder and is picked like any station |
+| R9 | Code | Whether METr's `hDesDryT` and `cDesDryT` are the ASHRAE design dry bulbs | Not known. Parked in the Deferred table; J5 stands |
+
+Settled earlier by a journey: a failing station can be attached (J3); both limits are cited from
+the Phius Certification Guidebook 2024, section 1.4.4.2, which also names a New York City
+exception that PH-Composer does not model (J3); Cooling 2 and the ground row at export (J8).
+
+Still owed, each as an entry check of the stage that needs it:
+
+1. On a host: that SketchUp's preferences are kept per SketchUp version, which was the reason for
+   a separate settings file; and where that file sits on macOS and Windows.
+2. The outline map: its data source and licence confirmed, its size in the RBZ, and how it draws
    on the Chromium 88 floor.
-5. Settled by J8: Cooling 2 repeats Cooling 1 at export and the ground row needs nothing. Still
-   to confirm in METr or with Phius: that a repeated cooling case is what a Phius dataset should
-   give, and PHX's handling end to end, which was read and not run.
-6. Settled by J3: both limits are cited from the Phius Certification Guidebook 2024, section
-   1.4.4.2. The same section names a New York City exception, which PH-Composer does not model.
-7. Hours from UTC is settled as a typed field (J2). Still to verify: what METr does with the
-   value, and that PHX writes a zero offset (read in the PHX checkout: a zero is written as not a
-   number; not reproduced). An unset offset exports empty, with a finding (J8); honeybee-ph
-   round-trips an empty offset (run in the pinned 1.33.65).
-8. Not drawn: Read from SketchUp Geolocation when the Model has no geolocation, an attached
-   station that fails, the pane of a hand-entered or incomplete climate, Set Location with a station attached, the Export tab's own layout
-   around the report's climate section, scanning in progress, charts, the 360 x 520 panel size.
-9. What the blended heat pump reads beyond the two design temperatures. The Phius estimator also
-   uses the monthly mean temperatures, which the climate holds; the Mechanical phase binds this.
-10. Stations outside the USA. The private corpus has Canadian and Japanese stations only as `.xls`
-    workbooks, which the first version does not read (W5), so they cannot be attached except by
-    typing values in. Whether an `.xls` reader joins the first version is not asked.
-11. Whether the user is told about new stations, for example "12 stations added since you last
-    looked". It needs a count remembered per folder. New files appear either way (J1).
-12. To measure before planning: how long reading a full dataset takes when the picker opens.
-    Measured 2026-11-17: the private corpus's 1,007 station files, 1.2 MB, read in 0.15 s in
-    Python with the files already on disk. Still to measure: Ruby inside SketchUp, and a
-    cloud-synced folder whose files are not downloaded.
-13. To measure on a host (J2): what SketchUp reports for latitude and longitude in a Model with
-    no geolocation, whether `Model#georeferenced?` tells the two apart, whether its `TZOffset` is
-    a usable hours-from-UTC, and whether a geolocated Model exposes an elevation. SketchUp's API reference lists `Latitude`, `Longitude`
-    and `TZOffset` on `ShadowInfo` and documents no defaults and no elevation (read 2026-11-17).
-14. Confirm the ten climate-zone codes against METr or WUFI-Passive. The list was read in the
-    honeybee-ph Grasshopper component; honeybee-ph and PHX take any integer.
-15. A custom dataset bought from Phius: confirm the format Phius delivers it in. If it is a
-    station file, it goes in a climate data folder and needs no typing.
-16. The paste: confirm on real copies from a Phius `.xls` workbook and a text file that one
-    block fills the grid. In the private corpus's text files all eight series rows carry the
-    three design columns (200 files checked for presence only, 2026-11-17). One workbook was read
-    for cell types only: its row labels and order were not seen, and two of its series rows held
-    twelve values.
-17. METr's site block has `hDesDryT` and `cDesDryT`, to which PHX writes 0.0 and 24.0 (read in
-    the PHX checkout, 2026-11-17). Verify whether they are the ASHRAE design dry bulbs and what
-    METr does with them before any export of the typed values is planned (J5).
-18. Export with a climate and no site. Hand entry does not need the site (J3), and honeybee-ph's
-    `Location` defaults to a latitude and longitude of its own. Decide whether the climate is
-    left out with a finding, as an incomplete one is.
+3. Read time when the picker opens. Measured 2026-11-17: the private corpus's 1,007 station
+   files, 1.2 MB, read in 0.15 s in Python with the files already on disk. Still to measure: Ruby
+   inside SketchUp, and a cloud-synced folder whose files are not downloaded.
+4. On a host (J2): what SketchUp reports for latitude and longitude in a Model with no
+   geolocation, whether `Model#georeferenced?` tells the two apart, whether its `TZOffset` is a
+   usable hours-from-UTC, and whether a geolocated Model exposes an elevation. SketchUp's API
+   reference lists `Latitude`, `Longitude` and `TZOffset` on `ShadowInfo` and documents no
+   defaults and no elevation (read 2026-11-17).
+5. The paste: confirm on real copies from a Phius `.xls` workbook and a text file that one block
+   fills the grid. In the private corpus's text files all eight series rows carry the three
+   design columns (200 files checked for presence only, 2026-11-17). One workbook was read for
+   cell types only: its row labels and order were not seen, and two of its series rows held
+   twelve values.
+6. PHX's handling of the exported `Site` end to end. It was read in the PHX checkout and not run:
+   the four peak-load cases, the ground row, and a zero or empty hours from UTC, which PHX writes
+   as not a number.
+
+Bound elsewhere: what the blended heat pump reads beyond the two design temperatures. The Phius
+estimator also uses the monthly mean temperatures, which the climate holds; the Mechanical phase
+binds this.
+
+Not drawn, by choice: scanning in progress (the read is fast where measured), charts, and the
+Export tab's own layout around the report's climate section.
 
 ## Deferred
 
@@ -419,6 +421,8 @@ Every journey listed on 2026-11-17 is walked.
 | PHI climate data | Not scheduled (W3) |
 | A registered contract for climate formats | The second reader (W6) |
 | Reading design temperatures from a file | Not scheduled (W4) |
+| Export of the design temperatures to METr. PHX writes 0.0 and 24.0 to METr's `hDesDryT` and `cDesDryT` (read in the PHX checkout, 2026-11-17); whether they are the ASHRAE values is not known (R9) | Someone checking the two fields in METr, then a honeybee-ph and PHX change |
+| An `.xls` reader for Phius workbooks, which alone cover Canada and Japan in the private corpus (R3) | Not scheduled; it would be the second reader (W6) |
 
 ## Non-goals
 

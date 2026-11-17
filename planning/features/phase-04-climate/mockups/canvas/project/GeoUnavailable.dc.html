@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Climate: Set Location, the SketchUp model has no geolocation</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/phcomposer/tokens.css">
+<link rel="stylesheet" href="ds/phcomposer/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+.mx{position:relative;width:1280px;height:800px;display:flex;flex-direction:column;overflow:hidden;background:#fff;color:#132a2b;font:13px/18px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.mx .phc-app-header{display:flex;align-items:center;justify-content:space-between;flex:none}
+.mx .panel-panes{flex:1;min-height:0;overflow:hidden;padding:0}
+.two{display:flex;gap:20px;align-items:flex-start}
+.side{flex:0 0 264px;display:flex;flex-direction:column;gap:8px}
+.pane{flex:1;min-width:0}
+.phc-workspace button.card{display:block;width:100%;height:auto;padding:10px 12px;border:1px solid #e1e6e9;border-radius:7px;background:#fff;text-align:left}
+.phc-workspace button.card[aria-current="true"]{border-color:#075360;background:#e3eff1}
+.card b{display:block;font-weight:600}
+.card small{display:block;margin-top:2px;color:#5d6b73;font-size:12px}
+.sep{margin:8px 0 0;color:#5d6b73;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.z{display:inline-block;height:22px;line-height:22px;padding:0 9px;margin:4px 4px 0 0;border-radius:999px;background:#edf1f2;font-size:12px;white-space:nowrap}
+.z.w{background:#ffe6a0;color:#785400}
+.z.ok{background:#d9efe4;color:#0b5a3c}
+.map{display:block;width:100%;border:1px solid #e1e6e9;border-radius:7px;background:#f6f8f9}
+.facts{display:grid;grid-template-columns:150px 1fr;gap:6px 12px;margin:14px 0 0}
+.facts dt{color:#5d6b73}
+.facts dd{margin:0}
+.scrim{position:absolute;left:0;top:0;right:0;bottom:0;background:#132a2b33}
+.dlg{position:absolute;left:170px;top:110px;width:940px;box-sizing:border-box;padding:18px 20px;border:1px solid #c9d2d7;border-radius:10px;background:#fff;box-shadow:0 16px 48px #10242c24,0 2px 6px #10242c14}
+.dlg h2{margin:0 0 12px;font-size:20px;line-height:24px;font-weight:600}
+.dlg .cols{display:flex;gap:20px;align-items:flex-start}
+.dlg .pick{flex:1;min-width:0;border:1px solid #e1e6e9;border-radius:7px;background:#f6f8f9;cursor:crosshair}
+.dlg .form{flex:0 0 300px}
+.dlg .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+.dlg .opt{margin:14px 0 8px;color:#5d6b73;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.dlg .hint{margin:10px 0 0;color:#5d6b73;font-size:12px;line-height:17px}
+.dlg label{display:flex;flex-direction:column;gap:4px;color:#5d6b73;font-size:12px;font-weight:500}
+.dlg .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+</style>
+</helmet>
+<div class="mx phc-workspace live-panel">
+<div class="phc-app-header">
+<nav class="phc-tabs" aria-label="Sections">
+<button type="button" aria-pressed="true">Climate</button>
+<button type="button">Zones</button>
+<button type="button">Assemblies</button>
+<button type="button">Window Types</button>
+<button type="button">Thermal Bridges</button>
+<button type="button">Programs</button>
+<button type="button">Mechanical</button>
+<button type="button">Library</button>
+<button type="button">Export</button>
+</nav>
+<div class="phc-app-tools"><div class="phc-unit-toggle" role="group" aria-label="Display units"><button type="button" aria-pressed="false">IP</button><button type="button" aria-pressed="true">SI</button></div></div>
+</div>
+<main class="panel-panes">
+<div data-pane="climate">
+<section>
+<div class="phc-heading"><h1>Climate</h1><div class="phc-heading-actions"><button type="button">Climate Data on This Computer…</button><button type="button" class="primary">Set Location…</button></div></div>
+<div class="two">
+<div class="side">
+<button type="button" class="card" aria-current="true"><b>Site location</b><span class="z w">Not set</span></button>
+<div class="sep">Climate sources</div>
+<button type="button" class="card"><b>Phius climate data</b><span class="z w">Not set</span></button>
+<button type="button" class="card"><b>Design temperatures</b><span class="z w">Not set</span></button>
+<button type="button" class="card" disabled style="opacity:.6"><b>Hourly weather file</b><span class="z">Planned</span></button>
+</div>
+<div class="pane">
+<p style="color:#5d6b73">The site location is not set.</p>
+</div>
+</div>
+</section>
+</div>
+</main>
+<footer class="phc-footer"><span>PH-Composer</span><span>Editing: Model</span></footer>
+<div class="scrim" aria-hidden="true"></div>
+<div class="dlg" role="dialog" aria-label="Set site location">
+<h2>Set site location</h2>
+<div class="cols">
+<svg class="pick" viewBox="0 0 560 420" role="img" aria-label="Outline map. Click to place the site">
+<g stroke="#e1e6e9" stroke-width="1"><path d="M0 105H560M0 210H560M0 315H560M140 0V420M280 0V420M420 0V420"/></g>
+<path d="M24 60 L180 40 L312 70 L384 30 L456 80 L480 190 L540 240 L560 250 L560 420 L0 420 L0 90 Z" fill="#fff" stroke="#c9d2d7" stroke-width="1.5"/>
+<g fill="none" stroke="#c9d2d7" stroke-width="1" stroke-dasharray="4 4"><path d="M312 70 L324 250 L300 420"/><path d="M0 250 L324 250 L480 190"/></g>
+<g fill="#7b878e" font-size="11"><text x="8" y="100">44° N</text><text x="8" y="205">43° N</text><text x="8" y="310">42° N</text><text x="144" y="414">76° W</text><text x="284" y="414">74° W</text><text x="424" y="414">72° W</text></g>
+
+<g transform="translate(516 14)"><rect width="30" height="60" rx="5" fill="#fff" stroke="#c9d2d7"/><path d="M0 30H30" stroke="#e1e6e9"/><path d="M9 15H21M15 9V21M9 45H21" stroke="#3a4a51" stroke-width="1.6" stroke-linecap="round"/></g>
+<text x="10" y="18" font-size="11" fill="#46565e">Click to place the site. Drag to pan.</text>
+</svg>
+<div class="form">
+<div class="grid">
+<label>Latitude °<input type="text" value=""></label>
+<label>Longitude °<input type="text" value=""></label>
+<label style="grid-column:1 / -1">Elevation m<input type="text" value=""></label>
+</div>
+<p class="hint">Latitude, longitude and elevation are needed. The station check compares distance and elevation to the site.</p>
+<div class="opt">For export</div>
+<div class="grid">
+<label>Climate zone<select><option>Not defined</option><option>1</option><option>2</option><option>3</option><option>4</option><option>4C</option><option>5</option><option>6</option><option>7</option><option>8</option></select></label>
+<label>Hours from UTC<input type="text" value=""></label>
+</div>
+<p class="hint">Read from SketchUp Geolocation fills latitude and longitude, and hours from UTC when SketchUp has one. It does not fill elevation. Nothing is written back to SketchUp.</p>
+</div>
+</div>
+<div class="acts"><button type="button" disabled>Read from SketchUp Geolocation</button><span style="margin-right:auto;color:#5d6b73;font-size:12px">This SketchUp model has no geolocation.</span><button type="button">Cancel</button><button type="button" class="primary" disabled>Set Location</button></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
