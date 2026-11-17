@@ -38,6 +38,13 @@ shipped with the extension. PH-Composer still loads no map tiles and reaches no 
    and a checksum. No folder path is stored in the Model or written to any export.
 4. The Model then reads in full on any computer. Only replacing the station needs the folder.
 
+Confirmed in the first journey walkthrough, 2026-11-17 (J1): the files stay where the user keeps
+them and are never copied into a PH-Composer folder. A file added or changed in a folder, or a
+whole new folder for a new year, shows the next time the picker opens, with nothing to import. The
+settings file is the only thing PH-Composer keeps, and it sits outside SketchUp's own folders: an
+extension's folder under SketchUp's Plugins is per SketchUp version and may be replaced when the
+extension is reinstalled, so it is no home for a user's setting or data.
+
 ## What honeybee-ph and METr take
 
 Verified on 2026-09-18 in `honeybee_ph/site.py` and PHX `to_METr_JSON/metr_schemas.py`, `_PhxSite`.
@@ -90,7 +97,7 @@ like:
 - a text-file tree, `USA/<ST>/<STATION>-mon.txt`: 1,007 stations in 50 state folders, the format
   the first version reads;
 - a few stray files in that tree whose names do not end `-mon.txt` (a second copy, an edited
-  copy), which a scan should count as not recognised and not as stations;
+  copy), which are counted as not read and not shown as second stations;
 - a second tree of one `.xls` workbook per station, for the USA and also for Canada and Japan,
   which have no text-file equivalent;
 - two folders of older `.xls` station workbooks.
@@ -157,7 +164,11 @@ weather file gives a second reader to shape it against.
 
 - A dialog, opened from the Climate tab and listed in the Setup view with a one-line summary (W5).
 - It lists each climate data folder with its name, its location, the format found, the number of
-  stations and states, and how many files were not recognised. Add Folder, Rescan and Remove.
+  stations and states, and the files it did not read, grouped by kind (for example "1,150 Excel
+  files, 4 other") so a folder that also holds other formats does not read as a failure. Add
+  Folder and Remove. There is no Rescan: the counts are read when the dialog opens (J1).
+- A setting whose folder has moved or been renamed says so and is pointed at the new place once.
+  Models are unaffected.
 - Adding a folder asks for its name, prefilled from the folder's own name. That name is the
   dataset name the Model and the Export report show (W5).
 - The first version recognises Phius station files only. Anything else in a folder is counted as
@@ -241,6 +252,16 @@ illustrate these.
 | W8 | UI, Code | Three peak-load cases is complete for a Phius station; the second cooling case and ground temperatures stay empty and unflagged; wind speed is typed with a prefilled mean; an attached station may be edited and is then marked as edited |
 | W9 | Scope | The packet is Phase 4, ahead of Shading, Programs and Mechanical |
 
+The journey walkthroughs. One journey at a time, with Ed.
+
+| # | Journey | Kind | Answer |
+| --- | --- | --- | --- |
+| J1 | A new user points PH-Composer at the climate files on their computer, 2026-11-17 | UI, Code | Done from the Climate tab's empty state, or the Climate Data on This Computer dialog, or the Setup view: choose a folder, name it, see what was found. Set once per computer, for every Model. Files are read in place and never copied; new and changed files show the next time the picker opens; no Rescan. The settings file sits in a PH-Composer folder under the user's application-support folder, outside SketchUp's versioned folders. Files not read are reported by kind. A cache of what was read, refreshed by each file's modified date and never managed by the user, is added only if reading proves slow |
+
+Journeys still to walk: setting the site; choosing and attaching a station; entering values by
+hand; the design temperatures; opening the Model on another computer; replacing and editing a
+station; export.
+
 ## Open, and owed before planning
 
 1. Which tab the panel opens on now that Climate is first. Zones is where most work happens.
@@ -263,6 +284,11 @@ illustrate these.
 10. Stations outside the USA. The private corpus has Canadian and Japanese stations only as `.xls`
     workbooks, which the first version does not read (W5), so they cannot be attached except by
     typing values in. Whether an `.xls` reader joins the first version is not asked.
+11. Whether the user is told about new stations, for example "12 stations added since you last
+    looked". It needs a count remembered per folder. New files appear either way (J1).
+12. To measure before planning: how long reading a full dataset takes when the picker opens, on a
+    local disk and in a cloud-synced folder whose files may not be downloaded. The private corpus
+    sits in one.
 
 ## Deferred
 

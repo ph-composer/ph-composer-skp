@@ -1,7 +1,7 @@
 # Climate data: status
 
 DATE: 2026-09-18
-STATUS: Requested. Wireframes reviewed with Ed by 2026-11-16 and the PRD revised to their nine answers (W1 to W9) the same day. Ten items are open or owed before planning (PRD, "Open"); nothing is planned or authorized. The Mechanical phase's heat pump stage waits on this packet.
+STATUS: Requested. Wireframes reviewed with Ed by 2026-11-16 and the PRD revised to their nine answers (W1 to W9) the same day. Twelve items are open or owed before planning (PRD, "Open"); the first of the user-journey walkthroughs is recorded (J1) and the rest continue in a new thread; nothing is planned or authorized. The Mechanical phase's heat pump stage waits on this packet.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (no remote)
 
@@ -35,7 +35,7 @@ D7 (no datasets ship) and the snapshot rule stand, and the proposal depends on b
 
 ## Next step
 
-Put the PRD's nine open items to Ed, draw the screens still missing (entering values by hand, the Design temperatures card, an edited station), then plan the stages. Earlier next step, superseded by the Phase 4 dependency: none until the MVP packets have plans, then interview the remaining feature-local questions and
+Continue the user-journey walkthroughs with Ed, one journey at a time, against the wireframes (the PRD lists the journeys still to walk); record each as J2 onward. Then put the PRD's open items to Ed, draw the screens still missing, and plan the stages. Earlier next step, superseded by the Phase 4 dependency: none until the MVP packets have plans, then interview the remaining feature-local questions and
 plan the peak-load entry, readiness and repair-route behavior already fixed by D9.
 
 ## Blockers
@@ -65,3 +65,4 @@ None. Nothing is implemented.
 | 2026-11-16 | Ed settled the code shape: Climate is its own feature, not a Library kind; a Model holds one site and one Phius climate; one built-in Phius reader now, with a format contract deferred until a second reader exists. All nine wireframe questions are now answered. The PRD is not yet revised. |
 | 2026-11-16 | PRD revised to the wireframe review: a Climate tab, climate data folders per computer, a station picker on an outline map, one climate per Model, typed design temperatures, the hourly weather file and PHI deferred. Q1 to Q9 kept with what the review did to each; W1 to W9 added; nine items listed as open or owed before planning. |
 | 2026-11-16 | Recorded the private development corpus: Ed's licensed Phius 2022 dataset, held outside the repository, located only in gitignored `_private/climate/MANIFEST.md`, never to be distributed. Its layout (from names only) is in the PRD. It shows a second, `.xls` format that alone covers Canada and Japan; added as open item 10. |
+| 2026-11-17 | First journey walked with Ed (J1, setting up the climate files): read in place and never copied, new files show by themselves, no Rescan, the settings file outside SketchUp's versioned folders, files not read reported by kind, a cache only if reading proves slow. Board 3 updated. Open items 11 (a notice of new stations) and 12 (measure the read time, including a cloud-synced folder) added. The remaining journeys move to a new thread. |

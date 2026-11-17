@@ -38,6 +38,24 @@ All data is synthetic, and every derived number on the Blended result board is a
 Not drawn: Heat Pumps › Units · Outdoor, Fans, Electric Heating, row actions, the New-record
 forms, the Ventilator disclosure for its two optional fields, and the 360 x 520 panel size.
 
+## Using these during the build
+
+These are the reference for the screens when the stages are built. They are static markup, not
+panel code: nothing here is copied into `src/`.
+
+- The [DECISIONS, Part 3](../DECISIONS.md#part-3-wireframe-review-2026-11-15) and the [equipment PRD](../equipment/PRD.md) own behaviour. Where a board and they differ, those win and the
+  board is corrected.
+- Each board uses the panel's real class names and stylesheets, so its structure (page header,
+  subtabs, inventory controls, table, dialog) is the structure to build. Classes defined in a
+  board's own `<style>` block are wireframe-only stand-ins for parts the kit does not have yet.
+- The notes in `canvas/project/canvas.json` hold what was settled against each board and when.
+- Before building a screen, load the UI polish skill and check the board at the panel's three
+  sizes; only 1280 x 800 and one 420 px board are drawn.
+
+Kit parts these boards assume and the panel does not have yet: the pill row under the subtabs, the
+Zone chips and Zone picker for Serves, and the grouped rows of Units · Indoor. The tab rows predate
+the 2026-11-16 decision that Climate is the first tab and show neither Climate nor Programs.
+
 ## Checked
 
 Every board loads in the local viewer with no console error and each table's rows match its

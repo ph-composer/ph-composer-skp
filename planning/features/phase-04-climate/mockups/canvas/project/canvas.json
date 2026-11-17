@@ -103,7 +103,7 @@
       "y": 850,
       "w": 620,
       "fill": "green",
-      "text": "SETTLED 2026-11-15 · The per-computer setting\nEach folder's location and its name are kept in PH-Composer's own settings file in the user's folder, shared by every SketchUp version; not in SketchUp's preferences and never in a Model. No list of stations is stored: the folder is read when the picker opens. You type the dataset name, prefilled from the folder's name. Reached from the Climate tab and listed in the Setup view. The first version recognises Phius station files only."
+      "text": "SETTLED 2026-11-15 · The per-computer setting\nEach folder's location and its name are kept in PH-Composer's own settings file in the user's folder, shared by every SketchUp version; not in SketchUp's preferences and never in a Model. No list of stations is stored: the folder is read when the picker opens. You type the dataset name, prefilled from the folder's name. Reached from the Climate tab and listed in the Setup view. The first version recognises Phius station files only.\nJourney 1, 2026-11-17: files stay where they are and are never copied in, so new or changed files show the next time the picker opens; Rescan is gone. Files not read are reported by kind."
     },
     "c4": {
       "x": 4080,

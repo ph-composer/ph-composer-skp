@@ -24,7 +24,7 @@ licensed climate data is in this folder.
 | --- | --- | --- |
 | 1 | `Main.dc.html` | The Climate tab with Site location selected and Set Location open: typed coordinates, elevation and climate zone, and Read from SketchUp Geolocation |
 | 2 | `PhiusEmpty.dc.html` | Phius climate data selected on a computer with no climate folder |
-| 3 | `DataSetup.dc.html` | Climate data on this computer: the folders, what was found in each, and what is kept where |
+| 3 | `DataSetup.dc.html` | Climate data on this computer: the folders, what was found in each, the files not read by kind, and what is kept where. Updated for journey J1 |
 | 4 | `Picker.dc.html` | Set Phius climate data: every station on an outline map, the site, the 50 mile ring, a State filter, the verdict and Attach |
 | 5 | `PhiusAttached.dc.html` | An attached station: the limit check, monthly temperatures and radiation, peak loads, and where the data lives |
 | 6 | `OtherComputer.dc.html` | The same Model on a computer with no climate folder |
@@ -58,6 +58,23 @@ that has moved, a station file that changed since it was attached, charts, and t
 | 7 | A primary Climate tab, and where it sits | Settled 2026-11-16: the first tab, before Zones: Climate, Zones, Assemblies, Window Types, Thermal Bridges, Programs, Mechanical, Library, Export. Open: which tab the panel opens on, since Zones is where most work happens |
 | 8 | What a Phius station file does not supply: ground temperatures, a second cooling case, one annual wind speed | Settled 2026-11-16: three peak-load cases is the complete set for a Phius station and Cooling 2 stays empty; ground temperatures stay empty and unflagged; average wind speed is typed, prefilled with the mean of the file's January and July values. A station's values may be edited after attaching, and the source is then marked as edited in the tab and the Export report. Whether export must write a placeholder for the empty slots is settled with the export stage |
 | 9 | Where the packet sits | Settled 2026-11-15: promoted to Phase 4, ahead of Mechanical |
+
+## Using these during the build
+
+These are the reference for the screens when the stages are built. They are static markup, not
+panel code: nothing here is copied into `src/`.
+
+- The [PRD](../PRD.md) owns behaviour. Where a board and the PRD differ, the PRD wins and the
+  board is corrected.
+- Each board uses the panel's real class names and stylesheets, so its structure (page header,
+  subtabs, inventory controls, table, dialog) is the structure to build. Classes defined in a
+  board's own `<style>` block are wireframe-only stand-ins for parts the kit does not have yet.
+- The notes in `canvas/project/canvas.json` hold what was settled against each board and when.
+- Before building a screen, load the UI polish skill and check the board at the panel's three
+  sizes; only 1280 x 800 and one 420 px board are drawn.
+
+Kit parts these boards assume and the panel does not have yet: the source cards in the sidebar,
+the outline map with its markers, ring, zoom buttons and hover tip, and the station list rows.
 
 ## Checked
 
