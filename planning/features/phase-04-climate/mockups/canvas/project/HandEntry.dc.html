@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Climate: Enter Phius climate values by hand</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/phcomposer/tokens.css">
+<link rel="stylesheet" href="ds/phcomposer/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+.mx{position:relative;width:1280px;height:800px;display:flex;flex-direction:column;overflow:hidden;background:#fff;color:#132a2b;font:13px/18px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.mx .phc-app-header{display:flex;align-items:center;justify-content:space-between;flex:none}
+.mx .panel-panes{flex:1;min-height:0;overflow:hidden;padding:0}
+.z{display:inline-block;height:22px;line-height:22px;padding:0 9px;border-radius:999px;background:#edf1f2;font-size:12px;white-space:nowrap}
+.z.w{background:#ffe6a0;color:#785400}
+.z.ok{background:#d9efe4;color:#0b5a3c}
+.z.no{background:#fff0ed;color:#a43a2d}
+.ro{color:#5d6b73}
+.scrim{position:absolute;left:0;top:0;right:0;bottom:0;background:#132a2b33}
+.dlg{position:absolute;left:60px;top:60px;width:1160px;height:680px;box-sizing:border-box;display:flex;flex-direction:column;padding:18px 20px;border:1px solid #c9d2d7;border-radius:10px;background:#fff;box-shadow:0 16px 48px #10242c24,0 2px 6px #10242c14}
+.dlg h2{margin:0;font-size:20px;line-height:24px;font-weight:600}
+.dlg .sub{margin:2px 0 12px;color:#5d6b73}
+.bar{display:flex;align-items:center;gap:10px;margin:0 0 12px}
+.bar label{display:flex;align-items:center;gap:6px;color:#5d6b73}
+.cols{flex:1;min-height:0;display:flex;gap:16px}
+.map{flex:1;min-width:0;border:1px solid #e1e6e9;border-radius:7px;background:#f6f8f9}
+.list{flex:0 0 420px;display:flex;flex-direction:column;border:1px solid #e1e6e9;border-radius:7px;overflow:hidden}
+.phc-workspace button.row{display:grid;grid-template-columns:1fr 62px 62px 58px;align-items:center;gap:8px;width:100%;height:auto;min-height:40px;padding:6px 12px;border:0;border-bottom:1px solid #edf0f2;border-radius:0;background:#fff;text-align:left}
+.phc-workspace button.row[aria-current="true"]{background:#e3eff1}
+.row span{font-variant-numeric:tabular-nums;text-align:right;color:#46565e}
+.row b{font-weight:600}
+.head{display:grid;grid-template-columns:1fr 62px 62px 58px;gap:8px;padding:8px 12px;background:#f6f8f9;border-bottom:1px solid #e1e6e9;color:#46565e;font-size:12px;font-weight:600}
+.head span{text-align:right}
+.verdict{margin:12px 0 0;padding:8px 12px;border-radius:7px;background:#ffe6a0;color:#5c4000}
+.hf{display:flex;gap:12px;margin:0 0 14px}
+.hf label{flex:1;display:flex;flex-direction:column;gap:4px;color:#5d6b73;font-size:12px;font-weight:500;min-width:0}
+.hf input{width:100%;box-sizing:border-box}
+.grid{width:100%;border-collapse:collapse;table-layout:fixed}
+.grid th{padding:4px 6px;color:#46565e;font-size:12px;font-weight:600;text-align:right}
+.grid th[scope="row"]{width:118px;white-space:nowrap;text-align:left;font-weight:500;color:#132a2b}
+.grid thead th:first-child{width:132px}
+.grid td{padding:2px}
+.grid td input{width:100%;box-sizing:border-box;height:28px;padding:0 6px;text-align:right;font-variant-numeric:tabular-nums}
+.grid .d{background:#f6f8f9}
+.grid th.d{border-left:1px solid #e1e6e9}
+.grid td.na{color:#7b878e;font-size:12px;text-align:center}
+.units{margin:8px 0 0;color:#5d6b73;font-size:12px}
+.acts{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:auto;padding-top:12px}
+</style>
+</helmet>
+<div class="mx phc-workspace live-panel">
+<div class="phc-app-header">
+<nav class="phc-tabs" aria-label="Sections">
+<button type="button" aria-pressed="true">Climate</button>
+<button type="button">Zones</button>
+<button type="button">Assemblies</button>
+<button type="button">Window Types</button>
+<button type="button">Thermal Bridges</button>
+<button type="button">Programs</button>
+<button type="button">Mechanical</button>
+<button type="button">Library</button>
+<button type="button">Export</button>
+</nav>
+<div class="phc-app-tools"><div class="phc-unit-toggle" role="group" aria-label="Display units"><button type="button" aria-pressed="false">IP</button><button type="button" aria-pressed="true">SI</button></div></div>
+</div>
+<main class="panel-panes"><div data-pane="climate"><section><div class="phc-heading"><h1>Climate</h1></div></section></div></main>
+<footer class="phc-footer"><span>PH-Composer</span><span>Editing: Model</span></footer>
+<div class="scrim" aria-hidden="true"></div>
+<div class="dlg" role="dialog" aria-label="Enter Phius climate values">
+<h2>Enter Phius climate values</h2>
+<div class="sub">Type the values, or copy the block from a Phius climate workbook and paste it into the first cell.</div>
+<div class="hf">
+<label style="flex:2">Name<input type="text" value="Custom dataset, Elm Street"></label>
+<label>Station elevation m<input type="text" value="92"></label>
+<label>Daily temperature swing K<input type="text" value="9.4"></label>
+<label>Average wind speed m/s<input type="text" value=""></label>
+<label>Latitude ° (optional)<input type="text" value=""></label>
+<label>Longitude ° (optional)<input type="text" value=""></label>
+</div>
+<table class="grid">
+<thead><tr><th></th><th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th><th>May</th><th>Jun</th><th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th><th class="d">Heating 1</th><th class="d">Heating 2</th><th class="d">Cooling</th></tr></thead>
+<tbody>
+<tr><th scope="row">Outdoor temp. °C</th><td><input type="text" value="−5.1" aria-label="Outdoor temp. °C"></td><td><input type="text" value="−3.6" aria-label="Outdoor temp. °C"></td><td><input type="text" value="1.4" aria-label="Outdoor temp. °C"></td><td><input type="text" value="8.2" aria-label="Outdoor temp. °C"></td><td><input type="text" value="14.5" aria-label="Outdoor temp. °C"></td><td><input type="text" value="19.3" aria-label="Outdoor temp. °C"></td><td><input type="text" value="22.0" aria-label="Outdoor temp. °C"></td><td><input type="text" value="21.0" aria-label="Outdoor temp. °C"></td><td><input type="text" value="16.6" aria-label="Outdoor temp. °C"></td><td><input type="text" value="10.1" aria-label="Outdoor temp. °C"></td><td><input type="text" value="4.2" aria-label="Outdoor temp. °C"></td><td><input type="text" value="−2.0" aria-label="Outdoor temp. °C"></td><td class="d"><input type="text" value="−13.4" aria-label="Outdoor temp. °C design"></td><td class="d"><input type="text" value="−7.9" aria-label="Outdoor temp. °C design"></td><td class="d"><input type="text" value="26.8" aria-label="Outdoor temp. °C design"></td></tr>
+<tr><th scope="row">North</th><td><input type="text" value="14" aria-label="North"></td><td><input type="text" value="19" aria-label="North"></td><td><input type="text" value="29" aria-label="North"></td><td><input type="text" value="39" aria-label="North"></td><td><input type="text" value="52" aria-label="North"></td><td><input type="text" value="58" aria-label="North"></td><td><input type="text" value="56" aria-label="North"></td><td><input type="text" value="45" aria-label="North"></td><td><input type="text" value="33" aria-label="North"></td><td><input type="text" value="23" aria-label="North"></td><td><input type="text" value="14" aria-label="North"></td><td><input type="text" value="11" aria-label="North"></td><td class="d"><input type="text" value="18" aria-label="North design"></td><td class="d"><input type="text" value="9" aria-label="North design"></td><td class="d"><input type="text" value="72" aria-label="North design"></td></tr>
+<tr><th scope="row">East</th><td><input type="text" value="27" aria-label="East"></td><td><input type="text" value="40" aria-label="East"></td><td><input type="text" value="60" aria-label="East"></td><td><input type="text" value="74" aria-label="East"></td><td><input type="text" value="90" aria-label="East"></td><td><input type="text" value="94" aria-label="East"></td><td><input type="text" value="96" aria-label="East"></td><td><input type="text" value="84" aria-label="East"></td><td><input type="text" value="63" aria-label="East"></td><td><input type="text" value="43" aria-label="East"></td><td><input type="text" value="25" aria-label="East"></td><td><input type="text" value="21" aria-label="East"></td><td class="d"><input type="text" value="41" aria-label="East design"></td><td class="d"><input type="text" value="14" aria-label="East design"></td><td class="d"><input type="text" value="168" aria-label="East design"></td></tr>
+<tr><th scope="row">South</th><td><input type="text" value="72" aria-label="South"></td><td><input type="text" value="85" aria-label="South"></td><td><input type="text" value="92" aria-label="South"></td><td><input type="text" value="82" aria-label="South"></td><td><input type="text" value="78" aria-label="South"></td><td><input type="text" value="73" aria-label="South"></td><td><input type="text" value="78" aria-label="South"></td><td><input type="text" value="88" aria-label="South"></td><td><input type="text" value="92" aria-label="South"></td><td><input type="text" value="86" aria-label="South"></td><td><input type="text" value="62" aria-label="South"></td><td><input type="text" value="58" aria-label="South"></td><td class="d"><input type="text" value="112" aria-label="South design"></td><td class="d"><input type="text" value="24" aria-label="South design"></td><td class="d"><input type="text" value="131" aria-label="South design"></td></tr>
+<tr><th scope="row">West</th><td><input type="text" value="28" aria-label="West"></td><td><input type="text" value="41" aria-label="West"></td><td><input type="text" value="61" aria-label="West"></td><td><input type="text" value="75" aria-label="West"></td><td><input type="text" value="91" aria-label="West"></td><td><input type="text" value="96" aria-label="West"></td><td><input type="text" value="98" aria-label="West"></td><td><input type="text" value="85" aria-label="West"></td><td><input type="text" value="64" aria-label="West"></td><td><input type="text" value="44" aria-label="West"></td><td><input type="text" value="26" aria-label="West"></td><td><input type="text" value="22" aria-label="West"></td><td class="d"><input type="text" value="40" aria-label="West design"></td><td class="d"><input type="text" value="14" aria-label="West design"></td><td class="d"><input type="text" value="172" aria-label="West design"></td></tr>
+<tr><th scope="row">Global</th><td><input type="text" value="50" aria-label="Global"></td><td><input type="text" value="73" aria-label="Global"></td><td><input type="text" value="111" aria-label="Global"></td><td><input type="text" value="139" aria-label="Global"></td><td><input type="text" value="170" aria-label="Global"></td><td><input type="text" value="180" aria-label="Global"></td><td><input type="text" value="184" aria-label="Global"></td><td><input type="text" value="160" aria-label="Global"></td><td><input type="text" value="118" aria-label="Global"></td><td><input type="text" value="79" aria-label="Global"></td><td><input type="text" value="46" aria-label="Global"></td><td><input type="text" value="38" aria-label="Global"></td><td class="d"><input type="text" value="62" aria-label="Global design"></td><td class="d"><input type="text" value="22" aria-label="Global design"></td><td class="d"><input type="text" value="288" aria-label="Global design"></td></tr>
+<tr><th scope="row">Dewpoint °C</th><td><input type="text" value="−9.8" aria-label="Dewpoint °C"></td><td><input type="text" value="−9.0" aria-label="Dewpoint °C"></td><td><input type="text" value="−4.9" aria-label="Dewpoint °C"></td><td><input type="text" value="0.6" aria-label="Dewpoint °C"></td><td><input type="text" value="7.4" aria-label="Dewpoint °C"></td><td><input type="text" value="13.1" aria-label="Dewpoint °C"></td><td><input type="text" value="15.9" aria-label="Dewpoint °C"></td><td><input type="text" value="15.4" aria-label="Dewpoint °C"></td><td><input type="text" value="11.5" aria-label="Dewpoint °C"></td><td><input type="text" value="5.0" aria-label="Dewpoint °C"></td><td><input type="text" value="−0.4" aria-label="Dewpoint °C"></td><td><input type="text" value="−6.3" aria-label="Dewpoint °C"></td><td class="d"><input type="text" value="−16.8" aria-label="Dewpoint °C design"></td><td class="d"><input type="text" value="−10.2" aria-label="Dewpoint °C design"></td><td class="d"><input type="text" value="19.4" aria-label="Dewpoint °C design"></td></tr>
+<tr><th scope="row">Sky temp. °C</th><td><input type="text" value="" aria-label="Sky temp. °C"></td><td><input type="text" value="" aria-label="Sky temp. °C"></td><td><input type="text" value="" aria-label="Sky temp. °C"></td><td><input type="text" value="" aria-label="Sky temp. °C"></td><td><input type="text" value="" aria-label="Sky temp. °C"></td><td><input type="text" value="" aria-label="Sky temp. °C"></td><td><input type="text" value="" aria-label="Sky temp. °C"></td><td><input type="text" value="" aria-label="Sky temp. °C"></td><td><input type="text" value="" aria-label="Sky temp. °C"></td><td><input type="text" value="" aria-label="Sky temp. °C"></td><td><input type="text" value="" aria-label="Sky temp. °C"></td><td><input type="text" value="" aria-label="Sky temp. °C"></td><td class="d"><input type="text" value="" aria-label="Sky temp. °C design"></td><td class="d"><input type="text" value="" aria-label="Sky temp. °C design"></td><td class="d"><input type="text" value="" aria-label="Sky temp. °C design"></td></tr>
+</tbody>
+</table>
+<p class="units">Radiation rows: kWh/m² for each month, W/m² in the three design columns. Rows and columns are in the order of a Phius climate file.</p>
+<div class="verdict" role="status">Incomplete: Sky temperature and the average wind speed are empty. It can be saved now and finished later. Export leaves the climate out until it is complete.</div>
+<div class="acts"><span class="ro" style="margin-right:auto">No coordinates: the Phius limit check will read "Not checked, entered by hand".</span><button type="button">Cancel</button><button type="button" class="primary">Save</button></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

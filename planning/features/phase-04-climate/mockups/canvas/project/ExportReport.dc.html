@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Export report: the climate section</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/phcomposer/tokens.css">
+<link rel="stylesheet" href="ds/phcomposer/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+.mx{position:relative;width:1280px;height:800px;display:flex;flex-direction:column;overflow:hidden;background:#fff;color:#132a2b;font:13px/18px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.mx .phc-app-header{display:flex;align-items:center;justify-content:space-between;flex:none}
+.mx .panel-panes{flex:1;min-height:0;overflow:hidden;padding:0}
+.two{display:flex;gap:20px;align-items:flex-start}
+.side{flex:0 0 264px;display:flex;flex-direction:column;gap:8px}
+.pane{flex:1;min-width:0}
+.phc-workspace button.card{display:block;width:100%;height:auto;padding:10px 12px;border:1px solid #e1e6e9;border-radius:7px;background:#fff;text-align:left}
+.phc-workspace button.card[aria-current="true"]{border-color:#075360;background:#e3eff1}
+.card b{display:block;font-weight:600}
+.card small{display:block;margin-top:2px;color:#5d6b73;font-size:12px}
+.sep{margin:8px 0 0;color:#5d6b73;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.z{display:inline-block;height:22px;line-height:22px;padding:0 9px;margin:4px 4px 0 0;border-radius:999px;background:#edf1f2;font-size:12px;white-space:nowrap}
+.z.w{background:#ffe6a0;color:#785400}
+.z.ok{background:#d9efe4;color:#0b5a3c}
+.rep{max-width:860px}
+.rep h2{margin:0 0 10px;font-size:15px;line-height:20px;font-weight:600}
+.rep dl{display:grid;grid-template-columns:170px 1fr;gap:8px 14px;margin:0 0 14px;padding:14px 16px;border:1px solid #e1e6e9;border-radius:7px}
+.rep dt{color:#5d6b73}
+.rep dd{margin:0}
+.rep .z{margin:0 6px 0 0}
+.find{margin:0 0 12px;padding:8px 12px;border-radius:7px;background:#ffe6a0;color:#5c4000}
+.ro{color:#5d6b73}
+.dt{max-width:640px}
+.dt h2{margin:0 0 6px;font-size:15px;line-height:20px;font-weight:600}
+.dt p{margin:0 0 14px;color:#46565e}
+.dt .f{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;margin:0 0 14px}
+.dt label{display:flex;flex-direction:column;gap:4px;color:#5d6b73;font-size:12px;font-weight:500}
+.dt .wide{grid-column:1 / -1}
+.dt .use{margin:0;padding:12px 14px;border-radius:7px;background:#f6f8f9;color:#46565e}
+.phc-workspace .empty{max-width:640px;margin:40px auto 0;padding:28px 32px;border:1px solid #e1e6e9;border-radius:7px;text-align:left}
+.empty h2{margin:0 0 8px;font-size:15px;line-height:20px;font-weight:600}
+.empty p{margin:0 0 12px;color:#46565e}
+.empty ul{margin:0 0 16px;padding-left:18px;color:#46565e}
+.empty li{margin:0 0 4px}
+.empty .acts{display:flex;gap:8px}
+</style>
+</helmet>
+<div class="mx phc-workspace live-panel">
+<div class="phc-app-header">
+<nav class="phc-tabs" aria-label="Sections">
+<button type="button">Climate</button>
+<button type="button">Zones</button>
+<button type="button">Assemblies</button>
+<button type="button">Window Types</button>
+<button type="button">Thermal Bridges</button>
+<button type="button">Programs</button>
+<button type="button">Mechanical</button>
+<button type="button">Library</button>
+<button type="button" aria-pressed="true">Export</button>
+</nav>
+<div class="phc-app-tools"><div class="phc-unit-toggle" role="group" aria-label="Display units"><button type="button" aria-pressed="false">IP</button><button type="button" aria-pressed="true">SI</button></div></div>
+</div>
+<main class="panel-panes">
+<div data-pane="export">
+<section>
+<div class="phc-heading"><h1>Export</h1></div>
+<div class="rep">
+<h2>Export report · Climate</h2>
+<dl>
+<dt>Site</dt><dd>42.750° N, 73.800° W · 84 m · climate zone 5</dd>
+<dt>Climate</dt><dd>Phius 2022 · Northfield Regional <span class="z w">Edited</span></dd>
+<dt>Phius limit check</dt><dd><span class="z ok">Pass</span> 18 km and 11 m from the site. Limits 80 km and 122 m.</dd>
+<dt>Edited values</dt><dd>2 differ from the station file: Air, January −6.0 (file −5.1); Heating 1 temperature −15.0 (file −13.4). Exported as a user-defined climate.</dd>
+<dt>Peak loads</dt><dd>Heating 1, Heating 2, Cooling 1. A Phius file has one cooling case, so Cooling 2 repeats Cooling 1.</dd>
+<dt>Wind speed</dt><dd>3.9 m/s, typed</dd>
+<dt>Design temperatures</dt><dd>99% heating −17.2 °C · 1% cooling 30.1 °C · ASHRAE 2021, Northfield Regional. Kept in the Model; not written to the HBJSON.</dd>
+</dl>
+<div class="find" role="status"><b>1 finding</b> · Hours from UTC is not set. It is exported empty. Set it in Climate, Site location.</div>
+<p class="ro">No folder location is written to the HBJSON or to this report.</p>
+</div>
+</section>
+</div>
+</main>
+<footer class="phc-footer"><span>PH-Composer</span><span>Editing: Model</span></footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

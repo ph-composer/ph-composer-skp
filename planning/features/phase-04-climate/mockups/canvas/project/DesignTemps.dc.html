@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Climate: Design temperatures</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/phcomposer/tokens.css">
+<link rel="stylesheet" href="ds/phcomposer/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+.mx{position:relative;width:1280px;height:800px;display:flex;flex-direction:column;overflow:hidden;background:#fff;color:#132a2b;font:13px/18px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.mx .phc-app-header{display:flex;align-items:center;justify-content:space-between;flex:none}
+.mx .panel-panes{flex:1;min-height:0;overflow:hidden;padding:0}
+.two{display:flex;gap:20px;align-items:flex-start}
+.side{flex:0 0 264px;display:flex;flex-direction:column;gap:8px}
+.pane{flex:1;min-width:0}
+.phc-workspace button.card{display:block;width:100%;height:auto;padding:10px 12px;border:1px solid #e1e6e9;border-radius:7px;background:#fff;text-align:left}
+.phc-workspace button.card[aria-current="true"]{border-color:#075360;background:#e3eff1}
+.card b{display:block;font-weight:600}
+.card small{display:block;margin-top:2px;color:#5d6b73;font-size:12px}
+.sep{margin:8px 0 0;color:#5d6b73;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.z{display:inline-block;height:22px;line-height:22px;padding:0 9px;margin:4px 4px 0 0;border-radius:999px;background:#edf1f2;font-size:12px;white-space:nowrap}
+.z.w{background:#ffe6a0;color:#785400}
+.z.ok{background:#d9efe4;color:#0b5a3c}
+.dt{max-width:640px}
+.dt h2{margin:0 0 6px;font-size:15px;line-height:20px;font-weight:600}
+.dt p{margin:0 0 14px;color:#46565e}
+.dt .f{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;margin:0 0 14px}
+.dt label{display:flex;flex-direction:column;gap:4px;color:#5d6b73;font-size:12px;font-weight:500}
+.dt .wide{grid-column:1 / -1}
+.dt .use{margin:0;padding:12px 14px;border-radius:7px;background:#f6f8f9;color:#46565e}
+.phc-workspace .empty{max-width:640px;margin:40px auto 0;padding:28px 32px;border:1px solid #e1e6e9;border-radius:7px;text-align:left}
+.empty h2{margin:0 0 8px;font-size:15px;line-height:20px;font-weight:600}
+.empty p{margin:0 0 12px;color:#46565e}
+.empty ul{margin:0 0 16px;padding-left:18px;color:#46565e}
+.empty li{margin:0 0 4px}
+.empty .acts{display:flex;gap:8px}
+</style>
+</helmet>
+<div class="mx phc-workspace live-panel">
+<div class="phc-app-header">
+<nav class="phc-tabs" aria-label="Sections">
+<button type="button" aria-pressed="true">Climate</button>
+<button type="button">Zones</button>
+<button type="button">Assemblies</button>
+<button type="button">Window Types</button>
+<button type="button">Thermal Bridges</button>
+<button type="button">Programs</button>
+<button type="button">Mechanical</button>
+<button type="button">Library</button>
+<button type="button">Export</button>
+</nav>
+<div class="phc-app-tools"><div class="phc-unit-toggle" role="group" aria-label="Display units"><button type="button" aria-pressed="false">IP</button><button type="button" aria-pressed="true">SI</button></div></div>
+</div>
+<main class="panel-panes">
+<div data-pane="climate">
+<section>
+<div class="phc-heading"><h1>Climate</h1><div class="phc-heading-actions"><button type="button">Climate Data on This Computer…</button></div></div>
+<div class="two">
+<div class="side">
+<button type="button" class="card"><b>Site location</b><small>42.750° N, 73.800° W · 84 m</small><small>Climate zone 5 · UTC −5</small></button>
+<div class="sep">Climate sources</div>
+<button type="button" class="card"><b>Phius climate data</b><small>Northfield Regional · Phius 2022</small><span class="z ok">Pass</span></button>
+<button type="button" class="card" aria-current="true"><b>Design temperatures</b><small>99% heating −17.2 °C · 1% cooling 30.1 °C</small><span class="z ok">Set</span></button>
+<button type="button" class="card" disabled style="opacity:.6"><b>Hourly weather file</b><span class="z">Planned</span></button>
+</div>
+<div class="pane">
+<div class="dt">
+<h2>Design temperatures</h2>
+<p>The ASHRAE design dry-bulb temperatures for the site. A Phius station file carries neither. Take them from the ASHRAE Handbook of Fundamentals climatic design conditions for the nearest station.</p>
+<div class="f">
+<label>99% heating dry bulb °C<input type="text" value="−17.2"></label>
+<label>1% cooling dry bulb °C<input type="text" value="30.1"></label>
+<label class="wide">Source (optional)<input type="text" value="ASHRAE 2021, Northfield Regional"></label>
+</div>
+<p class="use">Used for the blended heat pump on the Mechanical tab. Export does not wait on them: without both, only the blended heat pump is left out, with a finding. Clear a field to unset it.</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<footer class="phc-footer"><span>PH-Composer</span><span>Editing: Model</span></footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

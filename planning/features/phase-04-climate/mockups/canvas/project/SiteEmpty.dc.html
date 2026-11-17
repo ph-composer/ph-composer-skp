@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Climate: Site location not set</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/phcomposer/tokens.css">
+<link rel="stylesheet" href="ds/phcomposer/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+.mx{position:relative;width:1280px;height:800px;display:flex;flex-direction:column;overflow:hidden;background:#fff;color:#132a2b;font:13px/18px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.mx .phc-app-header{display:flex;align-items:center;justify-content:space-between;flex:none}
+.mx .panel-panes{flex:1;min-height:0;overflow:hidden;padding:0}
+.two{display:flex;gap:20px;align-items:flex-start}
+.side{flex:0 0 264px;display:flex;flex-direction:column;gap:8px}
+.pane{flex:1;min-width:0}
+.phc-workspace button.card{display:block;width:100%;height:auto;padding:10px 12px;border:1px solid #e1e6e9;border-radius:7px;background:#fff;text-align:left}
+.phc-workspace button.card[aria-current="true"]{border-color:#075360;background:#e3eff1}
+.card b{display:block;font-weight:600}
+.card small{display:block;margin-top:2px;color:#5d6b73;font-size:12px}
+.sep{margin:8px 0 0;color:#5d6b73;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.z{display:inline-block;height:22px;line-height:22px;padding:0 9px;margin:4px 4px 0 0;border-radius:999px;background:#edf1f2;font-size:12px;white-space:nowrap}
+.z.w{background:#ffe6a0;color:#785400}
+.phc-workspace .empty{max-width:640px;margin:40px auto 0;padding:28px 32px;border:1px solid #e1e6e9;border-radius:7px;text-align:left}
+.empty h2{margin:0 0 8px;font-size:15px;line-height:20px;font-weight:600}
+.empty p{margin:0 0 12px;color:#46565e}
+.empty ul{margin:0 0 16px;padding-left:18px;color:#46565e}
+.empty li{margin:0 0 4px}
+.empty .acts{display:flex;gap:8px}
+</style>
+</helmet>
+<div class="mx phc-workspace live-panel">
+<div class="phc-app-header">
+<nav class="phc-tabs" aria-label="Sections">
+<button type="button" aria-pressed="true">Climate</button>
+<button type="button">Zones</button>
+<button type="button">Assemblies</button>
+<button type="button">Window Types</button>
+<button type="button">Thermal Bridges</button>
+<button type="button">Programs</button>
+<button type="button">Mechanical</button>
+<button type="button">Library</button>
+<button type="button">Export</button>
+</nav>
+<div class="phc-app-tools"><div class="phc-unit-toggle" role="group" aria-label="Display units"><button type="button" aria-pressed="false">IP</button><button type="button" aria-pressed="true">SI</button></div></div>
+</div>
+<main class="panel-panes">
+<div data-pane="climate">
+<section>
+<div class="phc-heading"><h1>Climate</h1><div class="phc-heading-actions"><button type="button">Climate Data on This Computer…</button><button type="button" class="primary">Set Location…</button></div></div>
+<div class="two">
+<div class="side">
+<button type="button" class="card" aria-current="true"><b>Site location</b><span class="z w">Not set</span></button>
+<div class="sep">Climate sources</div>
+<button type="button" class="card"><b>Phius climate data</b><span class="z w">Not set</span></button>
+<button type="button" class="card"><b>Design temperatures</b><span class="z w">Not set</span></button>
+<button type="button" class="card" disabled style="opacity:.6"><b>Hourly weather file</b><span class="z">Planned</span></button>
+</div>
+<div class="pane">
+<div class="empty">
+<h2>The site location is not set</h2>
+<p>The site is where the building is. It is separate from the climate station, which may be some distance away.</p>
+<ul>
+<li>Type the latitude, longitude and elevation, or click the outline map to place the site.</li>
+<li>Read from SketchUp Geolocation fills latitude and longitude once. Nothing is written back to SketchUp.</li>
+<li>The station check measures distance and elevation from the site.</li>
+</ul>
+<div class="acts"><button type="button" class="primary">Set Location…</button></div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<footer class="phc-footer"><span>PH-Composer</span><span>Editing: Model</span></footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

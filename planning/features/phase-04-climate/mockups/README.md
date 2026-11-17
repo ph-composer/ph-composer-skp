@@ -5,7 +5,7 @@ STATUS: Reviewed. Drawn 2026-11-15 from Ed's request for a Climate tab that work
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
-Seven static artboards. The [PRD](../PRD.md) is the behaviour; these illustrate it. All station names, coordinates and values are synthetic; no
+Eighteen static artboards. The [PRD](../PRD.md) is the behaviour; these illustrate it. All station names, coordinates and values are synthetic; no
 licensed climate data is in this folder.
 
 ## Viewing
@@ -22,16 +22,26 @@ licensed climate data is in this folder.
 
 | # | File | Shows |
 | --- | --- | --- |
-| 1 | `Main.dc.html` | The Climate tab with Site location selected and Set Location open: typed coordinates, elevation and climate zone, and Read from SketchUp Geolocation |
+| 1 | `Main.dc.html` | The Climate tab with Site location selected and Set Location open: the map to click, typed coordinates and elevation, climate zone and hours from UTC, and Read from SketchUp Geolocation. Redrawn for journey J2 |
 | 2 | `PhiusEmpty.dc.html` | Phius climate data selected on a computer with no climate folder |
 | 3 | `DataSetup.dc.html` | Climate data on this computer: the folders, what was found in each, the files not read by kind, and what is kept where. Updated for journey J1 |
-| 4 | `Picker.dc.html` | Set Phius climate data: every station on an outline map, the site, the 50 mile ring, a State filter, the verdict and Attach |
+| 4 | `Picker.dc.html` | Set Phius climate data: every station on an outline map, the site, the 50 mile ring, a State filter, the verdict and Attach. Drawn narrowed to one state; it opens on All (J3) |
 | 5 | `PhiusAttached.dc.html` | An attached station: the limit check, monthly temperatures and radiation, peak loads, and where the data lives |
-| 6 | `OtherComputer.dc.html` | The same Model on a computer with no climate folder |
+| 6 | `OtherComputer.dc.html` | The same Model on a computer with no climate folder. Replace enabled, for journey J6 |
 | 7 | `Narrow.dc.html` | The tab at 420 px wide |
+| 8 | `SiteEmpty.dc.html` | Site location on a new Model: not set. Added for journey J2 |
+| 9 | `PhiusNeedsSite.dc.html` | Phius climate data with no site set: the site is asked for first. Added for journey J3 |
+| 10 | `PhiusReady.dc.html` | Phius climate data with a folder and a site and nothing attached. Added for journey J3 |
+| 11 | `PickerFail.dc.html` | The picker with a failing station selected: the warning, and Attach still offered. Added for journey J3 |
+| 12 | `HandEntry.dc.html` | Enter Phius climate values: the Phius-shaped grid, partly filled and marked Incomplete. Added for journey J4 |
+| 13 | `DesignTemps.dc.html` | The Design temperatures pane: two typed values and an optional source note. Added for journey J5 |
+| 14 | `DataSetupMoved.dc.html` | Climate data on this computer with one folder not found: Locate and Remove. Added for journey J6 |
+| 15 | `PhiusEdited.dc.html` | An edited station: the mark, the edited cells and Restore Original Values. Added for journey J7 |
+| 16 | `PickerReplace.dc.html` | Replace: the current and the new station side by side, and the edits that will be lost. Added for journey J7 |
+| 17 | `SourceChanged.dc.html` | The station file has changed since it was attached: the mark and Update from File. Added for journey J7 |
+| 18 | `ExportReport.dc.html` | The Export report's climate section, for an edited station with one finding. Its content, not the Export tab's layout. Added for journey J8 |
 
-Not drawn: the Design temperatures card's own screen, entering values by hand, scanning in progress, a folder
-that has moved, a station file that changed since it was attached, charts, and the 360 x 520 size.
+Not drawn: Read from SketchUp Geolocation on a Model with no geolocation, an attached station that fails, the pane of a hand-entered or incomplete climate, scanning in progress, Set Location with a station attached, charts, and the 360 x 520 size.
 
 ## How it is meant to work
 
@@ -50,13 +60,13 @@ that has moved, a station file that changed since it was attached, charts, and t
 | # | Question | Drawn as |
 | --- | --- | --- |
 | 1 | The map. The panel reaches no network (`context/TECH_STACK.md`, "Panel"), so web map tiles cannot load | Settled 2026-11-16: an outline map shipped with the extension, with world countries and US and Canadian state and province borders from public-domain data; no web tiles. Pan and zoom, click a station to select it, hover for its details, click to place the site in Set Location. Revises the PRD's "does not host a climate map"; "no map tiles" stands |
-| 2 | Location with no network: no address search, elevation lookup or climate-zone lookup | Typed fields and a one-way read from SketchUp's geolocation (PRD Q5, Q6) |
+| 2 | Location with no network: no address search, elevation lookup or climate-zone lookup | Typed fields and a one-way read from SketchUp's geolocation (PRD Q5, Q6). Journey J2, 2026-11-17: latitude, longitude and elevation set the site; climate zone is ten integer codes with no moisture letter; hours from UTC is typed; the read fills latitude and longitude, and hours from UTC if SketchUp supplies one, never elevation |
 | 3 | Which sources. The PRD has user-owned monthly files, a local EPW and manual paste, with peak loads supplied separately | Settled 2026-11-16: separate cards as PH-Navigator, for Phius climate data and an Hourly weather file; no PHI for now. In the first version Phius climate data is the only climate and the one that exports, set from a station in the folder or typed and pasted by hand. The Hourly weather file card is shown as Planned; the PRD's EPW route waits for it |
 | 4 | Design temperatures. The Phius heat pump estimator's derating reads the ASHRAE 99% heating and 1% cooling dry bulb for the location, and a Phius station file carries neither | Settled 2026-11-16: two typed values on their own card. Export does not wait on them; without them only the blended heat pump is left out, with a finding |
 | 5 | Where the folder setting lives | Settled 2026-11-15: a dialog opened from the Climate tab, also listed in the Setup view with a one-line summary. The setting is stored in PH-Composer's own settings file, not SketchUp's preferences; the user types the dataset name, prefilled from the folder's name; the first version recognises Phius station files only |
 | 6 | The record kind: the PRD's `climates` library kind through the provider seam, or a separate folder source | Settled 2026-11-16 (code): Climate is its own feature, not a Library kind. A Model holds one site and one Phius climate, which is what exports; replacing the station is one Undo step. One built-in Phius reader now; a registered format contract waits until the hourly weather file gives a second example. Revises the PRD's Q3 and its "Library provider seam" row |
 | 7 | A primary Climate tab, and where it sits | Settled 2026-11-16: the first tab, before Zones: Climate, Zones, Assemblies, Window Types, Thermal Bridges, Programs, Mechanical, Library, Export. Open: which tab the panel opens on, since Zones is where most work happens |
-| 8 | What a Phius station file does not supply: ground temperatures, a second cooling case, one annual wind speed | Settled 2026-11-16: three peak-load cases is the complete set for a Phius station and Cooling 2 stays empty; ground temperatures stay empty and unflagged; average wind speed is typed, prefilled with the mean of the file's January and July values. A station's values may be edited after attaching, and the source is then marked as edited in the tab and the Export report. Whether export must write a placeholder for the empty slots is settled with the export stage |
+| 8 | What a Phius station file does not supply: ground temperatures, a second cooling case, one annual wind speed | Settled 2026-11-16: three peak-load cases is the complete set for a Phius station and Cooling 2 stays empty; ground temperatures stay empty and unflagged; average wind speed is typed, prefilled with the mean of the file's January and July values. A station's values may be edited after attaching, and the source is then marked as edited in the tab and the Export report. Journey J8, 2026-11-17: export repeats Cooling 1 as Cooling 2, and the ground row needs nothing |
 | 9 | Where the packet sits | Settled 2026-11-15: promoted to Phase 4, ahead of Mechanical |
 
 ## Using these during the build
@@ -78,5 +88,5 @@ the outline map with its markers, ring, zoom buttons and hover tip, and the stat
 
 ## Checked
 
-Every board loads in the local viewer at its own size with no console error. The Design canvas
+Every board loaded in the local viewer at its own size with no console error on 2026-11-15; boards 1 and 8 were checked again on 2026-11-17 after journey J2, boards 9 to 11 after journey J3, board 12 after journey J4, board 13 after journey J5, boards 6 and 14 after journey J6, boards 15 to 17 after journey J7, and board 18 after journey J8. The Design canvas
 rendering was not checked.

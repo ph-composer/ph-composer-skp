@@ -31,9 +31,14 @@ body{margin:0}
 .facts dt{color:#5d6b73}
 .facts dd{margin:0}
 .scrim{position:absolute;left:0;top:0;right:0;bottom:0;background:#132a2b33}
-.dlg{position:absolute;left:410px;top:150px;width:460px;padding:18px 20px;border:1px solid #c9d2d7;border-radius:10px;background:#fff;box-shadow:0 16px 48px #10242c24,0 2px 6px #10242c14}
+.dlg{position:absolute;left:170px;top:110px;width:940px;box-sizing:border-box;padding:18px 20px;border:1px solid #c9d2d7;border-radius:10px;background:#fff;box-shadow:0 16px 48px #10242c24,0 2px 6px #10242c14}
 .dlg h2{margin:0 0 12px;font-size:20px;line-height:24px;font-weight:600}
+.dlg .cols{display:flex;gap:20px;align-items:flex-start}
+.dlg .pick{flex:1;min-width:0;border:1px solid #e1e6e9;border-radius:7px;background:#f6f8f9;cursor:crosshair}
+.dlg .form{flex:0 0 300px}
 .dlg .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+.dlg .opt{margin:14px 0 8px;color:#5d6b73;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.dlg .hint{margin:10px 0 0;color:#5d6b73;font-size:12px;line-height:17px}
 .dlg label{display:flex;flex-direction:column;gap:4px;color:#5d6b73;font-size:12px;font-weight:500}
 .dlg .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
 </style>
@@ -59,7 +64,7 @@ body{margin:0}
 <div class="phc-heading"><h1>Climate</h1><div class="phc-heading-actions"><button type="button">Climate Data on This Computer…</button><button type="button" class="primary">Set Location…</button></div></div>
 <div class="two">
 <div class="side">
-<button type="button" class="card" aria-current="true"><b>Site location</b><small>42.750° N, 73.800° W · 84 m</small><small>Climate zone 5A</small></button>
+<button type="button" class="card" aria-current="true"><b>Site location</b><small>42.750° N, 73.800° W · 84 m</small><small>Climate zone 5 · UTC −5</small></button>
 <div class="sep">Climate sources</div>
 <button type="button" class="card"><b>Phius climate data</b><span class="z w">Not set</span></button>
 <button type="button" class="card"><b>Design temperatures</b><span class="z w">Not set</span></button>
@@ -77,8 +82,8 @@ body{margin:0}
 <dl class="facts">
 <dt>Coordinates</dt><dd>42.750° N, 73.800° W</dd>
 <dt>Elevation</dt><dd>84 m</dd>
-<dt>Climate zone</dt><dd>5A</dd>
-<dt>Set by</dt><dd>Read from SketchUp geolocation, then edited</dd>
+<dt>Climate zone</dt><dd>5</dd>
+<dt>Hours from UTC</dt><dd>−5</dd>
 </dl>
 </div>
 </div>
@@ -89,13 +94,32 @@ body{margin:0}
 <div class="scrim" aria-hidden="true"></div>
 <div class="dlg" role="dialog" aria-label="Set site location">
 <h2>Set site location</h2>
+<div class="cols">
+<svg class="pick" viewBox="0 0 560 420" role="img" aria-label="Outline map. Click to place the site">
+<g stroke="#e1e6e9" stroke-width="1"><path d="M0 105H560M0 210H560M0 315H560M140 0V420M280 0V420M420 0V420"/></g>
+<path d="M24 60 L180 40 L312 70 L384 30 L456 80 L480 190 L540 240 L560 250 L560 420 L0 420 L0 90 Z" fill="#fff" stroke="#c9d2d7" stroke-width="1.5"/>
+<g fill="none" stroke="#c9d2d7" stroke-width="1" stroke-dasharray="4 4"><path d="M312 70 L324 250 L300 420"/><path d="M0 250 L324 250 L480 190"/></g>
+<g fill="#7b878e" font-size="11"><text x="8" y="100">44° N</text><text x="8" y="205">43° N</text><text x="8" y="310">42° N</text><text x="144" y="414">76° W</text><text x="284" y="414">74° W</text><text x="424" y="414">72° W</text></g>
+<g stroke="#075360" stroke-width="1" stroke-dasharray="3 3"><path d="M300 0V420M0 236H560"/></g>
+<g transform="translate(300 236)"><path d="M0 -12 L9 0 L0 12 L-9 0 Z" fill="#132a2b"/><text x="14" y="-8" font-size="12" font-weight="600" fill="#132a2b">Site</text></g>
+<g transform="translate(516 14)"><rect width="30" height="60" rx="5" fill="#fff" stroke="#c9d2d7"/><path d="M0 30H30" stroke="#e1e6e9"/><path d="M9 15H21M15 9V21M9 45H21" stroke="#3a4a51" stroke-width="1.6" stroke-linecap="round"/></g>
+<text x="10" y="18" font-size="11" fill="#46565e">Click to place the site. Drag to pan.</text>
+</svg>
+<div class="form">
 <div class="grid">
 <label>Latitude °<input type="text" value="42.750"></label>
 <label>Longitude °<input type="text" value="-73.800"></label>
-<label>Elevation m<input type="text" value="84"></label>
-<label>Climate zone<select><option>5A</option></select></label>
+<label style="grid-column:1 / -1">Elevation m<input type="text" value="84"></label>
 </div>
-<p style="margin:12px 0 0;color:#5d6b73">Click the map to place the site, or type its coordinates. The climate station is chosen separately and may be some distance away.</p>
+<p class="hint">Latitude, longitude and elevation are needed. The station check compares distance and elevation to the site.</p>
+<div class="opt">For export</div>
+<div class="grid">
+<label>Climate zone<select><option>Not defined</option><option>1</option><option>2</option><option>3</option><option>4</option><option>4C</option><option selected>5</option><option>6</option><option>7</option><option>8</option></select></label>
+<label>Hours from UTC<input type="text" value="-5"></label>
+</div>
+<p class="hint">Read from SketchUp Geolocation fills latitude and longitude, and hours from UTC when SketchUp has one. It does not fill elevation. Nothing is written back to SketchUp.</p>
+</div>
+</div>
 <div class="acts"><button type="button" style="margin-right:auto">Read from SketchUp Geolocation</button><button type="button">Cancel</button><button type="button" class="primary">Set Location</button></div>
 </div>
 </div>
