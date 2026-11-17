@@ -535,6 +535,12 @@ reference to `ph_composer.windows.psi_install_type`, or null), `default_psi_inst
 otherwise `default_psi_install_w_mk`; a default Type no longer in the Model resolves to nothing, never
 to that value. A field the stored dictionary does not hold reads its default, without a write.
 
+Climate keeps two dictionaries because a proposal guards its whole dictionary and its two updates
+each guard only their own fields. `ph_composer.climate_site` holds `latitude_deg`, `longitude_deg`,
+`elevation_m`, `climate_zone` (the WUFI-Passive code) and `hours_from_utc`; latitude, longitude and
+elevation are present together or all null. `ph_composer.climate_design_temperatures` holds
+`heating_99_c`, `cooling_1_c` and `design_temperature_source`. Every field defaults to null.
+
 The foundation's `ph_composer.model` dictionary holds the Model's own `user_data` and `extension_data`
 (`shell/model_metadata.rb`), both `{}` by default; it is building metadata, not a feature's
 configuration, and no feature settings dictionary carries either map.

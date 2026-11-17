@@ -1,9 +1,9 @@
 # P4c-01: The Climate feature, the site and the design temperatures
 
 DATE: 2026-11-17
-STATUS: Scoped. Not authorized.
+STATUS: Implemented on branch `feature/climate-p4c-01`. Authorized by Ed, 2026-11-17. CM01 not run.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
 
 ## Entry and scope
 
@@ -28,6 +28,25 @@ Load the architecture review skill before step 2.
 3. Read `core/units.rb` and `html/unit_tables.js` and confirm what CONTRACTS section 8 lists as
    missing, including the IP form `length` takes for an elevation.
 
+### Entry check outcomes, 2026-11-17
+
+1. Confirmed. `features/thermal_bridges/install.rb` names its parts in a header, requires them, and
+   installs each registration module from one `install`; `features/spaces/settings.rb` is a
+   `ModelSettings` service with a `get` query and a guarded `update` action. Climate follows both:
+   `install.rb`, `settings.rb`, `codes.rb`, `site/` and `declarations/`. `FEATURE_ID` is defined
+   before the requires, as in `features/assemblies/install.rb`, because the settings constants use it.
+2. Not as planned. `ModelSettings` guards the whole dictionary: `propose` compares every field with
+   `expected_values`, the scope digests the whole stored dictionary, and the step's `apply` rereads
+   all of it. One dictionary would let a design-temperature change stale a site read. Two
+   dictionaries are used and D4c-02 is amended in [DECISIONS](../DECISIONS.md).
+   `design_temperatures.update` takes any of its three fields and guards each one given; the
+   handler merges them over the stored values before the whole-dictionary proposal.
+3. Confirmed. Ruby had no temperature; JavaScript had `temperature` and `temperature_difference`;
+   neither had `irradiation`, `irradiance`, `wind_speed` or `distance`. Ruby's `length` shows
+   decimal feet in IP. The panel's `length` shows decimal feet too unless the field names a
+   dimension scope, when it follows the user's dimension format, so an elevation field (P4c-06)
+   takes no scope.
+
 ## Steps
 
 1. **Units.** Add `temperature`, `temperature_difference`, `irradiation`, `irradiance`,
@@ -37,8 +56,8 @@ Load the architecture review skill before step 2.
 2. **Feature.** `features/climate/install.rb` registering `ph_composer.climate`, requiring
    `ph_composer.zones` (the export section's dependency, P4c-05); one `require_relative` and one
    entry in `FEATURES` in `extension.rb`. `codes.rb` starts with the codes this stage refuses with.
-3. **Settings.** `features/climate/settings.rb`: the dictionary `ph_composer.climate_settings`
-   with the eight fields of CONTRACTS section 2, each with its `x-unit` and range; the ten
+3. **Settings.** `features/climate/settings.rb`: the dictionaries `ph_composer.climate_site` and
+   `ph_composer.climate_design_temperatures` (entry check 2) with the eight fields of CONTRACTS section 2, each with its `x-unit` and range; the ten
    climate-zone codes as an enum; the rule that latitude, longitude and elevation are set
    together.
 4. **Operations and reads**, declared under `features/climate/declarations/`:
@@ -80,6 +99,17 @@ Load the architecture review skill before step 2.
 ## Host gate
 
 CM01 in [ACCEPTANCE](../ACCEPTANCE.md).
+
+## Departures in the build
+
+- `codes.rb` declares one code, `climate.heating_not_below_cooling`, the warning the
+  design-temperature read carries. The operations refuse only with foundation codes.
+- Out-of-range values and an unlisted zone refuse with `params.invalid`, from the declared schema,
+  before the handler runs; a partial location refuses with `validation.failed`.
+- The `summary` snapshot section is backed by the query `ph_composer.climate.summary.get`.
+- `site.get` adds `climate_zone_label` from the zone table, so the panel and the report read the
+  label from Ruby.
+- `site.update`'s result is the site read; the limit check joins it in P4c-02.
 
 ## Leaves for the next stage
 

@@ -36,6 +36,8 @@ class UnitsTest < PhComposerTestCase
     assert_equal 125.0, Units.from_display("125", :quantity => "length_mm", :system => "SI")
     assert_in_delta 0.3048, Units.from_display(12, :quantity => "length_mm", :system => "IP", :unit => "m"), 1e-12
     assert_in_delta 100.0, Units.from_display(58.857777869, :quantity => "airflow", :system => "IP"), 1e-6
+    assert_in_delta(-23.333333333, Units.from_display(-10, :quantity => "temperature", :system => "IP"), 1e-6)
+    assert_in_delta 80.4672, Units.from_display(50, :quantity => "distance", :system => "IP"), 1e-9
     assert_raises(ArgumentError) { Units.from_display("twelve", :quantity => "length_mm", :system => "IP") }
     assert_raises(TypeError) { Units.from_display(nil, :quantity => "length_mm", :system => "IP") }
   end
@@ -60,7 +62,14 @@ class UnitsTest < PhComposerTestCase
       [1, "conductivity", "1 W/(m K)", "0.578 Btu/(h ft °F)"],
       [0.1, "linear_psi", "0.1 W/(m K)", "0.058 Btu/(h ft °F)"],
       [1, "heat_loss_rate", "1 W/K", "1.896 Btu/(h °F)"],
-      [100, "airflow", "100 m³/h", "58.9 cfm"]
+      [100, "airflow", "100 m³/h", "58.9 cfm"],
+      [-40, "temperature", "-40 °C", "-40 °F"],
+      [20, "temperature", "20 °C", "68 °F"],
+      [10, "temperature_difference", "10 K", "18 °F"],
+      [100, "irradiation", "100 kWh/m²", "31.7 kBtu/ft²"],
+      [500, "irradiance", "500 W/m²", "158.5 Btu/(h ft²)"],
+      [4, "wind_speed", "4 m/s", "8.9 mph"],
+      [80.4672, "distance", "80.5 km", "50 mi"]
     ].each do |value, quantity, si, ip|
       assert_equal si, Units.format(value, :quantity => quantity, :system => "SI")
       assert_equal ip, Units.format(value, :quantity => quantity, :system => "IP")

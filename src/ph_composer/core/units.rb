@@ -17,13 +17,15 @@ module PhComposer
     FT3_PER_M3 = FT2_PER_M2 / METRES_PER_FOOT
     BTU_H_PER_W = 3600.0 / JOULES_PER_BTU
     U_FACTOR = BTU_H_PER_W / FT2_PER_M2 / F_PER_K
+    METRES_PER_MILE = 1609.344
     LENGTH_METRES = { "mm" => 0.001, "m" => 1.0, "in" => INCH_TO_M, "ft" => METRES_PER_FOOT }.freeze
     CONDUCTIVITY = {
       :si_label => "W/(m K)", :ip_label => "Btu/(h ft °F)", :si_precision => 3, :ip_precision => 3,
       :factor => BTU_H_PER_W * METRES_PER_FOOT / F_PER_K
     }.freeze
 
-    # Lengths convert through LENGTH_METRES, their labels naming the unit; other quantities scale by factor.
+    # Lengths convert through LENGTH_METRES, their labels naming the unit; other quantities scale by factor,
+    # and a temperature adds its offset after scaling.
     DEFINITIONS = {
       "length" => {
         :length => true, :canonical => "m", :si_label => "m", :ip_label => "ft", :si_precision => 2,
@@ -56,6 +58,29 @@ module PhComposer
       "airflow" => {
         :si_label => "m³/h", :ip_label => "cfm", :si_precision => 1, :ip_precision => 1,
         :factor => FT3_PER_M3 / 60
+      },
+      "temperature" => {
+        :si_label => "°C", :ip_label => "°F", :si_precision => 1, :ip_precision => 1, :factor => F_PER_K,
+        :offset => 32.0
+      },
+      "temperature_difference" => {
+        :si_label => "K", :ip_label => "°F", :si_precision => 1, :ip_precision => 1, :factor => F_PER_K
+      },
+      "irradiation" => {
+        :si_label => "kWh/m²", :ip_label => "kBtu/ft²", :si_precision => 1, :ip_precision => 2,
+        :factor => BTU_H_PER_W / FT2_PER_M2 # kWh to kBtu is Wh to Btu
+      },
+      "irradiance" => {
+        :si_label => "W/m²", :ip_label => "Btu/(h ft²)", :si_precision => 1, :ip_precision => 1,
+        :factor => BTU_H_PER_W / FT2_PER_M2
+      },
+      "wind_speed" => {
+        :si_label => "m/s", :ip_label => "mph", :si_precision => 1, :ip_precision => 1,
+        :factor => 3600 / METRES_PER_MILE
+      },
+      "distance" => {
+        :si_label => "km", :ip_label => "mi", :si_precision => 1, :ip_precision => 1,
+        :factor => 1000 / METRES_PER_MILE
       }
     }.freeze
 
@@ -65,7 +90,7 @@ module PhComposer
     def to_display(value, quantity:, system:, unit: nil)
       definition = fetch_definition(quantity)
       number = Float(value)
-      return (ip?(system) ? number * definition.fetch(:factor) : number) unless definition[:length]
+      return scaled(number, definition, system) unless definition[:length]
 
       metres = number * LENGTH_METRES.fetch(unit || definition.fetch(:canonical))
       metres / LENGTH_METRES.fetch(label(:quantity => quantity, :system => system))
@@ -76,7 +101,7 @@ module PhComposer
     def from_display(value, quantity:, system:, unit: nil)
       definition = fetch_definition(quantity)
       number = Float(value)
-      return (ip?(system) ? number / definition.fetch(:factor) : number) unless definition[:length]
+      return unscaled(number, definition, system) unless definition[:length]
 
       metres = number * LENGTH_METRES.fetch(label(:quantity => quantity, :system => system))
       metres / LENGTH_METRES.fetch(unit || definition.fetch(:canonical))
@@ -111,6 +136,16 @@ module PhComposer
       system.to_s.upcase == "IP"
     end
     private_class_method :ip?
+
+    def scaled(number, definition, system)
+      ip?(system) ? (number * definition.fetch(:factor)) + definition.fetch(:offset, 0.0) : number
+    end
+    private_class_method :scaled
+
+    def unscaled(number, definition, system)
+      ip?(system) ? (number - definition.fetch(:offset, 0.0)) / definition.fetch(:factor) : number
+    end
+    private_class_method :unscaled
 
     def fetch_definition(quantity)
       DEFINITIONS.fetch(quantity.to_s) { raise ArgumentError, "Unknown quantity: #{quantity}" }

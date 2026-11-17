@@ -44,7 +44,7 @@ class ExampleFoundationTest < PhComposerTestCase
 
     assert_equal ExampleFoundation::ID, registry.owner_of("example.foundation.update_parts")
     assert_equal [PhComposer::Assemblies, PhComposer::Zones, PhComposer::Windows, PhComposer::Spaces,
-                  PhComposer::ThermalBridges],
+                  PhComposer::ThermalBridges, PhComposer::Climate],
                  PhComposer::FEATURES,
                  "the example does not alter the shipping feature list"
   end

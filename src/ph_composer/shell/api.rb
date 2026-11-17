@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 61
+    MINOR = 62
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -328,7 +328,15 @@ module PhComposer
                     "target ph_composer.model.metadata puts the Model's extension payloads in the incoming-reference " \
                     "check, so a record a Model payload names refuses deletion as reference.in_use. A membrane " \
                     "Layer's Layer-Segment map stays in the Model with an export.metadata_omitted finding even " \
-                    "with a steel stud spacing." }
+                    "with a steel stud spacing." },
+      { "minor" => 62, "date" => "2026-11-17",
+        "change" => "The ph_composer.climate feature is new, requiring ph_composer.zones. " \
+                    "ph_composer.climate.site.get and site.update read and set the Model's site (latitude, " \
+                    "longitude and elevation together, a climate-zone code and hours from UTC); " \
+                    "ph_composer.climate.design_temperatures.get and design_temperatures.update read and set the " \
+                    "ASHRAE 99% heating and 1% cooling dry bulbs and a source note, any field alone; " \
+                    "ph_composer.climate.summary.get backs the ph_composer.climate.summary snapshot section. " \
+                    "climate.heating_not_below_cooling is new, a warning the design-temperature read carries." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

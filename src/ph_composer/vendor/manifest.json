@@ -331,9 +331,9 @@
       "sha256": "f58ed1e9eead16c157c40e05ee9eb4b6f1d7d6b4b6246f236550af161d100439"
     },
     "html/fields.js": {
-      "bytes": 1833,
+      "bytes": 2417,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "ad0a0729f41d444e1d3b979a07bc996e991ff5abfe9ab6b4b58c2fe0a62fac0b"
+      "sha256": "ceed48c4ecd1033519bfb0e807d53ba7183f149dd4d7620cef789deec1404e42"
     },
     "html/icons.js": {
       "bytes": 12345,
@@ -561,9 +561,9 @@
       "sha256": "4a5d6e269f4f3200b35fca1aa381f705c61c5318a1eae6f70153a984da639dd3"
     },
     "html/unit_tables.js": {
-      "bytes": 12016,
+      "bytes": 12961,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "44efc47847380c549a3db29128e1937355440a03b14100d707f13159294a69d9"
+      "sha256": "eff5dd53e0a443a8360b8229678ea68abef6d5c916eb1eb15eb00bec9f05e427"
     },
     "html/units.js": {
       "bytes": 14458,

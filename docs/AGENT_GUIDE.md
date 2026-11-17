@@ -57,8 +57,10 @@ any section, a description or list longer than a row allows is cut, and the row 
 ## Values and units
 
 Every number is SI and its schema says the unit as `x-unit`: metres, square metres, cubic metres,
-cubic metres per hour. Convert before you write. An edit carries `expected_values`, the values you
-last read; if the Model holds something else now, the edit is refused and nothing is written.
+cubic metres per hour, and degrees Celsius (`degC`) for a temperature. Latitude and longitude are
+decimal degrees (`deg`) and an offset from UTC is in hours (`h`). Convert before you write. An
+edit carries `expected_values`, the values you last read; if the Model holds something else now,
+the edit is refused and nothing is written.
 
 ## Large records and previews
 
@@ -439,6 +441,23 @@ glazed element, and the grid actions (`ph_composer.windows.types.grid.insert`,
 ids themselves; read them back with `ph_composer.windows.types.elements.list`. A layout you write
 whole in `values` keeps the ids you give, and one that leaves a cell uncovered or overlaps is refused
 as `validation.failed`.
+
+### Site and design temperatures
+
+Read the site with `ph_composer.climate.site.get`. A new Model reads `state: "not_set"` and
+nothing is written. Set it with `ph_composer.climate.site.update`, giving all five fields in
+`values` and the five you read in `expected_values`. Latitude, longitude and elevation are given
+together or all null; anything else is refused with `validation.failed`. `climate_zone` is the
+WUFI-Passive code (1 for Not defined, 11 to 18 for US zones 1 to 8, 141 for 4C) and the read
+adds its label; it and `hours_from_utc` may be null with the site set. Type `hours_from_utc` as
+given: never work it out from the longitude.
+
+Read the design temperatures with `ph_composer.climate.design_temperatures.get`. Set any of
+`heating_99_c`, `cooling_1_c` and `design_temperature_source` with
+`ph_composer.climate.design_temperatures.update`: `values` holds the fields to set and
+`expected_values` the same fields as you read them. Null unsets a field. The read gives `state`
+(`not_set`, `incomplete` or `set`) and a `warning`, `climate.heating_not_below_cooling`, when
+heating is at or above cooling; the values still save. Each update is one Undo step.
 
 ### Library records
 

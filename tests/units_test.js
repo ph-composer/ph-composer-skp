@@ -57,7 +57,8 @@ test("the registry lists every quantity in its published order", function () {
   assert.deepStrictEqual(Object.keys(units.quantities), [
     "fraction", "length", "length_mm", "area", "volume", "u_value", "thermal_resistance", "conductivity",
     "linear_psi", "heat_loss_rate", "density", "specific_heat", "airflow", "temperature",
-    "temperature_difference", "air_permeance", "vapor_sd", "vapor_diffusion_resistance"
+    "temperature_difference", "air_permeance", "vapor_sd", "vapor_diffusion_resistance", "irradiation",
+    "irradiance", "wind_speed", "distance"
   ]);
 });
 
@@ -100,6 +101,17 @@ test("one shared vector per quantity converts to its recorded IP value", functio
 test("temperature converts by scale and a temperature difference by ratio", function () {
   assert.strictEqual(units.toDisplay(-40, field("temperature", "c"), "IP"), -40);
   assert.strictEqual(units.toDisplay(10, field("temperature_difference", "k"), "IP"), 18);
+});
+
+test("the climate quantities read back what they display", function () {
+  [["temperature", "c", -12.5], ["temperature_difference", "k", 4], ["irradiation", "kwh_m2", 95.3],
+    ["irradiance", "w_m2", 410], ["wind_speed", "m_s", 3.4], ["distance", "km", 80.4672]].forEach(function (row) {
+    var valueField = field(row[0], row[1]);
+    var shown = units.toDisplay(row[2], valueField, "IP");
+    parsed(String(shown), valueField, units.quantities[row[0]].ip.id, row[2]);
+  });
+  parsed("50 miles", field("distance", "km"), "km", 80.4672);
+  parsed("-10 °F", field("temperature", "c"), "c", -23.333333333);
 });
 
 test("a length expression carries its units through the arithmetic", function () {
@@ -288,7 +300,9 @@ test("each quantity reads its SI and IP unit aliases", function () {
     ["airflow", "m3_h", "2 m³/h", "2 ft3/min"], ["temperature", "c", "2 °C", "2 °F"],
     ["temperature_difference", "k", "2 K", "2 deltaF"],
     ["air_permeance", "l_s_m2_75pa", "2 L/(s m²) at 75 Pa", "2 cfm/ft² at 1.57 psf"],
-    ["vapor_sd", "sd_m", "2 sd_m", "2 perm"], ["vapor_diffusion_resistance", "mu", "2 μ", "2 perm-in"]
+    ["vapor_sd", "sd_m", "2 sd_m", "2 perm"], ["vapor_diffusion_resistance", "mu", "2 μ", "2 perm-in"],
+    ["irradiation", "kwh_m2", "2 kWh/m²", "2 kBtu/ft²"], ["irradiance", "w_m2", "2 W/m²", "2 Btu/(h ft²)"],
+    ["wind_speed", "m_s", "2 m/s", "2 mph"], ["distance", "km", "2 km", "2 mi"]
   ].forEach(function (row) {
     var valueField = field(row[0], row[1]);
     assert.strictEqual(parse(row[2], valueField, units.quantities[row[0]].si.id).ok, true, row[2]);

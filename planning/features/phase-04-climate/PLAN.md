@@ -1,9 +1,9 @@
 # Phase 4 delivery plan: Climate
 
 DATE: 2026-11-17
-STATUS: Scoped. Stages P4c-01 to P4c-11 are written and ready to authorize; P4c-12 is the closing outline. No stage authorized.
+STATUS: In progress. Stages P4c-01 to P4c-11 are written; P4c-12 is the closing outline. Ed authorized every stage on 2026-11-17: "Use the 'pr-loop' skill protocol for all reviews. Use a new branch for each phase of the work, and cleanup all branches and worktrees as you go. You are authorized to merge all PRs once the repo CI is green and all reviewer comments are addressed and resolved." P4c-01 is implemented on branch.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft; one issue per stage group when Ed authorizes)
+ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
 
 ## Outcome and scope
 
@@ -33,7 +33,7 @@ Paths are relative to `src/ph_composer/`. Planning baseline `origin/main` at `03
 | Existing | Reused as | Still required |
 | --- | --- | --- |
 | `extension.rb` `FEATURES`; `shell/registry.rb` `FeatureScope` | Registering `ph_composer.climate` and everything it declares | One `require_relative` and one module in `FEATURES` (P4c-01) |
-| `core/model_settings.rb` `ModelSettings`; `features/spaces/settings.rb` as the small example | The site and the design temperatures, each guarded by the values last read | One settings dictionary (P4c-01) |
+| `core/model_settings.rb` `ModelSettings`; `features/spaces/settings.rb` as the small example | The site and the design temperatures, each guarded by the values last read | Two settings dictionaries, D4c-02 as amended (P4c-01) |
 | `core/records/` record kinds; the fixed-id singleton in `features/zones/options/definitions.rb` | The Model's one climate record | The kind and its operations (P4c-02) |
 | `core/units.rb`, `html/unit_tables.js`, `html/fields.js`, `tests/support/units_vectors.json` | Display and entry in SI and IP | Ruby has no temperature; neither side has radiation, wind speed or a distance in km and miles (P4c-01) |
 | `library/setup.rb` (per-computer store in SketchUp's preferences), `core/diagnostics.rb` `data_root` (inside SketchUp's versioned folder), `agent_access/connections.rb` (a folder under the user's home) | Precedents only. None fits: the PRD puts Climate's settings in PH-Composer's own file outside SketchUp's versioned folders | A per-computer settings file and its path rule (P4c-03) |

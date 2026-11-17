@@ -886,6 +886,11 @@ The following public operations have panel-closed walkthroughs.
   choose"). `export_preview` with `location` reports what that destination holds.
   [Walkthrough](../tools/examples/library/materials_walkthrough.rb),
   [approved locations](../tools/examples/library/approved_location_walkthrough.rb).
+- **Climate** (`ph_composer.climate.*`). Reads: `site.get`, `design_temperatures.get` and
+  `summary.get`, which backs the `summary` snapshot section. Writes: `site.update`, the five site
+  fields together, and `design_temperatures.update`, any of its three fields; each guards only the
+  fields it names, so a design-temperature change does not stale a site read.
+  [Walkthrough](../tools/examples/climate/site_walkthrough.rb).
 
 Discovery also lists read-only `reference_targets`; description returns their descriptor: ID, owner,
 label, schema version, values schema, occurrence-reference schema and declared core references.

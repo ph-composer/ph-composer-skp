@@ -13,6 +13,10 @@ PhComposerUI.define("unit_tables", [], function () {
   var BTU_H_PER_W = 3600 / JOULES_PER_BTU;
   var U_FACTOR = BTU_H_PER_W / FT2_PER_M2 / F_PER_K;
   var CONDUCTIVITY_FACTOR = BTU_H_PER_W * METRES_PER_FOOT / F_PER_K;
+  var METRES_PER_MILE = 1609.344;
+  /* Radiation per square foot. kWh to kBtu is the same ratio as Wh to Btu, so monthly irradiation and peak
+     irradiance share it. */
+  var RADIATION_FACTOR = BTU_H_PER_W / FT2_PER_M2;
   var MAX_INPUT_LENGTH = 256;
   var SPACE_GROUPS = /[   ]/g;
 
@@ -86,7 +90,16 @@ PhComposerUI.define("unit_tables", [], function () {
     vapor_sd: { label: "equivalent air-layer thickness", reciprocal: 3.496, infiniteAtZero: true,
     precision: { SI: 2, IP: 3 }, si: unit("sd_m", "m", ["sdm"]), ip: unit("perm", "perm") },
     vapor_diffusion_resistance: { label: "vapor diffusion resistance", reciprocal: 137.6, min: 1,
-    precision: { SI: 1, IP: 2 }, si: unit("mu", "μ"), ip: unit("perm_in", "perm-in") }
+    precision: { SI: 1, IP: 2 }, si: unit("mu", "μ"), ip: unit("perm_in", "perm-in") },
+    irradiation: { label: "irradiation", factor: RADIATION_FACTOR, precision: { SI: 1, IP: 2 },
+    si: unit("kwh_m2", "kWh/m²"), ip: unit("kbtu_ft2", "kBtu/ft²") },
+    irradiance: { label: "irradiance", factor: RADIATION_FACTOR, precision: { SI: 1, IP: 1 },
+    si: unit("w_m2", "W/m²"), ip: unit("btu_h_ft2", "Btu/(h ft²)") },
+    wind_speed: { label: "wind speed", factor: 3600 / METRES_PER_MILE, precision: { SI: 1, IP: 1 },
+    si: unit("m_s", "m/s"), ip: unit("mph", "mph", ["mi/h"]) },
+    distance: { label: "distance", factor: 1000 / METRES_PER_MILE, precision: { SI: 1, IP: 1 },
+    si: unit("km", "km", ["kilometer", "kilometers", "kilometre", "kilometres"]),
+    ip: unit("mi", "mi", ["mile", "miles"]) }
   };
 
   var DIMENSION_FORMATS = [

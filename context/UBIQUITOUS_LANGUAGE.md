@@ -164,9 +164,10 @@ Face types and boundary conditions follow Honeybee. A Zone owns its Face assignm
 
 | Term | Meaning |
 | --- | --- |
+| Site location | The Model's latitude, longitude and elevation, set together, with an optional climate zone (stored as the WUFI-Passive code) and an optional typed offset from UTC. The site is set when all three of latitude, longitude and elevation are present |
 | Climate data folder | A planned per-computer setting: a folder of climate files the user is licensed to use, read where it is and never copied into a Model |
 | Station | One location in a climate data folder, read from one file. Attaching it copies its values into the Model |
-| Design temperatures | The planned typed ASHRAE 99% heating and 1% cooling dry-bulb temperatures for the site |
+| Design temperatures | The typed ASHRAE 99% heating and 1% cooling dry-bulb temperatures for the site, in °C, with an optional source note. Not set, Incomplete (one of the two) or Set; heating at or above cooling saves with a warning. Kept in the Model only |
 | Climate snapshot | The model-owned monthly and, when supplied, peak-load climate values plus provenance. It remains readable without its source file or provider |
 | EPW-derived monthly climate | Preliminary monthly climate produced by honeybee-ph from a user-selected annual EPW |
 | Monthly-demand ready | The climate has the complete monthly values required by preliminary demand calculations and overlays |
