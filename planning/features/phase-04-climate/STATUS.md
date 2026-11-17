@@ -1,9 +1,9 @@
 # Climate data: status
 
 DATE: 2026-09-18
-STATUS: Requested. Wireframes reviewed with Ed by 2026-11-16 and the PRD revised to their nine answers (W1 to W9) the same day. All eight user-journey walkthroughs are recorded (J1 to J8) and Ed answered the open items on 2026-11-17 (R1 to R9); six checks remain, each tied to a stage (PRD, "Open"). Twenty-three boards are drawn. Nothing is planned or authorized. The Mechanical phase's heat pump stage waits on this packet.
+STATUS: Scoped (2026-11-17). The PRD is settled (W1 to W9, J1 to J8, R1 to R9) and the stages are planned: P4c-01 to P4c-11 ready to authorize, P4c-12 the closing outline. No stage authorized. Three items are open for Ed (E1 to E3 in DECISIONS). The Mechanical phase's heat pump stage waits on P4c-02.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (no remote)
+ISSUE: none (local planning draft; one issue per stage group when Ed authorizes)
 
 ## State
 
@@ -35,18 +35,26 @@ D7 (no datasets ship) and the snapshot rule stand, and the proposal depends on b
 
 ## Next step
 
-The journeys, the open items and the screens are done (2026-11-17). Next: plan the stages, at Ed's request of 2026-11-17: the coordinating packet and one stage document per stage. Implementation needs separate authorization. Earlier next step, superseded by the Phase 4 dependency: none until the MVP packets have plans, then interview the remaining feature-local questions and
-plan the peak-load entry, readiness and repair-route behavior already fixed by D9.
+The stages are planned (2026-11-17): [PLAN](PLAN.md), [CONTRACTS](CONTRACTS.md), [DECISIONS](DECISIONS.md),
+[ACCEPTANCE](ACCEPTANCE.md) and [phases/](phases). Next: Ed reads the plan and answers E1 to E3, then
+authorizes stages one at a time, starting with P4c-01. Implementation needs that separate
+authorization.
 
 ## Blockers
 
-See the PRD's Dependencies section. EPW-derived monthly climates do not contain the peak-load
-cases PHX currently requires for METr export; the feature must enforce D9's explicit readiness
-gate. No GitHub remote, so no issue yet.
+- E1 and E2 (what the HBJSON carries when no climate is written) need Ed's answer before P4c-05.
+- E3 (the Windows half of owed check 1, and which second SketchUp version) before P4c-03 closes.
+- The six owed checks are entry checks of P4c-03 to P4c-07 and P4c-11 ([PLAN](PLAN.md#owed-checks-each-an-entry-check)).
+- The hourly weather file and its D9 peak-load gate are deferred, so nothing here waits on them.
+- No GitHub issue yet; one per stage group when Ed authorizes.
 
 ## Verification
 
-None. Nothing is implemented.
+Nothing is implemented. Planning claims about honeybee-ph were checked against the pinned wheel
+(1.33.65): read in its source, and run for the default `Site`, a `None` hours from UTC, and a
+synthetic `Site` with a provenance, both readiness lists empty, through a `BldgSegment` round trip.
+PHX claims were read in the local checkout at 1.59.1, not pinned and not run; owed check 6 runs
+them. `make lint-paths lint-citations` pass on the packet.
 
 ## Ledger
 
@@ -74,3 +82,4 @@ None. Nothing is implemented.
 | 2026-11-17 | Seventh journey walked with Ed (J7, replacing and editing): the Model keeps the as-read values so edited cells are marked, listed in the Export report and restorable anywhere; Replace shows a summary comparison and is one Undo step; a changed source file offers Update from File; the verdict is recomputed on a site change and Set Location warns first. Boards 15 to 17 added. |
 | 2026-11-17 | Eighth and last journey walked with Ed (J8, export): Cooling 2 repeats Cooling 1, because honeybee-ph cannot leave it empty and would write zeros (run in the pinned 1.33.65); unset climate zone and UTC offset export unset with findings; an edited station and a hand-entered climate export as user-defined; coordinates and edits travel in the provenance's assumptions. Board 18 added. Open item 5 settled, item 7 narrowed. Item 18 added (export with a climate and no site). Eighteen items are listed; 2, 5 and 6 are settled. |
 | 2026-11-17 | Ed answered the open items one at a time (R1 to R9): the panel opens on Zones; a climate with no site is left out of export; no `.xls` reader and no new-station notice in the first version; Cooling 2 equals Cooling 1 in WUFI and METr; hours from UTC is not used by METr as far as Ed knows; the ten zone codes are the full set and the Model stores the WUFI code; a custom Phius dataset comes as the same text and `.xls` files; METr's two design-temperature fields are parked. Six measurements and confirmations remain as stage entry checks. Boards 19 to 23 added. Ed asked for the stage planning next. |
+| 2026-11-17 | Stages planned: the coordinating packet and twelve stage documents, P4c-01 to P4c-12, with each owed check an entry check of a named stage. Ids use `P4c-`, `D4c-`, `C4c-` and `CM` because `P4-` and `D4-` are the Mechanical packet's. Found while planning: honeybee-ph serializes a default `Site` on every Building Segment, so an export with no climate already carries a placeholder (E1). Three items open for Ed. Nothing authorized. |

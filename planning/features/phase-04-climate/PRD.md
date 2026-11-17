@@ -1,7 +1,7 @@
 # Climate
 
 DATE: 2026-09-18
-STATUS: Requested. Drafted 2026-09-18 as a post-MVP packet (D7 and D9 confirmed). All eight journeys (J1 to J8) walked by 2026-11-17. Revised 2026-11-16 to the wireframe review of 2026-11-15 and 2026-11-16 (W1 to W9): a Climate tab, climate data read from a folder on the user's computer, one climate copied into the Model. Not planned; no stage authorized.
+STATUS: Requested. Drafted 2026-09-18 as a post-MVP packet (D7 and D9 confirmed). All eight journeys (J1 to J8) walked by 2026-11-17. Revised 2026-11-16 to the wireframe review of 2026-11-15 and 2026-11-16 (W1 to W9): a Climate tab, climate data read from a folder on the user's computer, one climate copied into the Model. Stages planned 2026-11-17 ([PLAN](PLAN.md)); no stage authorized.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 

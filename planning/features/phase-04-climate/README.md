@@ -7,7 +7,15 @@ Set the Model's site and climate on a Climate tab. Climate data is read from a f
 user's own computer; the one station the user attaches is copied into the SKP with its source, so
 the Model reads anywhere.
 
-Read [PRD.md](PRD.md), then [STATUS.md](STATUS.md).
+Read [PRD.md](PRD.md) for the behavior, [PLAN.md](PLAN.md) for the twelve stages (P4c-01 to
+P4c-12) under [phases/](phases), [CONTRACTS.md](CONTRACTS.md) for the records and seams,
+[DECISIONS.md](DECISIONS.md) for the answers and the three items open for Ed,
+[ACCEPTANCE.md](ACCEPTANCE.md) for each stage's gate, then [STATUS.md](STATUS.md). Planned
+2026-11-17; no stage is authorized.
+
+Stage and decision ids here are `P4c-` and `D4c-`. `P4-` and `D4-` belong to the
+[Mechanical packet](../phase-07-mechanical/README.md), which kept its ids when the phases were
+re-ordered.
 
 The [wireframes](mockups/README.md) were reviewed with Ed on 2026-11-15 and 2026-11-16; the PRD
 was revised to their nine answers on 2026-11-16.

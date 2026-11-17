@@ -1,0 +1,91 @@
+# Phase 4 decisions: Climate
+
+DATE: 2026-11-17
+STATUS: The PRD's answers (D7, D9, Q1 to Q9, W1 to W9, J1 to J8, R1 to R9) are indexed here and not restated. Planning decisions D4c-01 to D4c-15 are recorded as made by the plan; three items are open for Ed.
+AUTHOR: Ed May, BLDGTYP, with Claude
+ISSUE: none (local planning draft)
+
+The [PRD](PRD.md) owns every answer Ed gave. This file says which stage builds each, records the
+choices the plan itself made, and lists what Ed still has to decide. Each decision is labelled UI
+or Code.
+
+## For Ed
+
+Three items. None blocks P4c-01 to P4c-04; E1 and E2 are needed before P4c-05, and E3 before
+P4c-03 closes.
+
+| Id | Kind | Question | Recommendation |
+| --- | --- | --- | --- |
+| E1 | Code, UI | The PRD says a Model with no climate "exports without one, as today" and that a climate with no site is "left out and no `Site` is written" (R2). In the pinned honeybee-ph 1.33.65 every `BldgSegment` builds a default `Site` and always serializes it (read), so today's HBJSON already carries one: latitude 40.6, longitude -73.8, hours from UTC -4, a climate named "New York" with zero values and no provenance (run). PHX converts that without complaint (read in the local checkout, not pinned). "Left out" can only mean the placeholder stays. Should the report say so? | Yes. Whenever no climate is written, one line in the report's climate section and one non-blocking finding: "No climate is set. The HBJSON carries honeybee-ph's placeholder site, which is not this building's." Nothing else changes, and no upstream change is needed. The alternative, a provenance marked unavailable, makes PHX refuse the whole conversion |
+| E2 | Code | A site is set and no climate is attached. R2 covers the reverse case only. Is the `Location` written? | No. `Location` and `Climate` leave together as one `Site` or not at all: a real latitude over the placeholder's zero climate would read as a real `Site`. The report shows the site and the E1 line |
+| E3 | Scope | Owed check 1 has a Windows half (where the settings file sits) and the acceptance shape opens the Model "under a second SketchUp version". There is no Windows host run in this plan, and the second version must be installed on the test computer | Run the macOS half and the second-version case on the Mac, with whichever second version Ed has installed (say which). Write the Windows path from Ruby's documented `APPDATA` variable, mark it unverified in the evidence, and add the check to the [Windows support](../unscheduled/windows-support/README.md) packet |
+
+Noted, not a decision: the task named stage files `p4-<nn>`. That prefix is the Mechanical
+packet's, so this packet uses `p4c-<nn>` (D4c-01).
+
+## The PRD's answers, by stage
+
+Each id links to its row in the PRD; nothing is restated here.
+
+| Id | Kind | Subject | Stage |
+| --- | --- | --- | --- |
+| D7 | Scope | No datasets ship | All; P4c-04 fixtures |
+| D9 | Scope | Peak loads for an EPW-derived climate | Deferred with the hourly weather file |
+| [Q1 to Q9](PRD.md#decisions) | | The September interview, as revised | See W and J rows |
+| [W1](PRD.md#decisions) | UI | The outline map | P4c-07, P4c-09 |
+| W2 | UI | Location typed or read once from SketchUp | P4c-06 |
+| W3 | UI, Scope | The cards; Phius climate data is the only climate | P4c-06; P4c-08 to P4c-11 |
+| W4 | UI, Code | Design temperatures typed, not gating export | P4c-01, P4c-06 |
+| W5 | UI, Code | The per-computer settings file; no index; the dataset name | P4c-03, P4c-08 |
+| W6 | Code | Its own feature; one climate per Model; one reader | P4c-01, P4c-02, P4c-04 |
+| W7 | UI | Climate is the first tab | P4c-06 |
+| W8 | UI, Code | What a Phius file does not supply; edits | P4c-02, P4c-05, P4c-10 |
+| W9 | Scope | Phase 4 | This packet |
+| [J1](PRD.md#decisions) | UI, Code | Setting up the climate files | P4c-03, P4c-04, P4c-08 |
+| J2 | UI, Code | Setting the site | P4c-01, P4c-06, P4c-07 |
+| J3 | UI, Code | Choosing and attaching a station | P4c-02, P4c-04, P4c-08, P4c-09 |
+| J4 | UI, Code | Entering values by hand | P4c-02, P4c-11 |
+| J5 | UI, Code | The design temperatures | P4c-01, P4c-06 |
+| J6 | UI, Code | Another computer | P4c-03, P4c-04, P4c-08, P4c-10 |
+| J7 | UI, Code | Replacing and editing | P4c-02, P4c-07, P4c-09, P4c-10 |
+| J8 | UI, Code | Export | P4c-05 |
+| [R1](PRD.md#open-and-owed-before-planning) | UI | The panel opens on Zones | P4c-06 |
+| R2 | Code | A climate with no site is left out | P4c-05 (and E1) |
+| R3 | Scope | No `.xls` reader | P4c-04 (counted as not read), P4c-11 (the paste) |
+| R4 | UI, Code | No new-station notice | P4c-08 |
+| R5 | Code | Cooling 2 equals Cooling 1 | P4c-05 |
+| R6 | Code | Hours from UTC optional, finding informational | P4c-05 |
+| R7 | Code | Ten climate-zone codes, stored as the WUFI code | P4c-01 |
+| R8 | Scope | A custom Phius dataset is the same text file | P4c-04 |
+| R9 | Code | METr's two design-temperature fields are parked | Deferred |
+
+## Planning decisions
+
+Made while planning the stages, 2026-11-17. Each can be overturned by Ed or by the stage's
+architecture review. Three touch what the PRD says and are for Ed to confirm: D4c-03 (the Records
+block stores provenance; the plan stores `source` and derives the rest), D4c-04 (the pass boundary
+is the exact conversion, not the rounded 80 km and 122 m) and D4c-10 (the folder is chosen before
+its name is asked). The rest change no PRD answer.
+
+| Id | Kind | Decision | Why |
+| --- | --- | --- | --- |
+| D4c-01 | Code | Ids: stages `P4c-nn`, decisions `D4c-nn`, contract questions `C4c-n`, acceptance rows `CMnn`, stage files `phases/p4c-nn-<title>.md` | `P4-` and `D4-` are the Mechanical packet's and `P4a-` is Programs'. `D5-1` is used and Phase 5 is now Shading, so the old roadmap number 5.1 gives no free prefix. The lettered form is the convention's own, and the citation lint already refuses it in `src/` and `tests/`. `CL` is taken by an archived packet; `CM` is free in the native case ledger and in planning |
+| D4c-02 | Code | The site and the design temperatures are fields of one `ModelSettings` dictionary; the climate is one record of its own kind under a fixed id | The first are a handful of nullable scalars, which is what `ModelSettings` is for. The climate is about 240 numbers with an as-read copy; as a record it gets a schema version, `user_data`, true absence and Clear as a delete, and is not dragged through every small settings guard |
+| D4c-03 | Code | The Model stores `source` (dataset, station, state, checksum); the honeybee-ph provenance fields are derived at export | `source_type` depends on whether any cell is edited, which is itself derived. Storing it would let it disagree with the values |
+| D4c-04 | Code | The limit check compares in SI against the exact conversions of Phius's limits, 80.4672 km and 121.92 m, at or inside both passing; distance is great-circle | Phius states the limits in miles and feet. The PRD's 80 km and 122 m are rounded labels |
+| D4c-05 | Code | The settings file is a small foundation service with one section per feature id. Climate is its only user for now | The PRD calls it PH-Composer's own settings file, not Climate's. One file with sections costs nothing more than a private one and keeps the path rule in one place. No other store moves into it |
+| D4c-06 | Code | Station values never pass through the panel. The station list carries location and elevation only; attach names a station and Ruby reads the file | Attach then works with the panel closed and through the agent interface, the licensed values travel no further than they must, and no path enters params, results or logs |
+| D4c-07 | Code | The `Site` section attaches at `MODEL` after the Zones section, sets one `Site` on every exported Building Segment, and is optional for export. Provenance marks monthly and peak-load data available | honeybee-ph keeps `Site` per segment; a Model has one site. A `Site` that fails to build must not block an export that works without it. PHX refuses a provenance whose availability flags are not both true (read in the local checkout) |
+| D4c-08 | Code | Complete means: name, station elevation, daily swing, wind speed, all 96 monthly values, and each case's air temperature and five radiation values. A case's dewpoint and sky temperature are optional | It is what honeybee-ph's readiness checks ask for (read), so "complete" and "PHX will convert it" mean the same thing |
+| D4c-09 | UI | IP display: °F, kBtu/ft² for monthly radiation, Btu/h·ft² for peak radiation, mph, miles, feet. Latitude and longitude stay decimal degrees | Proposed, not checked against WUFI-Passive or METr. Ed may prefer another set; it is a table entry |
+| D4c-10 | UI | Add Folder opens the folder chooser first, stores the folder under its own name, and opens that name for editing in the row | The chooser's path cannot travel through the panel, so the name cannot be asked before the folder is known. The user still names the dataset before doing anything else (W5) |
+| D4c-11 | Code | The station list is read on demand. Over 0.5 s it is sliced so the panel stays live; a cache is added only if a warm read of a real-size folder exceeds 2 s | J1: a cache only if reading proves slow. The thresholds make "slow" a measurement |
+| D4c-12 | Code | Stage order: records and operations with the panel closed, then export, then screens | Every screen then calls operations that already have tests, and Mechanical can start after P4c-02 |
+| D4c-13 | UI | The tab row gains Climate first. Programs and Mechanical tabs arrive with their own phases; the disabled Systems button stays until Mechanical replaces it | W7 gives the final nine-tab order; this plan adds only its own tab |
+| D4c-14 | Code | The optional `phx` test group is added by this packet's P4c-05 or the Programs packet's P4a-03, whichever merges first | Both plans need it and neither should wait on the other |
+| D4c-15 | Code | The map's borders ship as a generated JavaScript module, drawn as SVG | The panel loads from a file with no network and a content policy that allows only the extension's own scripts, so data cannot be fetched. SVG is already used for the Assembly and Window drawings |
+
+## Contract questions
+
+C4c-1 to C4c-6 are in [CONTRACTS](CONTRACTS.md#open-contract-questions), each with a
+recommendation and the stage that settles it.
