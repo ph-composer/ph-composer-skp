@@ -4901,6 +4901,21 @@
         "src/ph_composer/features/climate/declarations/design_temperatures.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "CM07",
+      "label": "The outline map on the installed RBZ in the real HtmlDialog: owed check 2's draw time (first paint, pan and zoom frame time); Set Location's map pans by drag, zooms by wheel and buttons and resets; a click places the site and fills latitude and longitude; typed values move the pin; with a station attached the station and its 50 mile ring show and a site that would fail warns before Set, which still saves; no network and no content-policy violation; the zoom and Reset buttons reached by keyboard and placing by typed values; native Undo and Redo of the Set; the UI polish review by Ed",
+      "mode": "mixed",
+      "authority": "planning/features/phase-04-climate/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/html/index.html",
+        "src/ph_composer/html/outline_map.js",
+        "src/ph_composer/html/outline_map.css",
+        "src/ph_composer/html/map_projection.js",
+        "src/ph_composer/html/map_borders.js",
+        "src/ph_composer/html/features/climate/*"
+      ],
+      "native_control_required": true
     }
   ]
 }

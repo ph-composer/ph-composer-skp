@@ -1,9 +1,9 @@
 # P4c-07: The outline map
 
 DATE: 2026-11-17
-STATUS: Scoped. Not authorized.
+STATUS: Implemented on branch `feature/climate-p4c-07`, PR #518, 2026-11-18; CM07 agent run Pass on `3a48fef3`, Ed's verification pass pending. Authorized with every Climate stage on 2026-11-17 ([STATUS](../STATUS.md#authorization)).
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
 
 ## Entry and scope
 
@@ -97,3 +97,54 @@ P4c-09 reuses the kit part for the picker, with every station as a marker.
 ## Done when
 
 CM07 passes, owed check 2 is recorded with the licence wording, and C4c-5 is answered.
+
+## Departures, 2026-11-18
+
+- **Owed check 2** ([evidence](../evidence/owed-check-2-20261118.md)): Natural Earth 5.1.2 at 1:50m, public
+  domain with no attribution asked, so the shipped `LICENSE.txt` is unchanged. The borders are written in the
+  encoded polyline algorithm (113 KB), not as decimal arrays (the first draft, 187 KB without the United States
+  and Canada outlines): both fit the 300 KB budget, but the decimal draft left 70 KB under the runtime manifest's
+  installed ceiling for P4c-08 to P4c-11; 137 KB remain. The United States and Canada keep a solid country
+  outline at their states' detail, so their land is filled and their coast is solid, as board 21 draws it.
+- **The tool** is `tools/map_data/map_borders.py`, a standard-library PEP 723 script, with
+  `tests/python/test_map_borders.py` (synthetic GeoJSON; the real source when `PH_COMPOSER_MAP_DATA` is set).
+- **Projection** lives in its own module, `html/map_projection.js`, so its tests need no DOM. The
+  ring test's "the limit check's own distance function" is a Ruby test (`tests/map_ring_test.rb`) measuring
+  the shared ring points in `tests/support/map_ring_vectors.json` with `LimitCheck.distance_km`; the panel's ring
+  function is held to the same points in JavaScript, and the panel's copy of the 80.4672 km limit to the file's.
+- **Hover tip**: the map's own positioned tip, not a `Bubble`. Markers are SVG nodes redrawn on every pan and
+  zoom frame, which a `Bubble` trigger cannot be; the tip still holds the owner's content.
+- **Set Location** reads the attached station once on open with `climate.climate.get` (an existing query), so
+  no operation or API version changed. The dialog grows to board 21's two columns (940 px), the map above the
+  fields below 760 px at 220 px tall. The warning is the amber warning tone, not board 21's red: the site still
+  saves. It names the failing limits (distance, elevation or both) from the host's preview, asked one request at
+  a time, and an answer for values no longer typed is not shown.
+- **Limits in Phius's units**: the ring label and the warning give the limits as Phius states them, 50 mi and
+  400 ft, in both display systems; the measured distance and elevation follow the display units.
+- **Sonnet read-through before the gate**: 12 findings. Fixed: a late station read reframing a map the user had
+  moved; typed coordinates off the view now pan to them; a pressed marker's tip coming back; a release of
+  another button ending a left press, and an uncaptured press ending when the pointer leaves; pan and wheel
+  painted once per display frame; the wheel over the zoom buttons zooms; a failed limit check now says so; the
+  preview host's double takes the Ruby's floating-point slack. Kept: a preview per keystroke (one at a time,
+  stale answers dropped); a ring near ±180° longitude is not wrapped (the borders stop there too, and no Phius
+  station is near it); tests 4 and 5 are browser evidence, outside `make ci`, as every panel browser check is.
+- **Codex review** (gpt-6.1-sol), PR #518: 5 P2, all fixed. Set now waits for the station read and for the
+  limit check at the values typed, so a failing site is never set before its warning shows (it can still be set
+  once the warning is up); the dialog reads the station only when the summary says the Model holds a climate. A
+  resize after a pan keeps the centre and scale at the new size; the zoom buttons count as the user's move, so a
+  late station read leaves them alone; a click off the globe at a wide zoom places nothing; the wheel during a
+  drag is ignored.
+- **Codex review, second cycle** (the last under the two-cycle cap): 4 P2, all fixed in a commit that merges
+  unreviewed. An elevation draft cancelled with Escape asks for the check at the elevation shown; a change to
+  the Model while the dialog is open (an agent attaching, replacing or clearing the climate) reads the station
+  again and drops the old checks, keeping the typed values and the view; a failed station read is said in the
+  warning slot rather than taken for no station (Set still saves, with the check said not to be shown); the
+  hover tip flips above the pointer near the map's bottom and stays inside it.
+- **Kept for Ed's pass**: the dialog grows by the warning and re-centres, moving the map about 37 px when
+  the warning appears after a click. A fix (a reserved warning slot, or a top-anchored dialog in the shared
+  form dialog) would change shared layout after the review cycles; it is listed for Ed instead.
+- **Not built**: board 21's pane map (the Site location pane drawing the site on the map) is in no stage's steps;
+  left for Ed to place.
+- **Example**: `tools/examples/outline_map/example_outline_map.js`, loaded by the preview page and shown with
+  `?example=outline_map` (`&markers=1000` for the timing).
+

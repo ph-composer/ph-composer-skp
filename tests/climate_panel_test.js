@@ -524,3 +524,240 @@ test("a design draft cancelled or committed unchanged shows the Model's newer va
       { heating_99_c: -11 }, ending + ": guarded by what the field showed");
   });
 });
+
+/* The outline map in Set Location. A test sets the drawing's laid-out rectangle, which the stub otherwise
+   reports as empty. */
+var MAP_RECT = { left: 0, top: 0, right: 560, bottom: 380, width: 560, height: 380, x: 0, y: 0 };
+function mapOf(d) { return d.querySelector(".phc-outline-map-drawing"); }
+function pressMap(d, x, y) {
+  var svg = mapOf(d);
+  svg.rect = MAP_RECT;
+  var base = { clientX: x, clientY: y, button: 0, isPrimary: true, pointerId: 7, target: svg,
+    preventDefault: function () {} };
+  svg.listeners.pointerdown(Object.assign({ type: "pointerdown" }, base));
+  svg.listeners.pointerup(Object.assign({ type: "pointerup" }, base));
+}
+function pinOf(d) {
+  var pin = d.querySelector(".phc-outline-map-site");
+  return pin ? pin.getAttribute("transform") : null;
+}
+function station(latitude, longitude) {
+  return completed({ state: "complete", missing: [], edited_cells: [], limit_check: null,
+    climate: { id: "climate-1", values: { name: "Northfield Regional", station_latitude_deg: latitude,
+      station_longitude_deg: longitude, station_elevation_m: 90 } } });
+}
+/* The summary of a Model holding a climate, so Set Location reads its station. */
+function withClimate(p) {
+  p.summary = { site: p.site.state, design_temperatures: { state: "not_set", warning: null },
+    climate: { state: "complete", origin: "station", verdict: "pass", edited: false } };
+  p.publish();
+  return p;
+}
+function passing() {
+  return completed({ limit_check: { verdict: "pass", reason: null, distance_km: 8, elevation_difference_m: 6,
+    distance_ok: true, elevation_ok: true } });
+}
+function failing(distance, elevation) {
+  return completed({ limit_check: { verdict: "fail", reason: null, distance_km: distance,
+    elevation_difference_m: elevation, distance_ok: distance <= 80.4672, elevation_ok: elevation <= 121.92 } });
+}
+
+test("a click on the map fills latitude and longitude, and typed values move the pin", function () {
+  var p = page();
+  open(p);
+  click(byText(pane(p), "button", "Set Location…"));
+  var d = dialog(p);
+  assert.ok(mapOf(d), "the map is in the dialog");
+  assert.strictEqual(pinOf(d), null, "no pin before a site");
+  pressMap(d, 280, 190);
+  var latitude = field(d, "Latitude").value, longitude = field(d, "Longitude").value;
+  assert.match(latitude, /^\d{2}(\.\d{1,4})?$/);
+  assert.match(longitude, /^-\d{2,3}(\.\d{1,4})?$/);
+  assert.ok(Number(latitude) > 24 && Number(latitude) < 52 && Number(longitude) > -126 && Number(longitude) < -66,
+    "the map opens on North America with no site");
+  var placed = pinOf(d);
+  assert.ok(placed, "the click placed the pin");
+  assert.strictEqual(named(p, P + "site.update").length, 0, "a click writes nothing");
+  type(field(d, "Latitude"), "40.5");
+  assert.notStrictEqual(pinOf(d), placed, "typing moved the pin");
+  type(field(d, "Longitude"), "");
+  assert.strictEqual(pinOf(d), null, "a missing longitude takes the pin away");
+});
+
+test("a click on the map fills coordinates in the panel's decimal comma", function () {
+  var p = page(SITE_SET, null, { decimal: "," });
+  open(p);
+  click(byText(pane(p), "button", "Set Location…"));
+  var d = dialog(p);
+  assert.ok(pinOf(d), "the set site has its pin");
+  pressMap(d, 100, 100);
+  assert.match(field(d, "Latitude").value, /^\d{2},\d{1,4}$/);
+});
+
+test("with an attached station the map shows it and its ring, and warns before a site that fails it", function () {
+  var p = withClimate(page(SITE_SET));
+  open(p);
+  click(byText(pane(p), "button", "Set Location…"));
+  var d = dialog(p);
+  var reads = named(p, P + "climate.get");
+  assert.strictEqual(reads.length, 1);
+  assert.strictEqual(reads[0].type, "query.invoke");
+  answer(p, reads[0], station(42.8, -73.7), "query.result");
+  var marker = d.querySelector("[data-point='station']");
+  assert.ok(marker, "the station is a marker");
+  assert.strictEqual(d.querySelector(".phc-outline-map-ring").children[1].textContent, "50 mi from the station");
+  var previews = named(p, P + "site.preview_limit_check");
+  assert.strictEqual(previews.length, 1, "the open site is checked");
+  assert.deepStrictEqual(previews[0].payload.params, { latitude_deg: 42.75, longitude_deg: -73.8, elevation_m: 84 });
+  answer(p, previews[0], completed({ limit_check: { verdict: "pass", reason: null, distance_km: 8.2,
+    elevation_difference_m: 6, distance_ok: true, elevation_ok: true } }), "query.result");
+  var warning = d.querySelector(".climate-limit-warning");
+  assert.strictEqual(warning.hidden, true, "no warning for a passing site");
+
+  type(field(d, "Latitude"), "43.56");
+  type(field(d, "Longitude"), "-72.87");
+  previews = named(p, P + "site.preview_limit_check");
+  assert.strictEqual(previews.length, 2, "one request while the first is out");
+  type(field(d, "Longitude"), "-72.9");
+  assert.strictEqual(named(p, P + "site.preview_limit_check").length, 2, "single flight");
+  answer(p, previews[1], failing(131, 6), "query.result");
+  assert.strictEqual(warning.hidden, true, "an answer for values no longer typed is not shown");
+  previews = named(p, P + "site.preview_limit_check");
+  assert.strictEqual(previews.length, 3, "the newer values are asked about when the answer lands");
+  assert.strictEqual(previews[2].payload.params.longitude_deg, -72.9);
+  answer(p, previews[2], failing(131, 6), "query.result");
+  assert.strictEqual(warning.hidden, false);
+  assert.strictEqual(warning.textContent, "At this site Northfield Regional, the attached station, is outside the " +
+    "Phius limits: 131 km away, over 50 mi. The station stays attached and will read Outside Phius limits.");
+  assert.strictEqual(d.querySelector("[data-point='station']").getAttribute("data-tone"), "warning");
+  assert.strictEqual(setButton(d).disabled, false, "Set still saves");
+  d.querySelector("form").listeners.submit({ preventDefault: function () {} });
+  assert.strictEqual(named(p, P + "site.update").length, 1);
+});
+
+test("an elevation alone outside the limit warns, naming the elevation", function () {
+  var p = withClimate(page(SITE_SET));
+  open(p);
+  click(byText(pane(p), "button", "Set Location…"));
+  var d = dialog(p);
+  answer(p, named(p, P + "climate.get")[0], station(42.8, -73.7), "query.result");
+  answer(p, named(p, P + "site.preview_limit_check")[0], failing(8, 300), "query.result");
+  assert.strictEqual(d.querySelector(".climate-limit-warning").textContent, "At this site Northfield Regional, the " +
+    "attached station, is outside the Phius limits: 300 m apart in elevation, over 400 ft. The station stays " +
+    "attached and will read Outside Phius limits.");
+});
+
+test("a climate typed without station coordinates, or none, puts nothing on the map and asks no check", function () {
+  [station(null, null), null].forEach(function (outcome) {
+      var p = outcome ? withClimate(page(SITE_SET)) : page(SITE_SET);
+      open(p);
+      click(byText(pane(p), "button", "Set Location…"));
+      var d = dialog(p);
+      if (outcome) {
+        assert.strictEqual(setButton(d).disabled, true, "Set waits for the station read");
+        answer(p, named(p, P + "climate.get")[0], outcome, "query.result");
+      } else {
+        assert.strictEqual(named(p, P + "climate.get").length, 0, "no climate, no read");
+      }
+      assert.strictEqual(setButton(d).disabled, false);
+      type(field(d, "Latitude"), "43.1");
+      assert.strictEqual(d.querySelectorAll("[data-point]").length, 0);
+      assert.strictEqual(d.querySelectorAll(".phc-outline-map-ring").length, 0);
+      assert.strictEqual(named(p, P + "site.preview_limit_check").length, 0);
+      assert.strictEqual(d.querySelector(".climate-limit-warning").hidden, true);
+    });
+});
+
+test("the map's ring is drawn at the limit check's distance", function () {
+  var vectors = JSON.parse(fs.readFileSync(path.join(__dirname, "support", "map_ring_vectors.json"), "utf8"));
+  var p = page();
+  assert.strictEqual(p.modules["features/climate/shared"].DISTANCE_LIMIT_KM, vectors.radius_km);
+});
+
+test("a check that fails says so, and a station read after the user moved the map leaves the view alone", function () {
+  var p = withClimate(page(SITE_SET));
+  open(p);
+  click(byText(pane(p), "button", "Set Location…"));
+  var d = dialog(p);
+  var svg = mapOf(d);
+  svg.rect = MAP_RECT;
+  var base = { button: 0, isPrimary: true, pointerId: 3, target: svg, preventDefault: function () {} };
+  svg.listeners.pointerdown(Object.assign({ type: "pointerdown", clientX: 100, clientY: 100 }, base));
+  svg.listeners.pointermove(Object.assign({ type: "pointermove", clientX: 200, clientY: 160 }, base));
+  svg.listeners.pointerup(Object.assign({ type: "pointerup", clientX: 200, clientY: 160 }, base));
+  var transform = d.querySelector(".phc-outline-map-borders").getAttribute("transform");
+  answer(p, named(p, P + "climate.get")[0], station(42.8, -73.7), "query.result");
+  assert.strictEqual(d.querySelector(".phc-outline-map-borders").getAttribute("transform"), transform);
+  assert.ok(d.querySelector("[data-point='station']"));
+  answer(p, named(p, P + "site.preview_limit_check")[0], { status: "failed", message: "The Model could not be read." },
+    "query.result");
+  var warning = d.querySelector(".climate-limit-warning");
+  assert.strictEqual(warning.hidden, false);
+  assert.strictEqual(warning.textContent, "The Phius limit check could not be run for this site: The Model could not " +
+    "be read.");
+});
+
+test("with a station, Set waits for the check at the values typed; a failing site can still be set", function () {
+  var p = withClimate(page(SITE_SET));
+  open(p);
+  click(byText(pane(p), "button", "Set Location…"));
+  var d = dialog(p);
+  answer(p, named(p, P + "climate.get")[0], station(42.8, -73.7), "query.result");
+  assert.strictEqual(setButton(d).disabled, true, "the open site's check is out");
+  d.querySelector("form").listeners.submit({ preventDefault: function () {} });
+  assert.strictEqual(named(p, P + "site.update").length, 0, "Enter sends nothing before the check");
+  answer(p, named(p, P + "site.preview_limit_check")[0], failing(8, 6), "query.result");
+  type(field(d, "Latitude"), "44.9");
+  assert.strictEqual(setButton(d).disabled, true, "a new site waits for its own check");
+  answer(p, named(p, P + "site.preview_limit_check")[1], failing(240, 6), "query.result");
+  assert.strictEqual(d.querySelector(".climate-limit-warning").hidden, false);
+  assert.strictEqual(setButton(d).disabled, false, "the warning shows, and Set still saves");
+  d.querySelector("form").listeners.submit({ preventDefault: function () {} });
+  assert.strictEqual(named(p, P + "site.update").length, 1);
+});
+
+test("a failed station read is said, and another change to the Model reads the station again", function () {
+  var p = withClimate(page(SITE_SET));
+  open(p);
+  click(byText(pane(p), "button", "Set Location…"));
+  var d = dialog(p);
+  answer(p, named(p, P + "climate.get")[0], { status: "failed", message: "The record could not be read." },
+    "query.result");
+  var warning = d.querySelector(".climate-limit-warning");
+  assert.strictEqual(warning.hidden, false);
+  assert.strictEqual(warning.textContent, "The attached station could not be read, so the Phius limit check is not " +
+    "shown: The record could not be read.");
+  p.revision += 1;
+  p.publish();
+  var reads = named(p, P + "climate.get");
+  assert.strictEqual(reads.length, 2, "a new revision reads the station again");
+  answer(p, reads[1], station(42.8, -73.7), "query.result");
+  assert.ok(d.querySelector("[data-point='station']"));
+  answer(p, named(p, P + "site.preview_limit_check")[0], passing(), "query.result");
+  assert.strictEqual(warning.hidden, true);
+  p.revision += 1;
+  p.publish();
+  assert.strictEqual(setButton(d).disabled, true, "the old station's check no longer counts");
+  assert.strictEqual(d.querySelectorAll("[data-point]").length, 0);
+});
+
+test("an elevation draft cancelled with Escape repaints the check for the elevation shown", function () {
+  var p = withClimate(page(SITE_SET));
+  open(p);
+  click(byText(pane(p), "button", "Set Location…"));
+  var d = dialog(p);
+  answer(p, named(p, P + "climate.get")[0], station(42.8, -73.7), "query.result");
+  answer(p, named(p, P + "site.preview_limit_check")[0], passing(), "query.result");
+  type(field(d, "Elevation"), "500");
+  answer(p, named(p, P + "site.preview_limit_check")[1], failing(8, 416), "query.result");
+  assert.strictEqual(d.querySelector(".climate-limit-warning").hidden, false);
+  key(field(d, "Elevation"), "Escape");
+  assert.strictEqual(field(d, "Elevation").value, "84");
+  assert.strictEqual(d.querySelector(".climate-limit-warning").hidden, true, "the 500 m warning goes");
+  assert.strictEqual(setButton(d).disabled, true, "Set waits for the check at 84 m");
+  var previews = named(p, P + "site.preview_limit_check");
+  assert.strictEqual(previews[2].payload.params.elevation_m, 84);
+  answer(p, previews[2], passing(), "query.result");
+  assert.strictEqual(setButton(d).disabled, false);
+});
+

@@ -1116,6 +1116,10 @@
     site: { latitude_deg: 42.75, longitude_deg: -73.8, elevation_m: 84, climate_zone: 15, hours_from_utc: -5 },
     design: { heating_99_c: -17.2, cooling_1_c: 30.1, design_temperature_source: "ASHRAE 2021, nearest station" } } };
 
+  // The outline map (P4c-07): the site set, with a Phius station attached nearby. Synthetic coordinates.
+  FIXTURES.climatestation = { parts: [], climate: { site: FIXTURES.climateset.climate.site,
+    station: { name: "Northfield Regional", latitude_deg: 42.82, longitude_deg: -73.62, elevation_m: 90 } } };
+
   global.PhComposerPreviewFixtures = {
     names: Object.keys(FIXTURES),
     fromQuery: function (search) {
