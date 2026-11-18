@@ -1158,8 +1158,8 @@
   }
   var PREVIEW_STATIONS = previewStations();
   FIXTURES.climatepicker = { parts: [], climate: { site: FIXTURES.climateset.climate.site,
-    folders: [PREVIEW_FOLDERS[0], climateFolder("previewddddd", "Phius Climate Data - US and Canada 2024",
-      "~/Climate/US and Canada", 1007, 8, [])],
+    folders: [PREVIEW_FOLDERS[0], climateFolder("previewddddd", "Invented Second Station Set With a Long Name",
+      "~/Climate/Second Set", 1007, 8, [])],
     lastDatasetId: PREVIEW_FOLDERS[0].id, stations: PREVIEW_STATIONS } };
   FIXTURES.climatereplace = { parts: [], climate: Object.assign({}, FIXTURES.climatepicker.climate, {
     station: PREVIEW_STATIONS.slice().sort(function (a, b) {
