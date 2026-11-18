@@ -507,6 +507,13 @@ below is refused with `climate.settings_unavailable`.
 drive. No call takes or answers a folder's path. A folder that cannot be found reads
 `found: false` and keeps its setting: PH-Composer never removes one itself.
 
+The list also reads each folder now and gives what it holds: `format` (`phius_station_file` when it
+holds stations), `station_count`, `state_count`, and `files_not_read`, the other files by extension
+with the most first, beside `files_not_read_total`. A `-mon.txt` file whose header does not read
+counts under `.txt`; one whose header reads is listed, and attaching it is refused if the rest does
+not read. `complete` is false when the folder was too large or too deep to read whole. These are null
+for a folder that is not found.
+
 The changes are setup commands and need the `setup` capability. None changes a Model or adds an
 Undo step.
 
@@ -525,6 +532,41 @@ A folder that is already listed, or sits inside or around a listed one, is refus
 PH-Composer wrote it, reads and changes are refused with `climate.settings_unreadable` and the file
 is left as it is. A change that cannot be saved, for example while another SketchUp is saving the
 same file, is refused with `climate.settings_unavailable`; nothing was written, so try again.
+
+### Climate stations
+
+A station is a Phius station file, named `<STATION>-mon.txt`, anywhere in a climate data folder.
+Its `state` is the name of the folder it sits in and its `key` is its path inside the climate data
+folder, such as `NY/STATION-mon.txt`. The station's values go from the file into the Model inside
+PH-Composer: no call takes them, and the reads below answer no monthly value and no folder path.
+
+To attach the nearest station that meets Phius's limits:
+
+1. Set the site first (`ph_composer.climate.site.update`). Without it, the calls below are refused
+   with `climate.site_not_set`.
+2. Call `ph_composer.climate.folders.list` and take a folder's `id` with `station_count` above zero.
+3. Call `ph_composer.climate.stations.list` with that `folder_id`. Stations come nearest first, each
+   with its `key`, `name`, `state`, coordinates, elevation and `limit_check`, in pages: pass
+   `next_cursor` back as `cursor` for the next one. A cursor from before a site change is refused
+   with `query.cursor_expired`; start again from the first page.
+4. Take the first station whose `limit_check.verdict` is `pass` and call
+   `ph_composer.climate.climate.attach_station` with `folder_id` and its `key` as `station_key`.
+   A failing station can be attached too; the limit check then reads `fail` wherever it shows.
+
+Attach is one Undo step, "Attach Climate Station". The Model keeps the values, a copy as read, the
+dataset name, the station name and state, the file's SHA-256, and a wind speed that starts as the
+mean of the file's January and July values. With a climate already in the Model, attach is refused
+with `target.changed`: call `ph_composer.climate.climate.replace_station` instead, one Undo step,
+"Replace Climate Station". Its result names the climate it replaced and `lost_edited_cells`, how
+many edited values that loses. A key that is not in the folder now is refused with
+`climate.station_not_found`, and a file that is not a station file this version reads with
+`climate.station_unreadable`, whose message names the row.
+
+`ph_composer.climate.climate.source_status` looks for the attached station's file in every climate
+data folder on this computer by its station name and state, whatever the folder is named, then
+compares the files' SHA-256: `found`, `changed` or `not_on_this_computer`, and `not_applicable` for
+a climate typed by hand or none. When found or changed it gives `folder_id` and `station_key`; to
+update from a changed file, pass them to `replace_station`.
 
 ### Library records
 

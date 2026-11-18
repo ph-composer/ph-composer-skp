@@ -1,2 +1,4 @@
 # Vector cursor PDFs are binary assets; their xref records contain required trailing spaces.
 *.pdf binary
+# Station-file fixtures keep their CRLF line ends and Windows-1252 bytes, as Phius writes them.
+tests/fixtures/climate/** -text -diff

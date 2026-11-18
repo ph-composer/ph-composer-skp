@@ -3,6 +3,8 @@
 require_relative "test_helper"
 require_relative "../tools/examples/climate/climate_walkthrough"
 require_relative "../tools/examples/climate/station_seed"
+require_relative "support/climate_station_files"
+require "minitest/mock"
 
 class ClimateWalkthroughTest < PhComposerTestCase
   def setup
@@ -29,6 +31,50 @@ class ClimateWalkthroughTest < PhComposerTestCase
     end
     trace.length.times { model.redo }
     assert ClimateWalkthrough.verify.fetch("passed")
+  end
+
+  # The agent guide's recipe on a copy of the invented fixture folder, which the user chose in SketchUp.
+  def test_the_attach_walkthrough_attaches_the_nearest_passing_station_in_one_undo_step
+    model = Sketchup.active_model
+    root = Dir.mktmpdir("climate_walkthrough")
+    folder = File.join(root, "Phius invented")
+    FileUtils.cp_r(File.expand_path("fixtures/climate/folder", __dir__), folder)
+    context = PhComposer::API.connect(:session_id => PhComposer::Sessions.for(model).id,
+                                      :capabilities => %w[read setup])
+    id = UI.stub(:select_directory, folder) do
+      PhComposer::NativeApproval.setup(context, "ph_composer.climate.folders.add", {})
+    end.dig("value", "id")
+    client = AuthoringExample::Client.new
+    site = ClimateStationFiles::SITE.merge("climate_zone" => nil, "hours_from_utc" => nil)
+    expected = client.query("ph_composer.climate.site.get").fetch("value").slice(*site.keys)
+    client.invoke("ph_composer.climate.site.update", "values" => site, "expected_values" => expected)
+    operations = model.operations.length
+
+    attached = ClimateWalkthrough.run_attach(id)
+
+    assert attached.fetch("passed"), attached.inspect
+    assert_equal ["Attach Climate Station"], model.operations.drop(operations).map(&:first)
+    assert_equal "Caf\u00E9 Station XB", ClimateWalkthrough.climate(client).dig("climate", "values", "name")
+  ensure
+    FileUtils.rm_rf(root) if root
+  end
+
+  # Nearest first, the first page of one holds a station that fails on elevation; the walkthrough follows the
+  # cursor to the passing one on a later page.
+  def test_the_attach_walkthrough_follows_pages_to_a_passing_station
+    client = AuthoringExample::Client.new
+    pages = [{ "stations" => [{ "key" => "XB/FAILS-mon.txt", "limit_check" => { "verdict" => "fail" } }],
+               "next_cursor" => "c1" },
+             { "stations" => [{ "key" => "XB/PASSES-mon.txt", "limit_check" => { "verdict" => "pass" } }],
+               "next_cursor" => nil }]
+    asked = []
+    found = client.stub(:query, lambda { |_name, params|
+      asked << params["cursor"]
+      { "status" => "completed", "value" => pages.fetch(asked.length - 1) }
+    }) { ClimateWalkthrough.nearest_passing(client, [], "climate_folder_AbCdEf123456", 1) }
+
+    assert_equal "XB/PASSES-mon.txt", found.fetch("key")
+    assert_equal [nil, "c1"], asked
   end
 
   def test_the_walkthrough_uses_public_calls_only_and_the_seed_matches_its_values

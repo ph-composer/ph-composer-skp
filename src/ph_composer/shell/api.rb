@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 64
+    MINOR = 65
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -352,7 +352,15 @@ module PhComposer
                     "absolute path; the setup commands folders.add and folders.locate take a folder the user " \
                     "chooses, and folders.rename, folders.remove and folders.remember_dataset take its id. " \
                     "climate.settings_unreadable, climate.settings_unavailable, climate.folder_not_found and " \
-                    "climate.folder_overlaps are new." }
+                    "climate.folder_overlaps are new." },
+      { "minor" => 65, "date" => "2026-11-18",
+        "change" => "The Phius station reader. ph_composer.climate.folders.list gives each folder's format, station " \
+                    "and state counts and files not read by extension; ph_composer.climate.stations.list pages one " \
+                    "folder's stations nearest the site first with each one's Phius limit check; " \
+                    "climate.attach_station and climate.replace_station take a folder id and a station key and " \
+                    "read the file in Ruby; climate.source_status says whether the attached station's file is on " \
+                    "this computer. climate.site_not_set, climate.station_not_found and climate.station_unreadable " \
+                    "are new. A station climate's provenance station_name is its file name's stem." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

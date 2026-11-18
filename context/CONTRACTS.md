@@ -585,6 +585,46 @@ the home folder, the volume's name and the rest under `/Volumes/`, and otherwise
 two names. The reasons map to `climate.settings_unreadable` (`unreadable`, `later_version`) and
 `climate.settings_unavailable` (the rest).
 
+## The Phius station reader
+
+`features/climate/stations/` reads Phius station files in place, in the climate data folders this
+computer's settings file lists; nothing is copied or indexed (D4c-11: a 1,007-file folder walks and
+reads its headers in under 0.1 s in SketchUp 2026's Ruby, so the read is synchronous with no cache).
+
+- **Reader** (`PhiusStationFile`, pure): bytes in, at most 64 KiB, read as Windows-1252 into UTF-8
+  with an undefined byte replaced. Rows are tab-delimited and matched by their first cell, compared
+  without its unit and case. The header row is the first whose cells include `Latitude`; its first
+  cell is the station's name (1 to 120 characters) and `Latitude`, `Longitude`, `Height a.s.l.` and
+  `Daily temperature variation summer` each take the next non-empty cell. The series rows are
+  `Temperature outdoor`, `North`, `East`, `South`, `West`, `Global`, `Dewpoint` and `Sky
+  temperature`, in any order, the first occurrence winning: cells 1 to 12 are the months into
+  `monthly` (`air_c`, the `rad_*_kwh_m2` rows, `dewpoint_c`, `sky_c`), and cells 13 to 15 of the
+  temperature and five radiation rows are Heating 1, Heating 2 and Cooling into `peak_loads`
+  (`air_c`, `rad_*_w_m2`). The dewpoint and sky design cells are notes, so those peak values are
+  null. The row holding `Wind speed` gives the cells after `Jan` and `Jul`. A number is plain
+  decimal with an optional exponent; a comma is not a decimal separator. Name, latitude (within 90),
+  longitude (within 180), height and every month and numeric design cell are needed: a missing row,
+  a short row or a non-number raises `Unreadable` naming the row (`header`, the series label, `Wind
+  speed` or `file`) and no value. The swing and the two winds read null when absent. Nothing is
+  guessed: no default swing, wind or offset.
+- **Walk** (`FolderScan`): every visible file under the folder; hidden names are skipped and links are
+  not followed. A station is a `-mon.txt` file with a name before the suffix whose header reads: the
+  list is read from headers, and a file whose series rows do not read is refused at attach. The series
+  and wind rows are looked for after the header row only. Its `key` is its path relative to
+  the folder, its `state` the name of the folder it sits in, and its matching name the file name's
+  stem (C4c-2: unique in a state folder, where header names may repeat). Everything else is counted
+  by lower-case extension. Past 20,000 entries (hidden ones counted as
+  they are read) or 16 folders deep, or at a folder that cannot be listed, the walk stops there and
+  reports `complete: false`. An extension is cut at 16 characters before counting.
+- **Attach** reads only a key the walk lists, never a key joined onto the folder. The record's `name`
+  is the header's name; `provenance.station_name` is the stem, `provenance.state` the state and
+  `source_checksum` the SHA-256 of the bytes read. Attach and Replace are two actions because an
+  action has one Undo name; both are guarded by the request's `expected_revision`, so no station
+  value travels in params.
+- **Source status** walks every folder found, matches stem and state (a `-mon.txt` whose header no
+  longer reads still matches, and reads `changed`), then compares SHA-256: `found`,
+  else `changed`, else `not_on_this_computer`; `not_applicable` for a hand-entered climate or none.
+
 ## Geometry records and occurrence references
 
 Records are canonical JSON under registered `ph_composer.*` dictionaries. A read never creates a

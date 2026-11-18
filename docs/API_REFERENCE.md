@@ -9708,6 +9708,69 @@ Example params:
 {}
 ```
 
+### `ph_composer.climate.climate.source_status`
+
+Whether the attached station's file is on this computer: looked for by station name and state in every climate data folder, then compared by SHA-256. Owner: `ph_composer.climate`.
+
+Refuses: `climate.settings_unavailable`, `climate.settings_unreadable`, `record.unreadable`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "status",
+    "folder_id",
+    "station_key"
+  ],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "found",
+        "changed",
+        "not_on_this_computer",
+        "not_applicable"
+      ],
+      "description": "found when a file of the same station name and state has the same SHA-256, changed when it has another; not_applicable for a climate entered by hand or none."
+    },
+    "folder_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The folder holding the matched file, when found or changed."
+    },
+    "station_key": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Its key, for replace_station (Update from File)."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
 ### `ph_composer.climate.design_temperatures.get`
 
 The ASHRAE 99% heating and 1% cooling dry bulbs, the source note, the state and the warning. A new Model reads not_set and nothing is written. Owner: `ph_composer.climate`.
@@ -9794,7 +9857,7 @@ Example params:
 
 ### `ph_composer.climate.folders.list`
 
-The climate data folders set up on this computer, with each one's name, display location and whether it can be found now. Owner: `ph_composer.climate`.
+The climate data folders set up on this computer, with each one's name, display location, whether it can be found now, and the stations, states and files not read found in it now. Owner: `ph_composer.climate`.
 
 Refuses: `climate.settings_unavailable`, `climate.settings_unreadable`, and the `query` common set.
 
@@ -9829,7 +9892,13 @@ Result:
           "id",
           "name",
           "display_location",
-          "found"
+          "found",
+          "format",
+          "station_count",
+          "state_count",
+          "files_not_read",
+          "files_not_read_total",
+          "complete"
         ],
         "properties": {
           "id": {
@@ -9848,6 +9917,73 @@ Result:
           "found": {
             "type": "boolean",
             "description": "false when the folder cannot be found now; the setting is kept."
+          },
+          "format": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "phius_station_file",
+              null
+            ],
+            "description": "The format of the stations found; null when there are none or the folder is not found."
+          },
+          "station_count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "Read when the list is; null when the folder is not found."
+          },
+          "state_count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "Read when the list is; null when the folder is not found."
+          },
+          "files_not_read": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "extension",
+                "count"
+              ],
+              "properties": {
+                "extension": {
+                  "type": "string",
+                  "description": "The file extension in lower case, such as .xls; empty for none."
+                },
+                "count": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "description": "Files not read as stations, by extension, most first, at most 20 kinds. A station file that does not read counts under .txt. Null when the folder is not found."
+          },
+          "files_not_read_total": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "Read when the list is; null when the folder is not found."
+          },
+          "complete": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "false when the folder was too large or deep to read whole, or part of it could not be listed; null when not found."
           }
         }
       },
@@ -10137,6 +10273,210 @@ Example params:
   "latitude_deg": 40.6782,
   "longitude_deg": -73.9442,
   "elevation_m": 10.0
+}
+```
+
+### `ph_composer.climate.stations.list`
+
+One climate data folder's Phius stations, nearest the Model's site first, each with its distance, elevation difference and Phius verdict. Paged; refuses climate.site_not_set with no site. Owner: `ph_composer.climate`.
+
+Refuses: `climate.folder_not_found`, `climate.settings_unavailable`, `climate.settings_unreadable`, `climate.site_not_set`, `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "folder_id"
+  ],
+  "properties": {
+    "folder_id": {
+      "type": "string",
+      "description": "A climate data folder's id, from folders.list."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "folder_id",
+    "dataset_name",
+    "complete",
+    "total",
+    "next_cursor",
+    "stations"
+  ],
+  "properties": {
+    "folder_id": {
+      "type": "string",
+      "description": "A climate data folder's id, from folders.list."
+    },
+    "dataset_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "description": "The dataset name the Model and the Export report show."
+    },
+    "complete": {
+      "type": "boolean",
+      "description": "false when the folder was too large or deep to read whole, or part of it could not be listed."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "stations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "name",
+          "state",
+          "latitude_deg",
+          "longitude_deg",
+          "elevation_m",
+          "limit_check"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "The station's key from stations.list: its file's path inside the climate data folder, such as NY/STATION-mon.txt."
+          },
+          "name": {
+            "type": "string",
+            "description": "The station's name as its file's header gives it."
+          },
+          "state": {
+            "type": "string",
+            "description": "The name of the folder the file sits in."
+          },
+          "latitude_deg": {
+            "type": "number",
+            "x-unit": "deg"
+          },
+          "longitude_deg": {
+            "type": "number",
+            "x-unit": "deg"
+          },
+          "elevation_m": {
+            "type": "number",
+            "x-unit": "m",
+            "description": "Height above sea level."
+          },
+          "limit_check": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "verdict",
+              "reason",
+              "distance_km",
+              "elevation_difference_m",
+              "distance_ok",
+              "elevation_ok"
+            ],
+            "properties": {
+              "verdict": {
+                "type": "string",
+                "enum": [
+                  "pass",
+                  "fail",
+                  "not_checked"
+                ],
+                "description": "pass at or inside both Phius limits, 50 miles and 400 feet; not_checked gives its reason."
+              },
+              "reason": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "no_site",
+                  "no_station_coordinates",
+                  null
+                ],
+                "description": "Why the check did not run; null when it did."
+              },
+              "distance_km": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "km",
+                "description": "Great-circle distance from the site to the station."
+              },
+              "elevation_difference_m": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "m",
+                "description": "The site's elevation less the station's, as a magnitude."
+              },
+              "distance_ok": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "elevation_ok": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              }
+            },
+            "description": "The Phius limit check, worked out from the site and the station each time and never stored."
+          }
+        }
+      },
+      "description": "Nearest first, then by key."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "folder_id": "climate_folder_AbCdEf123456"
+}
+```
+
+Example params:
+
+```json
+{
+  "folder_id": "climate_folder_AbCdEf123456",
+  "limit": 20
 }
 ```
 
@@ -42786,6 +43126,226 @@ Example params:
 }
 ```
 
+### `ph_composer.climate.climate.attach_station`
+
+Attach a station from a climate data folder: Ruby reads its file and the Model keeps a copy of its values, with the as-read copy, the source and the wind speed prefilled from January and July. Needs the site set; refuses target.changed when the Model already holds a climate. Owner: `ph_composer.climate`.
+
+Undo step: Attach Climate Station. Stores the climate in this SKP.
+
+Refuses: `climate.folder_not_found`, `climate.settings_unavailable`, `climate.settings_unreadable`, `climate.site_not_set`, `climate.station_not_found`, `climate.station_unreadable`, `record.unreadable`, `target.changed`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "folder_id",
+    "station_key"
+  ],
+  "properties": {
+    "folder_id": {
+      "type": "string",
+      "description": "A climate data folder's id, from folders.list."
+    },
+    "station_key": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "description": "The station's key from stations.list: its file's path inside the climate data folder, such as NY/STATION-mon.txt."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "state",
+    "missing",
+    "edited_cells",
+    "limit_check"
+  ],
+  "properties": {
+    "state": {
+      "type": "string",
+      "enum": [
+        "none",
+        "incomplete",
+        "complete"
+      ],
+      "description": "none with no climate; incomplete while missing lists a gap."
+    },
+    "missing": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "row",
+          "columns"
+        ],
+        "properties": {
+          "row": {
+            "type": "string",
+            "description": "The record key: a monthly or peak-load row, or a single value such as daily_temp_swing_k."
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "jan",
+                "feb",
+                "mar",
+                "apr",
+                "may",
+                "jun",
+                "jul",
+                "aug",
+                "sep",
+                "oct",
+                "nov",
+                "dec",
+                "heat_1",
+                "heat_2",
+                "cool_1"
+              ]
+            },
+            "description": "The months or cases missing; empty for a single value."
+          }
+        }
+      },
+      "description": "What a complete climate still needs, by row, in grid order."
+    },
+    "edited_cells": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "row",
+          "column"
+        ],
+        "properties": {
+          "row": {
+            "type": "string",
+            "description": "The record key: a monthly or peak-load row, or a single value such as daily_temp_swing_k."
+          },
+          "column": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "jan",
+              "feb",
+              "mar",
+              "apr",
+              "may",
+              "jun",
+              "jul",
+              "aug",
+              "sep",
+              "oct",
+              "nov",
+              "dec",
+              "heat_1",
+              "heat_2",
+              "cool_1",
+              null
+            ],
+            "description": "A month or a peak-load case; null for a single value."
+          }
+        }
+      },
+      "description": "Each value that differs from the station file; none for a climate entered by hand. Wind speed is never one."
+    },
+    "limit_check": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "verdict",
+        "reason",
+        "distance_km",
+        "elevation_difference_m",
+        "distance_ok",
+        "elevation_ok"
+      ],
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail",
+            "not_checked"
+          ],
+          "description": "pass at or inside both Phius limits, 50 miles and 400 feet; not_checked gives its reason."
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "no_site",
+            "no_station_coordinates",
+            null
+          ],
+          "description": "Why the check did not run; null when it did."
+        },
+        "distance_km": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "km",
+          "description": "Great-circle distance from the site to the station."
+        },
+        "elevation_difference_m": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "m",
+          "description": "The site's elevation less the station's, as a magnitude."
+        },
+        "distance_ok": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "elevation_ok": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "description": "The Phius limit check; null with no climate."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "folder_id": "climate_folder_AbCdEf123456",
+  "station_key": "XA/STATION-mon.txt"
+}
+```
+
 ### `ph_composer.climate.climate.clear`
 
 Delete the Model's climate. The site and the design temperatures stay. Owner: `ph_composer.climate`.
@@ -44359,6 +44919,254 @@ Example params:
       }
     }
   }
+}
+```
+
+### `ph_composer.climate.climate.replace_station`
+
+Replace the Model's climate with a station from a climate data folder, losing any edited values; with the station source_status matched it is Update from File. Needs the site set; refuses climate.not_found with no climate. Owner: `ph_composer.climate`.
+
+Undo step: Replace Climate Station. Stores the climate in this SKP.
+
+Refuses: `climate.folder_not_found`, `climate.not_found`, `climate.settings_unavailable`, `climate.settings_unreadable`, `climate.site_not_set`, `climate.station_not_found`, `climate.station_unreadable`, `record.unreadable`, `target.changed`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "folder_id",
+    "station_key"
+  ],
+  "properties": {
+    "folder_id": {
+      "type": "string",
+      "description": "A climate data folder's id, from folders.list."
+    },
+    "station_key": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "description": "The station's key from stations.list: its file's path inside the climate data folder, such as NY/STATION-mon.txt."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "state",
+    "missing",
+    "edited_cells",
+    "limit_check",
+    "replaced"
+  ],
+  "properties": {
+    "state": {
+      "type": "string",
+      "enum": [
+        "none",
+        "incomplete",
+        "complete"
+      ],
+      "description": "none with no climate; incomplete while missing lists a gap."
+    },
+    "missing": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "row",
+          "columns"
+        ],
+        "properties": {
+          "row": {
+            "type": "string",
+            "description": "The record key: a monthly or peak-load row, or a single value such as daily_temp_swing_k."
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "jan",
+                "feb",
+                "mar",
+                "apr",
+                "may",
+                "jun",
+                "jul",
+                "aug",
+                "sep",
+                "oct",
+                "nov",
+                "dec",
+                "heat_1",
+                "heat_2",
+                "cool_1"
+              ]
+            },
+            "description": "The months or cases missing; empty for a single value."
+          }
+        }
+      },
+      "description": "What a complete climate still needs, by row, in grid order."
+    },
+    "edited_cells": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "row",
+          "column"
+        ],
+        "properties": {
+          "row": {
+            "type": "string",
+            "description": "The record key: a monthly or peak-load row, or a single value such as daily_temp_swing_k."
+          },
+          "column": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "jan",
+              "feb",
+              "mar",
+              "apr",
+              "may",
+              "jun",
+              "jul",
+              "aug",
+              "sep",
+              "oct",
+              "nov",
+              "dec",
+              "heat_1",
+              "heat_2",
+              "cool_1",
+              null
+            ],
+            "description": "A month or a peak-load case; null for a single value."
+          }
+        }
+      },
+      "description": "Each value that differs from the station file; none for a climate entered by hand. Wind speed is never one."
+    },
+    "limit_check": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "verdict",
+        "reason",
+        "distance_km",
+        "elevation_difference_m",
+        "distance_ok",
+        "elevation_ok"
+      ],
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail",
+            "not_checked"
+          ],
+          "description": "pass at or inside both Phius limits, 50 miles and 400 feet; not_checked gives its reason."
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "no_site",
+            "no_station_coordinates",
+            null
+          ],
+          "description": "Why the check did not run; null when it did."
+        },
+        "distance_km": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "km",
+          "description": "Great-circle distance from the site to the station."
+        },
+        "elevation_difference_m": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "m",
+          "description": "The site's elevation less the station's, as a magnitude."
+        },
+        "distance_ok": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "elevation_ok": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "description": "The Phius limit check; null with no climate."
+    },
+    "replaced": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "origin",
+        "lost_edited_cells"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The replaced climate's name."
+        },
+        "origin": {
+          "type": "string",
+          "enum": [
+            "station",
+            "hand"
+          ]
+        },
+        "lost_edited_cells": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many of its values differed from its station file; wind speed is never an edit, and a climate entered by hand has none."
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "folder_id": "climate_folder_AbCdEf123456",
+  "station_key": "XA/STATION-mon.txt"
 }
 ```
 
@@ -72463,7 +73271,13 @@ Result:
     "id",
     "name",
     "display_location",
-    "found"
+    "found",
+    "format",
+    "station_count",
+    "state_count",
+    "files_not_read",
+    "files_not_read_total",
+    "complete"
   ],
   "properties": {
     "id": {
@@ -72482,6 +73296,73 @@ Result:
     "found": {
       "type": "boolean",
       "description": "false when the folder cannot be found now; the setting is kept."
+    },
+    "format": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "phius_station_file",
+        null
+      ],
+      "description": "The format of the stations found; null when there are none or the folder is not found."
+    },
+    "station_count": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "description": "Read when the list is; null when the folder is not found."
+    },
+    "state_count": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "description": "Read when the list is; null when the folder is not found."
+    },
+    "files_not_read": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "extension",
+          "count"
+        ],
+        "properties": {
+          "extension": {
+            "type": "string",
+            "description": "The file extension in lower case, such as .xls; empty for none."
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "description": "Files not read as stations, by extension, most first, at most 20 kinds. A station file that does not read counts under .txt. Null when the folder is not found."
+    },
+    "files_not_read_total": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "description": "Read when the list is; null when the folder is not found."
+    },
+    "complete": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "false when the folder was too large or deep to read whole, or part of it could not be listed; null when not found."
     }
   }
 }
@@ -72544,7 +73425,13 @@ Result:
     "id",
     "name",
     "display_location",
-    "found"
+    "found",
+    "format",
+    "station_count",
+    "state_count",
+    "files_not_read",
+    "files_not_read_total",
+    "complete"
   ],
   "properties": {
     "id": {
@@ -72563,6 +73450,73 @@ Result:
     "found": {
       "type": "boolean",
       "description": "false when the folder cannot be found now; the setting is kept."
+    },
+    "format": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "phius_station_file",
+        null
+      ],
+      "description": "The format of the stations found; null when there are none or the folder is not found."
+    },
+    "station_count": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "description": "Read when the list is; null when the folder is not found."
+    },
+    "state_count": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "description": "Read when the list is; null when the folder is not found."
+    },
+    "files_not_read": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "extension",
+          "count"
+        ],
+        "properties": {
+          "extension": {
+            "type": "string",
+            "description": "The file extension in lower case, such as .xls; empty for none."
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "description": "Files not read as stations, by extension, most first, at most 20 kinds. A station file that does not read counts under .txt. Null when the folder is not found."
+    },
+    "files_not_read_total": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "description": "Read when the list is; null when the folder is not found."
+    },
+    "complete": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "false when the folder was too large or deep to read whole, or part of it could not be listed; null when not found."
     }
   }
 }
@@ -72620,7 +73574,13 @@ Result:
           "id",
           "name",
           "display_location",
-          "found"
+          "found",
+          "format",
+          "station_count",
+          "state_count",
+          "files_not_read",
+          "files_not_read_total",
+          "complete"
         ],
         "properties": {
           "id": {
@@ -72639,6 +73599,73 @@ Result:
           "found": {
             "type": "boolean",
             "description": "false when the folder cannot be found now; the setting is kept."
+          },
+          "format": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "phius_station_file",
+              null
+            ],
+            "description": "The format of the stations found; null when there are none or the folder is not found."
+          },
+          "station_count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "Read when the list is; null when the folder is not found."
+          },
+          "state_count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "Read when the list is; null when the folder is not found."
+          },
+          "files_not_read": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "extension",
+                "count"
+              ],
+              "properties": {
+                "extension": {
+                  "type": "string",
+                  "description": "The file extension in lower case, such as .xls; empty for none."
+                },
+                "count": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "description": "Files not read as stations, by extension, most first, at most 20 kinds. A station file that does not read counts under .txt. Null when the folder is not found."
+          },
+          "files_not_read_total": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "Read when the list is; null when the folder is not found."
+          },
+          "complete": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "false when the folder was too large or deep to read whole, or part of it could not be listed; null when not found."
           }
         }
       },
@@ -72707,7 +73734,13 @@ Result:
           "id",
           "name",
           "display_location",
-          "found"
+          "found",
+          "format",
+          "station_count",
+          "state_count",
+          "files_not_read",
+          "files_not_read_total",
+          "complete"
         ],
         "properties": {
           "id": {
@@ -72726,6 +73759,73 @@ Result:
           "found": {
             "type": "boolean",
             "description": "false when the folder cannot be found now; the setting is kept."
+          },
+          "format": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "phius_station_file",
+              null
+            ],
+            "description": "The format of the stations found; null when there are none or the folder is not found."
+          },
+          "station_count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "Read when the list is; null when the folder is not found."
+          },
+          "state_count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "Read when the list is; null when the folder is not found."
+          },
+          "files_not_read": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "extension",
+                "count"
+              ],
+              "properties": {
+                "extension": {
+                  "type": "string",
+                  "description": "The file extension in lower case, such as .xls; empty for none."
+                },
+                "count": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "description": "Files not read as stations, by extension, most first, at most 20 kinds. A station file that does not read counts under .txt. Null when the folder is not found."
+          },
+          "files_not_read_total": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "Read when the list is; null when the folder is not found."
+          },
+          "complete": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "false when the folder was too large or deep to read whole, or part of it could not be listed; null when not found."
           }
         }
       },
@@ -72791,7 +73891,13 @@ Result:
     "id",
     "name",
     "display_location",
-    "found"
+    "found",
+    "format",
+    "station_count",
+    "state_count",
+    "files_not_read",
+    "files_not_read_total",
+    "complete"
   ],
   "properties": {
     "id": {
@@ -72810,6 +73916,73 @@ Result:
     "found": {
       "type": "boolean",
       "description": "false when the folder cannot be found now; the setting is kept."
+    },
+    "format": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "phius_station_file",
+        null
+      ],
+      "description": "The format of the stations found; null when there are none or the folder is not found."
+    },
+    "station_count": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "description": "Read when the list is; null when the folder is not found."
+    },
+    "state_count": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "description": "Read when the list is; null when the folder is not found."
+    },
+    "files_not_read": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "extension",
+          "count"
+        ],
+        "properties": {
+          "extension": {
+            "type": "string",
+            "description": "The file extension in lower case, such as .xls; empty for none."
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "description": "Files not read as stations, by extension, most first, at most 20 kinds. A station file that does not read counts under .txt. Null when the folder is not found."
+    },
+    "files_not_read_total": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "description": "Read when the list is; null when the folder is not found."
+    },
+    "complete": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "false when the folder was too large or deep to read whole, or part of it could not be listed; null when not found."
     }
   }
 }
@@ -76350,6 +77523,9 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `climate.not_found` | The Model holds no climate to edit, restore or clear. Nothing was written. |
 | `climate.settings_unavailable` | This computer's settings file cannot be used: it is kept on macOS only for now, or it could not be saved. Nothing was written. |
 | `climate.settings_unreadable` | This computer's climate data settings cannot be read, or a later version of PH-Composer wrote them. They are left as stored; reads report it and changes refuse. |
+| `climate.site_not_set` | The site's latitude, longitude and elevation are not set, and the station list and attach need them. Nothing was read or written. |
+| `climate.station_not_found` | No station file with that key is in the climate data folder now, or it could not be opened. Nothing was written. |
+| `climate.station_unreadable` | The station file is not a Phius station file this version reads; the message names the row. Nothing was written. |
 
 ### `ph_composer.spaces`
 
@@ -76577,3 +77753,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.62 | 2026-11-17 | The ph_composer.climate feature is new, requiring ph_composer.zones. ph_composer.climate.site.get and site.update read and set the Model's site (latitude, longitude and elevation together, a climate-zone code and hours from UTC); ph_composer.climate.design_temperatures.get and design_temperatures.update read and set the ASHRAE 99% heating and 1% cooling dry bulbs and a source note, any field alone; ph_composer.climate.summary.get backs the ph_composer.climate.summary snapshot section. climate.heating_not_below_cooling is new, a warning the design-temperature read carries. |
 | 1.63 | 2026-11-17 | The ph_composer.climate.climate record kind is new, one climate per Model. ph_composer.climate.climate.get reads it with its state, what is missing, the edited cells and the Phius limit check against the site; climate.enter_values enters one by hand with gaps allowed, climate.save_values edits its values and rewrites its provenance, climate.restore_original copies the station file's values back, and climate.clear deletes it, each guarded by the editable fields last read. ph_composer.climate.site.update's result gains limit_check, ph_composer.climate.site.preview_limit_check is new, and the summary gains the climate card. climate.not_found and climate.no_original are new. |
 | 1.64 | 2026-11-18 | The climate data folders on this computer, kept in PH-Composer's own settings file: ph_composer.climate.folders.list reads them with a display location that is never an absolute path; the setup commands folders.add and folders.locate take a folder the user chooses, and folders.rename, folders.remove and folders.remember_dataset take its id. climate.settings_unreadable, climate.settings_unavailable, climate.folder_not_found and climate.folder_overlaps are new. |
+| 1.65 | 2026-11-18 | The Phius station reader. ph_composer.climate.folders.list gives each folder's format, station and state counts and files not read by extension; ph_composer.climate.stations.list pages one folder's stations nearest the site first with each one's Phius limit check; climate.attach_station and climate.replace_station take a folder id and a station key and read the file in Ruby; climate.source_status says whether the attached station's file is on this computer. climate.site_not_set, climate.station_not_found and climate.station_unreadable are new. A station climate's provenance station_name is its file name's stem. |

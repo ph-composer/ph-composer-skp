@@ -214,7 +214,7 @@ class ClimateRecordTest < PhComposerTestCase
     provenance = CLIMATE::Record.from_station(ClimateFixtures.parsed_station, ClimateFixtures.source)
                                 .fetch("provenance")
 
-    assert_equal ["Synthetic Dataset", "Synthetic Station", "XX", "phius_approved",
+    assert_equal ["Synthetic Dataset", "SYNTHETIC_STATION", "XX", "phius_approved",
                   "Synthetic Dataset: Synthetic Station", "ab" * 32, true, true, nil],
                  provenance.values_at("dataset_name", "station_name", "state", "source_type", "source_name",
                                       "source_checksum", "monthly_data_available", "peak_load_data_available",

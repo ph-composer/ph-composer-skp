@@ -4853,6 +4853,22 @@
         "src/ph_composer/features/climate/install.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "CM04",
+      "label": "The Phius station reader with the panel closed, on the installed RBZ in a fresh synthetic Model: owed check 3 through the product code, the real-size folder's walk, folders.list and stations.list times in SketchUp's Ruby, counts and seconds only; on a copy of the invented fixture folder, stations, states and files not read counted by kind, the -mon2.txt variant and the malformed file not stations, the Windows-1252 name read, the list's distance, elevation difference and verdict against the site; attach refused with no site, then attach_station and replace_station each one Undo step under its name, with the values, the as-read copy, the source and the wind prefill; source status found, changed, not on this computer and found again in a folder of another name; no path in an answer, the record or the log; Edit > Undo and Redo name each step",
+      "mode": "mixed",
+      "authority": "planning/features/phase-04-climate/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/climate/stations/*",
+        "src/ph_composer/features/climate/declarations/stations.rb",
+        "src/ph_composer/features/climate/declarations/folders.rb",
+        "src/ph_composer/features/climate/folders/*",
+        "src/ph_composer/features/climate/climate/record.rb",
+        "src/ph_composer/features/climate/codes.rb",
+        "src/ph_composer/features/climate/install.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }

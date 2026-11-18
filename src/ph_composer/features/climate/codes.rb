@@ -3,7 +3,8 @@
 module PhComposer
   module Climate
     # The codes Climate reports under its own noun, published in docs/API_REFERENCE.md: refusals of the
-    # climate's writes and of the climate data folder commands, and a warning the design-temperature read carries.
+    # climate's writes, the climate data folder commands and the station reads and writes, and a warning the
+    # design-temperature read carries.
     module Codes
       ALL = {
         Settings::CROSSED => "The heating design temperature is at or above the cooling one; both still save.",
@@ -18,7 +19,13 @@ module PhComposer
         Folders::Operations::NOT_FOUND => "No climate data folder has that id, or the chosen folder is not there. " \
                                           "Nothing was written.",
         Folders::Operations::OVERLAPS => "The chosen folder is, holds or sits inside a listed climate data folder, " \
-                                         "so its stations would be listed twice. Nothing was written."
+                                         "so its stations would be listed twice. Nothing was written.",
+        Stations::Operations::SITE_NOT_SET => "The site's latitude, longitude and elevation are not set, and the " \
+                                              "station list and attach need them. Nothing was read or written.",
+        Stations::Operations::STATION_NOT_FOUND => "No station file with that key is in the climate data folder " \
+                                                   "now, or it could not be opened. Nothing was written.",
+        Stations::Operations::UNREADABLE => "The station file is not a Phius station file this version reads; the " \
+                                            "message names the row. Nothing was written."
       }.freeze
 
       module_function

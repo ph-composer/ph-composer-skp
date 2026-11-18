@@ -81,14 +81,32 @@ module PhComposer
           nil
         end
 
-        # The Setup view's line: how many folders, or why there are none to count.
+        # The stored row `{ id, name, location }` of a folder that is set up and found now, for the station reads,
+        # which keep its location to themselves. Refuses climate.folder_not_found otherwise.
+        def folder(id)
+          row = find!(Store.read.fetch("folders"), id)
+          return row if File.directory?(row.fetch("location"))
+
+          raise CodedError.new(NOT_FOUND, "That climate data folder cannot be found on this computer now; locate " \
+                                          "it or remove it. Nothing was read or written.")
+        end
+
+        # Every stored row whose folder is found now, in the order added.
+        def found_folders
+          Store.read.fetch("folders").select { |row| File.directory?(row.fetch("location")) }
+        end
+
+        # The Setup view's line: how many folders and stations, or why there are none to count.
         def setup_summary
           case Store.state
           when "unavailable" then "Not available on this computer yet"
           when "unreadable" then "The climate data settings cannot be read"
           else
             count = Store.read.fetch("folders").length
-            count.zero? ? "No climate data folder" : "#{count} folder#{'s' unless count == 1}"
+            return "No climate data folder" if count.zero?
+
+            stations = found_folders.sum { |row| Stations::FolderScan.call(row.fetch("location")).stations.length }
+            "#{count} folder#{'s' unless count == 1}, #{delimited(stations)} station#{'s' unless stations == 1}"
           end
         end
 
@@ -106,10 +124,16 @@ module PhComposer
           tail.empty? ? "…" : "…/#{tail.join('/')}"
         end
 
+        # The public row: no location, and the folder's counts as one walk finds them now (Stations::Operations).
         def public_row(row)
           location = row.fetch("location")
           { "id" => row.fetch("id"), "name" => row.fetch("name"),
             "display_location" => display_location(location, home), "found" => File.directory?(location) }
+            .merge(Stations::Operations.counts(location))
+        end
+
+        def delimited(count)
+          count.to_s.reverse.scan(/\d{1,3}/).join(",").reverse
         end
 
         def listed(section)
@@ -187,7 +211,7 @@ module PhComposer
         rescue ArgumentError
           ""
         end
-        private_class_method :public_row, :listed, :chosen_folder, :change_row, :find!, :refuse_overlap,
+        private_class_method :public_row, :delimited, :listed, :chosen_folder, :change_row, :find!, :refuse_overlap,
                              :comparable, :default_name, :home
       end
     end

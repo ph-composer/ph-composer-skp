@@ -206,10 +206,10 @@ class ClimateFoldersTest < PhComposerTestCase
     summary = -> { Folders::Operations.setup_summary }
     assert_equal "No climate data folder", summary.call
     choose("add", folder("One"))
-    assert_equal "1 folder", summary.call
+    assert_equal "1 folder, 0 stations", summary.call
     choose("add", folder("Two"))
     choose("add", folder("Three"))
-    assert_equal "3 folders", summary.call
+    assert_equal "3 folders, 0 stations", summary.call
 
     File.write(File.join(PhComposer::ComputerSettings.directory, PhComposer::ComputerSettings::FILE_NAME), "{")
     assert_equal "The climate data settings cannot be read", summary.call
