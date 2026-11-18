@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 63
+    MINOR = 64
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -345,7 +345,14 @@ module PhComposer
                     "climate.restore_original copies the station file's values back, and climate.clear deletes " \
                     "it, each guarded by the editable fields last read. ph_composer.climate.site.update's " \
                     "result gains limit_check, ph_composer.climate.site.preview_limit_check is new, and the " \
-                    "summary gains the climate card. climate.not_found and climate.no_original are new." }
+                    "summary gains the climate card. climate.not_found and climate.no_original are new." },
+      { "minor" => 64, "date" => "2026-11-18",
+        "change" => "The climate data folders on this computer, kept in PH-Composer's own settings file: " \
+                    "ph_composer.climate.folders.list reads them with a display location that is never an " \
+                    "absolute path; the setup commands folders.add and folders.locate take a folder the user " \
+                    "chooses, and folders.rename, folders.remove and folders.remember_dataset take its id. " \
+                    "climate.settings_unreadable, climate.settings_unavailable, climate.folder_not_found and " \
+                    "climate.folder_overlaps are new." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

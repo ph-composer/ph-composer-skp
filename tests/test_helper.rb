@@ -61,6 +61,8 @@ class PhComposerTestCase < Minitest::Test
     # Hermetic: a client's saved token and Codex's config go to a scratch folder, and no test runs a client.
     @agent_home = Dir.mktmpdir("ph_composer_agent_home")
     PhComposer::AgentAccess::Connections.directory = File.join(@agent_home, ".ph-composer")
+    # Hermetic: PH-Composer's settings file on this computer goes to the same scratch home.
+    PhComposer::ComputerSettings.directory = File.join(@agent_home, "Library", "Application Support", "PH-Composer")
     PhComposer::AgentAccess::ClientSetup.home = @agent_home
     PhComposer::AgentAccess::ClientSetup.timeout = nil
     PhComposer::AgentAccess::ClientSetup.runner = ->(argv) { raise "a test ran #{argv.first} without a runner" }

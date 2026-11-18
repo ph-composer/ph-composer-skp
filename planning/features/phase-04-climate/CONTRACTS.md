@@ -177,20 +177,24 @@ first user. The Library's setup store, the approved locations and the display pr
 SketchUp's preferences where they are.
 
 - **Location**: a `PH-Composer` folder in the user's application-support folder, outside
-  SketchUp's own folders: on macOS under `~/Library/Application Support/`. Owed check 1 confirms
-  it. `Diagnostics.data_root` is not it: that sits inside SketchUp's versioned folder.
+  SketchUp's own folders: on macOS `~/Library/Application Support/PH-Composer/settings.json`. Owed
+  check 1 confirmed it on SketchUp 2026. `Diagnostics.data_root` is not it: that sits inside
+  SketchUp's versioned folder.
 - **macOS only for now** (E3). The Windows location is not chosen, written or tested in this
   packet. On any other platform the service reports `climate.settings_unavailable` and the
   folder commands refuse with it; that behaviour is the plan's proposal, not part of Ed's
   answer. Choosing and verifying the Windows location is future work in
   the [Windows support](../unscheduled/windows-support/README.md) packet.
 - **Shape**: `{ "schema_version": 1, "sections": { "<feature id>": { ... } } }`.
-- **Writes**: read the file, change one section, write beside it and rename into place. Two
-  SketchUp versions may be open at once; the last write wins for a section and never damages
-  another.
+- **Writes**: read the file, change one section, write beside it and rename into place, all under
+  an exclusive lock on a sibling `settings.lock` (D4c-17). Two SketchUp versions may be open at
+  once; the last write wins for a section and never damages another.
 - **Failure**: a file that cannot be read is left as stored and reported; a write that cannot be
   made refuses and the panel never shows "saved". Same rule as `shell/preferences.rb`.
-- A file written by a later schema version is read-only to this build.
+- A file written by a later schema version is left as stored: this build neither reads nor writes
+  it, and reports `climate.settings_unreadable` (D4c-17).
+- The service names no feature: it raises `ComputerSettings::Refused` with a reason, and Climate's
+  store maps it to `climate.settings_unreadable` or `climate.settings_unavailable` (D4c-17).
 
 Climate's section:
 
@@ -198,6 +202,11 @@ Climate's section:
 folders          [ { id, name, location } ]     location is an absolute folder path
 last_dataset_id  string | null                  the folder the picker opens on (J3)
 ```
+
+`ph_composer.climate.folders.list` answers each folder as `{ id, name, display_location, found }`
+and the `last_dataset_id`. The display location is C4c-1's answer (D4c-16): `~/` and the rest under
+the home folder, the volume's name and the rest under `/Volumes/`, otherwise `…/` and the last two
+names. Never an absolute path.
 
 Setup commands (the `setup` capability; none touches a Model or adds an Undo step):
 
@@ -400,7 +409,7 @@ Latitude and longitude are decimal degrees in both profiles.
 
 | Id | Question | Recommendation | Settle in |
 | --- | --- | --- | --- |
-| C4c-1 | Board 3 shows each folder's location. `Library::Setup.providers` strips paths from its read | Answer a display location shortened to the user's home (`~/...`), never an absolute path, and keep the full path out of every result and log | P4c-03 |
+| C4c-1 | Board 3 shows each folder's location. `Library::Setup.providers` strips paths from its read | **Settled at P4c-03, 2026-11-18 (D4c-16):** a display location, `~/` and the rest under the home folder, the volume's name and the rest under `/Volumes/`, otherwise `…/` and the last two names; never an absolute path, and the full path stays out of every result and log | Settled |
 | C4c-2 | Is a station's matching name the file name's stem or the name in its header? | The file name's stem with the state folder: it is what the user sees in the folder and it is unique there | P4c-04 |
 | C4c-3 | The Setup view runs a native menu item's Ruby handler; the climate data dialog is in the panel | The handler asks the panel to open the Climate tab with the dialog as its intent, through the same route `panel.navigate` uses | P4c-08 |
 | C4c-4 | What the report callable receives when the section wrote no `Site` | Always emit the one record, with `location` and `climate` null when not written and `climate_left_out` giving the reason, so the report and the findings read one source | P4c-05 |

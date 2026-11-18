@@ -559,6 +559,32 @@ The foundation's `ph_composer.model` dictionary holds the Model's own `user_data
 (`shell/model_metadata.rb`), both `{}` by default; it is building metadata, not a feature's
 configuration, and no feature settings dictionary carries either map.
 
+## This computer's settings file
+
+Settings that belong to the computer and not to a Model, and that every SketchUp version must read,
+live in one JSON file kept by `shell/computer_settings.rb` (placement and write rules in
+[TECH_STACK](TECH_STACK.md#this-computers-settings-file)):
+
+```
+{ "schema_version": 1, "sections": { "<feature id>": { ... } } }
+```
+
+A feature owns the section under its own id and validates it on every read. `ComputerSettings.read`
+answers `{}` for an absent section or file. It raises `ComputerSettings::Refused` with a `reason`:
+`unavailable` (not macOS), `unreadable`, `later_version`, `too_large` or `unwritable`. Its message
+never holds a path. A file that is unreadable or from a later version is left as stored: reads and
+writes both refuse. The owning feature maps the reason to its own code.
+
+Climate's section, `ph_composer.climate`, is `{ "folders": [ { "id", "name", "location" } ],
+"last_dataset_id": string or null }`. `id` is `climate_folder_` and twelve alphanumerics, `name` the
+dataset name (1 to 120 characters), `location` the folder's absolute path. A `last_dataset_id` naming
+no listed folder reads as null. A section that fails validation reads as
+`climate.settings_unreadable` and is never replaced. `location` never leaves the section: the
+`ph_composer.climate.folders.*` operations answer `display_location` instead, `~/` and the rest under
+the home folder, the volume's name and the rest under `/Volumes/`, and otherwise `…/` and the last
+two names. The reasons map to `climate.settings_unreadable` (`unreadable`, `later_version`) and
+`climate.settings_unavailable` (the rest).
+
 ## Geometry records and occurrence references
 
 Records are canonical JSON under registered `ph_composer.*` dictionaries. A read never creates a

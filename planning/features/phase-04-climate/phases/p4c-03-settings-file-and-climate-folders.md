@@ -1,9 +1,9 @@
 # P4c-03: The settings file and climate data folders
 
 DATE: 2026-11-17
-STATUS: Scoped. Not authorized.
+STATUS: Implemented on branch `feature/climate-p4c-03` (PR #514), 2026-11-18. CM03 Pass on `45224965`.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
 
 ## Entry and scope
 
@@ -100,6 +100,23 @@ CM03 in [ACCEPTANCE](../ACCEPTANCE.md).
 ## Leaves for the next stage
 
 P4c-04 reads the folders this stage lists. P4c-08 builds the dialog and registers the Setup entry.
+
+## Departures, 2026-11-18
+
+- **The service names no feature** (D4c-17). `shell/computer_settings.rb` raises
+  `ComputerSettings::Refused` with a reason; Climate's store maps it to `climate.settings_unreadable`
+  (unreadable, later version) or `climate.settings_unavailable` (not macOS, too large, could not be
+  saved). Step 1 had the service answer the climate code itself.
+- **A lock across the write** (D4c-17). Re-read and rename alone leave a window where one process's
+  stale copy erases another's section; a write holds `settings.lock`, at most two seconds.
+- **A later schema version is neither read nor written** (D4c-17), where CONTRACTS said read-only.
+- **C4c-1** settled as D4c-16: the home and `/Volumes/` forms, and `…/` with the last two names
+  elsewhere.
+- `folders.list` answers `{ id, name, display_location, found }`; `remove` and `remember_dataset`
+  answer the list. Removing the remembered folder clears `last_dataset_id`.
+- Add and Locate refuse before the chooser opens when the settings cannot be read or are
+  unavailable, and Locate when the id is unknown (each command's precondition).
+- An approved `open_folder` location stands in for the chooser, as for the Library's folder add.
 
 ## Done when
 

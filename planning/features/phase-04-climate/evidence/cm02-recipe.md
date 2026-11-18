@@ -1,7 +1,7 @@
 # CM02 host recipe: the climate record, panel closed
 
 DATE: 2026-11-17
-STATUS: Prepared for the conductor. Not run.
+STATUS: Run 2026-11-18 on `024768ea`: Pass ([evidence](cm02-20261118.md)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
 

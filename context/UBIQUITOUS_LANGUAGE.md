@@ -165,7 +165,7 @@ Face types and boundary conditions follow Honeybee. A Zone owns its Face assignm
 | Term | Meaning |
 | --- | --- |
 | Site location | The Model's latitude, longitude and elevation, set together, with an optional climate zone (stored as the WUFI-Passive code) and an optional typed offset from UTC. The site is set when all three of latitude, longitude and elevation are present |
-| Climate data folder | A planned per-computer setting: a folder of climate files the user is licensed to use, read where it is and never copied into a Model |
+| Climate data folder | A per-computer setting, kept in PH-Composer's settings file on this computer: a folder of climate files the user is licensed to use, named by its dataset name, read where it is and never copied into a Model |
 | Station | One location in a climate data folder, read from one file. Attaching it copies its values into the Model with an as-read copy, so edited values show and Restore Original Values works on any computer. The Model keeps the station's coordinates for the Phius limit check |
 | Phius climate data | The climate a Model holds from a Phius station, or values typed by hand in the same grid: monthly temperatures and radiation and three peak-load cases (Heating 1, Heating 2, Cooling). Complete when the station elevation, daily swing, wind speed, all 96 monthly values and each case's air temperature and five radiation values are present; Incomplete otherwise |
 | Phius limit check | Whether the station is within 50 miles and 400 feet of the site, Phius's limits for a climate dataset. Pass, Fail, or Not checked with no site or a climate typed without coordinates. Worked out each time, never stored |
