@@ -1,7 +1,7 @@
 # Phase 4 delivery plan: Climate
 
 DATE: 2026-11-17
-STATUS: In progress. Stages P4c-01 to P4c-11 are written; P4c-12 is the closing outline. Ed authorized every stage on 2026-11-17: "Use the 'pr-loop' skill protocol for all reviews. Use a new branch for each phase of the work, and cleanup all branches and worktrees as you go. You are authorized to merge all PRs once the repo CI is green and all reviewer comments are addressed and resolved." P4c-01 is implemented on branch.
+STATUS: In progress. Stages P4c-01 to P4c-11 are written; P4c-12 is the closing outline. Ed authorized every stage on 2026-11-17: "Use the 'pr-loop' skill protocol for all reviews. Use a new branch for each phase of the work, and cleanup all branches and worktrees as you go. You are authorized to merge all PRs once the repo CI is green and all reviewer comments are addressed and resolved." P4c-01 is merged (PR #512) and CM01 passed; P4c-02 is implemented on branch.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
 

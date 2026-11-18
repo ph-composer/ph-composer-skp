@@ -166,9 +166,11 @@ Face types and boundary conditions follow Honeybee. A Zone owns its Face assignm
 | --- | --- |
 | Site location | The Model's latitude, longitude and elevation, set together, with an optional climate zone (stored as the WUFI-Passive code) and an optional typed offset from UTC. The site is set when all three of latitude, longitude and elevation are present |
 | Climate data folder | A planned per-computer setting: a folder of climate files the user is licensed to use, read where it is and never copied into a Model |
-| Station | One location in a climate data folder, read from one file. Attaching it copies its values into the Model |
+| Station | One location in a climate data folder, read from one file. Attaching it copies its values into the Model with an as-read copy, so edited values show and Restore Original Values works on any computer. The Model keeps the station's coordinates for the Phius limit check |
+| Phius climate data | The climate a Model holds from a Phius station, or values typed by hand in the same grid: monthly temperatures and radiation and three peak-load cases (Heating 1, Heating 2, Cooling). Complete when the station elevation, daily swing, wind speed, all 96 monthly values and each case's air temperature and five radiation values are present; Incomplete otherwise |
+| Phius limit check | Whether the station is within 50 miles and 400 feet of the site, Phius's limits for a climate dataset. Pass, Fail, or Not checked with no site or a climate typed without coordinates. Worked out each time, never stored |
 | Design temperatures | The typed ASHRAE 99% heating and 1% cooling dry-bulb temperatures for the site, in °C, with an optional source note. Not set, Incomplete (one of the two) or Set; heating at or above cooling saves with a warning. Kept in the Model only |
-| Climate snapshot | The model-owned monthly and, when supplied, peak-load climate values plus provenance. It remains readable without its source file or provider |
+| Climate snapshot | The Model's one climate record: monthly and peak-load values, the as-read copy of a station's file, and provenance in honeybee-ph's shape. It remains readable without its source file or folder, and holds no file location |
 | EPW-derived monthly climate | Preliminary monthly climate produced by honeybee-ph from a user-selected annual EPW |
 | Monthly-demand ready | The climate has the complete monthly values required by preliminary demand calculations and overlays |
 | METr-climate ready | The climate has both monthly values and the user-supplied peak-load cases required by the planned METr export |

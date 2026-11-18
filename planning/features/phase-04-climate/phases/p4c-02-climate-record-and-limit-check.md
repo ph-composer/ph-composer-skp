@@ -1,9 +1,9 @@
 # P4c-02: The climate record and the Phius limit check
 
 DATE: 2026-11-17
-STATUS: Scoped. Not authorized.
+STATUS: Implemented on branch `feature/climate-p4c-02`. Authorized by Ed, 2026-11-17. CM02 not run.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
 
 ## Entry and scope
 
@@ -24,6 +24,37 @@ produce. Paths are relative to `src/ph_composer/`.
    one proposal step.
 2. Confirm in the pinned honeybee-ph wheel that a peak-load case's dewpoint and sky temperature
    may be `None` and are not in `peak_load_readiness_issues` (read 2026-11-17; D4c-08 rests on it).
+
+### Entry check outcomes, 2026-11-17
+
+1. Confirmed for create and update, with two notes. `Options.set_settings` creates the singleton
+   under its fixed id with `proposal.put` after checking `SETTINGS.problems` itself, because
+   `propose_create` mints a fresh id, and updates it with `propose_update`. Zones never deletes
+   its settings record, so Clear rests on `Engine#propose_delete`, not on that pattern. Update
+   departs: `Engine#propose_update` removes a key whose value is nil, and the climate's nullable
+   fields would then be absent rather than null, so every climate write stages the whole record
+   with `proposal.put`, checked by the kind first.
+2. Confirmed in the pinned honeybee-ph 1.33.65 (`honeybee_ph/site.py`):
+   `Climate_PeakLoadValueSet` defaults `dewpoint` and `sky_temp` to `None`, and
+   `peak_load_readiness_issues` checks only `temp` and the five radiation values of each case.
+
+### Departures
+
+- **Two entry actions.** An action declares one Undo name and the dispatcher opens the operation
+  under it, so "Enter Climate Values" and "Edit Climate Values" cannot come from one
+  `save_values`. `climate.enter_values` creates a hand-entered climate and refuses
+  `target.changed` over an existing one; `climate.save_values` edits. Recorded in
+  [CONTRACTS](../CONTRACTS.md) section 3 and in P4c-11.
+- **Edit Values keeps a station's name and coordinates**, refusing `validation.failed`, so no
+  edit can move a station into the limits unmarked. P4c-11 already shows them read-only.
+- **Write results omit the record.** With the record in each write's declared result, `describe`
+  of `save_values` measured 35,979 bytes against the 24,576-byte reply; the writes answer
+  `state`, `missing`, `edited_cells` and `limit_check`, and `climate.get` reads the record.
+  `missing` is grouped by row and an edited cell is its row and column, so the largest
+  `climate.get` measured 17,826 bytes.
+- **A development seed for the host gate.** No public operation makes a station climate until
+  P4c-04, so `tools/examples/climate/station_seed.rb` writes one through `Record.from_station` as
+  "Seed Station Climate" for CM02's station half. The walkthrough itself uses public calls only.
 
 ## Steps
 

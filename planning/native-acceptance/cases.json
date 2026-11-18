@@ -4820,6 +4820,24 @@
         "tools/examples/authoring/client.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "CM02",
+      "label": "The climate record with the panel closed, on the installed RBZ in a fresh synthetic Model with no site and no climate: the walkthrough enters a climate by hand with gaps (Enter Climate Values), completes it (Edit Climate Values), checks that Restore refuses it, and clears it (Clear Climate); the development seed writes a synthetic station climate (Seed Station Climate); the walkthrough sets the site near it (Set Site Location), edits one cell and restores it (Edit Climate Values, Restore Climate Values), then moves the site out of the Phius limits (Set Site Location) with nothing stored; native Undo and Redo of each step through the Edit menu with its name; save, fresh-process reopen and the station climate with its as-read copy read back",
+      "mode": "mixed",
+      "authority": "planning/features/phase-04-climate/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/climate/*",
+        "src/ph_composer/features/climate/climate/*",
+        "src/ph_composer/features/climate/declarations/*",
+        "src/ph_composer/core/model_settings.rb",
+        "src/ph_composer/core/records/engine.rb",
+        "src/ph_composer/core/records/dictionary_store.rb",
+        "tools/examples/climate/climate_walkthrough.rb",
+        "tools/examples/climate/station_seed.rb",
+        "tools/examples/authoring/client.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }

@@ -541,6 +541,20 @@ each guard only their own fields. `ph_composer.climate_site` holds `latitude_deg
 elevation are present together or all null. `ph_composer.climate_design_temperatures` holds
 `heating_99_c`, `cooling_1_c` and `design_temperature_source`. Every field defaults to null.
 
+The Model's climate is a record, not a setting: kind `ph_composer.climate.climate`, prefix `clm`,
+held under the one fixed id `clm_AAAAAAAAAAAA`, so no record means no climate and Clear is a delete
+(`features/climate/climate/schema.rb`). It holds the name, `origin` (`station` or `hand`), the
+station's coordinates and elevation, the daily temperature swing, the wind speed, `monthly` (eight
+rows of twelve) and `peak_loads` (`heat_1`, `heat_2`, `cool_1`), `as_read` (the station file's own
+values, null for a climate typed by hand) and `provenance` in the shape of honeybee-ph's
+`ClimateProvenance`, without `source_uri`. Every object in it is closed, so no file location can be
+stored. Each write stages the whole record with its provenance rewritten from the values
+(`Climate::Record`), so the source type (`phius_approved` until a value differs from the file,
+otherwise `user_defined`) and the edited values in `assumptions` never disagree with them. The
+record is staged whole rather than through `Engine#propose_update`, which would drop a key set to
+null. Completeness, edited cells and the Phius limit check are derived on every read and never
+stored.
+
 The foundation's `ph_composer.model` dictionary holds the Model's own `user_data` and `extension_data`
 (`shell/model_metadata.rb`), both `{}` by default; it is building metadata, not a feature's
 configuration, and no feature settings dictionary carries either map.

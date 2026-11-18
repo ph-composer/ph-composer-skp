@@ -620,6 +620,979 @@ Values:
 }
 ```
 
+### `ph_composer.climate.climate`
+
+Climate, a catalog kind owned by `ph_composer.climate`, schema version 1.
+
+Values:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "origin",
+    "station_latitude_deg",
+    "station_longitude_deg",
+    "station_elevation_m",
+    "daily_temp_swing_k",
+    "wind_speed_m_s",
+    "monthly",
+    "peak_loads",
+    "as_read",
+    "provenance"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "origin": {
+      "type": "string",
+      "enum": [
+        "station",
+        "hand"
+      ]
+    },
+    "station_latitude_deg": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": -90,
+      "maximum": 90,
+      "x-unit": "deg",
+      "description": "The station's coordinate in decimal degrees; null only for a climate typed without one."
+    },
+    "station_longitude_deg": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": -180,
+      "maximum": 180,
+      "x-unit": "deg",
+      "description": "The station's coordinate in decimal degrees; null only for a climate typed without one."
+    },
+    "station_elevation_m": {
+      "type": "number",
+      "x-unit": "m",
+      "description": "The station's height above sea level; needed."
+    },
+    "daily_temp_swing_k": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-unit": "K",
+      "description": "The summer daily temperature swing; null while not entered."
+    },
+    "wind_speed_m_s": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-unit": "m/s",
+      "description": "The average wind speed; null while not entered."
+    },
+    "monthly": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "air_c",
+        "dewpoint_c",
+        "sky_c",
+        "rad_north_kwh_m2",
+        "rad_east_kwh_m2",
+        "rad_south_kwh_m2",
+        "rad_west_kwh_m2",
+        "rad_global_kwh_m2"
+      ],
+      "properties": {
+        "air_c": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "x-unit": "degC"
+          }
+        },
+        "dewpoint_c": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "x-unit": "degC"
+          }
+        },
+        "sky_c": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "x-unit": "degC"
+          }
+        },
+        "rad_north_kwh_m2": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "x-unit": "kWh/m2"
+          }
+        },
+        "rad_east_kwh_m2": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "x-unit": "kWh/m2"
+          }
+        },
+        "rad_south_kwh_m2": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "x-unit": "kWh/m2"
+          }
+        },
+        "rad_west_kwh_m2": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "x-unit": "kWh/m2"
+          }
+        },
+        "rad_global_kwh_m2": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "x-unit": "kWh/m2"
+          }
+        }
+      },
+      "description": "Eight rows of twelve months, January first; a value is null while not entered."
+    },
+    "peak_loads": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "heat_1",
+        "heat_2",
+        "cool_1"
+      ],
+      "properties": {
+        "heat_1": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "air_c",
+            "dewpoint_c",
+            "sky_c",
+            "rad_north_w_m2",
+            "rad_east_w_m2",
+            "rad_south_w_m2",
+            "rad_west_w_m2",
+            "rad_global_w_m2"
+          ],
+          "properties": {
+            "air_c": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "degC"
+            },
+            "dewpoint_c": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "degC"
+            },
+            "sky_c": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "degC"
+            },
+            "rad_north_w_m2": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "W/m2"
+            },
+            "rad_east_w_m2": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "W/m2"
+            },
+            "rad_south_w_m2": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "W/m2"
+            },
+            "rad_west_w_m2": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "W/m2"
+            },
+            "rad_global_w_m2": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "W/m2"
+            }
+          }
+        },
+        "heat_2": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "air_c",
+            "dewpoint_c",
+            "sky_c",
+            "rad_north_w_m2",
+            "rad_east_w_m2",
+            "rad_south_w_m2",
+            "rad_west_w_m2",
+            "rad_global_w_m2"
+          ],
+          "properties": {
+            "air_c": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "degC"
+            },
+            "dewpoint_c": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "degC"
+            },
+            "sky_c": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "degC"
+            },
+            "rad_north_w_m2": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "W/m2"
+            },
+            "rad_east_w_m2": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "W/m2"
+            },
+            "rad_south_w_m2": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "W/m2"
+            },
+            "rad_west_w_m2": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "W/m2"
+            },
+            "rad_global_w_m2": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "W/m2"
+            }
+          }
+        },
+        "cool_1": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "air_c",
+            "dewpoint_c",
+            "sky_c",
+            "rad_north_w_m2",
+            "rad_east_w_m2",
+            "rad_south_w_m2",
+            "rad_west_w_m2",
+            "rad_global_w_m2"
+          ],
+          "properties": {
+            "air_c": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "degC"
+            },
+            "dewpoint_c": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "degC"
+            },
+            "sky_c": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "degC"
+            },
+            "rad_north_w_m2": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "W/m2"
+            },
+            "rad_east_w_m2": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "W/m2"
+            },
+            "rad_south_w_m2": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "W/m2"
+            },
+            "rad_west_w_m2": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "W/m2"
+            },
+            "rad_global_w_m2": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "W/m2"
+            }
+          }
+        }
+      },
+      "description": "Heating 1, Heating 2 and Cooling, each with the monthly rows' eight values in W/m2 for radiation; null while not entered, and dewpoint and sky may stay null."
+    },
+    "as_read": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "station_elevation_m",
+        "daily_temp_swing_k",
+        "monthly",
+        "peak_loads"
+      ],
+      "properties": {
+        "station_elevation_m": {
+          "type": "number",
+          "x-unit": "m",
+          "description": "The station's height above sea level; needed."
+        },
+        "daily_temp_swing_k": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "K",
+          "description": "The summer daily temperature swing; null while not entered."
+        },
+        "monthly": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "air_c",
+            "dewpoint_c",
+            "sky_c",
+            "rad_north_kwh_m2",
+            "rad_east_kwh_m2",
+            "rad_south_kwh_m2",
+            "rad_west_kwh_m2",
+            "rad_global_kwh_m2"
+          ],
+          "properties": {
+            "air_c": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "degC"
+              }
+            },
+            "dewpoint_c": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "degC"
+              }
+            },
+            "sky_c": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "degC"
+              }
+            },
+            "rad_north_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_east_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_south_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_west_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_global_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            }
+          },
+          "description": "Eight rows of twelve months, January first; a value is null while not entered."
+        },
+        "peak_loads": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "heat_1",
+            "heat_2",
+            "cool_1"
+          ],
+          "properties": {
+            "heat_1": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "air_c",
+                "dewpoint_c",
+                "sky_c",
+                "rad_north_w_m2",
+                "rad_east_w_m2",
+                "rad_south_w_m2",
+                "rad_west_w_m2",
+                "rad_global_w_m2"
+              ],
+              "properties": {
+                "air_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "dewpoint_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "sky_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "rad_north_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_east_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_south_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_west_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_global_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                }
+              }
+            },
+            "heat_2": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "air_c",
+                "dewpoint_c",
+                "sky_c",
+                "rad_north_w_m2",
+                "rad_east_w_m2",
+                "rad_south_w_m2",
+                "rad_west_w_m2",
+                "rad_global_w_m2"
+              ],
+              "properties": {
+                "air_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "dewpoint_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "sky_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "rad_north_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_east_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_south_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_west_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_global_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                }
+              }
+            },
+            "cool_1": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "air_c",
+                "dewpoint_c",
+                "sky_c",
+                "rad_north_w_m2",
+                "rad_east_w_m2",
+                "rad_south_w_m2",
+                "rad_west_w_m2",
+                "rad_global_w_m2"
+              ],
+              "properties": {
+                "air_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "dewpoint_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "sky_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "rad_north_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_east_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_south_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_west_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_global_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                }
+              }
+            }
+          },
+          "description": "Heating 1, Heating 2 and Cooling, each with the monthly rows' eight values in W/m2 for radiation; null while not entered, and dewpoint and sky may stay null."
+        }
+      },
+      "description": "The station file's own values, kept so edits show and Restore works anywhere; null for a climate entered by hand."
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dataset_name",
+        "station_name",
+        "state",
+        "source_type",
+        "source_name",
+        "source_version",
+        "source_checksum",
+        "conversion_method",
+        "conversion_method_version",
+        "is_certification_approved",
+        "monthly_data_available",
+        "peak_load_data_available",
+        "assumptions"
+      ],
+      "properties": {
+        "dataset_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "station_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "state": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The station's state, named as its folder is, such as NY; never a location on disk. Null for a climate entered by hand."
+        },
+        "source_type": {
+          "type": "string",
+          "enum": [
+            "phius_approved",
+            "user_defined"
+          ]
+        },
+        "source_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_checksum": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "The station file's SHA-256; null for a climate entered by hand."
+        },
+        "conversion_method": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "conversion_method_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "is_certification_approved": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "monthly_data_available": {
+          "type": "boolean"
+        },
+        "peak_load_data_available": {
+          "type": "boolean"
+        },
+        "assumptions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "ph_composer"
+          ],
+          "properties": {
+            "ph_composer": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "station_latitude_deg",
+                "station_longitude_deg",
+                "edited_values"
+              ],
+              "properties": {
+                "station_latitude_deg": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "deg"
+                },
+                "station_longitude_deg": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "deg"
+                },
+                "edited_values": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "row",
+                      "column",
+                      "value",
+                      "as_read"
+                    ],
+                    "properties": {
+                      "row": {
+                        "type": "string",
+                        "description": "The record key: a monthly or peak-load row, or a single value such as daily_temp_swing_k."
+                      },
+                      "column": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "jan",
+                          "feb",
+                          "mar",
+                          "apr",
+                          "may",
+                          "jun",
+                          "jul",
+                          "aug",
+                          "sep",
+                          "oct",
+                          "nov",
+                          "dec",
+                          "heat_1",
+                          "heat_2",
+                          "cool_1",
+                          null
+                        ],
+                        "description": "A month or a peak-load case; null for a single value."
+                      },
+                      "value": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "as_read": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      }
+                    }
+                  },
+                  "description": "Each value that differs from the station file, with what the file read."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
 ### `ph_composer.model.metadata`
 
 Model metadata, a entity kind owned by `ph_composer.model`, schema version nil.
@@ -7552,6 +8525,1193 @@ Example params:
 }
 ```
 
+### `ph_composer.climate.climate.get`
+
+The Model's climate with its state, what is missing, the edited cells and the Phius limit check against the site. State none when there is none. Owner: `ph_composer.climate`.
+
+Refuses: `record.unreadable`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "state",
+    "missing",
+    "edited_cells",
+    "limit_check",
+    "climate"
+  ],
+  "properties": {
+    "state": {
+      "type": "string",
+      "enum": [
+        "none",
+        "incomplete",
+        "complete"
+      ],
+      "description": "none with no climate; incomplete while missing lists a gap."
+    },
+    "missing": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "row",
+          "columns"
+        ],
+        "properties": {
+          "row": {
+            "type": "string",
+            "description": "The record key: a monthly or peak-load row, or a single value such as daily_temp_swing_k."
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "jan",
+                "feb",
+                "mar",
+                "apr",
+                "may",
+                "jun",
+                "jul",
+                "aug",
+                "sep",
+                "oct",
+                "nov",
+                "dec",
+                "heat_1",
+                "heat_2",
+                "cool_1"
+              ]
+            },
+            "description": "The months or cases missing; empty for a single value."
+          }
+        }
+      },
+      "description": "What a complete climate still needs, by row, in grid order."
+    },
+    "edited_cells": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "row",
+          "column"
+        ],
+        "properties": {
+          "row": {
+            "type": "string",
+            "description": "The record key: a monthly or peak-load row, or a single value such as daily_temp_swing_k."
+          },
+          "column": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "jan",
+              "feb",
+              "mar",
+              "apr",
+              "may",
+              "jun",
+              "jul",
+              "aug",
+              "sep",
+              "oct",
+              "nov",
+              "dec",
+              "heat_1",
+              "heat_2",
+              "cool_1",
+              null
+            ],
+            "description": "A month or a peak-load case; null for a single value."
+          }
+        }
+      },
+      "description": "Each value that differs from the station file; none for a climate entered by hand. Wind speed is never one."
+    },
+    "limit_check": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "verdict",
+        "reason",
+        "distance_km",
+        "elevation_difference_m",
+        "distance_ok",
+        "elevation_ok"
+      ],
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail",
+            "not_checked"
+          ],
+          "description": "pass at or inside both Phius limits, 50 miles and 400 feet; not_checked gives its reason."
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "no_site",
+            "no_station_coordinates",
+            null
+          ],
+          "description": "Why the check did not run; null when it did."
+        },
+        "distance_km": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "km",
+          "description": "Great-circle distance from the site to the station."
+        },
+        "elevation_difference_m": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "m",
+          "description": "The site's elevation less the station's, as a magnitude."
+        },
+        "distance_ok": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "elevation_ok": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "description": "The Phius limit check; null with no climate."
+    },
+    "climate": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "values",
+        "user_data"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "values": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "origin",
+            "station_latitude_deg",
+            "station_longitude_deg",
+            "station_elevation_m",
+            "daily_temp_swing_k",
+            "wind_speed_m_s",
+            "monthly",
+            "peak_loads",
+            "as_read",
+            "provenance"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "origin": {
+              "type": "string",
+              "enum": [
+                "station",
+                "hand"
+              ]
+            },
+            "station_latitude_deg": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": -90,
+              "maximum": 90,
+              "x-unit": "deg",
+              "description": "The station's coordinate in decimal degrees; null only for a climate typed without one."
+            },
+            "station_longitude_deg": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": -180,
+              "maximum": 180,
+              "x-unit": "deg",
+              "description": "The station's coordinate in decimal degrees; null only for a climate typed without one."
+            },
+            "station_elevation_m": {
+              "type": "number",
+              "x-unit": "m",
+              "description": "The station's height above sea level; needed."
+            },
+            "daily_temp_swing_k": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "K",
+              "description": "The summer daily temperature swing; null while not entered."
+            },
+            "wind_speed_m_s": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "m/s",
+              "description": "The average wind speed; null while not entered."
+            },
+            "monthly": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "air_c",
+                "dewpoint_c",
+                "sky_c",
+                "rad_north_kwh_m2",
+                "rad_east_kwh_m2",
+                "rad_south_kwh_m2",
+                "rad_west_kwh_m2",
+                "rad_global_kwh_m2"
+              ],
+              "properties": {
+                "air_c": {
+                  "type": "array",
+                  "minItems": 12,
+                  "maxItems": 12,
+                  "items": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "x-unit": "degC"
+                  }
+                },
+                "dewpoint_c": {
+                  "type": "array",
+                  "minItems": 12,
+                  "maxItems": 12,
+                  "items": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "x-unit": "degC"
+                  }
+                },
+                "sky_c": {
+                  "type": "array",
+                  "minItems": 12,
+                  "maxItems": 12,
+                  "items": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "x-unit": "degC"
+                  }
+                },
+                "rad_north_kwh_m2": {
+                  "type": "array",
+                  "minItems": 12,
+                  "maxItems": 12,
+                  "items": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "x-unit": "kWh/m2"
+                  }
+                },
+                "rad_east_kwh_m2": {
+                  "type": "array",
+                  "minItems": 12,
+                  "maxItems": 12,
+                  "items": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "x-unit": "kWh/m2"
+                  }
+                },
+                "rad_south_kwh_m2": {
+                  "type": "array",
+                  "minItems": 12,
+                  "maxItems": 12,
+                  "items": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "x-unit": "kWh/m2"
+                  }
+                },
+                "rad_west_kwh_m2": {
+                  "type": "array",
+                  "minItems": 12,
+                  "maxItems": 12,
+                  "items": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "x-unit": "kWh/m2"
+                  }
+                },
+                "rad_global_kwh_m2": {
+                  "type": "array",
+                  "minItems": 12,
+                  "maxItems": 12,
+                  "items": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "x-unit": "kWh/m2"
+                  }
+                }
+              },
+              "description": "Eight rows of twelve months, January first; a value is null while not entered."
+            },
+            "peak_loads": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "heat_1",
+                "heat_2",
+                "cool_1"
+              ],
+              "properties": {
+                "heat_1": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "air_c",
+                    "dewpoint_c",
+                    "sky_c",
+                    "rad_north_w_m2",
+                    "rad_east_w_m2",
+                    "rad_south_w_m2",
+                    "rad_west_w_m2",
+                    "rad_global_w_m2"
+                  ],
+                  "properties": {
+                    "air_c": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "degC"
+                    },
+                    "dewpoint_c": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "degC"
+                    },
+                    "sky_c": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "degC"
+                    },
+                    "rad_north_w_m2": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "W/m2"
+                    },
+                    "rad_east_w_m2": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "W/m2"
+                    },
+                    "rad_south_w_m2": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "W/m2"
+                    },
+                    "rad_west_w_m2": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "W/m2"
+                    },
+                    "rad_global_w_m2": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "W/m2"
+                    }
+                  }
+                },
+                "heat_2": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "air_c",
+                    "dewpoint_c",
+                    "sky_c",
+                    "rad_north_w_m2",
+                    "rad_east_w_m2",
+                    "rad_south_w_m2",
+                    "rad_west_w_m2",
+                    "rad_global_w_m2"
+                  ],
+                  "properties": {
+                    "air_c": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "degC"
+                    },
+                    "dewpoint_c": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "degC"
+                    },
+                    "sky_c": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "degC"
+                    },
+                    "rad_north_w_m2": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "W/m2"
+                    },
+                    "rad_east_w_m2": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "W/m2"
+                    },
+                    "rad_south_w_m2": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "W/m2"
+                    },
+                    "rad_west_w_m2": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "W/m2"
+                    },
+                    "rad_global_w_m2": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "W/m2"
+                    }
+                  }
+                },
+                "cool_1": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "air_c",
+                    "dewpoint_c",
+                    "sky_c",
+                    "rad_north_w_m2",
+                    "rad_east_w_m2",
+                    "rad_south_w_m2",
+                    "rad_west_w_m2",
+                    "rad_global_w_m2"
+                  ],
+                  "properties": {
+                    "air_c": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "degC"
+                    },
+                    "dewpoint_c": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "degC"
+                    },
+                    "sky_c": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "degC"
+                    },
+                    "rad_north_w_m2": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "W/m2"
+                    },
+                    "rad_east_w_m2": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "W/m2"
+                    },
+                    "rad_south_w_m2": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "W/m2"
+                    },
+                    "rad_west_w_m2": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "W/m2"
+                    },
+                    "rad_global_w_m2": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "W/m2"
+                    }
+                  }
+                }
+              },
+              "description": "Heating 1, Heating 2 and Cooling, each with the monthly rows' eight values in W/m2 for radiation; null while not entered, and dewpoint and sky may stay null."
+            },
+            "as_read": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "additionalProperties": false,
+              "required": [
+                "station_elevation_m",
+                "daily_temp_swing_k",
+                "monthly",
+                "peak_loads"
+              ],
+              "properties": {
+                "station_elevation_m": {
+                  "type": "number",
+                  "x-unit": "m",
+                  "description": "The station's height above sea level; needed."
+                },
+                "daily_temp_swing_k": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "K",
+                  "description": "The summer daily temperature swing; null while not entered."
+                },
+                "monthly": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "air_c",
+                    "dewpoint_c",
+                    "sky_c",
+                    "rad_north_kwh_m2",
+                    "rad_east_kwh_m2",
+                    "rad_south_kwh_m2",
+                    "rad_west_kwh_m2",
+                    "rad_global_kwh_m2"
+                  ],
+                  "properties": {
+                    "air_c": {
+                      "type": "array",
+                      "minItems": 12,
+                      "maxItems": 12,
+                      "items": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "x-unit": "degC"
+                      }
+                    },
+                    "dewpoint_c": {
+                      "type": "array",
+                      "minItems": 12,
+                      "maxItems": 12,
+                      "items": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "x-unit": "degC"
+                      }
+                    },
+                    "sky_c": {
+                      "type": "array",
+                      "minItems": 12,
+                      "maxItems": 12,
+                      "items": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "x-unit": "degC"
+                      }
+                    },
+                    "rad_north_kwh_m2": {
+                      "type": "array",
+                      "minItems": 12,
+                      "maxItems": 12,
+                      "items": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "x-unit": "kWh/m2"
+                      }
+                    },
+                    "rad_east_kwh_m2": {
+                      "type": "array",
+                      "minItems": 12,
+                      "maxItems": 12,
+                      "items": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "x-unit": "kWh/m2"
+                      }
+                    },
+                    "rad_south_kwh_m2": {
+                      "type": "array",
+                      "minItems": 12,
+                      "maxItems": 12,
+                      "items": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "x-unit": "kWh/m2"
+                      }
+                    },
+                    "rad_west_kwh_m2": {
+                      "type": "array",
+                      "minItems": 12,
+                      "maxItems": 12,
+                      "items": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "x-unit": "kWh/m2"
+                      }
+                    },
+                    "rad_global_kwh_m2": {
+                      "type": "array",
+                      "minItems": 12,
+                      "maxItems": 12,
+                      "items": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "x-unit": "kWh/m2"
+                      }
+                    }
+                  },
+                  "description": "Eight rows of twelve months, January first; a value is null while not entered."
+                },
+                "peak_loads": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "heat_1",
+                    "heat_2",
+                    "cool_1"
+                  ],
+                  "properties": {
+                    "heat_1": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "air_c",
+                        "dewpoint_c",
+                        "sky_c",
+                        "rad_north_w_m2",
+                        "rad_east_w_m2",
+                        "rad_south_w_m2",
+                        "rad_west_w_m2",
+                        "rad_global_w_m2"
+                      ],
+                      "properties": {
+                        "air_c": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "degC"
+                        },
+                        "dewpoint_c": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "degC"
+                        },
+                        "sky_c": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "degC"
+                        },
+                        "rad_north_w_m2": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "W/m2"
+                        },
+                        "rad_east_w_m2": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "W/m2"
+                        },
+                        "rad_south_w_m2": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "W/m2"
+                        },
+                        "rad_west_w_m2": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "W/m2"
+                        },
+                        "rad_global_w_m2": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "W/m2"
+                        }
+                      }
+                    },
+                    "heat_2": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "air_c",
+                        "dewpoint_c",
+                        "sky_c",
+                        "rad_north_w_m2",
+                        "rad_east_w_m2",
+                        "rad_south_w_m2",
+                        "rad_west_w_m2",
+                        "rad_global_w_m2"
+                      ],
+                      "properties": {
+                        "air_c": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "degC"
+                        },
+                        "dewpoint_c": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "degC"
+                        },
+                        "sky_c": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "degC"
+                        },
+                        "rad_north_w_m2": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "W/m2"
+                        },
+                        "rad_east_w_m2": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "W/m2"
+                        },
+                        "rad_south_w_m2": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "W/m2"
+                        },
+                        "rad_west_w_m2": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "W/m2"
+                        },
+                        "rad_global_w_m2": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "W/m2"
+                        }
+                      }
+                    },
+                    "cool_1": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "air_c",
+                        "dewpoint_c",
+                        "sky_c",
+                        "rad_north_w_m2",
+                        "rad_east_w_m2",
+                        "rad_south_w_m2",
+                        "rad_west_w_m2",
+                        "rad_global_w_m2"
+                      ],
+                      "properties": {
+                        "air_c": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "degC"
+                        },
+                        "dewpoint_c": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "degC"
+                        },
+                        "sky_c": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "degC"
+                        },
+                        "rad_north_w_m2": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "W/m2"
+                        },
+                        "rad_east_w_m2": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "W/m2"
+                        },
+                        "rad_south_w_m2": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "W/m2"
+                        },
+                        "rad_west_w_m2": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "W/m2"
+                        },
+                        "rad_global_w_m2": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "W/m2"
+                        }
+                      }
+                    }
+                  },
+                  "description": "Heating 1, Heating 2 and Cooling, each with the monthly rows' eight values in W/m2 for radiation; null while not entered, and dewpoint and sky may stay null."
+                }
+              },
+              "description": "The station file's own values, kept so edits show and Restore works anywhere; null for a climate entered by hand."
+            },
+            "provenance": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "dataset_name",
+                "station_name",
+                "state",
+                "source_type",
+                "source_name",
+                "source_version",
+                "source_checksum",
+                "conversion_method",
+                "conversion_method_version",
+                "is_certification_approved",
+                "monthly_data_available",
+                "peak_load_data_available",
+                "assumptions"
+              ],
+              "properties": {
+                "dataset_name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "station_name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "state": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The station's state, named as its folder is, such as NY; never a location on disk. Null for a climate entered by hand."
+                },
+                "source_type": {
+                  "type": "string",
+                  "enum": [
+                    "phius_approved",
+                    "user_defined"
+                  ]
+                },
+                "source_name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_version": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_checksum": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[0-9a-f]{64}$",
+                  "description": "The station file's SHA-256; null for a climate entered by hand."
+                },
+                "conversion_method": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "conversion_method_version": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "is_certification_approved": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "monthly_data_available": {
+                  "type": "boolean"
+                },
+                "peak_load_data_available": {
+                  "type": "boolean"
+                },
+                "assumptions": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "ph_composer"
+                  ],
+                  "properties": {
+                    "ph_composer": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "station_latitude_deg",
+                        "station_longitude_deg",
+                        "edited_values"
+                      ],
+                      "properties": {
+                        "station_latitude_deg": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "deg"
+                        },
+                        "station_longitude_deg": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "x-unit": "deg"
+                        },
+                        "edited_values": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "row",
+                              "column",
+                              "value",
+                              "as_read"
+                            ],
+                            "properties": {
+                              "row": {
+                                "type": "string",
+                                "description": "The record key: a monthly or peak-load row, or a single value such as daily_temp_swing_k."
+                              },
+                              "column": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "enum": [
+                                  "jan",
+                                  "feb",
+                                  "mar",
+                                  "apr",
+                                  "may",
+                                  "jun",
+                                  "jul",
+                                  "aug",
+                                  "sep",
+                                  "oct",
+                                  "nov",
+                                  "dec",
+                                  "heat_1",
+                                  "heat_2",
+                                  "cool_1",
+                                  null
+                                ],
+                                "description": "A month or a peak-load case; null for a single value."
+                              },
+                              "value": {
+                                "type": [
+                                  "number",
+                                  "null"
+                                ]
+                              },
+                              "as_read": {
+                                "type": [
+                                  "number",
+                                  "null"
+                                ]
+                              }
+                            }
+                          },
+                          "description": "Each value that differs from the station file, with what the file read."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "user_data": {
+          "type": "object",
+          "description": "The record's local JSON metadata."
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
 ### `ph_composer.climate.design_temperatures.get`
 
 The ASHRAE 99% heating and 1% cooling dry bulbs, the source note, the state and the warning. A new Model reads not_set and nothing is written. Owner: `ph_composer.climate`.
@@ -7765,9 +9925,150 @@ Example params:
 {}
 ```
 
+### `ph_composer.climate.site.preview_limit_check`
+
+The Phius limit check the Model's climate would get at a proposed latitude, longitude and elevation; null with no climate. Nothing is written. Owner: `ph_composer.climate`.
+
+Refuses: `record.unreadable`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "latitude_deg",
+    "longitude_deg",
+    "elevation_m"
+  ],
+  "properties": {
+    "latitude_deg": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": -90,
+      "maximum": 90,
+      "x-unit": "deg",
+      "description": "Decimal degrees, north positive; null until the site is set."
+    },
+    "longitude_deg": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": -180,
+      "maximum": 180,
+      "x-unit": "deg",
+      "description": "Decimal degrees, east positive; null until the site is set."
+    },
+    "elevation_m": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-unit": "m",
+      "description": "Elevation above sea level; null until the site is set."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "limit_check"
+  ],
+  "properties": {
+    "limit_check": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "verdict",
+        "reason",
+        "distance_km",
+        "elevation_difference_m",
+        "distance_ok",
+        "elevation_ok"
+      ],
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail",
+            "not_checked"
+          ],
+          "description": "pass at or inside both Phius limits, 50 miles and 400 feet; not_checked gives its reason."
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "no_site",
+            "no_station_coordinates",
+            null
+          ],
+          "description": "Why the check did not run; null when it did."
+        },
+        "distance_km": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "km",
+          "description": "Great-circle distance from the site to the station."
+        },
+        "elevation_difference_m": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "m",
+          "description": "The site's elevation less the station's, as a magnitude."
+        },
+        "distance_ok": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "elevation_ok": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "description": "The Phius limit check; null with no climate."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "latitude_deg": 40.6782,
+  "longitude_deg": -73.9442,
+  "elevation_m": 10.0
+}
+```
+
 ### `ph_composer.climate.summary.get`
 
-The state of the site and design-temperature cards. Owner: `ph_composer.climate`.
+The state of the site, design-temperature and climate cards. Owner: `ph_composer.climate`.
 
 Refuses: `record.unreadable`, and the `query` common set.
 
@@ -7790,7 +10091,8 @@ Result:
   "additionalProperties": false,
   "required": [
     "site",
-    "design_temperatures"
+    "design_temperatures",
+    "climate"
   ],
   "properties": {
     "site": {
@@ -7828,6 +10130,55 @@ Result:
             null
           ],
           "description": "climate.heating_not_below_cooling when heating is at or above cooling; the values still save."
+        }
+      }
+    },
+    "climate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "origin",
+        "verdict",
+        "edited"
+      ],
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "none",
+            "incomplete",
+            "complete"
+          ]
+        },
+        "origin": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "station",
+            "hand",
+            null
+          ],
+          "description": "Where the climate came from; null with none."
+        },
+        "verdict": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "pass",
+            "fail",
+            "not_checked",
+            null
+          ],
+          "description": "pass at or inside both Phius limits, 50 miles and 400 feet; not_checked gives its reason."
+        },
+        "edited": {
+          "type": "boolean",
+          "description": "true when a value differs from the station file."
         }
       }
     }
@@ -40361,6 +42712,3668 @@ Example params:
 }
 ```
 
+### `ph_composer.climate.climate.clear`
+
+Delete the Model's climate. The site and the design temperatures stay. Owner: `ph_composer.climate`.
+
+Undo step: Clear Climate. Removes the climate from this SKP.
+
+Refuses: `climate.not_found`, `record.unreadable`, `target.changed`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "expected_values"
+  ],
+  "properties": {
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "station_latitude_deg",
+        "station_longitude_deg",
+        "station_elevation_m",
+        "daily_temp_swing_k",
+        "wind_speed_m_s",
+        "monthly",
+        "peak_loads"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "station_latitude_deg": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -90,
+          "maximum": 90,
+          "x-unit": "deg",
+          "description": "The station's coordinate in decimal degrees; null only for a climate typed without one."
+        },
+        "station_longitude_deg": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -180,
+          "maximum": 180,
+          "x-unit": "deg",
+          "description": "The station's coordinate in decimal degrees; null only for a climate typed without one."
+        },
+        "station_elevation_m": {
+          "type": "number",
+          "x-unit": "m",
+          "description": "The station's height above sea level; needed."
+        },
+        "daily_temp_swing_k": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "K",
+          "description": "The summer daily temperature swing; null while not entered."
+        },
+        "wind_speed_m_s": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "m/s",
+          "description": "The average wind speed; null while not entered."
+        },
+        "monthly": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "air_c",
+            "dewpoint_c",
+            "sky_c",
+            "rad_north_kwh_m2",
+            "rad_east_kwh_m2",
+            "rad_south_kwh_m2",
+            "rad_west_kwh_m2",
+            "rad_global_kwh_m2"
+          ],
+          "properties": {
+            "air_c": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "degC"
+              }
+            },
+            "dewpoint_c": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "degC"
+              }
+            },
+            "sky_c": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "degC"
+              }
+            },
+            "rad_north_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_east_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_south_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_west_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_global_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            }
+          },
+          "description": "Eight rows of twelve months, January first; a value is null while not entered."
+        },
+        "peak_loads": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "heat_1",
+            "heat_2",
+            "cool_1"
+          ],
+          "properties": {
+            "heat_1": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "air_c",
+                "dewpoint_c",
+                "sky_c",
+                "rad_north_w_m2",
+                "rad_east_w_m2",
+                "rad_south_w_m2",
+                "rad_west_w_m2",
+                "rad_global_w_m2"
+              ],
+              "properties": {
+                "air_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "dewpoint_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "sky_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "rad_north_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_east_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_south_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_west_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_global_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                }
+              }
+            },
+            "heat_2": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "air_c",
+                "dewpoint_c",
+                "sky_c",
+                "rad_north_w_m2",
+                "rad_east_w_m2",
+                "rad_south_w_m2",
+                "rad_west_w_m2",
+                "rad_global_w_m2"
+              ],
+              "properties": {
+                "air_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "dewpoint_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "sky_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "rad_north_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_east_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_south_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_west_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_global_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                }
+              }
+            },
+            "cool_1": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "air_c",
+                "dewpoint_c",
+                "sky_c",
+                "rad_north_w_m2",
+                "rad_east_w_m2",
+                "rad_south_w_m2",
+                "rad_west_w_m2",
+                "rad_global_w_m2"
+              ],
+              "properties": {
+                "air_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "dewpoint_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "sky_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "rad_north_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_east_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_south_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_west_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_global_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                }
+              }
+            }
+          },
+          "description": "Heating 1, Heating 2 and Cooling, each with the monthly rows' eight values in W/m2 for radiation; null while not entered, and dewpoint and sky may stay null."
+        }
+      },
+      "description": "The editable fields as climate.get last returned them under climate.values; a change refuses."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "state",
+    "missing",
+    "edited_cells",
+    "limit_check",
+    "removed_user_data",
+    "removed_user_data_total",
+    "removed_user_data_truncated"
+  ],
+  "properties": {
+    "state": {
+      "type": "string",
+      "enum": [
+        "none",
+        "incomplete",
+        "complete"
+      ],
+      "description": "none with no climate; incomplete while missing lists a gap."
+    },
+    "missing": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "row",
+          "columns"
+        ],
+        "properties": {
+          "row": {
+            "type": "string",
+            "description": "The record key: a monthly or peak-load row, or a single value such as daily_temp_swing_k."
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "jan",
+                "feb",
+                "mar",
+                "apr",
+                "may",
+                "jun",
+                "jul",
+                "aug",
+                "sep",
+                "oct",
+                "nov",
+                "dec",
+                "heat_1",
+                "heat_2",
+                "cool_1"
+              ]
+            },
+            "description": "The months or cases missing; empty for a single value."
+          }
+        }
+      },
+      "description": "What a complete climate still needs, by row, in grid order."
+    },
+    "edited_cells": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "row",
+          "column"
+        ],
+        "properties": {
+          "row": {
+            "type": "string",
+            "description": "The record key: a monthly or peak-load row, or a single value such as daily_temp_swing_k."
+          },
+          "column": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "jan",
+              "feb",
+              "mar",
+              "apr",
+              "may",
+              "jun",
+              "jul",
+              "aug",
+              "sep",
+              "oct",
+              "nov",
+              "dec",
+              "heat_1",
+              "heat_2",
+              "cool_1",
+              null
+            ],
+            "description": "A month or a peak-load case; null for a single value."
+          }
+        }
+      },
+      "description": "Each value that differs from the station file; none for a climate entered by hand. Wind speed is never one."
+    },
+    "limit_check": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "verdict",
+        "reason",
+        "distance_km",
+        "elevation_difference_m",
+        "distance_ok",
+        "elevation_ok"
+      ],
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail",
+            "not_checked"
+          ],
+          "description": "pass at or inside both Phius limits, 50 miles and 400 feet; not_checked gives its reason."
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "no_site",
+            "no_station_coordinates",
+            null
+          ],
+          "description": "Why the check did not run; null when it did."
+        },
+        "distance_km": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "km",
+          "description": "Great-circle distance from the site to the station."
+        },
+        "elevation_difference_m": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "m",
+          "description": "The site's elevation less the station's, as a magnitude."
+        },
+        "distance_ok": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "elevation_ok": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "description": "The Phius limit check; null with no climate."
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "expected_values": {
+    "name": "Typed climate",
+    "station_latitude_deg": null,
+    "station_longitude_deg": null,
+    "station_elevation_m": 10.0,
+    "daily_temp_swing_k": null,
+    "wind_speed_m_s": null,
+    "monthly": {
+      "air_c": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "dewpoint_c": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "sky_c": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_north_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_east_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_south_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_west_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_global_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "peak_loads": {
+      "heat_1": {
+        "air_c": null,
+        "dewpoint_c": null,
+        "sky_c": null,
+        "rad_north_w_m2": null,
+        "rad_east_w_m2": null,
+        "rad_south_w_m2": null,
+        "rad_west_w_m2": null,
+        "rad_global_w_m2": null
+      },
+      "heat_2": {
+        "air_c": null,
+        "dewpoint_c": null,
+        "sky_c": null,
+        "rad_north_w_m2": null,
+        "rad_east_w_m2": null,
+        "rad_south_w_m2": null,
+        "rad_west_w_m2": null,
+        "rad_global_w_m2": null
+      },
+      "cool_1": {
+        "air_c": null,
+        "dewpoint_c": null,
+        "sky_c": null,
+        "rad_north_w_m2": null,
+        "rad_east_w_m2": null,
+        "rad_south_w_m2": null,
+        "rad_west_w_m2": null,
+        "rad_global_w_m2": null
+      }
+    }
+  }
+}
+```
+
+### `ph_composer.climate.climate.enter_values`
+
+Enter a climate by hand: a name and the station elevation are needed, every other value may stay null and the climate reads incomplete. Station coordinates are optional and go together. Refuses when the Model already holds a climate. Owner: `ph_composer.climate`.
+
+Undo step: Enter Climate Values. Stores the climate in this SKP.
+
+Refuses: `record.unreadable`, `target.changed`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "values"
+  ],
+  "properties": {
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "station_latitude_deg",
+        "station_longitude_deg",
+        "station_elevation_m",
+        "daily_temp_swing_k",
+        "wind_speed_m_s",
+        "monthly",
+        "peak_loads"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "station_latitude_deg": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -90,
+          "maximum": 90,
+          "x-unit": "deg",
+          "description": "The station's coordinate in decimal degrees; null only for a climate typed without one."
+        },
+        "station_longitude_deg": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -180,
+          "maximum": 180,
+          "x-unit": "deg",
+          "description": "The station's coordinate in decimal degrees; null only for a climate typed without one."
+        },
+        "station_elevation_m": {
+          "type": "number",
+          "x-unit": "m",
+          "description": "The station's height above sea level; needed."
+        },
+        "daily_temp_swing_k": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "K",
+          "description": "The summer daily temperature swing; null while not entered."
+        },
+        "wind_speed_m_s": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "m/s",
+          "description": "The average wind speed; null while not entered."
+        },
+        "monthly": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "air_c",
+            "dewpoint_c",
+            "sky_c",
+            "rad_north_kwh_m2",
+            "rad_east_kwh_m2",
+            "rad_south_kwh_m2",
+            "rad_west_kwh_m2",
+            "rad_global_kwh_m2"
+          ],
+          "properties": {
+            "air_c": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "degC"
+              }
+            },
+            "dewpoint_c": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "degC"
+              }
+            },
+            "sky_c": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "degC"
+              }
+            },
+            "rad_north_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_east_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_south_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_west_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_global_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            }
+          },
+          "description": "Eight rows of twelve months, January first; a value is null while not entered."
+        },
+        "peak_loads": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "heat_1",
+            "heat_2",
+            "cool_1"
+          ],
+          "properties": {
+            "heat_1": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "air_c",
+                "dewpoint_c",
+                "sky_c",
+                "rad_north_w_m2",
+                "rad_east_w_m2",
+                "rad_south_w_m2",
+                "rad_west_w_m2",
+                "rad_global_w_m2"
+              ],
+              "properties": {
+                "air_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "dewpoint_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "sky_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "rad_north_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_east_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_south_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_west_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_global_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                }
+              }
+            },
+            "heat_2": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "air_c",
+                "dewpoint_c",
+                "sky_c",
+                "rad_north_w_m2",
+                "rad_east_w_m2",
+                "rad_south_w_m2",
+                "rad_west_w_m2",
+                "rad_global_w_m2"
+              ],
+              "properties": {
+                "air_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "dewpoint_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "sky_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "rad_north_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_east_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_south_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_west_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_global_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                }
+              }
+            },
+            "cool_1": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "air_c",
+                "dewpoint_c",
+                "sky_c",
+                "rad_north_w_m2",
+                "rad_east_w_m2",
+                "rad_south_w_m2",
+                "rad_west_w_m2",
+                "rad_global_w_m2"
+              ],
+              "properties": {
+                "air_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "dewpoint_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "sky_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "rad_north_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_east_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_south_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_west_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_global_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                }
+              }
+            }
+          },
+          "description": "Heating 1, Heating 2 and Cooling, each with the monthly rows' eight values in W/m2 for radiation; null while not entered, and dewpoint and sky may stay null."
+        }
+      },
+      "description": "Every editable field: the name and the station elevation are needed, any other value may be null."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "state",
+    "missing",
+    "edited_cells",
+    "limit_check"
+  ],
+  "properties": {
+    "state": {
+      "type": "string",
+      "enum": [
+        "none",
+        "incomplete",
+        "complete"
+      ],
+      "description": "none with no climate; incomplete while missing lists a gap."
+    },
+    "missing": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "row",
+          "columns"
+        ],
+        "properties": {
+          "row": {
+            "type": "string",
+            "description": "The record key: a monthly or peak-load row, or a single value such as daily_temp_swing_k."
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "jan",
+                "feb",
+                "mar",
+                "apr",
+                "may",
+                "jun",
+                "jul",
+                "aug",
+                "sep",
+                "oct",
+                "nov",
+                "dec",
+                "heat_1",
+                "heat_2",
+                "cool_1"
+              ]
+            },
+            "description": "The months or cases missing; empty for a single value."
+          }
+        }
+      },
+      "description": "What a complete climate still needs, by row, in grid order."
+    },
+    "edited_cells": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "row",
+          "column"
+        ],
+        "properties": {
+          "row": {
+            "type": "string",
+            "description": "The record key: a monthly or peak-load row, or a single value such as daily_temp_swing_k."
+          },
+          "column": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "jan",
+              "feb",
+              "mar",
+              "apr",
+              "may",
+              "jun",
+              "jul",
+              "aug",
+              "sep",
+              "oct",
+              "nov",
+              "dec",
+              "heat_1",
+              "heat_2",
+              "cool_1",
+              null
+            ],
+            "description": "A month or a peak-load case; null for a single value."
+          }
+        }
+      },
+      "description": "Each value that differs from the station file; none for a climate entered by hand. Wind speed is never one."
+    },
+    "limit_check": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "verdict",
+        "reason",
+        "distance_km",
+        "elevation_difference_m",
+        "distance_ok",
+        "elevation_ok"
+      ],
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail",
+            "not_checked"
+          ],
+          "description": "pass at or inside both Phius limits, 50 miles and 400 feet; not_checked gives its reason."
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "no_site",
+            "no_station_coordinates",
+            null
+          ],
+          "description": "Why the check did not run; null when it did."
+        },
+        "distance_km": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "km",
+          "description": "Great-circle distance from the site to the station."
+        },
+        "elevation_difference_m": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "m",
+          "description": "The site's elevation less the station's, as a magnitude."
+        },
+        "distance_ok": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "elevation_ok": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "description": "The Phius limit check; null with no climate."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "values": {
+    "name": "Typed climate",
+    "station_latitude_deg": null,
+    "station_longitude_deg": null,
+    "station_elevation_m": 10.0,
+    "daily_temp_swing_k": null,
+    "wind_speed_m_s": null,
+    "monthly": {
+      "air_c": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "dewpoint_c": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "sky_c": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_north_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_east_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_south_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_west_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_global_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "peak_loads": {
+      "heat_1": {
+        "air_c": null,
+        "dewpoint_c": null,
+        "sky_c": null,
+        "rad_north_w_m2": null,
+        "rad_east_w_m2": null,
+        "rad_south_w_m2": null,
+        "rad_west_w_m2": null,
+        "rad_global_w_m2": null
+      },
+      "heat_2": {
+        "air_c": null,
+        "dewpoint_c": null,
+        "sky_c": null,
+        "rad_north_w_m2": null,
+        "rad_east_w_m2": null,
+        "rad_south_w_m2": null,
+        "rad_west_w_m2": null,
+        "rad_global_w_m2": null
+      },
+      "cool_1": {
+        "air_c": null,
+        "dewpoint_c": null,
+        "sky_c": null,
+        "rad_north_w_m2": null,
+        "rad_east_w_m2": null,
+        "rad_south_w_m2": null,
+        "rad_west_w_m2": null,
+        "rad_global_w_m2": null
+      }
+    }
+  }
+}
+```
+
+### `ph_composer.climate.climate.restore_original`
+
+Copy the values the station file read back over every edit. Refuses climate.no_original for a climate entered by hand. Owner: `ph_composer.climate`.
+
+Undo step: Restore Climate Values. Stores the climate in this SKP.
+
+Refuses: `climate.no_original`, `climate.not_found`, `record.unreadable`, `target.changed`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "expected_values"
+  ],
+  "properties": {
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "station_latitude_deg",
+        "station_longitude_deg",
+        "station_elevation_m",
+        "daily_temp_swing_k",
+        "wind_speed_m_s",
+        "monthly",
+        "peak_loads"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "station_latitude_deg": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -90,
+          "maximum": 90,
+          "x-unit": "deg",
+          "description": "The station's coordinate in decimal degrees; null only for a climate typed without one."
+        },
+        "station_longitude_deg": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -180,
+          "maximum": 180,
+          "x-unit": "deg",
+          "description": "The station's coordinate in decimal degrees; null only for a climate typed without one."
+        },
+        "station_elevation_m": {
+          "type": "number",
+          "x-unit": "m",
+          "description": "The station's height above sea level; needed."
+        },
+        "daily_temp_swing_k": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "K",
+          "description": "The summer daily temperature swing; null while not entered."
+        },
+        "wind_speed_m_s": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "m/s",
+          "description": "The average wind speed; null while not entered."
+        },
+        "monthly": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "air_c",
+            "dewpoint_c",
+            "sky_c",
+            "rad_north_kwh_m2",
+            "rad_east_kwh_m2",
+            "rad_south_kwh_m2",
+            "rad_west_kwh_m2",
+            "rad_global_kwh_m2"
+          ],
+          "properties": {
+            "air_c": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "degC"
+              }
+            },
+            "dewpoint_c": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "degC"
+              }
+            },
+            "sky_c": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "degC"
+              }
+            },
+            "rad_north_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_east_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_south_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_west_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_global_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            }
+          },
+          "description": "Eight rows of twelve months, January first; a value is null while not entered."
+        },
+        "peak_loads": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "heat_1",
+            "heat_2",
+            "cool_1"
+          ],
+          "properties": {
+            "heat_1": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "air_c",
+                "dewpoint_c",
+                "sky_c",
+                "rad_north_w_m2",
+                "rad_east_w_m2",
+                "rad_south_w_m2",
+                "rad_west_w_m2",
+                "rad_global_w_m2"
+              ],
+              "properties": {
+                "air_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "dewpoint_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "sky_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "rad_north_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_east_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_south_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_west_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_global_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                }
+              }
+            },
+            "heat_2": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "air_c",
+                "dewpoint_c",
+                "sky_c",
+                "rad_north_w_m2",
+                "rad_east_w_m2",
+                "rad_south_w_m2",
+                "rad_west_w_m2",
+                "rad_global_w_m2"
+              ],
+              "properties": {
+                "air_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "dewpoint_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "sky_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "rad_north_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_east_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_south_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_west_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_global_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                }
+              }
+            },
+            "cool_1": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "air_c",
+                "dewpoint_c",
+                "sky_c",
+                "rad_north_w_m2",
+                "rad_east_w_m2",
+                "rad_south_w_m2",
+                "rad_west_w_m2",
+                "rad_global_w_m2"
+              ],
+              "properties": {
+                "air_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "dewpoint_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "sky_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "rad_north_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_east_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_south_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_west_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_global_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                }
+              }
+            }
+          },
+          "description": "Heating 1, Heating 2 and Cooling, each with the monthly rows' eight values in W/m2 for radiation; null while not entered, and dewpoint and sky may stay null."
+        }
+      },
+      "description": "The editable fields as climate.get last returned them under climate.values; a change refuses."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "state",
+    "missing",
+    "edited_cells",
+    "limit_check"
+  ],
+  "properties": {
+    "state": {
+      "type": "string",
+      "enum": [
+        "none",
+        "incomplete",
+        "complete"
+      ],
+      "description": "none with no climate; incomplete while missing lists a gap."
+    },
+    "missing": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "row",
+          "columns"
+        ],
+        "properties": {
+          "row": {
+            "type": "string",
+            "description": "The record key: a monthly or peak-load row, or a single value such as daily_temp_swing_k."
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "jan",
+                "feb",
+                "mar",
+                "apr",
+                "may",
+                "jun",
+                "jul",
+                "aug",
+                "sep",
+                "oct",
+                "nov",
+                "dec",
+                "heat_1",
+                "heat_2",
+                "cool_1"
+              ]
+            },
+            "description": "The months or cases missing; empty for a single value."
+          }
+        }
+      },
+      "description": "What a complete climate still needs, by row, in grid order."
+    },
+    "edited_cells": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "row",
+          "column"
+        ],
+        "properties": {
+          "row": {
+            "type": "string",
+            "description": "The record key: a monthly or peak-load row, or a single value such as daily_temp_swing_k."
+          },
+          "column": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "jan",
+              "feb",
+              "mar",
+              "apr",
+              "may",
+              "jun",
+              "jul",
+              "aug",
+              "sep",
+              "oct",
+              "nov",
+              "dec",
+              "heat_1",
+              "heat_2",
+              "cool_1",
+              null
+            ],
+            "description": "A month or a peak-load case; null for a single value."
+          }
+        }
+      },
+      "description": "Each value that differs from the station file; none for a climate entered by hand. Wind speed is never one."
+    },
+    "limit_check": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "verdict",
+        "reason",
+        "distance_km",
+        "elevation_difference_m",
+        "distance_ok",
+        "elevation_ok"
+      ],
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail",
+            "not_checked"
+          ],
+          "description": "pass at or inside both Phius limits, 50 miles and 400 feet; not_checked gives its reason."
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "no_site",
+            "no_station_coordinates",
+            null
+          ],
+          "description": "Why the check did not run; null when it did."
+        },
+        "distance_km": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "km",
+          "description": "Great-circle distance from the site to the station."
+        },
+        "elevation_difference_m": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "m",
+          "description": "The site's elevation less the station's, as a magnitude."
+        },
+        "distance_ok": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "elevation_ok": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "description": "The Phius limit check; null with no climate."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "expected_values": {
+    "name": "Typed climate",
+    "station_latitude_deg": null,
+    "station_longitude_deg": null,
+    "station_elevation_m": 10.0,
+    "daily_temp_swing_k": null,
+    "wind_speed_m_s": null,
+    "monthly": {
+      "air_c": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "dewpoint_c": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "sky_c": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_north_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_east_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_south_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_west_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_global_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "peak_loads": {
+      "heat_1": {
+        "air_c": null,
+        "dewpoint_c": null,
+        "sky_c": null,
+        "rad_north_w_m2": null,
+        "rad_east_w_m2": null,
+        "rad_south_w_m2": null,
+        "rad_west_w_m2": null,
+        "rad_global_w_m2": null
+      },
+      "heat_2": {
+        "air_c": null,
+        "dewpoint_c": null,
+        "sky_c": null,
+        "rad_north_w_m2": null,
+        "rad_east_w_m2": null,
+        "rad_south_w_m2": null,
+        "rad_west_w_m2": null,
+        "rad_global_w_m2": null
+      },
+      "cool_1": {
+        "air_c": null,
+        "dewpoint_c": null,
+        "sky_c": null,
+        "rad_north_w_m2": null,
+        "rad_east_w_m2": null,
+        "rad_south_w_m2": null,
+        "rad_west_w_m2": null,
+        "rad_global_w_m2": null
+      }
+    }
+  }
+}
+```
+
+### `ph_composer.climate.climate.save_values`
+
+Edit the values of the Model's climate. A station's name and coordinates stay as its file gave them; a value that differs from the file is an edit, and the provenance's source type and edited values change with it. Owner: `ph_composer.climate`.
+
+Undo step: Edit Climate Values. Stores the climate in this SKP.
+
+Refuses: `climate.not_found`, `record.unreadable`, `target.changed`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "values",
+    "expected_values"
+  ],
+  "properties": {
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "station_latitude_deg",
+        "station_longitude_deg",
+        "station_elevation_m",
+        "daily_temp_swing_k",
+        "wind_speed_m_s",
+        "monthly",
+        "peak_loads"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "station_latitude_deg": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -90,
+          "maximum": 90,
+          "x-unit": "deg",
+          "description": "The station's coordinate in decimal degrees; null only for a climate typed without one."
+        },
+        "station_longitude_deg": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -180,
+          "maximum": 180,
+          "x-unit": "deg",
+          "description": "The station's coordinate in decimal degrees; null only for a climate typed without one."
+        },
+        "station_elevation_m": {
+          "type": "number",
+          "x-unit": "m",
+          "description": "The station's height above sea level; needed."
+        },
+        "daily_temp_swing_k": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "K",
+          "description": "The summer daily temperature swing; null while not entered."
+        },
+        "wind_speed_m_s": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "m/s",
+          "description": "The average wind speed; null while not entered."
+        },
+        "monthly": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "air_c",
+            "dewpoint_c",
+            "sky_c",
+            "rad_north_kwh_m2",
+            "rad_east_kwh_m2",
+            "rad_south_kwh_m2",
+            "rad_west_kwh_m2",
+            "rad_global_kwh_m2"
+          ],
+          "properties": {
+            "air_c": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "degC"
+              }
+            },
+            "dewpoint_c": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "degC"
+              }
+            },
+            "sky_c": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "degC"
+              }
+            },
+            "rad_north_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_east_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_south_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_west_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_global_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            }
+          },
+          "description": "Eight rows of twelve months, January first; a value is null while not entered."
+        },
+        "peak_loads": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "heat_1",
+            "heat_2",
+            "cool_1"
+          ],
+          "properties": {
+            "heat_1": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "air_c",
+                "dewpoint_c",
+                "sky_c",
+                "rad_north_w_m2",
+                "rad_east_w_m2",
+                "rad_south_w_m2",
+                "rad_west_w_m2",
+                "rad_global_w_m2"
+              ],
+              "properties": {
+                "air_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "dewpoint_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "sky_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "rad_north_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_east_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_south_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_west_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_global_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                }
+              }
+            },
+            "heat_2": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "air_c",
+                "dewpoint_c",
+                "sky_c",
+                "rad_north_w_m2",
+                "rad_east_w_m2",
+                "rad_south_w_m2",
+                "rad_west_w_m2",
+                "rad_global_w_m2"
+              ],
+              "properties": {
+                "air_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "dewpoint_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "sky_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "rad_north_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_east_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_south_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_west_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_global_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                }
+              }
+            },
+            "cool_1": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "air_c",
+                "dewpoint_c",
+                "sky_c",
+                "rad_north_w_m2",
+                "rad_east_w_m2",
+                "rad_south_w_m2",
+                "rad_west_w_m2",
+                "rad_global_w_m2"
+              ],
+              "properties": {
+                "air_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "dewpoint_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "sky_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "rad_north_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_east_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_south_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_west_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_global_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                }
+              }
+            }
+          },
+          "description": "Heating 1, Heating 2 and Cooling, each with the monthly rows' eight values in W/m2 for radiation; null while not entered, and dewpoint and sky may stay null."
+        }
+      },
+      "description": "Every editable field: the name and the station elevation are needed, any other value may be null."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "station_latitude_deg",
+        "station_longitude_deg",
+        "station_elevation_m",
+        "daily_temp_swing_k",
+        "wind_speed_m_s",
+        "monthly",
+        "peak_loads"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "station_latitude_deg": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -90,
+          "maximum": 90,
+          "x-unit": "deg",
+          "description": "The station's coordinate in decimal degrees; null only for a climate typed without one."
+        },
+        "station_longitude_deg": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -180,
+          "maximum": 180,
+          "x-unit": "deg",
+          "description": "The station's coordinate in decimal degrees; null only for a climate typed without one."
+        },
+        "station_elevation_m": {
+          "type": "number",
+          "x-unit": "m",
+          "description": "The station's height above sea level; needed."
+        },
+        "daily_temp_swing_k": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "K",
+          "description": "The summer daily temperature swing; null while not entered."
+        },
+        "wind_speed_m_s": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "m/s",
+          "description": "The average wind speed; null while not entered."
+        },
+        "monthly": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "air_c",
+            "dewpoint_c",
+            "sky_c",
+            "rad_north_kwh_m2",
+            "rad_east_kwh_m2",
+            "rad_south_kwh_m2",
+            "rad_west_kwh_m2",
+            "rad_global_kwh_m2"
+          ],
+          "properties": {
+            "air_c": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "degC"
+              }
+            },
+            "dewpoint_c": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "degC"
+              }
+            },
+            "sky_c": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "degC"
+              }
+            },
+            "rad_north_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_east_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_south_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_west_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            },
+            "rad_global_kwh_m2": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "kWh/m2"
+              }
+            }
+          },
+          "description": "Eight rows of twelve months, January first; a value is null while not entered."
+        },
+        "peak_loads": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "heat_1",
+            "heat_2",
+            "cool_1"
+          ],
+          "properties": {
+            "heat_1": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "air_c",
+                "dewpoint_c",
+                "sky_c",
+                "rad_north_w_m2",
+                "rad_east_w_m2",
+                "rad_south_w_m2",
+                "rad_west_w_m2",
+                "rad_global_w_m2"
+              ],
+              "properties": {
+                "air_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "dewpoint_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "sky_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "rad_north_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_east_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_south_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_west_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_global_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                }
+              }
+            },
+            "heat_2": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "air_c",
+                "dewpoint_c",
+                "sky_c",
+                "rad_north_w_m2",
+                "rad_east_w_m2",
+                "rad_south_w_m2",
+                "rad_west_w_m2",
+                "rad_global_w_m2"
+              ],
+              "properties": {
+                "air_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "dewpoint_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "sky_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "rad_north_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_east_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_south_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_west_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_global_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                }
+              }
+            },
+            "cool_1": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "air_c",
+                "dewpoint_c",
+                "sky_c",
+                "rad_north_w_m2",
+                "rad_east_w_m2",
+                "rad_south_w_m2",
+                "rad_west_w_m2",
+                "rad_global_w_m2"
+              ],
+              "properties": {
+                "air_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "dewpoint_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "sky_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "degC"
+                },
+                "rad_north_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_east_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_south_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_west_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                },
+                "rad_global_w_m2": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "W/m2"
+                }
+              }
+            }
+          },
+          "description": "Heating 1, Heating 2 and Cooling, each with the monthly rows' eight values in W/m2 for radiation; null while not entered, and dewpoint and sky may stay null."
+        }
+      },
+      "description": "The editable fields as climate.get last returned them under climate.values; a change refuses."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "state",
+    "missing",
+    "edited_cells",
+    "limit_check"
+  ],
+  "properties": {
+    "state": {
+      "type": "string",
+      "enum": [
+        "none",
+        "incomplete",
+        "complete"
+      ],
+      "description": "none with no climate; incomplete while missing lists a gap."
+    },
+    "missing": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "row",
+          "columns"
+        ],
+        "properties": {
+          "row": {
+            "type": "string",
+            "description": "The record key: a monthly or peak-load row, or a single value such as daily_temp_swing_k."
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "jan",
+                "feb",
+                "mar",
+                "apr",
+                "may",
+                "jun",
+                "jul",
+                "aug",
+                "sep",
+                "oct",
+                "nov",
+                "dec",
+                "heat_1",
+                "heat_2",
+                "cool_1"
+              ]
+            },
+            "description": "The months or cases missing; empty for a single value."
+          }
+        }
+      },
+      "description": "What a complete climate still needs, by row, in grid order."
+    },
+    "edited_cells": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "row",
+          "column"
+        ],
+        "properties": {
+          "row": {
+            "type": "string",
+            "description": "The record key: a monthly or peak-load row, or a single value such as daily_temp_swing_k."
+          },
+          "column": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "jan",
+              "feb",
+              "mar",
+              "apr",
+              "may",
+              "jun",
+              "jul",
+              "aug",
+              "sep",
+              "oct",
+              "nov",
+              "dec",
+              "heat_1",
+              "heat_2",
+              "cool_1",
+              null
+            ],
+            "description": "A month or a peak-load case; null for a single value."
+          }
+        }
+      },
+      "description": "Each value that differs from the station file; none for a climate entered by hand. Wind speed is never one."
+    },
+    "limit_check": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "verdict",
+        "reason",
+        "distance_km",
+        "elevation_difference_m",
+        "distance_ok",
+        "elevation_ok"
+      ],
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail",
+            "not_checked"
+          ],
+          "description": "pass at or inside both Phius limits, 50 miles and 400 feet; not_checked gives its reason."
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "no_site",
+            "no_station_coordinates",
+            null
+          ],
+          "description": "Why the check did not run; null when it did."
+        },
+        "distance_km": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "km",
+          "description": "Great-circle distance from the site to the station."
+        },
+        "elevation_difference_m": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "m",
+          "description": "The site's elevation less the station's, as a magnitude."
+        },
+        "distance_ok": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "elevation_ok": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "description": "The Phius limit check; null with no climate."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "values": {
+    "name": "Typed climate",
+    "station_latitude_deg": null,
+    "station_longitude_deg": null,
+    "station_elevation_m": 10.0,
+    "daily_temp_swing_k": 11.5,
+    "wind_speed_m_s": null,
+    "monthly": {
+      "air_c": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "dewpoint_c": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "sky_c": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_north_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_east_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_south_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_west_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_global_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "peak_loads": {
+      "heat_1": {
+        "air_c": null,
+        "dewpoint_c": null,
+        "sky_c": null,
+        "rad_north_w_m2": null,
+        "rad_east_w_m2": null,
+        "rad_south_w_m2": null,
+        "rad_west_w_m2": null,
+        "rad_global_w_m2": null
+      },
+      "heat_2": {
+        "air_c": null,
+        "dewpoint_c": null,
+        "sky_c": null,
+        "rad_north_w_m2": null,
+        "rad_east_w_m2": null,
+        "rad_south_w_m2": null,
+        "rad_west_w_m2": null,
+        "rad_global_w_m2": null
+      },
+      "cool_1": {
+        "air_c": null,
+        "dewpoint_c": null,
+        "sky_c": null,
+        "rad_north_w_m2": null,
+        "rad_east_w_m2": null,
+        "rad_south_w_m2": null,
+        "rad_west_w_m2": null,
+        "rad_global_w_m2": null
+      }
+    }
+  },
+  "expected_values": {
+    "name": "Typed climate",
+    "station_latitude_deg": null,
+    "station_longitude_deg": null,
+    "station_elevation_m": 10.0,
+    "daily_temp_swing_k": null,
+    "wind_speed_m_s": null,
+    "monthly": {
+      "air_c": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "dewpoint_c": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "sky_c": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_north_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_east_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_south_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_west_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "rad_global_kwh_m2": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "peak_loads": {
+      "heat_1": {
+        "air_c": null,
+        "dewpoint_c": null,
+        "sky_c": null,
+        "rad_north_w_m2": null,
+        "rad_east_w_m2": null,
+        "rad_south_w_m2": null,
+        "rad_west_w_m2": null,
+        "rad_global_w_m2": null
+      },
+      "heat_2": {
+        "air_c": null,
+        "dewpoint_c": null,
+        "sky_c": null,
+        "rad_north_w_m2": null,
+        "rad_east_w_m2": null,
+        "rad_south_w_m2": null,
+        "rad_west_w_m2": null,
+        "rad_global_w_m2": null
+      },
+      "cool_1": {
+        "air_c": null,
+        "dewpoint_c": null,
+        "sky_c": null,
+        "rad_north_w_m2": null,
+        "rad_east_w_m2": null,
+        "rad_south_w_m2": null,
+        "rad_west_w_m2": null,
+        "rad_global_w_m2": null
+      }
+    }
+  }
+}
+```
+
 ### `ph_composer.climate.design_temperatures.update`
 
 Set any of the two design temperatures and the source note; null unsets one. Each field given is guarded by its value in expected_values, which names the same fields; fields not given keep what is stored. Owner: `ph_composer.climate`.
@@ -40700,7 +46713,8 @@ Result:
     "climate_zone",
     "hours_from_utc",
     "climate_zone_label",
-    "state"
+    "state",
+    "limit_check"
   ],
   "properties": {
     "latitude_deg": {
@@ -40788,6 +46802,73 @@ Result:
         "set"
       ],
       "description": "set when latitude, longitude and elevation are all present."
+    },
+    "limit_check": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "verdict",
+        "reason",
+        "distance_km",
+        "elevation_difference_m",
+        "distance_ok",
+        "elevation_ok"
+      ],
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail",
+            "not_checked"
+          ],
+          "description": "pass at or inside both Phius limits, 50 miles and 400 feet; not_checked gives its reason."
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "no_site",
+            "no_station_coordinates",
+            null
+          ],
+          "description": "Why the check did not run; null when it did."
+        },
+        "distance_km": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "km",
+          "description": "Great-circle distance from the site to the station."
+        },
+        "elevation_difference_m": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "m",
+          "description": "The site's elevation less the station's, as a magnitude."
+        },
+        "distance_ok": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "elevation_ok": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "description": "The Phius limit check; null with no climate."
     }
   }
 }
@@ -69783,6 +75864,8 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | Code | Meaning |
 | --- | --- |
 | `climate.heating_not_below_cooling` | The heating design temperature is at or above the cooling one; both still save. |
+| `climate.no_original` | A climate entered by hand has no station values to restore. Nothing was written. |
+| `climate.not_found` | The Model holds no climate to edit, restore or clear. Nothing was written. |
 
 ### `ph_composer.spaces`
 
@@ -70008,3 +76091,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.60 | 2026-11-14 | An update that rebuilds a record's parts, such as windows.types.update with elements, keeps each surviving part's user_data by id whether or not it sends it, starts a new part without one, and refuses params.invalid for a part map that differs from the stored one. The deletes of Materials, Assemblies, Frames, Glazings, Psi-Install Types, Window Types, Thermal Bridge Types and Attached zones return removed_user_data and removed_user_data_total, each part listed by part_ids. ph_composer.model.detail takes metadata summary, ph_composer.model.fragment is new, and ph_composer.model.update_metadata returns extension_status only. thermal_bridges.edges.selection, at and candidates take metadata summary, and thermal_bridges.edges.detail is new. Export reports an unused Building Segment's or Level's map as omitted. A part declaration needs a required string id and an optional object user_data. Engine#propose_update takes derived_part_maps and Engine#propose_delete returns the removal report. |
 | 1.61 | 2026-11-14 | Every delete and merge that returns removed_user_data also returns removed_user_data_truncated, and its rows stay within 8192 bytes: each listed map keeps its address and user_data_key_total, and its keys fill in while they fit. The new reference target ph_composer.model.metadata puts the Model's extension payloads in the incoming-reference check, so a record a Model payload names refuses deletion as reference.in_use. A membrane Layer's Layer-Segment map stays in the Model with an export.metadata_omitted finding even with a steel stud spacing. |
 | 1.62 | 2026-11-17 | The ph_composer.climate feature is new, requiring ph_composer.zones. ph_composer.climate.site.get and site.update read and set the Model's site (latitude, longitude and elevation together, a climate-zone code and hours from UTC); ph_composer.climate.design_temperatures.get and design_temperatures.update read and set the ASHRAE 99% heating and 1% cooling dry bulbs and a source note, any field alone; ph_composer.climate.summary.get backs the ph_composer.climate.summary snapshot section. climate.heating_not_below_cooling is new, a warning the design-temperature read carries. |
+| 1.63 | 2026-11-17 | The ph_composer.climate.climate record kind is new, one climate per Model. ph_composer.climate.climate.get reads it with its state, what is missing, the edited cells and the Phius limit check against the site; climate.enter_values enters one by hand with gaps allowed, climate.save_values edits its values and rewrites its provenance, climate.restore_original copies the station file's values back, and climate.clear deletes it, each guarded by the editable fields last read. ph_composer.climate.site.update's result gains limit_check, ph_composer.climate.site.preview_limit_check is new, and the summary gains the climate card. climate.not_found and climate.no_original are new. |

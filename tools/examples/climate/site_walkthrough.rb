@@ -20,7 +20,8 @@ module ClimateSiteWalkthrough
   EXPECTED = {
     "site" => SITE.merge("climate_zone_label" => "4", "state" => "set"),
     "design_temperatures" => DESIGN.merge("state" => "set", "warning" => nil),
-    "summary" => { "site" => "set", "design_temperatures" => { "state" => "set", "warning" => nil } }
+    "summary" => { "site" => "set", "design_temperatures" => { "state" => "set", "warning" => nil },
+                   "climate" => { "state" => "none", "origin" => nil, "verdict" => nil, "edited" => false } }
   }.freeze
 
   module_function

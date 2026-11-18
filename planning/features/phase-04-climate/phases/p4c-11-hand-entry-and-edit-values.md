@@ -9,8 +9,9 @@ ISSUE: none (local planning draft)
 
 Requires P4c-10 and owed check 5. Owns the one editor behind Enter Values by Hand and Edit
 Values: a grid in the order of a Phius climate file, filled by one paste or by typing, saved
-with gaps; and the pane of a hand-entered climate. It calls `climate.save_values` and holds no
-rule: completeness and edited cells come back from Ruby.
+with gaps; and the pane of a hand-entered climate. It calls `climate.enter_values` for a new
+climate and `climate.save_values` for Edit Values (split at P4c-02 so each carries its Undo
+name), and holds no rule: completeness and edited cells come back from Ruby.
 
 Behavior: [PRD](../PRD.md), "An attached climate" (the hand-entry bullets). Names:
 [CONTRACTS](../CONTRACTS.md) section 3. Answers: W3, W8, J4, J7, R3; D4c-08. Boards: 12
@@ -53,7 +54,7 @@ or not) and nothing else. The test fixtures are invented blocks.
    tab-separated `parse`. A block larger than the grid is refused with a notice and nothing is
    filled; a cell that is not a number is left empty and counted in the notice. A paste is one
    draft change and saves nothing.
-4. **Save**: enabled with a name and a station elevation. One `save_values`, one Undo step. It
+4. **Save**: enabled with a name and a station elevation. One `enter_values` (or `save_values` for Edit Values), one Undo step. It
    saves with gaps (J4); a stale record refuses and the draft stays in the grid.
 5. **Edit Values** on an attached station: the same editor opened on the record. On save the
    pane shows the edited marks P4c-10 draws. The name and coordinates of a station are shown
