@@ -4869,6 +4869,21 @@
         "src/ph_composer/features/climate/install.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "CM05",
+      "label": "The Site export on the installed RBZ through the bridge, the panel closed: eight reference Models exported, from no site and no climate to a board-18 station with one edit and an unset offset; the same honeybee-ph Site on every Building Segment, honeybee-ph's default for each part not written, Cooling 2 equal to Cooling 1, the provenance passed through (phius_approved, user_defined, no source_uri), each finding on its case and none blocking; PHX 1.57.5 reads each back in WUFI XML and METr JSON; no folder location in any answer, HBJSON, report or result",
+      "mode": "mixed",
+      "authority": "planning/features/phase-04-climate/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/climate/export.rb",
+        "src/ph_composer/features/climate/export/*",
+        "src/ph_composer/python/ph_composer_translation/site_sections.py",
+        "src/ph_composer/python/ph_composer_translation/composition.py",
+        "src/ph_composer/features/climate/codes.rb",
+        "src/ph_composer/features/climate/install.rb"
+      ],
+      "native_control_required": false
     }
   ]
 }

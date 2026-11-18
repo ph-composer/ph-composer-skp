@@ -145,8 +145,10 @@ CM05 passes, owed check 6 is recorded, and C4c-4 is answered.
   identity and a missing-value count added. `assembly.py` attaches each host level in the
   coordinator's order, which follows `requires`, so the Site section attaches at `MODEL` after the
   Zones section although its id sorts first.
-- **Zone and offset findings** fire whenever the Location is written, with or without a climate
-  (D4c-23, for Ed to confirm).
+- **Zone and offset findings** fire only with a climate in the Model (D4c-23), as CM05 says; the
+  first head fired them for a site alone and the Codex review held it to the contract.
+- **A path-like design-temperature note** is replaced in the report by a line saying it stays in the
+  Model (D4c-25), so it cannot block the export through the artifact guard.
 - **Conformance** compares a digest of the built `Site` with every reloaded Building Segment
   (D4c-24), and honeybee-ph's default for each part the record did not carry.
 - **The round trip** (step 8) renames the reference model's Building Segments without a space: PHX

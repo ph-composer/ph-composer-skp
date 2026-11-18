@@ -98,6 +98,15 @@ class ClimateExportTest < PhComposerTestCase
     assert_nil neither.dig("report", "climate")
   end
 
+  # A note that reads as a file location stays in the Model; the artifact guard would refuse the whole export.
+  def test_a_source_note_that_names_a_file_location_is_left_out_of_the_record
+    note = "/Users/example/ASHRAE.pdf"
+    report = RECORD.call(NEAR, DESIGN.merge("design_temperature_source" => note), nil).fetch("report")
+    assert_equal RECORD::NOTE_LEFT_OUT, report.fetch("design_temperature_source")
+    assert PhComposer::Export::ArtifactHygiene.validate!(report)
+    assert_equal "ASHRAE 2021", RECORD.call(NEAR, DESIGN, nil).dig("report", "design_temperature_source")
+  end
+
   def test_an_unset_zone_writes_not_defined_and_an_unset_offset_writes_null
     location = RECORD.call(NEAR.merge("climate_zone" => nil, "hours_from_utc" => nil), NO_DESIGN, nil)
                      .fetch("location")
@@ -137,8 +146,7 @@ class ClimateExportTest < PhComposerTestCase
   def test_each_finding_on_its_case
     unset = NEAR.merge("climate_zone" => nil, "hours_from_utc" => nil)
     assert_equal %w[climate.zone_not_set climate.utc_offset_not_set], codes(unset, station)
-    assert_equal %w[climate.zone_not_set climate.utc_offset_not_set], codes(unset, nil),
-                 "a written Location says which of its values it writes as unset, with or without a climate"
+    assert_empty codes(unset, nil), "a site with no climate, its zone and offset unset (E2)"
     assert_empty codes(NO_SITE, nil), "no site and no climate"
     assert_empty codes(NEAR, nil), "a site with no climate"
     assert_empty codes(NEAR, station)
@@ -163,10 +171,12 @@ class ClimateExportTest < PhComposerTestCase
   def test_the_preflight_reads_the_findings_live_and_none_blocks
     assert_empty preflight
     update_site(SITE.merge("hours_from_utc" => nil))
-    rows = preflight
-    assert_equal [["climate.utc_offset_not_set", RECORD::ID, false]],
-                 rows.map { |row| row.values_at("code", "object_id", "blocks_export") }
+    assert_empty preflight, "a site with no climate gives no finding"
     seed(station)
+    rows = preflight
+    assert_equal [["climate.utc_offset_not_set", RECORD::ID, false],
+                  ["climate.outside_phius_limits", RECORD::ID, false]],
+                 rows.map { |row| row.values_at("code", "object_id", "blocks_export") }
     update_site(NO_SITE)
     assert_equal %w[climate.site_not_set], preflight.map { |row| row.fetch("code") }
   end

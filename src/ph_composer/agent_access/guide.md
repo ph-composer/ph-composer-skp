@@ -579,7 +579,7 @@ Grasshopper model with nothing connected does. The design temperatures stay in t
 blocks it: `climate.site_not_set` and `climate.incomplete` for a climate left out,
 `climate.zone_not_set` (written as Not defined) and `climate.utc_offset_not_set` (written empty)
 for a site written with those unset, `climate.outside_phius_limits` and `climate.not_checked`. A
-Model with no climate gives none about the climate. The report's Climate section names the dataset
+Model with no climate gives none, with or without a site. The report's Climate section names the dataset
 and station, never a folder.
 
 ### Library records

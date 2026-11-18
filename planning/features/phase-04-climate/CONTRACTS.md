@@ -401,7 +401,9 @@ fields are `location`, `climate` (the identity with the written `source_type` an
 `climate_written`, `climate_left_out`, `missing_values`, `peak_load_temperatures_c`, `limit_check`,
 `edited_cells` (row, column, value and as read), `design_temperatures`, `design_temperature_source`,
 `building_segments` and `site_digest`. Every finding's `object_id` is `Site`. The zone and offset
-findings fire whenever the Location is written, with or without a climate (D4c-23, for Ed to confirm).
+findings fire only with a climate in the Model; a site alone gives none (D4c-23). A design-temperature
+note that reads as a file location is replaced in the report block by a line saying it stays in the
+Model (D4c-25).
 A climate both incomplete and without a site gives both findings, and `climate_left_out` reads
 `site_not_set`. `climate.site_not_set` is the code P4c-04 declared; its description now covers both.
 

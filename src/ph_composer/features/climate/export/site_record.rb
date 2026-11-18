@@ -23,6 +23,7 @@ module PhComposer
       # The Model's own provenance fields, which honeybee-ph's ClimateProvenance does not have.
       MODEL_PROVENANCE = %w[dataset_name station_name state].freeze
       COOLING_2_NOTE = "repeats cooling_load_1"
+      NOTE_LEFT_OUT = "The source note names a file location, so it stays in the Model."
       SITE_NOT_SET = Stations::Operations::SITE_NOT_SET
       INCOMPLETE = "climate.incomplete"
       ZONE_NOT_SET = "climate.zone_not_set"
@@ -56,14 +57,14 @@ module PhComposer
           "report" => report(site, design, climate) }
       end
 
-      # `[code, message]` for each finding, all non-blocking. A Model with no climate gives none about the
-      # climate (E1, E2); a site that is written says which of its own values it writes as unset.
+      # `[code, message]` for each finding, all non-blocking. A Model with no climate gives none, with or
+      # without a site (E1, E2): a site alone is written as honeybee-ph's PH Site component writes it. With a
+      # climate, a written site also says which of its own values it writes as unset.
       def findings(site, climate)
-        located = !site.fetch("latitude_deg").nil?
-        rows = located ? site_findings(site) : []
-        return rows unless climate
+        return [] unless climate
 
-        rows + climate_findings(located, site, climate)
+        located = !site.fetch("latitude_deg").nil?
+        (located ? site_findings(site) : []) + climate_findings(located, site, climate)
       end
 
       def left_out_reason(located, climate)
@@ -106,7 +107,13 @@ module PhComposer
           "limit_check" => climate && LimitCheck.call(site, climate),
           "edited_cells" => climate ? Edits.cells(climate) : [],
           "design_temperatures" => design.slice("heating_99_c", "cooling_1_c"),
-          "design_temperature_source" => design.fetch("design_temperature_source") }
+          "design_temperature_source" => source_note(design.fetch("design_temperature_source")) }
+      end
+
+      # The design-temperature note as the report may show it. A note that reads as a file location stays in
+      # the Model and is replaced here, since the export's artifact guard refuses any local path in the result.
+      def source_note(note)
+        Diagnostics.absolute_path?(note.to_s) ? NOTE_LEFT_OUT : note
       end
 
       def identity(climate)
