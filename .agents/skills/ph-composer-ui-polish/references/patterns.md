@@ -57,6 +57,15 @@ Paths under **Local** are in this repository at `src/ph_composer/html/`. The UI 
   `planned` card is shown read only and is never selected, by click, keyboard or the select. Below 700 px the
   cards give way to one select above the pane that names each card's state. First used by the Climate tab
   (P4c-06); the Library sidebar stays the pattern for browsing records, this one for a few subjects with states.
+- Outline map (`outline_map.js`, `outline_map.css`, `map_projection.js`, borders in `map_borders.js`): world
+  countries and the United States' and Canada's states and provinces as light unfilled lines on the alt surface,
+  with markers toned neutral, `ok` teal or `warning` amber, the selected marker in a teal ring, rings at a distance
+  in kilometres as a dashed teal line on a faint teal fill, and one pin, an ink diamond with a label. Markers,
+  labels and the pin keep their size at every zoom. Drag pans (a press that moves no more than 4 px is a click),
+  the wheel zooms about the pointer, and three icon buttons at the top right zoom in, zoom out and reset to the
+  owner's `frame(bounds)`. A click on a marker selects it; elsewhere it places. The hover tip is the owner's text or
+  node. Placing and selecting have a non-map route in the owner (typed fields, a list). It knows nothing of
+  climate. First used by Set Location (P4c-07), beside the fields, above them below 760 px.
 - `unit_field.js` `UnitField`, `units.js`, `unit_preferences.js` and `fields.js`: every unit-bearing input and its stored-field descriptor.
 
 ## Accepted screen patterns (local)

@@ -472,7 +472,9 @@ The panel is one client of `PhComposer::API`, not the owner of any Model behavio
   help) declares a `Content-Security-Policy` meta, with `tests/page_csp_test.js` holding each page to its
   policy: no inline script or event handler, and only the extension's own files. The panel and its two
   dialogs reach no network; the runtime page reaches only its own loopback asset server and allows
-  `'unsafe-eval'` for Pyodide on the Chromium 88 floor. A page starts from `html/boot.js`, which names the
+  `'unsafe-eval'` for Pyodide on the Chromium 88 floor. The outline map (`html/outline_map.js`) loads no map
+  tiles: its borders ship as a generated panel module (`html/map_borders.js`, public-domain Natural Earth data,
+  built by `tools/map_data/`) and draw as SVG. A page starts from `html/boot.js`, which names the
   entry module on `<body data-phc-entry>`. Inline styles are allowed on the panel, because a blocked
   run's report shows in a `srcdoc` frame that inherits the panel's policy, and on the generated help
   page; nowhere else. The panel reports a blocked load as `panel_csp_violation`. Ruby's

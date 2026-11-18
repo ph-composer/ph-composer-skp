@@ -1,0 +1,36 @@
+/* The outline map (outline_map.js): borders as light unfilled lines, markers, rings and the pin above them, and the
+   zoom and Reset buttons in a small group at the top right. The owner sets the map's height; it fills its width. */
+.phc-outline-map { position: relative; height: 320px; min-width: 0; overflow: hidden; border: 1px solid var(--line);
+  border-radius: var(--radius-md); background: var(--surface-alt); }
+.phc-outline-map-drawing { display: block; width: 100%; height: 100%; cursor: crosshair; touch-action: none;
+  user-select: none; }
+.phc-outline-map.is-panning .phc-outline-map-drawing { cursor: grabbing; }
+.phc-outline-map-countries { fill: var(--paper); stroke: var(--line-strong); stroke-width: 1; stroke-linejoin: round; }
+.phc-outline-map-states { fill: none; stroke: var(--line-strong); stroke-width: .75; stroke-dasharray: 3 3; }
+.phc-outline-map-ring path { fill: var(--interaction-highlight-tint); stroke: var(--interaction-highlight);
+  stroke-width: 1.5; stroke-dasharray: 6 5; }
+.phc-outline-map-ring text { fill: var(--interaction-highlight); font-size: var(--text-xs); }
+.phc-outline-map-point { cursor: pointer; }
+.phc-outline-map-point circle { fill: var(--muted); stroke: var(--paper); stroke-width: 1.5; pointer-events: all; }
+.phc-outline-map-point[data-tone="ok"] circle { fill: var(--interaction-highlight); }
+.phc-outline-map-point[data-tone="warning"] circle { fill: var(--amber); }
+.phc-outline-map-point[aria-current="true"] circle { stroke: var(--interaction-highlight); stroke-width: 3; }
+.phc-outline-map-point:hover circle { stroke: var(--drawing-highlight); stroke-width: 3; }
+.phc-outline-map-point text { fill: var(--ink); font-size: var(--text-xs); paint-order: stroke;
+  stroke: var(--paper); stroke-width: 3; }
+.phc-outline-map-site path { fill: var(--ink); stroke: var(--paper); stroke-width: 1.5; }
+.phc-outline-map-site text { fill: var(--ink); font-size: var(--text-sm); font-weight: 600; paint-order: stroke;
+  stroke: var(--paper); stroke-width: 3; }
+.phc-outline-map-points, .phc-outline-map-site, .phc-outline-map-rings { pointer-events: none; }
+.phc-outline-map-points .phc-outline-map-point { pointer-events: all; }
+.phc-outline-map-controls { position: absolute; top: 8px; right: 8px; display: flex; flex-direction: column;
+  gap: 2px; padding: 2px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  background: var(--paper); }
+.phc-outline-map-controls .phc-icon-button { width: 26px; height: 26px; min-height: 26px; padding: 0; }
+.phc-outline-map-hint { position: absolute; left: 8px; top: 6px; margin: 0; padding: 0 4px;
+  max-width: calc(100% - 60px); border-radius: var(--radius-sm); background: #ffffffcc; color: var(--muted-strong);
+  font-size: var(--text-xs); pointer-events: none; }
+.phc-outline-map-tip { position: absolute; z-index: 1; max-width: 220px; padding: 6px 8px;
+  border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--paper);
+  box-shadow: var(--shadow-float); color: var(--ink); font-size: var(--text-sm); pointer-events: none; }
+.phc-outline-map-tip[hidden] { display: none; }

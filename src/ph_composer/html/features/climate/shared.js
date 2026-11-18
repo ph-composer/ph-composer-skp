@@ -9,6 +9,10 @@ PhComposerUI.define("features/climate/shared", ["fields", "units"], function (fi
   var SITE_FIELDS = ["latitude_deg", "longitude_deg", "elevation_m", "climate_zone", "hours_from_utc"];
   var ELEVATION = fields.with(fields.LENGTH_M, { label: "Elevation", allowBlank: true, allowNegative: true });
   var TEMPERATURE = fields.with(fields.TEMPERATURE_C, { label: "Temperature", allowBlank: true });
+  var DISTANCE = fields.with(fields.DISTANCE_KM, { label: "Distance" });
+  /* Phius's limit on how far the station may be from the site, 50 mi, held in km as
+     features/climate/climate/limit_check.rb holds it; tests/climate_panel_test.js compares the two. */
+  var DISTANCE_LIMIT_KM = 80.4672;
 
   // A value and its unit stay on one line.
   function formatted(value, field) { return units.format(value, field, units.profile(field)).replace(/ /g, "\u00a0"); }
@@ -35,6 +39,6 @@ PhComposerUI.define("features/climate/shared", ["fields", "units"], function (fi
 
   return { PREFIX: PREFIX, SITE: PREFIX + "site", DESIGN: PREFIX + "design_temperatures",
     SUMMARY: PREFIX + "summary", ZONES: ZONES, SITE_FIELDS: SITE_FIELDS, ELEVATION: ELEVATION,
-    TEMPERATURE: TEMPERATURE,
+    TEMPERATURE: TEMPERATURE, DISTANCE: DISTANCE, DISTANCE_LIMIT_KM: DISTANCE_LIMIT_KM,
     formatted: formatted, coordinates: coordinates, hours: hours, offset: offset, exportLine: exportLine };
 });

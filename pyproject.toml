@@ -34,14 +34,14 @@ addopts = "-q"
 # module name only through these entries. The shipped translation package, the synthetic sections and
 # the development example's sections are imported the same way.
 pythonpath = [
-    "tools/rbz", "tools/help", "tools/hostkit", "tools/runtime", "src/ph_composer/python", "tests/python", "tools/examples/foundation",
+    "tools/rbz", "tools/help", "tools/hostkit", "tools/runtime", "tools/map_data", "src/ph_composer/python", "tests/python", "tools/examples/foundation",
     "tools/githooks",
 ]
 
 [tool.ruff]
 line-length = 120
 src = [
-    ".", "tools/rbz", "tools/help", "tools/hostkit", "tools/runtime", "src/ph_composer/python", "tests/python", "tools/examples/foundation",
+    ".", "tools/rbz", "tools/help", "tools/hostkit", "tools/runtime", "tools/map_data", "src/ph_composer/python", "tests/python", "tools/examples/foundation",
     "tools/githooks",
 ]
 
@@ -68,13 +68,13 @@ ignore = ["RUF001", "RUF002", "RUF003"]
 [tool.ty.environment]
 python-version = "3.11"
 root = [
-    "src/ph_composer/python", "tools/examples/foundation", "tools/rbz", "tools/help", "tools/hostkit", "tools/runtime", "tests/python",
+    "src/ph_composer/python", "tools/examples/foundation", "tools/rbz", "tools/help", "tools/hostkit", "tools/runtime", "tools/map_data", "tests/python",
     "tools/githooks",
 ]
 
 [tool.ty.src]
 include = [
-    "src/ph_composer/python", "tools/examples/foundation", "tools/rbz", "tools/help", "tools/hostkit", "tools/runtime", "tests/python",
+    "src/ph_composer/python", "tools/examples/foundation", "tools/rbz", "tools/help", "tools/hostkit", "tools/runtime", "tools/map_data", "tests/python",
     "tools/githooks",
 ]
 

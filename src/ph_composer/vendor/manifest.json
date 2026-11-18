@@ -116,9 +116,9 @@
       "sha256": "9e8041546528ef8733c8da7b2359bd980cee349c3ed13ef3ebafc023a11a3479"
     },
     "html/features/climate/climate.css": {
-      "bytes": 3100,
+      "bytes": 3945,
       "mime": "text/css; charset=utf-8",
-      "sha256": "39181ae6132dd0840927dea065b7f8368aaa490e9fcf3ab7356b7fc28001fa93"
+      "sha256": "33e1d88edeef2e43f37f0b19172a73046ec5783eee526ba0f619d080d90b9184"
     },
     "html/features/climate/design_temperatures.js": {
       "bytes": 8478,
@@ -131,14 +131,14 @@
       "sha256": "ba04a30f32913ad8ad576e837ae5edaa7b671aa9a6c11cb675b7795f63092bcc"
     },
     "html/features/climate/set_location.js": {
-      "bytes": 9957,
+      "bytes": 18087,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "dac28f6f322f1b53604252551b479da00ac878c1b577bcf2b3d119b6e8a1b6ae"
+      "sha256": "323408d8186eaa9f21316ef5ff170e363c251543b43f29226471056194e6910e"
     },
     "html/features/climate/shared.js": {
-      "bytes": 2412,
+      "bytes": 2767,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "1bfea4a0499143d1ca43aa10ae591b5afcaa6ffba86818bf9c9c9436928e1005"
+      "sha256": "a0f672e547298a4fef87a27966ba59af4c3ae2fe675e6be003cd17a5228f852c"
     },
     "html/features/climate/site.js": {
       "bytes": 2552,
@@ -371,9 +371,9 @@
       "sha256": "ae769a7d0c4b07031ab9812cd350d17b6e4638549d0f5295ccaafe1f1390ed54"
     },
     "html/index.html": {
-      "bytes": 8827,
+      "bytes": 9010,
       "mime": "text/html; charset=utf-8",
-      "sha256": "21af0dd50e7d95aa35a70807d1cb158a65f338054341d498a94e1282c2a0c159"
+      "sha256": "5d6518079d4a26f7b939af515d0b48f9a7c0fb2990e26242e04473c97f59849d"
     },
     "html/inventory.js": {
       "bytes": 12812,
@@ -450,10 +450,30 @@
       "mime": "text/javascript; charset=utf-8",
       "sha256": "32a94d159fec4ad46489552205e09ac3763ec0e234bb5f50cd8b5df8fa185d7d"
     },
+    "html/map_borders.js": {
+      "bytes": 90352,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "e1c1efa63a41b00a03b70228830604268701f409cee2df175da9beafe91032ca"
+    },
+    "html/map_projection.js": {
+      "bytes": 6117,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "dce5aaac91032b8b1adf86edb5f05c3ef095852136952dd49e46d9265df59afb"
+    },
     "html/module.js": {
       "bytes": 2942,
       "mime": "text/javascript; charset=utf-8",
       "sha256": "884ea2b3e0312b660d13517ae33cb7cb5cf6c60fd602f7dee624543bfac9cde2"
+    },
+    "html/outline_map.css": {
+      "bytes": 3118,
+      "mime": "text/css; charset=utf-8",
+      "sha256": "0994665737fa9c49581af20d7addc570e99077c33f6a76ef00e180d9ecc773c9"
+    },
+    "html/outline_map.js": {
+      "bytes": 16236,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "c2b5595a2d6d3c9b48952efb86e43ab3139726c13bafbd1aadbfe1aef8842c6b"
     },
     "html/overlay.css": {
       "bytes": 17329,

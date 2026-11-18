@@ -178,7 +178,9 @@
         [CLIMATE + "design_temperatures"]: { status: "completed", value: this.climateDesign() },
         [CLIMATE + "summary"]: { status: "completed", value: { site: this.climateSite().state,
           design_temperatures: { state: this.climateDesign().state, warning: this.climateDesign().warning },
-          climate: { state: "none", origin: null, verdict: null, edited: false } } },
+          climate: this.climate.station ? { state: "complete", origin: "station",
+            verdict: this.limitCheck(this.climate.site).verdict, edited: false } :
+            { state: "none", origin: null, verdict: null, edited: false } } },
         [ATTACHED]: { status: "completed", code: "ok", revision: this.revision,
           value: { records: JSON.parse(JSON.stringify(this.attachedZones)), next_cursor: null,
             total: this.attachedZones.length } }
@@ -961,11 +963,41 @@
   Host.prototype.climateQuery = function (payload) {
     var host = this;
     this.window.setTimeout(function () {
-      var outcome = payload.name === CLIMATE + "site.geolocation" ?
-        { status: "completed", revision: host.revision, value: JSON.parse(JSON.stringify(host.climate.geolocation)) } :
+      var value = payload.name === CLIMATE + "site.geolocation" ? JSON.parse(JSON.stringify(host.climate.geolocation)) :
+        payload.name === CLIMATE + "climate.get" ? host.climateRecord() :
+          payload.name === CLIMATE + "site.preview_limit_check" ? { limit_check: host.limitCheck(payload.params) } :
+            null;
+      var outcome = value ? { status: "completed", revision: host.revision, value: value } :
         refused("operation.unknown", "The preview does not answer " + payload.name + ".", host.revision);
       host.publish("query.result", { request_id: payload.request_id, session: payload.session, outcome: outcome });
     }, 0);
+  };
+  /* The fixture's station as climate.get gives it, its values reduced to what Set Location reads, or none. */
+  Host.prototype.climateRecord = function () {
+    var station = this.climate.station;
+    if (!station) return { state: "none", climate: null, missing: [], edited_cells: [], limit_check: null };
+    return { state: "complete", missing: [], edited_cells: [], limit_check: this.limitCheck(this.climate.site),
+      climate: { id: "preview-climate", values: { name: station.name, station_latitude_deg: station.latitude_deg,
+        station_longitude_deg: station.longitude_deg, station_elevation_m: station.elevation_m } } };
+  };
+  /* Phius's limit check at a site, as features/climate/climate/limit_check.rb works it out. */
+  Host.prototype.limitCheck = function (site) {
+    var station = this.climate.station, radians = Math.PI / 180;
+    if (!station) return null;
+    if (site.latitude_deg === null || site.longitude_deg === null || site.elevation_m === null) {
+      return { verdict: "not_checked", reason: "no_site", distance_km: null, elevation_difference_m: null,
+        distance_ok: null, elevation_ok: null };
+    }
+    var halfLat = (station.latitude_deg - site.latitude_deg) * radians / 2;
+    var halfLon = (station.longitude_deg - site.longitude_deg) * radians / 2;
+    var h = Math.pow(Math.sin(halfLat), 2) + Math.cos(site.latitude_deg * radians) *
+      Math.cos(station.latitude_deg * radians) * Math.pow(Math.sin(halfLon), 2);
+    var distance = 2 * 6371.0088 * Math.asin(Math.sqrt(Math.min(h, 1)));
+    var elevation = Math.abs(site.elevation_m - station.elevation_m);
+    // The same limits and floating-point slack as the Ruby.
+    var distanceOk = distance <= 80.4672 + 1e-12, elevationOk = elevation <= 121.92 + 1e-9;
+    return { verdict: distanceOk && elevationOk ? "pass" : "fail", reason: null, distance_km: distance,
+      elevation_difference_m: elevation, distance_ok: distanceOk, elevation_ok: elevationOk };
   };
   Host.prototype.climateAction = function (payload) {
     var target = payload.name === CLIMATE + "site.update" ? this.climate.site :
