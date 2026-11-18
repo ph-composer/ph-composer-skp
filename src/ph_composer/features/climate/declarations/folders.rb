@@ -2,7 +2,8 @@
 
 module PhComposer
   module Climate
-    # The climate data folders on this computer: one query and five setup commands under the `setup` grant.
+    # The climate data folders on this computer: one query and five setup commands under the `setup` grant, and
+    # the Setup view's entry that opens the panel's dialog for them.
     # None touches a Model, adds an Undo step or advances a session revision. Add and Locate need the user to
     # choose the folder (Declarations::Approval), so a scripted caller without an approved location is refused
     # and the path never travels in params, a result or the log.
@@ -48,6 +49,8 @@ module PhComposer
       }).freeze
       BY_ID = Shapes.object({ "id" => FOLDER_ID }).freeze
       EXAMPLE_ID = "climate_folder_AbCdEf123456"
+      # The Setup view's entry and its Extensions menu item open the dialog, which is in the Climate tab.
+      OPEN_DIALOG = { "open" => "climate_data" }.freeze
 
       module_function
 
@@ -60,6 +63,18 @@ module PhComposer
                       :examples => [{}]) { |_request| Folders::Operations.list }
         install_chosen(feature)
         install_by_id(feature)
+        install_setup_entry(feature)
+      end
+
+      # Climate Data on This Computer in the Setup view, with how many folders and stations there are. Not in
+      # the viewport's right-click menu: it has nothing to do with what is under the pointer.
+      def install_setup_entry(feature)
+        summary = ->(_session) { Folders::Operations.setup_summary }
+        feature.menu_item("#{FEATURE_ID}.data.open", :label => "Climate Data on This Computer…", :menu => "Climate",
+                                                     :available => ->(_read) { false }, :in_setup => true,
+                                                     :summary => summary) do |session|
+          session.open_in_panel(FEATURE_ID, OPEN_DIALOG)
+        end
       end
 
       # The two commands that take a folder the user chooses.

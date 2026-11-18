@@ -19,7 +19,6 @@ module PhComposer
     REFRESH_EVENTS = %i[
       session_created transaction_committed transaction_undone transaction_redone active_path_changed
     ].freeze
-    MAX_PENDING_NOTICES = 20
     # Once a request id has been forgotten, an id the host does not hold may have been received and run.
     FORGOTTEN = Outcome.build(
       "refused", "request.outcome_unavailable",
@@ -57,6 +56,7 @@ module PhComposer
 
         Sessions.on_refresh { |session| refresh(session) }
         Sessions.on_notice { |session, message, tone| notice(session, message, tone) }
+        Sessions.on_panel_open { |session, owner, intent| open_at(session, owner, intent) }
         REFRESH_EVENTS.each do |kind|
           Sessions.on_host_event(kind) { |session| session.request_refresh if showing?(session) }
         end
@@ -104,15 +104,16 @@ module PhComposer
       end
 
       # A session's notice reaches the open panel if it shows that session; otherwise it waits, bounded,
-      # until the panel next shows it. It never opens the panel.
+      # until the panel next shows it (PanelOutbox). It never opens the panel.
       def notice(session, message, tone)
-        item = { "session" => session.id, "message" => message.to_s, "tone" => tone.to_s }
-        if showing?(session)
-          publish("panel.notice", item)
-        else
-          pending_notices << item
-          pending_notices.shift while pending_notices.length > MAX_PENDING_NOTICES
-        end
+        deliver(session, "panel.notice", "session" => session.id, "message" => message.to_s, "tone" => tone.to_s)
+      end
+
+      # Shows the panel (a user command asked) and its page for `owner` with `intent`, now or once the page shows
+      # this session. The page finds the tab for `owner` itself, so nothing here names a feature or a tab.
+      def open_at(session, owner, intent)
+        show
+        deliver(session, "panel.navigate", "session" => session.id, "owner" => owner, "intent" => intent)
       end
 
       def reset_for_test
@@ -121,7 +122,6 @@ module PhComposer
         @ready = false
         @contexts = {}
         @sequences = {}
-        @pending_notices = []
         @development_scripts = []
       end
 
@@ -146,6 +146,7 @@ module PhComposer
 
         @dialog = nil
         @ready = false
+        PanelOutbox.forget_route
       end
 
       def receive(dialog, raw)
@@ -207,9 +208,11 @@ module PhComposer
         return publish("panel.snapshot", PanelPresence.empty_snapshot) unless session
 
         publish_snapshot(session)
-        delivered, waiting = pending_notices.partition { |item| item["session"] == session.id }
-        @pending_notices = waiting
-        delivered.each { |item| publish("panel.notice", item) }
+        PanelOutbox.take(session.id).each { |type, item| publish(type, item) }
+      end
+
+      def deliver(session, type, item)
+        showing?(session) ? publish(type, item) : PanelOutbox.hold(type, item)
       end
 
       # The active Model's session when the payload names it: the panel acts only on the Model it shows.
@@ -439,10 +442,6 @@ module PhComposer
 
       def publish(type, payload)
         @dialog&.execute_script(PanelMessages.script(type, payload))
-      end
-
-      def pending_notices
-        @pending_notices ||= []
       end
 
       def development_scripts

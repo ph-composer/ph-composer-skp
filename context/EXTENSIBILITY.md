@@ -890,6 +890,23 @@ regains focus, so a summary can be stale while another window is in front. A sum
 answers no text is logged and left out; the entry still shows. An entry is a static item with no
 `state`: an entries provider cannot be one, and a check mark or greyed state has no button to carry it.
 
+An entry whose window is a dialog in the panel opens it through the panel: its handler calls
+`session.open_in_panel(owner, intent)`, where `owner` is the feature id (or an operation name) the page
+registered with `panel.workedOn` and `intent` is a JSON object that page's `onNavigate` reads. The shell
+shows the panel, or brings it forward, and hands the page the intent once it shows that Model, so the same
+handler serves the Setup view and the Extensions menu with the panel closed. Ruby names no tab. Climate's
+entry is the example:
+
+```ruby
+feature.menu_item("ph_composer.climate.data.open", label: "Climate Data on This Computer…", menu: "Climate",
+                  available: ->(_read) { false }, in_setup: true,
+                  summary: ->(_session) { Folders::Operations.setup_summary }) do |session|
+  session.open_in_panel("ph_composer.climate", "open" => "climate_data")
+end
+```
+
+Only a user command opens the panel, so only a handler calls `open_in_panel`.
+
 It is not an operation. A menu item is already the user's own route, so the panel reaching it gives
 no one more, and nothing here is registered with `PhComposer::API`: no client can list or run a Setup
 entry. Setup a client should reach is a setup command.

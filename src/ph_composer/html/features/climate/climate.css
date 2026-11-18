@@ -45,6 +45,57 @@
 .climate-geolocation { margin: 12px 0; }
 .climate-geolocation-status { margin: 6px 0 0; color: var(--muted-strong); }
 .climate-geolocation-status:empty { display: none; }
+/* The Phius climate data pane's empty states: the actions in a row, a disabled one with its reason beside it. */
+.climate-empty-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.climate-later { display: inline-flex; align-items: center; gap: 2px; }
+/* Climate Data on This Computer: one row per folder in a table; below 1040 px, where the table's columns no longer
+   fit the dialog, each row stacks, each value after its label, so the dialog never scrolls sideways. */
+.climate-data-setup { width: min(1120px, calc(100vw - 32px)); }
+.climate-data-status { margin: 0 0 8px; color: var(--muted-strong); }
+.climate-data-status:empty { display: none; }
+.climate-data-status.is-warning { padding: 8px 10px; border-radius: var(--radius-md); background: var(--warning-surface);
+  color: var(--warning-ink); }
+.climate-data-list { margin: 0 0 8px; }
+.climate-data-failure { margin: 0; padding: 8px 10px; border-radius: var(--radius-md); background: var(--warning-surface);
+  color: var(--warning-ink); }
+.climate-data-table th, .climate-data-table td { text-align: left; }
+.climate-data-table .is-number { text-align: right; }
+.climate-data-table th:nth-child(1) { width: 170px; }
+.climate-data-table th:nth-child(3) { width: 200px; }
+.climate-data-table th:nth-child(4) { width: 76px; text-align: right; }
+.climate-data-table th:nth-child(5) { width: 64px; text-align: right; }
+.climate-data-table th:nth-child(6) { width: 190px; }
+.climate-data-table th:nth-child(7) { width: 156px; }
+.climate-data-location, .climate-data-not-read { color: var(--muted-strong); }
+.climate-data-line { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.climate-data-name-text { overflow: hidden; text-overflow: ellipsis; }
+.climate-data-rename { opacity: 0; }
+.climate-data-table tr:hover .climate-data-rename, .climate-data-rename:focus { opacity: 1; }
+.climate-data-name-editor { display: flex; align-items: center; gap: 2px; width: 100%; }
+.climate-data-name-input { flex: 1; min-width: 0; }
+.climate-data-chip { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: var(--text-sm); }
+.climate-data-chip.is-ok { background: var(--interaction-highlight-soft); color: var(--interaction-highlight); }
+.climate-data-chip.is-warning { background: var(--warning-surface-alt); color: var(--warning-ink); }
+.climate-data-row-actions { gap: 6px; justify-content: flex-end; }
+.climate-data-notes .climate-dialog-note { color: var(--muted-strong); }
+.climate-data-notes:not(:empty) { margin: 0 0 8px; }
+.climate-data-kept { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 12px 0;
+  padding: 12px 14px; border-radius: var(--radius-md); background: var(--surface-alt); font-size: var(--text-sm); }
+.climate-data-kept dt { font-weight: 600; }
+.climate-data-kept dd { margin: 0; color: var(--muted-strong); }
+@media (max-width: 1040px) {
+  .climate-data-table, .climate-data-table tbody, .climate-data-table tr, .climate-data-table td { display: block;
+    width: auto; }
+  .climate-data-table thead { display: none; }
+  .climate-data-table tr { padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .climate-data-table td { height: auto; padding: 2px 0; border: 0; white-space: normal; text-align: left; }
+  .climate-data-table td.is-number { text-align: left; }
+  .climate-data-table td[data-label]::before { content: attr(data-label) ": "; color: var(--muted); }
+  .climate-data-name { font-weight: 600; }
+  .climate-data-rename { opacity: 1; }
+  .climate-data-row-actions { justify-content: flex-start; padding-top: 6px; }
+  .climate-data-kept { grid-template-columns: 1fr; }
+}
 @media (max-width: 700px) {
   .climate-layout { flex-direction: column; gap: 12px; }
   .climate-content { width: 100%; }

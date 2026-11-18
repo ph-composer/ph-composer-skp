@@ -427,7 +427,9 @@ active), `panel.setup_entries` and `panel.setup_open` (the Setup view's entries,
 `shell/setup_entries.rb`), `action.invoke`, `action.status`, `view.invoke`, `setup.invoke`, `query.invoke`, `file_export.invoke`, `preferences.set` and the shell's Export command (`export.start`,
 `export.preflight`, `export.status`, `export.cancel`, `export.latest`) inbound; `panel.snapshot`,
 `action.result`, `view.result`, `setup.result`, `query.result`, `file_export.result`,
-`preferences.result`, `export.result`, `panel.notice`, `panel.setup` and `panel.failure` outbound. Ruby refuses an inbound type or payload key the table does not declare and answers with
+`preferences.result`, `export.result`, `panel.notice`, `panel.setup`, `panel.navigate` (a native route's
+request to show the page where an owner's operations are worked on, with an intent: `Panel.open_at`) and
+`panel.failure` outbound. Ruby refuses an inbound type or payload key the table does not declare and answers with
 `panel.failure`; it refuses to publish an undeclared outbound key. `tests/panel_messages_test.rb`
 reads the page sources and fails when the page sends or handles a type the table does not declare.
 

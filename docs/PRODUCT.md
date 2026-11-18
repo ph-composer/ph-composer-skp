@@ -28,6 +28,36 @@ Values follow the IP and SI switch and are stored in SI. The **Phius climate dat
 the state of the Model's climate; choosing a station from this tab comes in a later version, and
 the **Hourly weather file** card is planned.
 
+## Set up climate data on this computer
+
+PH-Composer includes no climate data. Phius licenses its climate files to you, so they stay on
+your computer, and PH-Composer reads them where you keep them. It copies nothing and shares
+nothing: your licence covers your own use of the files, and PH-Composer never sends them anywhere.
+
+Open **Climate Data on This Computer** from the Climate tab's page header, or from the Setup view
+behind the gear at the right end of the tab row, where its line says how many folders and stations
+there are. With no folder set up, the **Phius climate data** card offers **Choose Climate Data
+Folder** as well.
+
+1. Choose **Add Folder** and pick the folder that holds your Phius station files. Subfolders are
+   read too; a station's state is the name of the folder its file sits in.
+2. Type the dataset name. It starts as the folder's own name, and it is the name the Model and the
+   Export report show.
+3. Each folder's row shows where it is, the format found, the number of stations and states, and
+   the files it did not read, by kind. A folder that also holds spreadsheets or other files is not
+   at fault: those are counted and left alone.
+
+The counts are read each time the dialog opens, so a file you add or change shows up the next time,
+with nothing to rescan or import. A folder that cannot be found, because it moved or is on a drive
+that is not connected, keeps its row: **Locate** points the setting at its new place, and
+**Remove** forgets it. Its stations are left out of the station picker until then. PH-Composer
+never removes a folder setting itself, and removing one never changes a Model.
+
+What is kept where: each folder's location and dataset name in a PH-Composer settings file in your
+user folder, outside SketchUp's own folders, so every SketchUp version on this computer reads it;
+the station files, read when they are needed; and in a Model, only the station you attach, never a
+folder location. Climate data folders are available on macOS for now.
+
 ## Make Zones and classify the envelope
 
 1. Select a Group or loose geometry. Right-click and choose **PH-Composer > Make Zone**. Each

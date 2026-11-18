@@ -1,7 +1,7 @@
 # P4c-07: The outline map
 
 DATE: 2026-11-17
-STATUS: Implemented on branch `feature/climate-p4c-07`, PR #518, 2026-11-18; CM07 agent run Pass on `3a48fef3`, Ed's verification pass pending. Authorized with every Climate stage on 2026-11-17 ([STATUS](../STATUS.md#authorization)).
+STATUS: Merged to main through PR #518 (`eca138d9`), 2026-11-18; CM07 agent run Pass on `3a48fef3`, Ed's verification pass pending. Authorized with every Climate stage on 2026-11-17 ([STATUS](../STATUS.md#authorization)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
 

@@ -1120,6 +1120,27 @@
   FIXTURES.climatestation = { parts: [], climate: { site: FIXTURES.climateset.climate.site,
     station: { name: "Northfield Regional", latitude_deg: 42.82, longitude_deg: -73.62, elevation_m: 90 } } };
 
+  // Climate Data on This Computer and the Phius pane's empty states (P4c-08): synthetic folders, never a licensed
+  // dataset's name, location or counts. `climatedata` has a found folder and one not found, and no site;
+  // `climateready` adds the site. The chooser hands Add Folder a third folder.
+  function climateFolder(id, name, location, stations, states, notRead) {
+    var total = notRead.reduce(function (sum, kind) { return sum + kind.count; }, 0);
+    return { id: "climate_folder_" + id, name: name, display_location: location, found: true,
+      format: stations ? "phius_station_file" : null, station_count: stations, state_count: states,
+      files_not_read: notRead, files_not_read_total: total, complete: true };
+  }
+  var PREVIEW_FOLDERS = [climateFolder("previewaaaaa", "Preview Stations", "~/Climate/Preview Stations", 1007, 51,
+    [{ extension: ".xls", count: 1150 }, { extension: ".db", count: 4 }]),
+  { id: "climate_folder_previewbbbbb", name: "Custom sets", display_location: "~/Climate/Custom", found: false,
+    format: null, station_count: null, state_count: null, files_not_read: null, files_not_read_total: null,
+    complete: null }];
+  var PREVIEW_CHOOSER = [climateFolder("previewccccc", "Sheets", "Climate Drive/Sheets", 0, 0,
+    [{ extension: ".xlsx", count: 12 }])];
+  FIXTURES.climate.climate.chooser = PREVIEW_CHOOSER;
+  FIXTURES.climatedata = { parts: [], climate: { folders: PREVIEW_FOLDERS, chooser: PREVIEW_CHOOSER } };
+  FIXTURES.climateready = { parts: [], climate: { site: FIXTURES.climateset.climate.site,
+    folders: PREVIEW_FOLDERS.slice(0, 1), lastDatasetId: PREVIEW_FOLDERS[0].id, chooser: PREVIEW_CHOOSER } };
+
   global.PhComposerPreviewFixtures = {
     names: Object.keys(FIXTURES),
     fromQuery: function (search) {

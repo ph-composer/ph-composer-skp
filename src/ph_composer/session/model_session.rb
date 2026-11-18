@@ -191,6 +191,14 @@ module PhComposer
       Sessions.notify_notice(self, message, tone)
     end
 
+    # Opens the panel on the page where `owner`'s operations are worked on (an operation name or its
+    # prefix, such as a feature id) and hands that page `intent`, a JSON object it reads. For a native
+    # menu item whose window is a dialog in the panel; only a user command calls it, because it opens
+    # or raises the panel.
+    def open_in_panel(owner, intent = {})
+      Sessions.notify_panel_open(self, owner.to_s, intent)
+    end
+
     def request_refresh
       return if @detached
 
