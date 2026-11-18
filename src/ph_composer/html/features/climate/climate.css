@@ -1,4 +1,4 @@
-/* The Climate tab (features/climate/): source cards beside one pane, and the Set Location dialog. At narrow widths
+/* The Climate tab (features/climate/): source cards beside one pane, Set Location and the station picker. At narrow widths
    the cards become a select above the pane (source_cards.css), so the layout stacks. */
 .climate-layout { display: flex; gap: 20px; align-items: flex-start; }
 .climate-content { flex: 1; min-width: 0; }
@@ -83,6 +83,36 @@
   padding: 12px 14px; border-radius: var(--radius-md); background: var(--surface-alt); font-size: var(--text-sm); }
 .climate-data-kept dt { font-weight: 600; }
 .climate-data-kept dd { margin: 0; color: var(--muted-strong); }
+/* Set Phius climate data (picker.js): the map beside the station list, the selected station's verdict under both. */
+.climate-picker { width: min(1120px, calc(100vw - 32px)); }
+.climate-picker-summary { margin: -8px 0 0; }
+.climate-picker-controls { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; min-width: 0; }
+/* A long dataset name shortens its select rather than widening the dialog. */
+.phc-form-dialog .climate-picker-controls label { flex: 0 1 auto; flex-direction: row; align-items: center; gap: 6px;
+  min-width: 0; max-width: 100%; }
+.phc-form-dialog .climate-picker-controls select { flex: 0 1 auto; width: auto; min-width: 0; max-width: 100%;
+  text-overflow: ellipsis; }
+.climate-picker-controls .phc-inventory-controls { flex: 1 1 200px; min-width: 0; margin: 0; }
+.climate-picker-notice { margin: 0; padding: 8px 10px; border-radius: var(--radius-md);
+  background: var(--warning-surface); color: var(--warning-ink); }
+.climate-picker-notice[hidden] { display: none; }
+.climate-picker-body { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 5fr); gap: 16px; }
+.climate-picker-body .phc-outline-map, .climate-picker-list { height: 340px; }
+/* Its own stacking context, so the table's sticky header stays under the dialog's sticky Cancel and Attach. */
+.climate-picker-list { overflow: auto; border: 1px solid var(--line); border-radius: var(--radius-md);
+  isolation: isolate; }
+.climate-picker-list .climate-picker-station { min-height: 0; padding: 0; border: 0; background: none; color: inherit;
+  font: inherit; text-align: left; cursor: pointer; }
+.climate-picker-list td .climate-data-chip { margin-left: 6px; }
+.climate-picker-tip { display: flex; flex-direction: column; gap: 2px; }
+.climate-picker-selection { min-width: 0; }
+.climate-picker-selection p { margin: 0 0 6px; }
+.climate-picker-selection .climate-picker-warning { padding: 8px 10px; border-radius: var(--radius-md);
+  background: var(--warning-surface); color: var(--warning-ink); }
+/* Replace's Now and New facts keep their widths and scroll sideways inside their own box at narrow sizes. */
+.climate-picker-compare-scroll { margin: 0 0 8px; overflow-x: auto; }
+.climate-picker-selection .climate-picker-compare { width: auto; min-width: 100%; table-layout: auto; }
+.climate-picker-compare th, .climate-picker-compare td { text-align: left; white-space: nowrap; }
 @media (max-width: 1040px) {
   .climate-data-table, .climate-data-table tbody, .climate-data-table tr, .climate-data-table td { display: block;
     width: auto; }
@@ -104,6 +134,13 @@
 @media (max-width: 760px) {
   .climate-set-location-body { grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .climate-set-location-body .phc-outline-map { height: 220px; }
+}
+/* Below 900 px, where the list's columns no longer fit beside the map, the map sits above the list, both shorter;
+   the dialog scrolls to Attach. */
+@media (max-width: 900px) {
+  .climate-picker-body { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .climate-picker-body .phc-outline-map { height: 220px; }
+  .climate-picker-list { height: 240px; }
 }
 @media (max-width: 500px) {
   .climate-design-fields, .climate-site-fields, .climate-export-fields { grid-template-columns: 1fr; }

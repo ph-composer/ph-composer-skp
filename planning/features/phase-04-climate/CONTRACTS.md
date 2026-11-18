@@ -280,6 +280,9 @@ The refusals are `climate.site_not_set`, `climate.folder_not_found`, `climate.st
 and `climate.station_unreadable`. The reader's exact rules are in `context/CONTRACTS.md`, "The
 Phius station reader".
 
+Amended at P4c-09, 2026-11-18. `stations.all` (API 1.68) answers `stations.list`'s rows for one folder
+in one unbounded read, for the station picker (D4c-30). Agents page `stations.list`.
+
 ## 7. Export: the `Site` section (P4c-05)
 
 honeybee-ph holds `Site` on each `BldgSegment`, builds a default one for every segment and always

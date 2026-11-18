@@ -10467,6 +10467,187 @@ Example params:
 }
 ```
 
+### `ph_composer.climate.stations.all`
+
+Every station of one climate data folder in one read, nearest first, for the station picker. Scripts page ph_composer.climate.stations.list instead. Owner: `ph_composer.climate`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.climate.stations.list` instead.
+
+Refuses: `climate.folder_not_found`, `climate.settings_unavailable`, `climate.settings_unreadable`, `climate.site_not_set`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "folder_id"
+  ],
+  "properties": {
+    "folder_id": {
+      "type": "string",
+      "description": "A climate data folder's id, from folders.list."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "folder_id",
+    "dataset_name",
+    "complete",
+    "total",
+    "stations"
+  ],
+  "properties": {
+    "folder_id": {
+      "type": "string",
+      "description": "A climate data folder's id, from folders.list."
+    },
+    "dataset_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "description": "The dataset name the Model and the Export report show."
+    },
+    "complete": {
+      "type": "boolean",
+      "description": "false when the folder was too large or deep to read whole, or part of it could not be listed."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    },
+    "stations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "name",
+          "state",
+          "latitude_deg",
+          "longitude_deg",
+          "elevation_m",
+          "limit_check"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "The station's key from stations.list: its file's path inside the climate data folder, such as NY/STATION-mon.txt."
+          },
+          "name": {
+            "type": "string",
+            "description": "The station's name as its file's header gives it."
+          },
+          "state": {
+            "type": "string",
+            "description": "The name of the folder the file sits in."
+          },
+          "latitude_deg": {
+            "type": "number",
+            "x-unit": "deg"
+          },
+          "longitude_deg": {
+            "type": "number",
+            "x-unit": "deg"
+          },
+          "elevation_m": {
+            "type": "number",
+            "x-unit": "m",
+            "description": "Height above sea level."
+          },
+          "limit_check": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "verdict",
+              "reason",
+              "distance_km",
+              "elevation_difference_m",
+              "distance_ok",
+              "elevation_ok"
+            ],
+            "properties": {
+              "verdict": {
+                "type": "string",
+                "enum": [
+                  "pass",
+                  "fail",
+                  "not_checked"
+                ],
+                "description": "pass at or inside both Phius limits, 50 miles and 400 feet; not_checked gives its reason."
+              },
+              "reason": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "no_site",
+                  "no_station_coordinates",
+                  null
+                ],
+                "description": "Why the check did not run; null when it did."
+              },
+              "distance_km": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "km",
+                "description": "Great-circle distance from the site to the station."
+              },
+              "elevation_difference_m": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "m",
+                "description": "The site's elevation less the station's, as a magnitude."
+              },
+              "distance_ok": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "elevation_ok": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              }
+            },
+            "description": "The Phius limit check, worked out from the site and the station each time and never stored."
+          }
+        }
+      },
+      "description": "Nearest first, then by key."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "folder_id": "climate_folder_AbCdEf123456"
+}
+```
+
 ### `ph_composer.climate.stations.list`
 
 One climate data folder's Phius stations, nearest the Model's site first, each with its distance, elevation difference and Phius verdict. Paged; refuses climate.site_not_set with no site. Owner: `ph_composer.climate`.
@@ -77952,3 +78133,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.65 | 2026-11-18 | The Phius station reader. ph_composer.climate.folders.list gives each folder's format, station and state counts and files not read by extension; ph_composer.climate.stations.list pages one folder's stations nearest the site first with each one's Phius limit check; climate.attach_station and climate.replace_station take a folder id and a station key and read the file in Ruby; climate.source_status says whether the attached station's file is on this computer. climate.site_not_set, climate.station_not_found and climate.station_unreadable are new. A station climate's provenance station_name is its file name's stem. |
 | 1.66 | 2026-11-18 | The Site export section. ph_composer.climate.export_preflight is new and answers the export findings climate.incomplete, climate.zone_not_set, climate.utc_offset_not_set, climate.outside_phius_limits and climate.not_checked, which are new, and climate.site_not_set; none blocks the export. The export writes the site and a complete climate as honeybee-ph's Site on every Building Segment. |
 | 1.67 | 2026-11-18 | ph_composer.climate.site.geolocation is new: what SketchUp reports for the Model's geolocation, latitude and longitude only when SketchUp reports the Model geolocated, and no elevation or offset. The snapshot sections ph_composer.climate.site and ph_composer.climate.design_temperatures carry the site and design-temperature reads for the Climate tab. |
+| 1.68 | 2026-11-18 | ph_composer.climate.stations.all is new: one climate data folder's stations in one unbounded read, nearest the site first, in stations.list's rows, for the station picker; scripts page stations.list. |

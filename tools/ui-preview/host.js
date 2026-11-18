@@ -983,8 +983,10 @@
         payload.name === CLIMATE + "climate.get" ? host.climateRecord() :
         payload.name === CLIMATE + "folders.list" ? host.climateFolders() :
           payload.name === CLIMATE + "site.preview_limit_check" ? { limit_check: host.limitCheck(payload.params) } :
-            null;
-      var outcome = value ? { status: "completed", revision: host.revision, value: value } :
+            payload.name === CLIMATE + "stations.all" ? host.climateStations(payload.params.folder_id) :
+              payload.name === CLIMATE + "climate.source_status" ? host.climateSource() : null;
+      var outcome = value && value.status === "refused" ? value : value ? { status: "completed",
+        revision: host.revision, value: value } :
         refused("operation.unknown", "The preview does not answer " + payload.name + ".", host.revision);
       host.publish("query.result", { request_id: payload.request_id, session: payload.session, outcome: outcome });
     }, 0);
@@ -1006,6 +1008,8 @@
         "computer. Nothing was written.", this.revision);
     } else if (verb === "add") {
       folders.push(chosen); outcome = { status: "completed", value: JSON.parse(JSON.stringify(chosen)) };
+    } else if (verb === "remember_dataset") {
+      this.climate.lastDatasetId = row.id; outcome = { status: "completed", value: this.climateFolders() };
     } else if (verb === "remove") {
       this.climate.folders = folders.filter(function (folder) { return folder !== row; });
       outcome = { status: "completed", value: this.climateFolders() };
@@ -1020,17 +1024,41 @@
         outcome: Object.assign({ revision: host.revision }, outcome) });
     }, this.climate.setupDelayMs || 0);
   };
+  /* stations.all over the fixture's invented stations, each checked against the site, nearest first; refused as
+     the host refuses with no site. */
+  Host.prototype.climateStations = function (folderId) {
+    var host = this, site = this.climate.site;
+    var folder = this.climate.folders.filter(function (row) { return row.id === folderId; })[0];
+    if (site.latitude_deg === null) return refused("climate.site_not_set", "Set the site first.", this.revision);
+    if (!folder) return refused("climate.folder_not_found", "That folder is not on this computer.", this.revision);
+    var rows = (this.climate.stations || []).map(function (station) {
+      return Object.assign({}, station, { limit_check: host.limitCheck(site, station) });
+    }).sort(function (a, b) { return a.limit_check.distance_km - b.limit_check.distance_km; });
+    return { folder_id: folder.id, dataset_name: folder.name, complete: true, total: rows.length, stations: rows };
+  };
+  /* The attached station is found in the first folder when it came from the fixture's list. */
+  Host.prototype.climateSource = function () {
+    var station = this.climate.station, folder = this.climate.folders[0];
+    if (!station) return { status: "not_applicable", folder_id: null, station_key: null };
+    return station.key && folder ? { status: "found", folder_id: folder.id, station_key: station.key } :
+      { status: "not_on_this_computer", folder_id: null, station_key: null };
+  };
   /* The fixture's station as climate.get gives it, its values reduced to what Set Location reads, or none. */
   Host.prototype.climateRecord = function () {
     var station = this.climate.station;
     if (!station) return { state: "none", climate: null, missing: [], edited_cells: [], limit_check: null };
-    return { state: "complete", missing: [], edited_cells: [], limit_check: this.limitCheck(this.climate.site),
-      climate: { id: "preview-climate", values: { name: station.name, station_latitude_deg: station.latitude_deg,
-        station_longitude_deg: station.longitude_deg, station_elevation_m: station.elevation_m } } };
+    var edited = Array.from({ length: this.climate.edited || 0 }, function (_, i) {
+      return { row: "air_c", column: i };
+    });
+    return { state: "complete", missing: [], edited_cells: edited, limit_check: this.limitCheck(this.climate.site),
+      climate: { id: "preview-climate", values: { name: station.name, origin: "station",
+        station_latitude_deg: station.latitude_deg,
+        station_longitude_deg: station.longitude_deg, station_elevation_m: station.elevation_m,
+        provenance: { dataset_name: station.key ? this.climate.folders[0].name : null } } } };
   };
   /* Phius's limit check at a site, as features/climate/climate/limit_check.rb works it out. */
-  Host.prototype.limitCheck = function (site) {
-    var station = this.climate.station, radians = Math.PI / 180;
+  Host.prototype.limitCheck = function (site, of) {
+    var station = of || this.climate.station, radians = Math.PI / 180;
     if (!station) return null;
     if (site.latitude_deg === null || site.longitude_deg === null || site.elevation_m === null) {
       return { verdict: "not_checked", reason: "no_site", distance_km: null, elevation_difference_m: null,
@@ -1048,6 +1076,7 @@
       elevation_difference_m: elevation, distance_ok: distanceOk, elevation_ok: elevationOk };
   };
   Host.prototype.climateAction = function (payload) {
+    if (/\.(attach|replace)_station$/.test(payload.name)) return this.climateAttach(payload);
     var target = payload.name === CLIMATE + "site.update" ? this.climate.site :
       payload.name === CLIMATE + "design_temperatures.update" ? this.climate.design : null;
     var values = payload.params.values || {}, expected = payload.params.expected_values || {};
@@ -1070,6 +1099,21 @@
     this.revision++;
     return { status: "completed", effect: "committed", revision: this.revision,
       value: target === this.climate.site ? this.climateSite() : this.climateDesign() };
+  };
+
+  /* Attach and Replace: the named station becomes the Model's climate, refused as the host refuses. */
+  Host.prototype.climateAttach = function (payload) {
+    var replacing = /replace_station$/.test(payload.name), key = payload.params.station_key;
+    var station = (this.climate.stations || []).filter(function (row) { return row.key === key; })[0];
+    if (Boolean(this.climate.station) !== replacing) {
+      return refused(replacing ? "climate.not_found" : "target.changed", "The Model's climate changed. " +
+        NOTHING_WRITTEN, this.revision);
+    }
+    if (!station) return refused("climate.station_not_found", "No station file with that key is in the climate " +
+      "data folder now. " + NOTHING_WRITTEN, this.revision);
+    this.climate.station = station; this.climate.edited = 0;
+    this.revision++;
+    return { status: "completed", effect: "committed", revision: this.revision, value: {} };
   };
 
   Host.prototype.libraryQuery = function (payload) {

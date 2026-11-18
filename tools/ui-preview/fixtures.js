@@ -1141,6 +1141,32 @@
   FIXTURES.climateready = { parts: [], climate: { site: FIXTURES.climateset.climate.site,
     folders: PREVIEW_FOLDERS.slice(0, 1), lastDatasetId: PREVIEW_FOLDERS[0].id, chooser: PREVIEW_CHOOSER } };
 
+  // The station picker (P4c-09): 1,007 invented stations in eight invented states around the site, a few hundred
+  // km across, so some pass and most fail. `climatepicker` has none attached; `climatereplace` has the nearest
+  // attached, with two edited values. Every name and place is made up.
+  function previewStations() {
+    var states = ["XA", "XB", "XC", "XD", "XE", "XF", "XG", "XH"], rows = [], seed = 7;
+    function next() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+    for (var i = 0; i < 1007; i += 1) {
+      var state = states[i % states.length], name = "Station " + state + " " + (100 + i);
+      rows.push({ key: state + "/STATION_" + (100 + i) + "-mon.txt", name: name, state: state,
+        latitude_deg: Math.round((42.75 + (next() - 0.5) * 6) * 1000) / 1000,
+        longitude_deg: Math.round((-73.8 + (next() - 0.5) * 8) * 1000) / 1000,
+        elevation_m: Math.round(next() * 600) });
+    }
+    return rows;
+  }
+  var PREVIEW_STATIONS = previewStations();
+  FIXTURES.climatepicker = { parts: [], climate: { site: FIXTURES.climateset.climate.site,
+    folders: [PREVIEW_FOLDERS[0], climateFolder("previewddddd", "Invented Second Station Set With a Long Name",
+      "~/Climate/Second Set", 1007, 8, [])],
+    lastDatasetId: PREVIEW_FOLDERS[0].id, stations: PREVIEW_STATIONS } };
+  FIXTURES.climatereplace = { parts: [], climate: Object.assign({}, FIXTURES.climatepicker.climate, {
+    station: PREVIEW_STATIONS.slice().sort(function (a, b) {
+      return Math.hypot(a.latitude_deg - 42.75, a.longitude_deg + 73.8) -
+        Math.hypot(b.latitude_deg - 42.75, b.longitude_deg + 73.8);
+    })[0], edited: 2 }) };
+
   global.PhComposerPreviewFixtures = {
     names: Object.keys(FIXTURES),
     fromQuery: function (search) {

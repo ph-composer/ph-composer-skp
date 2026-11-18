@@ -25,7 +25,7 @@ the left show each part's state; at a narrow panel width they become one list ab
    warning. The design temperatures stay in the Model; export does not wait on them.
 
 Values follow the IP and SI switch and are stored in SI. The **Phius climate data** card shows
-the state of the Model's climate; choosing a station from this tab comes in a later version, and
+the state of the Model's climate and opens the station picker (see "Choose a Phius station"), and
 the **Hourly weather file** card is planned.
 
 ## Set up climate data on this computer
@@ -57,6 +57,34 @@ What is kept where: each folder's location and dataset name in a PH-Composer set
 user folder, outside SketchUp's own folders, so every SketchUp version on this computer reads it;
 the station files, read when they are needed; and in a Model, only the station you attach, never a
 folder location. Climate data folders are available on macOS for now.
+
+## Choose a Phius station
+
+With a climate data folder set up and the site set, choose **Phius climate data**, then **Choose
+Station**. The picker shows every station of one dataset on the outline map and in a list, with
+each station's distance from the site, its elevation above or below the site, and a Pass or Fail
+result. It opens on the dataset of the station already attached, else the one you used last, sorted
+by distance, with State on All and the map framed on a 50 mile ring around the site.
+
+- **Dataset** changes the folder, and the picker opens on it next time. **State** narrows the list
+  and the map to one state folder, and the search field narrows them by name. **Find Nearest** goes
+  back to the opening view with the nearest station selected.
+- Click a station on the map or in the list to select it in both. Hover over a station on the map
+  for its name, distance, elevation difference and result. In the list, the arrow keys move the
+  selection.
+- Under the map and the list, the selected station is compared with both limits. **Attach** copies
+  its values into the Model, as one Undo step.
+
+A station passes when it is within 50 miles (80 km) of the site and within 400 feet (122 m) of the
+site's elevation. Outside either limit it fails. Both limits are Phius's (Certification Guidebook
+2024, section 1.4.4.2). A failing station can still be attached, with no extra step: the picker says
+before Attach that Phius asks for a custom dataset there unless an exception applies, and the card,
+the pane and the Export report then show the climate as outside the Phius limits. PH-Composer
+reports the result and does not approve or refuse a station; Phius decides.
+
+With a climate already in the Model, the pane offers **Replace Station**. The picker then shows the
+current and the selected station side by side, with their dataset, distance, elevation difference
+and result, and says how many edited values replacing would discard. **Replace** is one Undo step.
 
 ## Make Zones and classify the envelope
 

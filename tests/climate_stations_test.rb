@@ -153,6 +153,31 @@ class ClimateStationsTest < PhComposerTestCase
     assert_equal "query.cursor_expired", expired.fetch("code")
   end
 
+  # The station picker reads one folder whole in one call, past the bounded page's budget, in the list's order.
+  def test_stations_all_reads_every_station_in_one_call_unbounded_in_the_lists_order
+    id, path = add_folder("folder", "Phius A")
+    80.times do |index|
+      bytes = ClimateStationFiles.station_bytes(name: "Many #{index}", latitude: 41.0 + (index * 0.01),
+                                                elevation: 500.0, offset: 1.0)
+      FileUtils.mkdir_p(File.join(path, "XM"))
+      File.binwrite(File.join(path, "XM", "MANY_#{index}-mon.txt"), bytes)
+    end
+    no_site = query("stations.all", "folder_id" => id)
+    set_site
+
+    value = query("stations.all", "folder_id" => id).fetch("value")
+    paged = query("stations.list", "folder_id" => id).fetch("value")
+
+    assert_equal "climate.site_not_set", no_site.fetch("code")
+    assert_equal({ "bounded" => false, "prefer" => "#{PREFIX}.stations.list" },
+                 PhComposer::Registry.current.queries.fetch("#{PREFIX}.stations.all").response)
+    refute_nil paged.fetch("next_cursor"), "85 stations are more than one bounded page"
+    assert_equal ["Phius A", 85, true], value.values_at("dataset_name", "total", "complete")
+    assert_equal 85, value.fetch("stations").length
+    assert_equal paged.fetch("stations"), value.fetch("stations").first(paged.fetch("stations").length)
+    refute value.key?("next_cursor")
+  end
+
   def test_attach_copies_the_values_the_as_read_copy_the_source_and_the_wind_prefill_in_one_undo_step
     id, path = add_folder("folder", "Phius A")
     set_site

@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 67
+    MINOR = 68
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -372,7 +372,11 @@ module PhComposer
                     "geolocation, latitude and longitude only when SketchUp reports the Model geolocated, and no " \
                     "elevation or offset. The snapshot sections ph_composer.climate.site and " \
                     "ph_composer.climate.design_temperatures carry the site and design-temperature reads for the " \
-                    "Climate tab." }
+                    "Climate tab." },
+      { "minor" => 68, "date" => "2026-11-18",
+        "change" => "ph_composer.climate.stations.all is new: one climate data folder's stations in one unbounded " \
+                    "read, nearest the site first, in stations.list's rows, for the station picker; scripts page " \
+                    "stations.list." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

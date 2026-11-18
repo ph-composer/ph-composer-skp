@@ -905,7 +905,9 @@ The following public operations have panel-closed walkthroughs.
   its key, name, state, coordinates, elevation and limit check; `climate.attach_station` and
   `climate.replace_station` take a folder id and a station key, read the file in Ruby and write the
   climate in one Undo step each; `climate.source_status` matches the attached station by its file
-  name's stem and state across every folder, then by SHA-256. These reads walk folders the user chose
+  name's stem and state across every folder, then by SHA-256. `stations.all` (API 1.68) answers the
+  same rows in one unbounded read for the station picker, which shows every station; it declares
+  `response.bounded: false` and prefers `stations.list`, as the other panel reads do. These reads walk folders the user chose
   and are under `read`: they answer a station's name, state, coordinates and elevation, counts and a
   folder-relative key, never a monthly value or an absolute path, and a folder can only be listed
   after a `setup` grant or the user added it (architecture review, P4c-04). No call takes a

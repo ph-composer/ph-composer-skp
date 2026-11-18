@@ -1,9 +1,9 @@
 # P4c-09: The station picker
 
 DATE: 2026-11-17
-STATUS: Scoped. Not authorized.
+STATUS: Implemented on branch `feature/climate-p4c-09`, 2026-11-18 (PR #520); CM09 agent run Pass on `fab641b3`; Ed's pass pending. Authorized with every Climate stage on 2026-11-17 ([STATUS](../STATUS.md#authorization)).
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
 
 ## Entry and scope
 
@@ -88,3 +88,49 @@ dialog.
 ## Done when
 
 CM09 passes and the narrow layout is recorded.
+
+## Departures, 2026-11-18
+
+- **One read for the whole list** (D4c-30): the picker reads `stations.all`, new at API 1.68, not
+  `stations.list`. A 1,007-station folder is 19 bounded pages of `stations.list` at about 0.1 s each, and the
+  picker shows every station on one map. `stations.all` answers the same rows unpaged, declared
+  `response.bounded: false` with `stations.list` preferred, as the Zones and Thermal Bridges panel reads are.
+- **Entry check 1**: no separate reading state. The read is synchronous (D4c-21), so the list's empty line
+  says "Reading the stations…" until it answers. In Chrome with 1,007 invented stations the picker opened in
+  150 to 190 ms, a State filter took about 30 ms and a marker click about 12 ms
+  (`tools/ui-preview/climate_picker_checks.cjs`); the host's time is CM09's.
+- **Entry check 2** (D4c-29): below 900 px the map sits above the list, both shorter, and the dialog scrolls to
+  its sticky Cancel and Attach. Below 500 px the State column gives way to the name (the State filter stays);
+  at 360 px the list scrolls sideways inside itself to its Result column.
+- **Entry check 3**: no windowing. The table's own `rowHidden` narrows the 1,000 rows; rows are built once and
+  a selection repaints two rows and the markers.
+- **Test 7, read to D4c-06**: the station reads (`stations.all`) and the attach and replace carry no station
+  value beyond key, name, state, place and elevation. In Replace the picker also reads `climate.get` for the
+  lost edits, as step 8 and test 5 ask; that is the Model's own climate, not a station file read.
+- **Elevation difference**: the size is the host's limit check; its sign (+ above the site, − below) comes from
+  comparing the station's and the site's elevations, as boards 4 and 16 draw "+11 m" and "11 m higher".
+- **Replace before the attached pane**: P4c-10 builds the pane, but CM09 needs Replace now. The interim
+  attached pane gains a Replace Station button; P4c-10 replaces it. Update from File's entry is
+  `openPicker({ folder_id, station_key })`, tested and not yet wired.
+- **The limits in words** are said in miles and feet in both unit systems ("Within the Phius limits of 50 mi and
+  400 ft"), as Set Location says them (P4c-07); board 4 draws km and m. The list's result chip reads Pass or
+  Fail, as drawn; the hover tip says "Outside Phius limits", as the card does.
+- **The search** is the kit's filter field ("Search stations"); the boards draw none. A State column is in
+  the list as step 3 asks; the boards draw none.
+- The Phius pane's dataset rule moved to `shared.openingDataset`, so the pane and the picker name the same one.
+- **Cases the plan does not name**: a filter that hides the selected station selects the first station it
+  leaves, so Attach never takes a station the list and the map do not show; Enter in the search narrows and
+  never submits; the list is read again when the site changes, not on every revision; without a site the
+  interim Replace Station is disabled with its reason, as the picker needs the site.
+- **After the Codex review** (cycle 1): a change to the site or the Model while Attach or Replace is out is read
+  once it answers, and both wait for every read out, so a retry after `revision.stale` names the edits it would
+  discard; a search that matched nothing selects again when it matches; a folder not read whole
+  (`complete: false`) says so in the dialog; a dataset that could not be remembered says so; a station renamed in
+  its file shows its new name after a re-read.
+- **After the Codex review** (cycle 2): Replace's Now and New facts keep their widths and scroll sideways in their
+  own box at narrow sizes; a long dataset name shortens its select instead of widening the dialog (the preview's
+  second folder now has one); a climate replaced elsewhere while the picker is open moves the Attached mark. This
+  last fix merges unreviewed under the two-cycle cap.
+- **After a host smoke run** on `f94f816e`: the Attached chip was cut short in a 120 px Station column at 1280 px;
+  the column now starts at 190 px when the panel is wider than 500 px (120 px below). This fix also merges
+  unreviewed.

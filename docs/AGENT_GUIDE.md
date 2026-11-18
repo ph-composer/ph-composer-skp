@@ -548,7 +548,8 @@ To attach the nearest station that meets Phius's limits:
 3. Call `ph_composer.climate.stations.list` with that `folder_id`. Stations come nearest first, each
    with its `key`, `name`, `state`, coordinates, elevation and `limit_check`, in pages: pass
    `next_cursor` back as `cursor` for the next one. A cursor from before a site change is refused
-   with `query.cursor_expired`; start again from the first page.
+   with `query.cursor_expired`; start again from the first page. `stations.all` is the panel's
+   one-call read of the same rows, larger than one reply for a real folder.
 4. Take the first station whose `limit_check.verdict` is `pass` and call
    `ph_composer.climate.climate.attach_station` with `folder_id` and its `key` as `station_key`.
    A failing station can be attached too; the limit check then reads `fail` wherever it shows.
