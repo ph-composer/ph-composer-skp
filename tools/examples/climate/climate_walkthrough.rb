@@ -99,15 +99,13 @@ module ClimateWalkthrough
 
   # The agent guide's recipe: folders, then stations nearest first, then attach the first that passes. Reads
   # only what the list answers; the station's values go from its file to the Model inside PH-Composer.
-  def run_attach(folder_id)
+  def run_attach(folder_id, limit = nil)
     client = AuthoringExample::Client.new
     steps = []
     folders = client.query("#{PREFIX}.folders.list").fetch("value").fetch("folders")
     folder = folders.find { |row| row.fetch("id") == folder_id }
     steps << { "step" => "folder has stations", "passed" => folder.to_h.fetch("station_count", 0).to_i.positive? }
-    listed = client.query("#{PREFIX}.stations.list", "folder_id" => folder_id)
-    steps << { "step" => "stations.list", "passed" => listed["status"] == "completed", "code" => listed["code"] }
-    nearest = listed.dig("value", "stations").to_a.find { |row| row.dig("limit_check", "verdict") == "pass" }
+    nearest = nearest_passing(client, steps, folder_id, limit)
     steps << { "step" => "a station passes", "passed" => !nearest.nil? }
     return result(steps) unless nearest
 
@@ -119,6 +117,24 @@ module ClimateWalkthrough
     steps << { "step" => "source found", "passed" => status.values_at("status", "station_key") ==
                                                      ["found", nearest.fetch("key")] }
     result(steps)
+  end
+
+  # The first station that passes, following the pages nearest first: a nearer station may fail on elevation
+  # while a farther one on a later page passes. Nil when none passes or a page is refused.
+  def nearest_passing(client, steps, folder_id, limit = nil)
+    params = { "folder_id" => folder_id }
+    params["limit"] = limit if limit
+    loop do
+      page = client.query("#{PREFIX}.stations.list", params)
+      steps << { "step" => "stations.list", "passed" => page["status"] == "completed", "code" => page["code"] }
+      return nil unless page["status"] == "completed"
+
+      found = page.dig("value", "stations").find { |row| row.dig("limit_check", "verdict") == "pass" }
+      cursor = page.dig("value", "next_cursor")
+      return found if found || cursor.nil?
+
+      params = params.merge("cursor" => cursor)
+    end
   end
 
   # The site, the climate's state and source, its edited count, one value and its as-read copy, and the verdict,

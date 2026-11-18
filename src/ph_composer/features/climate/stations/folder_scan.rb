@@ -38,13 +38,17 @@ module PhComposer
           pending = [[root, [], File.basename(root)]]
           until pending.empty?
             folder, segments, state = pending.shift
-            children = list(folder, max_entries - entries)
+            children, enumerated = list(folder, max_entries - entries)
+            # Every entry read counts, hidden ones and those of a folder that failed part way.
+            entries += enumerated
             if children.nil?
               complete = false
+              # Past the budget nothing more is read anywhere; a folder that cannot be listed stops only itself.
+              break if entries >= max_entries
+
               next
             end
 
-            entries += children.length
             children.each do |name|
               path = File.join(folder, name)
               stat = File.lstat(path)
@@ -63,21 +67,22 @@ module PhComposer
           Scan.new(:stations => stations.sort_by(&:key), :not_read => not_read, :complete => complete)
         end
 
-        # The folder's visible children in name order, or nil when it cannot be listed or holds more than
-        # `budget` entries, hidden ones included. Names are counted as they are read, so a huge folder is never
-        # listed whole.
+        # [the folder's visible children in name order, how many entries were read]. The children are nil when
+        # the folder cannot be listed or holds more than `budget` entries, hidden ones included; then the count is
+        # the budget, so the walk stops. Names are counted as they are read, so a huge folder is never listed
+        # whole.
         def list(folder, budget)
           names = []
           count = 0
           Dir.each_child(folder) do |name|
             count += 1
-            return nil if count > budget
+            return [nil, budget] if count > budget
 
             names << name unless name.start_with?(".")
           end
-          names.sort
+          [names.sort, count]
         rescue SystemCallError, IOError
-          nil
+          [nil, count]
         end
 
         # The station a regular file is, or nil when it is not one.
@@ -86,7 +91,8 @@ module PhComposer
           stem = name.delete_suffix(PhiusStationFile::SUFFIX)
           return nil if stem == name || stem.empty? || stat.size > PhiusStationFile::MAX_BYTES
 
-          header = PhiusStationFile.header(File.binread(path))
+          # At most one byte past the limit, so a file that grew since its size was read is still refused unread.
+          header = PhiusStationFile.header(File.binread(path, PhiusStationFile::MAX_BYTES + 1) || "".b)
           Station.new(:key => key, :stem => stem, :name => header.fetch("name"),
                       :state => state, :latitude_deg => header.fetch("latitude_deg"),
                       :longitude_deg => header.fetch("longitude_deg"), :elevation_m => header.fetch("elevation_m"),

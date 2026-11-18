@@ -60,6 +60,22 @@ class ClimateFolderScanTest < PhComposerTestCase
     refute(scan.not_read.key?(""))
   end
 
+  def test_a_file_that_grew_after_its_size_was_read_is_read_no_further_than_the_limit
+    dir = File.join(@root, "Dataset")
+    path = File.join(dir, "XA", "GROWN-mon.txt")
+    ClimateStationFiles.write(path, station)
+    limit = PhComposer::Climate::Stations::PhiusStationFile::MAX_BYTES
+    read = File.method(:binread)
+    lengths = []
+    scan = File.stub(:binread, lambda { |file, *args|
+      lengths << args.first
+      file == path ? station + (" ".b * limit) : read.call(file, *args)
+    }) { SCAN.call(dir) }
+
+    assert_empty scan.stations
+    assert_equal [limit + 1], lengths
+  end
+
   def test_an_oversized_or_nameless_station_file_is_counted_and_a_long_extension_is_cut
     dir = File.join(@root, "Dataset")
     ClimateStationFiles.write(File.join(dir, "XA", "BIG-mon.txt"),
@@ -107,6 +123,18 @@ class ClimateFolderScanTest < PhComposerTestCase
     assert_equal 3, deep_scan.stations.length
     refute SCAN.call(dir, :max_entries => 3).complete
     assert SCAN.call(File.join(dir, "XA"), :max_entries => 3).complete
+  end
+
+  # The budget is charged for every entry read across folders, hidden ones included.
+  def test_the_entry_budget_spans_folders_and_counts_hidden_entries
+    dir = File.join(@root, "Dataset")
+    %w[XA XB].each do |state|
+      ClimateStationFiles.write(File.join(dir, state, "S-mon.txt"), station)
+      ClimateStationFiles.write(File.join(dir, state, ".hidden"), "x".b)
+    end
+
+    refute SCAN.call(dir, :max_entries => 5).complete
+    assert SCAN.call(dir, :max_entries => 6).complete
   end
 
   def station

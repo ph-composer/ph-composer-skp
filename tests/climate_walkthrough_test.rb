@@ -59,6 +59,24 @@ class ClimateWalkthroughTest < PhComposerTestCase
     FileUtils.rm_rf(root) if root
   end
 
+  # Nearest first, the first page of one holds a station that fails on elevation; the walkthrough follows the
+  # cursor to the passing one on a later page.
+  def test_the_attach_walkthrough_follows_pages_to_a_passing_station
+    client = AuthoringExample::Client.new
+    pages = [{ "stations" => [{ "key" => "XB/FAILS-mon.txt", "limit_check" => { "verdict" => "fail" } }],
+               "next_cursor" => "c1" },
+             { "stations" => [{ "key" => "XB/PASSES-mon.txt", "limit_check" => { "verdict" => "pass" } }],
+               "next_cursor" => nil }]
+    asked = []
+    found = client.stub(:query, lambda { |_name, params|
+      asked << params["cursor"]
+      { "status" => "completed", "value" => pages.fetch(asked.length - 1) }
+    }) { ClimateWalkthrough.nearest_passing(client, [], "climate_folder_AbCdEf123456", 1) }
+
+    assert_equal "XB/PASSES-mon.txt", found.fetch("key")
+    assert_equal [nil, "c1"], asked
+  end
+
   def test_the_walkthrough_uses_public_calls_only_and_the_seed_matches_its_values
     text = File.read(File.expand_path("../tools/examples/climate/climate_walkthrough.rb", __dir__))
 
