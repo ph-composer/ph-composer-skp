@@ -1,7 +1,7 @@
 # P4c-05: Export of the site and climate
 
 DATE: 2026-11-17
-STATUS: Implemented on branch `feature/climate-p4c-05`, 2026-11-18; CM05 not yet run. Ed authorized every stage on 2026-11-17. Departures below.
+STATUS: Implemented, PR #516, 2026-11-18; CM05 Pass on `e4392993`. Ed authorized every stage on 2026-11-17. Departures below.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
