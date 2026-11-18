@@ -5,8 +5,8 @@
    a stale site puts the Model's values back in the fields. The empty region at the top is where the
    outline map goes. */
 PhComposerUI.define("features/climate/set_location", ["workspace", "record_form", "request", "unit_field",
-  "features/climate/shared"],
-function (ui, RecordForm, requests, unitField, shared) {
+  "unit_numbers", "unit_preferences", "features/climate/shared"],
+function (ui, RecordForm, requests, unitField, numbers, preferences, shared) {
   "use strict";
   var UPDATE = shared.PREFIX + "site.update", GEOLOCATION = shared.PREFIX + "site.geolocation";
   var REQUIRED = "Latitude, longitude and elevation are needed. The station check compares distance and " +
@@ -92,10 +92,16 @@ function (ui, RecordForm, requests, unitField, shared) {
     this.hours.value = text(site.hours_from_utc);
     this.paint();
   };
-  function text(value) { return value === null || value === undefined ? "" : String(value); }
+  /* Coordinates and the offset are read and shown in the panel's number format, as the unit fields are. */
+  function numberFormat() { return numbers.normalizeNumberFormat(preferences.current().numberFormat); }
+  function text(value) {
+    return value === null || value === undefined ? "" : String(value).replace(".", numberFormat().decimal);
+  }
   function number(input) {
     var value = input.value.trim().replace(/−/g, "-");
-    return value === "" || !isFinite(Number(value)) ? null : Number(value);
+    if (value === "") return null;
+    var parsed = numbers.parseRegionalNumber(value, numberFormat());
+    return parsed.ok ? parsed.value : null;
   }
   SetLocation.prototype.elevationValue = function () {
     if (!this.elevation.editing) return this.elevation.baseline;
@@ -141,13 +147,20 @@ function (ui, RecordForm, requests, unitField, shared) {
     outcome = this.settle(state);
     if (!outcome) return;
     if (outcome.status === "completed") { this.hide(); return; }
-    // Another write changed the site after the dialog opened: show what the Model holds now.
-    if (outcome.code === "target.changed") {
+    // Another write changed the site after the dialog opened: show what the Model holds now. A write that
+    // reached the host before the panel saw that change refuses as a stale revision instead.
+    if (outcome.code === "target.changed" || (outcome.code === "revision.stale" && this.siteMoved())) {
       var message = this.error.textContent;
       this.load(this.currentSite());
       this.error.textContent = message;
     }
     this.paint();
+  };
+  SetLocation.prototype.siteMoved = function () {
+    var site = this.currentSite() || {}, expected = this.expected;
+    return shared.SITE_FIELDS.some(function (key) {
+      return (site[key] === undefined ? null : site[key]) !== expected[key];
+    });
   };
   SetLocation.prototype.filled = function (outcome) {
     var value = outcome.value || {};

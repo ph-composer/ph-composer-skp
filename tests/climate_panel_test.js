@@ -27,11 +27,11 @@ function sections(site, design, summary) {
     design_temperatures: { state: design.state, warning: design.warning } });
   return result;
 }
-function snapshot(session, revision, parts, system) {
+function snapshot(session, revision, parts, system, decimal) {
   return { product: "PH-Composer", version: "0.1.0-dev", session: session, revision: revision,
     file_name: "house.skp", edit_path: [], sections: parts,
     preferences: { unit_system: system || "SI", dimension_formats: {},
-      number_format: { decimal: ".", locale: "en-US" } } };
+      number_format: decimal === "," ? { decimal: ",", locale: "de-DE" } : { decimal: ".", locale: "en-US" } } };
 }
 
 function page(site, design, options) {
@@ -45,10 +45,12 @@ function page(site, design, options) {
   dom.attachEvents(context);
   var modules = panelSource.start(context, ["sections/shell", "sections/export", "features/climate/section"]);
   var p = { context: context, modules: modules, panel: modules.panel, sent: sent, session: "session-a", revision: 1,
-    site: site || SITE_UNSET, design: design || DESIGN_UNSET, system: (options && options.system) || "SI" };
+    site: site || SITE_UNSET, design: design || DESIGN_UNSET, system: (options && options.system) || "SI",
+    decimal: (options && options.decimal) || "." };
   p.receive = function (type, payload) { p.panel.receive({ type: type, payload: payload }); };
   p.publish = function () {
-    p.receive("panel.snapshot", snapshot(p.session, p.revision, sections(p.site, p.design, p.summary), p.system));
+    p.receive("panel.snapshot", snapshot(p.session, p.revision, sections(p.site, p.design, p.summary), p.system,
+      p.decimal));
   };
   p.publish();
   return p;
@@ -435,4 +437,72 @@ test("Set Location says what it cannot read, and a failed geolocation read says 
   d.listeners.cancel({ preventDefault: function () {} });
   assert.strictEqual(dialog(p), null, "Escape closes it with nothing written");
   assert.strictEqual(named(p, P + "site.update").length, 0);
+});
+
+test("Set Location takes a site below sea level, in SI and IP", function () {
+  ["SI", "IP"].forEach(function (system) {
+    var p = page(null, null, { system: system });
+    open(p);
+    click(byText(pane(p), "button", "Set Location…"));
+    var d = dialog(p);
+    type(field(d, "Latitude"), "52.4"); type(field(d, "Longitude"), "4.8"); type(field(d, "Elevation"), "-10");
+    assert.strictEqual(setButton(d).disabled, false, system + ": a negative elevation is a site");
+    d.querySelector("form").listeners.submit({ preventDefault: function () {} });
+    var elevation = named(p, P + "site.update")[0].payload.params.values.elevation_m;
+    assert.ok(Math.abs(elevation - (system === "SI" ? -10 : -3.048)) < 1e-9, String(elevation));
+  });
+});
+
+test("coordinates are read and shown in the panel's decimal comma", function () {
+  var p = page(null, null, { decimal: "," });
+  open(p);
+  click(byText(pane(p), "button", "Set Location…"));
+  var d = dialog(p);
+  type(field(d, "Latitude"), "42,75"); type(field(d, "Longitude"), "-73,8"); type(field(d, "Elevation"), "84");
+  d.querySelector("form").listeners.submit({ preventDefault: function () {} });
+  var values = named(p, P + "site.update")[0].payload.params.values;
+  assert.strictEqual(values.latitude_deg, 42.75);
+  assert.strictEqual(values.longitude_deg, -73.8);
+  answer(p, named(p, P + "site.update")[0], completed({}));
+  click(byText(pane(p), "button", "Set Location…"));
+  click(byText(dialog(p), "button", "Read from SketchUp Geolocation"));
+  answer(p, named(p, P + "site.geolocation")[0], completed({ geolocated: true, latitude_deg: 42.3233,
+    longitude_deg: -73.3887, hours_from_utc: null }), "query.result");
+  assert.strictEqual(field(dialog(p), "Latitude").value, "42,3233");
+});
+
+test("a design edit that sends nothing lets go of its guard", function () {
+  var p = page(null, { heating_99_c: -10, cooling_1_c: 30, design_temperature_source: "Note", state: "set",
+    warning: null });
+  open(p);
+  click(card(p, "design"));
+  var root = pane(p).querySelector(".climate-design"), heating = field(root, "99% heating dry bulb");
+  type(heating, "-10.0"); key(heating, "Enter");
+  assert.strictEqual(named(p, P + "design_temperatures.update").length, 0, "the same value sends nothing");
+  p.design = Object.assign({}, p.design, { heating_99_c: -11 }); p.revision = 2; p.publish();
+  assert.strictEqual(heating.value, "-11");
+  type(heating, "-12"); key(heating, "Enter");
+  assert.deepStrictEqual(named(p, P + "design_temperatures.update")[0].payload.params.expected_values,
+    { heating_99_c: -11 }, "the next edit is guarded by what the field showed then");
+  var source = field(root, "Source (optional)");
+  type(source, "Note"); source.listeners.blur({});
+  p.design = Object.assign({}, p.design, { design_temperature_source: "Other" }); p.publish();
+  answer(p, named(p, P + "design_temperatures.update")[0], completed(p.design));
+  type(source, "Third"); key(source, "Enter");
+  assert.deepStrictEqual(named(p, P + "design_temperatures.update")[1].payload.params.expected_values,
+    { design_temperature_source: "Other" });
+});
+
+test("a stale revision after the site changed puts the Model's values back in Set Location", function () {
+  var p = page();
+  open(p);
+  click(byText(pane(p), "button", "Set Location…"));
+  var d = dialog(p);
+  type(field(d, "Latitude"), "45"); type(field(d, "Longitude"), "10"); type(field(d, "Elevation"), "5");
+  d.querySelector("form").listeners.submit({ preventDefault: function () {} });
+  p.site = SITE_SET; p.revision = 2; p.publish();
+  answer(p, named(p, P + "site.update")[0], { status: "refused", code: "revision.stale", message: "Stale." });
+  assert.strictEqual(field(d, "Latitude").value, "42.75");
+  d.querySelector("form").listeners.submit({ preventDefault: function () {} });
+  assert.strictEqual(named(p, P + "site.update")[1].payload.params.expected_values.latitude_deg, 42.75);
 });

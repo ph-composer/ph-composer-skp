@@ -7,7 +7,7 @@ PhComposerUI.define("features/climate/shared", ["fields", "units"], function (fi
   var ZONES = [[1, "Not defined"], [11, "1"], [12, "2"], [13, "3"], [14, "4"], [141, "4C"], [15, "5"], [16, "6"],
     [17, "7"], [18, "8"]];
   var SITE_FIELDS = ["latitude_deg", "longitude_deg", "elevation_m", "climate_zone", "hours_from_utc"];
-  var ELEVATION = fields.with(fields.LENGTH_M, { label: "Elevation", allowBlank: true });
+  var ELEVATION = fields.with(fields.LENGTH_M, { label: "Elevation", allowBlank: true, allowNegative: true });
   var TEMPERATURE = fields.with(fields.TEMPERATURE_C, { label: "Temperature", allowBlank: true });
 
   // A value and its unit stay on one line.

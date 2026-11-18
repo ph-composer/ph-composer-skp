@@ -59,6 +59,11 @@ function (ui, requests, unitField, shared) {
       onCancel: function () { delete self.started[key]; } });
     field.input.addEventListener("input", function () { self.begin(key); });
     field.input.addEventListener("paste", function () { self.begin(key); });
+    // An edit that ended with nothing to send (the same value, retyped) lets go of its guard, so the next edit
+    // is guarded by what the field shows then. These run after the field's own Enter and blur handling.
+    function settled() { if (!field.editing) delete self.started[key]; }
+    field.input.addEventListener("keydown", function (event) { if (event.key === "Enter") settled(); });
+    field.input.addEventListener("blur", settled);
     label.appendChild(ui.element("span", "climate-field-label", title));
     label.appendChild(field.root);
     grid.appendChild(label);
@@ -94,7 +99,7 @@ function (ui, requests, unitField, shared) {
     this.sourceEditing = false;
     var text = this.source.value.trim();
     var value = text === "" ? null : text;
-    if (value === (this.values && this.values[SOURCE])) return;
+    if (value === (this.values && this.values[SOURCE])) { delete this.started[SOURCE]; return; }
     this.commit(SOURCE, value);
   };
   Pane.prototype.paintSource = function () {

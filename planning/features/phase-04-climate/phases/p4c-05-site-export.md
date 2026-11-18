@@ -1,7 +1,7 @@
 # P4c-05: Export of the site and climate
 
 DATE: 2026-11-17
-STATUS: Implemented, PR #516, 2026-11-18; CM05 Pass on `e4392993`. Ed authorized every stage on 2026-11-17. Departures below.
+STATUS: Merged to main 2026-11-18, PR #516 (`4239dbe4`); CM05 Pass on `e4392993`. Ed authorized every stage on 2026-11-17. Departures below.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -154,4 +154,4 @@ CM05 passes, owed check 6 is recorded, and C4c-4 is answered.
 - **The round trip** (step 8) renames the reference model's Building Segments without a space: PHX
   1.57.5 names a merged Room after its segment, and a Room identifier cannot hold one. A PHX
   follow-up, not a Site defect.
-- **`locate`**: P4c-06 has not merged, so the findings carry none; P4c-06 adds them.
+- **`locate`**: P4c-06 has not merged, so the findings carry none. P4c-06 found that a `locate` names a viewport command and routes the findings to their card through the Export tab's Open Climate instead.
