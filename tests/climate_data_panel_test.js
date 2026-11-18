@@ -352,6 +352,31 @@ test("pressing Add Folder with the name unchanged adds at once; a refused name d
   assert.strictEqual(named(p, P + "folders.add").length, 1, "the refusal is read before anything else runs");
 });
 
+test("Done while Add Folder runs closes on its answer, and a reopened dialog shows the fresh list", function () {
+  var p = page();
+  openDialog(p);
+  list(p, []);
+  click(byText(dialog(p), "button", "Add Folder…"));
+  click(byText(dialog(p), "button", "Done"));
+  answer(p, last(p, P + "folders.add"), completed(MAIN));
+  assert.strictEqual(dialog(p).hidden, true);
+  assert.strictEqual(labelled(dialog(p), "Dataset name"), null, "no name opens in a closed dialog");
+  openDialog(p);
+  list(p, [MAIN, OTHER_ONLY]);
+  assert.strictEqual(rows(p).length, 2);
+});
+
+test("pressing Remove on the row being renamed confirms it under its new name", function () {
+  var p = page();
+  openDialog(p);
+  list(p, [MAIN]);
+  click(labelled(dialog(p), "Rename Station Set A"));
+  labelled(dialog(p), "Dataset name").value = "Renamed";
+  press(p, labelled(rows(p)[0], "Remove Station Set A"));
+  answer(p, last(p, P + "folders.rename"), completed(Object.assign({}, MAIN, { name: "Renamed" })));
+  assert.ok(byText(all(body(p), ".phc-confirm-dialog")[0], "h2", "Remove Renamed?"));
+});
+
 test("another Model while Remove is confirming takes the dialog and its confirm away", function () {
   var p = page();
   openDialog(p);
@@ -367,7 +392,7 @@ test("a folder read only in part says so below the table", function () {
   var p = page();
   openDialog(p);
   list(p, [Object.assign({}, MAIN, { complete: false })]);
-  assert.ok(notes(p)[0].textContent.indexOf("too large or too deep") >= 0);
+  assert.ok(notes(p)[0].textContent.indexOf("part of the folder could not be read") >= 0);
 });
 
 test("with no folder the Phius pane says why none ships and Choose Climate Data Folder starts Add", function () {

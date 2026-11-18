@@ -113,7 +113,8 @@ function (ui, requests, shared) {
   /* Opens on a fresh read; `add` starts Add Folder at once, for the Climate tab's empty state. */
   DataSetup.prototype.open = function (options) {
     if (this.isOpen() || this.disposed) return;
-    this.folders = null; this.failure = null; this.renaming = null; this.closeWhenSettled = false;
+    this.folders = null; this.failure = null; this.renaming = null; this.editor = null;
+    this.closeWhenSettled = false; this.afterRename = null;
     this.say("");
     this.reads.reset(); this.reads.run(FOLDERS + "list", {});
     this.paint(); this.root.openModal();
@@ -201,7 +202,7 @@ function (ui, requests, shared) {
     folders.forEach(function (folder) { body.appendChild(self.row(folder, busy)); });
     this.list.replaceChildren(table);
     folders.forEach(function (folder) { self.note(folder); });
-    if (this.renaming) this.startRename(this.renaming);
+    if (this.renaming && this.isOpen()) this.startRename(this.renaming);
   };
 
   DataSetup.prototype.row = function (folder, busy) {
@@ -255,8 +256,8 @@ function (ui, requests, shared) {
     var text = !folder.found ? folder.name + ": the folder is not where it was. It may have moved, been renamed, " +
       "or be on a drive that is not connected. Locate points this setting at its new place. Its stations are " +
       "left out of the station picker until then. Models are not affected." :
-      folder.complete === false ? folder.name + ": the folder is too large or too deep to read in full, so the " +
-      "counts are of the part read." : null;
+      folder.complete === false ? folder.name + ": part of the folder could not be read (it is too large or " +
+      "too deep, or a folder in it could not be opened), so the counts are of the part read." : null;
     if (text) this.notes.appendChild(el("p", "climate-dialog-note", text));
   };
 
@@ -307,6 +308,8 @@ function (ui, requests, shared) {
   /* Remove names the dataset and says what stays: the folder, its files and every Model's climate. */
   DataSetup.prototype.confirmRemove = function (folder, trigger) {
     var self = this, dialog = ui.formDialog("phc-confirm-dialog", close);
+    // A name saved since the button was drawn is the one to confirm.
+    folder = (this.folders || []).filter(function (item) { return item.id === folder.id; })[0] || folder;
     this.confirm = dialog;
     function close() {
       if (self.confirm === dialog) self.confirm = null;
@@ -332,6 +335,7 @@ function (ui, requests, shared) {
       return;
     }
     this.reads.reset();
+    this.renaming = null; this.editor = null; this.afterRename = null;
     this.root.closeModal();
     this.closed();
   };
