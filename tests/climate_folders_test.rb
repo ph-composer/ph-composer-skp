@@ -128,6 +128,20 @@ class ClimateFoldersTest < PhComposerTestCase
     assert_equal 3, stored.fetch("folders").length
   end
 
+  # A listed folder that is not there now still compares through its parent's real path, so a folder around it
+  # reached by another name is refused before the missing one comes back.
+  def test_a_missing_listed_folder_under_a_linked_parent_still_overlaps
+    real = folder("real")
+    link = File.join(@root, "link")
+    File.symlink(real, link)
+    missing = File.join(link, "climate")
+    FileUtils.mkdir_p(missing)
+    choose("add", missing)
+    FileUtils.rm_rf(File.join(real, "climate"))
+
+    assert_equal "climate.folder_overlaps", choose("add", real).fetch("code")
+  end
+
   def test_an_unknown_id_refuses_folder_not_found_and_locate_opens_no_chooser
     choose("add", folder("Phius"))
     unknown = { "id" => "climate_folder_AbCdEf123456" }
@@ -160,7 +174,9 @@ class ClimateFoldersTest < PhComposerTestCase
   def test_an_unreadable_settings_file_is_left_as_stored_reported_and_refused_before_the_chooser
     file = File.join(PhComposer::ComputerSettings.directory, PhComposer::ComputerSettings::FILE_NAME)
     FileUtils.mkdir_p(File.dirname(file))
-    sections = [{ "folders" => "not a list" }, 5, nil, true, [], "text"].map do |section|
+    nul_row = { "id" => "climate_folder_AbCdEf123456", "name" => "Broken", "location" => "/tmp\u0000broken" }
+    sections = [{ "folders" => "not a list" }, { "folders" => [nul_row], "last_dataset_id" => nil }, 5, nil, true,
+                [], "text"].map do |section|
       JSON.generate("schema_version" => 1, "sections" => { "ph_composer.climate" => section })
     end
     (["not json"] + sections).each do |text|
@@ -174,6 +190,8 @@ class ClimateFoldersTest < PhComposerTestCase
       end
       assert_equal "climate.settings_unreadable",
                    setup_command("remove", "id" => "climate_folder_AbCdEf123456").fetch("code")
+      assert_equal "climate.settings_unreadable",
+                   setup_command("rename", "id" => "climate_folder_AbCdEf123456", "name" => "New").fetch("code")
       assert_equal text, File.read(file)
     end
   end

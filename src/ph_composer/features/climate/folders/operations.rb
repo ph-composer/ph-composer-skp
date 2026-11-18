@@ -157,16 +157,23 @@ module PhComposer
                                          "twice. Nothing was written.")
         end
 
-        # The folder's real path when it is there, so a link and its target compare equal (on macOS the real
-        # path also takes the case the disk holds), without its trailing separator: the root becomes empty, so it
-        # holds every folder.
+        # The folder's real path, so a link and its target compare equal (on macOS the real path also takes the
+        # case the disk holds). A folder that is not there now resolves its nearest existing parent and keeps
+        # the rest, so it still compares with folders under the same linked parent. No trailing separator: the
+        # root becomes empty, so it holds every folder.
         def comparable(location)
-          real = begin
-            File.directory?(location) ? File.realpath(location) : location
-          rescue SystemCallError
-            location
+          existing = location
+          rest = []
+          until existing == "/" || File.exist?(existing)
+            rest.unshift(File.basename(existing))
+            existing = File.dirname(existing)
           end
-          real.chomp("/")
+          real = begin
+            File.realpath(existing)
+          rescue SystemCallError
+            existing
+          end
+          File.join(real, *rest).chomp("/")
         end
 
         def default_name(location)

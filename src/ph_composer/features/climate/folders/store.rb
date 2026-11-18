@@ -81,7 +81,7 @@ module PhComposer
           id, name, location = row.values_at("id", "name", "location")
           [id, name, location].all? { |value| value.is_a?(String) } &&
             Records::Identity.pattern(ID_PREFIX).match?(id) && valid_name?(name) &&
-            location.start_with?("/") && location.bytesize <= MAX_LOCATION_BYTES
+            location.start_with?("/") && !location.include?("\0") && location.bytesize <= MAX_LOCATION_BYTES
         end
 
         def valid_name?(name)

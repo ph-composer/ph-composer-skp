@@ -4838,6 +4838,21 @@
         "tools/examples/authoring/client.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "CM03",
+      "label": "This computer's settings file and Climate's climate data folders with the panel closed, on the installed RBZ in a fresh synthetic Model: the file is created on first write in ~/Library/Application Support/PH-Composer, outside SketchUp's versioned folder; add, rename, locate and remove each survive a quit and relaunch; a folder not found keeps its row; SketchUp and a second process writing different sections lose neither; a damaged file is left as stored, reads refuse climate.settings_unreadable and the summary says so; a scripted add with no approval is refused access.user_required; no answer and no log line holds an absolute path; the Setup summary reads no folder, one, several and unreadable; and the native folder chooser through the approval route adds a folder, and cancels with nothing added",
+      "mode": "mixed",
+      "authority": "planning/features/phase-04-climate/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/shell/computer_settings.rb",
+        "src/ph_composer/shell/native_approval.rb",
+        "src/ph_composer/features/climate/folders/*",
+        "src/ph_composer/features/climate/declarations/folders.rb",
+        "src/ph_composer/features/climate/codes.rb",
+        "src/ph_composer/features/climate/install.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }
