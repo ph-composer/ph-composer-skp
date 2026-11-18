@@ -4916,6 +4916,24 @@
         "src/ph_composer/html/features/climate/*"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "CM08",
+      "label": "Climate Data on This Computer and the Phius pane's empty states on the installed RBZ in the real HtmlDialog: each folder listed with name, display location, format, stations, states and files not read by kind; Add Folder through the native chooser with the new name open for editing; Remove with its confirm; a folder not found offering Locate and Remove, its stations absent from stations.list; no Rescan and no new-station notice, counts read on each open; the dialog opened from the Climate tab, from the Setup view entry with its summary, and from the Extensions menu with the panel closed; the Phius pane's three empty states (no folder, no site, ready); 420 and 360 px; the UI polish review by Ed",
+      "mode": "mixed",
+      "authority": "planning/features/phase-04-climate/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/html/index.html",
+        "src/ph_composer/html/panel.js",
+        "src/ph_composer/html/sections/setup.js",
+        "src/ph_composer/html/features/climate/*",
+        "src/ph_composer/shell/panel.rb",
+        "src/ph_composer/shell/panel_outbox.rb",
+        "src/ph_composer/shell/setup_entries.rb",
+        "src/ph_composer/features/climate/declarations/folders.rb",
+        "src/ph_composer/features/climate/folders/*"
+      ],
+      "native_control_required": true
     }
   ]
 }
