@@ -9,8 +9,8 @@
    Phius's distance limit around it, and a site that would put the station outside the Phius limits is warned
    about before Set, from the host's own limit check at the proposed site. Set still saves it. */
 PhComposerUI.define("features/climate/set_location", ["workspace", "record_form", "request", "unit_field",
-  "unit_numbers", "unit_preferences", "outline_map", "map_projection", "features/climate/shared"],
-function (ui, RecordForm, requests, unitField, numbers, preferences, outlineMap, projection, shared) {
+  "unit_numbers", "unit_preferences", "snapshot", "outline_map", "map_projection", "features/climate/shared"],
+function (ui, RecordForm, requests, unitField, numbers, preferences, snapshot, outlineMap, projection, shared) {
   "use strict";
   var UPDATE = shared.PREFIX + "site.update", GEOLOCATION = shared.PREFIX + "site.geolocation";
   var PREVIEW = shared.PREFIX + "site.preview_limit_check", CLIMATE = shared.PREFIX + "climate.get";
@@ -37,6 +37,7 @@ function (ui, RecordForm, requests, unitField, numbers, preferences, outlineMap,
     this.stationRead = requests.channel(session, send, "climate_station", "query.invoke");
     this.preview = requests.channel(session, send, "climate_preview", "query.invoke");
     this.station = null; this.previewed = null; this.check = null; this.checked = null; this.checkFailure = null;
+    this.stationFailure = null; this.revision = null;
     this.map = outlineMap({ label: "Outline map. Click to place the site",
       hint: "Click to place the site. Drag to pan.",
       onPlace: function (point) { self.place(point); } });
@@ -52,7 +53,8 @@ function (ui, RecordForm, requests, unitField, numbers, preferences, outlineMap,
     [this.latitude, this.longitude].forEach(function (input) {
       input.addEventListener("input", function () { self.showSite(); });
     });
-    this.elevation = new unitField.UnitField({ field: shared.ELEVATION, onCommit: function () { self.paint(); } });
+    this.elevation = new unitField.UnitField({ field: shared.ELEVATION, onCommit: function () { self.paint(); },
+      onCancel: function () { self.paint(); } });
     var elevation = this.labelled("Elevation", this.elevation.root);
     elevation.classList.add("climate-field-wide");
     place.appendChild(elevation);
@@ -217,9 +219,10 @@ function (ui, RecordForm, requests, unitField, numbers, preferences, outlineMap,
     var check = this.currentCheck(), current = this.checked !== null && this.checked === key(this.proposed());
     var failing = Boolean(this.station && check && check.verdict === "fail");
     var unknown = Boolean(this.station && current && this.checkFailure);
-    this.warning.hidden = !failing && !unknown;
-    this.warning.textContent = failing ? limitWarning(check, this.station.name) :
-      unknown ? "The Phius limit check could not be run for this site: " + this.checkFailure : "";
+    this.warning.hidden = !failing && !unknown && !this.stationFailure;
+    this.warning.textContent = this.stationFailure ? "The attached station could not be read, so the Phius limit " +
+      "check is not shown: " + this.stationFailure : failing ? limitWarning(check, this.station.name) :
+        unknown ? "The Phius limit check could not be run for this site: " + this.checkFailure : "";
   };
   /* "At this site Northfield Regional, the attached station, is outside the Phius limits: 131 km away, over
      50 mi. The station stays attached and will read Outside Phius limits." */
@@ -263,6 +266,7 @@ function (ui, RecordForm, requests, unitField, numbers, preferences, outlineMap,
   };
 
   SetLocation.prototype.consume = function (state) {
+    this.followRevision(state);
     var geo = this.geolocation.consume(state), read = this.stationRead.consume(state);
     var check = this.preview.consume(state), outcome;
     if (geo) this.filled(geo);
@@ -309,9 +313,30 @@ function (ui, RecordForm, requests, unitField, numbers, preferences, outlineMap,
     this.showSite();
   };
 
-  /* The climate's station, when it has coordinates; a climate typed without them has no place on the map. */
+  /* Another change to the Model (an agent attaching, replacing or clearing the climate) may change the station:
+     read it again and forget the checks made against the old one, keeping the typed values and the view. */
+  SetLocation.prototype.followRevision = function (state) {
+    var revision = state && state.revision, summary = snapshot.value(state, shared.SUMMARY);
+    if (revision === undefined || revision === null || revision === this.revision) return;
+    var first = this.revision === null;
+    this.revision = revision;
+    if (first || this.busy()) return;
+    this.station = null; this.stationFailure = null; this.previewed = null; this.checked = null; this.check = null;
+    this.checkFailure = null;
+    this.preview.reset();
+    this.stationRead.reset();
+    if (summary && summary.climate.state !== "none") this.stationRead.run(CLIMATE, {});
+    this.paint();
+  };
+  /* The climate's station, when it has coordinates; a climate typed without them has no place on the map. A read
+     that fails is said, not taken for no station. */
   SetLocation.prototype.stationFound = function (outcome) {
-    var values = outcome.status === "completed" && outcome.value.climate && outcome.value.climate.values;
+    if (outcome.status !== "completed") {
+      this.stationFailure = outcome.message || "PH-Composer did not answer.";
+      return;
+    }
+    this.stationFailure = null;
+    var values = outcome.value.climate && outcome.value.climate.values;
     if (!values || values.station_latitude_deg === null || values.station_longitude_deg === null) return;
     this.station = { name: values.name, latitude_deg: values.station_latitude_deg,
       longitude_deg: values.station_longitude_deg };

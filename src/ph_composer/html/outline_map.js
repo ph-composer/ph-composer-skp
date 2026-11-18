@@ -303,9 +303,12 @@ PhComposerUI.define("outline_map", ["workspace", "map_projection", "map_borders"
     if (content === null || content === undefined || content === "") { this.hideTip(); return; }
     this.tip.replaceChildren(typeof content === "string" ? ui.element("span", "", content) : content);
     var at = this.local(event), size = this.size();
-    this.tip.style.left = Math.round(Math.min(at.x + 12, Math.max(0, size.width - 220))) + "px";
-    this.tip.style.top = Math.round(at.y + 14) + "px";
     this.tip.hidden = false;
+    // Below and right of the pointer, or above it near the bottom, always inside the map, which clips.
+    var height = this.tip.offsetHeight || 0, width = this.tip.offsetWidth || 220;
+    var top = at.y + 14 + height > size.height ? at.y - 10 - height : at.y + 14;
+    this.tip.style.left = Math.round(Math.max(0, Math.min(at.x + 12, size.width - width))) + "px";
+    this.tip.style.top = Math.round(Math.max(0, Math.min(top, size.height - height))) + "px";
   };
   OutlineMap.prototype.hideTip = function () {
     this.tip.hidden = true;

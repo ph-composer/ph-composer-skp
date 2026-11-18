@@ -131,9 +131,9 @@
       "sha256": "04a38aeeb486d21b7407dc21ccc92b94ee4f6b1519bf06299a1533a064808205"
     },
     "html/features/climate/set_location.js": {
-      "bytes": 18548,
+      "bytes": 19951,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "a7dafee5bd892b4b3e9543da598164bf9c87b383c841ec69040ef045e9746f25"
+      "sha256": "8562e255ade8789f306d39feaf1cac84da13e2520287468a3432c0c15b1fac6b"
     },
     "html/features/climate/shared.js": {
       "bytes": 2767,
@@ -471,9 +471,9 @@
       "sha256": "0994665737fa9c49581af20d7addc570e99077c33f6a76ef00e180d9ecc773c9"
     },
     "html/outline_map.js": {
-      "bytes": 16878,
+      "bytes": 17186,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "f0c4b73fec3facaac6fdc165b7324247087f3ef4abb9bb574dce4271ef589507"
+      "sha256": "337c25f786bea4c89e7ec7dda3d205ae1243de56644d9c0bc75ccfe4949938a3"
     },
     "html/overlay.css": {
       "bytes": 17329,

@@ -242,3 +242,14 @@ test("a click off the globe places nothing, and the wheel during a drag is ignor
   assert.ok(wheel.defaultPrevented, "the dialog does not scroll either");
   assert.strictEqual(t.map.view.scale, scale);
 });
+
+test("a tip near the bottom opens above the pointer, inside the map", function () {
+  var t = setup();
+  var alpha = marker(t, "alpha").children[0];
+  t.map.tip.offsetHeight = 40;
+  t.map.tip.offsetWidth = 150;
+  fire(t.map.svg, "pointermove", event("pointermove", RECT.left + 540, RECT.top + 415, { target: alpha, buttons: 0 }));
+  assert.strictEqual(t.map.tip.style.top, "365px");
+  assert.strictEqual(t.map.tip.style.left, "410px");
+});
+

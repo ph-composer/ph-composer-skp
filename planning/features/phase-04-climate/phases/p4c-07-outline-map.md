@@ -104,7 +104,7 @@ CM07 passes, owed check 2 is recorded with the licence wording, and C4c-5 is ans
   domain with no attribution asked, so the shipped `LICENSE.txt` is unchanged. The borders are written in the
   encoded polyline algorithm (113 KB), not as decimal arrays (the first draft, 187 KB without the United States
   and Canada outlines): both fit the 300 KB budget, but the decimal draft left 70 KB under the runtime manifest's
-  installed ceiling for P4c-08 to P4c-11; 139 KB remain. The United States and Canada keep a solid country
+  installed ceiling for P4c-08 to P4c-11; 137 KB remain. The United States and Canada keep a solid country
   outline at their states' detail, so their land is filled and their coast is solid, as board 21 draws it.
 - **The tool** is `tools/map_data/map_borders.py`, a standard-library PEP 723 script, with
   `tests/python/test_map_borders.py` (synthetic GeoJSON; the real source when `PH_COMPOSER_MAP_DATA` is set).
@@ -134,6 +134,12 @@ CM07 passes, owed check 2 is recorded with the licence wording, and C4c-5 is ans
   resize after a pan keeps the centre and scale at the new size; the zoom buttons count as the user's move, so a
   late station read leaves them alone; a click off the globe at a wide zoom places nothing; the wheel during a
   drag is ignored.
+- **Codex review, second cycle** (the last under the two-cycle cap): 4 P2, all fixed in a commit that merges
+  unreviewed. An elevation draft cancelled with Escape asks for the check at the elevation shown; a change to
+  the Model while the dialog is open (an agent attaching, replacing or clearing the climate) reads the station
+  again and drops the old checks, keeping the typed values and the view; a failed station read is said in the
+  warning slot rather than taken for no station (Set still saves, with the check said not to be shown); the
+  hover tip flips above the pointer near the map's bottom and stays inside it.
 - **Not built**: board 21's pane map (the Site location pane drawing the site on the map) is in no stage's steps;
   left for Ed to place.
 - **Example**: `tools/examples/outline_map/example_outline_map.js`, loaded by the preview page and shown with

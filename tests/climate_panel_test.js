@@ -553,6 +553,10 @@ function withClimate(p) {
   p.publish();
   return p;
 }
+function passing() {
+  return completed({ limit_check: { verdict: "pass", reason: null, distance_km: 8, elevation_difference_m: 6,
+    distance_ok: true, elevation_ok: true } });
+}
 function failing(distance, elevation) {
   return completed({ limit_check: { verdict: "fail", reason: null, distance_km: distance,
     elevation_difference_m: elevation, distance_ok: distance <= 80.4672, elevation_ok: elevation <= 121.92 } });
@@ -711,3 +715,49 @@ test("with a station, Set waits for the check at the values typed; a failing sit
   d.querySelector("form").listeners.submit({ preventDefault: function () {} });
   assert.strictEqual(named(p, P + "site.update").length, 1);
 });
+
+test("a failed station read is said, and another change to the Model reads the station again", function () {
+  var p = withClimate(page(SITE_SET));
+  open(p);
+  click(byText(pane(p), "button", "Set Location…"));
+  var d = dialog(p);
+  answer(p, named(p, P + "climate.get")[0], { status: "failed", message: "The record could not be read." },
+    "query.result");
+  var warning = d.querySelector(".climate-limit-warning");
+  assert.strictEqual(warning.hidden, false);
+  assert.strictEqual(warning.textContent, "The attached station could not be read, so the Phius limit check is not " +
+    "shown: The record could not be read.");
+  p.revision += 1;
+  p.publish();
+  var reads = named(p, P + "climate.get");
+  assert.strictEqual(reads.length, 2, "a new revision reads the station again");
+  answer(p, reads[1], station(42.8, -73.7), "query.result");
+  assert.ok(d.querySelector("[data-point='station']"));
+  answer(p, named(p, P + "site.preview_limit_check")[0], passing(), "query.result");
+  assert.strictEqual(warning.hidden, true);
+  p.revision += 1;
+  p.publish();
+  assert.strictEqual(setButton(d).disabled, true, "the old station's check no longer counts");
+  assert.strictEqual(d.querySelectorAll("[data-point]").length, 0);
+});
+
+test("an elevation draft cancelled with Escape repaints the check for the elevation shown", function () {
+  var p = withClimate(page(SITE_SET));
+  open(p);
+  click(byText(pane(p), "button", "Set Location…"));
+  var d = dialog(p);
+  answer(p, named(p, P + "climate.get")[0], station(42.8, -73.7), "query.result");
+  answer(p, named(p, P + "site.preview_limit_check")[0], passing(), "query.result");
+  type(field(d, "Elevation"), "500");
+  answer(p, named(p, P + "site.preview_limit_check")[1], failing(8, 416), "query.result");
+  assert.strictEqual(d.querySelector(".climate-limit-warning").hidden, false);
+  key(field(d, "Elevation"), "Escape");
+  assert.strictEqual(field(d, "Elevation").value, "84");
+  assert.strictEqual(d.querySelector(".climate-limit-warning").hidden, true, "the 500 m warning goes");
+  assert.strictEqual(setButton(d).disabled, true, "Set waits for the check at 84 m");
+  var previews = named(p, P + "site.preview_limit_check");
+  assert.strictEqual(previews[2].payload.params.elevation_m, 84);
+  answer(p, previews[2], passing(), "query.result");
+  assert.strictEqual(setButton(d).disabled, false);
+});
+
