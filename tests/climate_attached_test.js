@@ -431,3 +431,52 @@ test("the header's climate actions show only on the Phius card", function () {
   assert.strictEqual(all(heading, "[aria-label='More climate actions']")[0].closest(".phc-bubble-anchor").hidden, true);
   assert.ok(byText(heading, "button", "Set Location…"));
 });
+
+function typeWind(p, value) {
+  var wind = section(p, "Station values").querySelector("input");
+  wind.value = value;
+  wind.listeners.input({ target: wind });
+  return wind;
+}
+function press(input, name) {
+  input.listeners.keydown({ key: name, preventDefault: function () {}, stopPropagation: function () {} });
+}
+
+test("a wind speed is guarded by what the pane showed when typing began, so a change meanwhile refuses", function () {
+  var p = page();
+  load(p);
+  var wind = typeWind(p, "5");
+  var changed = station(); changed.climate.values.wind_speed_m_s = 7;
+  p.revision = 2; p.publish();
+  answer(p, last(p, P + "climate.get"), completed(changed));
+  press(wind, "Enter");
+  var saved = last(p, P + "climate.save_values");
+  assert.strictEqual(saved.payload.params.values.wind_speed_m_s, 5);
+  assert.strictEqual(saved.payload.params.expected_values.wind_speed_m_s, 3.9, "the value seen when typing began");
+});
+
+test("the same wind speed retyped with Enter lets a held repaint through", function () {
+  var p = page();
+  load(p);
+  var wind = typeWind(p, "3.9");
+  p.revision = 2; p.publish();
+  answer(p, last(p, P + "climate.get"), completed(station({ edits: [["air_c", "jan", -6]] })));
+  assert.strictEqual(cellsEdited(p).length, 0, "held while the draft is open");
+  press(wind, "Enter");
+  assert.strictEqual(named(p, P + "climate.save_values").length, 0);
+  assert.strictEqual(cellsEdited(p).length, 1);
+});
+
+test("a wind draft left invalid is dropped when the climate is cleared, so another climate shows", function () {
+  var p = page();
+  load(p);
+  var wind = typeWind(p, "abc");
+  press(wind, "Enter");
+  p.climate = "none"; p.revision = 2; p.publish();
+  p.climate = "complete"; p.revision = 3; p.publish();
+  var next = station(); next.climate.values.name = "Birch Point";
+  answer(p, last(p, P + "climate.get"), completed(next));
+  assert.strictEqual(attached(p).querySelector(".climate-attached-heading").querySelector("h2").textContent,
+    "Birch Point");
+  assert.strictEqual(wind.value, "3.9");
+});

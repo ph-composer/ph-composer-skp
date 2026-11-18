@@ -24,6 +24,7 @@ function (ui, requests, shared, Attached) {
     this.reads = requests.channel(session, send, "climate_phius_folders", "query.invoke");
     this.root = el("section", "climate-pane climate-phius");
     this.attached = new Attached(session, send, { replace: actions.replace, openData: actions.openData,
+      setLocation: actions.setLocation,
       update: function (source) {
         actions.choose({ folder_id: source.folder_id, station_key: source.station_key });
       } });

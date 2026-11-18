@@ -494,9 +494,12 @@ test("Replace without a site explains and offers Set Location; the picker does n
   assert.strictEqual(picker(p), null);
   var explained = pane(p).querySelector(".climate-attached-explain").querySelector(".phc-bubble");
   assert.strictEqual(explained.hidden, false);
-  assert.ok(byText(explained, "button", "Set Location…"));
   tab(p).openPicker(null);
   assert.strictEqual(picker(p), null);
+  click(byText(explained, "button", "Set Location…"));
+  assert.strictEqual(explained.hidden, true);
+  var setLocation = p.context.document.querySelector(".climate-set-location");
+  assert.ok(setLocation && !setLocation.hidden, "Set Location opens");
 });
 
 test("in Replace only the Model's own climate read carries values; the station reads and Replace do not", function () {

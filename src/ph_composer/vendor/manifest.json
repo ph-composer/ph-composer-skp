@@ -116,9 +116,9 @@
       "sha256": "9e8041546528ef8733c8da7b2359bd980cee349c3ed13ef3ebafc023a11a3479"
     },
     "html/features/climate/attached.js": {
-      "bytes": 30623,
+      "bytes": 31698,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "40e5028a0c06dbd64b04857806ae7ebeec98720a2e7d5719e70a898838c3abd1"
+      "sha256": "6e0f030a75a343bb7ffa14a9f7b7ef209f4a62488ddd7aaa79a2e69a31bcf429"
     },
     "html/features/climate/climate.css": {
       "bytes": 13871,
@@ -136,9 +136,9 @@
       "sha256": "8d194678ba2da13408e5182f1c27eee964e6a6f710a764628459735d744c10fd"
     },
     "html/features/climate/phius.js": {
-      "bytes": 8731,
+      "bytes": 8771,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "0cffacd78575cc1f3d24b9ec49e08ee47258cbe2b024699b418bb05adf70b2f4"
+      "sha256": "d129bf82ae3fbc2e04c969999e63dab5028d48b73afbd09492ff17a4c65fe2c3"
     },
     "html/features/climate/picker.js": {
       "bytes": 24987,

@@ -79,11 +79,19 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
     this.root = el("div", "climate-attached");
     this.body = el("div", "climate-attached-body");
     // The wind speed is built once and moved into each repaint, so a repaint never drops a half-typed draft.
+    // Its write is guarded by the values the pane showed when typing began, so a change made elsewhere meanwhile
+    // refuses rather than being overwritten.
     this.wind = new unitField.UnitField({ field: WIND, commitOnBlur: true,
       onCommit: function (value) { self.saveWind(value); },
-      onCancel: function () { self.paint(); self.paintWind(); } });
-    // A draft left with nothing to save lets a held repaint through.
-    this.wind.input.addEventListener("blur", function () { if (!self.wind.editing) self.paint(); });
+      onCancel: function () { self.settled(); } });
+    function begin() { if (!self.windGuard && self.values()) self.windGuard = slice(self.values()); }
+    this.wind.input.addEventListener("input", begin);
+    this.wind.input.addEventListener("paste", begin);
+    // A draft that ended with nothing to save (the same value, retyped) lets a held repaint through. These run
+    // after the field's own Enter and blur handling.
+    function ended() { if (!self.wind.editing) self.settled(); }
+    this.wind.input.addEventListener("blur", ended);
+    this.wind.input.addEventListener("keydown", function (event) { if (event.key === "Enter") ended(); });
     this.wind.input.setAttribute("aria-label", "Average wind speed");
     this.root.appendChild(this.body);
     this.buildActions();
@@ -527,10 +535,16 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
     return true;
   };
   Pane.prototype.saveWind = function (value) {
-    var values = this.values();
-    if (!values || value === values.wind_speed_m_s) return;
-    var next = slice(values); next.wind_speed_m_s = value;
-    this.write("save_values", { values: next });
+    var guard = this.windGuard || (this.values() && slice(this.values()));
+    this.windGuard = null;
+    if (!guard || this.writes.busy() || value === guard.wind_speed_m_s) { this.settled(); return; }
+    var next = JSON.parse(JSON.stringify(guard)); next.wind_speed_m_s = value;
+    this.writes.run(P + "climate.save_values", { values: next, expected_values: guard });
+    this.painted = null; this.paint();
+  };
+  /* The draft is over without a write: its guard goes, and the Model's values show. */
+  Pane.prototype.settled = function () {
+    this.windGuard = null; this.paint(); this.paintWind();
   };
   Pane.prototype.restore = function () { this.write("restore_original"); };
   Pane.prototype.clear = function () { this.write("clear"); };
@@ -543,7 +557,9 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
 
   /* The Model holds no climate now: what was read is not shown again when one is attached. */
   Pane.prototype.forget = function () {
-    this.record = null; this.source = null; this.failure = null; this.painted = null;
+    if (this.wind.editing) this.wind.cancel();
+    this.wind.clearError();
+    this.record = null; this.source = null; this.failure = null; this.painted = null; this.windGuard = null;
   };
 
   Pane.prototype.dispose = function () {
