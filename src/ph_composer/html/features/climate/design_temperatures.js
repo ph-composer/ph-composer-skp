@@ -56,12 +56,12 @@ function (ui, requests, unitField, shared) {
     var self = this, label = ui.element("label", "climate-field");
     var field = new unitField.UnitField({ field: Object.assign({}, shared.TEMPERATURE, { label: title }),
       commitOnBlur: true, onCommit: function (value) { self.commit(key, value); },
-      onCancel: function () { delete self.started[key]; } });
+      onCancel: function () { self.release(key, field); } });
     field.input.addEventListener("input", function () { self.begin(key); });
     field.input.addEventListener("paste", function () { self.begin(key); });
     // An edit that ended with nothing to send (the same value, retyped) lets go of its guard, so the next edit
     // is guarded by what the field shows then. These run after the field's own Enter and blur handling.
-    function settled() { if (!field.editing) delete self.started[key]; }
+    function settled() { if (!field.editing) self.release(key, field); }
     field.input.addEventListener("keydown", function (event) { if (event.key === "Enter") settled(); });
     field.input.addEventListener("blur", settled);
     label.appendChild(ui.element("span", "climate-field-label", title));
@@ -70,6 +70,12 @@ function (ui, requests, unitField, shared) {
     return field;
   };
 
+  /* A draft that ended without a write (Escape, or the same value committed) lets go of its guard and shows the
+     Model's value, which may have changed while it was being typed, so the next edit is guarded by what it shows. */
+  Pane.prototype.release = function (key, field) {
+    delete this.started[key];
+    if (this.values && !this.pending(key)) field.setValue(this.values[key]);
+  };
   Pane.prototype.begin = function (key) {
     if (this.values && !Object.prototype.hasOwnProperty.call(this.started, key)) this.started[key] = this.values[key];
   };

@@ -506,3 +506,21 @@ test("a stale revision after the site changed puts the Model's values back in Se
   d.querySelector("form").listeners.submit({ preventDefault: function () {} });
   assert.strictEqual(named(p, P + "site.update")[1].payload.params.expected_values.latitude_deg, 42.75);
 });
+
+test("a design draft cancelled or committed unchanged shows the Model's newer value and is guarded by it", function () {
+  ["Escape", "Enter"].forEach(function (ending) {
+    var p = page(null, { heating_99_c: -10, cooling_1_c: 30, design_temperature_source: null, state: "set",
+      warning: null });
+    open(p);
+    click(card(p, "design"));
+    var heating = field(pane(p).querySelector(".climate-design"), "99% heating dry bulb");
+    type(heating, ending === "Escape" ? "-13" : "-10.0");
+    p.design = Object.assign({}, p.design, { heating_99_c: -11 }); p.revision = 2; p.publish();
+    key(heating, ending);
+    assert.strictEqual(named(p, P + "design_temperatures.update").length, 0, ending + " sends nothing");
+    assert.strictEqual(heating.value, "-11", ending + " shows the Model's value");
+    type(heating, "-12"); key(heating, "Enter");
+    assert.deepStrictEqual(named(p, P + "design_temperatures.update")[0].payload.params.expected_values,
+      { heating_99_c: -11 }, ending + ": guarded by what the field showed");
+  });
+});
