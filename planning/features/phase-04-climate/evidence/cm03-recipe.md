@@ -1,7 +1,7 @@
 # CM03 host recipe: the settings file and climate data folders
 
 DATE: 2026-11-18
-STATUS: Prepared on the PR #514 head. Bridge steps run by the stage; the native chooser step is the conductor's.
+STATUS: Run 2026-11-18 on `45224965`: Pass ([evidence](cm03-20261118.md)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
 

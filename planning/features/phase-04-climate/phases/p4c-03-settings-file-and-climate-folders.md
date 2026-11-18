@@ -1,7 +1,7 @@
 # P4c-03: The settings file and climate data folders
 
 DATE: 2026-11-17
-STATUS: Implemented on branch `feature/climate-p4c-03`, 2026-11-18. CM03 not yet run.
+STATUS: Implemented on branch `feature/climate-p4c-03` (PR #514), 2026-11-18. CM03 Pass on `45224965`.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
 
