@@ -567,3 +567,14 @@ test("a station renamed in its file shows its new name after a re-read", functio
   }));
   assert.strictEqual(rowButton(p, NEAR).textContent, "Alder Field East");
 });
+
+test("in Replace, a climate replaced elsewhere moves the Attached mark", function () {
+  var p = openReplace(0);
+  assert.ok(text(row(p, NEAR)).indexOf("Attached") >= 0);
+  p.revision = 2; p.publish();
+  assert.strictEqual(named(p, P + "climate.source_status").length, 2, "where the attached station is, read again");
+  answer(p, last(p, P + "climate.source_status"), completed({ status: "found", folder_id: SET_A.id,
+    station_key: SECOND.key }));
+  assert.strictEqual(text(row(p, NEAR)).indexOf("Attached"), -1);
+  assert.ok(text(row(p, SECOND)).indexOf("Attached") >= 0);
+});

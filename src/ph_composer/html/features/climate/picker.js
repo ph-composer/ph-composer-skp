@@ -139,7 +139,10 @@ function (ui, RecordForm, requests, snapshot, tables, controls, outlineMap, proj
   Picker.prototype.refresh = function () {
     if (this.busy()) return;
     if (this.staleStations && this.folderId) { this.staleStations = false; this.read(this.folderId); }
-    if (this.staleClimate && this.replacing) { this.staleClimate = false; this.readClimate(); }
+    if (this.staleClimate && this.replacing) {
+      this.staleClimate = false; this.readClimate();
+      this.reads.source.reset(); this.reads.source.run(P + "climate.source_status", {});
+    }
   };
   function siteKey(site) {
     return site && site.state === "set" ? [site.latitude_deg, site.longitude_deg, site.elevation_m].join() : "";
@@ -372,6 +375,8 @@ function (ui, RecordForm, requests, snapshot, tables, controls, outlineMap, proj
 
   Picker.prototype.comparison = function (station) {
     var table = el("table", "phc-table climate-picker-compare"), head = el("tr"), site = this.site;
+    var scroll = el("div", "climate-picker-compare-scroll");
+    scroll.appendChild(table);
     ["", "Station", "Dataset", "Distance", "Elevation", "Result"].forEach(function (word) {
       head.appendChild(el("th", "", word));
     });
@@ -392,7 +397,7 @@ function (ui, RecordForm, requests, snapshot, tables, controls, outlineMap, proj
         check, current.station_elevation_m);
     }
     line("New", station.name, this.value.dataset_name, station.limit_check, station.elevation_m);
-    return table;
+    return scroll;
   };
 
   /* "Alder Field is 18 km from the site and 11 m higher. Within the Phius limits of 50 mi and 400 ft." The limits

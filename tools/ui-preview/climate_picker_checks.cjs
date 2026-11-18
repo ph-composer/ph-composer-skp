@@ -40,6 +40,15 @@ check({ name: "climate-picker", output }, async ({ newPage, step }) => {
       assert.equal(fit.sideways, false, `${name}: the dialog scrolls sideways at ${width}`);
       const button = await picker.getByRole("button", { name: commit, exact: true }).boundingBox();
       assert.ok(button.y >= 0 && button.y + button.height <= height, `${name}: ${commit} is in reach at ${width}`);
+      const controls = await picker.locator(".climate-picker-controls select").evaluateAll(nodes => nodes.map(n =>
+        n.getBoundingClientRect().right));
+      assert.ok(Math.max(...controls) <= fit.box.x + fit.box.width, `${name}: Dataset and State fit at ${width}`);
+      const compare = picker.locator(".climate-picker-compare-scroll");
+      if (await compare.count()) {
+        const clipped = await compare.evaluate(node => Array.prototype.some.call(node.querySelectorAll("td"),
+          cell => cell.scrollWidth > cell.clientWidth + 1));
+        assert.equal(clipped, false, `${name}: the Now and New facts are not cut at ${width}`);
+      }
       const stateColumn = await picker.locator("th.col-state").isVisible();
       assert.equal(stateColumn, width > 500, `${name}: the State column ${width > 500 ? "shows" : "gives way"} at ${width}`);
       const map = await picker.locator(".phc-outline-map").boundingBox();

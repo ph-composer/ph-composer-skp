@@ -127,3 +127,7 @@ CM09 passes and the narrow layout is recorded.
   discard; a search that matched nothing selects again when it matches; a folder not read whole
   (`complete: false`) says so in the dialog; a dataset that could not be remembered says so; a station renamed in
   its file shows its new name after a re-read.
+- **After the Codex review** (cycle 2): Replace's Now and New facts keep their widths and scroll sideways in their
+  own box at narrow sizes; a long dataset name shortens its select instead of widening the dialog (the preview's
+  second folder now has one); a climate replaced elsewhere while the picker is open moves the Attached mark. This
+  last fix merges unreviewed under the two-cycle cap.

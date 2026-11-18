@@ -86,9 +86,12 @@
 /* Set Phius climate data (picker.js): the map beside the station list, the selected station's verdict under both. */
 .climate-picker { width: min(1120px, calc(100vw - 32px)); }
 .climate-picker-summary { margin: -8px 0 0; }
-.climate-picker-controls { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
-.phc-form-dialog .climate-picker-controls label { flex: none; flex-direction: row; align-items: center; gap: 6px; }
-.phc-form-dialog .climate-picker-controls select { width: auto; }
+.climate-picker-controls { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; min-width: 0; }
+/* A long dataset name shortens its select rather than widening the dialog. */
+.phc-form-dialog .climate-picker-controls label { flex: 0 1 auto; flex-direction: row; align-items: center; gap: 6px;
+  min-width: 0; max-width: 100%; }
+.phc-form-dialog .climate-picker-controls select { flex: 0 1 auto; width: auto; min-width: 0; max-width: 100%;
+  text-overflow: ellipsis; }
 .climate-picker-controls .phc-inventory-controls { flex: 1 1 200px; min-width: 0; margin: 0; }
 .climate-picker-notice { margin: 0; padding: 8px 10px; border-radius: var(--radius-md);
   background: var(--warning-surface); color: var(--warning-ink); }
@@ -102,11 +105,14 @@
   font: inherit; text-align: left; cursor: pointer; }
 .climate-picker-list td .climate-data-chip { margin-left: 6px; }
 .climate-picker-tip { display: flex; flex-direction: column; gap: 2px; }
+.climate-picker-selection { min-width: 0; }
 .climate-picker-selection p { margin: 0 0 6px; }
 .climate-picker-selection .climate-picker-warning { padding: 8px 10px; border-radius: var(--radius-md);
   background: var(--warning-surface); color: var(--warning-ink); }
-.climate-picker-compare { margin: 0 0 8px; }
-.climate-picker-compare th, .climate-picker-compare td { text-align: left; }
+/* Replace's Now and New facts keep their widths and scroll sideways inside their own box at narrow sizes. */
+.climate-picker-compare-scroll { margin: 0 0 8px; overflow-x: auto; }
+.climate-picker-selection .climate-picker-compare { width: auto; min-width: 100%; table-layout: auto; }
+.climate-picker-compare th, .climate-picker-compare td { text-align: left; white-space: nowrap; }
 @media (max-width: 1040px) {
   .climate-data-table, .climate-data-table tbody, .climate-data-table tr, .climate-data-table td { display: block;
     width: auto; }
