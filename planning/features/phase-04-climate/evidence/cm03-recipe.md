@@ -93,7 +93,7 @@ B eval "load '$D'; CM03.replug('Phius C')"   # found true again
 Start the second process and, at once, the SketchUp loop:
 
 ```sh
-ruby _private/host/<run>/driver/external_writer.rb "$PWD" 200 > _private/host/<run>/CM03/external.txt &
+/usr/bin/ruby _private/host/<run>/driver/external_writer.rb "$PWD" 200 > _private/host/<run>/CM03/external.txt &
 B eval "load '$D'; CM03.write_section(200)"
 wait
 cat _private/host/<run>/CM03/external.txt

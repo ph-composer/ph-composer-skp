@@ -179,8 +179,14 @@ class ClimateFoldersTest < PhComposerTestCase
                 [], "text"].map do |section|
       JSON.generate("schema_version" => 1, "sections" => { "ph_composer.climate" => section })
     end
-    (["not json"] + sections).each do |text|
-      File.write(file, text)
+    # A name JSON decodes to text that is not UTF-8: an escaped lone surrogate, and a raw 0xFF byte.
+    bad_names = ["\\udcff".b, "\xFF".b].map do |name|
+      row = %({"id":"climate_folder_AbCdEf123456","name":"N#{name}","location":"/tmp/x"})
+      %({"schema_version":1,"sections":{"ph_composer.climate":{"folders":[#{row}],"last_dataset_id":null}}}).b
+    end
+    (["not json"] + sections + bad_names).each do |text|
+      File.binwrite(file, text)
+      assert_equal "The climate data settings cannot be read", Folders::Operations.setup_summary
 
       assert_equal "climate.settings_unreadable",
                    PhComposer::API.query(:context => @context, :name => "#{PREFIX}.list").fetch("code")
@@ -192,7 +198,7 @@ class ClimateFoldersTest < PhComposerTestCase
                    setup_command("remove", "id" => "climate_folder_AbCdEf123456").fetch("code")
       assert_equal "climate.settings_unreadable",
                    setup_command("rename", "id" => "climate_folder_AbCdEf123456", "name" => "New").fetch("code")
-      assert_equal text, File.read(file)
+      assert_equal text.b, File.binread(file)
     end
   end
 

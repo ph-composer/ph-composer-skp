@@ -113,7 +113,13 @@ module PhComposer
         unreadable = "PH-Composer's settings file on this computer could not be read. It was left as stored."
         raise Refused.new(:unreadable, unreadable) if text.nil? || text.bytesize > MAX_BYTES
 
-        document = JSON.parse(text.dup.force_encoding(Encoding::UTF_8))
+        text = text.dup.force_encoding(Encoding::UTF_8)
+        raise Refused.new(:unreadable, unreadable) unless text.valid_encoding?
+
+        document = JSON.parse(text)
+        # JSON decodes an escaped lone surrogate to a string that is not valid UTF-8; no reader may meet one.
+        raise Refused.new(:unreadable, unreadable) unless valid_strings?(document)
+
         version = document.is_a?(Hash) && document["schema_version"]
         raise Refused.new(:unreadable, unreadable) unless version.is_a?(Integer)
         if version > SCHEMA_VERSION
@@ -125,6 +131,15 @@ module PhComposer
         document
       rescue JSON::ParserError, EncodingError, ArgumentError
         raise Refused.new(:unreadable, unreadable), :cause => nil
+      end
+
+      def valid_strings?(value)
+        case value
+        when String then value.valid_encoding?
+        when Hash then value.all? { |key, item| valid_strings?(key) && valid_strings?(item) }
+        when Array then value.all? { |item| valid_strings?(item) }
+        else true
+        end
       end
 
       # Writes the document beside the file and renames it into place, so a reader sees the old file or the
