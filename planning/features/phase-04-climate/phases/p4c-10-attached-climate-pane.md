@@ -1,7 +1,7 @@
 # P4c-10: The attached climate pane
 
 DATE: 2026-11-17
-STATUS: Implemented on branch `feature/climate-p4c-10` (2026-11-18, PR #521); CM10 agent run Pass on `9ae52ed0`, Ed's pass pending. Authorized 2026-11-17 with every Climate stage (packet STATUS, Authorization).
+STATUS: Merged to main 2026-11-18 (PR #521, `acf0827b`); CM10 agent run Pass on `9ae52ed0`, Ed's pass pending. Authorized 2026-11-17 with every Climate stage (packet STATUS, Authorization).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 

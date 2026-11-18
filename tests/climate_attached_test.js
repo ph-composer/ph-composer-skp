@@ -286,18 +286,22 @@ test("with no folder Replace explains and offers Choose Climate Data Folder and 
   var bubble = pane(p).querySelector(".climate-attached-explain").querySelector(".phc-bubble");
   assert.strictEqual(bubble.hidden, false);
   assert.ok(/no climate data folder on this computer/.test(text(bubble)));
-  assert.strictEqual(byText(bubble, "button", "Enter Values by Hand…").disabled, true);
+  assert.strictEqual(byText(bubble, "button", "Enter Values by Hand…").disabled, true, "one climate: Clear first");
+  assert.ok(all(bubble, "[aria-label='Why Enter Values by Hand is unavailable']").length);
   click(byText(bubble, "button", "Choose Climate Data Folder…"));
   assert.strictEqual(named(p, P + "folders.add").length, 1, "the dialog opens and starts Add Folder");
 });
 
-test("Clear is one action with no confirm, from the overflow menu; Edit Values waits with its reason", function () {
+test("Clear is one action with no confirm, from the overflow menu; Edit Values opens the editor", function () {
   var p = page();
   load(p);
   var heading = pane(p).querySelector(".phc-heading");
   var edit = byText(heading, "button", "Edit Values…");
-  assert.strictEqual(edit.disabled, true);
-  assert.ok(all(heading, "[aria-label='Why Edit Values is unavailable']").length);
+  assert.strictEqual(edit.disabled, false);
+  click(edit);
+  var editor = p.context.document.querySelector(".climate-values");
+  assert.ok(editor && !editor.hidden, "the values editor opens on the climate");
+  click(byText(editor, "button", "Cancel"));
   var menu = all(heading, "[aria-label='More climate actions']")[0];
   click(menu);
   click(byText(heading, "button", "Clear"));

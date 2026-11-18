@@ -192,3 +192,14 @@
   .climate-attached-where dd { margin-bottom: 8px; }
   .climate-design-fields, .climate-site-fields, .climate-export-fields { grid-template-columns: 1fr; }
 }
+/* The values editor (board 12): the fields above one grid, which scrolls inside the dialog both ways. */
+.climate-values { width: min(1160px, calc(100vw - 32px)); }
+.climate-values-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px;
+  margin: 0 0 8px; }
+.climate-values-notice:empty { display: none; }
+.climate-values-scroll { max-height: calc(100vh - 380px); min-height: 120px; overflow: auto; margin: 0 0 8px; }
+.climate-values-grid th { white-space: nowrap; }
+.climate-values-grid td { padding: 0; }
+.climate-values-grid .is-design { background: var(--surface-alt); }
+.climate-values-grid input { width: 64px; height: 28px; padding: 0 6px; border: 0; background: transparent;
+  text-align: right; }
