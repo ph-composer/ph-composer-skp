@@ -96,3 +96,11 @@ destination and write the HBJSON and its companion report. Use the findings in t
 
 The report records exported quantities and findings. Share linked datasheets and photos
 separately when the recipient needs them.
+
+The HBJSON carries the site and the climate on every Building-Segment. The site location is
+written once it is set. The climate is written once it is complete and the site is set, with its
+source: an unedited Phius station, or a climate you edited or typed. The second cooling case
+repeats the station's one. The report's Climate section lists the site, the dataset and station,
+the Phius limit check, any edited values with the file's values, the peak loads, the wind speed
+and the design temperatures, which stay in the Model. It names no folder on your computer. A
+climate left out is named there with the reason, and the export still runs.

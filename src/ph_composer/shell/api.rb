@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 65
+    MINOR = 66
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -360,7 +360,13 @@ module PhComposer
                     "climate.attach_station and climate.replace_station take a folder id and a station key and " \
                     "read the file in Ruby; climate.source_status says whether the attached station's file is on " \
                     "this computer. climate.site_not_set, climate.station_not_found and climate.station_unreadable " \
-                    "are new. A station climate's provenance station_name is its file name's stem." }
+                    "are new. A station climate's provenance station_name is its file name's stem." },
+      { "minor" => 66, "date" => "2026-11-18",
+        "change" => "The Site export section. ph_composer.climate.export_preflight is new and answers the export " \
+                    "findings climate.incomplete, climate.zone_not_set, climate.utc_offset_not_set, " \
+                    "climate.outside_phius_limits and climate.not_checked, which are new, and " \
+                    "climate.site_not_set; none blocks the export. The export writes the site and a complete " \
+                    "climate as honeybee-ph's Site on every Building Segment." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

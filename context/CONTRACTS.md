@@ -1237,7 +1237,7 @@ stud spacing), the hybrid host; each Layer-Segment of a divided Layer carries it
 EnergyMaterial. Material identifiers are scoped by Assembly and Layer, so no two Layers share one, and the
 reversed construction reuses the same objects. A membrane Layer, its Layer-Segment (even with a steel stud
 spacing) and an undivided Layer's Layer-Segment have no material of their own
-(`features/assemblies/export.rb`, extraction and preflight alike); their maps, Window Elements', Thermal Bridge Edges', Attached zones' and every
+(`features/assemblies/export.rb`, extraction and preflight alike); their maps, Window Elements', Thermal Bridge Edges', Attached zones', the climate's and every
 definition's (Materials, Frames, Glazings, Psi-Install Types, Window Types, Thermal Bridge Types, Building
 Segments and Levels) stay in the Model with one `export.metadata_omitted` finding per entity, used or
 not: the Zone section passes every valid Building Segment and Level through the boundary once
@@ -1252,6 +1252,24 @@ the declared `ph_composer.thermal_bridge_type_id`: a run joins many Edges, so no
 leaves. A missing type or psi-value refuses the section; every other finding is a note, and an Edge no Zone
 holds is left out with one. Its result fields list each attached run's length, psi-value, quantity and
 heat loss, and its conformance finds each run on its Zone's Building-Segment in the reloaded model.
+
+The Site section is the first to attach at `MODEL` after another section: `ph_composer.climate.export.site`
+(Ruby `features/climate/export.rb`, Python `site_sections.py`) `requires:` the Zones section, so in both
+languages it runs after it and attaches once the Rooms and the Building Segments they share exist; section
+ids alone would order it first. It writes one record always (C4c-4): `location` (the site, or null),
+`climate` (a complete climate's values with Cooling 2 added as a copy of Cooling 1, or null),
+`climate_left_out` (`site_not_set`, `incomplete` or null), `provenance` (the stored provenance in
+honeybee-ph's fields, with a line saying Cooling 2 repeats Cooling 1) and `report`, the report's facts,
+which Python passes to the result unchanged. Ruby decides every value, an unset climate zone written as 1
+(Not defined) and an unset UTC offset as null among them; Python builds `Location`, `Climate` with its
+`ClimateProvenance`, and `Site(location, climate)`, a null part becoming honeybee-ph's default, and sets
+that one `Site` on every distinct Building Segment. With both parts null it sets nothing. It is optional,
+and all its findings are notes: a Model exports without a climate. The climate record's `user_data`
+stays in the Model with an `export.metadata_omitted` finding. Its result fields carry the location, the
+climate's identity, the four peak-load temperatures, the limit check, the edited values with what the
+file read, the design temperatures, the count of Building Segments and a digest of the built `Site`;
+conformance finds that `Site` on every reloaded Building Segment, honeybee-ph's default for each part the
+record did not carry, Cooling 2 equal to Cooling 1 and no `source_uri`.
 
 Export reads one revision-bound `GeometrySnapshot`: one traversal recording each occurrence path
 and accumulated transform, with no live SketchUp objects. Its entries are Faces, Edges (world SI

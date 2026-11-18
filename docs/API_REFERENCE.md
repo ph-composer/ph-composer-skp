@@ -9855,6 +9855,128 @@ Example params:
 {}
 ```
 
+### `ph_composer.climate.export_preflight`
+
+Climate export checks: what the Site section writes as unset, and a climate it leaves out and why. None blocks the export. Owner: `ph_composer.climate`.
+
+Refuses: `record.unreadable`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "findings",
+    "repairs"
+  ],
+  "properties": {
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "section",
+          "object_id",
+          "message",
+          "blocks_export"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "section": {
+            "type": "string"
+          },
+          "object_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The record the finding is about."
+          },
+          "message": {
+            "type": "string"
+          },
+          "blocks_export": {
+            "type": "boolean"
+          },
+          "locate": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "params"
+            ],
+            "description": "A view command that shows what the finding is about.",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "params": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "repairs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "checked",
+          "action",
+          "params"
+        ],
+        "description": "An action the export workflow offers to run before exporting.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "checked": {
+            "type": "boolean"
+          },
+          "action": {
+            "type": "string"
+          },
+          "params": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
 ### `ph_composer.climate.folders.list`
 
 The climate data folders set up on this computer, with each one's name, display location, whether it can be found now, and the stations, states and files not read found in it now. Owner: `ph_composer.climate`.
@@ -77519,13 +77641,18 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `climate.folder_not_found` | No climate data folder has that id, or the chosen folder is not there. Nothing was written. |
 | `climate.folder_overlaps` | The chosen folder is, holds or sits inside a listed climate data folder, so its stations would be listed twice. Nothing was written. |
 | `climate.heating_not_below_cooling` | The heating design temperature is at or above the cooling one; both still save. |
+| `climate.incomplete` | The climate has values missing, so it was left out of the HBJSON; the site location was still written. The message counts what is missing. |
 | `climate.no_original` | A climate entered by hand has no station values to restore. Nothing was written. |
+| `climate.not_checked` | The climate was entered by hand without station coordinates, so the Phius limit check was not made. |
 | `climate.not_found` | The Model holds no climate to edit, restore or clear. Nothing was written. |
+| `climate.outside_phius_limits` | The attached station is farther from the site than Phius allows, by distance, elevation or both. |
 | `climate.settings_unavailable` | This computer's settings file cannot be used: it is kept on macOS only for now, or it could not be saved. Nothing was written. |
 | `climate.settings_unreadable` | This computer's climate data settings cannot be read, or a later version of PH-Composer wrote them. They are left as stored; reads report it and changes refuse. |
-| `climate.site_not_set` | The site's latitude, longitude and elevation are not set, and the station list and attach need them. Nothing was read or written. |
+| `climate.site_not_set` | The site's latitude, longitude and elevation are not set. The station list and attach refuse, reading and writing nothing; export leaves a climate out of the HBJSON with this finding. |
 | `climate.station_not_found` | No station file with that key is in the climate data folder now, or it could not be opened. Nothing was written. |
 | `climate.station_unreadable` | The station file is not a Phius station file this version reads; the message names the row. Nothing was written. |
+| `climate.utc_offset_not_set` | The site's hours from UTC are not set. They are exported empty. |
+| `climate.zone_not_set` | The site's climate zone is not set. It is exported as Not defined. |
 
 ### `ph_composer.spaces`
 
@@ -77754,3 +77881,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.63 | 2026-11-17 | The ph_composer.climate.climate record kind is new, one climate per Model. ph_composer.climate.climate.get reads it with its state, what is missing, the edited cells and the Phius limit check against the site; climate.enter_values enters one by hand with gaps allowed, climate.save_values edits its values and rewrites its provenance, climate.restore_original copies the station file's values back, and climate.clear deletes it, each guarded by the editable fields last read. ph_composer.climate.site.update's result gains limit_check, ph_composer.climate.site.preview_limit_check is new, and the summary gains the climate card. climate.not_found and climate.no_original are new. |
 | 1.64 | 2026-11-18 | The climate data folders on this computer, kept in PH-Composer's own settings file: ph_composer.climate.folders.list reads them with a display location that is never an absolute path; the setup commands folders.add and folders.locate take a folder the user chooses, and folders.rename, folders.remove and folders.remember_dataset take its id. climate.settings_unreadable, climate.settings_unavailable, climate.folder_not_found and climate.folder_overlaps are new. |
 | 1.65 | 2026-11-18 | The Phius station reader. ph_composer.climate.folders.list gives each folder's format, station and state counts and files not read by extension; ph_composer.climate.stations.list pages one folder's stations nearest the site first with each one's Phius limit check; climate.attach_station and climate.replace_station take a folder id and a station key and read the file in Ruby; climate.source_status says whether the attached station's file is on this computer. climate.site_not_set, climate.station_not_found and climate.station_unreadable are new. A station climate's provenance station_name is its file name's stem. |
+| 1.66 | 2026-11-18 | The Site export section. ph_composer.climate.export_preflight is new and answers the export findings climate.incomplete, climate.zone_not_set, climate.utc_offset_not_set, climate.outside_phius_limits and climate.not_checked, which are new, and climate.site_not_set; none blocks the export. The export writes the site and a complete climate as honeybee-ph's Site on every Building Segment. |

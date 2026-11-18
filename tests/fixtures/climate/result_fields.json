@@ -1,0 +1,14 @@
+[
+  "location",
+  "climate",
+  "climate_written",
+  "climate_left_out",
+  "missing_values",
+  "peak_load_temperatures_c",
+  "limit_check",
+  "edited_cells",
+  "design_temperatures",
+  "design_temperature_source",
+  "building_segments",
+  "site_digest"
+]

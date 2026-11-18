@@ -1,7 +1,7 @@
 # P4c-04: The Phius station reader, the station list and attach
 
 DATE: 2026-11-17
-STATUS: Implemented, PR #515, 2026-11-18; CM04 Pass on `47f26946`. Ed authorized every stage on 2026-11-17. Departures below.
+STATUS: Merged to main 2026-11-18 (PR #515, `de07fd81`); CM04 Pass on `47f26946`. Ed authorized every stage on 2026-11-17. Departures below.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 

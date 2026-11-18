@@ -1,0 +1,52 @@
+{
+  "ph_composer.climate.export.site": {
+    "building_segments": 1,
+    "climate": {
+      "dataset_name": "Synthetic Dataset",
+      "name": "Inside Both XA",
+      "origin": "station",
+      "source_type": "user_defined",
+      "state": "XA",
+      "station_name": "INSIDE_BOTH",
+      "wind_speed_m_s": 3.0
+    },
+    "climate_left_out": null,
+    "climate_written": true,
+    "design_temperature_source": "ASHRAE 2021, invented note",
+    "design_temperatures": {
+      "cooling_1_c": 30.1,
+      "heating_99_c": -17.2
+    },
+    "edited_cells": [
+      {
+        "as_read": 1.0,
+        "column": "jan",
+        "row": "air_c",
+        "value": 0.5
+      }
+    ],
+    "limit_check": {
+      "distance_km": 77.83655616347384,
+      "distance_ok": true,
+      "elevation_difference_m": 121.0,
+      "elevation_ok": true,
+      "reason": null,
+      "verdict": "pass"
+    },
+    "location": {
+      "climate_zone": 15,
+      "elevation_m": 500.0,
+      "hours_from_utc": null,
+      "latitude_deg": 40.0,
+      "longitude_deg": -100.0
+    },
+    "missing_values": 0,
+    "peak_load_temperatures_c": {
+      "cool_1": 201.0,
+      "cool_2": 201.0,
+      "heat_1": 1.0,
+      "heat_2": 101.0
+    },
+    "site_digest": "856fde5908015b8b4a77fc9c0b8a792110d7254170c3eddd1e15101b70207222"
+  }
+}

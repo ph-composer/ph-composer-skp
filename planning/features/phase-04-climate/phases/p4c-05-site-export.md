@@ -1,7 +1,7 @@
 # P4c-05: Export of the site and climate
 
 DATE: 2026-11-17
-STATUS: Scoped. Not authorized.
+STATUS: Implemented, PR #516, 2026-11-18; CM05 Pass on `e4392993`. Ed authorized every stage on 2026-11-17. Departures below.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -135,3 +135,23 @@ own finding for a heat pump left out for want of design temperatures.
 ## Done when
 
 CM05 passes, owed check 6 is recorded, and C4c-4 is answered.
+
+## Departures, 2026-11-18
+
+- **Entry checks** ([evidence](../evidence/owed-check-6-20261118.md)): owed check 6 ran on PHX 1.57.5
+  over the pinned stack and every expectation of CONTRACTS section 7 held. PHX 1.58 and later need a
+  newer honeybee-ph, so the `phx` group pins 1.57.5 (D4c-22). C4c-4 is settled (D4c-24): the
+  report reads the Python result, so the record's report block passes through it, with the climate's
+  identity and a missing-value count added. `assembly.py` attaches each host level in the
+  coordinator's order, which follows `requires`, so the Site section attaches at `MODEL` after the
+  Zones section although its id sorts first.
+- **Zone and offset findings** fire only with a climate in the Model (D4c-23), as CM05 says; the
+  first head fired them for a site alone and the Codex review held it to the contract.
+- **A path-like design-temperature note** is replaced in the report by a line saying it stays in the
+  Model (D4c-25), so it cannot block the export through the artifact guard.
+- **Conformance** compares a digest of the built `Site` with every reloaded Building Segment
+  (D4c-24), and honeybee-ph's default for each part the record did not carry.
+- **The round trip** (step 8) renames the reference model's Building Segments without a space: PHX
+  1.57.5 names a merged Room after its segment, and a Room identifier cannot hold one. A PHX
+  follow-up, not a Site defect.
+- **`locate`**: P4c-06 has not merged, so the findings carry none; P4c-06 adds them.

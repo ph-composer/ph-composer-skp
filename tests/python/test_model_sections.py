@@ -16,6 +16,7 @@ from ph_composer_translation.material_sources import MaterialSourcesSection
 from ph_composer_translation.model_metadata import ModelMetadataSection
 from ph_composer_translation.model_sections import FaceSection, ZoneSection
 from ph_composer_translation.sections import Inputs
+from ph_composer_translation.site_sections import SiteSection
 from ph_composer_translation.space_sections import SpaceSection
 from ph_composer_translation.thermal_bridge_sections import ThermalBridgeSection
 from ph_composer_translation.window_sections import ApertureSection, WindowConstructionSection
@@ -35,7 +36,7 @@ def load_fixture() -> dict[str, Any]:
 def test_normal_composition_uses_only_authored_constructions() -> None:
     result = translate(load_fixture(), SECTIONS).to_document()
     assert result["state"] == "complete"
-    assert result["summary"] == {"objects": 15, "unavailable": 0, "findings": 0, "publishable": True}
+    assert result["summary"] == {"objects": 16, "unavailable": 0, "findings": 0, "publishable": True}
     assert "canonical_model" in result
 
 
@@ -124,6 +125,7 @@ def test_model_sections_build_rooms_then_resolve_surface_pairs(monkeypatch: pyte
             WindowConstructionSection(),
             ApertureSection(),
             ZoneSection(),
+            SiteSection(),
             ModelMetadataSection(),
             SpaceSection(),
             ThermalBridgeSection(),
@@ -153,6 +155,7 @@ def test_invalid_face_vocabulary_becomes_a_record_error(monkeypatch: pytest.Monk
             WindowConstructionSection(),
             ApertureSection(),
             ZoneSection(),
+            SiteSection(),
             ModelMetadataSection(),
             SpaceSection(),
             ThermalBridgeSection(),
@@ -188,6 +191,7 @@ def test_surface_requires_an_available_reciprocal_counterpart(monkeypatch: pytes
             WindowConstructionSection(),
             ApertureSection(),
             ZoneSection(),
+            SiteSection(),
             ModelMetadataSection(),
             SpaceSection(),
             ThermalBridgeSection(),
@@ -251,6 +255,7 @@ def test_explicit_and_reciprocal_omissions_preserve_inputs_and_publish_remaining
             WindowConstructionSection(),
             ApertureSection(),
             ZoneSection(),
+            SiteSection(),
             ModelMetadataSection(),
             SpaceSection(),
             ThermalBridgeSection(),
@@ -259,7 +264,7 @@ def test_explicit_and_reciprocal_omissions_preserve_inputs_and_publish_remaining
     result = cast(dict[str, Any], translation.to_document())
 
     assert result["state"] == "complete_with_findings"
-    assert result["summary"] == {"objects": 15, "unavailable": 0, "findings": 2, "publishable": True}
+    assert result["summary"] == {"objects": 16, "unavailable": 0, "findings": 2, "publishable": True}
     assert result["canonical_model"]["faces"] == 10
     assert result["canonical_model"]["surface_pairs"] == 0
     assert len(result["ph_composer.zones.faces.export.faces"]["surface_omissions"]) == 2
@@ -297,6 +302,7 @@ def test_retired_face_with_no_boundary_is_a_nonblocking_reported_omission(monkey
                 WindowConstructionSection(),
                 ApertureSection(),
                 ZoneSection(),
+                SiteSection(),
                 ModelMetadataSection(),
                 SpaceSection(),
                 ThermalBridgeSection(),
@@ -350,6 +356,7 @@ def test_malformed_omission_metadata_remains_a_blocker(
                 WindowConstructionSection(),
                 ApertureSection(),
                 ZoneSection(),
+                SiteSection(),
                 ModelMetadataSection(),
                 SpaceSection(),
                 ThermalBridgeSection(),
@@ -377,6 +384,7 @@ def test_missing_boundary_without_explicit_omission_remains_a_blocker(monkeypatc
                 WindowConstructionSection(),
                 ApertureSection(),
                 ZoneSection(),
+                SiteSection(),
                 ModelMetadataSection(),
                 SpaceSection(),
                 ThermalBridgeSection(),
@@ -406,6 +414,7 @@ def test_omitted_face_invalid_classification_still_blocks(monkeypatch: pytest.Mo
                 WindowConstructionSection(),
                 ApertureSection(),
                 ZoneSection(),
+                SiteSection(),
                 ModelMetadataSection(),
                 SpaceSection(),
                 ThermalBridgeSection(),
