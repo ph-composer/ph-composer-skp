@@ -87,7 +87,8 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
      Replace opens an explanation anchored to it. */
   Pane.prototype.buildActions = function () {
     var self = this;
-    this.edit = ui.button("Edit Values…", function () { if (self.values()) self.actions.editValues(self.values()); });
+    // A wind speed saved on blur by this very click is read back first, so the editor opens on the Model's values.
+    this.edit = ui.button("Edit Values…", function () { self.editQueued = true; self.openQueuedEdit(); });
     this.replace = ui.button("Replace…", function () { self.onReplace(); });
     // Replace stays enabled; with no folder or no site it explains here and offers the way on (J6).
     this.explain = new ui.Bubble(this.replace, "Replace", { ownTrigger: true, detachedTrigger: true });
@@ -135,6 +136,11 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
     return ui.button(label, function () { self.explain.close(false); run(); });
   };
 
+  Pane.prototype.openQueuedEdit = function () {
+    if (!this.editQueued || this.awaitingRead || this.writes.busy() || this.reads.get.busy() || !this.values()) return;
+    this.editQueued = false; this.actions.editValues(this.values());
+  };
+
   /* Reads the source again: after the picker or the data dialog closes, either may have changed it. */
   Pane.prototype.refreshSource = function () { this.sourceStale = true; };
 
@@ -158,6 +164,7 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
     if (this.queued && !this.awaitingRead && !this.writes.busy() && !this.reads.get.busy()) {
       var queued = this.queued; this.queued = null; this.write(queued);
     }
+    this.openQueuedEdit();
     var opened = shown && !this.shown;
     this.shown = shown;
     this.menu.root.hidden = !shown;
@@ -564,6 +571,7 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
     if (this.wind.editing) this.wind.cancel();
     this.wind.clearError();
     this.record = null; this.source = null; this.failure = null; this.painted = null; this.windGuard = null;
+    this.editQueued = false;
   };
 
   Pane.prototype.dispose = function () {

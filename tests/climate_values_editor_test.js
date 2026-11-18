@@ -311,3 +311,54 @@ test("an empty clipboard, a column of words and a typographic minus", function (
   submit(p);
   assert.strictEqual(last(p, P + "climate.enter_values").payload.params.values.monthly.air_c[0], -5.5);
 });
+
+test("a station file's point decimals paste in a comma number format", function () {
+  var p = page({ decimal: "," });
+  openHand(p);
+  paste(p, cell(p, 0, 0), "0.5\t1.234\t2,5");
+  assert.strictEqual(notice(p), "Pasted 1 row.", "none refused");
+  type(field(p, "Name"), "Elm Street");
+  type(field(p, "Station elevation"), "92");
+  submit(p);
+  assert.deepStrictEqual(last(p, P + "climate.enter_values").payload.params.values.monthly.air_c.slice(0, 3),
+    [0.5, 1.234, 2.5], "a point is a decimal, never a group");
+});
+
+test("while a save is out the draft cannot change", function () {
+  var p = page();
+  openHand(p);
+  type(field(p, "Name"), "Elm Street");
+  type(field(p, "Station elevation"), "92");
+  type(cell(p, 0, 0), "10");
+  submit(p);
+  assert.strictEqual(cell(p, 0, 0).readOnly, true);
+  assert.strictEqual(field(p, "Name").readOnly, true);
+  assert.strictEqual(field(p, "Station elevation").disabled, true);
+  answer(p, last(p, P + "climate.enter_values"), { status: "refused", code: "validation.failed",
+    message: "Not saved.", effect: "none" });
+  assert.strictEqual(cell(p, 0, 0).readOnly, false, "a refusal gives the draft back");
+  assert.strictEqual(field(p, "Station elevation").disabled, false);
+});
+
+test("Edit Values pressed as a wind speed saves on blur opens on the values read after it", function () {
+  var p = page({ climate: "complete" });
+  var values = full({ wind_speed_m_s: 3 });
+  answer(p, last(p, P + "climate.get"), completed({ state: "complete", missing: [], edited_cells: [],
+    limit_check: null, climate: { id: "clm_AAAAAAAAAAAA", values: values } }));
+  var wind = all(pane(p), "input").filter(function (n) {
+    return n.getAttribute("aria-label") === "Average wind speed";
+  })[0];
+  wind.value = "4";
+  dom.dispatch(wind, { type: "input" });
+  dom.dispatch(wind, { type: "blur" });
+  assert.strictEqual(named(p, P + "climate.save_values").length, 1, "the blur saves");
+  click(byText(pane(p).querySelector(".phc-heading"), "button", "Edit Values…"));
+  assert.strictEqual(editor(p), null, "not on the values read before the save");
+  answer(p, last(p, P + "climate.save_values"), { status: "completed", effect: "committed", revision: 2, value: {} });
+  p.revision = 2; p.publish();
+  var after = full({ wind_speed_m_s: 4 });
+  answer(p, last(p, P + "climate.get"), completed({ state: "complete", missing: [], edited_cells: [],
+    limit_check: null, climate: { id: "clm_AAAAAAAAAAAA", values: after } }));
+  assert.ok(editor(p), "it opens once the Model is read again");
+  assert.strictEqual(field(p, "Average wind speed").value, "4");
+});

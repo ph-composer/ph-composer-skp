@@ -45,7 +45,6 @@ function (ui, RecordForm, unitField, numbers, preferences, units, fields, Grid, 
     this.elevation.setValue(values.station_elevation_m);
     this.swing.setValue(values.daily_temp_swing_k);
     this.wind.setValue(values.wind_speed_m_s);
-    [this.name, this.latitude, this.longitude].forEach(function (input) { input.readOnly = station; });
     this.form.appendChild(el("p", "climate-dialog-note", station ? "The station's name and coordinates come from " +
       "its file; Replace changes the station." : "Latitude and longitude are optional. Without them the Phius " +
       "limit check reads Not checked, entered by hand."));
@@ -171,6 +170,11 @@ function (ui, RecordForm, unitField, numbers, preferences, units, fields, Grid, 
     event.preventDefault();
     if (!text.trim()) return;
     try { rows = Grid.parse(text); } catch (error) { this.say(error.message); return; }
+    // A station file writes a point decimal whatever the panel's number format, and no Phius value is grouped.
+    var decimal = format().decimal, POINT = /^\s*[-+\u2212]?\d+\.\d+\s*$/;
+    rows = rows.map(function (row) {
+      return row.map(function (cell) { return POINT.test(cell) ? cell.replace(".", decimal) : cell; });
+    });
     // A leading column of words on every row, beside values, is a label column.
     var probe = this.cells[0][0];
     function label(row) { var word = row[0].trim(); return word && self.read(probe, word) === undefined; }
@@ -234,7 +238,14 @@ function (ui, RecordForm, unitField, numbers, preferences, units, fields, Grid, 
     var elevation = this.elevation.editing ? this.elevation.input.value.trim() : this.elevation.baseline;
     return Boolean(this.name.value.trim()) && elevation !== null && elevation !== "";
   };
-  Editor.prototype.paint = function () { this.submitButton.disabled = this.busy() || !this.ready(); };
+  /* While a save is out nothing can be typed, so the draft saved is the draft shown. */
+  Editor.prototype.paint = function () {
+    var self = this, busy = this.busy();
+    this.submitButton.disabled = busy || !this.ready();
+    this.cells.forEach(function (row) { row.forEach(function (input) { input.readOnly = busy; }); });
+    [this.name, this.latitude, this.longitude].forEach(function (input) { input.readOnly = busy || self.station; });
+    [this.elevation, this.swing, this.wind].forEach(function (unit) { unit.setDisabled(busy); });
+  };
 
   /* The eight editable fields, or a sentence counting the values that are not numbers, each marked. */
   Editor.prototype.values = function () {
