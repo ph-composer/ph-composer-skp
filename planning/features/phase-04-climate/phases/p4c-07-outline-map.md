@@ -1,7 +1,7 @@
 # P4c-07: The outline map
 
 DATE: 2026-11-17
-STATUS: Implemented on branch `feature/climate-p4c-07`, 2026-11-18; CM07 not run. Authorized with every Climate stage on 2026-11-17 ([STATUS](../STATUS.md#authorization)).
+STATUS: Implemented on branch `feature/climate-p4c-07`, PR #518, 2026-11-18; CM07 agent run Pass on `3a48fef3`, Ed's verification pass pending. Authorized with every Climate stage on 2026-11-17 ([STATUS](../STATUS.md#authorization)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
 
@@ -140,6 +140,9 @@ CM07 passes, owed check 2 is recorded with the licence wording, and C4c-5 is ans
   again and drops the old checks, keeping the typed values and the view; a failed station read is said in the
   warning slot rather than taken for no station (Set still saves, with the check said not to be shown); the
   hover tip flips above the pointer near the map's bottom and stays inside it.
+- **Kept for Ed's pass**: the dialog grows by the warning and re-centres, moving the map about 37 px when
+  the warning appears after a click. A fix (a reserved warning slot, or a top-anchored dialog in the shared
+  form dialog) would change shared layout after the review cycles; it is listed for Ed instead.
 - **Not built**: board 21's pane map (the Site location pane drawing the site on the map) is in no stage's steps;
   left for Ed to place.
 - **Example**: `tools/examples/outline_map/example_outline_map.js`, loaded by the preview page and shown with

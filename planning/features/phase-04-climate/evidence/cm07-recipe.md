@@ -1,7 +1,7 @@
 # CM07 host recipe: the outline map and placing the site in Set Location
 
 DATE: 2026-11-18
-STATUS: Written after the last review fix of PR #518. Part A is the stage agent's (bridge, no window focus); part B needs real mouse gestures and SketchUp in front and is the conductor's; part C is Ed's verification pass.
+STATUS: Written after the last review fix of PR #518 (head `3a48fef3`). Parts A and B ran 2026-11-18 on that head ([evidence](cm07-20261118.md)); part C is Ed's verification pass.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
 
@@ -66,8 +66,8 @@ B eval "CM07.size(420, 732)"; B eval "CM07.map_read"; B eval "CM07.size(360, 520
 ```
 
 Capture the panel window by id at each size (`screencapture -x -o -l <id>`, from this shell). Then set
-the site with Set Location (scripted click) and read `CM07.state`: the site as typed, one Set Site
-Location step.
+the site with Set Location (scripted click) and read `CM07.state`: the site the last placement filled,
+the station's verdict as the warning said.
 
 ## Part B: real gestures and native Undo (the conductor, one hold)
 
@@ -75,6 +75,10 @@ The panel opens on a display the conductor cannot see: first move it with System
 `tell application "System Events" to tell process "SketchUp" to set position of window "PH-Composer" to {40, 60}`.
 The Edit menu needs an AXRaise of the document window (`cm07.skp`), not the panel.
 
+0. **A thousand markers in the HtmlDialog** (owed check 2, item 3), needs the panel visible, since a hidden
+   page runs no animation frames: `B eval "load '<run>/driver/k1000.rb'"`, wait about ten seconds, then
+   `B eval "CM07.result('k1000')"` for first paint and pan and zoom frame times. The script draws its own
+   900 x 600 map over the panel and removes it when done.
 1. Open Set Location on the Climate tab.
 2. **Drag to pan**: press on the map and drag about 150 px; the borders move with the pointer and the
    latitude and longitude fields do not change.
@@ -85,7 +89,8 @@ The Edit menu needs an AXRaise of the document window (`cm07.skp`), not the pane
    Enter.
 5. **Click to place**: click well away from the station's ring; the fields fill, the pin moves and the
    amber warning appears; Set Location is enabled. Click inside the ring; the warning goes.
-6. **Hover** the station marker; the cursor is a pointer and its ring outline turns red.
+6. **Hover** the station marker; the cursor is a pointer and the marker's own outline turns red. Set
+   Location passes no hover content, so no tip shows, and the station's 50 mi ring does not change.
 7. **Type** a latitude and longitude off the view (for example 21.3, -157.8); the map pans to the pin.
 8. Click **Set Location**; read `CM07.state` through the bridge.
 9. **Native Undo and Redo**: Edit > Undo ("Undo Set Site Location") and Redo; the site card follows.

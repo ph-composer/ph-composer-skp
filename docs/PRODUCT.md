@@ -13,8 +13,12 @@ the left show each part's state; at a narrow panel width they become one list ab
    and may stay unset; the Export tab names an unset one. **Read from SketchUp Geolocation**
    fills the latitude and longitude when SketchUp reports the Model as geolocated, and otherwise
    says it has no geolocation. It does not fill the
-   elevation or the hours from UTC, and it writes nothing back to SketchUp. Set Location is one
-   Undo step.
+   elevation or the hours from UTC, and it writes nothing back to SketchUp. The outline map beside
+   the fields places the site too: drag to pan, scroll or use the zoom buttons, and click to fill
+   the latitude and longitude. The map ships with PH-Composer and loads nothing from the internet.
+   With a station attached, the map shows it and its 50 mile ring, and Set Location warns before
+   a site that would put the station outside the Phius limits; the site can still be set. Set
+   Location is one Undo step.
 2. Choose **Design temperatures** and type the ASHRAE 99% heating and 1% cooling dry bulbs, with
    an optional source note. Each field saves when you press Enter or leave it, as its own Undo
    step. Clear a field to unset it. A heating value at or above the cooling value is saved with a
