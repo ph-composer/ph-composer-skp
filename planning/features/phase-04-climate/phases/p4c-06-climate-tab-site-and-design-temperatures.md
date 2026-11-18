@@ -1,9 +1,9 @@
 # P4c-06: The Climate tab, Site location and Design temperatures
 
 DATE: 2026-11-17
-STATUS: Scoped. Not authorized.
+STATUS: Implemented on branch `feature/climate-p4c-06`, 2026-11-18; CM06 not yet run. Authorized with every Climate stage on 2026-11-17 ([STATUS](../STATUS.md#authorization)).
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
 
 ## Entry and scope
 
@@ -108,3 +108,32 @@ P4c-07 fills the dialog's map region. P4c-08 replaces the Phius pane's placehold
 ## Done when
 
 CM06 passes, owed check 4 is recorded and board 22 matches the host.
+
+## Departures, 2026-11-18
+
+- **Owed check 4** ([evidence](../evidence/owed-check-4-20261118.md)): a Model never geolocated
+  still carries its template's location in `ShadowInfo`, so the read gates on `Model#georeferenced?`.
+  Item 2 ran through the Ruby API, not Add Location, so what Add Location writes to `TZOffset` is not
+  known: `site.geolocation` keeps `hours_from_utc` in its shape and always answers null, and the
+  dialog says it does not fill hours from UTC. Board 22 matches the host and is not redrawn; its
+  "and hours from UTC when SketchUp has one" is not built. The native Add Location run is listed in
+  the evidence for the conductor.
+- **Tab row** at 1280, 420 and 360 px (`tools/ui-preview/climate_checks.cjs`): one, three and three
+  lines with eight buttons (seven tabs and the disabled Systems), every tab reachable; before Climate,
+  one, three and three with seven. The row wraps; it does not scroll. Programs and Mechanical will add
+  two more.
+- **Two snapshot sections** (`ph_composer.climate.site` and `.design_temperatures`, backed by the
+  existing reads) carry the values the cards and panes paint, so the tab needs no query of its own
+  (CONTRACTS section 2 amended).
+- **Findings route** (step 8): a `locate` names a viewport view command run by the host, so it
+  cannot open a panel tab, and none was added. Climate registers its tab with `panel.workedOn`, which
+  gives each Climate export finding an Open Climate button; that button now passes the finding's code
+  with the navigation, and the tab maps the code to the card that fixes it. `sections/export.js`
+  names no feature.
+- **Design temperatures**: the panel stamps every action with the revision it rendered, so two fields
+  committed close together would refuse the second as stale. The pane sends its writes one at a time,
+  each waiting for the last; each is guarded by the value its field showed when typing began.
+- **Source cards** are a new kit part (`html/source_cards.js`, `source_cards.css`), recorded in the UI
+  polish patterns reference: the Library sidebar is a record browser with its own store and does not fit
+  a few subjects with states.
+- **Climate Data on This Computer** is P4c-08's; the page header does not show it yet.

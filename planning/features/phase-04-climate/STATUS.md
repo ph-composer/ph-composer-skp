@@ -46,11 +46,33 @@ Ed authorized every Climate stage on 2026-11-17: "Use the 'pr-loop' skill protoc
 | [P4c-03](phases/p4c-03-settings-file-and-climate-folders.md) | Merged to main 2026-11-18 ([PR #514](https://github.com/ph-composer/ph-composer-skp/pull/514), `7c3312ea`); CM03 Pass on `45224965` ([evidence](evidence/cm03-20261118.md)). CM01 and CM02 read `needs_recheck` and are rerun in P4c-12's fresh-process run. Owed check 1 recorded ([evidence](evidence/owed-check-1-20261118.md)) and folded into `context/SKETCHUP_HOST_BEHAVIOR.md`; C4c-1 settled (D4c-16) | `make ci` on the branch, 2026-11-18: RuboCop 774 files, no offenses; Ruby suite 2974 runs, 37262 assertions, 0 failures; JavaScript 877 tests pass; Python 271 passed; hostkit Ruby 48 runs, 0 failures; RBZ verified, 609 files. New: `tests/computer_settings_test.rb` (7 runs), `tests/climate_folders_test.rb` (12 runs). Codex review (gpt-6-astra), two cycles: 3 P2, all fixed (`057cbd94`, `45224965`; the second unreviewed by the two-cycle cap). Departures (a feature-free service, a write lock, a later schema version neither read nor written) in the [stage doc](phases/p4c-03-settings-file-and-climate-folders.md#departures-2026-11-18) |
 | [P4c-04](phases/p4c-04-station-reader-and-attach.md) | Merged to main 2026-11-18 ([PR #515](https://github.com/ph-composer/ph-composer-skp/pull/515), `de07fd81`); CM04 Pass on `47f26946` ([evidence](evidence/cm04-20261118.md)), the cloud-synced clause not run. CM02 and CM03 read `needs_recheck`, rerun in P4c-12. Owed check 3 recorded ([evidence](evidence/owed-check-3-20261118.md)): 0.06 to 0.08 s for 1,007 files in SketchUp's Ruby, so the read is synchronous (D4c-11, D4c-21); the cloud-synced case not run. C4c-2 and C4c-6 settled (D4c-18). Departures (two actions, paging, the stem in the source, header-only listing) in the [stage doc](phases/p4c-04-station-reader-and-attach.md#departures-2026-11-18) | `make ci` on the branch, 2026-11-18: RuboCop 783 files, no offenses; Ruby suite 3006 runs, 37656 assertions, 0 failures, 1 skip (the private-corpus test, `PH_COMPOSER_CLIMATE_CORPUS` unset); JavaScript 877 tests pass; Python 271 passed; hostkit Ruby 48 runs, 0 failures; RBZ verified, 613 files. New: `tests/climate_station_file_test.rb` (8 runs), `tests/climate_folder_scan_test.rb` (7), `tests/climate_stations_test.rb` (14), `tests/climate_station_corpus_test.rb` (1, passes with the corpus set), one more in `tests/climate_walkthrough_test.rb`. Sonnet read-through before the gate: 15 findings, 9 fixed, the rest recorded. Codex review (gpt-6.1-sol), two cycles: 3 P2 then 2 P2, all fixed (`83c4ae98`, `47f26946`; the second unreviewed by the two-cycle cap) |
 | [P4c-05](phases/p4c-05-site-export.md) | Implemented on branch `feature/climate-p4c-05` ([PR #516](https://github.com/ph-composer/ph-composer-skp/pull/516)); CM05 Pass on `e4392993` ([evidence](evidence/cm05-20261118.md)). Owed check 6 recorded ([evidence](evidence/owed-check-6-20261118.md)); C4c-4 settled (D4c-24). Departures (the PHX pin, the report block through the result, a path-like note kept out of the report) in the [stage doc](phases/p4c-05-site-export.md#departures-2026-11-18) | `make ci` on the branch, 2026-11-18: RuboCop 787 files, no offenses; Ruby suite 3020 runs, 37892 assertions, 0 failures, 1 skip (the private-corpus test); JavaScript 877 tests pass; Python 279 passed, 1 skipped (the PHX round trip without its group); hostkit Ruby 48 runs, 0 failures; RBZ verified, 617 files. New: `tests/climate_export_test.rb` (11 runs), `tests/python/test_site_sections.py` (7), `tests/python/test_site_phx_round_trip.py` (2 passed with `uv run --group phx`, skipped without); goldens `tests/fixtures/climate/extraction.json`, `result_fields.json` and `result.json`, the last owned by the Python test through `make fixtures`; the phase-one and thermal-bridge extraction goldens gain the empty Site record. Sonnet read-through before the gate: 15 findings; fixed the left-out climate's "exported" line, the preflight not reading the design-temperature dictionary, record-to-object coverage of every row and case, the report's branches and the Python golden's ownership; a free-text note that reads as a path was left as a follow-up and fixed after the Codex review (D4c-25). Codex review (gpt-6-astra), two cycles: 2 P2 (a path-like note blocked the export; zone and offset findings with no climate), both fixed in `e4392993`; the second cycle approved with no findings |
-| P4c-06 to P4c-12 | Scoped | |
+| [P4c-06](phases/p4c-06-climate-tab-site-and-design-temperatures.md) | Implemented on branch `feature/climate-p4c-06`; CM06 not yet run. Owed check 4 recorded ([evidence](evidence/owed-check-4-20261118.md)), its Add Location run left for the conductor. Departures in the [stage doc](phases/p4c-06-climate-tab-site-and-design-temperatures.md#departures-2026-11-18) | Gate counts in the PR and the next ledger edit |
+| P4c-07 to P4c-12 | Scoped | |
 
 ## Next step
 
-P4c-05 merges on green CI (auto-merge armed); P4c-06 next. CM01 and CM02 rechecks wait for P4c-12.
+P4c-05 merges on green CI (auto-merge armed). P4c-06 is in review; CM06 runs on its last head, then
+Ed's verification pass. CM01 and CM02 rechecks wait for P4c-12.
+
+## For Ed's verification pass
+
+Agents run every CM06 gesture on the host first; these need Ed's own judgment, and CM06 is not
+marked Pass until he has looked at them.
+
+- **P4c-06, UI polish sign-off** of the Climate tab against boards 1, 7, 8, 13, 22 and 23: the
+  source cards and their chips, the Site location empty state and its set state, Set Location, and
+  the Design temperatures pane, at 1280, 420 and 360 px.
+- **P4c-06, wording**: Set Location's geolocation note ("It does not fill elevation or hours from
+  UTC"), which differs from boards 1 and 22 until owed check 4's Add Location run proves SketchUp's
+  offset; the empty state's first bullet, which leaves out the map until P4c-07; the Phius climate
+  data placeholder line; the design pane's closing line and its warning sentence.
+- **P4c-06, feel**: a design temperature saves on Enter or on leaving the field and is read only
+  while it saves; Set Location stays disabled until latitude, longitude and elevation read as numbers.
+- **P4c-06, layout**: the empty state offers Set Location twice, in the page header and in the
+  pane, as board 8 does; the tab row wraps to three lines at 420 and 360 px with eight buttons.
+- **P4c-06, owed check 4**: if a Model given a manual location in Model Info reads not geolocated,
+  Read from SketchUp Geolocation says "This SketchUp model has no geolocation." for it. Whether that
+  is acceptable is Ed's call once the native run reports it.
 
 ## Blockers
 

@@ -4884,6 +4884,23 @@
         "src/ph_composer/features/climate/install.rb"
       ],
       "native_control_required": false
+    },
+    {
+      "id": "CM06",
+      "label": "The Climate tab in the panel on the installed RBZ in a fresh synthetic Model: owed check 4 recorded; Climate first in the tab row and the panel opening on Zones; the cards' states and the Hourly weather file card Planned and inert; Site location Not set on a new Model; Set Location from typed values as one Set Site Location step, a partial site refused in the dialog; Read from SketchUp Geolocation filling latitude and longitude only when SketchUp reports the Model geolocated, never elevation or hours from UTC; the design temperatures committed per field as Change Design Temperature steps; IP and SI; the tab row and both panes at 420 and 360 px; native Undo and Redo; the UI polish review by Ed",
+      "mode": "mixed",
+      "authority": "planning/features/phase-04-climate/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/html/index.html",
+        "src/ph_composer/html/source_cards.js",
+        "src/ph_composer/html/source_cards.css",
+        "src/ph_composer/html/sections/export.js",
+        "src/ph_composer/html/features/climate/*",
+        "src/ph_composer/features/climate/site/geolocation.rb",
+        "src/ph_composer/features/climate/declarations/site.rb",
+        "src/ph_composer/features/climate/declarations/design_temperatures.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }

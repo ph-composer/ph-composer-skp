@@ -1108,6 +1108,13 @@
     return dense;
   }
   FIXTURES.dense = buildDense();
+  // The Climate tab (P4c-06): a new Model with no site, which SketchUp reports as geolocated, and one with the
+  // site and the design temperatures set. Synthetic coordinates.
+  FIXTURES.climate = { parts: [], climate: { geolocation: { geolocated: true, latitude_deg: 42.75,
+    longitude_deg: -73.8, hours_from_utc: null } } };
+  FIXTURES.climateset = { parts: [], climate: {
+    site: { latitude_deg: 42.75, longitude_deg: -73.8, elevation_m: 84, climate_zone: 15, hours_from_utc: -5 },
+    design: { heating_99_c: -17.2, cooling_1_c: 30.1, design_temperature_source: "ASHRAE 2021, nearest station" } } };
 
   global.PhComposerPreviewFixtures = {
     names: Object.keys(FIXTURES),

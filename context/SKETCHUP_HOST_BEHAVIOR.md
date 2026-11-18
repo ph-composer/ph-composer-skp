@@ -248,3 +248,18 @@ for measurements of the native gestures.
 
 The [ZC-04 result](../planning/archive/zone-child-lifecycle/STATUS.md#zc-04-native-receipt)
 covers native Undo of the copy and repair.
+
+## Geolocation
+
+Measured on 26.1.188, Ruby 3.2.2, macOS, 2026-11-18, a fresh process on a fresh copy of
+`_private/host/blank-template.skp`, read through the bridge
+([owed check 4](../planning/features/phase-04-climate/evidence/owed-check-4-20261118.md)).
+SketchUp's own Add Location was not run; item 2 is an API stand-in and is labelled so.
+
+| Fact | Consequence |
+| --- | --- |
+| A Model never geolocated still carries its template's location in `ShadowInfo`: `Latitude` 40.018309, `Longitude` -105.242139, `TZOffset` -7.0, `City` "Boulder (CO)", `DaylightSavings` false. Its `GeoReference` dictionary holds the same latitude and longitude with `UsesGeoReferencing` false and `LocationSource` "Manual". `Model#georeferenced?` is false. | `ShadowInfo` alone cannot tell a real location from none. `site.geolocation` reads nothing unless `georeferenced?` is true (`features/climate/site/geolocation.rb`). |
+| `georeferenced?` follows the `GeoReference` dictionary's `UsesGeoReferencing`, not `ShadowInfo`: writing `ShadowInfo` latitude and longitude left it false; writing `UsesGeoReferencing` true made it true, with the dictionary's latitude still the template's. | Whether Add Location, or Model Info's manual location, sets that flag and keeps the two latitudes equal is not measured. |
+| `TZOffset` is a Float holding whatever is written to it (-5.0, 5.5); setting `DaylightSavings` true did not change it. | What Add Location writes there is not measured, so `site.geolocation` answers `hours_from_utc` null and the panel never fills it (J2: never a guess from the longitude). |
+| Neither `ShadowInfo` nor the `GeoReference` dictionary holds an elevation. | Read from SketchUp Geolocation never fills elevation. |
+| `ShadowInfo` writes survived `abort_operation` (the latitude stayed as written and `modified?` read false); the `GeoReference` attribute write was undone. | A probe that writes `ShadowInfo` changes the open Model's location even when aborted: run it on a scratch copy only. |

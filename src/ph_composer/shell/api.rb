@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 66
+    MINOR = 67
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -366,7 +366,13 @@ module PhComposer
                     "findings climate.incomplete, climate.zone_not_set, climate.utc_offset_not_set, " \
                     "climate.outside_phius_limits and climate.not_checked, which are new, and " \
                     "climate.site_not_set; none blocks the export. The export writes the site and a complete " \
-                    "climate as honeybee-ph's Site on every Building Segment." }
+                    "climate as honeybee-ph's Site on every Building Segment." },
+      { "minor" => 67, "date" => "2026-11-18",
+        "change" => "ph_composer.climate.site.geolocation is new: what SketchUp reports for the Model's " \
+                    "geolocation, latitude and longitude only when SketchUp reports the Model geolocated, and no " \
+                    "elevation or offset. The snapshot sections ph_composer.climate.site and " \
+                    "ph_composer.climate.design_temperatures carry the site and design-temperature reads for the " \
+                    "Climate tab." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

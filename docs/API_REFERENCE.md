@@ -10128,6 +10128,75 @@ Example params:
 {}
 ```
 
+### `ph_composer.climate.site.geolocation`
+
+What SketchUp reports for the Model's geolocation: latitude and longitude when SketchUp reports the Model geolocated, else nulls. Never an elevation. Nothing is written to SketchUp or to the Model. Owner: `ph_composer.climate`.
+
+Refuses: only the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "geolocated",
+    "latitude_deg",
+    "longitude_deg",
+    "hours_from_utc"
+  ],
+  "properties": {
+    "geolocated": {
+      "type": "boolean",
+      "description": "true when SketchUp reports the Model as geolocated (Model#georeferenced?)."
+    },
+    "latitude_deg": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-unit": "deg",
+      "description": "SketchUp's latitude; null when the Model is not geolocated."
+    },
+    "longitude_deg": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-unit": "deg",
+      "description": "SketchUp's longitude; null when the Model is not geolocated."
+    },
+    "hours_from_utc": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "x-unit": "h",
+      "description": "Always null for now: what SketchUp's time zone offset holds after Add Location is not yet measured, and it is never guessed from the longitude."
+    }
+  },
+  "description": "What SketchUp reports for the Model's geolocation. There is no elevation: SketchUp exposes none."
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
 ### `ph_composer.climate.site.get`
 
 The Model's site: latitude, longitude, elevation, climate zone and hours from UTC, with the site state. A new Model reads not_set and nothing is written. Owner: `ph_composer.climate`.
@@ -77882,3 +77951,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.64 | 2026-11-18 | The climate data folders on this computer, kept in PH-Composer's own settings file: ph_composer.climate.folders.list reads them with a display location that is never an absolute path; the setup commands folders.add and folders.locate take a folder the user chooses, and folders.rename, folders.remove and folders.remember_dataset take its id. climate.settings_unreadable, climate.settings_unavailable, climate.folder_not_found and climate.folder_overlaps are new. |
 | 1.65 | 2026-11-18 | The Phius station reader. ph_composer.climate.folders.list gives each folder's format, station and state counts and files not read by extension; ph_composer.climate.stations.list pages one folder's stations nearest the site first with each one's Phius limit check; climate.attach_station and climate.replace_station take a folder id and a station key and read the file in Ruby; climate.source_status says whether the attached station's file is on this computer. climate.site_not_set, climate.station_not_found and climate.station_unreadable are new. A station climate's provenance station_name is its file name's stem. |
 | 1.66 | 2026-11-18 | The Site export section. ph_composer.climate.export_preflight is new and answers the export findings climate.incomplete, climate.zone_not_set, climate.utc_offset_not_set, climate.outside_phius_limits and climate.not_checked, which are new, and climate.site_not_set; none blocks the export. The export writes the site and a complete climate as honeybee-ph's Site on every Building Segment. |
+| 1.67 | 2026-11-18 | ph_composer.climate.site.geolocation is new: what SketchUp reports for the Model's geolocation, latitude and longitude only when SketchUp reports the Model geolocated, and no elevation or offset. The snapshot sections ph_composer.climate.site and ph_composer.climate.design_temperatures carry the site and design-temperature reads for the Climate tab. |

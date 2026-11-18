@@ -115,6 +115,36 @@
       "mime": "text/javascript; charset=utf-8",
       "sha256": "9e8041546528ef8733c8da7b2359bd980cee349c3ed13ef3ebafc023a11a3479"
     },
+    "html/features/climate/climate.css": {
+      "bytes": 3100,
+      "mime": "text/css; charset=utf-8",
+      "sha256": "39181ae6132dd0840927dea065b7f8368aaa490e9fcf3ab7356b7fc28001fa93"
+    },
+    "html/features/climate/design_temperatures.js": {
+      "bytes": 7605,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "8203a637b1ac2fd8aa9980c57dfc1c874cfb8aeeb841e3a1bf29658bb954dd99"
+    },
+    "html/features/climate/section.js": {
+      "bytes": 6525,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "ba04a30f32913ad8ad576e837ae5edaa7b671aa9a6c11cb675b7795f63092bcc"
+    },
+    "html/features/climate/set_location.js": {
+      "bytes": 9147,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "6fab36774efe76f1a17a6bd5123adf3bfa331b1c1f6e86bd3bbca685dd7bdcb4"
+    },
+    "html/features/climate/shared.js": {
+      "bytes": 2391,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "c764c795986aeaaa2579c0b45c7f7015a578b57ddaf4853743a4caabf4014b20"
+    },
+    "html/features/climate/site.js": {
+      "bytes": 2552,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "40135eed367181148ba5362ea4d60d377f2f8d5e031c752f08c6930221dbfd49"
+    },
     "html/features/spaces/actions.js": {
       "bytes": 16689,
       "mime": "text/javascript; charset=utf-8",
@@ -341,9 +371,9 @@
       "sha256": "ae769a7d0c4b07031ab9812cd350d17b6e4638549d0f5295ccaafe1f1390ed54"
     },
     "html/index.html": {
-      "bytes": 8263,
+      "bytes": 8827,
       "mime": "text/html; charset=utf-8",
-      "sha256": "97531c12082a86f8d157460c338fbdc5184bcc39a59d827db349719725ded2fa"
+      "sha256": "21af0dd50e7d95aa35a70807d1cb158a65f338054341d498a94e1282c2a0c159"
     },
     "html/inventory.js": {
       "bytes": 12812,
@@ -476,9 +506,9 @@
       "sha256": "53c825755869f1a5f4f5bf3fbe49fca66094778fcd81ba509ea4c374df105c48"
     },
     "html/sections/export.js": {
-      "bytes": 15957,
+      "bytes": 16108,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "3c0f0ade92bef5d126cf7a6b4bfeb604455075b328452d7d312dc30e1a1585de"
+      "sha256": "fe216570a534dcd3a5cf704ac66c8f25c6be769109d9473838c4393faaf819c8"
     },
     "html/sections/setup.js": {
       "bytes": 2677,
@@ -504,6 +534,16 @@
       "bytes": 1462,
       "mime": "text/javascript; charset=utf-8",
       "sha256": "ebd42866e75a1c4ba916861e9dfef089f80463ad8ce7ef7184ba459cd3da4fd7"
+    },
+    "html/source_cards.css": {
+      "bytes": 2262,
+      "mime": "text/css; charset=utf-8",
+      "sha256": "be4d854a4f9f3ca868d3bd1769dc467bbf3bfedf7edbd0e8f6c18979ea52d1aa"
+    },
+    "html/source_cards.js": {
+      "bytes": 4796,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "546b151d94680e2f749130504603c156510e42e5d5e0484492ec413135f501be"
     },
     "html/subtabs.js": {
       "bytes": 7074,
