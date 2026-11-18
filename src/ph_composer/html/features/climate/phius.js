@@ -4,19 +4,19 @@
      no folder   says so, says why PH-Composer ships none, and offers Choose Climate Data Folder (board 2);
      no site     asks for the site first and offers Set Location (board 9);
      ready       names the dataset the station picker opens on, with its station count (board 10).
-   Each offers Enter Values by Hand. Choose Station and Enter Values by Hand are shown disabled with their reason
-   until the station picker and hand entry land. With a climate in the Model the pane keeps its one line. */
+   Each offers Enter Values by Hand, shown disabled with its reason until hand entry lands. Choose Station opens the
+   station picker. With a climate in the Model the pane keeps its one line and offers Replace Station until the
+   attached pane lands. */
 PhComposerUI.define("features/climate/phius", ["workspace", "request", "features/climate/shared"],
 function (ui, requests, shared) {
   "use strict";
   var el = ui.element, LIST = shared.PREFIX + "folders.list";
   var PAINT = { loading: "loading", unreadable: "noFolder", no_folder: "noFolder", no_site: "noSite",
     ready: "ready", attached: "attached" };
-  var LATER = { station: "Choosing a station comes in a later version of PH-Composer.",
-    hand: "Typing climate values by hand comes in a later version of PH-Composer." };
+  var LATER = { hand: "Typing climate values by hand comes in a later version of PH-Composer." };
 
   /* `actions.openData(add)` opens Climate Data on This Computer, starting Add Folder when `add`;
-     `actions.setLocation()` opens Set Location. */
+     `actions.setLocation()` opens Set Location; `actions.choose()` opens the station picker. */
   function Pane(session, send, actions) {
     this.actions = actions; this.folders = undefined; this.failure = null; this.shown = false; this.painted = null;
     this.reads = requests.channel(session, send, "climate_phius_folders", "query.invoke");
@@ -49,7 +49,8 @@ function (ui, requests, shared) {
     var waiting = this.folders === undefined || this.outdated;
     var view = attached ? "attached" : !summary || !site || waiting ? "loading" :
       this.failure ? "unreadable" : this.stateFor(site);
-    var key = view + "|" + JSON.stringify(this.folders || null) + (this.failure || "");
+    this.siteSet = Boolean(site && site.state === "set");
+    var key = view + "|" + this.siteSet + JSON.stringify(this.folders || null) + (this.failure || "");
     if (key === this.painted) return;
     this.painted = key;
     this.root.setAttribute("data-state", view);
@@ -64,14 +65,6 @@ function (ui, requests, shared) {
   Pane.prototype.stateFor = function (site) {
     if (!this.found().length) return "no_folder";
     return site.state === "set" ? "ready" : "no_site";
-  };
-
-  /* The dataset the station picker opens on: the one it used last, if it is found, else the first found that holds
-     stations, else the first found. */
-  Pane.prototype.dataset = function () {
-    var found = this.found(), last = this.folders.last_dataset_id;
-    return found.filter(function (folder) { return folder.id === last; })[0] ||
-      found.filter(function (folder) { return folder.station_count > 0; })[0] || found[0];
   };
 
   Pane.prototype.box = function (title, intro, bullets, buttons) {
@@ -89,7 +82,7 @@ function (ui, requests, shared) {
     var button = ui.button(label, run); button.className = "primary"; return button;
   };
 
-  /* A control whose feature has not landed: disabled, with its reason beside it. */
+  /* A control that cannot act yet: disabled, with its reason beside it. */
   function later(label, reason) {
     var group = el("span", "climate-later"), button = ui.button(label, function () {});
     button.disabled = true;
@@ -129,20 +122,22 @@ function (ui, requests, shared) {
   };
 
   Pane.prototype.ready = function () {
-    var dataset = this.dataset(), stations = dataset.station_count;
+    var self = this, dataset = shared.openingDataset(this.folders), stations = dataset.station_count;
     this.box("No Phius climate data in this Model", dataset.name + " · " + Number(stations).toLocaleString("en-US") +
       " station" + (stations === 1 ? "" : "s") + " on this computer.",
       ["Choose a station near the site. Its values are copied into this Model, which then reads without the folder.",
         "With a custom dataset from Phius, or no station file, type or paste the monthly values and peak loads " +
         "yourself."],
-      [later("Choose Station…", LATER.station), later("Enter Values by Hand…", LATER.hand)]);
+      [this.primary("Choose Station…", function () { self.actions.choose(); }), later("Enter Values by Hand…",
+        LATER.hand)]);
   };
 
   /* Until the attached pane lands. */
   Pane.prototype.attached = function () {
-    this.root.replaceChildren(el("h2", "", "Phius climate data"), el("p", "climate-pane-intro", "Attaching a " +
-      "Phius station or typing its values by hand comes in a later version. This Model holds a climate, and " +
-      "export writes it when it is complete."));
+    var self = this, replace = this.siteSet ? ui.button("Replace Station…", function () { self.actions.choose(); }) :
+      later("Replace Station…", "Set the site location first. The station list is sorted by distance from it.");
+    this.root.replaceChildren(el("h2", "", "Phius climate data"), el("p", "climate-pane-intro", "This Model holds " +
+      "a climate, and export writes it when it is complete."), replace);
   };
 
   Pane.prototype.loading = function () {

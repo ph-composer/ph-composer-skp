@@ -37,8 +37,19 @@ PhComposerUI.define("features/climate/shared", ["fields", "units"], function (fi
       (offset(site.hours_from_utc) || "Hours from UTC not set");
   }
 
+  /* The dataset the station picker opens on: the attached station's, when its file is on this computer,
+     else the one used last, else the first found holding stations, else the first found. Only folders found now
+     count. */
+  function openingDataset(listed, attachedId) {
+    var found = ((listed && listed.folders) || []).filter(function (folder) { return folder.found; });
+    function byId(id) { return found.filter(function (folder) { return folder.id === id; })[0]; }
+    return (attachedId && byId(attachedId)) || byId(listed.last_dataset_id) ||
+      found.filter(function (folder) { return folder.station_count > 0; })[0] || found[0] || null;
+  }
+
   return { PREFIX: PREFIX, SITE: PREFIX + "site", DESIGN: PREFIX + "design_temperatures",
     SUMMARY: PREFIX + "summary", ZONES: ZONES, SITE_FIELDS: SITE_FIELDS, ELEVATION: ELEVATION,
     TEMPERATURE: TEMPERATURE, DISTANCE: DISTANCE, DISTANCE_LIMIT_KM: DISTANCE_LIMIT_KM,
-    formatted: formatted, coordinates: coordinates, hours: hours, offset: offset, exportLine: exportLine };
+    formatted: formatted, openingDataset: openingDataset, coordinates: coordinates, hours: hours, offset: offset,
+    exportLine: exportLine };
 });

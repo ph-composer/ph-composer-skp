@@ -15,6 +15,7 @@ module PhComposer
         FORMAT = "phius_station_file"
         # At most this many kinds of file not read are listed; files_not_read_total counts every one.
         MAX_KINDS = 20
+        NEAREST_FIRST = ->(row) { [row.dig("limit_check", "distance_km"), row.fetch("key")] }
 
         module_function
 
@@ -38,14 +39,19 @@ module PhComposer
         # site, in pages bounded for one reply. A page's cursor is bound to the Model's revision, so a site change
         # between pages refuses it rather than mixing two orders.
         def list(request, folder_id)
+          whole = all(request, folder_id)
+          page, next_cursor = Pages.bounded(request, QUERY, whole.fetch("stations"), :key => NEAREST_FIRST)
+          whole.merge("next_cursor" => next_cursor, "stations" => page)
+        end
+
+        # stations.all: the same rows in one read, unbounded, for the station picker, which shows every station.
+        def all(request, folder_id)
           site = site!(request.model)
           folder = Folders::Operations.folder(folder_id)
           scan = FolderScan.call(folder.fetch("location"))
-          nearest_first = ->(row) { [row.dig("limit_check", "distance_km"), row.fetch("key")] }
-          rows = scan.stations.map { |station| row(station, site) }.sort_by(&nearest_first)
-          page, next_cursor = Pages.bounded(request, QUERY, rows, :key => nearest_first)
+          rows = scan.stations.map { |station| row(station, site) }.sort_by(&NEAREST_FIRST)
           { "folder_id" => folder_id, "dataset_name" => folder.fetch("name"), "complete" => scan.complete,
-            "total" => rows.length, "next_cursor" => next_cursor, "stations" => page }
+            "total" => rows.length, "stations" => rows }
         end
 
         # climate.attach_station: a new climate from a station file. Refuses target.changed when the Model holds

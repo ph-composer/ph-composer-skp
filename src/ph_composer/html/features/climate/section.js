@@ -1,14 +1,15 @@
 /* The Climate tab: one page header over source cards (Site location, then under "Climate sources" Phius climate
    data, Design temperatures and Hourly weather file) and the pane of the card selected. Every card's state comes
    from the summary snapshot section and the panes paint from the site and design-temperature sections. The
-   card selected is remembered per Model session. The Phius climate data pane shows its empty states until the
-   station picker lands, and the Hourly weather file card is Planned. The page header always offers Climate Data
+   card selected is remembered per Model session. The Phius climate data pane opens the station picker, and the
+   Hourly weather file card is Planned. The page header always offers Climate Data
    on This Computer, which a native route (the Setup view, the Extensions menu) also opens with the intent
    `{ open: "climate_data" }`. Climate is first in the tab row; the panel still opens on Zones. */
 PhComposerUI.define("features/climate/section", ["panel", "workspace", "snapshot", "source_cards",
   "features/climate/shared", "features/climate/site", "features/climate/set_location",
-  "features/climate/design_temperatures", "features/climate/phius", "features/climate/data_setup"],
-function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, DesignPane, PhiusPane, dataSetup) {
+  "features/climate/design_temperatures", "features/climate/phius", "features/climate/data_setup",
+  "features/climate/picker"],
+function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, DesignPane, PhiusPane, dataSetup, picker) {
   "use strict";
   var TAB = "climate";
   var pages = Object.create(null);
@@ -36,7 +37,7 @@ function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, Desig
     changed: function () { panel.repaint(); } });
     this.site = new SitePane(function () { self.openSetLocation(); });
     this.phius = new PhiusPane(state.session, send, { openData: function (add) { self.openData(add); },
-      setLocation: function () { self.openSetLocation(); } });
+      setLocation: function () { self.openSetLocation(); }, choose: function () { self.openPicker(null); } });
     this.design = new DesignPane(state.session, send);
     this.panes = { site: this.site.root, phius: this.phius.root, design: this.design.root };
     var content = ui.element("div", "climate-content");
@@ -52,6 +53,17 @@ function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, Desig
     this.dialog = setLocation.open(this.session, this.send, this.siteValues,
       function () { return self.siteValues; }, function () { self.dialog = null; panel.repaint(); },
       Boolean(this.summary && this.summary.climate.state !== "none"));
+  };
+
+  /* The station picker, in Replace with a climate in the Model; `preselect` ({ folder_id, station_key }) selects
+     that station, for Update from File. It closes on the Phius pane. */
+  View.prototype.openPicker = function (preselect) {
+    var self = this;
+    if (this.picker || !this.siteValues || this.siteValues.state !== "set") return;
+    this.picker = picker.open(this.session, this.send, { site: this.siteValues, preselect: preselect,
+      replacing: Boolean(this.summary && this.summary.climate.state !== "none") }, function () {
+      self.picker = null; self.phius.refresh(); panel.repaint();
+    });
   };
 
   /* Climate Data on This Computer, read afresh on each open; `add` starts Add Folder at once. The Phius pane
@@ -79,6 +91,7 @@ function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, Desig
     this.phius.render(state, summary, site, state.ui.activeTab === TAB && selected === "phius");
     if (this.dialog) this.dialog.consume(state);
     if (this.data) this.data.consume(state);
+    if (this.picker) this.picker.consume(state);
   };
 
   View.prototype.paintCards = function (summary, site, design) {
@@ -108,6 +121,7 @@ function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, Desig
 
   View.prototype.dispose = function () {
     if (this.dialog) { this.dialog.dispose(); this.dialog = null; }
+    if (this.picker) { this.picker.dispose(); this.picker = null; }
     if (this.data) { this.data.dispose(); this.data = null; }
     this.design.dispose();
     this.phius.dispose();

@@ -118,11 +118,11 @@ check({ name: "climate-data", output }, async ({ newPage, step }) => {
   await page.locator("dialog.climate-set-location").waitFor();
   await page.locator("dialog.climate-set-location").getByRole("button", { name: "Cancel" }).click();
 
-  step("a folder and a site (board 10): the dataset and its stations; Choose Station waits for the picker");
+  step("a folder and a site (board 10): the dataset and its stations, and Choose Station");
   await openPhius("climateready");
   await paneAtSizes("ready", "pane-ready");
   await phius.getByText("Preview Stations · 1,007 stations on this computer.").waitFor();
-  assert.equal(await phius.getByRole("button", { name: "Choose Station…" }).isDisabled(), true);
+  assert.equal(await phius.getByRole("button", { name: "Choose Station…" }).isDisabled(), false);
 
   step("the Setup view's entry shows its summary and opens the dialog on the Climate tab");
   await page.locator("[data-tab='setup']").click();

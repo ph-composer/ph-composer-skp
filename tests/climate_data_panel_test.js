@@ -431,8 +431,8 @@ test("with a folder and a site the pane names the picker's dataset and its stati
   assert.ok(byText(phius(p), "h2", "No Phius climate data in this Model"));
   assert.ok(byText(phius(p), "p", "Station Set A · 1,007 stations on this computer."), "the dataset used last");
   var choose = byText(phius(p), "button", "Choose Station…");
-  assert.strictEqual(choose.disabled, true);
-  assert.ok(labelled(phius(p), "Why Choose Station is unavailable"));
+  assert.strictEqual(choose.disabled, false, "Choose Station opens the station picker");
+  assert.strictEqual(labelled(phius(p), "Why Choose Station is unavailable"), null);
   p.receive("panel.snapshot", Object.assign({}, p.panel.state, { revision: 2 }));
   assert.strictEqual(named(p, P + "folders.list").length, 1, "a refresh while shown does not read the disk");
 });

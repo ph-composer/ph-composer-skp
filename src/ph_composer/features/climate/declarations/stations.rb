@@ -2,11 +2,11 @@
 
 module PhComposer
   module Climate
-    # The station reads and the two writes that take a station file: stations.list, climate.attach_station,
-    # climate.replace_station and climate.source_status. The reads are under the `read` grant: they answer a
-    # station's name, state, coordinates and elevation, never a monthly value or a path (context/CONTRACTS.md,
-    # "The Phius station reader"). Attaching and replacing are separate actions so that each carries its own Undo
-    # name; both take a folder id and a station key, and Ruby reads the file.
+    # The station reads and the two writes that take a station file: stations.list, stations.all,
+    # climate.attach_station, climate.replace_station and climate.source_status. The reads are under the `read`
+    # grant: they answer a station's name, state, coordinates and elevation, never a monthly value or a path
+    # (context/CONTRACTS.md, "The Phius station reader"). Attaching and replacing are separate actions so that each
+    # carries its own Undo name; both take a folder id and a station key, and Ruby reads the file.
     module StationsRegistration
       STATIONS_PREFIX = "#{FEATURE_ID}.stations".freeze
       CLIMATE_PREFIX = ClimateRegistration::PREFIX
@@ -33,6 +33,8 @@ module PhComposer
         "next_cursor" => Pages::NEXT_CURSOR,
         "stations" => Shapes.list(STATION, :description => "Nearest first, then by key.")
       }).freeze
+      BY_FOLDER = Shapes.object({ "folder_id" => FoldersRegistration::FOLDER_ID }).freeze
+      ALL = Shapes.object(LIST.fetch("properties").reject { |key, _| key == "next_cursor" }).freeze
       BY_STATION = Shapes.object({ "folder_id" => FoldersRegistration::FOLDER_ID, "station_key" => STATION_KEY }).freeze
       REPLACED = Shapes.with(ClimateRegistration::WRITTEN, "replaced" => Shapes.object({
         "name" => { "type" => "string", "description" => "The replaced climate's name." },
@@ -73,6 +75,15 @@ module PhComposer
                       :examples => [{ "folder_id" => FoldersRegistration::EXAMPLE_ID },
                                     { "folder_id" => FoldersRegistration::EXAMPLE_ID, "limit" => 20 }]) do |request|
           Stations::Operations.list(request, request.params.fetch("folder_id"))
+        end
+        feature.query("#{STATIONS_PREFIX}.all",
+                      :description => "Every station of one climate data folder in one read, nearest first, for " \
+                                      "the station picker. Scripts page #{STATIONS_PREFIX}.list instead.",
+                      :response => { "bounded" => false, "prefer" => "#{STATIONS_PREFIX}.list" },
+                      :refuses => FOLDER_REFUSES + [Stations::Operations::SITE_NOT_SET],
+                      :params => BY_FOLDER, :result => ALL,
+                      :examples => [{ "folder_id" => FoldersRegistration::EXAMPLE_ID }]) do |request|
+          Stations::Operations.all(request, request.params.fetch("folder_id"))
         end
         feature.query("#{CLIMATE_PREFIX}.source_status",
                       :description => "Whether the attached station's file is on this computer: looked for by " \
