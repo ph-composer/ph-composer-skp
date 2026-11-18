@@ -621,7 +621,8 @@ reads its headers in under 0.1 s in SketchUp 2026's Ruby, so the read is synchro
   `source_checksum` the SHA-256 of the bytes read. Attach and Replace are two actions because an
   action has one Undo name; both are guarded by the request's `expected_revision`, so no station
   value travels in params.
-- **Source status** walks every folder found, matches stem and state, then compares SHA-256: `found`,
+- **Source status** walks every folder found, matches stem and state (a `-mon.txt` whose header no
+  longer reads still matches, and reads `changed`), then compares SHA-256: `found`,
   else `changed`, else `not_on_this_computer`; `not_applicable` for a hand-entered climate or none.
 
 ## Geometry records and occurrence references

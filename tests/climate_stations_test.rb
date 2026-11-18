@@ -264,6 +264,8 @@ class ClimateStationsTest < PhComposerTestCase
     invoke("climate.attach_station", "folder_id" => id, "station_key" => INSIDE)
 
     found = query("climate.source_status").fetch("value")
+    File.binwrite(File.join(path, INSIDE), "damaged\r\n".b)
+    damaged = query("climate.source_status").fetch("value")
     File.binwrite(File.join(path, INSIDE), ClimateStationFiles.second_files.fetch(INSIDE))
     changed = query("climate.source_status").dig("value", "status")
     FileUtils.rm_rf(path)
@@ -274,6 +276,7 @@ class ClimateStationsTest < PhComposerTestCase
     again = query("climate.source_status").fetch("value")
 
     assert_equal({ "status" => "found", "folder_id" => id, "station_key" => INSIDE }, found)
+    assert_equal({ "status" => "changed", "folder_id" => id, "station_key" => INSIDE }, damaged)
     assert_equal %w[changed not_on_this_computer], [changed, gone]
     assert_equal({ "status" => "found", "folder_id" => other_id, "station_key" => INSIDE }, again)
   end

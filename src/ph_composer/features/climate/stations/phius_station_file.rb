@@ -109,7 +109,8 @@ module PhComposer
             raise Unreadable.new("header", "the station name is empty or longer than #{MAX_NAME_LENGTH} characters")
           end
 
-          values = HEADER_LABELS.to_h { |label, key| [key, labelled(cells, label, "header")] }
+          # The labels follow the name cell, so a station named "Latitude" is not read as its own label.
+          values = HEADER_LABELS.to_h { |label, key| [key, labelled(cells.drop(1), label, "header")] }
           %w[latitude_deg longitude_deg elevation_m].each do |key|
             raise Unreadable.new("header", "#{key} is missing") if values.fetch(key).nil?
           end

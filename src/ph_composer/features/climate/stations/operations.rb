@@ -91,7 +91,9 @@ module PhComposer
           provenance = values.fetch("provenance")
           changed = nil
           Folders::Operations.found_folders.each do |folder|
-            FolderScan.call(folder.fetch("location")).stations.each do |station|
+            scan = FolderScan.call(folder.fetch("location"))
+            # A source whose header no longer reads is still the same file name in the same state: changed.
+            (scan.stations + scan.unreadable).each do |station|
               next unless station.stem == provenance.fetch("station_name") && station.state == provenance.fetch("state")
 
               match = status("found", folder, station)

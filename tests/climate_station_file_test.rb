@@ -65,6 +65,8 @@ class ClimateStationFileTest < PhComposerTestCase
     [no_longitude, no_height, unnamed, long_name].each do |raw|
       assert_equal "header", assert_raises(READER::Unreadable) { READER.parse(raw) }.row
     end
+    assert_equal 40.5, READER.header(bytes(:name => "Latitude [\u00B0]")).fetch("latitude_deg")
+    assert_equal "Longitude", READER.parse(bytes(:name => "Longitude")).fetch("name")
     north = READER.parse(bytes(:name => "North"))
     assert_equal ["North", 11.0], [north.fetch("name"), north.dig("monthly", "rad_north_kwh_m2", 0)]
   end

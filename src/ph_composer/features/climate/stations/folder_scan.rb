@@ -23,7 +23,9 @@ module PhComposer
                              :keyword_init => true)
         # What one walk found: the stations in key order, files not read as { extension => count }, and whether
         # the walk read the whole folder.
-        Scan = Struct.new(:stations, :not_read, :complete, :keyword_init => true)
+        # `unreadable` holds the `-mon.txt` files whose header does not read, as Stations with only key, stem, state
+        # and path: they are counted in not_read and never listed, but source_status still finds a damaged source.
+        Scan = Struct.new(:stations, :unreadable, :not_read, :complete, :keyword_init => true)
 
         module_function
 
@@ -32,6 +34,7 @@ module PhComposer
         # whose header reads and whose series rows do not is listed, and attach refuses it naming the row.
         def call(root, max_entries: MAX_ENTRIES, max_depth: MAX_DEPTH)
           stations = []
+          unreadable = []
           not_read = Hash.new(0)
           complete = true
           entries = 0
@@ -58,13 +61,19 @@ module PhComposer
                 complete = false
               elsif stat.file?
                 station = station(path, stat, (segments + [name]).join("/"), state)
-                station ? stations << station : not_read[extension(name)] += 1
+                if station&.name
+                  stations << station
+                else
+                  unreadable << station if station
+                  not_read[extension(name)] += 1
+                end
               end
             rescue SystemCallError, IOError, EncodingError, ArgumentError
               complete = false
             end
           end
-          Scan.new(:stations => stations.sort_by(&:key), :not_read => not_read, :complete => complete)
+          Scan.new(:stations => stations.sort_by(&:key), :unreadable => unreadable.sort_by(&:key),
+                   :not_read => not_read, :complete => complete)
         end
 
         # [the folder's visible children in name order, how many entries were read]. The children are nil when
@@ -85,20 +94,24 @@ module PhComposer
           [nil, count]
         end
 
-        # The station a regular file is, or nil when it is not one.
+        # The station a regular file is, nil when it is not a `-mon.txt` file with a name before the suffix, or a
+        # Station with no name when its header does not read.
         def station(path, stat, key, state)
           name = File.basename(path)
           stem = name.delete_suffix(PhiusStationFile::SUFFIX)
-          return nil if stem == name || stem.empty? || stat.size > PhiusStationFile::MAX_BYTES
+          return nil if stem == name || stem.empty?
+
+          found = Station.new(:key => key, :stem => stem, :state => state, :path => path)
+          return found if stat.size > PhiusStationFile::MAX_BYTES
 
           # At most one byte past the limit, so a file that grew since its size was read is still refused unread.
           header = PhiusStationFile.header(File.binread(path, PhiusStationFile::MAX_BYTES + 1) || "".b)
-          Station.new(:key => key, :stem => stem, :name => header.fetch("name"),
-                      :state => state, :latitude_deg => header.fetch("latitude_deg"),
-                      :longitude_deg => header.fetch("longitude_deg"), :elevation_m => header.fetch("elevation_m"),
-                      :path => path)
+          found.name = header.fetch("name")
+          found.latitude_deg, found.longitude_deg, found.elevation_m =
+            header.values_at("latitude_deg", "longitude_deg", "elevation_m")
+          found
         rescue PhiusStationFile::Unreadable, SystemCallError, IOError
-          nil
+          found
         end
 
         # A file's kind for the counts: its extension in lower case, such as ".xls", or "" for none.
