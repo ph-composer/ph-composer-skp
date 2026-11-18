@@ -1,0 +1,245 @@
+{
+  "run_id": "run-climate",
+  "schema_version": 1,
+  "sections": {
+    "ph_composer.climate.export.site": {
+      "records": [
+        {
+          "climate": {
+            "daily_temp_swing_k": 10.5,
+            "monthly": {
+              "air_c": [
+                0.5,
+                2.0,
+                3.0,
+                4.0,
+                5.0,
+                6.0,
+                7.0,
+                8.0,
+                9.0,
+                10.0,
+                11.0,
+                12.0
+              ],
+              "dewpoint_c": [
+                61.0,
+                62.0,
+                63.0,
+                64.0,
+                65.0,
+                66.0,
+                67.0,
+                68.0,
+                69.0,
+                70.0,
+                71.0,
+                72.0
+              ],
+              "rad_east_kwh_m2": [
+                21.0,
+                22.0,
+                23.0,
+                24.0,
+                25.0,
+                26.0,
+                27.0,
+                28.0,
+                29.0,
+                30.0,
+                31.0,
+                32.0
+              ],
+              "rad_global_kwh_m2": [
+                51.0,
+                52.0,
+                53.0,
+                54.0,
+                55.0,
+                56.0,
+                57.0,
+                58.0,
+                59.0,
+                60.0,
+                61.0,
+                62.0
+              ],
+              "rad_north_kwh_m2": [
+                11.0,
+                12.0,
+                13.0,
+                14.0,
+                15.0,
+                16.0,
+                17.0,
+                18.0,
+                19.0,
+                20.0,
+                21.0,
+                22.0
+              ],
+              "rad_south_kwh_m2": [
+                31.0,
+                32.0,
+                33.0,
+                34.0,
+                35.0,
+                36.0,
+                37.0,
+                38.0,
+                39.0,
+                40.0,
+                41.0,
+                42.0
+              ],
+              "rad_west_kwh_m2": [
+                41.0,
+                42.0,
+                43.0,
+                44.0,
+                45.0,
+                46.0,
+                47.0,
+                48.0,
+                49.0,
+                50.0,
+                51.0,
+                52.0
+              ],
+              "sky_c": [
+                71.0,
+                72.0,
+                73.0,
+                74.0,
+                75.0,
+                76.0,
+                77.0,
+                78.0,
+                79.0,
+                80.0,
+                81.0,
+                82.0
+              ]
+            },
+            "name": "Inside Both XA",
+            "peak_loads": {
+              "cool_1": {
+                "air_c": 201.0,
+                "dewpoint_c": null,
+                "rad_east_w_m2": 203.0,
+                "rad_global_w_m2": 206.0,
+                "rad_north_w_m2": 202.0,
+                "rad_south_w_m2": 204.0,
+                "rad_west_w_m2": 205.0,
+                "sky_c": null
+              },
+              "cool_2": {
+                "air_c": 201.0,
+                "dewpoint_c": null,
+                "rad_east_w_m2": 203.0,
+                "rad_global_w_m2": 206.0,
+                "rad_north_w_m2": 202.0,
+                "rad_south_w_m2": 204.0,
+                "rad_west_w_m2": 205.0,
+                "sky_c": null
+              },
+              "heat_1": {
+                "air_c": 1.0,
+                "dewpoint_c": null,
+                "rad_east_w_m2": 3.0,
+                "rad_global_w_m2": 6.0,
+                "rad_north_w_m2": 2.0,
+                "rad_south_w_m2": 4.0,
+                "rad_west_w_m2": 5.0,
+                "sky_c": null
+              },
+              "heat_2": {
+                "air_c": 101.0,
+                "dewpoint_c": null,
+                "rad_east_w_m2": 103.0,
+                "rad_global_w_m2": 106.0,
+                "rad_north_w_m2": 102.0,
+                "rad_south_w_m2": 104.0,
+                "rad_west_w_m2": 105.0,
+                "sky_c": null
+              }
+            },
+            "station_elevation_m": 621.0,
+            "wind_speed_m_s": 3.0
+          },
+          "climate_left_out": null,
+          "id": "Site",
+          "location": {
+            "climate_zone": 15,
+            "elevation_m": 500.0,
+            "hours_from_utc": null,
+            "latitude_deg": 40.0,
+            "longitude_deg": -100.0
+          },
+          "provenance": {
+            "assumptions": {
+              "ph_composer": {
+                "cooling_load_2": "repeats cooling_load_1",
+                "edited_values": [
+                  {
+                    "as_read": 1.0,
+                    "column": "jan",
+                    "row": "air_c",
+                    "value": 0.5
+                  }
+                ],
+                "station_latitude_deg": 40.7,
+                "station_longitude_deg": -100.0
+              }
+            },
+            "conversion_method": null,
+            "conversion_method_version": null,
+            "is_certification_approved": null,
+            "monthly_data_available": true,
+            "peak_load_data_available": true,
+            "source_checksum": "536518ba314f82c3af82f5f5ae1d636103bf542d53fe86357bd4e5023f0ac18c",
+            "source_name": "Synthetic Dataset: Inside Both XA",
+            "source_type": "user_defined",
+            "source_version": null
+          },
+          "report": {
+            "climate": {
+              "dataset_name": "Synthetic Dataset",
+              "name": "Inside Both XA",
+              "origin": "station",
+              "state": "XA",
+              "station_name": "INSIDE_BOTH"
+            },
+            "design_temperature_source": "ASHRAE 2021, invented note",
+            "design_temperatures": {
+              "cooling_1_c": 30.1,
+              "heating_99_c": -17.2
+            },
+            "edited_cells": [
+              {
+                "as_read": 1.0,
+                "column": "jan",
+                "row": "air_c",
+                "value": 0.5
+              }
+            ],
+            "limit_check": {
+              "distance_km": 77.83655616347384,
+              "distance_ok": true,
+              "elevation_difference_m": 121.0,
+              "elevation_ok": true,
+              "reason": null,
+              "verdict": "pass"
+            },
+            "missing_values": 0
+          }
+        }
+      ],
+      "version": 1
+    },
+    "ph_composer.zones.export.zones": {
+      "records": [],
+      "version": 2
+    }
+  }
+}

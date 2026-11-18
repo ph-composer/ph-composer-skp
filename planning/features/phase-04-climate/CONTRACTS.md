@@ -1,7 +1,7 @@
 # Phase 4 contracts: Climate records, the settings file, the reader and export
 
 DATE: 2026-11-17
-STATUS: Scoped for P4c-01 to P4c-11; sections 2 to 4 implemented (P4c-01, P4c-02), section 3 amended at P4c-02. Contract questions C4c-1 to C4c-6 settle in their stages. Not reviewed against the code by a second reader.
+STATUS: Scoped for P4c-01 to P4c-11; sections 2 to 7 implemented (P4c-01 to P4c-05), sections 3, 6 and 7 amended in their stages. Contract questions C4c-1 to C4c-6 settle in their stages. Not reviewed against the code by a second reader.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -392,6 +392,19 @@ what honeybee-ph supplies in its place (E1). A folder location never appears.
 `phx` dependency group pinned to a released PHX, added here or by the Programs packet's P4a-03,
 whichever merges first (D4c-14); the tests skip without it.
 
+Amended at P4c-05, 2026-11-18. Owed check 6 ran on PHX 1.57.5 and every row above held
+([evidence](evidence/owed-check-6-20261118.md)); the `phx` group pins it (D4c-22). C4c-4 is settled
+(D4c-24): the record is emitted always, and its `report` block also carries `climate` (name, origin,
+dataset, station and state, or null), `missing_values`, and the design temperatures as
+`design_temperatures` (`heating_99_c`, `cooling_1_c`) beside `design_temperature_source`. The result
+fields are `location`, `climate` (the identity with the written `source_type` and wind speed),
+`climate_written`, `climate_left_out`, `missing_values`, `peak_load_temperatures_c`, `limit_check`,
+`edited_cells` (row, column, value and as read), `design_temperatures`, `design_temperature_source`,
+`building_segments` and `site_digest`. Every finding's `object_id` is `Site`. The zone and offset
+findings fire whenever the Location is written, with or without a climate (D4c-23, for Ed to confirm).
+A climate both incomplete and without a site gives both findings, and `climate_left_out` reads
+`site_not_set`. `climate.site_not_set` is the code P4c-04 declared; its description now covers both.
+
 ## 8. Units (P4c-01)
 
 Stored values are SI and each field's key names its unit. New quantities, on both the Ruby and
@@ -426,6 +439,6 @@ Latitude and longitude are decimal degrees in both profiles.
 | C4c-1 | Board 3 shows each folder's location. `Library::Setup.providers` strips paths from its read | **Settled at P4c-03, 2026-11-18 (D4c-16):** a display location, `~/` and the rest under the home folder, the volume's name and the rest under `/Volumes/`, otherwise `…/` and the last two names; never an absolute path, and the full path stays out of every result and log | Settled |
 | C4c-2 | Is a station's matching name the file name's stem or the name in its header? | The file name's stem with the state folder: it is what the user sees in the folder and it is unique there | Settled at P4c-04 as recommended (D4c-18) |
 | C4c-3 | The Setup view runs a native menu item's Ruby handler; the climate data dialog is in the panel | The handler asks the panel to open the Climate tab with the dialog as its intent, through the same route `panel.navigate` uses | P4c-08 |
-| C4c-4 | What the report callable receives when the section wrote no `Site` | Always emit the one record, with `location` and `climate` null when not written and `climate_left_out` giving the reason, so the report and the findings read one source | P4c-05 |
+| C4c-4 | What the report callable receives when the section wrote no `Site` | Always emit the one record, with `location` and `climate` null when not written and `climate_left_out` giving the reason, so the report and the findings read one source | Settled at P4c-05 as recommended, with the report block passed through the result (D4c-24) |
 | C4c-5 | The map's projection and level of detail | An equirectangular projection scaled at the view's centre latitude, borders simplified to the size owed check 2 allows | P4c-07 |
 | C4c-6 | Is `Digest::SHA256` available in SketchUp's Ruby on the supported hosts? | Check at P4c-04's entry; it is Ruby standard library | Settled at P4c-04: it loads in SketchUp 2026's Ruby 3.2.2 ([evidence](evidence/owed-check-3-20261118.md)). SketchUp 2023 is the floor packet's |

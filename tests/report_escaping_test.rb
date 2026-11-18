@@ -11,7 +11,7 @@ require_relative "test_helper"
 class ReportEscapingTest < PhComposerTestCase
   EXTENSION_ROOT = File.join(SOURCE_ROOT, "ph_composer")
   REPORT_FILES = ["export/report.rb", *Dir.glob("features/**/export.rb", :base => EXTENSION_ROOT),
-                  *Dir.glob("features/**/source_report.rb", :base => EXTENSION_ROOT)].freeze
+                  *Dir.glob("features/**/*_report.rb", :base => EXTENSION_ROOT)].freeze
   ALLOWED = [["export/report.rb", "<<~HTML"]].freeze
   OPENERS = %i[on_tstring_beg on_heredoc_beg on_regexp_beg on_qwords_beg on_words_beg on_qsymbols_beg
                on_symbols_beg on_backtick].freeze

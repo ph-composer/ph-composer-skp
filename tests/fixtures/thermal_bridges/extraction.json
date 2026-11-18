@@ -54,6 +54,29 @@
       "records": [],
       "version": 1
     },
+    "ph_composer.climate.export.site": {
+      "records": [
+        {
+          "climate": null,
+          "climate_left_out": null,
+          "id": "Site",
+          "location": null,
+          "provenance": null,
+          "report": {
+            "climate": null,
+            "design_temperature_source": null,
+            "design_temperatures": {
+              "cooling_1_c": null,
+              "heating_99_c": null
+            },
+            "edited_cells": [],
+            "limit_check": null,
+            "missing_values": 0
+          }
+        }
+      ],
+      "version": 1
+    },
     "ph_composer.model.export.model": {
       "records": [],
       "version": 1

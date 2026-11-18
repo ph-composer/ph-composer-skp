@@ -30,6 +30,7 @@ def test_the_product_build_lists_every_feature_section_and_the_model_section_and
         "ph_composer.windows.export.window_constructions",
         "ph_composer.windows.export.apertures",
         "ph_composer.zones.export.zones",
+        "ph_composer.climate.export.site",
         "ph_composer.model.export.model",
         "ph_composer.spaces.export.spaces",
         "ph_composer.thermal_bridges.export.thermal_bridges",

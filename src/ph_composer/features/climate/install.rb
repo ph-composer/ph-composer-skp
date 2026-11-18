@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 # One feature owns a Model's climate. Today that is the site location and the design temperatures, as
-# Model settings, the climate itself, one record with the Phius limit check against the site, and the climate
-# data folders set up on this computer, and the Phius station reader with the station list and attach; the
-# Climate tab and the Site export section join it later. It requires Zones, which that export section builds
+# Model settings, the climate itself, one record with the Phius limit check against the site, the climate
+# data folders set up on this computer, the Phius station reader with the station list and attach, and the
+# Site export section; the Climate tab joins it later. It requires Zones, which that export section builds
 # on; no Zones file names it. Climate is not a Library kind and registers no library provider.
 #
 #   site/           the climate-zone codes and their labels
@@ -13,6 +13,8 @@
 #   folders/        the climate data folders: Climate's section of this computer's settings file and its changes
 #   stations/       the Phius station reader, one walk of a folder, and the station list, attach, replace and
 #                   source status over them
+#   export/         the Site export record with its findings, and the report's climate section
+#   export.rb       the Site export section and its preflight
 #   codes.rb        the codes under the climate noun
 #   declarations/   what Climate registers: the site, the design temperatures, the climate, the summary, the
 #                   folders and the stations
@@ -35,6 +37,9 @@ require_relative "folders/operations"
 require_relative "stations/phius_station_file"
 require_relative "stations/folder_scan"
 require_relative "stations/operations"
+require_relative "export/site_record"
+require_relative "export/site_report"
+require_relative "export"
 require_relative "declarations/shapes"
 require_relative "declarations/site"
 require_relative "declarations/design_temperatures"
@@ -56,6 +61,7 @@ module PhComposer
       SummaryRegistration.install(feature)
       FoldersRegistration.install(feature)
       StationsRegistration.install(feature)
+      SiteExport.install(feature)
       Codes.install(feature)
     end
   end

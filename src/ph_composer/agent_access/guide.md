@@ -568,6 +568,20 @@ compares the files' SHA-256: `found`, `changed` or `not_on_this_computer`, and `
 a climate typed by hand or none. When found or changed it gives `folder_id` and `station_key`; to
 update from a changed file, pass them to `replace_station`.
 
+### Climate in the export
+
+The export writes the site and the climate to the HBJSON as honeybee-ph's `Site`, the same one on
+every Building Segment. The site's `Location` is written whenever the site is set; the climate only
+when it is complete and the site is set, with its provenance as the Model stores it and a second
+cooling case that repeats the file's one. Whatever is not written keeps honeybee-ph's default, as a
+Grasshopper model with nothing connected does. The design temperatures stay in the Model.
+`ph_composer.climate.export_preflight` lists the climate's findings before you export, and none
+blocks it: `climate.site_not_set` and `climate.incomplete` for a climate left out,
+`climate.zone_not_set` (written as Not defined) and `climate.utc_offset_not_set` (written empty)
+for a site written with those unset, `climate.outside_phius_limits` and `climate.not_checked`. A
+Model with no climate gives none about the climate. The report's Climate section names the dataset
+and station, never a folder.
+
 ### Library records
 
 List configured providers with `ph_composer.library.providers`. Use `ph_composer.library.load`
@@ -672,7 +686,7 @@ Volume's, Space Floor's and Floor Segment's to the matching honeybee-ph object. 
 map goes to its material (the hybrid material when the Layer is divided), and a divided Layer's
 Layer-Segments' maps go to their cell materials. Every other map stays in the Model with one
 `export.metadata_omitted` finding per entity: a membrane Layer and its Layer-Segment, the one
-Layer-Segment of an undivided Layer, Window Elements, Thermal Bridge Edges, Attached zones and the definitions (Materials, Frames,
+Layer-Segment of an undivided Layer, Window Elements, Thermal Bridge Edges, Attached zones, the climate and the definitions (Materials, Frames,
 Glazings, Psi-Install Types, Window Types, Thermal Bridge Types, Building Segments and Levels). A
 `ph_composer` key in any map that leaves blocks the export. The finding for a Layer, Layer-Segment
 or Window Element names the part in `object_id` and gives `reference`, the `{kind, id, part_ids}`

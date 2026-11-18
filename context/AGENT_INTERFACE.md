@@ -909,7 +909,10 @@ The following public operations have panel-closed walkthroughs.
   and are under `read`: they answer a station's name, state, coordinates and elevation, counts and a
   folder-relative key, never a monthly value or an absolute path, and a folder can only be listed
   after a `setup` grant or the user added it (architecture review, P4c-04). No call takes a
-  station's values, so they go from the file to the Model without crossing the connection.
+  station's values, so they go from the file to the Model without crossing the connection. The Site
+  export (API 1.66): `climate.export_preflight` answers the climate's export findings, none
+  blocking, through the export workflow's common preflight shape; the export itself has no climate
+  operation of its own.
   [Site walkthrough](../tools/examples/climate/site_walkthrough.rb),
   [climate walkthrough](../tools/examples/climate/climate_walkthrough.rb), whose `run_attach` is the
   agent guide's recipe.

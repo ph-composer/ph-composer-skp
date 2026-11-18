@@ -112,12 +112,15 @@ lint-python:
 
 # The owning tests, one per golden: exactly one test may write each file (docs/DEVELOPMENT.md
 # "Fixtures and coverage"). A new golden adds its owner here and its path below.
-FIXTURE_OWNERS := phase_one_export thermal_bridge_export api_reference agent_guide climate_folder_scan
+FIXTURE_OWNERS := phase_one_export thermal_bridge_export api_reference agent_guide climate_folder_scan climate_export
+# Python owners run after the Ruby ones, whose extractions they translate.
+PYTHON_FIXTURE_OWNERS := tests/python/test_site_sections.py::test_board_18_reloads_with_its_site_on_the_building_segment_and_owns_the_result_golden
 FIXTURE_PATHS := tests/fixtures tests/python/fixtures docs/API_REFERENCE.md src/ph_composer/agent_access/guide.md
 
 fixtures:
 	@if [ -z "$(strip $(FIXTURE_OWNERS))" ]; then echo "fixtures: no generated goldens yet"; else \
 	  PHC_WRITE_FIXTURES=1 $(RUBY) -Itests $(addprefix -r,$(addsuffix _test,$(FIXTURE_OWNERS))) -e ""; fi
+	@PHC_WRITE_FIXTURES=1 uv run pytest -q $(PYTHON_FIXTURE_OWNERS) >/dev/null
 
 # Regenerate, then fail if that changed any golden on disk. The comparison is by content, not against
 # the last commit, so a golden regenerated and not yet committed passes and `make ci && git commit -s`

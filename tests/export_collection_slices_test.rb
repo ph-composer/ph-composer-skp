@@ -24,7 +24,7 @@ class ExportCollectionSlicesTest < PhComposerTestCase
     PhComposer::Registry.install([TestFeature])
     expected = PhComposer::Export::Collection.build(model, :run_id => "same-run")
     builder = PhComposer::Export::Collection::Builder.new(model, :run_id => "same-run")
-    10.times { break if builder.advance }
+    20.times { break if builder.advance }
 
     assert_equal expected.document, builder.extraction.document
     assert_equal expected.findings, builder.extraction.findings
