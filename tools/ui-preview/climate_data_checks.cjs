@@ -96,6 +96,23 @@ check({ name: "climate-data", output }, async ({ newPage, step }) => {
   await dialog.getByRole("button", { name: "Locate Custom sets" }).click();
   await page.waitForFunction(() => !document.querySelector("dialog.climate-data-setup [data-found='false']"));
   assert.equal((await sent(CLIMATE + "folders.locate")).length, 1);
+
+  step("a press on Add Folder or another row's Remove while a changed name is open saves it, then acts");
+  await page.evaluate(() => { window.previewHost.climate.setupDelayMs = 400; });
+  await dialog.getByRole("button", { name: "Rename Preview Stations" }).click();
+  await dialog.getByLabel("Dataset name").fill("Preview Set");
+  await dialog.getByRole("button", { name: "Add Folder…" }).click();
+  await page.waitForFunction(n => window.previewHost.sent.some(m => m.payload && m.payload.name === n),
+    CLIMATE + "folders.add");
+  assert.equal((await sent(CLIMATE + "folders.rename")).length, 1, "the name was saved first");
+  await dialog.locator(".climate-data-status:empty").waitFor({ state: "attached" });
+  await dialog.getByRole("button", { name: "Rename Preview Set" }).click();
+  await dialog.getByLabel("Dataset name").fill("Preview Stations");
+  await dialog.getByRole("button", { name: "Remove Custom sets" }).click();
+  await page.locator("dialog.phc-confirm-dialog").getByRole("heading", { name: "Remove Custom sets?" }).waitFor();
+  assert.equal((await sent(CLIMATE + "folders.rename")).length, 2);
+  await page.locator("dialog.phc-confirm-dialog").getByRole("button", { name: "Cancel" }).click();
+  await page.evaluate(() => { window.previewHost.climate.setupDelayMs = 0; });
   await dialog.getByRole("button", { name: "Done" }).click();
   await phius.getByRole("button", { name: "Set Location…" }).click();
   await page.locator("dialog.climate-set-location").waitFor();

@@ -305,18 +305,51 @@ test("Locate cancelled changes nothing; Locate refused says why and keeps the ro
   assert.strictEqual(dialog(p).querySelector(".climate-data-status").textContent, refusal);
 });
 
-test("a click on Add Folder that saved a name by leaving the field runs once the name is saved", function () {
+// A real press: the dialog sees the button's mousedown before the name field loses focus.
+function press(p, button) {
+  dialog(p).listeners.mousedown({ target: button, preventDefault: function () {} });
+}
+
+test("pressing Add Folder while a changed name is open saves it and then adds", function () {
   var p = page();
   openDialog(p);
   list(p, [MAIN]);
   click(labelled(dialog(p), "Rename Station Set A"));
-  var input = labelled(dialog(p), "Dataset name");
-  input.value = "Renamed";
-  input.listeners.blur({});
-  click(byText(dialog(p), "button", "Add Folder…"));
+  labelled(dialog(p), "Dataset name").value = "Renamed";
+  press(p, byText(dialog(p), "button", "Add Folder…"));
+  assert.strictEqual(named(p, P + "folders.rename").length, 1, "the name is saved first");
   assert.strictEqual(named(p, P + "folders.add").length, 0, "one command at a time");
   answer(p, last(p, P + "folders.rename"), completed(Object.assign({}, MAIN, { name: "Renamed" })));
+  assert.strictEqual(named(p, P + "folders.add").length, 1, "then the press does what it was for");
+});
+
+test("pressing another row's Remove while a name is open saves it and then confirms that row", function () {
+  var p = page();
+  openDialog(p);
+  list(p, [MAIN, MISSING]);
+  click(labelled(dialog(p), "Rename Station Set A"));
+  labelled(dialog(p), "Dataset name").value = "Renamed";
+  press(p, labelled(rows(p)[1], "Remove Custom sets"));
+  assert.strictEqual(all(body(p), ".phc-confirm-dialog").length, 0);
+  answer(p, last(p, P + "folders.rename"), completed(Object.assign({}, MAIN, { name: "Renamed" })));
+  assert.ok(byText(all(body(p), ".phc-confirm-dialog")[0], "h2", "Remove Custom sets?"));
+});
+
+test("pressing Add Folder with the name unchanged adds at once; a refused name drops the press", function () {
+  var p = page();
+  openDialog(p);
+  list(p, [MAIN]);
+  click(labelled(dialog(p), "Rename Station Set A"));
+  press(p, byText(dialog(p), "button", "Add Folder…"));
+  assert.strictEqual(named(p, P + "folders.rename").length, 0);
   assert.strictEqual(named(p, P + "folders.add").length, 1);
+  answer(p, last(p, P + "folders.add"), { status: "cancelled", code: "approval.cancelled", message: "Cancelled." });
+  click(labelled(dialog(p), "Rename Station Set A"));
+  labelled(dialog(p), "Dataset name").value = "Renamed";
+  press(p, byText(dialog(p), "button", "Add Folder…"));
+  answer(p, last(p, P + "folders.rename"), { status: "refused", code: "climate.folder_not_found",
+    message: "No climate data folder with that id is set up on this computer. Nothing was written." });
+  assert.strictEqual(named(p, P + "folders.add").length, 1, "the refusal is read before anything else runs");
 });
 
 test("another Model while Remove is confirming takes the dialog and its confirm away", function () {

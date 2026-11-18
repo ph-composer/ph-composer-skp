@@ -1014,10 +1014,11 @@
         name: row.name }));
       outcome = { status: "completed", value: JSON.parse(JSON.stringify(row)) };
     }
+    // `setupDelayMs` holds the answer back, as a slow disk or a chooser left open would.
     this.window.setTimeout(function () {
       host.publish("setup.result", { request_id: payload.request_id, session: payload.session,
         outcome: Object.assign({ revision: host.revision }, outcome) });
-    }, 0);
+    }, this.climate.setupDelayMs || 0);
   };
   /* The fixture's station as climate.get gives it, its values reduced to what Set Location reads, or none. */
   Host.prototype.climateRecord = function () {

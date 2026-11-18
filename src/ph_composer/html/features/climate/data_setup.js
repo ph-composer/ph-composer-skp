@@ -64,14 +64,49 @@ function (ui, requests, shared) {
     var kept = el("dl", "climate-data-kept");
     KEPT.forEach(function (item) { kept.appendChild(el("dt", "", item[0])); kept.appendChild(el("dd", "", item[1])); });
     this.root.appendChild(kept);
-    this.addButton = ui.button("Add Folder…", function () { self.run("add", {}); });
+    this.addButton = intent(ui.button("Add Folder…", null), function () { self.run("add", {}); });
     // Every change here applies at once, so the dialog ends with Done, never a Cancel that would undo nothing.
-    this.done = ui.button("Done", function () { self.close(); });
+    this.done = intent(ui.button("Done", null), function () { self.close(); });
     var footer = el("div", "phc-dialog-actions climate-data-actions");
     footer.appendChild(this.addButton); footer.appendChild(this.done);
     this.root.appendChild(footer);
+    this.keepClickWhileNaming();
     document.body.appendChild(this.root);
   }
+
+  /* A button whose click runs `run`, also kept on it as its intent, so a press that first saves a name being
+     typed still does what it was pressed for. */
+  function intent(button, run) {
+    button._intent = run;
+    button.addEventListener("click", function (event) { run(event); });
+    return button;
+  }
+
+  /* Pressing another button while a name is being typed saves the name first, as leaving the field does, and
+     then does what the button was pressed for: once the name is saved, or at once when nothing needed saving.
+     Left to the browser, leaving the field would save the name, disable or repaint the button under the pointer,
+     and lose the click. */
+  DataSetup.prototype.keepClickWhileNaming = function () {
+    var self = this;
+    this.root.addEventListener("mousedown", function (event) {
+      var button = event.target && event.target.closest ? event.target.closest("button") : null;
+      var editor = self.editor;
+      if (!button || !button._intent || !editor || !editor.isConnected || editor.contains(button)) return;
+      event.preventDefault();
+      self.swallow = button;
+      var run = button._intent;
+      if (self.commitRename()) self.afterRename = run;
+      else if (!self.editor) run();
+    }, true);
+    // The click that follows that press has been answered already.
+    this.root.addEventListener("click", function (event) {
+      var swallowed = self.swallow;
+      self.swallow = null;
+      if (swallowed && (event.target === swallowed || swallowed.contains(event.target))) {
+        event.preventDefault(); event.stopPropagation();
+      }
+    }, true);
+  };
 
   DataSetup.prototype.isOpen = function () { return !this.root.hidden; };
 
@@ -111,12 +146,12 @@ function (ui, requests, shared) {
       else this.replace(value);
     }
     if (verb === "rename") this.renaming = null;
-    var next = this.next;
-    this.next = null;
+    var after = this.afterRename;
+    this.afterRename = null;
     if (this.closeWhenSettled) {
       this.closeWhenSettled = false;
       if (outcome.status === "completed" || outcome.status === "cancelled") return this.close();
-    } else if (next && outcome.status === "completed") this.run(next[0], next[1]);
+    } else if (after && outcome.status === "completed") after();
   };
 
   /* A row the host answered takes the place of the one with its id; `append` adds it when there is none (a list
@@ -127,14 +162,9 @@ function (ui, requests, shared) {
       folders.concat([row]);
   };
 
-  /* One command at a time. A click that lands while a name is saving (leaving the field saved it) runs once the
-     name is saved. */
+  /* One command at a time. */
   DataSetup.prototype.run = function (verb, params) {
-    if (this.disposed) return false;
-    if (this.commands.busy()) {
-      if (this.verb === "rename" && verb !== "rename") this.next = [verb, params];
-      return false;
-    }
+    if (this.disposed || this.commands.busy()) return false;
     this.verb = verb;
     this.commands.run(FOLDERS + verb, params);
     this.say(WAITING[verb]);
@@ -179,7 +209,9 @@ function (ui, requests, shared) {
     row.setAttribute("data-folder-id", folder.id); row.setAttribute("data-found", String(folder.found));
     var name = el("td", "climate-data-name"), line = el("div", "climate-data-line");
     line.appendChild(el("span", "climate-data-name-text", folder.name));
-    var rename = ui.iconButton("Rename " + folder.name, "pencil", function () { self.startRename(folder.id); });
+    var rename = intent(ui.iconButton("Rename " + folder.name, "pencil", null), function () {
+      self.startRename(folder.id);
+    });
     rename.classList.add("climate-data-rename"); rename.disabled = busy;
     line.appendChild(rename); name.appendChild(line);
     row.appendChild(name);
@@ -213,7 +245,7 @@ function (ui, requests, shared) {
   }
 
   DataSetup.prototype.action = function (label, accessible, busy, run) {
-    var button = ui.button(label, run);
+    var button = intent(ui.button(label, null), run);
     button.setAttribute("aria-label", accessible); button.disabled = busy;
     return button;
   };
@@ -255,10 +287,13 @@ function (ui, requests, shared) {
         input.focus(); return;
       }
       done = true; self.editor = null; self.renaming = null;
-      if (commit && name !== folder.name) { self.renaming = id; self.run("rename", { id: id, name: name }); }
-      else { self.say(""); self.paint(); }
+      if (commit && name !== folder.name) { self.renaming = id; return self.run("rename", { id: id, name: name }); }
+      self.say(""); self.paint();
+      return false;
     }
     this.cancelRename = function () { finish(false); };
+    // Whether saving the name sent a rename; a blank name keeps the field open and sends nothing.
+    this.commitRename = function () { return Boolean(finish(true)); };
     input.addEventListener("keydown", function (event) {
       if (event.key === "Enter") { event.preventDefault(); finish(true); }
       if (event.key === "Escape") {
@@ -292,7 +327,7 @@ function (ui, requests, shared) {
   DataSetup.prototype.close = function () {
     if (this.editor && this.editor.isConnected) { this.cancelRename(); return; }
     if (this.commands.busy()) {
-      this.closeWhenSettled = true; this.next = null;
+      this.closeWhenSettled = true; this.afterRename = null;
       this.say(this.status.textContent + " The dialog closes when this is done.");
       return;
     }
