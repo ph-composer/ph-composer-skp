@@ -1,9 +1,9 @@
 # P4c-08: Climate Data on This Computer and the Phius pane's empty states
 
 DATE: 2026-11-17
-STATUS: Scoped. Not authorized.
+STATUS: Implemented on branch `feature/climate-p4c-08`, 2026-11-18; CM08 not run. Authorized with every Climate stage on 2026-11-17 ([STATUS](../STATUS.md#authorization)).
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
 
 ## Entry and scope
 
@@ -91,3 +91,33 @@ P4c-09 enables Choose Station; P4c-11 enables Enter Values by Hand.
 ## Done when
 
 CM08 passes and C4c-3 is answered.
+
+## Departures, 2026-11-18
+
+- **C4c-3** (D4c-27): the handler calls `session.open_in_panel(owner, intent)`. The shell shows the panel and
+  sends `panel.navigate` with the owner and the intent, held in `shell/panel_outbox.rb` with the session's
+  notices until the page has started and shows that Model; the page finds the tab with `panel.tabFor(owner)`,
+  so Ruby names no tab. The same handler serves the Setup view and the Extensions menu with the panel closed.
+  Moving the waiting notices into the outbox kept `Panel` within its 300-line limit.
+- **The pane's cases the plan does not name** (D4c-28): a folder set up but not found counts as none, and the
+  no-folder state then says the folder cannot be found and offers the dialog instead of Choose Climate Data
+  Folder; board 10 names the dataset the picker opens on (the one used last if found, else the first found that
+  holds stations, else the first found). Settings that cannot be read show their message with only Enter Values
+  by Hand. The pane reads `folders.list` each time it is shown and after the dialog closes; the list is not a
+  snapshot section, because it walks the disk.
+- **Choose Climate Data Folder** opens the dialog and starts Add Folder at once, so the name is asked in the
+  row as D4c-10 has it.
+- **One primary in the dialog**, as the Library's setup dialog has it: Add Folder while no folder is set up,
+  Done once one is. Board 3 draws Add Folder primary always. The board's footer hint moved above the "kept"
+  block, so the footer holds only its two buttons.
+- **Rename** is a pencil on the row, shown on hover or focus (always below 1040 px), with the same check and
+  cross as a Window Type's name; boards 3 and 14 draw none. Remove and Locate are text buttons, as drawn.
+- **Entry check 3**: below 1040 px the dialog's rows stack, each value after its label, because the seven
+  columns stop fitting the dialog there; the browser check measures 1280, 1060, 800, 420 and 360 px.
+- **Words not on the boards**: a folder with no station files reads "No station files"; a folder read only in
+  part and a folder not found each get a line below the table; a row's Remove asks "Remove <name>?" and says
+  the folder and its files are not touched and Models keep their climates. Kinds not read are named for Excel,
+  CSV, PDF, EPW, text and zip files, and the rest are "other".
+- **"Absent from the picker"** is held by `stations.list` refusing `climate.folder_not_found` for a folder that
+  is gone (`tests/climate_stations_test.rb`); the picker is P4c-09's.
+

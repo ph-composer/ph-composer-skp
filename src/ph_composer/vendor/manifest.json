@@ -116,19 +116,29 @@
       "sha256": "9e8041546528ef8733c8da7b2359bd980cee349c3ed13ef3ebafc023a11a3479"
     },
     "html/features/climate/climate.css": {
-      "bytes": 3945,
+      "bytes": 7586,
       "mime": "text/css; charset=utf-8",
-      "sha256": "33e1d88edeef2e43f37f0b19172a73046ec5783eee526ba0f619d080d90b9184"
+      "sha256": "159e1b64dfb010d21cabda368539369b3438c67b8f950ed087fb33a832199493"
+    },
+    "html/features/climate/data_setup.js": {
+      "bytes": 19477,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "d1d8ff03727a83c253ca271ca215f354024700856defe8e980d93827c6b90218"
     },
     "html/features/climate/design_temperatures.js": {
       "bytes": 8478,
       "mime": "text/javascript; charset=utf-8",
       "sha256": "8d194678ba2da13408e5182f1c27eee964e6a6f710a764628459735d744c10fd"
     },
-    "html/features/climate/section.js": {
-      "bytes": 6623,
+    "html/features/climate/phius.js": {
+      "bytes": 8280,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "04a38aeeb486d21b7407dc21ccc92b94ee4f6b1519bf06299a1533a064808205"
+      "sha256": "a9bead3bac1fa16247af7d17948652b0ce239bb47d991b0045049e2dbd3e1a1a"
+    },
+    "html/features/climate/section.js": {
+      "bytes": 7401,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "cddcce09a45bb8af8a2b6057a2d06b24ea3daf9759fdccfc098646e6a85937d6"
     },
     "html/features/climate/set_location.js": {
       "bytes": 19951,
@@ -371,9 +381,9 @@
       "sha256": "ae769a7d0c4b07031ab9812cd350d17b6e4638549d0f5295ccaafe1f1390ed54"
     },
     "html/index.html": {
-      "bytes": 9010,
+      "bytes": 9123,
       "mime": "text/html; charset=utf-8",
-      "sha256": "5d6518079d4a26f7b939af515d0b48f9a7c0fb2990e26242e04473c97f59849d"
+      "sha256": "d7e61b7125c20b1e963027eaab67ee0962d71d728c23e5d98053275a4c7debb8"
     },
     "html/inventory.js": {
       "bytes": 12812,
@@ -491,9 +501,9 @@
       "sha256": "d13884a436faec8c0e461b0598043b09d5af4a47147a0a48a867a99874085f39"
     },
     "html/panel.js": {
-      "bytes": 38186,
+      "bytes": 38785,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "77298381d2f6e9e82425be56ddbb8af249cb31f4f2888d27ec454ba8318b59eb"
+      "sha256": "c169c280fc0cab9ee7382a63a7c532c6bd66dfba3ad1ac74fe344e98311ce9fd"
     },
     "html/record_edits.js": {
       "bytes": 18177,

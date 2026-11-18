@@ -117,6 +117,12 @@ module PhComposer
         register_subscriber(notice_subscribers, block)
       end
 
+      # A native route asking the panel to show the page an owner's operations are worked on, with an
+      # intent for that page (ModelSession#open_in_panel).
+      def on_panel_open(&block)
+        register_subscriber(panel_open_subscribers, block)
+      end
+
       # Subscribers run in subscription order, which is `install` order, and an error propagates to
       # the observer that published the event.
       def on_host_event(kind, &block)
@@ -139,6 +145,10 @@ module PhComposer
 
       def notify_notice(session, message, tone)
         notify_subscribers(notice_subscribers, session, message, tone)
+      end
+
+      def notify_panel_open(session, owner, intent)
+        notify_subscribers(panel_open_subscribers, session, owner, intent)
       end
 
       def detach(model)
@@ -224,6 +234,10 @@ module PhComposer
 
       def notice_subscribers
         @notice_subscribers ||= []
+      end
+
+      def panel_open_subscribers
+        @panel_open_subscribers ||= []
       end
 
       def host_event!(kind)

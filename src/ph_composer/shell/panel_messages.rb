@@ -55,6 +55,8 @@ module PhComposer
       "export.result" => %w[request_id session outcome],
       "panel.notice" => %w[session message tone],
       "panel.setup" => %w[entries],
+      # A native route's request to show the page where `owner`'s operations are worked on (Panel.open_at).
+      "panel.navigate" => %w[session owner intent],
       "panel.failure" => %w[message]
     }.freeze
 

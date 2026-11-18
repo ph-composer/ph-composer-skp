@@ -1,13 +1,14 @@
 /* The Climate tab: one page header over source cards (Site location, then under "Climate sources" Phius climate
    data, Design temperatures and Hourly weather file) and the pane of the card selected. Every card's state comes
    from the summary snapshot section and the panes paint from the site and design-temperature sections. The
-   card selected is remembered per Model session. The Phius climate data pane is a placeholder until the station
-   picker lands, and the Hourly weather file card is Planned. Climate is first in the tab row; the panel still
-   opens on Zones. */
+   card selected is remembered per Model session. The Phius climate data pane shows its empty states until the
+   station picker lands, and the Hourly weather file card is Planned. The page header always offers Climate Data
+   on This Computer, which a native route (the Setup view, the Extensions menu) also opens with the intent
+   `{ open: "climate_data" }`. Climate is first in the tab row; the panel still opens on Zones. */
 PhComposerUI.define("features/climate/section", ["panel", "workspace", "snapshot", "source_cards",
   "features/climate/shared", "features/climate/site", "features/climate/set_location",
-  "features/climate/design_temperatures"],
-function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, DesignPane) {
+  "features/climate/design_temperatures", "features/climate/phius", "features/climate/data_setup"],
+function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, DesignPane, PhiusPane, dataSetup) {
   "use strict";
   var TAB = "climate";
   var pages = Object.create(null);
@@ -25,7 +26,8 @@ function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, Desig
     this.session = state.session; this.send = send; this.root = root;
     root.replaceChildren();
     this.setButton = ui.button("Set Location…", function () { self.openSetLocation(); });
-    this.header = ui.pageHeader({ title: "Climate" });
+    this.dataButton = ui.button("Climate Data on This Computer…", function () { self.openData(false); });
+    this.header = ui.pageHeader({ title: "Climate", actions: [this.dataButton] });
     this.cards = new SourceCards({ label: "Climate", state: page, stateKey: "card", groups: [
       { cards: [{ id: "site", title: "Site location" }] },
       { caption: "Climate sources", cards: [{ id: "phius", title: "Phius climate data" },
@@ -33,12 +35,10 @@ function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, Desig
         { id: "hourly", title: "Hourly weather file", planned: true }] }],
     changed: function () { panel.repaint(); } });
     this.site = new SitePane(function () { self.openSetLocation(); });
-    this.phius = ui.element("section", "climate-pane climate-phius");
-    this.phiusLine = ui.element("p", "climate-pane-intro");
-    this.phius.appendChild(ui.element("h2", "", "Phius climate data"));
-    this.phius.appendChild(this.phiusLine);
+    this.phius = new PhiusPane(state.session, send, { openData: function (add) { self.openData(add); },
+      setLocation: function () { self.openSetLocation(); } });
     this.design = new DesignPane(state.session, send);
-    this.panes = { site: this.site.root, phius: this.phius, design: this.design.root };
+    this.panes = { site: this.site.root, phius: this.phius.root, design: this.design.root };
     var content = ui.element("div", "climate-content");
     Object.keys(this.panes).forEach(function (key) { content.appendChild(self.panes[key]); });
     var layout = ui.element("div", "climate-layout");
@@ -54,6 +54,16 @@ function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, Desig
       Boolean(this.summary && this.summary.climate.state !== "none"));
   };
 
+  /* Climate Data on This Computer, read afresh on each open; `add` starts Add Folder at once. The Phius pane
+     reads the folders again when it closes. */
+  View.prototype.openData = function (add) {
+    var self = this;
+    if (!this.data) this.data = new dataSetup.DataSetup(this.session, this.send, function () {
+      self.phius.refresh(); panel.repaint();
+    });
+    this.data.open({ add: add });
+  };
+
   View.prototype.render = function (state) {
     var summary = snapshot.value(state, shared.SUMMARY), site = snapshot.value(state, shared.SITE);
     var design = snapshot.value(state, shared.DESIGN);
@@ -66,10 +76,9 @@ function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, Desig
     this.header.setPrimary(selected === "site" ? this.setButton : null);
     this.site.render(site);
     this.design.render(state, design);
-    this.phiusLine.textContent = "Attaching a Phius station or typing its values by hand comes in a later " +
-      "version. " + (summary && summary.climate.state !== "none" ? "This Model holds a climate, and export " +
-      "writes it when it is complete." : "This Model holds no climate.");
+    this.phius.render(state, summary, site, state.ui.activeTab === TAB && selected === "phius");
     if (this.dialog) this.dialog.consume(state);
+    if (this.data) this.data.consume(state);
   };
 
   View.prototype.paintCards = function (summary, site, design) {
@@ -89,15 +98,19 @@ function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, Desig
     cards.paint("hourly", { chip: { text: "Planned" } });
   };
 
-  /* A navigation from elsewhere may name a card, or an export finding's code that one card fixes. */
+  /* A navigation from elsewhere may name a card, or an export finding's code that one card fixes, or open
+     Climate Data on This Computer. */
   View.prototype.navigate = function (intent) {
     var card = intent.card || CARD_FOR_CODE[intent.code];
     if (card) { this.cards.select(card); panel.repaint(); }
+    if (intent.open === "climate_data") this.openData(false);
   };
 
   View.prototype.dispose = function () {
     if (this.dialog) { this.dialog.dispose(); this.dialog = null; }
+    if (this.data) { this.data.dispose(); this.data = null; }
     this.design.dispose();
+    this.phius.dispose();
   };
 
   function render(root, state, send) {

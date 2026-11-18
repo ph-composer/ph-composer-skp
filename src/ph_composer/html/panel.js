@@ -37,7 +37,8 @@ PhComposerUI.define("panel", ["unit_preferences", "workspace", "table_views", "r
     "panel.notice": reduceNotice,
     "panel.failure": reduceFailure,
     "export.result": reduceExportResult,
-    "panel.setup": reduceSetupEntries
+    "panel.setup": reduceSetupEntries,
+    "panel.navigate": reduceNavigate
   };
 
   function initialState() {
@@ -196,6 +197,16 @@ PhComposerUI.define("panel", ["unit_preferences", "workspace", "table_views", "r
     offerHelp(before, payload);
     if (state === before && !moved) return;
     render();
+  }
+
+  /* A native route (a menu item, a Setup entry) asks for the page where an owner's operations are worked on,
+     with an intent for it (Panel.open_at). The page finds the tab itself, so the host names none; a route for
+     a Model this page does not show is dropped. Navigating moves the state itself, so the moved state is the
+     answer. */
+  function reduceNavigate(previous, payload) {
+    var target = payload.session === previous.session && api.tabFor(payload.owner);
+    if (target) navigate(target.tab, payload.intent || {});
+    return state;
   }
 
   /* An unexpected failure from any request carries its incident reference. Views show their own refusals,

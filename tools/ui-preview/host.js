@@ -77,6 +77,11 @@
       this.climate.design || {});
     this.climate.geolocation = this.climate.geolocation || { geolocated: false, latitude_deg: null,
       longitude_deg: null, hours_from_utc: null };
+    // The climate data folders on this computer (features/climate/folders/), as `folders.list` answers them, and
+    // the rows the folder chooser hands Add Folder and Locate in turn, then a cancel once they run out.
+    this.climate.folders = this.climate.folders || [];
+    this.climate.lastDatasetId = this.climate.lastDatasetId || null;
+    this.climate.chooser = this.climate.chooser || [];
     this.preferences = { unit_system: settings.unitSystem || "SI", dimension_formats: {},
       number_format: { decimal: settings.decimal || ".", locale: settings.locale || "en-US" } };
   }
@@ -257,11 +262,22 @@
       outcome: refused("export.unavailable", "File writes are unavailable in this browser preview.", this.revision)
     });
     if (message.type === "view.invoke") this.viewCommand(message.payload);
-    if (message.type === "setup.invoke") this.librarySetup(message.payload);
-    // The Setup view's entries (shell/setup_entries.rb); running one opens a native window the preview has not.
+    if (message.type === "setup.invoke") {
+      if (message.payload.name.indexOf(CLIMATE) === 0) this.climateSetup(message.payload);
+      else this.librarySetup(message.payload);
+    }
+    // The Setup view's entries (shell/setup_entries.rb). Agent Access opens a native window the preview has not;
+    // Climate Data on This Computer asks the panel for its dialog (Panel.open_at).
+    if (message.type === "panel.setup_open" && message.payload.name === CLIMATE + "data.open") {
+      this.publish("panel.navigate", { session: this.session, owner: "ph_composer.climate",
+        intent: { open: "climate_data" } });
+    }
     if (message.type === "panel.setup_entries" || message.type === "panel.setup_open") {
+      var folders = this.climate.folders.length;
       this.publish("panel.setup", { entries: [{ name: "ph_composer.agent_access.open", menu: "Agent Access",
-        label: "Agent Access…", summary: "Listening on port 46110 · 1 live token" }] });
+        label: "Agent Access…", summary: "Listening on port 46110 · 1 live token" },
+      { name: CLIMATE + "data.open", menu: "Climate", label: "Climate Data on This Computer…",
+        summary: folders ? folders + " folder" + (folders === 1 ? "" : "s") : "No climate data folder" }] });
     }
     if (message.type === "preferences.set") this.setPreference(message.payload);
     if (message.type === "export.start") this.exportStart(message.payload);
@@ -965,12 +981,44 @@
     this.window.setTimeout(function () {
       var value = payload.name === CLIMATE + "site.geolocation" ? JSON.parse(JSON.stringify(host.climate.geolocation)) :
         payload.name === CLIMATE + "climate.get" ? host.climateRecord() :
+        payload.name === CLIMATE + "folders.list" ? host.climateFolders() :
           payload.name === CLIMATE + "site.preview_limit_check" ? { limit_check: host.limitCheck(payload.params) } :
             null;
       var outcome = value ? { status: "completed", revision: host.revision, value: value } :
         refused("operation.unknown", "The preview does not answer " + payload.name + ".", host.revision);
       host.publish("query.result", { request_id: payload.request_id, session: payload.session, outcome: outcome });
     }, 0);
+  };
+  Host.prototype.climateFolders = function () {
+    return JSON.parse(JSON.stringify({ folders: this.climate.folders, last_dataset_id: this.climate.lastDatasetId }));
+  };
+  /* The climate data folder commands, as features/climate/folders/operations.rb answers them. Add and Locate take
+     the chooser's next row, or cancel when there is none. Nothing is written anywhere. */
+  Host.prototype.climateSetup = function (payload) {
+    var host = this, verb = payload.name.split(".").pop(), params = payload.params || {};
+    var folders = this.climate.folders;
+    var row = folders.filter(function (folder) { return folder.id === params.id; })[0], outcome;
+    var chosen = (verb === "add" || verb === "locate") ? this.climate.chooser.shift() : null;
+    if ((verb === "add" || verb === "locate") && !chosen) {
+      outcome = { status: "cancelled", code: "approval.cancelled", message: "No folder was chosen.", effect: "none" };
+    } else if (verb !== "add" && !row) {
+      outcome = refused("climate.folder_not_found", "No climate data folder with that id is set up on this " +
+        "computer. Nothing was written.", this.revision);
+    } else if (verb === "add") {
+      folders.push(chosen); outcome = { status: "completed", value: JSON.parse(JSON.stringify(chosen)) };
+    } else if (verb === "remove") {
+      this.climate.folders = folders.filter(function (folder) { return folder !== row; });
+      outcome = { status: "completed", value: this.climateFolders() };
+    } else {
+      Object.assign(row, verb === "rename" ? { name: params.name } : Object.assign({}, chosen, { id: row.id,
+        name: row.name }));
+      outcome = { status: "completed", value: JSON.parse(JSON.stringify(row)) };
+    }
+    // `setupDelayMs` holds the answer back, as a slow disk or a chooser left open would.
+    this.window.setTimeout(function () {
+      host.publish("setup.result", { request_id: payload.request_id, session: payload.session,
+        outcome: Object.assign({ revision: host.revision }, outcome) });
+    }, this.climate.setupDelayMs || 0);
   };
   /* The fixture's station as climate.get gives it, its values reduced to what Set Location reads, or none. */
   Host.prototype.climateRecord = function () {

@@ -104,6 +104,73 @@ class SetupEntriesTest < PhComposerTestCase
     assert_includes listener.stub(:status, stopped) { PhComposer::AgentAccess.setup_summary }, "cannot be read"
   end
 
+  # C4c-3: an entry whose window is a dialog in the panel asks the panel to open its page with an intent. From the
+  # Setup view the page is started and gets it at once; from the Extensions menu the panel opens first and the
+  # page gets it once it has started and shows the Model.
+  def test_an_entry_opens_its_page_in_the_panel_now_or_once_the_page_has_started
+    Registry.install([feature do |registry|
+      registry.feature("outside.probe", :contract_version => 1)
+              .menu_item("outside.probe.open", :label => "Probe…", :menu => "Probe", :in_setup => true) do |session|
+        session.open_in_panel("outside.probe", "open" => "probe")
+      end
+    end])
+    expected = { "session" => @session.id, "owner" => "outside.probe", "intent" => { "open" => "probe" } }
+
+    Registry.current.menu_items.fetch("outside.probe.open").handler.call(@session)
+    dialog = Panel.show
+    assert_empty messages(dialog, "panel.navigate"), "the page has not started"
+    dialog.fire("ph_composer_message", envelope("panel.ready", {}))
+    types = types(dialog)
+    assert_equal [expected], messages(dialog, "panel.navigate")
+    assert_operator types.index("panel.snapshot"), :<, types.index("panel.navigate"), "the Model is shown first"
+
+    dialog.fire("ph_composer_message", envelope("panel.setup_open", "name" => "outside.probe.open"))
+    assert_equal [expected, expected], messages(dialog, "panel.navigate")
+    dialog.fire("ph_composer_message", envelope("panel.ready", {}))
+    assert_equal 2, messages(dialog, "panel.navigate").length, "a route is delivered once"
+  end
+
+  def test_a_later_route_replaces_one_waiting_and_a_closed_panel_forgets_it
+    Panel.reset_for_test
+    @session.open_in_panel("outside.first", "n" => 1)
+    @session.open_in_panel("outside.second", "n" => 2)
+    dialog = Panel.show
+    dialog.fire("ph_composer_message", envelope("panel.ready", {}))
+    assert_equal [{ "session" => @session.id, "owner" => "outside.second", "intent" => { "n" => 2 } }],
+                 messages(dialog, "panel.navigate")
+
+    Panel.reset_for_test
+    @session.open_in_panel("outside.third", {})
+    Panel.instance_variable_get(:@dialog).close
+    reopened = Panel.show
+    reopened.fire("ph_composer_message", envelope("panel.ready", {}))
+    assert_empty messages(reopened, "panel.navigate"), "a window closed before its page started takes its route"
+  end
+
+  def test_climate_data_is_a_setup_entry_whose_button_opens_its_dialog_in_the_climate_tab
+    PhComposer::Climate::Folders::Store.stub(:state, "ok") do
+      PhComposer::Climate::Folders::Store.stub(:read, { "folders" => [], "last_dataset_id" => nil }) do
+        entry = PhComposer::SetupEntries.list(@session).find { |item| item["name"] == "ph_composer.climate.data.open" }
+        assert_equal ["Climate", "Climate Data on This Computer…", "No climate data folder"],
+                     entry.values_at("menu", "label", "summary")
+      end
+    end
+    dialog = Panel.show
+    dialog.fire("ph_composer_message", envelope("panel.ready", {}))
+
+    dialog.fire("ph_composer_message", envelope("panel.setup_open", "name" => "ph_composer.climate.data.open"))
+
+    route = { "session" => @session.id, "owner" => "ph_composer.climate", "intent" => { "open" => "climate_data" } }
+    assert_equal [route], messages(dialog, "panel.navigate")
+  end
+
+  def test_a_climate_summary_that_raises_leaves_the_entry_showing
+    PhComposer::Climate::Folders::Operations.stub(:setup_summary, -> { raise IOError, "disk" }) do
+      entry = PhComposer::SetupEntries.list(@session).find { |item| item["name"] == "ph_composer.climate.data.open" }
+      assert_equal ["Climate Data on This Computer…", nil], entry.values_at("label", "summary")
+    end
+  end
+
   def test_a_refused_entry_is_the_models_notice_and_the_entries_come_again
     Registry.install([feature do |registry|
       registry.feature("outside.probe", :contract_version => 1)
@@ -126,6 +193,10 @@ class SetupEntriesTest < PhComposerTestCase
 
   def envelope(type, payload)
     JSON.generate("type" => type, "payload" => payload)
+  end
+
+  def types(dialog)
+    dialog.scripts.map { |script| JSON.parse(script[/receive\((.*)\)\z/m, 1]).fetch("type") }
   end
 
   def messages(dialog, type)
