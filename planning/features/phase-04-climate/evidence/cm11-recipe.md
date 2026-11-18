@@ -1,7 +1,7 @@
 # CM11 host recipe: hand entry and Edit Values
 
 DATE: 2026-11-18
-STATUS: Written after the last review fix of PR #522. Part A is the stage agent's; part B is the conductor's hold; part C is Ed's verification pass.
+STATUS: Written after the last review fix of PR #522. Part A run by the stage agent on `408285df`, all as expected (`_private/host/cm11-20261118/CM11/steps.md`); part B run by the conductor under one hold, all as expected ([evidence](cm11-20261118.md)); part C is Ed's verification pass.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
 
@@ -66,7 +66,7 @@ B eval "CM11.click('Enter Values by Hand…')"; B eval "CM11.editor"
 
 ```sh
 B eval "CM11.paste(0)"; B eval "CM11.editor"
-#   first "0.5"; last "154.5"; Heating 1 dewpoint ""; notice "Pasted 8 rows."
+#   first "0.5"; last (sky temperature, Cooling) ""; Heating 1 dewpoint ""; notice "Pasted 8 rows."
 B eval "CM11.paste(15, CM11.block(8, false))"; B eval "CM11.editor"
 #   notice "The pasted block is 8 rows by 15 values; from this cell the grid holds 7 by 15. Nothing was filled."
 ```
@@ -113,7 +113,7 @@ B eval "CM11.click_card('site')"; B eval "CM11.click_card('phius')"
 B eval "CM11.click('Edit Values…')"; B eval "CM11.editor"
 #   Name "Alder Field" read only; Latitude and Longitude read only
 B eval "CM11.type(13, '77')"; B eval "CM11.editor_click('Save')"; B eval "CM11.detail"
-#   edited [{row: rad_north_w_m2, column: heat_2}]
+#   edited [{row: air_c, column: heat_2}] (cell 13 is outdoor temperature, Heating 2)
 B eval "CM11.read"            # tags [Pass, Edited]; "1 value differs from the station file: ..."
 B eval "CM11.click('Restore Original Values')"; B eval "CM11.climate"         # edited 0
 ```
@@ -140,18 +140,18 @@ AXRaise the panel window before clicking in it. The Edit menu needs an AXRaise o
 (`cm11.skp`) first. Each step has a DOM read the conductor checks through the bridge instead of pixels.
 
 **Clipboard.** Before step 2, put this synthetic block on the clipboard with
-`ruby -e 'load "<D>"' -e 'print CM11.block' | pbcopy` run from the repository (the driver needs no SketchUp
-for `block`). It is eight lines, tab-separated, CRLF line ends, the first line beginning `Series 1	0.5	1.5`
+`ruby -e 'print Array.new(8) { |r| (["Series #{r + 1}"] + Array.new(r >= 6 ? 12 : 15) { |c| format("%.1f", r * 20 + c + 0.5) }).join("\t") }.join("\r\n") + "\r\n"' | pbcopy`,
+the same text as `CM11.block` (the driver itself loads only inside SketchUp). It is eight lines, tab-separated, CRLF line ends, the first line beginning `Series 1	0.5	1.5`
 and the last `Series 8	140.5	141.5 … 151.5`. Reading it back with `pbpaste | head -1` is enough.
 
 1. AXRaise the panel. Click **Enter Values by Hand…**. `CM11.editor`: open, 120 empty cells, Save disabled.
 2. Click the first cell (Outdoor temperature, Jan) and press **Cmd+V**. `CM11.editor`: first "0.5", last
-   "154.5", notice "Pasted 8 rows.". This is the real clipboard through the real paste.
-3. Click **Name**, type `Real Street`; click **Station elevation**, type `92`; press **Tab** twice and type `11`
+   (sky temperature, Cooling) "", notice "Pasted 8 rows.". This is the real clipboard through the real paste.
+3. Click **Name**, type `Real Street`; click **Station elevation**, type `92`; press **Tab** once and type `11`
    in Daily temperature swing, **Tab** and `3.5` in Average wind speed. Click the grid's first cell, press
-   **Down Arrow** twice and type `9`. `CM11.editor`: Save enabled.
-4. Click **Save**. `CM11.detail`: state complete, origin hand, name "Real Street"; January east radiation 9 (the
-   third row). AXRaise `cm11.skp`, **Edit > Undo Enter Climate Values**: `CM11.detail` state none;
+   **Down Arrow** twice (East, Jan, its text selected) and type `9`. `CM11.editor`: Save enabled.
+4. Click **Save**. `CM11.detail`: state complete, origin hand, name "Real Street";
+   `B eval "CM11.query('climate.get').dig('value', 'climate', 'values', 'monthly', 'rad_east_kwh_m2', 0)"` reads 9. AXRaise `cm11.skp`, **Edit > Undo Enter Climate Values**: `CM11.detail` state none;
    **Edit > Redo Enter Climate Values**: complete again. One Undo step each way.
 5. AXRaise the panel. Click **Edit Values…** in the page header, click the last cell (Sky temperature, Cooling),
    select all, type `2`, press **Return**, then click **Save**. `CM11.detail`: complete. AXRaise `cm11.skp`,
