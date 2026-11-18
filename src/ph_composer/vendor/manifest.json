@@ -136,9 +136,9 @@
       "sha256": "0cfc35d01686c97c0489b2da79592efaa4541e1b17e7a792ac4e5d63b1667d17"
     },
     "html/features/climate/picker.js": {
-      "bytes": 24768,
+      "bytes": 24987,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "98ebf61291bdc1f1ff5b02cbf002176ce5dc90dac1a985ea75dea008daf099f2"
+      "sha256": "997354e228c41c56cbd9ed7d95064c3d3433033d67ca00bc4fc4dee0378db8d0"
     },
     "html/features/climate/section.js": {
       "bytes": 8197,

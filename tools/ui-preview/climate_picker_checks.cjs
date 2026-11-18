@@ -133,6 +133,9 @@ check({ name: "climate-picker", output }, async ({ newPage, step }) => {
   await open("climatereplace", "Replace Station…");
   await picker.getByText("has 2 edited values. Replacing it discards them.").waitFor();
   assert.equal(await rows.filter({ hasText: "Attached" }).count(), 1, "the attached station is marked");
+  const cut = await rows.filter({ hasText: "Attached" }).locator("td.col-station").evaluate(cell =>
+    cell.scrollWidth > cell.clientWidth + 1);
+  assert.equal(cut, false, "the name and its Attached chip fit at 1280");
   await rows.nth(3).locator(".climate-picker-station").click();
   assert.equal(await picker.locator(".climate-picker-compare tr").count(), 3);
   await atSizes("picker-replace", "Replace");

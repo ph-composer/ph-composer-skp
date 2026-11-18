@@ -131,3 +131,6 @@ CM09 passes and the narrow layout is recorded.
   own box at narrow sizes; a long dataset name shortens its select instead of widening the dialog (the preview's
   second folder now has one); a climate replaced elsewhere while the picker is open moves the Attached mark. This
   last fix merges unreviewed under the two-cycle cap.
+- **After a host smoke run** on `f94f816e`: the Attached chip was cut short in a 120 px Station column at 1280 px;
+  the column now starts at 190 px when the panel is wider than 500 px (120 px below). This fix also merges
+  unreviewed.

@@ -15,7 +15,9 @@ function (ui, RecordForm, requests, snapshot, tables, controls, outlineMap, proj
     not_checked: ["Not checked", "", "Not checked"] };
   var COLUMNS = [["station", "Station"], ["state", "State"], ["distance", "Distance"], ["elevation", "Elevation"],
     ["verdict", "Result"]];
-  var WIDTHS = { station: 120, state: 56, distance: 72, elevation: 72, verdict: 64 };
+  // The Station column holds a name and, in Replace, the Attached chip; narrow, it starts at its name alone.
+  var WIDTHS = { station: 190, state: 56, distance: 72, elevation: 80, verdict: 64 };
+  var NARROW = { station: 120, state: 56, distance: 72, elevation: 72, verdict: 64 };
   var PARTIAL = "This folder was not read whole: it is too large or too deep, or part of it could not be listed. " +
     "Stations past that point are not shown, and a nearer one may be among them.";
   var NARROW_PX = 500; // below it the State column gives way to the station's name; the State filter stays
@@ -272,7 +274,7 @@ function (ui, RecordForm, requests, snapshot, tables, controls, outlineMap, proj
     // A filter that hides the selected station selects the first it leaves, so Attach never takes a hidden one.
     if (this.visible.indexOf(this.selected) < 0) this.selected = this.visible[0] || null;
     this.narrow = window.innerWidth <= NARROW_PX;
-    tables.table(this.list, this.stations, { rows: rows, columns: COLUMNS, defaultWidths: WIDTHS,
+    tables.table(this.list, this.stations, { rows: rows, columns: COLUMNS, defaultWidths: this.narrow ? NARROW : WIDTHS,
       stickyWidths: {}, hiddenColumns: { state: this.narrow }, rowHidden: projected.hidden, visibleCount: this.shown,
       selected: function (row) { return row.key === self.selected; },
       empty: this.failure ? "" : this.value ? "No stations match this view." : "Reading the stations…",
