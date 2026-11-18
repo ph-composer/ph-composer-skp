@@ -1,7 +1,7 @@
 # P4c-10: The attached climate pane
 
 DATE: 2026-11-17
-STATUS: Scoped. Not authorized.
+STATUS: Implemented on branch `feature/climate-p4c-10` (2026-11-18). Authorized 2026-11-17 with every Climate stage (packet STATUS, Authorization).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -89,3 +89,38 @@ P4c-11 wires Edit Values and Enter Values by Hand, and the pane of a hand-entere
 ## Done when
 
 CM10 passes and the narrow table layout is recorded.
+
+## Entry checks, 2026-11-18
+
+1. **Actions** (D4c-31): with a climate attached and the Phius card selected, the page header holds Climate Data on
+   This Computer and Edit Values (disabled with its reason until P4c-11), then Replace as the one primary, then the
+   More climate actions menu with Clear alone. Restore Original Values sits in the edited line above the values and
+   Update from File in Where this lives, each only when it applies.
+2. **Narrow tables** (D4c-32): the monthly tables and the peak loads keep their columns and scroll sideways inside
+   their own box, the row names held at the left. Checked at 1280, 420 and 360 px in
+   `tools/ui-preview/climate_attached_checks.cjs`: the panel never scrolls sideways, the boxes scroll below 1000 px.
+3. **`source_status`**: it walks every found folder's headers and hashes the one matching file. Owed check 3 measured
+   the walk at 0.06 to 0.08 s for 1,007 station files in SketchUp's Ruby
+   ([evidence](../evidence/owed-check-3-20261118.md)), so it is read when the pane is shown, when the attached
+   station's checksum changes, and after the picker or the data dialog closes; never on a revision. `climate.get`
+   reads no disk and is read again on each revision while the pane shows, so the limit check follows a site change.
+
+## Departures, 2026-11-18
+
+- **Actions in the page header**, not in the pane's top row as boards 5 and 15 draw them, and Clear in the
+  overflow (D4c-31).
+- **Replace with no site** opens the same explanation bubble, offering Set Location, rather than a disabled
+  Replace; the interim pane disabled it. J6 keeps Replace enabled.
+- **The wind note has no numbers.** Board 5 quotes the file's January and July wind speeds; the record keeps
+  neither (CONTRACTS section 3), so the note says the value started as their mean.
+- **Peak loads show all eight values of each case** (air, dewpoint, sky and the five radiation values), where the
+  boards draw the air temperature and radiation only: an edit to a dewpoint or sky value must be visible to be
+  marked.
+- **The card keeps one chip**, the verdict. Edited, Incomplete and Source changed show in the pane's heading;
+  `SourceCards.paint` takes one chip and Source changed needs a disk read the summary does not make. Boards 15 and 17
+  draw two chips on the card.
+- **Limits in mi and ft in both unit systems**, as the picker says them; board 5 says 80 km and 122 m.
+- **Ready for** reads "Export" (or why not yet) and the blended heat pump, with or waiting for the design
+  temperatures, as step 5 says; the boards say "Monthly demand · Peak loads".
+- **An incomplete station** (a value cleared by Edit Values) lists what is missing in a line above the values.
+  Hand-entered climates are P4c-11's.

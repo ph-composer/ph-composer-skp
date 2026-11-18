@@ -1,32 +1,39 @@
-/* The Phius climate data pane while the Model holds no climate: one of three states, from the climate data
+/* The Phius climate data pane: one of three empty states while the Model holds no climate, from the climate data
    folders on this computer (`folders.list`, read each time the pane is shown and after the climate data dialog
-   closes) and the Model's site (J3).
+   closes) and the Model's site (J3), or the attached pane (attached.js) once it holds one.
      no folder   says so, says why PH-Composer ships none, and offers Choose Climate Data Folder (board 2);
      no site     asks for the site first and offers Set Location (board 9);
      ready       names the dataset the station picker opens on, with its station count (board 10).
    Each offers Enter Values by Hand, shown disabled with its reason until hand entry lands. Choose Station opens the
-   station picker. With a climate in the Model the pane keeps its one line and offers Replace Station until the
-   attached pane lands. */
-PhComposerUI.define("features/climate/phius", ["workspace", "request", "features/climate/shared"],
-function (ui, requests, shared) {
+   station picker. The folders are read with a climate attached too: Replace explains instead of opening when none
+   is found. */
+PhComposerUI.define("features/climate/phius", ["workspace", "request", "features/climate/shared",
+  "features/climate/attached"],
+function (ui, requests, shared, Attached) {
   "use strict";
   var el = ui.element, LIST = shared.PREFIX + "folders.list";
   var PAINT = { loading: "loading", unreadable: "noFolder", no_folder: "noFolder", no_site: "noSite",
-    ready: "ready", attached: "attached" };
+    ready: "ready", attached: "showAttached" };
   var LATER = { hand: "Typing climate values by hand comes in a later version of PH-Composer." };
 
   /* `actions.openData(add)` opens Climate Data on This Computer, starting Add Folder when `add`;
-     `actions.setLocation()` opens Set Location; `actions.choose()` opens the station picker. */
+     `actions.setLocation()` opens Set Location; `actions.choose(preselect)` opens the station picker;
+     `actions.replace(trigger)` is the attached pane's Replace. */
   function Pane(session, send, actions) {
     this.actions = actions; this.folders = undefined; this.failure = null; this.shown = false; this.painted = null;
     this.reads = requests.channel(session, send, "climate_phius_folders", "query.invoke");
     this.root = el("section", "climate-pane climate-phius");
+    this.attached = new Attached(session, send, { replace: actions.replace, openData: actions.openData,
+      update: function (source) {
+        actions.choose({ folder_id: source.folder_id, station_key: source.station_key });
+      } });
   }
 
   /* Reads the folders again the next time the pane is shown, or now if it is. What was read before is not shown
      meanwhile: the dialog may have changed it. */
   Pane.prototype.refresh = function () {
     this.stale = true; this.outdated = true;
+    this.attached.refreshSource();
     if (this.shown) this.read();
   };
 
@@ -44,9 +51,14 @@ function (ui, requests, shared) {
     }
     var opened = shown && !this.shown;
     this.shown = shown;
-    var attached = summary && summary.climate.state !== "none";
-    if (!attached && shown && (opened || this.stale || this.folders === undefined)) this.read();
+    var attached = Boolean(summary && summary.climate.state !== "none");
+    if (shown && (opened || this.stale || this.folders === undefined)) this.read();
+    if (summary && !attached) this.attached.forget();
+    this.attached.setSite(site);
     var waiting = this.folders === undefined || this.outdated;
+    // With a climate attached the folders only decide Replace, so the pane does not wait for them.
+    this.attached.render(state, shown && attached, summary && summary.design_temperatures.state,
+      waiting ? undefined : this.failure ? { failure: this.failure } : this.folders);
     var view = attached ? "attached" : !summary || !site || waiting ? "loading" :
       this.failure ? "unreadable" : this.stateFor(site);
     this.siteSet = Boolean(site && site.state === "set");
@@ -56,6 +68,9 @@ function (ui, requests, shared) {
     this.root.setAttribute("data-state", view);
     this[PAINT[view]](summary);
   };
+
+  /* Whether Replace should explain rather than open: the folders are read and none is found now. */
+  Pane.prototype.noFolder = function () { return this.attached.noFolder(); };
 
   /* A folder that cannot be found now is not one the picker can read: with none found, the pane is empty. */
   Pane.prototype.found = function () {
@@ -132,19 +147,13 @@ function (ui, requests, shared) {
         LATER.hand)]);
   };
 
-  /* Until the attached pane lands. */
-  Pane.prototype.attached = function () {
-    var self = this, replace = this.siteSet ? ui.button("Replace Station…", function () { self.actions.choose(); }) :
-      later("Replace Station…", "Set the site location first. The station list is sorted by distance from it.");
-    this.root.replaceChildren(el("h2", "", "Phius climate data"), el("p", "climate-pane-intro", "This Model holds " +
-      "a climate, and export writes it when it is complete."), replace);
-  };
+  Pane.prototype.showAttached = function () { this.root.replaceChildren(this.attached.root); };
 
   Pane.prototype.loading = function () {
     this.root.replaceChildren(el("p", "muted", "Reading the climate data folders…"));
   };
 
-  Pane.prototype.dispose = function () { this.reads.reset(); };
+  Pane.prototype.dispose = function () { this.reads.reset(); this.attached.dispose(); };
 
   return Pane;
 });

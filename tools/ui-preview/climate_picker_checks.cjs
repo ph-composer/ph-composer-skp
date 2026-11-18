@@ -26,7 +26,7 @@ check({ name: "climate-picker", output }, async ({ newPage, step }) => {
     await page.locator("[data-tab='climate']").click();
     await page.locator("[data-pane='climate'] [data-card='phius']").click();
     const started = Date.now();
-    await page.locator(".climate-phius").getByRole("button", { name: button }).click();
+    await page.locator("[data-pane='climate']").getByRole("button", { name: button, exact: true }).click();
     await page.waitForFunction(() => document.querySelectorAll("dialog.climate-picker tr[data-row-key]").length === 1007);
     return Date.now() - started;
   }
@@ -130,7 +130,7 @@ check({ name: "climate-picker", output }, async ({ newPage, step }) => {
   assert.equal((await sent(CLIMATE + "climate.attach_station")).length, 1, "one action, no confirm");
 
   step("board 16: Replace compares the current and the selected, names the lost edits and replaces in one action");
-  await open("climatereplace", "Replace Station…");
+  await open("climatereplace", "Replace…");
   await picker.getByText("has 2 edited values. Replacing it discards them.").waitFor();
   assert.equal(await rows.filter({ hasText: "Attached" }).count(), 1, "the attached station is marked");
   const cut = await rows.filter({ hasText: "Attached" }).locator("td.col-station").evaluate(cell =>

@@ -101,8 +101,13 @@ function key(node, name) {
   node.listeners.keydown(event);
   return event;
 }
+/* Every request but the attached pane's: with a climate attached it reads the climate and its source too
+   (attached.js), and these tests leave those unanswered. */
 function named(p, name) {
-  return p.sent.filter(function (message) { return message.payload && message.payload.name === name; });
+  return p.sent.filter(function (message) {
+    return message.payload && message.payload.name === name &&
+      !/:climate_attached/.test(message.payload.request_id || "");
+  });
 }
 function last(p, name) { var found = named(p, name); return found[found.length - 1]; }
 function answer(p, message, outcome) {
@@ -163,7 +168,7 @@ function opened(rows) {
   stations(p, rows || STATIONS);
   return p;
 }
-/* A Model holding a climate: the Phius pane offers Replace Station, which opens the picker in Replace. */
+/* A Model holding a climate: the page header offers Replace, which opens the picker in Replace. */
 function climateGet(p, edited) {
   return completed({ state: "complete", missing: [], edited_cells: Array.from({ length: edited }, function (_, i) {
     return { row: "air_c", column: i };
@@ -176,7 +181,7 @@ function openReplace(edited) {
   var p = page({ climate: { edited: edited } });
   p.panel.showTab("climate");
   click(pane(p).querySelector("[data-card='phius']"));
-  click(byText(pane(p), "button", "Replace Station…"));
+  click(byText(pane(p), "button", "Replace…"));
   folders(p, [SET_B, SET_A]);
   answer(p, last(p, P + "climate.source_status"), completed({ status: "found", folder_id: SET_A.id,
     station_key: NEAR.key }));
@@ -466,7 +471,7 @@ test("Replace over a climate entered by hand compares it as entered by hand, not
   var p = page({ climate: { edited: 0 } });
   p.panel.showTab("climate");
   click(pane(p).querySelector("[data-card='phius']"));
-  click(byText(pane(p), "button", "Replace Station…"));
+  click(byText(pane(p), "button", "Replace…"));
   folders(p, [SET_A]);
   answer(p, last(p, P + "climate.source_status"), completed({ status: "not_applicable", folder_id: null,
     station_key: null }));
@@ -480,13 +485,16 @@ test("Replace over a climate entered by hand compares it as entered by hand, not
   assert.strictEqual(compared[1], "NowTyped valuesEntered by hand——Not checked");
 });
 
-test("Replace Station waits for the site, and the picker does not open without one", function () {
+test("Replace without a site explains and offers Set Location; the picker does not open without one", function () {
   var p = page({ climate: { edited: 0 }, site: { latitude_deg: null, longitude_deg: null, elevation_m: null,
     climate_zone: null, hours_from_utc: null, climate_zone_label: null, state: "not_set" } });
   p.panel.showTab("climate");
   click(pane(p).querySelector("[data-card='phius']"));
-  assert.strictEqual(byText(pane(p), "button", "Replace Station…").disabled, true);
-  assert.ok(labelled(pane(p), "Why Replace Station is unavailable"));
+  click(byText(pane(p), "button", "Replace…"));
+  assert.strictEqual(picker(p), null);
+  var explained = pane(p).querySelector(".climate-attached-explain").querySelector(".phc-bubble");
+  assert.strictEqual(explained.hidden, false);
+  assert.ok(byText(explained, "button", "Set Location…"));
   tab(p).openPicker(null);
   assert.strictEqual(picker(p), null);
 });

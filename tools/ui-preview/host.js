@@ -184,7 +184,8 @@
         [CLIMATE + "summary"]: { status: "completed", value: { site: this.climateSite().state,
           design_temperatures: { state: this.climateDesign().state, warning: this.climateDesign().warning },
           climate: this.climate.station ? { state: "complete", origin: "station",
-            verdict: this.limitCheck(this.climate.site).verdict, edited: false } :
+            verdict: this.limitCheck(this.climate.site).verdict,
+            edited: this.climateRecord().edited_cells.length > 0 } :
             { state: "none", origin: null, verdict: null, edited: false } } },
         [ATTACHED]: { status: "completed", code: "ok", revision: this.revision,
           value: { records: JSON.parse(JSON.stringify(this.attachedZones)), next_cursor: null,
@@ -1036,25 +1037,102 @@
     }).sort(function (a, b) { return a.limit_check.distance_km - b.limit_check.distance_km; });
     return { folder_id: folder.id, dataset_name: folder.name, complete: true, total: rows.length, stations: rows };
   };
-  /* The attached station is found in the first folder when it came from the fixture's list. */
+  /* The attached station is found in the first folder when it came from the fixture's list; a fixture's `source`
+     names another answer (changed, not on this computer). */
   Host.prototype.climateSource = function () {
     var station = this.climate.station, folder = this.climate.folders[0];
     if (!station) return { status: "not_applicable", folder_id: null, station_key: null };
+    if (this.climate.source === "changed") return { status: "changed", folder_id: folder.id, station_key: station.key };
     return station.key && folder ? { status: "found", folder_id: folder.id, station_key: station.key } :
       { status: "not_on_this_computer", folder_id: null, station_key: null };
   };
-  /* The fixture's station as climate.get gives it, its values reduced to what Set Location reads, or none. */
+  /* An invented station file's values: each monthly row a smooth year, each peak case a few round numbers. */
+  var PREVIEW_MONTHLY = ["air_c", "dewpoint_c", "sky_c", "rad_north_kwh_m2", "rad_east_kwh_m2", "rad_south_kwh_m2",
+    "rad_west_kwh_m2", "rad_global_kwh_m2"];
+  var PREVIEW_PEAK = ["air_c", "dewpoint_c", "sky_c", "rad_north_w_m2", "rad_east_w_m2", "rad_south_w_m2",
+    "rad_west_w_m2", "rad_global_w_m2"];
+  var PREVIEW_MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+  function previewFile() {
+    var monthly = {}, peaks = {};
+    PREVIEW_MONTHLY.forEach(function (row, r) {
+      monthly[row] = PREVIEW_MONTHS.map(function (_, m) {
+        var season = -Math.cos(m / 11 * 2 * Math.PI);
+        return r < 3 ? Math.round((8 - r * 6 + season * 13) * 10) / 10 :
+          Math.round(60 + r * 9 + season * (40 + r * 6));
+      });
+    });
+    [["heat_1", -13.4], ["heat_2", -7.9], ["cool_1", 26.8]].forEach(function (pair, c) {
+      peaks[pair[0]] = {};
+      PREVIEW_PEAK.forEach(function (row, r) {
+        peaks[pair[0]][row] = r === 0 ? pair[1] : r < 3 ? Math.round((pair[1] - r * 4) * 10) / 10 :
+          20 + c * 60 + r * 15;
+      });
+    });
+    return { station_elevation_m: null, daily_temp_swing_k: 11.2, monthly: monthly, peak_loads: peaks };
+  }
+  /* The fixture's station as climate.get gives it, with the values its invented file reads and `edited` of them
+     changed (January, February, ... of the air temperature), or none. */
   Host.prototype.climateRecord = function () {
     var station = this.climate.station;
     if (!station) return { state: "none", climate: null, missing: [], edited_cells: [], limit_check: null };
-    var edited = Array.from({ length: this.climate.edited || 0 }, function (_, i) {
-      return { row: "air_c", column: i };
+    if (!this.climate.values) {
+      var file = previewFile();
+      file.station_elevation_m = station.elevation_m;
+      var now = JSON.parse(JSON.stringify(file));
+      for (var i = 0; i < (this.climate.edited || 0); i += 1) {
+        now.monthly.air_c[i] = Math.round((now.monthly.air_c[i] - 0.9) * 10) / 10;
+      }
+      this.climate.values = { name: station.name, origin: "station", station_latitude_deg: station.latitude_deg,
+        station_longitude_deg: station.longitude_deg, station_elevation_m: station.elevation_m,
+        daily_temp_swing_k: file.daily_temp_swing_k, wind_speed_m_s: 3.9, monthly: now.monthly,
+        peak_loads: now.peak_loads, as_read: file,
+        provenance: { dataset_name: station.key && this.climate.folders[0] ? this.climate.folders[0].name :
+          "Preview Stations", station_name: String(station.name).toUpperCase().replace(/ /g, "_"),
+        state: station.state || "XA", source_type: "phius_approved", source_checksum: "0".repeat(64) } };
+    }
+    // Every value that differs from the file, in features/climate/climate/edits.rb's order.
+    var values = this.climate.values, read = values.as_read, edited = [];
+    ["station_elevation_m", "daily_temp_swing_k"].forEach(function (row) {
+      if (values[row] !== read[row]) edited.push({ row: row, column: null });
+    });
+    PREVIEW_MONTHLY.forEach(function (row) {
+      PREVIEW_MONTHS.forEach(function (month, m) {
+        if (values.monthly[row][m] !== read.monthly[row][m]) edited.push({ row: row, column: month });
+      });
+    });
+    PREVIEW_PEAK.forEach(function (row) {
+      ["heat_1", "heat_2", "cool_1"].forEach(function (name) {
+        if (values.peak_loads[name][row] !== read.peak_loads[name][row]) edited.push({ row: row, column: name });
+      });
     });
     return { state: "complete", missing: [], edited_cells: edited, limit_check: this.limitCheck(this.climate.site),
-      climate: { id: "preview-climate", values: { name: station.name, origin: "station",
-        station_latitude_deg: station.latitude_deg,
-        station_longitude_deg: station.longitude_deg, station_elevation_m: station.elevation_m,
-        provenance: { dataset_name: station.key ? this.climate.folders[0].name : null } } } };
+      climate: { id: "preview-climate", values: JSON.parse(JSON.stringify(values)) } };
+  };
+  /* Restore, Clear and Edit Values (the wind speed), guarded by the editable fields as the host guards them. */
+  Host.prototype.climateWrite = function (payload) {
+    var record = this.climateRecord().climate, verb = payload.name.slice((CLIMATE + "climate.").length);
+    var expected = payload.params.expected_values || {};
+    if (!record) return refused("climate.not_found", "The Model holds no climate. " + NOTHING_WRITTEN, this.revision);
+    var guard = ["daily_temp_swing_k", "monthly", "name", "peak_loads", "station_elevation_m", "station_latitude_deg",
+      "station_longitude_deg", "wind_speed_m_s"];
+    if (Object.keys(expected).sort().join() !== guard.join()) {
+      return refused("validation.failed", "expected_values names the eight editable fields. " + NOTHING_WRITTEN,
+        this.revision);
+    }
+    var stale = Object.keys(expected).some(function (key) {
+      return JSON.stringify(record.values[key]) !== JSON.stringify(expected[key]);
+    });
+    if (stale) return refused("target.changed", "The climate changed since it was read. " + NOTHING_WRITTEN,
+      this.revision);
+    var values = this.climate.values;
+    if (verb === "clear") { this.climate.station = null; this.climate.values = null; this.climate.edited = 0; }
+    if (verb === "restore_original") {
+      values.monthly = JSON.parse(JSON.stringify(values.as_read.monthly));
+      values.peak_loads = JSON.parse(JSON.stringify(values.as_read.peak_loads));
+    }
+    if (verb === "save_values") Object.assign(values, payload.params.values);
+    this.revision++;
+    return { status: "completed", effect: "committed", revision: this.revision, value: {} };
   };
   /* Phius's limit check at a site, as features/climate/climate/limit_check.rb works it out. */
   Host.prototype.limitCheck = function (site, of) {
@@ -1077,6 +1155,7 @@
   };
   Host.prototype.climateAction = function (payload) {
     if (/\.(attach|replace)_station$/.test(payload.name)) return this.climateAttach(payload);
+    if (/\.climate\.(clear|restore_original|save_values)$/.test(payload.name)) return this.climateWrite(payload);
     var target = payload.name === CLIMATE + "site.update" ? this.climate.site :
       payload.name === CLIMATE + "design_temperatures.update" ? this.climate.design : null;
     var values = payload.params.values || {}, expected = payload.params.expected_values || {};
@@ -1111,7 +1190,7 @@
     }
     if (!station) return refused("climate.station_not_found", "No station file with that key is in the climate " +
       "data folder now. " + NOTHING_WRITTEN, this.revision);
-    this.climate.station = station; this.climate.edited = 0;
+    this.climate.station = station; this.climate.edited = 0; this.climate.values = null; this.climate.source = null;
     this.revision++;
     return { status: "completed", effect: "committed", revision: this.revision, value: {} };
   };
