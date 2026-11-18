@@ -1,0 +1,46 @@
+/* The Climate tab (features/climate/): source cards beside one pane, and the Set Location dialog. At narrow widths
+   the cards become a select above the pane (source_cards.css), so the layout stacks. */
+.climate-layout { display: flex; gap: 20px; align-items: flex-start; }
+.climate-content { flex: 1; min-width: 0; }
+.climate-pane h2 { margin: 0 0 6px; font-size: var(--text-lg); line-height: 20px; font-weight: 600; }
+.climate-pane-intro { margin: 0 0 14px; color: var(--muted-strong); max-width: 640px; }
+.climate-empty { max-width: 640px; margin: 24px 0 0; padding: 24px 28px; border: 1px solid var(--line);
+  border-radius: var(--radius-md); }
+.climate-empty p, .climate-empty ul { margin: 0 0 12px; color: var(--muted-strong); }
+.climate-empty ul { padding-left: 18px; }
+.climate-empty li { margin: 0 0 4px; }
+.climate-facts { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 8px 0 0; }
+.climate-facts dt { color: var(--muted); }
+.climate-facts dd { margin: 0; }
+.climate-facts dd.is-unset { color: var(--muted); }
+.climate-design { max-width: 640px; }
+.climate-design-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; margin: 0 0 12px; }
+.climate-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.climate-field-label { color: var(--muted); font-size: var(--text-sm); font-weight: 500; }
+.climate-field-wide { grid-column: 1 / -1; }
+.climate-field input, .climate-field select { width: 100%; box-sizing: border-box; }
+/* A design temperature's field spans its column with the unit beside it; an error takes the row below. */
+.climate-design-fields .phc-unit-field { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+.climate-design-state { margin: 0 0 6px; color: var(--muted-strong); }
+.climate-design-warning { margin: 0 0 10px; padding: 8px 12px; border-radius: var(--radius-md);
+  background: var(--warning-surface); color: var(--warning-ink); }
+.climate-design-warning[hidden] { display: none; }
+.climate-pane-use { margin: 0; padding: 12px 14px; border-radius: var(--radius-md); background: var(--surface-alt);
+  color: var(--muted-strong); }
+.climate-set-location { width: min(560px, calc(100vw - 32px)); }
+.climate-site-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0 0 8px;
+  padding: 0; border: 0; }
+.climate-export-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 12px; }
+.climate-export-fields legend { padding: 0; margin-bottom: 6px; font-weight: 600; }
+.climate-dialog-note { margin: 0 0 8px; color: var(--muted); font-size: var(--text-sm); }
+.climate-geolocation { margin: 12px 0; }
+.climate-geolocation-status { margin: 6px 0 0; color: var(--muted-strong); }
+.climate-geolocation-status:empty { display: none; }
+@media (max-width: 700px) {
+  .climate-layout { flex-direction: column; gap: 12px; }
+  .climate-content { width: 100%; }
+  .climate-empty { margin-top: 4px; padding: 16px; }
+}
+@media (max-width: 500px) {
+  .climate-design-fields, .climate-site-fields, .climate-export-fields { grid-template-columns: 1fr; }
+}

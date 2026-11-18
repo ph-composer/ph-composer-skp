@@ -2,8 +2,8 @@
 
 module PhComposer
   module Climate
-    # The design temperatures' read and their update, which sets any of the three fields as one native Undo
-    # step so each typed value saves on its own.
+    # The design temperatures' read, also the snapshot section the Climate tab paints from, and their update,
+    # which sets any of the three fields as one native Undo step so each typed value saves on its own.
     module DesignTemperaturesRegistration
       PREFIX = "#{FEATURE_ID}.design_temperatures".freeze
       FIELDS = Settings::DESIGN_DEFAULTS.keys.freeze
@@ -18,6 +18,7 @@ module PhComposer
                       :refuses => %w[record.unreadable], :params => Shapes::NONE,
                       :result => Shapes::DESIGN_TEMPERATURES,
                       :examples => [{}]) { |request| Settings.design_temperatures(request.model) }
+        feature.snapshot_section(PREFIX, :query => "#{PREFIX}.get")
         feature.action("#{PREFIX}.update",
                        :description => "Set any of the two design temperatures and the source note; null unsets " \
                                        "one. Each field given is guarded by its value in expected_values, which " \

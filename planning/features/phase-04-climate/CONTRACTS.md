@@ -1,7 +1,7 @@
 # Phase 4 contracts: Climate records, the settings file, the reader and export
 
 DATE: 2026-11-17
-STATUS: Scoped for P4c-01 to P4c-11; sections 2 to 7 implemented (P4c-01 to P4c-05), sections 3, 6 and 7 amended in their stages. Contract questions C4c-1 to C4c-6 settle in their stages. Not reviewed against the code by a second reader.
+STATUS: Scoped for P4c-01 to P4c-11; sections 2 to 7 implemented (P4c-01 to P4c-05), sections 2, 3, 6 and 7 amended in their stages (section 2 in P4c-06). Contract questions C4c-1 to C4c-6 settle in their stages. Not reviewed against the code by a second reader.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -65,11 +65,12 @@ Operations. Each is one Undo step, guarded by the values last read (`expected_va
 | --- | --- | --- |
 | `ph_composer.climate.site.get` | query | The five site fields and the site state |
 | `ph_composer.climate.site.update` | action | Sets the five site fields together (Set Location). Result carries the limit check after the change |
-| `ph_composer.climate.site.geolocation` | query | What SketchUp reports for the Model: latitude, longitude, an offset when usable, and whether the Model is geolocated. Reads only; nothing is written to SketchUp or to the Model (Q5, Q6). Shape fixed by owed check 4 |
+| `ph_composer.climate.site.geolocation` | query | What SketchUp reports for the Model: `{ geolocated, latitude_deg, longitude_deg, hours_from_utc }`. Latitude and longitude only when `Model#georeferenced?` is true; `hours_from_utc` always null until a host run proves what Add Location writes to `TZOffset`; never an elevation. Reads only; nothing is written to SketchUp or to the Model (Q5, Q6). Shape fixed by owed check 4 (P4c-06) |
 | `ph_composer.climate.site.preview_limit_check` | query | The limit check the attached station would get at a proposed site, for Set Location's warning (J7) |
 | `ph_composer.climate.design_temperatures.get` | query | The two values, the note, the state and the warning |
 | `ph_composer.climate.design_temperatures.update` | action | Sets any of the three; null unsets one |
 | `ph_composer.climate.summary` | snapshot section | The three cards' states, for the sidebar, backed by the query `ph_composer.climate.summary.get` |
+| `ph_composer.climate.site`, `ph_composer.climate.design_temperatures` | snapshot sections | The two reads above, so the Climate tab paints its cards' values and its panes without a query of its own (added in P4c-06) |
 
 ## 3. The climate record (P4c-02)
 

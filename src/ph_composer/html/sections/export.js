@@ -154,7 +154,10 @@ PhComposerUI.define("sections/export", ["panel", "request", "workspace"], functi
         last.send("view.invoke", { request_id: "export-locate:" + String(sequence += 1), session: session,
           name: locate.name, params: locate.params });
       }));
-      if (tab) row.appendChild(ui.button("Open " + tab.label, function () { panel.navigate(tab.tab); }));
+      // The finding's code goes with the navigation, so the tab can open where that finding is fixed.
+      if (tab) row.appendChild(ui.button("Open " + tab.label, function () {
+        panel.navigate(tab.tab, { code: group.findings[0].code });
+      }));
       list.appendChild(row);
     });
     block.appendChild(list);

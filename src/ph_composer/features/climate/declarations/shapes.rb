@@ -42,6 +42,20 @@ module PhComposer
                                               "description" => "The Phius limit check; null with no climate.")
                                        .freeze
       SITE_UPDATE = with(SITE, "limit_check" => LIMIT_CHECK_OR_NULL).freeze
+      GEOLOCATION = object({
+        "geolocated" => { "type" => "boolean",
+                          "description" => "true when SketchUp reports the Model as geolocated " \
+                                           "(Model#georeferenced?)." },
+        "latitude_deg" => { "type" => %w[number null], "x-unit" => "deg",
+                            "description" => "SketchUp's latitude; null when the Model is not geolocated." },
+        "longitude_deg" => { "type" => %w[number null], "x-unit" => "deg",
+                             "description" => "SketchUp's longitude; null when the Model is not geolocated." },
+        "hours_from_utc" => { "type" => %w[integer null], "x-unit" => "h",
+                              "description" => "Always null for now: what SketchUp's time zone offset holds after " \
+                                               "Add Location is not yet measured, and it is never guessed from " \
+                                               "the longitude." }
+      }, :description => "What SketchUp reports for the Model's geolocation. There is no elevation: SketchUp " \
+                         "exposes none.").freeze
       PROPOSED_SITE = object(Settings::SITE_VALUES.fetch("properties").slice(*Settings::LOCATION_FIELDS)).freeze
     end
   end

@@ -13,15 +13,18 @@
     <link rel="stylesheet" href="drawing_dimensions.css">
     <link rel="stylesheet" href="shell.css">
     <link rel="stylesheet" href="table.css">
+    <link rel="stylesheet" href="source_cards.css">
     <link rel="stylesheet" href="features/zones/zones.css">
     <link rel="stylesheet" href="library/library.css">
     <link rel="stylesheet" href="features/assemblies/assembly.css">
     <link rel="stylesheet" href="features/windows/windows.css">
     <link rel="stylesheet" href="features/thermal_bridges/thermal_bridges.css">
+    <link rel="stylesheet" href="features/climate/climate.css">
   </head>
   <body class="phc-workspace live-panel" data-phc-entry="panel">
     <div class="phc-app-header">
       <nav class="phc-tabs" aria-label="Sections">
+        <button type="button" data-tab="climate">Climate</button>
         <button type="button" data-tab="overview">Zones</button>
         <button type="button" data-tab="assemblies">Assemblies</button>
         <button type="button" data-tab="windows">Window Types</button>
@@ -42,6 +45,7 @@
     </div>
     <div class="phc-notice-layer" data-notice-layer></div>
     <main class="panel-panes">
+      <div data-pane="climate" hidden></div>
       <div data-pane="overview"></div>
       <div data-pane="windows" hidden></div>
       <div data-pane="assemblies" hidden></div>
@@ -104,6 +108,12 @@
     <script src="library/section.js"></script>
     <script src="features/assemblies/materials.js"></script>
     <script src="features/assemblies/section.js"></script>
+    <script src="features/climate/shared.js"></script>
+    <script src="features/climate/design_temperatures.js"></script>
+    <script src="features/climate/set_location.js"></script>
+    <script src="features/climate/site.js"></script>
+    <script src="source_cards.js"></script>
+    <script src="features/climate/section.js"></script>
     <script src="features/spaces/actions.js"></script>
     <script src="features/spaces/cells.js"></script>
     <script src="features/spaces/create_review.js"></script>

@@ -3,6 +3,27 @@
 Open a SketchUp model of the building. Work through the envelope and Spaces, then save the
 SKP and write HBJSON from the Export tab.
 
+## Set the site and the design temperatures
+
+Open the **Climate** tab, the first tab in the row. The panel still opens on Zones. The cards on
+the left show each part's state; at a narrow panel width they become one list above the page.
+
+1. Choose **Site location**, then **Set Location**. Type the latitude, longitude and elevation.
+   All three are needed to set the site. The climate zone and the hours from UTC are for export
+   and may stay unset; the Export tab names an unset one. **Read from SketchUp Geolocation**
+   fills the latitude and longitude when SketchUp reports the Model as geolocated, and otherwise
+   says it has no geolocation. It does not fill the
+   elevation or the hours from UTC, and it writes nothing back to SketchUp. Set Location is one
+   Undo step.
+2. Choose **Design temperatures** and type the ASHRAE 99% heating and 1% cooling dry bulbs, with
+   an optional source note. Each field saves when you press Enter or leave it, as its own Undo
+   step. Clear a field to unset it. A heating value at or above the cooling value is saved with a
+   warning. The design temperatures stay in the Model; export does not wait on them.
+
+Values follow the IP and SI switch and are stored in SI. The **Phius climate data** card shows
+the state of the Model's climate; choosing a station from this tab comes in a later version, and
+the **Hourly weather file** card is planned.
+
 ## Make Zones and classify the envelope
 
 1. Select a Group or loose geometry. Right-click and choose **PH-Composer > Make Zone**. Each

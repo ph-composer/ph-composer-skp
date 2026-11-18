@@ -18,6 +18,9 @@
   var MATERIALS = "ph_composer.assemblies.materials";
   var ASSEMBLIES = "ph_composer.assemblies.assemblies";
   var TB = "ph_composer.thermal_bridges.";
+  var CLIMATE = "ph_composer.climate.";
+  var ZONE_LABELS = { 1: "Not defined", 11: "1", 12: "2", 13: "3", 14: "4", 141: "4C", 15: "5", 16: "6", 17: "7",
+    18: "8" };
   var NOTHING_WRITTEN = "Nothing was written.";
 
   function Host(window, options) {
@@ -65,6 +68,15 @@
     this.thermalBridges = JSON.parse(JSON.stringify(settings.thermalBridges ||
       { types: [], selected: [], runs: [], edgeFindings: [] }));
     this.edgeTool = { active: false, thermal_bridge_type_id: null, quantity: 1, gesture_limit: 250 };
+    // The Model's site and design temperatures (features/climate/settings.rb) and what SketchUp would report
+    // for its geolocation; `climate.geolocation` stands in for the host read.
+    this.climate = JSON.parse(JSON.stringify(settings.climate || {}));
+    this.climate.site = Object.assign({ latitude_deg: null, longitude_deg: null, elevation_m: null,
+      climate_zone: null, hours_from_utc: null }, this.climate.site || {});
+    this.climate.design = Object.assign({ heating_99_c: null, cooling_1_c: null, design_temperature_source: null },
+      this.climate.design || {});
+    this.climate.geolocation = this.climate.geolocation || { geolocated: false, latitude_deg: null,
+      longitude_deg: null, hours_from_utc: null };
     this.preferences = { unit_system: settings.unitSystem || "SI", dimension_formats: {},
       number_format: { decimal: settings.decimal || ".", locale: settings.locale || "en-US" } };
   }
@@ -162,6 +174,11 @@
         [TB + "edges.selected"]: { status: "completed", value: { edges: JSON.parse(JSON.stringify(
           this.thermalBridges.selected)), ignored: [], ignored_total: 0 } },
         [TB + "edge_tool"]: { status: "completed", value: JSON.parse(JSON.stringify(this.edgeTool)) },
+        [CLIMATE + "site"]: { status: "completed", value: this.climateSite() },
+        [CLIMATE + "design_temperatures"]: { status: "completed", value: this.climateDesign() },
+        [CLIMATE + "summary"]: { status: "completed", value: { site: this.climateSite().state,
+          design_temperatures: { state: this.climateDesign().state, warning: this.climateDesign().warning },
+          climate: { state: "none", origin: null, verdict: null, edited: false } } },
         [ATTACHED]: { status: "completed", code: "ok", revision: this.revision,
           value: { records: JSON.parse(JSON.stringify(this.attachedZones)), next_cursor: null,
             total: this.attachedZones.length } }
@@ -230,6 +247,7 @@
     if (message.type === "action.invoke") this.invoke(message.payload);
     if (message.type === "query.invoke") {
       if (message.payload.name.indexOf(TB) === 0) this.scheduleQuery(message.payload);
+      else if (message.payload.name.indexOf(CLIMATE) === 0) this.climateQuery(message.payload);
       else this.libraryQuery(message.payload);
     }
     if (message.type === "file_export.invoke") this.publish("file_export.result", {
@@ -621,6 +639,7 @@
     }
     if (payload.name.indexOf("ph_composer.windows.") === 0) return this.windowAction(payload);
     if (payload.name.indexOf(TB) === 0) return this.thermalBridgeAction(payload);
+    if (payload.name.indexOf(CLIMATE) === 0) return this.climateAction(payload);
     if (payload.name === "ph_composer.library.copy") return this.libraryCopy(payload);
     if (payload.name.indexOf("ph_composer.assemblies.") === 0 ||
         payload.name.indexOf("ph_composer.zones.faces.attached_zone.") === 0) return this.inventoryAction(payload);
@@ -922,6 +941,57 @@
     });
     return result;
   };
+  /* The Climate tab's reads and writes, as features/climate/settings.rb answers them: the site's state, the
+     design temperatures' state and warning, a guarded write of the fields given, and the geolocation read. */
+  Host.prototype.climateSite = function () {
+    var site = JSON.parse(JSON.stringify(this.climate.site));
+    site.climate_zone_label = site.climate_zone === null ? null : ZONE_LABELS[site.climate_zone];
+    site.state = site.latitude_deg !== null && site.longitude_deg !== null && site.elevation_m !== null ?
+      "set" : "not_set";
+    return site;
+  };
+  Host.prototype.climateDesign = function () {
+    var design = JSON.parse(JSON.stringify(this.climate.design));
+    var typed = [design.heating_99_c, design.cooling_1_c].filter(function (value) { return value !== null; });
+    design.state = typed.length === 2 ? "set" : typed.length ? "incomplete" : "not_set";
+    design.warning = typed.length === 2 && design.heating_99_c >= design.cooling_1_c ?
+      "climate.heating_not_below_cooling" : null;
+    return design;
+  };
+  Host.prototype.climateQuery = function (payload) {
+    var host = this;
+    this.window.setTimeout(function () {
+      var outcome = payload.name === CLIMATE + "site.geolocation" ?
+        { status: "completed", revision: host.revision, value: JSON.parse(JSON.stringify(host.climate.geolocation)) } :
+        refused("operation.unknown", "The preview does not answer " + payload.name + ".", host.revision);
+      host.publish("query.result", { request_id: payload.request_id, session: payload.session, outcome: outcome });
+    }, 0);
+  };
+  Host.prototype.climateAction = function (payload) {
+    var target = payload.name === CLIMATE + "site.update" ? this.climate.site :
+      payload.name === CLIMATE + "design_temperatures.update" ? this.climate.design : null;
+    var values = payload.params.values || {}, expected = payload.params.expected_values || {};
+    if (!target) {
+      return refused("operation.unknown", "The preview does not answer " + payload.name + ".", this.revision);
+    }
+    var stale = Object.keys(expected).some(function (key) {
+      return JSON.stringify(target[key]) !== JSON.stringify(expected[key]);
+    });
+    if (stale) return refused("target.changed", "The values changed since they were read. " + NOTHING_WRITTEN,
+      this.revision);
+    var given = ["latitude_deg", "longitude_deg", "elevation_m"].filter(function (key) {
+      return values[key] !== undefined && values[key] !== null;
+    });
+    if (target === this.climate.site && given.length && given.length < 3) {
+      return refused("validation.failed", "Latitude, longitude and elevation are set together. " + NOTHING_WRITTEN,
+        this.revision);
+    }
+    Object.keys(values).forEach(function (key) { target[key] = values[key]; });
+    this.revision++;
+    return { status: "completed", effect: "committed", revision: this.revision,
+      value: target === this.climate.site ? this.climateSite() : this.climateDesign() };
+  };
+
   Host.prototype.libraryQuery = function (payload) {
     if (payload.name === "ph_composer.library.export_preview") { this.libraryExportPreview(payload); return; }
     if (payload.name.indexOf("ph_composer.spaces.") === 0) { this.spacesQuery(payload); return; }

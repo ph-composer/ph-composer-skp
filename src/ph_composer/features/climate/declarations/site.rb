@@ -2,9 +2,10 @@
 
 module PhComposer
   module Climate
-    # The site's read, Set Location, which writes its five fields together as one native Undo step and answers
-    # the limit check the Model's climate gets after the change, and the preview of that check at a proposed
-    # site, which Set Location shows before it is set.
+    # The site's read, also the snapshot section the Climate tab paints from; Set Location, which writes its five
+    # fields together as one native Undo step and answers the limit check the Model's climate gets after the
+    # change; what SketchUp reports for the Model's geolocation, which Set Location can fill its fields from;
+    # and the preview of the limit check at a proposed site, which Set Location shows before it is set.
     module SiteRegistration
       PREFIX = "#{FEATURE_ID}.site".freeze
       EXAMPLE = { "latitude_deg" => 40.6782, "longitude_deg" => -73.9442, "elevation_m" => 10.0,
@@ -37,6 +38,13 @@ module PhComposer
                                                           :expected_values => request.params.fetch("expected_values"))
           site.merge("limit_check" => Operations.limit_check(request.engine, site))
         end
+        feature.snapshot_section(PREFIX, :query => "#{PREFIX}.get")
+        feature.query("#{PREFIX}.geolocation",
+                      :description => "What SketchUp reports for the Model's geolocation: latitude and longitude " \
+                                      "when SketchUp reports the Model geolocated, else nulls. Never an elevation. " \
+                                      "Nothing is written to SketchUp or to the Model.",
+                      :refuses => [], :params => Shapes::NONE, :result => Shapes::GEOLOCATION,
+                      :examples => [{}]) { |request| Geolocation.read(request.model) }
         feature.query("#{PREFIX}.preview_limit_check",
                       :description => "The Phius limit check the Model's climate would get at a proposed latitude, " \
                                       "longitude and elevation; null with no climate. Nothing is written.",

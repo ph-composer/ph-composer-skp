@@ -6,7 +6,7 @@
 # Site export section; the Climate tab joins it later. It requires Zones, which that export section builds
 # on; no Zones file names it. Climate is not a Library kind and registers no library provider.
 #
-#   site/           the climate-zone codes and their labels
+#   site/           the climate-zone codes and their labels, and what SketchUp reports for the geolocation
 #   settings.rb     the site and the design temperatures: two settings dictionaries and their derived states
 #   climate/        the climate record: its schema, the pure rules (completeness, edits, the limit check), the
 #                   builder that rewrites its provenance, and its operations
@@ -25,6 +25,7 @@ module PhComposer
 end
 
 require_relative "site/climate_zones"
+require_relative "site/geolocation"
 require_relative "settings"
 require_relative "climate/schema"
 require_relative "climate/completeness"

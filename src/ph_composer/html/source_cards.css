@@ -1,0 +1,30 @@
+/* Source cards (source_cards.js): a column of cards beside a pane, each with its state. A selected card carries
+   the active-row teal in its border and fill, never a side accent. At narrow widths the select takes their place. */
+.phc-source-cards { flex: 0 0 248px; min-width: 0; }
+.phc-source-card-list { display: flex; flex-direction: column; gap: 8px; }
+.phc-source-card-caption { margin: 8px 0 0; color: var(--muted); font-size: var(--text-xs); text-transform: uppercase;
+  letter-spacing: .04em; }
+.phc-workspace .phc-source-card { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%;
+  height: auto; min-height: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-md);
+  background: var(--card); color: var(--ink); text-align: left; font-weight: 400; }
+.phc-workspace .phc-source-card:hover:enabled { border-color: var(--line-strong); background: var(--row-hover-wash); }
+.phc-workspace .phc-source-card.is-selected,
+.phc-workspace .phc-source-card.is-selected:hover:enabled { border-color: var(--interaction-highlight);
+  background: var(--interaction-highlight-soft); }
+.phc-workspace .phc-source-card:disabled { opacity: .6; cursor: default; }
+.phc-source-card-title { font-weight: 600; }
+.phc-source-card-lines { display: flex; flex-direction: column; color: var(--muted); font-size: var(--text-sm); }
+.phc-source-card-lines:empty { display: none; }
+.phc-source-card-line { overflow-wrap: anywhere; }
+.phc-source-card-chip { display: inline-block; margin-top: 4px; padding: 0 9px; border-radius: var(--radius-pill);
+  background: var(--surface-alt); color: var(--muted-strong); font-size: var(--text-sm); line-height: 22px;
+  white-space: nowrap; }
+.phc-source-card-chip[data-tone="warning"] { background: var(--warning-surface-alt); color: var(--warning-ink); }
+.phc-source-card-chip[data-tone="ok"] { background: var(--interaction-highlight-soft); color: var(--interaction-highlight); }
+.phc-source-card-select { display: none; }
+@media (max-width: 700px) {
+  .phc-source-cards { flex: none; width: 100%; }
+  .phc-source-card-list { display: none; }
+  .phc-source-card-select { display: block; width: 100%; box-sizing: border-box; }
+}
+.phc-source-card-chip[hidden] { display: none; }

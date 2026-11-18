@@ -912,7 +912,11 @@ The following public operations have panel-closed walkthroughs.
   station's values, so they go from the file to the Model without crossing the connection. The Site
   export (API 1.66): `climate.export_preflight` answers the climate's export findings, none
   blocking, through the export workflow's common preflight shape; the export itself has no climate
-  operation of its own.
+  operation of its own. The Climate tab (API 1.67): `site.geolocation` reads what SketchUp reports for
+  the Model's geolocation, latitude and longitude only when `Model#georeferenced?` is true, never an
+  elevation, and `hours_from_utc` always null until a host check proves SketchUp's offset
+  (`context/SKETCHUP_HOST_BEHAVIOR.md`, "Geolocation"); it writes nothing. The `site` and
+  `design_temperatures` snapshot sections carry the two reads for the panel.
   [Site walkthrough](../tools/examples/climate/site_walkthrough.rb),
   [climate walkthrough](../tools/examples/climate/climate_walkthrough.rb), whose `run_attach` is the
   agent guide's recipe.
