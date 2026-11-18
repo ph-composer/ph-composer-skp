@@ -20,8 +20,9 @@ module PhComposer
 
       # A station climate from a parsed Phius station file and where it came from. `parsed` holds name,
       # latitude_deg, longitude_deg, elevation_m, daily_temp_swing_k, monthly and peak_loads in the record's
-      # shape, and wind_speed_january_m_s and wind_speed_july_m_s; `source` holds dataset_name, state and the
-      # file's SHA-256 as checksum. The wind speed starts as the mean of January and July, and the values are
+      # shape, and wind_speed_january_m_s and wind_speed_july_m_s; `source` holds dataset_name, station_name (the
+      # file name's stem, which source_status matches with the state), state and the file's SHA-256 as
+      # checksum. The wind speed starts as the mean of January and July, and the values are
       # copied into `as_read` as separate objects.
       def from_station(parsed, source)
         read = {
@@ -30,7 +31,7 @@ module PhComposer
           "monthly" => parsed.fetch("monthly"), "peak_loads" => parsed.fetch("peak_loads")
         }
         identity = {
-          "dataset_name" => source.fetch("dataset_name"), "station_name" => parsed.fetch("name"),
+          "dataset_name" => source.fetch("dataset_name"), "station_name" => source.fetch("station_name"),
           "state" => source.fetch("state"), "source_checksum" => source.fetch("checksum"),
           "source_name" => "#{source.fetch('dataset_name')}: #{parsed.fetch('name')}"
         }

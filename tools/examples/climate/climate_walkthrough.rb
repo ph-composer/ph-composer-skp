@@ -5,10 +5,13 @@ require_relative "../authoring/client"
 # Run with the panel closed, through the public API only, in a scratch Model with no site and no climate:
 #   ClimateWalkthrough.run_hand      enters a climate by hand with gaps, completes it, checks that Restore
 #                                    refuses for it, and clears it: three Undo steps
-#   ClimateStationSeed.seed          (station_seed.rb) writes a synthetic station climate: one Undo step. No
-#                                    public operation attaches a station until the station reader exists
+#   ClimateStationSeed.seed          (station_seed.rb) writes a synthetic station climate with no file behind
+#                                    it: one Undo step
 #   ClimateWalkthrough.run_station   sets the site near the station, edits one cell, restores it, then moves
 #                                    the site out of the Phius limits: four Undo steps
+#   ClimateWalkthrough.run_attach(id) with the site set and no climate: lists the climate data folders, lists
+#                                    the folder `id`'s stations nearest first, attaches the nearest one that
+#                                    passes the Phius limits and reads its source as found: one Undo step
 #   ClimateWalkthrough.state         the compact state the Undo and Redo steps are checked against
 #   ClimateWalkthrough.verify        `state` against the last row of TRACE; works in a fresh process
 # TRACE is the state after each Undo step in order, newest first, so the host recipe and the offline test read
@@ -91,6 +94,30 @@ module ClimateWalkthrough
                "passed" => far.dig("value", "limit_check", "verdict") == "fail" &&
                            climate(client).fetch("climate") == stored }
     steps << { "step" => "read back", "passed" => verify.fetch("passed") }
+    result(steps)
+  end
+
+  # The agent guide's recipe: folders, then stations nearest first, then attach the first that passes. Reads
+  # only what the list answers; the station's values go from its file to the Model inside PH-Composer.
+  def run_attach(folder_id)
+    client = AuthoringExample::Client.new
+    steps = []
+    folders = client.query("#{PREFIX}.folders.list").fetch("value").fetch("folders")
+    folder = folders.find { |row| row.fetch("id") == folder_id }
+    steps << { "step" => "folder has stations", "passed" => folder.to_h.fetch("station_count", 0).to_i.positive? }
+    listed = client.query("#{PREFIX}.stations.list", "folder_id" => folder_id)
+    steps << { "step" => "stations.list", "passed" => listed["status"] == "completed", "code" => listed["code"] }
+    nearest = listed.dig("value", "stations").to_a.find { |row| row.dig("limit_check", "verdict") == "pass" }
+    steps << { "step" => "a station passes", "passed" => !nearest.nil? }
+    return result(steps) unless nearest
+
+    invoke(client, steps, "climate.attach_station", "folder_id" => folder_id, "station_key" => nearest.fetch("key"))
+    found = climate(client)
+    steps << { "step" => "attached", "passed" => found.dig("climate", "values", "origin") == "station" &&
+                                                 found.dig("limit_check", "verdict") == "pass" }
+    status = client.query("#{PREFIX}.climate.source_status").fetch("value")
+    steps << { "step" => "source found", "passed" => status.values_at("status", "station_key") ==
+                                                     ["found", nearest.fetch("key")] }
     result(steps)
   end
 

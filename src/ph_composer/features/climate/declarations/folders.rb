@@ -14,6 +14,8 @@ module PhComposer
       NAME = { "type" => "string", "minLength" => 1, "maxLength" => Folders::Store::MAX_NAME_LENGTH,
                "description" => "The dataset name the Model and the Export report show." }.freeze
       FOLDER_ID = Shapes.described(Shapes::ID, "A climate data folder's id, from folders.list.").freeze
+      COUNT_OR_NULL = { "type" => %w[integer null], "minimum" => 0,
+                        "description" => "Read when the list is; null when the folder is not found." }.freeze
       FOLDER = Shapes.object({
         "id" => Shapes::ID,
         "name" => NAME,
@@ -22,7 +24,22 @@ module PhComposer
                                                  "home folder, the volume's name and the rest on another volume. " \
                                                  "Never an absolute path." },
         "found" => { "type" => "boolean",
-                     "description" => "false when the folder cannot be found now; the setting is kept." }
+                     "description" => "false when the folder cannot be found now; the setting is kept." },
+        "format" => { "type" => %w[string null], "enum" => [Stations::Operations::FORMAT, nil],
+                      "description" => "The format of the stations found; null when there are none or the folder " \
+                                       "is not found." },
+        "station_count" => COUNT_OR_NULL, "state_count" => COUNT_OR_NULL,
+        "files_not_read" => Shapes.list(Shapes.object({
+          "extension" => { "type" => "string",
+                           "description" => "The file extension in lower case, such as .xls; empty for none." },
+          "count" => { "type" => "integer", "minimum" => 1 }
+        }), :description => "Files not read as stations, by extension, most first, at most " \
+                            "#{Stations::Operations::MAX_KINDS} kinds. A station file that does not read counts " \
+                            "under .txt. Null when the folder is not found.").merge("type" => %w[array null]),
+        "files_not_read_total" => COUNT_OR_NULL,
+        "complete" => { "type" => %w[boolean null],
+                        "description" => "false when the folder was too large or deep to read whole, or part of " \
+                                         "it could not be listed; null when not found." }
       }).freeze
       LIST = Shapes.object({
         "folders" => Shapes.list(FOLDER, :description => "In the order added."),
@@ -37,7 +54,8 @@ module PhComposer
       def install(feature)
         feature.query("#{PREFIX}.list",
                       :description => "The climate data folders set up on this computer, with each one's name, " \
-                                      "display location and whether it can be found now.",
+                                      "display location, whether it can be found now, and the stations, states " \
+                                      "and files not read found in it now.",
                       :refuses => STORE_REFUSES, :params => Shapes::NONE, :result => LIST,
                       :examples => [{}]) { |_request| Folders::Operations.list }
         install_chosen(feature)

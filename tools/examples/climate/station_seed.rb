@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 # Development only. Writes a synthetic station climate into the active Model as one native Undo step, "Seed
-# Station Climate", built by PhComposer::Climate::Record.from_station from a hand-made parsed station. No
-# public operation attaches a station until the station reader exists; this seed lets the climate walkthrough
-# and the host recipe reach the station half (edited cells, Restore) before then. It reaches into the feature
-# on purpose, so it is kept apart from the public-only walkthrough.
+# Station Climate", built by PhComposer::Climate::Record.from_station from a hand-made parsed station with no
+# file behind it, so the climate walkthrough reaches the station half (edited cells, Restore) without a climate
+# data folder; ClimateWalkthrough.run_attach attaches a real station file. It reaches into the feature on
+# purpose, so it is kept apart from the public-only walkthrough.
 #   ClimateStationSeed.seed   refuses with a message when the Model already holds a climate
 module ClimateStationSeed
   STATION_AIR_JAN = -2.0
@@ -28,7 +28,8 @@ module ClimateStationSeed
   end
 
   def source
-    { "dataset_name" => "Walkthrough Dataset", "state" => "XX", "checksum" => "0" * 64 }
+    { "dataset_name" => "Walkthrough Dataset", "station_name" => "WALKTHROUGH_STATION", "state" => "XX",
+      "checksum" => "0" * 64 }
   end
 
   def seed

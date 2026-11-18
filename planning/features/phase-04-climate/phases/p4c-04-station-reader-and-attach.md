@@ -1,7 +1,7 @@
 # P4c-04: The Phius station reader, the station list and attach
 
 DATE: 2026-11-17
-STATUS: Scoped. Not authorized.
+STATUS: Implemented on branch `feature/climate-p4c-04`, 2026-11-18. Ed authorized every stage on 2026-11-17. Departures below.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -119,3 +119,26 @@ P4c-08 shows the counts; P4c-09 shows the list and calls attach; P4c-10 shows so
 ## Done when
 
 CM04 passes, owed check 3 is recorded, and C4c-2 and C4c-6 are answered.
+
+## Departures, 2026-11-18
+
+- **Entry checks** ([evidence](../evidence/owed-check-3-20261118.md)): the read takes 0.06 to 0.08 s
+  for 1,007 files in SketchUp's Ruby, so it is synchronous and the plan's split rule does not apply;
+  the walk is bounded instead (D4c-21). The cloud-synced case was not run: it would need a change
+  to Ed's Dropbox sync settings. C4c-2 and C4c-6 are settled (D4c-18).
+- **Two actions** (D4c-19): an action has one Undo name, so step 6's "Attach Climate Station" and
+  "Replace Climate Station" are `climate.attach_station` and `climate.replace_station`. Both are
+  guarded by the request's revision; neither takes the climate's values.
+- **Paging and keys** (D4c-20): `stations.list` pages nearest first; a key is the file's path inside
+  the climate data folder.
+- **`Record.from_station`** takes the stem as `station_name` in its source (D4c-18), a change to
+  P4c-02's builder.
+- **Fixtures** are committed under `tests/fixtures/climate/`, written by
+  `tests/support/climate_station_files.rb` through `make fixtures`, with `-text` in `.gitattributes`
+  so their CRLF and Windows-1252 bytes survive.
+- **The list is read from headers** (CONTRACTS section 6 and step 3): a `-mon.txt` whose header reads
+  and whose series rows do not is listed and counted as a station, and attach refuses it with
+  `climate.station_unreadable` naming the row. A file whose header does not read is not a station.
+  A full parse of every file in the walk measured 0.25 s offline, so this can change if the dialog
+  needs exact counts.
+- P4c-09 calls `replace_station` for Replace, and P4c-10 for Update from File.

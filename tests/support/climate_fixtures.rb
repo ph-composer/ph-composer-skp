@@ -27,7 +27,8 @@ module ClimateFixtures
   end
 
   def source
-    { "dataset_name" => "Synthetic Dataset", "state" => "XX", "checksum" => "ab" * 32 }
+    { "dataset_name" => "Synthetic Dataset", "station_name" => "SYNTHETIC_STATION", "state" => "XX",
+      "checksum" => "ab" * 32 }
   end
 
   # The editable fields of a complete climate typed by hand.

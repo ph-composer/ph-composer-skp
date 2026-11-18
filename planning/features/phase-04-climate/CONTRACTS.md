@@ -265,6 +265,20 @@ no index (W5, J1). The stage measures it in SketchUp's Ruby. A read over 0.5 s i
 `DeferredWork` so the panel stays live; a cache keyed by each file's modified date is added only
 if a warm read of a real-size folder still exceeds 2 s.
 
+Amended at P4c-04, 2026-11-18. Owed check 3 measured 0.06 to 0.08 s for 1,007 station files in
+SketchUp 2026's Ruby ([evidence](evidence/owed-check-3-20261118.md)), so the read is synchronous
+with no cache, and bounded instead (D4c-21). The matching name is the file's stem (C4c-2, D4c-18).
+A station's key is its path inside the climate data folder, and `stations.list` is paged nearest
+first (D4c-20). The one action of the table above is two, `climate.attach_station` and
+`climate.replace_station`, each with its own Undo name (D4c-19); Update from File is
+`replace_station` with the key `source_status` gives. `folders.list` adds `format`,
+`station_count`, `state_count`, `files_not_read` (`{ extension, count }`, most first, at most
+20), `files_not_read_total` and `complete`, all null for a folder not found. `source_status`
+answers `{ status, folder_id, station_key }` and reads `not_applicable` with no climate too.
+The refusals are `climate.site_not_set`, `climate.folder_not_found`, `climate.station_not_found`
+and `climate.station_unreadable`. The reader's exact rules are in `context/CONTRACTS.md`, "The
+Phius station reader".
+
 ## 7. Export: the `Site` section (P4c-05)
 
 honeybee-ph holds `Site` on each `BldgSegment`, builds a default one for every segment and always
@@ -410,8 +424,8 @@ Latitude and longitude are decimal degrees in both profiles.
 | Id | Question | Recommendation | Settle in |
 | --- | --- | --- | --- |
 | C4c-1 | Board 3 shows each folder's location. `Library::Setup.providers` strips paths from its read | **Settled at P4c-03, 2026-11-18 (D4c-16):** a display location, `~/` and the rest under the home folder, the volume's name and the rest under `/Volumes/`, otherwise `…/` and the last two names; never an absolute path, and the full path stays out of every result and log | Settled |
-| C4c-2 | Is a station's matching name the file name's stem or the name in its header? | The file name's stem with the state folder: it is what the user sees in the folder and it is unique there | P4c-04 |
+| C4c-2 | Is a station's matching name the file name's stem or the name in its header? | The file name's stem with the state folder: it is what the user sees in the folder and it is unique there | Settled at P4c-04 as recommended (D4c-18) |
 | C4c-3 | The Setup view runs a native menu item's Ruby handler; the climate data dialog is in the panel | The handler asks the panel to open the Climate tab with the dialog as its intent, through the same route `panel.navigate` uses | P4c-08 |
 | C4c-4 | What the report callable receives when the section wrote no `Site` | Always emit the one record, with `location` and `climate` null when not written and `climate_left_out` giving the reason, so the report and the findings read one source | P4c-05 |
 | C4c-5 | The map's projection and level of detail | An equirectangular projection scaled at the view's centre latitude, borders simplified to the size owed check 2 allows | P4c-07 |
-| C4c-6 | Is `Digest::SHA256` available in SketchUp's Ruby on the supported hosts? | Check at P4c-04's entry; it is Ruby standard library | P4c-04 |
+| C4c-6 | Is `Digest::SHA256` available in SketchUp's Ruby on the supported hosts? | Check at P4c-04's entry; it is Ruby standard library | Settled at P4c-04: it loads in SketchUp 2026's Ruby 3.2.2 ([evidence](evidence/owed-check-3-20261118.md)). SketchUp 2023 is the floor packet's |

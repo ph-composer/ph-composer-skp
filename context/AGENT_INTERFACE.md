@@ -899,8 +899,20 @@ The following public operations have panel-closed walkthroughs.
   fields last read. `site.update` answers the limit check after the change and
   `site.preview_limit_check` the check at a proposed site, with nothing written. The largest
   `climate.get`, a station with every value edited, measured 17,826 bytes of value, so it fits one
-  reply. [Site walkthrough](../tools/examples/climate/site_walkthrough.rb),
-  [climate walkthrough](../tools/examples/climate/climate_walkthrough.rb).
+  reply. The Phius stations (API 1.65): `folders.list` adds each folder's format, station and state
+  counts and files not read by extension; `stations.list` pages one folder's stations nearest the
+  site first (`Pages.bounded`, bound to the revision, so a site change expires its cursor), each with
+  its key, name, state, coordinates, elevation and limit check; `climate.attach_station` and
+  `climate.replace_station` take a folder id and a station key, read the file in Ruby and write the
+  climate in one Undo step each; `climate.source_status` matches the attached station by its file
+  name's stem and state across every folder, then by SHA-256. These reads walk folders the user chose
+  and are under `read`: they answer a station's name, state, coordinates and elevation, counts and a
+  folder-relative key, never a monthly value or an absolute path, and a folder can only be listed
+  after a `setup` grant or the user added it (architecture review, P4c-04). No call takes a
+  station's values, so they go from the file to the Model without crossing the connection.
+  [Site walkthrough](../tools/examples/climate/site_walkthrough.rb),
+  [climate walkthrough](../tools/examples/climate/climate_walkthrough.rb), whose `run_attach` is the
+  agent guide's recipe.
 
 Discovery also lists read-only `reference_targets`; description returns their descriptor: ID, owner,
 label, schema version, values schema, occurrence-reference schema and declared core references.
