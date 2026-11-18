@@ -146,7 +146,10 @@ daily swing, the wind speed, `monthly`, `peak_loads`) as last read. The writes a
 fields without the record itself, so each declaration stays small enough to describe in one agent
 reply; `climate.get` reads the record back. `missing` is grouped by row (`{ row, columns }`) and
 an edited cell is `{ row, column }`, the values being in the record and its `as_read` copy, so a
-station with every value edited reads in 17,826 bytes against the 24,576-byte reply. The record is
+station with every value edited reads in 17,826 bytes against the 24,576-byte reply. The record's
+`user_data` is left out of `climate.get`, since it has no size bound; `ph_composer.records.detail`
+reads it. The limit check allows a nanometre of floating-point slack at each limit, so a value
+exactly on it passes (Codex review of PR #513). The record is
 staged whole, since `Engine#propose_update` drops a key set to null.
 
 ## 4. The Phius limit check (P4c-02)

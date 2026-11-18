@@ -18,11 +18,9 @@ module PhComposer
         "columns" => Shapes.list({ "type" => "string", "enum" => Schema::MONTHS + Schema::CASES },
                                  :description => "The months or cases missing; empty for a single value.")
       }).freeze
-      CLIMATE = Shapes.object({
-        "id" => Shapes::ID,
-        "values" => Schema::KIND.values_schema,
-        "user_data" => { "type" => "object", "description" => "The record's local JSON metadata." }
-      }).freeze
+      CLIMATE = Shapes.object({ "id" => Shapes::ID, "values" => Schema::KIND.values_schema },
+                              :description => "The record's values. Its user_data, which has no size bound, is " \
+                                              "read with ph_composer.records.detail.").freeze
       # What a write answers; climate.get adds the record under climate.
       WRITTEN = Shapes.object({
         "state" => { "type" => "string", "enum" => %w[none incomplete complete],

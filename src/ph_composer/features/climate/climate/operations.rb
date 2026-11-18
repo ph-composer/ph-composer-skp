@@ -25,7 +25,9 @@ module PhComposer
       # climate.get: the record with its derived state, what is missing, the edited cells and the limit check
       # against the Model's site. State none and nulls when there is no climate. Reads never write. An edited
       # cell is its row and column alone: its value and the file's are in the values and their as_read copy,
-      # and the provenance lists both, so a station with every value edited still fits one agent reply.
+      # and the provenance lists both, so a station with every value edited still fits one agent reply. The
+      # record's user_data is left out for the same reason, since it has no size bound; ph_composer.records.detail
+      # reads it.
       def read(request)
         describe(stored(request.engine), Settings.site(request.model))
       end
@@ -36,8 +38,7 @@ module PhComposer
         values = Schema::KIND.values(record)
         missing = Completeness.missing(values)
         { "state" => missing.empty? ? "complete" : "incomplete",
-          "climate" => { "id" => record.fetch("id"), "values" => values,
-                         "user_data" => DeepCopy.call(record.fetch("user_data", {})) },
+          "climate" => { "id" => record.fetch("id"), "values" => values },
           "missing" => missing, "edited_cells" => Edits.cells(values).map { |cell| cell.slice("row", "column") },
           "limit_check" => LimitCheck.call(site, values) }
       end

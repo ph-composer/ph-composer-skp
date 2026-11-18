@@ -465,7 +465,8 @@ Read the Model's climate with `ph_composer.climate.climate.get`. It gives `state
 `incomplete` or `complete`), the record under `climate.values`, `missing` (what a complete climate
 still needs, by row, with the months or cases of each row), `edited_cells` (each value that differs
 from the station file, by row and column) and `limit_check`. A new Model reads `state: "none"` and
-nothing is written.
+nothing is written. The climate's `user_data` is not in this read; read it with
+`ph_composer.records.detail`.
 
 To type a climate, call `ph_composer.climate.climate.enter_values` with every editable field in
 `values`: `name`, `station_latitude_deg`, `station_longitude_deg`, `station_elevation_m`,
@@ -488,7 +489,8 @@ Undo step.
 
 `limit_check` compares the site with the station against Phius's limits, 50 miles (80.4672 km) and
 400 feet (121.92 m): `verdict` is `pass` at or inside both, `fail` outside either, or
-`not_checked` with `reason` `no_site` or `no_station_coordinates`. It is worked out on every read
+`not_checked` with `reason` `no_site` or `no_station_coordinates`. A value exactly on a limit
+passes, whatever rounding the arithmetic adds. It is worked out on every read
 and never stored, so `ph_composer.climate.site.update` answers it after the change, and
 `ph_composer.climate.site.preview_limit_check` gives it for a proposed latitude, longitude and
 elevation without writing anything.

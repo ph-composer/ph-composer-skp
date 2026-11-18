@@ -8725,8 +8725,7 @@ Result:
       "additionalProperties": false,
       "required": [
         "id",
-        "values",
-        "user_data"
+        "values"
       ],
       "properties": {
         "id": {
@@ -9695,12 +9694,9 @@ Result:
               }
             }
           }
-        },
-        "user_data": {
-          "type": "object",
-          "description": "The record's local JSON metadata."
         }
-      }
+      },
+      "description": "The record's values. Its user_data, which has no size bound, is read with ph_composer.records.detail."
     }
   }
 }

@@ -136,6 +136,19 @@ class ClimateRecordTest < PhComposerTestCase
     assert_equal ["fail", true, false], over_elevation.values_at("verdict", "distance_ok", "elevation_ok")
   end
 
+  def test_a_site_exactly_on_either_limit_passes_through_the_floating_point_arithmetic
+    station_latitude = 41.0 + (LIMIT::DISTANCE_LIMIT_KM / LIMIT::EARTH_RADIUS_KM * 180 / Math::PI)
+    climate = { "station_latitude_deg" => station_latitude, "station_longitude_deg" => -74.0,
+                "station_elevation_m" => 200.0 }
+    on_both = SITE.merge("elevation_m" => 321.92)
+    metre = 0.001 / LIMIT::EARTH_RADIUS_KM * 180 / Math::PI
+
+    assert_equal ["pass", true, true], LIMIT.call(on_both, climate).values_at("verdict", "distance_ok", "elevation_ok")
+    assert_equal "fail", LIMIT.call(on_both.merge("elevation_m" => 321.921), climate).fetch("verdict")
+    assert_equal "fail", LIMIT.call(on_both, climate.merge("station_latitude_deg" => station_latitude + metre))
+                              .fetch("verdict")
+  end
+
   def test_the_elevation_difference_is_a_magnitude_compared_exactly
     climate = { "station_latitude_deg" => 41.0, "station_longitude_deg" => -74.0, "station_elevation_m" => 0.0 }
 

@@ -13,6 +13,10 @@ module PhComposer
       DISTANCE_LIMIT_KM = 80.4672 # 50 mi x 1.609344 km/mi
       ELEVATION_LIMIT_M = 121.92 # 400 ft x 0.3048 m/ft
       EARTH_RADIUS_KM = 6371.0088 # the mean radius
+      # Floating-point slack at the limits, a nanometre: the haversine and a subtraction such as 321.92 - 200.0
+      # (121.92000000000002) land a hair past a limit the inputs sit exactly on, which must pass.
+      TOLERANCE_KM = 1e-12
+      TOLERANCE_M = 1e-9
 
       module_function
 
@@ -33,8 +37,8 @@ module PhComposer
 
       # The verdict for a distance and an elevation difference already worked out.
       def compare(distance_km, elevation_difference_m)
-        distance_ok = distance_km <= DISTANCE_LIMIT_KM
-        elevation_ok = elevation_difference_m <= ELEVATION_LIMIT_M
+        distance_ok = distance_km <= DISTANCE_LIMIT_KM + TOLERANCE_KM
+        elevation_ok = elevation_difference_m <= ELEVATION_LIMIT_M + TOLERANCE_M
         { "verdict" => distance_ok && elevation_ok ? "pass" : "fail", "reason" => nil,
           "distance_km" => distance_km, "elevation_difference_m" => elevation_difference_m,
           "distance_ok" => distance_ok, "elevation_ok" => elevation_ok }

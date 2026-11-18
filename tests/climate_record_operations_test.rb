@@ -245,8 +245,8 @@ class ClimateRecordOperationsTest < PhComposerTestCase
     assert_equal %w[not_checked no_station_coordinates], get.fetch("limit_check").values_at("verdict", "reason")
   end
 
-  # The largest reply climate.get can give, a station with every value edited, still fits one agent reply:
-  # 17,826 bytes of value when measured, against 24,576.
+  # The largest reply climate.get can give, a station with every value edited and a large user_data map, still
+  # fits one agent reply: 17,826 bytes of value when measured, against 24,576, since the map is not in it.
   def test_the_largest_read_fits_one_reply
     seed_station
     values = editable
@@ -255,6 +255,12 @@ class ClimateRecordOperationsTest < PhComposerTestCase
     values["daily_temp_swing_k"] = 1.123456
     invoke("save_values", "values" => values, "expected_values" => editable)
 
+    update = { "reference" => { "kind" => SCHEMA::KIND_ID, "id" => SCHEMA::RECORD_ID },
+               "expected_metadata" => { "user_data" => {}, "extension_data" => {} },
+               "user_data" => { "note" => "x" * 8192 } }
+    metadata = invoke("update_metadata", { "updates" => [update] }, "", "ph_composer.records.")
+
+    assert_equal "committed", metadata.fetch("effect"), metadata.inspect
     assert_operator JSON.generate(query("climate.get")).bytesize, :<, PhComposer::Pages::REPLY_BYTES
   end
 
@@ -306,9 +312,9 @@ class ClimateRecordOperationsTest < PhComposerTestCase
     PhComposer::API.query(:context => @context, :name => "ph_composer.climate.#{name}", :params => params)
   end
 
-  def invoke(name, params, prefix = "climate.")
+  def invoke(name, params, prefix = "climate.", owner = "ph_composer.climate.")
     @sequence += 1
-    PhComposer::API.invoke(:context => @context, :name => "ph_composer.climate.#{prefix}#{name}", :params => params,
+    PhComposer::API.invoke(:context => @context, :name => "#{owner}#{prefix}#{name}", :params => params,
                            :request => { "sequence" => @sequence, "expected_revision" => @session.revision })
   end
 end
