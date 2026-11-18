@@ -480,3 +480,40 @@ test("a wind draft left invalid is dropped when the climate is cleared, so anoth
     "Birch Point");
   assert.strictEqual(wind.value, "3.9");
 });
+
+test("Restore pressed as a wind speed saves on blur runs after that save, guarded by the climate read again",
+  function () {
+    var p = page();
+    load(p, station({ edits: [["air_c", "jan", -6]] }));
+    var wind = typeWind(p, "5");
+    var restore = byText(attached(p), "button", "Restore Original Values");
+    wind.listeners.blur({ target: wind });
+    assert.ok(restore.parentNode, "the button is still on the page for the click that blurred the field");
+    click(restore);
+    assert.strictEqual(named(p, P + "climate.save_values").length, 1);
+    assert.strictEqual(named(p, P + "climate.restore_original").length, 0, "waits for the save");
+    answer(p, last(p, P + "climate.save_values"), { status: "completed", effect: "committed", revision: 2, value: {} });
+    p.revision = 2; p.publish();
+    var saved = station({ edits: [["air_c", "jan", -6]] }); saved.climate.values.wind_speed_m_s = 5;
+    answer(p, last(p, P + "climate.get"), completed(saved));
+    var restored = named(p, P + "climate.restore_original");
+    assert.strictEqual(restored.length, 1);
+    assert.strictEqual(restored[0].payload.params.expected_values.wind_speed_m_s, 5, "guarded by the new read");
+  });
+
+test("a failed re-read says so and shows no verdict from the last read", function () {
+  var p = page();
+  load(p);
+  p.revision = 2; p.publish();
+  answer(p, last(p, P + "climate.get"), refused("record.unreadable", "The climate record cannot be read."));
+  var line = text(attached(p).querySelector(".climate-attached-notice"));
+  assert.ok(/^The climate could not be read again: The climate record cannot be read\./.test(line), line);
+  assert.deepStrictEqual(all(attached(p).querySelector(".climate-attached-heading"), ".climate-data-chip").map(text),
+    []);
+  assert.strictEqual(text(section(p, "Phius limit check").querySelector("p")),
+    "Not shown: the climate could not be read again.");
+  p.revision = 3; p.publish();
+  answer(p, last(p, P + "climate.get"), completed(station()));
+  assert.deepStrictEqual(all(attached(p).querySelector(".climate-attached-heading"), ".climate-data-chip").map(text),
+    ["Pass"]);
+});

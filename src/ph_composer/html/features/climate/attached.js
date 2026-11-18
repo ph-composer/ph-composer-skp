@@ -165,7 +165,14 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
     }
     if (written && written.status !== "completed") {
       panel.notify(written.message || "The climate was not changed.", "error");
-      this.stale = true;
+      this.queued = null;
+    }
+    // Any answer to a write is followed by a read; an action pressed while the write was out (Restore or Clear
+    // just after a wind speed saved on blur) runs once that read answers, guarded by the new values.
+    if (written) { this.stale = true; this.awaitingRead = true; }
+    if (got) this.awaitingRead = false;
+    if (this.queued && !this.awaitingRead && !this.writes.busy() && !this.reads.get.busy()) {
+      var queued = this.queued; this.queued = null; this.write(queued);
     }
     var opened = shown && !this.shown;
     this.shown = shown;
@@ -216,11 +223,13 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
       return;
     }
     if (!values) { this.body.replaceChildren(el("p", "muted", "Reading the climate…")); return; }
-    var edited = this.editedCells();
+    var edited = this.editedCells(), focused = document.activeElement === this.wind.input;
     this.body.replaceChildren.apply(this.body, [this.heading(values)].concat(this.notices(values, edited),
       [this.limitBlock(values), this.monthlyTemperatures(values, edited), this.monthlyRadiation(values, edited),
         this.peakLoads(values, edited), this.stationValues(values, edited), this.where(values)]));
     this.paintWind();
+    // Moving the field into the new body drops its focus; Enter leaves the user in it.
+    if (focused && this.wind.input.focus) this.wind.input.focus({ preventScroll: true });
   };
 
   /* With the folders read, whether none is found now: a Replace then explains instead of opening. */
@@ -254,7 +263,7 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
       place.push(shared.coordinates({ state: "set", latitude_deg: values.station_latitude_deg,
         longitude_deg: values.station_longitude_deg, elevation_m: values.station_elevation_m }));
     }
-    var verdict = check && check.verdict;
+    var verdict = !this.failure && check && check.verdict;
     if (verdict === "pass") tags.appendChild(chip("Pass", "ok"));
     if (verdict === "fail") tags.appendChild(chip("Outside Phius limits", "warning"));
     if (this.record.edited_cells && this.record.edited_cells.length) tags.appendChild(chip("Edited", "warning"));
@@ -269,7 +278,11 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
 
   /* The lines above the values: outside the limits (board 19), edited (board 15) and incomplete. */
   Pane.prototype.notices = function (values, edited) {
-    var self = this, lines = [], check = this.record.limit_check, keys = Object.keys(edited);
+    var self = this, lines = [], check = this.failure ? null : this.record.limit_check, keys = Object.keys(edited);
+    if (this.failure) {
+      lines.push(el("p", "climate-attached-notice is-warning", "The climate could not be read again: " +
+        this.failure + " What shows is the last read; the limit check is not shown until it reads."));
+    }
     if (check && check.verdict === "fail") {
       lines.push(el("p", "climate-attached-notice is-warning", "Outside the Phius limits: " +
         this.failingParts(values, check).join(" and ") + ". " + CUSTOM + " The Export report says the same."));
@@ -330,6 +343,10 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
   Pane.prototype.limitBlock = function (values) {
     var check = this.record.limit_check, block = el("div", "climate-attached-section");
     block.appendChild(el("h3", "", "Phius limit check"));
+    if (this.failure) {
+      block.appendChild(el("p", "climate-dialog-note", "Not shown: the climate could not be read again."));
+      return block;
+    }
     if (!check || check.verdict === "not_checked") {
       var why = check && check.reason === "no_site" ? "Not checked: set the site location to check the station." :
         "Not checked, entered by hand: the climate has no station coordinates.";
@@ -529,6 +546,7 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
   /* Each write is one Undo step guarded by the eight editable fields as last read. */
   Pane.prototype.write = function (name, params) {
     var values = this.values();
+    if (values && !params && this.writes.busy()) { this.queued = name; return false; }
     if (!values || this.writes.busy()) return false;
     this.writes.run(P + "climate." + name, Object.assign({ expected_values: slice(values) }, params || {}));
     this.painted = null; this.paint();
@@ -539,8 +557,9 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
     this.windGuard = null;
     if (!guard || this.writes.busy() || value === guard.wind_speed_m_s) { this.settled(); return; }
     var next = JSON.parse(JSON.stringify(guard)); next.wind_speed_m_s = value;
+    // No repaint here: the blur that saves may be the first half of a click on another button, which a rebuilt
+    // body would remove before the click lands. The answer repaints.
     this.writes.run(P + "climate.save_values", { values: next, expected_values: guard });
-    this.painted = null; this.paint();
   };
   /* The draft is over without a write: its guard goes, and the Model's values show. */
   Pane.prototype.settled = function () {
