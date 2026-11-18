@@ -168,7 +168,7 @@ function (ui, RecordForm, unitField, numbers, preferences, units, fields, Grid, 
     var self = this, at = event.target._at, rows, text = event.clipboardData.getData("text/plain");
     if (!at) return;
     event.preventDefault();
-    if (!text.trim()) return;
+    if (!text || this.busy()) return;
     try { rows = Grid.parse(text); } catch (error) { this.say(error.message); return; }
     // A station file writes a point decimal whatever the panel's number format, and no Phius value is grouped.
     var decimal = format().decimal, POINT = /^\s*[-+\u2212]?\d+\.\d+\s*$/;

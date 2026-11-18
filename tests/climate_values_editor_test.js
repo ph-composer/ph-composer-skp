@@ -304,6 +304,9 @@ test("an empty clipboard, a column of words and a typographic minus", function (
   paste(p, cell(p, 0, 0), "warm\r\ncold\r\n");
   assert.strictEqual(notice(p), "Pasted 2 rows. 2 values were not numbers and were left empty.",
     "one column of words is values, not labels");
+  paste(p, cell(p, 0, 0), "1\t2");
+  paste(p, cell(p, 0, 0), "\t\r\n");
+  assert.deepStrictEqual([cell(p, 0, 0).value, cell(p, 0, 1).value], ["", ""], "blank cells empty what they cover");
   paste(p, cell(p, 0, 0), "−5.5\t3");
   assert.strictEqual(cell(p, 0, 0).value, "−5.5");
   type(field(p, "Name"), "Elm Street");
@@ -332,6 +335,8 @@ test("while a save is out the draft cannot change", function () {
   type(cell(p, 0, 0), "10");
   submit(p);
   assert.strictEqual(cell(p, 0, 0).readOnly, true);
+  paste(p, cell(p, 0, 0), "99");
+  assert.strictEqual(cell(p, 0, 0).value, "10", "a paste waits too");
   assert.strictEqual(field(p, "Name").readOnly, true);
   assert.strictEqual(field(p, "Station elevation").disabled, true);
   answer(p, last(p, P + "climate.enter_values"), { status: "refused", code: "validation.failed",
