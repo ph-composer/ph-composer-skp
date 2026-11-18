@@ -1,10 +1,10 @@
 /* The Climate tab: one page header over source cards (Site location, then under "Climate sources" Phius climate
    data, Design temperatures and Hourly weather file) and the pane of the card selected. Every card's state comes
    from the summary snapshot section and the panes paint from the site and design-temperature sections. The
-   card selected is remembered per Model session. The Phius climate data pane opens the station picker, and the
-   Hourly weather file card is Planned. The page header always offers Climate Data
-   on This Computer, which a native route (the Setup view, the Extensions menu) also opens with the intent
-   `{ open: "climate_data" }`. Climate is first in the tab row; the panel still opens on Zones. */
+   card selected is remembered per Model session. The Phius climate data pane opens the station picker; with a
+   climate attached its actions sit in the page header. The Hourly weather file card is Planned. The page header
+   always offers Climate Data on This Computer, which a native route (the Setup view, the Extensions menu) also
+   opens with the intent `{ open: "climate_data" }`. Climate is first in the tab row; the panel still opens on Zones. */
 PhComposerUI.define("features/climate/section", ["panel", "workspace", "snapshot", "source_cards",
   "features/climate/shared", "features/climate/site", "features/climate/set_location",
   "features/climate/design_temperatures", "features/climate/phius", "features/climate/data_setup",
@@ -28,7 +28,13 @@ function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, Desig
     root.replaceChildren();
     this.setButton = ui.button("Set Location…", function () { self.openSetLocation(); });
     this.dataButton = ui.button("Climate Data on This Computer…", function () { self.openData(false); });
-    this.header = ui.pageHeader({ title: "Climate", actions: [this.dataButton] });
+    this.phius = new PhiusPane(state.session, send, { openData: function (add) { self.openData(add); },
+      setLocation: function () { self.openSetLocation(); },
+      choose: function (preselect) { self.openPicker(preselect || null); },
+      replace: function () { self.openPicker(null); } });
+    // With a climate attached and its card selected, the header holds its actions: Edit Values, Replace
+    // as the primary, and Clear in the overflow menu, which is hidden otherwise.
+    this.header = ui.pageHeader({ title: "Climate", actions: [this.dataButton], menu: this.phius.attached.menu.root });
     this.cards = new SourceCards({ label: "Climate", state: page, stateKey: "card", groups: [
       { cards: [{ id: "site", title: "Site location" }] },
       { caption: "Climate sources", cards: [{ id: "phius", title: "Phius climate data" },
@@ -36,8 +42,6 @@ function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, Desig
         { id: "hourly", title: "Hourly weather file", planned: true }] }],
     changed: function () { panel.repaint(); } });
     this.site = new SitePane(function () { self.openSetLocation(); });
-    this.phius = new PhiusPane(state.session, send, { openData: function (add) { self.openData(add); },
-      setLocation: function () { self.openSetLocation(); }, choose: function () { self.openPicker(null); } });
     this.design = new DesignPane(state.session, send);
     this.panes = { site: this.site.root, phius: this.phius.root, design: this.design.root };
     var content = ui.element("div", "climate-content");
@@ -85,7 +89,12 @@ function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, Desig
     var selected = this.cards.selected, panes = this.panes;
     Object.keys(panes).forEach(function (key) { panes[key].hidden = key !== selected; });
     this.setButton.disabled = !site;
-    this.header.setPrimary(selected === "site" ? this.setButton : null);
+    var attached = selected === "phius" && Boolean(summary && summary.climate.state !== "none");
+    if (attached !== this.headerAttached) {
+      this.headerAttached = attached;
+      this.header.setActions(attached ? [this.dataButton, this.phius.attached.edit] : [this.dataButton]);
+    }
+    this.header.setPrimary(selected === "site" ? this.setButton : attached ? this.phius.attached.replace : null);
     this.site.render(site);
     this.design.render(state, design);
     this.phius.render(state, summary, site, state.ui.activeTab === TAB && selected === "phius");

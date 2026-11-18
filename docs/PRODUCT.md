@@ -82,9 +82,41 @@ before Attach that Phius asks for a custom dataset there unless an exception app
 the pane and the Export report then show the climate as outside the Phius limits. PH-Composer
 reports the result and does not approve or refuse a station; Phius decides.
 
-With a climate already in the Model, the pane offers **Replace Station**. The picker then shows the
+With a climate already in the Model, the page header offers **Replace**. The picker then shows the
 current and the selected station side by side, with their dataset, distance, elevation difference
 and result, and says how many edited values replacing would discard. **Replace** is one Undo step.
+
+## Read an attached climate
+
+With a climate in the Model, **Phius climate data** shows it in full, read from the Model alone:
+
+- The station's name, its dataset and place, and its marks: Pass or Outside Phius limits, Edited,
+  Incomplete, and Source changed.
+- The Phius limit check: the distance and elevation difference from the site, each against its
+  limit, with the result. It is worked out again whenever the site changes. A station outside the
+  limits says so above the values, with a line that Phius asks for a custom dataset there.
+- The monthly temperatures and radiation, and the peak loads for Heating 1, Heating 2 and Cooling 1.
+  Ground temperatures and a second cooling case are not part of a Phius station file and are shown
+  as such. On a narrow panel each table scrolls sideways inside its own box.
+- The station elevation, the daily temperature swing and the average wind speed. The wind speed
+  starts as the mean of the file's January and July values; type another and press Enter to change
+  it. Changing it does not count as an edit.
+- **Where this lives**: what the Model holds, whether the station file is on this computer, and what
+  the climate is ready for.
+
+A value that differs from the station file is marked in its table; hover over it for the file's
+value. A line above the values names the edits, and **Restore Original Values** puts the file's
+values back as one Undo step. The Model keeps the values as read, so this works without the folder.
+
+When the station file on this computer differs from the copy in the Model, Where this lives says
+**Source changed**, and **Update from File** opens the picker in Replace on that station. Nothing
+updates on its own.
+
+On another computer, or one with no climate data folder, the pane reads in full with no notice, and
+Where this lives says the source is not on this computer. **Replace** then explains that there is no
+folder and offers **Choose Climate Data Folder**. **Clear**, in the page header's **More climate
+actions** menu, removes the climate as one Undo step with no confirmation; the site and the design
+temperatures stay.
 
 ## Make Zones and classify the envelope
 

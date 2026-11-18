@@ -1,7 +1,7 @@
 # P4c-09: The station picker
 
 DATE: 2026-11-17
-STATUS: Implemented on branch `feature/climate-p4c-09`, 2026-11-18 (PR #520); CM09 agent run Pass on `fab641b3`; Ed's pass pending. Authorized with every Climate stage on 2026-11-17 ([STATUS](../STATUS.md#authorization)).
+STATUS: Merged to main 2026-11-18 (PR #520, `fdf43034`); CM09 agent run Pass on `fab641b3`; Ed's pass pending. Authorized with every Climate stage on 2026-11-17 ([STATUS](../STATUS.md#authorization)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
 

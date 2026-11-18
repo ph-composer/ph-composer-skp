@@ -115,10 +115,15 @@
       "mime": "text/javascript; charset=utf-8",
       "sha256": "9e8041546528ef8733c8da7b2359bd980cee349c3ed13ef3ebafc023a11a3479"
     },
+    "html/features/climate/attached.js": {
+      "bytes": 33088,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "2edf172bdc8c4632c7ebbd961f3bc89200cab2f0f804a87632a6ffd4fb2250d3"
+    },
     "html/features/climate/climate.css": {
-      "bytes": 10340,
+      "bytes": 13871,
       "mime": "text/css; charset=utf-8",
-      "sha256": "500a4306192808e7a0e48c463a218f7c4d0f02c5c4366524a456f9a7841df8df"
+      "sha256": "6113812ca660f5c561b62b5a2bbdfbad16b82038e5c16381dd527034719126c9"
     },
     "html/features/climate/data_setup.js": {
       "bytes": 19477,
@@ -131,9 +136,9 @@
       "sha256": "8d194678ba2da13408e5182f1c27eee964e6a6f710a764628459735d744c10fd"
     },
     "html/features/climate/phius.js": {
-      "bytes": 8131,
+      "bytes": 8771,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "0cfc35d01686c97c0489b2da79592efaa4541e1b17e7a792ac4e5d63b1667d17"
+      "sha256": "d129bf82ae3fbc2e04c969999e63dab5028d48b73afbd09492ff17a4c65fe2c3"
     },
     "html/features/climate/picker.js": {
       "bytes": 24987,
@@ -141,9 +146,9 @@
       "sha256": "997354e228c41c56cbd9ed7d95064c3d3433033d67ca00bc4fc4dee0378db8d0"
     },
     "html/features/climate/section.js": {
-      "bytes": 8197,
+      "bytes": 8892,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "8295a05383197241faf58010cc304c28002860b8bea608f45b82b398b8cac5e3"
+      "sha256": "4afbacb25a2ae69fd80d923c558a39628ded00cc9ebb6691f25087d7a8614108"
     },
     "html/features/climate/set_location.js": {
       "bytes": 19951,
@@ -386,9 +391,9 @@
       "sha256": "ae769a7d0c4b07031ab9812cd350d17b6e4638549d0f5295ccaafe1f1390ed54"
     },
     "html/index.html": {
-      "bytes": 9178,
+      "bytes": 9235,
       "mime": "text/html; charset=utf-8",
-      "sha256": "b9df4369ea4b63663d4b1eaccc6c8d468c44bf504adab36515463e4174a4ab8d"
+      "sha256": "1928d051a424f88b9129c70c49d2f493d62c351936876987b54bf34fa259c8f8"
     },
     "html/inventory.js": {
       "bytes": 12812,

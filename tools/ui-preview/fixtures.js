@@ -1166,6 +1166,23 @@
       return Math.hypot(a.latitude_deg - 42.75, a.longitude_deg + 73.8) -
         Math.hypot(b.latitude_deg - 42.75, b.longitude_deg + 73.8);
     })[0], edited: 2 }) };
+  // The attached pane (P4c-10): the nearest station within the elevation limit attached, with the design
+  // temperatures set; its file changed since (board 17); on a computer with no climate data folder (board 6); the
+  // same station 400 m higher, outside the limits (19). `climatereplace` is the edited station of board 15.
+  var NEAREST = PREVIEW_STATIONS.filter(function (row) { return Math.abs(row.elevation_m - 84) <= 100; })
+    .sort(function (a, b) {
+      return Math.hypot(a.latitude_deg - 42.75, a.longitude_deg + 73.8) -
+        Math.hypot(b.latitude_deg - 42.75, b.longitude_deg + 73.8);
+    })[0];
+  function attachedFixture(changes) {
+    return { parts: [], climate: Object.assign({}, FIXTURES.climatepicker.climate,
+      { design: FIXTURES.climateset.climate.design, station: NEAREST, edited: 0 }, changes) };
+  }
+  FIXTURES.climateattached = attachedFixture({});
+  FIXTURES.climatechanged = attachedFixture({ source: "changed" });
+  FIXTURES.climateother = attachedFixture({ folders: [], lastDatasetId: null });
+  FIXTURES.climatefail = attachedFixture({ station: Object.assign({}, NEAREST, { elevation_m: NEAREST.elevation_m +
+    400 }) });
 
   global.PhComposerPreviewFixtures = {
     names: Object.keys(FIXTURES),

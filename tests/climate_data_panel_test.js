@@ -461,11 +461,11 @@ test("folders that cannot be found read as none, and the pane reads again when t
   assert.strictEqual(phius(p).getAttribute("data-state"), "ready");
 });
 
-test("with a climate in the Model the pane reads no folders and keeps its line", function () {
+test("with a climate in the Model the pane shows it attached and reads the folders once, for Replace", function () {
   var p = page({ site: SITE_SET, climate: "complete" });
   selectPhius(p);
   assert.strictEqual(phius(p).getAttribute("data-state"), "attached");
-  assert.strictEqual(named(p, P + "folders.list").length, 0);
+  assert.strictEqual(named(p, P + "folders.list").length, 1);
 });
 
 test("the Setup view's button reaches the host, whose route opens the dialog on the Climate tab", function () {
