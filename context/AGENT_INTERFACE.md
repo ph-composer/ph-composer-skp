@@ -453,9 +453,11 @@ is given against the file as it is when the user answers. A library export's res
 afterwards while the file is unchanged. No receipt is kept for a lost reply: the caller compares the
 destination's state with the one it reviewed.
 
-Three operations take a location today: `ph_composer.library.export_file`,
-`ph_composer.library.providers.add_file` and `.providers.add_folder`; the HBJSON export task takes
-one too. The path never appears in params or a log, nor in a result or outcome but one: once an HBJSON
+Five operations take a location today: `ph_composer.library.export_file`,
+`ph_composer.library.providers.add_file` and `.providers.add_folder`, and
+`ph_composer.climate.folders.add` and `.folders.locate`, which keep the folder in this computer's
+settings file and answer only its display location; the HBJSON export task takes one too. The path
+never appears in params or a log, nor in a result or outcome but one: once an HBJSON
 export has written its pair, the caller that started the task reads `outcome.value.artifacts` from
 `export_status` and `latest_export`, each file's path, SHA-256 and byte size from the bytes the final
 verification read, to read the files with its own tools and compare the hash before parsing (a later

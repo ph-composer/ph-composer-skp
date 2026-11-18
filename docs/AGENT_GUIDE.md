@@ -495,6 +495,37 @@ and never stored, so `ph_composer.climate.site.update` answers it after the chan
 `ph_composer.climate.site.preview_limit_check` gives it for a proposed latitude, longitude and
 elevation without writing anything.
 
+### Climate data folders
+
+The climate data folders are kept in PH-Composer's own settings file on this computer, not in a
+Model, and serve every Model opened on it. This works on macOS only for now; elsewhere every call
+below is refused with `climate.settings_unavailable`.
+
+`ph_composer.climate.folders.list` gives each folder's `id`, its `name` (the dataset name), its
+`display_location` and whether it is `found` now, and the `last_dataset_id`. The display location is
+`~/` and the rest for a folder under the home folder, or the volume's name and the rest on another
+drive. No call takes or answers a folder's path. A folder that cannot be found reads
+`found: false` and keeps its setting: PH-Composer never removes one itself.
+
+The changes are setup commands and need the `setup` capability. None changes a Model or adds an
+Undo step.
+
+- `ph_composer.climate.folders.add` and `ph_composer.climate.folders.locate` need the user to choose
+  the folder in SketchUp. Called with no `location`, they are refused with `access.user_required` and
+  no dialog opens. To use a folder the user approved, pass `location: {"id": "<location id>"}` with
+  an id from `ph_composer.locations.list`. Add names the dataset after the folder; Locate points an existing setting, by `id`,
+  at a new folder and keeps its name.
+- `ph_composer.climate.folders.rename` sets the dataset name, 1 to 120 characters.
+- `ph_composer.climate.folders.remove` removes the setting. The folder and its files are not touched.
+- `ph_composer.climate.folders.remember_dataset` records the folder the station picker opens on.
+
+A folder that is already listed, or sits inside or around a listed one, is refused with
+`climate.folder_overlaps`, so no station is listed twice. An id that is not set up is refused with
+`climate.folder_not_found`. When the settings file cannot be read, or a later version of
+PH-Composer wrote it, reads and changes are refused with `climate.settings_unreadable` and the file
+is left as it is. A change that cannot be saved, for example while another SketchUp is saving the
+same file, is refused with `climate.settings_unavailable`; nothing was written, so try again.
+
 ### Library records
 
 List configured providers with `ph_composer.library.providers`. Use `ph_composer.library.load`

@@ -9792,6 +9792,84 @@ Example params:
 {}
 ```
 
+### `ph_composer.climate.folders.list`
+
+The climate data folders set up on this computer, with each one's name, display location and whether it can be found now. Owner: `ph_composer.climate`.
+
+Refuses: `climate.settings_unavailable`, `climate.settings_unreadable`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "folders",
+    "last_dataset_id"
+  ],
+  "properties": {
+    "folders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "display_location",
+          "found"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "description": "The dataset name the Model and the Export report show."
+          },
+          "display_location": {
+            "type": "string",
+            "description": "Where the folder is, for display: ~/ and the rest under the home folder, the volume's name and the rest on another volume. Never an absolute path."
+          },
+          "found": {
+            "type": "boolean",
+            "description": "false when the folder cannot be found now; the setting is kept."
+          }
+        }
+      },
+      "description": "In the order added."
+    },
+    "last_dataset_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The folder the station picker last used; null when none."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
 ### `ph_composer.climate.site.get`
 
 The Model's site: latitude, longitude, elevation, climate zone and hours from UTC, with the site state. A new Model reads not_set and nothing is written. Owner: `ph_composer.climate`.
@@ -72340,6 +72418,412 @@ Example params:
 
 Called with a context granted `setup`.
 
+### `ph_composer.climate.folders.add`
+
+Add a climate data folder the user chooses in SketchUp, stored under the folder's own name. Refuses climate.folder_overlaps for a folder already listed, or inside or around one. Owner: `ph_composer.climate`.
+
+Needs the user: the panel or menu asks for a folder first. Any other caller passes `location`, the id of a location the user approved, or is refused with `access.user_required`.
+
+Refuses: `climate.folder_not_found`, `climate.folder_overlaps`, `climate.settings_unavailable`, `climate.settings_unreadable`, and the `setup_command` and `approval` and `location` common sets.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The id of a location the user approved, from ph_composer.locations.list."
+        }
+      },
+      "description": "An approved location to use instead of asking the user. A native client asks instead."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "name",
+    "display_location",
+    "found"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "description": "The dataset name the Model and the Export report show."
+    },
+    "display_location": {
+      "type": "string",
+      "description": "Where the folder is, for display: ~/ and the rest under the home folder, the volume's name and the rest on another volume. Never an absolute path."
+    },
+    "found": {
+      "type": "boolean",
+      "description": "false when the folder cannot be found now; the setting is kept."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.climate.folders.locate`
+
+Point a climate data folder's setting at the folder the user chooses in SketchUp, keeping its id and name. Owner: `ph_composer.climate`.
+
+Needs the user: the panel or menu asks for a folder first. Any other caller passes `location`, the id of a location the user approved, or is refused with `access.user_required`.
+
+Refuses: `climate.folder_not_found`, `climate.folder_overlaps`, `climate.settings_unavailable`, `climate.settings_unreadable`, and the `setup_command` and `approval` and `location` common sets.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "A climate data folder's id, from folders.list."
+    },
+    "location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The id of a location the user approved, from ph_composer.locations.list."
+        }
+      },
+      "description": "An approved location to use instead of asking the user. A native client asks instead."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "name",
+    "display_location",
+    "found"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "description": "The dataset name the Model and the Export report show."
+    },
+    "display_location": {
+      "type": "string",
+      "description": "Where the folder is, for display: ~/ and the rest under the home folder, the volume's name and the rest on another volume. Never an absolute path."
+    },
+    "found": {
+      "type": "boolean",
+      "description": "false when the folder cannot be found now; the setting is kept."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "climate_folder_AbCdEf123456"
+}
+```
+
+### `ph_composer.climate.folders.remember_dataset`
+
+Remember the folder the station picker opens on next time. Owner: `ph_composer.climate`.
+
+Refuses: `climate.folder_not_found`, `climate.settings_unavailable`, `climate.settings_unreadable`, and the `setup_command` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "A climate data folder's id, from folders.list."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "folders",
+    "last_dataset_id"
+  ],
+  "properties": {
+    "folders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "display_location",
+          "found"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "description": "The dataset name the Model and the Export report show."
+          },
+          "display_location": {
+            "type": "string",
+            "description": "Where the folder is, for display: ~/ and the rest under the home folder, the volume's name and the rest on another volume. Never an absolute path."
+          },
+          "found": {
+            "type": "boolean",
+            "description": "false when the folder cannot be found now; the setting is kept."
+          }
+        }
+      },
+      "description": "In the order added."
+    },
+    "last_dataset_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The folder the station picker last used; null when none."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "climate_folder_AbCdEf123456"
+}
+```
+
+### `ph_composer.climate.folders.remove`
+
+Remove a climate data folder's setting. The folder and its files are not touched. PH-Composer never removes one itself. Owner: `ph_composer.climate`.
+
+Refuses: `climate.folder_not_found`, `climate.settings_unavailable`, `climate.settings_unreadable`, and the `setup_command` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "A climate data folder's id, from folders.list."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "folders",
+    "last_dataset_id"
+  ],
+  "properties": {
+    "folders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "display_location",
+          "found"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "description": "The dataset name the Model and the Export report show."
+          },
+          "display_location": {
+            "type": "string",
+            "description": "Where the folder is, for display: ~/ and the rest under the home folder, the volume's name and the rest on another volume. Never an absolute path."
+          },
+          "found": {
+            "type": "boolean",
+            "description": "false when the folder cannot be found now; the setting is kept."
+          }
+        }
+      },
+      "description": "In the order added."
+    },
+    "last_dataset_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The folder the station picker last used; null when none."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "climate_folder_AbCdEf123456"
+}
+```
+
+### `ph_composer.climate.folders.rename`
+
+Set a climate data folder's dataset name. Owner: `ph_composer.climate`.
+
+Refuses: `climate.folder_not_found`, `climate.settings_unavailable`, `climate.settings_unreadable`, and the `setup_command` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "name"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "A climate data folder's id, from folders.list."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "description": "The dataset name the Model and the Export report show."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "name",
+    "display_location",
+    "found"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "description": "The dataset name the Model and the Export report show."
+    },
+    "display_location": {
+      "type": "string",
+      "description": "Where the folder is, for display: ~/ and the rest under the home folder, the volume's name and the rest on another volume. Never an absolute path."
+    },
+    "found": {
+      "type": "boolean",
+      "description": "false when the folder cannot be found now; the setting is kept."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "climate_folder_AbCdEf123456",
+  "name": "Phius 2022"
+}
+```
+
 ### `ph_composer.library.cancel_load`
 
 Cancel a hosted library load that is still running. The catalog it would have replaced stays as it was. Owner: `ph_composer.library`.
@@ -75859,9 +76343,13 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 
 | Code | Meaning |
 | --- | --- |
+| `climate.folder_not_found` | No climate data folder has that id, or the chosen folder is not there. Nothing was written. |
+| `climate.folder_overlaps` | The chosen folder is, holds or sits inside a listed climate data folder, so its stations would be listed twice. Nothing was written. |
 | `climate.heating_not_below_cooling` | The heating design temperature is at or above the cooling one; both still save. |
 | `climate.no_original` | A climate entered by hand has no station values to restore. Nothing was written. |
 | `climate.not_found` | The Model holds no climate to edit, restore or clear. Nothing was written. |
+| `climate.settings_unavailable` | This computer's settings file cannot be used: it is kept on macOS only for now, or it could not be saved. Nothing was written. |
+| `climate.settings_unreadable` | This computer's climate data settings cannot be read, or a later version of PH-Composer wrote them. They are left as stored; reads report it and changes refuse. |
 
 ### `ph_composer.spaces`
 
@@ -76088,3 +76576,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.61 | 2026-11-14 | Every delete and merge that returns removed_user_data also returns removed_user_data_truncated, and its rows stay within 8192 bytes: each listed map keeps its address and user_data_key_total, and its keys fill in while they fit. The new reference target ph_composer.model.metadata puts the Model's extension payloads in the incoming-reference check, so a record a Model payload names refuses deletion as reference.in_use. A membrane Layer's Layer-Segment map stays in the Model with an export.metadata_omitted finding even with a steel stud spacing. |
 | 1.62 | 2026-11-17 | The ph_composer.climate feature is new, requiring ph_composer.zones. ph_composer.climate.site.get and site.update read and set the Model's site (latitude, longitude and elevation together, a climate-zone code and hours from UTC); ph_composer.climate.design_temperatures.get and design_temperatures.update read and set the ASHRAE 99% heating and 1% cooling dry bulbs and a source note, any field alone; ph_composer.climate.summary.get backs the ph_composer.climate.summary snapshot section. climate.heating_not_below_cooling is new, a warning the design-temperature read carries. |
 | 1.63 | 2026-11-17 | The ph_composer.climate.climate record kind is new, one climate per Model. ph_composer.climate.climate.get reads it with its state, what is missing, the edited cells and the Phius limit check against the site; climate.enter_values enters one by hand with gaps allowed, climate.save_values edits its values and rewrites its provenance, climate.restore_original copies the station file's values back, and climate.clear deletes it, each guarded by the editable fields last read. ph_composer.climate.site.update's result gains limit_check, ph_composer.climate.site.preview_limit_check is new, and the summary gains the climate card. climate.not_found and climate.no_original are new. |
+| 1.64 | 2026-11-18 | The climate data folders on this computer, kept in PH-Composer's own settings file: ph_composer.climate.folders.list reads them with a display location that is never an absolute path; the setup commands folders.add and folders.locate take a folder the user chooses, and folders.rename, folders.remove and folders.remember_dataset take its id. climate.settings_unreadable, climate.settings_unavailable, climate.folder_not_found and climate.folder_overlaps are new. |

@@ -552,6 +552,26 @@ The panel targets Chromium 88 and ES2020. ESLint checks both syntax and the allo
   ft³ in IP, two decimals) and `airflow` (canonical m³/h, displayed as cfm in IP, one decimal),
   agreeing with the panel through `tests/support/units_vectors.json`.
 
+## This computer's settings file
+
+- `shell/computer_settings.rb` keeps PH-Composer's own per-computer settings in one JSON file,
+  `~/Library/Application Support/PH-Composer/settings.json`, outside SketchUp's versioned folders, so
+  every SketchUp version and every reinstall of the extension reads the same file. `Sketchup.write_default`
+  is not used for it: that store is named for the SketchUp version
+  ([measured host behavior](SKETCHUP_HOST_BEHAVIOR.md#saving-dialogs-and-the-panel)). Display
+  preferences, the Library's setup, approved locations and agent tokens stay where they are.
+- The file holds one section per feature id (shape in [CONTRACTS](CONTRACTS.md#this-computers-settings-file)).
+  A feature reads its section and changes it through `write(section) { |values| ... }`; the service
+  names no feature, and the owning feature maps a `Refused` reason to its own code. Climate's climate
+  data folders are the only section today.
+- A write holds an exclusive lock on the sibling `settings.lock`, waiting at most two seconds, while it
+  re-reads the file, changes one section, writes a sibling file and renames it into place. Two
+  SketchUp processes writing different sections lose neither; a write cut short leaves the old file,
+  and the next write clears the copy it left. The folder is owner-only and the file owner-readable.
+- A file that cannot be read, is over 256 KiB, or was written by a later schema version is left as
+  stored: reads report it and writes refuse. A read never creates the folder or the file.
+- macOS only. On another platform the service is unavailable; the Windows location is not chosen yet.
+
 ## Rules for later features
 
 - **One folder.** `features/<name>/`, listed by hand in the composition root's `FEATURES`. Outside
