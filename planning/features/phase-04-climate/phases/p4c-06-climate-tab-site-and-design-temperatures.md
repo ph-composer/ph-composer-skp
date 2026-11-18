@@ -1,7 +1,7 @@
 # P4c-06: The Climate tab, Site location and Design temperatures
 
 DATE: 2026-11-17
-STATUS: Implemented on branch `feature/climate-p4c-06`, PR #517, 2026-11-18; CM06 not yet run. Authorized with every Climate stage on 2026-11-17 ([STATUS](../STATUS.md#authorization)).
+STATUS: Implemented on branch `feature/climate-p4c-06`, PR #517, 2026-11-18; CM06 agent run Pass, Ed's verification pass pending. Authorized with every Climate stage on 2026-11-17 ([STATUS](../STATUS.md#authorization)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
 

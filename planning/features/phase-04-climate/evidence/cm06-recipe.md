@@ -1,7 +1,7 @@
 # CM06 host recipe: the Climate tab, Site location and Design temperatures
 
 DATE: 2026-11-18
-STATUS: Written after the last review fix of PR #517. Part A runs through the bridge with no window focus; part B needs SketchUp in front and is the conductor's; part C is Ed's verification pass.
+STATUS: Written after the last review fix of PR #517 (head `d263a336`). Parts A and B ran 2026-11-18 on that head ([evidence](cm06-20261118.md)); part B's Add Location run and part C not run. Part A runs through the bridge with no window focus; part B needs SketchUp in front and is the conductor's; part C is Ed's verification pass.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
 
@@ -107,6 +107,7 @@ B eval "CM06.click_button(CM06::APP, 'SI')"
 ```sh
 B eval "CM06.size(420, 732)";  B eval "CM06.read('tabs')";  B eval "CM06.result('tabs')"
 B eval "CM06.read('cards')";  B eval "CM06.result('cards')"           # select shown, list hidden
+# Pick a card through `.phc-source-card-select` (CM06.js), not by aria-label: the hidden nav shares it.
 B eval "CM06.size(360, 520)";  B eval "CM06.read('tabs')";  B eval "CM06.result('tabs')"
 B eval "CM06.read('cards')";  B eval "CM06.result('cards')"
 ```
@@ -125,7 +126,8 @@ Expected: "Undo Change Design Temperature". Record each observation in
 
 ## Part B: SketchUp in front (the conductor, one hold)
 
-On the same Model and head, the panel open:
+Part A leaves SketchUp running on `cm06.skp` (unsaved: the site set, the design temperatures set and
+the note typed), the panel open at 1280 x 800 on the Climate tab, Ed's IP profile as found. On it:
 
 1. **Native Undo and Redo.** Edit > Undo through the design-temperature steps and Set Site Location,
    reading the Edit menu's label before each; the panel repaints each value back; Edit > Redo
