@@ -8,9 +8,12 @@ where they differ.
 ## Checkout and branch
 
 - Start with `git fetch origin && git checkout main && git pull --ff-only`, then branch with the name the
-  brief gives. If a sibling stage's PR is still open, branch from main anyway. Before you open your PR, read
-  that PR's state once. If it has merged, rebase. If it is still open, say in your PR body that yours follows
-  it. Read once per check, never in a loop.
+  brief gives. If the brief names a base branch (the previous stage, whose PR has auto-merge armed but has
+  not merged), branch from `origin/<base>` instead and open your PR against that base.
+- Before you open your PR, read the base PR's state once (`gh pr view <N> --json state,mergedAt`). If it
+  has merged, run `git fetch origin && git rebase --onto origin/main <old base tip> <branch>`, push with
+  `--force-with-lease`, and open the PR against `main`. If it is still open, say in your PR body that
+  yours stacks on it. Read once per check, never in a loop.
 - The stage owns the main checkout; do not use a worktree, because `make ci` in a worktree skips RuboCop.
   Run `git rev-parse --abbrev-ref HEAD` before every commit. Stage named paths only, never `git add -A`.
   After `git mv`, `git add` only the new path.
@@ -43,8 +46,12 @@ where they differ.
 - Run one Sonnet read-through before the gate, then Codex through the conductor's review command. Use the
   model the brief names: gpt-6.1-sol by default, gpt-6-astra where the plan asks for the stronger lane. On a
   usage-limit refusal, stop and report.
-- Under `--merge`, once every thread is answered, run `gh pr merge <N> --auto --squash --delete-branch` and
-  stop. Never poll CI.
+- If the stage owns a host case, stop after the last review fix and report "ready for host" with the
+  recipe path and the PR head SHA. Do not arm the merge. The conductor runs the case on that head and
+  resumes you with the evidence paths; commit the evidence and ledger rows (docs-only, no second review).
+- Under `--merge`, once every thread is answered and any host case is recorded, run
+  `gh pr merge <N> --auto --squash --delete-branch` and stop. Never poll CI. The conductor starts the
+  next stage without waiting for this merge.
 
 ## Host and control
 
