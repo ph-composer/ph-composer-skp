@@ -4934,6 +4934,22 @@
         "src/ph_composer/features/climate/folders/*"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "CM09",
+      "label": "The station picker on the installed RBZ in the real HtmlDialog, over a real-size folder of invented stations: it opens sorted by distance, framed on the site's 50 mi ring, State on All, on the attached station's dataset or the one used last; Find Nearest; the State filter and the search; Dataset, remembered; map and list selecting together; hover facts; a failing station's warning before Attach, attached with no confirm; with a station attached the two compared, the lost edits named and Replace one native Undo step; 420 and 360 px; the UI polish review by Ed",
+      "mode": "mixed",
+      "authority": "planning/features/phase-04-climate/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/html/index.html",
+        "src/ph_composer/html/outline_map.js",
+        "src/ph_composer/html/table.js",
+        "src/ph_composer/html/view_controls.js",
+        "src/ph_composer/html/features/climate/*",
+        "src/ph_composer/features/climate/declarations/stations.rb",
+        "src/ph_composer/features/climate/stations/*"
+      ],
+      "native_control_required": true
     }
   ]
 }

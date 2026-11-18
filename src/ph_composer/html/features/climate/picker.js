@@ -16,6 +16,8 @@ function (ui, RecordForm, requests, snapshot, tables, controls, outlineMap, proj
   var COLUMNS = [["station", "Station"], ["state", "State"], ["distance", "Distance"], ["elevation", "Elevation"],
     ["verdict", "Result"]];
   var WIDTHS = { station: 120, state: 56, distance: 72, elevation: 72, verdict: 64 };
+  var PARTIAL = "This folder was not read whole: it is too large or too deep, or part of it could not be listed. " +
+    "Stations past that point are not shown, and a nearer one may be among them.";
   var NARROW_PX = 500; // below it the State column gives way to the station's name; the State filter stays
 
   function count(value) { return Number(value).toLocaleString("en-US"); }
@@ -109,7 +111,11 @@ function (ui, RecordForm, requests, snapshot, tables, controls, outlineMap, proj
     var switched = Boolean(summary) && this.setMode(summary.climate.state !== "none");
     var listed = this.reads.folders.consume(state), source = this.reads.source.consume(state);
     var climate = this.reads.climate.consume(state), stations = this.reads.stations.consume(state);
-    this.remember.consume(state);
+    var remembered = this.remember.consume(state);
+    if (remembered) {
+      this.unsaved = remembered.status === "completed" ? null : "The dataset was not remembered for next time: " +
+        (remembered.message || "PH-Composer did not answer.");
+    }
     if (listed) this.listed = listed.status === "completed" ? listed.value : { folders: [], failure: listed.message };
     if (source) this.source = source.status === "completed" ? source.value : { status: "unknown" };
     if (climate) {
@@ -118,15 +124,22 @@ function (ui, RecordForm, requests, snapshot, tables, controls, outlineMap, proj
     }
     if (stations) this.loaded(stations);
     if ((listed || source) && this.folderId === null) this.openDataset();
-    // A site change moves every distance: read the list again. Another change to the Model may change its climate.
-    if (moved && this.folderId && !this.busy()) this.read(this.folderId);
+    // A site change moves every distance; another change to the Model may change its climate. Either is read
+    // again, and one that arrives while Attach or Replace is out is read once it answers.
+    if (moved) this.staleStations = true;
     this.followRevision(state);
     var units = shared.formatted(1, shared.DISTANCE) + shared.formatted(1, shared.ELEVATION);
     if ((switched || source || units !== this.units) && !stations) { this.units = units; this.paintList(); }
     this.units = units;
     var outcome = this.settle(state);
     if (outcome && outcome.status === "completed") { this.hide(); return; }
+    this.refresh();
     this.paint();
+  };
+  Picker.prototype.refresh = function () {
+    if (this.busy()) return;
+    if (this.staleStations && this.folderId) { this.staleStations = false; this.read(this.folderId); }
+    if (this.staleClimate && this.replacing) { this.staleClimate = false; this.readClimate(); }
   };
   function siteKey(site) {
     return site && site.state === "set" ? [site.latitude_deg, site.longitude_deg, site.elevation_m].join() : "";
@@ -211,7 +224,7 @@ function (ui, RecordForm, requests, snapshot, tables, controls, outlineMap, proj
     if (revision === undefined || revision === null || revision === this.revision) return;
     var first = this.revision === null;
     this.revision = revision;
-    if (!first && !this.busy() && this.replacing) this.readClimate();
+    if (!first) this.staleClimate = true;
   };
 
   Picker.prototype.select = function (key, fromMap) {
@@ -254,7 +267,7 @@ function (ui, RecordForm, requests, snapshot, tables, controls, outlineMap, proj
     });
     this.shown = this.visible.length;
     // A filter that hides the selected station selects the first it leaves, so Attach never takes a hidden one.
-    if (this.selected && this.visible.indexOf(this.selected) < 0) this.selected = this.visible[0] || null;
+    if (this.visible.indexOf(this.selected) < 0) this.selected = this.visible[0] || null;
     this.narrow = window.innerWidth <= NARROW_PX;
     tables.table(this.list, this.stations, { rows: rows, columns: COLUMNS, defaultWidths: WIDTHS,
       stickyWidths: {}, hiddenColumns: { state: this.narrow }, rowHidden: projected.hidden, visibleCount: this.shown,
@@ -291,6 +304,7 @@ function (ui, RecordForm, requests, snapshot, tables, controls, outlineMap, proj
         if (attached) td.appendChild(el("span", "climate-data-chip is-ok", "Attached"));
       }
       this.buttons[station.key] = button;
+      if (button.textContent !== station.name) button.textContent = station.name;
       button.setAttribute("tabindex", station.key === this.selected ? "0" : "-1");
       return;
     }
@@ -322,9 +336,12 @@ function (ui, RecordForm, requests, snapshot, tables, controls, outlineMap, proj
   Picker.prototype.paint = function () {
     this.summary.textContent = this.value ? this.value.dataset_name + " · " + count(this.value.total) + " station" +
       (this.value.total === 1 ? "" : "s") + " on this computer · " + count(this.shown || 0) + " shown" : "";
-    this.notice.textContent = this.failure || "";
-    this.notice.hidden = !this.failure;
-    this.submitButton.disabled = this.busy() || !this.byKey[this.selected] || (this.replacing && !this.current);
+    var notes = [this.failure, this.value && !this.value.complete ? PARTIAL : null, this.unsaved].filter(Boolean);
+    this.notice.textContent = notes.join(" ");
+    this.notice.hidden = !notes.length;
+    // Attach and Replace wait for every read out, so neither acts on a list or a climate read before a change.
+    this.submitButton.disabled = this.busy() || !this.byKey[this.selected] || (this.replacing && !this.current) ||
+      this.reads.stations.busy() || this.reads.climate.busy();
     this.paintSelection();
   };
 

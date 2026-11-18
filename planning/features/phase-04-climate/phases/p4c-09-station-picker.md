@@ -122,3 +122,8 @@ CM09 passes and the narrow layout is recorded.
   leaves, so Attach never takes a station the list and the map do not show; Enter in the search narrows and
   never submits; the list is read again when the site changes, not on every revision; without a site the
   interim Replace Station is disabled with its reason, as the picker needs the site.
+- **After the Codex review** (cycle 1): a change to the site or the Model while Attach or Replace is out is read
+  once it answers, and both wait for every read out, so a retry after `revision.stale` names the edits it would
+  discard; a search that matched nothing selects again when it matches; a folder not read whole
+  (`complete: false`) says so in the dialog; a dataset that could not be remembered says so; a station renamed in
+  its file shows its new name after a re-read.

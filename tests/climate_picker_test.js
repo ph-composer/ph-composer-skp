@@ -510,3 +510,60 @@ test("in Replace only the Model's own climate read carries values; the station r
       assert.ok(!/monthly|peak_loads|as_read|daily_temp_swing|wind_speed/.test(JSON.stringify(m.payload.outcome)));
     });
 });
+
+test("a change while Replace is out is read once it answers, and Replace waits for that read", function () {
+  var p = openReplace(2);
+  click(rowButton(p, SECOND));
+  commit(p);
+  var replace = last(p, P + "climate.replace_station");
+  p.revision = 2; p.publish();
+  assert.strictEqual(named(p, P + "climate.get").length, 1, "nothing is read while Replace is out");
+  answer(p, replace, refused("revision.stale", "The Model changed since it was read."));
+  assert.strictEqual(named(p, P + "climate.get").length, 2, "the climate is read again");
+  assert.strictEqual(byText(picker(p), "button", "Replace").disabled, true, "Replace waits for it");
+  answer(p, last(p, P + "climate.get"), climateGet(p, 5));
+  assert.ok(footer(p).indexOf("has 5 edited values") >= 0, "the new edits are named before a retry");
+  assert.strictEqual(byText(picker(p), "button", "Replace").disabled, false);
+});
+
+test("a search that matched nothing selects again when it matches", function () {
+  var p = opened();
+  var search = labelled(picker(p), "Filter stations");
+  type(search, "nothing here");
+  assert.deepStrictEqual(selectedRow(p), []);
+  type(search, "birch");
+  assert.deepStrictEqual(selectedRow(p), [SECOND.key]);
+  assert.strictEqual(rowButton(p, SECOND).getAttribute("tabindex"), "0");
+  assert.strictEqual(byText(picker(p), "button", "Attach").disabled, false);
+});
+
+test("a folder not read whole says so in the dialog", function () {
+  var p = page();
+  openPicker(p);
+  answer(p, last(p, P + "stations.all"), completed({ folder_id: SET_A.id, dataset_name: SET_A.name, complete: false,
+    total: STATIONS.length, stations: STATIONS }));
+  assert.ok(text(picker(p).querySelector(".climate-picker-notice")).indexOf("This folder was not read whole") === 0);
+  assert.strictEqual(picker(p).querySelector(".climate-picker-notice").hidden, false);
+});
+
+test("a dataset that could not be remembered says so, and its stations still show", function () {
+  var p = page();
+  openPicker(p, [SET_A, SET_B], SET_A.id);
+  stations(p, STATIONS);
+  change(select(p, "Dataset"), SET_B.id);
+  answer(p, last(p, P + "folders.remember_dataset"), refused("climate.settings_unreadable", "The settings file " +
+    "cannot be written."));
+  stations(p, [FAR], SET_B);
+  assert.deepStrictEqual(shown(p), [FAR.key]);
+  assert.ok(text(picker(p).querySelector(".climate-picker-notice")).indexOf("The dataset was not remembered for " +
+    "next time: The settings file cannot be written.") >= 0);
+});
+
+test("a station renamed in its file shows its new name after a re-read", function () {
+  var p = opened();
+  p.revision = 2; p.site = Object.assign({}, SITE, { elevation_m: 90 }); p.publish();
+  stations(p, STATIONS.map(function (s) {
+    return s === NEAR ? Object.assign({}, s, { name: "Alder Field East" }) : s;
+  }));
+  assert.strictEqual(rowButton(p, NEAR).textContent, "Alder Field East");
+});
