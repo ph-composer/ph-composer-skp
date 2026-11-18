@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 62
+    MINOR = 63
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -336,7 +336,16 @@ module PhComposer
                     "ph_composer.climate.design_temperatures.get and design_temperatures.update read and set the " \
                     "ASHRAE 99% heating and 1% cooling dry bulbs and a source note, any field alone; " \
                     "ph_composer.climate.summary.get backs the ph_composer.climate.summary snapshot section. " \
-                    "climate.heating_not_below_cooling is new, a warning the design-temperature read carries." }
+                    "climate.heating_not_below_cooling is new, a warning the design-temperature read carries." },
+      { "minor" => 63, "date" => "2026-11-17",
+        "change" => "The ph_composer.climate.climate record kind is new, one climate per Model. " \
+                    "ph_composer.climate.climate.get reads it with its state, what is missing, the edited cells " \
+                    "and the Phius limit check against the site; climate.enter_values enters one by hand with " \
+                    "gaps allowed, climate.save_values edits its values and rewrites its provenance, " \
+                    "climate.restore_original copies the station file's values back, and climate.clear deletes " \
+                    "it, each guarded by the editable fields last read. ph_composer.climate.site.update's " \
+                    "result gains limit_check, ph_composer.climate.site.preview_limit_check is new, and the " \
+                    "summary gains the climate card. climate.not_found and climate.no_original are new." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

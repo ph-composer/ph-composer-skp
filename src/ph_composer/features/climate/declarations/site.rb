@@ -2,7 +2,9 @@
 
 module PhComposer
   module Climate
-    # The site's read and Set Location, which writes its five fields together as one native Undo step.
+    # The site's read, Set Location, which writes its five fields together as one native Undo step and answers
+    # the limit check the Model's climate gets after the change, and the preview of that check at a proposed
+    # site, which Set Location shows before it is set.
     module SiteRegistration
       PREFIX = "#{FEATURE_ID}.site".freeze
       EXAMPLE = { "latitude_deg" => 40.6782, "longitude_deg" => -73.9442, "elevation_m" => 10.0,
@@ -27,12 +29,21 @@ module PhComposer
                          "expected_values" => Shapes.described(Settings::SITE_VALUES,
                                                                "The five site fields last read; a change refuses.")
                        }),
-                       :result => Shapes::SITE, :undo_name => "Set Site Location",
+                       :result => Shapes::SITE_UPDATE, :undo_name => "Set Site Location",
                        :side_effects => "Stores the site in this SKP.",
                        :examples => [{ "values" => EXAMPLE,
                                        "expected_values" => Settings::SITE_DEFAULTS }]) do |request, proposal|
-          Settings.propose_site(request, proposal, :values => request.params.fetch("values"),
-                                                   :expected_values => request.params.fetch("expected_values"))
+          site = Settings.propose_site(request, proposal, :values => request.params.fetch("values"),
+                                                          :expected_values => request.params.fetch("expected_values"))
+          site.merge("limit_check" => Operations.limit_check(request.engine, site))
+        end
+        feature.query("#{PREFIX}.preview_limit_check",
+                      :description => "The Phius limit check the Model's climate would get at a proposed latitude, " \
+                                      "longitude and elevation; null with no climate. Nothing is written.",
+                      :refuses => %w[record.unreadable], :params => Shapes::PROPOSED_SITE,
+                      :result => Shapes.object({ "limit_check" => Shapes::LIMIT_CHECK_OR_NULL }),
+                      :examples => [EXAMPLE.slice(*Settings::LOCATION_FIELDS)]) do |request|
+          { "limit_check" => Operations.limit_check(request.engine, request.params) }
         end
       end
     end

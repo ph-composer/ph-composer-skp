@@ -889,8 +889,16 @@ The following public operations have panel-closed walkthroughs.
 - **Climate** (`ph_composer.climate.*`). Reads: `site.get`, `design_temperatures.get` and
   `summary.get`, which backs the `summary` snapshot section. Writes: `site.update`, the five site
   fields together, and `design_temperatures.update`, any of its three fields; each guards only the
-  fields it names, so a design-temperature change does not stale a site read.
-  [Walkthrough](../tools/examples/climate/site_walkthrough.rb).
+  fields it names, so a design-temperature change does not stale a site read. The climate record:
+  `climate.get` gives the record with its state (`none`, `incomplete`, `complete`), what is missing
+  by row, the edited cells and the Phius limit check against the site; `climate.enter_values`
+  enters one by hand, `climate.save_values` edits it, `climate.restore_original` copies the station
+  file's values back and `climate.clear` deletes it, each one Undo step guarded by the editable
+  fields last read. `site.update` answers the limit check after the change and
+  `site.preview_limit_check` the check at a proposed site, with nothing written. The largest
+  `climate.get`, a station with every value edited, measured 17,826 bytes of value, so it fits one
+  reply. [Site walkthrough](../tools/examples/climate/site_walkthrough.rb),
+  [climate walkthrough](../tools/examples/climate/climate_walkthrough.rb).
 
 Discovery also lists read-only `reference_targets`; description returns their descriptor: ID, owner,
 label, schema version, values schema, occurrence-reference schema and declared core references.

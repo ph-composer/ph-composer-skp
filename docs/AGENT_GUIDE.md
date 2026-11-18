@@ -459,6 +459,42 @@ Read the design temperatures with `ph_composer.climate.design_temperatures.get`.
 (`not_set`, `incomplete` or `set`) and a `warning`, `climate.heating_not_below_cooling`, when
 heating is at or above cooling; the values still save. Each update is one Undo step.
 
+### Climate
+
+Read the Model's climate with `ph_composer.climate.climate.get`. It gives `state` (`none`,
+`incomplete` or `complete`), the record under `climate.values`, `missing` (what a complete climate
+still needs, by row, with the months or cases of each row), `edited_cells` (each value that differs
+from the station file, by row and column) and `limit_check`. A new Model reads `state: "none"` and
+nothing is written. The climate's `user_data` is not in this read; read it with
+`ph_composer.records.detail`.
+
+To type a climate, call `ph_composer.climate.climate.enter_values` with every editable field in
+`values`: `name`, `station_latitude_deg`, `station_longitude_deg`, `station_elevation_m`,
+`daily_temp_swing_k`, `wind_speed_m_s`, `monthly` and `peak_loads`. The name and the station
+elevation are needed; any other value may be null and the climate saves as `incomplete`. Each
+`monthly` row holds twelve months, January first. `peak_loads` holds `heat_1`, `heat_2` and
+`cool_1`, each with the same eight rows; a case's dewpoint and sky temperature may stay null.
+Station coordinates are optional and go together.
+
+To change values, call `ph_composer.climate.climate.save_values` with the new `values` and, in
+`expected_values`, the same eight fields as you read them; if the climate changed since, the edit
+is refused with `target.changed` and nothing is written. A station's name and coordinates come from
+its file and are refused as `validation.failed`. A value that differs from the file is an edit: the
+provenance's `source_type` becomes `user_defined` and its `assumptions` list the edited values.
+Wind speed is never an edit. `ph_composer.climate.climate.restore_original` copies the file's
+values back and is refused with `climate.no_original` for a climate typed by hand.
+`ph_composer.climate.climate.clear` deletes the climate and leaves the site and the design
+temperatures. With no climate, these three are refused with `climate.not_found`. Each write is one
+Undo step.
+
+`limit_check` compares the site with the station against Phius's limits, 50 miles (80.4672 km) and
+400 feet (121.92 m): `verdict` is `pass` at or inside both, `fail` outside either, or
+`not_checked` with `reason` `no_site` or `no_station_coordinates`. A value exactly on a limit
+passes, whatever rounding the arithmetic adds. It is worked out on every read
+and never stored, so `ph_composer.climate.site.update` answers it after the change, and
+`ph_composer.climate.site.preview_limit_check` gives it for a proposed latitude, longitude and
+elevation without writing anything.
+
 ### Library records
 
 List configured providers with `ph_composer.library.providers`. Use `ph_composer.library.load`

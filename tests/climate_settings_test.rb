@@ -38,7 +38,8 @@ class ClimateSettingsTest < PhComposerTestCase
 
     assert_equal SETTINGS::SITE_DEFAULTS.merge("climate_zone_label" => nil, "state" => "not_set"), site
     assert_equal SETTINGS::DESIGN_DEFAULTS.merge("state" => "not_set", "warning" => nil), design
-    assert_equal({ "site" => "not_set", "design_temperatures" => { "state" => "not_set", "warning" => nil } },
+    assert_equal({ "site" => "not_set", "design_temperatures" => { "state" => "not_set", "warning" => nil },
+                   "climate" => { "state" => "none", "origin" => nil, "verdict" => nil, "edited" => false } },
                  query("summary.get").fetch("value"))
     assert_nil SETTINGS::SITE.store.read(@model)
     assert_nil SETTINGS::DESIGN_TEMPERATURES.store.read(@model)
@@ -52,7 +53,7 @@ class ClimateSettingsTest < PhComposerTestCase
     result = update_site(SITE)
 
     assert_equal "committed", result.fetch("effect")
-    assert_equal SITE.merge("climate_zone_label" => "4", "state" => "set"), result.fetch("value")
+    assert_equal SITE.merge("climate_zone_label" => "4", "state" => "set", "limit_check" => nil), result.fetch("value")
     assert_equal [["Set Site Location", :committed]], @model.operations.drop(operations).map { |row|
       row.values_at(0, 2)
     }

@@ -1,7 +1,7 @@
 # Phase 4 contracts: Climate records, the settings file, the reader and export
 
 DATE: 2026-11-17
-STATUS: Scoped for P4c-01 to P4c-11. Contract questions C4c-1 to C4c-6 settle in their stages. Not reviewed against the code by a second reader.
+STATUS: Scoped for P4c-01 to P4c-11; sections 2 to 4 implemented (P4c-01, P4c-02), section 3 amended at P4c-02. Contract questions C4c-1 to C4c-6 settle in their stages. Not reviewed against the code by a second reader.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -111,7 +111,7 @@ Rules:
   (section 7).
 - **Provenance is stored, in honeybee-ph's shape** (D4c-03, Ed's ruling): the fields after
   `state` are honeybee-ph's `ClimateProvenance`, with the values of the table in section 7, and
-  export passes them through. `attach_station`, `save_values` and `restore_original` each write
+  export passes them through. `attach_station`, `enter_values`, `save_values` and `restore_original` each write
   the values and the provenance together in one Undo step, so the source type and the list of
   edited values in `assumptions` cannot disagree with the values. `source_checksum` is the
   file's SHA-256.
@@ -130,12 +130,27 @@ Operations, each one Undo step:
 
 | Name | Kind | Does |
 | --- | --- | --- |
-| `ph_composer.climate.climate.get` | query | The record, with derived `state` (`none`, `incomplete`, `complete`), `missing`, `edited_cells` and `limit_check`. Null when there is none |
-| `ph_composer.climate.climate.save_values` | action | Creates a hand-entered climate, or changes the values of the one in the Model (Edit Values). Saves with gaps |
+| `ph_composer.climate.climate.get` | query | `state` (`none`, `incomplete`, `complete`), the record under `climate` (null when there is none), `missing` by row, `edited_cells` by row and column, and `limit_check` |
+| `ph_composer.climate.climate.enter_values` | action | Creates a hand-entered climate (Enter Values by Hand). Saves with gaps. Refuses `target.changed` when the Model already holds one |
+| `ph_composer.climate.climate.save_values` | action | Changes the values of the climate in the Model (Edit Values). Saves with gaps. A station's name and coordinates refuse `validation.failed`: Replace changes them |
 | `ph_composer.climate.climate.restore_original` | action | Copies `as_read` back over the values. Refuses `climate.no_original` for a hand-entered climate |
 | `ph_composer.climate.climate.clear` | action | Deletes the record. The site and the design temperatures stay (J7) |
 
 Attach, Replace and Update from File are `ph_composer.climate.climate.attach_station` (section 6).
+
+Amended at P4c-02, 2026-11-17. The plan had one `save_values` with two Undo names, "Enter Climate
+Values" and "Edit Climate Values", but an action declares one Undo name and the dispatcher opens
+the operation under it, so the create is its own action, `enter_values`. Every write is guarded by
+`expected_values`, the eight editable fields (`name`, the station's coordinates and elevation, the
+daily swing, the wind speed, `monthly`, `peak_loads`) as last read. The writes answer the read's
+fields without the record itself, so each declaration stays small enough to describe in one agent
+reply; `climate.get` reads the record back. `missing` is grouped by row (`{ row, columns }`) and
+an edited cell is `{ row, column }`, the values being in the record and its `as_read` copy, so a
+station with every value edited reads in 17,826 bytes against the 24,576-byte reply. The record's
+`user_data` is left out of `climate.get`, since it has no size bound; `ph_composer.records.detail`
+reads it. The limit check allows a nanometre of floating-point slack at each limit, so a value
+exactly on it passes (Codex review of PR #513). The record is
+staged whole, since `Engine#propose_update` drops a key set to null.
 
 ## 4. The Phius limit check (P4c-02)
 
@@ -148,7 +163,8 @@ A pure Ruby function of the site and the station; never stored (J7).
   reference; the PRD's "80 km" and "122 m" are display labels (confirmed by Ed).
 - Result: `{ verdict, distance_km, elevation_difference_m, distance_ok, elevation_ok }`, where
   `verdict` is `pass`, `fail` or `not_checked`. `not_checked` carries a reason: `no_site`, or
-  `no_station_coordinates` for a hand-entered climate without them (J4).
+  `no_station_coordinates` for a hand-entered climate without them (J4). With neither, the reason is
+  `no_station_coordinates`: no site can repair it (settled at P4c-02).
 
 The limits are Phius's (PRD, "Choosing a station"). The New York City exception is not modelled.
 
