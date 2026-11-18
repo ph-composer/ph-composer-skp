@@ -102,8 +102,10 @@ CM07 passes, owed check 2 is recorded with the licence wording, and C4c-5 is ans
 
 - **Owed check 2** ([evidence](../evidence/owed-check-2-20261118.md)): Natural Earth 5.1.2 at 1:50m, public
   domain with no attribution asked, so the shipped `LICENSE.txt` is unchanged. The borders are written in the
-  encoded polyline algorithm (90 KB), not as decimal arrays (187 KB): both fit the 300 KB budget, but the decimal
-  draft left 70 KB under the runtime manifest's installed ceiling for P4c-08 to P4c-11.
+  encoded polyline algorithm (113 KB), not as decimal arrays (the first draft, 187 KB without the United States
+  and Canada outlines): both fit the 300 KB budget, but the decimal draft left 70 KB under the runtime manifest's
+  installed ceiling for P4c-08 to P4c-11; 139 KB remain. The United States and Canada keep a solid country
+  outline at their states' detail, so their land is filled and their coast is solid, as board 21 draws it.
 - **The tool** is `tools/map_data/map_borders.py`, a standard-library PEP 723 script, with
   `tests/python/test_map_borders.py` (synthetic GeoJSON; the real source when `PH_COMPOSER_MAP_DATA` is set).
 - **Projection** lives in its own module, `html/map_projection.js`, so its tests need no DOM. The
@@ -126,6 +128,12 @@ CM07 passes, owed check 2 is recorded with the licence wording, and C4c-5 is ans
   preview host's double takes the Ruby's floating-point slack. Kept: a preview per keystroke (one at a time,
   stale answers dropped); a ring near ±180° longitude is not wrapped (the borders stop there too, and no Phius
   station is near it); tests 4 and 5 are browser evidence, outside `make ci`, as every panel browser check is.
+- **Codex review** (gpt-6.1-sol), PR #518: 5 P2, all fixed. Set now waits for the station read and for the
+  limit check at the values typed, so a failing site is never set before its warning shows (it can still be set
+  once the warning is up); the dialog reads the station only when the summary says the Model holds a climate. A
+  resize after a pan keeps the centre and scale at the new size; the zoom buttons count as the user's move, so a
+  late station read leaves them alone; a click off the globe at a wide zoom places nothing; the wheel during a
+  drag is ignored.
 - **Not built**: board 21's pane map (the Site location pane drawing the site on the map) is in no stage's steps;
   left for Ed to place.
 - **Example**: `tools/examples/outline_map/example_outline_map.js`, loaded by the preview page and shown with

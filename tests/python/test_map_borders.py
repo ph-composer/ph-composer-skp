@@ -68,10 +68,14 @@ def test_the_same_source_and_settings_give_the_same_bytes() -> None:
     assert all(len(line) <= 120 for line in first.splitlines())
 
 
-def test_outer_rings_only_with_the_us_and_canada_from_their_regions() -> None:
+def test_outer_rings_only_and_regions_for_the_us_and_canada_alone() -> None:
     countries, states = sources()
     text = map_borders.build(countries, states, map_borders.Settings(), "test")
-    assert rings(text, "countries") == [[0, 0, 400, 0, 0, 400, -400, 0], [1000, 1000, 500, 0, 0, 500, -500, 0]]
+    assert rings(text, "countries") == [
+        [-10000, 3000, 2000, 0, 0, 2000, -2000, 0],
+        [0, 0, 400, 0, 0, 400, -400, 0],
+        [1000, 1000, 500, 0, 0, 500, -500, 0],
+    ]
     assert rings(text, "states") == [
         [-10000, 3000, 1000, 0, 0, 1000, -1000, 0],
         [-9000, 3000, 1000, 0, 0, 1000, -1000, 0],

@@ -16,8 +16,8 @@ Each ring is integers in hundredths of a degree: the first longitude and latitud
 before. Those are written with the encoded polyline algorithm (each integer in five-bit groups as printable
 characters, 63 to 126), which takes about a third of the bytes of decimal text; rings are separated by a space, and
 each layer is split into lines the repository's 120-character limit allows. Only outer rings are drawn: a lake
-inside a country is not a border. The United States and Canada are drawn from their states and provinces, whose
-outer edges are the country's, so neither country's outline is drawn twice.
+inside a country is not a border. The United States and Canada are simplified as finely as their states and
+provinces, so the country's solid outline and the dashed state lines drawn over it agree along the coast.
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 OUTPUT = ROOT / "src" / "ph_composer" / "html" / "map_borders.js"
 GRID = 100  # stored units per degree: 0.01 degree, about 1.1 km of latitude
-DIVIDED = ("USA", "CAN")  # countries drawn from their states and provinces
+DIVIDED = ("USA", "CAN")  # countries with their states and provinces drawn, simplified as finely as those
 LINE = 112  # a line's written string with its quotes; with the indent and comma it stays within 120
 
 
@@ -159,10 +159,7 @@ def _code(feature: dict[str, Any], *keys: str) -> str:
 
 def build(countries: dict[str, Any], states: dict[str, Any], settings: Settings, version: str) -> str:
     """The module's text for the two parsed GeoJSON sources."""
-    world = sorted(
-        (feature for feature in countries["features"] if feature["properties"].get("ADM0_A3") not in DIVIDED),
-        key=lambda feature: _code(feature, "ADM0_A3", "NAME"),
-    )
+    world = sorted(countries["features"], key=lambda feature: _code(feature, "ADM0_A3", "NAME"))
     regions = sorted(
         (feature for feature in states["features"] if feature["properties"].get("adm0_a3") in DIVIDED),
         key=lambda feature: _code(feature, "adm0_a3", "iso_3166_2", "name"),
@@ -171,7 +168,17 @@ def build(countries: dict[str, Any], states: dict[str, Any], settings: Settings,
         "source": f"Natural Earth {version}, 1:50m Admin 0 countries and Admin 1 states and provinces",
         "licence": "Public domain (naturalearthdata.com/about/terms-of-use)",
         "grid": GRID,
-        "countries": layer(world, settings.countries_tolerance_deg, settings.smallest_ring_deg2),
+        "countries": [
+            ring
+            for feature in world
+            for ring in layer(
+                [feature],
+                settings.states_tolerance_deg
+                if feature["properties"].get("ADM0_A3") in DIVIDED
+                else settings.countries_tolerance_deg,
+                settings.smallest_ring_deg2,
+            )
+        ],
         "states": layer(regions, settings.states_tolerance_deg, settings.smallest_ring_deg2),
     }
     body = ",\n".join(f"    {json.dumps(key)}: {_value(value)}" for key, value in data.items())

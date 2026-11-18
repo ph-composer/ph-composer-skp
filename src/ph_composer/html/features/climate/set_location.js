@@ -26,8 +26,8 @@ function (ui, RecordForm, requests, unitField, numbers, preferences, outlineMap,
   var FILLED = "Latitude and longitude are filled from SketchUp. Set Location saves them.";
 
   /* `currentSite()` answers the Model's site as last painted, for a stale refusal; `closed()` runs when it
-     closes, whichever way. */
-  function SetLocation(session, send, site, currentSite, closed) {
+     closes, whichever way; `hasClimate` says the Model holds a climate, whose station the dialog then reads. */
+  function SetLocation(session, send, site, currentSite, closed, hasClimate) {
     var self = this;
     RecordForm.call(this, session, send, { title: "Set site location", action: UPDATE, label: "climate_site",
       submitLabel: "Set Location", pendingText: "Setting the location…", failureText: "The location was not set.",
@@ -87,7 +87,10 @@ function (ui, RecordForm, requests, unitField, numbers, preferences, outlineMap,
     document.body.appendChild(this.root);
     this.show();
     this.frameMap();
-    this.stationRead.run(CLIMATE, {});
+    if (hasClimate) {
+      this.stationRead.run(CLIMATE, {});
+      this.paint();
+    }
     this.latitude.focus();
   }
   RecordForm.extend(SetLocation);
@@ -144,8 +147,11 @@ function (ui, RecordForm, requests, unitField, numbers, preferences, outlineMap,
       elevation_m: this.elevationValue(), climate_zone: this.zone.value === "" ? null : Number(this.zone.value),
       hours_from_utc: hours === "" ? null : Number(hours) };
   };
+  /* Set waits for the three values, and with a climate for the limit check at them, so a site that puts the
+     station outside the limits is never set before its warning shows. */
   SetLocation.prototype.ready = function () {
-    return number(this.latitude) !== null && number(this.longitude) !== null && this.elevationValue() !== null;
+    return number(this.latitude) !== null && number(this.longitude) !== null && this.elevationValue() !== null &&
+      !this.stationRead.busy() && (!this.station || this.checked === key(this.proposed()));
   };
   /* The site the fields hold now, latitude and longitude only, or null while either is missing or off the
      globe. */
@@ -260,7 +266,10 @@ function (ui, RecordForm, requests, unitField, numbers, preferences, outlineMap,
     var geo = this.geolocation.consume(state), read = this.stationRead.consume(state);
     var check = this.preview.consume(state), outcome;
     if (geo) this.filled(geo);
-    if (read) this.stationFound(read);
+    if (read) {
+      this.stationFound(read);
+      this.paint();
+    }
     if (check) {
       // One request is out at a time, so this answers the values last asked about.
       this.check = check.status === "completed" ? check.value.limit_check : null;
@@ -307,7 +316,6 @@ function (ui, RecordForm, requests, unitField, numbers, preferences, outlineMap,
     this.station = { name: values.name, latitude_deg: values.station_latitude_deg,
       longitude_deg: values.station_longitude_deg };
     this.frameMap();
-    this.paint();
   };
 
   SetLocation.prototype.dispose = function () {
@@ -320,7 +328,7 @@ function (ui, RecordForm, requests, unitField, numbers, preferences, outlineMap,
     if (this.root.parentNode) this.root.parentNode.removeChild(this.root);
   };
 
-  return { open: function (session, send, site, currentSite, closed) {
-    return new SetLocation(session, send, site, currentSite, closed);
+  return { open: function (session, send, site, currentSite, closed, hasClimate) {
+    return new SetLocation(session, send, site, currentSite, closed, hasClimate);
   } };
 });

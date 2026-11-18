@@ -28,11 +28,11 @@ Then `make runtime-manifest` and `make rbz`, since the module is a shipped panel
 The same source and settings give the same bytes. Settings live in `Settings` in the script: how far a simplified
 line may stray (0.08° for countries, 0.02° for United States and Canadian states and provinces) and the smallest
 ring kept (0.05 square degrees). Coordinates are rounded to 0.01°. Rings are written in the encoded polyline
-algorithm, about a third of the bytes of decimal text. The United States and Canada are drawn from their states
-and provinces only, so their outline is not drawn twice.
+algorithm, about a third of the bytes of decimal text. The United States and Canada are simplified as finely as
+their states and provinces, so the country's solid outline and the dashed state lines agree along the coast.
 
 The extension's installed size has a ceiling (`tools/runtime/vendor.py`); the map was held to 300 KB added and
-uses about 90 KB. Coarser settings come before dropping a layer.
+uses about 113 KB. Coarser settings come before dropping a layer.
 
 `tests/python/test_map_borders.py` checks the script on synthetic GeoJSON, and checks the committed module
 against the real files when `PH_COMPOSER_MAP_DATA` names their folder.

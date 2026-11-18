@@ -546,6 +546,13 @@ function station(latitude, longitude) {
     climate: { id: "climate-1", values: { name: "Northfield Regional", station_latitude_deg: latitude,
       station_longitude_deg: longitude, station_elevation_m: 90 } } });
 }
+/* The summary of a Model holding a climate, so Set Location reads its station. */
+function withClimate(p) {
+  p.summary = { site: p.site.state, design_temperatures: { state: "not_set", warning: null },
+    climate: { state: "complete", origin: "station", verdict: "pass", edited: false } };
+  p.publish();
+  return p;
+}
 function failing(distance, elevation) {
   return completed({ limit_check: { verdict: "fail", reason: null, distance_km: distance,
     elevation_difference_m: elevation, distance_ok: distance <= 80.4672, elevation_ok: elevation <= 121.92 } });
@@ -584,7 +591,7 @@ test("a click on the map fills coordinates in the panel's decimal comma", functi
 });
 
 test("with an attached station the map shows it and its ring, and warns before a site that fails it", function () {
-  var p = page(SITE_SET);
+  var p = withClimate(page(SITE_SET));
   open(p);
   click(byText(pane(p), "button", "Set Location…"));
   var d = dialog(p);
@@ -625,7 +632,7 @@ test("with an attached station the map shows it and its ring, and warns before a
 });
 
 test("an elevation alone outside the limit warns, naming the elevation", function () {
-  var p = page(SITE_SET);
+  var p = withClimate(page(SITE_SET));
   open(p);
   click(byText(pane(p), "button", "Set Location…"));
   var d = dialog(p);
@@ -637,13 +644,18 @@ test("an elevation alone outside the limit warns, naming the elevation", functio
 });
 
 test("a climate typed without station coordinates, or none, puts nothing on the map and asks no check", function () {
-  [station(null, null), completed({ state: "none", climate: null, missing: [], edited_cells: [], limit_check: null })]
-    .forEach(function (outcome) {
-      var p = page(SITE_SET);
+  [station(null, null), null].forEach(function (outcome) {
+      var p = outcome ? withClimate(page(SITE_SET)) : page(SITE_SET);
       open(p);
       click(byText(pane(p), "button", "Set Location…"));
       var d = dialog(p);
-      answer(p, named(p, P + "climate.get")[0], outcome, "query.result");
+      if (outcome) {
+        assert.strictEqual(setButton(d).disabled, true, "Set waits for the station read");
+        answer(p, named(p, P + "climate.get")[0], outcome, "query.result");
+      } else {
+        assert.strictEqual(named(p, P + "climate.get").length, 0, "no climate, no read");
+      }
+      assert.strictEqual(setButton(d).disabled, false);
       type(field(d, "Latitude"), "43.1");
       assert.strictEqual(d.querySelectorAll("[data-point]").length, 0);
       assert.strictEqual(d.querySelectorAll(".phc-outline-map-ring").length, 0);
@@ -659,7 +671,7 @@ test("the map's ring is drawn at the limit check's distance", function () {
 });
 
 test("a check that fails says so, and a station read after the user moved the map leaves the view alone", function () {
-  var p = page(SITE_SET);
+  var p = withClimate(page(SITE_SET));
   open(p);
   click(byText(pane(p), "button", "Set Location…"));
   var d = dialog(p);
@@ -679,4 +691,23 @@ test("a check that fails says so, and a station read after the user moved the ma
   assert.strictEqual(warning.hidden, false);
   assert.strictEqual(warning.textContent, "The Phius limit check could not be run for this site: The Model could not " +
     "be read.");
+});
+
+test("with a station, Set waits for the check at the values typed; a failing site can still be set", function () {
+  var p = withClimate(page(SITE_SET));
+  open(p);
+  click(byText(pane(p), "button", "Set Location…"));
+  var d = dialog(p);
+  answer(p, named(p, P + "climate.get")[0], station(42.8, -73.7), "query.result");
+  assert.strictEqual(setButton(d).disabled, true, "the open site's check is out");
+  d.querySelector("form").listeners.submit({ preventDefault: function () {} });
+  assert.strictEqual(named(p, P + "site.update").length, 0, "Enter sends nothing before the check");
+  answer(p, named(p, P + "site.preview_limit_check")[0], failing(8, 6), "query.result");
+  type(field(d, "Latitude"), "44.9");
+  assert.strictEqual(setButton(d).disabled, true, "a new site waits for its own check");
+  answer(p, named(p, P + "site.preview_limit_check")[1], failing(240, 6), "query.result");
+  assert.strictEqual(d.querySelector(".climate-limit-warning").hidden, false);
+  assert.strictEqual(setButton(d).disabled, false, "the warning shows, and Set still saves");
+  d.querySelector("form").listeners.submit({ preventDefault: function () {} });
+  assert.strictEqual(named(p, P + "site.update").length, 1);
 });

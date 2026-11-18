@@ -124,14 +124,19 @@ PhComposerUI.define("outline_map", ["workspace", "map_projection", "map_borders"
   };
   OutlineMap.prototype.zoomBy = function (factor) {
     var size = this.size();
+    this.framed = false;
     this.setView(projection.zoomAt(this.current(size), factor, size.width / 2, size.height / 2));
   };
-  /* The view at the drawing's present size: a resize keeps the centre and scale, or refits the frame while
-     the user has not moved it. */
+  /* The view at the drawing's present size: a resize refits the frame while the user has not moved the map,
+     and otherwise keeps the centre and scale (within the zoom range for the new height). */
   OutlineMap.prototype.current = function (size) {
     var view = this.view;
     if (!view || (this.framed && (view.width !== size.width || view.height !== size.height))) {
       return projection.frame(this.home, size.width, size.height);
+    }
+    if (view.width !== size.width || view.height !== size.height) {
+      return projection.bounded({ latitude_deg: view.latitude_deg, longitude_deg: view.longitude_deg,
+        scale: view.scale, width: size.width, height: size.height });
     }
     return view;
   };
@@ -264,6 +269,8 @@ PhComposerUI.define("outline_map", ["workspace", "map_projection", "map_borders"
     // On the whole map, so the wheel over the zoom buttons zooms too rather than scrolling the dialog.
     this.root.addEventListener("wheel", function (event) {
       event.preventDefault();
+      // A drag in progress keeps its own anchor; zooming under it would be undone by the next move.
+      if (self.gesture) return;
       var at = self.local(event), size = self.size();
       self.moved(projection.zoomAt(self.current(size), Math.exp(-event.deltaY * WHEEL_RATE), at.x, at.y));
     }, { passive: false });
@@ -281,7 +288,9 @@ PhComposerUI.define("outline_map", ["workspace", "map_projection", "map_borders"
 
   OutlineMap.prototype.click = function (gesture) {
     if (gesture.point !== null && this.options.onSelect) { this.options.onSelect(gesture.point); return; }
-    if (!this.options.onPlace) return;
+    var place = gesture.grabbed;
+    // Off the globe at a wide zoom: there is nothing there to place.
+    if (!this.options.onPlace || Math.abs(place.latitude_deg) > 90 || Math.abs(place.longitude_deg) > 180) return;
     this.options.onPlace({ latitude_deg: gesture.grabbed.latitude_deg, longitude_deg: gesture.grabbed.longitude_deg });
   };
 

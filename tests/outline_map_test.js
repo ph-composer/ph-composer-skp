@@ -212,3 +212,33 @@ test("show pans to a point outside the view at the same scale, and userMoved fol
   t.map.reset();
   assert.strictEqual(t.map.userMoved(), false);
 });
+
+test("a resize after the user moved the map keeps its centre and scale at the new size", function () {
+  var t = setup();
+  t.map.zoomIn.listeners.click({ preventDefault: function () {} });
+  assert.strictEqual(t.map.userMoved(), true, "button zoom is the user's move");
+  var before = t.map.view;
+  t.map.svg.rect = { left: 100, top: 50, right: 380, bottom: 270, width: 280, height: 220, x: 100, y: 50 };
+  t.map.update({});
+  assert.deepStrictEqual([t.map.view.width, t.map.view.height], [280, 220]);
+  assert.strictEqual(t.map.view.scale, before.scale);
+  assert.strictEqual(t.map.view.latitude_deg, before.latitude_deg);
+  var centre = t.projection.project(t.map.view, before.latitude_deg, before.longitude_deg);
+  assert.deepStrictEqual([centre.x, centre.y], [140, 110]);
+});
+
+test("a click off the globe places nothing, and the wheel during a drag is ignored", function () {
+  var t = setup();
+  t.map.frame({ south: -10, west: -179, north: 10, east: -171 });
+  for (var i = 0; i < 6; i += 1) t.map.zoomOut.listeners.click({ preventDefault: function () {} });
+  press(t, t.map.svg, { x: RECT.left + 2, y: RECT.top + 2 });
+  assert.strictEqual(t.calls.place.length, 0);
+  t.map.reset();
+  fire(t.map.svg, "pointerdown", event("pointerdown", 300, 200, { target: t.map.svg }));
+  fire(t.map.svg, "pointermove", event("pointermove", 340, 220, { target: t.map.svg }));
+  var scale = t.map.view.scale;
+  var wheel = event("wheel", 340, 220, { deltaY: -400 });
+  fire(t.map.root, "wheel", wheel);
+  assert.ok(wheel.defaultPrevented, "the dialog does not scroll either");
+  assert.strictEqual(t.map.view.scale, scale);
+});

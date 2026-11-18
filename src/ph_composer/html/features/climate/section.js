@@ -50,13 +50,15 @@ function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, Desig
     var self = this;
     if (this.dialog || !this.siteValues) return;
     this.dialog = setLocation.open(this.session, this.send, this.siteValues,
-      function () { return self.siteValues; }, function () { self.dialog = null; panel.repaint(); });
+      function () { return self.siteValues; }, function () { self.dialog = null; panel.repaint(); },
+      Boolean(this.summary && this.summary.climate.state !== "none"));
   };
 
   View.prototype.render = function (state) {
     var summary = snapshot.value(state, shared.SUMMARY), site = snapshot.value(state, shared.SITE);
     var design = snapshot.value(state, shared.DESIGN);
     this.siteValues = site;
+    this.summary = summary;
     this.paintCards(summary, site, design);
     var selected = this.cards.selected, panes = this.panes;
     Object.keys(panes).forEach(function (key) { panes[key].hidden = key !== selected; });
