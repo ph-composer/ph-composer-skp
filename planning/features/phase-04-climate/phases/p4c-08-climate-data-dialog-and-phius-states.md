@@ -1,7 +1,7 @@
 # P4c-08: Climate Data on This Computer and the Phius pane's empty states
 
 DATE: 2026-11-17
-STATUS: Implemented on branch `feature/climate-p4c-08`, 2026-11-18; CM08 not run. Authorized with every Climate stage on 2026-11-17 ([STATUS](../STATUS.md#authorization)).
+STATUS: Merged to main 2026-11-18 (PR #519, `7bcb6672`); CM08 agent run Pass, Ed's pass pending. Authorized with every Climate stage on 2026-11-17 ([STATUS](../STATUS.md#authorization)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
 
