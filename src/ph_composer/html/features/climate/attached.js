@@ -22,29 +22,21 @@ PhComposerUI.define("features/climate/attached", ["panel", "workspace", "request
 function (panel, ui, requests, unitField, preferences, units, fields, shared) {
   "use strict";
   var el = ui.element, P = shared.PREFIX;
-  // The eight fields a write is guarded by, as climate.get returned them (features/climate/climate/schema.rb).
-  var EDITABLE = ["name", "station_latitude_deg", "station_longitude_deg", "station_elevation_m",
-    "daily_temp_swing_k", "wind_speed_m_s", "monthly", "peak_loads"];
-  var MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+  var MONTHS = shared.MONTHS, CASES = shared.CASES, rowField = shared.rowField;
   var MONTH_WORDS = ["January", "February", "March", "April", "May", "June", "July", "August", "September",
     "October", "November", "December"];
-  var CASES = [["heat_1", "Heating 1"], ["heat_2", "Heating 2"], ["cool_1", "Cooling 1"]];
   var TEMPERATURE_ROWS = [["air_c", "Air"], ["dewpoint_c", "Dewpoint"], ["sky_c", "Sky"]];
   var DIRECTIONS = [["north", "North"], ["east", "East"], ["south", "South"], ["west", "West"], ["global", "Global"]];
-  var RADIATION = fields.IRRADIATION_KWH_M2, PEAK = fields.IRRADIANCE_W_M2;
+  var RADIATION = shared.RADIATION;
   var SWING = fields.TEMPERATURE_DIFFERENCE_K;
   var WIND = fields.with(fields.WIND_SPEED_M_S, { label: "Average wind speed", allowBlank: true });
   var NOT_IN_FILE = "Not part of a Phius station file";
   var CUSTOM = "Phius asks for a custom dataset here unless an exception applies.";
-  var LATER = "Editing the values comes in a later version of PH-Composer.";
-  var LATER_HAND = "Typing climate values by hand comes in a later version of PH-Composer.";
+  var CLEAR_FIRST = "A Model holds one climate. Clear this one first, from More climate actions, then enter values " +
+    "by hand.";
   var SCALARS = { station_elevation_m: ["Station elevation", shared.ELEVATION],
     daily_temp_swing_k: ["Daily temperature swing", SWING] };
 
-  function rowField(row) {
-    if (/_c$/.test(row)) return shared.TEMPERATURE;
-    return /_kwh_m2$/.test(row) ? RADIATION : PEAK;
-  }
   function rowWord(row) {
     var temperature = TEMPERATURE_ROWS.filter(function (pair) { return pair[0] === row; })[0];
     if (temperature) return temperature[1];
@@ -61,15 +53,9 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
   }
   function header(label, field) { return units.header(label, field, undefined); }
   function chip(text, tone) { return el("span", "climate-data-chip" + (tone ? " is-" + tone : ""), text); }
-  function slice(values) {
-    var picked = {};
-    EDITABLE.forEach(function (key) { picked[key] = values[key]; });
-    return picked;
-  }
-
   /* `actions.replace()` opens the picker in Replace, `actions.update(source)` opens it on the source_status answer
-     (Update from File), `actions.openData(add)` opens Climate Data on This Computer and `actions.setLocation()` Set
-     Location. */
+     (Update from File), `actions.editValues(values)` the values editor, `actions.openData(add)` Climate Data on This
+     Computer and `actions.setLocation()` Set Location. */
   function Pane(session, send, actions) {
     var self = this;
     this.actions = actions; this.record = null; this.source = null; this.revision = null; this.painted = null;
@@ -84,7 +70,7 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
     this.wind = new unitField.UnitField({ field: WIND, commitOnBlur: true,
       onCommit: function (value) { self.saveWind(value); },
       onCancel: function () { self.settled(); } });
-    function begin() { if (!self.windGuard && self.values()) self.windGuard = slice(self.values()); }
+    function begin() { if (!self.windGuard && self.values()) self.windGuard = shared.editable(self.values()); }
     this.wind.input.addEventListener("input", begin);
     this.wind.input.addEventListener("paste", begin);
     // A draft that ended with nothing to save (the same value, retyped) lets a held repaint through. These run
@@ -97,13 +83,12 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
     this.buildActions();
   }
 
-  /* The page header's controls for this pane: Edit Values (disabled until it lands), Replace, and Clear in the
-     overflow menu. A no-folder Replace opens an explanation anchored to it. */
+  /* The page header's controls for this pane: Edit Values, Replace, and Clear in the overflow menu. A no-folder
+     Replace opens an explanation anchored to it. */
   Pane.prototype.buildActions = function () {
     var self = this;
-    var edit = ui.button("Edit Values…", function () {}); edit.disabled = true;
-    this.edit = el("span", "climate-later");
-    this.edit.appendChild(edit); this.edit.appendChild(ui.reasonButton("Edit Values", LATER));
+    // A wind speed saved on blur by this very click is read back first, so the editor opens on the Model's values.
+    this.edit = ui.button("Edit Values…", function () { self.editQueued = true; self.openQueuedEdit(); });
     this.replace = ui.button("Replace…", function () { self.onReplace(); });
     // Replace stays enabled; with no folder or no site it explains here and offers the way on (J6).
     this.explain = new ui.Bubble(this.replace, "Replace", { ownTrigger: true, detachedTrigger: true });
@@ -142,13 +127,18 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
   Pane.prototype.handLater = function () {
     var hand = ui.button("Enter Values by Hand…", function () {}), later = el("span", "climate-later");
     hand.disabled = true;
-    later.appendChild(hand); later.appendChild(ui.reasonButton("Enter Values by Hand", LATER_HAND));
+    later.appendChild(hand); later.appendChild(ui.reasonButton("Enter Values by Hand", CLEAR_FIRST));
     return later;
   };
   /* A choice in the explanation closes it first, so what it opens takes the focus. */
   Pane.prototype.choice = function (label, run) {
     var self = this;
     return ui.button(label, function () { self.explain.close(false); run(); });
+  };
+
+  Pane.prototype.openQueuedEdit = function () {
+    if (!this.editQueued || this.awaitingRead || this.writes.busy() || this.reads.get.busy() || !this.values()) return;
+    this.editQueued = false; this.actions.editValues(this.values());
   };
 
   /* Reads the source again: after the picker or the data dialog closes, either may have changed it. */
@@ -174,6 +164,7 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
     if (this.queued && !this.awaitingRead && !this.writes.busy() && !this.reads.get.busy()) {
       var queued = this.queued; this.queued = null; this.write(queued);
     }
+    this.openQueuedEdit();
     var opened = shown && !this.shown;
     this.shown = shown;
     this.menu.root.hidden = !shown;
@@ -188,6 +179,7 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
     }
     this.design = design; this.folders = folders;
     this.replace.disabled = this.writes.busy();
+    this.edit.disabled = this.writes.busy() || !this.values();
     // An explanation whose reason no longer holds (a folder added, the site set elsewhere) closes.
     if (!this.explain.panel.hidden && this.blocked() !== this.explained) this.explain.close(false);
     this.paint();
@@ -548,12 +540,12 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
     var values = this.values();
     if (values && !params && this.writes.busy()) { this.queued = name; return false; }
     if (!values || this.writes.busy()) return false;
-    this.writes.run(P + "climate." + name, Object.assign({ expected_values: slice(values) }, params || {}));
+    this.writes.run(P + "climate." + name, Object.assign({ expected_values: shared.editable(values) }, params || {}));
     this.painted = null; this.paint();
     return true;
   };
   Pane.prototype.saveWind = function (value) {
-    var guard = this.windGuard || (this.values() && slice(this.values()));
+    var guard = this.windGuard || (this.values() && shared.editable(this.values()));
     this.windGuard = null;
     if (!guard || this.writes.busy() || value === guard.wind_speed_m_s) { this.settled(); return; }
     var next = JSON.parse(JSON.stringify(guard)); next.wind_speed_m_s = value;
@@ -579,6 +571,7 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
     if (this.wind.editing) this.wind.cancel();
     this.wind.clearError();
     this.record = null; this.source = null; this.failure = null; this.painted = null; this.windGuard = null;
+    this.editQueued = false;
   };
 
   Pane.prototype.dispose = function () {

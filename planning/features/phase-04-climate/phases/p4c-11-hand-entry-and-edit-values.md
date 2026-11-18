@@ -1,7 +1,7 @@
 # P4c-11: Hand entry and Edit Values
 
 DATE: 2026-11-17
-STATUS: Scoped. Not authorized.
+STATUS: Implemented on branch `feature/climate-p4c-11` (2026-11-18, PR #522); CM11 agent run Pass on `408285df`, Ed's licensed paste and pass pending. Authorized 2026-11-17 with every Climate stage (packet STATUS, Authorization).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -102,3 +102,29 @@ P4c-12 closes the register.
 ## Done when
 
 CM11 passes and owed check 5 is recorded by shape only.
+
+## Entry checks, 2026-11-18
+
+**Owed check 5** ([evidence](../evidence/owed-check-5-20261118.md)), from the shape of every workbook and
+station file, nothing copied: both sources put a label cell before each of the eight series rows, in the PRD's order;
+the first six rows carry twelve monthly and three design values, the dewpoint and sky rows twelve. The paste
+leaves out a leading text column, and one layout is enough (D4c-34). Item 3 corrected: a row of twelve leaves the
+dewpoint and sky design cells empty, which D4c-08 allows, so it does not save as Incomplete. What Excel and a text
+editor put on the clipboard is not measured here; CM11 part B pastes one of each into the real panel.
+
+## Departures, 2026-11-18
+
+- **Enter Values by Hand in Replace's explanation stays disabled**, its reason now "A Model holds one climate. Clear
+  this one first, from More climate actions, then enter values by hand." `enter_values` refuses while the Model holds
+  a climate (CONTRACTS section 3), and replacing a climate by typed values in one Undo step would need a new
+  operation. The empty states' buttons (step 7) are enabled.
+- **Enter moves down a column** in the grid, as in a spreadsheet, rather than submitting the form; Save is the
+  button. Tab follows the page's order, row by row.
+- **An empty or non-numeric pasted cell empties its grid cell**, so a paste always leaves what the block holds; a
+  row shorter than the block leaves the cells past its end as they were.
+- **The pane of a hand-entered climate** (step 6) is P4c-10's pane unchanged: it already reads "Entered by hand",
+  lists what is missing and says "Not checked, entered by hand" without coordinates. Board 20's "Missing:" line
+  reads "Incomplete:" there, and Where this lives says there is no station file to look for.
+- **Units in the grid**: the temperature rows carry their unit in the row heading; the radiation rows share one
+  note below the grid naming the monthly and design units, as board 12 does.
+- **The size ceiling** was raised by Ed for this stage (D4c-33); the editor adds 16,466 bytes installed.

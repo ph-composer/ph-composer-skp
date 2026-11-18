@@ -1,15 +1,17 @@
 /* The Climate tab: one page header over source cards (Site location, then under "Climate sources" Phius climate
    data, Design temperatures and Hourly weather file) and the pane of the card selected. Every card's state comes
    from the summary snapshot section and the panes paint from the site and design-temperature sections. The
-   card selected is remembered per Model session. The Phius climate data pane opens the station picker; with a
-   climate attached its actions sit in the page header. The Hourly weather file card is Planned. The page header
-   always offers Climate Data on This Computer, which a native route (the Setup view, the Extensions menu) also
-   opens with the intent `{ open: "climate_data" }`. Climate is first in the tab row; the panel still opens on Zones. */
+   card selected is remembered per Model session. The Phius climate data pane opens the station picker and the
+   values editor; with a climate attached its actions sit in the page header. The Hourly weather file card is
+   Planned. The page header always offers Climate Data on This Computer, which a native route (the Setup view, the
+   Extensions menu) also opens with the intent `{ open: "climate_data" }`. Climate is first in the tab row; the
+   panel still opens on Zones. */
 PhComposerUI.define("features/climate/section", ["panel", "workspace", "snapshot", "source_cards",
   "features/climate/shared", "features/climate/site", "features/climate/set_location",
   "features/climate/design_temperatures", "features/climate/phius", "features/climate/data_setup",
-  "features/climate/picker"],
-function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, DesignPane, PhiusPane, dataSetup, picker) {
+  "features/climate/picker", "features/climate/values_editor"],
+function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, DesignPane, PhiusPane, dataSetup, picker,
+  valuesEditor) {
   "use strict";
   var TAB = "climate";
   var pages = Object.create(null);
@@ -31,7 +33,8 @@ function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, Desig
     this.phius = new PhiusPane(state.session, send, { openData: function (add) { self.openData(add); },
       setLocation: function () { self.openSetLocation(); },
       choose: function (preselect) { self.openPicker(preselect || null); },
-      replace: function () { self.openPicker(null); } });
+      replace: function () { self.openPicker(null); },
+      values: function (values) { self.openValues(values); } });
     // With a climate attached and its card selected, the header holds its actions: Edit Values, Replace
     // as the primary, and Clear in the overflow menu, which is hidden otherwise.
     this.header = ui.pageHeader({ title: "Climate", actions: [this.dataButton], menu: this.phius.attached.menu.root });
@@ -70,6 +73,15 @@ function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, Desig
     });
   };
 
+  /* The values editor: Edit Values on `values`, or Enter Values by Hand with none. */
+  View.prototype.openValues = function (values) {
+    var self = this;
+    if (this.editor) return;
+    this.editor = valuesEditor.open(this.session, this.send, values, function () {
+      self.editor = null; panel.repaint();
+    });
+  };
+
   /* Climate Data on This Computer, read afresh on each open; `add` starts Add Folder at once. The Phius pane
      reads the folders again when it closes. */
   View.prototype.openData = function (add) {
@@ -101,6 +113,7 @@ function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, Desig
     if (this.dialog) this.dialog.consume(state);
     if (this.data) this.data.consume(state);
     if (this.picker) this.picker.consume(state);
+    if (this.editor) this.editor.consume(state);
   };
 
   View.prototype.paintCards = function (summary, site, design) {
@@ -132,6 +145,7 @@ function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, Desig
     if (this.dialog) { this.dialog.dispose(); this.dialog = null; }
     if (this.picker) { this.picker.dispose(); this.picker = null; }
     if (this.data) { this.data.dispose(); this.data = null; }
+    if (this.editor) { this.editor.dispose(); this.editor = null; }
     this.design.dispose();
     this.phius.dispose();
   };

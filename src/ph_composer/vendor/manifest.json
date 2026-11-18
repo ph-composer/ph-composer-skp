@@ -116,14 +116,14 @@
       "sha256": "9e8041546528ef8733c8da7b2359bd980cee349c3ed13ef3ebafc023a11a3479"
     },
     "html/features/climate/attached.js": {
-      "bytes": 33088,
+      "bytes": 32757,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "2edf172bdc8c4632c7ebbd961f3bc89200cab2f0f804a87632a6ffd4fb2250d3"
+      "sha256": "3c4da0e9dfc77e5a1a3180a7aa240586cb1cb0223f72ce22a825cb72e7ee3158"
     },
     "html/features/climate/climate.css": {
-      "bytes": 13871,
+      "bytes": 14619,
       "mime": "text/css; charset=utf-8",
-      "sha256": "6113812ca660f5c561b62b5a2bbdfbad16b82038e5c16381dd527034719126c9"
+      "sha256": "6b19597dd33c760acd6cc155296b0a0e691387f36a636f1107033bf4daedf110"
     },
     "html/features/climate/data_setup.js": {
       "bytes": 19477,
@@ -136,9 +136,9 @@
       "sha256": "8d194678ba2da13408e5182f1c27eee964e6a6f710a764628459735d744c10fd"
     },
     "html/features/climate/phius.js": {
-      "bytes": 8771,
+      "bytes": 8416,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "d129bf82ae3fbc2e04c969999e63dab5028d48b73afbd09492ff17a4c65fe2c3"
+      "sha256": "2ff9e8a5d89b86654824d9691232f6f78f115a34165430c1899df7c90e852b68"
     },
     "html/features/climate/picker.js": {
       "bytes": 24987,
@@ -146,9 +146,9 @@
       "sha256": "997354e228c41c56cbd9ed7d95064c3d3433033d67ca00bc4fc4dee0378db8d0"
     },
     "html/features/climate/section.js": {
-      "bytes": 8892,
+      "bytes": 9473,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "4afbacb25a2ae69fd80d923c558a39628ded00cc9ebb6691f25087d7a8614108"
+      "sha256": "1e4b874970e7eb31062e2f491573f683e1994716712c0c846916df74e55a878f"
     },
     "html/features/climate/set_location.js": {
       "bytes": 19951,
@@ -156,14 +156,19 @@
       "sha256": "8562e255ade8789f306d39feaf1cac84da13e2520287468a3432c0c15b1fac6b"
     },
     "html/features/climate/shared.js": {
-      "bytes": 3468,
+      "bytes": 4640,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "29f221229bd6f8c0bec343baeea83b90472cf5a82feff9c5598bc661157e3b25"
+      "sha256": "b802e2fbf68df1b8d0beac03df815bf0d828dfd61a6dcb7809030fee4b3dca04"
     },
     "html/features/climate/site.js": {
       "bytes": 2552,
       "mime": "text/javascript; charset=utf-8",
       "sha256": "40135eed367181148ba5362ea4d60d377f2f8d5e031c752f08c6930221dbfd49"
+    },
+    "html/features/climate/values_editor.js": {
+      "bytes": 17181,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "72e80a2682eee8d51d1648de5e8543338f05d66d6b1a3db14b323273a51a5be1"
     },
     "html/features/spaces/actions.js": {
       "bytes": 16689,
@@ -391,9 +396,9 @@
       "sha256": "ae769a7d0c4b07031ab9812cd350d17b6e4638549d0f5295ccaafe1f1390ed54"
     },
     "html/index.html": {
-      "bytes": 9235,
+      "bytes": 9297,
       "mime": "text/html; charset=utf-8",
-      "sha256": "1928d051a424f88b9129c70c49d2f493d62c351936876987b54bf34fa259c8f8"
+      "sha256": "42923758c15026d4f3ca153a813b1c99a2ffa22acd8911624f84b09db3190ded"
     },
     "html/inventory.js": {
       "bytes": 12812,
@@ -846,8 +851,8 @@
     "cold_boot_ceiling_ms": 6000,
     "cold_boot_target_ms": 4000,
     "installed_baseline_bytes": 24541739,
-    "installed_ceiling_bytes": 26000000,
-    "installed_growth_bytes": 1500000,
+    "installed_ceiling_bytes": 28000000,
+    "installed_growth_bytes": 2500000,
     "installed_target_bytes": 24000000,
     "panel_ready_ceiling_ms": 2000,
     "panel_ready_target_ms": 1000,

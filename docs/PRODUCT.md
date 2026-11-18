@@ -118,6 +118,36 @@ folder and offers **Choose Climate Data Folder**. **Clear**, in the page header'
 actions** menu, removes the climate as one Undo step with no confirmation; the site and the design
 temperatures stay.
 
+## Enter or edit climate values by hand
+
+**Enter Values by Hand** opens one editor with a grid in the order of a Phius climate file: outdoor
+temperature, the north, east, south, west and global radiation, dewpoint and sky temperature, by
+month, then the Heating 1, Heating 2 and Cooling design values. It needs no climate data folder and
+no site. Use it for a custom dataset from Phius, or for a station outside the USA, which Phius
+supplies only as an Excel workbook. A climate entered this way exports as user-defined.
+
+1. Type a name and the station elevation; both are needed to save. Type the daily temperature
+   swing and the average wind speed. Latitude and longitude are optional: without them the Phius
+   limit check reads "Not checked, entered by hand".
+2. In the workbook, select the eight series rows of the block in your unit system, from the label
+   column or the first month to the last design column, and copy. From a station file, copy the
+   eight series lines. Click the first cell of the grid and paste. The labels are left out, a value
+   that is not a number is left empty and counted, and a block that does not fit from the cell you
+   chose fills nothing. Do not include the month and day rows above the series.
+3. Type or correct any cell. The arrow keys and Enter move between cells.
+4. **Save** stores the climate as one Undo step. Empty cells may be saved: the card then reads
+   Incomplete, the pane lists what is missing, and export leaves the climate out until it is
+   complete. The dewpoint and sky temperature of the design columns may stay empty.
+
+**Edit Values**, in the page header with a climate in the Model, opens the same editor on its
+values. For a station, the name and coordinates stay as its file gave them; **Replace** changes the
+station. For a station, each value you change is marked as edited, and **Restore Original Values**
+puts the file's values back. If the climate changed elsewhere while the editor was open, saving refuses and your
+values stay in the grid.
+
+A Model holds one climate. To type a climate by hand in place of an attached station, **Clear** it
+first.
+
 ## Make Zones and classify the envelope
 
 1. Select a Group or loose geometry. Right-click and choose **PH-Composer > Make Zone**. Each

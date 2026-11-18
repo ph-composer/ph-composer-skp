@@ -4965,6 +4965,22 @@
         "src/ph_composer/features/climate/stations/operations.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "CM11",
+      "label": "The values editor on the installed RBZ in the real HtmlDialog: Enter Values by Hand with no folder, one synthetic paste filling the grid with its label column left out, Save waiting for the name and station elevation and saving with gaps, the card and pane reading Incomplete with what is missing and Not checked without coordinates, Edit Values on a hand climate and on a station marking the station edited, a stale save keeping the draft, one native Undo step for Enter and Edit Climate Values, a real paste from the clipboard, 420 and 360 px; Ed's real paste from a Phius workbook and station file, nothing kept, and the UI polish review",
+      "mode": "mixed",
+      "authority": "planning/features/phase-04-climate/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/html/index.html",
+        "src/ph_composer/html/inventory_grid.js",
+        "src/ph_composer/html/record_form.js",
+        "src/ph_composer/html/unit_field.js",
+        "src/ph_composer/html/features/climate/*",
+        "src/ph_composer/features/climate/declarations/climate.rb",
+        "src/ph_composer/features/climate/climate/*"
+      ],
+      "native_control_required": true
     }
   ]
 }

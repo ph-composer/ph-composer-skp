@@ -13,6 +13,25 @@ PhComposerUI.define("features/climate/shared", ["fields", "units"], function (fi
   /* Phius's limit on how far the station may be from the site, 50 mi, held in km as
      features/climate/climate/limit_check.rb holds it; tests/climate_panel_test.js compares the two. */
   var DISTANCE_LIMIT_KM = 80.4672;
+  // The record's columns and the eight fields a write is guarded by (features/climate/climate/schema.rb).
+  var MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+  var CASES = [["heat_1", "Heating 1"], ["heat_2", "Heating 2"], ["cool_1", "Cooling 1"]];
+  var EDITABLE = ["name", "station_latitude_deg", "station_longitude_deg", "station_elevation_m",
+    "daily_temp_swing_k", "wind_speed_m_s", "monthly", "peak_loads"];
+  var RADIATION = fields.with(fields.IRRADIATION_KWH_M2, { allowBlank: true });
+  var PEAK = fields.with(fields.IRRADIANCE_W_M2, { allowBlank: true });
+
+  /* A monthly or peak-load row's unit: temperature, monthly radiation or peak radiation. */
+  function rowField(row) {
+    if (/_c$/.test(row)) return TEMPERATURE;
+    return /_kwh_m2$/.test(row) ? RADIATION : PEAK;
+  }
+  /* The editable fields of a climate's values, the guard of its next write. */
+  function editable(values) {
+    var picked = {};
+    EDITABLE.forEach(function (key) { picked[key] = values[key]; });
+    return picked;
+  }
 
   // A value and its unit stay on one line.
   function formatted(value, field) { return units.format(value, field, units.profile(field)).replace(/ /g, "\u00a0"); }
@@ -49,7 +68,8 @@ PhComposerUI.define("features/climate/shared", ["fields", "units"], function (fi
 
   return { PREFIX: PREFIX, SITE: PREFIX + "site", DESIGN: PREFIX + "design_temperatures",
     SUMMARY: PREFIX + "summary", ZONES: ZONES, SITE_FIELDS: SITE_FIELDS, ELEVATION: ELEVATION,
-    TEMPERATURE: TEMPERATURE, DISTANCE: DISTANCE, DISTANCE_LIMIT_KM: DISTANCE_LIMIT_KM,
+    TEMPERATURE: TEMPERATURE, DISTANCE: DISTANCE, DISTANCE_LIMIT_KM: DISTANCE_LIMIT_KM, MONTHS: MONTHS, CASES: CASES,
+    RADIATION: RADIATION, PEAK: PEAK, rowField: rowField, editable: editable,
     formatted: formatted, openingDataset: openingDataset, coordinates: coordinates, hours: hours, offset: offset,
     exportLine: exportLine };
 });

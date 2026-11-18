@@ -4,8 +4,8 @@
      no folder   says so, says why PH-Composer ships none, and offers Choose Climate Data Folder (board 2);
      no site     asks for the site first and offers Set Location (board 9);
      ready       names the dataset the station picker opens on, with its station count (board 10).
-   Each offers Enter Values by Hand, shown disabled with its reason until hand entry lands. Choose Station opens the
-   station picker. The folders are read with a climate attached too: Replace explains instead of opening when none
+   Each offers Enter Values by Hand, which opens the values editor. Choose Station opens the station
+   picker. The folders are read with a climate attached too: Replace explains instead of opening when none
    is found. */
 PhComposerUI.define("features/climate/phius", ["workspace", "request", "features/climate/shared",
   "features/climate/attached"],
@@ -14,17 +14,17 @@ function (ui, requests, shared, Attached) {
   var el = ui.element, LIST = shared.PREFIX + "folders.list";
   var PAINT = { loading: "loading", unreadable: "noFolder", no_folder: "noFolder", no_site: "noSite",
     ready: "ready", attached: "showAttached" };
-  var LATER = { hand: "Typing climate values by hand comes in a later version of PH-Composer." };
 
   /* `actions.openData(add)` opens Climate Data on This Computer, starting Add Folder when `add`;
      `actions.setLocation()` opens Set Location; `actions.choose(preselect)` opens the station picker;
-     `actions.replace(trigger)` is the attached pane's Replace. */
+     `actions.replace(trigger)` is the attached pane's Replace; `actions.values(values)` opens the
+     values editor, on a climate's values for Edit Values or empty with none. */
   function Pane(session, send, actions) {
     this.actions = actions; this.folders = undefined; this.failure = null; this.shown = false; this.painted = null;
     this.reads = requests.channel(session, send, "climate_phius_folders", "query.invoke");
     this.root = el("section", "climate-pane climate-phius");
     this.attached = new Attached(session, send, { replace: actions.replace, openData: actions.openData,
-      setLocation: actions.setLocation,
+      setLocation: actions.setLocation, editValues: actions.values,
       update: function (source) {
         actions.choose({ folder_id: source.folder_id, station_key: source.station_key });
       } });
@@ -98,26 +98,22 @@ function (ui, requests, shared, Attached) {
     var button = ui.button(label, run); button.className = "primary"; return button;
   };
 
-  /* A control that cannot act yet: disabled, with its reason beside it. */
-  function later(label, reason) {
-    var group = el("span", "climate-later"), button = ui.button(label, function () {});
-    button.disabled = true;
-    group.appendChild(button); group.appendChild(ui.reasonButton(label.replace(/…$/, ""), reason));
-    return group;
-  }
+  Pane.prototype.hand = function () {
+    var self = this;
+    return ui.button("Enter Values by Hand…", function () { self.actions.values(null); });
+  };
 
   Pane.prototype.noFolder = function () {
     var self = this, missing = (this.folders && this.folders.folders || []).length > 0;
     if (this.failure) {
-      return this.box("No Phius climate data on this computer", this.failure, [], [later("Enter Values by Hand…",
-        LATER.hand)]);
+      return this.box("No Phius climate data on this computer", this.failure, [], [this.hand()]);
     }
     if (missing) {
       return this.box("The climate data folder cannot be found", "The climate data folder set up on this " +
         "computer is not where it was. It may have moved, or be on a drive that is not connected.",
         ["Locate it, or choose another, in Climate Data on This Computer."],
         [this.primary("Climate Data on This Computer…", function () { self.actions.openData(false); }),
-          later("Enter Values by Hand…", LATER.hand)]);
+          this.hand()]);
     }
     this.box("No Phius climate data on this computer", "PH-Composer does not include climate data. Phius " +
       "licenses its climate files to you, so they stay on your computer.",
@@ -126,7 +122,7 @@ function (ui, requests, shared, Attached) {
         "When you pick a station, its values are copied into this Model. The Model then reads without the folder.",
         "With no climate files, type or paste the monthly values and peak loads yourself."],
       [this.primary("Choose Climate Data Folder…", function () { self.actions.openData(true); }),
-        later("Enter Values by Hand…", LATER.hand)]);
+        this.hand()]);
   };
 
   Pane.prototype.noSite = function () {
@@ -134,7 +130,7 @@ function (ui, requests, shared, Attached) {
     this.box("Set the site location first", "A station is checked against the site: Phius allows one within " +
       "50 miles (80 km) and 400 feet (122 m) of elevation. The station list is sorted by distance from the site.",
       [], [this.primary("Set Location…", function () { self.actions.setLocation(); }),
-        later("Enter Values by Hand…", LATER.hand)]);
+        this.hand()]);
   };
 
   Pane.prototype.ready = function () {
@@ -144,8 +140,7 @@ function (ui, requests, shared, Attached) {
       ["Choose a station near the site. Its values are copied into this Model, which then reads without the folder.",
         "With a custom dataset from Phius, or no station file, type or paste the monthly values and peak loads " +
         "yourself."],
-      [this.primary("Choose Station…", function () { self.actions.choose(); }), later("Enter Values by Hand…",
-        LATER.hand)]);
+      [this.primary("Choose Station…", function () { self.actions.choose(); }), this.hand()]);
   };
 
   Pane.prototype.showAttached = function () { this.root.replaceChildren(this.attached.root); };

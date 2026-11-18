@@ -405,8 +405,7 @@ test("with no folder the Phius pane says why none ships and Choose Climate Data 
   assert.ok(byText(phius(p), "p", "PH-Composer does not include climate data. Phius licenses its climate files to " +
     "you, so they stay on your computer."));
   var hand = byText(phius(p), "button", "Enter Values by Hand…");
-  assert.strictEqual(hand.disabled, true);
-  assert.ok(labelled(phius(p), "Why Enter Values by Hand is unavailable"), "its reason sits beside it");
+  assert.strictEqual(hand.disabled, false, "hand entry needs no folder");
   click(byText(phius(p), "button", "Choose Climate Data Folder…"));
   assert.strictEqual(dialog(p).hidden, false);
   assert.strictEqual(named(p, P + "folders.add").length, 1, "the chooser opens at once");
@@ -418,7 +417,9 @@ test("with a folder and no site the pane asks for the site and opens Set Locatio
   list(p, [MAIN]);
   assert.strictEqual(phius(p).getAttribute("data-state"), "no_site");
   assert.ok(byText(phius(p), "h2", "Set the site location first"));
-  assert.strictEqual(byText(phius(p), "button", "Enter Values by Hand…").disabled, true);
+  click(byText(phius(p), "button", "Enter Values by Hand…"));
+  assert.ok(p.context.document.querySelector(".climate-values"), "hand entry needs no site");
+  click(byText(p.context.document.querySelector(".climate-values"), "button", "Cancel"));
   click(byText(phius(p), "button", "Set Location…"));
   assert.ok(p.context.document.querySelector(".climate-set-location"), "Set Location opens");
 });

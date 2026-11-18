@@ -58,10 +58,7 @@ check({ name: "climate-data", output }, async ({ newPage, step }) => {
   await openPhius("climate");
   await paneAtSizes("no_folder", "pane-no-folder");
   await phius.getByRole("heading", { name: "No Phius climate data on this computer" }).waitFor();
-  assert.equal(await phius.getByRole("button", { name: "Enter Values by Hand…" }).isDisabled(), true);
-  await phius.getByRole("button", { name: "Why Enter Values by Hand is unavailable" }).click();
-  await page.getByText("Typing climate values by hand comes in a later version of PH-Composer.").waitFor();
-  await page.keyboard.press("Escape");
+  assert.equal(await phius.getByRole("button", { name: "Enter Values by Hand…" }).isDisabled(), false);
   await phius.getByRole("button", { name: "Choose Climate Data Folder…" }).click();
   await dialog.waitFor();
   const name = dialog.getByLabel("Dataset name");
