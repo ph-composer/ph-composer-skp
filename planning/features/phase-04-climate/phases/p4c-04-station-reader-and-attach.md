@@ -1,7 +1,7 @@
 # P4c-04: The Phius station reader, the station list and attach
 
 DATE: 2026-11-17
-STATUS: Implemented on branch `feature/climate-p4c-04`, 2026-11-18. Ed authorized every stage on 2026-11-17. Departures below.
+STATUS: Implemented, PR #515, 2026-11-18; CM04 Pass on `47f26946`. Ed authorized every stage on 2026-11-17. Departures below.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 

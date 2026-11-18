@@ -1,7 +1,7 @@
 # CM04 host recipe: the station reader, the station list and attach
 
 DATE: 2026-11-18
-STATUS: Prepared. Steps 1 to 6 run by the stage; step 7 (Edit > Undo and Redo) is the conductor's.
+STATUS: Run 2026-11-18 on `47f26946`: Pass ([evidence](cm04-20261118.md)). Steps 1 to 6 run by the stage, step 7 by the conductor.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
 
