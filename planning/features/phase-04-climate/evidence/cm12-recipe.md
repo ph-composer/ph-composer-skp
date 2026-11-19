@@ -1,7 +1,7 @@
 # CM12 host recipe: the integrated run, with the CM01 to CM03 rechecks
 
 DATE: 2026-11-18
-STATUS: Written at P4c-12 before the run. Part A is the stage agent's, through the bridge; part B is the conductor's, under one hold; part C is Ed's verification pass.
+STATUS: Run 2026-11-18 on `1ca85729`: part A by the stage agent, part B by the conductor, all as expected ([evidence](cm12-20261118.md)). Part C is Ed's verification pass.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
 

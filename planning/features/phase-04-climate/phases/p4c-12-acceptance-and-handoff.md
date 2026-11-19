@@ -1,7 +1,7 @@
 # P4c-12: Acceptance and handoff
 
 DATE: 2026-11-17
-STATUS: In progress on branch `feature/climate-p4c-12` (2026-11-18). Authorized 2026-11-17 with every Climate stage (packet STATUS, Authorization).
+STATUS: Implemented on branch `feature/climate-p4c-12` (PR #523, 2026-11-18); CM12 agent run Pass on `1ca85729`, Ed's polish pass pending. Authorized 2026-11-17 with every Climate stage (packet STATUS, Authorization).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
