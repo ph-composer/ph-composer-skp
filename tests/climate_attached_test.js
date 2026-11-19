@@ -511,11 +511,14 @@ test("a press on Restore from a typed wind speed saves it, then restores once, t
   load(p, station({ edits: [["air_c", "jan", -6]] }));
   typeWind(p, "5");
   var restore = byText(attached(p), "button", "Restore Original Values");
+  var wind = section(p, "Station values").querySelector("input");
   attached(p).listeners.mousedown({ target: restore, button: 0, preventDefault: function () {} });
   dom.dispatch(restore, { type: "click" });
   assert.strictEqual(named(p, P + "climate.save_values").length, 1, "the wind speed saves first");
-  assert.strictEqual(named(p, P + "climate.restore_original").length, 0, "waits for the save");
+  assert.strictEqual(wind.disabled, true, "the field kept its focus, so it takes no second value while saving");
   answer(p, last(p, P + "climate.save_values"), { status: "completed", effect: "committed", revision: 2, value: {} });
+  assert.strictEqual(wind.disabled, true, "nor before the save is read back");
+  assert.strictEqual(named(p, P + "climate.restore_original").length, 0, "waits for the save");
   p.revision = 2; p.publish();
   var saved = station({ edits: [["air_c", "jan", -6]] }); saved.climate.values.wind_speed_m_s = 5;
   answer(p, last(p, P + "climate.get"), completed(saved));
@@ -588,6 +591,18 @@ test("Clear pressed after a read lands while the wind speed saves still waits fo
   var cleared = named(p, P + "climate.clear");
   assert.strictEqual(cleared.length, 1, "the Clear pressed during the save runs once it is read back");
   assert.strictEqual(cleared[0].payload.params.expected_values.wind_speed_m_s, 5);
+});
+
+test("a wind save refused and read back unchanged gives the field back", function () {
+  var p = page();
+  load(p);
+  var wind = typeWind(p, "5");
+  press(wind, "Enter");
+  assert.strictEqual(wind.disabled, true);
+  answer(p, last(p, P + "climate.save_values"), refused("target.changed", "The climate changed since it was read."));
+  answer(p, last(p, P + "climate.get"), completed(station()));
+  assert.strictEqual(wind.disabled, false);
+  assert.strictEqual(wind.value, "3.9");
 });
 
 test("Clear pressed as a wind speed saves does not run on a climate replaced elsewhere meanwhile", function () {

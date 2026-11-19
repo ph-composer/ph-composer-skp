@@ -99,7 +99,7 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
       self.swallow = true;
       self.wind.commit();
       if (self.wind.editing) return;
-      if (!self.windSaving) self.settled();
+      if (self.windSaving) self.paintWind(); else self.settled();
       self.restore();
     }, true);
     // The click that follows that press has been answered already.
@@ -189,7 +189,10 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
     // that differs from it means another change came first, and it is dropped.
     // Only a read sent after the answer counts: one already out may hold the values from before the write.
     if (written) { this.stale = true; this.awaitingRead = true; this.followUpSent = false; }
-    if (got && this.awaitingRead && this.followUpSent) { this.awaitingRead = false; this.windSaving = null; }
+    // A save read back repaints in full, whatever the read holds: the held body and the wind speed come back.
+    if (got && this.awaitingRead && this.followUpSent) {
+      this.awaitingRead = false; this.painted = this.windSaving ? null : this.painted; this.windSaving = null;
+    }
     if (this.queued && !this.awaitingRead && !this.writes.busy() && !this.reads.get.busy()) {
       var queued = this.queued; this.queued = null;
       if (this.values() && sameClimate(shared.editable(this.values()), queued.expected)) this.write(queued.name);
@@ -566,10 +569,11 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
     return ["Looking for the station file…"];
   };
 
-  /* The wind speed shows the Model's value unless it is being typed or saved. */
+  /* The wind speed shows the Model's value unless it is being typed or saved; it takes no value until a save is
+     read back. */
   Pane.prototype.paintWind = function () {
     var values = this.values();
-    this.wind.setDisabled(!values || this.writes.busy());
+    this.wind.setDisabled(!values || this.writes.busy() || Boolean(this.windSaving));
     if (values && !this.wind.editing) this.wind.setValue(values.wind_speed_m_s);
   };
 
