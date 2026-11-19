@@ -1,7 +1,7 @@
 # Phase 4 contracts: Climate records, the settings file, the reader and export
 
 DATE: 2026-11-17
-STATUS: Scoped for P4c-01 to P4c-11; sections 2 to 7 implemented (P4c-01 to P4c-05), sections 2, 3, 6 and 7 amended in their stages (section 2 in P4c-06). Contract questions C4c-1 to C4c-6 settle in their stages. Not reviewed against the code by a second reader.
+STATUS: Implemented; not reviewed against the code by a second reader beyond the stages' own reviews. Sections 2 to 7 implemented in P4c-01 to P4c-05 and amended in their stages (section 2 in P4c-06); C4c-1 to C4c-6 settled. Folded into `context/CONTRACTS.md`, `context/EXTENSIBILITY.md` and `context/TECH_STACK.md` at P4c-12 (2026-11-18), which are canonical from here; section 9 is read back for Mechanical in the CM12 run.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 

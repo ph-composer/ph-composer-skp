@@ -23,7 +23,8 @@ check({ name: "setup", output }, async ({ newPage, step }) => {
   assert.equal(await gear.getAttribute("aria-pressed"), "true");
   assert.equal(await page.locator(".phc-tabs [aria-pressed='true']").count(), 0, "no section tab stays current");
   await view.getByRole("heading", { name: "Agent Access", level: 2 }).waitFor();
-  assert.equal(await view.locator(".phc-setup-entry p").textContent(), "Listening on port 46110 · 1 live token");
+  const agentEntry = view.locator(".phc-setup-entry").filter({ hasText: "Agent Access" });
+  assert.equal(await agentEntry.locator("p").textContent(), "Listening on port 46110 · 1 live token");
   for (const [width, height] of PANEL_SIZES) {
     step(`Setup at ${width} x ${height}`);
     await setPanelSize(page, width, height);

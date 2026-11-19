@@ -51,6 +51,11 @@ stopped drawing, choose Reopen panel. Apply any edits you want to keep before re
 
 Use the Libraries screen to reset unreadable library setup.
 
+Climate data folders are changed in Climate Data on This Computer, from the Climate tab or the Setup
+view. Reset display preferences leaves them alone. When the screen says "The climate data settings
+cannot be read", the settings file is left as it is and nothing in it is changed; see Getting help
+below.
+
 ## Getting help
 
 Open any SketchUp document, then choose Extensions > PH-Composer > Help and Diagnostics.

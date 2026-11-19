@@ -45,7 +45,7 @@ check({ name: "header", output }, async ({ newPage, step }) => {
     await palette.press("Enter");
     await page.waitForFunction(() => document.querySelector('th.col-face_type [aria-pressed="true"]'));
     assert.deepEqual(await level.locator(".phc-th-label").boundingBox(), labelBefore, "pressed mode does not move label");
-    await page.locator("h1").first().hover();
+    await page.locator("h1:visible").first().hover();
     assert.equal(await palette.evaluate(node => getComputedStyle(node.closest(".phc-header-action")).opacity), "1");
     const menu = level.getByRole("button", { name: /Level.*column menu/i });
     await menu.focus();
