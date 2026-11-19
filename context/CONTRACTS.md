@@ -19,7 +19,7 @@ root (`extension.rb`) lists features explicitly; there is no dynamic loader.
 | Query, action, view command, setup command, FileExport | Namespaced id, description, input and result schemas, examples, refusal codes (`refuses`), handler |
 | Action additions | Side effects, confirmation policy (only `none` today), Undo name, `transitions:` (the transitions of its own feature it emits through `request.contribute_transition`) |
 | Optional terms | `preconditions:` on actions and commands, sentences a caller reads; `side_effects:` on a view command that can trigger a protection boundary; `response:` on a query that answers the whole Model, naming its bounded alternative |
-| Menu item | Label, menu, availability test supplied by the owning feature, handler; or a per-session entries provider |
+| Menu item | Label, menu, availability test supplied by the owning feature, handler; or a per-session entries provider. `in_setup:` and `summary:` also list it in the Setup view ([EXTENSIBILITY](EXTENSIBILITY.md#setup-entries)) |
 | Snapshot section | Owner id, query-backed projection |
 | Export contributor | Owner, section name and version, `contract` callback, optional `preflight` query, result fields, `report` callback, `user_data_keys`, `requires` (sections it reads), optional `projection`, `entity_projections` (claims on another feature's entity payloads) |
 | Proposal participant | Namespaced id, description, params and result schemas, examples, refusal codes, the participants it calls, handler; called only through `request.participate` by a declaration that lists it |
@@ -554,6 +554,18 @@ otherwise `user_defined`) and the edited values in `assumptions` never disagree 
 record is staged whole rather than through `Engine#propose_update`, which would drop a key set to
 null. Completeness, edited cells and the Phius limit check are derived on every read and never
 stored.
+
+`ph_composer.climate.climate.get` answers the record with `state` (`none`, `incomplete`,
+`complete`), `missing`, `edited_cells` and `limit_check`, and leaves `user_data` to
+`ph_composer.records.detail`. The writes are each one Undo step: `enter_values` (refused
+`target.changed` when a climate exists), `save_values`, `restore_original` (refused
+`climate.no_original` for a climate typed by hand), `clear`, `attach_station` (refused
+`target.changed` when a climate exists) and `replace_station`, which keeps the record's `user_data`.
+`save_values`, `restore_original` and `clear` guard with `expected_values`, the eight editable fields
+as read, and the request's expected revision guards the rest; the station writes refuse
+`climate.site_not_set` with no site. Wind speed is never an edited
+cell. Climate's three snapshot sections are `ph_composer.climate.site`, `ph_composer.climate.design_temperatures`
+and `ph_composer.climate.summary` (the Climate tab's cards). The codes are published in [API_REFERENCE](../docs/API_REFERENCE.md).
 
 The foundation's `ph_composer.model` dictionary holds the Model's own `user_data` and `extension_data`
 (`shell/model_metadata.rb`), both `{}` by default; it is building metadata, not a feature's

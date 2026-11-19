@@ -151,7 +151,34 @@ Face types and boundary conditions follow Honeybee. A Zone owns its Face assignm
 | Supply, Extract and Transfer airflow | Separate optional Space inputs, stored so that unset is different from explicitly zero. When all three are unset the Zone's ventilation load applies. When any one is set the Space is user-specified: its values override the Zone's load and an unset rate counts as zero |
 | Ventilation assignment | Relationship from a Space to serving ventilation equipment |
 
-## Systems and climate terminology for planned features
+## Site and climate
+
+Shipped in Phase 4 (Climate). The hourly weather file and its peak-load gate are deferred; their
+terms are at the end, marked planned.
+
+| Term | Meaning |
+| --- | --- |
+| Site location | The Model's latitude, longitude and elevation, set together, with an optional climate zone (stored as the WUFI-Passive code) and an optional typed offset from UTC. The site is set when all three of latitude, longitude and elevation are present. Set in Set Location by typing, by a click on the outline map, or from SketchUp's geolocation, which fills latitude and longitude only |
+| Climate data folder | A per-computer setting, kept in PH-Composer's settings file on this computer: a folder of climate files the user is licensed to use, named by its dataset name, read where it is and never copied into a Model. Listed, added, renamed, located and removed in Climate Data on This Computer |
+| Dataset | The name the user gives a climate data folder. The picker shows one dataset at a time; a station's source is matched by station name, state and checksum across every folder, not by dataset name |
+| Settings file | PH-Composer's own per-computer file, outside SketchUp's versioned folders, with one section per feature. Climate's section holds the climate data folders. Never in a Model or HBJSON |
+| Station | One location in a climate data folder, read from one Phius station file. The Model keeps the station's coordinates for the Phius limit check |
+| Attach and Replace | Attach copies a station's values into a Model with no climate, with an as-read copy, so edited values show and Restore Original Values works on any computer. Replace swaps the Model's climate for another station in one Undo step. Both are refused with no site |
+| Phius climate data | The climate a Model holds from a Phius station, or values typed by hand in the same grid: monthly temperatures and radiation and three peak-load cases (Heating 1, Heating 2, Cooling). Complete when the station elevation, daily swing, wind speed, all 96 monthly values and each case's air temperature and five radiation values are present; Incomplete otherwise |
+| Climate | The Model's one climate record: monthly and peak-load values, the as-read copy of a station's file, and provenance in honeybee-ph's shape. It remains readable without its source file or folder, and holds no file location |
+| Enter Values by Hand, Edit Values | The one values editor: Enter Values by Hand types a climate into a Model with none; Edit Values changes the Model's climate. One paste of the eight series rows fills the grid |
+| Edited value | A value of a station's climate that differs from its as-read copy. Marked in the pane and listed in the Export report; Restore Original Values copies the file's values back. Wind speed is never an edited value |
+| Source status | Whether the attached station's file is on this computer: Source found, Source changed (the file differs from the as-read copy; Update from File offers it) or Not on this computer. Read each time; the Model reads in full in every case |
+| Phius limit check | Whether the station is within 50 miles and 400 feet of the site, Phius's limits for a climate dataset. Pass, Fail (shown as Outside Phius limits), or Not checked with no site or a climate typed without coordinates. Worked out each time, never stored |
+| Design temperatures | The typed ASHRAE 99% heating and 1% cooling dry-bulb temperatures for the site, in °C, with an optional source note. Not set, Incomplete (one of the two) or Set; heating at or above cooling saves with a warning. Kept in the Model only |
+| Source card | A card in a tab's sidebar naming one source of data with its state chip: on the Climate tab, Site location, Phius climate data, Hourly weather file (planned) and Design temperatures |
+| Outline map | The world map shipped with the extension: country borders, and the state and province borders of the United States and Canada; no tiles and no network. Used in Set Location and the station picker |
+| Hourly weather file | Planned. A second climate source, an annual EPW from which honeybee-ph derives a preliminary monthly climate. Shown on the Climate tab as Planned and inert |
+| EPW-derived monthly climate | Planned. Preliminary monthly climate produced by honeybee-ph from a user-selected annual EPW |
+| Monthly-demand ready | Planned. The climate has the complete monthly values required by preliminary demand calculations and overlays |
+| METr-climate ready | Planned. The climate has both monthly values and the user-supplied peak-load cases required by the planned METr export |
+
+## Systems terminology for planned features
 
 | Term | Meaning |
 | --- | --- |
@@ -159,21 +186,6 @@ Face types and boundary conditions follow Honeybee. A Zone owns its Face assignm
 | Hot Water System | The planned record that groups heaters and tanks and serves Zones. Heaters and tanks are their own rows and each names its System |
 | Blended heat pump | The planned single air-source heat pump exported for a building, computed from every outdoor unit by the Phius heat pump estimator's method |
 | Piping / Ducting | Modeled runs, their segments and the systems they serve |
-
-### Site and climate
-
-| Term | Meaning |
-| --- | --- |
-| Site location | The Model's latitude, longitude and elevation, set together, with an optional climate zone (stored as the WUFI-Passive code) and an optional typed offset from UTC. The site is set when all three of latitude, longitude and elevation are present |
-| Climate data folder | A per-computer setting, kept in PH-Composer's settings file on this computer: a folder of climate files the user is licensed to use, named by its dataset name, read where it is and never copied into a Model |
-| Station | One location in a climate data folder, read from one file. Attaching it copies its values into the Model with an as-read copy, so edited values show and Restore Original Values works on any computer. The Model keeps the station's coordinates for the Phius limit check |
-| Phius climate data | The climate a Model holds from a Phius station, or values typed by hand in the same grid: monthly temperatures and radiation and three peak-load cases (Heating 1, Heating 2, Cooling). Complete when the station elevation, daily swing, wind speed, all 96 monthly values and each case's air temperature and five radiation values are present; Incomplete otherwise |
-| Phius limit check | Whether the station is within 50 miles and 400 feet of the site, Phius's limits for a climate dataset. Pass, Fail, or Not checked with no site or a climate typed without coordinates. Worked out each time, never stored |
-| Design temperatures | The typed ASHRAE 99% heating and 1% cooling dry-bulb temperatures for the site, in °C, with an optional source note. Not set, Incomplete (one of the two) or Set; heating at or above cooling saves with a warning. Kept in the Model only |
-| Climate snapshot | The Model's one climate record: monthly and peak-load values, the as-read copy of a station's file, and provenance in honeybee-ph's shape. It remains readable without its source file or folder, and holds no file location |
-| EPW-derived monthly climate | Preliminary monthly climate produced by honeybee-ph from a user-selected annual EPW |
-| Monthly-demand ready | The climate has the complete monthly values required by preliminary demand calculations and overlays |
-| METr-climate ready | The climate has both monthly values and the user-supplied peak-load cases required by the planned METr export |
 
 ## Export
 

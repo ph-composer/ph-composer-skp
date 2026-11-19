@@ -138,6 +138,16 @@ owner's `busy`/`active` predicates. Enter, blur and outside close share one comm
 refused drafts stay open; `refuse(message, focus)` shows the owner's refusal, and `accept(value, focus)`
 settles a snapshot-driven request. Acceptance callbacks are invalidated by retries and disposal.
 Escape restores and closes; a pending request holds the surface until the owner settles it.
+
+The `source_cards` module exports the `SourceCards` constructor itself: a sidebar of cards beside one pane, each a subject the pane shows with a
+title, a few lines and a state chip; a card marked `planned` is shown read only and never selected, and
+at narrow widths the cards give way to one select above the pane. The owner keeps the selected card in
+its per-Model state and repaints a card with `paint(id, { lines, chip })`. The Climate tab is its first
+owner. The `outline_map` module exports the `outlineMap` function, which draws the borders shipped in `map_borders.js` (Natural Earth, public domain) on the
+projection in `map_projection.js`, with markers, rings and one pin; it fetches nothing and knows nothing
+about what a marker stands for. The owner supplies `onSelect`, `onPlace` and `onHover` and a keyboard
+route for placing and selecting (typed fields, a list), since the map has none. Set Location and the
+station picker are its owners.
 Persistent fields remain subscribed until `dispose`; `once: true` disposes after closing a one-use
 editor. Owners retain exact mutation parameters, transaction rules and snapshot authority.
 
@@ -954,6 +964,9 @@ Hosted libraries add `.connections.connect`, `.disconnect`, `.reauthorize`, `.se
 (sign out and erase the stored credential), each taking a `provider_kind`, and
 `ph_composer.library.cancel_load`; `ph_composer.library.connections` lists each connection's label,
 state and actions.
+Climate adds the climate data folder commands, `ph_composer.climate.folders.add`, `.locate`,
+`.rename`, `.remove` and `.remember_dataset`; `add` and `locate` take the folder the user chooses
+through `approval:`.
 It is a fourth verb because none of the other three fits: a read never
 changes state, an action is an undoable Model operation, and a view command changes only what the
 host shows.
@@ -974,6 +987,19 @@ with no sequence and no expected revision; it refuses while the session is busy.
 user's machine is granted explicitly, as `export` is. The panel sends `setup.invoke` and settles
 the answer in its own result slot. A setup command takes the same optional `approval:` and
 `precondition:` a file export does (see "Registered file exports").
+
+### Per-computer settings
+
+A setting that belongs to this computer rather than to a Model, and that every SketchUp version must
+read, goes in PH-Composer's own settings file, `shell/computer_settings.rb`, not in
+`Sketchup.write_default` (which is per SketchUp version). A feature owns one section under its own id:
+`ComputerSettings.read(feature_id)` answers the section or `{}`, and
+`ComputerSettings.write(feature_id) { |section| new_section }` changes it under the file's lock. The
+feature validates the section on every read and before every write, and maps
+`ComputerSettings::Refused#reason` to its own codes. Climate's climate data folders are the model
+(`features/climate/folders/store.rb`). Writes go through setup commands, never a Model operation.
+Placement and write rules are in [TECH_STACK.md](TECH_STACK.md), "This computer's settings file", and
+the contract in [CONTRACTS.md](CONTRACTS.md), "This computer's settings file".
 
 ### Viewport tools
 
@@ -1047,7 +1073,7 @@ Space Floors (`spaces.update_metadata`); the Model's own maps use `ph_composer.m
 All follow the same rules ([CONTRACTS.md](CONTRACTS.md), "Records and extension data"). Core
 calculations do not silently interpret arbitrary metadata. Absence in an older record is valid.
 
-A contribution that adds an authored entity, including the future mechanical and climate entities,
+A contribution that adds an authored entity, including the future mechanical entities,
 meets the same obligation before it is accepted:
 
 - Give it a `user_data` map: a catalog kind gets one from the engine; a nested object is declared as a

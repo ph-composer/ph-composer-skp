@@ -1,7 +1,7 @@
 # P4c-11: Hand entry and Edit Values
 
 DATE: 2026-11-17
-STATUS: Implemented on branch `feature/climate-p4c-11` (2026-11-18, PR #522); CM11 agent run Pass on `408285df`, Ed's licensed paste and pass pending. Authorized 2026-11-17 with every Climate stage (packet STATUS, Authorization).
+STATUS: Merged to main 2026-11-18 (PR #522, `74d85a79`); CM11 agent run Pass on `408285df`, Ed's licensed paste and pass pending. Authorized 2026-11-17 with every Climate stage (packet STATUS, Authorization).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 

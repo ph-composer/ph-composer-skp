@@ -170,7 +170,7 @@ Climate data (5.1) is now [Phase 4](features/phase-04-climate/README.md) and
 
 | # | Item | State | Note |
 | --- | --- | --- | --- |
-| 5.1 | [Climate data](features/phase-04-climate/README.md) | Promoted to Phase 4 on 2026-11-15; Scoped 2026-11-17: [PLAN](features/phase-04-climate/PLAN.md) stages P4c-01 to P4c-12, none authorized | Ships no datasets. Reuses honeybee-ph EPW-to-monthly conversion for preliminary work; user-supplied peak loads are required for climate-bearing METr export per D9 |
+| 5.1 | [Climate data](features/phase-04-climate/README.md) | Promoted to Phase 4 on 2026-11-15; [PLAN](features/phase-04-climate/PLAN.md) stages P4c-01 to P4c-12 authorized 2026-11-17; P4c-01 to P4c-11 merged (PRs #512 to #522), P4c-12 (acceptance and handoff) in PR #523 with the CM12 integrated run passed by agents, 2026-11-18. The site, one Phius climate per Model and the design temperatures ship; the hourly weather file is deferred | Ships no datasets. Reuses honeybee-ph EPW-to-monthly conversion for preliminary work; user-supplied peak loads are required for climate-bearing METr export per D9 |
 | 5.2 | [Sun-path view](features/phase-08-post-mvp/sun-path-view/README.md) | Requested, PRD drafted | Can ship on SketchUp geolocation alone, before 5.1 |
 | 5.3 | [Window performance overlays](features/phase-08-post-mvp/window-performance-overlays/README.md) | Requested, PRD drafted | Needs 5.1 for radiation. A U-w ramp needs nothing and could come earlier |
 | 5.4 | Further library kinds and providers | Not drafted | Thermal Bridge Types, Pipe and Duct Types, equipment, climates |

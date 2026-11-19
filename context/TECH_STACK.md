@@ -213,7 +213,9 @@ and ERV ducting reuse these rules.
 
 The embedded runtime is served from a token-qualified loopback HTTP origin. `file://` and an
 unqualified loopback URL are not valid shortcuts. The manifest controls the allow-list, MIME type,
-hash, source URL, version and installed size of every runtime asset. The runtime runs in its own
+hash, source URL, version and installed size of every runtime asset. `make rbz-check` holds the installed
+extension to the size gates the manifest's `tools/runtime/vendor.py` declares: a 28,000,000-byte ceiling and growth
+of at most 2,500,000 bytes over the 24,541,739-byte baseline (Climate D4c-33, 2026-11-18). The runtime runs in its own
 page, `html/runtime/`, which `runtime/runtime_host.rb` opens on that origin for one Model session;
 the panel never loads Pyodide, and nothing starts the runtime when the extension loads or the panel
 opens. The server's token authorizes loading runtime assets and nothing else; it is not an agent
@@ -712,6 +714,9 @@ this foundation when their feature lands.
   `columnSort: true`) and grouping, with one Collapse all / Expand all icon toggle that collapses while
   anything is open and expands once everything is shut; filtering hides rows and never drops
   records, so drafts and expansion survive.
+- `SourceCards` (the `source_cards` module's export) for a sidebar of subjects beside one pane, and
+  `outlineMap` (`outline_map`'s) for a place on a map, which fetches nothing and leaves placing by keyboard to its owner's typed fields
+  ([EXTENSIBILITY](EXTENSIBILITY.md#organization-and-dependencies)).
 - `ui.Bubble` for non-modal editors anchored to a control: shared surface and pointer, viewport
   positioning, one active bubble, Escape and outside-click dismissal, focus return.
 - `ui.actionRow(cancel, primary, destructive)` for confirmation rows. Cancel on the left with an x;

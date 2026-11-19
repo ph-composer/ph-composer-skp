@@ -451,6 +451,10 @@ together or all null; anything else is refused with `validation.failed`. `climat
 WUFI-Passive code (1 for Not defined, 11 to 18 for US zones 1 to 8, 141 for 4C) and the read
 adds its label; it and `hours_from_utc` may be null with the site set. Type `hours_from_utc` as
 given: never work it out from the longitude.
+`ph_composer.climate.site.geolocation` reads what SketchUp reports for the Model's location: latitude
+and longitude only when SketchUp reports the Model geolocated, otherwise nulls. It never gives an
+elevation, and `hours_from_utc` is always null. It writes nothing; pass what you keep to
+`site.update` with the elevation.
 
 Read the design temperatures with `ph_composer.climate.design_temperatures.get`. Set any of
 `heating_99_c`, `cooling_1_c` and `design_temperature_source` with
@@ -475,6 +479,8 @@ elevation are needed; any other value may be null and the climate saves as `inco
 `monthly` row holds twelve months, January first. `peak_loads` holds `heat_1`, `heat_2` and
 `cool_1`, each with the same eight rows; a case's dewpoint and sky temperature may stay null.
 Station coordinates are optional and go together.
+A Model that already holds a climate refuses `enter_values` with `target.changed`; change it with
+`save_values`, or clear it first.
 
 To change values, call `ph_composer.climate.climate.save_values` with the new `values` and, in
 `expected_values`, the same eight fields as you read them; if the climate changed since, the edit
@@ -484,7 +490,8 @@ provenance's `source_type` becomes `user_defined` and its `assumptions` list the
 Wind speed is never an edit. `ph_composer.climate.climate.restore_original` copies the file's
 values back and is refused with `climate.no_original` for a climate typed by hand.
 `ph_composer.climate.climate.clear` deletes the climate and leaves the site and the design
-temperatures. With no climate, these three are refused with `climate.not_found`. Each write is one
+temperatures.
+Both take the same `expected_values` as `save_values`. With no climate, these three are refused with `climate.not_found`. Each write is one
 Undo step.
 
 `limit_check` compares the site with the station against Phius's limits, 50 miles (80.4672 km) and

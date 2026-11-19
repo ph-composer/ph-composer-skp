@@ -249,6 +249,19 @@ for measurements of the native gestures.
 The [ZC-04 result](../planning/archive/zone-child-lifecycle/STATUS.md#zc-04-native-receipt)
 covers native Undo of the copy and repair.
 
+## Reading climate station files
+
+Measured on 26.1.188, Ruby 3.2.2, macOS, 2026-11-18, a fresh process, through a probe loaded with the
+bridge over a real-size folder of 1,007 Phius station files
+([owed check 3](../planning/features/phase-04-climate/evidence/owed-check-3-20261118.md)). Counts and
+timings only.
+
+| Fact | Consequence |
+| --- | --- |
+| Walking the folder and reading each station file's header took 0.06 to 0.08 s with the operating system's file cache warm, the slowest file 1 to 2 ms; a SHA-256 of every file added about 0.005 s. A cold disk was not measured. | The read is synchronous, with no `DeferredWork` and no cache (D4c-11). The walk is bounded instead: 20,000 entries, 16 folders deep, 64 KiB a file, links not followed (`features/climate/stations/folder_scan.rb`). |
+| `require "digest"` loads and `Digest::SHA256` gives the published test vector. | The source checksum uses it with no fallback. SketchUp 2023 is the floor packet's to check. |
+| A cloud-synced folder whose files are not downloaded was not run. | Whether such a read blocks, downloads or fails is still owed. |
+
 ## Geolocation
 
 Measured on 26.1.188, Ruby 3.2.2, macOS, 2026-11-18, a fresh process on a fresh copy of

@@ -1,7 +1,7 @@
 # Climate tab wireframes
 
 DATE: 2026-11-15
-STATUS: Reviewed. Drawn 2026-11-15 from Ed's request for a Climate tab that works like PH-Navigator's, with climate data loaded from a folder on the user's computer. Ed answered all nine questions below on 2026-11-15 and 2026-11-16, and the [PRD](../PRD.md) was revised to them (its W1 to W9). Static wireframes, not a screen; no panel code.
+STATUS: Reviewed. Drawn 2026-11-15 from Ed's request for a Climate tab that works like PH-Navigator's, with climate data loaded from a folder on the user's computer. Ed answered all nine questions below on 2026-11-15 and 2026-11-16, and the [PRD](../PRD.md) was revised to them (its W1 to W9). Static wireframes, not a screen; no panel code. Built from in P4c-06 to P4c-11 (2026-11-18); each stage's departures from a board are in its stage document and the packet STATUS lists them for Ed's pass.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 

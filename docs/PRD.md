@@ -16,6 +16,9 @@ The [modeling guide](PRODUCT.md) describes the tools in the current build. The
   to downstream converters.
 - Give scripts and extensions the same operations and validation rules as the interface.
   Agent access uses explicit, revocable grants.
+- Keep the site, the design temperatures and one climate in the SKP file. Read Phius station
+  files where the user keeps them, copy the chosen station's values into the model, or take values
+  typed by hand, and write the climate as the HBJSON `Site`.
 
 ## Planned work
 
@@ -23,7 +26,7 @@ The [modeling guide](PRODUCT.md) describes the tools in the current build. The
 | --- | --- | --- |
 | Mechanical systems | Define equipment, model duct and pipe runs, and associate them with the building systems they serve | [Mechanical](../planning/features/phase-07-mechanical/README.md) |
 | METr handoff | Convert HBJSON with PHX and verify the resulting model in METr | [METr export](../planning/features/unscheduled/metr-export/README.md) |
-| Site and climate | Store a model-owned site and monthly climate snapshot from user data or an EPW. Use supplied peak-load data for the METr handoff | [Climate data](../planning/features/phase-04-climate/README.md) |
+| Hourly weather file | Derive a preliminary monthly climate from an EPW, with user-supplied peak-load data for the METr handoff | [Climate data](../planning/features/phase-04-climate/README.md) |
 
 The roadmap also tracks [sun-path and window performance views](../planning/ROADMAP.md#phase-5-post-mvp),
 additional library kinds and PV.
