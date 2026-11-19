@@ -4809,7 +4809,7 @@
       "id": "CM01",
       "label": "Climate site and design temperatures with the panel closed, on the installed RBZ in a fresh synthetic Model: the walkthrough reads the site Not set, sets it with Set Site Location, then sets the heating and cooling design temperatures and the source note as three Change Design Temperature steps, all through registered operations; native Undo and Redo of each step through the Edit menu with its name; save, fresh-process reopen and the same site and design temperatures read back",
       "mode": "mixed",
-      "authority": "planning/features/phase-04-climate/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-04-climate/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/climate/*",
         "src/ph_composer/features/climate/site/*",
@@ -4825,7 +4825,7 @@
       "id": "CM02",
       "label": "The climate record with the panel closed, on the installed RBZ in a fresh synthetic Model with no site and no climate: the walkthrough enters a climate by hand with gaps (Enter Climate Values), completes it (Edit Climate Values), checks that Restore refuses it, and clears it (Clear Climate); the development seed writes a synthetic station climate (Seed Station Climate); the walkthrough sets the site near it (Set Site Location), edits one cell and restores it (Edit Climate Values, Restore Climate Values), then moves the site out of the Phius limits (Set Site Location) with nothing stored; native Undo and Redo of each step through the Edit menu with its name; save, fresh-process reopen and the station climate with its as-read copy read back",
       "mode": "mixed",
-      "authority": "planning/features/phase-04-climate/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-04-climate/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/climate/*",
         "src/ph_composer/features/climate/climate/*",
@@ -4843,7 +4843,7 @@
       "id": "CM03",
       "label": "This computer's settings file and Climate's climate data folders with the panel closed, on the installed RBZ in a fresh synthetic Model: the file is created on first write in ~/Library/Application Support/PH-Composer, outside SketchUp's versioned folder; add, rename, locate and remove each survive a quit and relaunch; a folder not found keeps its row; SketchUp and a second process writing different sections lose neither; a damaged file is left as stored, reads refuse climate.settings_unreadable and the summary says so; a scripted add with no approval is refused access.user_required; no answer and no log line holds an absolute path; the Setup summary reads no folder, one, several and unreadable; and the native folder chooser through the approval route adds a folder, and cancels with nothing added",
       "mode": "mixed",
-      "authority": "planning/features/phase-04-climate/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-04-climate/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/shell/computer_settings.rb",
         "src/ph_composer/shell/native_approval.rb",
@@ -4858,7 +4858,7 @@
       "id": "CM04",
       "label": "The Phius station reader with the panel closed, on the installed RBZ in a fresh synthetic Model: owed check 3 through the product code, the real-size folder's walk, folders.list and stations.list times in SketchUp's Ruby, counts and seconds only; on a copy of the invented fixture folder, stations, states and files not read counted by kind, the -mon2.txt variant and the malformed file not stations, the Windows-1252 name read, the list's distance, elevation difference and verdict against the site; attach refused with no site, then attach_station and replace_station each one Undo step under its name, with the values, the as-read copy, the source and the wind prefill; source status found, changed, not on this computer and found again in a folder of another name; no path in an answer, the record or the log; Edit > Undo and Redo name each step",
       "mode": "mixed",
-      "authority": "planning/features/phase-04-climate/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-04-climate/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/climate/stations/*",
         "src/ph_composer/features/climate/declarations/stations.rb",
@@ -4874,7 +4874,7 @@
       "id": "CM05",
       "label": "The Site export on the installed RBZ through the bridge, the panel closed: eight reference Models exported, from no site and no climate to a board-18 station with one edit and an unset offset; the same honeybee-ph Site on every Building Segment, honeybee-ph's default for each part not written, Cooling 2 equal to Cooling 1, the provenance passed through (phius_approved, user_defined, no source_uri), each finding on its case and none blocking; PHX 1.57.5 reads each back in WUFI XML and METr JSON; no folder location in any answer, HBJSON, report or result",
       "mode": "mixed",
-      "authority": "planning/features/phase-04-climate/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-04-climate/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/climate/export.rb",
         "src/ph_composer/features/climate/export/*",
@@ -4889,7 +4889,7 @@
       "id": "CM06",
       "label": "The Climate tab in the panel on the installed RBZ in a fresh synthetic Model: owed check 4 recorded; Climate first in the tab row and the panel opening on Zones; the cards' states and the Hourly weather file card Planned and inert; Site location Not set on a new Model; Set Location from typed values as one Set Site Location step, a partial site refused in the dialog; Read from SketchUp Geolocation filling latitude and longitude only when SketchUp reports the Model geolocated, never elevation or hours from UTC; the design temperatures committed per field as Change Design Temperature steps; IP and SI; the tab row and both panes at 420 and 360 px; native Undo and Redo; the UI polish review by Ed",
       "mode": "mixed",
-      "authority": "planning/features/phase-04-climate/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-04-climate/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/html/index.html",
         "src/ph_composer/html/source_cards.js",
@@ -4906,7 +4906,7 @@
       "id": "CM07",
       "label": "The outline map on the installed RBZ in the real HtmlDialog: owed check 2's draw time (first paint, pan and zoom frame time); Set Location's map pans by drag, zooms by wheel and buttons and resets; a click places the site and fills latitude and longitude; typed values move the pin; with a station attached the station and its 50 mile ring show and a site that would fail warns before Set, which still saves; no network and no content-policy violation; the zoom and Reset buttons reached by keyboard and placing by typed values; native Undo and Redo of the Set; the UI polish review by Ed",
       "mode": "mixed",
-      "authority": "planning/features/phase-04-climate/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-04-climate/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/html/index.html",
         "src/ph_composer/html/outline_map.js",
@@ -4921,7 +4921,7 @@
       "id": "CM08",
       "label": "Climate Data on This Computer and the Phius pane's empty states on the installed RBZ in the real HtmlDialog: each folder listed with name, display location, format, stations, states and files not read by kind; Add Folder through the native chooser with the new name open for editing; Remove with its confirm; a folder not found offering Locate and Remove, its stations absent from stations.list; no Rescan and no new-station notice, counts read on each open; the dialog opened from the Climate tab, from the Setup view entry with its summary, and from the Extensions menu with the panel closed; the Phius pane's three empty states (no folder, no site, ready); 420 and 360 px; the UI polish review by Ed",
       "mode": "mixed",
-      "authority": "planning/features/phase-04-climate/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-04-climate/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/html/index.html",
         "src/ph_composer/html/panel.js",
@@ -4939,7 +4939,7 @@
       "id": "CM09",
       "label": "The station picker on the installed RBZ in the real HtmlDialog, over a real-size folder of invented stations: it opens sorted by distance, framed on the site's 50 mi ring, State on All, on the attached station's dataset or the one used last; Find Nearest; the State filter and the search; Dataset, remembered; map and list selecting together; hover facts; a failing station's warning before Attach, attached with no confirm; with a station attached the two compared, the lost edits named and Replace one native Undo step; 420 and 360 px; the UI polish review by Ed",
       "mode": "mixed",
-      "authority": "planning/features/phase-04-climate/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-04-climate/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/html/index.html",
         "src/ph_composer/html/outline_map.js",
@@ -4955,7 +4955,7 @@
       "id": "CM10",
       "label": "The attached climate pane on the installed RBZ in the real HtmlDialog over a synthetic station: the heading and tags, the limit check, the monthly and peak-load tables with Ground and Cooling 2 not part of the file, the wind speed and Where this lives; edited cells marked and Restore Original Values one native Undo step; a changed source file's mark and Update from File; with no folder the pane in full with no notice and Replace explaining; a failing station outside the Phius limits; Clear one native Undo step with no confirm; IP and SI; 420 and 360 px; the UI polish review by Ed",
       "mode": "mixed",
-      "authority": "planning/features/phase-04-climate/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-04-climate/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/html/index.html",
         "src/ph_composer/html/page_header.js",
@@ -4970,7 +4970,7 @@
       "id": "CM11",
       "label": "The values editor on the installed RBZ in the real HtmlDialog: Enter Values by Hand with no folder, one synthetic paste filling the grid with its label column left out, Save waiting for the name and station elevation and saving with gaps, the card and pane reading Incomplete with what is missing and Not checked without coordinates, Edit Values on a hand climate and on a station marking the station edited, a stale save keeping the draft, one native Undo step for Enter and Edit Climate Values, a real paste from the clipboard, 420 and 360 px; Ed's real paste from a Phius workbook and station file, nothing kept, and the UI polish review",
       "mode": "mixed",
-      "authority": "planning/features/phase-04-climate/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-04-climate/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/html/index.html",
         "src/ph_composer/html/inventory_grid.js",
@@ -4986,7 +4986,7 @@
       "id": "CM12",
       "label": "The Climate packet end to end on the installed RBZ, from a fresh process, in the order of the PRD's acceptance shape: a synthetic climate data folder added and its stations, states and files not read counted; the site set by typing, by a click on the outline map and from SketchUp's geolocation with the elevation typed; the picker's nearest station with a passing and a failing verdict; attach; save, the folder's setting removed and a fresh reopen with the climate read in full and Replace asking for a folder; the folder restored and the station replaced as one native Undo step; an edited value marked; a climate typed by hand on a second Model; the design temperatures entered and cleared; export with Site in the HBJSON, the dataset and station in the report and no folder location anywhere; Mechanical's reads of climate.get and design_temperatures.get; the UI polish review by Ed",
       "mode": "mixed",
-      "authority": "planning/features/phase-04-climate/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-04-climate/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/climate/*",
         "src/ph_composer/html/features/climate/*",

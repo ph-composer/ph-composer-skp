@@ -122,14 +122,14 @@ part of it.
 D4-15 needs the Model's climate: a Phius location, or the ASHRAE 99% and 1% design temperatures
 with the monthly values the derating reads. Ed, 2026-11-15: Climate is built first and planned in
 its own thread, and this packet assumes it supplies that data.
-[Climate data](../phase-04-climate/README.md) is the existing packet, drafted as a
+[Climate data](../../archive/phase-04-climate/README.md) is the existing packet, drafted as a
 post-MVP request.
 
 ### Recorded since, from the Climate packet
 
 | # | Finding | Consequence |
 | --- | --- | --- |
-| F20 | The estimator's derating reads two values per location from its own table, the ASHRAE 1% cooling and 99% heating dry bulb, and its input-power totals read the share of months whose mean temperature is below 17 and below 47 °F (workbook formulas read 2026-11-15, outside this repository). A Phius station file carries the monthly means and neither design temperature | The blend takes the monthly means from the Model's climate and the two design temperatures from the user: [Climate PRD](../phase-04-climate/PRD.md), W4. Without them the blended heat pump is left out with a finding and export proceeds |
+| F20 | The estimator's derating reads two values per location from its own table, the ASHRAE 1% cooling and 99% heating dry bulb, and its input-power totals read the share of months whose mean temperature is below 17 and below 47 °F (workbook formulas read 2026-11-15, outside this repository). A Phius station file carries the monthly means and neither design temperature | The blend takes the monthly means from the Model's climate and the two design temperatures from the user: [Climate PRD](../../archive/phase-04-climate/PRD.md), W4. Without them the blended heat pump is left out with a finding and export proceeds |
 
 D4-13's tab row gains two neighbours settled in the Climate packet on 2026-11-16: Climate is the
 first primary tab, and the row reads Climate, Zones, Assemblies, Window Types, Thermal Bridges,
@@ -161,4 +161,4 @@ Programs, Mechanical, Library, Export.
 | 2026-10-21 | Drafted from `420c783a` and the three interviews of the same day: fourteen findings, twelve decisions. None answered. |
 | 2026-10-21 | Ed answered D4-01 to D4-12, all as recommended. The bindings in CONTRACTS stand as drafted. |
 | 2026-11-15 | Wireframe review with Ed: findings F15 to F19, decisions D4-13 to D4-20 (Part 3). D4-08 and the interview answers Q4 (heat pumps), Q9, H1, H4 and H7 are revised. Bindings and stages not yet re-planned. |
-| 2026-11-17 | F20 recorded (what the estimator reads from climate) and the tab row's order noted, both from the [Climate packet](../phase-04-climate/PRD.md), which is now Phase 4 and precedes this phase. |
+| 2026-11-17 | F20 recorded (what the estimator reads from climate) and the tab row's order noted, both from the [Climate packet](../../archive/phase-04-climate/PRD.md), which is now Phase 4 and precedes this phase. |

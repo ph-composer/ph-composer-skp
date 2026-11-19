@@ -1,0 +1,374 @@
+# Climate data: status
+
+DATE: 2026-09-18
+STATUS: Complete (2026-11-18), archived. Implementation: all twelve stages, P4c-01 to P4c-12, built. Merge: P4c-01 to P4c-12 merged to main (PRs #512 to #523, last `2c4faf17`); the review fixes of the commits that merged unreviewed are PR #524, merged to main 2026-11-19 UTC as `73ef7ba9`. Host acceptance: not complete; CM01 to CM05 Pass, CM06 to CM12 agent runs Pass with Ed's verification pass open, and the ledger reads CM04 to CM12 `needs_recheck` ([Closure](#closure-2026-11-18)). Release: none. Ed authorized every stage on 2026-11-17 ([Authorization](#authorization)).
+AUTHOR: Ed May, BLDGTYP, with Claude
+ISSUE: [#511](https://github.com/ph-composer/ph-composer-skp/issues/511)
+
+## State
+
+Post-MVP by Ed's request of 2026-09-18. PRD drafted the same day from the predecessor's
+`planning/phases/C1_climate-data.md`, adapted for the pivot away from designPH and PHPP. D7 is
+confirmed: no datasets ship; user-owned climate files, manual entry and public EPWs are permitted;
+honeybee-ph owns EPW-to-monthly conversion. D9 is confirmed: the derived monthly climate supports
+preliminary work, and user-supplied peak loads gate climate-bearing METr export. Remaining feature
+questions are not interviewed.
+
+## Proposed 2026-11-15, answered by 2026-11-16
+
+All nine questions are answered in the [wireframes' README](mockups/README.md) and the ledger below, and the PRD was revised to them on 2026-11-16. The list that follows is what that revision changed.
+
+Ed asked on 2026-11-15 for a Climate tab that works like PH-Navigator's, with climate data loaded
+from a folder on the user's own computer and kept out of the Model apart from the chosen station.
+The [wireframes](mockups/README.md) propose it and list nine questions. Nothing in the PRD is
+changed yet. A review would revise:
+
+- the non-goal "No map tiles in the first scope" and the boundary line "does not host a climate
+  map": an outline map shipped with the extension is proposed, still with no network;
+- the Behaviors' "A Climate section": a primary Climate tab is proposed;
+- Q2 and Q3: a Phius station folder becomes a named source, configured per computer;
+- a new input, the ASHRAE 99% heating and 1% cooling dry bulb, which Phase 4's blended heat pump
+  needs ([Phase 4 DECISIONS, Part 3](../../features/phase-07-mechanical/DECISIONS.md#part-3-wireframe-review-2026-11-15), D4-15);
+- this packet's place. Settled 2026-11-15: promoted to Phase 4, ahead of Mechanical (now Phase 7).
+
+D7 (no datasets ship) and the snapshot rule stand, and the proposal depends on both.
+
+## Authorization
+
+Ed authorized every Climate stage on 2026-11-17: "Use the 'pr-loop' skill protocol for all reviews. Use a new branch for each phase of the work, and cleanup all branches and worktrees as you go. You are authorized to merge all PRs once the repo CI is green and all reviewer comments are addressed and resolved."
+
+## Stages
+
+| Stage | State | Evidence |
+| --- | --- | --- |
+| [P4c-01](phases/p4c-01-feature-site-and-design-temperatures.md) | Merged to main 2026-11-17 ([PR #512](https://github.com/ph-composer/ph-composer-skp/pull/512), `d49585a9`); CM01 Pass | `make ci` on the branch, 2026-11-17: RuboCop 755 files, no offenses; Ruby suite 2917 runs, 36459 assertions, 0 failures; JavaScript 877 tests pass; Python 271 passed; hostkit Ruby 48 runs, 0 failures. New: `tests/climate_settings_test.rb` (14 runs), `tests/climate_site_walkthrough_test.rb` (1 run), climate quantities in `tests/units_test.rb` and `tests/units_test.js`. CM01 Pass on SketchUp 26.1.188: [evidence](evidence/cm01-20261117.md), [recipe](evidence/cm01-recipe.md) |
+| [P4c-02](phases/p4c-02-climate-record-and-limit-check.md) | Merged to main 2026-11-18 ([PR #513](https://github.com/ph-composer/ph-composer-skp/pull/513), `85c4d78e`); CM02 Pass; CM01 recheck Pass | `make ci` on the branch, 2026-11-17: RuboCop 768 files, no offenses; Ruby suite 2955 runs, 36911 assertions, 0 failures; JavaScript 877 tests pass; Python 271 passed; hostkit Ruby 48 runs, 0 failures; RBZ verified, 605 files (on the review-fix head). Codex review (gpt-6.1-sol) found 2 P2, both fixed: inclusive limits under floating-point error, and `user_data` left out of `climate.get` to keep it within one reply. New: `tests/climate_record_test.rb` (19 runs), `tests/climate_record_operations_test.rb` (17 runs), `tests/climate_walkthrough_test.rb` (2 runs). Entry checks and departures (a separate `enter_values`, write results without the record, the station seed) in the [stage doc](phases/p4c-02-climate-record-and-limit-check.md). CM02 case added, [recipe](evidence/cm02-recipe.md). CM01's ledger row read `needs_recheck` after this change. On `024768ea`, SketchUp 26.1.188: CM02 Pass ([evidence](evidence/cm02-20261118.md)), CM01 recheck Pass ([evidence](evidence/cm01-20261118.md)) |
+| [P4c-03](phases/p4c-03-settings-file-and-climate-folders.md) | Merged to main 2026-11-18 ([PR #514](https://github.com/ph-composer/ph-composer-skp/pull/514), `7c3312ea`); CM03 Pass on `45224965` ([evidence](evidence/cm03-20261118.md)). CM01 and CM02 read `needs_recheck` and are rerun in P4c-12's fresh-process run. Owed check 1 recorded ([evidence](evidence/owed-check-1-20261118.md)) and folded into `context/SKETCHUP_HOST_BEHAVIOR.md`; C4c-1 settled (D4c-16) | `make ci` on the branch, 2026-11-18: RuboCop 774 files, no offenses; Ruby suite 2974 runs, 37262 assertions, 0 failures; JavaScript 877 tests pass; Python 271 passed; hostkit Ruby 48 runs, 0 failures; RBZ verified, 609 files. New: `tests/computer_settings_test.rb` (7 runs), `tests/climate_folders_test.rb` (12 runs). Codex review (gpt-6-astra), two cycles: 3 P2, all fixed (`057cbd94`, `45224965`; the second unreviewed by the two-cycle cap). Departures (a feature-free service, a write lock, a later schema version neither read nor written) in the [stage doc](phases/p4c-03-settings-file-and-climate-folders.md#departures-2026-11-18) |
+| [P4c-04](phases/p4c-04-station-reader-and-attach.md) | Merged to main 2026-11-18 ([PR #515](https://github.com/ph-composer/ph-composer-skp/pull/515), `de07fd81`); CM04 Pass on `47f26946` ([evidence](evidence/cm04-20261118.md)), the cloud-synced clause not run. CM02 and CM03 read `needs_recheck`, rerun in P4c-12. Owed check 3 recorded ([evidence](evidence/owed-check-3-20261118.md)): 0.06 to 0.08 s for 1,007 files in SketchUp's Ruby, so the read is synchronous (D4c-11, D4c-21); the cloud-synced case not run. C4c-2 and C4c-6 settled (D4c-18). Departures (two actions, paging, the stem in the source, header-only listing) in the [stage doc](phases/p4c-04-station-reader-and-attach.md#departures-2026-11-18) | `make ci` on the branch, 2026-11-18: RuboCop 783 files, no offenses; Ruby suite 3006 runs, 37656 assertions, 0 failures, 1 skip (the private-corpus test, `PH_COMPOSER_CLIMATE_CORPUS` unset); JavaScript 877 tests pass; Python 271 passed; hostkit Ruby 48 runs, 0 failures; RBZ verified, 613 files. New: `tests/climate_station_file_test.rb` (8 runs), `tests/climate_folder_scan_test.rb` (7), `tests/climate_stations_test.rb` (14), `tests/climate_station_corpus_test.rb` (1, passes with the corpus set), one more in `tests/climate_walkthrough_test.rb`. Sonnet read-through before the gate: 15 findings, 9 fixed, the rest recorded. Codex review (gpt-6.1-sol), two cycles: 3 P2 then 2 P2, all fixed (`83c4ae98`, `47f26946`; the second unreviewed by the two-cycle cap) |
+| [P4c-05](phases/p4c-05-site-export.md) | Merged to main 2026-11-18 ([PR #516](https://github.com/ph-composer/ph-composer-skp/pull/516), `4239dbe4`); CM05 Pass on `e4392993` ([evidence](evidence/cm05-20261118.md)). Owed check 6 recorded ([evidence](evidence/owed-check-6-20261118.md)); C4c-4 settled (D4c-24). Departures (the PHX pin, the report block through the result, a path-like note kept out of the report) in the [stage doc](phases/p4c-05-site-export.md#departures-2026-11-18) | `make ci` on the branch, 2026-11-18: RuboCop 787 files, no offenses; Ruby suite 3020 runs, 37892 assertions, 0 failures, 1 skip (the private-corpus test); JavaScript 877 tests pass; Python 279 passed, 1 skipped (the PHX round trip without its group); hostkit Ruby 48 runs, 0 failures; RBZ verified, 617 files. New: `tests/climate_export_test.rb` (11 runs), `tests/python/test_site_sections.py` (7), `tests/python/test_site_phx_round_trip.py` (2 passed with `uv run --group phx`, skipped without); goldens `tests/fixtures/climate/extraction.json`, `result_fields.json` and `result.json`, the last owned by the Python test through `make fixtures`; the phase-one and thermal-bridge extraction goldens gain the empty Site record. Sonnet read-through before the gate: 15 findings; fixed the left-out climate's "exported" line, the preflight not reading the design-temperature dictionary, record-to-object coverage of every row and case, the report's branches and the Python golden's ownership; a free-text note that reads as a path was left as a follow-up and fixed after the Codex review (D4c-25). Codex review (gpt-6-astra), two cycles: 2 P2 (a path-like note blocked the export; zone and offset findings with no climate), both fixed in `e4392993`; the second cycle approved with no findings |
+| [P4c-06](phases/p4c-06-climate-tab-site-and-design-temperatures.md) | Merged to main 2026-11-18 ([PR #517](https://github.com/ph-composer/ph-composer-skp/pull/517), `f1b4e2b4`); CM06 agent run Pass on `d263a336` ([evidence](evidence/cm06-20261118.md)); the ledger records blocked until Ed's verification pass. Codex (gpt-6.1-sol), two cycles: 4 P2 then 1 P2, all fixed; the last fix, `d263a336`, merges unreviewed. Owed check 4 recorded ([evidence](evidence/owed-check-4-20261118.md)), its Add Location run left for the conductor. Departures in the [stage doc](phases/p4c-06-climate-tab-site-and-design-temperatures.md#departures-2026-11-18) | `make ci` on the branch, 2026-11-18: RuboCop 789 files, no offenses; Ruby suite 3026 runs, 37933 assertions, 0 failures, 1 skip; JavaScript 893 tests pass; Python 279 passed, 1 skipped; hostkit Ruby 48 runs, 0 failures; RBZ verified, 626 files. New: `tests/climate_panel_test.js` (16 tests), `tests/climate_geolocation_test.rb` (5 runs), browser check `tools/ui-preview/climate_checks.cjs` at the three panel sizes. Sonnet read-through before the gate: 11 findings, 9 fixed (a unit field's error layout, the design guard taken when typing began, geolocation wording, focus on commit, five missing tests), 2 kept (board 8's two Set Location buttons; the shared action-result slot, matched by request id) |
+| [P4c-07](phases/p4c-07-outline-map.md) | Merged to main 2026-11-18 ([PR #518](https://github.com/ph-composer/ph-composer-skp/pull/518), `eca138d9`); CM07 agent run Pass on `3a48fef3` ([evidence](evidence/cm07-20261118.md)); Ed's pass pending. Owed check 2 recorded ([evidence](evidence/owed-check-2-20261118.md)): Natural Earth 5.1.2, public domain, 113,186 bytes of borders, 151,835 bytes added installed; C4c-5 settled (D4c-26). Departures (the polyline encoding, the hover tip, the dialog's layout and the amber warning, the pane map not built) in the [stage doc](phases/p4c-07-outline-map.md#departures-2026-11-18) | `make ci` on the branch, 2026-11-18: RuboCop 790 files, no offenses; Ruby suite 3027 runs, 37971 assertions, 0 failures, 1 skip; JavaScript 931 tests pass; Python 283 passed, 2 skipped (the PHX round trip and the map source check without their inputs); hostkit Ruby 48 runs, 0 failures; RBZ verified, 630 files. New: `tests/map_projection_test.js` (8), `tests/outline_map_test.js` (15), `tests/map_ring_test.rb` (1), `tests/python/test_map_borders.py` (5, the source check passing with `PH_COMPOSER_MAP_DATA` set), 10 more in `tests/climate_panel_test.js`; browser check `tools/ui-preview/outline_map_checks.cjs`. Sonnet read-through before the gate: 12 findings, 9 fixed, 3 kept. Codex review (gpt-6.1-sol), two cycles: 5 P2 then 4 P2, all fixed (`05648bc8`, then a last fix that merges unreviewed under the two-cycle cap; stage doc) |
+| [P4c-08](phases/p4c-08-climate-data-dialog-and-phius-states.md) | Merged to main 2026-11-18 ([PR #519](https://github.com/ph-composer/ph-composer-skp/pull/519), `7bcb6672`); CM08 agent run Pass on `94b26a96` ([evidence](evidence/cm08-20261118.md)); Ed's pass pending. C4c-3 settled (D4c-27); the pane's unnamed cases settled (D4c-28). Departures in the [stage doc](phases/p4c-08-climate-data-dialog-and-phius-states.md#departures-2026-11-18) | `make ci` on the branch, 2026-11-18: RuboCop 791 files, no offenses; Ruby suite 3031 runs, 0 failures, 1 skip; JavaScript 952 tests pass; Python 283 passed, 2 skipped; RBZ verified. New: `tests/climate_data_panel_test.js` (25), 4 runs in `tests/setup_entries_test.rb`, browser check `tools/ui-preview/climate_data_checks.cjs` at 1280, 1060, 800, 420 and 360 px. Sonnet read-through before the gate: 10 findings and 7 test gaps; 6 findings fixed (an orphaned Remove confirm, the table's sideways scroll between 701 and 1040 px, Done during a running command, a click lost to a rename saved on leaving the field, a dataset with no stations named, a route kept across a closed window) and the gaps covered; 4 kept (Add Folder's reason is the failure shown above it; the pane's stale first paint is now a reading state; `notify_subscribers` rescuing errors and the Setup summary's walk predate the stage). Codex review (gpt-6.1-sol), cycle 1: 1 P2, fixed (a press on another button while a changed name was open saved the name and lost the click; the press now saves the name and then acts, with a browser regression); cycle 2: 1 P2 and 2 P3, all fixed in the last fix, which merges unreviewed under the two-cycle cap (a name editor opened in a dialog closed by Done while Add ran, which then kept a reopened dialog's list stale; Remove confirmed a renamed row under its old name; a folder read in part always blamed its size) |
+| [P4c-09](phases/p4c-09-station-picker.md) | Merged to main 2026-11-18 ([PR #520](https://github.com/ph-composer/ph-composer-skp/pull/520), `fdf43034`); CM09 agent run Pass on `fab641b3`, parts A and B ([evidence](evidence/cm09-20261118.md), [recipe](evidence/cm09-recipe.md)); Ed's pass pending. D4c-29 (the narrow layout) and D4c-30 (`stations.all`, API 1.68) made. Departures in the [stage doc](phases/p4c-09-station-picker.md#departures-2026-11-18) | `make ci` on `fab641b3`, 2026-11-18: RuboCop 791 files, no offenses; Ruby suite 3032 runs, 38022 assertions, 0 failures, 1 skip; JavaScript 987 tests pass; Python 283 passed, 2 skipped; hostkit Ruby 48 runs, 0 failures; RBZ verified, 634 files, 25,930,681 bytes installed (69,319 under the 26,000,000-byte ceiling; this stage added about 31 KB). New: `tests/climate_picker_test.js` (31), one run in `tests/climate_stations_test.rb`, browser check `tools/ui-preview/climate_picker_checks.cjs` at 1280, 420 and 360 px (1,007 invented stations: open 157 ms, filter 28 ms, marker select 12 ms in Chrome). Sonnet read-through before the gate: 14 findings and 3 test gaps; fixed the API test's minor, Enter in the search submitting Attach, the old list left after Dataset, failed reads left unpainted, a selection hidden by a filter, a re-read on every revision, the narrow layout after a resize, the Attached mark and Replace mode not repainted, a stale refusal, cells kept across a unit change, the picker and Replace without a site; gaps covered (IP units, a climate entered by hand, Replace's messages, keyboard reach in the browser). Kept: `climate.get` in Replace (stage doc), the elevation sign from the site (stage doc), counts grouped with commas as P4c-08. Codex review (gpt-6.1-sol), cycle 1: 1 P1, 3 P2, 1 P3, all fixed (a change during a pending Replace not read again before a retry; no selection after a search recovered; a folder not read whole not said; a dataset not remembered not said; a renamed station's cached label); cycle 2: 3 P2, all fixed in the last fix, which merges unreviewed under the two-cycle cap (Replace's facts cut at 360 px; a long dataset name widening the dialog; the Attached mark not following a climate replaced elsewhere); a host smoke run on `f94f816e` found the Attached chip cut short, widened in a later fix that also merges unreviewed |
+| [P4c-10](phases/p4c-10-attached-climate-pane.md) | Merged to main 2026-11-18 ([PR #521](https://github.com/ph-composer/ph-composer-skp/pull/521), `acf0827b`); CM10 agent run Pass on `9ae52ed0`, parts A and B ([evidence](evidence/cm10-20261118.md), [recipe](evidence/cm10-recipe.md)); Ed's pass pending. D4c-31 (the actions in the page header) and D4c-32 (the narrow tables scroll inside their own box) made. Entry checks and departures in the [stage doc](phases/p4c-10-attached-climate-pane.md#entry-checks-2026-11-18) | `make ci` on the branch, 2026-11-18: RuboCop 791 files, no offenses; Ruby suite 3032 runs, 38022 assertions, 0 failures, 1 skip; JavaScript 1007 tests pass; Python 283 passed, 2 skipped; RBZ verified, 635 files, 25,968,889 bytes installed from `9ae52ed0` (31,111 under the 26,000,000-byte ceiling; this stage added about 37 KB). New: `tests/climate_attached_test.js` (20), browser check `tools/ui-preview/climate_attached_checks.cjs` at 1280, 420 and 360 px with five preview fixtures; the picker and data-dialog tests follow Replace into the page header. Sonnet read-through before the gate: 15 findings; fixed a repaint dropping a typed wind speed, scalar and peak edits untested, the preview's edits and guard looser than the host's, an unreadable folder list explained as no folder, a stale explanation bubble, unbounded names and missing lists, table names and row scope, a focusable edited cell with a non-colour mark, an unknown source status read as a failure, a stale Source changed after a replace, a guard on an unknown case, and six missing tests; kept the limits in mi and ft in both systems (as the picker; Ed's pass) and the paint key over the whole read. Codex review (gpt-6.1-sol), cycle 1: 1 P1 and 3 P2, all fixed (a wind speed guarded by the values read when it was saved, not when typing began; Set Location not passed to Replace's explanation; an invalid wind draft kept across Clear; a held repaint not released by an unchanged Enter); the CM10 case added to `cases.json`; cycle 2: 2 P2, both fixed in the last fix, which merges unreviewed under the two-cycle cap (a click on Restore that ended a wind draft by blur was lost to the repaint, now queued until the save answers and the climate is read again; a failed re-read kept showing the last verdict without saying so) |
+| [P4c-11](phases/p4c-11-hand-entry-and-edit-values.md) | Merged to main 2026-11-18 ([PR #522](https://github.com/ph-composer/ph-composer-skp/pull/522), `74d85a79`); CM11 agent run Pass on `408285df`, parts A and B ([evidence](evidence/cm11-20261118.md), [recipe](evidence/cm11-recipe.md)); Ed's licensed paste and pass pending. Owed check 5 recorded by shape ([evidence](evidence/owed-check-5-20261118.md)), its clipboard half left for CM11 part B; D4c-33 (Ed raised the installed-size ceiling to 28,000,000 bytes and the growth allowance to 2,500,000) and D4c-34 (one paste layout, a label column left out) made. Departures in the [stage doc](phases/p4c-11-hand-entry-and-edit-values.md#departures-2026-11-18) | `make ci` on the branch, 2026-11-18: RuboCop 791 files, no offenses; Ruby suite 3032 runs, 38022 assertions, 0 failures, 1 skip; JavaScript 1018 tests pass; Python 283 passed, 2 skipped; RBZ verified, 636 files, 25,987,072 bytes installed (18,183 more than P4c-10; 2,012,928 under the new ceiling). New: `tests/climate_values_editor_test.js` (11), browser check `tools/ui-preview/climate_values_checks.cjs` at 1280, 420 and 360 px. Sonnet read-through before the gate: 13 findings; fixed rounded text sent back for a value typed and put back (cells and unit fields), coordinates shown outside the panel's number format, a single column of words taken for labels, an empty clipboard, the typographic minus, units fixed by a refused paste, modified arrow keys, the cells' unit description, and a PRODUCT line on Restore; declined a confirm before Cancel discards a draft (the shared form's behavior). Codex (gpt-6.1-sol) cycle 1 on `f371803a`: 3 P2 and 1 P3, all fixed in `07f8c099` (a station file's point decimals in a comma number format, a draft changed while a save was out, Edit Values opened before a wind speed's save was read back, the missing CM11 recipe). Cycle 2 on `07f8c099`: 2 P2, both fixed in the next commit (a paste while a save is out, a block of blank cells ignored), which merges unreviewed by the two-cycle cap |
+| [P4c-12](phases/p4c-12-acceptance-and-handoff.md) | Merged to main 2026-11-18 ([PR #523](https://github.com/ph-composer/ph-composer-skp/pull/523), `2c4faf17`); CM12 agent run Pass on `1ca85729`, parts A and B ([evidence](evidence/cm12-20261118.md), [recipe](evidence/cm12-recipe.md)), Ed's polish pass pending; CM01, CM02 and CM03 rechecks Pass; Mechanical's entry gate met | `make ci` on the branch, 2026-11-18: RuboCop 791 files, no offenses; Ruby suite 3032 runs, 38022 assertions, 0 failures, 1 skip; JavaScript 1021 tests pass; Python 283 passed, 2 skipped; hostkit Ruby 48 runs, 0 failures; RBZ verified, 636 files. `make ci` on Ruby 2.7.2 passed on `b88a6122` (791 files, no offenses; 3032 runs, 0 failures, 1 skip). `make coverage`: Ruby 97.2% of 30,563 lines (minimum 93%), JavaScript 97.4% of 19,557 (94%), Python 94.84% (92%). `make runtime-browser-check` passed. `make ui-checks`: every check passes but `assembly_hover_checks.cjs`, which fails the same way on `d49585a9^`, before this packet (a follow-up, not Climate's); `header_checks.cjs` and `setup_checks.cjs` were stale since P4c-06 and P4c-08 (the first `h1` is now the hidden Climate tab's; the Setup view has two entries) and now pass. Footprint, as installed from `1ca85729`: 25,988,982 bytes, 2,011,018 under the 28,000,000-byte ceiling and 1,052,757 under the growth gate (24,541,739 plus 2,500,000), 1,447,243 over the baseline; the map's four files (`map_borders.js` 113,186, `outline_map.js` 17,186, `map_projection.js` 6,117, `outline_map.css` 3,118) are 139,607 bytes, 0.5% of the installed size and 9.6% of the growth. Sonnet read-throughs: a docs audit against the code (gaps folded) and the diff, 19 findings, all fixed. Codex (gpt-6.1-sol) cycle 1 on `b88a6122`: 1 P1, 3 P2, 1 P3, all fixed in the recipe, `cases.json` and the kit wording (the run now moves this computer's settings aside and puts them back; CM12's paths include its shared persistence, approval, privacy and page-header files; B2 runs on a Model never geolocated with coordinates the stand-in never wrote; the whole climate is compared across save and reopen; `SourceCards` and `outlineMap` named as the modules export them). Cycle 2 on `b63d04df`: 3 P2, all fixed in the next commit, docs only, which merges unreviewed under the two-cycle cap (the rechecks reuse A0's install and skip their recipes' checkouts; B2's no-geolocation branch reads blocked rather than reaching an unreachable Set; CM12's paths gain unit parsing, dispatch, the model operation and the session) |
+
+## Next step
+
+Ed's verification pass, below, and his decision on the rechecks ([Closure](#closure-2026-11-18)). No
+stage work is left.
+
+## Closure 2026-11-18
+
+Four separate facts:
+
+| Fact | State |
+| --- | --- |
+| Implementation | Complete: P4c-01 to P4c-12 built; every code commit reviewed by Codex, the last (`6b5d1e0c`) with no findings |
+| Merge | P4c-01 to P4c-12 merged to main through PRs #512 to #523 (last `2c4faf17`). The five review fixes are [PR #524](https://github.com/ph-composer/ph-composer-skp/pull/524), both CI jobs green on `2126f1fd`, merged to main 2026-11-19 UTC as `73ef7ba9` |
+| Host acceptance | Not complete. The ledger (`acceptance_ledger.py status` on PR #524's head `2126f1fd`): CM01 to CM03 Pass, source unchanged; CM04 and CM05 Pass, `needs_recheck`; CM06 to CM12 blocked on Ed's assertions (the agent runs Pass), `needs_recheck` |
+| Release | None. No release, distribution, platform-support or certification claim follows from this packet |
+
+### Open for Ed
+
+- **CM04 to CM10, `needs_recheck`**: later stages changed files in their dependency paths. Ed
+  decides what is rerun. CM12's integrated run on `1ca85729` walked their surfaces, but CM12 itself
+  reads `needs_recheck` on PR #524's head, so a fresh CM12 run on the final head is the candidate.
+- **CM11 and CM12, `needs_recheck` after PR #524**, whose fixes change the pane's queue, the Set
+  Location dialog and the shared table.
+- **The [verification pass](#for-eds-verification-pass)** below: the polish, wording, layout and
+  feel items of P4c-06 to P4c-11, the CM11 licensed paste (owed check 5 items 1 and 2), and the two
+  open calls (Replace by typed values in one Undo step; the shell notice for a refused save).
+- **SketchUp's own Add Location** (owed check 4 item 2): never run. A manual location set in Model
+  Info was run in CM12 part B and reads as geolocated.
+- **Flagged for recheck from earlier packets**: E17, PS9, AW02 and AW10 read `needs_recheck` in the
+  same ledger read.
+
+### Final gates
+
+- `make ci` on P4c-12's branch, 2026-11-18: RuboCop 791 files, no offenses; Ruby suite 3032 runs,
+  38022 assertions, 0 failures, 1 skip (the private-corpus test); JavaScript 1021 tests pass; Python
+  283 passed, 2 skipped (the PHX round trip and the map source check without their inputs); hostkit
+  Ruby 48 runs, 0 failures; RBZ verified, 636 files. The same gate on Ruby 2.7.2 passed on `b88a6122`.
+- `make coverage`: Ruby 97.2% of 30,563 lines (minimum 93%), JavaScript 97.4% of 19,557 (94%),
+  Python 94.84% (92%). `make runtime-browser-check` passed. `make ui-checks` passed except
+  `assembly_hover_checks.cjs` (below).
+- PR #524: both CI jobs (`make ci` on Ruby 2.7.2 and 3.2.2) green on `2126f1fd`.
+- `make ci` on the archive branch (PR #524's code with this packet's documents), 2026-11-18: RuboCop
+  791 files, no offenses; Ruby suite 3032 runs, 38022 assertions, 0 failures, 1 skip; JavaScript
+  1031 tests pass; Python 283 passed, 2 skipped; hostkit Ruby 48 runs, 0 failures; RBZ verified, 636
+  files, 25,992,613 bytes installed.
+
+### Footprint
+
+25,988,982 bytes installed, measured from `1ca85729`: 2,011,018 under the 28,000,000-byte ceiling
+(D4c-33), 1,052,757 under the growth gate (24,541,739 plus 2,500,000) and 1,447,243 over the Phase 3b
+baseline. The outline map's four files are 139,607 bytes, 9.6% of the growth. With PR #524's fixes
+the RBZ check reads 25,992,613 bytes installed, 3,631 more and 2,007,387 under the ceiling.
+
+### Residual risks
+
+- A cloud-synced folder whose files are not downloaded was never read, and a cold disk was not
+  timed (owed check 3; CM04's clause not run).
+- Windows and a second SketchUp version are deferred (E3): the settings file is verified on macOS
+  in SketchUp 2026 only. The 2023 floor and Windows support packets carry the checks.
+- The picker map's wheel zoom was sent on the host but not seen (CM09 part B).
+- The clipboard from Excel and a text editor is settled by shape only, not by a real paste (owed
+  check 5).
+- PHX is pinned at 1.57.5 for the round trip; 1.58 and later need honeybee-ph 1.33.68.
+- The private-corpus test and the map source check skip in CI; they run only on a computer with
+  their inputs.
+
+### Deferred follow-ups
+
+Reported by the conductor and not reproduced in this packet:
+
+- PHX: a Building Segment name with a space fails conversion.
+- PHX: METr writes a latitude, longitude or UTC offset of 0 as NaN.
+- The network-mount stall.
+
+Recorded in this packet:
+
+- The `access.user_required` message names the Libraries menu's "Approve Library Folder…" for any
+  folder approval, the climate folder's included ([CM03 evidence](evidence/cm03-20261118.md)).
+- `tools/ui-preview/assembly_hover_checks.cjs` fails the same way on `d49585a9^`, before Climate.
+- Board 21's map in the Site location pane was not built (P4c-07); place it in a stage or drop it.
+- The Set Location dialog grows and re-centres when the limit warning shows or hides, moving the
+  map about 37 px (CM07 part B).
+- The hourly weather file, its D9 peak-load gate and PHI data (out of scope from the start).
+- The Phius card's second chip (Edited, Incomplete, Source changed), which needs a kit change to
+  Source cards (P4c-10).
+
+## For Ed's verification pass
+
+Agents run every CM06 gesture on the host first; these need Ed's own judgment, and CM06 is not
+marked Pass until he has looked at them.
+
+- **P4c-06, UI polish sign-off** of the Climate tab against boards 1, 7, 8, 13, 22 and 23: the
+  source cards and their chips, the Site location empty state and its set state, Set Location, and
+  the Design temperatures pane, at 1280, 420 and 360 px.
+- **P4c-06, wording**: Set Location's geolocation note ("It does not fill elevation or hours from
+  UTC"), which differs from boards 1 and 22 until owed check 4's Add Location run proves SketchUp's
+  offset; the empty state's first bullet, which leaves out the map until P4c-07; the Phius climate
+  data placeholder line; the design pane's closing line and its warning sentence.
+- **P4c-06, feel**: a design temperature saves on Enter or on leaving the field and is read only
+  while it saves; Set Location stays disabled until latitude, longitude and elevation read as numbers.
+- **P4c-06, layout**: the empty state offers Set Location twice, in the page header and in the
+  pane, as board 8 does; the tab row wraps to three lines at 420 and 360 px with eight buttons.
+- **P4c-06, owed check 4 item 2, run in CM12 part B** (a manual location read as geolocated and filled Set Location; Add Location itself still not run): SketchUp's Add Location (a place whose offset is not a
+  longitude guess, such as Madrid) and Model Info's Set Manual Location, each read with the owed-check
+  probe, then Read from SketchUp Geolocation in the Climate tab
+  ([steps](evidence/owed-check-4-20261118.md#left-for-the-conductor-needs-sketchup-in-front)). If a
+  manual location reads not geolocated, the dialog says "This SketchUp model has no geolocation." for
+  it; whether that is acceptable is Ed's call. Until then hours from UTC is never filled from SketchUp.
+
+- **P4c-07, UI polish sign-off** of the outline map in Set Location against boards 1 and 21 at 1280, 420
+  and 360 px: the map beside the fields, above them below 760 px at 220 px tall; the light borders (countries
+  solid, states and provinces dashed); the station dot, its dashed 50 mi ring and its label; the Site diamond;
+  the zoom and Reset buttons at the top right; the hint line.
+- **P4c-07, wording**: the warning, which the conductor found awkward with a real name ("At this site
+  Walkthrough Station, the attached station, is outside the Phius limits: 131 km away, over 50 mi. The station stays attached and will read Outside Phius limits."), amber
+  rather than board 21's red; the limits said in mi and ft in both unit systems; the ring label "50 mi from
+  the station"; the hint "Click to place the site. Drag to pan."; the failed-check line.
+- **P4c-07, feel**: drag, wheel and button zoom (in the HtmlDialog with 1,000 markers pan ran at a 22 ms and wheel zoom at an 18 ms mean frame;
+  with one station pan held 60 Hz and wheel zoom about 40 fps); the dialog growing and re-centring when the warning shows or hides, which moves the map about 37 px (in
+  CM07 part B a click on Longitude missed because the warning reappeared and the dialog moved mid-gesture); that Set Location waits a moment for the limit check after
+  each change of latitude, longitude or elevation; that typing coordinates off the view pans the map to them;
+  the detail of state lines at the closest zoom (0.5° tall).
+- **P4c-07, the empty state's first bullet** still reads "Type the latitude, longitude and elevation in Set
+  Location." and does not mention the map (the P4c-06 wording item); `docs/PRODUCT.md` now describes the map.
+- **P4c-07, not built**: board 21's map in the Site location pane (the set site on the map beside its facts)
+  is in no stage's steps. Place it in a stage or drop it.
+- **P4c-07, size**: settled by Ed at P4c-11 (D4c-33): the installed ceiling is now 28,000,000 bytes and the
+  growth allowance 2,500,000 bytes, where P4c-10 had left 31,111 bytes under the old 26,000,000.
+
+- **P4c-08, UI polish sign-off** of Climate Data on This Computer against boards 3 and 14, and the Phius
+  pane's three empty states against boards 2, 9 and 10, at 1280, 420 and 360 px: the table, its stacked rows
+  below 1040 px, the chips, the "kept" block, the Remove confirm, the disabled Choose Station and Enter Values
+  by Hand with their reasons.
+- **P4c-08, layout departures**: one primary in the dialog (Add Folder with no folder, Done with one), where
+  board 3 keeps Add Folder primary; the footer hint moved above the "kept" block; a pencil for Rename on each
+  row, which the boards do not draw; Choose Climate Data Folder opens the dialog and the chooser at once.
+- **P4c-08, the cases the plan did not name** (D4c-28): a folder set up but not found reads as no folder, with
+  "The climate data folder cannot be found" and the dialog offered instead of Choose Climate Data Folder; which
+  dataset board 10 names when there are several.
+- **P4c-08, wording**: "No station files" for a folder of other formats; the notes below the table for a
+  folder not found and one read only in part; the Remove confirm; the reasons "Choosing a station comes in a
+  later version of PH-Composer." and "Typing climate values by hand comes in a later version of PH-Composer.";
+  counts are grouped with commas in every number format; `docs/PRODUCT.md`'s new section on setting up climate
+  data, written for an outside reader.
+- **P4c-08, seen in CM08 part A**: at 1280 px the Not read column cuts a long kinds line short with no
+  tooltip; opened from the Setup view or the menu, the dialog's close control takes the focus and shows its
+  tooltip, where the Climate tab's button focuses Add Folder.
+- **P4c-08, the menu route's card**: opened from the Extensions menu or the Setup view, the dialog shows over
+  whichever card the tab last had (Site location in CM08), not Phius climate data. Selecting the Phius card on
+  that route is one line in the section if wanted.
+- **P4c-08, feel**: a name saves on Enter or on leaving the field; Done while a command runs closes the dialog
+  when it is answered; the Setup view's button brings the Climate tab forward with the dialog open.
+
+- **P4c-09, UI polish sign-off** of the station picker against boards 4, 11 and 16 at 1280, 420 and 360 px: the
+  map beside the list, above it below 900 px; the list's columns (a State column the boards do not draw, dropped
+  below 500 px, and the list scrolling sideways to Result at 360 px); the Pass and Fail chips; the footer's verdict
+  and warning; Replace's Now and New table; the dialog scrolling to its sticky Cancel and Attach at 360 x 520.
+- **P4c-09, wording**: the verdict sentence ("Alder Field is 18 km from the site and 11 m higher. Within the Phius
+  limits of 50 mi and 400 ft."), the limits said in mi and ft in both unit systems where board 4 says km and m;
+  "Phius asks for a custom dataset here unless an exception applies."; the hover tip's "Outside Phius limits"
+  beside the list's "Fail"; the summary line "· 1,007 stations on this computer · 38 shown"; "Search stations".
+- **P4c-09, numbers**: elevations in IP read to two decimals ("−321.52 ft", "521.65 ft higher"), the
+  Elevation field's own precision, where distances read to one ("2.6 mi"); boards 4 and 16 draw whole numbers.
+- **P4c-09, seen in CM09 part A**: the map's hint line overdraws the "50 mi from the site" ring label at the
+  opening frame; Replace opens with the nearest station selected even when it is the attached one, so Now and
+  New match and Replace is enabled; on the host the picker opened in 0.29 s (200 stations), 0.56 s (1,007) and
+  1.15 s in Replace (1,007 with its two extra reads), with only "Reading the stations…" showing meanwhile.
+- **P4c-09, seen in CM09 part B**: at 420 px the footer's warning and Replace's Now and New table sit below the
+  fold of the scrolling dialog, so only the map and list show at first; the wheel zoom over the picker's map was
+  sent on the host but no zoom was seen (not confirmed).
+- **P4c-09, interim Replace**: the attached-climate placeholder's Replace Station button, which P4c-10's pane
+  replaces; and Replace over a climate entered by hand ("Entered by hand", no distance, Not checked).
+- **P4c-09, feel**: the picker's open time with a real-size folder on the host, a selection from the map with
+  1,000 markers, the arrow keys moving along the list, and a filter that hides the selection moving it to the first
+  station shown.
+
+- **P4c-10, UI polish sign-off** of the attached pane against boards 5, 6, 15, 17 and 19 at 1280, 420 and 360 px: the
+  heading and its tags, the limit check table, the three value tables scrolling inside their own box at narrow sizes
+  with the row names held (D4c-32), the edited cells' light amber with a dotted underline, Station values with the
+  wind speed field, and Where this lives.
+- **P4c-10, actions** (D4c-31): Edit Values (disabled until P4c-11) and Replace in the page header, Clear alone in the
+  More climate actions menu, Restore Original Values in the edited line and Update from File in Where this lives,
+  where boards 5, 15 and 17 put all of them in the pane's top row; Replace with no folder or no site opening a bubble
+  that explains, rather than a disabled button.
+- **P4c-10, wording**: "Outside the Phius limits: 310 m higher than the site. Phius asks for a custom dataset here
+  unless an exception applies. The Export report says the same."; the edited line ("2 values differ from the station
+  file: Air, January (file -5.1 °C), …"); "Not part of a Phius station file" for Ground and Cooling 2; the wind note
+  without the January and July values the record does not keep; Ready for ("Export; the blended heat pump, with the
+  design temperatures"), where the boards say "Monthly demand · Peak loads"; the Replace explanations.
+- **P4c-10, the card**: the Phius card still shows one chip (the verdict); Edited, Incomplete and Source changed show
+  only in the pane's heading. Boards 15 and 17 draw two chips on the card, which needs a kit change to Source cards.
+- **P4c-10, peak loads**: all eight values of each case are shown (air, dewpoint, sky and five radiation), where the
+  boards show the air temperature and radiation only.
+- **P4c-10, size**: settled at P4c-11 by Ed's ceiling decision (D4c-33).
+
+- **P4c-11, UI polish sign-off** of the values editor against boards 12 and 15 at 1280, 420 and 360 px: the six fields
+  in a row above the grid, the grid's quiet borderless cells with the design columns tinted, the row headings with
+  the temperature unit and the note naming the radiation units, the grid scrolling inside its box with the row names
+  held, and the dialog scrolling to Save at 360 x 520.
+- **P4c-11, wording**: the intro ("Type the values, or copy the eight series rows from a Phius climate workbook or
+  station file and paste them into a cell. A label column is left out."); the paste notices ("Pasted 8 rows. 6 values
+  were not numbers and were left empty.", which a whole station file's paste shows for its dewpoint and sky notes, and
+  the refusal naming the block's size and the room from the cell); the coordinate note; the gaps note; "Save".
+- **P4c-11, feel**: Enter moves down a column rather than saving; the arrow keys move left and right only at the
+  text's ends; units held from the first key or paste; Cancel and Escape discard a pasted draft with no confirm, as
+  every form does.
+- **P4c-11, Replace's explanation** keeps Enter Values by Hand disabled, with "A Model holds one climate. Clear this
+  one first, from More climate actions, then enter values by hand." Replacing a station by typed values in one Undo
+  step needs an operation `enter_values` does not offer; say whether that is wanted.
+- **P4c-11, the clipboard from Excel and a text editor** (owed check 5 items 1 and 2): CM11 part B's paste of a real
+  block from each into the real panel, with nothing kept, and whether the result is the eight rows expected.
+- **P4c-11, seen in CM11**: the shell's notice for a refused save ("The climate changed since it was read. Nothing
+  was written.") stays until dismissed, as warnings and errors do, while the editor's status line says the same;
+  whether the editor should withdraw it, or the notice not be raised for a refusal the editor shows, is Ed's call.
+- **P4c-11, the hand-entered pane** (board 20): P4c-10's pane as it stands, its line reading "Incomplete:" where the
+  board says "Missing:", and Where this lives saying there is no station file to look for.
+
+## Before archive
+
+The archive PR is the conductor's, after P4c-12 merges. Before it, one Codex review covers every
+commit that merged unreviewed under the two-cycle cap: `45224965` (P4c-03), `47f26946` (P4c-04),
+`d263a336` (P4c-06), `3a48fef3` (P4c-07), `94b26a96` (P4c-08), `f94f816e` and `fab641b3` (P4c-09),
+`9ae52ed0` (P4c-10), `408285df` (P4c-11) and `1ca85729` (P4c-12, the recipe and `cases.json`). The docs-only `09452506`, `41faa0d8` and P4c-12's evidence commits need none.
+
+The ledger read on 2026-11-18 (`acceptance_ledger.py status`) gives CM04 to CM10 `needs_recheck`:
+later stages changed files in their dependency paths, as each stage's host run trailed the next.
+P4c-12 reruns CM01 to CM03 as its brief asks; CM04 to CM10 are covered only as far as the CM12 run
+walks the same surfaces on the final head. Whether that stands for their rows, or each is rerun, is
+for Ed before the archive.
+
+### Review of unreviewed commits
+
+On 2026-11-18 one Codex review (gpt-6.1-sol) covered the ten commits above, one commit at a time. Seven
+came back clean. It found 5 defects in the other three, all fixed in `e948ae1f`
+([PR #524](https://github.com/ph-composer/ph-composer-skp/pull/524)), each with a regression test that
+failed on `2c4faf17` first:
+
+| Commit | Finding | Fix |
+| --- | --- | --- |
+| `3a48fef3` | P2: Set Location opened with no climate did not read a station attached as the first change | The dialog takes the revision it opened at |
+| `3a48fef3` | P2: a revision seen while Set was out was marked handled, so a retry after `revision.stale` used the old station's check | The refresh is followed once Set answers |
+| `fab641b3` | P2: the picker's breakpoint column widths applied only when its table was built | `table.js` repaints default widths on every paint; a width set by hand wins |
+| `9ae52ed0` | P1: Clear queued during a wind save replayed with a later read's values, so it could delete a climate replaced elsewhere | The queue keeps the climate the save started from and drops the action, with a warning, when the read differs beyond the wind speed |
+| `9ae52ed0` | P2: blur during a wind edit rebuilt the body, detaching Restore under the click | The body holds until the save is read back, and a press on Restore from a wind draft acts at the press |
+
+The PR's own Codex review (gpt-6.1-sol) ran two cycles, both on the pane's queue. The first found 1 P1
+(a wind-only change elsewhere passed the replay check) and 1 P2 (an early read released the pending save),
+both fixed in `917a9ed8`. The second found 1 P2: the wind field stayed enabled after a press on Restore. It
+is fixed in `6b5d1e0c`. A further Codex review (gpt-6.1-sol) of `6b5d1e0c` alone found nothing, so every
+code commit in this packet has been reviewed.
+
+The ledger read after the fix (`acceptance_ledger.py status`, working tree against `origin/main`)
+moves CM11 and CM12 from `source_unchanged_environment_unchecked` to `needs_recheck`. CM07, CM09 and
+CM10, whose files these fixes change, already read `needs_recheck`, as do CM04 to CM06 and CM08. No
+host case was run; whether CM12's run stands for CM04 to CM10 is Ed's decision before the archive.
+
+## Blockers
+
+- Windows and a second SketchUp version are out of this packet (E3): the settings file is built
+  and verified on macOS in SketchUp 2026 only.
+- The six owed checks are entry checks of P4c-03 to P4c-07 and P4c-11 ([PLAN](PLAN.md#owed-checks-each-an-entry-check)).
+- The hourly weather file and its D9 peak-load gate are deferred, so nothing here waits on them.
+
+## Verification
+
+The stages' gates and host runs are in the stage rows above and the final gates in the
+[Closure](#closure-2026-11-18). Before the stages were planned, claims about honeybee-ph were checked against the pinned wheel
+(1.33.65): read in its source, and run for the default `Site`, a `None` hours from UTC, and a
+synthetic `Site` with a provenance, both readiness lists empty, through a `BldgSegment` round trip.
+PHX claims were read in the local checkout at 1.59.1, not pinned and not run; owed check 6 runs
+them. `make lint-paths lint-citations` pass on the packet.
+
+## Ledger
+
+| Date | Event |
+| --- | --- |
+| 2026-09-18 | PRD drafted as a post-MVP packet. |
+| 2026-09-18 | D7 confirmed. Verified that the PH monthly converter is honeybee-ph `Site.from_epw()`, not PH-Navigator-Web. The plan now ships no datasets, supports user-owned files and local EPWs, and records the peak-load gap as D9. |
+| 2026-09-18 | D9 confirmed: EPW-derived monthly data supports preliminary work; METr climate export requires user-supplied peak-load cases and never synthetic values. |
+| 2026-11-15 | Climate tab wireframes drawn at Ed's request: a per-computer climate data folder, a station picker on an outline map, and the chosen station copied into the Model. Nine questions open; the PRD is unchanged. Phase 4's heat pump stage (D4-15) now waits on this packet. |
+| 2026-11-15 | Ed promoted the packet from `phase-05-post-mvp/climate-data/` to `phase-04-climate/`: Climate is built before Mechanical. The PRD's "Post-MVP" wording predates the move. |
+| 2026-11-15 | Ed settled the data folder: its location and name live in PH-Composer's own per-computer settings file (not SketchUp's preferences, no station index, no imported copy); the setup is reached from the Climate tab and the Setup view; the user types the dataset name, prefilled from the folder; Phius station files only at first. To verify on a host before planning: that SketchUp's preferences are per version, which was the reason given, and where the settings file sits on macOS and Windows. Library locations stay where they are. |
+| 2026-11-16 | Ed settled the map: an outline map shipped with the extension (world countries, US and Canadian states and provinces, public-domain data), no web tiles, with pan and zoom, click to select, hover details and a click-to-place site pin. Owed at planning: the data source and its licence confirmed, its size in the RBZ, and how it draws on the Chromium 88 floor. |
+| 2026-11-16 | Ed settled the sources: separate cards for Phius climate data and an Hourly weather file, no PHI; in the first version Phius climate data (a station from the folder, or values typed by hand) is the only climate and exports, and the Hourly weather file card is shown as Planned. Design temperatures are typed and do not gate export. The PRD's EPW route and its D9 peak-load entry wait for the Hourly weather file card. |
+| 2026-11-16 | Ed settled a Phius station's gaps: three peak-load cases is complete and Cooling 2 stays empty; ground temperatures stay empty and unflagged; average wind speed is typed, prefilled with the January and July mean; values may be edited after attaching and the source is then marked edited. Owed at planning: what honeybee-ph and PHX do with an empty Cooling 2 and an empty ground row at export (PHX pads a missing peak value with zero in METr, read from the PHX checkout, not reproduced). |
+| 2026-11-16 | Ed settled the tab's position: Climate is the first primary tab, before Zones. Open: which tab the panel opens on, and the nine-tab row at the 420 px and 360 px panel widths. The Mechanical wireframes' tab rows predate this and show neither Climate nor Programs. |
+| 2026-11-16 | Ed settled the code shape: Climate is its own feature, not a Library kind; a Model holds one site and one Phius climate; one built-in Phius reader now, with a format contract deferred until a second reader exists. All nine wireframe questions are now answered. The PRD is not yet revised. |
+| 2026-11-16 | PRD revised to the wireframe review: a Climate tab, climate data folders per computer, a station picker on an outline map, one climate per Model, typed design temperatures, the hourly weather file and PHI deferred. Q1 to Q9 kept with what the review did to each; W1 to W9 added; nine items listed as open or owed before planning. |
+| 2026-11-16 | Recorded the private development corpus: Ed's licensed Phius 2022 dataset, held outside the repository, located only in gitignored `_private/climate/MANIFEST.md`, never to be distributed. Its layout (from names only) is in the PRD. It shows a second, `.xls` format that alone covers Canada and Japan; added as open item 10. |
+| 2026-11-17 | First journey walked with Ed (J1, setting up the climate files): read in place and never copied, new files show by themselves, no Rescan, the settings file outside SketchUp's versioned folders, files not read reported by kind, a cache only if reading proves slow. Board 3 updated. Open items 11 (a notice of new stations) and 12 (measure the read time, including a cloud-synced folder) added. The remaining journeys move to a new thread. |
+| 2026-11-17 | Second journey walked with Ed (J2, setting the site): the site is set by latitude, longitude and elevation; climate zone is the ten integer codes the honeybee-ph Grasshopper component allows, with no moisture letter; hours from UTC is a typed field; Read from SketchUp Geolocation fills latitude and longitude, and hours from UTC if the host supplies an offset, never elevation. Board 1 redrawn with the map inside Set Location, board 8 added for the site not set, and the zone corrected on boards 2, 5 and 6. Open item 7 narrowed; items 13 (a host measurement of SketchUp's geolocation) and 14 (confirm the zone codes against METr) added. |
+| 2026-11-17 | Third journey walked with Ed (J3, choosing and attaching a station): the site comes first; the picker opens sorted by distance on one dataset at a time; a failing station can be attached and is reported as outside the Phius limits; the Model keeps the station's coordinates. Boards 9 to 11 added. Open items 2 and 6 settled (both limits cited from the Phius guidebook); item 12 half measured (0.15 s for the private corpus in Python). |
+| 2026-11-17 | Fourth journey walked with Ed (J4, entering values by hand): one grid in the order of a Phius climate file, filled by one paste or typed; it saves with gaps and is marked Incomplete; coordinates are optional and the limit check reads Not checked without them; the same editor serves Edit Values. Board 12 added. Open items 15 (a custom dataset's format) and 16 (confirm the paste on real copies) added. |
+| 2026-11-17 | Fifth journey walked with Ed (J5, the design temperatures): typed in the card's pane with an optional source note; Not set, Incomplete or Set; kept in the Model only, with nothing written to METr in the first version. Board 13 added. Open item 17 added (the two METr design-temperature fields PHX writes fixed values to). |
+| 2026-11-17 | Sixth journey walked with Ed (J6, another computer): the Model reads in full with no notice; the source is matched by station name, state and checksum across every folder, not by dataset name; Replace stays enabled and explains when there is no folder; a folder not found keeps its setting and offers Locate and Remove. Board 6 corrected and board 14 added. |
+| 2026-11-17 | Seventh journey walked with Ed (J7, replacing and editing): the Model keeps the as-read values so edited cells are marked, listed in the Export report and restorable anywhere; Replace shows a summary comparison and is one Undo step; a changed source file offers Update from File; the verdict is recomputed on a site change and Set Location warns first. Boards 15 to 17 added. |
+| 2026-11-17 | Eighth and last journey walked with Ed (J8, export): Cooling 2 repeats Cooling 1, because honeybee-ph cannot leave it empty and would write zeros (run in the pinned 1.33.65); unset climate zone and UTC offset export unset with findings; an edited station and a hand-entered climate export as user-defined; coordinates and edits travel in the provenance's assumptions. Board 18 added. Open item 5 settled, item 7 narrowed. Item 18 added (export with a climate and no site). Eighteen items are listed; 2, 5 and 6 are settled. |
+| 2026-11-17 | Ed answered the open items one at a time (R1 to R9): the panel opens on Zones; a climate with no site is left out of export; no `.xls` reader and no new-station notice in the first version; Cooling 2 equals Cooling 1 in WUFI and METr; hours from UTC is not used by METr as far as Ed knows; the ten zone codes are the full set and the Model stores the WUFI code; a custom Phius dataset comes as the same text and `.xls` files; METr's two design-temperature fields are parked. Six measurements and confirmations remain as stage entry checks. Boards 19 to 23 added. Ed asked for the stage planning next. |
+| 2026-11-17 | Stages planned: the coordinating packet and twelve stage documents, P4c-01 to P4c-12, with each owed check an entry check of a named stage. Ids use `P4c-`, `D4c-`, `C4c-` and `CM` because `P4-` and `D4-` are the Mechanical packet's. Found while planning: honeybee-ph serializes a default `Site` on every Building Segment, so an export with no climate already carries a placeholder (E1). Three items open for Ed. Nothing authorized. |
+| 2026-11-17 | Ed answered E1 to E3 and ruled on two planning decisions, after a review of honeybee-ph 1.33.65 (run) and the Grasshopper components (read). His rule: match honeybee-ph and honeybee-grasshopper-ph. E1: a Model with no site and no climate writes nothing, honeybee-ph's default `Site` stays, with no finding and no remark. E2: a site with no climate is written as its `Location` over honeybee-ph's default `Climate`. E3: all Windows path work is deferred to the Windows support packet, and acceptance runs on SketchUp 2026 only, so the two-version checks move to the 2023 floor packet. D4c-03 overturned: the record stores provenance in honeybee-ph's shape and export passes it through. D4c-04 confirmed: the exact conversions of 50 miles and 400 feet. Found: a Building Segment with no `site` key does not load. D4c-10 confirmed: Add Folder opens the chooser first, then the name. An earlier set of picks relayed from another session chose the first recommendations; Ed said these stand. Nothing authorized. |
+| 2026-11-17 | Issue [#511](https://github.com/ph-composer/ph-composer-skp/issues/511) opened for the packet. Ed authorized every stage: "Use the 'pr-loop' skill protocol for all reviews. Use a new branch for each phase of the work, and cleanup all branches and worktrees as you go. You are authorized to merge all PRs once the repo CI is green and all reviewer comments are addressed and resolved." P4c-01 implemented on branch: the `ph_composer.climate` feature, the site and the design temperatures in two settings dictionaries (D4c-02 amended at its entry check), the climate unit quantities, the walkthrough and the CM01 case and recipe. CM01 not run. |
+| 2026-11-17 | P4c-01 merged to main through PR #512 (`d49585a9`). CM01 run on the merged head on SketchUp 26.1.188, macOS: walkthrough, Undo names, Undo and Redo, save and fresh reopen all pass; ledger result recorded ([evidence](evidence/cm01-20261117.md)). |
+| 2026-11-17 | P4c-02 implemented on branch: the climate record kind under one fixed id, completeness, edited cells, the Phius limit check, the station builder, `climate.get`, `enter_values`, `save_values`, `restore_original` and `clear`, `site.preview_limit_check`, the limit check in `site.update`'s result and the climate card in the summary. `enter_values` split from `save_values` so each carries its Undo name (CONTRACTS section 3 amended). CM02 case and recipe prepared; not run. |
+| 2026-11-18 | P4c-02 merged to main through PR #513 (`85c4d78e`). On `024768ea`, SketchUp 26.1.188, macOS: CM02 walkthrough, Undo names, Undo and Redo, save and fresh reopen all pass ([evidence](evidence/cm02-20261118.md)); CM01 rerun in its own fresh Model, all pass ([evidence](evidence/cm01-20261118.md)). One missed Redo click (CM02) and one uncounted CM01 driver attempt are noted in the evidence. Owed check 1, items 1 and 2, recorded ([evidence](evidence/owed-check-1-20261118.md)). |
+| 2026-11-18 | P4c-05 merged to main through PR #516 (`4239dbe4`). P4c-06 implemented on branch (PR #517): the Climate tab first in the row with the panel opening on Zones, source cards as a kit part, the Site location pane, Set Location, `site.geolocation` (API 1.67), the Design temperatures pane, the site and design-temperature snapshot sections and the export findings' route to their card. Owed check 4 recorded ([evidence](evidence/owed-check-4-20261118.md)): an ungeolocated Model carries the template's location, so the read gates on `georeferenced?` and fills no offset; the Add Location run is left for the conductor. "For Ed's verification pass" added. CM06 not run. |
+| 2026-11-18 | CM06 agent run on PR #517 head `d263a336`: part A through the bridge, part B (native Undo and Redo, real clicks, the 420 px select) by the conductor, all observed as expected ([evidence](evidence/cm06-20261118.md)); the polish assertion is Ed's, so the ledger records blocked. Owed check 4 item 2 not run, on Ed's verification pass. Codex (gpt-6.1-sol) two cycles, 5 P2 fixed; `d263a336` merges unreviewed. Auto-merge armed. |
+| 2026-11-18 | P4c-07 merged to main through PR #518 (`eca138d9`). P4c-08 implemented on branch `feature/climate-p4c-08`: Climate Data on This Computer, its Setup view entry and the Extensions menu item through `session.open_in_panel` (C4c-3, D4c-27), and the Phius pane's three empty states (D4c-28). CM08 not run; its items for Ed's pass added. |
+| 2026-11-18 | CM08 agent run on PR #519 head `94b26a96`: part A through the bridge, part B (the real Add and Locate sheets, real clicks and keys, the Extensions menu) by the conductor, all as expected ([evidence](evidence/cm08-20261118.md)); the polish assertion is Ed's, so the ledger records blocked. Codex (gpt-6.1-sol) two cycles, 4 findings fixed; `94b26a96` merges unreviewed. Auto-merge armed. |
+| 2026-11-18 | P4c-08 merged to main through PR #519 (`7bcb6672`). P4c-09 implemented on branch `feature/climate-p4c-09`: the station picker, `stations.all` (API 1.68), D4c-29 and D4c-30. CM09 not run. |
+| 2026-11-18 | CM09 part A on PR #520 head `fab641b3` through the bridge, all as expected ([evidence](evidence/cm09-20261118.md)); a smoke run on `f94f816e` found the Attached chip cut short, fixed in `fab641b3`. Codex (gpt-6.1-sol) two cycles: 1 P1, 3 P2, 1 P3, then 3 P2, all fixed; `f94f816e` and `fab641b3` merge unreviewed. Part B waits on the conductor. |
+| 2026-11-18 | CM09 part B on `fab641b3` by the conductor under one hold (real clicks, keys, drag, native Undo and Redo of Replace Climate Station), all as expected but the wheel zoom, not confirmed; recorded with `acceptance_case.py finish`. Agent run Pass; Ed's pass pending. Auto-merge armed. |
+| 2026-11-18 | P4c-10 merged to main through PR #521 (`acf0827b`). P4c-11 implemented on branch `feature/climate-p4c-11`: the values editor behind Enter Values by Hand and Edit Values, owed check 5 by shape, D4c-33 (Ed raised the installed-size ceiling to 28,000,000 bytes and the growth allowance to 2,500,000) and D4c-34. CM11 not run. |
+| 2026-11-18 | CM11 agent run on PR #522 head `408285df`: part A through the bridge, part B (the real Cmd+V of a synthetic block from the system clipboard, real typing, native Undo and Redo of Enter and Edit Climate Values) by the conductor, all as expected ([evidence](evidence/cm11-20261118.md)); Ed's licensed paste and the polish assertion block the ledger. Codex (gpt-6.1-sol) two cycles, 6 findings fixed; `408285df` merges unreviewed. Auto-merge armed. |
+| 2026-11-18 | P4c-11 merged to main through PR #522 (`74d85a79`). P4c-12 on branch `feature/climate-p4c-12`: the stage's steps written from its outline; `context/` and `docs/` folded (CONTRACTS, EXTENSIBILITY, TECH_STACK, SKETCHUP_HOST_BEHAVIOR with owed check 3, the glossary's "Site and climate", the agent guide, USER_DATA, HELP, the product PRD); the header and Setup browser checks brought up to the Climate tab; CM12 added to `cases.json` and its [recipe](evidence/cm12-recipe.md) written. The CM12 run follows the last review fix. |
+| 2026-11-18 | CM12 part A on PR #523 head `1ca85729`, with the CM01 to CM03 rechecks' part A, all as expected ([evidence](evidence/cm12-20261118.md)). Mechanical's reads confirmed on the host and its entry gate recorded met in the [Mechanical ledger](../../features/phase-07-mechanical/STATUS.md). Part B waits on the conductor's hold; no ledger row recorded. |
+| 2026-11-18 | CM12 part B by the conductor (B1 to B5 with background app control while Ed was away, B6 under one hold), all as expected; recorded with `acceptance_case.py finish`: CM01, CM02, CM03 Pass, CM12 blocked on its polish assertion only. A manual location in Model Info reads as geolocated and fills Set Location, settling owed check 4 item 2's question. |
+| 2026-11-18 | Codex (gpt-6.1-sol) reviewed the ten commits that merged unreviewed: 5 defects in `3a48fef3`, `fab641b3` and `9ae52ed0`, all fixed in `e948ae1f` on PR #524, the review cycles' fixes in `917a9ed8` and `6b5d1e0c` ([Review of unreviewed commits](#review-of-unreviewed-commits)). CM11 and CM12 read `needs_recheck` after it; no host case run. |
+| 2026-11-18 | Codex (gpt-6.1-sol) reviewed `6b5d1e0c`: no findings; every code commit in the packet is reviewed. Packet marked Complete with host acceptance open ([Closure](#closure-2026-11-18)) and archived to `planning/archive/phase-04-climate/`. |

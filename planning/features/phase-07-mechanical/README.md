@@ -5,7 +5,7 @@ STATUS: Scoped. Interviewed (equipment shared shape, Ventilators, hot water) and
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
-Renumbered 2026-11-15 when Ed re-ordered the phases. Stage, decision, register and roadmap item ids keep their original prefixes (P4-, D4-, M, roadmap 4.1 to 4.6): this was Phase 4, and its documents still say so. It now follows [Phase 4: climate](../phase-04-climate/README.md), which its heat pump stage needs, [Phase 5: shading](../phase-05-shading/README.md) and [Phase 6: Programs](../phase-06-program/README.md).
+Renumbered 2026-11-15 when Ed re-ordered the phases. Stage, decision, register and roadmap item ids keep their original prefixes (P4-, D4-, M, roadmap 4.1 to 4.6): this was Phase 4, and its documents still say so. It now follows [Phase 4: climate](../../archive/phase-04-climate/README.md), which its heat pump stage needs, [Phase 5: shading](../phase-05-shading/README.md) and [Phase 6: Programs](../phase-06-program/README.md).
 
 Roadmap items 4.1 to 4.6 from [ROADMAP.md](../../ROADMAP.md). Author the equipment a Phius model
 needs and the Zones each item serves, then draw and measure the ducts and pipes, so METr needs no

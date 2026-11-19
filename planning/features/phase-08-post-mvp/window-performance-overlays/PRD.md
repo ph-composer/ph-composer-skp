@@ -68,7 +68,7 @@ claim, no material mutation, no CSV join.
 
 ## Dependencies
 
-[climate-data](../../phase-04-climate/README.md) for the monthly series.
+[climate-data](../../../archive/phase-04-climate/README.md) for the monthly series.
 [window-types](../../../archive/window-types/README.md) for window units, glazing area and the schedule.
 [face-assignment](../../../archive/face-assignment/README.md) for the Colour-by component. The deferred
 overlay spike for filled faces.
