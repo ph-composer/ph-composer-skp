@@ -589,3 +589,27 @@ test("in Replace, a climate replaced elsewhere moves the Attached mark", functio
   assert.strictEqual(text(row(p, NEAR)).indexOf("Attached"), -1);
   assert.ok(text(row(p, SECOND)).indexOf("Attached") >= 0);
 });
+
+test("resized across the breakpoint the columns take that width's defaults; one resized by hand stays", function () {
+  function width(p, field) {
+    return all(picker(p), "col").filter(function (col) { return col.classList.contains("col-" + field); })[0]
+      .style.width;
+  }
+  function resize(p, px) { p.context.innerWidth = px; dom.dispatch(p.context, { type: "resize" }); }
+  [[1280, "190px", 360, "120px"], [360, "120px", 1280, "190px"]].forEach(function (sizes) {
+    var p = page();
+    p.context.innerWidth = sizes[0];
+    openPicker(p);
+    stations(p, STATIONS);
+    assert.strictEqual(width(p, "station"), sizes[1], "opened at " + sizes[0] + " px");
+    resize(p, sizes[2]);
+    assert.strictEqual(width(p, "station"), sizes[3], "resized to " + sizes[2] + " px");
+    var handle = all(picker(p), "th").filter(function (th) { return th.classList.contains("col-distance"); })[0]
+      .querySelector(".phc-column-resizer");
+    handle.listeners.keydown({ key: "ArrowRight", preventDefault: function () {}, stopPropagation: function () {} });
+    var byHand = width(p, "distance");
+    resize(p, sizes[0]);
+    assert.strictEqual(width(p, "station"), sizes[1], "back at " + sizes[0] + " px");
+    assert.strictEqual(width(p, "distance"), byHand, "the column resized by hand keeps its width");
+  });
+});

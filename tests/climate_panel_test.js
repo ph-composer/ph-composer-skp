@@ -741,6 +741,45 @@ test("a failed station read is said, and another change to the Model reads the s
   assert.strictEqual(d.querySelectorAll("[data-point]").length, 0);
 });
 
+test("a climate attached as the first change after opening with none is read and checked", function () {
+  var p = page(SITE_SET);
+  open(p);
+  click(byText(pane(p), "button", "Set Location…"));
+  var d = dialog(p);
+  assert.strictEqual(named(p, P + "climate.get").length, 0, "no climate, no read");
+  p.revision += 1;
+  withClimate(p);
+  var reads = named(p, P + "climate.get");
+  assert.strictEqual(reads.length, 1, "the attached station is read");
+  answer(p, reads[0], station(42.8, -73.7), "query.result");
+  assert.ok(d.querySelector("[data-point='station']"));
+  assert.strictEqual(named(p, P + "site.preview_limit_check").length, 1, "the open site is checked against it");
+});
+
+test("a climate replaced while Set is out is read again once Set refuses as stale", function () {
+  var p = withClimate(page(SITE_SET));
+  open(p);
+  click(byText(pane(p), "button", "Set Location…"));
+  var d = dialog(p);
+  answer(p, named(p, P + "climate.get")[0], station(42.8, -73.7), "query.result");
+  answer(p, named(p, P + "site.preview_limit_check")[0], passing(), "query.result");
+  type(field(d, "Elevation"), "90");
+  answer(p, named(p, P + "site.preview_limit_check")[1], passing(), "query.result");
+  d.querySelector("form").listeners.submit({ preventDefault: function () {} });
+  assert.strictEqual(named(p, P + "site.update").length, 1);
+  p.revision += 1; p.publish();
+  answer(p, named(p, P + "site.update")[0], { status: "refused", code: "revision.stale", message: "Stale." });
+  var reads = named(p, P + "climate.get");
+  assert.strictEqual(reads.length, 2, "the replacement's station is read");
+  assert.strictEqual(setButton(d).disabled, true, "the old station's check no longer counts");
+  assert.strictEqual(d.querySelectorAll("[data-point]").length, 0);
+  answer(p, reads[1], station(44.1, -71.2), "query.result");
+  var previews = named(p, P + "site.preview_limit_check");
+  assert.strictEqual(previews.length, 3, "the typed site is checked against the replacement");
+  answer(p, previews[2], failing(190, 6), "query.result");
+  assert.strictEqual(d.querySelector(".climate-limit-warning").hidden, false);
+});
+
 test("an elevation draft cancelled with Escape repaints the check for the elevation shown", function () {
   var p = withClimate(page(SITE_SET));
   open(p);

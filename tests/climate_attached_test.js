@@ -492,7 +492,8 @@ test("Restore pressed as a wind speed saves on blur runs after that save, guarde
     var wind = typeWind(p, "5");
     var restore = byText(attached(p), "button", "Restore Original Values");
     wind.listeners.blur({ target: wind });
-    assert.ok(restore.parentNode, "the button is still on the page for the click that blurred the field");
+    assert.strictEqual(restore.isConnected, true,
+      "the button is still on the page for the click that blurred the field");
     click(restore);
     assert.strictEqual(named(p, P + "climate.save_values").length, 1);
     assert.strictEqual(named(p, P + "climate.restore_original").length, 0, "waits for the save");
@@ -504,6 +505,123 @@ test("Restore pressed as a wind speed saves on blur runs after that save, guarde
     assert.strictEqual(restored.length, 1);
     assert.strictEqual(restored[0].payload.params.expected_values.wind_speed_m_s, 5, "guarded by the new read");
   });
+
+test("a press on Restore from a typed wind speed saves it, then restores once, the click swallowed", function () {
+  var p = page();
+  load(p, station({ edits: [["air_c", "jan", -6]] }));
+  typeWind(p, "5");
+  var restore = byText(attached(p), "button", "Restore Original Values");
+  var wind = section(p, "Station values").querySelector("input");
+  attached(p).listeners.mousedown({ target: restore, button: 0, preventDefault: function () {} });
+  dom.dispatch(restore, { type: "click" });
+  assert.strictEqual(named(p, P + "climate.save_values").length, 1, "the wind speed saves first");
+  assert.strictEqual(wind.disabled, true, "the field kept its focus, so it takes no second value while saving");
+  answer(p, last(p, P + "climate.save_values"), { status: "completed", effect: "committed", revision: 2, value: {} });
+  assert.strictEqual(wind.disabled, true, "nor before the save is read back");
+  assert.strictEqual(named(p, P + "climate.restore_original").length, 0, "waits for the save");
+  p.revision = 2; p.publish();
+  var saved = station({ edits: [["air_c", "jan", -6]] }); saved.climate.values.wind_speed_m_s = 5;
+  answer(p, last(p, P + "climate.get"), completed(saved));
+  assert.strictEqual(named(p, P + "climate.restore_original").length, 1, "one restore, from the press");
+});
+
+test("a press on Restore from a wind draft that cannot be read keeps the draft and runs nothing", function () {
+  var p = page();
+  load(p, station({ edits: [["air_c", "jan", -6]] }));
+  var wind = typeWind(p, "abc");
+  var restore = byText(attached(p), "button", "Restore Original Values");
+  attached(p).listeners.mousedown({ target: restore, button: 0, preventDefault: function () {} });
+  dom.dispatch(restore, { type: "click" });
+  assert.strictEqual(named(p, P + "climate.save_values").length, 0);
+  assert.strictEqual(named(p, P + "climate.restore_original").length, 0, "the click is swallowed too");
+  assert.strictEqual(wind.value, "abc", "the draft stays with its message");
+});
+
+test("a revision read out when the wind speed saves does not count as the save read back", function () {
+  var p = page();
+  load(p, station({ edits: [["air_c", "jan", -6]] }));
+  var wind = typeWind(p, "5");
+  p.revision = 2; p.publish();
+  var before = last(p, P + "climate.get");
+  wind.listeners.blur({ target: wind });
+  click(byText(attached(p), "button", "Restore Original Values"));
+  answer(p, last(p, P + "climate.save_values"), { status: "completed", effect: "committed", revision: 3, value: {} });
+  answer(p, before, completed(station({ edits: [["air_c", "jan", -6]] })));
+  assert.strictEqual(named(p, P + "climate.restore_original").length, 0, "the read from before the save is not it");
+  p.revision = 3; p.publish();
+  var saved = station({ edits: [["air_c", "jan", -6]] }); saved.climate.values.wind_speed_m_s = 5;
+  answer(p, last(p, P + "climate.get"), completed(saved));
+  var restored = named(p, P + "climate.restore_original");
+  assert.strictEqual(restored.length, 1);
+  assert.strictEqual(restored[0].payload.params.expected_values.wind_speed_m_s, 5);
+});
+
+test("Clear queued behind a wind save does not run when another client changed the wind speed meanwhile",
+  function () {
+    var p = page();
+    load(p);
+    var wind = typeWind(p, "5");
+    wind.listeners.blur({ target: wind });
+    var heading = pane(p).querySelector(".phc-heading");
+    click(all(heading, "[aria-label='More climate actions']")[0]);
+    click(byText(heading, "button", "Clear"));
+    answer(p, last(p, P + "climate.save_values"), { status: "completed", effect: "committed", revision: 2, value: {} });
+    p.revision = 3; p.publish();
+    var changed = station(); changed.climate.values.wind_speed_m_s = 7;
+    answer(p, last(p, P + "climate.get"), completed(changed));
+    assert.strictEqual(named(p, P + "climate.clear").length, 0, "the newer wind speed is not the climate saved");
+    assert.strictEqual(p.notices[p.notices.length - 1][1], "warning");
+  });
+
+test("Clear pressed after a read lands while the wind speed saves still waits for the save", function () {
+  var p = page();
+  load(p);
+  var wind = typeWind(p, "5");
+  p.revision = 2; p.publish();
+  var before = last(p, P + "climate.get");
+  wind.listeners.blur({ target: wind });
+  answer(p, before, completed(station()));
+  var heading = pane(p).querySelector(".phc-heading");
+  click(all(heading, "[aria-label='More climate actions']")[0]);
+  click(byText(heading, "button", "Clear"));
+  answer(p, last(p, P + "climate.save_values"), { status: "completed", effect: "committed", revision: 3, value: {} });
+  p.revision = 3; p.publish();
+  var saved = station(); saved.climate.values.wind_speed_m_s = 5;
+  answer(p, last(p, P + "climate.get"), completed(saved));
+  var cleared = named(p, P + "climate.clear");
+  assert.strictEqual(cleared.length, 1, "the Clear pressed during the save runs once it is read back");
+  assert.strictEqual(cleared[0].payload.params.expected_values.wind_speed_m_s, 5);
+});
+
+test("a wind save refused and read back unchanged gives the field back", function () {
+  var p = page();
+  load(p);
+  var wind = typeWind(p, "5");
+  press(wind, "Enter");
+  assert.strictEqual(wind.disabled, true);
+  answer(p, last(p, P + "climate.save_values"), refused("target.changed", "The climate changed since it was read."));
+  answer(p, last(p, P + "climate.get"), completed(station()));
+  assert.strictEqual(wind.disabled, false);
+  assert.strictEqual(wind.value, "3.9");
+});
+
+test("Clear pressed as a wind speed saves does not run on a climate replaced elsewhere meanwhile", function () {
+  var p = page();
+  load(p);
+  var wind = typeWind(p, "5");
+  wind.listeners.blur({ target: wind });
+  var heading = pane(p).querySelector(".phc-heading");
+  click(all(heading, "[aria-label='More climate actions']")[0]);
+  click(byText(heading, "button", "Clear"));
+  assert.strictEqual(named(p, P + "climate.clear").length, 0, "waits for the save");
+  answer(p, last(p, P + "climate.save_values"), { status: "completed", effect: "committed", revision: 2, value: {} });
+  p.revision = 3; p.publish();
+  var replaced = station(); replaced.climate.values.name = "Birch Point"; replaced.climate.values.wind_speed_m_s = 6;
+  answer(p, last(p, P + "climate.get"), completed(replaced));
+  assert.strictEqual(named(p, P + "climate.clear").length, 0, "the climate the user chose to clear is gone");
+  assert.deepStrictEqual(p.notices[p.notices.length - 1], ["The climate changed while the wind speed was saving, " +
+    "so Clear did not run.", "warning"]);
+});
 
 test("a failed re-read says so and shows no verdict from the last read", function () {
   var p = page();

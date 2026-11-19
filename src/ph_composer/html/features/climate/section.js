@@ -59,7 +59,7 @@ function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, Desig
     if (this.dialog || !this.siteValues) return;
     this.dialog = setLocation.open(this.session, this.send, this.siteValues,
       function () { return self.siteValues; }, function () { self.dialog = null; panel.repaint(); },
-      Boolean(this.summary && this.summary.climate.state !== "none"));
+      Boolean(this.summary && this.summary.climate.state !== "none"), this.revision);
   };
 
   /* The station picker, in Replace with a climate in the Model; `preselect` ({ folder_id, station_key }) selects
@@ -97,6 +97,7 @@ function (panel, ui, snapshot, SourceCards, shared, SitePane, setLocation, Desig
     var design = snapshot.value(state, shared.DESIGN);
     this.siteValues = site;
     this.summary = summary;
+    this.revision = state.revision;
     this.paintCards(summary, site, design);
     var selected = this.cards.selected, panes = this.panes;
     Object.keys(panes).forEach(function (key) { panes[key].hidden = key !== selected; });

@@ -26,8 +26,9 @@ function (ui, RecordForm, requests, unitField, numbers, preferences, snapshot, o
   var FILLED = "Latitude and longitude are filled from SketchUp. Set Location saves them.";
 
   /* `currentSite()` answers the Model's site as last painted, for a stale refusal; `closed()` runs when it
-     closes, whichever way; `hasClimate` says the Model holds a climate, whose station the dialog then reads. */
-  function SetLocation(session, send, site, currentSite, closed, hasClimate) {
+     closes, whichever way; `hasClimate` says the Model holds a climate, whose station the dialog then reads;
+     `revision` is the Model's revision both were read at. */
+  function SetLocation(session, send, site, currentSite, closed, hasClimate, revision) {
     var self = this;
     RecordForm.call(this, session, send, { title: "Set site location", action: UPDATE, label: "climate_site",
       submitLabel: "Set Location", pendingText: "Setting the location…", failureText: "The location was not set.",
@@ -37,7 +38,7 @@ function (ui, RecordForm, requests, unitField, numbers, preferences, snapshot, o
     this.stationRead = requests.channel(session, send, "climate_station", "query.invoke");
     this.preview = requests.channel(session, send, "climate_preview", "query.invoke");
     this.station = null; this.previewed = null; this.check = null; this.checked = null; this.checkFailure = null;
-    this.stationFailure = null; this.revision = null;
+    this.stationFailure = null; this.revision = revision === undefined ? null : revision; this.revisionMoved = false;
     this.map = outlineMap({ label: "Outline map. Click to place the site",
       hint: "Click to place the site. Drag to pan.",
       onPlace: function (point) { self.place(point); } });
@@ -284,6 +285,7 @@ function (ui, RecordForm, requests, unitField, numbers, preferences, snapshot, o
     outcome = this.settle(state);
     if (!outcome) return;
     if (outcome.status === "completed") { this.hide(); return; }
+    this.followRevision(state);
     // Another write changed the site after the dialog opened: show what the Model holds now. A write that
     // reached the host before the panel saw that change refuses as a stale revision instead.
     if (outcome.code === "target.changed" || (outcome.code === "revision.stale" && this.siteMoved())) {
@@ -314,13 +316,16 @@ function (ui, RecordForm, requests, unitField, numbers, preferences, snapshot, o
   };
 
   /* Another change to the Model (an agent attaching, replacing or clearing the climate) may change the station:
-     read it again and forget the checks made against the old one, keeping the typed values and the view. */
+     read it again and forget the checks made against the old one, keeping the typed values and the view. A change
+     seen while Set is out is followed once Set answers, so a retry after a refusal checks the new station. */
   SetLocation.prototype.followRevision = function (state) {
     var revision = state && state.revision, summary = snapshot.value(state, shared.SUMMARY);
-    if (revision === undefined || revision === null || revision === this.revision) return;
-    var first = this.revision === null;
-    this.revision = revision;
-    if (first || this.busy()) return;
+    if (revision !== undefined && revision !== null && revision !== this.revision) {
+      this.revisionMoved = this.revision !== null;
+      this.revision = revision;
+    }
+    if (!this.revisionMoved || this.busy()) return;
+    this.revisionMoved = false;
     this.station = null; this.stationFailure = null; this.previewed = null; this.checked = null; this.check = null;
     this.checkFailure = null;
     this.preview.reset();
@@ -353,7 +358,7 @@ function (ui, RecordForm, requests, unitField, numbers, preferences, snapshot, o
     if (this.root.parentNode) this.root.parentNode.removeChild(this.root);
   };
 
-  return { open: function (session, send, site, currentSite, closed, hasClimate) {
-    return new SetLocation(session, send, site, currentSite, closed, hasClimate);
+  return { open: function (session, send, site, currentSite, closed, hasClimate, revision) {
+    return new SetLocation(session, send, site, currentSite, closed, hasClimate, revision);
   } };
 });
