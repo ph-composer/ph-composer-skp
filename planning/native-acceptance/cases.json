@@ -5008,7 +5008,12 @@
         "src/ph_composer/html/inventory_grid.js",
         "src/ph_composer/shell/panel.rb",
         "src/ph_composer/shell/setup_entries.rb",
-        "src/ph_composer/python/ph_composer_translation/composition.py"
+        "src/ph_composer/python/ph_composer_translation/composition.py",
+        "src/ph_composer/core/model_settings.rb",
+        "src/ph_composer/core/records/dictionary_store.rb",
+        "src/ph_composer/shell/native_approval.rb",
+        "src/ph_composer/export/privacy.rb",
+        "src/ph_composer/html/page_header.js"
       ],
       "native_control_required": true
     }

@@ -714,8 +714,8 @@ this foundation when their feature lands.
   `columnSort: true`) and grouping, with one Collapse all / Expand all icon toggle that collapses while
   anything is open and expands once everything is shut; filtering hides rows and never drops
   records, so drafts and expansion survive.
-- `source_cards.SourceCards` for a sidebar of subjects beside one pane, and `outline_map` for a place on
-  a map, which fetches nothing and leaves placing by keyboard to its owner's typed fields
+- `SourceCards` (the `source_cards` module's export) for a sidebar of subjects beside one pane, and
+  `outlineMap` (`outline_map`'s) for a place on a map, which fetches nothing and leaves placing by keyboard to its owner's typed fields
   ([EXTENSIBILITY](EXTENSIBILITY.md#organization-and-dependencies)).
 - `ui.Bubble` for non-modal editors anchored to a control: shared surface and pointer, viewport
   positioning, one active bubble, Escape and outside-click dismissal, focus return.

@@ -139,11 +139,11 @@ refused drafts stay open; `refuse(message, focus)` shows the owner's refusal, an
 settles a snapshot-driven request. Acceptance callbacks are invalidated by retries and disposal.
 Escape restores and closes; a pending request holds the surface until the owner settles it.
 
-`source_cards.SourceCards` is a sidebar of cards beside one pane, each a subject the pane shows with a
+The `source_cards` module exports the `SourceCards` constructor itself: a sidebar of cards beside one pane, each a subject the pane shows with a
 title, a few lines and a state chip; a card marked `planned` is shown read only and never selected, and
 at narrow widths the cards give way to one select above the pane. The owner keeps the selected card in
 its per-Model state and repaints a card with `paint(id, { lines, chip })`. The Climate tab is its first
-owner. `outline_map` draws the borders shipped in `map_borders.js` (Natural Earth, public domain) on the
+owner. The `outline_map` module exports the `outlineMap` function, which draws the borders shipped in `map_borders.js` (Natural Earth, public domain) on the
 projection in `map_projection.js`, with markers, rings and one pin; it fetches nothing and knows nothing
 about what a marker stands for. The owner supplies `onSelect`, `onPlace` and `onHover` and a keyboard
 route for placing and selecting (typed fields, a list), since the map has none. Set Location and the

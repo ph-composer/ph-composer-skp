@@ -22,9 +22,10 @@ own callback, scripted DOM events in the real HtmlDialog, the folder chooser sto
 tab's approval stood in, the reference fixture's one Face given its Assembly again (CM05), and in part A only,
 SketchUp's geolocation stood in by `ShadowInfo` and `GeoReference`'s `UsesGeoReferencing` (owed check 4).
 
-**What it touches.** The cases write this computer's settings file, `~/Library/Application Support/PH-Composer/`. A0
-records whether the folder exists; each case's cleanup removes only what it added, and the folder itself only
-when it was absent at A0.
+**What it touches.** The cases write this computer's settings file, `~/Library/Application Support/PH-Composer/`,
+and CM03's steps rename, relocate and remove every listed folder. So every case runs from no settings folder:
+A0 moves an existing one aside into the run folder, and the run ends (B7) by removing what the cases left and
+moving it back, checked byte for byte.
 
 ## Part A: the bridge, no window focus (the stage agent)
 
@@ -33,7 +34,9 @@ when it was absent at A0.
 ```sh
 pgrep -x SketchUp || echo none           # none: the gate and the host share port 46110
 make rbz install bridge-install
-ls "$HOME/Library/Application Support/PH-Composer"   # noted: absent or present
+P="$HOME/Library/Application Support/PH-Composer"
+if [ -d "$P" ]; then mv "$P" _private/host/<run>/settings-before; fi   # noted: moved aside or absent
+ls "$P" 2>/dev/null || echo absent
 ```
 
 ### A1. CM03: the settings file, panel closed
@@ -119,9 +122,11 @@ B eval "CM12.climate"                                 # complete; station CAFE_S
 ### A8. Save, remove the folder's setting, reopen (boards 6, 14)
 
 ```sh
+B eval "CM12.snapshot('attached')"          # the whole climate.get value, as_read and provenance, to CM12/attached.json
 B save; B eval "CM12.remove_folders"; B quit
 B launch "$PWD/_private/host/<run>/CM12/cm12.skp"
-B eval "load '$D/cm12.rb'; CM12.state"     # climate complete with every value; no folders; source not_on_this_computer
+B eval "load '$D/cm12.rb'; CM12.compare('attached')"   # equal: true, every value, as_read and provenance
+B eval "CM12.state"                        # no folders; source not_on_this_computer
 B eval "CM12.open_panel"; B eval "CM12.click_tab('climate')"; B eval "CM12.click_card('phius')"
 B eval "CM12.attached"                      # shown; no notice; Where this lives: not on this computer
 B eval "CM12.click(CM12::HEAD, 'Replace…')"; B eval "CM12.attached"   # explain names no climate data folder
@@ -207,14 +212,27 @@ The panel may be on another Space: `app_bring_to_current_space`, then System Eve
    differ from 40 and -100; Elevation still 500.
 3. Click **Cancel**. `CM12.state`: the site still 40.0, -100.0, 500.
 
-### B2. CM12: SketchUp's geolocation
+### B2. SketchUp's geolocation, on a Model never geolocated
 
-1. AXRaise `cm12.skp`. **Window > Model Info > Geo-location > Set Manual Location…**, latitude `40`, longitude
-   `-100`, OK, close Model Info. `B eval "[Sketchup.active_model.georeferenced?, Sketchup.active_model.shadow_info['Latitude']]"`.
-2. AXRaise the panel. **Set Location…**, **Read from SketchUp Geolocation**. `CM12.setloc`: Latitude 40 and
-   Longitude -100 with Elevation left as typed, or, if SketchUp reports the manual location not geolocated, the
-   status "This SketchUp model has no geolocation." Either is recorded; the second is Ed's call (packet STATUS,
-   owed check 4 item 2). **Cancel**.
+Part A stood the geolocation in on `cm12.skp`, so this runs on a fresh copy instead, with coordinates the stand-in
+never wrote.
+
+```sh
+cp _private/host/blank-template.skp _private/host/<run>/CM12/cm12-geo.skp
+B eval "Sketchup.open_file('$PWD/_private/host/<run>/CM12/cm12-geo.skp')"
+B eval "CM12.state"     # title cm12-geo; geolocation geolocated false; site not_set
+B eval "CM12.open_panel"; B eval "CM12.click_tab('climate')"
+```
+
+1. AXRaise `cm12-geo.skp`. **Window > Model Info > Geo-location > Set Manual Location…**, latitude `42.3`,
+   longitude `-73.4`, OK, close Model Info. `B eval "CM12.state"`: `geolocation` as SketchUp now reports it, and
+   `B eval "[Sketchup.active_model.georeferenced?, Sketchup.active_model.shadow_info['Latitude']]"`.
+2. AXRaise the panel. **Set Location…**, **Read from SketchUp Geolocation**. `CM12.setloc`: Latitude 42.3 and
+   Longitude -73.4 with Elevation empty, or, if SketchUp reports the manual location not geolocated, the status
+   "This SketchUp model has no geolocation." Either is recorded; the second is Ed's call (packet STATUS, owed
+   check 4 item 2). Type Elevation `100`, **Set Location**: `CM12.state` site 42.3, -73.4, 100.
+3. `B eval "Sketchup.open_file('$PWD/_private/host/<run>/CM12/cm12.skp')"` to return; `cm12-geo.skp` is never
+   saved and closes with the quit after B3.
 
 ### B3. CM12: Replace as one native Undo step
 
@@ -259,7 +277,15 @@ B eval "load '$D/cm03.rb'; PhComposer::NativeApproval.setup(CM03.context, 'ph_co
 
 The sheet "Add Climate Data Folder" opens; choose `folders-cm03/Phius native` and press **Open**: `completed`,
 name `Phius native`. Run it again and press **Cancel**: `cancelled`, nothing added. Then `CM03.privacy` (all
-false), `B diagnostics --json` holds no path, `CM03.remove_all`, `CM03.cleanup(<absent at A0>)`, `B quit`.
+false), `B diagnostics --json` holds no path, `CM03.remove_all`, `CM03.cleanup(true)`, `B quit`.
+
+### B7. Put this computer's settings back
+
+```sh
+P="$HOME/Library/Application Support/PH-Composer"
+ls "$P" 2>/dev/null || echo absent        # absent after the cleanups
+if [ -d _private/host/<run>/settings-before ]; then cp -Rp _private/host/<run>/settings-before "$P" && diff -r _private/host/<run>/settings-before "$P" && echo restored; fi
+```
 
 Hand back with the run log. The stage agent writes each case's `observations.json` and runs
 `acceptance_case.py finish` for CM01, CM02, CM03 and CM12 with `--evidence` naming
