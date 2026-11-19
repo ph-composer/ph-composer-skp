@@ -43,7 +43,7 @@ record kind exists, so it is shaped against a real kind and then reused by the n
 | 2 | Envelope | Real assemblies and real windows on that model, with a file library |
 | 3 | Rooms and junctions | Spaces and thermal bridges. The model matches what a designPH export gave |
 | 4 | Climate | The Model carries a site and a climate chosen from the user's own data |
-| 5 | Shading | Not scoped; a placeholder |
+| 5 | Shading | Faces and Groups tagged as shading reach WUFI-Passive and METr as shading components. No solver |
 | 6 | Programs | ProgramTypes, loads and schedules on Zones |
 | 7 | Mechanical | Equipment, ducting and piping. METr needs no hand entry before its first run |
 | 8 | Post-MVP | Sun path, window overlays, further providers |
@@ -166,7 +166,7 @@ to 7, piping and ducting are gate stubs until their interviews. No stage authori
 ## Phase 8: post-MVP (was Phase 5; items 5.1 to 5.5)
 
 Climate data (5.1) is now [Phase 4](archive/phase-04-climate/README.md) and
-[Phase 5: shading](features/phase-05-shading/README.md) is a placeholder; neither has a section above yet.
+[Phase 5: shading](features/phase-05-shading/README.md) was scoped on 2026-11-19; neither has a section above yet.
 
 | # | Item | State | Note |
 | --- | --- | --- | --- |
@@ -272,3 +272,4 @@ prerequisites and carried B1/B2 conditions into the next phase.
 | 2026-11-15 | Phase 4 Mechanical tab wireframes reviewed with Ed: D4-13 to D4-20 answered (a Mechanical tab with subtabs by system, heat pumps as four tables with one blended export by the Phius estimator's method, hot water as Systems, Heaters and Tanks). Heat pumps now need Climate first; Phase 4's bindings and stages P4-05 to P4-11 owe re-planning. |
 | 2026-11-15 | Ed re-ordered the later phases and their folders: Climate promoted to `phase-04-climate`, `phase-05-shading` reserved as a placeholder, Programs to `phase-06-program` (was 4a), Mechanical to `phase-07-mechanical` (was 4), Post-MVP to `phase-08-post-mvp` (was 5). Ids keep their prefixes. Climate tab wireframes drawn the same day, not reviewed. |
 | 2026-11-18 | Climate (Phase 4) P4c-01 to P4c-12 merged (PRs #512 to #523), the review fixes in PR #524 (`73ef7ba9`); the packet is archived at `archive/phase-04-climate/` with host acceptance open for Ed's verification pass (CM06 to CM12) and CM04 to CM12 reading `needs_recheck`. Not released. |
+| 2026-11-19 | Phase 5 Shading scoped: tag Faces and Groups, export as honeybee orphaned Shades, no solver. Packet written with stages P5s-01 to P5s-07; none authorized. |
