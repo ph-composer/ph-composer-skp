@@ -5021,6 +5021,18 @@
         "src/ph_composer/session/model_session.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "SD01",
+      "label": "Shading mark host facts: a marked loose Face, Group and ComponentInstance under native copy and paste, Move-copy array, cut and paste, Make Group, Make Component, Make Unique (with a Face mark behind shared storage), push-pull, Divide of a bounding Edge, Intersect Faces across the Face and explode of the marked Group, each with Undo, Redo, save and fresh-process reopen; hidden, tag-hidden and holed Faces read through the export snapshot",
+      "mode": "mixed",
+      "authority": "planning/features/phase-05-shading/ACCEPTANCE.md",
+      "paths": [
+        "tools/spikes/shading/shading_spike.rb",
+        "src/ph_composer/export/geometry_snapshot.rb",
+        "src/ph_composer/core/face_capture.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }

@@ -1,9 +1,9 @@
 # Shading: acceptance register
 
 DATE: 2026-11-19
-STATUS: Scoped. Not authorized.
+STATUS: Scoped. Authorized 2026-11-19 with every Shading stage ([STATUS](STATUS.md#authorization)).
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 
 Closure gates for Phase 5. The [PRD](PRD.md), "Acceptance shape", is the behavior list. Ids use
 `SD` (`SH` is taken in [`native-acceptance/cases.json`](../../native-acceptance/cases.json)).

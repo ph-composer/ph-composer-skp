@@ -1,9 +1,9 @@
 # Shading surfaces: PRD
 
 DATE: 2026-11-19
-STATUS: Scoped. Interviewed 2026-11-19 (Ed's request and seventeen answers, [DECISIONS](DECISIONS.md)); nothing authorized.
+STATUS: Scoped. Interviewed 2026-11-19 (Ed's request and seventeen answers, [DECISIONS](DECISIONS.md)); every stage authorized 2026-11-19 ([STATUS](STATUS.md#authorization)).
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 
 ## Why
 
