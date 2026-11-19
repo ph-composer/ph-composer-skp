@@ -39,6 +39,9 @@ if [ -d "$P" ]; then mv "$P" _private/host/<run>/settings-before; fi   # noted: 
 ls "$P" 2>/dev/null || echo absent
 ```
 
+Every case below runs on A0's installation of the final head. Where a referenced recipe's step 1 checks out a
+branch or runs `make rbz install bridge-install`, leave that out: only its launch, `state` and `begin` apply.
+
 ### A1. CM03: the settings file, panel closed
 
 Its [recipe](cm03-recipe.md) steps 1 to 6 (step 7 and the cleanup of step 8 come in B6), with `--control native` and its eight assertions, the fixture
@@ -229,8 +232,11 @@ B eval "CM12.open_panel"; B eval "CM12.click_tab('climate')"
    `B eval "[Sketchup.active_model.georeferenced?, Sketchup.active_model.shadow_info['Latitude']]"`.
 2. AXRaise the panel. **Set Location…**, **Read from SketchUp Geolocation**. `CM12.setloc`: Latitude 42.3 and
    Longitude -73.4 with Elevation empty, or, if SketchUp reports the manual location not geolocated, the status
-   "This SketchUp model has no geolocation." Either is recorded; the second is Ed's call (packet STATUS, owed
-   check 4 item 2). Type Elevation `100`, **Set Location**: `CM12.state` site 42.3, -73.4, 100.
+   "This SketchUp model has no geolocation." Either is recorded.
+   - Filled: type Elevation `100`, **Set Location**: `CM12.state` site 42.3, -73.4, 100. `site-geolocation` passes.
+   - No geolocation: Set Location stays disabled with the fields empty; **Cancel**. `site-geolocation` reads
+     blocked, part A's stand-in run its only pass, until Ed decides (packet STATUS, owed check 4 item 2). Type no
+     coordinates in its place.
 3. `B eval "Sketchup.open_file('$PWD/_private/host/<run>/CM12/cm12.skp')"` to return; `cm12-geo.skp` is never
    saved and closes with the quit after B3.
 

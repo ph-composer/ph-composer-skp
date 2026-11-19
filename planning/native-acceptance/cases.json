@@ -5013,7 +5013,12 @@
         "src/ph_composer/core/records/dictionary_store.rb",
         "src/ph_composer/shell/native_approval.rb",
         "src/ph_composer/export/privacy.rb",
-        "src/ph_composer/html/page_header.js"
+        "src/ph_composer/html/page_header.js",
+        "src/ph_composer/html/unit_numbers.js",
+        "src/ph_composer/html/units.js",
+        "src/ph_composer/shell/dispatch.rb",
+        "src/ph_composer/core/model_operation.rb",
+        "src/ph_composer/session/model_session.rb"
       ],
       "native_control_required": true
     }
