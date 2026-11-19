@@ -34,6 +34,7 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
   var CUSTOM = "Phius asks for a custom dataset here unless an exception applies.";
   var CLEAR_FIRST = "A Model holds one climate. Clear this one first, from More climate actions, then enter values " +
     "by hand.";
+  var QUEUED_WORDS = { clear: "Clear", restore_original: "Restore Original Values" };
   var SCALARS = { station_elevation_m: ["Station elevation", shared.ELEVATION],
     daily_temp_swing_k: ["Daily temperature swing", SWING] };
 
@@ -81,7 +82,33 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
     this.wind.input.setAttribute("aria-label", "Average wind speed");
     this.root.appendChild(this.body);
     this.buildActions();
+    this.keepRestoreWhileTyping();
   }
+
+  /* Pressing Restore while a wind speed is typed saves the wind speed first, as leaving the field does, and
+     restores once that save is read back. The press acts, not the click: the save's answer repaints the body,
+     which would remove the button before the click lands. A draft that cannot be read stays open with its
+     message, and nothing runs. */
+  Pane.prototype.keepRestoreWhileTyping = function () {
+    var self = this;
+    this.root.addEventListener("mousedown", function (event) {
+      var button = event.target && event.target.closest ? event.target.closest("button") : null;
+      self.swallow = false;
+      if (event.button || !button || !button._restore || !self.wind.editing) return;
+      event.preventDefault();
+      self.swallow = true;
+      self.wind.commit();
+      if (self.wind.editing) return;
+      if (!self.windSaving) self.settled();
+      self.restore();
+    }, true);
+    // The click that follows that press has been answered already.
+    this.root.addEventListener("click", function (event) {
+      var swallowed = self.swallow;
+      self.swallow = false;
+      if (swallowed) { event.preventDefault(); event.stopPropagation(); }
+    }, true);
+  };
 
   /* The page header's controls for this pane: Edit Values, Replace, and Clear in the overflow menu. A no-folder
      Replace opens an explanation anchored to it. */
@@ -157,12 +184,19 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
       panel.notify(written.message || "The climate was not changed.", "error");
       this.queued = null;
     }
-    // Any answer to a write is followed by a read; an action pressed while the write was out (Restore or Clear
-    // just after a wind speed saved on blur) runs once that read answers, guarded by the new values.
-    if (written) { this.stale = true; this.awaitingRead = true; }
-    if (got) this.awaitingRead = false;
+    // Any answer to a write is followed by a read; an action pressed while a wind speed saves (Restore or Clear)
+    // runs once that read answers, guarded by the new values. It runs only on the climate it was pressed on: a
+    // read that differs beyond the wind speed means another change came first, and it is dropped.
+    // Only a read sent after the answer counts: one already out may hold the values from before the write.
+    if (written) { this.stale = true; this.awaitingRead = true; this.followUpSent = false; }
+    if (got && (!this.awaitingRead || this.followUpSent)) { this.awaitingRead = false; this.windSaving = null; }
     if (this.queued && !this.awaitingRead && !this.writes.busy() && !this.reads.get.busy()) {
-      var queued = this.queued; this.queued = null; this.write(queued);
+      var queued = this.queued; this.queued = null;
+      if (this.values() && sameBesideWind(shared.editable(this.values()), queued.expected)) this.write(queued.name);
+      else {
+        panel.notify("The climate changed while the wind speed was saving, so " + QUEUED_WORDS[queued.name] +
+          " did not run.", "warning");
+      }
     }
     this.openQueuedEdit();
     var opened = shown && !this.shown;
@@ -173,6 +207,7 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
     if (opened) this.sourceStale = true;
     if (this.stale && !this.reads.get.busy()) {
       this.stale = false; this.revision = state.revision; this.reads.get.run(P + "climate.get", {});
+      if (this.awaitingRead) this.followUpSent = true;
     }
     if (this.sourceStale && !this.reads.source.busy()) {
       this.sourceStale = false; this.reads.source.run(P + "climate.source_status", {});
@@ -202,9 +237,11 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
     return this.record && this.record.climate ? this.record.climate.values : null;
   };
 
-  /* Not while the wind speed is being typed: a rebuilt body would take its focus. It paints once the draft ends. */
+  /* Not while the wind speed is being typed: a rebuilt body would take its focus. It paints once the draft ends.
+     Nor while it saves: the blur that saved it may be the first half of a click on another button (Restore),
+     which a rebuilt body would remove before the click lands. The read after the save repaints. */
   Pane.prototype.paint = function () {
-    if (this.wind.editing) return;
+    if (this.wind.editing || this.windSaving) return;
     var values = this.values();
     var key = JSON.stringify([this.record, this.source, this.design, this.noFolder(), this.failure,
       this.writes.busy(), this.siteElevation, preferences.current()]);
@@ -287,6 +324,7 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
       line.appendChild(el("p", "", keys.length + " value" + (keys.length === 1 ? " differs" : "s differ") +
         " from the station file: " + named.join(", ") + more + ". The Export report lists them."));
       var restore = ui.button("Restore Original Values", function () { self.restore(); });
+      restore._restore = true;
       restore.disabled = this.writes.busy();
       line.appendChild(restore);
       lines.push(line);
@@ -535,10 +573,18 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
     if (values && !this.wind.editing) this.wind.setValue(values.wind_speed_m_s);
   };
 
-  /* Each write is one Undo step guarded by the eight editable fields as last read. */
+  /* The editable fields of two climates agree, the wind speed aside. */
+  function sameBesideWind(a, b) {
+    var left = Object.assign({}, a, { wind_speed_m_s: null }), right = Object.assign({}, b, { wind_speed_m_s: null });
+    return JSON.stringify(left) === JSON.stringify(right);
+  }
+
+  /* Each write is one Undo step guarded by the eight editable fields as last read. Restore or Clear pressed while
+     a wind speed saves, or before that save is read back, waits for the read, remembering the climate the save
+     started from. */
   Pane.prototype.write = function (name, params) {
     var values = this.values();
-    if (values && !params && this.writes.busy()) { this.queued = name; return false; }
+    if (values && !params && this.windSaving) { this.queued = { name: name, expected: this.windSaving }; return false; }
     if (!values || this.writes.busy()) return false;
     this.writes.run(P + "climate." + name, Object.assign({ expected_values: shared.editable(values) }, params || {}));
     this.painted = null; this.paint();
@@ -549,8 +595,7 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
     this.windGuard = null;
     if (!guard || this.writes.busy() || value === guard.wind_speed_m_s) { this.settled(); return; }
     var next = JSON.parse(JSON.stringify(guard)); next.wind_speed_m_s = value;
-    // No repaint here: the blur that saves may be the first half of a click on another button, which a rebuilt
-    // body would remove before the click lands. The answer repaints.
+    this.windSaving = guard;
     this.writes.run(P + "climate.save_values", { values: next, expected_values: guard });
   };
   /* The draft is over without a write: its guard goes, and the Model's values show. */
@@ -571,7 +616,7 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
     if (this.wind.editing) this.wind.cancel();
     this.wind.clearError();
     this.record = null; this.source = null; this.failure = null; this.painted = null; this.windGuard = null;
-    this.editQueued = false;
+    this.editQueued = false; this.queued = null; this.windSaving = null;
   };
 
   Pane.prototype.dispose = function () {

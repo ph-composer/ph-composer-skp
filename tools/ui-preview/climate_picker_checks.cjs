@@ -139,6 +139,11 @@ check({ name: "climate-picker", output }, async ({ newPage, step }) => {
   await rows.nth(3).locator(".climate-picker-station").click();
   assert.equal(await picker.locator(".climate-picker-compare tr").count(), 3);
   await atSizes("picker-replace", "Replace");
+  // Opened at 1280 and taken down to 360, the list widens its Station column again on the way back.
+  await setPanelSize(page, 1280, 800);
+  const back = await rows.filter({ hasText: "Attached" }).locator("td.col-station").evaluate(cell =>
+    cell.scrollWidth > cell.clientWidth + 1);
+  assert.equal(back, false, "the name and its Attached chip fit at 1280 after a resize from 360");
   await picker.getByRole("button", { name: "Replace", exact: true }).click();
   await picker.waitFor({ state: "detached" });
   assert.equal((await sent(CLIMATE + "climate.replace_station")).length, 1);

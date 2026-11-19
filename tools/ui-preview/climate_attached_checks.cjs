@@ -92,6 +92,15 @@ check({ name: "climate-attached", output }, async ({ newPage, step }) => {
   await page.waitForFunction(() => !document.querySelector(".climate-attached .climate-attached-notice.is-edited"));
   assert.equal(await attached.locator(".is-edited").count(), 0);
 
+  step("Restore clicked straight from a typed wind speed lands: the wind saves on the blur, then Restore runs");
+  await open("climatereplace");
+  await wind.fill("4.5");
+  await attached.getByRole("button", { name: "Restore Original Values" }).click();
+  await page.waitForFunction(() => window.previewHost.sent.some(m => m.payload &&
+    m.payload.name === "ph_composer.climate.climate.restore_original"));
+  assert.equal((await sent(CLIMATE + "climate.save_values")).length, 1, "the wind speed saved first");
+  await page.waitForFunction(() => document.querySelectorAll(".climate-attached td.is-edited").length === 0);
+
   step("board 17: a changed source has its quiet mark and Update from File opens the picker in Replace");
   await open("climatechanged");
   await attached.getByText("Source changed").first().waitFor();

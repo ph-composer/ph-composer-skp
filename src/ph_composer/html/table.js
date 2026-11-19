@@ -197,7 +197,6 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
       resizeHandles: Object.create(null), body: element("tbody"),
       rows: Object.create(null), columns: tableColumns, columnWidths: options.columnWidths || {},
       stickyWidths: stickyWidths,
-      defaultWidths: Object.assign({}, stickyWidths, options.defaultWidths || {}),
       groups: Object.create(null), empty: element("p", "phc-empty"), emptyAction: element("button") };
     cache.emptyAction.className = "primary phc-empty-action"; cache.emptyAction.type = "button";
     cache.emptyAction.hidden = true;
@@ -524,6 +523,8 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
     // Row icons that show only on hover or focus, for a screen whose rows carry them as quiet affordances.
     cache.node.classList.toggle("reveals-row-actions", Boolean(options.revealRowActions));
     if (options.columnWidths) cache.columnWidths = options.columnWidths;
+    // Defaults follow each paint (a screen's widths at its current size); a width set by hand still wins.
+    cache.defaultWidths = Object.assign({}, cache.stickyWidths, options.defaultWidths || {});
     paintHeaders(cache, options);
     paintHeaderCheck(cache);
     cache.empty.hidden = (options.visibleCount === undefined ? rows.length : options.visibleCount) > 0;
