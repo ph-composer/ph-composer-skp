@@ -106,10 +106,11 @@ a Zone nested in a Zone counts for both. The exclusion covers each side's own se
 
 Paths are relative to `src/ph_composer/features/`.
 
-Four funnels carry nearly every read. P5s-03 applies the check in each funnel; every consumer listed
+Four funnels carry nearly every read. P5s-03 applies the check in each funnel, to Face leaves only:
+`resolve_element` (thermal bridges' Edge references) and `containment` with a non-Face leaf are unchanged; every consumer listed
 under a funnel inherits it and gets its own test there.
 
-| Funnel | Where | What P5s-03 does |
+| Funnel | Where | What P5s-03 does (proposed; P5s-03 decides) |
 | --- | --- | --- |
 | A. Face walk | `zones/zone/occurrences.rb` `walk_faces`, behind `scan_faces`, `Occurrences.faces` and `Zones::Index` (`faces`, `all_faces`, `faces_by_id`) | Leaves an excluded Face out. The walk carries `inside` (or a marked flag and a claimed flag that agree with the check) |
 | B. Point read | `zones/zone/occurrences.rb` `holding`, behind `occurrence_for_path`, `occurrence_at` and `containment` | Returns no Face occurrence for an excluded Face, with its own reason beside `outside_zone` |
@@ -206,4 +207,4 @@ Paths are relative to `src/ph_composer/`.
 | 3 | Does the mark survive the native edits, each with Undo, Redo, save and reopen? | Waits on the SD01 host run; the table goes into `context/SKETCHUP_HOST_BEHAVIOR.md` and the PRD's "Copies and edits" follows it | SD01 |
 | 4 | Does the snapshot's Face geometry carry inner loops in a form `Face3D(boundary, holes)` takes? | Yes. `FaceCapture` reads `face.loops` in host order into `loops_m`, outer first, and the Faces section builds `Face3D(points[0], holes=points[1:] or None)`. A holed `Face3D` makes a `Shade` with `is_detached` true at the pinned honeybee. Whether the host lists the outer loop first is read on the SD01 fixture | `core/face_capture.rb`; `core/face_geometry.rb` `outer_loop`, `holes`; `python/ph_composer_translation/model_sections.py` |
 | 5 | Do hidden and tag-hidden Faces export? | Yes. `GeometrySnapshot.walk` captures every Face whatever its visibility, and neither Zones nor the export filters on it, so Shading exports them too. The SD01 fixture reads it on the host | `export/geometry_snapshot.rb` `walk` |
-| 6 | Does `faces.classify` with every field cleared return a Face to unclassified (F12)? | No. Clearing `face_type`, `boundary_condition` and `assembly_id` writes back a record with its id and empty values, so the Face reads as classified with no Face type (`face.type_missing`), not as unclassified. P5s-03 adds the route to remove the record (D5s-11) | `features/zones/faces/operations.rb` `patched_record`; checked against the SketchUp stub through `faces.classify` |
+| 6 | Does `faces.classify` with every field cleared return a Face to unclassified (F12)? | No. Clearing `face_type`, `boundary_condition` and `assembly_id` writes back a record with its id and empty values, so the Face reads as classified with no Face type (`face.type_missing`), not as unclassified. P5s-03 adds the route to remove the record (D5s-11) | `features/zones/faces/operations.rb` `patched_record` (a clear deletes the field and keeps the record), observed through `faces.classify` against the SketchUp stub; `features/zones/faces/export.rb` `face_findings` reads a present record as classified and `assignment_issues` raises `face.type_missing` |

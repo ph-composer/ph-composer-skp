@@ -4,7 +4,8 @@
 # SketchUp through the development bridge:
 #
 #   load "<repo>/tools/spikes/shading/shading_spike.rb"
-#   ShadingSpike.setup        # one island per native gesture, plus the shared and visibility islands
+#   ShadingSpike.setup        # builds the islands; returns what it built, counted by construction
+#   ShadingSpike.look(:copy)  # camera on one island, so a viewport point is on screen
 #   ShadingSpike.select(:copy, :face, :group, :instance)   # the native selection a gesture starts from
 #   ShadingSpike.scan         # every marked entity and every Shading Face occurrence, by island
 #
@@ -26,6 +27,15 @@ module ShadingSpike
   ISLAND_PITCH_M = 10.0
   CASES = %i[copy array cut make_group make_component make_unique pushpull divide intersect explode].freeze
   EXTRA = %i[shared visibility].freeze
+  # Per gesture island, by construction: the loose Face, the box's six Faces and the nested Group's one, and
+  # the fin's two. Marked rows count occurrences, so a marked definition Face counts once per placement.
+  BUILT = { "face_occurrences" => 10, "shading_face_occurrences" => 10, "marked_rows" => 3 }.freeze
+  BUILT_EXCEPTIONS = {
+    "make_unique" => { "face_occurrences" => 12, "shading_face_occurrences" => 11, "marked_rows" => 5 },
+    "intersect" => { "face_occurrences" => 11, "shading_face_occurrences" => 10, "marked_rows" => 3 },
+    "shared" => { "face_occurrences" => 4, "shading_face_occurrences" => 4, "marked_rows" => 4 },
+    "visibility" => { "face_occurrences" => 3, "shading_face_occurrences" => 3, "marked_rows" => 3 }
+  }.freeze
 
   class << self
     def model
@@ -35,12 +45,46 @@ module ShadingSpike
     def setup
       raise "ShadingSpike.setup needs an empty Model." unless model.entities.length.zero?
 
+      @marked_pids = Hash.new { |hash, key| hash[key] = [] }
       operation("SD01 setup") do
         CASES.each_with_index { |name, index| island(name, index) }
+        @island = "shared"
         shared(CASES.length)
+        @island = "visibility"
         visibility(CASES.length + 1)
       end
-      scan
+      built
+    end
+
+    # What `setup` wrote, from its own bookkeeping and the counts above, never from a scan: the recorder is
+    # checked against this.
+    def built
+      (CASES.map(&:to_s) + EXTRA.map(&:to_s)).to_h do |name|
+        [name, BUILT_EXCEPTIONS.fetch(name, BUILT).merge("marked_pids" => @marked_pids[name].sort)]
+      end
+    end
+
+    # The scan of each island reduced to the shape `built` returns.
+    def check(built_islands)
+      scanned = scan.fetch("islands")
+      built_islands.to_h do |name, want|
+        found = scanned.fetch(name, {})
+        rows = found.fetch("marked", [])
+        got = { "face_occurrences" => found["face_occurrences"],
+                "shading_face_occurrences" => found["shading_face_occurrences"], "marked_rows" => rows.length,
+                "marked_pids" => rows.map { |row| row["pid"] }.uniq.sort }
+        [name, got == want ? "ok" : { "built" => want, "scanned" => got }]
+      end
+    end
+
+    def look(name)
+      root = model.entities.to_a.select { |entity| island_of(entity) == name.to_s }
+      bounds = Geom::BoundingBox.new
+      root.each { |entity| bounds.add(entity.bounds) }
+      centre = bounds.center
+      eye = centre.offset(Geom::Vector3d.new(-6000.mm, -9000.mm, 7000.mm))
+      model.active_view.camera = Sketchup::Camera.new(eye, centre, Z_AXIS)
+      centre.to_a.map(&:to_mm).map(&:round)
     end
 
     # The island's targets by role, as the native selection: `:face` (the loose Face), `:face_edges` (its
@@ -100,7 +144,14 @@ module ShadingSpike
 
     def mark(entity, role)
       entity.set_attribute(DICTIONARY, KEY, MARK)
+      @marked_pids[@island] << entity.persistent_id
       label(entity, role)
+    end
+
+    # A mark on a definition's own Face: one entity, read once per placement.
+    def mark_definition_face(face)
+      face.set_attribute(DICTIONARY, KEY, MARK)
+      @marked_pids[@island] << face.persistent_id
     end
 
     def label(entity, role)
@@ -113,6 +164,7 @@ module ShadingSpike
     end
 
     def island(name, index)
+      @island = name.to_s
       x = origin(index)
       mark(square(model.entities, x, 0, 2000.mm), "face")
       group = model.entities.add_group
@@ -132,8 +184,7 @@ module ShadingSpike
     # the definition, the Face mark behind shared storage of D5s-16.
     def second_placement(definition, x)
       label(model.entities.add_instance(definition, Geom::Transformation.new([x + 5000.mm, 3000.mm, 0])), "instance2")
-      first = definition.entities.grep(Sketchup::Face).min_by { |face| face.bounds.center.x }
-      first.set_attribute(DICTIONARY, KEY, MARK)
+      mark_definition_face(definition.entities.grep(Sketchup::Face).min_by { |face| face.bounds.center.x })
     end
 
     # A vertical Face in its own Group crossing the loose Face and the box, for Intersect Faces > With Model.
@@ -148,7 +199,7 @@ module ShadingSpike
     def shared(index)
       x = origin(index)
       definition = fin("C_shared")
-      definition.entities.grep(Sketchup::Face).each { |face| face.set_attribute(DICTIONARY, KEY, MARK) }
+      definition.entities.grep(Sketchup::Face).each { |face| mark_definition_face(face) }
       label(model.entities.add_instance(definition, Geom::Transformation.new([x, 0, 0])), "instance")
       label(model.entities.add_instance(definition, Geom::Transformation.new([x, 3000.mm, 0])), "instance2")
     end
@@ -160,6 +211,8 @@ module ShadingSpike
       inner = model.entities.add_face([x + 1000.mm, 1000.mm, 0], [x + 2000.mm, 1000.mm, 0],
                                       [x + 2000.mm, 2000.mm, 0], [x + 1000.mm, 2000.mm, 0])
       inner.erase!
+      raise "The holed Face did not get an inner loop." unless holed.valid? && holed.loops.length == 2
+
       mark(holed, "face")
       hidden = mark(square(model.entities, x, 4000.mm, 1000.mm), "hidden")
       hidden.hidden = true
