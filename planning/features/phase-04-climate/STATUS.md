@@ -217,6 +217,11 @@ failed on `2c4faf17` first:
 | `9ae52ed0` | P1: Clear queued during a wind save replayed with a later read's values, so it could delete a climate replaced elsewhere | The queue keeps the climate the save started from and drops the action, with a warning, when the read differs beyond the wind speed |
 | `9ae52ed0` | P2: blur during a wind edit rebuilt the body, detaching Restore under the click | The body holds until the save is read back, and a press on Restore from a wind draft acts at the press |
 
+The PR's own Codex review (gpt-6.1-sol) ran two cycles, both on the pane's queue. The first found 1 P1
+(a wind-only change elsewhere passed the replay check) and 1 P2 (an early read released the pending save),
+both fixed in `917a9ed8`. The second found 1 P2: the wind field stayed enabled after a press on Restore. It
+is fixed in `6b5d1e0c`, which merges unreviewed under the two-cycle cap.
+
 The ledger read after the fix (`acceptance_ledger.py status`, working tree against `origin/main`)
 moves CM11 and CM12 from `source_unchanged_environment_unchecked` to `needs_recheck`. CM07, CM09 and
 CM10, whose files these fixes change, already read `needs_recheck`, as do CM04 to CM06 and CM08. No
@@ -281,4 +286,4 @@ them. `make lint-paths lint-citations` pass on the packet.
 | 2026-11-18 | P4c-11 merged to main through PR #522 (`74d85a79`). P4c-12 on branch `feature/climate-p4c-12`: the stage's steps written from its outline; `context/` and `docs/` folded (CONTRACTS, EXTENSIBILITY, TECH_STACK, SKETCHUP_HOST_BEHAVIOR with owed check 3, the glossary's "Site and climate", the agent guide, USER_DATA, HELP, the product PRD); the header and Setup browser checks brought up to the Climate tab; CM12 added to `cases.json` and its [recipe](evidence/cm12-recipe.md) written. The CM12 run follows the last review fix. |
 | 2026-11-18 | CM12 part A on PR #523 head `1ca85729`, with the CM01 to CM03 rechecks' part A, all as expected ([evidence](evidence/cm12-20261118.md)). Mechanical's reads confirmed on the host and its entry gate recorded met in the [Mechanical ledger](../phase-07-mechanical/STATUS.md). Part B waits on the conductor's hold; no ledger row recorded. |
 | 2026-11-18 | CM12 part B by the conductor (B1 to B5 with background app control while Ed was away, B6 under one hold), all as expected; recorded with `acceptance_case.py finish`: CM01, CM02, CM03 Pass, CM12 blocked on its polish assertion only. A manual location in Model Info reads as geolocated and fills Set Location, settling owed check 4 item 2's question. |
-| 2026-11-18 | Codex (gpt-6.1-sol) reviewed the ten commits that merged unreviewed: 5 defects in `3a48fef3`, `fab641b3` and `9ae52ed0`, all fixed in `e948ae1f` on PR #524 ([Review of unreviewed commits](#review-of-unreviewed-commits)). CM11 and CM12 read `needs_recheck` after it; no host case run. |
+| 2026-11-18 | Codex (gpt-6.1-sol) reviewed the ten commits that merged unreviewed: 5 defects in `3a48fef3`, `fab641b3` and `9ae52ed0`, all fixed in `e948ae1f` on PR #524, the review cycles' fixes in `917a9ed8` and `6b5d1e0c` (the last unreviewed) ([Review of unreviewed commits](#review-of-unreviewed-commits)). CM11 and CM12 read `needs_recheck` after it; no host case run. |
