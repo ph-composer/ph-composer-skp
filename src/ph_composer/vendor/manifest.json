@@ -116,9 +116,9 @@
       "sha256": "9e8041546528ef8733c8da7b2359bd980cee349c3ed13ef3ebafc023a11a3479"
     },
     "html/features/climate/attached.js": {
-      "bytes": 35350,
+      "bytes": 35583,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "e7e000e00c00777d014ae052ecaf43f8d7a0d18af173e5a4eecaa549bf320950"
+      "sha256": "1f2a8e4886806ccc65f70d34b2148cbfedf7be32554b55077658445a2d8517d2"
     },
     "html/features/climate/climate.css": {
       "bytes": 14619,

@@ -553,6 +553,43 @@ test("a revision read out when the wind speed saves does not count as the save r
   assert.strictEqual(restored[0].payload.params.expected_values.wind_speed_m_s, 5);
 });
 
+test("Clear queued behind a wind save does not run when another client changed the wind speed meanwhile",
+  function () {
+    var p = page();
+    load(p);
+    var wind = typeWind(p, "5");
+    wind.listeners.blur({ target: wind });
+    var heading = pane(p).querySelector(".phc-heading");
+    click(all(heading, "[aria-label='More climate actions']")[0]);
+    click(byText(heading, "button", "Clear"));
+    answer(p, last(p, P + "climate.save_values"), { status: "completed", effect: "committed", revision: 2, value: {} });
+    p.revision = 3; p.publish();
+    var changed = station(); changed.climate.values.wind_speed_m_s = 7;
+    answer(p, last(p, P + "climate.get"), completed(changed));
+    assert.strictEqual(named(p, P + "climate.clear").length, 0, "the newer wind speed is not the climate saved");
+    assert.strictEqual(p.notices[p.notices.length - 1][1], "warning");
+  });
+
+test("Clear pressed after a read lands while the wind speed saves still waits for the save", function () {
+  var p = page();
+  load(p);
+  var wind = typeWind(p, "5");
+  p.revision = 2; p.publish();
+  var before = last(p, P + "climate.get");
+  wind.listeners.blur({ target: wind });
+  answer(p, before, completed(station()));
+  var heading = pane(p).querySelector(".phc-heading");
+  click(all(heading, "[aria-label='More climate actions']")[0]);
+  click(byText(heading, "button", "Clear"));
+  answer(p, last(p, P + "climate.save_values"), { status: "completed", effect: "committed", revision: 3, value: {} });
+  p.revision = 3; p.publish();
+  var saved = station(); saved.climate.values.wind_speed_m_s = 5;
+  answer(p, last(p, P + "climate.get"), completed(saved));
+  var cleared = named(p, P + "climate.clear");
+  assert.strictEqual(cleared.length, 1, "the Clear pressed during the save runs once it is read back");
+  assert.strictEqual(cleared[0].payload.params.expected_values.wind_speed_m_s, 5);
+});
+
 test("Clear pressed as a wind speed saves does not run on a climate replaced elsewhere meanwhile", function () {
   var p = page();
   load(p);

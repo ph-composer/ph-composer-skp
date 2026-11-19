@@ -185,14 +185,14 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
       this.queued = null;
     }
     // Any answer to a write is followed by a read; an action pressed while a wind speed saves (Restore or Clear)
-    // runs once that read answers, guarded by the new values. It runs only on the climate it was pressed on: a
-    // read that differs beyond the wind speed means another change came first, and it is dropped.
+    // runs once that read answers, guarded by the new values. It runs only on the climate the save left: a read
+    // that differs from it means another change came first, and it is dropped.
     // Only a read sent after the answer counts: one already out may hold the values from before the write.
     if (written) { this.stale = true; this.awaitingRead = true; this.followUpSent = false; }
-    if (got && (!this.awaitingRead || this.followUpSent)) { this.awaitingRead = false; this.windSaving = null; }
+    if (got && this.awaitingRead && this.followUpSent) { this.awaitingRead = false; this.windSaving = null; }
     if (this.queued && !this.awaitingRead && !this.writes.busy() && !this.reads.get.busy()) {
       var queued = this.queued; this.queued = null;
-      if (this.values() && sameBesideWind(shared.editable(this.values()), queued.expected)) this.write(queued.name);
+      if (this.values() && sameClimate(shared.editable(this.values()), queued.expected)) this.write(queued.name);
       else {
         panel.notify("The climate changed while the wind speed was saving, so " + QUEUED_WORDS[queued.name] +
           " did not run.", "warning");
@@ -573,15 +573,18 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
     if (values && !this.wind.editing) this.wind.setValue(values.wind_speed_m_s);
   };
 
-  /* The editable fields of two climates agree, the wind speed aside. */
-  function sameBesideWind(a, b) {
+  /* The editable fields of two climates agree; the wind speed within a rounding of its unit conversion. */
+  function sameClimate(a, b) {
     var left = Object.assign({}, a, { wind_speed_m_s: null }), right = Object.assign({}, b, { wind_speed_m_s: null });
-    return JSON.stringify(left) === JSON.stringify(right);
+    var windA = a.wind_speed_m_s, windB = b.wind_speed_m_s;
+    var wind = windA === windB || (typeof windA === "number" && typeof windB === "number" &&
+      Math.abs(windA - windB) <= 1e-9 * Math.max(1, Math.abs(windB)));
+    return wind && JSON.stringify(left) === JSON.stringify(right);
   }
 
   /* Each write is one Undo step guarded by the eight editable fields as last read. Restore or Clear pressed while
      a wind speed saves, or before that save is read back, waits for the read, remembering the climate the save
-     started from. */
+     leaves. */
   Pane.prototype.write = function (name, params) {
     var values = this.values();
     if (values && !params && this.windSaving) { this.queued = { name: name, expected: this.windSaving }; return false; }
@@ -595,7 +598,7 @@ function (panel, ui, requests, unitField, preferences, units, fields, shared) {
     this.windGuard = null;
     if (!guard || this.writes.busy() || value === guard.wind_speed_m_s) { this.settled(); return; }
     var next = JSON.parse(JSON.stringify(guard)); next.wind_speed_m_s = value;
-    this.windSaving = guard;
+    this.windSaving = next;
     this.writes.run(P + "climate.save_values", { values: next, expected_values: guard });
   };
   /* The draft is over without a write: its guard goes, and the Model's values show. */
