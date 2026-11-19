@@ -640,6 +640,16 @@ reads its headers in under 0.1 s in SketchUp 2026's Ruby, so the read is synchro
   longer reads still matches, and reads `changed`), then compares SHA-256: `found`,
   else `changed`, else `not_on_this_computer`; `not_applicable` for a hand-entered climate or none.
 
+### Reading the site and climate from another feature
+
+A feature that needs the Model's climate requires `ph_composer.climate` and reads it through its
+registered queries, never Climate's settings dictionaries or record store. Mechanical's blended heat
+pump reads `ph_composer.climate.climate.get` for the twelve monthly mean air temperatures and
+`ph_composer.climate.design_temperatures.get` for the two design temperatures and their state; a
+heat pump left out for want of them is Mechanical's finding. A sun-path view or a window overlay, when built,
+reads the site and the monthly radiation the same way. These reads were confirmed on SketchUp 2026
+in Climate's integrated host run.
+
 ## Geometry records and occurrence references
 
 Records are canonical JSON under registered `ph_composer.*` dictionaries. A read never creates a

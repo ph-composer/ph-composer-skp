@@ -165,12 +165,12 @@ to 7, piping and ducting are gate stubs until their interviews. No stage authori
 
 ## Phase 8: post-MVP (was Phase 5; items 5.1 to 5.5)
 
-Climate data (5.1) is now [Phase 4](features/phase-04-climate/README.md) and
+Climate data (5.1) is now [Phase 4](archive/phase-04-climate/README.md) and
 [Phase 5: shading](features/phase-05-shading/README.md) is a placeholder; neither has a section above yet.
 
 | # | Item | State | Note |
 | --- | --- | --- | --- |
-| 5.1 | [Climate data](features/phase-04-climate/README.md) | Promoted to Phase 4 on 2026-11-15; [PLAN](features/phase-04-climate/PLAN.md) stages P4c-01 to P4c-12 authorized 2026-11-17; P4c-01 to P4c-11 merged (PRs #512 to #522), P4c-12 (acceptance and handoff) in PR #523 with the CM12 integrated run passed by agents, 2026-11-18. The site, one Phius climate per Model and the design temperatures ship; the hourly weather file is deferred | Ships no datasets. Reuses honeybee-ph EPW-to-monthly conversion for preliminary work; user-supplied peak loads are required for climate-bearing METr export per D9 |
+| 5.1 | [Climate data](archive/phase-04-climate/README.md) | Promoted to Phase 4 on 2026-11-15; [PLAN](archive/phase-04-climate/PLAN.md) stages P4c-01 to P4c-12 authorized 2026-11-17; P4c-01 to P4c-12 merged (PRs #512 to #523), the review fixes in PR #524 (`73ef7ba9`); complete and archived 2026-11-18, with host acceptance open for Ed's verification pass. The site, one Phius climate per Model and the design temperatures ship; the hourly weather file is deferred | Ships no datasets. Reuses honeybee-ph EPW-to-monthly conversion for preliminary work; user-supplied peak loads are required for climate-bearing METr export per D9 |
 | 5.2 | [Sun-path view](features/phase-08-post-mvp/sun-path-view/README.md) | Requested, PRD drafted | Can ship on SketchUp geolocation alone, before 5.1 |
 | 5.3 | [Window performance overlays](features/phase-08-post-mvp/window-performance-overlays/README.md) | Requested, PRD drafted | Needs 5.1 for radiation. A U-w ramp needs nothing and could come earlier |
 | 5.4 | Further library kinds and providers | Not drafted | Thermal Bridge Types, Pipe and Duct Types, equipment, climates |
@@ -271,3 +271,4 @@ prerequisites and carried B1/B2 conditions into the next phase.
 | 2026-10-26 | Thermal bridges P3b-01 to P3b-09 merged (PRs #302, #308 to #315), T01 to T09 pass; the packet is archived as `phase-03b-thermal-bridges`, with geometry-contribution-contracts. Both Phase 3 sub-phases are complete, so Phase 3 closes. |
 | 2026-11-15 | Phase 4 Mechanical tab wireframes reviewed with Ed: D4-13 to D4-20 answered (a Mechanical tab with subtabs by system, heat pumps as four tables with one blended export by the Phius estimator's method, hot water as Systems, Heaters and Tanks). Heat pumps now need Climate first; Phase 4's bindings and stages P4-05 to P4-11 owe re-planning. |
 | 2026-11-15 | Ed re-ordered the later phases and their folders: Climate promoted to `phase-04-climate`, `phase-05-shading` reserved as a placeholder, Programs to `phase-06-program` (was 4a), Mechanical to `phase-07-mechanical` (was 4), Post-MVP to `phase-08-post-mvp` (was 5). Ids keep their prefixes. Climate tab wireframes drawn the same day, not reviewed. |
+| 2026-11-18 | Climate (Phase 4) P4c-01 to P4c-12 merged (PRs #512 to #523), the review fixes in PR #524 (`73ef7ba9`); the packet is archived at `archive/phase-04-climate/` with host acceptance open for Ed's verification pass (CM06 to CM12) and CM04 to CM12 reading `needs_recheck`. Not released. |

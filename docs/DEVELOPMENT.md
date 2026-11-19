@@ -29,6 +29,14 @@ Use `make lint` and `make test` for focused work. Ruby tests run in shards and p
 Set `RUBY_TEST_JOBS=1` or use `ruby -Itests tests/all_tests.rb` to investigate order-dependent
 failures. Run `make coverage` when the owning phase requires it. The Makefile defines the thresholds.
 
+Three tests skip unless you give them an input or a dependency that the repository does not hold. Set
+`PH_COMPOSER_CLIMATE_CORPUS` to a folder of Phius station files you are licensed to use, to run
+`tests/climate_station_corpus_test.rb`. Set `PH_COMPOSER_MAP_DATA` as the
+[outline map data guide](../tools/map_data/README.md) says, to check the shipped map borders against
+their source. Run `uv run --group phx pytest tests/python/test_site_phx_round_trip.py` for the PHX
+round trip of the exported site. Keep the location of any licensed files in a gitignored
+`_private/` manifest, never in a tracked file.
+
 The lint tools are RuboCop, ESLint and Ruff. Install the project's dependencies if lint reports a
 skip. `make lint-citations` checks that shipped code and tests cite durable engineering contracts.
 `make lint-paths` checks tracked files for personal home paths, with exceptions for synthetic

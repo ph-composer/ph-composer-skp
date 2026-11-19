@@ -16,7 +16,8 @@ HBJSON is the canonical export.
 | Local agent access and user grants | [Agent interface](context/AGENT_INTERFACE.md) and [client setup](docs/AGENT_ACCESS.md) |
 | Build, test and release | [Development guide](docs/DEVELOPMENT.md) |
 | Security reports and implementation | [Security policy](docs/SECURITY.md), [listener rules](context/AGENT_INTERFACE.md#security-posture) and [panel rules](context/TECH_STACK.md#panel) |
-| Host and preview tools | [Host kit](tools/hostkit/.index.md) and [UI preview](tools/ui-preview/.index.md) |
+| Site, climate and station files | [Station reader](context/CONTRACTS.md#the-phius-station-reader), [this computer's settings file](context/CONTRACTS.md#this-computers-settings-file) and [climate operations](docs/AGENT_GUIDE.md#climate) |
+| Host and preview tools | [Host kit](tools/hostkit/.index.md), [UI preview](tools/ui-preview/.index.md) and [outline map data](tools/map_data/README.md) |
 | Active work and acceptance | [Planning status](planning/STATUS.md), then the owning packet and [native case ledger](planning/native-acceptance/README.md) |
 
 Shipping code lives in `src/ph_composer/`. Development tools live in `tools/`. Use

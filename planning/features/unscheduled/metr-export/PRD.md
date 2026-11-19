@@ -53,7 +53,7 @@ METr model's names.
 | Q1 | Final file extension and overwrite UX | Validation/export PRD Q6; confirm against METr's import UI |
 | Q2 | Floor-area source | B1 left zone rooms empty and floor areas zero. Decide whether Spaces must exist first or another source is acceptable; no workaround without a decision |
 | Q3 | Minimum sections for a useful first export | Depends on which Phase 2 to 4 features have landed |
-| Q4 | Climate in the first export | Governed by D9 and the [climate data](../../phase-04-climate/README.md) packet |
+| Q4 | Climate in the first export | Governed by D9 and the [climate data](../../../archive/phase-04-climate/README.md) packet |
 
 ## Acceptance shape
 

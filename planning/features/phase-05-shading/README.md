@@ -6,7 +6,7 @@ AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
 Ed reserved this phase on 2026-11-15 for a forthcoming shading packet, to follow
-[Phase 4: climate](../phase-04-climate/README.md) and precede
+[Phase 4: climate](../../archive/phase-04-climate/README.md) and precede
 [Phase 6: Programs](../phase-06-program/README.md). Its scope is not written yet.
 
 Existing material that touches shading, none of it moved here:

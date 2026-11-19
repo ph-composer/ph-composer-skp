@@ -58,7 +58,7 @@ checks, review and limits. P3a-01 reuses it; no Spaces stage gate is closed by t
 | Piping / Q2 | Confirm nominal pipe-size selection versus converted diameter; reuse length quantities for insulation/run length and add descriptors, vectors and feature-screen checks | [Hot water piping](../../phase-07-mechanical/hot-water-piping/STATUS.md); requested, interview pending |
 | Ducting | Confirm duct dimension/insulation descriptors and displays; reuse registered length/airflow quantities where applicable and verify the owning screen/export boundary | [ERV ducting](../../phase-07-mechanical/erv-ducting/STATUS.md); requested, interview pending |
 | Equipment / Q3 | Confirm power/energy displays and capacities; add missing volume-in-litres, capacity and ventilator-efficiency conversions as required. W/kWh unchanged and kBtu/h capacity remain proposals; ventilator electric efficiency confirmed 2026-10-21 as Wh/m³ stored, W/cfm in IP (equipment V4) | [Equipment](../../phase-07-mechanical/equipment/STATUS.md); requested, family interviews pending |
-| Climate | Confirm radiation quantities and add their conversions/vectors; reuse temperature and length primitives for matching fields | [Climate data](../../phase-04-climate/STATUS.md); requested, post-MVP |
+| Climate | Confirm radiation quantities and add their conversions/vectors; reuse temperature and length primitives for matching fields | [Climate data](../../../archive/phase-04-climate/STATUS.md); requested, post-MVP |
 
 Thermal-bridge run length and psi already have generic quantities (`length`, `linear_psi`);
 [Phase 3b](../../../archive/phase-03b-thermal-bridges/STATUS.md) still owns its field wiring and acceptance.

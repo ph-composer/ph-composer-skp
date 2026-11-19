@@ -58,7 +58,7 @@ comparison is defined and passed, no writes to SketchUp's location, north or tim
 ## Dependencies
 
 The foundation's overlay lifecycle and a current-host line-drawing proof. The filled-face overlay
-spike does not gate this line-only view. [climate-data](../../phase-04-climate/README.md) supplies the site
+spike does not gate this line-only view. [climate-data](../../../archive/phase-04-climate/README.md) supplies the site
 location when present and is optional under Q1.
 
 ## Acceptance shape

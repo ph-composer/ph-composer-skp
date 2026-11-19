@@ -20,7 +20,7 @@ dependencies = [
 dev = ["pytest>=8", "pytest-cov>=5", "ruff>=0.6", "ty==0.0.87"]
 # The PHX round trip of the exported Site (tests/python/test_site_phx_round_trip.py), which skips without it:
 # `uv run --group phx pytest tests/python/test_site_phx_round_trip.py`. PHX is not shipped and not a
-# dependency. 1.57.5 is the latest PHX over the pinned honeybee-ph (planning/features/phase-04-climate/
+# dependency. 1.57.5 is the latest PHX over the pinned honeybee-ph (planning/archive/phase-04-climate/
 # evidence/owed-check-6-20261118.md); 1.58 and later need honeybee-ph 1.33.68.
 phx = ["PHX==1.57.5"]
 
