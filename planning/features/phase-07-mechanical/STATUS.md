@@ -1,7 +1,7 @@
 # Phase 4: mechanical, tracking ledger
 
 DATE: 2026-10-21
-STATUS: Scoped. Interviewed (shared shape, Ventilators, hot water) and planned as P4-01 to P4-15 on 2026-10-21; D4-01 to D4-12 answered as recommended the same day; nothing authorized or implemented. Wireframes reviewed 2026-11-15: D4-13 to D4-20 answered, revising D4-08 and five interview answers; CONTRACTS, ACCEPTANCE and stages P4-05 to P4-11 owe re-planning; heat pumps wait on Climate.
+STATUS: Scoped. Interviewed (shared shape, Ventilators, hot water) and planned as P4-01 to P4-15 on 2026-10-21; D4-01 to D4-12 answered as recommended the same day; nothing authorized or implemented. Wireframes reviewed 2026-11-15: D4-13 to D4-20 answered, revising D4-08 and five interview answers; CONTRACTS, ACCEPTANCE and stages P4-05 to P4-11 owe re-planning; Climate's entry gate for the heat pumps met 2026-11-18.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -43,7 +43,7 @@ Ed creates the phase issue and says go on P4-01, which waits for Phase 3b's P3b-
 | P3b-01 merged before P4-01 (both edit the `PLANNING_IDS` line) | Open; Phase 3b P3b-01 in progress since 2026-10-21 |
 | The other shared files (`extension.rb`, `index.html`, `composition.py`, `assembly.py`, `api.rb`, the agent guide) are never open on a Phase 3b branch and a Phase 4 branch at once; whichever lands second rebases (PLAN, "Order and parallel work") | Coordination, not an ordering gate |
 | Families 3 to 7 interviewed before P4-08 to P4-12 | Heat pumps settled at the wireframe review, 2026-11-15 (D4-14 to D4-16). Pumps, Fans and Electric Heating: table shape and columns only (D4-13, D4-20), interviews otherwise open |
-| Climate supplies a location or design temperatures and monthly values, before P4-08 (D4-15) | Open. Climate is built first and planned in its own thread (Ed, 2026-11-15); [climate-data](../phase-04-climate/README.md) is the existing packet |
+| Climate supplies a location or design temperatures and monthly values, before P4-08 (D4-15) | Met 2026-11-18 by the Climate phase: `ph_composer.climate.climate.get` gives the twelve monthly mean air temperatures and `ph_composer.climate.design_temperatures.get` the two design temperatures with their state, read back on the host in Climate's integrated run ([CM12 evidence](../phase-04-climate/evidence/cm12-20261118.md), [contract](../phase-04-climate/CONTRACTS.md#9-what-other-features-read)). This authorizes nothing here |
 | Phase 3b P3b-03, P3b-04, P3b-06, P3b-07 and P3b-08 merged, then the piping and ducting interviews, before P4-13 and P4-14 | Open |
 
 ## Stage ledger
@@ -164,3 +164,4 @@ reproduces what the stages depend on.
 | 2026-10-21 | Planned in detail: fourteen findings, twelve decisions D4-01 to D4-12, bindings with additions A1 to A5, stages P4-01 to P4-15 (P4-08 to P4-14 as gate stubs), register M01 to M15 with a hand-calculated reference model. No decision answered, no stage authorized. |
 | 2026-10-21 | Ed answered D4-01 to D4-12, all as recommended; P4-02 to P4-07 lose their decision blockers. Waiting on the phase issue and the go on P4-01. |
 | 2026-11-15 | Wireframes reviewed with Ed ([mockups](mockups/README.md)): D4-13 to D4-20 answered and F15 to F19 recorded in DECISIONS Part 3. D4-08 and the answers Q4 (heat pumps), Q9, H1, H4 and H7 revised. Climate added as an entry gate for P4-08. Bindings, register and stages P4-05 to P4-11 owe re-planning; nothing authorized. |
+| 2026-11-18 | Climate's entry gate for P4-08 met: Climate P4c-12's integrated run read `climate.get` and `design_temperatures.get` on the host with a complete, an incomplete and no climate, and set, incomplete and unset design temperatures, as Climate CONTRACTS section 9 says. Nothing authorized. |

@@ -94,13 +94,14 @@ B eval "CM12.folders"; B eval "CM12.click(CM12::DATA, 'Done')"
 ### A6. Set the site three ways (boards 1, 21, 22)
 
 ```sh
-# typed
-B eval "CM12.click(CM12::HEAD, 'Set Location…')"
+# typed (with no site, Set Location… is in the Phius pane; once a site is set, it is in the page header
+# while the Site location card is selected)
+B eval "CM12.click(CM12::PANE, 'Set Location…')"
 B eval "CM12.fill(CM12::SETLOC, 'Latitude', '41.5')"; B eval "CM12.fill(CM12::SETLOC, 'Longitude', '-99.0')"
 B eval "CM12.fill(CM12::SETLOC, 'Elevation', '450')"; B eval "CM12.setloc"
 B eval "CM12.click(CM12::SETLOC, 'Set Location')"; B eval "CM12.state"     # site set, 41.5, -99.0, 450
 # a click on the map (scripted pointer events; the real click is B1)
-B eval "CM12.click(CM12::HEAD, 'Set Location…')"; B eval "CM12.press_map(60, 40)"; B eval "CM12.setloc"
+B eval "CM12.click_card('site')"; B eval "CM12.click(CM12::HEAD, 'Set Location…')"; B eval "CM12.press_map(60, 40)"; B eval "CM12.setloc"
 #   latitude and longitude changed from 41.5 and -99.0; elevation kept
 B eval "CM12.click(CM12::SETLOC, 'Set Location')"; B eval "CM12.state"
 # SketchUp's geolocation (stood in), the elevation typed
@@ -109,6 +110,7 @@ B eval "CM12.click(CM12::HEAD, 'Set Location…')"; B eval "CM12.click(CM12::SET
 B eval "CM12.setloc"                        # Latitude 40, Longitude -100; Elevation not filled by the read
 B eval "CM12.fill(CM12::SETLOC, 'Elevation', '500')"; B eval "CM12.click(CM12::SETLOC, 'Set Location')"
 B eval "CM12.state"                         # site 40.0, -100.0, 500: the reference site
+B eval "CM12.click_card('phius')"
 ```
 
 ### A7. The picker: nearest, a passing and a failing verdict, attach (boards 4, 11)
@@ -180,13 +182,15 @@ B eval "CM12.privacy"                  # no path in any answer or the log
 
 ### A13. A climate typed by hand on a second Model (boards 12, 20)
 
+`Sketchup.open_file` of a second document does not make it the active Model while no SketchUp window is key
+(host control notes), so the second Model has its own process.
+
 ```sh
-B save                                       # cm12.skp, before the second Model opens
-B eval "Sketchup.open_file('$PWD/_private/host/<run>/CM12/cm12-hand.skp')"   # a fresh copy of blank-template.skp, made first
-B eval "CM12.state"                          # title cm12-hand; climate none
-B eval "CM12.open_panel"                     # the panel follows the active Model
+B save; B quit
+B launch "$PWD/_private/host/<run>/CM12/cm12-hand.skp" --fresh-from _private/host/blank-template.skp
+B eval "load '$D/cm12.rb'; CM12.state"       # title cm12-hand; climate none; the folder listed
 B eval "CM12.mechanical"                     # climate none, design not_set: what Mechanical's finding reads
-B eval "CM12.click_tab('climate')"; B eval "CM12.click_card('phius')"
+B eval "CM12.open_panel"; B eval "CM12.click_tab('climate')"; B eval "CM12.click_card('phius')"
 B eval "CM12.click(CM12::PHIUS, 'Enter Values by Hand…')"; B eval "CM12.paste(0)"; B eval "CM12.editor"
 B eval "CM12.type('Name', 'Typed Street')"; B eval "CM12.type('Station elevation', '92')"
 B eval "CM12.click(CM12::EDITOR, 'Save')"; B eval "CM12.climate"    # incomplete; origin hand; missing swing, wind
@@ -198,7 +202,8 @@ B eval "CM12.click_tab('climate')"; B eval "CM12.click_card('phius')"; B eval "C
 ```
 
 Leave SketchUp as part B needs it: a fresh process with `cm12.skp` alone, saved, the panel open at 1280 x 800
-on the Climate tab with the Phius card showing the attached climate, the folder set up.
+on the Climate tab with the Phius card showing the attached climate (Inside Both XA, one edited value), the
+folder set up.
 
 ## Part B: real input and native Undo (the conductor, one hold)
 
@@ -210,10 +215,11 @@ The panel may be on another Space: `app_bring_to_current_space`, then System Eve
 
 ### B1. CM12: a real click on the map
 
-1. Click **Set Location…** in the page header. `CM12.setloc`: open, the map drawn.
+1. Click the **Site location** card, then **Set Location…** in the page header. `CM12.setloc`: open, the map
+   drawn.
 2. Click once on the map, away from the site's pin, without dragging. `CM12.setloc`: Latitude and Longitude
    differ from 40 and -100; Elevation still 500.
-3. Click **Cancel**. `CM12.state`: the site still 40.0, -100.0, 500.
+3. Click **Cancel**, then the **Phius climate data** card. `CM12.state`: the site still 40.0, -100.0, 500.
 
 ### B2. SketchUp's geolocation, on a Model never geolocated
 
@@ -223,26 +229,30 @@ never wrote.
 ```sh
 cp _private/host/blank-template.skp _private/host/<run>/CM12/cm12-geo.skp
 B eval "Sketchup.open_file('$PWD/_private/host/<run>/CM12/cm12-geo.skp')"
-B eval "CM12.state"     # title cm12-geo; geolocation geolocated false; site not_set
-B eval "CM12.open_panel"; B eval "CM12.click_tab('climate')"
 ```
+
+AXRaise the `cm12-geo.skp` window so it becomes the active Model, then `B eval "CM12.state"`: title
+`cm12-geo`, geolocation geolocated false, site not_set. The panel follows the active Model; select the Site
+location card.
 
 1. AXRaise `cm12-geo.skp`. **Window > Model Info > Geo-location > Set Manual Location…**, latitude `42.3`,
    longitude `-73.4`, OK, close Model Info. `B eval "CM12.state"`: `geolocation` as SketchUp now reports it, and
    `B eval "[Sketchup.active_model.georeferenced?, Sketchup.active_model.shadow_info['Latitude']]"`.
 2. AXRaise the panel. **Set Location…**, **Read from SketchUp Geolocation**. `CM12.setloc`: Latitude 42.3 and
-   Longitude -73.4 with Elevation empty, or, if SketchUp reports the manual location not geolocated, the status
+   Longitude -73.4 with Elevation empty (the panel's **Set Location…** is in the page header while the Site
+   location card is selected), or, if SketchUp reports the manual location not geolocated, the status
    "This SketchUp model has no geolocation." Either is recorded.
    - Filled: type Elevation `100`, **Set Location**: `CM12.state` site 42.3, -73.4, 100. `site-geolocation` passes.
    - No geolocation: Set Location stays disabled with the fields empty; **Cancel**. `site-geolocation` reads
      blocked, part A's stand-in run its only pass, until Ed decides (packet STATUS, owed check 4 item 2). Type no
      coordinates in its place.
-3. `B eval "Sketchup.open_file('$PWD/_private/host/<run>/CM12/cm12.skp')"` to return; `cm12-geo.skp` is never
-   saved and closes with the quit after B3.
+3. AXRaise the `cm12.skp` window to return (`CM12.state` title `cm12`) and select the Phius climate data card;
+   `cm12-geo.skp` is never saved and closes with the quit after B3.
 
 ### B3. CM12: Replace as one native Undo step
 
-1. Click **Replace…** in the page header. The picker opens. Click the row **Café Station**, then **Replace**.
+1. With the Phius climate data card selected, click **Replace…** in the page header. The picker opens. Click the
+   row **Café Station XB**, then **Replace**.
    `CM12.climate`: station `CAFE_STATION`, edited 0.
 2. AXRaise `cm12.skp`. **Edit > Undo Replace Climate Station**: `CM12.climate` station `INSIDE_BOTH`, edited 1.
    **Edit > Redo Replace Climate Station**: `CAFE_STATION` again. One step each way, the titles exact.
