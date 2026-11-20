@@ -10,10 +10,12 @@ module PhComposer
       PREFIX = FEATURE_ID
       TEXT = { "type" => "string" }.freeze
       REFERENCE = Targets::REFERENCE
-      TARGETS = list(REFERENCE).merge("minItems" => 1, "maxItems" => Mark::TARGET_LIMIT,
-                                      "description" => "Faces, Groups and components by root-to-entity path, as " \
-                                                       "#{PREFIX}.selection returns them; at most " \
-                                                       "#{Mark::TARGET_LIMIT}. A repeated path counts once.")
+      TARGETS = list(REFERENCE).merge(
+        "minItems" => 1, "maxItems" => Mark::TARGET_LIMIT,
+        "description" => "Faces, Groups and components by root-to-entity path, as #{PREFIX}.selection returns " \
+                         "them; at most #{Mark::TARGET_LIMIT} references, a repeated path counting toward the " \
+                         "limit and applied once."
+      )
       PARAMS = object({ "targets" => TARGETS }).freeze
       # Resolving each path: a step missing or repeated refuses the whole command, as does the Zone read.
       RESOLVE = %w[target.not_found target.ambiguous record.unreadable validation.failed].freeze
@@ -53,7 +55,7 @@ module PhComposer
           "kind" => { "type" => "string", "enum" => Mark::KINDS },
           "readable" => { "type" => "boolean", "description" => "False when the stored mark is not a JSON object; " \
                                                                 "it still marks the entity, and clear removes it." }
-        })).merge("description" => "Every entity carrying the mark, outside cutting components, in path order."),
+        })).merge("description" => "Every entity carrying the mark, inside cutting components too, in path order."),
         "components" => list(object({
           "display_name" => TEXT, "face_count" => { "type" => "integer", "minimum" => 0 },
           "area_m2" => { "type" => "number", "minimum" => 0, "x-unit" => "m2" }
@@ -103,7 +105,8 @@ module PhComposer
                       :description => "Every entity carrying the shading mark and every shading component: the " \
                                       "Shading Faces grouped by the name they export under, with Face count and " \
                                       "world area. Reads Zones' occurrences, then walks the Model once.",
-                      :refuses => %w[record.unreadable validation.failed], :params => object({}), :result => LIST,
+                      :refuses => %w[geometry.invalid record.unreadable validation.failed], :params => object({}),
+                      :result => LIST,
                       :examples => [{}]) { |request| Inventory.list(request) }
         feature.query("#{PREFIX}.selection",
                       :description => "The selected Faces, Groups and components under the active path as " \

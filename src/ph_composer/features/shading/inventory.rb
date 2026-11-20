@@ -3,9 +3,10 @@
 module PhComposer
   module Shading
     # `shading.list`: every marked entity and every shading component, the Shading Faces grouped by the name they
-    # export under, with their count and world area. Two walks: Zones' walk of its occurrences, which says which
-    # Groups are Zones without Shading reading Zones' records, then one walk of the Model. Cutting components
-    # are not walked, as export does not read their Faces. Reads only.
+    # export under, with their count and world area. A mark inside a cutting component is listed, so clear can
+    # find it, but those Faces count in no component, as export does not read them. Two walks: Zones' walk of
+    # its occurrences, which says which Groups are Zones without Shading reading Zones' records, then one walk
+    # of the Model. A Face whose transform is singular refuses the read as geometry.invalid. Reads only.
     module Inventory
       module_function
 
@@ -15,10 +16,11 @@ module PhComposer
           hash[name] = { "display_name" => name, "face_count" => 0, "area_m2" => 0.0 }
         end
         zones = Targets.zone_names(request.model)
-        walk(request.model.entities, [], [], Geom::Transformation.new, zones) do |entity, path, containers, transform|
+        walk(request.model.entities, [], [], Geom::Transformation.new,
+             zones) do |entity, path, containers, transform, cut|
           marked << { "entity_path" => path, "kind" => Mark.kind(entity), "readable" => Mark.readable?(entity) } if
             Mark.marked?(entity)
-          next unless entity.is_a?(Sketchup::Face) &&
+          next unless entity.is_a?(Sketchup::Face) && !cut &&
                       Reads.shading_face?(:marked => Mark.marked?(entity), :owned => Targets.owned?(entity),
                                           :containers => containers)
 
@@ -31,18 +33,19 @@ module PhComposer
           "units" => { "area_m2" => "m2" } }
       end
 
-      # Yields each Face, Group and component with its root path, the Reads::Container rows above it and the
-      # transform from its collection to world, once per placement. `zones` maps Zone paths to names.
-      def walk(entities, path, containers, transform, zones, &block)
+      # Yields each Face, Group and component with its root path, the Reads::Container rows above it, the
+      # transform from its collection to world and whether a cutting component holds it, once per placement.
+      # `zones` maps Zone paths to names.
+      def walk(entities, path, containers, transform, zones, cut = false, &block)
         entities.each do |entity|
           next unless Mark.kind(entity)
 
           current = path + [entity.persistent_id]
-          yield entity, current, containers, transform
-          next if entity.is_a?(Sketchup::Face) || Targets.cutting?(entity)
+          yield entity, current, containers, transform, cut
+          next if entity.is_a?(Sketchup::Face)
 
           walk(Targets.contents(entity), current, containers + [Targets.container(entity, current, zones)],
-               transform * entity.transformation, zones, &block)
+               transform * entity.transformation, zones, cut || Targets.cutting?(entity), &block)
         end
       end
     end

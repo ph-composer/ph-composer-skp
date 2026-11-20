@@ -14333,7 +14333,7 @@ Example params:
 
 Every entity carrying the shading mark and every shading component: the Shading Faces grouped by the name they export under, with Face count and world area. Reads Zones' occurrences, then walks the Model once. Owner: `ph_composer.shading`.
 
-Refuses: `record.unreadable`, `validation.failed`, and the `query` common set.
+Refuses: `geometry.invalid`, `record.unreadable`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -14391,7 +14391,7 @@ Result:
           }
         }
       },
-      "description": "Every entity carrying the mark, outside cutting components, in path order."
+      "description": "Every entity carrying the mark, inside cutting components too, in path order."
     },
     "components": {
       "type": "array",
@@ -48976,7 +48976,7 @@ Params:
       },
       "minItems": 1,
       "maxItems": 250,
-      "description": "Faces, Groups and components by root-to-entity path, as ph_composer.shading.selection returns them; at most 250. A repeated path counts once."
+      "description": "Faces, Groups and components by root-to-entity path, as ph_composer.shading.selection returns them; at most 250 references, a repeated path counting toward the limit and applied once."
     }
   }
 }
@@ -49125,7 +49125,7 @@ Params:
       },
       "minItems": 1,
       "maxItems": 250,
-      "description": "Faces, Groups and components by root-to-entity path, as ph_composer.shading.selection returns them; at most 250. A repeated path counts once."
+      "description": "Faces, Groups and components by root-to-entity path, as ph_composer.shading.selection returns them; at most 250 references, a repeated path counting toward the limit and applied once."
     }
   }
 }

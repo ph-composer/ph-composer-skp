@@ -204,6 +204,25 @@ class ShadingOperationsTest < PhComposerTestCase
     assert_in_delta 3 * 0.5 * (0.0254**2), louvre.fetch("area_m2"), 1e-12
   end
 
+  # A mark inside a cutting component stays listed for clear to find; its Face counts in no component.
+  def test_list_names_a_mark_inside_a_cutting_component_and_counts_no_face_there
+    STORE.write(live(100, 130, 131), SH::Mark::RECORD)
+    value = list
+    # The cutting definition is placed at 130 and 24, so its one marked Face is listed per placement.
+    assert_equal [[20, 24, 131], [100, 130, 131]], value.fetch("marked").map { |row| row.fetch("entity_path") }
+    assert_empty value.fetch("components")
+    assert_equal "target.shared_definition", clear([100, 130, 131])["code"]
+  end
+
+  def test_list_refuses_a_shading_face_under_a_singular_transform
+    flat = Sketchup::ComponentDefinition.new(Sketchup::Entities.new([Sketchup::Face.new(96)]), :name => "Flat")
+    @model.entities << Sketchup::ComponentInstance.new(95, flat,
+                                                       :transformation => Geom::Transformation.scaling(0, 1, 1))
+    STORE.write(live(95), SH::Mark::RECORD)
+    result = API.query(:context => @context, :name => "#{SH::FEATURE_ID}.list", :params => {})
+    assert_equal %w[refused geometry.invalid], result.values_at("status", "code")
+  end
+
   # An instance's own name comes before its definition's.
   def test_an_instance_named_on_its_own_exports_under_that_name
     assign([44])
