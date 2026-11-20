@@ -2,8 +2,10 @@
 
 Two full gates at once (two stage worktrees, or a gate beside a Codex review's test runs) pushed the load
 average to 16 and the Ruby 2.7 suite past its 900 s limit. A second caller waits and says so. The lock is an
-advisory `flock` on one file: the kernel releases it when its holder exits, however it exits, so nothing is
-ever reclaimed or deleted. Usage: python3 tools/gate_lock.py <command> [args...]
+advisory `flock` on one file, held by this wrapper and inherited by the command: the kernel releases it when
+the last holder exits, however it exits, so nothing is ever reclaimed or deleted.
+
+Usage: python3 tools/gate_lock.py <command> [args...]
 """
 
 from __future__ import annotations
@@ -32,7 +34,9 @@ def main(argv: list[str]) -> int:
         except BlockingIOError:
             print(f"gate: another make ci holds {path}; waiting", flush=True)
             fcntl.flock(handle, fcntl.LOCK_EX)
-        return subprocess.call(argv)
+        # The command inherits the locked descriptor, so the lock stays held while it or anything it started
+        # runs, even if this wrapper is killed first.
+        return subprocess.call(argv, pass_fds=(handle.fileno(),))
 
 
 if __name__ == "__main__":

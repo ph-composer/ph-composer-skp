@@ -59,9 +59,10 @@ runs. If he will not, show no full-screen card he cannot answer. Run what needs 
 Events as each stage finishes, record the native-gesture rows as owed, and run every owed case in one
 batched sitting on the final head, from one recipe, under one card. In Phase 5 (2026-11-19) three
 unanswered cards cost about 15 minutes and the workarounds about 15 more; the batched pass then ran SD01 to
-SD07 in 28 minutes. Synthetic pointer moves reach a Ruby tool's `onMouseMove` only intermittently: for a
-hover or tooltip check, call the tool's handler by bridge at the target's screen point, in an eval after
-the view has settled, and capture the result.
+SD07 in 28 minutes. Synthetic pointer moves reach a Ruby tool's `onMouseMove` only intermittently, so a
+native hover row may not be drivable. Calling the tool's handler by bridge at the target's screen point
+shows what the tool would draw; record that as a labelled simulation, not as the native hover, and leave
+the native hover assertion owed until a real pointer reaches it.
 
 Tell Ed in one line before any host step that can change his screen: bringing SketchUp to the front (a
 Model switch is the only way to fire `onActivateModel`; `host_bridge.py show-model` makes one), or anything
