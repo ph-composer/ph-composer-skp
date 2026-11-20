@@ -346,9 +346,9 @@
       "sha256": "5cdfedd2c1f977aae1a40d6c6e7979cfb9e866b5c13550954b29d520fa981900"
     },
     "html/features/zones/faces_view.js": {
-      "bytes": 41480,
+      "bytes": 43157,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "71c18b776490a7643b1564007b491991ce40d7c310a2a88fd7a6532492b8ea5b"
+      "sha256": "a3b5f6e92d4709000ce846123c0c46166f9851e79a43bedefb070e65faf5115d"
     },
     "html/features/zones/option_dialog.js": {
       "bytes": 16451,
@@ -356,14 +356,14 @@
       "sha256": "918fe136617fd341fd5bd51d85125284fe06b0f99c978070010234b46a1576fa"
     },
     "html/features/zones/overview.js": {
-      "bytes": 57288,
+      "bytes": 57424,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "4e0f61addd76b05bdc11db3428bcbdc75164fb1b27887d96ee6740642de0eadf"
+      "sha256": "845919747b71fae7ca8023c58d1d1da178a5781edfba5bb63c7b446467c37bdb"
     },
     "html/features/zones/segment_rows.js": {
-      "bytes": 24054,
+      "bytes": 24533,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "8c5a2c2359ae99cc2b360fab49e35a0deaa4c32f252692cce606c801e1a96be9"
+      "sha256": "af9f9ba4c54f35d1b2c326a2c7cb944aba913a00137687f842dfe4c7f5f3050a"
     },
     "html/features/zones/segment_settings.js": {
       "bytes": 11166,

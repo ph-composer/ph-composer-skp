@@ -35,7 +35,8 @@ function (panel, ui, snapshot, units, fields, words, tableViews, attachedAssignm
 
   /* This view's state for one Model, with the host handle it reaches the shared state through. */
   function create(host) {
-    var vs = { host: host, checked: new CheckedFaces(), showAll: Object.create(null), locating: false,
+    var vs = { host: host, checked: new CheckedFaces(), emptyChecked: Object.create(null),
+      showAll: Object.create(null), locating: false,
       faces: [], barTargets: [], limit: Infinity, faceTypes: [], boundaries: [] };
     // The Assembly chip keeps the object it was painted with and reads it again when the user chooses, so it
     // is one object for the session whose fields follow the host's.
@@ -535,7 +536,9 @@ function (panel, ui, snapshot, units, fields, words, tableViews, attachedAssignm
      first, then the checked set, then Locate's outline. True when this view used the key. */
   function escape(vs) {
     if (classify.showing()) return false;
-    if (vs.checked.among(vs.faces).length) { vs.checked.clear(); panel.repaint(); return true; }
+    if (vs.checked.among(vs.faces).length || Object.keys(vs.emptyChecked).length) {
+      clearChecks(vs); panel.repaint(); return true;
+    }
     return clearLocate(vs);
   }
 
@@ -557,6 +560,17 @@ function (panel, ui, snapshot, units, fields, words, tableViews, attachedAssignm
 
   /* ---------------------------------------------------------------- the checked set and its bar */
 
+  /* A Zone row with no Faces checks itself, so it can still be moved to another Building Segment from the bar;
+     it never counts for Solve, which acts on Faces. */
+  function emptyZone(row) {
+    return !row.parent && Boolean(row.record.zone) && !(row.record.every || []).length;
+  }
+
+  function clearChecks(vs) {
+    vs.checked.clear();
+    vs.emptyChecked = Object.create(null);
+  }
+
   /* What the shared table's checkboxes do in this view: a Face row checks its Face, a Zone or summary row
      checks the Faces beneath it, and the header box checks every Face the filters show. Called as the table
      paints, with the rows it shows, the Zone rows that pass the filters and every Zone row. */
@@ -564,14 +578,34 @@ function (panel, ui, snapshot, units, fields, words, tableViews, attachedAssignm
     var visible = context.visible, filterFaces = facesShown(context.zoneRows, context.filters);
     vs.checkedZones = context.allZoneRows.filter(function (row) { return vs.checked.state(row) === true; })
       .map(function (row) { return row.record.zone; });
+    var live = Object.create(null);
+    context.allZoneRows.forEach(function (row) {
+      if (emptyZone(row) && vs.emptyChecked[row.key]) live[row.key] = row;
+    });
+    vs.emptyChecked = Object.create(null);
+    Object.keys(live).forEach(function (key) { vs.emptyChecked[key] = true; });
+    // What the Building Segment choice moves: every fully checked Zone, with or without Faces.
+    vs.moveZones = vs.checkedZones.concat(Object.keys(live).map(function (key) { return live[key].record.zone; }));
     vs.hiddenChecked = vs.checked.among(vs.faces).length - vs.checked.among(filterFaces).length;
-    return { state: function (row) { return vs.checked.state(row); },
-      toggle: function (row, event) { vs.checked.toggle(row, event, visible); panel.repaint(); },
+    return { state: function (row) {
+      return emptyZone(row) ? Boolean(vs.emptyChecked[row.key]) : vs.checked.state(row);
+    },
+      toggle: function (row, event) {
+        if (emptyZone(row)) {
+          if (vs.emptyChecked[row.key]) delete vs.emptyChecked[row.key]; else vs.emptyChecked[row.key] = true;
+        } else vs.checked.toggle(row, event, visible);
+        panel.repaint();
+      },
       header: function () { return Boolean(filterFaces.length) && vs.checked.stateOf(filterFaces); },
       toggleAll: function () { vs.checked.toggleAll(filterFaces); panel.repaint(); },
-      label: function (row) { return (vs.checked.state(row) === true ? "Uncheck " : "Check ") + row.record.name; },
+      label: function (row) {
+        var checked = emptyZone(row) ? Boolean(vs.emptyChecked[row.key]) : vs.checked.state(row) === true;
+        return (checked ? "Uncheck " : "Check ") + row.record.name;
+      },
       headerLabel: function (value) { return (value === true ? "Uncheck" : "Check") + " every Face the filter shows"; },
-      any: function () { return vs.checked.among(vs.faces).length > 0; } };
+      any: function () {
+        return vs.checked.among(vs.faces).length > 0 || Object.keys(vs.emptyChecked).length > 0;
+      } };
   }
 
   /* The Faces the filters show, whether or not their rows are open or painted (a long unclassified list
@@ -595,7 +629,7 @@ function (panel, ui, snapshot, units, fields, words, tableViews, attachedAssignm
     var bar = vs.bar;
     if (!bar) {
       bar = vs.bar = new selectionBars.SelectionBar("Checked Faces", function () {
-        vs.checked.clear(); panel.repaint();
+        clearChecks(vs); panel.repaint();
       });
       vs.selectionControls = selectionControls(vs);
       bar.controls.appendChild(vs.selectionControls.root);
@@ -603,14 +637,15 @@ function (panel, ui, snapshot, units, fields, words, tableViews, attachedAssignm
       bar.controls.appendChild(vs.zoneSolveControls.root);
     }
     if (bar.root.parentNode !== overview) overview.appendChild(bar.root);
-    var count = vs.barTargets.length;
-    vs.selectionControls.root.hidden = false;
+    var count = vs.barTargets.length, zones = (vs.moveZones || []).length;
+    vs.selectionControls.root.hidden = !count;
     vs.zoneSolveControls.paint();
     if (count) {
       bar.show(count + (count === 1 ? " Face selected" : " Faces selected") +
         (vs.hiddenChecked ? ", " + vs.hiddenChecked + " hidden" : ""), true);
       vs.selectionControls.paint();
-    } else bar.hide();
+    } else if (zones) bar.show("", true);
+    else bar.hide();
     return bar;
   }
 
@@ -639,12 +674,12 @@ function (panel, ui, snapshot, units, fields, words, tableViews, attachedAssignm
     }
     var why = ui.element("span", "phc-selection-limit");
     // The checked Zones move to another Building Segment from here, as from the Spaces view's bar.
-    var segment = host.segmentMove(function () { return vs.checkedZones || []; });
+    var segment = host.segmentMove(function () { return vs.moveZones || []; });
     root.appendChild(count); root.appendChild(segment.root); root.appendChild(solve); root.appendChild(why);
     return { root: root, paint: function () {
       segment.paint();
-      var total = (vs.checkedZones || []).length, shared = sharedChecked();
-      root.hidden = !total;
+      var total = (vs.checkedZones || []).length, shared = sharedChecked(), moving = (vs.moveZones || []).length;
+      root.hidden = !moving;
       var reason = shared ? shared + (shared === 1 ? " checked Zone is" : " checked Zones are") +
         " shared with another occurrence and read only. Uncheck " + (shared === 1 ? "it" : "them") +
         " to solve." : null;
@@ -652,7 +687,7 @@ function (panel, ui, snapshot, units, fields, words, tableViews, attachedAssignm
       if (reason && why._reason !== reason) {
         why._reason = reason; why.replaceChildren(ui.reasonButton("Solve", reason));
       }
-      count.textContent = total + (total === 1 ? " Zone checked" : " Zones checked");
+      count.textContent = moving + (moving === 1 ? " Zone checked" : " Zones checked");
       solve.disabled = host.edits.busy() || total < 2 || Boolean(shared);
       ui.tooltip(solve, reason ? reason :
         total < 2 ? "Check at least two complete Zones. Partially checked Zones are not included." :
@@ -762,11 +797,15 @@ function (panel, ui, snapshot, units, fields, words, tableViews, attachedAssignm
     leave: leave,
     // Zones every Face of which is checked, and checking every Face of Zones another view handed over.
     checkedZones: function (vs) {
-      return (vs.checkedZones || []).map(function (zone) {
+      return (vs.moveZones || []).map(function (zone) {
         return JSON.stringify(["Zone", zone.reference.zone_path]);
       });
     },
     checkZones: function (vs, keys) {
+      vs.emptyChecked = Object.create(null);
+      keys.forEach(function (key) {
+        if (!((vs.byZone || {})[occurrence(JSON.parse(key)[1])] || []).length) vs.emptyChecked[key] = true;
+      });
       vs.checked.replace(keys.reduce(function (all, key) {
         var faces = (vs.byZone || {})[occurrence(JSON.parse(key)[1])] || [];
         return all.concat(faces.map(function (face) { return face.reference; }));

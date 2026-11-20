@@ -853,10 +853,11 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
     var filters = state.controls.columnFilters, hidden = groupedHidden(own, rows, groupRows, projection, state);
     var shown = ordered(own, projection.records.concat(groupRows.map(function (row) { return row.record; })), byId,
       rows, state.controls);
-    var visible = shown.filter(function (row) { return !hidden(row); });
-    // Each Zone under its Building Segment's heading; the views never see the heading rows.
+    // Each Zone under its Building Segment's heading; the views never see the heading rows. What a view's checks
+    // act on (a Shift-click range) follows the order the table shows, Segment by Segment.
     var filtering = Boolean((state.controls.filter.value || "").trim()) || state.controls.filterCount() > 0;
     var arranged = state.segments.arrange(shown, hidden, filtering), sums = Object.create(null);
+    var visible = arranged.rows.filter(function (row) { return !row.heading && !hidden(row); });
     function headingValue(row, field) {
       if (field === "name") return row.record.name;
       if (!sums[row.key]) sums[row.key] = call(own, "segmentSums", [SegmentRows.group(row), profile], null) || {};

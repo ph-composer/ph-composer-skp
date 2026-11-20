@@ -56,9 +56,13 @@ function (panel, ui, requests, tableViews, zoneOptions, SegmentSettings) {
     this.settings.consume(state, this.options);
     this.channel.consume(state);
     // A Segment named in place that has been read and is gone again (Undo took it) leaves nothing to rename. The
-    // create's result can arrive before the snapshot that lists the new Segment.
-    if (this.renaming && this.segment(this.renaming.id)) this.renaming.seen = true;
-    else if (this.renaming && this.renaming.seen) this.renaming = null;
+    // create's result can arrive before the snapshot that lists the new Segment. The values the field first read
+    // are its guard, so a name changed elsewhere meanwhile is never overwritten.
+    var named = this.renaming && this.segment(this.renaming.id);
+    if (named && !this.renaming.seen) {
+      this.renaming.seen = true;
+      this.renaming.expected = { name: named.values.name, colour: named.values.colour };
+    } else if (this.renaming && !named && this.renaming.seen) this.renaming = null;
     this.newButton.disabled = this.channel.busy();
   };
 
@@ -280,8 +284,13 @@ function (panel, ui, requests, tableViews, zoneOptions, SegmentSettings) {
     if (!renaming || this.channel.busy()) return;
     renaming.leaving = false;
     var segment = this.segment(renaming.id), name = String(renaming.draft || "").trim();
-    if (!segment || !name || name === segment.values.name) { this.stopRename(); return; }
-    var expected = { name: segment.values.name, colour: segment.values.colour };
+    var expected = renaming.expected;
+    if (!segment || !expected || !name || name === expected.name) { this.stopRename(); return; }
+    if (segment.values.name !== expected.name || segment.values.colour !== expected.colour) {
+      this.stopRename();
+      this.refuse("This Building Segment changed while it was being named. Rename it from its settings.");
+      return;
+    }
     this.channel.run("ph_composer.zones.options.update", { collection: "building_segment", id: segment.id,
       values: { name: name, colour: segment.values.colour }, expected_values: expected }, {
       onDone: function () { if (self.renaming === renaming) self.renaming = null; },

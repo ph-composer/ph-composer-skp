@@ -240,6 +240,62 @@ test("New Building Segment makes one, opens its name in place, and Enter renames
     expected_values: { name: "Building Segment 3", colour: "#9977AA" } });
 });
 
+test("a name changed elsewhere while a new Segment is being named is never overwritten", function () {
+  var p = load();
+  click(byLabel(p.section(), "New Building Segment"));
+  complete(p, p.actions()[0], { id: "bsg_three", name: "Building Segment 3", zone_ids: [] });
+  function withThird(name) {
+    return snapshot(null, function (state) {
+      state.sections["ph_composer.zones.options"].value.building_segments.push({ id: "bsg_three",
+        values: { name: name, colour: "#9977AA", export_identifier: "bseg_three" },
+        usage: { live: 0, recoverable: 0 }, extension_data: {} });
+    });
+  }
+  p.panel.receive({ type: "panel.snapshot", payload: withThird("Building Segment 3") });
+  var field = byLabel(p.section(), "Building Segment name");
+  field.value = "Garage"; field.listeners.input({});
+  p.panel.receive({ type: "panel.snapshot", payload: withThird("Shed") });
+  byLabel(p.section(), "Building Segment name").listeners.keydown({ key: "Enter", preventDefault: function () {} });
+  assert.strictEqual(p.actions().length, 1, "only the create was sent");
+  assert.strictEqual(byLabel(p.section(), "Building Segment name"), undefined);
+});
+
+test("a Shift-click range follows the rows as the Segments show them", function () {
+  var p = load(null, function (state) {
+    var overview = state.sections["ph_composer.zones.overview"].value;
+    overview.zones[1].values.building_segment_id = "bsg_annex";
+    var third = JSON.parse(JSON.stringify(overview.zones[0]));
+    third.id = "zon_c"; third.reference = { zone_id: "zon_c", zone_path: [300] };
+    third.values = Object.assign({}, third.values, { name: "Zone C" });
+    overview.zones.push(third);
+    state.sections["ph_composer.zones.faces.faces"].value.faces.push(face("zon_c", [300], 301, 9));
+  });
+  assert.deepStrictEqual(outline(p).map(function (row) { return row[1]; }),
+    ["Annex", "Zone B", "House", "Zone A", "Zone C"]);
+  click(zoneRow(p, "Zone B").querySelector(".row-check"));
+  zoneRow(p, "Zone C").querySelector(".row-check").listeners.click({ shiftKey: true, preventDefault: function () {} });
+  ["Zone A", "Zone B", "Zone C"].forEach(function (name) {
+    assert.strictEqual(zoneRow(p, name).querySelector(".row-check").checked, true, name + " is in the range");
+  });
+});
+
+test("a Zone with no Faces is checked on its own in Geometry and moves from the bar", function () {
+  var p = load(null, function (state) {
+    var faces = state.sections["ph_composer.zones.faces.faces"].value.faces;
+    faces.splice(1, 1);
+  });
+  var box = zoneRow(p, "Zone B").querySelector(".row-check");
+  assert.ok(box, "a Zone with no Faces still has a box");
+  click(box);
+  var select = byLabel(p.section(), "Building Segment for checked Zones");
+  assert.ok(select && !select.disabled && !select.parentNode.hidden);
+  choose(select, "bsg_house");
+  var move = p.actions()[0];
+  assert.strictEqual(move.payload.name, "ph_composer.zones.update_field");
+  assert.deepStrictEqual(move.payload.params.targets.map(function (target) { return target.reference.zone_id; }),
+    ["zon_b"]);
+});
+
 test("Escape keeps a new Segment's given name and sends nothing", function () {
   var p = load();
   click(byLabel(p.section(), "New Building Segment"));
