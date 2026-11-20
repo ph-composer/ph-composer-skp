@@ -110,7 +110,7 @@
           "basis": "q50",
           "building_segment_id": "bsg_FIXED0000001",
           "export_identifier": "bseg_d6e6d36e20e0d1ed",
-          "flow_per_exterior_area": 0.00003227433043692842,
+          "flow_per_exterior_area": 3.227433043692842e-05,
           "id": "zon_AAAAAAAAAAAA",
           "value": 0.6,
           "wind_exposure": "several_sides_high_screening"
@@ -119,7 +119,7 @@
           "basis": "n50",
           "building_segment_id": "bsg_FIXED0000002",
           "export_identifier": "bseg_2526c620c18174be",
-          "flow_per_exterior_area": 0.00006468483948329536,
+          "flow_per_exterior_area": 6.468483948329536e-05,
           "id": "zon_KKKKKKKKKKKK",
           "value": 2.0,
           "wind_exposure": "one_side_moderate_screening"
@@ -128,7 +128,7 @@
           "basis": "n50",
           "building_segment_id": "bsg_FIXED0000002",
           "export_identifier": "bseg_2526c620c18174be",
-          "flow_per_exterior_area": 0.00006468483948329536,
+          "flow_per_exterior_area": 6.468483948329536e-05,
           "id": "zon_LLLLLLLLLLLL",
           "value": 2.0,
           "wind_exposure": "one_side_moderate_screening"
