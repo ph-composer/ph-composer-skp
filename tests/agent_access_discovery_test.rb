@@ -77,7 +77,8 @@ class AgentAccessDiscoveryTest < PhComposerTestCase
       end
     end
     assert_includes all_rows("record_kinds").map { |row| row.fetch("id") }, "test.fixture.part"
-    assert_equal ["test.fixture.review"], all_rows("extensions").map { |row| row.fetch("namespace") }
+    assert_equal ["ph_composer.certification.segment", "test.fixture.review"],
+                 all_rows("extensions").map { |row| row.fetch("namespace") }
   end
 
   def test_an_extension_describes_its_installed_contract_and_never_an_invented_schema

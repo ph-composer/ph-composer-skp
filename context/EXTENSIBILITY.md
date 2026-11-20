@@ -889,10 +889,25 @@ contributor for `ph_composer.zones.segment_settings_saved` ("Transition contribu
 namespaces whose payload changed. The owner requires `ph_composer.zones`, writes only its own kinds
 and leaves the Segment record to Zones.
 
+A setting that reaches the HBJSON is exported by its owner, not by Zones. The owner's export contributor
+claims its namespace on the Building Segment kind (`entity_projections: [{"namespace", "target_kind" =>
+"ph_composer.zones.building_segment", "source_section" => "ph_composer.zones.export.zones", "fields"}]`),
+and Zones' section hands it the declared fields of each Segment an exported Zone names, as
+`{"id", "path" => nil, "payload"}` rows ("Exporting a payload on another feature's entity" in
+[CONTRACTS.md](CONTRACTS.md)). The Zones section's projection (`reader.section(...)`) gives each Zone
+occurrence's `building_segment_id` and `building_segment_export_identifier`, so the owner can write one
+record per exported Segment, defaults included. Its Python section attaches at the `SEGMENT` host, keyed by
+that export identifier, and changes the shared honeybee-ph `BldgSegment` in place. A namespace declared
+`export_relevance: "required"` with no claim blocks every export of a Segment that carries it;
+`"local_only"` stays in the Model with a finding.
+
 The development example is `tools/examples/zones/example_segment_note.rb` (the namespace and its
 validator) and `example_segment_note.js` (its section), loaded together by
 `example_segment_note_load.rb`; `tests/segment_settings_test.rb` and
-`tests/segment_rows_panel_test.js` run it.
+`tests/segment_rows_panel_test.js` run it. The first shipped section is Phius certification
+(`features/certification/`, `html/features/certification/section.js` and
+`python/ph_composer_translation/certification_sections.py`), which also exports;
+`tests/segment_certification_test.rb` runs a development namespace through the same claim.
 
 ### Native menu items
 

@@ -274,8 +274,13 @@ module PhComposer
         @records.capture_entity(record, :target_kind => target_kind, :path => path)
       end
 
+      def capture_record(record, target_kind:)
+        @records.capture_record(record, :target_kind => target_kind)
+      end
+
       # The declared fields of `namespace` envelopes on `target_kind` occurrences, as
-      # `{"id", "path", "payload"}` rows; the reading contributor must hold that claim.
+      # `{"id", "path", "payload"}` rows (`path` null on a catalog record); the reading contributor must hold
+      # that claim.
       def entity_projection(namespace, target_kind)
         @records.entity_projection(namespace, target_kind, :reader => @reading)
       end

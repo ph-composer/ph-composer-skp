@@ -84,7 +84,8 @@ class EntityProjectionTest < PhComposerTestCase
 
   def test_claims_refuse_a_foreign_namespace_an_unrequired_target_a_missing_source_overlaps_and_empty_fields
     assert_match(/not an extension test.review declares/, refused(review_feature(:extension => nil)))
-    assert_match(/entity target its feature must own or require/, refused(review_feature(:requires => [])))
+    assert_match(/entity target or record kind its feature must own or require/,
+                 refused(review_feature(:requires => [])))
     assert_match(/must list in requires/, refused(review_feature(:sections => [])))
     assert_match(/already projects/, refused(review_feature(:claims => [CLAIM, CLAIM])))
     assert_match(/non-empty list/, refused(review_feature(:claims => [CLAIM.merge("fields" => [])])))

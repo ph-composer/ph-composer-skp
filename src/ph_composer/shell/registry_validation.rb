@@ -442,8 +442,8 @@ module PhComposer
       CLAIM_KEYS = %w[namespace target_kind source_section fields].freeze
 
       # Each claim names an extension the contributor's own feature declares, a registered entity
-      # reference target whose owner that feature is or requires, a source section in `requires:`, and
-      # a non-empty field list. A namespace and target kind are claimed once across the registry.
+      # reference target or catalog record kind whose owner that feature is or requires, a source section in
+      # `requires:`, and a non-empty field list. A namespace and target kind are claimed once across the registry.
       def check_entity_projections(contributor)
         claims = contributor.entity_projections
         well_formed = lambda do |claim|
@@ -486,12 +486,14 @@ module PhComposer
 
         target_owner = @staging.owner_of(target_kind)
         registered = @staging.declared_reference_targets.any? { |item| item.id == target_kind } ||
-                     @live.reference_targets.key?(target_kind)
+                     @live.reference_targets.key?(target_kind) ||
+                     @staging.declared_record_kinds.any? { |item| item.id == target_kind } ||
+                     @live.record_kinds.key?(target_kind)
         reachable = target_owner && (target_owner == contributor.owner || feature&.requires&.include?(target_owner))
         unless registered && reachable
           add("registration.missing_dependency", contributor.owner, contributor.name,
-              "#{contributor.name} projects onto #{target_kind.inspect}, a registered entity target its feature " \
-              "must own or require.", target_owner || target_kind)
+              "#{contributor.name} projects onto #{target_kind.inspect}, a registered entity target or record " \
+              "kind its feature must own or require.", target_owner || target_kind)
         end
         return if Array(contributor.requires).include?(source_section)
 

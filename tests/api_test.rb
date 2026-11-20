@@ -28,11 +28,12 @@ class ApiTest < PhComposerTestCase
   def test_discovery_lists_the_session_and_every_registration_by_name
     found = API.discover
 
-    assert_equal({ "major" => 1, "minor" => 75 }, found.fetch("api"))
+    assert_equal({ "major" => 1, "minor" => 76 }, found.fetch("api"))
     assert_equal [@session.id], found.fetch("sessions").map { |session| session.fetch("id") }
     assert_includes found.fetch("actions").map { |action| action.fetch("name") }, "test.fixture.update_parts"
     assert_includes found.fetch("queries").map { |query| query.fetch("name") }, "ph_composer.records.list"
-    assert_equal ["test.fixture.review"], found.fetch("extensions").map { |extension| extension.fetch("namespace") }
+    assert_equal ["ph_composer.certification.segment", "test.fixture.review"],
+                 found.fetch("extensions").map { |extension| extension.fetch("namespace") }
     assert_equal "mm", API.describe(:name => PART).dig("values", "properties", "length_mm", "x-unit")
     assert_equal "action", API.describe(:name => "test.fixture.update_parts").fetch("kind")
   end

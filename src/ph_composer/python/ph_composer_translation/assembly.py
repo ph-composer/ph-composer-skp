@@ -1,10 +1,11 @@
 """Builds the one Honeybee Model from the sections' attachments (context/CONTRACTS.md, "Translation
 sections and artifacts").
 
-Honeybee nests Apertures in Faces, Faces in Rooms and Rooms in the Model. A section whose objects
-belong inside another declares `attaches = Attachment(host, key)`; the assembly attaches each host
-level in turn, outermost first, so a Face exists before anything is attached to it. Each host's
-objects are attached in one call, in id order, so the attaching section can check them together.
+Honeybee nests Apertures in Faces, Faces in Rooms and Rooms in the Model, and the Rooms of one Building
+Segment share one honeybee-ph `BldgSegment`. A section whose objects belong inside another declares
+`attaches = Attachment(host, key)`; the assembly attaches each host level in turn, outermost first, so a Face
+exists before anything is attached to it, and a Building Segment once the Rooms that share it are in the Model.
+Each host's objects are attached in one call, in id order, so the attaching section can check them together.
 The assembly names no section and knows no feature: it only follows the declarations.
 
 The canonical model is serialized when it holds a Room and no required section's attachment was refused, even
@@ -24,7 +25,7 @@ from typing import Any
 from . import stack
 from .contract import JSONObject, RecordError
 from .result import OBJECT_UNAVAILABLE, Finding, Translation
-from .sections import FACE, HOSTS, MODEL, ROOM, AttachmentRefused, Section
+from .sections import FACE, HOSTS, MODEL, ROOM, SEGMENT, AttachmentRefused, Section
 
 MODEL_ID = "ph_composer_model"
 
@@ -53,6 +54,10 @@ def assemble(translation: Translation, sections: Sequence[Section[Any, Any]]) ->
 def _hosts(model: Any, level: str) -> dict[str, Any]:
     if level == MODEL:
         return {"": model}
+    if level == SEGMENT:
+        # The Rooms of one Segment share one object (ZoneSection.attach), keyed by its identifier.
+        segments = (room.properties.ph.ph_bldg_segment for room in model.rooms)
+        return {segment.identifier: segment for segment in segments}
     if level == ROOM:
         return {room.identifier: room for room in model.rooms}
     assert level == FACE

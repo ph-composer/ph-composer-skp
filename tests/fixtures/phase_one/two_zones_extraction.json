@@ -54,6 +54,10 @@
       "records": [],
       "version": 1
     },
+    "ph_composer.certification.export.segments": {
+      "records": [],
+      "version": 1
+    },
     "ph_composer.climate.export.site": {
       "records": [
         {

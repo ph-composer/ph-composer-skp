@@ -54,6 +54,20 @@
       "records": [],
       "version": 1
     },
+    "ph_composer.certification.export.segments": {
+      "records": [
+        {
+          "category": "residential",
+          "export_identifier": "bseg_2526c620c18174be",
+          "id": "bsg_FIXED0000001",
+          "program": "phius_2021_core",
+          "status": "in_planning",
+          "type": "new_construction",
+          "use": "residential"
+        }
+      ],
+      "version": 1
+    },
     "ph_composer.climate.export.site": {
       "records": [
         {

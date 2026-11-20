@@ -355,6 +355,26 @@ A Segment's settings dialog saves through `ph_composer.zones.save_segment_settin
    member Zone does not block a settings save; a rename or a new default rewrites each member Zone and
    refuses `target.locked` on a locked one.
 
+### Phius certification
+
+Each Building Segment carries its Phius certification settings as the `ph_composer.certification.segment`
+payload, five values: `category` (`residential`, `non_residential`), `program` (`phius_2021_core`,
+`phius_2021_zero`, `phius_2018_core`, `phius_2018_zero`, `phius_2018`, `phius_2015`), `use`
+(`residential`, `office_administrative`, `school`, `other`, `undefined_unfinished`), `status`
+(`in_planning`, `under_construction`, `complete`) and `type` (`new_construction`, `retrofit`, `mixed`).
+
+1. Read one Segment's values with `ph_composer.certification.segment.get` and its `id`. A Segment with no
+   payload reads the defaults (residential, Phius 2021 CORE, residential, in planning, new construction)
+   with `stored` false. So does one whose stored payload this version cannot read: check
+   `extension_status`, which is null with no payload and `understood` for a payload the values come from.
+2. Write them with `ph_composer.zones.save_segment_settings` (above), all five in
+   `extension_payloads["ph_composer.certification.segment"]`. A missing field, an extra one or a value not
+   listed refuses `validation.failed` and writes nothing.
+3. Export writes each exported Segment's values, or the defaults, to its honeybee-ph `BldgSegment`, and
+   PHX carries them to the WUFI-Passive and METr Variant. A Segment no exported Zone names keeps its
+   settings in the Model. A stored payload this version cannot read blocks the export with its
+   `extension.*` code, on any Building Segment, exported or not.
+
 ### Spaces from loose Faces
 
 Ask the user to draw separate loose floor surfaces in SketchUp, inset from the walls or
