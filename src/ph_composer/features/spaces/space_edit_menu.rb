@@ -46,6 +46,18 @@ module PhComposer
       end
 
       # The selected Spaces, or none unless the selection holds nothing else.
+      # What an airflow edit that switched Zones to detailed airflows tells the user; the Spaces view's notice
+      # (html/features/spaces/view.js) says the same. `others` counts their Spaces still with no rate.
+      def switch_message(names, others)
+        head = names.length == 1 ? "#{names.first} now uses" : "#{names[0...-1].join(', ')} and #{names.last} now use"
+        return "#{head} detailed airflows." if others.zero?
+
+        whose = names.length == 1 ? "its" : "their"
+        rest = others == 1 ? "other Space exports 0 until you enter its rates." :
+          "other #{others} Spaces export 0 until you enter theirs."
+        "#{head} detailed airflows: #{whose} #{rest}"
+      end
+
       def selected(model)
         chosen = model.selection.to_a
         return [] unless chosen.all? { |entity| Navigation.space?(entity) }
@@ -132,8 +144,33 @@ module PhComposer
 
           changes = airflow_changes(entered, defaults, system)
           return announce(INVALID_AIRFLOW) unless changes
+          return if changes.empty?
 
-          submit(spaces, changes, revision) unless changes.empty?
+          before = zone_modes
+          outcome = submit(spaces, changes, revision)
+          announce_switch(before) if outcome.fetch("status") == "completed"
+        end
+
+        # Each Zone's airflow mode now, by id, from every Space record in the Model.
+        def zone_modes
+          Metrics.zone_modes(Occurrences.scan(@session.model, :strict => false).spaces.map(&:record))
+        end
+
+        # The Zones an airflow edit took from By Program to detailed: the notice says what that does to their
+        # other Spaces, as the Spaces view's does.
+        def announce_switch(before)
+          spaces = Occurrences.scan(@session.model, :strict => false).spaces.map(&:record)
+          switched = Metrics.zone_modes(spaces).select do |zone_id, mode|
+            mode == Metrics::DETAILED && before[zone_id] == Metrics::BY_PROGRAM
+          end.keys
+          return if switched.empty?
+
+          names = Zones::Occurrences.zones(@session.model).map(&:record)
+                                    .select { |record| switched.include?(record["id"]) }
+                                    .uniq { |record| record["id"] }.map { |record| record["name"].to_s }
+          others = spaces.count { |record| switched.include?(record["zone_id"]) && !Metrics.rated?(record) }
+          message = SpaceEditMenu.switch_message(names, others)
+          HostNotice.show(@session, message, :tone => :info)
         end
 
         private

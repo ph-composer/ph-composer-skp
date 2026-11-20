@@ -103,14 +103,25 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
      nothing of this view's in flight, raises none. */
   function noticeSwitch(vs, before) {
     if (!vs.cells.inFlight()) return;
+    var names = [], others = 0;
     Object.keys(vs.sums).forEach(function (key) {
       var was = before[key], now = vs.sums[key];
       if (!was || was.airflow_mode === DETAILED || now.airflow_mode !== DETAILED) return;
-      var others = (vs.byZone[key] || []).filter(function (space) { return !rated(space); }).length;
-      vs.switchNotice = (now.name || "This Zone") + " now uses detailed airflows" + (others ? ": its other " +
-        (others === 1 ? "Space exports 0 until you enter its rates." : others + " Spaces export 0 until you enter " +
-          "theirs.") : ".");
+      names.push(now.name || "A Zone");
+      others += (vs.byZone[key] || []).filter(function (space) { return !rated(space); }).length;
     });
+    if (names.length) vs.switchNotice = switchMessage(names, others);
+  }
+
+  /* One notice for every Zone an edit switched, a batch's several included; SketchUp's Set Airflows menu
+     (features/spaces/space_edit_menu.rb, switch_message) says the same. */
+  function switchMessage(names, others) {
+    var head = names.length === 1 ? names[0] + " now uses" :
+      names.slice(0, -1).join(", ") + " and " + names[names.length - 1] + " now use";
+    if (!others) return head + " detailed airflows.";
+    return head + " detailed airflows: " + (names.length === 1 ? "its" : "their") + " " + (others === 1 ?
+      "other Space exports 0 until you enter its rates." : "other " + others + " Spaces export 0 until you " +
+        "enter theirs.");
   }
 
   function zoneRecord(vs, record) {

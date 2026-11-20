@@ -201,9 +201,9 @@
       "sha256": "2cc1d826be20472e89379addbb605b89d32778b4cbcf1a658b81c55512c2568d"
     },
     "html/features/spaces/view.js": {
-      "bytes": 24704,
+      "bytes": 25258,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "16559da2510fb76939695e1b50eea7d3572de5f30787771b3dbf2e4163a164cf"
+      "sha256": "85af412b3da4965a0d65658c315cb7ca678164a519a4807b42fea8d0ff5a956c"
     },
     "html/features/thermal_bridges/assign_bar.js": {
       "bytes": 11913,

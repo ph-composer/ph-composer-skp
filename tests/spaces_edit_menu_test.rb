@@ -232,6 +232,25 @@ class SpacesEditMenuTest < PhComposerTestCase
     assert_equal "by_program", space_row("101").fetch("airflow_mode")
   end
 
+  # Zone B is By Program; a first rate on Loft switches it, and the notice says so as the Spaces view's does. Zone A
+  # was already detailed, so a further rate there says nothing of the kind.
+  def test_a_first_rate_in_a_by_program_zone_says_the_zone_now_uses_detailed_airflows
+    loft = @zone_b.entities.to_a.first
+    @model.active_path = [@zone_b]
+    select(loft)
+    UI.inputbox_result = ["30", "", ""]
+    choose(nil, EDIT::AIRFLOWS_LABEL)
+    assert_equal ["Zone B now uses detailed airflows.", :info], @notices.last
+    assert_equal "detailed", space_row("201").fetch("airflow_mode")
+    @model.active_path = [@zone_a]
+    select(@bath)
+    UI.inputbox_result = ["15", "40", ""]
+    choose(nil, EDIT::AIRFLOWS_LABEL)
+    refute_match(/detailed airflows/, @notices.last.first)
+    assert_equal "Zone A and Zone B now use detailed airflows: their other 2 Spaces export 0 until you enter theirs.",
+                 PhComposer::Spaces::SpaceEditMenu.switch_message(["Zone A", "Zone B"], 2)
+  end
+
   def test_an_airflow_that_is_not_a_number_of_zero_or_more_writes_nothing
     @model.active_path = [@zone_a]
     select(@living)

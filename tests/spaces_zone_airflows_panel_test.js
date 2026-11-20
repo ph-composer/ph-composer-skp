@@ -105,6 +105,16 @@ test("the notice names how many other Spaces in the Zone now export 0", function
     "Zone B now uses detailed airflows: its other Space exports 0 until you enter its rates.");
 });
 
+test("a batch that switches two Zones names both in one notice", function () {
+  var p = page();
+  p.receive(snapshot({ bareA: true, stair: true }));
+  enter(p.input("Loft supply"), "30");
+  var after = snapshot({ stair: true, loft: { v_sup_m3h: 30 } }, 5);
+  p.receive(after);
+  assert.strictEqual(notice(p).message,
+    "Zone A and Zone B now use detailed airflows: their other Space exports 0 until you enter its rates.");
+});
+
 test("a Zone turning detailed with nothing of this view's in flight, as on Undo, raises no notice", function () {
   var p = page();
   p.receive(snapshot());

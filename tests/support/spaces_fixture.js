@@ -4,7 +4,7 @@
    section reads it: Zone A holds 101 Living, 102 Bath and 103 Hall (two Volumes), each with one rate, so it uses
    detailed airflows; Zone B holds 201 Loft, with none, so it is By Program. `outside` adds a Space no Zone holds,
    with no Volume; `loft` gives Loft those rates; `noLoft` leaves Zone B with no Spaces; `stair` adds 202 Stair,
-   with no rate, to Zone B. Numbers are the
+   with no rate, to Zone B; `bareA` takes Zone A's rates away, so it is By Program too. Numbers are the
    hand-computed ones, as the host publishes them. */
 
 var ZONE_A = [100], ZONE_B = [200];
@@ -91,6 +91,11 @@ function section(options) {
       [volume([200, 201, 1], 1, 3.0, [segment([200, 201, 1, 1], "Segment 1", 12, 1)])])
   ];
   if (options && options.noLoft) spaces.pop();
+  if (options && options.bareA) {
+    spaces.slice(0, 3).forEach(function (item) {
+      AIRFLOW_KEYS.forEach(function (key) { delete item.values[key]; });
+    });
+  }
   if (options && options.stair) {
     spaces.push(space([200, 202], ZONE_B, "202", "Stair", {},
       [volume([200, 202, 1], 1, 2.5, [segment([200, 202, 1, 1], "Segment 1", 4, 1)])]));
