@@ -20,19 +20,22 @@ module PhComposer
       module_function
 
       # The marked container a Face or container below `containers` is shading through, or nil. Walking outward
-      # from the innermost, a Zone or an owned container stops the walk before any mark above it, so a
-      # mark never reaches through a Zone or another feature's object.
+      # from the innermost, a Zone stops the walk before any mark above it, so a mark never reaches through a
+      # Zone; an owned container anywhere on the path means nothing below it is shading, however near the mark.
       def inherited_from(containers)
+        return nil if containers.any?(&:owned)
+
         containers.reverse_each do |container|
-          return nil if container.zone? || container.owned
+          return nil if container.zone?
           return container if container.marked
         end
         nil
       end
 
-      # Whether a Face is a Shading Face: it carries the mark or inherits it, and is not itself another feature's.
+      # Whether a Face is a Shading Face: it carries the mark or inherits it, and neither it nor any container
+      # above it is another feature's object.
       def shading_face?(marked:, owned:, containers:)
-        return false if owned
+        return false if owned || containers.any?(&:owned)
 
         marked || !inherited_from(containers).nil?
       end

@@ -2,9 +2,10 @@
 
 module PhComposer
   module Shading
-    # `shading.list`: one walk of the Model for every marked entity and every shading component, the Shading
-    # Faces grouped by the name they export under, with their count and world area. Cutting components are not
-    # walked, as export does not read their Faces. Reads only.
+    # `shading.list`: every marked entity and every shading component, the Shading Faces grouped by the name they
+    # export under, with their count and world area. Two walks: Zones' walk of its occurrences, which says which
+    # Groups are Zones without Shading reading Zones' records, then one walk of the Model. Cutting components
+    # are not walked, as export does not read their Faces. Reads only.
     module Inventory
       module_function
 

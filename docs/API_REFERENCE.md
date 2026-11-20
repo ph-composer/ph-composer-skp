@@ -14331,7 +14331,7 @@ Example params:
 
 ### `ph_composer.shading.list`
 
-Every entity carrying the shading mark and every shading component: the Shading Faces grouped by the name they export under, with Face count and world area. One walk of the Model. Owner: `ph_composer.shading`.
+Every entity carrying the shading mark and every shading component: the Shading Faces grouped by the name they export under, with Face count and world area. Reads Zones' occurrences, then walks the Model once. Owner: `ph_composer.shading`.
 
 Refuses: `record.unreadable`, `validation.failed`, and the `query` common set.
 

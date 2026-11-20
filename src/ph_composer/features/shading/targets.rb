@@ -72,6 +72,7 @@ module PhComposer
           :locked => entities.any? { |entity| locked?(entity) }, :shared => above.any? { |entity| shared?(entity) },
           :cutting => entities.any? { |entity| cutting?(entity) },
           :owned => containers.any?(&:owned) || owned?(leaf), :classified => classified,
+          :zone => zones.key?(path),
           :zone_target => container?(leaf) && zones.keys.any? { |zone| zone[0, path.length] == path },
           :holds_owned => container?(leaf) && Records::EntityStore.claimed_within?(contents(leaf).to_a)
         )

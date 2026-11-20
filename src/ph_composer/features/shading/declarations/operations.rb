@@ -102,7 +102,7 @@ module PhComposer
         feature.query("#{PREFIX}.list",
                       :description => "Every entity carrying the shading mark and every shading component: the " \
                                       "Shading Faces grouped by the name they export under, with Face count and " \
-                                      "world area. One walk of the Model.",
+                                      "world area. Reads Zones' occurrences, then walks the Model once.",
                       :refuses => %w[record.unreadable validation.failed], :params => object({}), :result => LIST,
                       :examples => [{}]) { |request| Inventory.list(request) }
         feature.query("#{PREFIX}.selection",

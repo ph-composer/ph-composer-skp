@@ -39,7 +39,9 @@ class ShadingOperationsTest < PhComposerTestCase
     louvre = Sketchup::ComponentDefinition.new(Sketchup::Entities.new([Sketchup::Face.new(41)]), :name => "Louvre")
     once = Sketchup::ComponentDefinition.new(Sketchup::Entities.new([Sketchup::Face.new(51)]), :name => "Once")
     copied = Sketchup::Entities.new([Sketchup::Face.new(62)])
-    space = Sketchup::Group.new(80, Sketchup::Entities.new([Sketchup::Face.new(81)]))
+    space = Sketchup::Group.new(80, Sketchup::Entities.new([Sketchup::Face.new(81), Sketchup::Group.new(
+      82, Sketchup::Entities.new([Sketchup::Face.new(83)])
+    )]))
     PhComposer::Spaces::SPACE_STORE.write(space, "id" => "spc_AAAAAAAAAAAA")
     inner_space = Sketchup::Group.new(86, Sketchup::Entities.new([Sketchup::Face.new(87)]))
     PhComposer::Spaces::SPACE_STORE.write(inner_space, "id" => "spc_BBBBBBBBBBBB")
@@ -51,7 +53,8 @@ class ShadingOperationsTest < PhComposerTestCase
      Sketchup::Group.new(20, Sketchup::Entities.new([Sketchup::Face.new(21),
                                                      Sketchup::Group.new(22, Sketchup::Entities.new(
                                                        [Sketchup::Face.new(23)]
-                                                     ))]), :name => "Neighbour"),
+                                                     )), Sketchup::ComponentInstance.new(24, cutting)]),
+                         :name => "Neighbour"),
      Sketchup::ComponentInstance.new(40, louvre), Sketchup::ComponentInstance.new(42, louvre),
      Sketchup::ComponentInstance.new(43, louvre), Sketchup::ComponentInstance.new(50, once),
      Sketchup::Group.new(60, copied), Sketchup::Group.new(61, copied),
@@ -216,6 +219,26 @@ class ShadingOperationsTest < PhComposerTestCase
     assert_equal %w[refused target.locked], result.values_at("status", "code")
     assert_equal %w[target.locked target.shared_definition], result.dig("detail", "left_out").map { |row| row["code"] }
     assert STORE.marks?(live(100, 120, 121)) && STORE.marks?(live(40, 41))
+  end
+
+  # A claimed entity anywhere above a Face wins over a mark, its own or a nearer container's.
+  def test_a_mark_inside_a_space_never_makes_a_shading_face
+    STORE.write(live(80, 81), SH::Mark::RECORD)
+    STORE.write(live(80, 82), SH::Mark::RECORD)
+    assert_empty list.fetch("components")
+  end
+
+  # Clear names shading.inherited only where the mark above would reach: not a Zone, a cutting component or
+  # anything inside them, which stay unchanged.
+  def test_clear_reports_inherited_only_where_the_mark_above_reaches
+    STORE.write(live(70), SH::Mark::RECORD)
+    STORE.write(live(20), SH::Mark::RECORD)
+    result = clear([70, 71], [70, 71, 72], [20, 24], [20, 24, 131], [70, 73])
+    value = result.fetch("value")
+    assert_equal [[70, 71], [70, 71, 72], [20, 24], [20, 24, 131]],
+                 value.fetch("unchanged").map { |row| row.fetch("entity_path") }
+    left_out = value.fetch("left_out").map { |row| row.values_at("entity_path", "code") }
+    assert_equal [[[70, 73], "shading.inherited"]], left_out
   end
 
   # The Group's own Face beside the Zone stays shading; the Zone's and the Space's Faces never are.

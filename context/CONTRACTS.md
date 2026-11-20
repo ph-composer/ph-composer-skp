@@ -723,8 +723,8 @@ Zone occurrence and stays in `ph_composer.zones.all`.
 
 Shading (`ph_composer.shading`, requiring Zones) keeps one record with no identity on a Face, Group or
 ComponentInstance. A **Shading Face** is a Face carrying the mark, or one whose root path passes through a
-marked Group or ComponentInstance with no Zone Group and no claimed entity between that container and the
-Face; a claimed Face is never one. Its target reference starts at the Model root:
+marked Group or ComponentInstance with no Zone Group between that container and the Face. A claimed entity
+anywhere on the Face's path, the Face included, means it is never one, however near the mark. Its target reference starts at the Model root:
 
 ```json
 { "entity_path": [4812, 4901] }
@@ -745,11 +745,12 @@ placement shares (`target.shared_definition`: a component placed more than once 
 the target; a component placed once is not shared) or through a lock (`target.locked`). Clear leaves out
 only an entity that is not a Face, Group or component (`target.wrong_kind`), a marked entity whose path
 refuses the write (`target.shared_definition`, `target.locked`) and an unmarked entity shading through a
-marked container above it (`shading.inherited`, naming that container). Reads go by presence, so an unreadable mark still marks:
+marked container above it (`shading.inherited`, naming that container); an unmarked Zone Group, cutting
+component or claimed entity, or anything inside one, is `unchanged`, since no mark above reaches it. Reads go by presence, so an unreadable mark still marks:
 assign leaves it unchanged and clear removes it. `shading.selection` answers the selected Faces, Groups and
 components under the active path with what each action would do, by the same rule; `shading.list` answers
-every marked entity and each shading component (`display_name`, `face_count`, world `area_m2`), named by
-the nearest enclosing named Group or component (an instance's own name before its definition's), a Zone as
+every marked entity and each shading component (`display_name`, `face_count`, world `area_m2`), from
+Zones' walk of its occurrences and one walk of the Model. A component is named by the nearest enclosing named Group or component (an instance's own name before its definition's), a Zone as
 that container giving its name followed by " Shading", and "Shading" with none.
 
 The mark's store is constructed with `excludes_from_envelope: true`. `Records::EntityStore.envelope_excluded?

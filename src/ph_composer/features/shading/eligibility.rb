@@ -13,10 +13,10 @@ module PhComposer
       # write would reach that placement too. `cutting`: the target is, or sits inside, a cutting component.
       # `owned`: the target or a container above it is another feature's object. `classified`: a Face in a Zone
       # with a Face record, whatever its values.
-      # `zone_target`: a container that is a Zone or holds one. `holds_owned`: a container holding another
-      # feature's object.
+      # `zone`: the target is a Zone Group. `zone_target`: a container that is a Zone or holds one.
+      # `holds_owned`: a container holding another feature's object.
       Facts = Struct.new(:path, :kind, :marked, :containers, :locked, :shared, :cutting, :owned, :classified,
-                         :zone_target, :holds_owned, keyword_init: true)
+                         :zone, :zone_target, :holds_owned, keyword_init: true)
 
       SHARED = "The %s is in storage another placement shares (a Component placed more than once, or a copied " \
                "Group not yet made unique), so the mark would reach every placement. Tag the Component or Group " \
@@ -38,7 +38,7 @@ module PhComposer
         return ["left_out", wrong_kind] unless facts.kind
 
         unless facts.marked
-          through = Reads.inherited_from(facts.containers)
+          through = inherits?(facts) && Reads.inherited_from(facts.containers)
           return ["left_out", inherited(through)] if through
 
           return ["unchanged", nil]
@@ -73,6 +73,12 @@ module PhComposer
         return refusal("target.locked", "The #{noun(facts)} or a Group above it is locked.") if facts.locked
 
         nil
+      end
+
+      # Whether a mark above can reach the target at all: never a cutting component or anything inside one, a
+      # Zone Group, or another feature's object.
+      def inherits?(facts)
+        !(facts.cutting || facts.zone || facts.owned)
       end
 
       def inherited(container)

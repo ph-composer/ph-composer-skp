@@ -30,6 +30,7 @@ class ShadingReadsTest < PhComposerTestCase
     assert_equal [20], READS.inherited_from([marked, container]).path
     assert_nil READS.inherited_from([marked, container(:zone_name => "Zone A")])
     assert_nil READS.inherited_from([marked, container(:owned => true)])
+    assert_nil READS.inherited_from([container(:owned => true), marked])
     assert_nil READS.inherited_from([container(:marked => true, :zone_name => "Zone A")])
     assert_equal [21], READS.inherited_from([marked, container(:marked => true, :path => [21])]).path
   end
@@ -40,5 +41,6 @@ class ShadingReadsTest < PhComposerTestCase
     assert READS.shading_face?(:marked => false, :owned => false, :containers => marked)
     refute READS.shading_face?(:marked => false, :owned => false, :containers => [container])
     refute READS.shading_face?(:marked => true, :owned => true, :containers => marked)
+    refute READS.shading_face?(:marked => true, :owned => false, :containers => [container(:owned => true)])
   end
 end
