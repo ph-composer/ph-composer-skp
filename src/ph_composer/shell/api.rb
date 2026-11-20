@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 68
+    MINOR = 69
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -376,7 +376,14 @@ module PhComposer
       { "minor" => 68, "date" => "2026-11-18",
         "change" => "ph_composer.climate.stations.all is new: one climate data folder's stations in one unbounded " \
                     "read, nearest the site first, in stations.list's rows, for the station picker; scripts page " \
-                    "stations.list." }
+                    "stations.list." },
+      { "minor" => 69, "date" => "2026-11-19",
+        "change" => "The Shading feature. ph_composer.shading.assign and ph_composer.shading.clear mark and unmark " \
+                    "explicit Faces, Groups and components by root-to-entity path, each one Undo step, answering " \
+                    "assigned or cleared, unchanged and left_out; ph_composer.shading.selection and " \
+                    "ph_composer.shading.list read the selection and every mark and shading component. " \
+                    "shading.face_classified, shading.zone_target, shading.inherited and shading.cutting_component " \
+                    "are new." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

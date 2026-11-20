@@ -672,6 +672,7 @@ access and never fall back to selection, display name, proximity or the active M
 | Floor Segment | `ph_composer.floor_segment` | A Face directly inside a Volume | `fsg_` id; `display_name`, `weighting_factor` and `net_area_factor`, each 0 to 1 |
 | Spaces settings | `ph_composer.spaces_settings` | Model | None; `last_height_m`, the height new Spaces take, null until entered |
 | Primary definition index | `ph_composer.window_definitions`, key `index` | Model | None; `{ "schema_version": 1, "definitions": { "wnt_...": persistent_id } }` |
+| Shading mark | `ph_composer.shading` | A Face, Group or ComponentInstance, inside a Zone or not | None; `{ "schema_version": 1 }` with optional `user_data` and `extension_data`. Claims nothing; excludes from the envelope (see "The shading mark") |
 
 The Face values include an optional `assembly_id` reference to
 `ph_composer.assemblies.assembly`. An absent assignment and a dangling reference are distinct read
@@ -717,6 +718,45 @@ storage on the path), or null. It scans only the collections along each path, ne
 Model, so a viewport tool may call it on a pointer move. A duplicated Zone or Face id needs a walk,
 so `write_refusal` cannot show it and the write still resolves strictly. Zone state needs every
 Zone occurrence and stays in `ph_composer.zones.all`.
+
+### The shading mark
+
+Shading (`ph_composer.shading`, requiring Zones) keeps one record with no identity on a Face, Group or
+ComponentInstance. A **Shading Face** is a Face carrying the mark, or one whose root path passes through a
+marked Group or ComponentInstance with no Zone Group and no claimed entity between that container and the
+Face; a claimed Face is never one. Its target reference starts at the Model root:
+
+```json
+{ "entity_path": [4812, 4901] }
+```
+
+Resolution verifies every step by persistent id and never searches; a step that is missing, repeated or
+not a container refuses the whole command (`target.not_found`, `target.ambiguous`). `shading.assign` and
+`shading.clear` take up to 250 references and answer `assigned` (or `cleared`), `unchanged` and
+`left_out`, each `left_out` row with its code and message. What can change is written in one step, one
+Undo entry; nothing else is touched. The command refuses whole only when every target is left out, with
+the first row's code and the whole result as `detail`; with only `unchanged` targets it completes with
+effect `none`. Assign leaves out, in this order: an entity that is not a Face, Group or component, or is
+claimed or inside a claimed entity (`target.wrong_kind`); a cutting component or anything inside one,
+Window Units and their panes included (`shading.cutting_component`); a Zone Group or a container holding
+one (`shading.zone_target`); a container holding a claimed entity (`target.wrong_kind`); a Zone Face with a
+Face record, whatever its values (`shading.face_classified`); then a write through storage another
+placement shares (`target.shared_definition`: a component placed more than once or a copied Group above
+the target; a component placed once is not shared) or through a lock (`target.locked`). Clear leaves out
+only an entity that is not a Face, Group or component (`target.wrong_kind`), a marked entity whose path
+refuses the write (`target.shared_definition`, `target.locked`) and an unmarked entity shading through a
+marked container above it (`shading.inherited`, naming that container). Reads go by presence, so an unreadable mark still marks:
+assign leaves it unchanged and clear removes it. `shading.selection` answers the selected Faces, Groups and
+components under the active path with what each action would do, by the same rule; `shading.list` answers
+every marked entity and each shading component (`display_name`, `face_count`, world `area_m2`), named by
+the nearest enclosing named Group or component (an instance's own name before its definition's), a Zone as
+that container giving its name followed by " Shading", and "Shading" with none.
+
+The mark's store is constructed with `excludes_from_envelope: true`. `Records::EntityStore.envelope_excluded?
+(inside)` is true when an entity in `inside` (from the first entity inside the Zone Group down to the Face,
+as Zones' `holding` returns it) carries an excluding store's record and none is claimed;
+`envelope_excluded_entries?(entries)` applies the same rule to detached snapshot entries through their
+`dictionaries` map. Both read by presence and name no feature. Zones does not read them yet.
 
 **Containment.** `ph_composer.zones.containment` answers, for each root-to-entity path, the Zone
 occurrence holding the drawing element at its end (`zone_id`, `zone_path`, `name`, `building_segment`,

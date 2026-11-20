@@ -28,7 +28,8 @@ Paths are relative to `src/ph_composer/`. Behavior owner: the [PRD](../PRD.md). 
    nested, unnamed, instance-named and Zone cases.
 5. **Actions.** `assign` and `clear`: resolve every target strictly, apply to the eligible ones
    in one native operation, return `assigned` or `cleared`, `unchanged` and `left_out`.
-   Refuse whole when nothing changes.
+   Refuse whole when every target is left out (D5s-13); a command whose targets are all `unchanged`
+   completes and writes nothing.
 6. **Queries.** `list` and `selection`, each one walk.
 7. **Agent surface.** Descriptions, examples and refusals on every registration; the API change
    row; `docs/AGENT_GUIDE.md` gains a Shading section.

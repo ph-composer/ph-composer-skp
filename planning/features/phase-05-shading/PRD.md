@@ -59,7 +59,8 @@ These go into `context/UBIQUITOUS_LANGUAGE.md` when the feature lands.
 | A Face inside a Zone that has no classification | Tagged. It leaves the Zone's envelope: it is not an unclassified Face, takes no Face type, and is not part of the Room |
 | A Face inside a Zone that is classified | Refused: clear its classification first (D5s-11) |
 | A Group that is a Zone, or holds one at any depth | Refused. A whole Zone as shading is the [zone-shading brief](../unscheduled/zone-shading.md) |
-| A Space, Volume or Floor Segment, a Window Unit, a pane Face, anything inside them | Refused: another feature owns the entity |
+| A Space, Volume or Floor Segment, anything inside them, or a Group holding one | Refused: another feature owns the entity |
+| A Window Unit, a pane Face, anything inside them | Refused as a cutting component (P5s-02): a Window Unit cuts its opening and claims nothing |
 | A Face inside a cutting component | Refused: export does not read those Faces |
 | Anything behind a locked Group or instance | Refused with the foundation's `target.locked` |
 
