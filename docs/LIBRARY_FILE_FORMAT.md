@@ -158,7 +158,12 @@ each Schedule it names in the same Undo step, or reuses the local copy of that S
 same library. The copy result lists each Schedule under `dependencies`. A Schedule that the loaded
 `schedules` catalog does not hold refuses the copy with `library.dependency_missing`, and nothing
 is written. A local Schedule with the same name and other values refuses the copy with
-`library.review_required` until you copy that Schedule on its own.
+`library.review_required`. Replace that Schedule from the library first, or rename it, then copy the
+Program again.
+
+Exporting a Program also exports each Schedule it names, even when the selection or the chosen
+kinds leave the Schedule out, so the file can supply it. An exported Equipment Set's devices carry
+no `user_data`; the review before the write lists `devices[].user_data` as omitted.
 
 A copied Program or Equipment Set can become the Model's default in the copy's Undo step. A
 replacement of a local Equipment Set keeps each local device whose place in the list the library

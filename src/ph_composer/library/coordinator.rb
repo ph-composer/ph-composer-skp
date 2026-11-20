@@ -156,7 +156,8 @@ module PhComposer
           reports += [Dependencies.report(target, id, "created")]
         else
           raise Error.new("library.review_required", "#{review.row.fetch('display_label')} (#{target.fetch('kind')}) " \
-                                                     "needs review: copy it on its own first.",
+                                                     "needs review: replace the local one from the library, or " \
+                                                     "rename it.",
                           target.merge("outcome" => resolution.fetch("outcome")))
         end
         copying[key] = id

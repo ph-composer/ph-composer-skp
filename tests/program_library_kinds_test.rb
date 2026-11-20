@@ -167,6 +167,50 @@ class ProgramLibraryKindsTest < PhComposerTestCase
     assert_equal revision, @session.revision
     assert_equal [local.dig("value", "id")], stored(P::SCHEDULE_KIND).map { |record| record.fetch("id") }
     assert_empty stored(P::PROGRAM_KIND)
+
+    candidate = resolution("schedules", "office-air").fetch("candidates").first
+    replaced = invoke("#{L}.copy", copy_params("schedules", "office-air", "use_library")
+      .merge("local_id" => local.dig("value", "id"), "expected_values" => candidate.fetch("expected_values")))
+    assert_equal "committed", replaced["effect"], replaced.inspect
+    copied = invoke("#{L}.copy", copy_params("programs", "office"))
+    assert_equal [%w[office-hours created], %w[office-air reused]],
+                 copied.dig("value", "dependencies").map { |row| row.values_at("record_id", "outcome") }
+  end
+
+  # A selected Program exports with the Schedules it names, and the file copies into a fresh Model; a device map
+  # the file leaves out is reported.
+  def test_an_exported_program_brings_its_schedules_and_copies_into_a_fresh_model
+    program = invoke("#{L}.copy", copy_params("programs", "office")).dig("value", "local_id")
+    set = invoke("#{L}.copy", copy_params("equipment_sets", "kitchen")).dig("value", "local_id")
+    record = P::EquipmentSet::KIND.store.read(@model, set)
+    first, *rest = record.fetch("devices")
+    devices = [first.merge("user_data" => { "a" => 1 })] + rest
+    P::EquipmentSet::KIND.store.write(@model, record.merge("devices" => devices))
+    path = File.join(@directory, "export.json")
+    context = API.connect(:session_id => @session.id, :capabilities => %w[read export model_write view])
+    approval = PhComposer::NativeApproval::Granted.new(:path => path, :replace => false)
+    selected = { "scope" => "selected", "kinds" => %w[programs equipment_sets],
+                 "records" => [{ "record_kind" => P::PROGRAM_KIND, "id" => program },
+                               { "record_kind" => P::EQUIPMENT_SET_KIND, "id" => set }] }
+    preview = PhComposer::Dispatch.new.query(context, "#{L}.export_preview", selected.slice("scope", "records"))
+    assert_includes preview.dig("value", "omissions").flat_map { |row| row.fetch("fields") }, "devices[].user_data"
+    result = PhComposer::Dispatch.new.file_export(context, "#{L}.export_file", selected, :approval => approval)
+    assert_equal "completed", result["status"], result.inspect
+    exported = JSON.parse(File.read(path))
+    assert_equal [1, 2, 1], %w[programs schedules equipment_sets].map { |kind| exported.dig("kinds", kind).length }
+
+    @model = Sketchup::Model.new
+    Sketchup.active_model = @model
+    @session = PhComposer::Sessions.for(@model)
+    @context = API.connect(:session_id => @session.id, :capabilities => %w[read view model_write setup])
+    PhComposer::Library::Setup.remove(PROVIDER)
+    PhComposer::Library::Setup.add_file(:id => PROVIDER, :label => "Exported", :path => path)
+    %w[schedules programs].each { |kind| load_kind(kind) }
+    copied = invoke("#{L}.copy", copy_params("programs", program).merge("library_id" => exported.dig("library", "id")))
+    assert_equal ["committed", %w[created created]],
+                 [copied["effect"], copied.dig("value", "dependencies").map { |row|
+                   row.fetch("outcome")
+                 }], copied.inspect
   end
 
   def test_a_schedule_of_the_wrong_type_for_its_load_refuses_the_copy

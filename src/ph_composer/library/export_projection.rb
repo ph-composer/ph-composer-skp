@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
+require_relative "dependencies"
 require_relative "file_provider"
 require_relative "library_file"
 
 module PhComposer
   module Library
     # Detached, adapter-owned semantic projection. Record metadata is reviewed by field name only;
-    # neither extension payloads nor a provider's transport configuration enter a library file.
+    # neither extension payloads nor a provider's transport configuration enter a library file. A written row's
+    # dependencies (Dependencies) are written with it, whatever the selection, so the file can supply them.
     module ExportProjection
       # Which local records an export reads: `scope` is "all" or "selected", `records` the selected ones,
       # `kinds` the wire kinds written.
@@ -31,7 +33,8 @@ module PhComposer
 
           collect(request, declaration, record_kind, id, collected)
         end
-        rows = collected.rows
+        add_dependencies(request, declarations, collected)
+        rows = collected.rows.sort.to_h
         origins = collected.origins
         omissions = collected.omissions
         if rows.values.sum(&:length) > FileProvider::MAX_ROWS
@@ -39,7 +42,7 @@ module PhComposer
         end
 
         rows.each_value { |items| items.sort_by! { |row| row.fetch("id") } }
-        versions = kinds.sort.to_h do |kind|
+        versions = rows.keys.to_h do |kind|
           [kind, declarations.find { |row| row.adapter.wire_kind == kind }.adapter.wire_version]
         end
         projection = { "kinds" => rows, "kind_schema_versions" => versions, "record_origins" => origins,
@@ -63,11 +66,41 @@ module PhComposer
         # A recorded origin carries the source attribution, so `source` is omitted only without one.
         fields = record.keys - adapter.wire_schema.fetch("properties").keys - ["schema_version"]
         fields -= ["source"] if origin
+        fields += part_maps(request.registry.record_kinds.fetch(record_kind), record)
         collected.omissions << omission(record_kind, id, fields.sort, "fields_not_in_wire_schema") unless fields.empty?
         if origin
           (collected.origins[adapter.wire_kind] ||= {})[id] = origin
         elsif record["source"].is_a?(Hash) && record["source"]["kind"] == "library"
           collected.omissions << omission(record_kind, id, ["record_origins"], "origin_identity_unavailable")
+        end
+      end
+
+      # Each declared part path, as "devices[].user_data", where a member holds a map the row leaves out.
+      def part_maps(kind, record)
+        return [] unless kind.respond_to?(:parts)
+
+        kind.parts.filter_map do |part|
+          held = part.members(record).any? { |member| member["user_data"].is_a?(Hash) && !member["user_data"].empty? }
+          "#{part.path}.user_data" if held
+        end
+      end
+
+      # Every local record a written row names through its kind's dependencies, written too, and theirs in turn.
+      def add_dependencies(request, declarations, collected)
+        adapter_of = ->(kind) { declarations.find { |row| row.adapter.wire_kind == kind } }
+        queue = collected.rows.flat_map { |kind, rows| rows.map { |row| [kind, row] } }
+        until queue.empty?
+          kind, row = queue.shift
+          adapter = adapter_of.call(kind).adapter
+          Dependencies.targets(adapter, mapped_values(adapter, row)).each do |target|
+            written = (collected.rows[target.fetch("kind")] ||= [])
+            next if written.any? { |item| item.fetch("id") == target.fetch("id") }
+
+            declaration = adapter_of.call(target.fetch("kind"))
+            count = written.length
+            collect(request, declaration, declaration.record_kind, target.fetch("id"), collected)
+            queue << [target.fetch("kind"), written.last] if written.length > count
+          end
         end
       end
 
@@ -177,7 +210,7 @@ module PhComposer
         { "kinds" => kinds, "omissions" => omissions }
       end
       private_class_method :selection, :collect, :targets, :read_record, :reverse, :mapped_values, :origin,
-                           :safe_identity?, :omission
+                           :safe_identity?, :omission, :part_maps, :add_dependencies
     end
   end
 end

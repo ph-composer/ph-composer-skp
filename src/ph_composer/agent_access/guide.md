@@ -432,8 +432,9 @@ total 24, each with a fraction of the design flow. An Equipment Set holds honeyb
    with the defaults `settings.get` answered, to make the copy the Model's default in that step; an Equipment Set
    copies and assigns the same way. A Schedule missing from the loaded catalog refuses `library.dependency_missing`
    and writes nothing; its `detail` names the kind and record id, and `catalog_state` `unloaded` means load that
-   kind first. A local Schedule with the same name and other values refuses `library.review_required`: copy that
-   Schedule on its own first, keeping or replacing the local one, then copy the Program again.
+   kind first. A local Schedule with the same name and other values refuses `library.review_required`: either
+   copy that Schedule on its own with `use_library`, which gives the local one the library's values and source,
+   or rename the local one; then copy the Program again. `keep_local` does not resolve it.
 
 ### Spaces from loose Faces
 

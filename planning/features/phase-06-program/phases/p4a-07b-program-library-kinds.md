@@ -63,7 +63,8 @@ Each recorded in `context/CONTRACTS.md`, "Library dependencies" and "Programs, S
   source named by its local copy, so a reused Program reads `reuse`; the fingerprint stays the row's own.
 - **Which catalog.** A dependency is read from the current loaded catalog of its kind, same provider and library.
   Absent, or the kind never loaded, refuses `library.dependency_missing` with `catalog_state`. A same-named local
-  record of other values refuses `library.review_required` naming it: the user copies that record on its own first.
+  record of other values refuses `library.review_required` naming it: the user replaces that record from the
+  library (`use_library`) or renames it first; `keep_local` gives it no source, so it does not resolve.
 - **Snapshots.** A Program's source snapshot keeps the library's Schedule ids and an Equipment Set's keeps id-less
   devices, so the Programs kinds declare their library form for the snapshot (`KindFields.with`).
 - **Equipment Set replacement.** Keeps each local device whose place the incoming device of the same type takes,

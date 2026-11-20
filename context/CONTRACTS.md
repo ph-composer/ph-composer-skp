@@ -1446,10 +1446,13 @@ record. The Programs kinds are the shipped example: a Program names its Schedule
   `library_id`, `record_id` and `catalog_state`. It resolves as a row does: `reuse` takes the local
   record unchanged, `create` copies it (its own dependencies first) with its own attribution and use
   check, and any other outcome refuses as `library.review_required` naming it, until that record is
-  copied on its own. Each record is copied once per copy, however many references name it; a cycle
+  replaced from the library (`use_library`, which gives it the source) or renamed. Each record is copied once per copy, however many references name it; a cycle
   refuses as `library.adapter_invalid`. `keep_local` copies nothing. A reused dependency is taken as it
   stands locally, and a row's fingerprint covers its references, not the referenced records' values, so a
   change in the library to a Schedule alone shows on that Schedule's own resolution, not its Program's.
+- *Export.* A library export writes each record a written row names, and theirs in turn, even when the
+  selection or `kinds` leaves it out, so the file supplies every dependency. A declared part's map
+  that a row leaves out is listed among the omissions as `<path>.user_data`, such as `devices[].user_data`.
 
 **Callback write ownership.** A create, replace or assign callback shares the caller's proposal.
 Its request's engine is `engine.projected(proposal, writable_kinds:, refusal_code:)`
