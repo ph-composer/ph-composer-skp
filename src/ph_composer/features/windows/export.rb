@@ -66,7 +66,10 @@ module PhComposer
         settings = Settings::SERVICE.effective(ExportGeometry.record(reader.snapshot.model_dictionaries,
                                                                      Settings::SERVICE.store))
         Settings::SERVICE.validate!(settings)
-        reader.snapshot.records(Units::STORE.dictionary).each do |_entry, record|
+        reader.snapshot.records(Units::STORE.dictionary).each do |entry, record|
+          # A Unit in a Zone in no Building Segment leaves with its Zone, unread; the assessment notes it.
+          next if Zones::ExportProjection.left_out?(reader, entry.path)
+
           Units.validate!(record)
           reader.entity_record(record, :fields => %w[window_type_id anchor], :target_kind => Units::REFERENCE_KIND,
                                        :user_data => true)
@@ -82,6 +85,8 @@ module PhComposer
         left_out_rows(assessed.left_out).each { |row| reader.note(*row.values_at("code", "object_id", "message")) }
         result = assessed.apertures
         reader.snapshot.records(Units::STORE.dictionary).each do |entry, record|
+          next if Zones::ExportProjection.left_out?(reader, entry.path)
+
           reader.capture_entity(record, :target_kind => Units::REFERENCE_KIND, :path => entry.path)
         end
         result
@@ -123,6 +128,11 @@ module PhComposer
 
       # Per Zone, by id, a row counting the Units hosted on its Faces that export leaves out with it, as
       # `{code, object_id, message}`.
+      # The Zone Groups in no Building Segment, live: nothing inside them is read.
+      def left_out_entities(request)
+        Zones::ExportProjection.left_out_zones(request.model).map(&:entity)
+      end
+
       def left_out_rows(left_out)
         left_out.group_by { |row| row.fetch("zone_id") }.sort.map do |zone_id, units|
           count = units.length
@@ -139,7 +149,8 @@ module PhComposer
         check = Export::MetadataCheck
         kinds = [TYPE_KIND] + Products::KINDS.values.map(&:id)
         kinds.flat_map { |kind| check.findings(request, check.definitions(request, kind), :section => APERTURES) } +
-          check.findings(request, check.entity_records(request.model, Units::STORE),
+          check.findings(request,
+                         check.entity_records(request.model, Units::STORE, :skip => left_out_entities(request)),
                          :section => APERTURES, :user_data => true, :target_kind => Units::REFERENCE_KIND)
       end
 

@@ -123,8 +123,10 @@ module PhComposer
         findings = []
         repairs = []
         # A Space in a Zone export leaves out goes with it, and nothing about it is checked.
-        left_out = left_out_zones(request.model)
-        spaces, gone = read.fetch("spaces").partition { |space| !left_out.key?(space.dig("zone", "zone_id")) }
+        zones = Zones::ExportProjection.left_out_zones(request.model)
+        left_out = zones.to_h { |zone| [zone.record.fetch("id"), zone.record.fetch("name")] }
+        owners = read.fetch("spaces").to_h { |space| [space, left_out_owner(space, zones)] }
+        spaces, gone = read.fetch("spaces").partition { |space| owners.fetch(space).nil? }
         rows = spaces.flat_map do |space|
           [space] + space.fetch("volumes").flat_map { |volume| [volume] + volume.fetch("floor_segments") }
         end
@@ -138,8 +140,8 @@ module PhComposer
           repairs << repair if repair
         end
         findings.concat(offset_findings(request.model, left_out))
-        findings.concat(metadata_findings(request, gone.map { |space| space.dig("reference", "space_id") }))
-        findings.concat(left_out_findings(gone, left_out))
+        findings.concat(metadata_findings(request))
+        findings.concat(left_out_findings(gone.map { |space| owners.fetch(space) }, left_out))
         { "findings" => findings, "repairs" => repairs.uniq { |row| row.fetch("id") } }
       rescue CodedError => error
         { "findings" => [{ "code" => error.code, "section" => SECTION, "object_id" => nil,
@@ -147,31 +149,33 @@ module PhComposer
       end
 
       # The metadata extraction refuses, read as `records` reads each Space, Volume, Space Floor and Floor
-      # Segment: user_data passed through, and the envelopes another contributor claims on each kind. The rows
-      # of the Spaces `left_out` names (by id), whose records never leave, are not checked; their Volumes and
-      # Floor Segments still are, as the read cannot tell which Space holds a record by id alone.
-      def metadata_findings(request, left_out = [])
+      # Segment: user_data passed through, and the envelopes another contributor claims on each kind. Nothing
+      # inside a Zone in no Building Segment is read: it never leaves.
+      def metadata_findings(request)
         check = Export::MetadataCheck
-        floors = check.entity_records(request.model, VOLUME_STORE).map { |volume| floor_part(volume) }
+        skip = Zones::ExportProjection.left_out_zones(request.model).map(&:entity)
+        floors = check.entity_records(request.model, VOLUME_STORE, :skip => skip).map { |volume| floor_part(volume) }
         { SPACE_STORE => SPACE_KIND, VOLUME_STORE => VOLUME_KIND, FLOOR_SEGMENT_STORE => FLOOR_SEGMENT_KIND }
           .flat_map do |store, kind|
-            records = check.entity_records(request.model, store)
-            records = records.reject { |record| left_out.include?(record["id"]) } if store == SPACE_STORE
-            check.findings(request, records, :section => SECTION, :user_data => true, :target_kind => kind)
+            check.findings(request, check.entity_records(request.model, store, :skip => skip),
+                           :section => SECTION, :user_data => true, :target_kind => kind)
           end + check.findings(request, floors, :section => SECTION, :user_data => true)
       end
 
-      # The Zones in no Building Segment, live, by id with their names: export leaves them out.
-      def left_out_zones(model)
-        Zones::Occurrences.zones(model).reject { |zone| Zones::Schema.exported?(zone.record) }
-                          .to_h { |zone| [zone.record.fetch("id"), zone.record.fetch("name")] }
+      # The id of the Zone in no Building Segment that a Spaces row names or sits inside, or nil.
+      def left_out_owner(space, zones)
+        path = Array(space.dig("reference", "entity_path"))
+        zones.find do |zone|
+          zone.record.fetch("id") == space.dig("zone", "zone_id") ||
+            (path.length > zone.path.length && path[0, zone.path.length] == zone.path)
+        end&.record&.fetch("id")
       end
 
-      # One row per left-out Zone counting the Spaces that go with it.
-      def left_out_findings(gone, left_out)
-        gone.group_by { |space| space.dig("zone", "zone_id") }.sort.map do |zone_id, spaces|
+      # One row per left-out Zone counting the Spaces that go with it, from the Zone id of each.
+      def left_out_findings(zone_ids, left_out)
+        zone_ids.tally.sort.map do |zone_id, count|
           { "code" => "space.zone_left_out", "section" => SECTION, "object_id" => zone_id,
-            "message" => left_out_message(left_out.fetch(zone_id), spaces.length), "blocks_export" => false }
+            "message" => left_out_message(left_out.fetch(zone_id), count), "blocks_export" => false }
         end
       end
 
@@ -234,9 +238,15 @@ module PhComposer
 
       def records(reader)
         snapshot = reader.snapshot
-        spaces = unique!(snapshot.records(SPACE_STORE.dictionary, :kind => "group"), "Space")
-        volumes = unique!(snapshot.records(VOLUME_STORE.dictionary, :kind => "group"), "Volume")
-        segments = unique!(snapshot.records(FLOOR_SEGMENT_STORE.dictionary, :kind => "face"), "Floor Segment")
+        # What sits inside a Zone in no Building Segment leaves with it, before anything about it is checked.
+        kept = lambda do |dictionary, kind|
+          snapshot.records(dictionary, :kind => kind)
+                  .reject { |entry, _record| Zones::ExportProjection.left_out?(reader, entry.path) }
+        end
+        note_left_out(reader)
+        spaces = unique!(kept.call(SPACE_STORE.dictionary, "group"), "Space")
+        volumes = unique!(kept.call(VOLUME_STORE.dictionary, "group"), "Volume")
+        segments = unique!(kept.call(FLOOR_SEGMENT_STORE.dictionary, "face"), "Floor Segment")
         structure!(spaces, volumes, segments)
         # Each Volume and Floor Segment filed under the path of the container it sits directly in, and each
         # Zone's own-Face extents, once per export: per Space, a lookup and not a pass over the snapshot.
@@ -269,6 +279,18 @@ module PhComposer
           reader.note("space.zone_left_out", zone.fetch("id"), left_out_message(zone.fetch("name"), records.length))
         end
         rows.sort_by { |row| row.fetch("id") }
+      end
+
+      # One note per Zone in no Building Segment counting the Spaces inside it that leave with it.
+      def note_left_out(reader)
+        gone = reader.snapshot.records(SPACE_STORE.dictionary, :kind => "group").filter_map do |entry, _record|
+          next unless Zones::ExportProjection.left_out?(reader, entry.path)
+
+          Zones::ExportProjection.enclosing_zones(reader, entry.path).first&.last
+        end
+        gone.group_by { |zone| zone.fetch("id") }.sort.each do |zone_id, rows|
+          reader.note("space.zone_left_out", zone_id, left_out_message(rows.first.fetch("name"), rows.length))
+        end
       end
 
       # The outer-loop points of the Floor Segments in these Volumes.

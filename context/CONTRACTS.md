@@ -1378,8 +1378,13 @@ managed Zone whose `building_segment_id` is set).
   Thermal bridges and Windows leave out the Spaces, assigned Edges and Window Units in it or on its Faces,
   each noting `space.zone_left_out`, `thermal_bridge.zone_left_out` or `window.zone_left_out` per Zone. Each
   preflight skips what it leaves out and gives the same row as info, so incomplete authoring inside the Zone
-  (an unclassified Face, a missing Window Type or Space height) never blocks. A record that cannot be read
-  still blocks wherever it is, as does a Zone nested in a Zone.
+  (an unclassified Face, a missing Window Type or Space height, a copied Space identity) never blocks. Their
+  sections drop what is inside the Zone (`Zones::ExportProjection.left_out?` on a snapshot path) before
+  validating or reading it, and their preflights' metadata checks skip the Zone's contents
+  (`Export::MetadataCheck.entity_records(..., skip:)` with `left_out_zones`). A Zone record or thermal-bridge
+  assignment that cannot be read still blocks, as does a Zone nested in a Zone.
+- Solve pairs coincident Faces whatever their boundary, so while any Zone is left out the preflight's
+  Solve repair is offered unchecked, its label saying it pairs those Faces again.
   Features read the rule from the projections: a Zones row's `exported` and a Faces row's `left_out`, or
   `Zones::Schema.exported?` on a live Zone record.
 - The Zones projection keeps a left-out Zone's row, so Shading still names a Shade "<Zone> Shading" there,

@@ -64,7 +64,8 @@ module PhComposer
                                        "discard it, #{Assignment::Repair::ROUTE}.",
                           "locate" => { "edge_paths" => [row.fetch("path")] } }, nil)
         end
-        findings += left_out_counts(gone, names).map do |zone_id, message|
+        counts = gone.map { |fact| fact.zone.fetch("zone_id") }.tally
+        findings += left_out_counts(counts, names).map do |zone_id, message|
           { "code" => "thermal_bridge.zone_left_out", "section" => SECTION, "object_id" => zone_id,
             "message" => message, "blocks_export" => false }
         end
@@ -79,8 +80,14 @@ module PhComposer
       def metadata_findings(request)
         check = Export::MetadataCheck
         check.findings(request, check.definitions(request, TYPE_KIND), :section => SECTION) +
-          check.findings(request, check.entity_records(request.model, Assignment::STORE),
+          check.findings(request,
+                         check.entity_records(request.model, Assignment::STORE, :skip => left_out_entities(request)),
                          :section => SECTION, :target_kind => EDGE_KIND)
+      end
+
+      # The Zone Groups in no Building Segment, live: nothing inside them is read.
+      def left_out_entities(request)
+        Zones::ExportProjection.left_out_zones(request.model).map(&:entity)
       end
 
       def preflight_row(finding, object_id, prefix = "")
@@ -110,12 +117,15 @@ module PhComposer
 
       def records(reader)
         types = reader.records(TYPE_KIND).to_h { |row| [row.fetch("id"), row] }
-        names = reader.section(ZONES).reject { |row| row.fetch("exported") }
-                      .to_h { |row| [row.fetch("zone_id"), row.fetch("name")] }
-        facts, gone = split_left_out(facts(reader), names.keys)
-        left_out_counts(gone, names).each { |zone_id, message|
+        left_out = reader.section(ZONES).reject { |row| row.fetch("exported") }
+        facts = facts(reader)
+        gone = reader.snapshot.records(Assignment::STORE.dictionary, :kind => "edge").filter_map do |entry, _record|
+          left_out.find { |row| inside?(row.fetch("zone_path"), entry.path) }&.fetch("zone_id")
+        end
+        names = left_out.to_h { |row| [row.fetch("zone_id"), row.fetch("name")] }
+        left_out_counts(gone.tally, names).each do |zone_id, message|
           reader.note("thermal_bridge.zone_left_out", zone_id, message)
-        }
+        end
         outlines = reader.section(APERTURES).map { |row| row.fetch("outline_m") }
         schedule = Runs::Schedule.call(facts, :types => types, :outlines => outlines)
         blocking = schedule.fetch("runs").flat_map { |run| run.fetch("findings") }.find { |row| row["blocks_export"] }
@@ -147,7 +157,10 @@ module PhComposer
         faces = reader.section(FACES).to_h { |row| [row.fetch("path"), row] }
         storage = snapshot.entries.select { |entry| entry.kind == "component_instance" }
                           .to_h { |entry| [entry.path, true] }
-        snapshot.records(Assignment::STORE.dictionary, :kind => "edge").map do |entry, record|
+        snapshot.records(Assignment::STORE.dictionary, :kind => "edge").filter_map do |entry, record|
+          # An Edge in a Zone in no Building Segment leaves with its Zone, unread.
+          next if Zones::ExportProjection.left_out?(reader, entry.path)
+
           begin
             Assignment.validate!(record)
           rescue CodedError => error
@@ -185,10 +198,10 @@ module PhComposer
         facts.partition { |fact| !left_out.include?(fact.zone&.fetch("zone_id")) }
       end
 
-      # Per left-out Zone, by id, the sentence counting the assigned Edges that went with it.
-      def left_out_counts(gone, names)
-        gone.group_by { |fact| fact.zone.fetch("zone_id") }.sort.map do |zone_id, facts|
-          count = facts.length
+      # Per left-out Zone, by id, the sentence counting the assigned Edges that went with it, from their counts by
+      # Zone id.
+      def left_out_counts(counts, names)
+        counts.sort.map do |zone_id, count|
           [zone_id, "#{count} assigned #{count == 1 ? 'Edge' : 'Edges'} in Zone #{names.fetch(zone_id)}, which " \
                     "is in no Building Segment, #{count == 1 ? 'is' : 'are'} left out of export with it."]
         end

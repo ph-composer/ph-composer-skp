@@ -144,6 +144,43 @@ class SegmentExportRulesTest < PhComposerTestCase
     assert_equal [2, []], moved_back.values_at("attached_face_count", "faces")
   end
 
+  # Solve pairs coincident Faces whatever their boundary, so while a Zone is left out the preflight's Solve
+  # repair is unchecked: run by default, it would pair again the Faces the offer made an Attached zone.
+  def test_the_solve_repair_is_unchecked_while_a_zone_is_left_out
+    reference
+    solve = ->(rows) { rows.find { |row| row.fetch("id").end_with?("solve_all") } }
+    assert solve.call(completed(API.export_preflight(:context => @context)).fetch("repairs")).fetch("checked")
+    move(%w[ADU], nil)
+    make_attached_zone("ADU")
+
+    repair = solve.call(completed(API.export_preflight(:context => @context)).fetch("repairs"))
+
+    refute repair.fetch("checked")
+    assert_includes repair.fetch("label"), "Attached zone of a Zone in no Building Segment"
+  end
+
+  # What sits inside a left-out Zone is not read: a reserved metadata key on its Volume or Edge and a copied
+  # Space identity there block neither the preflight nor the extraction.
+  def test_records_inside_a_left_out_zone_are_neither_validated_nor_read
+    reference
+    move(%w[ADU], nil)
+    make_attached_zone("ADU")
+    adu = @model.entities.to_a.find { |entity| entity.persistent_id == 3000 }
+    volume = adu.entities.to_a.find { |entity| entity.persistent_id == 3050 }.entities.to_a.first
+    PhComposer::Spaces::VOLUME_STORE.write(volume, PhComposer::Spaces::VOLUME_STORE.read(volume)
+                                                     .merge("user_data" => { "ph_composer" => { "x" => 1 } }))
+    edge = adu.entities.to_a.find { |entity| entity.persistent_id == 3090 }
+    TB::Assignment::STORE.write(edge, TB::Assignment::STORE.read(edge).merge("user_data" => { "ph_composer" => 1 }))
+    copy = space_group(3150, space_record("A", :number => "2", :name => "Copy"),
+                       [volume_group(3160, volume_record("C"), [floor_face(3170, rectangle(6, 5, 1, 1),
+                                                                           segment_record("C"))])])
+    adu.entities << copy
+    UI.run_timers
+
+    assert_empty preflight.select { |row| row.fetch("blocks_export") }
+    assert_empty extract.document.dig("sections", "ph_composer.spaces.export.spaces", "records")
+  end
+
   # ---------------------------------------------------------------- shading and the Site
 
   def test_a_marked_face_in_a_left_out_zone_still_exports_as_its_zones_shade

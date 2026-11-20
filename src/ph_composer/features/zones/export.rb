@@ -68,10 +68,22 @@ module PhComposer
         end
         findings.concat(metadata_findings(request, zones.select { |zone| Schema.exported?(zone.record) }))
         findings.concat(left_out_findings(request, zones, index))
-        repair = { "id" => "#{FEATURE_ID}.solve_all", "label" => "Re-solve adjacencies before export",
-                   "checked" => true, "action" => "#{FEATURE_ID}.solve_adjacency",
-                   "params" => { "zones" => zones.map(&:reference) } }
-        { "findings" => findings, "repairs" => zones.empty? ? [] : [repair] }
+        { "findings" => findings, "repairs" => zones.empty? ? [] : [solve_repair(zones)] }
+      end
+
+      # Re-solving every Zone before export. Solve pairs coincident Faces whatever their boundary, so while a Zone
+      # is in no Building Segment it would pair again the Faces made its Attached zone, which then refuse: the
+      # repair is offered unchecked, and says so.
+      def solve_repair(zones)
+        left_out = zones.any? { |zone| !Schema.exported?(zone.record) }
+        label = if left_out
+                  "Re-solve adjacencies before export (this pairs again the Faces made the Attached zone of a " \
+                    "Zone in no Building Segment)"
+                else
+                  "Re-solve adjacencies before export"
+                end
+        { "id" => "#{FEATURE_ID}.solve_all", "label" => label, "checked" => !left_out,
+          "action" => "#{FEATURE_ID}.solve_adjacency", "params" => { "zones" => zones.map(&:reference) } }
       end
 
       # A Zone's options as export needs them: adopted when the Model manages its options, and each named
@@ -162,6 +174,21 @@ module PhComposer
         heading = "Gross area (#{Units.label(:quantity => 'area', :system => display_units)})"
         table = Export::ReportHtml.table(["Assembly", "Faces", heading], rows)
         [Export::ReportHtml.section("Construction usage", table)]
+      end
+
+      # The live Zone occurrences in no Building Segment, which export leaves out with everything inside them. A
+      # contributor's preflight passes their entities as `skip` to Export::MetadataCheck.entity_records.
+      def left_out_zones(model, index: nil)
+        Occurrences.zones(model, :index => index).reject { |zone| Schema.exported?(zone.record) }
+      end
+
+      # Whether the snapshot path `path` is inside a Zone in no Building Segment, so it leaves export with its
+      # Zone: a contributor drops such entries before it validates or reads them.
+      def left_out?(reader, path)
+        left_out = reader.projection(:zone_left_out_paths) do
+          zone_occurrences(reader).reject { |_entry, record| Schema.exported?(record) }.map { |entry, _| entry.path }
+        end
+        left_out.any? { |zone_path| path.length > zone_path.length && path[0, zone_path.length] == zone_path }
       end
 
       # Every Zone occurrence in the snapshot as [entry, record], in snapshot order, read once per export and

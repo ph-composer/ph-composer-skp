@@ -330,6 +330,8 @@ To clear that refusal, make the left-out Zone the Attached zone of the Faces it 
    and ends each pair on both sides.
 3. Moving the Zone back into a Segment leaves those Faces on the Attached zone; the offer's
    `attached_face_count` counts them. Run `ph_composer.zones.solve_adjacency` to pair them again.
+   Solve pairs them whatever their boundary, so while a Zone is left out the export preflight offers its
+   Solve repair unchecked; leave it unchecked to keep the Attached zone.
 
 An AttachedZone Face exports as honeybee-ph `PhAdditionalZone`, with its Attached zone's id, name and
 temperature reduction factor. Through PHX, WUFI-Passive receives the factor; METr receives the attached
