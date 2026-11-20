@@ -860,6 +860,8 @@ what it leaves out (`omissions`), its `projection_digest` and, with an approved 
 `scope`, `kinds` and `records` and the `projection_digest` pages them, refused as `revision.stale`
 once the projection is no longer that one. Read every omission of an all-scope export before you
 replace a file with it; choosing fewer records is a different export, not a way round a long list.
+A Program exports with every Schedule it names, even when `kinds` or `records` leave them out, and
+one that cannot be written refuses `library.dependency_missing`.
 `ph_composer.library.export_file` (an `export_file` tool call with the location) replaces an
 existing file only with `replace`, the reported `state` as `expected_destination` and the
 `projection_digest`; a destination that changed since is refused as `library.destination_changed`.

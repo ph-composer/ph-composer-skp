@@ -130,6 +130,27 @@ class ProgramLibraryKindsTest < PhComposerTestCase
     assert_equal count, [stored(P::PROGRAM_KIND).length, stored(P::SCHEDULE_KIND).length]
   end
 
+  # A library update that names a Schedule not yet local: the replacement copies it first and names it.
+  def test_a_program_replacement_copies_a_newly_named_schedule
+    program = invoke("#{L}.copy", copy_params("programs", "office")).dig("value", "local_id")
+    evening = { "id" => "office-evening", "name" => "Office evening", "type" => "fractional", "start_h" => 18,
+                "end_h" => 22 }
+    office = rows.fetch("programs").first
+    write_programs(rows.merge("schedules" => rows.fetch("schedules") + [evening],
+                              "programs" => [office.merge("lighting" => { "schedule_id" => "office-evening" })]))
+    %w[schedules programs].each { |kind| load_kind(kind) }
+    candidate = resolution("programs", "office").fetch("candidates").first
+    assert_equal true, candidate.fetch("source_changed")
+    replaced = invoke("#{L}.copy", copy_params("programs", "office", "use_library")
+      .merge("local_id" => program, "expected_values" => candidate.fetch("expected_values")))
+    assert_equal "committed", replaced["effect"], replaced.inspect
+    assert_equal [%w[office-hours reused], %w[office-evening created], %w[office-air reused]],
+                 replaced.dig("value", "dependencies").map { |row| row.values_at("record_id", "outcome") }
+    evening_id = replaced.dig("value", "dependencies").find { |row| row["record_id"] == "office-evening" }["local_id"]
+    assert_equal evening_id, P::Program::KIND.store.read(@model, program).dig("lighting", "schedule_id")
+    assert_equal 3, stored(P::SCHEDULE_KIND).length
+  end
+
   def test_a_second_program_naming_copied_schedules_reuses_them_by_source
     invoke("#{L}.copy", copy_params("schedules", "office-hours"))
     copied = invoke("#{L}.copy", copy_params("programs", "office"))

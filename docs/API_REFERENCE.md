@@ -14162,7 +14162,7 @@ Params:
         "minLength": 1
       },
       "minItems": 1,
-      "description": "Limit the export to these library kinds, such as materials."
+      "description": "Limit the export to these library kinds, such as materials. A written row's dependencies, a Program's Schedules, are written too."
     },
     "records": {
       "type": "array",
@@ -14357,7 +14357,7 @@ Params:
         "minLength": 1
       },
       "minItems": 1,
-      "description": "Limit the export to these library kinds, such as materials."
+      "description": "Limit the export to these library kinds, such as materials. A written row's dependencies, a Program's Schedules, are written too."
     },
     "records": {
       "type": "array",
@@ -89678,7 +89678,7 @@ Params:
         "minLength": 1
       },
       "minItems": 1,
-      "description": "Limit the export to these library kinds, such as materials."
+      "description": "Limit the export to these library kinds, such as materials. A written row's dependencies, a Program's Schedules, are written too."
     },
     "records": {
       "type": "array",
@@ -91978,4 +91978,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.77 | 2026-11-20 | A Space's airflow mode is its Zone's: by_program until any Space in the Zone has a rate, then detailed, when every Space exports its own rates with 0 for a blank. ph_composer.spaces.all and list add airflow_mode to each Zone row; all's Zone rows drop inheriting_count, and each building_segments row replaces inheriting_count with by_program_zone_count. A Space row's airflow_mode takes by_program or detailed (was inheriting or user_specified), a copy of its Zone's kept for this minor version; read the Zone row's. ph_composer.spaces.clear_zone_airflows is new: From Program, every Space's rates in the named Zones cleared in one Undo step. The Spaces export section moves to version 2, each record carrying airflow_mode, and its preflight adds space.zone_without_spaces, a warning that does not block. |
 | 1.78 | 2026-11-20 | ph_composer.programs is a new feature: the ph_composer.programs.airtightness extension on each Building Segment (basis n50 or q50, value or null, wind_exposure), saved through zones.save_segment_settings, read by ph_composer.programs.airtightness.get with its defaults, and exported to each Zone's Infiltration and the BldgSegment's wind exposure. Export refuses airtightness.no_net_volume and airtightness.no_exposed_face. The Spaces export section registers a projection of each Zone's net volume. |
 | 1.79 | 2026-11-20 | ph_composer.programs adds the Program, Schedule and Equipment Set record kinds with create, update, duplicate, delete, list and all reads; equipment_sets.add_device, update_device, delete_device and device_types; schedules.profile; settings.get and settings.update for the Model's default Program and Equipment Set; and reset_default. Reads answer PH-Composer's residential default Program, its Schedules and the default Equipment Set until a write stores them. Deleting a default without a replacement refuses programs.default_in_use. |
-| 1.80 | 2026-11-20 | The programs, schedules and equipment_sets library kinds: ph_composer.library.copy copies a library Program with every Schedule it names, reusing a local copy of each from the same source, in one Undo step, and a Program or Equipment Set copy may assign itself as the Model's default (mode model_default). A library kind may declare dependencies, which describe names; copy answers dependencies, each record of another kind it copied or reused, and refuses library.dependency_missing when the loaded catalog of that kind does not hold one. |
+| 1.80 | 2026-11-20 | The programs, schedules and equipment_sets library kinds: ph_composer.library.copy copies a library Program with every Schedule it names, reusing a local copy of each from the same source, in one Undo step, and a Program or Equipment Set copy may assign itself as the Model's default (mode model_default). A library kind may declare dependencies, which describe names; copy answers dependencies, each record of another kind it copied or reused, and refuses library.dependency_missing when the loaded catalog of that kind does not hold one. Library export writes each dependency of a written row, whatever kinds or records select, and refuses library.dependency_missing for one it cannot write; its omissions list a declared part's map the file leaves out as <path>.user_data, such as devices[].user_data. |

@@ -8,9 +8,10 @@ ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 Run by the P4a-07b stage, offline, on Ruby 3.2.2 and 2.7.2 against the SketchUp stub. SketchUp was not
 launched (conductor decision: two earlier launches this run reached no bridge).
 
-Command, both Rubies (48 runs, 780 assertions, 0 failures on each, with `tests/library_export_test` added):
+Command, both Rubies (49 runs, 794 assertions, 0 failures on each, measured on `6849bee4` plus the final test commit):
 `ruby -Itests -e 'require "./tests/program_library_kinds_test"; require "./tests/library_programs_walkthrough_test";
-require "./tests/library_registration_test"; require "./tests/library_assignment_contract_test"'`.
+require "./tests/library_registration_test"; require "./tests/library_assignment_contract_test";
+require "./tests/library_export_test"'`.
 
 ## Rows
 
@@ -24,7 +25,8 @@ require "./tests/library_registration_test"; require "./tests/library_assignment
 | An Equipment Set copies with new device ids; a replacement keeps matching devices | Pass | `test_an_equipment_set_copies_with_new_device_ids_and_a_replacement_keeps_matching_devices`: `dev_` ids allocated; `use_library` keeps the first device's id and `user_data` with the new value; a replacement that would drop a device holding `user_data` refuses `validation.failed` |
 | Copy plus assignment as the Model's default is one Undo step | Pass | `test_copy_and_model_default_assignment_are_one_undo_step`: one operation; the default names the copy; the residential default is written first; Undo removes every Program and Schedule and restores the settings; Redo restores the copy; a stale `expected_settings` refuses `target.changed` with nothing written |
 | The published contract: describe, discovery, assignment from the descriptor | Pass | `test_describe_names_the_dependency_and_the_assignment`; `library_assignment_contract_test`: Programs and Equipment Sets assign as the Model's default from the published example; Schedules alone are unassignable; `test_dependencies_name_registered_other_kinds_with_callable_list_and_remap` |
-| An exported Program brings its Schedules; device maps are reported | Pass | `test_an_exported_program_brings_its_schedules_and_copies_into_a_fresh_model`: a selected Program and Equipment Set export with both Schedules though neither the selection nor `kinds` names them; the preview lists `devices[].user_data`; the file copies into a fresh Model, creating both Schedules |
+| An exported Program brings its Schedules; device maps are reported | Pass | `test_an_exported_program_brings_its_schedules_and_copies_into_a_fresh_model`: a selected Program and Equipment Set export with both Schedules though neither the selection nor `kinds` names them; the preview lists `devices[].user_data`; the file copies into a fresh Model, creating both Schedules; a Schedule the export cannot label refuses the preview `library.dependency_missing` |
+| A Program replacement copies a newly named Schedule | Pass | `test_a_program_replacement_copies_a_newly_named_schedule`: the library Program now names a third Schedule; `in_file` reads `source_changed` true; `use_library` reuses the two local Schedules, creates the third and names it in the Program |
 | The published fixture reads | Pass | `test_the_published_programs_fixture_reads_each_kind`: two Schedules (each with the `library.row_optional_absent` warning a Schedule row always carries), one Program and one Equipment Set, nothing unavailable |
 | The panel-closed walkthrough | Pass | `tests/library_programs_walkthrough_test.rb`: the copy with its Schedules as the default is one Undo step named "Copy Library Record", a second copy reuses everything, Undo empties the stores; the walkthrough names no `PhComposer::Programs` constant |
 | The installed RBZ: a copy from a library file, native Edit-menu Undo and Redo | Owed | Batched sitting, case `PG07b` in the case ledger |

@@ -18,7 +18,8 @@ module PhComposer
                                           "new, the default, gives the file a new library id; update keeps the id " \
                                           "of the library file being replaced."),
           "kinds" => Library.described({ "type" => "array", "items" => text, "minItems" => 1 },
-                                       "Limit the export to these library kinds, such as materials."),
+                                       "Limit the export to these library kinds, such as materials. A " \
+                                       "written row's dependencies, a Program's Schedules, are written too."),
           "records" => Library.described({ "type" => "array", "items" => selected, "minItems" => 1 },
                                          "With scope selected: the records to export, each by record kind and id."),
           "library_name" => Library.described(text, "The library name written into the file. Defaults to Model " \
