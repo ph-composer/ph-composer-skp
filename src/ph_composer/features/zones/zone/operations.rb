@@ -260,7 +260,14 @@ module PhComposer
 
       after = DeepCopy.call(before)
       values.each { |key, value| after[key] = DeepCopy.call(value) }
-      after["choice_evidence"] = Options.evidence(request.engine, after) if Schema.managed?(after)
+      if Schema.managed?(after)
+        # The first option a Zone names in a Model without option settings gives the Model its settings and
+        # default Segment, so the Zone's evidence names this Model and needs no adoption.
+        if Options.settings(request.engine, proposal).nil? && after.values_at("building_segment_id", "level_id").any?
+          Options.ensure_default(request, proposal)
+        end
+        after["choice_evidence"] = Options.evidence(request.engine, after, proposal)
+      end
       return { "zone_id" => before.fetch("id") } if before == after
 
       after = Schema.validate!(Schema.current(after))

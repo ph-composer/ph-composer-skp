@@ -919,7 +919,8 @@ versioned option definitions and source identity for native clipboard recovery; 
 recovery evidence, not assignment authority; it carries null for an option the Zone does not name.
 Managed read rows expose resolved presentation names/colours separately as `display`. Missing/foreign
 choices require explicit destination adoption; a Zone naming neither a Segment nor a Level has
-nothing to adopt, and in a Model with no option settings yet its evidence keeps the source it names.
+nothing to adopt, and in a Model with no option settings yet its evidence keeps the source it names;
+the first option such a Zone is given creates the Model's settings and default Segment.
 Option rewrites validate every Zone and stamp they write. In a managed Model, export preflight also blocks legacy Zones pending adoption. A wholly legacy Model retains its compatible export path. Until export
 leaves Zones in no Building Segment out, preflight blocks such a Zone with `reference.invalid`.
 

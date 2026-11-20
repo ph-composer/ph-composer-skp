@@ -116,6 +116,18 @@ test("a used Segment moves its Zones to none, the default moves to the first rem
     assert.strictEqual(p.sent[0].payload.params.default_segment_id, "bsg_b");
   });
 
+test("a Segment that took a used Segment's Zones in this draft offers No Building Segment, not deletion",
+  function () {
+    var data = fixture(); data.building_segments.push(choice("bsg_c", "Wing"));
+    var p = page(data); p.dialog.open("building_segment");
+    p.dialog.removal(p.dialog.draft[0], p.dialog.list.children[0]);
+    var replacement = p.find("Replacement for House"); replacement.value = "bsg_b"; replacement.listeners.change({});
+    click(p.find("Remove"));
+    p.dialog.removal(p.dialog.draft[0], p.dialog.list.children[0]);
+    var none = p.find("Replacement for Annex").children.filter(function (node) { return node.value === ""; })[0];
+    assert.strictEqual(none.textContent, "No Building Segment");
+  });
+
 test("used Level deletion explicitly clears live and recovery assignments", function () {
   var p = page(); p.dialog.open("level"); p.dialog.removal(p.dialog.draft[0], p.dialog.list.children[0]);
   var replacement = p.find("Replacement for Ground"); replacement.value = ""; replacement.listeners.change({});

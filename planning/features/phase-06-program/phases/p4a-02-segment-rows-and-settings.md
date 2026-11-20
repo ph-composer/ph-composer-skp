@@ -1,7 +1,7 @@
 # P4a-02: Segment heading rows, table management and the settings dialog
 
 DATE: 2026-11-15
-STATUS: Scoped. Not authorized.
+STATUS: Scoped. Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 

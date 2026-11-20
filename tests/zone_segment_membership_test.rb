@@ -290,7 +290,17 @@ class ZoneSegmentMembershipTest < PhComposerTestCase
     assert_empty Z::Schema.problems(record(zone_id))
     assert_equal ["Renamed", "another_model"], [record(zone_id).fetch("name"),
                                                 record(zone_id).dig("choice_evidence", "source_model_id")]
-    assert completed(API.query(:context => @context, :name => "#{O::PREFIX}.all"))
+
+    # The first option it names gives the Model its settings and default Segment; edits then still run.
+    row = zone_row(zone_id)
+    target = { "reference" => row.fetch("reference"), "expected_values" => row.fetch("values") }
+    completed(invoke("#{Z::FEATURE_ID}.update_field", "field" => "level", "value" => "Upper", "targets" => [target]))
+    options = query("#{O::PREFIX}.all")
+    assert_equal ["Building"], options.fetch("building_segments").map { |row| row.dig("values", "name") }
+    refute options.dig("adoption", "required")
+    refute O::Adoption.needs_adoption?(request_engine, record(zone_id))
+    completed(set_segment([zone_row(zone_id)], "Building"))
+    assert_equal options.fetch("default_segment_id"), record(zone_id).fetch("building_segment_id")
   end
 
   def test_adopting_copied_zones_that_bring_only_a_level_makes_the_default_segment

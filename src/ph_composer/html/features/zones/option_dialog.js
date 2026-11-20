@@ -168,9 +168,14 @@ function (ui, requests, options) {
     this.defaultSelect.value = this.defaultId || "";
   };
   OptionDialog.prototype.removal = function (choice, row) {
-    var self = this, stored = options.find(this.current, this.collection, choice.id),
-      used = stored && stored.usage || {};
-    var inUse = Boolean(used.live || used.recoverable), area = ui.element("div", "phc-zone-option-removal");
+    var self = this, stored = options.find(this.current, this.collection, choice.id);
+    // An option takes the Zones of every used option this draft already merged into it.
+    var inUse = [choice.id].concat(Object.keys(this.replacements).filter(function (id) {
+      return self.replacements[id] === choice.id;
+    })).some(function (id) {
+      var source = options.find(self.current, self.collection, id), counts = source && source.usage || {};
+      return Boolean(counts.live || counts.recoverable);
+    }), area = ui.element("div", "phc-zone-option-removal");
     var segments = this.collection === "building_segment";
     // The Model keeps at least one Building Segment, so the last one says why it stays.
     if (segments && this.draft.length === 1) {

@@ -1,7 +1,7 @@
 # P4a-12: Acceptance and handoff
 
 DATE: 2026-11-15
-STATUS: Outline. Rewritten after the Programs tab review (gate G1). Not authorized.
+STATUS: Outline. Rewritten after the Programs tab review (gate G1). Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 

@@ -1,7 +1,7 @@
 # Phase 4a: Programs on the Zones tab
 
 DATE: 2026-11-15
-STATUS: Scoped. Interviewed 2026-11-14 and 2026-11-15; prototype and Programs tab reviewed (Q4a-01 to Q4a-36, BS-1 to BS-6, C4a-5, C4a-7 to C4a-10). Stages P4a-01 to P4a-11 written. No stage authorized.
+STATUS: Scoped. Interviewed 2026-11-14 and 2026-11-15; prototype and Programs tab reviewed (Q4a-01 to Q4a-36, BS-1 to BS-6, C4a-5, C4a-7 to C4a-10). Stages P4a-01 to P4a-11 written; P4a-01 to P4a-12 authorized 2026-11-20 ([STATUS](STATUS.md)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 

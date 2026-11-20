@@ -1,7 +1,7 @@
 # Building Segments
 
 DATE: 2026-11-15
-STATUS: Scoped. Phase 4a stages P4a-01 to P4a-04; no stage authorized.
+STATUS: Scoped. Phase 4a stages P4a-01 to P4a-04, authorized 2026-11-20 ([STATUS](../STATUS.md)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
