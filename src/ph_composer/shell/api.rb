@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 78
+    MINOR = 79
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -460,7 +460,14 @@ module PhComposer
                     "zones.save_segment_settings, read by ph_composer.programs.airtightness.get with its defaults, " \
                     "and exported to each Zone's Infiltration and the BldgSegment's wind exposure. Export refuses " \
                     "airtightness.no_net_volume and airtightness.no_exposed_face. The Spaces export section " \
-                    "registers a projection of each Zone's net volume." }
+                    "registers a projection of each Zone's net volume." },
+      { "minor" => 79, "date" => "2026-11-20",
+        "change" => "ph_composer.programs adds the Program, Schedule and Equipment Set record kinds with create, " \
+                    "update, duplicate, delete, list and all reads; equipment_sets.add_device, update_device, " \
+                    "delete_device and device_types; schedules.profile; settings.get and settings.update for the " \
+                    "Model's default Program and Equipment Set; and reset_default. Reads answer PH-Composer's " \
+                    "residential default Program, its Schedules and the default Equipment Set until a write stores " \
+                    "them. Deleting a default without a replacement refuses programs.default_in_use." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

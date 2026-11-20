@@ -8,7 +8,7 @@ ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 ## Entry and scope
 
 Requires P4a-08 (assignments, derivations, findings), P4a-05 (detailed airflows feed the
-Ventilation column) and P4a-07 (library Programs for the Program select). Owns the third Zone view:
+Ventilation column) and P4a-07b (library Programs for the Program select). Owns the third Zone view:
 its columns, cells, Segment heading cells, selection bar, and the Dwelling and lock bubbles. Writes
 only through P4a-08's actions and the library coordinator. Load the UI polish and architecture
 review skills first.

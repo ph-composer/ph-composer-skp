@@ -5230,6 +5230,26 @@
         "src/ph_composer/html/features/zones/segment_settings.js"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "PG07",
+      "label": "Program, Schedule and Equipment Set records on the installed RBZ with the panel closed, in a fresh synthetic Model: the Programs walkthrough reads the residential default Program, its Schedules and the default Equipment Set unwritten, creates a Schedule and a Program, edits the default Program (writing it with its Schedules in one step), adds a device to the default Set, makes the new Program the default, deletes the residential default and resets it, all through registered operations; native Undo and Redo of each step from the Edit menu; save, fresh-process reopen and verify",
+      "mode": "mixed",
+      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/programs/schedule.rb",
+        "src/ph_composer/features/programs/equipment_types.rb",
+        "src/ph_composer/features/programs/program.rb",
+        "src/ph_composer/features/programs/default_program.rb",
+        "src/ph_composer/features/programs/settings.rb",
+        "src/ph_composer/features/programs/store.rb",
+        "src/ph_composer/features/programs/operations.rb",
+        "src/ph_composer/features/programs/inventory.rb",
+        "src/ph_composer/features/programs/declarations.rb",
+        "tools/examples/programs/program_records_walkthrough.rb",
+        "tools/examples/authoring/client.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }

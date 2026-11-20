@@ -99,7 +99,19 @@ PhComposerUI.define("unit_tables", [], function () {
     si: unit("m_s", "m/s"), ip: unit("mph", "mph", ["mi/h"]) },
     distance: { label: "distance", factor: 1000 / METRES_PER_MILE, precision: { SI: 1, IP: 1 },
     si: unit("km", "km", ["kilometer", "kilometers", "kilometre", "kilometres"]),
-    ip: unit("mi", "mi", ["mile", "miles"]) }
+    ip: unit("mi", "mi", ["mile", "miles"]) },
+    /* Program loads. The airflows' SI unit is m³/h, as airflow's; a Program stores honeybee's m³/s, which a
+       field scales by 3600 before display. */
+    power: { label: "power", factor: BTU_H_PER_W, precision: { SI: 0, IP: 0 }, si: unit("w", "W"),
+    ip: unit("btu_h", "Btu/h") },
+    power_per_area: { label: "power per area", factor: 1 / FT2_PER_M2, precision: { SI: 2, IP: 2 },
+    si: unit("w_m2", "W/m²"), ip: unit("w_ft2", "W/ft²") },
+    people_per_area: { label: "people per area", factor: 1 / FT2_PER_M2, precision: { SI: 3, IP: 4 },
+    si: unit("people_m2", "people/m²"), ip: unit("people_ft2", "people/ft²") },
+    airflow_per_person: { label: "airflow per person", factor: FT3_PER_M3 / 60, precision: { SI: 1, IP: 1 },
+    si: unit("m3_h_person", "m³/h per person"), ip: unit("cfm_person", "cfm per person") },
+    airflow_per_area: { label: "airflow per area", factor: FT3_PER_M3 / 60 / FT2_PER_M2, precision: { SI: 2, IP: 3 },
+    si: unit("m3_h_m2", "m³/h per m²"), ip: unit("cfm_ft2", "cfm/ft²") }
   };
 
   var DIMENSION_FORMATS = [

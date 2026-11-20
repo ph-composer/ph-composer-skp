@@ -1605,6 +1605,1834 @@ Values:
 }
 ```
 
+### `ph_composer.programs.equipment_set`
+
+Equipment Set, a catalog kind owned by `ph_composer.programs`, schema version 1.
+
+Values:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "devices"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notes": {
+      "type": "string"
+    },
+    "datasheet_links": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "provider_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "library_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fingerprint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "copied_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "derived",
+            "library",
+            "ph_composer_default"
+          ]
+        },
+        "fingerprint_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        },
+        "snapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "notes": {
+              "type": "string"
+            },
+            "datasheet_links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "devices": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "type",
+                  "display_name",
+                  "quantity",
+                  "in_conditioned_space",
+                  "comment",
+                  "reference_quantity"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^dev_[A-Za-z0-9]{12}$",
+                    "description": "This device's id, unique within its Equipment Set."
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "dishwasher",
+                      "clothes_washer",
+                      "clothes_dryer",
+                      "refrigerator",
+                      "freezer",
+                      "fridge_freezer",
+                      "cooktop",
+                      "phius_mel",
+                      "phius_lighting_interior",
+                      "phius_lighting_exterior",
+                      "phius_lighting_garage",
+                      "custom_annual_electric",
+                      "custom_annual_lighting",
+                      "custom_annual_mel"
+                    ],
+                    "description": "The honeybee-ph type; fixed once added."
+                  },
+                  "display_name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "in_conditioned_space": {
+                    "type": "boolean"
+                  },
+                  "comment": {
+                    "type": "string"
+                  },
+                  "reference_quantity": {
+                    "type": "integer",
+                    "description": "The WUFI-Passive and METr reference quantity code the type allows."
+                  },
+                  "user_data": {
+                    "type": "object",
+                    "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
+                  },
+                  "reference_energy_norm": {
+                    "type": "integer",
+                    "description": "The period energy_demand is given for: 1 a day or a use, 2 a year."
+                  },
+                  "energy_demand": {
+                    "type": "number",
+                    "minimum": 0,
+                    "x-unit": "kWh",
+                    "description": "Per unit, over reference_energy_norm's period."
+                  },
+                  "energy_demand_per_use": {
+                    "type": "number",
+                    "minimum": 0,
+                    "x-unit": "kWh",
+                    "description": "PHPP only; WUFI-Passive and METr ignore it."
+                  },
+                  "capacity_type": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ],
+                    "description": "1, standard."
+                  },
+                  "capacity_place_settings": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "capacity_m3": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "x-unit": "m3"
+                  },
+                  "modified_energy_factor": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "utilization_factor": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "water_connection": {
+                    "type": "string",
+                    "enum": [
+                      "dhw",
+                      "cold_water"
+                    ]
+                  },
+                  "dryer_type": {
+                    "type": "string",
+                    "enum": [
+                      "clothes_line",
+                      "drying_closet_cold",
+                      "drying_closet_cold_extract_air",
+                      "condensation",
+                      "electric_exhaust_air",
+                      "gas_exhaust_air",
+                      "heat_pump"
+                    ]
+                  },
+                  "combined_energy_factor": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "x-unit": "lb/kWh"
+                  },
+                  "gas_consumption": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "gas_efficiency_factor": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "field_utilization_factor_type": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ],
+                    "description": "1, timer controls."
+                  },
+                  "field_utilization_factor": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "cooktop_type": {
+                    "type": "string",
+                    "enum": [
+                      "electricity",
+                      "natural_gas",
+                      "lpg"
+                    ]
+                  },
+                  "high_efficacy_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_revision_schema_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        }
+      }
+    },
+    "devices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "type",
+          "display_name",
+          "quantity",
+          "in_conditioned_space",
+          "comment",
+          "reference_quantity"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^dev_[A-Za-z0-9]{12}$",
+            "description": "This device's id, unique within its Equipment Set."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "dishwasher",
+              "clothes_washer",
+              "clothes_dryer",
+              "refrigerator",
+              "freezer",
+              "fridge_freezer",
+              "cooktop",
+              "phius_mel",
+              "phius_lighting_interior",
+              "phius_lighting_exterior",
+              "phius_lighting_garage",
+              "custom_annual_electric",
+              "custom_annual_lighting",
+              "custom_annual_mel"
+            ],
+            "description": "The honeybee-ph type; fixed once added."
+          },
+          "display_name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "in_conditioned_space": {
+            "type": "boolean"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "reference_quantity": {
+            "type": "integer",
+            "description": "The WUFI-Passive and METr reference quantity code the type allows."
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
+          },
+          "reference_energy_norm": {
+            "type": "integer",
+            "description": "The period energy_demand is given for: 1 a day or a use, 2 a year."
+          },
+          "energy_demand": {
+            "type": "number",
+            "minimum": 0,
+            "x-unit": "kWh",
+            "description": "Per unit, over reference_energy_norm's period."
+          },
+          "energy_demand_per_use": {
+            "type": "number",
+            "minimum": 0,
+            "x-unit": "kWh",
+            "description": "PHPP only; WUFI-Passive and METr ignore it."
+          },
+          "capacity_type": {
+            "type": "integer",
+            "enum": [
+              1
+            ],
+            "description": "1, standard."
+          },
+          "capacity_place_settings": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "capacity_m3": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "x-unit": "m3"
+          },
+          "modified_energy_factor": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "utilization_factor": {
+            "type": "number",
+            "minimum": 0
+          },
+          "water_connection": {
+            "type": "string",
+            "enum": [
+              "dhw",
+              "cold_water"
+            ]
+          },
+          "dryer_type": {
+            "type": "string",
+            "enum": [
+              "clothes_line",
+              "drying_closet_cold",
+              "drying_closet_cold_extract_air",
+              "condensation",
+              "electric_exhaust_air",
+              "gas_exhaust_air",
+              "heat_pump"
+            ]
+          },
+          "combined_energy_factor": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "x-unit": "lb/kWh"
+          },
+          "gas_consumption": {
+            "type": "number",
+            "minimum": 0
+          },
+          "gas_efficiency_factor": {
+            "type": "number",
+            "minimum": 0
+          },
+          "field_utilization_factor_type": {
+            "type": "integer",
+            "enum": [
+              1
+            ],
+            "description": "1, timer controls."
+          },
+          "field_utilization_factor": {
+            "type": "number",
+            "minimum": 0
+          },
+          "cooktop_type": {
+            "type": "string",
+            "enum": [
+              "electricity",
+              "natural_gas",
+              "lpg"
+            ]
+          },
+          "high_efficacy_fraction": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "x-unit": "fraction"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### `ph_composer.programs.program`
+
+Program, a catalog kind owned by `ph_composer.programs`, schema version 1.
+
+References: `people.occupancy_schedule_id` names one `ph_composer.programs.schedule`; `people.activity_schedule_id` names one `ph_composer.programs.schedule`; `lighting.schedule_id` names one `ph_composer.programs.schedule`; `electric_equipment.schedule_id` names one `ph_composer.programs.schedule`; `gas_equipment.schedule_id` names one `ph_composer.programs.schedule`; `service_hot_water.schedule_id` names one `ph_composer.programs.schedule`; `infiltration.schedule_id` names one `ph_composer.programs.schedule`; `ventilation.schedule_id` names one `ph_composer.programs.schedule`; `setpoint.heating_schedule_id` names one `ph_composer.programs.schedule`; `setpoint.cooling_schedule_id` names one `ph_composer.programs.schedule`.
+
+Values:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "people",
+    "lighting",
+    "electric_equipment",
+    "gas_equipment",
+    "service_hot_water",
+    "infiltration",
+    "ventilation",
+    "setpoint"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notes": {
+      "type": "string"
+    },
+    "datasheet_links": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "provider_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "library_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fingerprint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "copied_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "derived",
+            "library",
+            "ph_composer_default"
+          ]
+        },
+        "fingerprint_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        },
+        "snapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "notes": {
+              "type": "string"
+            },
+            "datasheet_links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "people": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "rule",
+                "people_per_area",
+                "occupancy_schedule_id",
+                "activity_schedule_id",
+                "radiant_fraction",
+                "latent_fraction"
+              ],
+              "properties": {
+                "rule": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "enum": [
+                    "phius_residential",
+                    null
+                  ],
+                  "description": "phius_residential while the rule sets this load; null for the fixed value."
+                },
+                "people_per_area": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "x-unit": "people/m2",
+                  "description": "Peak people per m² of floor."
+                },
+                "occupancy_schedule_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^sch_[A-Za-z0-9]{12}$",
+                  "description": "A fractional Schedule, of the peak."
+                },
+                "activity_schedule_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^sch_[A-Za-z0-9]{12}$",
+                  "description": "An activity Schedule, W per person."
+                },
+                "radiant_fraction": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction"
+                },
+                "latent_fraction": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction",
+                  "description": "Null for honeybee's autocalculate."
+                },
+                "source": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "The base program this load's values came from, for a library Program."
+                }
+              }
+            },
+            "lighting": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "rule",
+                "watts_per_area",
+                "high_efficacy_fraction",
+                "schedule_id",
+                "return_air_fraction",
+                "radiant_fraction",
+                "visible_fraction"
+              ],
+              "properties": {
+                "rule": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "enum": [
+                    "phius_interior",
+                    null
+                  ],
+                  "description": "phius_interior while the rule sets this load; null for the fixed value."
+                },
+                "watts_per_area": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "x-unit": "W/m2"
+                },
+                "high_efficacy_fraction": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction",
+                  "description": "The Phius rule's input: the share of high-efficacy lighting."
+                },
+                "schedule_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^sch_[A-Za-z0-9]{12}$",
+                  "description": "A fractional Schedule."
+                },
+                "return_air_fraction": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction"
+                },
+                "radiant_fraction": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction"
+                },
+                "visible_fraction": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction"
+                },
+                "source": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "The base program this load's values came from, for a library Program."
+                }
+              }
+            },
+            "electric_equipment": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "watts_per_area",
+                "schedule_id",
+                "radiant_fraction",
+                "latent_fraction",
+                "lost_fraction"
+              ],
+              "properties": {
+                "watts_per_area": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "x-unit": "W/m2"
+                },
+                "schedule_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^sch_[A-Za-z0-9]{12}$",
+                  "description": "A fractional Schedule."
+                },
+                "radiant_fraction": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction"
+                },
+                "latent_fraction": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction"
+                },
+                "lost_fraction": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction"
+                },
+                "source": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "The base program this load's values came from, for a library Program."
+                }
+              }
+            },
+            "gas_equipment": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "watts_per_area",
+                "schedule_id",
+                "radiant_fraction",
+                "latent_fraction",
+                "lost_fraction"
+              ],
+              "properties": {
+                "watts_per_area": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "x-unit": "W/m2"
+                },
+                "schedule_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^sch_[A-Za-z0-9]{12}$",
+                  "description": "A fractional Schedule."
+                },
+                "radiant_fraction": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction"
+                },
+                "latent_fraction": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction"
+                },
+                "lost_fraction": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction"
+                },
+                "source": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "The base program this load's values came from, for a library Program."
+                }
+              }
+            },
+            "service_hot_water": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "rule",
+                "flow_per_area",
+                "target_temperature_c",
+                "schedule_id",
+                "sensible_fraction",
+                "latent_fraction"
+              ],
+              "properties": {
+                "rule": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "enum": [
+                    "building_america",
+                    null
+                  ],
+                  "description": "building_america while the rule sets this load; null for the fixed value."
+                },
+                "flow_per_area": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "x-unit": "L/h/m2",
+                  "description": "Peak flow per m² of floor."
+                },
+                "target_temperature_c": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 100,
+                  "x-unit": "C"
+                },
+                "schedule_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^sch_[A-Za-z0-9]{12}$",
+                  "description": "A fractional Schedule."
+                },
+                "sensible_fraction": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction"
+                },
+                "latent_fraction": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction"
+                },
+                "source": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "The base program this load's values came from, for a library Program."
+                }
+              }
+            },
+            "infiltration": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "flow_per_exterior_area",
+                "schedule_id"
+              ],
+              "properties": {
+                "flow_per_exterior_area": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "x-unit": "m3/s/m2",
+                  "description": "Per m² of exposed exterior area, at about 4 Pa."
+                },
+                "schedule_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^sch_[A-Za-z0-9]{12}$",
+                  "description": "A fractional Schedule."
+                },
+                "source": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "The base program this load's values came from, for a library Program."
+                }
+              }
+            },
+            "ventilation": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "flow_per_person",
+                "flow_per_area",
+                "flow_per_zone",
+                "air_changes_per_hour",
+                "schedule_id"
+              ],
+              "properties": {
+                "flow_per_person": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "x-unit": "m3/s/person"
+                },
+                "flow_per_area": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "x-unit": "m3/s/m2"
+                },
+                "flow_per_zone": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "x-unit": "m3/s"
+                },
+                "air_changes_per_hour": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "x-unit": "1/h"
+                },
+                "schedule_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^sch_[A-Za-z0-9]{12}$",
+                  "description": "A ventilation Schedule."
+                },
+                "source": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "The base program this load's values came from, for a library Program."
+                }
+              }
+            },
+            "setpoint": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "heating_c",
+                "cooling_c",
+                "heating_schedule_id",
+                "cooling_schedule_id",
+                "dehumidify_rh",
+                "humidify_rh"
+              ],
+              "properties": {
+                "heating_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "C"
+                },
+                "cooling_c": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "x-unit": "C"
+                },
+                "heating_schedule_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^sch_[A-Za-z0-9]{12}$",
+                  "description": "A temperature Schedule, in place of heating_c."
+                },
+                "cooling_schedule_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^sch_[A-Za-z0-9]{12}$",
+                  "description": "A temperature Schedule, in place of cooling_c."
+                },
+                "dehumidify_rh": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "maximum": 100,
+                  "x-unit": "%"
+                },
+                "humidify_rh": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "maximum": 100,
+                  "x-unit": "%"
+                },
+                "source": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "The base program this load's values came from, for a library Program."
+                }
+              }
+            }
+          }
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_revision_schema_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        }
+      }
+    },
+    "people": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rule",
+        "people_per_area",
+        "occupancy_schedule_id",
+        "activity_schedule_id",
+        "radiant_fraction",
+        "latent_fraction"
+      ],
+      "properties": {
+        "rule": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "phius_residential",
+            null
+          ],
+          "description": "phius_residential while the rule sets this load; null for the fixed value."
+        },
+        "people_per_area": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "people/m2",
+          "description": "Peak people per m² of floor."
+        },
+        "occupancy_schedule_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^sch_[A-Za-z0-9]{12}$",
+          "description": "A fractional Schedule, of the peak."
+        },
+        "activity_schedule_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^sch_[A-Za-z0-9]{12}$",
+          "description": "An activity Schedule, W per person."
+        },
+        "radiant_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction"
+        },
+        "latent_fraction": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "Null for honeybee's autocalculate."
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The base program this load's values came from, for a library Program."
+        }
+      }
+    },
+    "lighting": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rule",
+        "watts_per_area",
+        "high_efficacy_fraction",
+        "schedule_id",
+        "return_air_fraction",
+        "radiant_fraction",
+        "visible_fraction"
+      ],
+      "properties": {
+        "rule": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "phius_interior",
+            null
+          ],
+          "description": "phius_interior while the rule sets this load; null for the fixed value."
+        },
+        "watts_per_area": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "W/m2"
+        },
+        "high_efficacy_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction",
+          "description": "The Phius rule's input: the share of high-efficacy lighting."
+        },
+        "schedule_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^sch_[A-Za-z0-9]{12}$",
+          "description": "A fractional Schedule."
+        },
+        "return_air_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction"
+        },
+        "radiant_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction"
+        },
+        "visible_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The base program this load's values came from, for a library Program."
+        }
+      }
+    },
+    "electric_equipment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "watts_per_area",
+        "schedule_id",
+        "radiant_fraction",
+        "latent_fraction",
+        "lost_fraction"
+      ],
+      "properties": {
+        "watts_per_area": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "W/m2"
+        },
+        "schedule_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^sch_[A-Za-z0-9]{12}$",
+          "description": "A fractional Schedule."
+        },
+        "radiant_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction"
+        },
+        "latent_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction"
+        },
+        "lost_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The base program this load's values came from, for a library Program."
+        }
+      }
+    },
+    "gas_equipment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "watts_per_area",
+        "schedule_id",
+        "radiant_fraction",
+        "latent_fraction",
+        "lost_fraction"
+      ],
+      "properties": {
+        "watts_per_area": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "W/m2"
+        },
+        "schedule_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^sch_[A-Za-z0-9]{12}$",
+          "description": "A fractional Schedule."
+        },
+        "radiant_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction"
+        },
+        "latent_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction"
+        },
+        "lost_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The base program this load's values came from, for a library Program."
+        }
+      }
+    },
+    "service_hot_water": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rule",
+        "flow_per_area",
+        "target_temperature_c",
+        "schedule_id",
+        "sensible_fraction",
+        "latent_fraction"
+      ],
+      "properties": {
+        "rule": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "building_america",
+            null
+          ],
+          "description": "building_america while the rule sets this load; null for the fixed value."
+        },
+        "flow_per_area": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "L/h/m2",
+          "description": "Peak flow per m² of floor."
+        },
+        "target_temperature_c": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 100,
+          "x-unit": "C"
+        },
+        "schedule_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^sch_[A-Za-z0-9]{12}$",
+          "description": "A fractional Schedule."
+        },
+        "sensible_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction"
+        },
+        "latent_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The base program this load's values came from, for a library Program."
+        }
+      }
+    },
+    "infiltration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "flow_per_exterior_area",
+        "schedule_id"
+      ],
+      "properties": {
+        "flow_per_exterior_area": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "m3/s/m2",
+          "description": "Per m² of exposed exterior area, at about 4 Pa."
+        },
+        "schedule_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^sch_[A-Za-z0-9]{12}$",
+          "description": "A fractional Schedule."
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The base program this load's values came from, for a library Program."
+        }
+      }
+    },
+    "ventilation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "flow_per_person",
+        "flow_per_area",
+        "flow_per_zone",
+        "air_changes_per_hour",
+        "schedule_id"
+      ],
+      "properties": {
+        "flow_per_person": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "m3/s/person"
+        },
+        "flow_per_area": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "m3/s/m2"
+        },
+        "flow_per_zone": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "m3/s"
+        },
+        "air_changes_per_hour": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "1/h"
+        },
+        "schedule_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^sch_[A-Za-z0-9]{12}$",
+          "description": "A ventilation Schedule."
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The base program this load's values came from, for a library Program."
+        }
+      }
+    },
+    "setpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "heating_c",
+        "cooling_c",
+        "heating_schedule_id",
+        "cooling_schedule_id",
+        "dehumidify_rh",
+        "humidify_rh"
+      ],
+      "properties": {
+        "heating_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "C"
+        },
+        "cooling_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "x-unit": "C"
+        },
+        "heating_schedule_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^sch_[A-Za-z0-9]{12}$",
+          "description": "A temperature Schedule, in place of heating_c."
+        },
+        "cooling_schedule_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^sch_[A-Za-z0-9]{12}$",
+          "description": "A temperature Schedule, in place of cooling_c."
+        },
+        "dehumidify_rh": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 100,
+          "x-unit": "%"
+        },
+        "humidify_rh": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 100,
+          "x-unit": "%"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The base program this load's values came from, for a library Program."
+        }
+      }
+    }
+  }
+}
+```
+
+### `ph_composer.programs.schedule`
+
+Schedule, a catalog kind owned by `ph_composer.programs`, schema version 1.
+
+Values:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "type",
+    "days_per_week",
+    "weeks_per_year"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notes": {
+      "type": "string"
+    },
+    "datasheet_links": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "provider_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "library_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fingerprint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "copied_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "derived",
+            "library",
+            "ph_composer_default"
+          ]
+        },
+        "fingerprint_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        },
+        "snapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "notes": {
+              "type": "string"
+            },
+            "datasheet_links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "fractional",
+                "activity",
+                "temperature",
+                "ventilation"
+              ]
+            },
+            "days_per_week": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 7
+            },
+            "weeks_per_year": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 52
+            },
+            "start_h": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 23,
+              "x-unit": "h"
+            },
+            "end_h": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 24,
+              "x-unit": "h"
+            },
+            "fraction_on": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "fraction_off": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "watts_on": {
+              "type": "number",
+              "minimum": 0,
+              "x-unit": "W/person"
+            },
+            "watts_off": {
+              "type": "number",
+              "minimum": 0,
+              "x-unit": "W/person"
+            },
+            "value_c": {
+              "type": "number",
+              "minimum": -273.15,
+              "x-unit": "C"
+            },
+            "periods": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "period",
+                  "hours",
+                  "fraction"
+                ],
+                "properties": {
+                  "period": {
+                    "type": "string",
+                    "enum": [
+                      "high",
+                      "standard",
+                      "basic",
+                      "minimum"
+                    ]
+                  },
+                  "hours": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 24,
+                    "x-unit": "h"
+                  },
+                  "fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction",
+                    "description": "The share of the design flow in this period."
+                  }
+                }
+              },
+              "minItems": 4,
+              "maxItems": 4
+            }
+          }
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_revision_schema_version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        }
+      }
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "fractional",
+        "activity",
+        "temperature",
+        "ventilation"
+      ]
+    },
+    "days_per_week": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 7
+    },
+    "weeks_per_year": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 52
+    },
+    "start_h": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 23,
+      "x-unit": "h"
+    },
+    "end_h": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 24,
+      "x-unit": "h"
+    },
+    "fraction_on": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "x-unit": "fraction"
+    },
+    "fraction_off": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "x-unit": "fraction"
+    },
+    "watts_on": {
+      "type": "number",
+      "minimum": 0,
+      "x-unit": "W/person"
+    },
+    "watts_off": {
+      "type": "number",
+      "minimum": 0,
+      "x-unit": "W/person"
+    },
+    "value_c": {
+      "type": "number",
+      "minimum": -273.15,
+      "x-unit": "C"
+    },
+    "periods": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "period",
+          "hours",
+          "fraction"
+        ],
+        "properties": {
+          "period": {
+            "type": "string",
+            "enum": [
+              "high",
+              "standard",
+              "basic",
+              "minimum"
+            ]
+          },
+          "hours": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 24,
+            "x-unit": "h"
+          },
+          "fraction": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "x-unit": "fraction",
+            "description": "The share of the design flow in this period."
+          }
+        }
+      },
+      "minItems": 4,
+      "maxItems": 4
+    }
+  }
+}
+```
+
+### `ph_composer.programs.settings_record`
+
+Programs defaults, a entity kind owned by `ph_composer.programs`, schema version 1.
+
+References: `default_program_id` names one `ph_composer.programs.program`; `default_equipment_set_id` names one `ph_composer.programs.equipment_set`.
+
+Values:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "default_program_id",
+    "default_equipment_set_id"
+  ],
+  "properties": {
+    "default_program_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "default_equipment_set_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}
+```
+
 ### `ph_composer.spaces.floor_segment`
 
 Floor Segment, a entity kind owned by `ph_composer.spaces`, schema version 1.
@@ -14297,6 +16125,4900 @@ Example params:
 {
   "id": "bsg_Ab12Cd34Ef56"
 }
+```
+
+### `ph_composer.programs.equipment_sets.all`
+
+Every Equipment Set, PH-Composer's defaults included. Owner: `ph_composer.programs`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.programs.equipment_sets.list` instead.
+
+Refuses: only the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "schema_version",
+          "values",
+          "user_data",
+          "extension_data",
+          "kind",
+          "extension_status",
+          "stored",
+          "default",
+          "use_count"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "devices"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library",
+                      "ph_composer_default"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "devices": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "id",
+                            "type",
+                            "display_name",
+                            "quantity",
+                            "in_conditioned_space",
+                            "comment",
+                            "reference_quantity"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "pattern": "^dev_[A-Za-z0-9]{12}$",
+                              "description": "This device's id, unique within its Equipment Set."
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "dishwasher",
+                                "clothes_washer",
+                                "clothes_dryer",
+                                "refrigerator",
+                                "freezer",
+                                "fridge_freezer",
+                                "cooktop",
+                                "phius_mel",
+                                "phius_lighting_interior",
+                                "phius_lighting_exterior",
+                                "phius_lighting_garage",
+                                "custom_annual_electric",
+                                "custom_annual_lighting",
+                                "custom_annual_mel"
+                              ],
+                              "description": "The honeybee-ph type; fixed once added."
+                            },
+                            "display_name": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "quantity": {
+                              "type": "integer",
+                              "minimum": 1
+                            },
+                            "in_conditioned_space": {
+                              "type": "boolean"
+                            },
+                            "comment": {
+                              "type": "string"
+                            },
+                            "reference_quantity": {
+                              "type": "integer",
+                              "description": "The WUFI-Passive and METr reference quantity code the type allows."
+                            },
+                            "user_data": {
+                              "type": "object",
+                              "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
+                            },
+                            "reference_energy_norm": {
+                              "type": "integer",
+                              "description": "The period energy_demand is given for: 1 a day or a use, 2 a year."
+                            },
+                            "energy_demand": {
+                              "type": "number",
+                              "minimum": 0,
+                              "x-unit": "kWh",
+                              "description": "Per unit, over reference_energy_norm's period."
+                            },
+                            "energy_demand_per_use": {
+                              "type": "number",
+                              "minimum": 0,
+                              "x-unit": "kWh",
+                              "description": "PHPP only; WUFI-Passive and METr ignore it."
+                            },
+                            "capacity_type": {
+                              "type": "integer",
+                              "enum": [
+                                1
+                              ],
+                              "description": "1, standard."
+                            },
+                            "capacity_place_settings": {
+                              "type": "number",
+                              "exclusiveMinimum": 0
+                            },
+                            "capacity_m3": {
+                              "type": "number",
+                              "exclusiveMinimum": 0,
+                              "x-unit": "m3"
+                            },
+                            "modified_energy_factor": {
+                              "type": "number",
+                              "exclusiveMinimum": 0
+                            },
+                            "utilization_factor": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "water_connection": {
+                              "type": "string",
+                              "enum": [
+                                "dhw",
+                                "cold_water"
+                              ]
+                            },
+                            "dryer_type": {
+                              "type": "string",
+                              "enum": [
+                                "clothes_line",
+                                "drying_closet_cold",
+                                "drying_closet_cold_extract_air",
+                                "condensation",
+                                "electric_exhaust_air",
+                                "gas_exhaust_air",
+                                "heat_pump"
+                              ]
+                            },
+                            "combined_energy_factor": {
+                              "type": "number",
+                              "exclusiveMinimum": 0,
+                              "x-unit": "lb/kWh"
+                            },
+                            "gas_consumption": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "gas_efficiency_factor": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "field_utilization_factor_type": {
+                              "type": "integer",
+                              "enum": [
+                                1
+                              ],
+                              "description": "1, timer controls."
+                            },
+                            "field_utilization_factor": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "cooktop_type": {
+                              "type": "string",
+                              "enum": [
+                                "electricity",
+                                "natural_gas",
+                                "lpg"
+                              ]
+                            },
+                            "high_efficacy_fraction": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 1,
+                              "x-unit": "fraction"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "devices": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "id",
+                    "type",
+                    "display_name",
+                    "quantity",
+                    "in_conditioned_space",
+                    "comment",
+                    "reference_quantity"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^dev_[A-Za-z0-9]{12}$",
+                      "description": "This device's id, unique within its Equipment Set."
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "dishwasher",
+                        "clothes_washer",
+                        "clothes_dryer",
+                        "refrigerator",
+                        "freezer",
+                        "fridge_freezer",
+                        "cooktop",
+                        "phius_mel",
+                        "phius_lighting_interior",
+                        "phius_lighting_exterior",
+                        "phius_lighting_garage",
+                        "custom_annual_electric",
+                        "custom_annual_lighting",
+                        "custom_annual_mel"
+                      ],
+                      "description": "The honeybee-ph type; fixed once added."
+                    },
+                    "display_name": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "quantity": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "in_conditioned_space": {
+                      "type": "boolean"
+                    },
+                    "comment": {
+                      "type": "string"
+                    },
+                    "reference_quantity": {
+                      "type": "integer",
+                      "description": "The WUFI-Passive and METr reference quantity code the type allows."
+                    },
+                    "user_data": {
+                      "type": "object",
+                      "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
+                    },
+                    "reference_energy_norm": {
+                      "type": "integer",
+                      "description": "The period energy_demand is given for: 1 a day or a use, 2 a year."
+                    },
+                    "energy_demand": {
+                      "type": "number",
+                      "minimum": 0,
+                      "x-unit": "kWh",
+                      "description": "Per unit, over reference_energy_norm's period."
+                    },
+                    "energy_demand_per_use": {
+                      "type": "number",
+                      "minimum": 0,
+                      "x-unit": "kWh",
+                      "description": "PHPP only; WUFI-Passive and METr ignore it."
+                    },
+                    "capacity_type": {
+                      "type": "integer",
+                      "enum": [
+                        1
+                      ],
+                      "description": "1, standard."
+                    },
+                    "capacity_place_settings": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "capacity_m3": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "x-unit": "m3"
+                    },
+                    "modified_energy_factor": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "utilization_factor": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "water_connection": {
+                      "type": "string",
+                      "enum": [
+                        "dhw",
+                        "cold_water"
+                      ]
+                    },
+                    "dryer_type": {
+                      "type": "string",
+                      "enum": [
+                        "clothes_line",
+                        "drying_closet_cold",
+                        "drying_closet_cold_extract_air",
+                        "condensation",
+                        "electric_exhaust_air",
+                        "gas_exhaust_air",
+                        "heat_pump"
+                      ]
+                    },
+                    "combined_energy_factor": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "x-unit": "lb/kWh"
+                    },
+                    "gas_consumption": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "gas_efficiency_factor": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "field_utilization_factor_type": {
+                      "type": "integer",
+                      "enum": [
+                        1
+                      ],
+                      "description": "1, timer controls."
+                    },
+                    "field_utilization_factor": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "cooktop_type": {
+                      "type": "string",
+                      "enum": [
+                        "electricity",
+                        "natural_gas",
+                        "lpg"
+                      ]
+                    },
+                    "high_efficacy_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "stored": {
+            "type": "boolean",
+            "description": "False for PH-Composer's default while the Model holds none of it: reads answer its definition until a write stores it."
+          },
+          "default": {
+            "type": "boolean"
+          },
+          "use_count": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.programs.equipment_sets.device_types`
+
+The fourteen honeybee-ph device types: each one's fields, allowed reference quantities and energy norms, and a new device's values. Owner: `ph_composer.programs`.
+
+Refuses: only the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "types"
+  ],
+  "properties": {
+    "types": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.programs.equipment_sets.list`
+
+One bounded page of equipment_sets in id order, with what uses each. Owner: `ph_composer.programs`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 500,
+      "description": "Only these record ids."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "schema_version",
+          "values",
+          "user_data",
+          "extension_data",
+          "kind",
+          "extension_status",
+          "stored",
+          "default",
+          "use_count"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "devices"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library",
+                      "ph_composer_default"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "devices": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "id",
+                            "type",
+                            "display_name",
+                            "quantity",
+                            "in_conditioned_space",
+                            "comment",
+                            "reference_quantity"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "pattern": "^dev_[A-Za-z0-9]{12}$",
+                              "description": "This device's id, unique within its Equipment Set."
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "dishwasher",
+                                "clothes_washer",
+                                "clothes_dryer",
+                                "refrigerator",
+                                "freezer",
+                                "fridge_freezer",
+                                "cooktop",
+                                "phius_mel",
+                                "phius_lighting_interior",
+                                "phius_lighting_exterior",
+                                "phius_lighting_garage",
+                                "custom_annual_electric",
+                                "custom_annual_lighting",
+                                "custom_annual_mel"
+                              ],
+                              "description": "The honeybee-ph type; fixed once added."
+                            },
+                            "display_name": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "quantity": {
+                              "type": "integer",
+                              "minimum": 1
+                            },
+                            "in_conditioned_space": {
+                              "type": "boolean"
+                            },
+                            "comment": {
+                              "type": "string"
+                            },
+                            "reference_quantity": {
+                              "type": "integer",
+                              "description": "The WUFI-Passive and METr reference quantity code the type allows."
+                            },
+                            "user_data": {
+                              "type": "object",
+                              "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
+                            },
+                            "reference_energy_norm": {
+                              "type": "integer",
+                              "description": "The period energy_demand is given for: 1 a day or a use, 2 a year."
+                            },
+                            "energy_demand": {
+                              "type": "number",
+                              "minimum": 0,
+                              "x-unit": "kWh",
+                              "description": "Per unit, over reference_energy_norm's period."
+                            },
+                            "energy_demand_per_use": {
+                              "type": "number",
+                              "minimum": 0,
+                              "x-unit": "kWh",
+                              "description": "PHPP only; WUFI-Passive and METr ignore it."
+                            },
+                            "capacity_type": {
+                              "type": "integer",
+                              "enum": [
+                                1
+                              ],
+                              "description": "1, standard."
+                            },
+                            "capacity_place_settings": {
+                              "type": "number",
+                              "exclusiveMinimum": 0
+                            },
+                            "capacity_m3": {
+                              "type": "number",
+                              "exclusiveMinimum": 0,
+                              "x-unit": "m3"
+                            },
+                            "modified_energy_factor": {
+                              "type": "number",
+                              "exclusiveMinimum": 0
+                            },
+                            "utilization_factor": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "water_connection": {
+                              "type": "string",
+                              "enum": [
+                                "dhw",
+                                "cold_water"
+                              ]
+                            },
+                            "dryer_type": {
+                              "type": "string",
+                              "enum": [
+                                "clothes_line",
+                                "drying_closet_cold",
+                                "drying_closet_cold_extract_air",
+                                "condensation",
+                                "electric_exhaust_air",
+                                "gas_exhaust_air",
+                                "heat_pump"
+                              ]
+                            },
+                            "combined_energy_factor": {
+                              "type": "number",
+                              "exclusiveMinimum": 0,
+                              "x-unit": "lb/kWh"
+                            },
+                            "gas_consumption": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "gas_efficiency_factor": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "field_utilization_factor_type": {
+                              "type": "integer",
+                              "enum": [
+                                1
+                              ],
+                              "description": "1, timer controls."
+                            },
+                            "field_utilization_factor": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "cooktop_type": {
+                              "type": "string",
+                              "enum": [
+                                "electricity",
+                                "natural_gas",
+                                "lpg"
+                              ]
+                            },
+                            "high_efficacy_fraction": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 1,
+                              "x-unit": "fraction"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "devices": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "id",
+                    "type",
+                    "display_name",
+                    "quantity",
+                    "in_conditioned_space",
+                    "comment",
+                    "reference_quantity"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^dev_[A-Za-z0-9]{12}$",
+                      "description": "This device's id, unique within its Equipment Set."
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "dishwasher",
+                        "clothes_washer",
+                        "clothes_dryer",
+                        "refrigerator",
+                        "freezer",
+                        "fridge_freezer",
+                        "cooktop",
+                        "phius_mel",
+                        "phius_lighting_interior",
+                        "phius_lighting_exterior",
+                        "phius_lighting_garage",
+                        "custom_annual_electric",
+                        "custom_annual_lighting",
+                        "custom_annual_mel"
+                      ],
+                      "description": "The honeybee-ph type; fixed once added."
+                    },
+                    "display_name": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "quantity": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "in_conditioned_space": {
+                      "type": "boolean"
+                    },
+                    "comment": {
+                      "type": "string"
+                    },
+                    "reference_quantity": {
+                      "type": "integer",
+                      "description": "The WUFI-Passive and METr reference quantity code the type allows."
+                    },
+                    "user_data": {
+                      "type": "object",
+                      "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
+                    },
+                    "reference_energy_norm": {
+                      "type": "integer",
+                      "description": "The period energy_demand is given for: 1 a day or a use, 2 a year."
+                    },
+                    "energy_demand": {
+                      "type": "number",
+                      "minimum": 0,
+                      "x-unit": "kWh",
+                      "description": "Per unit, over reference_energy_norm's period."
+                    },
+                    "energy_demand_per_use": {
+                      "type": "number",
+                      "minimum": 0,
+                      "x-unit": "kWh",
+                      "description": "PHPP only; WUFI-Passive and METr ignore it."
+                    },
+                    "capacity_type": {
+                      "type": "integer",
+                      "enum": [
+                        1
+                      ],
+                      "description": "1, standard."
+                    },
+                    "capacity_place_settings": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "capacity_m3": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "x-unit": "m3"
+                    },
+                    "modified_energy_factor": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "utilization_factor": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "water_connection": {
+                      "type": "string",
+                      "enum": [
+                        "dhw",
+                        "cold_water"
+                      ]
+                    },
+                    "dryer_type": {
+                      "type": "string",
+                      "enum": [
+                        "clothes_line",
+                        "drying_closet_cold",
+                        "drying_closet_cold_extract_air",
+                        "condensation",
+                        "electric_exhaust_air",
+                        "gas_exhaust_air",
+                        "heat_pump"
+                      ]
+                    },
+                    "combined_energy_factor": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "x-unit": "lb/kWh"
+                    },
+                    "gas_consumption": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "gas_efficiency_factor": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "field_utilization_factor_type": {
+                      "type": "integer",
+                      "enum": [
+                        1
+                      ],
+                      "description": "1, timer controls."
+                    },
+                    "field_utilization_factor": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "cooktop_type": {
+                      "type": "string",
+                      "enum": [
+                        "electricity",
+                        "natural_gas",
+                        "lpg"
+                      ]
+                    },
+                    "high_efficacy_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "stored": {
+            "type": "boolean",
+            "description": "False for PH-Composer's default while the Model holds none of it: reads answer its definition until a write stores it."
+          },
+          "default": {
+            "type": "boolean"
+          },
+          "use_count": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 20
+}
+```
+
+### `ph_composer.programs.programs.all`
+
+Every Program, PH-Composer's defaults included. Owner: `ph_composer.programs`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.programs.programs.list` instead.
+
+Refuses: only the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "schema_version",
+          "values",
+          "user_data",
+          "extension_data",
+          "kind",
+          "extension_status",
+          "stored",
+          "default",
+          "use_count"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "people",
+              "lighting",
+              "electric_equipment",
+              "gas_equipment",
+              "service_hot_water",
+              "infiltration",
+              "ventilation",
+              "setpoint"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library",
+                      "ph_composer_default"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "people": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "rule",
+                          "people_per_area",
+                          "occupancy_schedule_id",
+                          "activity_schedule_id",
+                          "radiant_fraction",
+                          "latent_fraction"
+                        ],
+                        "properties": {
+                          "rule": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "enum": [
+                              "phius_residential",
+                              null
+                            ],
+                            "description": "phius_residential while the rule sets this load; null for the fixed value."
+                          },
+                          "people_per_area": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "x-unit": "people/m2",
+                            "description": "Peak people per m² of floor."
+                          },
+                          "occupancy_schedule_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^sch_[A-Za-z0-9]{12}$",
+                            "description": "A fractional Schedule, of the peak."
+                          },
+                          "activity_schedule_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^sch_[A-Za-z0-9]{12}$",
+                            "description": "An activity Schedule, W per person."
+                          },
+                          "radiant_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "latent_fraction": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction",
+                            "description": "Null for honeybee's autocalculate."
+                          },
+                          "source": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "The base program this load's values came from, for a library Program."
+                          }
+                        }
+                      },
+                      "lighting": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "rule",
+                          "watts_per_area",
+                          "high_efficacy_fraction",
+                          "schedule_id",
+                          "return_air_fraction",
+                          "radiant_fraction",
+                          "visible_fraction"
+                        ],
+                        "properties": {
+                          "rule": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "enum": [
+                              "phius_interior",
+                              null
+                            ],
+                            "description": "phius_interior while the rule sets this load; null for the fixed value."
+                          },
+                          "watts_per_area": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "x-unit": "W/m2"
+                          },
+                          "high_efficacy_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction",
+                            "description": "The Phius rule's input: the share of high-efficacy lighting."
+                          },
+                          "schedule_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^sch_[A-Za-z0-9]{12}$",
+                            "description": "A fractional Schedule."
+                          },
+                          "return_air_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "radiant_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "visible_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "source": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "The base program this load's values came from, for a library Program."
+                          }
+                        }
+                      },
+                      "electric_equipment": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "watts_per_area",
+                          "schedule_id",
+                          "radiant_fraction",
+                          "latent_fraction",
+                          "lost_fraction"
+                        ],
+                        "properties": {
+                          "watts_per_area": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "x-unit": "W/m2"
+                          },
+                          "schedule_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^sch_[A-Za-z0-9]{12}$",
+                            "description": "A fractional Schedule."
+                          },
+                          "radiant_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "latent_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "lost_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "source": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "The base program this load's values came from, for a library Program."
+                          }
+                        }
+                      },
+                      "gas_equipment": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "watts_per_area",
+                          "schedule_id",
+                          "radiant_fraction",
+                          "latent_fraction",
+                          "lost_fraction"
+                        ],
+                        "properties": {
+                          "watts_per_area": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "x-unit": "W/m2"
+                          },
+                          "schedule_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^sch_[A-Za-z0-9]{12}$",
+                            "description": "A fractional Schedule."
+                          },
+                          "radiant_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "latent_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "lost_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "source": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "The base program this load's values came from, for a library Program."
+                          }
+                        }
+                      },
+                      "service_hot_water": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "rule",
+                          "flow_per_area",
+                          "target_temperature_c",
+                          "schedule_id",
+                          "sensible_fraction",
+                          "latent_fraction"
+                        ],
+                        "properties": {
+                          "rule": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "enum": [
+                              "building_america",
+                              null
+                            ],
+                            "description": "building_america while the rule sets this load; null for the fixed value."
+                          },
+                          "flow_per_area": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "x-unit": "L/h/m2",
+                            "description": "Peak flow per m² of floor."
+                          },
+                          "target_temperature_c": {
+                            "type": "number",
+                            "exclusiveMinimum": 0,
+                            "maximum": 100,
+                            "x-unit": "C"
+                          },
+                          "schedule_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^sch_[A-Za-z0-9]{12}$",
+                            "description": "A fractional Schedule."
+                          },
+                          "sensible_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "latent_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "source": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "The base program this load's values came from, for a library Program."
+                          }
+                        }
+                      },
+                      "infiltration": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "flow_per_exterior_area",
+                          "schedule_id"
+                        ],
+                        "properties": {
+                          "flow_per_exterior_area": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "x-unit": "m3/s/m2",
+                            "description": "Per m² of exposed exterior area, at about 4 Pa."
+                          },
+                          "schedule_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^sch_[A-Za-z0-9]{12}$",
+                            "description": "A fractional Schedule."
+                          },
+                          "source": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "The base program this load's values came from, for a library Program."
+                          }
+                        }
+                      },
+                      "ventilation": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "flow_per_person",
+                          "flow_per_area",
+                          "flow_per_zone",
+                          "air_changes_per_hour",
+                          "schedule_id"
+                        ],
+                        "properties": {
+                          "flow_per_person": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "x-unit": "m3/s/person"
+                          },
+                          "flow_per_area": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "x-unit": "m3/s/m2"
+                          },
+                          "flow_per_zone": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "x-unit": "m3/s"
+                          },
+                          "air_changes_per_hour": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "x-unit": "1/h"
+                          },
+                          "schedule_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^sch_[A-Za-z0-9]{12}$",
+                            "description": "A ventilation Schedule."
+                          },
+                          "source": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "The base program this load's values came from, for a library Program."
+                          }
+                        }
+                      },
+                      "setpoint": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "heating_c",
+                          "cooling_c",
+                          "heating_schedule_id",
+                          "cooling_schedule_id",
+                          "dehumidify_rh",
+                          "humidify_rh"
+                        ],
+                        "properties": {
+                          "heating_c": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "x-unit": "C"
+                          },
+                          "cooling_c": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "x-unit": "C"
+                          },
+                          "heating_schedule_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^sch_[A-Za-z0-9]{12}$",
+                            "description": "A temperature Schedule, in place of heating_c."
+                          },
+                          "cooling_schedule_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^sch_[A-Za-z0-9]{12}$",
+                            "description": "A temperature Schedule, in place of cooling_c."
+                          },
+                          "dehumidify_rh": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "maximum": 100,
+                            "x-unit": "%"
+                          },
+                          "humidify_rh": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "maximum": 100,
+                            "x-unit": "%"
+                          },
+                          "source": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "The base program this load's values came from, for a library Program."
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "people": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "rule",
+                  "people_per_area",
+                  "occupancy_schedule_id",
+                  "activity_schedule_id",
+                  "radiant_fraction",
+                  "latent_fraction"
+                ],
+                "properties": {
+                  "rule": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "enum": [
+                      "phius_residential",
+                      null
+                    ],
+                    "description": "phius_residential while the rule sets this load; null for the fixed value."
+                  },
+                  "people_per_area": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "x-unit": "people/m2",
+                    "description": "Peak people per m² of floor."
+                  },
+                  "occupancy_schedule_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^sch_[A-Za-z0-9]{12}$",
+                    "description": "A fractional Schedule, of the peak."
+                  },
+                  "activity_schedule_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^sch_[A-Za-z0-9]{12}$",
+                    "description": "An activity Schedule, W per person."
+                  },
+                  "radiant_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "latent_fraction": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction",
+                    "description": "Null for honeybee's autocalculate."
+                  },
+                  "source": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The base program this load's values came from, for a library Program."
+                  }
+                }
+              },
+              "lighting": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "rule",
+                  "watts_per_area",
+                  "high_efficacy_fraction",
+                  "schedule_id",
+                  "return_air_fraction",
+                  "radiant_fraction",
+                  "visible_fraction"
+                ],
+                "properties": {
+                  "rule": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "enum": [
+                      "phius_interior",
+                      null
+                    ],
+                    "description": "phius_interior while the rule sets this load; null for the fixed value."
+                  },
+                  "watts_per_area": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "x-unit": "W/m2"
+                  },
+                  "high_efficacy_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction",
+                    "description": "The Phius rule's input: the share of high-efficacy lighting."
+                  },
+                  "schedule_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^sch_[A-Za-z0-9]{12}$",
+                    "description": "A fractional Schedule."
+                  },
+                  "return_air_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "radiant_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "visible_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "source": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The base program this load's values came from, for a library Program."
+                  }
+                }
+              },
+              "electric_equipment": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "watts_per_area",
+                  "schedule_id",
+                  "radiant_fraction",
+                  "latent_fraction",
+                  "lost_fraction"
+                ],
+                "properties": {
+                  "watts_per_area": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "x-unit": "W/m2"
+                  },
+                  "schedule_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^sch_[A-Za-z0-9]{12}$",
+                    "description": "A fractional Schedule."
+                  },
+                  "radiant_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "latent_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "lost_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "source": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The base program this load's values came from, for a library Program."
+                  }
+                }
+              },
+              "gas_equipment": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "watts_per_area",
+                  "schedule_id",
+                  "radiant_fraction",
+                  "latent_fraction",
+                  "lost_fraction"
+                ],
+                "properties": {
+                  "watts_per_area": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "x-unit": "W/m2"
+                  },
+                  "schedule_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^sch_[A-Za-z0-9]{12}$",
+                    "description": "A fractional Schedule."
+                  },
+                  "radiant_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "latent_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "lost_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "source": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The base program this load's values came from, for a library Program."
+                  }
+                }
+              },
+              "service_hot_water": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "rule",
+                  "flow_per_area",
+                  "target_temperature_c",
+                  "schedule_id",
+                  "sensible_fraction",
+                  "latent_fraction"
+                ],
+                "properties": {
+                  "rule": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "enum": [
+                      "building_america",
+                      null
+                    ],
+                    "description": "building_america while the rule sets this load; null for the fixed value."
+                  },
+                  "flow_per_area": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "x-unit": "L/h/m2",
+                    "description": "Peak flow per m² of floor."
+                  },
+                  "target_temperature_c": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 100,
+                    "x-unit": "C"
+                  },
+                  "schedule_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^sch_[A-Za-z0-9]{12}$",
+                    "description": "A fractional Schedule."
+                  },
+                  "sensible_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "latent_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "source": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The base program this load's values came from, for a library Program."
+                  }
+                }
+              },
+              "infiltration": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "flow_per_exterior_area",
+                  "schedule_id"
+                ],
+                "properties": {
+                  "flow_per_exterior_area": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "x-unit": "m3/s/m2",
+                    "description": "Per m² of exposed exterior area, at about 4 Pa."
+                  },
+                  "schedule_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^sch_[A-Za-z0-9]{12}$",
+                    "description": "A fractional Schedule."
+                  },
+                  "source": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The base program this load's values came from, for a library Program."
+                  }
+                }
+              },
+              "ventilation": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "flow_per_person",
+                  "flow_per_area",
+                  "flow_per_zone",
+                  "air_changes_per_hour",
+                  "schedule_id"
+                ],
+                "properties": {
+                  "flow_per_person": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "x-unit": "m3/s/person"
+                  },
+                  "flow_per_area": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "x-unit": "m3/s/m2"
+                  },
+                  "flow_per_zone": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "x-unit": "m3/s"
+                  },
+                  "air_changes_per_hour": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "x-unit": "1/h"
+                  },
+                  "schedule_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^sch_[A-Za-z0-9]{12}$",
+                    "description": "A ventilation Schedule."
+                  },
+                  "source": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The base program this load's values came from, for a library Program."
+                  }
+                }
+              },
+              "setpoint": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "heating_c",
+                  "cooling_c",
+                  "heating_schedule_id",
+                  "cooling_schedule_id",
+                  "dehumidify_rh",
+                  "humidify_rh"
+                ],
+                "properties": {
+                  "heating_c": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "x-unit": "C"
+                  },
+                  "cooling_c": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "x-unit": "C"
+                  },
+                  "heating_schedule_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^sch_[A-Za-z0-9]{12}$",
+                    "description": "A temperature Schedule, in place of heating_c."
+                  },
+                  "cooling_schedule_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^sch_[A-Za-z0-9]{12}$",
+                    "description": "A temperature Schedule, in place of cooling_c."
+                  },
+                  "dehumidify_rh": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 100,
+                    "x-unit": "%"
+                  },
+                  "humidify_rh": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 100,
+                    "x-unit": "%"
+                  },
+                  "source": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The base program this load's values came from, for a library Program."
+                  }
+                }
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "stored": {
+            "type": "boolean",
+            "description": "False for PH-Composer's default while the Model holds none of it: reads answer its definition until a write stores it."
+          },
+          "default": {
+            "type": "boolean"
+          },
+          "use_count": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.programs.programs.list`
+
+One bounded page of programs in id order, with what uses each. Owner: `ph_composer.programs`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 500,
+      "description": "Only these record ids."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "schema_version",
+          "values",
+          "user_data",
+          "extension_data",
+          "kind",
+          "extension_status",
+          "stored",
+          "default",
+          "use_count"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "people",
+              "lighting",
+              "electric_equipment",
+              "gas_equipment",
+              "service_hot_water",
+              "infiltration",
+              "ventilation",
+              "setpoint"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library",
+                      "ph_composer_default"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "people": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "rule",
+                          "people_per_area",
+                          "occupancy_schedule_id",
+                          "activity_schedule_id",
+                          "radiant_fraction",
+                          "latent_fraction"
+                        ],
+                        "properties": {
+                          "rule": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "enum": [
+                              "phius_residential",
+                              null
+                            ],
+                            "description": "phius_residential while the rule sets this load; null for the fixed value."
+                          },
+                          "people_per_area": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "x-unit": "people/m2",
+                            "description": "Peak people per m² of floor."
+                          },
+                          "occupancy_schedule_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^sch_[A-Za-z0-9]{12}$",
+                            "description": "A fractional Schedule, of the peak."
+                          },
+                          "activity_schedule_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^sch_[A-Za-z0-9]{12}$",
+                            "description": "An activity Schedule, W per person."
+                          },
+                          "radiant_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "latent_fraction": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction",
+                            "description": "Null for honeybee's autocalculate."
+                          },
+                          "source": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "The base program this load's values came from, for a library Program."
+                          }
+                        }
+                      },
+                      "lighting": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "rule",
+                          "watts_per_area",
+                          "high_efficacy_fraction",
+                          "schedule_id",
+                          "return_air_fraction",
+                          "radiant_fraction",
+                          "visible_fraction"
+                        ],
+                        "properties": {
+                          "rule": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "enum": [
+                              "phius_interior",
+                              null
+                            ],
+                            "description": "phius_interior while the rule sets this load; null for the fixed value."
+                          },
+                          "watts_per_area": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "x-unit": "W/m2"
+                          },
+                          "high_efficacy_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction",
+                            "description": "The Phius rule's input: the share of high-efficacy lighting."
+                          },
+                          "schedule_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^sch_[A-Za-z0-9]{12}$",
+                            "description": "A fractional Schedule."
+                          },
+                          "return_air_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "radiant_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "visible_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "source": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "The base program this load's values came from, for a library Program."
+                          }
+                        }
+                      },
+                      "electric_equipment": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "watts_per_area",
+                          "schedule_id",
+                          "radiant_fraction",
+                          "latent_fraction",
+                          "lost_fraction"
+                        ],
+                        "properties": {
+                          "watts_per_area": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "x-unit": "W/m2"
+                          },
+                          "schedule_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^sch_[A-Za-z0-9]{12}$",
+                            "description": "A fractional Schedule."
+                          },
+                          "radiant_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "latent_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "lost_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "source": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "The base program this load's values came from, for a library Program."
+                          }
+                        }
+                      },
+                      "gas_equipment": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "watts_per_area",
+                          "schedule_id",
+                          "radiant_fraction",
+                          "latent_fraction",
+                          "lost_fraction"
+                        ],
+                        "properties": {
+                          "watts_per_area": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "x-unit": "W/m2"
+                          },
+                          "schedule_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^sch_[A-Za-z0-9]{12}$",
+                            "description": "A fractional Schedule."
+                          },
+                          "radiant_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "latent_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "lost_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "source": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "The base program this load's values came from, for a library Program."
+                          }
+                        }
+                      },
+                      "service_hot_water": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "rule",
+                          "flow_per_area",
+                          "target_temperature_c",
+                          "schedule_id",
+                          "sensible_fraction",
+                          "latent_fraction"
+                        ],
+                        "properties": {
+                          "rule": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "enum": [
+                              "building_america",
+                              null
+                            ],
+                            "description": "building_america while the rule sets this load; null for the fixed value."
+                          },
+                          "flow_per_area": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "x-unit": "L/h/m2",
+                            "description": "Peak flow per m² of floor."
+                          },
+                          "target_temperature_c": {
+                            "type": "number",
+                            "exclusiveMinimum": 0,
+                            "maximum": 100,
+                            "x-unit": "C"
+                          },
+                          "schedule_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^sch_[A-Za-z0-9]{12}$",
+                            "description": "A fractional Schedule."
+                          },
+                          "sensible_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "latent_fraction": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "x-unit": "fraction"
+                          },
+                          "source": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "The base program this load's values came from, for a library Program."
+                          }
+                        }
+                      },
+                      "infiltration": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "flow_per_exterior_area",
+                          "schedule_id"
+                        ],
+                        "properties": {
+                          "flow_per_exterior_area": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "x-unit": "m3/s/m2",
+                            "description": "Per m² of exposed exterior area, at about 4 Pa."
+                          },
+                          "schedule_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^sch_[A-Za-z0-9]{12}$",
+                            "description": "A fractional Schedule."
+                          },
+                          "source": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "The base program this load's values came from, for a library Program."
+                          }
+                        }
+                      },
+                      "ventilation": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "flow_per_person",
+                          "flow_per_area",
+                          "flow_per_zone",
+                          "air_changes_per_hour",
+                          "schedule_id"
+                        ],
+                        "properties": {
+                          "flow_per_person": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "x-unit": "m3/s/person"
+                          },
+                          "flow_per_area": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "x-unit": "m3/s/m2"
+                          },
+                          "flow_per_zone": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "x-unit": "m3/s"
+                          },
+                          "air_changes_per_hour": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "x-unit": "1/h"
+                          },
+                          "schedule_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^sch_[A-Za-z0-9]{12}$",
+                            "description": "A ventilation Schedule."
+                          },
+                          "source": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "The base program this load's values came from, for a library Program."
+                          }
+                        }
+                      },
+                      "setpoint": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "heating_c",
+                          "cooling_c",
+                          "heating_schedule_id",
+                          "cooling_schedule_id",
+                          "dehumidify_rh",
+                          "humidify_rh"
+                        ],
+                        "properties": {
+                          "heating_c": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "x-unit": "C"
+                          },
+                          "cooling_c": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "x-unit": "C"
+                          },
+                          "heating_schedule_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^sch_[A-Za-z0-9]{12}$",
+                            "description": "A temperature Schedule, in place of heating_c."
+                          },
+                          "cooling_schedule_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^sch_[A-Za-z0-9]{12}$",
+                            "description": "A temperature Schedule, in place of cooling_c."
+                          },
+                          "dehumidify_rh": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "maximum": 100,
+                            "x-unit": "%"
+                          },
+                          "humidify_rh": {
+                            "type": [
+                              "number",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "maximum": 100,
+                            "x-unit": "%"
+                          },
+                          "source": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "The base program this load's values came from, for a library Program."
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "people": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "rule",
+                  "people_per_area",
+                  "occupancy_schedule_id",
+                  "activity_schedule_id",
+                  "radiant_fraction",
+                  "latent_fraction"
+                ],
+                "properties": {
+                  "rule": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "enum": [
+                      "phius_residential",
+                      null
+                    ],
+                    "description": "phius_residential while the rule sets this load; null for the fixed value."
+                  },
+                  "people_per_area": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "x-unit": "people/m2",
+                    "description": "Peak people per m² of floor."
+                  },
+                  "occupancy_schedule_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^sch_[A-Za-z0-9]{12}$",
+                    "description": "A fractional Schedule, of the peak."
+                  },
+                  "activity_schedule_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^sch_[A-Za-z0-9]{12}$",
+                    "description": "An activity Schedule, W per person."
+                  },
+                  "radiant_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "latent_fraction": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction",
+                    "description": "Null for honeybee's autocalculate."
+                  },
+                  "source": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The base program this load's values came from, for a library Program."
+                  }
+                }
+              },
+              "lighting": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "rule",
+                  "watts_per_area",
+                  "high_efficacy_fraction",
+                  "schedule_id",
+                  "return_air_fraction",
+                  "radiant_fraction",
+                  "visible_fraction"
+                ],
+                "properties": {
+                  "rule": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "enum": [
+                      "phius_interior",
+                      null
+                    ],
+                    "description": "phius_interior while the rule sets this load; null for the fixed value."
+                  },
+                  "watts_per_area": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "x-unit": "W/m2"
+                  },
+                  "high_efficacy_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction",
+                    "description": "The Phius rule's input: the share of high-efficacy lighting."
+                  },
+                  "schedule_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^sch_[A-Za-z0-9]{12}$",
+                    "description": "A fractional Schedule."
+                  },
+                  "return_air_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "radiant_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "visible_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "source": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The base program this load's values came from, for a library Program."
+                  }
+                }
+              },
+              "electric_equipment": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "watts_per_area",
+                  "schedule_id",
+                  "radiant_fraction",
+                  "latent_fraction",
+                  "lost_fraction"
+                ],
+                "properties": {
+                  "watts_per_area": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "x-unit": "W/m2"
+                  },
+                  "schedule_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^sch_[A-Za-z0-9]{12}$",
+                    "description": "A fractional Schedule."
+                  },
+                  "radiant_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "latent_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "lost_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "source": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The base program this load's values came from, for a library Program."
+                  }
+                }
+              },
+              "gas_equipment": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "watts_per_area",
+                  "schedule_id",
+                  "radiant_fraction",
+                  "latent_fraction",
+                  "lost_fraction"
+                ],
+                "properties": {
+                  "watts_per_area": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "x-unit": "W/m2"
+                  },
+                  "schedule_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^sch_[A-Za-z0-9]{12}$",
+                    "description": "A fractional Schedule."
+                  },
+                  "radiant_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "latent_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "lost_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "source": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The base program this load's values came from, for a library Program."
+                  }
+                }
+              },
+              "service_hot_water": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "rule",
+                  "flow_per_area",
+                  "target_temperature_c",
+                  "schedule_id",
+                  "sensible_fraction",
+                  "latent_fraction"
+                ],
+                "properties": {
+                  "rule": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "enum": [
+                      "building_america",
+                      null
+                    ],
+                    "description": "building_america while the rule sets this load; null for the fixed value."
+                  },
+                  "flow_per_area": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "x-unit": "L/h/m2",
+                    "description": "Peak flow per m² of floor."
+                  },
+                  "target_temperature_c": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 100,
+                    "x-unit": "C"
+                  },
+                  "schedule_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^sch_[A-Za-z0-9]{12}$",
+                    "description": "A fractional Schedule."
+                  },
+                  "sensible_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "latent_fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "x-unit": "fraction"
+                  },
+                  "source": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The base program this load's values came from, for a library Program."
+                  }
+                }
+              },
+              "infiltration": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "flow_per_exterior_area",
+                  "schedule_id"
+                ],
+                "properties": {
+                  "flow_per_exterior_area": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "x-unit": "m3/s/m2",
+                    "description": "Per m² of exposed exterior area, at about 4 Pa."
+                  },
+                  "schedule_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^sch_[A-Za-z0-9]{12}$",
+                    "description": "A fractional Schedule."
+                  },
+                  "source": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The base program this load's values came from, for a library Program."
+                  }
+                }
+              },
+              "ventilation": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "flow_per_person",
+                  "flow_per_area",
+                  "flow_per_zone",
+                  "air_changes_per_hour",
+                  "schedule_id"
+                ],
+                "properties": {
+                  "flow_per_person": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "x-unit": "m3/s/person"
+                  },
+                  "flow_per_area": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "x-unit": "m3/s/m2"
+                  },
+                  "flow_per_zone": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "x-unit": "m3/s"
+                  },
+                  "air_changes_per_hour": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "x-unit": "1/h"
+                  },
+                  "schedule_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^sch_[A-Za-z0-9]{12}$",
+                    "description": "A ventilation Schedule."
+                  },
+                  "source": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The base program this load's values came from, for a library Program."
+                  }
+                }
+              },
+              "setpoint": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "heating_c",
+                  "cooling_c",
+                  "heating_schedule_id",
+                  "cooling_schedule_id",
+                  "dehumidify_rh",
+                  "humidify_rh"
+                ],
+                "properties": {
+                  "heating_c": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "x-unit": "C"
+                  },
+                  "cooling_c": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "x-unit": "C"
+                  },
+                  "heating_schedule_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^sch_[A-Za-z0-9]{12}$",
+                    "description": "A temperature Schedule, in place of heating_c."
+                  },
+                  "cooling_schedule_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^sch_[A-Za-z0-9]{12}$",
+                    "description": "A temperature Schedule, in place of cooling_c."
+                  },
+                  "dehumidify_rh": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 100,
+                    "x-unit": "%"
+                  },
+                  "humidify_rh": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 100,
+                    "x-unit": "%"
+                  },
+                  "source": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The base program this load's values came from, for a library Program."
+                  }
+                }
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "stored": {
+            "type": "boolean",
+            "description": "False for PH-Composer's default while the Model holds none of it: reads answer its definition until a write stores it."
+          },
+          "default": {
+            "type": "boolean"
+          },
+          "use_count": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 20
+}
+```
+
+### `ph_composer.programs.schedules.all`
+
+Every Schedule, PH-Composer's defaults included. Owner: `ph_composer.programs`.
+
+Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.programs.schedules.list` instead.
+
+Refuses: only the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "schema_version",
+          "values",
+          "user_data",
+          "extension_data",
+          "kind",
+          "extension_status",
+          "stored",
+          "uses",
+          "use_count",
+          "profile"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "type",
+              "days_per_week",
+              "weeks_per_year"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library",
+                      "ph_composer_default"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "fractional",
+                          "activity",
+                          "temperature",
+                          "ventilation"
+                        ]
+                      },
+                      "days_per_week": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 7
+                      },
+                      "weeks_per_year": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 52
+                      },
+                      "start_h": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 23,
+                        "x-unit": "h"
+                      },
+                      "end_h": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 24,
+                        "x-unit": "h"
+                      },
+                      "fraction_on": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "x-unit": "fraction"
+                      },
+                      "fraction_off": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "x-unit": "fraction"
+                      },
+                      "watts_on": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "W/person"
+                      },
+                      "watts_off": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "W/person"
+                      },
+                      "value_c": {
+                        "type": "number",
+                        "minimum": -273.15,
+                        "x-unit": "C"
+                      },
+                      "periods": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "period",
+                            "hours",
+                            "fraction"
+                          ],
+                          "properties": {
+                            "period": {
+                              "type": "string",
+                              "enum": [
+                                "high",
+                                "standard",
+                                "basic",
+                                "minimum"
+                              ]
+                            },
+                            "hours": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 24,
+                              "x-unit": "h"
+                            },
+                            "fraction": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 1,
+                              "x-unit": "fraction",
+                              "description": "The share of the design flow in this period."
+                            }
+                          }
+                        },
+                        "minItems": 4,
+                        "maxItems": 4
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "fractional",
+                  "activity",
+                  "temperature",
+                  "ventilation"
+                ]
+              },
+              "days_per_week": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 7
+              },
+              "weeks_per_year": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 52
+              },
+              "start_h": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 23,
+                "x-unit": "h"
+              },
+              "end_h": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 24,
+                "x-unit": "h"
+              },
+              "fraction_on": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "x-unit": "fraction"
+              },
+              "fraction_off": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "x-unit": "fraction"
+              },
+              "watts_on": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "W/person"
+              },
+              "watts_off": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "W/person"
+              },
+              "value_c": {
+                "type": "number",
+                "minimum": -273.15,
+                "x-unit": "C"
+              },
+              "periods": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "period",
+                    "hours",
+                    "fraction"
+                  ],
+                  "properties": {
+                    "period": {
+                      "type": "string",
+                      "enum": [
+                        "high",
+                        "standard",
+                        "basic",
+                        "minimum"
+                      ]
+                    },
+                    "hours": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 24,
+                      "x-unit": "h"
+                    },
+                    "fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction",
+                      "description": "The share of the design flow in this period."
+                    }
+                  }
+                },
+                "minItems": 4,
+                "maxItems": 4
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "stored": {
+            "type": "boolean",
+            "description": "False for PH-Composer's default while the Model holds none of it: reads answer its definition until a write stores it."
+          },
+          "uses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "program_id",
+                "name",
+                "slot"
+              ],
+              "properties": {
+                "program_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "slot": {
+                  "type": "string",
+                  "description": "The load and field, such as people.occupancy_schedule_id."
+                }
+              }
+            }
+          },
+          "use_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "profile": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "hours",
+              "daily_full_load_hours",
+              "annual_full_load_hours"
+            ],
+            "properties": {
+              "hours": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "description": "The value in each hour, 0:00 first."
+              },
+              "daily_full_load_hours": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "h",
+                "description": "Null for an activity or temperature Schedule."
+              },
+              "annual_full_load_hours": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "h",
+                "description": "The daily hours on days_per_week × weeks_per_year days."
+              }
+            }
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.programs.schedules.list`
+
+One bounded page of schedules in id order, with what uses each. Owner: `ph_composer.programs`.
+
+Refuses: `query.cursor_expired`, `query.limit_invalid`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 500,
+      "description": "Only these record ids."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Page size, 1 to 500; 100 when absent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "next_cursor from the previous page of the same query and filter."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "records",
+    "unreadable",
+    "next_cursor",
+    "total"
+  ],
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "schema_version",
+          "values",
+          "user_data",
+          "extension_data",
+          "kind",
+          "extension_status",
+          "stored",
+          "uses",
+          "use_count",
+          "profile"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "integer"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "type",
+              "days_per_week",
+              "weeks_per_year"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": "string"
+              },
+              "datasheet_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "provider_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "library_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "record_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "copied_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "derived",
+                      "library",
+                      "ph_composer_default"
+                    ]
+                  },
+                  "fingerprint_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "datasheet_links": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "fractional",
+                          "activity",
+                          "temperature",
+                          "ventilation"
+                        ]
+                      },
+                      "days_per_week": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 7
+                      },
+                      "weeks_per_year": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 52
+                      },
+                      "start_h": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 23,
+                        "x-unit": "h"
+                      },
+                      "end_h": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 24,
+                        "x-unit": "h"
+                      },
+                      "fraction_on": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "x-unit": "fraction"
+                      },
+                      "fraction_off": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "x-unit": "fraction"
+                      },
+                      "watts_on": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "W/person"
+                      },
+                      "watts_off": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "W/person"
+                      },
+                      "value_c": {
+                        "type": "number",
+                        "minimum": -273.15,
+                        "x-unit": "C"
+                      },
+                      "periods": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "period",
+                            "hours",
+                            "fraction"
+                          ],
+                          "properties": {
+                            "period": {
+                              "type": "string",
+                              "enum": [
+                                "high",
+                                "standard",
+                                "basic",
+                                "minimum"
+                              ]
+                            },
+                            "hours": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 24,
+                              "x-unit": "h"
+                            },
+                            "fraction": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 1,
+                              "x-unit": "fraction",
+                              "description": "The share of the design flow in this period."
+                            }
+                          }
+                        },
+                        "minItems": 4,
+                        "maxItems": 4
+                      }
+                    }
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_revision_schema_version": {
+                    "type": "integer",
+                    "enum": [
+                      1
+                    ]
+                  }
+                }
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "fractional",
+                  "activity",
+                  "temperature",
+                  "ventilation"
+                ]
+              },
+              "days_per_week": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 7
+              },
+              "weeks_per_year": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 52
+              },
+              "start_h": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 23,
+                "x-unit": "h"
+              },
+              "end_h": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 24,
+                "x-unit": "h"
+              },
+              "fraction_on": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "x-unit": "fraction"
+              },
+              "fraction_off": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "x-unit": "fraction"
+              },
+              "watts_on": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "W/person"
+              },
+              "watts_off": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "W/person"
+              },
+              "value_c": {
+                "type": "number",
+                "minimum": -273.15,
+                "x-unit": "C"
+              },
+              "periods": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "period",
+                    "hours",
+                    "fraction"
+                  ],
+                  "properties": {
+                    "period": {
+                      "type": "string",
+                      "enum": [
+                        "high",
+                        "standard",
+                        "basic",
+                        "minimum"
+                      ]
+                    },
+                    "hours": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 24,
+                      "x-unit": "h"
+                    },
+                    "fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction",
+                      "description": "The share of the design flow in this period."
+                    }
+                  }
+                },
+                "minItems": 4,
+                "maxItems": 4
+              }
+            }
+          },
+          "user_data": {
+            "type": "object",
+            "description": "Contributor metadata, preserved as written."
+          },
+          "extension_data": {
+            "type": "object",
+            "description": "Versioned payloads registered extensions own."
+          },
+          "kind": {
+            "type": "string"
+          },
+          "extension_status": {
+            "type": "object"
+          },
+          "stored": {
+            "type": "boolean",
+            "description": "False for PH-Composer's default while the Model holds none of it: reads answer its definition until a write stores it."
+          },
+          "uses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "program_id",
+                "name",
+                "slot"
+              ],
+              "properties": {
+                "program_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "slot": {
+                  "type": "string",
+                  "description": "The load and field, such as people.occupancy_schedule_id."
+                }
+              }
+            }
+          },
+          "use_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "profile": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "hours",
+              "daily_full_load_hours",
+              "annual_full_load_hours"
+            ],
+            "properties": {
+              "hours": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "description": "The value in each hour, 0:00 first."
+              },
+              "daily_full_load_hours": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "h",
+                "description": "Null for an activity or temperature Schedule."
+              },
+              "annual_full_load_hours": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "h",
+                "description": "The daily hours on days_per_week × weeks_per_year days."
+              }
+            }
+          }
+        }
+      }
+    },
+    "unreadable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Pass back as cursor for the next page; null on the last page."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rows matching the filter, on every page."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "limit": 20
+}
+```
+
+### `ph_composer.programs.schedules.profile`
+
+The 24-hour profile and full-load hours of Schedule values, stored or not. Owner: `ph_composer.programs`.
+
+Refuses: `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "values"
+  ],
+  "properties": {
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        },
+        "datasheet_links": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library",
+                "ph_composer_default"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "fractional",
+                    "activity",
+                    "temperature",
+                    "ventilation"
+                  ]
+                },
+                "days_per_week": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 7
+                },
+                "weeks_per_year": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 52
+                },
+                "start_h": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 23,
+                  "x-unit": "h"
+                },
+                "end_h": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 24,
+                  "x-unit": "h"
+                },
+                "fraction_on": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction"
+                },
+                "fraction_off": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction"
+                },
+                "watts_on": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "W/person"
+                },
+                "watts_off": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "W/person"
+                },
+                "value_c": {
+                  "type": "number",
+                  "minimum": -273.15,
+                  "x-unit": "C"
+                },
+                "periods": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "period",
+                      "hours",
+                      "fraction"
+                    ],
+                    "properties": {
+                      "period": {
+                        "type": "string",
+                        "enum": [
+                          "high",
+                          "standard",
+                          "basic",
+                          "minimum"
+                        ]
+                      },
+                      "hours": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 24,
+                        "x-unit": "h"
+                      },
+                      "fraction": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "x-unit": "fraction",
+                        "description": "The share of the design flow in this period."
+                      }
+                    }
+                  },
+                  "minItems": 4,
+                  "maxItems": 4
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "fractional",
+            "activity",
+            "temperature",
+            "ventilation"
+          ]
+        },
+        "days_per_week": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 7
+        },
+        "weeks_per_year": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 52
+        },
+        "start_h": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 23,
+          "x-unit": "h"
+        },
+        "end_h": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 24,
+          "x-unit": "h"
+        },
+        "fraction_on": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction"
+        },
+        "fraction_off": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction"
+        },
+        "watts_on": {
+          "type": "number",
+          "minimum": 0,
+          "x-unit": "W/person"
+        },
+        "watts_off": {
+          "type": "number",
+          "minimum": 0,
+          "x-unit": "W/person"
+        },
+        "value_c": {
+          "type": "number",
+          "minimum": -273.15,
+          "x-unit": "C"
+        },
+        "periods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "period",
+              "hours",
+              "fraction"
+            ],
+            "properties": {
+              "period": {
+                "type": "string",
+                "enum": [
+                  "high",
+                  "standard",
+                  "basic",
+                  "minimum"
+                ]
+              },
+              "hours": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 24,
+                "x-unit": "h"
+              },
+              "fraction": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "x-unit": "fraction",
+                "description": "The share of the design flow in this period."
+              }
+            }
+          },
+          "minItems": 4,
+          "maxItems": 4
+        }
+      },
+      "description": "A Schedule's values; a missing one takes its default."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "hours",
+    "daily_full_load_hours",
+    "annual_full_load_hours"
+  ],
+  "properties": {
+    "hours": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "description": "The value in each hour, 0:00 first."
+    },
+    "daily_full_load_hours": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-unit": "h",
+      "description": "Null for an activity or temperature Schedule."
+    },
+    "annual_full_load_hours": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-unit": "h",
+      "description": "The daily hours on days_per_week × weeks_per_year days."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "values": {
+    "type": "fractional",
+    "start_h": 7,
+    "end_h": 18
+  }
+}
+```
+
+### `ph_composer.programs.settings.get`
+
+The Model's default Program and default Equipment Set, PH-Composer's own until another is chosen. Owner: `ph_composer.programs`.
+
+Refuses: `record.unreadable`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "default_program_id",
+    "default_equipment_set_id"
+  ],
+  "properties": {
+    "default_program_id": {
+      "type": "string"
+    },
+    "default_equipment_set_id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
 ```
 
 ### `ph_composer.records.detail`
@@ -49407,6 +56129,5628 @@ Example params:
 }
 ```
 
+### `ph_composer.programs.equipment_sets.add_device`
+
+Add one device of a honeybee-ph type, with that type's defaults under the values given. Owner: `ph_composer.programs`.
+
+Undo step: Add Device. Adds one device to the Equipment Set.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "type"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^eqs_[A-Za-z0-9]{12}$",
+      "description": "The Equipment Set."
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "dishwasher",
+        "clothes_washer",
+        "clothes_dryer",
+        "refrigerator",
+        "freezer",
+        "fridge_freezer",
+        "cooktop",
+        "phius_mel",
+        "phius_lighting_interior",
+        "phius_lighting_exterior",
+        "phius_lighting_garage",
+        "custom_annual_electric",
+        "custom_annual_lighting",
+        "custom_annual_mel"
+      ],
+      "description": "The honeybee-ph type; equipment_sets.device_types lists each one's fields."
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "display_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "in_conditioned_space": {
+          "type": "boolean"
+        },
+        "comment": {
+          "type": "string"
+        },
+        "reference_quantity": {
+          "type": "integer",
+          "description": "The WUFI-Passive and METr reference quantity code the type allows."
+        },
+        "reference_energy_norm": {
+          "type": "integer",
+          "description": "The period energy_demand is given for: 1 a day or a use, 2 a year."
+        },
+        "energy_demand": {
+          "type": "number",
+          "minimum": 0,
+          "x-unit": "kWh",
+          "description": "Per unit, over reference_energy_norm's period."
+        },
+        "energy_demand_per_use": {
+          "type": "number",
+          "minimum": 0,
+          "x-unit": "kWh",
+          "description": "PHPP only; WUFI-Passive and METr ignore it."
+        },
+        "capacity_type": {
+          "type": "integer",
+          "enum": [
+            1
+          ],
+          "description": "1, standard."
+        },
+        "capacity_place_settings": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "capacity_m3": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "x-unit": "m3"
+        },
+        "modified_energy_factor": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "utilization_factor": {
+          "type": "number",
+          "minimum": 0
+        },
+        "water_connection": {
+          "type": "string",
+          "enum": [
+            "dhw",
+            "cold_water"
+          ]
+        },
+        "dryer_type": {
+          "type": "string",
+          "enum": [
+            "clothes_line",
+            "drying_closet_cold",
+            "drying_closet_cold_extract_air",
+            "condensation",
+            "electric_exhaust_air",
+            "gas_exhaust_air",
+            "heat_pump"
+          ]
+        },
+        "combined_energy_factor": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "x-unit": "lb/kWh"
+        },
+        "gas_consumption": {
+          "type": "number",
+          "minimum": 0
+        },
+        "gas_efficiency_factor": {
+          "type": "number",
+          "minimum": 0
+        },
+        "field_utilization_factor_type": {
+          "type": "integer",
+          "enum": [
+            1
+          ],
+          "description": "1, timer controls."
+        },
+        "field_utilization_factor": {
+          "type": "number",
+          "minimum": 0
+        },
+        "cooktop_type": {
+          "type": "string",
+          "enum": [
+            "electricity",
+            "natural_gas",
+            "lpg"
+          ]
+        },
+        "high_efficacy_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction"
+        }
+      },
+      "description": "The device's values; any not given take the type's defaults."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "device_id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "device_id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "eqs_Ab12Cd34Ef56",
+  "type": "dishwasher"
+}
+```
+
+### `ph_composer.programs.equipment_sets.create`
+
+Create one Equipment Set with default values. Owner: `ph_composer.programs`.
+
+Undo step: Create Equipment Set. Creates one catalog record.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        },
+        "datasheet_links": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library",
+                "ph_composer_default"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "devices": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "id",
+                      "type",
+                      "display_name",
+                      "quantity",
+                      "in_conditioned_space",
+                      "comment",
+                      "reference_quantity"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^dev_[A-Za-z0-9]{12}$",
+                        "description": "This device's id, unique within its Equipment Set."
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "dishwasher",
+                          "clothes_washer",
+                          "clothes_dryer",
+                          "refrigerator",
+                          "freezer",
+                          "fridge_freezer",
+                          "cooktop",
+                          "phius_mel",
+                          "phius_lighting_interior",
+                          "phius_lighting_exterior",
+                          "phius_lighting_garage",
+                          "custom_annual_electric",
+                          "custom_annual_lighting",
+                          "custom_annual_mel"
+                        ],
+                        "description": "The honeybee-ph type; fixed once added."
+                      },
+                      "display_name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "quantity": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "in_conditioned_space": {
+                        "type": "boolean"
+                      },
+                      "comment": {
+                        "type": "string"
+                      },
+                      "reference_quantity": {
+                        "type": "integer",
+                        "description": "The WUFI-Passive and METr reference quantity code the type allows."
+                      },
+                      "user_data": {
+                        "type": "object",
+                        "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
+                      },
+                      "reference_energy_norm": {
+                        "type": "integer",
+                        "description": "The period energy_demand is given for: 1 a day or a use, 2 a year."
+                      },
+                      "energy_demand": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "kWh",
+                        "description": "Per unit, over reference_energy_norm's period."
+                      },
+                      "energy_demand_per_use": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "kWh",
+                        "description": "PHPP only; WUFI-Passive and METr ignore it."
+                      },
+                      "capacity_type": {
+                        "type": "integer",
+                        "enum": [
+                          1
+                        ],
+                        "description": "1, standard."
+                      },
+                      "capacity_place_settings": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      },
+                      "capacity_m3": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "x-unit": "m3"
+                      },
+                      "modified_energy_factor": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      },
+                      "utilization_factor": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "water_connection": {
+                        "type": "string",
+                        "enum": [
+                          "dhw",
+                          "cold_water"
+                        ]
+                      },
+                      "dryer_type": {
+                        "type": "string",
+                        "enum": [
+                          "clothes_line",
+                          "drying_closet_cold",
+                          "drying_closet_cold_extract_air",
+                          "condensation",
+                          "electric_exhaust_air",
+                          "gas_exhaust_air",
+                          "heat_pump"
+                        ]
+                      },
+                      "combined_energy_factor": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "x-unit": "lb/kWh"
+                      },
+                      "gas_consumption": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "gas_efficiency_factor": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "field_utilization_factor_type": {
+                        "type": "integer",
+                        "enum": [
+                          1
+                        ],
+                        "description": "1, timer controls."
+                      },
+                      "field_utilization_factor": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "cooktop_type": {
+                        "type": "string",
+                        "enum": [
+                          "electricity",
+                          "natural_gas",
+                          "lpg"
+                        ]
+                      },
+                      "high_efficacy_fraction": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "x-unit": "fraction"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "devices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "type",
+              "display_name",
+              "quantity",
+              "in_conditioned_space",
+              "comment",
+              "reference_quantity"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^dev_[A-Za-z0-9]{12}$",
+                "description": "This device's id, unique within its Equipment Set."
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "dishwasher",
+                  "clothes_washer",
+                  "clothes_dryer",
+                  "refrigerator",
+                  "freezer",
+                  "fridge_freezer",
+                  "cooktop",
+                  "phius_mel",
+                  "phius_lighting_interior",
+                  "phius_lighting_exterior",
+                  "phius_lighting_garage",
+                  "custom_annual_electric",
+                  "custom_annual_lighting",
+                  "custom_annual_mel"
+                ],
+                "description": "The honeybee-ph type; fixed once added."
+              },
+              "display_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "in_conditioned_space": {
+                "type": "boolean"
+              },
+              "comment": {
+                "type": "string"
+              },
+              "reference_quantity": {
+                "type": "integer",
+                "description": "The WUFI-Passive and METr reference quantity code the type allows."
+              },
+              "user_data": {
+                "type": "object",
+                "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
+              },
+              "reference_energy_norm": {
+                "type": "integer",
+                "description": "The period energy_demand is given for: 1 a day or a use, 2 a year."
+              },
+              "energy_demand": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "kWh",
+                "description": "Per unit, over reference_energy_norm's period."
+              },
+              "energy_demand_per_use": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "kWh",
+                "description": "PHPP only; WUFI-Passive and METr ignore it."
+              },
+              "capacity_type": {
+                "type": "integer",
+                "enum": [
+                  1
+                ],
+                "description": "1, standard."
+              },
+              "capacity_place_settings": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "capacity_m3": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "x-unit": "m3"
+              },
+              "modified_energy_factor": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "utilization_factor": {
+                "type": "number",
+                "minimum": 0
+              },
+              "water_connection": {
+                "type": "string",
+                "enum": [
+                  "dhw",
+                  "cold_water"
+                ]
+              },
+              "dryer_type": {
+                "type": "string",
+                "enum": [
+                  "clothes_line",
+                  "drying_closet_cold",
+                  "drying_closet_cold_extract_air",
+                  "condensation",
+                  "electric_exhaust_air",
+                  "gas_exhaust_air",
+                  "heat_pump"
+                ]
+              },
+              "combined_energy_factor": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "x-unit": "lb/kWh"
+              },
+              "gas_consumption": {
+                "type": "number",
+                "minimum": 0
+              },
+              "gas_efficiency_factor": {
+                "type": "number",
+                "minimum": 0
+              },
+              "field_utilization_factor_type": {
+                "type": "integer",
+                "enum": [
+                  1
+                ],
+                "description": "1, timer controls."
+              },
+              "field_utilization_factor": {
+                "type": "number",
+                "minimum": 0
+              },
+              "cooktop_type": {
+                "type": "string",
+                "enum": [
+                  "electricity",
+                  "natural_gas",
+                  "lpg"
+                ]
+              },
+              "high_efficacy_fraction": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "x-unit": "fraction"
+              }
+            }
+          }
+        }
+      },
+      "description": "The new Equipment Set's values; any not given take their defaults, and a missing name the first free \"Equipment Set N\"."
+    },
+    "user_data": {
+      "type": "object",
+      "description": "Local JSON metadata kept with the record in the Model."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "values": {
+    "name": "Example Equipment Set"
+  }
+}
+```
+
+### `ph_composer.programs.equipment_sets.delete`
+
+Delete one Equipment Set; remaining uses refuse. Owner: `ph_composer.programs`.
+
+Undo step: Delete Equipment Set. A replacement takes every use, then the record goes, in one step.
+
+Refuses: `copy.rule_missing`, `programs.default_in_use`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^eqs_[A-Za-z0-9]{12}$",
+      "description": "The Equipment Set to delete."
+    },
+    "expected_values": {
+      "type": "object",
+      "description": "Any of the values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    },
+    "replacement_id": {
+      "type": "string",
+      "pattern": "^eqs_[A-Za-z0-9]{12}$",
+      "description": "The Equipment Set every use of the deleted one takes instead. Needed while anything uses it."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "removed_user_data",
+    "removed_user_data_total",
+    "removed_user_data_truncated"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "eqs_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.programs.equipment_sets.delete_device`
+
+Delete one device from its Equipment Set. Owner: `ph_composer.programs`.
+
+Undo step: Delete Device. Removes one device and its user_data.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "device_id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^eqs_[A-Za-z0-9]{12}$",
+      "description": "The Equipment Set."
+    },
+    "device_id": {
+      "type": "string",
+      "pattern": "^dev_[A-Za-z0-9]{12}$",
+      "description": "The device, by its id within the Equipment Set."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "display_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "quantity": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "in_conditioned_space": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "comment": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reference_quantity": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "The WUFI-Passive and METr reference quantity code the type allows."
+        },
+        "reference_energy_norm": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "The period energy_demand is given for: 1 a day or a use, 2 a year."
+        },
+        "energy_demand": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "kWh",
+          "description": "Per unit, over reference_energy_norm's period."
+        },
+        "energy_demand_per_use": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "kWh",
+          "description": "PHPP only; WUFI-Passive and METr ignore it."
+        },
+        "capacity_type": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "enum": [
+            1,
+            null
+          ],
+          "description": "1, standard."
+        },
+        "capacity_place_settings": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        },
+        "capacity_m3": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "m3"
+        },
+        "modified_energy_factor": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        },
+        "utilization_factor": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "water_connection": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "dhw",
+            "cold_water",
+            null
+          ]
+        },
+        "dryer_type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "clothes_line",
+            "drying_closet_cold",
+            "drying_closet_cold_extract_air",
+            "condensation",
+            "electric_exhaust_air",
+            "gas_exhaust_air",
+            "heat_pump",
+            null
+          ]
+        },
+        "combined_energy_factor": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "lb/kWh"
+        },
+        "gas_consumption": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "gas_efficiency_factor": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "field_utilization_factor_type": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "enum": [
+            1,
+            null
+          ],
+          "description": "1, timer controls."
+        },
+        "field_utilization_factor": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "cooktop_type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "electricity",
+            "natural_gas",
+            "lpg",
+            null
+          ]
+        },
+        "high_efficacy_fraction": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction"
+        }
+      },
+      "description": "Any of the values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "device_id",
+    "removed_user_data",
+    "removed_user_data_total",
+    "removed_user_data_truncated"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "device_id": {
+      "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "eqs_Ab12Cd34Ef56",
+  "device_id": "dev_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.programs.equipment_sets.duplicate`
+
+Duplicate one Equipment Set with a new identity. Owner: `ph_composer.programs`.
+
+Undo step: Duplicate Equipment Set. Creates one catalog record; Schedules stay shared.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^eqs_[A-Za-z0-9]{12}$",
+      "description": "The Equipment Set to copy."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The copy's name; \"<name> (copy)\" when absent."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "eqs_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.programs.equipment_sets.update`
+
+Edit one Equipment Set; changed expected values refuse. Owner: `ph_composer.programs`.
+
+Undo step: Edit Equipment Set. Updates values; metadata stays as stored.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "values",
+    "expected_values"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^eqs_[A-Za-z0-9]{12}$",
+      "description": "The Equipment Set to edit."
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library",
+                "ph_composer_default"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "devices": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "id",
+                      "type",
+                      "display_name",
+                      "quantity",
+                      "in_conditioned_space",
+                      "comment",
+                      "reference_quantity"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^dev_[A-Za-z0-9]{12}$",
+                        "description": "This device's id, unique within its Equipment Set."
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "dishwasher",
+                          "clothes_washer",
+                          "clothes_dryer",
+                          "refrigerator",
+                          "freezer",
+                          "fridge_freezer",
+                          "cooktop",
+                          "phius_mel",
+                          "phius_lighting_interior",
+                          "phius_lighting_exterior",
+                          "phius_lighting_garage",
+                          "custom_annual_electric",
+                          "custom_annual_lighting",
+                          "custom_annual_mel"
+                        ],
+                        "description": "The honeybee-ph type; fixed once added."
+                      },
+                      "display_name": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "quantity": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "in_conditioned_space": {
+                        "type": "boolean"
+                      },
+                      "comment": {
+                        "type": "string"
+                      },
+                      "reference_quantity": {
+                        "type": "integer",
+                        "description": "The WUFI-Passive and METr reference quantity code the type allows."
+                      },
+                      "user_data": {
+                        "type": "object",
+                        "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
+                      },
+                      "reference_energy_norm": {
+                        "type": "integer",
+                        "description": "The period energy_demand is given for: 1 a day or a use, 2 a year."
+                      },
+                      "energy_demand": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "kWh",
+                        "description": "Per unit, over reference_energy_norm's period."
+                      },
+                      "energy_demand_per_use": {
+                        "type": "number",
+                        "minimum": 0,
+                        "x-unit": "kWh",
+                        "description": "PHPP only; WUFI-Passive and METr ignore it."
+                      },
+                      "capacity_type": {
+                        "type": "integer",
+                        "enum": [
+                          1
+                        ],
+                        "description": "1, standard."
+                      },
+                      "capacity_place_settings": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      },
+                      "capacity_m3": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "x-unit": "m3"
+                      },
+                      "modified_energy_factor": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      },
+                      "utilization_factor": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "water_connection": {
+                        "type": "string",
+                        "enum": [
+                          "dhw",
+                          "cold_water"
+                        ]
+                      },
+                      "dryer_type": {
+                        "type": "string",
+                        "enum": [
+                          "clothes_line",
+                          "drying_closet_cold",
+                          "drying_closet_cold_extract_air",
+                          "condensation",
+                          "electric_exhaust_air",
+                          "gas_exhaust_air",
+                          "heat_pump"
+                        ]
+                      },
+                      "combined_energy_factor": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "x-unit": "lb/kWh"
+                      },
+                      "gas_consumption": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "gas_efficiency_factor": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "field_utilization_factor_type": {
+                        "type": "integer",
+                        "enum": [
+                          1
+                        ],
+                        "description": "1, timer controls."
+                      },
+                      "field_utilization_factor": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "cooktop_type": {
+                        "type": "string",
+                        "enum": [
+                          "electricity",
+                          "natural_gas",
+                          "lpg"
+                        ]
+                      },
+                      "high_efficacy_fraction": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "x-unit": "fraction"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "devices": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "type",
+              "display_name",
+              "quantity",
+              "in_conditioned_space",
+              "comment",
+              "reference_quantity"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^dev_[A-Za-z0-9]{12}$",
+                "description": "This device's id, unique within its Equipment Set."
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "dishwasher",
+                  "clothes_washer",
+                  "clothes_dryer",
+                  "refrigerator",
+                  "freezer",
+                  "fridge_freezer",
+                  "cooktop",
+                  "phius_mel",
+                  "phius_lighting_interior",
+                  "phius_lighting_exterior",
+                  "phius_lighting_garage",
+                  "custom_annual_electric",
+                  "custom_annual_lighting",
+                  "custom_annual_mel"
+                ],
+                "description": "The honeybee-ph type; fixed once added."
+              },
+              "display_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "in_conditioned_space": {
+                "type": "boolean"
+              },
+              "comment": {
+                "type": "string"
+              },
+              "reference_quantity": {
+                "type": "integer",
+                "description": "The WUFI-Passive and METr reference quantity code the type allows."
+              },
+              "user_data": {
+                "type": "object",
+                "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
+              },
+              "reference_energy_norm": {
+                "type": "integer",
+                "description": "The period energy_demand is given for: 1 a day or a use, 2 a year."
+              },
+              "energy_demand": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "kWh",
+                "description": "Per unit, over reference_energy_norm's period."
+              },
+              "energy_demand_per_use": {
+                "type": "number",
+                "minimum": 0,
+                "x-unit": "kWh",
+                "description": "PHPP only; WUFI-Passive and METr ignore it."
+              },
+              "capacity_type": {
+                "type": "integer",
+                "enum": [
+                  1
+                ],
+                "description": "1, standard."
+              },
+              "capacity_place_settings": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "capacity_m3": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "x-unit": "m3"
+              },
+              "modified_energy_factor": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "utilization_factor": {
+                "type": "number",
+                "minimum": 0
+              },
+              "water_connection": {
+                "type": "string",
+                "enum": [
+                  "dhw",
+                  "cold_water"
+                ]
+              },
+              "dryer_type": {
+                "type": "string",
+                "enum": [
+                  "clothes_line",
+                  "drying_closet_cold",
+                  "drying_closet_cold_extract_air",
+                  "condensation",
+                  "electric_exhaust_air",
+                  "gas_exhaust_air",
+                  "heat_pump"
+                ]
+              },
+              "combined_energy_factor": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "x-unit": "lb/kWh"
+              },
+              "gas_consumption": {
+                "type": "number",
+                "minimum": 0
+              },
+              "gas_efficiency_factor": {
+                "type": "number",
+                "minimum": 0
+              },
+              "field_utilization_factor_type": {
+                "type": "integer",
+                "enum": [
+                  1
+                ],
+                "description": "1, timer controls."
+              },
+              "field_utilization_factor": {
+                "type": "number",
+                "minimum": 0
+              },
+              "cooktop_type": {
+                "type": "string",
+                "enum": [
+                  "electricity",
+                  "natural_gas",
+                  "lpg"
+                ]
+              },
+              "high_efficacy_fraction": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "x-unit": "fraction"
+              }
+            }
+          }
+        }
+      },
+      "description": "The values to change; any not given stay."
+    },
+    "expected_values": {
+      "type": "object",
+      "description": "Any of the values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "eqs_Ab12Cd34Ef56",
+  "values": {
+    "name": "Edited"
+  },
+  "expected_values": {
+    "name": "Original"
+  }
+}
+```
+
+### `ph_composer.programs.equipment_sets.update_device`
+
+Edit one device's values; its type is fixed. Owner: `ph_composer.programs`.
+
+Undo step: Edit Device. Updates one device; its user_data stays.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "device_id",
+    "values",
+    "expected_values"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^eqs_[A-Za-z0-9]{12}$",
+      "description": "The Equipment Set."
+    },
+    "device_id": {
+      "type": "string",
+      "pattern": "^dev_[A-Za-z0-9]{12}$",
+      "description": "The device, by its id within the Equipment Set."
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "display_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "quantity": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "in_conditioned_space": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "comment": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reference_quantity": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "The WUFI-Passive and METr reference quantity code the type allows."
+        },
+        "reference_energy_norm": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "The period energy_demand is given for: 1 a day or a use, 2 a year."
+        },
+        "energy_demand": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "kWh",
+          "description": "Per unit, over reference_energy_norm's period."
+        },
+        "energy_demand_per_use": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "kWh",
+          "description": "PHPP only; WUFI-Passive and METr ignore it."
+        },
+        "capacity_type": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "enum": [
+            1,
+            null
+          ],
+          "description": "1, standard."
+        },
+        "capacity_place_settings": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        },
+        "capacity_m3": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "m3"
+        },
+        "modified_energy_factor": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        },
+        "utilization_factor": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "water_connection": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "dhw",
+            "cold_water",
+            null
+          ]
+        },
+        "dryer_type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "clothes_line",
+            "drying_closet_cold",
+            "drying_closet_cold_extract_air",
+            "condensation",
+            "electric_exhaust_air",
+            "gas_exhaust_air",
+            "heat_pump",
+            null
+          ]
+        },
+        "combined_energy_factor": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "lb/kWh"
+        },
+        "gas_consumption": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "gas_efficiency_factor": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "field_utilization_factor_type": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "enum": [
+            1,
+            null
+          ],
+          "description": "1, timer controls."
+        },
+        "field_utilization_factor": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "cooktop_type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "electricity",
+            "natural_gas",
+            "lpg",
+            null
+          ]
+        },
+        "high_efficacy_fraction": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction"
+        }
+      },
+      "description": "The values to change; null removes one."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "display_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "quantity": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "in_conditioned_space": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "comment": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reference_quantity": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "The WUFI-Passive and METr reference quantity code the type allows."
+        },
+        "reference_energy_norm": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "The period energy_demand is given for: 1 a day or a use, 2 a year."
+        },
+        "energy_demand": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "kWh",
+          "description": "Per unit, over reference_energy_norm's period."
+        },
+        "energy_demand_per_use": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "kWh",
+          "description": "PHPP only; WUFI-Passive and METr ignore it."
+        },
+        "capacity_type": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "enum": [
+            1,
+            null
+          ],
+          "description": "1, standard."
+        },
+        "capacity_place_settings": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        },
+        "capacity_m3": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "m3"
+        },
+        "modified_energy_factor": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        },
+        "utilization_factor": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "water_connection": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "dhw",
+            "cold_water",
+            null
+          ]
+        },
+        "dryer_type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "clothes_line",
+            "drying_closet_cold",
+            "drying_closet_cold_extract_air",
+            "condensation",
+            "electric_exhaust_air",
+            "gas_exhaust_air",
+            "heat_pump",
+            null
+          ]
+        },
+        "combined_energy_factor": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "x-unit": "lb/kWh"
+        },
+        "gas_consumption": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "gas_efficiency_factor": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "field_utilization_factor_type": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "enum": [
+            1,
+            null
+          ],
+          "description": "1, timer controls."
+        },
+        "field_utilization_factor": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "cooktop_type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "electricity",
+            "natural_gas",
+            "lpg",
+            null
+          ]
+        },
+        "high_efficacy_fraction": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction"
+        }
+      },
+      "description": "Any of the values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "device_id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "device_id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "eqs_Ab12Cd34Ef56",
+  "device_id": "dev_Ab12Cd34Ef56",
+  "values": {
+    "quantity": 2
+  },
+  "expected_values": {
+    "quantity": 1
+  }
+}
+```
+
+### `ph_composer.programs.programs.create`
+
+Create one Program with default values. Owner: `ph_composer.programs`.
+
+Undo step: Create Program. Creates one catalog record.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        },
+        "datasheet_links": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library",
+                "ph_composer_default"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "people": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "rule",
+                    "people_per_area",
+                    "occupancy_schedule_id",
+                    "activity_schedule_id",
+                    "radiant_fraction",
+                    "latent_fraction"
+                  ],
+                  "properties": {
+                    "rule": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "phius_residential",
+                        null
+                      ],
+                      "description": "phius_residential while the rule sets this load; null for the fixed value."
+                    },
+                    "people_per_area": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "x-unit": "people/m2",
+                      "description": "Peak people per m² of floor."
+                    },
+                    "occupancy_schedule_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^sch_[A-Za-z0-9]{12}$",
+                      "description": "A fractional Schedule, of the peak."
+                    },
+                    "activity_schedule_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^sch_[A-Za-z0-9]{12}$",
+                      "description": "An activity Schedule, W per person."
+                    },
+                    "radiant_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "latent_fraction": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction",
+                      "description": "Null for honeybee's autocalculate."
+                    },
+                    "source": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The base program this load's values came from, for a library Program."
+                    }
+                  }
+                },
+                "lighting": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "rule",
+                    "watts_per_area",
+                    "high_efficacy_fraction",
+                    "schedule_id",
+                    "return_air_fraction",
+                    "radiant_fraction",
+                    "visible_fraction"
+                  ],
+                  "properties": {
+                    "rule": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "phius_interior",
+                        null
+                      ],
+                      "description": "phius_interior while the rule sets this load; null for the fixed value."
+                    },
+                    "watts_per_area": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "x-unit": "W/m2"
+                    },
+                    "high_efficacy_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction",
+                      "description": "The Phius rule's input: the share of high-efficacy lighting."
+                    },
+                    "schedule_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^sch_[A-Za-z0-9]{12}$",
+                      "description": "A fractional Schedule."
+                    },
+                    "return_air_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "radiant_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "visible_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "source": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The base program this load's values came from, for a library Program."
+                    }
+                  }
+                },
+                "electric_equipment": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "watts_per_area",
+                    "schedule_id",
+                    "radiant_fraction",
+                    "latent_fraction",
+                    "lost_fraction"
+                  ],
+                  "properties": {
+                    "watts_per_area": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "x-unit": "W/m2"
+                    },
+                    "schedule_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^sch_[A-Za-z0-9]{12}$",
+                      "description": "A fractional Schedule."
+                    },
+                    "radiant_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "latent_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "lost_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "source": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The base program this load's values came from, for a library Program."
+                    }
+                  }
+                },
+                "gas_equipment": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "watts_per_area",
+                    "schedule_id",
+                    "radiant_fraction",
+                    "latent_fraction",
+                    "lost_fraction"
+                  ],
+                  "properties": {
+                    "watts_per_area": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "x-unit": "W/m2"
+                    },
+                    "schedule_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^sch_[A-Za-z0-9]{12}$",
+                      "description": "A fractional Schedule."
+                    },
+                    "radiant_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "latent_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "lost_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "source": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The base program this load's values came from, for a library Program."
+                    }
+                  }
+                },
+                "service_hot_water": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "rule",
+                    "flow_per_area",
+                    "target_temperature_c",
+                    "schedule_id",
+                    "sensible_fraction",
+                    "latent_fraction"
+                  ],
+                  "properties": {
+                    "rule": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "building_america",
+                        null
+                      ],
+                      "description": "building_america while the rule sets this load; null for the fixed value."
+                    },
+                    "flow_per_area": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "x-unit": "L/h/m2",
+                      "description": "Peak flow per m² of floor."
+                    },
+                    "target_temperature_c": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 100,
+                      "x-unit": "C"
+                    },
+                    "schedule_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^sch_[A-Za-z0-9]{12}$",
+                      "description": "A fractional Schedule."
+                    },
+                    "sensible_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "latent_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "source": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The base program this load's values came from, for a library Program."
+                    }
+                  }
+                },
+                "infiltration": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "flow_per_exterior_area",
+                    "schedule_id"
+                  ],
+                  "properties": {
+                    "flow_per_exterior_area": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "x-unit": "m3/s/m2",
+                      "description": "Per m² of exposed exterior area, at about 4 Pa."
+                    },
+                    "schedule_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^sch_[A-Za-z0-9]{12}$",
+                      "description": "A fractional Schedule."
+                    },
+                    "source": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The base program this load's values came from, for a library Program."
+                    }
+                  }
+                },
+                "ventilation": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "flow_per_person",
+                    "flow_per_area",
+                    "flow_per_zone",
+                    "air_changes_per_hour",
+                    "schedule_id"
+                  ],
+                  "properties": {
+                    "flow_per_person": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "x-unit": "m3/s/person"
+                    },
+                    "flow_per_area": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "x-unit": "m3/s/m2"
+                    },
+                    "flow_per_zone": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "x-unit": "m3/s"
+                    },
+                    "air_changes_per_hour": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "x-unit": "1/h"
+                    },
+                    "schedule_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^sch_[A-Za-z0-9]{12}$",
+                      "description": "A ventilation Schedule."
+                    },
+                    "source": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The base program this load's values came from, for a library Program."
+                    }
+                  }
+                },
+                "setpoint": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "heating_c",
+                    "cooling_c",
+                    "heating_schedule_id",
+                    "cooling_schedule_id",
+                    "dehumidify_rh",
+                    "humidify_rh"
+                  ],
+                  "properties": {
+                    "heating_c": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "C"
+                    },
+                    "cooling_c": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "C"
+                    },
+                    "heating_schedule_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^sch_[A-Za-z0-9]{12}$",
+                      "description": "A temperature Schedule, in place of heating_c."
+                    },
+                    "cooling_schedule_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^sch_[A-Za-z0-9]{12}$",
+                      "description": "A temperature Schedule, in place of cooling_c."
+                    },
+                    "dehumidify_rh": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "maximum": 100,
+                      "x-unit": "%"
+                    },
+                    "humidify_rh": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "maximum": 100,
+                      "x-unit": "%"
+                    },
+                    "source": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The base program this load's values came from, for a library Program."
+                    }
+                  }
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "people": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule",
+            "people_per_area",
+            "occupancy_schedule_id",
+            "activity_schedule_id",
+            "radiant_fraction",
+            "latent_fraction"
+          ],
+          "properties": {
+            "rule": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "phius_residential",
+                null
+              ],
+              "description": "phius_residential while the rule sets this load; null for the fixed value."
+            },
+            "people_per_area": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "x-unit": "people/m2",
+              "description": "Peak people per m² of floor."
+            },
+            "occupancy_schedule_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^sch_[A-Za-z0-9]{12}$",
+              "description": "A fractional Schedule, of the peak."
+            },
+            "activity_schedule_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^sch_[A-Za-z0-9]{12}$",
+              "description": "An activity Schedule, W per person."
+            },
+            "radiant_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "latent_fraction": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction",
+              "description": "Null for honeybee's autocalculate."
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The base program this load's values came from, for a library Program."
+            }
+          }
+        },
+        "lighting": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule",
+            "watts_per_area",
+            "high_efficacy_fraction",
+            "schedule_id",
+            "return_air_fraction",
+            "radiant_fraction",
+            "visible_fraction"
+          ],
+          "properties": {
+            "rule": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "phius_interior",
+                null
+              ],
+              "description": "phius_interior while the rule sets this load; null for the fixed value."
+            },
+            "watts_per_area": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "x-unit": "W/m2"
+            },
+            "high_efficacy_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction",
+              "description": "The Phius rule's input: the share of high-efficacy lighting."
+            },
+            "schedule_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^sch_[A-Za-z0-9]{12}$",
+              "description": "A fractional Schedule."
+            },
+            "return_air_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "radiant_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "visible_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The base program this load's values came from, for a library Program."
+            }
+          }
+        },
+        "electric_equipment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "watts_per_area",
+            "schedule_id",
+            "radiant_fraction",
+            "latent_fraction",
+            "lost_fraction"
+          ],
+          "properties": {
+            "watts_per_area": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "x-unit": "W/m2"
+            },
+            "schedule_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^sch_[A-Za-z0-9]{12}$",
+              "description": "A fractional Schedule."
+            },
+            "radiant_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "latent_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "lost_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The base program this load's values came from, for a library Program."
+            }
+          }
+        },
+        "gas_equipment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "watts_per_area",
+            "schedule_id",
+            "radiant_fraction",
+            "latent_fraction",
+            "lost_fraction"
+          ],
+          "properties": {
+            "watts_per_area": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "x-unit": "W/m2"
+            },
+            "schedule_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^sch_[A-Za-z0-9]{12}$",
+              "description": "A fractional Schedule."
+            },
+            "radiant_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "latent_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "lost_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The base program this load's values came from, for a library Program."
+            }
+          }
+        },
+        "service_hot_water": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rule",
+            "flow_per_area",
+            "target_temperature_c",
+            "schedule_id",
+            "sensible_fraction",
+            "latent_fraction"
+          ],
+          "properties": {
+            "rule": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "building_america",
+                null
+              ],
+              "description": "building_america while the rule sets this load; null for the fixed value."
+            },
+            "flow_per_area": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "x-unit": "L/h/m2",
+              "description": "Peak flow per m² of floor."
+            },
+            "target_temperature_c": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 100,
+              "x-unit": "C"
+            },
+            "schedule_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^sch_[A-Za-z0-9]{12}$",
+              "description": "A fractional Schedule."
+            },
+            "sensible_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "latent_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The base program this load's values came from, for a library Program."
+            }
+          }
+        },
+        "infiltration": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "flow_per_exterior_area",
+            "schedule_id"
+          ],
+          "properties": {
+            "flow_per_exterior_area": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "x-unit": "m3/s/m2",
+              "description": "Per m² of exposed exterior area, at about 4 Pa."
+            },
+            "schedule_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^sch_[A-Za-z0-9]{12}$",
+              "description": "A fractional Schedule."
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The base program this load's values came from, for a library Program."
+            }
+          }
+        },
+        "ventilation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "flow_per_person",
+            "flow_per_area",
+            "flow_per_zone",
+            "air_changes_per_hour",
+            "schedule_id"
+          ],
+          "properties": {
+            "flow_per_person": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "x-unit": "m3/s/person"
+            },
+            "flow_per_area": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "x-unit": "m3/s/m2"
+            },
+            "flow_per_zone": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "x-unit": "m3/s"
+            },
+            "air_changes_per_hour": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "x-unit": "1/h"
+            },
+            "schedule_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^sch_[A-Za-z0-9]{12}$",
+              "description": "A ventilation Schedule."
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The base program this load's values came from, for a library Program."
+            }
+          }
+        },
+        "setpoint": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "heating_c",
+            "cooling_c",
+            "heating_schedule_id",
+            "cooling_schedule_id",
+            "dehumidify_rh",
+            "humidify_rh"
+          ],
+          "properties": {
+            "heating_c": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "C"
+            },
+            "cooling_c": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "C"
+            },
+            "heating_schedule_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^sch_[A-Za-z0-9]{12}$",
+              "description": "A temperature Schedule, in place of heating_c."
+            },
+            "cooling_schedule_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^sch_[A-Za-z0-9]{12}$",
+              "description": "A temperature Schedule, in place of cooling_c."
+            },
+            "dehumidify_rh": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 100,
+              "x-unit": "%"
+            },
+            "humidify_rh": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 100,
+              "x-unit": "%"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The base program this load's values came from, for a library Program."
+            }
+          }
+        }
+      },
+      "description": "The new Program's values; any not given take their defaults, and a missing name the first free \"Program N\"."
+    },
+    "user_data": {
+      "type": "object",
+      "description": "Local JSON metadata kept with the record in the Model."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "values": {
+    "name": "Example Program"
+  }
+}
+```
+
+### `ph_composer.programs.programs.delete`
+
+Delete one Program; remaining uses refuse. Owner: `ph_composer.programs`.
+
+Undo step: Delete Program. A replacement takes every use, then the record goes, in one step.
+
+Refuses: `copy.rule_missing`, `programs.default_in_use`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^pgm_[A-Za-z0-9]{12}$",
+      "description": "The Program to delete."
+    },
+    "expected_values": {
+      "type": "object",
+      "description": "Any of the values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    },
+    "replacement_id": {
+      "type": "string",
+      "pattern": "^pgm_[A-Za-z0-9]{12}$",
+      "description": "The Program every use of the deleted one takes instead. Needed while anything uses it."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "removed_user_data",
+    "removed_user_data_total",
+    "removed_user_data_truncated"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "pgm_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.programs.programs.duplicate`
+
+Duplicate one Program with a new identity. Owner: `ph_composer.programs`.
+
+Undo step: Duplicate Program. Creates one catalog record; Schedules stay shared.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^pgm_[A-Za-z0-9]{12}$",
+      "description": "The Program to copy."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The copy's name; \"<name> (copy)\" when absent."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "pgm_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.programs.programs.update`
+
+Edit one Program; changed expected values refuse. Owner: `ph_composer.programs`.
+
+Undo step: Edit Program. Updates values; metadata stays as stored.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "values",
+    "expected_values"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^pgm_[A-Za-z0-9]{12}$",
+      "description": "The Program to edit."
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library",
+                "ph_composer_default"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "people": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "rule",
+                    "people_per_area",
+                    "occupancy_schedule_id",
+                    "activity_schedule_id",
+                    "radiant_fraction",
+                    "latent_fraction"
+                  ],
+                  "properties": {
+                    "rule": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "phius_residential",
+                        null
+                      ],
+                      "description": "phius_residential while the rule sets this load; null for the fixed value."
+                    },
+                    "people_per_area": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "x-unit": "people/m2",
+                      "description": "Peak people per m² of floor."
+                    },
+                    "occupancy_schedule_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^sch_[A-Za-z0-9]{12}$",
+                      "description": "A fractional Schedule, of the peak."
+                    },
+                    "activity_schedule_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^sch_[A-Za-z0-9]{12}$",
+                      "description": "An activity Schedule, W per person."
+                    },
+                    "radiant_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "latent_fraction": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction",
+                      "description": "Null for honeybee's autocalculate."
+                    },
+                    "source": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The base program this load's values came from, for a library Program."
+                    }
+                  }
+                },
+                "lighting": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "rule",
+                    "watts_per_area",
+                    "high_efficacy_fraction",
+                    "schedule_id",
+                    "return_air_fraction",
+                    "radiant_fraction",
+                    "visible_fraction"
+                  ],
+                  "properties": {
+                    "rule": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "phius_interior",
+                        null
+                      ],
+                      "description": "phius_interior while the rule sets this load; null for the fixed value."
+                    },
+                    "watts_per_area": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "x-unit": "W/m2"
+                    },
+                    "high_efficacy_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction",
+                      "description": "The Phius rule's input: the share of high-efficacy lighting."
+                    },
+                    "schedule_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^sch_[A-Za-z0-9]{12}$",
+                      "description": "A fractional Schedule."
+                    },
+                    "return_air_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "radiant_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "visible_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "source": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The base program this load's values came from, for a library Program."
+                    }
+                  }
+                },
+                "electric_equipment": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "watts_per_area",
+                    "schedule_id",
+                    "radiant_fraction",
+                    "latent_fraction",
+                    "lost_fraction"
+                  ],
+                  "properties": {
+                    "watts_per_area": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "x-unit": "W/m2"
+                    },
+                    "schedule_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^sch_[A-Za-z0-9]{12}$",
+                      "description": "A fractional Schedule."
+                    },
+                    "radiant_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "latent_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "lost_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "source": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The base program this load's values came from, for a library Program."
+                    }
+                  }
+                },
+                "gas_equipment": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "watts_per_area",
+                    "schedule_id",
+                    "radiant_fraction",
+                    "latent_fraction",
+                    "lost_fraction"
+                  ],
+                  "properties": {
+                    "watts_per_area": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "x-unit": "W/m2"
+                    },
+                    "schedule_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^sch_[A-Za-z0-9]{12}$",
+                      "description": "A fractional Schedule."
+                    },
+                    "radiant_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "latent_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "lost_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "source": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The base program this load's values came from, for a library Program."
+                    }
+                  }
+                },
+                "service_hot_water": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "rule",
+                    "flow_per_area",
+                    "target_temperature_c",
+                    "schedule_id",
+                    "sensible_fraction",
+                    "latent_fraction"
+                  ],
+                  "properties": {
+                    "rule": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "building_america",
+                        null
+                      ],
+                      "description": "building_america while the rule sets this load; null for the fixed value."
+                    },
+                    "flow_per_area": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "x-unit": "L/h/m2",
+                      "description": "Peak flow per m² of floor."
+                    },
+                    "target_temperature_c": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 100,
+                      "x-unit": "C"
+                    },
+                    "schedule_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^sch_[A-Za-z0-9]{12}$",
+                      "description": "A fractional Schedule."
+                    },
+                    "sensible_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "latent_fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "x-unit": "fraction"
+                    },
+                    "source": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The base program this load's values came from, for a library Program."
+                    }
+                  }
+                },
+                "infiltration": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "flow_per_exterior_area",
+                    "schedule_id"
+                  ],
+                  "properties": {
+                    "flow_per_exterior_area": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "x-unit": "m3/s/m2",
+                      "description": "Per m² of exposed exterior area, at about 4 Pa."
+                    },
+                    "schedule_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^sch_[A-Za-z0-9]{12}$",
+                      "description": "A fractional Schedule."
+                    },
+                    "source": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The base program this load's values came from, for a library Program."
+                    }
+                  }
+                },
+                "ventilation": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "flow_per_person",
+                    "flow_per_area",
+                    "flow_per_zone",
+                    "air_changes_per_hour",
+                    "schedule_id"
+                  ],
+                  "properties": {
+                    "flow_per_person": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "x-unit": "m3/s/person"
+                    },
+                    "flow_per_area": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "x-unit": "m3/s/m2"
+                    },
+                    "flow_per_zone": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "x-unit": "m3/s"
+                    },
+                    "air_changes_per_hour": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "x-unit": "1/h"
+                    },
+                    "schedule_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^sch_[A-Za-z0-9]{12}$",
+                      "description": "A ventilation Schedule."
+                    },
+                    "source": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The base program this load's values came from, for a library Program."
+                    }
+                  }
+                },
+                "setpoint": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "heating_c",
+                    "cooling_c",
+                    "heating_schedule_id",
+                    "cooling_schedule_id",
+                    "dehumidify_rh",
+                    "humidify_rh"
+                  ],
+                  "properties": {
+                    "heating_c": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "C"
+                    },
+                    "cooling_c": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "x-unit": "C"
+                    },
+                    "heating_schedule_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^sch_[A-Za-z0-9]{12}$",
+                      "description": "A temperature Schedule, in place of heating_c."
+                    },
+                    "cooling_schedule_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^sch_[A-Za-z0-9]{12}$",
+                      "description": "A temperature Schedule, in place of cooling_c."
+                    },
+                    "dehumidify_rh": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "maximum": 100,
+                      "x-unit": "%"
+                    },
+                    "humidify_rh": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "maximum": 100,
+                      "x-unit": "%"
+                    },
+                    "source": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The base program this load's values came from, for a library Program."
+                    }
+                  }
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "people": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "rule",
+            "people_per_area",
+            "occupancy_schedule_id",
+            "activity_schedule_id",
+            "radiant_fraction",
+            "latent_fraction"
+          ],
+          "properties": {
+            "rule": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "phius_residential",
+                null
+              ],
+              "description": "phius_residential while the rule sets this load; null for the fixed value."
+            },
+            "people_per_area": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "x-unit": "people/m2",
+              "description": "Peak people per m² of floor."
+            },
+            "occupancy_schedule_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^sch_[A-Za-z0-9]{12}$",
+              "description": "A fractional Schedule, of the peak."
+            },
+            "activity_schedule_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^sch_[A-Za-z0-9]{12}$",
+              "description": "An activity Schedule, W per person."
+            },
+            "radiant_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "latent_fraction": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction",
+              "description": "Null for honeybee's autocalculate."
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The base program this load's values came from, for a library Program."
+            }
+          }
+        },
+        "lighting": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "rule",
+            "watts_per_area",
+            "high_efficacy_fraction",
+            "schedule_id",
+            "return_air_fraction",
+            "radiant_fraction",
+            "visible_fraction"
+          ],
+          "properties": {
+            "rule": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "phius_interior",
+                null
+              ],
+              "description": "phius_interior while the rule sets this load; null for the fixed value."
+            },
+            "watts_per_area": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "x-unit": "W/m2"
+            },
+            "high_efficacy_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction",
+              "description": "The Phius rule's input: the share of high-efficacy lighting."
+            },
+            "schedule_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^sch_[A-Za-z0-9]{12}$",
+              "description": "A fractional Schedule."
+            },
+            "return_air_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "radiant_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "visible_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The base program this load's values came from, for a library Program."
+            }
+          }
+        },
+        "electric_equipment": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "watts_per_area",
+            "schedule_id",
+            "radiant_fraction",
+            "latent_fraction",
+            "lost_fraction"
+          ],
+          "properties": {
+            "watts_per_area": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "x-unit": "W/m2"
+            },
+            "schedule_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^sch_[A-Za-z0-9]{12}$",
+              "description": "A fractional Schedule."
+            },
+            "radiant_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "latent_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "lost_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The base program this load's values came from, for a library Program."
+            }
+          }
+        },
+        "gas_equipment": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "watts_per_area",
+            "schedule_id",
+            "radiant_fraction",
+            "latent_fraction",
+            "lost_fraction"
+          ],
+          "properties": {
+            "watts_per_area": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "x-unit": "W/m2"
+            },
+            "schedule_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^sch_[A-Za-z0-9]{12}$",
+              "description": "A fractional Schedule."
+            },
+            "radiant_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "latent_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "lost_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The base program this load's values came from, for a library Program."
+            }
+          }
+        },
+        "service_hot_water": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "rule",
+            "flow_per_area",
+            "target_temperature_c",
+            "schedule_id",
+            "sensible_fraction",
+            "latent_fraction"
+          ],
+          "properties": {
+            "rule": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "building_america",
+                null
+              ],
+              "description": "building_america while the rule sets this load; null for the fixed value."
+            },
+            "flow_per_area": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "x-unit": "L/h/m2",
+              "description": "Peak flow per m² of floor."
+            },
+            "target_temperature_c": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 100,
+              "x-unit": "C"
+            },
+            "schedule_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^sch_[A-Za-z0-9]{12}$",
+              "description": "A fractional Schedule."
+            },
+            "sensible_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "latent_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "x-unit": "fraction"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The base program this load's values came from, for a library Program."
+            }
+          }
+        },
+        "infiltration": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "flow_per_exterior_area",
+            "schedule_id"
+          ],
+          "properties": {
+            "flow_per_exterior_area": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "x-unit": "m3/s/m2",
+              "description": "Per m² of exposed exterior area, at about 4 Pa."
+            },
+            "schedule_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^sch_[A-Za-z0-9]{12}$",
+              "description": "A fractional Schedule."
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The base program this load's values came from, for a library Program."
+            }
+          }
+        },
+        "ventilation": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "flow_per_person",
+            "flow_per_area",
+            "flow_per_zone",
+            "air_changes_per_hour",
+            "schedule_id"
+          ],
+          "properties": {
+            "flow_per_person": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "x-unit": "m3/s/person"
+            },
+            "flow_per_area": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "x-unit": "m3/s/m2"
+            },
+            "flow_per_zone": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "x-unit": "m3/s"
+            },
+            "air_changes_per_hour": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "x-unit": "1/h"
+            },
+            "schedule_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^sch_[A-Za-z0-9]{12}$",
+              "description": "A ventilation Schedule."
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The base program this load's values came from, for a library Program."
+            }
+          }
+        },
+        "setpoint": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "heating_c",
+            "cooling_c",
+            "heating_schedule_id",
+            "cooling_schedule_id",
+            "dehumidify_rh",
+            "humidify_rh"
+          ],
+          "properties": {
+            "heating_c": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "C"
+            },
+            "cooling_c": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "x-unit": "C"
+            },
+            "heating_schedule_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^sch_[A-Za-z0-9]{12}$",
+              "description": "A temperature Schedule, in place of heating_c."
+            },
+            "cooling_schedule_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^sch_[A-Za-z0-9]{12}$",
+              "description": "A temperature Schedule, in place of cooling_c."
+            },
+            "dehumidify_rh": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 100,
+              "x-unit": "%"
+            },
+            "humidify_rh": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 100,
+              "x-unit": "%"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The base program this load's values came from, for a library Program."
+            }
+          }
+        }
+      },
+      "description": "The values to change; any not given stay."
+    },
+    "expected_values": {
+      "type": "object",
+      "description": "Any of the values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "pgm_Ab12Cd34Ef56",
+  "values": {
+    "name": "Edited"
+  },
+  "expected_values": {
+    "name": "Original"
+  }
+}
+```
+
+### `ph_composer.programs.reset_default`
+
+Rewrite the residential default Program or the default Equipment Set from PH-Composer's definition, writing back any default Schedule it names that is gone. Owner: `ph_composer.programs`.
+
+Undo step: Reset to PH-Composer Default. Replaces the record's values; its user_data stays, and a device the definition lacks goes with its map.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind"
+  ],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": [
+        "program",
+        "equipment_set"
+      ],
+      "description": "Which default to reset."
+    },
+    "expected_values": {
+      "type": "object",
+      "description": "Any of the values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "removed_user_data",
+    "removed_user_data_total",
+    "removed_user_data_truncated"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "kind": "program"
+}
+```
+
+Example params:
+
+```json
+{
+  "kind": "equipment_set"
+}
+```
+
+### `ph_composer.programs.schedules.create`
+
+Create one Schedule with default values. Owner: `ph_composer.programs`.
+
+Undo step: Create Schedule. Creates one catalog record.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        },
+        "datasheet_links": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library",
+                "ph_composer_default"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "fractional",
+                    "activity",
+                    "temperature",
+                    "ventilation"
+                  ]
+                },
+                "days_per_week": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 7
+                },
+                "weeks_per_year": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 52
+                },
+                "start_h": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 23,
+                  "x-unit": "h"
+                },
+                "end_h": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 24,
+                  "x-unit": "h"
+                },
+                "fraction_on": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction"
+                },
+                "fraction_off": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction"
+                },
+                "watts_on": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "W/person"
+                },
+                "watts_off": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "W/person"
+                },
+                "value_c": {
+                  "type": "number",
+                  "minimum": -273.15,
+                  "x-unit": "C"
+                },
+                "periods": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "period",
+                      "hours",
+                      "fraction"
+                    ],
+                    "properties": {
+                      "period": {
+                        "type": "string",
+                        "enum": [
+                          "high",
+                          "standard",
+                          "basic",
+                          "minimum"
+                        ]
+                      },
+                      "hours": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 24,
+                        "x-unit": "h"
+                      },
+                      "fraction": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "x-unit": "fraction",
+                        "description": "The share of the design flow in this period."
+                      }
+                    }
+                  },
+                  "minItems": 4,
+                  "maxItems": 4
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "fractional",
+            "activity",
+            "temperature",
+            "ventilation"
+          ]
+        },
+        "days_per_week": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 7
+        },
+        "weeks_per_year": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 52
+        },
+        "start_h": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 23,
+          "x-unit": "h"
+        },
+        "end_h": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 24,
+          "x-unit": "h"
+        },
+        "fraction_on": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction"
+        },
+        "fraction_off": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction"
+        },
+        "watts_on": {
+          "type": "number",
+          "minimum": 0,
+          "x-unit": "W/person"
+        },
+        "watts_off": {
+          "type": "number",
+          "minimum": 0,
+          "x-unit": "W/person"
+        },
+        "value_c": {
+          "type": "number",
+          "minimum": -273.15,
+          "x-unit": "C"
+        },
+        "periods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "period",
+              "hours",
+              "fraction"
+            ],
+            "properties": {
+              "period": {
+                "type": "string",
+                "enum": [
+                  "high",
+                  "standard",
+                  "basic",
+                  "minimum"
+                ]
+              },
+              "hours": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 24,
+                "x-unit": "h"
+              },
+              "fraction": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "x-unit": "fraction",
+                "description": "The share of the design flow in this period."
+              }
+            }
+          },
+          "minItems": 4,
+          "maxItems": 4
+        }
+      },
+      "description": "The new Schedule's values; any not given take their defaults, and a missing name the first free \"Schedule N\"."
+    },
+    "user_data": {
+      "type": "object",
+      "description": "Local JSON metadata kept with the record in the Model."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+Example params:
+
+```json
+{
+  "values": {
+    "name": "Example Schedule"
+  }
+}
+```
+
+### `ph_composer.programs.schedules.delete`
+
+Delete one Schedule; remaining uses refuse. Owner: `ph_composer.programs`.
+
+Undo step: Delete Schedule. A replacement takes every use, then the record goes, in one step.
+
+Refuses: `copy.rule_missing`, `programs.default_in_use`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^sch_[A-Za-z0-9]{12}$",
+      "description": "The Schedule to delete."
+    },
+    "expected_values": {
+      "type": "object",
+      "description": "Any of the values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    },
+    "replacement_id": {
+      "type": "string",
+      "pattern": "^sch_[A-Za-z0-9]{12}$",
+      "description": "The Schedule every use of the deleted one takes instead. Needed while anything uses it."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "removed_user_data",
+    "removed_user_data_total",
+    "removed_user_data_truncated"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "sch_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.programs.schedules.duplicate`
+
+Duplicate one Schedule with a new identity. Owner: `ph_composer.programs`.
+
+Undo step: Duplicate Schedule. Creates one catalog record; Schedules stay shared.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^sch_[A-Za-z0-9]{12}$",
+      "description": "The Schedule to copy."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The copy's name; \"<name> (copy)\" when absent."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "sch_Ab12Cd34Ef56"
+}
+```
+
+### `ph_composer.programs.schedules.update`
+
+Edit one Schedule; changed expected values refuse. Owner: `ph_composer.programs`.
+
+Undo step: Edit Schedule. Updates values; metadata stays as stored.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "values",
+    "expected_values"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^sch_[A-Za-z0-9]{12}$",
+      "description": "The Schedule to edit."
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "datasheet_links": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "provider_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "library_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "copied_at": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "derived",
+                "library",
+                "ph_composer_default"
+              ]
+            },
+            "fingerprint_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            },
+            "snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "datasheet_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "fractional",
+                    "activity",
+                    "temperature",
+                    "ventilation"
+                  ]
+                },
+                "days_per_week": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 7
+                },
+                "weeks_per_year": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 52
+                },
+                "start_h": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 23,
+                  "x-unit": "h"
+                },
+                "end_h": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 24,
+                  "x-unit": "h"
+                },
+                "fraction_on": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction"
+                },
+                "fraction_off": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-unit": "fraction"
+                },
+                "watts_on": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "W/person"
+                },
+                "watts_off": {
+                  "type": "number",
+                  "minimum": 0,
+                  "x-unit": "W/person"
+                },
+                "value_c": {
+                  "type": "number",
+                  "minimum": -273.15,
+                  "x-unit": "C"
+                },
+                "periods": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "period",
+                      "hours",
+                      "fraction"
+                    ],
+                    "properties": {
+                      "period": {
+                        "type": "string",
+                        "enum": [
+                          "high",
+                          "standard",
+                          "basic",
+                          "minimum"
+                        ]
+                      },
+                      "hours": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 24,
+                        "x-unit": "h"
+                      },
+                      "fraction": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "x-unit": "fraction",
+                        "description": "The share of the design flow in this period."
+                      }
+                    }
+                  },
+                  "minItems": 4,
+                  "maxItems": 4
+                }
+              }
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_revision_schema_version": {
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          }
+        },
+        "type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "fractional",
+            "activity",
+            "temperature",
+            "ventilation",
+            null
+          ]
+        },
+        "days_per_week": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 7
+        },
+        "weeks_per_year": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 52
+        },
+        "start_h": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 23,
+          "x-unit": "h"
+        },
+        "end_h": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 24,
+          "x-unit": "h"
+        },
+        "fraction_on": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction"
+        },
+        "fraction_off": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "x-unit": "fraction"
+        },
+        "watts_on": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "W/person"
+        },
+        "watts_off": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "x-unit": "W/person"
+        },
+        "value_c": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -273.15,
+          "x-unit": "C"
+        },
+        "periods": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "period",
+              "hours",
+              "fraction"
+            ],
+            "properties": {
+              "period": {
+                "type": "string",
+                "enum": [
+                  "high",
+                  "standard",
+                  "basic",
+                  "minimum"
+                ]
+              },
+              "hours": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 24,
+                "x-unit": "h"
+              },
+              "fraction": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "x-unit": "fraction",
+                "description": "The share of the design flow in this period."
+              }
+            }
+          },
+          "minItems": 4,
+          "maxItems": 4
+        }
+      },
+      "description": "The values to change; any not given stay."
+    },
+    "expected_values": {
+      "type": "object",
+      "description": "Any of the values as last read; if one changed since, the edit is refused as target.changed. {} skips the check."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "sch_Ab12Cd34Ef56",
+  "values": {
+    "name": "Edited"
+  },
+  "expected_values": {
+    "name": "Original"
+  }
+}
+```
+
+### `ph_composer.programs.settings.update`
+
+Choose the Model's default Program or Equipment Set; each update guards only the defaults it names. Owner: `ph_composer.programs`.
+
+Undo step: Change Programs Defaults. Stores the defaults in this SKP, and stores the residential default it displaces.
+
+Refuses: `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.not_found`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "values",
+    "expected_values"
+  ],
+  "properties": {
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "default_program_id": {
+          "type": "string"
+        },
+        "default_equipment_set_id": {
+          "type": "string"
+        }
+      },
+      "description": "The defaults to change, at least one."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "default_program_id": {
+          "type": "string"
+        },
+        "default_equipment_set_id": {
+          "type": "string"
+        }
+      },
+      "description": "The defaults as last read."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "default_program_id",
+    "default_equipment_set_id"
+  ],
+  "properties": {
+    "default_program_id": {
+      "type": "string"
+    },
+    "default_equipment_set_id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "values": {
+    "default_program_id": "pgm_Ab12Cd34Ef56"
+  },
+  "expected_values": {
+    "default_program_id": "pgm_PHCDEFAULT01"
+  }
+}
+```
+
 ### `ph_composer.records.update_metadata`
 
 Replace the user_data and installed extension payloads of stored records of any kind ph_composer.records.list reads, or the user_data of a record's part, such as an Assembly's Layer or Layer-Segment, by part_ids; guarded by the metadata last read. Values are not changed; a kind's own update action edits them. A Building Segment or Level write also rewrites the copy each Zone and member stamp keeps, in the same Undo step. An internal kind, such as Zone option settings, refuses as target.wrong_kind. Owner: `ph_composer.records`.
@@ -79703,6 +92047,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | --- | --- |
 | `airtightness.no_exposed_face` | A Building Segment with an airtightness test result has no Outdoors or Ground Face, so PHX would read no infiltration. |
 | `airtightness.no_net_volume` | A Building Segment with an n50 test result has no Space net volume to convert it over. |
+| `programs.default_in_use` | A Program or Equipment Set is the Model's default; a delete must name a replacement, which becomes the default. |
 
 ### `ph_composer.shading`
 
@@ -79968,3 +92313,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.76 | 2026-11-20 | ph_composer.certification is a new feature: the ph_composer.certification.segment extension on each Building Segment (category, program, use, status, type), saved through zones.save_segment_settings, read by ph_composer.certification.segment.get with its defaults, and exported to the BldgSegment's phius_certification. An export contributor may claim an extension on a catalog record kind; its rows carry a null path, and Zones' export and preflight now check a claimed envelope on every valid Building Segment instead of leaving it out. The Zones section's projection rows add building_segment_id and building_segment_export_identifier, and translation sections may attach at the segment host. |
 | 1.77 | 2026-11-20 | A Space's airflow mode is its Zone's: by_program until any Space in the Zone has a rate, then detailed, when every Space exports its own rates with 0 for a blank. ph_composer.spaces.all and list add airflow_mode to each Zone row; all's Zone rows drop inheriting_count, and each building_segments row replaces inheriting_count with by_program_zone_count. A Space row's airflow_mode takes by_program or detailed (was inheriting or user_specified), a copy of its Zone's kept for this minor version; read the Zone row's. ph_composer.spaces.clear_zone_airflows is new: From Program, every Space's rates in the named Zones cleared in one Undo step. The Spaces export section moves to version 2, each record carrying airflow_mode, and its preflight adds space.zone_without_spaces, a warning that does not block. |
 | 1.78 | 2026-11-20 | ph_composer.programs is a new feature: the ph_composer.programs.airtightness extension on each Building Segment (basis n50 or q50, value or null, wind_exposure), saved through zones.save_segment_settings, read by ph_composer.programs.airtightness.get with its defaults, and exported to each Zone's Infiltration and the BldgSegment's wind exposure. Export refuses airtightness.no_net_volume and airtightness.no_exposed_face. The Spaces export section registers a projection of each Zone's net volume. |
+| 1.79 | 2026-11-20 | ph_composer.programs adds the Program, Schedule and Equipment Set record kinds with create, update, duplicate, delete, list and all reads; equipment_sets.add_device, update_device, delete_device and device_types; schedules.profile; settings.get and settings.update for the Model's default Program and Equipment Set; and reset_default. Reads answer PH-Composer's residential default Program, its Schedules and the default Equipment Set until a write stores them. Deleting a default without a replacement refuses programs.default_in_use. |

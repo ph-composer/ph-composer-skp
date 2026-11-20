@@ -666,9 +666,9 @@
       "sha256": "4a5d6e269f4f3200b35fca1aa381f705c61c5318a1eae6f70153a984da639dd3"
     },
     "html/unit_tables.js": {
-      "bytes": 12961,
+      "bytes": 13995,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "eff5dd53e0a443a8360b8229678ea68abef6d5c916eb1eb15eb00bec9f05e427"
+      "sha256": "6ff147bbbe26b528dbf26b149a0b4eb321d24b4f48e83d8ede25ca628bd88393"
     },
     "html/units.js": {
       "bytes": 14458,

@@ -7,7 +7,7 @@ ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
 ## Entry and scope
 
-Requires P4a-07 (records and library kinds) and P4a-08 (used-by counts, the default). Owns the
+Requires P4a-07a (records), P4a-07b (library kinds) and P4a-08 (used-by counts, the default). Owns the
 Programs tab: three subtabs, each an editor with one right sidebar. Load the UI polish and
 architecture review skills first.
 

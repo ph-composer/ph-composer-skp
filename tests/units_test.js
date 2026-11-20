@@ -58,7 +58,8 @@ test("the registry lists every quantity in its published order", function () {
     "fraction", "length", "length_mm", "area", "volume", "u_value", "thermal_resistance", "conductivity",
     "linear_psi", "heat_loss_rate", "density", "specific_heat", "airflow", "temperature",
     "temperature_difference", "air_permeance", "vapor_sd", "vapor_diffusion_resistance", "irradiation",
-    "irradiance", "wind_speed", "distance"
+    "irradiance", "wind_speed", "distance", "power", "power_per_area", "people_per_area", "airflow_per_person",
+    "airflow_per_area"
   ]);
 });
 

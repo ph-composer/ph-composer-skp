@@ -581,6 +581,62 @@ The foundation's `ph_composer.model` dictionary holds the Model's own `user_data
 (`shell/model_metadata.rb`), both `{}` by default; it is building metadata, not a feature's
 configuration, and no feature settings dictionary carries either map.
 
+## Programs, Schedules and Equipment Sets
+
+`ph_composer.programs` owns three catalog kinds (`features/programs/`), each with the shared name, notes,
+datasheet links and source fields, whose source kind may also be `ph_composer_default`:
+
+- **Program** (`ph_composer.programs.program`, `pgm_`): eight required load objects, `people`, `lighting`,
+  `electric_equipment`, `gas_equipment`, `service_hot_water`, `infiltration`, `ventilation` and `setpoint`,
+  each closed and each with an optional `source`, the base program a library value came from. Values are in the
+  unit the honeybee HBJSON field uses (people/m², W/m², L/h·m², m³/s per person, per m² and per Zone, m³/s per m²
+  of exterior area, 1/h, °C, %), each with its `x-unit`; a null value is still missing. People, Lighting and
+  Service hot water carry `rule` (`phius_residential`, `phius_interior`, `building_america`, or null for the
+  fixed value), and setting it to null and back keeps the value and the rule's inputs. A set point is a constant
+  or a Schedule, never both, and heating is not above cooling. Each Schedule reference is a core reference
+  (`people.occupancy_schedule_id` and so on), and its Schedule must be of the type the slot reads: fractional,
+  activity for People activity, ventilation for Ventilation, temperature for the set points
+  (`Program::SLOTS`); a wrong type refuses `validation.failed`.
+- **Schedule** (`ph_composer.programs.schedule`, `sch_`): `type` (`fractional`, `activity`, `temperature`,
+  `ventilation`), `days_per_week` (1 to 7), `weeks_per_year` (1 to 52) and the type's form only: `start_h`
+  (0 to 23), `end_h` (0 to 24) and `fraction_on` and `fraction_off`, or `watts_on` and `watts_off` (W per person)
+  for activity; `value_c`; or `periods`, high, standard, basic and minimum in that order, whole hours totalling 24
+  and a fraction each. An end before the start runs past midnight. A type change on update drops the old form's
+  fields and fills the new form's defaults. `ScheduleProfile` draws the 24-hour profile and, for fractional and
+  ventilation, the daily full-load hours and the annual ones over days_per_week × weeks_per_year operating days.
+- **Equipment Set** (`ph_composer.programs.equipment_set`, `eqs_`): `devices`, each a part (`devices[]`,
+  `dev_` ids, its own `user_data`) of one of the fourteen honeybee-ph `PhEquipment` types. `EquipmentTypes`
+  names each type's fields, the reference quantity codes and energy norms it allows and a new device's values
+  (honeybee-ph's PHIUS defaults); a field the type does not carry, or a missing one, refuses. A device's type is
+  fixed; add, update and delete are each one Undo step, and delete reports the device's removed map.
+
+**PH-Composer's defaults.** The residential default Program (`pgm_PHCDEFAULT01`) with its six Schedules
+(`sch_PHCDEFAULT01` to `06`) is one bundle, and the default Equipment Set (`eqs_PHCDEFAULT01`, eight devices)
+another (`features/programs/default_program.rb`). A bundle is unwritten while its settings field is null and its
+head record is not stored: the Programs reads answer its frozen records under the reserved ids with `stored`
+false, and nothing is written. The first write that touches it (an edit, duplicate or delete of one of its
+records, a record that comes to refer to one of its Schedules, a device change, or a settings update that makes
+another record the default) writes the whole bundle in the same Undo step; from then on its records are
+ordinary. The generic `ph_composer.records.*` routes see stored records only, so they answer `target.not_found`
+for an unwritten default. `ph_composer.programs.reset_default` rewrites the residential Program or the default
+Set from its definition, writing it under its reserved id if the Model holds none and writing back any default
+Schedule the Program names that is gone; an edited Schedule stays, since others may share it, and `user_data`
+stays.
+
+**The Model's defaults.** The `ph_composer.programs.settings` dictionary holds `default_program_id` and
+`default_equipment_set_id`, null for PH-Composer's own; the reserved ids are never stored, and
+`ph_composer.programs.settings.get` answers the effective ids. One dictionary holds both: an update guards only
+the fields it names and takes the other as it reads, so one never stales the other. A record that is the Model's
+default refuses a delete without a replacement as `programs.default_in_use`; with one, the default moves to it
+in the same step. An unwritten default deleted with a replacement leaves nothing to delete: the default moves and
+the bundle is no longer read. The stored fields are the reference target `ph_composer.programs.settings_record`
+with a retargeter per kind.
+
+**Deletes.** A Schedule a Program names refuses a plain delete as `reference.in_use`; with a replacement of the
+same type every Program slot naming it takes the replacement first. Zone assignments and Dwellings join these
+uses in P4a-08. Duplicate keeps a Program's Schedules shared and gives an Equipment Set's devices new ids, each
+keeping its map.
+
 ## This computer's settings file
 
 Settings that belong to the computer and not to a Model, and that every SketchUp version must read,
