@@ -75,11 +75,9 @@ module PhComposer
       def mark_findings(request, marks)
         records = []
         rows = marks.filter_map do |entity, path|
-          record = ExportSection.parse(entity.get_attribute(Mark::STORE.dictionary, Mark::STORE.key))
-          next row("record.unreadable", path, ExportSection.unreadable(path)) unless record
-
-          records << record.merge("id" => ExportSection.identifier(path))
-          nil
+          record, whole = ExportSection.parse(entity.get_attribute(Mark::STORE.dictionary, Mark::STORE.key))
+          records << record.merge("id" => ExportSection.identifier(path)) if record
+          row("record.unreadable", path, ExportSection.unreadable(path)) unless whole
         end
         rows + Export::MetadataCheck.findings(request, records, :section => SECTION)
       end
@@ -114,9 +112,13 @@ module PhComposer
             "make them shading.")
       end
 
+      # The container's name in quotes, or words for none. A name that reads as a local file path is left out, as
+      # the component name leaves it out, since these notes join every export's result.
       def label(entity)
         name = Targets.native_name(entity)
-        Reads.named?(name) ? "\"#{name}\"" : "An unnamed Group or component"
+        return "\"#{name}\"" if Reads.named?(name) && !Diagnostics.absolute_path?(name.strip)
+
+        "An unnamed Group or component"
       end
 
       def zone_inside(entity, path, what)

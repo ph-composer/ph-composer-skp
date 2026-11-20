@@ -783,7 +783,10 @@ holds one, holds a claimed object or holds a cutting component such as a Window 
 reach; `shading.classified_inside` names each marked Group or component inside a Zone that holds classified
 Faces, which stay envelope (assign refuses such a Group with `shading.face_classified`, naming the count);
 `shading.geometry_invalid` and `target.ambiguous` name a Shading Face the section leaves out; and
-`record.unreadable` names a mark whose text is not a JSON object with object metadata maps. A mark's
+`record.unreadable` names a mark whose text is not a JSON object with object metadata maps; any metadata map it
+holds that is an object is still read, so a required envelope beside a malformed `user_data` still refuses. A
+container name that reads as a local file path is left out of these notes as it is left out of component names,
+since they join every export's result. A mark's
 `extension_data` the left-out rules refuse, and a Shading Face whose transform is singular, are blocking rows,
 as they block the export for any record or Face. Each row names its path in its message and carries
 `object_id` `shd_` and a digest of that path, the id the section's note for the same condition uses, so the

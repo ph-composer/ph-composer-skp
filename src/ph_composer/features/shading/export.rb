@@ -102,32 +102,31 @@ module PhComposer
       end
 
       # Each mark through the metadata boundary, once per occurrence: its user_data stays in the Model with a note,
-      # and its extension_data follows the left-out rules. A mark whose text is not a JSON object still marks its
-      # entity (Mark reads by presence); it is noted and has no metadata to read.
+      # and its extension_data follows the left-out rules. A mark that cannot be read whole still marks its entity
+      # (Mark reads by presence) and is noted; whatever metadata map it holds that is an object is still read, so
+      # an envelope export needs is never skipped beside a malformed user_data.
       def marks(reader, snapshot)
         snapshot.entries.each do |entry|
           next unless Mark::STORE.carried_by?(entry.dictionaries)
 
           id = identifier(entry.path)
-          record = parse(entry.dictionaries.dig(Mark::STORE.dictionary, Mark::STORE.key))
-          if record
-            reader.entity_record(record.merge("id" => id), :fields => [])
-          else
-            reader.note("record.unreadable", id, unreadable(entry.path))
-          end
+          record, whole = parse(entry.dictionaries.dig(Mark::STORE.dictionary, Mark::STORE.key))
+          reader.note("record.unreadable", id, unreadable(entry.path)) unless whole
+          reader.entity_record(record.merge("id" => id), :fields => []) if record
         end
       end
 
-      # The mark's record when it is a JSON object whose metadata maps are objects or null (read as absent); else
-      # nil.
+      # `[record, whole]`: the mark's record with each metadata map that is not an object left out, and whether it
+      # read whole (a JSON object whose metadata maps are objects or null, null read as absent). Text that is not a
+      # JSON object gives `[nil, false]`.
       def parse(text)
         record = text.is_a?(String) ? JSON.parse(text) : nil
-        return nil unless record.is_a?(Hash)
+        return [nil, false] unless record.is_a?(Hash)
 
-        record = record.reject { |key, value| METADATA_KEYS.include?(key) && value.nil? }
-        METADATA_KEYS.all? { |key| record.fetch(key, {}).is_a?(Hash) } ? record : nil
+        kept = record.reject { |key, value| METADATA_KEYS.include?(key) && !value.is_a?(Hash) }
+        [kept, record.none? { |key, value| METADATA_KEYS.include?(key) && !value.nil? && !value.is_a?(Hash) }]
       rescue JSON::ParserError
-        nil
+        [nil, false]
       end
 
       # Why the Face occurrence at `path`, with its FaceGeometry::Snapshot, cannot become a Shade, as

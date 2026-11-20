@@ -247,6 +247,12 @@ class ShadingExportTest < PhComposerTestCase
     assert_equal 20, records.length, "each holder's own loose Face is shading"
     warnings = PhComposer::Export.preflight_warnings(@session).select { |row| row["code"] == "shading.zone_inside" }
     assert_equal [X.identifier([6000]), X.identifier([7000])].sort, warnings.map { |row| row.fetch("object_id") }.sort
+
+    # A Group named like a file location is named in no warning, so the artifact guard passes them all.
+    holders.first.name = "/site/north"
+    warnings = PhComposer::Export.preflight_warnings(@session)
+    assert PhComposer::Export::ArtifactHygiene.validate!("findings" => warnings)
+    assert_match(/\AAn unnamed Group/, warnings.find { |row| row["object_id"] == X.identifier([6000]) }["message"])
   end
 
   # Shading never blocks: a degenerate Face is left out with a note, and an unreadable mark still marks its Face,
@@ -284,6 +290,13 @@ class ShadingExportTest < PhComposerTestCase
     assert_equal "export.relevance_unknown", assert_raises(PhComposer::Export::Blocked) { extract }.code
     assert_equal [["export.relevance_unknown", X.identifier([2001]), true]],
                  preflight.map { |row| row.values_at("code", "object_id", "blocks_export") }
+
+    # A malformed user_data beside the envelope is noted and never hides it.
+    envelope = { "acme.shade" => { "schema_version" => 1 } }
+    mark(loose, "schema_version" => 1, "user_data" => [], "extension_data" => envelope)
+    assert_equal "export.relevance_unknown", assert_raises(PhComposer::Export::Blocked) { extract }.code
+    assert_equal [["export.relevance_unknown", true], ["record.unreadable", false]],
+                 preflight.map { |row| row.values_at("code", "blocks_export") }.sort
   end
 
   def test_a_model_with_no_shading_writes_an_empty_section_and_no_finding
