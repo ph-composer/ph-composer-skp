@@ -42,6 +42,15 @@ nearest enclosing Group or component that has one. Inside a Zone with no named G
 the name is the Zone's name followed by " Shading". With no named container, the name is
 "Shading". Two Groups with the same name make one component, so rename a Group to split it out.
 
+## See what is tagged
+
+Choose **Colour by > Shading** from Extensions > PH-Composer. Every shading surface takes its
+component's colour, including Faces inside tagged Groups and each placement of a tagged component.
+Everything else keeps its SketchUp colour. The legend in the upper left lists each component with
+its Face count and area in the Model's display units. A Face hidden by a tag stops drawing but
+still counts in the legend. A component placed with a scale that flattens it shows in amber with no
+area.
+
 ## Scripts and agents
 
 Set as Shading and Clear Shading call the same actions a script or a connected agent uses:
