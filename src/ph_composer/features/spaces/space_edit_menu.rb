@@ -151,6 +151,16 @@ module PhComposer
           announce_switch(before) if outcome.fetch("status") == "completed"
         end
 
+        # The switched Zones' names through the Zones read, in its order; nil when the read refuses, since the
+        # edit has already completed and its own notice stands.
+        def switched_names(zone_ids)
+          read = API.query(:context => @context, :name => ZONES_READ)
+          return unless read.fetch("status") == "completed"
+
+          read.dig("value", "zones").select { |zone| zone_ids.include?(zone.dig("reference", "zone_id")) }
+              .uniq { |zone| zone.dig("reference", "zone_id") }.map { |zone| zone.dig("values", "name").to_s }
+        end
+
         # Each Zone's airflow mode now, by id, from every Space record in the Model.
         def zone_modes
           Metrics.zone_modes(Occurrences.scan(@session.model, :strict => false).spaces.map(&:record))
@@ -165,9 +175,9 @@ module PhComposer
           end.keys
           return if switched.empty?
 
-          names = Zones::Occurrences.zones(@session.model).map(&:record)
-                                    .select { |record| switched.include?(record["id"]) }
-                                    .uniq { |record| record["id"] }.map { |record| record["name"].to_s }
+          names = switched_names(switched)
+          return unless names
+
           others = spaces.count { |record| switched.include?(record["zone_id"]) && !Metrics.rated?(record) }
           message = SpaceEditMenu.switch_message(names, others)
           HostNotice.show(@session, message, :tone => :info)

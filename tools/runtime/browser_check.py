@@ -228,7 +228,7 @@ def check_translation(client: CDP) -> dict[str, Any]:
     top = [[x, y, 2.5] for x, y, _z in floor]
     prism = [floor, top] + [[floor[i], floor[(i + 1) % 4], top[(i + 1) % 4], top[i]] for i in range(4)]
     document["sections"]["ph_composer.spaces.export.spaces"] = {
-        "version": 1,
+        "version": 2,
         "records": [
             {
                 "id": "spc_BrowserCheck",
@@ -236,6 +236,7 @@ def check_translation(client: CDP) -> dict[str, Any]:
                 "name": "Kitchen",
                 "number": "101",
                 "v_sup_m3h": 60.0,
+                "airflow_mode": "detailed",
                 "volumes": [
                     {
                         "id": "vol_BrowserCheck",
