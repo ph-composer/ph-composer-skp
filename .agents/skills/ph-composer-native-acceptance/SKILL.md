@@ -54,6 +54,15 @@ top-level session ran clean twice. A subagent prepares everything that needs no 
 "ready for hold"; the top-level session takes one card, runs every native step in that hold and
 hands the evidence back. When a stage must measure before it designs, that hold comes first.
 
+Settle the host plan when a multi-stage loop starts: ask Ed once whether he will be at the Mac while it
+runs. If he will not, show no full-screen card he cannot answer. Run what needs only the bridge and System
+Events as each stage finishes, record the native-gesture rows as owed, and run every owed case in one
+batched sitting on the final head, from one recipe, under one card. In Phase 5 (2026-11-19) three
+unanswered cards cost about 15 minutes and the workarounds about 15 more; the batched pass then ran SD01 to
+SD07 in 28 minutes. Synthetic pointer moves reach a Ruby tool's `onMouseMove` only intermittently: for a
+hover or tooltip check, call the tool's handler by bridge at the target's screen point, in an eval after
+the view has settled, and capture the result.
+
 Tell Ed in one line before any host step that can change his screen: bringing SketchUp to the front (a
 Model switch is the only way to fire `onActivateModel`; `host_bridge.py show-model` makes one), or anything
 that can raise a macOS permission prompt or System Settings window. On 2026-11-12 a `screencapture` run

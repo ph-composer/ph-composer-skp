@@ -1,4 +1,4 @@
-.PHONY: ci syntax lint lint-ruby lint-js lint-python lint-citations lint-paths test fixtures fixtures-check coverage hostkit-test python-check \
+.PHONY: ci ci-run ci-docs syntax lint lint-ruby lint-js lint-python lint-citations lint-paths test fixtures fixtures-check coverage hostkit-test python-check \
         panel-manifest panel-manifest-check ui-preview ui-deps ui-checks ui-gallery mockup-new rbz rbz-check install clean bridge-install \
         bridge-uninstall runtime-check runtime-pin-check runtime-manifest runtime-browser-check phase-one-proof \
         hooks hooks-auto help help-check
@@ -26,11 +26,33 @@ JS_TESTS := $(wildcard tests/*_test.js)
 # Rubocop is reached through the bundler that belongs to $(RUBY), never whatever `bundle` is first
 # on PATH: on macOS that is the system Ruby's, which cannot read this lock.
 BUNDLE := $(dir $(RUBY))bundle
+# A linked worktree (`.claude/worktrees/<slug>`) has no gems or node_modules of its own: they live in the main
+# checkout. Run Bundler against the main checkout's Gemfile (its `.bundle/config` names the gems' path, and a
+# worktree's own config would override a BUNDLE_PATH variable) and its eslint, so the worktree gate lints the
+# worktree's files exactly as the main checkout does; in a worktree a missing linter fails the gate instead of
+# printing a skip.
+MAIN_CHECKOUT := $(shell d=$$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null) && dirname "$$d")
+TOPLEVEL := $(shell git rev-parse --show-toplevel 2>/dev/null)
+ifneq ($(MAIN_CHECKOUT),$(TOPLEVEL))
+IN_WORKTREE := 1
+export BUNDLE_GEMFILE := $(MAIN_CHECKOUT)/Gemfile
+ESLINT := $(MAIN_CHECKOUT)/node_modules/.bin/eslint
+else
+ESLINT := node_modules/.bin/eslint
+endif
 SKETCHUP_VERSION ?= 2026
 
-# Every target docs/DEVELOPMENT.md claims for the offline loop that exists today.
-ci: hooks-auto syntax lint test fixtures-check panel-manifest-check help-check runtime-check runtime-pin-check \
+# Every target docs/DEVELOPMENT.md claims for the offline loop that exists today. `ci` holds a machine-wide
+# lock (tools/gate_lock.sh) so two gates never run at once; `ci-run` is the gate itself.
+ci:
+	@tools/gate_lock.sh $(MAKE) --no-print-directory ci-run
+
+ci-run: hooks-auto syntax lint test fixtures-check panel-manifest-check help-check runtime-check runtime-pin-check \
     hostkit-test python-check rbz rbz-check
+
+# The local gate for a commit that touches only docs/, context/ or planning/: what such a commit can break.
+# CI still runs the full gate on the push.
+ci-docs: hooks-auto lint-citations lint-paths help-check fixtures-check
 
 syntax:
 	@for file in $(RB_FILES); do $(RUBY) -c "$$file" >/dev/null || exit 1; done
@@ -68,13 +90,17 @@ lint: hooks-auto lint-ruby lint-js lint-python lint-citations lint-paths
 lint-ruby:
 	@if [ -x "$(BUNDLE)" ] && $(BUNDLE) check >/dev/null 2>&1; then \
 	  $(BUNDLE) exec rubocop $(RUBOCOP_ARGS); \
+	elif [ -n "$(IN_WORKTREE)" ]; then \
+	  echo "lint-ruby: rubocop not found in the main checkout's vendor/bundle (run 'bundle install' there)"; exit 1; \
 	else \
 	  echo "lint-ruby: skipped, rubocop is not installed (run 'bundle install')"; \
 	fi
 
 lint-js:
-	@if command -v pnpm >/dev/null 2>&1 && [ -d node_modules ]; then \
-	  pnpm exec eslint $(ESLINT_ARGS); \
+	@if [ -x "$(ESLINT)" ]; then \
+	  "$(ESLINT)" $(ESLINT_ARGS); \
+	elif [ -n "$(IN_WORKTREE)" ]; then \
+	  echo "lint-js: eslint not found in the main checkout's node_modules (run 'pnpm install' there)"; exit 1; \
 	else \
 	  echo "lint-js: skipped, eslint is not installed (run 'pnpm install')"; \
 	fi
