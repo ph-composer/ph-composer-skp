@@ -38,7 +38,7 @@ registry validation still exist.
 | `features/zones/faces/attached_zone.rb`, `PhAdditionalZone` export | Shared Faces of Zones left out | The move-out offer; PHX duplicate check (P4a-03) |
 | `python/ph_composer_translation/` sections, shared `BldgSegment` per Segment | Leaving Zones out; certification, airtightness and Program sections | New sections per stage |
 | Library providers, file provider, library kinds (Materials, frames, glazings) | Program, Schedule and Equipment Set library kinds | P4a-07 |
-| The `phx` dependency group, `PHX==1.57.5` (Climate, [D4c-22](../../archive/phase-04-climate/DECISIONS.md)) | Every PHX round trip | The pin choice (C4a-11) |
+| The `phx` dependency group, `PHX==1.57.5` (Climate, [D4c-22](../../archive/phase-04-climate/DECISIONS.md)) | Every PHX round trip | The pin choice, P4a-03's entry check (C4a-11) |
 | `SiteSection` and `ShadeSection`, both attached at `MODEL` (Climate, Shading) | Unchanged | Left-out Zones stay known to Shading (C4a-12, P4a-03); the `segment` host hands out the `BldgSegment` objects `SiteSection` already set (P4a-04) |
 | `session.open_in_panel`, `panel.navigate` and a preflight row's `locate` (Climate, D4c-27) | Preflight rows that open the Zones or Programs tab at the record | P4a-10 |
 | Unit quantities `airflow`, `area` and `temperature` on the Ruby and JavaScript sides, with shared vectors (Climate [CONTRACTS](../../archive/phase-04-climate/CONTRACTS.md) section 8) | Set points, airflows, areas | Power, power per area, people per area, airflow per person and per area (P4a-07) |
@@ -48,14 +48,14 @@ registry validation still exist.
 
 | Stage | Delivers | Depends on | Code owner | Host gate |
 | --- | --- | --- | --- | --- |
-| [P4a-01](phases/p4a-01-segment-membership.md) | Zone schema 3 (nullable Segment), last-Segment and default rules, Segment delete with destination, `update_field` accepting null | Ed's go | zones | Delete, move and Undo/Redo in a real Model; reopen |
+| [P4a-01](phases/p4a-01-segment-membership.md) | The footprint baseline reset (C4a-14); Zone schema 3 (nullable Segment), last-Segment and default rules, Segment delete with destination, `update_field` accepting null | Ed's go | zones | Delete, move and Undo/Redo in a real Model; reopen |
 | [P4a-02](phases/p4a-02-segment-rows-and-settings.md) | Segment heading rows in Geometry and Spaces; New, Delete and Move from the tables; the settings dialog, General section and section seam; Manage dialog and Geometry column removed | P4a-01 | zones, spaces, UI | Panel gestures with Ed |
-| [P4a-03](phases/p4a-03-segment-export-rules.md) | Export minimum, Zones left out, empty Segments, the shared-Face refusal, the move-out offer, PHX round trip of `PhAdditionalZone` | P4a-02 | zones, spaces, thermal_bridges, export | RBZ export; WUFI XML and METr JSON read back |
+| [P4a-03](phases/p4a-03-segment-export-rules.md) | The honeybee-ph and PHX pins (C4a-11); export minimum, Zones left out, empty Segments, the shared-Face refusal, the move-out offer, PHX round trip of `PhAdditionalZone` | P4a-02 | zones, spaces, thermal_bridges, export | RBZ export; WUFI XML and METr JSON read back |
 | [P4a-04](phases/p4a-04-segment-certification.md) | The export projection for Segment extensions; `ph_composer.certification`: Phius certification section and its export to `BldgSegment` | P4a-02, P4a-03 (both edit Zones' export) | certification (new) | Exported values read back in PHX |
 | [P4a-05](phases/p4a-05-detailed-airflows.md) | Per-Zone airflow mode, By Program, From Program, the notice, No Spaces warning | P4a-02 for the Zone-row action | spaces, UI | Spaces gestures with Ed; export round trip |
 | [P4a-06](phases/p4a-06-programs-feature-and-airtightness.md) | `ph_composer.programs` with the Airtightness section and infiltration export | P4a-02, P4a-04 | programs (new), export | Entered n50 and q50 read back in PHX |
 | G1 | **Programs tab review with Ed**: done 2026-11-15 (Q4a-21 to Q4a-25, Q4a-33 to Q4a-36; C4a-5, C4a-7 to C4a-10) | | | |
-| [P4a-07](phases/p4a-07-program-records.md) | The `PhEquipment` pin; Program, Schedule and Equipment Set kinds with device editing; the default Program and default Equipment Set; library kinds with dependency copy | P4a-06 | programs | Panel-closed script, Undo/Redo, reopen |
+| [P4a-07](phases/p4a-07-program-records.md) | Program, Schedule and Equipment Set kinds with device editing; the default Program and default Equipment Set; library kinds with dependency copy | P4a-06 | programs | Panel-closed script, Undo/Redo, reopen |
 | [P4a-08](phases/p4a-08-dwellings-and-single-dwelling.md) | Dwellings, per-Zone assignment extension, derivations, Single dwelling, Occupancy section, the Segment heading contribution | P4a-07, P4a-05 | programs | Single dwelling on and off, Undo/Redo, copy a Zone |
 | [P4a-09](phases/p4a-09-zones-programs-view.md) | Zones / Programs view, selection bar, Dwelling and lock bubbles | P4a-08, P4a-05 | programs, UI | Panel gestures with Ed |
 | [P4a-10](phases/p4a-10-program-export.md) | ProgramType, People, Process and set point export; Comfort section | P4a-08 | programs, export | Round trip of the five prototype journeys |

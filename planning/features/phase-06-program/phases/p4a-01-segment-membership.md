@@ -11,6 +11,10 @@ Requires Ed's go. Owns the record and operation changes that let a Zone be in no
 with the last-Segment and default rules. No panel change beyond what keeps today's screens
 working; the heading rows and dialog are P4a-02, export is P4a-03.
 
+Entry check (C4a-14, Ed, 2026-11-20): measure the installed size on `main` and write it to
+`installed_baseline_bytes` in `tools/runtime/vendor.py`, with a comment naming C4a-14. The ceiling and
+the growth allowance do not change. This is the phase's first commit.
+
 Behavior: [Building Segments PRD](../building-segments/PRD.md), "Membership". Names:
 [CONTRACTS](../CONTRACTS.md) section 1. Paths are relative to `src/ph_composer/`.
 

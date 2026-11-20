@@ -65,7 +65,7 @@ periods until the cross-repo fix for F4a-13 ships (Q4a-08; ventilation periods a
    The [GUI prototype](mockups/README.md) shows both.
 2. [CONTRACTS.md](CONTRACTS.md): records, ownership, seams and export mapping, with open contract
    questions C4a-2, C4a-3, C4a-4 and C4a-6, which settle in their stages, and C4a-11 to C4a-14, raised
-   on 2026-11-20 after Climate and Shading landed.
+   on 2026-11-20 after Climate and Shading landed and answered the same day.
 3. [PLAN.md](PLAN.md), the stages under [phases/](phases), and [ACCEPTANCE.md](ACCEPTANCE.md).
 4. [DECISIONS.md](DECISIONS.md): findings F4a-01 to F4a-29 and questions Q4a-01 to Q4a-36 with
    every answer.
@@ -85,7 +85,7 @@ periods until the cross-repo fix for F4a-13 ships (Q4a-08; ventilation periods a
 ## Next
 
 1. P4a-01 to P4a-11 are ready; each needs Ed's go.
-   Before P4a-01: Ed's answers to C4a-11 (the honeybee-ph and PHX pins) and C4a-14 (the footprint
-   baseline) in [CONTRACTS](CONTRACTS.md#open-contract-questions).
+   P4a-01's entry check resets the footprint baseline (C4a-14) and P4a-03's chooses the honeybee-ph
+   and PHX pins (C4a-11).
 2. Separately: the honeybee-ph and PHX fix for F4a-13 (Q4a-08), in those repositories, starting
    with a reproducing test in each.

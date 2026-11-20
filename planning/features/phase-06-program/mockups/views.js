@@ -153,7 +153,6 @@ function openSegSettings(gid) {
       row("Mechanical room temperature [°C]", '<input class="zp-num" name="mechRoom" value="' + g.mechRoom + '">') + '</div></section>' +
     '<section><h3>Planned</h3><div class="zp-grid">' +
       row("Floor levels", '<span class="zp-later">Counted from Levels</span>') +
-      row("Site and climate", '<span class="zp-later">Phase 5.1</span>') +
       row("Summer ventilation", '<span class="zp-later">Phase 4</span>') +
       row("Source energy and CO₂ factors", '<span class="zp-later">Not scheduled</span>') + '</div></section>' +
     '</div><div class="phc-dialog-actions"><button type="button" data-dlg="cancel">Cancel</button><button type="button" class="primary" data-dlg="ok">Save</button></div>';

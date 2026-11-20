@@ -19,11 +19,8 @@ sections 1 to 8 and 10. Paths are relative to `src/ph_composer/`.
 
 ## Steps
 
-0. **Pin.** Choose the honeybee-ph pin for `PhEquipment` (F4a-18: `quantity` defaults and the custom
-   types differ between 1.33.65 and 1.33.68) and record it in `pyproject.toml` and the vendored
-   wheels, before the per-type field table is built from it. C4a-11 recommends making this choice before
-   P4a-03, because the `phx` test group's PHX pin depends on it; if Ed agrees, this step only reads
-   the recorded pin.
+0. **Pin.** P4a-03's entry check chose the honeybee-ph pin for `PhEquipment` (F4a-18; C4a-11, Ed,
+   2026-11-20). Build the per-type field table from that pinned wheel.
 1. **Units.** Store every value in the honeybee SI unit its HBJSON field uses (people per m²,
    W/m², m³/s per person and per m², m³/s per Zone, 1/h, m³/s per m² of exterior area at 4 Pa,
    L/h per m², °C), each field with its `x-unit`, so P4a-10 writes values without conversion. The

@@ -1,7 +1,7 @@
 # Phase 4a contracts: records, ownership and seams
 
 DATE: 2026-11-15
-STATUS: Scoped for P4a-01 to P4a-11; revised after an independent review against the code (14 findings), the Programs tab review and a consistency sweep, all 2026-11-15. Ed answered C4a-5 and C4a-7 to C4a-10; C4a-2, C4a-3, C4a-4 and C4a-6 settle in their stages. C4a-11 to C4a-14 were raised on 2026-11-20, after Climate and Shading landed, and are open.
+STATUS: Scoped for P4a-01 to P4a-11; revised after an independent review against the code (14 findings), the Programs tab review and a consistency sweep, all 2026-11-15. Ed answered C4a-5 and C4a-7 to C4a-10; C4a-2, C4a-3, C4a-4 and C4a-6 settle in their stages. C4a-11 to C4a-14 were raised on 2026-11-20, after Climate and Shading landed; Ed accepted all four recommendations the same day.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -220,14 +220,15 @@ rule (P4a-10).
 **PHX in tests.** PHX is not shipped. Climate's P4c-05 added the optional `phx` dependency group
 (`pyproject.toml`), pinned to `PHX==1.57.5`, the latest release over the pinned honeybee-ph 1.33.65;
 PHX 1.58 and later need honeybee-ph 1.33.68 (Climate D4c-22). The research here read a local checkout
-at 1.59.1, so C4a-11 sets the pins before the first round trip. The round-trip tests skip without the
+at 1.59.1, so P4a-03's entry check sets both pins before the first round trip (C4a-11). The round-trip tests skip without the
 group and run in each stage's host gate with it installed.
 
 **Shading in a Zone left out.** Shading's export (`features/shading/export.rb`) knows a container is
 a Zone by its row in Zones' export section, and uses that to name a Shade "<Zone> Shading", to stop a
 mark above a Zone from reaching its Faces and to keep classified Faces in the envelope
 (`context/CONTRACTS.md`, "The shading mark"). P4a-03 keeps those three rules true for a Zone in no
-Segment (C4a-12).
+Segment: Zones goes on naming a left-out Zone to Shading, and a Face tagged as shading inside one still
+exports as a Shade (C4a-12).
 
 ## Open contract questions
 
@@ -242,7 +243,7 @@ Segment (C4a-12).
 | C4a-9 | Weeks per year below 52: where the weeks off fall in the honeybee ruleset | **Answered (Ed, 2026-11-15): one contiguous block centred on 1 August** | Answered |
 | C4a-10 | Operating periods before the F4a-13 fix | **Answered (Ed, 2026-11-15): write them for ventilation Schedules now** (F4a-13 affects only occupancy and lighting); occupancy and lighting stay rulesets only until the fix | Answered |
 | C4a-8 | Moving a Zone back into a Segment after its shared Faces were reclassified to an Attached zone | **Answered (Ed, 2026-11-15): they stay Attached zone**; the move-back notice says to re-run Solve | Answered |
-| C4a-11 | The honeybee-ph pin (F4a-18) is chosen in P4a-07, after P4a-03, P4a-04 and P4a-06 have run PHX round trips. The `phx` group pins PHX 1.57.5 because 1.58 and later need honeybee-ph 1.33.68, and this packet's PHX findings were read at 1.59.1 | Choose the honeybee-ph pin as an entry check before P4a-03 and move the `phx` group with it. Otherwise rerun the PHX findings at 1.57.5 first | Ed, before P4a-03 |
-| C4a-12 | If P4a-03 drops left-out Zones from Zones' export section, Shading no longer sees them as Zones: a marked Face inside one exports under its Group's name, a mark above the Zone reaches its Faces, and classified Faces under that mark export as Shades. Read from the code at `b409bdbc`, not run | Zones keeps naming left-out Zones to Shading, so the name rule (D5s-10) and the stop at a Zone (D5s-17) hold; a marked Face inside a left-out Zone still exports as a Shade | P4a-03 |
-| C4a-13 | The Segment settings Planned row lists site and climate. Climate shipped one site per Model, written to every Segment | Drop the row and the out-of-scope line in the [Building Segments PRD](building-segments/PRD.md) | Ed, at P4a-02 |
-| C4a-14 | The installed-size baseline in `tools/runtime/vendor.py` is still Phase 3b's, 24,541,739 bytes. Climate closed at 25,992,613 against a growth gate of 27,041,739; the size after Shading is not recorded | Reset the baseline at this phase's entry, as a recorded decision | Ed, before P4a-01 |
+| C4a-11 | The honeybee-ph pin (F4a-18) is chosen in P4a-07, after P4a-03, P4a-04 and P4a-06 have run PHX round trips. The `phx` group pins PHX 1.57.5 because 1.58 and later need honeybee-ph 1.33.68, and this packet's PHX findings were read at 1.59.1 | **Answered (Ed, 2026-11-20): choose the honeybee-ph pin as an entry check before P4a-03** and move the `phx` group with it. The pin's value is that check's result | Answered |
+| C4a-12 | If P4a-03 drops left-out Zones from Zones' export section, Shading no longer sees them as Zones: a marked Face inside one exports under its Group's name, a mark above the Zone reaches its Faces, and classified Faces under that mark export as Shades. Read from the code at `b409bdbc`, not run | **Answered (Ed, 2026-11-20): Zones keeps naming left-out Zones to Shading**, so the name rule (D5s-10) and the stop at a Zone (D5s-17) hold; a marked Face inside a left-out Zone still exports as a Shade. Built in P4a-03 | Answered |
+| C4a-13 | The Segment settings Planned row lists site and climate. Climate shipped one site per Model, written to every Segment | **Answered (Ed, 2026-11-20): dropped** from the Planned row and the out-of-scope list in the [Building Segments PRD](building-segments/PRD.md) and from the prototype | Answered |
+| C4a-14 | The installed-size baseline in `tools/runtime/vendor.py` is still Phase 3b's, 24,541,739 bytes. Climate closed at 25,992,613 against a growth gate of 27,041,739; the size after Shading is not recorded | **Answered (Ed, 2026-11-20): reset the baseline at this phase's entry.** P4a-01's entry check measures the installed size on `main` and writes it to `installed_baseline_bytes`; the ceiling and the growth allowance are unchanged | Answered |

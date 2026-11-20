@@ -86,7 +86,7 @@ one Undo step across every section. Sections, in this order:
 | Phius certification | Building category (residential or non-residential), certification program, building use, building status, building type | Certification, P4a-04 |
 | Airtightness | Test result: n50 (1/h) or q50 (m³/h·m²) and its value; wind exposure | Programs, P4a-06 |
 | Comfort | Winter and summer set points, read only, from the Zones' Programs (Q4a-04) | Programs, P4a-10 |
-| Planned | Floor levels (from Levels), site and climate (shipped per Model as Phase 4, Climate; C4a-13), summer ventilation, mechanical cooling and mechanical room temperature (Phase 7 mechanical), source energy and CO2 factors | Listed, disabled, with the phase in the tooltip |
+| Planned | Floor levels (from Levels), summer ventilation, mechanical cooling and mechanical room temperature (Phase 7 mechanical), source energy and CO2 factors | Listed, disabled, with the phase in the tooltip |
 
 The certification program list follows the pinned honeybee-ph `PhiusBuildingCertificationProgram`
 enum, which stops at Phius 2021 CORE and ZERO. Mechanical cooling and mechanical room temperature,
@@ -147,6 +147,6 @@ extensions staged by Zones' Save, the settings-section seam and the export proje
 
 ## Out of scope
 
-Exporting Zones in no Segment as shading ([zone-shading](../../unscheduled/zone-shading.md)), site
-and climate per Segment (Climate shipped one site per Model; C4a-13), summer ventilation and mechanical settings (Phase 7), drag and
+Exporting Zones in no Segment as shading ([zone-shading](../../unscheduled/zone-shading.md)), summer ventilation and mechanical settings
+(Phase 7), site and climate per Segment (the Climate tab sets one site for the Model; C4a-13), drag and
 drop between groups.
