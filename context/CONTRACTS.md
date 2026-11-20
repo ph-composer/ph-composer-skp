@@ -755,7 +755,10 @@ always sit in Extensions > PH-Composer; their handler invokes assign or clear wi
 revision and writes nothing itself. `shading.list` answers
 every marked entity and each shading component (`display_name`, `face_count`, world `area_m2`), from
 Zones' walk of its occurrences and one walk of the Model. A component is named by the nearest enclosing named Group or component (an instance's own name before its definition's), a Zone as
-that container giving its name followed by " Shading", and "Shading" with none.
+that container giving its name followed by " Shading", and "Shading" with none. A name the artifact guard would
+read as a local file path (`Diagnostics.absolute_path?`) counts as none, so a Group's name never blocks an
+export. A classified Zone Face that is shading only through a container is not a Shading Face to the list,
+Colour-by or export: classification wins (`Reads.exported?`, the one rule all three apply).
 
 The Colour-by mode `ph_composer.shading.by_component` (label "Shading", `entity_kind` `face`,
 `features/shading/colour_modes.rb`) gives one entry per Shading Face occurrence by the rule `shading.list`
@@ -770,15 +773,25 @@ The mark's store is constructed with `excludes_from_envelope: true`. `Records::E
 (inside)` is true when an entity in `inside` (from the first entity inside the Zone Group down to the Face,
 as Zones' `holding` returns it) carries an excluding store's record and none is claimed;
 `envelope_excluded_entries?(entries)` applies the same rule to detached snapshot entries through their
-`dictionaries` map. Both read by presence and name no feature. Zones reads them at every call site
+`dictionaries` map, and `claimed_entries?(entries)` is `claimed?` over them. All read by presence and name no
+feature. Zones reads them at every call site
 ("Zones geometry rules", "Envelope exclusion").
 
-`ph_composer.shading.export_preflight` answers non-blocking notes in `Export::PREFLIGHT_RESULT`:
-`shading.zone_inside` names each marked Group or component that is a Zone, holds one, holds a claimed
-object or holds a cutting component such as a Window Unit, which the mark does not reach, and
-`shading.classified_inside` names each marked Group or component inside a Zone that holds classified Faces,
-which stay envelope. Assign refuses such a Group with `shading.face_classified`, naming the count. Until the Shades export section lands, the aggregate export preflight
-does not read it.
+`ph_composer.shading.export_preflight` is the Shades section's preflight, in `Export::PREFLIGHT_RESULT`, so
+every export reads it. Its notes: `shading.zone_inside` names each marked Group or component that is a Zone,
+holds one, holds a claimed object or holds a cutting component such as a Window Unit, which the mark does not
+reach; `shading.classified_inside` names each marked Group or component inside a Zone that holds classified
+Faces, which stay envelope (assign refuses such a Group with `shading.face_classified`, naming the count);
+`shading.geometry_invalid` and `target.ambiguous` name a Shading Face the section leaves out; and
+`record.unreadable` names a mark whose text is not a JSON object with object metadata maps; any metadata map it
+holds that is an object is still read, so a required envelope beside a malformed `user_data` still refuses. A
+container name that reads as a local file path is left out of these notes as it is left out of component names,
+since they join every export's result. A mark's
+`extension_data` the left-out rules refuse, and a Shading Face whose transform is singular, are blocking rows,
+as they block the export for any record or Face. Each row names its path in its message and carries
+`object_id` `shd_` and a digest of that path, the id the section's note for the same condition uses, so the
+export lists each condition once and two marked Groups give two rows. No row has a `locate`: Shading has no
+locate command.
 
 **Containment.** `ph_composer.zones.containment` answers, for each root-to-entity path, the Zone
 occurrence holding the drawing element at its end (`zone_id`, `zone_path`, `name`, `building_segment`,
@@ -1386,6 +1399,31 @@ climate's identity, the four peak-load temperatures, the limit check, the edited
 file read, the design temperatures, the count of Building Segments and a digest of the built `Site`;
 conformance finds that `Site` on every reloaded Building Segment, honeybee-ph's default for each part the
 record did not carry, Cooling 2 equal to Cooling 1 and no `source_uri`.
+
+Shades are the first section that writes geometry outside every Room: `ph_composer.shading.export.shades` (Ruby
+`features/shading/export.rb`, Python `shade_sections.py`, record `contract/shade_records.py`) `requires:` the
+Zones section for its Zone names and writes one record per Shading Face occurrence, `{id, display_name,
+boundary, holes}`: `id` is `shd_` and a digest of the Face's root path, so each placement of a component is its
+own Shade and a re-export gives the same ids; `display_name` is the shading component's name ("The shading
+mark"); `boundary` and `holes` are the snapshot's loops in world metres, outer first. A record with any other
+key is an object finding. Which Faces are shading is `Reads.shading_face?` over `Reads::Container` rows built
+from the snapshot entries above each Face (an instance's name falling back to its definition's, which the
+snapshot carries as `native["definition_name"]`); inside a Zone, Zones' detached envelope test
+(`Zones::ExportProjection.outside_envelope?`) decides the classification clause, so the section writes what
+`shading.list` counts and a Face is a Room's or a Shade, never both. Python builds `Shade(id, Face3D(boundary, holes), is_detached=True)` with the
+`display_name`, serializes it once in `translate` so geometry honeybee cannot write costs that record, and
+attaches at `MODEL` with `model.add_shade` after checking every Shade against the Model. It is optional and
+never blocks for its own reasons: a Face with fewer than three points in a loop or under 1 mm2 of area
+(`shading.geometry_invalid`) and every Face sharing its path with another (`target.ambiguous`) are left out with
+a note, and an unreadable mark still marks its Faces with a `record.unreadable` note. Each mark passes the
+metadata boundary under its path's `shd_` id: its `user_data` stays in the Model with an
+`export.metadata_omitted` note and its `extension_data` follows the left-out rules. Its result fields are
+`shading_components` (`display_name`, `face_count`, `area_m2`), `shade_count` and `area_m2` over the attached
+Shades, none when there are none, so a Model with no shading writes the same HBJSON and result as before the
+section, bar its empty row in `sections`. Conformance finds the reported count of orphaned Shades, each
+detached, and per component the reported count and area. The report's Shading section lists each component
+and the totals, and is absent with none. PHX 1.57.5 writes one shading component per name in every Variant,
+with `InnerAttachment` and `idIC` -1 (`tests/python/test_shade_phx_round_trip.py`).
 
 Export reads one revision-bound `GeometrySnapshot`: one traversal recording each occurrence path
 and accumulated transform, with no live SketchUp objects. Its entries are Faces, Edges (world SI

@@ -40,12 +40,25 @@ module PhComposer
         marked || !inherited_from(containers).nil?
       end
 
+      # Whether a Face is a Shading Face that export writes, `shading.list` counts and Colour-by colours: a
+      # Shading Face, except a classified Zone Face (`classified`: a Face record present, readable or not) that is
+      # shading only through a container, which stays envelope: classification wins. Zones applies the same rule
+      # from its side, so a Face is a Room's or a Shade, never both.
+      def exported?(marked:, owned:, containers:, classified:)
+        return false unless shading_face?(:marked => marked, :owned => owned, :containers => containers)
+
+        marked || !(classified && containers.any?(&:zone?))
+      end
+
       # The component name a Shading Face exports under: the nearest enclosing container with a name,
       # walking outward; a Zone as that container gives its name followed by " Shading"; none gives "Shading".
+      # A name that reads as a local file path counts as none, since the export's artifact guard refuses one
+      # and shading never blocks the export.
       def component_name(containers)
         containers.reverse_each do |container|
-          return "#{container.zone_name}#{ZONE_SUFFIX}" if container.zone?
-          return container.name.strip if named?(container.name)
+          name = container.zone? ? "#{container.zone_name}#{ZONE_SUFFIX}" : container.name
+          return name.strip if named?(name) && !Diagnostics.absolute_path?(name.strip)
+          return DEFAULT_NAME if container.zone?
         end
         DEFAULT_NAME
       end

@@ -48,11 +48,8 @@ module PhComposer
       def shading_face?(entity, containers, cut)
         return false unless entity.is_a?(Sketchup::Face) && !cut
 
-        marked = Mark.marked?(entity)
-        return false unless Reads.shading_face?(:marked => marked, :owned => Targets.owned?(entity),
-                                                :containers => containers)
-
-        marked || !(containers.any?(&:zone?) && Zones::Occurrences.classified_face?(entity))
+        Reads.exported?(:marked => Mark.marked?(entity), :owned => Targets.owned?(entity), :containers => containers,
+                        :classified => Zones::Occurrences.classified_face?(entity))
       end
 
       # Yields each Face, Group and component with its root path, the Reads::Container rows above it, the

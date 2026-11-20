@@ -139,7 +139,8 @@ module PhComposer
         definition = entity.definition
         # A detached Face capture remains the smallest resumable native work unit.
         facts = definitions[definition.persistent_id] ||= definition_facts(definition) { block.call(nil) }
-        { "definition" => facts, "glued_to_id" => entity.glued_to&.persistent_id }.freeze
+        { "definition" => facts, "definition_name" => definition.name.to_s.dup.freeze,
+          "glued_to_id" => entity.glued_to&.persistent_id }.freeze
       end
 
       # One component definition as detached facts: its dictionaries, behaviour and each direct child

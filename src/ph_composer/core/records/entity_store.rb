@@ -52,9 +52,18 @@ module PhComposer
       # `envelope_excluded?` over detached export entries, each read through its `dictionaries` map
       # (GeometrySnapshot::Entry), for a caller that holds no live entity. The same rule, by presence.
       def self.envelope_excluded_entries?(entries)
-        carried = ->(stores) { entries.any? { |entry| stores.any? { |store| store.carried_by?(entry.dictionaries) } } }
-        carried.call(excluding.values) && !carried.call(claiming.values)
+        carried_entries?(excluding.values, entries) && !claimed_entries?(entries)
       end
+
+      # `claimed?` over detached export entries, each read through its `dictionaries` map. By presence.
+      def self.claimed_entries?(entries)
+        carried_entries?(claiming.values, entries)
+      end
+
+      def self.carried_entries?(stores, entries)
+        entries.any? { |entry| stores.any? { |store| store.carried_by?(entry.dictionaries) } }
+      end
+      private_class_method :carried_entries?
 
       # What a selection is read against: the selected entities and every open context around them.
       def self.selection_claimed?(model)

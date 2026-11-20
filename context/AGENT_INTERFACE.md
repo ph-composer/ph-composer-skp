@@ -875,10 +875,14 @@ The following public operations have panel-closed walkthroughs.
   repair over every copy first, and says so in its `side_effects`.
   [Walkthrough](../tools/examples/authoring/windows_walkthrough.rb),
   [placement](../tools/examples/authoring/windows_placement_walkthrough.rb).
-- **Shading** (`ph_composer.shading.*`, API 1.69, preflight 1.70). Reads: `selection`, the selected Faces,
-  Groups and components under the active path as root-path references with what `assign` and `clear` would do
-  to each, `list`, every mark and each shading component with its Face count and world area, and
-  `export_preflight`, the `shading.zone_inside` notes. A Shading Face inside a Zone is not one of its Faces:
+- **Shading** (`ph_composer.shading.*`, API 1.69, preflight 1.70, export 1.71). Reads: `selection`, the selected
+  Faces, Groups and components under the active path as root-path references with what `assign` and `clear`
+  would do to each, `list`, every mark and each shading component with its Face count and world area, and
+  `export_preflight`, the Shades section's checks: the `shading.zone_inside` and `shading.classified_inside`
+  notes, and each Face the section leaves out and each unreadable mark, under the object id the export's note
+  uses. Every export writes each Shading Face occurrence as an orphaned honeybee Shade
+  (`ph_composer.shading.export.shades`). Shading never blocks an export for its own reasons; the
+  foundation's metadata rules on a mark and a Face's singular transform still can. A Shading Face inside a Zone is not one of its Faces:
   Zones reads leave it out and an explicit reference refuses `face.outside_envelope`. A classified Face takes
   the mark after `ph_composer.zones.faces.clear_classification` removes its record. Writes:
   `assign` and `clear` over at most 250 explicit `{"entity_path": [...]}` references, each one Undo step.

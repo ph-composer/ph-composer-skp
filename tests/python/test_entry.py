@@ -34,6 +34,7 @@ def test_the_product_build_lists_every_feature_section_and_the_model_section_and
         "ph_composer.model.export.model",
         "ph_composer.spaces.export.spaces",
         "ph_composer.thermal_bridges.export.thermal_bridges",
+        "ph_composer.shading.export.shades",
     ]
     assert EXPORTERS == ()
     empty = {"schema_version": 1, "run_id": "run-0", "sections": {}}

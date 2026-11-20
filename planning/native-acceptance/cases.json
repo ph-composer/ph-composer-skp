@@ -5080,6 +5080,21 @@
         "src/ph_composer/colour_by/*"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "SD06",
+      "label": "Shading export from the packaged RBZ with the panel closed: the reference model exports; the HBJSON reloads with 18 orphaned Shades in five components by name, each is_detached; conformance passes; the report's Shading section matches; the pinned PHX gives five shading components per Variant with InnerAttachment -1 in WUFI XML and idIC -1 in METr JSON; save, reopen and re-export give the same HBJSON; the section's cost at 5,000 Shading Faces recorded. The forced attach refusal is offline evidence",
+      "mode": "bridge",
+      "authority": "planning/features/phase-05-shading/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/shading/export.rb",
+        "src/ph_composer/features/shading/preflight.rb",
+        "src/ph_composer/features/shading/reads.rb",
+        "src/ph_composer/python/ph_composer_translation/shade_sections.py",
+        "src/ph_composer/python/ph_composer_translation/contract/shade_records.py",
+        "src/ph_composer/export/geometry_snapshot.rb"
+      ],
+      "native_control_required": false
     }
   ]
 }

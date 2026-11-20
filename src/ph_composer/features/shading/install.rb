@@ -12,7 +12,8 @@
 #   selection.rb    the native selection with what each action would do
 #   inventory.rb    shading.list: every mark and every shading component
 #   colour_modes.rb the Shading Colour-by mode, by component name
-#   preflight.rb    shading.export_preflight: the notes on what the mark leaves as it is
+#   preflight.rb    shading.export_preflight: the notes on what the mark leaves as it is and on what export leaves out
+#   export.rb       the Shades export section: one record per Shading Face occurrence, from the snapshot
 #   codes.rb        the codes under the shading noun
 #   declarations/   what Shading registers: the actions and reads, and Set as Shading and Clear Shading
 require_relative "mark/schema"
@@ -25,6 +26,7 @@ require_relative "selection"
 require_relative "inventory"
 require_relative "colour_modes"
 require_relative "preflight"
+require_relative "export"
 require_relative "declarations/operations"
 require_relative "declarations/menu"
 require_relative "codes"
@@ -39,6 +41,7 @@ module PhComposer
       Registration.install(feature)
       Menu.install(feature)
       Codes.install(feature)
+      ExportSection.install(feature)
     end
   end
 end

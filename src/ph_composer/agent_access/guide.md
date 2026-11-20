@@ -488,6 +488,15 @@ the mark and it is a Zone Face again. A mark on a Group above a Zone does not re
 classified after the Group above it was marked stays part of the envelope, and the preflight notes
 that Group with `shading.classified_inside`.
 
+Every export writes each Shading Face as a Shade: one per Face and per placement, so a component placed
+three times gives three, each with the shading component's name. WUFI-Passive and METr show one
+shading component per name. Shading never stops an export. A Face with no area is left out, and so is
+each of two Faces that share one path; the export report and `ph_composer.shading.export_preflight`
+name each one with its path (`shading.geometry_invalid`, `target.ambiguous`). A mark whose text cannot
+be read still marks its Faces and is noted as `record.unreadable`. User data on a mark stays in the
+Model and the report says so. A shading component name that reads as a file location, such as
+`/site/north`, counts as no name, so those Faces take the next name out.
+
 `ph_composer.zones.faces.clear_classification` takes `faces`, each a Face reference with the
 `entity_id` you read, and removes their classification in one Undo step, so each reads as
 unclassified. It is refused for one side of a Surface pair (`face.surface_paired`; set another

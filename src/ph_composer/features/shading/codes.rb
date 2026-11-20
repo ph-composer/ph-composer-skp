@@ -14,6 +14,8 @@ module PhComposer
                                  "another feature's object or a cutting component, which the mark does not reach.",
         "shading.classified_inside" => "Preflight note: a marked Group or component inside a Zone holds classified " \
                                        "Zone Faces, which stay envelope and are not shading.",
+        "shading.geometry_invalid" => "Export note: a Shading Face has no area or too few points to become a " \
+                                      "Shade, so it was left out.",
         "shading.cutting_component" => "The entity is a cutting component or inside one; export does not read its " \
                                        "Faces."
       }.freeze
