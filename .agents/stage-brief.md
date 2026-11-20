@@ -14,16 +14,23 @@ where they differ.
   has merged, run `git fetch origin && git rebase --onto origin/main <old base tip> <branch>`, push with
   `--force-with-lease`, and open the PR against `main`. If it is still open, say in your PR body that
   yours stacks on it. Read once per check, never in a loop.
-- The stage owns the main checkout; do not use a worktree, because `make ci` in a worktree skips RuboCop.
+- Work in the main checkout unless the brief names a worktree. The conductor gives two stages that touch
+  disjoint files and need no host their own worktrees (`.claude/worktrees/<slug>`) so they run at once; there
+  `make ci` lints with the main checkout's RuboCop and ESLint, and fails if they are missing. Never symlink
+  `node_modules` into a worktree.
   Run `git rev-parse --abbrev-ref HEAD` before every commit. Stage named paths only, never `git add -A`.
   After `git mv`, `git add` only the new path.
-- Leave the checkout on `main` when the stage ends.
+- Leave the main checkout on `main` when the stage ends. A stage in a worktree leaves its worktree as it is;
+  the conductor removes it after the PR merges.
 
 ## Gate, commit, push
 
 - Run `pgrep -x SketchUp` before `make ci`. If SketchUp is running, stop and report: the gate and the host
   share port 46110. Do not quit SketchUp yourself.
 - `make ci && git commit -s ... && git push --no-thin`, chained with `&&`, never `;`, never `--no-verify`.
+  `make ci` waits for any other gate on the machine to finish; do not start it while a Codex review runs.
+- A commit that touches only `docs/`, `context/` or `planning/` (a ledger flip, evidence, a status row) gates
+  with `make ci-docs` instead, chained the same way. CI runs the full gate on the push.
 - If the push fails twice with HTTP 400 "unexpected disconnect while reading sideband packet", push with
   `git -c http.version=HTTP/1.1 -c http.postBuffer=524288000 push --no-thin ...`.
 - Commit messages end with the DCO sign-off and the agent attribution trailer the conductor names. The PR

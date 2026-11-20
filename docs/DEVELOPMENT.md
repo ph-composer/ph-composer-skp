@@ -25,6 +25,12 @@ lint, Ruby/JavaScript/Python tests, generated fixtures, panel and help pages, ru
 host tools, Python types and the RBZ contents. Ruby tests use a SketchUp stub. JavaScript tests
 use a DOM double. See [test support](../tests/support/.index.md) for what each stub models.
 
+`make ci` holds a machine-wide lock, so a second gate started elsewhere waits until the first finishes.
+In a linked worktree it lints with the main checkout's RuboCop and ESLint and fails if either is missing.
+For a commit that changes only `docs/`, `context/` or `planning/`, `make ci-docs` runs the checks such a
+commit can break: citations, home paths, the help page and the generated fixtures. GitHub Actions still runs
+the full gate on the push.
+
 Use `make lint` and `make test` for focused work. Ruby tests run in shards and print their seeds.
 Set `RUBY_TEST_JOBS=1` or use `ruby -Itests tests/all_tests.rb` to investigate order-dependent
 failures. Run `make coverage` when the owning phase requires it. The Makefile defines the thresholds.
