@@ -271,10 +271,17 @@ module PhComposer
       # inside a Zone carries the code its resolution refused.
       STRANDED_ROUTES = {
         "outside_zone" => "Restore its Zone, or remove it",
-        "face.outside_envelope" => "clear what takes it out of its Zone's envelope",
+        "outside_envelope" => "clear what takes it out of its Zone's envelope",
         "target.shared_definition" => "open its shared Group with Edit Group and close it, or explode its component",
         "target.locked" => "unlock its Group or Zone"
       }.freeze
+
+      # Why a Face record at a root path is in no Zone's Face inventory: `outside_envelope` for a Face inside a
+      # Zone that has left its envelope, else `outside_zone`, read along the path (Occurrences.containment).
+      def stranded_reason(model, path)
+        reason = Zones::Occurrences.containment(model, path).reason
+        reason == "outside_envelope" ? reason : "outside_zone"
+      end
 
       def face_view(request, occurrence, index:)
         record = FACE_STORE.read(occurrence.entity)

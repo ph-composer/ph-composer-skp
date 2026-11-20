@@ -100,6 +100,30 @@ class ZonesEnvelopeExclusionTest < PhComposerTestCase
     end
   end
 
+  # A classified Face inside a marked Group is in no Face inventory, so an Assembly replacement or an Attached
+  # zone delete cannot reach it: each refuses and says to clear what took it out of the envelope.
+  def test_stranded_records_inside_the_envelope_name_the_exclusion
+    record = FACE_STORE.read(face_at(@zone_a, 1003)).merge("id" => "fac_F00000000001",
+                                                           "boundary_condition" => "AttachedZone",
+                                                           "attached_zone_id" => "atz_AAAAAAAAAAAA")
+    FACE_STORE.write(@fin_face, record)
+    EXCLUDING.write(@fin, "schema_version" => 1)
+    request = PhComposer::HandlerRequest.for(@session, :owner => Zones::FEATURE_ID, :name => "test",
+                                                       :registry => PhComposer::Registry.current)
+    retarget = assert_raises(PhComposer::CodedError) do
+      Zones::Faces::AssemblyAssignment.retarget(request, PhComposer::Operations::Proposal.new,
+                                                :from => @assembly_id, :to => "asm_Other0000001")
+    end
+    delete = assert_raises(PhComposer::CodedError) do
+      Zones::Faces.send(:reassignable_faces, @model, "atz_AAAAAAAAAAAA")
+    end
+    errors = [retarget, delete]
+    errors.each do |error|
+      assert_equal "reference.in_use", error.code
+      assert_includes error.message, "clear what takes it out of its Zone's envelope"
+    end
+  end
+
   # Funnel B, behind the Classify tool's hover and click, the selection read and faces.host_context.
   def test_point_reads_find_no_zone_face_for_an_excluded_face
     each_state do |excluded|

@@ -29236,7 +29236,7 @@ Example params:
 
 A writable Zone Face's outline and bounding width and height in the frame units.place offsets use, with the holes and Window outlines on its plane to keep clear of. Owner: `ph_composer.windows`.
 
-Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.surface_host`, and the `query` common set.
+Refuses: `face.outside_envelope`, `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.surface_host`, and the `query` common set.
 
 Params:
 
@@ -29487,7 +29487,7 @@ Example params:
 
 One bounded page of a writable Zone Face's holes, each its bounding rectangle in the offsets units.place uses and its point count. Owner: `ph_composer.windows`.
 
-Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.surface_host`, and the `query` common set.
+Refuses: `face.outside_envelope`, `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.surface_host`, and the `query` common set.
 
 Params:
 
@@ -29636,7 +29636,7 @@ Example params:
 
 One bounded page of the points of a writable Zone Face's outer loop, or of one hole, in loop order, as offsets units.place uses. Owner: `ph_composer.windows`.
 
-Refuses: `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.surface_host`, and the `query` common set.
+Refuses: `face.outside_envelope`, `geometry.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.surface_host`, and the `query` common set.
 
 Params:
 
@@ -48556,7 +48556,7 @@ Copy or reuse one library record with optional assignment. Owner: `ph_composer.l
 
 Undo step: Copy Library Record. Copies or replaces local definitions and optional assignments in one Undo step.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `library.adapter_invalid`, `library.callback_invalid`, `library.catalog_stale`, `library.connection_changed`, `library.kind_unavailable`, `library.local_choice_required`, `library.model_changed`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.reauthorization_required`, `library.reload_required`, `library.review_required`, `library.row_semantic_invalid`, `library.row_unavailable`, `library.selection_changed`, `library.use_expired`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `library.adapter_invalid`, `library.callback_invalid`, `library.catalog_stale`, `library.connection_changed`, `library.kind_unavailable`, `library.local_choice_required`, `library.model_changed`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.reauthorization_required`, `library.reload_required`, `library.review_required`, `library.row_semantic_invalid`, `library.row_unavailable`, `library.selection_changed`, `library.use_expired`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -56060,7 +56060,7 @@ Delete Window Type; live references require replacement. Owner: `ph_composer.win
 
 Undo step: Delete Window Type. Rewrites referring definitions and defaults, then deletes atomically. It first gives every copied Window Unit that still shares an identity a new one, in the same Undo step; ph_composer.windows.units.repair_copied_identities does only that.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_changed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, `window.unknown_type`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_changed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, `window.unknown_type`, and the `action` common set.
 
 Params:
 
@@ -56761,7 +56761,7 @@ Set one row or column band's size. Owner: `ph_composer.windows`.
 
 Undo step: Resize Window Band. Changes this Window Type; its placed Windows follow. It first gives every copied Window Unit that still shares an identity a new one, in the same Undo step; ph_composer.windows.units.repair_copied_identities does only that.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -57380,7 +57380,7 @@ Mirror the layout left to right, swapping left and right Frames, installs and op
 
 Undo step: Flip Window Type. Changes this Window Type; its placed Windows follow. It first gives every copied Window Unit that still shares an identity a new one, in the same Undo step; ph_composer.windows.units.repair_copied_identities does only that.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -57971,7 +57971,7 @@ Insert a row or column band at a grid boundary, filled with new glazed elements.
 
 Undo step: Insert Window Band. Changes this Window Type; its placed Windows follow. It first gives every copied Window Unit that still shares an identity a new one, in the same Undo step; ph_composer.windows.units.repair_copied_identities does only that.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -58590,7 +58590,7 @@ Make elements glazed or Empty. Empty is wall area: it clears the elements' Glazi
 
 Undo step: Change Window Element Kind. Changes this Window Type; its placed Windows follow. It first gives every copied Window Unit that still shares an identity a new one, in the same Undo step; ph_composer.windows.units.repair_copied_identities does only that.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -59205,7 +59205,7 @@ Merge two or more elements of one kind that cover one rectangle into a single el
 
 Undo step: Merge Window Elements. Changes this Window Type; its placed Windows follow. It first gives every copied Window Unit that still shares an identity a new one, in the same Undo step; ph_composer.windows.units.repair_copied_identities does only that.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -59850,7 +59850,7 @@ Copy one glazed element's Glazing, Frames, operation and installs onto other gla
 
 Undo step: Paste Window Element. Changes this Window Type; its placed Windows follow. It first gives every copied Window Unit that still shares an identity a new one, in the same Undo step; ph_composer.windows.units.repair_copied_identities does only that.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -60462,7 +60462,7 @@ Remove one row or column band and the elements only it held. Refused while the l
 
 Undo step: Remove Window Band. Changes this Window Type; its placed Windows follow. It first gives every copied Window Unit that still shares an identity a new one, in the same Undo step; ph_composer.windows.units.repair_copied_identities does only that.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -61070,7 +61070,7 @@ Set or clear the Frame on one side of one glazed element; the other sides stay. 
 
 Undo step: Set Window Frame. Changes this Window Type; its placed Windows follow. It first gives every copied Window Unit that still shares an identity a new one, in the same Undo step; ph_composer.windows.units.repair_copied_identities does only that.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -61690,7 +61690,7 @@ Set or clear one glazed element's Glazing. Owner: `ph_composer.windows`.
 
 Undo step: Set Window Glazing. Changes this Window Type; its placed Windows follow. It first gives every copied Window Unit that still shares an identity a new one, in the same Undo step; ph_composer.windows.units.repair_copied_identities does only that.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -62298,7 +62298,7 @@ Name one element. Owner: `ph_composer.windows`.
 
 Undo step: Rename Window Element. Changes this Window Type; its placed Windows follow. It first gives every copied Window Unit that still shares an identity a new one, in the same Undo step; ph_composer.windows.units.repair_copied_identities does only that.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -62902,7 +62902,7 @@ Set or clear how one glazed element opens. A fixed element has no directions. Ow
 
 Undo step: Set Window Operation. Changes this Window Type; its placed Windows follow. It first gives every copied Window Unit that still shares an identity a new one, in the same Undo step; ph_composer.windows.units.repair_copied_identities does only that.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -63541,7 +63541,7 @@ Split one merged element back into one element per grid cell, each under a new i
 
 Undo step: Split Window Element. Changes this Window Type; its placed Windows follow. It first gives every copied Window Unit that still shares an identity a new one, in the same Undo step; ph_composer.windows.units.repair_copied_identities does only that.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -64141,7 +64141,7 @@ Undo step: Edit Window Installations. Creates or edits installation products and
 
 Calls: `ph_composer.library.copy_into_proposal`.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `library.adapter_invalid`, `library.callback_invalid`, `library.catalog_stale`, `library.connection_changed`, `library.kind_unavailable`, `library.local_choice_required`, `library.model_changed`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.reauthorization_required`, `library.reload_required`, `library.review_required`, `library.row_semantic_invalid`, `library.row_unavailable`, `library.selection_changed`, `library.use_expired`, `operation.participant_cycle`, `operation.proposal_required`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `library.adapter_invalid`, `library.callback_invalid`, `library.catalog_stale`, `library.connection_changed`, `library.kind_unavailable`, `library.local_choice_required`, `library.model_changed`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.reauthorization_required`, `library.reload_required`, `library.review_required`, `library.row_semantic_invalid`, `library.row_unavailable`, `library.selection_changed`, `library.use_expired`, `operation.participant_cycle`, `operation.proposal_required`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -65226,7 +65226,7 @@ Edit guarded authored values of one Window Type. Owner: `ph_composer.windows`.
 
 Undo step: Edit Window Type. Updates one definition and preserves its metadata. It first gives every copied Window Unit that still shares an identity a new one, in the same Undo step; ph_composer.windows.units.repair_copied_identities does only that.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -66071,7 +66071,7 @@ Replace reviewed drawn rectangles with placed Windows, one per group: a new Wind
 
 Undo step: Convert to Window Type. Erases the rectangles and the Edges only they use, healing the host Face, writes the new Window Types, and places one Unit per group, in one Undo step. It first gives every copied Window Unit that still shares an identity a new one, in the same Undo step; ph_composer.windows.units.repair_copied_identities does only that.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.convert_on_boundary`, `window.definition_changed`, `window.definition_missing`, `window.host_ambiguous`, `window.mull_not_rectangular`, `window.not_aligned`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.convert_on_boundary`, `window.definition_changed`, `window.definition_missing`, `window.host_ambiguous`, `window.mull_not_rectangular`, `window.not_aligned`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -66209,7 +66209,7 @@ Create a horizontally flipped Type for one mirrored Window. Owner: `ph_composer.
 
 Undo step: New Flipped Window Type. Creates one independent Type; preserves physical panes, metadata and glue. It first gives every copied Window Unit that still shares an identity a new one, in the same Undo step; ph_composer.windows.units.repair_copied_identities does only that.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_changed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.not_mirrored`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_changed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.not_mirrored`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -66292,7 +66292,7 @@ Place an anchored Window on an explicit writable Zone Face. Owner: `ph_composer.
 
 Undo step: Place Window. Creates or reuses the Type definition, glues an instance and stores its Unit record. It first gives every copied Window Unit that still shares an identity a new one, in the same Undo step; ph_composer.windows.units.repair_copied_identities does only that.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_changed`, `window.definition_missing`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_changed`, `window.definition_missing`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -66434,7 +66434,7 @@ Glue an unmoved Window to an explicit same-storage Face. Owner: `ph_composer.win
 
 Undo step: Re-host Window. Changes glue only, after containment and overlap checks. It first gives every copied Window Unit that still shares an identity a new one, in the same Undo step; ph_composer.windows.units.repair_copied_identities does only that.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_changed`, `window.overhang`, `window.overlap`, `window.rehost_parent`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_changed`, `window.overhang`, `window.overlap`, `window.rehost_parent`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -66831,7 +66831,7 @@ Reset explicit Windows of one Type to its authored geometry. Owner: `ph_composer
 
 Undo step: Reset Windows to Type. Repairs selected instances; regenerating an edited primary affects all its Units. It first gives every copied Window Unit that still shares an identity a new one, in the same Undo step; ph_composer.windows.units.repair_copied_identities does only that.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_kind`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.mirrored`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, `window.unknown_type`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_kind`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.mirrored`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, `window.unknown_type`, and the `action` common set.
 
 Params:
 
@@ -66915,7 +66915,7 @@ Recover a Unit from exact stamped pane Faces. Owner: `ph_composer.windows`.
 
 Undo step: Restore Window. Creates a new default-anchor Unit and removes only its exact loose panes and edges. It first gives every copied Window Unit that still shares an identity a new one, in the same Undo step; ph_composer.windows.units.repair_copied_identities does only that.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_changed`, `window.definition_missing`, `window.overhang`, `window.overlap`, `window.restore_unavailable`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_changed`, `window.definition_missing`, `window.overhang`, `window.overlap`, `window.restore_unavailable`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -67033,7 +67033,7 @@ Put a Window that has left its Face back on the nearest Face of its Zone. A Wind
 
 Undo step: Return Window to its Face. Moves and glues the instance; writes no record. A copy keeps its shared identity for the next Windows action to repair.
 
-Refuses: `geometry.invalid`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_changed`, `window.mirrored`, `window.no_host_face`, `window.scaled`, `window.sheared`, `window.surface_host`, `window.type_geometry_unknown`, `window.unknown_type`, and the `action` common set.
+Refuses: `face.outside_envelope`, `geometry.invalid`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_changed`, `window.mirrored`, `window.no_host_face`, `window.scaled`, `window.sheared`, `window.surface_host`, `window.type_geometry_unknown`, `window.unknown_type`, and the `action` common set.
 
 Params:
 
@@ -67111,7 +67111,7 @@ Swap explicit Windows, preserving their anchors. Owner: `ph_composer.windows`.
 
 Undo step: Swap Window Type. Reuses one target definition and preserves each Unit's metadata and host. It first gives every copied Window Unit that still shares an identity a new one, in the same Undo step; ph_composer.windows.units.repair_copied_identities does only that.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_changed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, `window.unknown_type`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_changed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, `window.unknown_type`, and the `action` common set.
 
 Params:
 
@@ -68508,7 +68508,7 @@ Remove the classification records of Faces, so each reads as never classified. O
 
 Undo step: Clear Classification. Removes Face assignment records; Zone stamps stay.
 
-Refuses: `face.aperture_host`, `face.outside_envelope`, `face.surface_paired`, `gesture.too_large`, `record.unreadable`, `reference.in_use`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
+Refuses: `copy.rule_missing`, `face.aperture_host`, `face.outside_envelope`, `face.surface_paired`, `gesture.too_large`, `record.unreadable`, `reference.in_use`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -73371,7 +73371,7 @@ Example params:
 
 Choose a Type and anchor, then start Place. Owner: `ph_composer.windows`.
 
-Refuses: `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.surface_host`, and the `view_command` common set.
+Refuses: `face.outside_envelope`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.surface_host`, and the `view_command` common set.
 
 Params:
 
@@ -76935,7 +76935,7 @@ Called by no client. An action of a feature that requires the owner names the pa
 
 Copy or reuse one library record, with optional assignment, inside the calling action's own proposal and Undo step. Owner: `ph_composer.library`.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `identity.conflict`, `library.adapter_invalid`, `library.callback_invalid`, `library.catalog_stale`, `library.connection_changed`, `library.kind_unavailable`, `library.local_choice_required`, `library.model_changed`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.reauthorization_required`, `library.reload_required`, `library.review_required`, `library.row_semantic_invalid`, `library.row_unavailable`, `library.selection_changed`, `library.use_expired`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `participant` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `library.adapter_invalid`, `library.callback_invalid`, `library.catalog_stale`, `library.connection_changed`, `library.kind_unavailable`, `library.local_choice_required`, `library.model_changed`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.reauthorization_required`, `library.reload_required`, `library.review_required`, `library.row_semantic_invalid`, `library.row_unavailable`, `library.selection_changed`, `library.use_expired`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `participant` common set.
 
 Params:
 

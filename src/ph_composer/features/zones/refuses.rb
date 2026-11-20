@@ -22,8 +22,8 @@ module PhComposer
                                    gesture.too_large]).freeze
       # Clearing a classification removes the Face record, which a Surface pair, a glued Window or an incoming
       # reference still needs.
-      CLEAR_CLASSIFICATION = (FACE_TARGET + %w[face.aperture_host face.surface_paired gesture.too_large
-                                               reference.in_use]).freeze
+      CLEAR_CLASSIFICATION = (FACE_TARGET + %w[copy.rule_missing face.aperture_host face.surface_paired
+                                               gesture.too_large reference.in_use]).freeze
       SOLVE = (FACE_TARGET + %w[adjacency.stale adjacency.unresolved copy.rule_missing extension.invalid
                                 geometry.invalid reference.invalid scope.incomplete target.same_zone]).freeze
       REPAIR_SPLIT_FACE = (FACE_TARGET + %w[adjacency.unresolved copy.rule_missing extension.invalid

@@ -15,9 +15,11 @@ module PhComposer
       EDIT = (WRITE + %w[target.changed target.not_found]).freeze
       DUPLICATE = (WRITE + %w[target.not_found]).freeze
       DELETE = (EDIT + %w[reference.in_use]).freeze
-      # Placing or reshaping a Unit on its host Face.
-      UNIT_GEOMETRY = (EDIT + %w[geometry.invalid target.wrong_hierarchy target.wrong_zone window.overhang
-                                 window.overlap window.surface_host window.type_geometry_unknown]).freeze
+      # Placing or reshaping a Unit on its host Face. A host Face that has left its Zone's envelope refuses as
+      # Zones resolves it (face.outside_envelope).
+      UNIT_GEOMETRY = (EDIT + %w[face.outside_envelope geometry.invalid target.wrong_hierarchy target.wrong_zone
+                                 window.overhang window.overlap window.surface_host
+                                 window.type_geometry_unknown]).freeze
       TYPE_EDIT = (UNIT_GEOMETRY + %w[window.definition_editing window.definition_missing window.host_required
                                       window.nested_units]).freeze
       TYPE_DELETE = (TYPE_EDIT + %w[reference.in_use window.definition_changed window.unknown_type]).freeze
@@ -28,15 +30,15 @@ module PhComposer
                        %w[window.mirrored window.unknown_type]).freeze
       RESTORE = (UNIT_GEOMETRY + %w[window.definition_changed window.definition_missing
                                     window.restore_unavailable]).freeze
-      RETURN_TO_HOST = %w[geometry.invalid record.unreadable target.ambiguous target.changed target.locked
-                          target.not_found target.shared_definition target.wrong_hierarchy target.wrong_kind
-                          target.wrong_zone validation.failed window.definition_changed window.mirrored
-                          window.no_host_face window.scaled window.sheared window.surface_host
+      RETURN_TO_HOST = %w[face.outside_envelope geometry.invalid record.unreadable target.ambiguous target.changed
+                          target.locked target.not_found target.shared_definition target.wrong_hierarchy
+                          target.wrong_kind target.wrong_zone validation.failed window.definition_changed
+                          window.mirrored window.no_host_face window.scaled window.sheared window.surface_host
                           window.type_geometry_unknown window.unknown_type].freeze
       # Choosing a host Face for the Place tool resolves it as a Zones Face occurrence.
-      PLACE_TOOL_CHOOSE = %w[record.unreadable target.ambiguous target.changed target.locked target.not_found
-                             target.shared_definition target.wrong_hierarchy target.wrong_kind target.wrong_zone
-                             validation.failed window.surface_host].freeze
+      PLACE_TOOL_CHOOSE = %w[face.outside_envelope record.unreadable target.ambiguous target.changed target.locked
+                             target.not_found target.shared_definition target.wrong_hierarchy target.wrong_kind
+                             target.wrong_zone validation.failed window.surface_host].freeze
       # Reading a host Face's placement extent locates it as a placement would.
       HOST_EXTENT = (PLACE_TOOL_CHOOSE + %w[geometry.invalid]).freeze
       # A left-out rectangle is a row of the review, not a refusal, so the read refuses only what reading Units does.

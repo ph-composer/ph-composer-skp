@@ -232,6 +232,24 @@ class SpacesExportTest < PhComposerTestCase
                  records.to_h { |row| [row["id"], row["offset_from_zone"]] })
   end
 
+  # A Face that has left the Zone's envelope sets none of its extents, live or in the snapshot.
+  def test_the_offset_leaves_out_a_face_outside_the_zone_envelope
+    excluding = PhComposer::Records::EntityStore.new("ph_composer.test_spaces_envelope",
+                                                     :excludes_from_envelope => true)
+    far = floor_face(1901, rectangle(20, 0, 5, 5))
+    beside = space_group(1200, space_record("F", :number => "201"),
+                         [volume_group(1210, volume_record("F"), [floor_face(1211, rectangle(20, 0, 1, 1),
+                                                                             segment_record("F"))])])
+    @model.entities << zone_group(1000, "A", [floor_face(1900, rectangle(0, 0, 5, 5)), far, beside])
+    [true, false].each do |excluded|
+      excluded ? excluding.write(far, "schema_version" => 1) : excluding.delete(far)
+      value = API.query(:context => @context, :name => X::PREFLIGHT).fetch("value")
+      offset = value.fetch("findings").select { |row| row["code"] == "space.offset_from_zone" }
+      assert_equal(excluded ? ["spc_FFFFFFFFFFFF"] : [], offset.map { |row| row["object_id"] })
+      assert_equal({ "spc_FFFFFFFFFFFF" => excluded }, records.to_h { |row| [row["id"], row["offset_from_zone"]] })
+    end
+  end
+
   # The extents are the Zone occurrence first in path order when a copy repeats its id, and a Face in a plain
   # Group inside a Space is the Space's, not the Zone's.
   def test_the_offset_reads_the_first_zone_copy_by_path_and_skips_faces_inside_spaces
