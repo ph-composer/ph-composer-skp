@@ -71,9 +71,16 @@ METr JSON, the same component: `{"n": "Neighbour", "idIC": -1, "idEC": -1, "type
 6. A shade is double-sided to the receiving program: PHX writes no orientation-dependent value, so
    the SketchUp Face's front and back do not matter.
 
-## Not checked
+## Answered by Ed in WUFI-Passive, 2026-11-20
 
-- Whether WUFI-Passive shades opaque components as well as windows with these surfaces. PHX writes
-  the same component either way.
-- How WUFI-Passive draws or meshes a bridged (holed) polygon.
-- The upper bound on shading polygons WUFI-Passive's shading calculation handles in reasonable time.
+Ed opened SD07's export (`sd07-reopened-wufi.xml`) in WUFI-Passive V.3.6.0.1 and answered the three questions
+this section used to leave open. His words are paraphrased closely; a screenshot is in the private run folder.
+
+- **Opaque components.** Probably not. WUFI-Passive and METr carry a separate shading factor for opaque
+  surfaces, which Ed does not believe these shading components change; as far as he knows only windows are
+  shaded by them. Not confirmed by a calculation.
+- **Holed polygon.** WUFI-Passive draws the holed Face as one polygon cut along a diagonal from the outer loop
+  to the hole: it looks holed, and is a single polygon wrapped around the opening. This is the bridged polygon
+  D5s-14 chose, drawn as intended.
+- **Many polygons.** No known bound on the shading calculation. WUFI-Passive is very slow to open an XML file
+  with many surfaces; the same model saved as an `.mwp` file opens quickly.

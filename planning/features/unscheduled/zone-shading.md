@@ -27,8 +27,9 @@ an adjoining building, a neighbouring wing that is not part of the certified env
 - METr carries the components as PHX writes them for WUFI-Passive, `idIC` -1
   ([Phase 5 research](../../archive/phase-05-shading/research/honeybee-ph-and-phx-shading.md)). PHX writes no
   transmittance schedule or reflectance, and Phase 5 stores none (SH-3 below).
-- Not checked: whether WUFI-Passive treats these components as shading for apertures only or for
-  opaque surfaces too. Phase 5's acceptance row SD07 asks Ed to look.
+- Ed, 2026-11-20, in WUFI-Passive: probably apertures only; opaque surfaces keep their own shading factor,
+  which these components are not believed to change. Not confirmed by a calculation
+  ([Phase 5 research](../../archive/phase-05-shading/research/honeybee-ph-and-phx-shading.md#answered-by-ed-in-wufi-passive-2026-11-20)).
 
 ## Open questions
 

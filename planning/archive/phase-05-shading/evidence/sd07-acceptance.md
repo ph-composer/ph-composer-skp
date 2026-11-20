@@ -75,11 +75,11 @@ from shading.
 
 ## Ed's check in WUFI-Passive, 2026-11-20
 
-Ed opened `sd07-reopened-wufi.xml` in WUFI-Passive and reported "WUFI looks right"
-(`_private/host/sd07-20261119/SD07/ed/wufi-check.txt`). He gave no further detail: the five components and the
-holed Face were not described separately in WUFI-Passive, and the three "Not checked" questions of the
-[research note](../research/honeybee-ph-and-phx-shading.md) were not answered separately. They stay residual
-risks in the [STATUS closure](../STATUS.md#closure-2026-11-20).
+Ed opened `sd07-reopened-wufi.xml` in WUFI-Passive V.3.6.0.1 and reported "WUFI looks right"
+(`_private/host/sd07-20261119/SD07/ed/wufi-check.txt`). His screenshot (`ed/wufi-check.webp`) shows the five
+components under Remaining elements (Louvre, Neighbour, Zone A Shading, Shading, Fin) and the holed Face drawn
+as one polygon cut along a diagonal to its hole. He then answered the research note's three open questions
+([research note](../research/honeybee-ph-and-phx-shading.md#answered-by-ed-in-wufi-passive-2026-11-20)).
 
 ## Ledger row
 

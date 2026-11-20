@@ -91,9 +91,10 @@ Four separate facts:
 
 Ed opened the files converted from SD07's host export on 2026-11-20 and said, of the METr JSON, "looks ok in
 METr" and, of the WUFI XML, "WUFI looks right". The METr observations (five components, the holed Face drawn
-with its hole) are in the [SD07 evidence](evidence/sd07-acceptance.md). Ed gave no further detail on WUFI-Passive,
-and the [research note](research/honeybee-ph-and-phx-shading.md)'s three "Not checked" questions were not
-answered separately.
+with its hole) are in the [SD07 evidence](evidence/sd07-acceptance.md). His WUFI-Passive screenshot shows the five
+components and the holed Face drawn as one polygon cut to its hole, and he answered the
+[research note](research/honeybee-ph-and-phx-shading.md#answered-by-ed-in-wufi-passive-2026-11-20)'s three open
+questions.
 
 ### Final gates
 
@@ -106,11 +107,10 @@ answered separately.
 
 ### Residual risks
 
-- WUFI-Passive: Ed's check was one sentence. Whether WUFI-Passive shades opaque components as well as
-  windows with these surfaces, how it draws or meshes a holed (bridged) polygon, and how many shading
-  polygons its calculation handles in reasonable time are not observed (research note, "Not checked").
-  D5s-14 (export a holed Face as one bridged polygon) stands on METr's drawing; WUFI-Passive's handling of a
-  holed Face is not observed.
+- WUFI-Passive: Ed believes these shading components shade windows only, and that opaque surfaces keep
+  their own shading factor; not confirmed by a calculation. WUFI-Passive opens an XML with many surfaces
+  very slowly (an `.mwp` of the same model opens quickly), so a detailed neighbour model may make the
+  exported XML slow to open. No bound on the shading calculation itself is known.
 - The export section cost was measured at 5,000 Shading Faces (SD06, 0.055 s); what WUFI-Passive or METr do
   with that many is not measured. PHX's coplanar merge is the user's mitigation.
 - Acceptance ran on SketchUp 2026 on macOS only, as every phase so far.

@@ -1,7 +1,7 @@
 # P5s-07: acceptance and handoff
 
 DATE: 2026-11-19
-STATUS: Complete. Merged to main 2026-11-20 UTC (PR #533, `906a102c`). SD07 Pass 2026-11-20 on `906a102c`: Ed checked both files ("WUFI looks right", "looks ok in METr"); the research note's three "Not checked" lines were not answered separately ([STATUS](../STATUS.md#closure-2026-11-20)). Authorized 2026-11-19 with every Shading stage ([STATUS](../STATUS.md#authorization)). Not released.
+STATUS: Complete. Merged to main 2026-11-20 UTC (PR #533, `906a102c`). SD07 Pass 2026-11-20 on `906a102c`: Ed checked both files ("WUFI looks right", "looks ok in METr"); Ed then answered the research note's three open questions ([research note](../research/honeybee-ph-and-phx-shading.md#answered-by-ed-in-wufi-passive-2026-11-20)). Authorized 2026-11-19 with every Shading stage ([STATUS](../STATUS.md#authorization)). Not released.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 
