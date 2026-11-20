@@ -288,6 +288,19 @@ test("a checked Zone row in Spaces moves from its bar too", function () {
     ["zon_a"]);
 });
 
+test("a Zone whose box reads mixed in Spaces is not moved", function () {
+  var p = load("ph_composer.spaces");
+  fixture.expandAll(p.section());
+  click(zoneRow(p, "Zone A").querySelector(".row-check"));
+  var living = shown(p).querySelectorAll("tr").filter(function (tr) {
+    return tr.getAttribute("data-row-key") === JSON.stringify(["Space", [100, 101]]);
+  })[0];
+  click(living.querySelector(".row-check"));
+  var select = byLabel(p.section(), "Building Segment for checked Zones");
+  assert.ok(!select || select.disabled || select.parentNode.hidden, "no Zone is fully checked, so none moves");
+  assert.strictEqual(p.actions().length, 0);
+});
+
 test("Delete names the Zones' destination and the settings that go, and sends the destination chosen", function () {
   var p = load();
   registerNote(p);
@@ -311,6 +324,19 @@ test("Delete names the Zones' destination and the settings that go, and sends th
   var empty = dialog(p, "phc-segment-delete-dialog");
   assert.strictEqual(empty.querySelector("select"), null, "an empty Segment moves nothing");
   assert.strictEqual(empty.querySelector(".phc-segment-consequence").textContent, "Its settings go with it: Note.");
+});
+
+test("Delete refuses once the Model has changed under its confirmation, and sends nothing", function () {
+  var p = load();
+  click(heading(p, "House").querySelector("[data-row-action='delete']"));
+  var confirm = dialog(p, "phc-segment-delete-dialog");
+  p.panel.receive({ type: "panel.snapshot", payload: snapshot(null, function (state) {
+    state.revision = 5;
+    state.sections["ph_composer.zones.overview"].value.zones[1].values.building_segment_id = "bsg_house";
+  }) });
+  click(confirm.querySelectorAll("button").filter(function (node) { return node.textContent === "Delete"; })[0]);
+  assert.strictEqual(p.actions().length, 0);
+  assert.strictEqual(dialog(p, "phc-segment-delete-dialog"), undefined, "the confirmation closes");
 });
 
 /* The development example's section (tools/examples/zones/example_segment_note.js): a note that must not be

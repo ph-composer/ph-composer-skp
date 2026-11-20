@@ -191,9 +191,9 @@
       "sha256": "f47862b81e16b0b0a2a6f2a472b337f9176b43183b7c03529a430c7b35f9f6fe"
     },
     "html/features/spaces/selection.js": {
-      "bytes": 15273,
+      "bytes": 15522,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "656ff2886d962040c858db3514c694d47cf59de7f1b6c2b889d05c7319a7743d"
+      "sha256": "2cc1d826be20472e89379addbb605b89d32778b4cbcf1a658b81c55512c2568d"
     },
     "html/features/spaces/view.js": {
       "bytes": 21650,
@@ -361,9 +361,9 @@
       "sha256": "4e0f61addd76b05bdc11db3428bcbdc75164fb1b27887d96ee6740642de0eadf"
     },
     "html/features/zones/segment_rows.js": {
-      "bytes": 23641,
+      "bytes": 24054,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "668a35b2db8b7a79903e9070335e4542f03b165a0895cea0238e911c386bf8cb"
+      "sha256": "8c5a2c2359ae99cc2b360fab49e35a0deaa4c32f252692cce606c801e1a96be9"
     },
     "html/features/zones/segment_settings.js": {
       "bytes": 11166,

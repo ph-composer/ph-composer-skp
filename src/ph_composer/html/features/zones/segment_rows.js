@@ -336,10 +336,17 @@ function (panel, ui, requests, tableViews, zoneOptions, SegmentSettings) {
     if (destination) destination.addEventListener("change", paint);
     paint();
     var cancel = ui.button("Cancel", function () { self.closeDelete(); });
+    // The confirmation names the Zones and settings of the Model it opened on; once the Model moves, what it
+    // names may no longer be what Delete would take, so it sends nothing and asks for a fresh look.
+    var revision = this.revision;
     var remove = ui.button("Delete", function () {
       var params = { collection: "building_segment", id: segment.id };
       if (destination) params.replacement_id = destination.value === OUT ? null : destination.value;
       self.closeDelete();
+      if (self.revision !== revision) {
+        self.refuse("The Model changed since Delete opened. Open it again to see where the Zones go.");
+        return;
+      }
       if (self.channel.busy()) return;
       self.channel.run("ph_composer.zones.options.remove", params, { onDone: function () {
         panel.notify(segment.values.name + " deleted.", "success");

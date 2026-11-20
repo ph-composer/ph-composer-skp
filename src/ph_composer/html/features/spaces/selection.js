@@ -91,8 +91,12 @@ function (panel, ui, units, preferences, fields, selectionBars) {
     }, this);
   };
 
+  /* The checked rows the bar acts on. A Zone counts only while everything beneath it is checked too: one whose
+     box reads mixed is not moved, as `checkedZones` hands none over. */
   SpaceSelection.prototype.checked = function () {
-    return this.rows.filter(function (row) { return this.keys[row.key] && kind(row); }, this);
+    return this.rows.filter(function (row) {
+      return this.keys[row.key] && kind(row) && (kind(row) !== "zone" || this.state(row) === true);
+    }, this);
   };
 
   SpaceSelection.prototype.clear = function () {
