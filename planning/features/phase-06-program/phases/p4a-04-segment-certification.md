@@ -7,7 +7,7 @@ ISSUE: none (local planning draft)
 
 ## Entry and scope
 
-Requires P4a-02 (the seam) and P4a-03 (the PHX test group). First adds the export plumbing every
+Requires P4a-02 (the seam) and P4a-03 (both edit `features/zones/export.rb`; the `phx` test group already exists). First adds the export plumbing every
 Segment extension needs, then the `ph_composer.certification` feature: the Phius certification
 section of the Segment settings, stored as its structured extension on the Segment, and its
 export. The first outside-Zones feature on the seam, so it is also the seam's proof.
@@ -23,7 +23,9 @@ certification". Names: [CONTRACTS](../CONTRACTS.md) sections 2 and 3.
    `check_claim` in `shell/registry_validation.rb` and Zones' `exported_choices` in
    `features/zones/export.rb`), and a `segment` attachment host in `python/.../sections.py`, one per
    exported `BldgSegment`. Test: a development namespace with `required` relevance exports and
-   attaches.
+   attaches. The host hands out the `BldgSegment` objects the Rooms already share: Climate's
+   `SiteSection` set their `Site` at `MODEL`, and a test reads that `Site` back after a `segment`
+   section has attached.
 1. **Feature.** `features/certification/install.rb`, `requires: ["ph_composer.zones"]`, listed in
    `extension.rb`; codes under the `certification` noun.
 2. **Extension.** Namespace `ph_composer.certification.segment` on `ph_composer.zones.building_segment`:

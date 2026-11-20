@@ -11,6 +11,13 @@ Requires P4a-02 (the move-out offer starts from its selection bar). Owns the exp
 hangs on them, empty Segments, the Attached zone rule for shared Faces, the move-out offer, and a
 PHX round trip of `PhAdditionalZone`.
 
+Entry checks, added 2026-11-20:
+
+- C4a-11 is answered, so the round trip runs on the pins the rest of the phase uses.
+- Climate's closure carries a report, never reproduced, that PHX fails to convert a Building Segment
+  whose name holds a space. Reproduce it with a two-Segment HBJSON before step 6; record the result
+  and, if it fails, the PHX issue (its own authorization).
+
 Behavior: [Building Segments PRD](../building-segments/PRD.md), "Export rules" and "How
 PhAdditionalZone reaches PHX". Paths are relative to `src/ph_composer/`.
 
@@ -20,7 +27,8 @@ PhAdditionalZone reaches PHX". Paths are relative to `src/ph_composer/`.
    naming Zones left out with counts of their Faces, Spaces and Edges; info line per empty Segment.
 2. **Leave out.** Zones' Room section skips no-Segment Zones; `features/spaces/export.rb` and
    `features/thermal_bridges/export.rb` skip what belongs to them; the Python sections
-   (`model_sections.py`, `space_sections.py`, `thermal_bridge_sections.py`) never see them.
+   (`model_sections.py`, `space_sections.py`, `thermal_bridge_sections.py`) never see them. Shading's export reads Zones' section rows to know
+   which containers are Zones (CONTRACTS section 7, C4a-12): a left-out Zone stays a Zone to it.
 3. **Shared Faces.** `features/zones/faces/export.rb`: a Surface Face whose partner Zone is left
    out refuses, naming the Face and pointing to the offer. A Face holds an Attached zone only on the
    Attached zone boundary (`faces/schema.rb`), so nothing is substituted at export.
@@ -29,8 +37,8 @@ PhAdditionalZone reaches PHX". Paths are relative to `src/ph_composer/`.
    sides) from Surface to Attached zone, leaving their pairs (`leave_pair!`), and creates or reuses
    an Attached zone named for the Zone: one Undo step through Zones' existing Face and Attached zone
    actions. Moving the Zone back leaves them as Attached zone with a notice to re-run Solve (C4a-8).
-5. **PHX test group.** Add an optional `phx` dependency group in `pyproject.toml`, pinned to a
-   released PHX; tests that need it skip when it is absent.
+5. **PHX test group.** Exists: Climate's P4c-05 added the `phx` group. Nothing to add here; its pin
+   follows C4a-11.
 6. **PHX round trip.** A test under `tests/python/`: export the two-Segment reference with the ADU
    moved out, convert with PHX to WUFI XML and METr JSON, read back the attached zone, its reduction
    factor and the Faces' exposure. Check whether one Attached zone shared by two Rooms reaches WUFI
@@ -44,6 +52,9 @@ PhAdditionalZone reaches PHX". Paths are relative to `src/ph_composer/`.
 3. The move-out offer reclassifies both sides, creates or reuses the Attached zone, and Undo
    restores the Surface pair.
 4. The PHX round trip above.
+5. Shading in a left-out Zone: a marked Face exports as a Shade named "<Zone> Shading"; a mark on a
+   Group above the Zone reaches none of its Faces; the Site section's Building Segment count still
+   matches the reloaded Model.
 
 ## Host gate
 

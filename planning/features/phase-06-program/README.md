@@ -5,14 +5,14 @@ STATUS: Scoped (2026-11-15): PRDs, contracts, plan, acceptance and stages P4a-01
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
-Renumbered 2026-11-15 when Ed re-ordered the phases. Stage, decision, register and roadmap item ids keep their original prefixes (P4a-, D4a-, Q4a-, C4a-): this was Phase 4a, and its documents still say so.
+Renumbered 2026-11-15 when Ed re-ordered the phases. Stage, decision, register and roadmap item ids keep their original prefixes (P4a-, D4a-, Q4a-, C4a-): this was Phase 4a, and its documents still say so. In DECISIONS and the research notes "Phase 4" means Mechanical, now Phase 7; Phase 4 is Climate and Phase 5 is Shading, both archived.
 
 Make Programs first-class in PH-Composer: author honeybee-energy ProgramTypes, with their loads and
 schedules, assign them to Zones, and export them in canonical HBJSON so WUFI-Passive, METr and
 PHPP receive occupancy, lighting, equipment, ventilation and airtightness without hand entry.
 
-Ed proposed this on 2026-11-14 as the next chunk of work, ahead of the Phase 4 mechanical stages.
-It is the "Zone loads packet" that [Phase 4](../phase-07-mechanical/README.md) defers to: equipment
+Ed proposed this on 2026-11-14 as the next chunk of work, ahead of the mechanical stages.
+It is the "Zone loads packet" that [Phase 7: Mechanical](../phase-07-mechanical/README.md) defers to: equipment
 Q12 left occupancy, lighting and the non-appliance Room loads to it, and Spaces already shows a
 dash where a Zone's ventilation load should be inherited. Its place on the roadmap is Q4a-01.
 
@@ -29,7 +29,7 @@ From Ed's request and the 2026-11-14 interview ([answers](DECISIONS.md#answered)
   and operating days (Q4a-07). An OpenStudio-style hourly editor is deferred but planned for.
 - **Equipment Sets**: honeybee-ph `PhEquipment` devices (appliances, Phius MEL and lighting,
   custom annual loads) assigned to Zones, exported as honeybee-ph Process loads (Q4a-03, F4a-17).
-  This absorbs Phase 4's appliances (P4-12).
+  This absorbs the Mechanical packet's appliances (P4-12).
 - **Dwellings**: a Dwelling record with a unit count that Zones reference, plus bedrooms and
   occupants per Zone, written to honeybee-ph's People extension (Q4a-11, F4a-19).
 - **A built-in default residential Program** for unassigned Zones, built from honeybee-ph's
@@ -64,7 +64,8 @@ periods until the cross-repo fix for F4a-13 ships (Q4a-08; ventilation periods a
    [building-segments/PRD.md](building-segments/PRD.md), the Building Segment work it stands on.
    The [GUI prototype](mockups/README.md) shows both.
 2. [CONTRACTS.md](CONTRACTS.md): records, ownership, seams and export mapping, with open contract
-   questions C4a-2, C4a-3, C4a-4 and C4a-6, which settle in their stages.
+   questions C4a-2, C4a-3, C4a-4 and C4a-6, which settle in their stages, and C4a-11 to C4a-14, raised
+   on 2026-11-20 after Climate and Shading landed.
 3. [PLAN.md](PLAN.md), the stages under [phases/](phases), and [ACCEPTANCE.md](ACCEPTANCE.md).
 4. [DECISIONS.md](DECISIONS.md): findings F4a-01 to F4a-29 and questions Q4a-01 to Q4a-36 with
    every answer.
@@ -84,5 +85,7 @@ periods until the cross-repo fix for F4a-13 ships (Q4a-08; ventilation periods a
 ## Next
 
 1. P4a-01 to P4a-11 are ready; each needs Ed's go.
+   Before P4a-01: Ed's answers to C4a-11 (the honeybee-ph and PHX pins) and C4a-14 (the footprint
+   baseline) in [CONTRACTS](CONTRACTS.md#open-contract-questions).
 2. Separately: the honeybee-ph and PHX fix for F4a-13 (Q4a-08), in those repositories, starting
    with a reproducing test in each.

@@ -21,11 +21,16 @@ sections 1 to 8 and 10. Paths are relative to `src/ph_composer/`.
 
 0. **Pin.** Choose the honeybee-ph pin for `PhEquipment` (F4a-18: `quantity` defaults and the custom
    types differ between 1.33.65 and 1.33.68) and record it in `pyproject.toml` and the vendored
-   wheels, before the per-type field table is built from it.
+   wheels, before the per-type field table is built from it. C4a-11 recommends making this choice before
+   P4a-03, because the `phx` test group's PHX pin depends on it; if Ed agrees, this step only reads
+   the recorded pin.
 1. **Units.** Store every value in the honeybee SI unit its HBJSON field uses (people per m²,
    W/m², m³/s per person and per m², m³/s per Zone, 1/h, m³/s per m² of exterior area at 4 Pa,
    L/h per m², °C), each field with its `x-unit`, so P4a-10 writes values without conversion. The
-   panel converts for display (m³/h, IP).
+   panel converts for display (m³/h, IP). `core/units.rb` and the panel's units have `airflow`, `area`
+   and `temperature`; add the quantities these fields need (power, power per area, people per area,
+   airflow per person and per area) on both sides with shared vectors in
+   `tests/support/units_vectors.json`, as Climate did for its own.
 2. **Schedule kind** `ph_composer.programs.schedule` (`sch_`): `name`, `type` (`fractional`,
    `activity`, `temperature`, `ventilation`) and one PH form by type:
    - fractional and activity: `start_h`, `end_h`, `fraction_on`, `fraction_off`;
@@ -67,7 +72,8 @@ sections 1 to 8 and 10. Paths are relative to `src/ph_composer/`.
    under its reserved id. **The first write that touches it materializes it** as an ordinary record
    with `source` naming PH-Composer's default, with its Schedules. A Programs Model setting,
    `ph_composer.programs.settings`, holds `default_program_id` and `default_equipment_set_id`;
-   absent means the frozen ones. **The default Equipment Set** (the eight honeybee-ph Phius
+   absent means the frozen ones. A settings proposal guards its whole dictionary, so decide here
+   whether the two defaults share one (CONTRACTS section 5). **The default Equipment Set** (the eight honeybee-ph Phius
    defaults, F4a-20) follows the same pattern. Deleting either default refuses
    `programs.default_in_use`. `ph_composer.programs.reset_default` rewrites either from its
    definition, one Undo step (Q4a-23).

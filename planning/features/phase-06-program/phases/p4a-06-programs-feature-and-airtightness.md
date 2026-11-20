@@ -29,7 +29,9 @@ Behavior: [Phase 4a PRD](../PRD.md), "Segment settings sections Programs owns". 
    the exposed-area rule; exponent 0.65; n50 by net volume) and implement its inverse: a Room
    `Infiltration` `flow_per_exterior_area` at 4 Pa such that PHX reports the entered value for the
    Segment. Pure Ruby, used by the panel's preview and the contributor; the Python section takes
-   `flow_per_exterior_area` from the contract record and computes nothing (P4a-10's rule).
+   `flow_per_exterior_area` from the contract record and computes nothing (P4a-10's rule). A Face tagged as shading is outside the envelope and outside the
+   HBJSON Room, so the exposed area reads a Zone's Faces through Zones' own reads, which leave it out
+   (`context/CONTRACTS.md`, "Envelope exclusion").
 5. **Export.** Contributor and Python section: each Room of a Segment with a test result gets that
    Infiltration; `BldgSegment.wind_exposure_type`; a Segment without a result leaves the Room's
    Infiltration to its Program (P4a-10) or PHX's default.

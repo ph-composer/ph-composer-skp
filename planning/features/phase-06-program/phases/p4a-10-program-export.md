@@ -50,7 +50,12 @@ Q4a-25, Q4a-31, Q4a-33. Paths are relative to `src/ph_composer/`.
    Programs (Q4a-04); the Comfort section shows them read only.
 8. **Python section** (`python/ph_composer_translation/program_sections.py`), attaching to `ROOM`,
    requiring the Zones and Spaces sections, and a `segment` section for set points through
-   P4a-04's attachment host.
+   P4a-04's attachment host. What the export report shows (set points, counts per Dwelling) travels
+   through the Python result and the privacy allowlist: the report reads the result, not the Ruby
+   record (Climate D4c-24). A Program note, device comment or name that reads as a local file path
+   stays in the Model, since the export's artifact guard refuses one (Climate D4c-25). Each preflight
+   row carries a `locate` that opens the Zones or Programs tab at its record, through
+   `session.open_in_panel` (Climate D4c-27).
 9. **Round trip.** Through the `phx` test group: export the five prototype journeys, convert to
    WUFI XML and METr JSON, and read back per Zone: occupancy and its utilization pattern, lighting,
    equipment and appliance devices, ventilation flows and pattern, set points, dwellings and

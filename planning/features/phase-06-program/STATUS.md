@@ -23,6 +23,7 @@ The one place this packet's progress is read from.
 | PRD, contracts, plan and stages for the Zones tab | Scoped | 2026-11-15 | [PRD](PRD.md), [Building Segments PRD](building-segments/PRD.md), [CONTRACTS](CONTRACTS.md), [PLAN](PLAN.md), [ACCEPTANCE](ACCEPTANCE.md), [phases/](phases); C4a-5 and C4a-7 to C4a-10 answered; C4a-2, C4a-3, C4a-4, C4a-6 settle in their stages; consistency sweep folded in |
 | P4a-01 to P4a-11 | Scoped | 2026-11-15 | Ready to authorize; P4a-12 is the closing outline |
 | Programs tab review (G1) | Complete | 2026-11-15 | Q4a-21 to Q4a-25 and Q4a-33 to Q4a-36 answered; C4a-5 and C4a-7 to C4a-10 answered |
+| Review against Climate and Shading | Complete | 2026-11-20 | Read against the two archived packets and `main` at `b409bdbc`; no code run. The `phx` test group already exists, so P4a-03 no longer adds it; C4a-11 to C4a-14 raised in [CONTRACTS](CONTRACTS.md#open-contract-questions); stage notes added to P4a-03, P4a-04, P4a-06, P4a-07, P4a-10, P4a-11 and P4a-12 |
 | GitHub issue | Requested | | Q4a-18 |
 | honeybee-ph and PHX fix for F4a-13 | Requested | | Q4a-08; cross-repo, own authorization |
 
@@ -31,9 +32,12 @@ The one place this packet's progress is read from.
 - Occupancy and lighting operating periods wait on the honeybee-ph and PHX fix for F4a-13
   (Q4a-08); until then those Schedules export as rulesets only. Ventilation Schedules write their
   periods now (C4a-10). Nothing else is blocked.
-- Phase 4 P4-12 (appliances) is superseded: this packet owns appliances as Equipment Sets
-  (Q4a-03). Nothing in Phase 4 mechanical blocks this packet.
-- P4a-07 chooses the honeybee-ph pin for `PhEquipment` first (F4a-18).
+- The Mechanical packet's P4-12 (appliances) is superseded: this packet owns appliances as Equipment Sets
+  (Q4a-03). Nothing in Phase 7 mechanical blocks this packet.
+- P4a-07 chooses the honeybee-ph pin for `PhEquipment` first (F4a-18). The `phx` test group pins PHX
+  1.57.5, the latest release over honeybee-ph 1.33.65, so the two pins move together; C4a-11 asks Ed
+  to choose them before P4a-03.
+- The installed-size growth gate still counts from Phase 3b's baseline (C4a-14).
 - Building Segment management, the Segment settings dialog and Zones outside every Segment are
   stages P4a-01 to P4a-04 ([building-segments](building-segments/PRD.md)), ahead of the Programs
   stages (BS-5).
@@ -48,3 +52,6 @@ Research claims were checked against the pinned wheels (honeybee-energy 1.123.23
 running honeybee-energy. Spot-checked by hand: the Phius base programs (F4a-14), PHX's unguarded schedule `ph` reads
 (F4a-15) and the ExhaustAir pin difference (F4a-16). The PHX double count (F4a-13) was confirmed
 by running a Phius meeting-room People and Lighting load through PHX's schedule builders.
+
+Since then Climate added the `phx` test group at PHX 1.57.5. The PHX findings above were read at
+1.59.1 and have not been rerun at 1.57.5 (C4a-11).

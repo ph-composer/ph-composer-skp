@@ -18,7 +18,7 @@ Q4a-33, Q4a-34, Q4a-35 (revised). Prototype: `j4-program-cards`, `j4-library`,
 
 ## Steps
 
-1. **Tab and pane.** A top-level Programs tab after Zones (`html/index.html`, a composition-root
+1. **Tab and pane.** A top-level Programs tab after Zones (Climate is now first in the row; `html/index.html`, a composition-root
    edit, and the panel manifest); `html/features/programs/` for the feature's panel modules; one
    page header (`ui.pageHeader`) over the shared subtabs nav, Programs, Schedules, Equipment Sets.
 2. **Right sidebar on every subtab** (Q4a-35): the shared library sidebar (`library/sidebar.js`),

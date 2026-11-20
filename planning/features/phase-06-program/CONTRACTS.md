@@ -1,7 +1,7 @@
 # Phase 4a contracts: records, ownership and seams
 
 DATE: 2026-11-15
-STATUS: Scoped for P4a-01 to P4a-11; revised after an independent review against the code (14 findings), the Programs tab review and a consistency sweep, all 2026-11-15. Ed answered C4a-5 and C4a-7 to C4a-10; C4a-2, C4a-3, C4a-4 and C4a-6 settle in their stages.
+STATUS: Scoped for P4a-01 to P4a-11; revised after an independent review against the code (14 findings), the Programs tab review and a consistency sweep, all 2026-11-15. Ed answered C4a-5 and C4a-7 to C4a-10; C4a-2, C4a-3, C4a-4 and C4a-6 settle in their stages. C4a-11 to C4a-14 were raised on 2026-11-20, after Climate and Shading landed, and are open.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -99,7 +99,10 @@ accepts only reference targets (`shell/registry_validation.rb` `check_claim`), a
 sections attach only to `model`, `room` and `face` (`sections.py`). A Segment extension with
 `export_relevance: required` would therefore block every export. P4a-04 first adds (a) a projection
 for extensions on catalog records, claimed by the namespace owner's export contributor, and (b) a
-`segment` attachment host in the Python sections, one per exported `BldgSegment`.
+`segment` attachment host in the Python sections, one per exported `BldgSegment`. Climate's
+`SiteSection` already sets one `Site` on each `BldgSegment` the Rooms share, attached at `MODEL`, and
+its conformance counts those segments from the Rooms. The host hands sections those same objects and
+never rebuilds one, or the `Site` is lost.
 
 ## 3. Feature ownership
 
@@ -148,7 +151,10 @@ materializes it as a record with its Schedules, `source` naming PH-Composer's de
 user may edit it like any Program. A Reset to PH-Composer default action rewrites it from the
 definition, one Undo step. A Programs Model setting, `ph_composer.programs.settings`, holds
 `default_program_id` (never null), the Program unassigned Zones and Single dwelling use; deleting
-that Program refuses while it is the default.
+that Program refuses while it is the default. A settings proposal guards its whole dictionary
+(Climate D4c-02, which split its settings in two for that reason), so with both defaults in one
+dictionary an update of one stales a pending update of the other; P4a-07 accepts that or gives each
+its own dictionary.
 
 **The default Equipment Set follows the same pattern**: the Phius single-family device set (the
 eight honeybee-ph Phius defaults, F4a-20) is a frozen definition until first written, then an
@@ -211,9 +217,17 @@ rule (P4a-10).
 | Equipment Set | honeybee-ph `PhEquipment` Process loads (F4a-17, Q4a-21). A Dwelling's Set, or the default Set, once per Dwelling on its largest Room, each device's `quantity` its own times the Dwelling's units, so PHX's merge across Rooms (by identifier, summing `quantity`) counts it once. A non-dwelling Zone's own Set on that Zone's Room; two such Zones sharing a Set each carry its devices, as two laundry rooms each have a washer | Programs |
 | Segment set points | `BldgSegment.set_points` | Programs |
 
-**PHX in tests.** PHX is not a dependency today (`pyproject.toml`; the research read a local
-checkout, PHX 1.59.1). P4a-03 adds an optional `phx` dependency group pinned to a released PHX; the
-round-trip tests skip when it is absent and run in each stage's host gate with it installed.
+**PHX in tests.** PHX is not shipped. Climate's P4c-05 added the optional `phx` dependency group
+(`pyproject.toml`), pinned to `PHX==1.57.5`, the latest release over the pinned honeybee-ph 1.33.65;
+PHX 1.58 and later need honeybee-ph 1.33.68 (Climate D4c-22). The research here read a local checkout
+at 1.59.1, so C4a-11 sets the pins before the first round trip. The round-trip tests skip without the
+group and run in each stage's host gate with it installed.
+
+**Shading in a Zone left out.** Shading's export (`features/shading/export.rb`) knows a container is
+a Zone by its row in Zones' export section, and uses that to name a Shade "<Zone> Shading", to stop a
+mark above a Zone from reaching its Faces and to keep classified Faces in the envelope
+(`context/CONTRACTS.md`, "The shading mark"). P4a-03 keeps those three rules true for a Zone in no
+Segment (C4a-12).
 
 ## Open contract questions
 
@@ -222,9 +236,13 @@ round-trip tests skip when it is absent and run in each stage's host gate with i
 | C4a-2 | A copied Zone shares its source's Dwelling: does it stay in it? | Yes, until the user chooses One dwelling each; a finding when a Dwelling spans Segments | P4a-08 |
 | C4a-3 | A Dwelling's Zones in two Segments | Refused by Programs' actions; a finding on generic routes | P4a-08 |
 | C4a-4 | The n50/q50 conversion's exposed area: PH-Composer's envelope sum, or PHX's `cleanup` rule exactly | Match PHX, proven by a round trip reading back the entered value | P4a-06 |
-| C4a-5 | Which feature owns mechanical cooling and the mechanical room temperature | **Answered (Ed, 2026-11-15): Phase 4 mechanical**; listed under Planned until then | Answered |
+| C4a-5 | Which feature owns mechanical cooling and the mechanical room temperature | **Answered (Ed, 2026-11-15): the Mechanical phase** (then Phase 4, now Phase 7); listed under Planned until then | Answered |
 | C4a-6 | Keep a per-Space `airflow_mode` copy for agents | Yes, derived from the Zone, for one API minor version | P4a-05 |
 | C4a-7 | Single dwelling's default: on for every Segment whose extension is absent, or on only for the first | **Answered (Ed, 2026-11-15): on for every Segment**, effective only while residential | Answered |
 | C4a-9 | Weeks per year below 52: where the weeks off fall in the honeybee ruleset | **Answered (Ed, 2026-11-15): one contiguous block centred on 1 August** | Answered |
 | C4a-10 | Operating periods before the F4a-13 fix | **Answered (Ed, 2026-11-15): write them for ventilation Schedules now** (F4a-13 affects only occupancy and lighting); occupancy and lighting stay rulesets only until the fix | Answered |
 | C4a-8 | Moving a Zone back into a Segment after its shared Faces were reclassified to an Attached zone | **Answered (Ed, 2026-11-15): they stay Attached zone**; the move-back notice says to re-run Solve | Answered |
+| C4a-11 | The honeybee-ph pin (F4a-18) is chosen in P4a-07, after P4a-03, P4a-04 and P4a-06 have run PHX round trips. The `phx` group pins PHX 1.57.5 because 1.58 and later need honeybee-ph 1.33.68, and this packet's PHX findings were read at 1.59.1 | Choose the honeybee-ph pin as an entry check before P4a-03 and move the `phx` group with it. Otherwise rerun the PHX findings at 1.57.5 first | Ed, before P4a-03 |
+| C4a-12 | If P4a-03 drops left-out Zones from Zones' export section, Shading no longer sees them as Zones: a marked Face inside one exports under its Group's name, a mark above the Zone reaches its Faces, and classified Faces under that mark export as Shades. Read from the code at `b409bdbc`, not run | Zones keeps naming left-out Zones to Shading, so the name rule (D5s-10) and the stop at a Zone (D5s-17) hold; a marked Face inside a left-out Zone still exports as a Shade | P4a-03 |
+| C4a-13 | The Segment settings Planned row lists site and climate. Climate shipped one site per Model, written to every Segment | Drop the row and the out-of-scope line in the [Building Segments PRD](building-segments/PRD.md) | Ed, at P4a-02 |
+| C4a-14 | The installed-size baseline in `tools/runtime/vendor.py` is still Phase 3b's, 24,541,739 bytes. Climate closed at 25,992,613 against a growth gate of 27,041,739; the size after Shading is not recorded | Reset the baseline at this phase's entry, as a recorded decision | Ed, before P4a-01 |

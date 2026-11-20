@@ -191,7 +191,7 @@ Schedules and Equipment Sets show only their records in this file for now. Proto
 
 [DECISIONS.md](DECISIONS.md#answered) holds every answer: the interview (Q4a-01 to Q4a-18), the
 prototype and Programs tab reviews (Q4a-19 to Q4a-36) and the findings F4a-01 to F4a-29. Contract
-questions C4a-2 to C4a-10 are in [CONTRACTS](CONTRACTS.md#open-contract-questions). The Building Segment
+questions C4a-2 to C4a-14 are in [CONTRACTS](CONTRACTS.md#open-contract-questions). The Building Segment
 answers are in the [Building Segments PRD](building-segments/PRD.md#decisions-ed-2026-11-15).
 
 ## Out of scope
@@ -199,4 +199,4 @@ answers are in the [Building Segments PRD](building-segments/PRD.md#decisions-ed
 ExhaustAir (F4a-16), daylighting control, fans and internal masses, EnergyPlus simulation
 settings, Space Types (Q4a-16), exporting Zones in no Segment as shading, Space rates folded into
 Room ventilation for EnergyPlus (Q4a-31), mechanical cooling and mechanical room temperature
-(Phase 4, C4a-5).
+(Phase 7 mechanical, C4a-5).

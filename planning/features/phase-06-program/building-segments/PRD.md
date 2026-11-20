@@ -86,11 +86,11 @@ one Undo step across every section. Sections, in this order:
 | Phius certification | Building category (residential or non-residential), certification program, building use, building status, building type | Certification, P4a-04 |
 | Airtightness | Test result: n50 (1/h) or q50 (m³/h·m²) and its value; wind exposure | Programs, P4a-06 |
 | Comfort | Winter and summer set points, read only, from the Zones' Programs (Q4a-04) | Programs, P4a-10 |
-| Planned | Floor levels (from Levels), site and climate (Phase 5.1), summer ventilation, mechanical cooling and mechanical room temperature (Phase 4), source energy and CO2 factors | Listed, disabled, with the phase in the tooltip |
+| Planned | Floor levels (from Levels), site and climate (shipped per Model as Phase 4, Climate; C4a-13), summer ventilation, mechanical cooling and mechanical room temperature (Phase 7 mechanical), source energy and CO2 factors | Listed, disabled, with the phase in the tooltip |
 
 The certification program list follows the pinned honeybee-ph `PhiusBuildingCertificationProgram`
 enum, which stops at Phius 2021 CORE and ZERO. Mechanical cooling and mechanical room temperature,
-shown in the prototype's Comfort section, move to Phase 4 mechanical, which owns the systems they
+shown in the prototype's Comfort section, move to Phase 7 mechanical, which owns the systems they
 describe (C4a-5, Ed, 2026-11-15).
 
 ### Export rules (P4a-03, BS-2, BS-6)
@@ -100,7 +100,8 @@ Checked when the user exports; the Zone tables never flag them.
 1. **The minimum is one Zone in one Building Segment.** With less, export refuses.
 2. A Zone in no Segment is left out with its Faces, Spaces and thermal-bridge Edges. One info
    finding names those Zones and counts what went with them. Later they export as shading
-   ([zone-shading](../../unscheduled/zone-shading.md)).
+   ([zone-shading](../../unscheduled/zone-shading.md)). A Face tagged as shading inside such a Zone
+   still exports as a Shade (C4a-12).
 3. An empty Segment is left out, with an info line in the export report.
 4. A Surface Face whose partner Zone is left out refuses export and names the Face. A Face can
    hold an Attached zone only on the Attached zone boundary (`features/zones/faces/schema.rb`), so
@@ -147,5 +148,5 @@ extensions staged by Zones' Save, the settings-section seam and the export proje
 ## Out of scope
 
 Exporting Zones in no Segment as shading ([zone-shading](../../unscheduled/zone-shading.md)), site
-and climate per Segment (Phase 5.1), summer ventilation and mechanical settings (Phase 4), drag and
+and climate per Segment (Climate shipped one site per Model; C4a-13), summer ventilation and mechanical settings (Phase 7), drag and
 drop between groups.

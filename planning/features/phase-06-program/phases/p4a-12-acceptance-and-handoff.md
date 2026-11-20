@@ -11,10 +11,10 @@ Requires every stage above. Closes the register and folds what landed into `cont
 
 ## Outline
 
-1. Both offline Ruby gates, coverage, browser and runtime checks; packaged footprint.
+1. Both offline Ruby gates, coverage, browser and runtime checks; packaged footprint against the baseline C4a-14 sets.
 2. The integrated run from a fresh process on the three reference models: Segments, settings, Spaces airflows, Programs, export and round trip.
 3. `context/CONTRACTS.md`, `context/EXTENSIBILITY.md`, `context/UBIQUITOUS_LANGUAGE.md`, `docs/PRODUCT.md`, the user data guide and the agent guide brought up to date.
-4. Handoff to Phase 4 mechanical: mechanical cooling and room temperature (C4a-5), the ventilation unit link per Space.
+4. Handoff to Phase 7 mechanical: mechanical cooling and room temperature (C4a-5), the ventilation unit link per Space.
 
 ## Open
 
