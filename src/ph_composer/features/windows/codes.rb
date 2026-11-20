@@ -42,6 +42,8 @@ module PhComposer
         "window.sheared" => "The Window has native in-plane shear.",
         "window.surface_host" => "A paired Surface Face cannot host a Window.",
         "window.type_geometry_unknown" => "A neighbouring Window's untouched geometry cannot be recovered.",
+        "window.zone_left_out" => "The Window is hosted on a Face of a Zone in no Building Segment, so export leaves " \
+                                  "it out with its Zone.",
         "window.unhosted" => "The Window is not glued to a resolvable host Face.",
         "window.unknown_type" => "The Window names a Window Type that is not in the Model.",
         "window_type.construction_unavailable" => "An element's Uw is outside what the pinned Honeybee simple " \

@@ -361,9 +361,9 @@
       "sha256": "845919747b71fae7ca8023c58d1d1da178a5781edfba5bb63c7b446467c37bdb"
     },
     "html/features/zones/segment_rows.js": {
-      "bytes": 24533,
+      "bytes": 30192,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "af9f9ba4c54f35d1b2c326a2c7cb944aba913a00137687f842dfe4c7f5f3050a"
+      "sha256": "02688bbb4f57ec017cba6ab676c995017313e73616d9c25768ef4f3cdb83c43e"
     },
     "html/features/zones/segment_settings.js": {
       "bytes": 11166,
@@ -756,9 +756,9 @@
       "sha256": "c9185a0a20c6a2396a82a606174c3b1c30ab08b8b15226990cb39f05f94ac937"
     },
     "python/ph_composer_translation/model_sections.py": {
-      "bytes": 23885,
+      "bytes": 26105,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "de11f33cdc040ede9d8a1cabad8639899090c8450b474ac5040431352d4c1c24"
+      "sha256": "9910a7df68b6a17c3af52a24e56b6519465ed5734231b4305d4a7b601c1c3538"
     },
     "python/ph_composer_translation/result.py": {
       "bytes": 3570,

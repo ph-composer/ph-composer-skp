@@ -44,13 +44,25 @@ class WindowExportTest < PhComposerTestCase
                      "window_type_id" => @type["id"], "anchor" => "sill_center" })
   end
 
-  def assess(face_values: {}, types: { @type["id"] => @type })
+  def assess(face_values: {}, types: { @type["id"] => @type }, left_out: false)
     snapshot = PhComposer::Export::GeometrySnapshot.capture(@model, :revision => 0)
     face = snapshot.entries.find { |e| e.kind == "face" }
     X.assess(:snapshot => snapshot, :types => types, :products => @products, :settings => @settings,
              :faces => [{ "path" => face.path, "geometry" => face.geometry, "zone_id" => "zon_AAAAAAAAAAAA",
+                          "left_out" => left_out,
                           "record" => { "id" => "fac_AAAAAAAAAAAA", "face_type" => "Wall",
                                         "boundary_condition" => "Outdoors" }.merge(face_values) }])
+  end
+
+  # A Unit on a Face of a Zone in no Building Segment leaves with its Zone: no aperture, and nothing about it,
+  # even an unknown Window Type, is checked.
+  def test_a_unit_on_a_left_out_face_is_left_out_unchecked
+    result = assess(:types => {}, :left_out => true)
+
+    assert_empty result.apertures
+    assert_empty result.findings
+    assert_equal [{ "unit_id" => "wun_AAAAAAAAAAAA", "zone_id" => "zon_AAAAAAAAAAAA" }], result.left_out
+    assert_equal "window.zone_left_out", X.left_out_rows(result.left_out).first.fetch("code")
   end
 
   def codes

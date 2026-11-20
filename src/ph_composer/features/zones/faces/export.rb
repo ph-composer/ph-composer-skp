@@ -23,18 +23,26 @@ module PhComposer
 
         # The Faces section's registered projection: detached native occurrences for contributors
         # needing host context, including unclassified Faces. Classification validity remains the
-        # consuming feature's export policy. A contributor reads it as `reader.section(SECTION)`.
+        # consuming feature's export policy. `left_out` is true for a Face of a Zone in no Building Segment,
+        # which the section leaves out, so a contributor leaves out what it hangs on that Face. A contributor
+        # reads it as `reader.section(SECTION)`.
         def contexts(reader)
           zone_faces(reader).map do |entry|
             stored = entry.record(FACE_DICTIONARY)
             owner = Zones::ExportProjection.zone_owner(reader, entry.path)
-            valid = stored && Schema.problems(stored).empty?
-            record = valid && reader.entity_record(stored,
-                                                   :fields => EXPORTED_FIELDS,
-                                                   :target_kind => REFERENCE_KIND, :user_data => true)
-            { "path" => entry.path, "record" => record || nil, "zone_id" => owner && owner[1]["id"],
-              "geometry" => entry.geometry }
+            left_out = !owner.nil? && !Zones::Schema.exported?(owner[1])
+            { "path" => entry.path, "record" => context_record(reader, stored, left_out),
+              "zone_id" => owner && owner[1]["id"], "left_out" => left_out, "geometry" => entry.geometry }
           end
+        end
+
+        # A valid Face record as the projection carries it, or nil. A left-out Face's metadata never leaves, so
+        # it is not read through the metadata boundary, and nothing about it can block the export.
+        def context_record(reader, stored, left_out)
+          return nil unless stored && Schema.problems(stored).empty?
+          return { "id" => stored.fetch("id") }.merge(stored.slice(*EXPORTED_FIELDS)) if left_out
+
+          reader.entity_record(stored, :fields => EXPORTED_FIELDS, :target_kind => REFERENCE_KIND, :user_data => true)
         end
 
         def install(feature)
@@ -43,7 +51,7 @@ module PhComposer
                                                       :params => Shapes::NONE, :result => Export::PREFLIGHT_RESULT,
                                                       :examples => [{}]) { |request| preflight(request) }
           feature.export_contributor(SECTION,
-                                     :section_version => 1,
+                                     :section_version => 2,
                                      :preflight => "#{PREFIX}.export_preflight", :projection => method(:contexts),
                                      :result => { "surface_omissions" => [
                                        Export::Privacy.fields(%w[face_id zone_id code reason area_m2])
@@ -65,7 +73,11 @@ module PhComposer
 
         def preflight(request)
           index = Zones::Index.new(request.model)
-          findings = Zones::Occurrences.zones(request.model, :index => index).flat_map do |zone|
+          # A Zone in no Building Segment is left out with its Faces, so none of them is checked.
+          exported = Zones::Occurrences.zones(request.model, :index => index).select do |zone|
+            Zones::Schema.exported?(zone.record)
+          end
+          findings = exported.flat_map do |zone|
             Zones::Occurrences.faces(zone, :index => index).flat_map do |occurrence|
               face_findings(request, zone, occurrence, index)
             end
@@ -116,6 +128,7 @@ module PhComposer
                             false)
           end
           issues.concat(attached_zone_issues(request, record)) if record["boundary_condition"] == "AttachedZone"
+          issues.concat(partner_issues(request, record, index)) if state == "current"
           return issues unless record["boundary_condition"] && (!state || state == "current")
 
           issues.concat(construction_issues(request, occurrence, record, index))
@@ -180,6 +193,18 @@ module PhComposer
           "This interior Face joins two Building-Segments, so it needs an Assembly."
         end
 
+        # A current Surface pair whose other side is in a Zone in no Building Segment: export leaves that Zone out,
+        # so the pair has no other side and refuses.
+        def partner_issues(request, record, index)
+          other = Zones::Occurrences.resolve_face(request.model, record.fetch("adjacency").fetch("counterpart"),
+                                                  :index => index)
+          return [] if Zones::Schema.exported?(other.zone.record)
+
+          [issue("face.partner_left_out", partner_message(record, other.zone.record), true)]
+        rescue CodedError
+          []
+        end
+
         def attached_zone_issues(request, record)
           id = record["attached_zone_id"]
           state = id.to_s.empty? ? "absent" : attached_record_state(request, id)
@@ -208,16 +233,20 @@ module PhComposer
           "invalid"
         end
 
+        # One record per classified Face of an exported Zone. A Face of a Zone in no Building Segment leaves with
+        # its Zone, and so is not written; an AttachedZone Face carries its Attached zone's values.
         def records(reader)
-          leave_out_attached_zone_maps(reader)
+          attached = attached_zones(reader)
           zone_faces(reader).filter_map do |entry|
             record = entry.record(FACE_DICTIONARY)
             next unless record
 
+            owner = Zones::ExportProjection.zone_owner(reader, entry.path)
+            next if owner && !Zones::Schema.exported?(owner.fetch(1))
+
             Schema.validate!(record)
             geometry = entry.geometry
             stamp = entry.record(Zones::STAMP_DICTIONARY)
-            owner = Zones::ExportProjection.zone_owner(reader, entry.path)
             unless stamp && stamp["zone_id"].is_a?(String) && owner && owner.fetch(1)["id"] == stamp["zone_id"]
               raise Export::Blocked.new("face.wrong_zone", "Face #{record.fetch('id')} has no owning Zone stamp.")
             end
@@ -228,6 +257,8 @@ module PhComposer
             ).merge(
               "zone_id" => stamp.fetch("zone_id"), "geometry" => geometry.to_h
             )
+            exported["attached_zone"] =
+              attached_zone(attached, record) if record["boundary_condition"] == "AttachedZone"
             omission = omission_reason(reader, entry, record)
             if omission
               exported["omission"] = { "code" => omission.fetch(0), "reason" => omission.fetch(1),
@@ -247,20 +278,36 @@ module PhComposer
           end
         end
 
-        # An Attached zone leaves no object of its own (an AttachedZone Face carries only its boundary), so each
-        # readable one with a map gets a finding that it stayed in the Model. Only its map is read here: whether
-        # its envelopes let export go ahead is the preflight's (`attached_record_state`), and a record that cannot
-        # be read is that preflight's finding when a Face names it.
-        def leave_out_attached_zone_maps(reader)
+        # Every readable Attached zone in the snapshot, by id. An Attached zone leaves no object of its own: each
+        # AttachedZone Face carries its values (`attached_zone`), so each one with a map gets a finding that the
+        # map stayed in the Model. Whether its envelopes let export go ahead is the preflight's
+        # (`attached_record_state`), and a record that cannot be read is that preflight's finding when a Face
+        # names it.
+        def attached_zones(reader)
           kind = AttachedZone::RECORD_KIND
-          reader.snapshot.model_dictionaries.fetch(kind.store.dictionary, {}).sort.each do |_id, text|
+          reader.snapshot.model_dictionaries.fetch(kind.store.dictionary,
+                                                   {}).sort.each_with_object({}) do |(id, text), found|
             record = text.is_a?(String) ? JSON.parse(text) : nil
             next unless record.is_a?(Hash) && kind.problems(record).empty?
 
             reader.entity_record(record.slice("id", "user_data"), :fields => [])
+            found[id] = record
           rescue JSON::ParserError
             next
           end
+        end
+
+        # The values an AttachedZone Face exports for its Attached zone: the record's id, name and factor. Its
+        # kind stays in the Model: honeybee-ph's Grasshopper component writes every attached zone as an unheated
+        # space, and PHX reads it as one.
+        def attached_zone(attached, record)
+          found = attached[record["attached_zone_id"]]
+          unless found
+            raise Export::Blocked.new("attached_zone.dangling",
+                                      "Face #{record.fetch('id')} names an Attached zone that cannot be exported.")
+          end
+
+          found.slice("id", "name", "temperature_reduction_factor")
         end
 
         def omission_reason(reader, entry, record)
@@ -277,12 +324,28 @@ module PhComposer
           unless counterpart && other && !Zones::ExportProjection.outside_envelope?(reader, counterpart)
             return ["adjacency.unresolved", "Face has no reciprocal Surface endpoint."]
           end
-          return nil if Zones::Adjacency.snapshot_pair_current?(entry, record, counterpart, other)
+          unless Zones::Adjacency.snapshot_pair_current?(entry, record, counterpart, other)
+            return ["adjacency.stale", "Face has no current reciprocal Surface endpoint."]
+          end
 
-          ["adjacency.stale", "Face has no current reciprocal Surface endpoint."]
+          # A current pair whose other side leaves with its Zone has no other side, as the preflight says.
+          partner = Zones::ExportProjection.zone_owner(reader, counterpart.path)
+          if partner && !Zones::Schema.exported?(partner.fetch(1))
+            raise Export::Blocked.new("face.partner_left_out", partner_message(record, partner.fetch(1)))
+          end
+
+          nil
+        end
+
+        # The refusal for a Surface Face whose other side is in a Zone export leaves out, and its repair.
+        def partner_message(record, partner)
+          "Face #{record.fetch('id')} is one side of a Surface pair with Zone #{partner.fetch('name')}, which is in " \
+            "no Building Segment and left out of export. Make #{partner.fetch('name')} the Attached zone for the " \
+            "Faces it shares, or put it in a Building Segment."
         end
         private_class_method :face_findings, :issue, :assignment_issues, :attached_zone_issues, :attached_record_state,
-                             :omission_reason, :construction_issues, :zone_faces, :leave_out_attached_zone_maps
+                             :omission_reason, :construction_issues, :zone_faces, :attached_zones, :attached_zone,
+                             :partner_message, :context_record, :partner_issues
       end
     end
   end

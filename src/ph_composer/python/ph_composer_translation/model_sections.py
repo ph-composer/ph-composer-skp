@@ -42,6 +42,19 @@ class FaceOmission:
 
 
 @dataclass(frozen=True)
+class AttachedZoneSpec:
+    """The Attached zone an AttachedZone Face names: honeybee-ph's `PhAdditionalZone` boundary."""
+
+    identifier: str
+    name: str
+    temperature_reduction_factor: float
+
+
+#: honeybee-ph's Grasshopper component writes every attached zone as this type, and PHX reads each as one.
+ATTACHED_ZONE_TYPE = "Unheated space"
+
+
+@dataclass(frozen=True)
 class FaceSpec:
     identifier: str
     zone_id: str
@@ -55,6 +68,7 @@ class FaceSpec:
     user_data: JSONObject = field(default_factory=dict)
     # The counterpart side of a Surface pair: it names the pair's Assembly and takes its layers reversed.
     assembly_reversed: bool = False
+    attached_zone: AttachedZoneSpec | None = None
 
 
 @dataclass(frozen=True)
@@ -82,7 +96,8 @@ FACES = Requirement(FACE_SECTION_ID, FaceSpec)
 
 class FaceSection(Section[FaceSpec, FaceSpec]):
     id = FACE_SECTION_ID
-    versions = frozenset({1})
+    # Version 2 adds `attached_zone` on an AttachedZone Face.
+    versions = frozenset({1, 2})
     object_type = FaceSpec
 
     def read(self, raw: Mapping[str, object]) -> FaceSpec:
@@ -123,6 +138,7 @@ class FaceSection(Section[FaceSpec, FaceSpec]):
         area = as_number(geometry.get("area_m2"), f"face {identifier} area_m2")
         if area < 0:
             raise RecordError(f"face {identifier} area_m2 must not be negative")
+        attached = _read_attached_zone(raw.get("attached_zone"), identifier, boundary)
         return FaceSpec(
             identifier,
             zone_id,
@@ -135,6 +151,7 @@ class FaceSection(Section[FaceSpec, FaceSpec]):
             omission,
             user_data(raw.get("user_data"), f"face {identifier}"),
             reversed_assembly,
+            attached,
         )
 
     def translate(self, record: FaceSpec, inputs: Inputs) -> FaceSpec:
@@ -251,7 +268,9 @@ class ZoneSection(Section[ZoneRecord, TranslatedZone]):
                 face_type = getattr(hb_types.face_types, _face_type_name(specification.face_type))
                 # A Surface boundary needs its counterpart's Room, so `attach` sets it once every Room exists.
                 boundary = hb_boundaries.boundary_conditions.outdoors
-                if specification.boundary_condition != "Surface":
+                if specification.attached_zone is not None:
+                    boundary = _attached_zone_boundary(specification.attached_zone)
+                elif specification.boundary_condition != "Surface":
                     boundary = getattr(
                         hb_boundaries.boundary_conditions, _boundary_name(specification.boundary_condition)
                     )
@@ -373,6 +392,36 @@ class _ConstructionUsage:
 
     def row(self, assembly_id: str) -> JSONValue:
         return {"assembly_id": assembly_id, "face_count": self.face_count, "gross_area_m2": self.gross_area_m2}
+
+
+def _read_attached_zone(value: object, identifier: str, boundary: str | None) -> AttachedZoneSpec | None:
+    """The Attached zone an AttachedZone Face carries; any other Face carries none."""
+    if boundary != "AttachedZone":
+        if value is not None:
+            raise RecordError(f"face {identifier} carries an Attached zone without the AttachedZone boundary")
+        return None
+    if not isinstance(value, Mapping):
+        raise RecordError(f"face {identifier} attached_zone must be an object")
+    factor = as_number(value.get("temperature_reduction_factor"), f"face {identifier} temperature_reduction_factor")
+    if not 0 <= factor <= 1:
+        raise RecordError(f"face {identifier} temperature_reduction_factor must be between 0 and 1")
+    return AttachedZoneSpec(
+        as_text(value.get("id"), f"face {identifier} attached_zone id"),
+        as_text(value.get("name"), f"face {identifier} attached_zone name"),
+        factor,
+    )
+
+
+def _attached_zone_boundary(attached: AttachedZoneSpec) -> Any:
+    """honeybee-ph's attached-zone boundary, one per Face, identified by the Attached zone so PHX makes one
+    attached zone of every Face that names it."""
+    boundary = stack.load("honeybee_energy_ph.boundarycondition").PhAdditionalZone
+    return boundary(
+        identifier=attached.identifier,
+        zone_name=attached.name,
+        zone_type=ATTACHED_ZONE_TYPE,
+        temperature_reduction_factor=attached.temperature_reduction_factor,
+    )
 
 
 def _read_omission(value: object, identifier: str, zone_id: str) -> FaceOmission | None:

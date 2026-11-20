@@ -8,7 +8,9 @@
    `table_views.heading` (Zones adds Default); the shown view fills its columns from `segmentSums`. Settings and
    Delete sit in its Actions cell. New Building Segment is an icon in the control row; it makes a Segment under a
    free default name and opens that name in place. Moving Zones happens in a view's selection bar through
-   `moveControl`. Every write is one request and one Undo step. */
+   `moveControl`. Moving a Zone to No Building Segment offers, in one confirmation, to make it the Attached zone of
+   the Surface pairs it shares with Zones still exported; moving one back says Solve adjacencies pairs them
+   again. Every write is one request and one Undo step. */
 PhComposerUI.define("features/zones/segment_rows", ["panel", "workspace", "request", "table_views",
   "features/zones/zone_options", "features/zones/segment_settings"],
 function (panel, ui, requests, tableViews, zoneOptions, SegmentSettings) {
@@ -19,6 +21,7 @@ function (panel, ui, requests, tableViews, zoneOptions, SegmentSettings) {
   var NEW = "__new", OUT = "__none";
   var LAST = "The Model keeps at least one Building Segment, so the last one cannot be deleted.";
   var LEFT_OUT = "Zones in no Building Segment are left out of export.";
+  var OFFER = "ph_composer.zones.faces.attached_zone.offer";
 
   // Zones' own contribution to every heading: the Segment new Zones join.
   tableViews.heading(HOST, { id: "ph_composer.zones.default_segment", order: 10,
@@ -45,6 +48,9 @@ function (panel, ui, requests, tableViews, zoneOptions, SegmentSettings) {
       send(type, Object.assign({}, payload, { expected_revision: self.revision }));
     }, "segments");
     this.settings = new SegmentSettings(session, send, function (message, tone) { panel.notify(message, tone); });
+    this.reads = requests.channel(session, function (type, payload) { send(type, payload); }, "segment-offer",
+      "query.invoke");
+    this.offers = []; this.offering = null;
     this.options = zoneOptions.read({});
     this.renaming = null;
     this.newButton = ui.iconButton("New Building Segment", "add", function () { self.create([]); });
@@ -55,6 +61,7 @@ function (panel, ui, requests, tableViews, zoneOptions, SegmentSettings) {
     this.snapshot = state; this.revision = state.revision; this.options = zoneOptions.read(state);
     this.settings.consume(state, this.options);
     this.channel.consume(state);
+    this.reads.consume(state);
     // A Segment named in place that has been read and is gone again (Undo took it) leaves nothing to rename. The
     // create's result can arrive before the snapshot that lists the new Segment. The values the field first read
     // are its guard, so a name changed elsewhere meanwhile is never overwritten.
@@ -81,6 +88,7 @@ function (panel, ui, requests, tableViews, zoneOptions, SegmentSettings) {
   SegmentRows.prototype.draftReason = function () {
     if (this.settings.active()) return "Finish the Building Segment settings first.";
     if (this.deleting) return "Finish deleting the Building Segment first.";
+    if (this.offering) return "Answer the Attached zone offer first.";
     return null;
   };
 
@@ -422,9 +430,15 @@ function (panel, ui, requests, tableViews, zoneOptions, SegmentSettings) {
       if (reason) { self.refuse(reason); return; }
       if (chosen === NEW) { self.create(targets(list)); return; }
       if (self.channel.busy()) return;
-      var segment = chosen === OUT ? null : self.segment(chosen);
+      var segment = chosen === OUT ? null : self.segment(chosen), moved = targets(list);
+      // Zones moved out are offered as Attached zones; Zones moved back from none are told about Solve.
+      var reviewed = moved.filter(function (target, index) {
+        return (groupKey(self.options, list[index]) === NONE) !== (chosen === OUT);
+      });
       self.channel.run("ph_composer.zones.update_field", { field: "building_segment",
-        value: segment ? segment.values.name : null, targets: targets(list) });
+        value: segment ? segment.values.name : null, targets: moved }, { onDone: function () {
+        self.review(reviewed.map(function (target) { return target.reference; }), chosen === OUT);
+      } });
       panel.repaint();
     });
     function paint() {
@@ -453,8 +467,95 @@ function (panel, ui, requests, tableViews, zoneOptions, SegmentSettings) {
     return { root: root, paint: paint };
   };
 
+  /* ---------------------------------------------------------------- the Attached zone offer */
+
+  /* After a move, reads each Zone's offer in turn: one moved `out` with Surface pairs shared with exported Zones
+     is offered as their Attached zone; one moved back that has Faces on an Attached zone gets a notice. */
+  SegmentRows.prototype.review = function (references, out) {
+    var self = this;
+    references.forEach(function (reference) { self.offers.push({ reference: reference, out: out }); });
+    this.nextOffer();
+  };
+
+  SegmentRows.prototype.nextOffer = function () {
+    var self = this;
+    if (this.offering || this.reads.busy() || !this.offers.length) return;
+    var item = this.offers.shift();
+    this.reads.run(OFFER, { zone: item.reference }, {
+      onDone: function (outcome) {
+        var offer = outcome.value;
+        if (item.out && offer.faces.length) { self.confirmOffer(offer, outcome.revision); return; }
+        if (!item.out && offer.attached_face_count) {
+          panel.notify(offer.name + " keeps " + offer.attached_face_count + (offer.attached_face_count === 1 ?
+            " Face" : " Faces") + " on an Attached zone. Run Solve adjacencies to pair the Faces it shares with " +
+            "other Zones again.", "info");
+        }
+        self.nextOffer();
+      },
+      // A Zone that cannot be read any more has nothing to offer.
+      onFail: function () { self.nextOffer(); }
+    });
+  };
+
+  /* One confirmation names the Zones on the other side and how many Faces change; Make reclassifies both sides
+     of each pair as one Undo step through the Attached zone actions, reusing an Attached zone of the name. The
+     offer holds for the revision it was read at; the next Zone's offer is read once this write settles. */
+  SegmentRows.prototype.confirmOffer = function (offer, read) {
+    var self = this, shared = offer.faces.length / 2;
+    var dialog = this.offering = ui.formDialog("phc-segment-offer-dialog", function () { self.closeOffer(); });
+    dialog.appendChild(ui.element("h2", "", "Make " + offer.name + " an Attached zone?"));
+    dialog.appendChild(ui.element("p", "phc-segment-consequence", offer.name + " is in no Building Segment, so " +
+      "export leaves it out, and the " + shared + (shared === 1 ? " Face" : " Faces") + " it shares with " +
+      listed(offer.shared_with) + " would refuse export as Surface pairs. Make " + offer.name +
+      (offer.attached_zone_id ? ", the Attached zone already in this Model," : " a new Attached zone and") +
+      " their boundary instead, on both sides."));
+    var later = ui.button("Not now", function () { self.closeOffer(); });
+    var make = ui.button("Make Attached zone", function () {
+      var settled = { onDone: function () { self.nextOffer(); }, onFail: function () { self.nextOffer(); } };
+      self.closeOffer(true);
+      if (typeof read === "number" && self.revision > read) {
+        self.refuse("The Model changed since the offer opened. Assign the Attached zone from Classify instead.");
+        self.nextOffer();
+        return;
+      }
+      if (self.channel.busy()) {
+        self.refuse("Another change is still being written. Assign the Attached zone from Classify instead.");
+        self.nextOffer();
+        return;
+      }
+      var expected = { boundary_condition: "Surface" };
+      if (offer.attached_zone_id) {
+        self.channel.run("ph_composer.zones.faces.classify", { faces: offer.faces, expected_values: expected,
+          intent: { boundary_condition: { mode: "set", value: "AttachedZone" },
+            attached_zone_id: { mode: "set", value: offer.attached_zone_id } } }, settled);
+      } else {
+        self.channel.run("ph_composer.zones.faces.attached_zone.create_and_assign", { faces: offer.faces,
+          values: { name: offer.name, kind: "other" }, expected_values: expected }, settled);
+      }
+      panel.repaint();
+    });
+    dialog.appendChild(ui.actionRow(later, make, true));
+    document.body.appendChild(dialog);
+    dialog.openModal();
+    make.focus();
+  };
+
+  /* Closes the offer; the next Zone's is read at once unless `waiting`, when the write it sent reads it. */
+  SegmentRows.prototype.closeOffer = function (waiting) {
+    if (!this.offering) return;
+    this.offering.closeModal(); this.offering.remove(); this.offering = null;
+    if (!waiting) this.nextOffer();
+  };
+
+  /* "A", "A and B", "A, B and C". */
+  function listed(names) {
+    if (names.length < 2) return names.join("");
+    return names.slice(0, -1).join(", ") + " and " + names[names.length - 1];
+  }
+
   SegmentRows.prototype.dispose = function () {
-    this.channel.reset(); this.settings.dispose(); this.closeDelete(); this.renaming = null;
+    this.channel.reset(); this.reads.reset(); this.settings.dispose(); this.closeDelete(); this.renaming = null;
+    this.offers = []; if (this.offering) { this.offering.closeModal(); this.offering.remove(); this.offering = null; }
   };
 
   SegmentRows.headingKey = headingKey;

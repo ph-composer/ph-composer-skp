@@ -50,6 +50,52 @@ module PhComposer
         created.merge(classified)
       end
 
+      # What moving `zone` out of every Building Segment offers: the Faces of each current Surface pair it shares
+      # with a Zone export includes, both sides, for create_and_assign (or classify, when `attached_zone_id`
+      # names an Attached zone of the Zone's name to reuse) to make AttachedZone in one step, leaving each pair;
+      # the Zones on the other sides; and how many of its Faces already name an Attached zone, which moving it
+      # back into a Segment leaves so until Solve adjacencies pairs them again. Reads only.
+      def attached_zone_offer(request, zone:)
+        index = Zones::Index.new(request.model)
+        occurrence = Zones::Occurrences.resolve_zone(request.model, zone, :index => index)
+        name = occurrence.record.fetch("name")
+        pairs = []
+        attached = 0
+        Zones::Occurrences.faces(occurrence, :index => index).each do |face|
+          record = FACE_STORE.read(face.entity)
+          attached += 1 if record && record["boundary_condition"] == "AttachedZone"
+          pair = shared_pair(request, face, record, index)
+          pairs << pair if pair
+        end
+        { "zone_id" => occurrence.record.fetch("id"), "name" => name,
+          "attached_zone_id" => named_attached_zone(request, name),
+          "faces" => pairs.flat_map { |pair| pair.first(2) },
+          "shared_with" => pairs.map(&:last).uniq.sort, "attached_face_count" => attached }
+      end
+
+      # `[this side, other side, other Zone's name]` for a Face in a current Surface pair with a Zone export
+      # includes, or nil.
+      def shared_pair(request, face, record, index)
+        return nil unless Zones::Adjacency.state(request.model, face, record, :index => index) == "current"
+
+        other = Zones::Occurrences.resolve_face(request.model, record.dig("adjacency", "counterpart"), :index => index)
+        return nil unless Zones::Schema.exported?(other.zone.record)
+
+        theirs = FACE_STORE.read(other.entity)
+        [face.reference(record.fetch("id")), other.reference(theirs.fetch("id")), other.zone.record.fetch("name")]
+      rescue CodedError
+        nil
+      end
+
+      # The id of the first Attached zone, in id order, whose name is `name`, or nil.
+      def named_attached_zone(request, name)
+        request.engine.ids(AttachedZone::KIND_ID).sort.find do |id|
+          request.engine.find(AttachedZone::KIND_ID, id)["name"] == name
+        rescue CodedError
+          false
+        end
+      end
+
       # The engine's own patch rule: a named value replaces, and an explicit nil removes.
       def merged_values(before, patch)
         patch.each_with_object(DeepCopy.call(before)) do |(key, value), after|

@@ -43,6 +43,9 @@ module PhComposer
       # as a blocking row, each locating its Edges with runs.locate.
       def preflight(request)
         facts, unreadable = Scan.call(request)
+        names = Zones::Occurrences.zones(request.model).reject { |zone| Zones::Schema.exported?(zone.record) }
+                                  .to_h { |zone| [zone.record.fetch("id"), zone.record.fetch("name")] }
+        facts, gone = split_left_out(facts, names.keys)
         outlines, skipped = facts.empty? ? [[], nil] : outlines(request)
         schedule = Runs::Schedule.call(facts, :types => Scan.types(request.engine), :outlines => outlines)
         findings = skipped ? [skipped] : []
@@ -60,6 +63,10 @@ module PhComposer
                           "message" => "An assigned Edge's record cannot be read: #{row.fetch('message')} To " \
                                        "discard it, #{Assignment::Repair::ROUTE}.",
                           "locate" => { "edge_paths" => [row.fetch("path")] } }, nil)
+        end
+        findings += left_out_counts(gone, names).map do |zone_id, message|
+          { "code" => "thermal_bridge.zone_left_out", "section" => SECTION, "object_id" => zone_id,
+            "message" => message, "blocks_export" => false }
         end
         { "findings" => findings + metadata_findings(request), "repairs" => [] }
       rescue CodedError => error
@@ -103,7 +110,12 @@ module PhComposer
 
       def records(reader)
         types = reader.records(TYPE_KIND).to_h { |row| [row.fetch("id"), row] }
-        facts = facts(reader)
+        names = reader.section(ZONES).reject { |row| row.fetch("exported") }
+                      .to_h { |row| [row.fetch("zone_id"), row.fetch("name")] }
+        facts, gone = split_left_out(facts(reader), names.keys)
+        left_out_counts(gone, names).each { |zone_id, message|
+          reader.note("thermal_bridge.zone_left_out", zone_id, message)
+        }
         outlines = reader.section(APERTURES).map { |row| row.fetch("outline_m") }
         schedule = Runs::Schedule.call(facts, :types => types, :outlines => outlines)
         blocking = schedule.fetch("runs").flat_map { |run| run.fetch("findings") }.find { |row| row["blocks_export"] }
@@ -165,6 +177,21 @@ module PhComposer
         return [nil, "outside_zone"] if holding.empty?
 
         [holding.first.slice("zone_id", "zone_path", "name", "building_segment"), nil]
+      end
+
+      # The facts whose Edge sits in a Zone export includes, and those in a Zone `left_out` names by id, which
+      # leave with their Zone and are neither scheduled nor checked.
+      def split_left_out(facts, left_out)
+        facts.partition { |fact| !left_out.include?(fact.zone&.fetch("zone_id")) }
+      end
+
+      # Per left-out Zone, by id, the sentence counting the assigned Edges that went with it.
+      def left_out_counts(gone, names)
+        gone.group_by { |fact| fact.zone.fetch("zone_id") }.sort.map do |zone_id, facts|
+          count = facts.length
+          [zone_id, "#{count} assigned #{count == 1 ? 'Edge' : 'Edges'} in Zone #{names.fetch(zone_id)}, which " \
+                    "is in no Building Segment, #{count == 1 ? 'is' : 'are'} left out of export with it."]
+        end
       end
 
       def inside?(parent, path)

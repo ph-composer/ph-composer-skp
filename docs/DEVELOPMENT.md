@@ -39,8 +39,8 @@ Four tests skip unless you give them an input or a dependency that the repositor
 `PH_COMPOSER_CLIMATE_CORPUS` to a folder of Phius station files you are licensed to use, to run
 `tests/climate_station_corpus_test.rb`. Set `PH_COMPOSER_MAP_DATA` as the
 [outline map data guide](../tools/map_data/README.md) says, to check the shipped map borders against
-their source. Run `uv run --group phx pytest tests/python/test_site_phx_round_trip.py tests/python/test_shade_phx_round_trip.py`
-for the PHX round trips of the exported site and the exported Shades. Keep the location of any licensed files in a gitignored
+their source. Run `uv run --group phx pytest tests/python` for the PHX round trips of the exported site, the exported
+Shades and a Zone left out of every Building Segment as an Attached zone. Keep the location of any licensed files in a gitignored
 `_private/` manifest, never in a tracked file.
 
 The lint tools are RuboCop, ESLint and Ruff. Install the project's dependencies if lint reports a

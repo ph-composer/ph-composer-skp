@@ -20,6 +20,8 @@ module PhComposer
         "space.nothing_to_create" => "None of the Faces given can become a Space.",
         "space.number_duplicate" => "Two Spaces in one Zone share a number.",
         "space.outside_zone" => "A Space is hosted in no Zone.",
+        "space.zone_left_out" => "A Space is in a Zone in no Building Segment, so export leaves it out with its " \
+                                 "Zone.",
         "space.zone_missing" => "A Space names a Zone that is no longer in the Model.",
         "space.same_zone" => "The Space is already in that Zone.",
         "space.solid_invalid" => "The chosen Group or component is not a closed solid, or encloses no volume.",

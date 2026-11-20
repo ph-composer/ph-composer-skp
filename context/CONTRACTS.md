@@ -926,8 +926,8 @@ Managed read rows expose resolved presentation names/colours separately as `disp
 choices require explicit destination adoption; a Zone naming neither a Segment nor a Level has
 nothing to adopt, and in a Model with no option settings yet its evidence keeps the source it names;
 the first option such a Zone is given creates the Model's settings and default Segment.
-Option rewrites validate every Zone and stamp they write. In a managed Model, export preflight also blocks legacy Zones pending adoption. A wholly legacy Model retains its compatible export path. Until export
-leaves Zones in no Building Segment out, preflight blocks such a Zone with `reference.invalid`.
+Option rewrites validate every Zone and stamp they write. In a managed Model, export preflight also blocks legacy Zones pending adoption. A wholly legacy Model retains its compatible export path. Export
+leaves a Zone in no Building Segment out (see "Building Segments at export").
 
 The `ph_composer.zones.options.*` operations publish collection reads, usage, guarded definition
 writes, complete-draft management, read-only adoption preview and atomic adoption. Management validates the
@@ -1367,6 +1367,39 @@ action and refuses without that action's active proposal
 (`operation.proposal_required`) or when its owner neither is nor requires the library
 (`operation.dependency_missing`).
 
+## Building Segments at export
+
+Export writes only Zones in a Building Segment (`Zones::Schema.exported?`: every legacy Zone, and every
+managed Zone whose `building_segment_id` is set).
+
+- With Zones in the Model and none in a Segment, the Zones preflight and section refuse `zone.no_segment`.
+- A Zone in no Building Segment is left out with everything that hangs on it. The Zones section leaves its
+  record out and notes `zone.left_out` with its Face count; the Faces section leaves its Faces out; Spaces,
+  Thermal bridges and Windows leave out the Spaces, assigned Edges and Window Units in it or on its Faces,
+  each noting `space.zone_left_out`, `thermal_bridge.zone_left_out` or `window.zone_left_out` per Zone. Each
+  preflight skips what it leaves out and gives the same row as info, so incomplete authoring inside the Zone
+  (an unclassified Face, a missing Window Type or Space height) never blocks. A record that cannot be read
+  still blocks wherever it is, as does a Zone nested in a Zone.
+  Features read the rule from the projections: a Zones row's `exported` and a Faces row's `left_out`, or
+  `Zones::Schema.exported?` on a live Zone record.
+- The Zones projection keeps a left-out Zone's row, so Shading still names a Shade "<Zone> Shading" there,
+  stops a mark above it at the Zone, and exports a Face marked as shading inside it.
+- A valid Building Segment no Zone names is noted `zone.segment_empty`; it never reaches HBJSON, which builds
+  Segments from Rooms.
+- A current Surface pair with one side in a left-out Zone refuses `face.partner_left_out` on the exported
+  side, naming the Face; a stale one is omitted, as any stale pair is. `ph_composer.zones.faces.attached_zone.offer` names both sides of every such pair,
+  and the Zone's name and any Attached zone already of that name; `create_and_assign` (or `classify`, to
+  reuse it) makes them AttachedZone in one Undo step, ending each pair. Moving the Zone back leaves them so;
+  Solve adjacencies pairs them again.
+
+The Faces section is version 2: an AttachedZone Face carries `attached_zone`, its Attached zone's `id`,
+`name` and `temperature_reduction_factor`, and translates to honeybee-ph `PhAdditionalZone` with zone type
+"Unheated space", as honeybee-ph's Grasshopper component writes it. PHX 1.59.1 merges a Segment's Rooms
+before it collects attached zones, so one Attached zone that two Rooms name reaches WUFI-Passive and METr as
+one attached zone, and its Faces' exterior exposure names it. WUFI XML carries its factor; METr JSON carries
+the zone with `typeZ` 2 and PHX's default `TRedUD` of 1.0, not the factor
+(`tests/python/test_segment_phx_round_trip.py`). The Attached zone's kind stays in the Model.
+
 ## Translation sections and artifacts
 
 A translation section declares its id, the extraction versions it can read and the section ids
@@ -1485,9 +1518,9 @@ in `requires:`; registration refuses a section that is not registered, or whose 
 the contributor's feature nor one that feature requires, with `registration.missing_dependency`.
 It reads that section's registered `projection` with `reader.section(id)` while collecting, and its
 result fields with `result.section(id)` in its report, which receives an `Export::ResultView`; an
-undeclared read is an internal error. The Zones section projects each Zone occurrence's id, path, name and
-Building-Segment; the Faces section each Zone Face's path, record and Zone; the Apertures section each
-placed Window's world outline. A contributor discloses what it leaves out of its records, or warns about
+undeclared read is an internal error. The Zones section projects each Zone occurrence's id, path, name,
+Building-Segment and `exported`; the Faces section each Zone Face's path, record, Zone and `left_out`; the
+Apertures section each placed Window's world outline. A contributor discloses what it leaves out of its records, or warns about
 them, with `reader.note(code, object_id, message)`: a non-blocking finding that joins the result's findings
 and so the report. Such a finding carries no `locate`; the preflight row for the same condition does.
 The run reads every contributor's preflight once, at the revision it exports, and each warning (a

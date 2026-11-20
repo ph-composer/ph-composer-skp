@@ -492,6 +492,11 @@ also runs extraction's metadata rules (`Export::MetadataCheck`, the same rules `
 raises on) over the records its section reads, so a reserved `user_data` key or extension data nothing
 exports is reported before a run; HBJSON conformance and the passed `user_data` guard stay translation
 checks that only a run makes.
+A Zone in no Building Segment is left out of export with what it holds (API 1.75; CONTRACTS.md, "Building
+Segments at export"): the preflights skip it and report it in info rows, refuse `zone.no_segment` when no
+Zone is in a Segment and `face.partner_left_out` on a Surface pair across that boundary, and
+`ph_composer.zones.faces.attached_zone.offer` reads the Faces to make AttachedZone instead, through the
+existing Attached zone actions.
 `API.start_export`, `export_status`, `cancel_export` and `latest_export` require the separate `export`
 grant. A scripted start names an approved save destination as `location` and, to replace a pair,
 the state `export_preflight(location:)` reported (see "Locations only the user can choose").

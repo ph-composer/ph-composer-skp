@@ -43,6 +43,8 @@ module PhComposer
         "face.invalid" => "A Face's assignment record cannot be read.",
         "face.outside_envelope" => "The Face is inside a Zone but not part of its envelope, so no Zone read or " \
                                    "write takes it.",
+        "face.partner_left_out" => "A Surface Face is paired with a Face of a Zone in no Building Segment, which " \
+                                   "export leaves out.",
         "face.surface_paired" => "The Face is one side of a Surface pair, so its classification cannot be cleared " \
                                  "until the pair is retired.",
         "face.type_missing" => "A Face has no Face type.",
@@ -62,7 +64,11 @@ module PhComposer
                                      "or removing that Group through its feature is refused while it is there.",
         "zone.identity_in_use" => "The Zone being restored is already in the Model.",
         "zone.identity_unique" => "The Zone's identity is already unique; there is nothing to repair.",
+        "zone.left_out" => "A Zone is in no Building Segment, so export leaves it out with its Faces and everything " \
+                           "inside it.",
+        "zone.no_segment" => "No Zone is in a Building Segment, so export has nothing to write.",
         "zone.none" => "The Model has no Zone to export.",
+        "zone.segment_empty" => "A Building Segment holds no Zone, so export leaves it out.",
         "zone.restore_is_limited" => "Restore recovers the Zone id, Building-Segment and Level only.",
         "zone.restore_unsafe" => "The Zone cannot be restored from what remains."
       }.freeze

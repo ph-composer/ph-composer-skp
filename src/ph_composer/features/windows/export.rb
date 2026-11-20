@@ -78,7 +78,9 @@ module PhComposer
       # The Apertures contract is the Units' owning section, so claimed Unit data is captured here, once,
       # and never by the assessment both sections share.
       def apertures(reader)
-        result = ready(reader).apertures
+        assessed = ready(reader)
+        left_out_rows(assessed.left_out).each { |row| reader.note(*row.values_at("code", "object_id", "message")) }
+        result = assessed.apertures
         reader.snapshot.records(Units::STORE.dictionary).each do |entry, record|
           reader.capture_entity(record, :target_kind => Units::REFERENCE_KIND, :path => entry.path)
         end
@@ -106,12 +108,29 @@ module PhComposer
                                            :reserved => Export::Collection.reserved(request.registry))
         reader = Export::SnapshotReader.new(records, snapshot, :registry => request.registry)
         result = reader.within(APERTURES) { projection(reader) }
-        { "findings" => result.findings + metadata, "repairs" => result.repairs.uniq { |row| row.fetch("id") } }
+        left_out = left_out_rows(result.left_out).map { |row|
+          row.merge("section" => APERTURES, "blocks_export" => false)
+        }
+        { "findings" => result.findings + metadata + left_out, "repairs" => result.repairs.uniq { |row|
+          row.fetch("id")
+        } }
       rescue CodedError => error
         named = Array(metadata).any? { |row| row.values_at("code", "message") == [error.code, error.message] }
         refused = { "code" => error.code, "section" => APERTURES, "object_id" => nil,
                     "message" => error.message, "blocks_export" => true }
         { "findings" => (named ? [] : [refused]) + Array(metadata), "repairs" => [] }
+      end
+
+      # Per Zone, by id, a row counting the Units hosted on its Faces that export leaves out with it, as
+      # `{code, object_id, message}`.
+      def left_out_rows(left_out)
+        left_out.group_by { |row| row.fetch("zone_id") }.sort.map do |zone_id, units|
+          count = units.length
+          { "code" => "window.zone_left_out", "object_id" => zone_id,
+            "message" => "#{count} Window #{count == 1 ? 'Unit is' : 'Units are'} hosted on Faces of Zone " \
+                         "#{zone_id}, which is in no Building Segment, so export leaves " \
+                         "#{count == 1 ? 'it' : 'them'} out with it." }
+        end
       end
 
       # The metadata extraction refuses, read as `assessment` reads it: each Window Type and product alone,

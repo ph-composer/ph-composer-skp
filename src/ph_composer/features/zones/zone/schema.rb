@@ -69,6 +69,12 @@ module PhComposer
         MANAGED_VERSIONS.include?(record["schema_version"])
       end
 
+      # Whether export includes the Zone `record`: every Zone but a managed one in no Building Segment, which is
+      # left out with its Faces and everything inside it. A legacy Zone always names a Segment.
+      def exported?(record)
+        !managed?(record) || !record["building_segment_id"].nil?
+      end
+
       # `after`, a managed Zone or stamp about to be written, at the current version: a write never leaves
       # a version 2 record behind, and an unchanged record is never written.
       def current(after)

@@ -302,11 +302,38 @@ as No Building Segment. The Model keeps at least one Building Segment, and the d
    the replacement is null. Deleting the last Segment refuses `zone.option_last_segment`.
 4. The result lists the deleted Segment's `removed_user_data` and `removed_extensions`: other features'
    settings stored on it go with it, and Undo brings them back.
-5. Read back with `ph_composer.zones.list` and `ph_composer.zones.options.list`. Export does not yet
-   take Zones in no Building Segment: its preflight blocks each one until it joins a Segment.
+5. Read back with `ph_composer.zones.list` and `ph_composer.zones.options.list`.
 6. Make a Segment with `ph_composer.zones.create_segment`: give its `colour`, and `targets` (as in
    step 1) to move Zones into it. It takes the first free name, such as "Building Segment 2", and the
    result names it; one Undo step covers the Segment and the moves.
+
+Export takes only Zones in a Building Segment:
+
+- With Zones in the Model and none in a Segment, export refuses `zone.no_segment`.
+- A Zone in no Building Segment is left out with its Faces, Spaces, assigned Edges and the Window Units
+  on its Faces. Preflight says so in info rows (`zone.left_out`, `space.zone_left_out`,
+  `thermal_bridge.zone_left_out`, `window.zone_left_out`). Unfinished work inside the Zone, such as an
+  unclassified Face, does not block export; a record that cannot be read still does. A Face marked as
+  shading inside it still exports as a Shade.
+- A Building Segment no Zone names is left out, with a `zone.segment_empty` row.
+- A Surface Face paired with a Face of a left-out Zone refuses `face.partner_left_out`, naming the Face.
+
+To clear that refusal, make the left-out Zone the Attached zone of the Faces it shares:
+
+1. Read `ph_composer.zones.faces.attached_zone.offer` with the Zone's `zone` reference. `faces` lists
+   both sides of each shared Surface pair; empty means there is nothing to do.
+2. When `attached_zone_id` is null, invoke `ph_composer.zones.faces.attached_zone.create_and_assign`
+   with those `faces`, `values` `{ "name": <the offer's name>, "kind": "other" }` and `expected_values`
+   `{ "boundary_condition": "Surface" }`. When it names an Attached zone, invoke
+   `ph_composer.zones.faces.classify` with the same `faces` and `expected_values` and an `intent` that
+   sets `boundary_condition` to `AttachedZone` and `attached_zone_id` to it. Either is one Undo step
+   and ends each pair on both sides.
+3. Moving the Zone back into a Segment leaves those Faces on the Attached zone; the offer's
+   `attached_face_count` counts them. Run `ph_composer.zones.solve_adjacency` to pair them again.
+
+An AttachedZone Face exports as honeybee-ph `PhAdditionalZone`, with its Attached zone's id, name and
+temperature reduction factor. Through PHX, WUFI-Passive receives the factor; METr receives the attached
+zone with a factor of 1.0.
 
 ### Building Segment settings
 

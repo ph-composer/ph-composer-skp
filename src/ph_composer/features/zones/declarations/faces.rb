@@ -165,6 +165,24 @@ module PhComposer
           "expected_values" => ATTACHED_ZONE.patch_schema.merge("description" => "The values last read.")
         }, :optional => %w[id user_data expected_values]).freeze
         ATTACHED_ZONE_ID_RESULT = Shapes.object({ "id" => Shapes::ID }).freeze
+        ATTACHED_ZONE_OFFER_PARAMS = Shapes.object({
+          "zone" => ZONE_REFERENCE.merge("description" => "The Zone occurrence moved out of every Building Segment.")
+        }).freeze
+        ATTACHED_ZONE_OFFER_RESULT = Shapes.object({
+          "zone_id" => Shapes::ID,
+          "name" => { "type" => "string", "description" => "The Zone's name, the Attached zone's name to use." },
+          "attached_zone_id" => Shapes::ID.merge("type" => %w[string null],
+                                                 "description" => "An Attached zone already named for the Zone, " \
+                                                                  "to reuse; null to create one."),
+          "faces" => Shapes.list(FACE_REFERENCE, :description => "Both sides of every current Surface pair the " \
+                                                                 "Zone shares with an exported Zone; empty when " \
+                                                                 "there is nothing to offer."),
+          "shared_with" => Shapes.list({ "type" => "string" }, :description => "The names of those other Zones."),
+          "attached_face_count" => Shapes::COUNT.merge("description" => "The Zone's Faces already on an Attached " \
+                                                                        "zone; moving it back into a Building " \
+                                                                        "Segment leaves them so until Solve " \
+                                                                        "adjacencies pairs them again.")
+        }).freeze
         ATTACHED_ZONE_CREATE_ASSIGN_PARAMS = Shapes.object({
           "faces" => FACES.merge("description" => "The Face occurrences to assign the new Attached zone to."),
           "values" => ATTACHED_ZONE.patch_schema.merge("description" => "The new Attached zone's values."),
@@ -237,6 +255,7 @@ module PhComposer
           declare_viewport(feature)
           declare_locate(feature)
           declare_attached_zones(feature)
+          declare_attached_zone_offer(feature)
           feature.snapshot_section("#{PREFIX}.faces", :query => "#{PREFIX}.all")
           ExportProjection.install(feature)
         end
@@ -423,6 +442,20 @@ module PhComposer
             { "ids" => request.engine.propose_duplicate(AttachedZone::KIND_ID, request.params.fetch("ids"), proposal) }
           end
           declare_attached_zone_delete(feature)
+        end
+
+        def declare_attached_zone_offer(feature)
+          feature.query("#{AttachedZone::KIND_ID}.offer",
+                        :description => "For a Zone moved out of every Building Segment, the Faces of the Surface " \
+                                        "pairs it shares with exported Zones, both sides: create_and_assign with " \
+                                        "the Zone's name, or classify with attached_zone_id when one is named, " \
+                                        "makes them AttachedZone in one Undo step.",
+                        :refuses => Refuses::ZONE_TARGET, :params => ATTACHED_ZONE_OFFER_PARAMS,
+                        :result => ATTACHED_ZONE_OFFER_RESULT,
+                        :examples => [{ "zone" => { "zone_id" => "zon_Ab12Cd34Ef56",
+                                                    "zone_path" => [1201] } }]) do |request|
+            Faces.attached_zone_offer(request, :zone => request.params.fetch("zone"))
+          end
         end
 
         def declare_attached_zone_delete(feature)

@@ -485,3 +485,82 @@ test("a heading contribution shows its tag and findings flag in every view", fun
   spaces.panel.repaint();
   assert.deepStrictEqual(outline(spaces)[1], ["heading", "House", ["Default", "Single dwelling"]]);
 });
+
+function answer(p, message, value) {
+  p.panel.receive({ type: "query.result", payload: { request_id: message.payload.request_id, session: "session-a",
+    outcome: { status: "completed", value: value } } });
+}
+
+function queries(p) {
+  return p.sent.filter(function (message) { return message.type === "query.invoke"; });
+}
+
+function button(root, text) {
+  return root.querySelectorAll("button").filter(function (node) { return node.textContent === text; })[0];
+}
+
+var SHARED = [{ zone_id: "zon_a", zone_path: [1], entity_path: [11], entity_id: "fac_a" },
+  { zone_id: "zon_b", zone_path: [2], entity_path: [21], entity_id: "fac_b" }];
+
+test("moving a Zone out offers to make it the Attached zone of the Faces it shares, in one request", function () {
+  var p = load();
+  click(zoneRow(p, "Zone A").querySelector(".row-check"));
+  choose(byLabel(p.section(), "Building Segment for checked Zones"), "__none");
+  complete(p, p.actions()[0], { zone_ids: ["zon_a"] });
+  var read = queries(p)[0];
+  assert.strictEqual(read.payload.name, "ph_composer.zones.faces.attached_zone.offer");
+  assert.strictEqual(read.payload.params.zone.zone_id, "zon_a");
+  answer(p, read, { zone_id: "zon_a", name: "Zone A", attached_zone_id: null, faces: SHARED,
+    shared_with: ["Zone B"], attached_face_count: 0 });
+  var offer = dialog(p, "phc-segment-offer-dialog");
+  assert.ok(offer, "the offer opens");
+  assert.strictEqual(offer.querySelector("h2").textContent, "Make Zone A an Attached zone?");
+  assert.match(offer.querySelector(".phc-segment-consequence").textContent, /1 Face it shares with Zone B/);
+  click(button(offer, "Make Attached zone"));
+  var made = p.actions()[1];
+  assert.strictEqual(made.payload.name, "ph_composer.zones.faces.attached_zone.create_and_assign");
+  assert.deepStrictEqual(made.payload.params, { faces: SHARED, values: { name: "Zone A", kind: "other" },
+    expected_values: { boundary_condition: "Surface" } });
+  assert.strictEqual(dialog(p, "phc-segment-offer-dialog"), undefined);
+});
+
+test("the offer reuses an Attached zone of the Zone's name, Not now sends nothing, and moving back notifies",
+  function () {
+    var p = load();
+    click(zoneRow(p, "Zone A").querySelector(".row-check"));
+    choose(byLabel(p.section(), "Building Segment for checked Zones"), "__none");
+    complete(p, p.actions()[0], { zone_ids: ["zon_a"] });
+    answer(p, queries(p)[0], { zone_id: "zon_a", name: "Zone A", attached_zone_id: "atz_zonea", faces: SHARED,
+      shared_with: ["Zone B"], attached_face_count: 0 });
+    assert.match(dialog(p, "phc-segment-offer-dialog").querySelector(".phc-segment-consequence").textContent,
+      /the Attached zone already in this Model/);
+    click(button(dialog(p, "phc-segment-offer-dialog"), "Not now"));
+    assert.strictEqual(p.actions().length, 1, "Not now writes nothing");
+
+    p = load();
+    click(zoneRow(p, "Zone B").querySelector(".row-check"));
+    choose(byLabel(p.section(), "Building Segment for checked Zones"), "bsg_house");
+    complete(p, p.actions()[0], { zone_ids: ["zon_b"] });
+    answer(p, queries(p)[0], { zone_id: "zon_b", name: "Zone B", attached_zone_id: null, faces: [],
+      shared_with: [], attached_face_count: 2 });
+    assert.strictEqual(dialog(p, "phc-segment-offer-dialog"), undefined, "nothing to offer on the way back");
+    assert.match(p.panel.state.ui.notice.message, /Zone B keeps 2 Faces on an Attached zone. Run Solve adjacencies/);
+  });
+
+test("two Zones moved out are offered in turn, the second read only once the first write settles", function () {
+  var p = load(null, function (state) {
+    state.sections["ph_composer.zones.overview"].value.zones[1].values.building_segment_id = "bsg_house";
+  });
+  click(zoneRow(p, "Zone A").querySelector(".row-check"));
+  click(zoneRow(p, "Zone B").querySelector(".row-check"));
+  choose(byLabel(p.section(), "Building Segment for checked Zones"), "__none");
+  complete(p, p.actions()[0], { zone_ids: ["zon_a", "zon_b"] });
+  assert.strictEqual(queries(p).length, 1, "one offer read at a time");
+  answer(p, queries(p)[0], { zone_id: "zon_a", name: "Zone A", attached_zone_id: null, faces: SHARED,
+    shared_with: ["Zone B"], attached_face_count: 0 });
+  click(button(dialog(p, "phc-segment-offer-dialog"), "Make Attached zone"));
+  assert.strictEqual(queries(p).length, 1, "the next read waits for the write");
+  complete(p, p.actions()[1], { id: "atz_zonea", face_ids: ["fac_a", "fac_b"] });
+  assert.strictEqual(queries(p).length, 2);
+  assert.strictEqual(queries(p)[1].payload.params.zone.zone_id, "zon_b");
+});

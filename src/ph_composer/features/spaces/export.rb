@@ -122,7 +122,10 @@ module PhComposer
         read = request.query("#{FEATURE_ID}.all")
         findings = []
         repairs = []
-        rows = read.fetch("spaces").flat_map do |space|
+        # A Space in a Zone export leaves out goes with it, and nothing about it is checked.
+        left_out = left_out_zones(request.model)
+        spaces, gone = read.fetch("spaces").partition { |space| !left_out.key?(space.dig("zone", "zone_id")) }
+        rows = spaces.flat_map do |space|
           [space] + space.fetch("volumes").flat_map { |volume| [volume] + volume.fetch("floor_segments") }
         end
         # A Space, Volume or Floor Segment row, or a stray record, carries its reference: it is located, and
@@ -134,8 +137,9 @@ module PhComposer
           repair = repair_row(finding, reference)
           repairs << repair if repair
         end
-        findings.concat(offset_findings(request.model))
-        findings.concat(metadata_findings(request))
+        findings.concat(offset_findings(request.model, left_out))
+        findings.concat(metadata_findings(request, gone.map { |space| space.dig("reference", "space_id") }))
+        findings.concat(left_out_findings(gone, left_out))
         { "findings" => findings, "repairs" => repairs.uniq { |row| row.fetch("id") } }
       rescue CodedError => error
         { "findings" => [{ "code" => error.code, "section" => SECTION, "object_id" => nil,
@@ -143,15 +147,37 @@ module PhComposer
       end
 
       # The metadata extraction refuses, read as `records` reads each Space, Volume, Space Floor and Floor
-      # Segment: user_data passed through, and the envelopes another contributor claims on each kind.
-      def metadata_findings(request)
+      # Segment: user_data passed through, and the envelopes another contributor claims on each kind. The rows
+      # of the Spaces `left_out` names (by id), whose records never leave, are not checked; their Volumes and
+      # Floor Segments still are, as the read cannot tell which Space holds a record by id alone.
+      def metadata_findings(request, left_out = [])
         check = Export::MetadataCheck
         floors = check.entity_records(request.model, VOLUME_STORE).map { |volume| floor_part(volume) }
         { SPACE_STORE => SPACE_KIND, VOLUME_STORE => VOLUME_KIND, FLOOR_SEGMENT_STORE => FLOOR_SEGMENT_KIND }
           .flat_map do |store, kind|
-            check.findings(request, check.entity_records(request.model, store),
-                           :section => SECTION, :user_data => true, :target_kind => kind)
+            records = check.entity_records(request.model, store)
+            records = records.reject { |record| left_out.include?(record["id"]) } if store == SPACE_STORE
+            check.findings(request, records, :section => SECTION, :user_data => true, :target_kind => kind)
           end + check.findings(request, floors, :section => SECTION, :user_data => true)
+      end
+
+      # The Zones in no Building Segment, live, by id with their names: export leaves them out.
+      def left_out_zones(model)
+        Zones::Occurrences.zones(model).reject { |zone| Zones::Schema.exported?(zone.record) }
+                          .to_h { |zone| [zone.record.fetch("id"), zone.record.fetch("name")] }
+      end
+
+      # One row per left-out Zone counting the Spaces that go with it.
+      def left_out_findings(gone, left_out)
+        gone.group_by { |space| space.dig("zone", "zone_id") }.sort.map do |zone_id, spaces|
+          { "code" => "space.zone_left_out", "section" => SECTION, "object_id" => zone_id,
+            "message" => left_out_message(left_out.fetch(zone_id), spaces.length), "blocks_export" => false }
+        end
+      end
+
+      def left_out_message(zone_name, count)
+        "#{count} #{count == 1 ? 'Space' : 'Spaces'} in Zone #{zone_name}, which is in no Building Segment, " \
+          "#{count == 1 ? 'is' : 'are'} left out of export with it."
       end
 
       def finding_row(finding, reference, object_id)
@@ -161,9 +187,10 @@ module PhComposer
                                             "params" => { "reference" => reference } }) : row
       end
 
-      # A Space drawn off to the side of its Zone exports as drawn; the preflight says so, without blocking.
-      def offset_findings(model)
-        zones = Zones::Occurrences.zones(model)
+      # A Space drawn off to the side of its Zone exports as drawn; the preflight says so, without blocking. A
+      # Space in a Zone `left_out` names does not export at all.
+      def offset_findings(model, left_out = {})
+        zones = Zones::Occurrences.zones(model).reject { |zone| left_out.key?(zone.record.fetch("id")) }
         spaces = Occurrences.scan(model, :strict => false).spaces
         space_paths = spaces.map(&:path)
         spaces.filter_map do |space|
@@ -217,9 +244,16 @@ module PhComposer
         segments_in = segments.group_by { |segment, _| segment.path[0...-1] }
         space_paths = spaces.to_h { |space, _| [space.path, true] }
         zone_bounds = {}
-        spaces.map do |entry, record|
-          Spaces.validate!(SPACE, record)
+        left_out = Hash.new { |hash, key| hash[key] = [] }
+        rows = spaces.filter_map do |entry, record|
           zone = hosting_zone(reader, record)
+          # A Space in a Zone in no Building Segment leaves with its Zone: not at all.
+          unless Zones::Schema.exported?(zone.last)
+            left_out[zone.last] << record
+            next
+          end
+
+          Spaces.validate!(SPACE, record)
           own = volumes_in.fetch(entry.path, [])
           exported = reader.entity_record(record, :fields => %w[name number] + AIRFLOWS, :target_kind => SPACE_KIND,
                                                   :path => entry.path, :user_data => true)
@@ -230,7 +264,11 @@ module PhComposer
                          "offset_from_zone" => Extents.outside_bounds?(floor_points(own, segments_in), bounds),
                          "volumes" => own.map { |volume| volume_record(reader, volume, segments_in) }
                                          .sort_by { |row| row.fetch("id") })
-        end.sort_by { |row| row.fetch("id") }
+        end
+        left_out.each do |zone, records|
+          reader.note("space.zone_left_out", zone.fetch("id"), left_out_message(zone.fetch("name"), records.length))
+        end
+        rows.sort_by { |row| row.fetch("id") }
       end
 
       # The outer-loop points of the Floor Segments in these Volumes.
