@@ -54,8 +54,8 @@ area.
 ## Export
 
 Every export writes each shading surface as a honeybee Shade on the Model, outside every Room: one
-Shade per Face and per placement, so a component placed three times gives three Shades, each with
-its shading component's name. Converted to WUFI-Passive XML and METr JSON, each name becomes one
+Shade per Face and per placement, so a component of two Faces placed three times gives six Shades,
+each with its shading component's name. Converted to WUFI-Passive XML and METr JSON, each name becomes one
 shading component in every Building Segment's file. Shading is opaque: no transmittance,
 reflectance or schedule is stored or written. A Face with a hole is written with its hole.
 

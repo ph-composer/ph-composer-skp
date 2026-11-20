@@ -5116,7 +5116,9 @@
         "src/ph_composer/python/ph_composer_translation/shade_sections.py",
         "src/ph_composer/python/ph_composer_translation/contract/shade_records.py",
         "src/ph_composer/python/ph_composer_translation/assembly.py",
-        "src/ph_composer/python/ph_composer_translation/composition.py"
+        "src/ph_composer/python/ph_composer_translation/composition.py",
+        "src/ph_composer/features/zones/zone/occurrences.rb",
+        "src/ph_composer/shell/commands.rb"
       ],
       "native_control_required": true
     }
