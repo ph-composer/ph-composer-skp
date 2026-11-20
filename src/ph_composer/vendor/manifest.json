@@ -835,10 +835,10 @@
       "mime": "application/octet-stream",
       "sha256": "384ff7552c131cc700b6c86f85afa39dfba1f7a3037bdb43e380d1a0f2de34e0"
     },
-    "vendor/wheels/honeybee_ph-1.33.65-py3-none-any.whl": {
-      "bytes": 223367,
+    "vendor/wheels/honeybee_ph-1.33.68-py3-none-any.whl": {
+      "bytes": 222436,
       "mime": "application/octet-stream",
-      "sha256": "b9b44a76806ec6ba66010a0023addd99c0279fea9dce9aab58b67031d421cece"
+      "sha256": "7c16e24d014da65bd6a2badbf7893829aa5eed0a58fd9df4d4f2a4b3a7501fdc"
     },
     "vendor/wheels/honeybee_standards-2.0.7-py2.py3-none-any.whl": {
       "bytes": 11109,
@@ -951,12 +951,12 @@
     },
     {
       "copyright_holder": "Package contributors (see bundled wheel license)",
-      "filename": "honeybee_ph-1.33.65-py3-none-any.whl",
+      "filename": "honeybee_ph-1.33.68-py3-none-any.whl",
       "license": "GPL-3.0-or-later",
       "name": "honeybee-ph",
-      "sha256": "b9b44a76806ec6ba66010a0023addd99c0279fea9dce9aab58b67031d421cece",
-      "source": "https://files.pythonhosted.org/packages/58/eb/c7581cd58ee81a3b5cc81187947ce2bea3c712adcccfaef488959c56ca4c/honeybee_ph-1.33.65-py3-none-any.whl",
-      "version": "1.33.65"
+      "sha256": "7c16e24d014da65bd6a2badbf7893829aa5eed0a58fd9df4d4f2a4b3a7501fdc",
+      "source": "https://files.pythonhosted.org/packages/a1/da/1086862b01e19d0e11dfe2e4968e034b5f29b0b97d3b321448f01c60e52e/honeybee_ph-1.33.68-py3-none-any.whl",
+      "version": "1.33.68"
     }
   ],
   "pyodide": {
@@ -1032,6 +1032,6 @@
     "honeybee_core-1.64.65-py3-none-any.whl",
     "honeybee_energy-1.123.23-py3-none-any.whl",
     "ph_units-1.5.38-py3-none-any.whl",
-    "honeybee_ph-1.33.65-py3-none-any.whl"
+    "honeybee_ph-1.33.68-py3-none-any.whl"
   ]
 }

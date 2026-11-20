@@ -24,7 +24,7 @@ CLI, schema-validation and simulation tooling is not part of this runtime.
 | honeybee-core | 1.64.65 | AGPL-3.0 | [Pinned wheel](https://files.pythonhosted.org/packages/d5/87/940c8ebe18c370d5f1e5e044f589643c9b68c9b9c1e6a52ad8f1080d9e2d/honeybee_core-1.64.65-py3-none-any.whl) |
 | honeybee-energy | 1.123.23 | AGPL-3.0 | [Pinned wheel](https://files.pythonhosted.org/packages/fe/6c/0f829cd768acf43c53253d8fbd1c3f7b4498d7f7c1f009080af6d20c2907/honeybee_energy-1.123.23-py3-none-any.whl) |
 | ph-units | 1.5.38 | GPL-3.0-or-later | [Pinned wheel](https://files.pythonhosted.org/packages/1e/19/ae8ecfb3de7d612f77b6c64dd80ee8f345f318fd826d831ead14c23308c8/ph_units-1.5.38-py3-none-any.whl) |
-| honeybee-ph | 1.33.65 | GPL-3.0-or-later | [Pinned wheel](https://files.pythonhosted.org/packages/58/eb/c7581cd58ee81a3b5cc81187947ce2bea3c712adcccfaef488959c56ca4c/honeybee_ph-1.33.65-py3-none-any.whl) |
+| honeybee-ph | 1.33.68 | GPL-3.0-or-later | [Pinned wheel](https://files.pythonhosted.org/packages/a1/da/1086862b01e19d0e11dfe2e4968e034b5f29b0b97d3b321448f01c60e52e/honeybee_ph-1.33.68-py3-none-any.whl) |
 
 The honeybee-standards 2.0.7 metadata classifier says GPL-3.0, while its bundled
 LICENSE contains the MIT license. The unmodified wheel and its full license text

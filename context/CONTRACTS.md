@@ -1472,7 +1472,7 @@ metadata boundary under its path's `shd_` id: its `user_data` stays in the Model
 Shades, none when there are none, so a Model with no shading writes the same HBJSON and result as before the
 section, bar its empty row in `sections`. Conformance finds the reported count of orphaned Shades, each
 detached, and per component the reported count and area. The report's Shading section lists each component
-and the totals, and is absent with none. PHX 1.57.5 writes one shading component per name in every Variant,
+and the totals, and is absent with none. PHX 1.59.1 writes one shading component per name in every Variant,
 with `InnerAttachment` and `idIC` -1 (`tests/python/test_shade_phx_round_trip.py`).
 
 Export reads one revision-bound `GeometrySnapshot`: one traversal recording each occurrence path
