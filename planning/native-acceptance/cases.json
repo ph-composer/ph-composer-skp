@@ -5057,6 +5057,17 @@
         "src/ph_composer/features/shading/preflight.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "SD04",
+      "label": "Shading native menu on the installed RBZ: right-click on loose Faces, a closed Group and a Face inside an open Group offers Set as Shading and Clear Shading only when each would change something, and neither on Edges only, a Zone Group or a pane Face; both items in Extensions > PH-Composer; each choice one native Undo step with Redo; a mixed selection's notice and status bar name what was tagged, what was left out with its reason and what was ignored",
+      "mode": "mixed",
+      "authority": "planning/features/phase-05-shading/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/shading/*",
+        "src/ph_composer/shell/commands.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }

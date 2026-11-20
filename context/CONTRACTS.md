@@ -748,7 +748,11 @@ refuses the write (`target.shared_definition`, `target.locked`) and an unmarked 
 marked container above it (`shading.inherited`, naming that container); an unmarked Zone Group, cutting
 component or claimed entity, or anything inside one, is `unchanged`, since no mark above reaches it. Reads go by presence, so an unreadable mark still marks:
 assign leaves it unchanged and clear removes it. `shading.selection` answers the selected Faces, Groups and
-components under the active path with what each action would do, by the same rule; `shading.list` answers
+components under the active path with what each action would do, by the same rule. It is the read behind the
+Set as Shading and Clear Shading menu items (`features/shading/declarations/menu.rb`): Set as Shading is offered
+on a right-click when assign would mark a selected entity, Clear Shading when one carries the mark, and both
+always sit in Extensions > PH-Composer; their handler invokes assign or clear with the read's references and
+revision and writes nothing itself. `shading.list` answers
 every marked entity and each shading component (`display_name`, `face_count`, world `area_m2`), from
 Zones' walk of its occurrences and one walk of the Model. A component is named by the nearest enclosing named Group or component (an instance's own name before its definition's), a Zone as
 that container giving its name followed by " Shading", and "Shading" with none.
