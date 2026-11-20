@@ -11,7 +11,9 @@ module PhComposer
     # names its rule; its value is worked out per Dwelling at export by honeybee-ph's Phius formulas. Setting
     # `rule` to null switches the load to its fixed value and back again keeps both the value and the rule's inputs
     # (the lighting high-efficacy fraction). Ventilation sums its four terms. A set point is a constant or a
-    # temperature Schedule, never both. Any load may name `source`, the base program a library value came from.
+    # temperature Schedule, never both; two constants keep heating at or below cooling, and a pair naming a Schedule
+    # is checked by the export preflight's set point findings. Any load may name `source`, the base program a
+    # library value came from.
     module Program
       FRACTION = { "type" => "number", "minimum" => 0, "maximum" => 1, "x-unit" => "fraction" }.freeze
       SOURCE = { "type" => "string", "minLength" => 1,

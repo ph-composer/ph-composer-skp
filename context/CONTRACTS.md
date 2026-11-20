@@ -593,7 +593,8 @@ datasheet links and source fields, whose source kind may also be `ph_composer_de
   of exterior area, 1/h, °C, %), each with its `x-unit`; a null value is still missing. People, Lighting and
   Service hot water carry `rule` (`phius_residential`, `phius_interior`, `building_america`, or null for the
   fixed value), and setting it to null and back keeps the value and the rule's inputs. A set point is a constant
-  or a Schedule, never both, and heating is not above cooling. Each Schedule reference is a core reference
+  or a Schedule, never both, and two constants put heating no higher than cooling; a pair that names a
+  Schedule is a cross-record check left to the export preflight's set point findings. Each Schedule reference is a core reference
   (`people.occupancy_schedule_id` and so on), and its Schedule must be of the type the slot reads: fractional,
   activity for People activity, ventilation for Ventilation, temperature for the set points
   (`Program::SLOTS`); a wrong type refuses `validation.failed`.
