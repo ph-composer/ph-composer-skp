@@ -46,3 +46,24 @@ Three runs of `SD05.time_repaint(7)`, 21 rebuilds and 21 refreshes:
 
 Projection median 37.6 ms (walk 29.6). The remaining rebuild cost is the shared Colour-by drawing (Face meshes,
 visibility, the hatch and publish), which no further contained change in this PR cut by 10 ms or more.
+
+The target is met at the median, not on every repaint.
+
+## Host check of the legend repaint and the Classify message (`63730e18`)
+
+Run by the conductor on the RBZ installed from PR head `63730e18` (code identical to `a0d8cb7e`), fixture a
+fresh copy of SD02's reference model with `SD05.tag_reference` applied. No full-screen hold was granted, so it
+ran under background control: menus through System Events, viewport clicks by background click, the status
+bar and the HUD read from window captures. Read-backs under `_private/host/shading-followups/HC/` (not
+tracked).
+
+| Check | How | Result |
+| --- | --- | --- |
+| Legend in SI | Colour by > Shading from the menu | HUD areas in m² |
+| Units to IP | `Preferences.set("unit_system", "IP")` by bridge, the call the panel makes; the panel itself was not clicked | HUD showed ft² (12.92, 893.4, 53.82, 64.58, 53.82) on the next window capture with no viewport interaction; `rebuilds` stayed 1 |
+| Units back to SI | Same, by bridge | m² at once; `rebuilds` 1 |
+| Reset display preferences | Not run | Covered offline only |
+| Tagged overhang inside Zone A | Zone A open, Set Face Type > Wall from the menu, background click | Status bar "That Face is not part of the Zone's envelope. Nothing was written."; revision unchanged, no Face record |
+| Loose untagged Face | Zone A closed, background click | "That Face is in no Zone. Make it a Zone first, then classify its Faces." |
+| Ordinary Zone Face | Set Face Type > Floor, click the roof | Floor 2 / Wall 4; Edit reads "Undo Classify Faces"; one Undo restored RoofCeiling 1 (revision 12 to 13) |
+| Hover tooltips | Not captured | Background clicks send no hover; covered offline only |

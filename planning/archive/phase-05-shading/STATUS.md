@@ -141,7 +141,9 @@ All three are fixed by [#536](https://github.com/ph-composer/ph-composer-skp/pul
 area from `Face#area(transform)` and section planes per container bring the rebuild to a 162.9 ms median plus a
 27.0 ms refresh on `a0d8cb7e` ([timing](evidence/followups-colour-by-timing.md)); a display-units write repaints
 every Model drawing a Colour-by legend (`Preferences.on_units_change`); the Classify tool says "That Face is not
-part of the Zone's envelope." The legend repaint and the Classify message await the conductor's host check.
+part of the Zone's envelope." That is under the target at the median; 6 of 21 pairs exceed 200 ms (worst 223.8 ms). The legend repaint and
+the Classify message passed the host check on `63730e18` under background control, the units switched by
+bridge ([evidence](evidence/followups-colour-by-timing.md#host-check-of-the-legend-repaint-and-the-classify-message-63730e18)).
 
 Carried from earlier packets, not Shading's: `tools/ui-preview/assembly_hover_checks.cjs` still fails as it
 did before this packet ([SD07 evidence](evidence/sd07-acceptance.md)).
