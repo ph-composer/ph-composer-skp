@@ -41,9 +41,13 @@ class ShadingMarkStoreTest < PhComposerTestCase
   end
 
   def test_the_mark_does_not_claim_its_entity
-    marked_entities.each_value do |entity|
+    claiming = STORE.new("ph_composer.test_shading_claims", :claims_entity => true)
+    marked_entities.each do |kind, entity|
       @store.write(entity, RECORD)
-      refute STORE.claimed_within?([entity])
+      refute STORE.claimed_within?([entity]), kind
+
+      claiming.write(entity, "id" => "a")
+      assert STORE.claimed_within?([entity]), "#{kind}: the check reads this entity"
     end
   end
 end
