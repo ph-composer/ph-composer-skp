@@ -89,6 +89,19 @@ check({ name: "assembly_hover", output }, async ({ newPage, step }) => {
       assert.equal(await neighbor.getAttribute("aria-pressed"), "false");
       assert.equal(await wool.getAttribute("aria-pressed"), "true", "crossing never moves selection");
     }
+    // The sweep can leave the body before its delay ends, so hold the neighbour's center through the delay
+    // and fade: it passes through transparent and partial red only, and settles on the normal red.
+    const neighborBox = await neighbor.boundingBox();
+    await page.mouse.move(neighborBox.x + neighborBox.width / 2, neighborBox.y + neighborBox.height / 2);
+    const bodyDeadline = Date.now() + 1000;
+    let body = await neighborState();
+    while (body.color !== "rgb(191, 85, 96)" && Date.now() < bodyDeadline) {
+      assert(redOrClear(body.color), `held neighbor body fades in the normal red, never teal (${body.color})`);
+      await page.waitForTimeout(25);
+      body = await neighborState();
+    }
+    assert(body.hovered && !body.edge, "the held pointer is on the neighbor's body");
+    assert.equal(body.color, "rgb(191, 85, 96)", "neighbor body settles on the normal red hover");
     step("edge sweeps");
     for (const edge of ["left", "right", "top", "bottom"]) {
       await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
