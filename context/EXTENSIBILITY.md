@@ -908,6 +908,9 @@ validator) and `example_segment_note.js` (its section), loaded together by
 (`features/certification/`, `html/features/certification/section.js` and
 `python/ph_composer_translation/certification_sections.py`), which also exports;
 `tests/segment_certification_test.rb` runs a development namespace through the same claim.
+Airtightness (`features/programs/`, `html/features/programs/airtightness.js` and
+`airtightness_sections.py`) shows the other shape: its Python section attaches at `ROOM`, one record per
+exported Zone of a Segment with settings, and sets the shared `BldgSegment` from each Room.
 
 ### Native menu items
 

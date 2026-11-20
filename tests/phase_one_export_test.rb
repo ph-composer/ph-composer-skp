@@ -189,7 +189,8 @@ class PhaseOneExportTest < PhComposerTestCase
      PhComposer::Assemblies::ExportProjection::SECTION, PhComposer::Assemblies::SourceReport::SECTION,
      PhComposer::Spaces::ExportProjection::SECTION, PhComposer::ThermalBridges::ExportProjection::SECTION,
      PhComposer::ModelMetadata::SECTION, PhComposer::Climate::SiteExport::SECTION,
-     PhComposer::Shading::ExportSection::SECTION, PhComposer::Certification::SegmentExport::SECTION]
+     PhComposer::Shading::ExportSection::SECTION, PhComposer::Certification::SegmentExport::SECTION,
+     PhComposer::Programs::AirtightnessExport::SECTION]
   end
 
   def seed_two_boxes

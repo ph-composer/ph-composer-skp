@@ -336,7 +336,9 @@ values, so a Segment write touches the Segment alone. `ph_composer.zones.save_se
 one Segment's settings dialog (its values, default and a payload per extension namespace) as one Undo
 step and emits `ph_composer.zones.segment_settings_saved`; `ph_composer.zones.create_segment` makes a
 Segment with Zones moved in. `ph_composer.certification.segment.get` reads one Segment's Phius
-certification payload with its defaults applied, the read other features take it from.
+certification payload with its defaults applied, the read other features take it from;
+`ph_composer.programs.airtightness.get` reads one Segment's airtightness test result and wind exposure
+the same way.
 `ph_composer.spaces.update_metadata` also writes a Space Floor's own map by a Volume row's
 `floor.reference`, and `ph_composer.model.update_metadata` writes the Model's own maps, read by
 `ph_composer.model.detail` and, for maps larger than a reply, `ph_composer.model.fragment`. Edge rows

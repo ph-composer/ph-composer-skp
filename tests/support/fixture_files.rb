@@ -52,10 +52,19 @@ module FixtureFiles
   # on a `gem install` that had nothing to do with this repo, and reports it as "run make
   # fixtures". Collapsing here pins the layout instead. A raw newline never appears inside a JSON
   # string, which is escaped as `\n`, so this cannot reach a value.
+  #
+  # Floats differ the same way: 2.6.3 writes `Float#to_s` (`3.2e-05`), later gems write a float
+  # below 1e-4 as a decimal (`0.000032`). Every float that is a whole line's value is rewritten
+  # with `Float#to_s`, which is what 2.6.3 writes, so the bytes no longer depend on the gem.
   def fixture_contents(value)
     generated = JSON.pretty_generate(sort_keys(normalize_uuids(value)))
-    generated.gsub(/\[\n\s*\]/, "[]").gsub(/\{\n\s*\}/, "{}") + "\n"
+    generated = generated.gsub(/\[\n\s*\]/, "[]").gsub(/\{\n\s*\}/, "{}")
+    generated.gsub(FLOAT_LINE) { "#{Regexp.last_match(1)}#{Float(Regexp.last_match(2))}#{Regexp.last_match(3)}" } + "\n"
   end
+
+  # A pretty-printed line whose value is a float: optional key, the number, optional comma.
+  FLOAT_LINE = /^(\s*(?:"(?:[^"\\\n]|\\.)*": )?)(-?\d+(?:\.\d+(?:[eE][+-]?\d+)?|[eE][+-]?\d+))(,?)$/.freeze
+  private_constant :FLOAT_LINE
 
   def relative_fixture_path(path)
     path.sub(File.expand_path("../..", __dir__) + "/", "")

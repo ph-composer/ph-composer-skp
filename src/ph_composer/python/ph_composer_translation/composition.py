@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from .airtightness_sections import AirtightnessSection
 from .certification_sections import CertificationSection
 from .constructions import ConstructionSection
 from .exporters import Exporter
@@ -33,6 +34,7 @@ SECTIONS: tuple[Section[Any, Any], ...] = (
     ModelMetadataSection(),
     SpaceSection(),
     ThermalBridgeSection(),
+    AirtightnessSection(),
     ShadeSection(),
 )
 EXPORTERS: tuple[Exporter, ...] = ()

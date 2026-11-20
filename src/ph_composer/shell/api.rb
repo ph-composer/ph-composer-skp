@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 77
+    MINOR = 78
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -453,7 +453,14 @@ module PhComposer
                     "ph_composer.spaces.clear_zone_airflows is new: From Program, every Space's rates in the named " \
                     "Zones cleared in one Undo step. The Spaces export section moves to version 2, each record " \
                     "carrying airflow_mode, and its preflight adds space.zone_without_spaces, a warning that does " \
-                    "not block." }
+                    "not block." },
+      { "minor" => 78, "date" => "2026-11-20",
+        "change" => "ph_composer.programs is a new feature: the ph_composer.programs.airtightness extension on each " \
+                    "Building Segment (basis n50 or q50, value or null, wind_exposure), saved through " \
+                    "zones.save_segment_settings, read by ph_composer.programs.airtightness.get with its defaults, " \
+                    "and exported to each Zone's Infiltration and the BldgSegment's wind exposure. Export refuses " \
+                    "airtightness.no_net_volume and airtightness.no_exposed_face. The Spaces export section " \
+                    "registers a projection of each Zone's net volume." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

@@ -375,6 +375,27 @@ payload, five values: `category` (`residential`, `non_residential`), `program` (
    settings in the Model. A stored payload this version cannot read blocks the export with its
    `extension.*` code, on any Building Segment, exported or not.
 
+### Airtightness
+
+Each Building Segment carries its airtightness as the `ph_composer.programs.airtightness` payload, three
+values: `basis` (`n50`, air changes per hour at 50 Pa, or `q50`, m³/h per m² of envelope at 50 Pa), `value`
+(the blower-door test result in that unit, greater than 0, or null for no test result) and `wind_exposure`
+(`several_sides_no_screening`, `several_sides_moderate_screening`, `several_sides_high_screening`,
+`one_side_no_screening`, `one_side_moderate_screening`, `one_side_high_screening`, `user_defined`).
+
+1. Read one Segment's values with `ph_composer.programs.airtightness.get` and its `id`. A Segment with no
+   payload reads the defaults (n50, no test result, several sides exposed with no screening) with `stored`
+   false; check `extension_status` as for Phius certification.
+2. Write them with `ph_composer.zones.save_segment_settings`, all three in
+   `extension_payloads["ph_composer.programs.airtightness"]`. A value of 0 or less, a missing or extra field
+   or a value not listed refuses `validation.failed` and writes nothing.
+3. Export converts the test result into each of the Segment's Zones' Infiltration, so PHX reads back the
+   value entered: q50 directly, n50 over the Segment's gross envelope area (every Face but the Surface pairs
+   inside the Segment) and the net volume of its Spaces. The WUFI-Passive and METr files carry q50. An n50
+   result on a Segment with no Spaces refuses `airtightness.no_net_volume`, and a result on a Segment with no
+   Outdoors or Ground Face refuses `airtightness.no_exposed_face`. With no test result, each Zone keeps its
+   Program's infiltration, and the wind exposure still reaches the Segment.
+
 ### Spaces from loose Faces
 
 Ask the user to draw separate loose floor surfaces in SketchUp, inset from the walls or

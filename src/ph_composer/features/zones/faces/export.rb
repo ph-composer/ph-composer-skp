@@ -311,15 +311,54 @@ module PhComposer
           found.slice("id", "name", "temperature_reduction_factor")
         end
 
+        # One Face a Building Segment's merged Room keeps (`segment_envelope`): its gross area in m² and its
+        # boundary condition.
+        EnvelopeFace = Struct.new(:area_m2, :boundary_condition, :keyword_init => true)
+
+        # The Faces PHX keeps when it merges the Rooms of one Building Segment (from_HBJSON/cleanup.py,
+        # merge_rooms), over the snapshot Zone occurrences `zone_entries` of Segment `segment_id`: every Face this
+        # section writes for them, less each Surface Face whose other side is in the same Segment, which the merge
+        # drops as interior. A Surface Face to another Segment, an Adiabatic Face and an Attached zone's Face stay;
+        # a Face that has left its Zone's envelope (a shading Face) is in no Zone's Faces, and a Face the section
+        # omits or refuses is not written.
+        def segment_envelope(reader, zone_entries, segment_id)
+          zone_entries.flat_map { |zone| Zones::ExportProjection.zone_faces(reader, zone) }.filter_map do |entry|
+            record = entry.record(FACE_DICTIONARY)
+            next unless record && written?(reader, entry, record) && !interior_to?(reader, record, segment_id)
+
+            EnvelopeFace.new(:area_m2 => entry.geometry.area_m2, :boundary_condition => record["boundary_condition"])
+          end
+        end
+
+        # Whether the section writes the classified Face `entry` with its stored `record` into the HBJSON: it has
+        # a boundary condition and, on a Surface, a current reciprocal other side that is written too.
+        def written?(reader, entry, record)
+          omission_reason(reader, entry, record).nil?
+        rescue Export::Blocked
+          false
+        end
+
+        # Whether a Surface Face's other side is in a Zone of Segment `segment_id`.
+        def interior_to?(reader, record, segment_id)
+          return false unless record["boundary_condition"] == "Surface"
+
+          _entry, other = Zones::ExportProjection.zone_owner(reader, counterpart_path(record))
+          !other.nil? && other["building_segment_id"] == segment_id
+        end
+
+        # The snapshot path of a Surface Face's other side, from its stored adjacency.
+        def counterpart_path(record)
+          endpoint = record.dig("adjacency", "counterpart")
+          Array(endpoint&.fetch("zone_path", nil)) + Array(endpoint&.fetch("entity_path", nil))
+        end
+
         def omission_reason(reader, entry, record)
           unless record["boundary_condition"]
             return ["face.boundary_unassigned", "Face has no assigned boundary condition."]
           end
           return nil unless record["boundary_condition"] == "Surface"
 
-          endpoint = record.dig("adjacency", "counterpart")
-          path = Array(endpoint&.fetch("zone_path", nil)) + Array(endpoint&.fetch("entity_path", nil))
-          counterpart = reader.snapshot.entry_at(path, :kind => "face")
+          counterpart = reader.snapshot.entry_at(counterpart_path(record), :kind => "face")
           other = counterpart&.record(FACE_DICTIONARY)
           # A counterpart that has left its Zone's envelope is not exported, so the pair has no other side.
           unless counterpart && other && !Zones::ExportProjection.outside_envelope?(reader, counterpart)
@@ -346,7 +385,8 @@ module PhComposer
         end
         private_class_method :face_findings, :issue, :assignment_issues, :attached_zone_issues, :attached_record_state,
                              :omission_reason, :construction_issues, :zone_faces, :attached_zones, :attached_zone,
-                             :partner_message, :context_record, :partner_issues
+                             :partner_message, :context_record, :partner_issues, :written?, :interior_to?,
+                             :counterpart_path
       end
     end
   end

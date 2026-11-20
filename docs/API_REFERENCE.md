@@ -14194,6 +14194,111 @@ Example params:
 }
 ```
 
+### `ph_composer.programs.airtightness.get`
+
+One Building Segment's airtightness settings, with the defaults where it has none. Owner: `ph_composer.programs`.
+
+Refuses: `record.unreadable`, `target.not_found`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^bsg_[A-Za-z0-9]{12}$",
+      "description": "The Building Segment."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "values",
+    "stored",
+    "extension_status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^bsg_[A-Za-z0-9]{12}$",
+      "description": "The Building Segment."
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "basis",
+        "value",
+        "wind_exposure"
+      ],
+      "properties": {
+        "basis": {
+          "type": "string",
+          "enum": [
+            "n50",
+            "q50"
+          ],
+          "description": "n50 (air changes per hour) or q50 (m³/h per m² of envelope), at 50 Pa."
+        },
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "The test result in the basis's unit; null when there is none."
+        },
+        "wind_exposure": {
+          "type": "string",
+          "enum": [
+            "several_sides_no_screening",
+            "several_sides_moderate_screening",
+            "several_sides_high_screening",
+            "one_side_no_screening",
+            "one_side_moderate_screening",
+            "one_side_high_screening",
+            "user_defined"
+          ]
+        }
+      },
+      "description": "The three settings: the stored payload when it is understood, else the defaults."
+    },
+    "stored": {
+      "type": "boolean",
+      "description": "Whether the values are a stored payload."
+    },
+    "extension_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The stored envelope's status, as a record read reports it; null when the Segment has none."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "bsg_Ab12Cd34Ef56"
+}
+```
+
 ### `ph_composer.records.detail`
 
 One value of one stored record, exactly, as canonical JSON text in fragments: join every fragment's text in order, check its sha256 and parse it. Pass next_cursor back for the next fragment. Owner: `ph_composer.records`.
@@ -79592,6 +79697,13 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `climate.utc_offset_not_set` | The site's hours from UTC are not set. They are exported empty. |
 | `climate.zone_not_set` | The site's climate zone is not set. It is exported as Not defined. |
 
+### `ph_composer.programs`
+
+| Code | Meaning |
+| --- | --- |
+| `airtightness.no_exposed_face` | A Building Segment with an airtightness test result has no Outdoors or Ground Face, so PHX would read no infiltration. |
+| `airtightness.no_net_volume` | A Building Segment with an n50 test result has no Space net volume to convert it over. |
+
 ### `ph_composer.shading`
 
 | Code | Meaning |
@@ -79855,3 +79967,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.75 | 2026-11-20 | Export leaves a Zone in no Building Segment out with its Faces, Spaces, assigned Edges and the Window Units on its Faces, and a Building Segment no Zone names; export preflight refuses zone.no_segment when Zones exist and none is in a Segment, no longer refuses such a Zone with reference.invalid, refuses face.partner_left_out on a Surface pair across that boundary, and adds the info rows zone.left_out, zone.segment_empty, space.zone_left_out, thermal_bridge.zone_left_out and window.zone_left_out. ph_composer.zones.faces.attached_zone.offer is new: the Faces a Zone moved out shares with exported Zones, both sides, for create_and_assign or classify. An AttachedZone Face exports as honeybee-ph PhAdditionalZone. |
 | 1.76 | 2026-11-20 | ph_composer.certification is a new feature: the ph_composer.certification.segment extension on each Building Segment (category, program, use, status, type), saved through zones.save_segment_settings, read by ph_composer.certification.segment.get with its defaults, and exported to the BldgSegment's phius_certification. An export contributor may claim an extension on a catalog record kind; its rows carry a null path, and Zones' export and preflight now check a claimed envelope on every valid Building Segment instead of leaving it out. The Zones section's projection rows add building_segment_id and building_segment_export_identifier, and translation sections may attach at the segment host. |
 | 1.77 | 2026-11-20 | A Space's airflow mode is its Zone's: by_program until any Space in the Zone has a rate, then detailed, when every Space exports its own rates with 0 for a blank. ph_composer.spaces.all and list add airflow_mode to each Zone row; all's Zone rows drop inheriting_count, and each building_segments row replaces inheriting_count with by_program_zone_count. A Space row's airflow_mode takes by_program or detailed (was inheriting or user_specified), a copy of its Zone's kept for this minor version; read the Zone row's. ph_composer.spaces.clear_zone_airflows is new: From Program, every Space's rates in the named Zones cleared in one Undo step. The Spaces export section moves to version 2, each record carrying airflow_mode, and its preflight adds space.zone_without_spaces, a warning that does not block. |
+| 1.78 | 2026-11-20 | ph_composer.programs is a new feature: the ph_composer.programs.airtightness extension on each Building Segment (basis n50 or q50, value or null, wind_exposure), saved through zones.save_segment_settings, read by ph_composer.programs.airtightness.get with its defaults, and exported to each Zone's Infiltration and the BldgSegment's wind exposure. Export refuses airtightness.no_net_volume and airtightness.no_exposed_face. The Spaces export section registers a projection of each Zone's net volume. |
