@@ -564,3 +564,16 @@ test("two Zones moved out are offered in turn, the second read only once the fir
   assert.strictEqual(queries(p).length, 2);
   assert.strictEqual(queries(p)[1].payload.params.zone.zone_id, "zon_b");
 });
+
+test("a Zone moved from none into a New Building Segment gets the Solve notice too", function () {
+  var p = load();
+  click(zoneRow(p, "Zone B").querySelector(".row-check"));
+  choose(byLabel(p.section(), "Building Segment for checked Zones"), "__new");
+  assert.strictEqual(queries(p).length, 0);
+  complete(p, p.actions()[0], { id: "bsg_annex", name: "Building Segment 2", zone_ids: ["zon_b"] });
+  var read = queries(p)[0];
+  assert.strictEqual(read.payload.params.zone.zone_id, "zon_b");
+  answer(p, read, { zone_id: "zon_b", name: "Zone B", attached_zone_id: null, faces: [], shared_with: [],
+    attached_face_count: 1 });
+  assert.match(p.panel.state.ui.notice.message, /Zone B keeps 1 Face on an Attached zone/);
+});

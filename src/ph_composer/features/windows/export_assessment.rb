@@ -30,8 +30,13 @@ module PhComposer
       def initialize(snapshot, types, products, settings, faces)
         @snapshot, @types, @products, @settings = snapshot, types, products, settings
         @faces = faces.to_h { |face| [face.fetch("path"), face] }
-        @apertures, @constructions, @findings, @repairs, @left_out = [], [], [], [], []
-        @units = unit_records
+        @apertures, @constructions, @findings, @repairs = [], [], [], []
+        # A Unit on a Face of a Zone in no Building Segment leaves with its Zone before anything, identities and
+        # outlines included, is assessed.
+        @units, left_out = unit_records.partition { |entry, _record| !host(entry)&.fetch("left_out", false) }
+        @left_out = left_out.map do |entry, record|
+          { "unit_id" => record["id"], "zone_id" => host(entry).fetch("zone_id") }
+        end
         @ids = @units.group_by { |_entry, record| record["id"] }
         @plans = {}
         @outlines = {}
@@ -83,12 +88,6 @@ module PhComposer
       def assess_unit(entry, record)
         start = @findings.length
         reference = { "unit_id" => record["id"], "entity_path" => entry.path }
-        # A Unit on a Face of a Zone in no Building Segment leaves with its Zone, unchecked.
-        if (host = host(entry)) && host["left_out"]
-          @left_out << { "unit_id" => record["id"], "zone_id" => host.fetch("zone_id") }
-          return
-        end
-
         validate_record(entry, record, reference)
         type = @types[record["window_type_id"]]
         unless type

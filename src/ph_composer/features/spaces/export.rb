@@ -132,8 +132,12 @@ module PhComposer
         end
         # A Space, Volume or Floor Segment row, or a stray record, carries its reference: it is located, and
         # offers the repair its finding names.
+        strays = read.fetch("findings").reject do |finding|
+          path = Array(finding.dig("reference", "entity_path"))
+          zones.any? { |zone| path.length > zone.path.length && path[0, zone.path.length] == zone.path }
+        end
         located = rows.flat_map { |row| Array(row["findings"]).map { |finding| [finding, row.fetch("reference")] } } +
-                  read.fetch("findings").map { |finding| [finding, finding.fetch("reference")] }
+                  strays.map { |finding| [finding, finding.fetch("reference")] }
         located.each do |finding, reference|
           findings << finding_row(finding, reference, reference_id(reference))
           repair = repair_row(finding, reference)

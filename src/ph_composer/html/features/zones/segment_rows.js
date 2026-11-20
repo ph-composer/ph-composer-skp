@@ -236,13 +236,17 @@ function (panel, ui, requests, tableViews, zoneOptions, SegmentSettings) {
     return free[0] || zoneOptions.PALETTE[used.length % zoneOptions.PALETTE.length];
   };
 
-  /* Makes a Segment, with `targets` (Zones as `{ reference, expected_values }`) moved in, and opens its name. */
-  SegmentRows.prototype.create = function (targets) {
+  /* Makes a Segment, with `targets` (Zones as `{ reference, expected_values }`) moved in, and opens its name;
+     `created`, if given, runs once it is made. */
+  SegmentRows.prototype.create = function (targets, created) {
     var reason = this.guard(), self = this;
     if (reason) return this.refuse(reason);
     if (this.channel.busy()) return null;
     this.channel.run("ph_composer.zones.create_segment", { colour: this.colour(), targets: targets }, {
-      onDone: function (outcome) { self.renaming = { id: outcome.value.id, draft: outcome.value.name }; }
+      onDone: function (outcome) {
+        self.renaming = { id: outcome.value.id, draft: outcome.value.name };
+        if (created) created();
+      }
     });
     panel.repaint();
     return null;
@@ -428,7 +432,13 @@ function (panel, ui, requests, tableViews, zoneOptions, SegmentSettings) {
       paint();
       if (!chosen || !list.length) return;
       if (reason) { self.refuse(reason); return; }
-      if (chosen === NEW) { self.create(targets(list)); return; }
+      if (chosen === NEW) {
+        var back = list.filter(function (zone) { return groupKey(self.options, zone) === NONE; });
+        self.create(targets(list), function () {
+          self.review(targets(back).map(function (target) { return target.reference; }), false);
+        });
+        return;
+      }
       if (self.channel.busy()) return;
       var segment = chosen === OUT ? null : self.segment(chosen), moved = targets(list);
       // Zones moved out are offered as Attached zones; Zones moved back from none are told about Solve.

@@ -361,9 +361,9 @@
       "sha256": "845919747b71fae7ca8023c58d1d1da178a5781edfba5bb63c7b446467c37bdb"
     },
     "html/features/zones/segment_rows.js": {
-      "bytes": 30192,
+      "bytes": 30538,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "02688bbb4f57ec017cba6ab676c995017313e73616d9c25768ef4f3cdb83c43e"
+      "sha256": "79b25420203357b0dcc562ee12305df91e26f8118f9fc6a34c09d8b752594510"
     },
     "html/features/zones/segment_settings.js": {
       "bytes": 11166,

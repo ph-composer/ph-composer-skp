@@ -290,7 +290,8 @@ module PhComposer
             record = text.is_a?(String) ? JSON.parse(text) : nil
             next unless record.is_a?(Hash) && kind.problems(record).empty?
 
-            reader.entity_record(record.slice("id", "user_data"), :fields => [])
+            # Whole, so a required envelope no section exports refuses rather than being dropped.
+            reader.entity_record(record, :fields => [])
             found[id] = record
           rescue JSON::ParserError
             next
