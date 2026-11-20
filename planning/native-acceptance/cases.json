@@ -5033,6 +5033,17 @@
         "src/ph_composer/core/face_capture.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "SD02",
+      "label": "Shading mark operations on the installed RBZ with the panel closed: assign and clear on explicit root-path references for a Face, a Group and a ComponentInstance, direct and nested, each one native Undo step with Redo; unchanged targets reported; every refusal row of the PRD's table, a Face behind shared storage included, writing nothing and carrying its code; a mixed selection applied with what it left out; a stale revision refused; shading.list returning the reference model's five components",
+      "mode": "mixed",
+      "authority": "planning/features/phase-05-shading/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/shading/*",
+        "src/ph_composer/core/records/entity_store.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }

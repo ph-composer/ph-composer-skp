@@ -442,6 +442,41 @@ ids themselves; read them back with `ph_composer.windows.types.elements.list`. A
 whole in `values` keeps the ids you give, and one that leaves a cell uncovered or overlaps is refused
 as `validation.failed`.
 
+### Shading
+
+Shading marks Faces, Groups and components as surfaces that shade the building: neighbouring
+buildings, overhangs, fins, site walls. The mark has no values. A target is its path from the Model
+root, `{"entity_path": [4812, 4901]}`. Read `ph_composer.shading.selection` to get the selected
+Faces, Groups and components in that shape, each with what `assign` and `clear` would do to it.
+
+Mark them with `ph_composer.shading.assign` and remove marks with `ph_composer.shading.clear`, each
+with `targets` (at most 250) and the revision you read. Every target that can change does, in one
+Undo step. The result lists `assigned` (or `cleared`), `unchanged` and `left_out`, where each left-out
+target has a code and a message. The call is refused only when every target is left out.
+
+What `assign` leaves out, and why:
+
+- A Face, Group or component inside a component placed more than once, or inside a copied Group:
+  `target.shared_definition`. Mark the component or the Group itself.
+- Anything locked, or inside a locked Group: `target.locked`.
+- A cutting component, such as a Window Unit, or anything inside one: `shading.cutting_component`.
+- A Zone, or a Group holding one: `shading.zone_target`.
+- A classified Zone Face: `shading.face_classified`. Clear its classification first.
+- A Space, Volume or Floor Segment, anything inside one, a Group holding one, or anything that is not
+  a Face, Group or component: `target.wrong_kind`.
+
+`clear` only removes a mark, so it leaves out only what is not a Face, Group or component
+(`target.wrong_kind`), a marked entity behind shared storage or a lock (the same two codes as
+above), and an unmarked entity that is shading only because a Group above it is marked
+(`shading.inherited`; the message names that Group, so clear it instead). Clearing an entity with no
+mark of its own and none above it is `unchanged`.
+
+A mark on a Group or component reaches every Face inside it, at any depth, unless a Zone or a Space
+comes between. `ph_composer.shading.list` returns every mark and each shading component: the Faces
+that export under one name, with their count and area in square metres. The name is the nearest
+enclosing Group or component name, with " Shading" added after a Zone's name, and "Shading" when
+there is none. Rename a Group to split or merge components.
+
 ### Site and design temperatures
 
 Read the site with `ph_composer.climate.site.get`. A new Model reads `state: "not_set"` and

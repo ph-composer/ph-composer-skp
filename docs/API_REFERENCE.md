@@ -14329,6 +14329,284 @@ Example params:
 }
 ```
 
+### `ph_composer.shading.list`
+
+Every entity carrying the shading mark and every shading component: the Shading Faces grouped by the name they export under, with Face count and world area. Reads Zones' occurrences, then walks the Model once. Owner: `ph_composer.shading`.
+
+Refuses: `geometry.invalid`, `record.unreadable`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "marked",
+    "components",
+    "units"
+  ],
+  "properties": {
+    "marked": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "entity_path",
+          "kind",
+          "readable"
+        ],
+        "properties": {
+          "entity_path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 1,
+            "description": "The root-to-entity persistent-id path."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "face",
+              "group",
+              "component_instance"
+            ]
+          },
+          "readable": {
+            "type": "boolean",
+            "description": "False when the stored mark is not a JSON object; it still marks the entity, and clear removes it."
+          }
+        }
+      },
+      "description": "Every entity carrying the mark, inside cutting components too, in path order."
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "display_name",
+          "face_count",
+          "area_m2"
+        ],
+        "properties": {
+          "display_name": {
+            "type": "string"
+          },
+          "face_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "area_m2": {
+            "type": "number",
+            "minimum": 0,
+            "x-unit": "m2"
+          }
+        }
+      },
+      "description": "Each shading component: the Shading Faces that export under one name, with their count and world area, by name."
+    },
+    "units": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "area_m2"
+      ],
+      "properties": {
+        "area_m2": {
+          "type": "string",
+          "enum": [
+            "m2"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
+### `ph_composer.shading.selection`
+
+The selected Faces, Groups and components under the active path as references, each with what ph_composer.shading.assign and ph_composer.shading.clear would do to it; anything else selected is ignored. Owner: `ph_composer.shading`.
+
+Refuses: `gesture.too_large`, `record.unreadable`, `target.ambiguous`, `target.not_found`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "entities",
+    "ignored",
+    "ignored_total"
+  ],
+  "properties": {
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reference",
+          "kind",
+          "marked",
+          "assign",
+          "clear"
+        ],
+        "properties": {
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "entity_path"
+            ],
+            "properties": {
+              "entity_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1,
+                "description": "The root-to-entity persistent-id path."
+              }
+            }
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "face",
+              "group",
+              "component_instance"
+            ]
+          },
+          "marked": {
+            "type": "boolean",
+            "description": "The entity carries the mark itself, readable or not."
+          },
+          "assign": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "outcome",
+              "code",
+              "message"
+            ],
+            "properties": {
+              "outcome": {
+                "type": "string"
+              },
+              "code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "message": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "description": "What ph_composer.shading.assign does to it: assigned, unchanged or left_out, with the code and message when left out."
+          },
+          "clear": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "outcome",
+              "code",
+              "message"
+            ],
+            "properties": {
+              "outcome": {
+                "type": "string"
+              },
+              "code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "message": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "description": "What ph_composer.shading.clear does to it: cleared, unchanged or left_out, with the code and message when left out."
+          }
+        }
+      }
+    },
+    "ignored": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "persistent_id",
+          "type"
+        ],
+        "properties": {
+          "persistent_id": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Selected entities that are not Faces, Groups or components, the first 50; never written."
+    },
+    "ignored_total": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
 ### `ph_composer.spaces.all`
 
 Every Space occurrence in one complete projection, for the panel. Scripts page ph_composer.spaces.list instead. Owner: `ph_composer.spaces`.
@@ -48657,6 +48935,304 @@ Example params:
 }
 ```
 
+### `ph_composer.shading.assign`
+
+Mark explicit Faces, Groups and components as shading. Every target that can take the mark gets it in one Undo step; one already marked is unchanged; one that cannot is left out with its code. Refuses only when every target is left out. Owner: `ph_composer.shading`.
+
+Undo step: Set as Shading. Writes the mark on each assigned entity.
+
+Before calling: Each path still names one Face, Group or component, step by step from the Model root. The request carries the revision the references were read at.
+
+Refuses: `record.unreadable`, `shading.cutting_component`, `shading.face_classified`, `shading.zone_target`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "targets"
+  ],
+  "properties": {
+    "targets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "entity_path"
+        ],
+        "properties": {
+          "entity_path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 1,
+            "description": "The root-to-entity persistent-id path."
+          }
+        }
+      },
+      "minItems": 1,
+      "maxItems": 250,
+      "description": "Faces, Groups and components by root-to-entity path, as ph_composer.shading.selection returns them; at most 250 references, a repeated path counting toward the limit and applied once."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "assigned",
+    "unchanged",
+    "left_out"
+  ],
+  "properties": {
+    "assigned": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "entity_path"
+        ],
+        "properties": {
+          "entity_path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 1,
+            "description": "The root-to-entity persistent-id path."
+          }
+        }
+      },
+      "description": "The entities this command changed."
+    },
+    "unchanged": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "entity_path"
+        ],
+        "properties": {
+          "entity_path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 1,
+            "description": "The root-to-entity persistent-id path."
+          }
+        }
+      },
+      "description": "The entities already as asked; nothing was written to them."
+    },
+    "left_out": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "entity_path",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "entity_path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 1,
+            "description": "The root-to-entity persistent-id path."
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "The entities this command cannot change, each with its code (target.wrong_kind, target.locked, target.shared_definition, shading.cutting_component, shading.zone_target, shading.face_classified) and message."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "targets": [
+    {
+      "entity_path": [
+        4812,
+        4901
+      ]
+    }
+  ]
+}
+```
+
+### `ph_composer.shading.clear`
+
+Remove the shading mark from explicit Faces, Groups and components, in one Undo step. Only the named entity's own mark goes: one shading through a marked container above it is left out as shading.inherited. Owner: `ph_composer.shading`.
+
+Undo step: Clear Shading. Removes the mark from each cleared entity.
+
+Before calling: Each path still names one Face, Group or component, step by step from the Model root. The request carries the revision the references were read at.
+
+Refuses: `record.unreadable`, `shading.inherited`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "targets"
+  ],
+  "properties": {
+    "targets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "entity_path"
+        ],
+        "properties": {
+          "entity_path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 1,
+            "description": "The root-to-entity persistent-id path."
+          }
+        }
+      },
+      "minItems": 1,
+      "maxItems": 250,
+      "description": "Faces, Groups and components by root-to-entity path, as ph_composer.shading.selection returns them; at most 250 references, a repeated path counting toward the limit and applied once."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "cleared",
+    "unchanged",
+    "left_out"
+  ],
+  "properties": {
+    "cleared": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "entity_path"
+        ],
+        "properties": {
+          "entity_path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 1,
+            "description": "The root-to-entity persistent-id path."
+          }
+        }
+      },
+      "description": "The entities this command changed."
+    },
+    "unchanged": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "entity_path"
+        ],
+        "properties": {
+          "entity_path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 1,
+            "description": "The root-to-entity persistent-id path."
+          }
+        }
+      },
+      "description": "The entities already as asked; nothing was written to them."
+    },
+    "left_out": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "entity_path",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "entity_path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 1,
+            "description": "The root-to-entity persistent-id path."
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "The entities this command cannot change, each with its code (target.wrong_kind, target.locked, target.shared_definition, shading.inherited) and message."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "targets": [
+    {
+      "entity_path": [
+        4812,
+        4901
+      ]
+    }
+  ]
+}
+```
+
 ### `ph_composer.spaces.batch_update`
 
 Change many Spaces, Volumes and Floor Segments in one all-or-nothing step. Owner: `ph_composer.spaces`.
@@ -77904,6 +78480,15 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `climate.utc_offset_not_set` | The site's hours from UTC are not set. They are exported empty. |
 | `climate.zone_not_set` | The site's climate zone is not set. It is exported as Not defined. |
 
+### `ph_composer.shading`
+
+| Code | Meaning |
+| --- | --- |
+| `shading.cutting_component` | The entity is a cutting component or inside one; export does not read its Faces. |
+| `shading.face_classified` | A classified Zone Face cannot be shading until its classification is cleared. |
+| `shading.inherited` | Clear named an entity that is shading through a marked Group or component above it; the message names that one. |
+| `shading.zone_target` | The Group is a Zone or holds one; a whole Zone as shading is not supported. |
+
 ### `ph_composer.spaces`
 
 | Code | Meaning |
@@ -78134,3 +78719,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.66 | 2026-11-18 | The Site export section. ph_composer.climate.export_preflight is new and answers the export findings climate.incomplete, climate.zone_not_set, climate.utc_offset_not_set, climate.outside_phius_limits and climate.not_checked, which are new, and climate.site_not_set; none blocks the export. The export writes the site and a complete climate as honeybee-ph's Site on every Building Segment. |
 | 1.67 | 2026-11-18 | ph_composer.climate.site.geolocation is new: what SketchUp reports for the Model's geolocation, latitude and longitude only when SketchUp reports the Model geolocated, and no elevation or offset. The snapshot sections ph_composer.climate.site and ph_composer.climate.design_temperatures carry the site and design-temperature reads for the Climate tab. |
 | 1.68 | 2026-11-18 | ph_composer.climate.stations.all is new: one climate data folder's stations in one unbounded read, nearest the site first, in stations.list's rows, for the station picker; scripts page stations.list. |
+| 1.69 | 2026-11-19 | The Shading feature. ph_composer.shading.assign and ph_composer.shading.clear mark and unmark explicit Faces, Groups and components by root-to-entity path, each one Undo step, answering assigned or cleared, unchanged and left_out; ph_composer.shading.selection and ph_composer.shading.list read the selection and every mark and shading component. shading.face_classified, shading.zone_target, shading.inherited and shading.cutting_component are new. |

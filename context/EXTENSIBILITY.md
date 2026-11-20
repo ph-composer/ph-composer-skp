@@ -879,6 +879,12 @@ claim: it hosts other features' objects on purpose, by their records, never by t
 own. A Zone record already on or inside a claimed Group, from a Model made before that refusal, reads the
 `zone.ownership_conflict` finding, which does not block export, and nothing repairs it automatically.
 
+A feature whose record takes Faces out of a Zone's envelope without making them its own constructs its
+store with `excludes_from_envelope: true`. `Records::EntityStore.envelope_excluded?(inside)` and its
+detached twin `envelope_excluded_entries?(entries)` are the one check Zones reads, so the envelope never
+names the feature that excludes. A claim wins: a Face inside a claimed entity is never excluded through a
+container above it. Shading's mark is the only excluding store (context/CONTRACTS.md, "The shading mark").
+
 ### Setup entries
 
 Implemented in WT-12 (#343). Setup for this computer that belongs to no page, such as agent access,

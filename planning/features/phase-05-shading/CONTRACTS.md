@@ -1,7 +1,7 @@
 # Shading: proposed contracts
 
 DATE: 2026-11-19
-STATUS: Scoped. Proposed bindings, built on Ed's answers in [DECISIONS](DECISIONS.md). P5s-01 confirmed sections 4 and 7 from code, tests and the SD01 host run on 2026-11-19; Move-copy array and push-pull stay owed to a later hold.
+STATUS: Scoped. Proposed bindings, built on Ed's answers in [DECISIONS](DECISIONS.md). P5s-01 confirmed sections 4 and 7 from code, tests and the SD01 host run on 2026-11-19; Move-copy array and push-pull stay owed to a later hold. P5s-02 bound sections 2 and 3 and the section 4 flag into `context/` on 2026-11-19.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 
@@ -72,6 +72,13 @@ Codes, under the `shading` noun, registered in `codes.rb`:
 A claimed entity refuses with the existing `target.wrong_kind`; a locked path with `target.locked`; a
 Face behind shared storage with `target.shared_definition` (D5s-16).
 
+P5s-02 bound sections 2 and 3 into `context/CONTRACTS.md`, "The shading mark", which is now their
+authority. Three points differ from this draft: a Window Unit and its pane Faces refuse as
+`shading.cutting_component`, since Windows claims nothing and every Unit cuts its opening; a Group
+holding a Window Unit takes the mark, the Unit's Faces staying out by the cutting rule; and a target
+refused for its nature or its path goes to `left_out`, the command refusing only when every target does,
+with the first row's code. `shading.zone_inside` and `shading.geometry_invalid` land with P5s-03 and P5s-06.
+
 ## 4. The Zones seam
 
 One foundation addition (D5s-12), named here. P5s-02 builds the flag and the check with their tests; P5s-03 makes Zones read it:
@@ -91,7 +98,7 @@ Face's path below the Zone's.
 
 The inherited case: a Face inside a marked Group inside a Zone has `inside` = [Group, Face], and the
 Group's mark excludes it. A claimed entity anywhere in `inside` wins, so a Face inside a Space volume
-or a Window Unit is never excluded through a container above it, and a Face inside a claimed entity is
+is never excluded through a container above it, and a Face inside a claimed entity is
 never a Shading Face (section 2).
 
 ### Which Faces a Zone owns (question 2)
@@ -151,7 +158,7 @@ Walkers outside the funnels:
 | Spaces' candidate Faces of a Zone | `spaces/create_faces.rb` `zone_faces` | Reads the check itself; Spaces' test in P5s-03 |
 | Face-record id inventories | `zones/faces/reference_targets.rb` `walk`; `zones/adjacency/adjacency.rb` `face_id_occurrence_counts`, `endpoint_survives?`; `zones/zone/split_identity_repair.rb` `live_identity_counts` | Exempt: they find Face records by id anywhere in the Model, not a Zone's envelope |
 | Restore offers | `zones/zone/repair.rb` `walk_orphans` (Groups only; it does not descend ComponentInstances) | Exempt: it reads membership stamps, which a Shading Face does not get once the stamp writer reads funnel A. A Face stamped before it was tagged keeps its stamp and is still offered: P5s-03 decides whether tagging clears the stamp or Restore skips a marked Face |
-| Faces inside a Space Volume or a Window Unit | `spaces/authoring.rb`, `spaces/steps.rb`, `spaces/scan/occurrences.rb`, `spaces/weighting_factor_menu.rb`, `spaces/add_volume_menu.rb`; `windows/units/restore_*.rb`, `mutation_scope.rb`, `convert_sources.rb` | Exempt: those Faces sit in claimed entities, which the check never excludes (section 2) |
+| Faces inside a Space Volume or a Window Unit | `spaces/authoring.rb`, `spaces/steps.rb`, `spaces/scan/occurrences.rb`, `spaces/weighting_factor_menu.rb`, `spaces/add_volume_menu.rb`; `windows/units/restore_*.rb`, `mutation_scope.rb`, `convert_sources.rb` | Exempt: a Space's Faces sit in claimed entities, which the check never excludes (section 2). A Window Unit claims nothing (P5s-02 found Windows' stores pass no `claims_entity`); its Faces sit in a cutting component, which no Zone walk descends and Shading refuses (`shading.cutting_component`) |
 | Windows' rectangle candidates and selection shape | `windows/units/candidates.rb` `convert`, `restore`; `windows/declarations/viewport.rb` `single_face?`; `windows/units/convert_route.rb` `face_paths` | Exempt: they read loose rectangles by geometry before any host is resolved; the host read goes through funnel B |
 | Make Zone candidates and shape checks | `zones/zone/make_candidates.rb` `read`; `zones/zone/operations.rb` `make_zone_shape?`; `zones/zone/steps.rb` `existing_group` | Exempt: they read a selection before any Zone exists |
 

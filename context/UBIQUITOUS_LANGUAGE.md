@@ -96,6 +96,9 @@ Face types and boundary conditions follow Honeybee. A Zone owns its Face assignm
 | Thermal bridge | A run of assigned edges with a measured length and the type's psi-value. HBJSON carries it as a `PhThermalBridge` on the Zone's Building-Segment |
 | Thermal bridge assignment | A record on a SketchUp Edge naming its Thermal Bridge Type and quantity. Copies and splits carry it. Deleting the Edge removes the record |
 | Run | Connected assigned edges with the same Zone, type and quantity, ending at a free end or at a junction of three or more. A closed loop is one run. Derived each time the Model is read, never stored |
+| Shading mark | The record that says a Face, Group or ComponentInstance is shading. It carries no values and no id |
+| Shading Face | A Face that carries the shading mark, or sits at any depth inside a marked Group or ComponentInstance with no Zone or claimed entity between. It leaves its Zone's envelope and is meant to export as one orphaned honeybee `Shade` per occurrence |
+| Shading component | The Shading Faces that export under one name, derived from the nearest named container. One component in WUFI-Passive and METr |
 | Thermal bridge group | Ambient, Perimeter or Basement floor, METr's words for its three groups. Stored as honeybee-ph's `15-Ambient`, `16-Perimeter` and `17-FS/BC`; shown in METr's words |
 
 ## Windows

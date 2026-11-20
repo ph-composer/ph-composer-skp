@@ -65,8 +65,11 @@ module PhComposer
     require_relative "features/windows/install"
     require_relative "features/spaces/install"
     require_relative "features/thermal_bridges/install"
+    require_relative "features/shading/install"
     require_relative "features/climate/install"
-    FEATURES = [Assemblies, Zones, Windows, Spaces, ThermalBridges, Climate].freeze unless const_defined?(:FEATURES)
+    unless const_defined?(:FEATURES)
+      FEATURES = [Assemblies, Zones, Windows, Spaces, ThermalBridges, Shading, Climate].freeze
+    end
 
     # Capabilities the foundation itself provides, registered through the same interface as a feature.
     unless const_defined?(:FOUNDATION_FEATURES)

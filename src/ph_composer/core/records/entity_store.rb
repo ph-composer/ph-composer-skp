@@ -38,6 +38,24 @@ module PhComposer
         false
       end
 
+      # Whether a Face whose `inside` list this is has left its Zone's envelope: some entity in `inside` carries
+      # an excluding store's record and none is claimed. `inside` runs from the first entity inside the Zone
+      # Group down to the Face, the Face included, as Zones' `holding` returns it, so a record on the Zone Group
+      # or above it never reaches the Zone's Faces. A store excludes when it is constructed with
+      # `excludes_from_envelope: true`, so this check names no feature. By presence, as `claimed?` reads, so a
+      # damaged record still excludes.
+      def self.envelope_excluded?(inside)
+        stores = excluding.values
+        inside.any? { |entity| stores.any? { |store| store.marks?(entity) } } && !claimed?(inside)
+      end
+
+      # `envelope_excluded?` over detached export entries, each read through its `dictionaries` map
+      # (GeometrySnapshot::Entry), for a caller that holds no live entity. The same rule, by presence.
+      def self.envelope_excluded_entries?(entries)
+        carried = ->(stores) { entries.any? { |entry| stores.any? { |store| store.carried_by?(entry.dictionaries) } } }
+        carried.call(excluding.values) && !carried.call(claiming.values)
+      end
+
       # What a selection is read against: the selected entities and every open context around them.
       def self.selection_claimed?(model)
         claimed?(model.selection.to_a + Array(model.active_path))
@@ -105,6 +123,10 @@ module PhComposer
         stores[[store.dictionary, store.key]] = store
       end
 
+      def self.exclude(store)
+        excluding[[store.dictionary, store.key]] = store
+      end
+
       def self.stores
         @stores ||= {}
       end
@@ -115,16 +137,30 @@ module PhComposer
       end
       private_class_method :claiming
 
-      def initialize(dictionary, key: "record", claims_entity: false)
+      def self.excluding
+        @excluding ||= {}
+      end
+      private_class_method :excluding
+
+      # `claims_entity`: the record makes its entity the feature's own object (`claimed?`).
+      # `excludes_from_envelope`: the record takes a Face, or the Faces inside a Group or component carrying it,
+      # out of a Zone's envelope (`envelope_excluded?`).
+      def initialize(dictionary, key: "record", claims_entity: false, excludes_from_envelope: false)
         @dictionary = Dictionaries.register(dictionary)
         @key = key
         self.class.register(self)
         self.class.claim(self) if claims_entity
+        self.class.exclude(self) if excludes_from_envelope
       end
 
       # Whether `entity` holds a record here, readable or not.
       def marks?(entity)
         !entity.get_attribute(dictionary, key).nil?
+      end
+
+      # Whether a detached `dictionaries` map ({dictionary => {key => value}}) holds a record here, readable or not.
+      def carried_by?(dictionaries)
+        !(dictionaries[dictionary] || {})[key].nil?
       end
 
       def read(entity)
