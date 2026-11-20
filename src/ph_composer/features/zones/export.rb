@@ -148,13 +148,14 @@ module PhComposer
       end
 
       # The metadata extraction refuses, read as `records` reads it: each exported Zone with its user_data passed
-      # through, and alone every valid Building-Segment and Level choice, named by a Zone or not.
+      # through, and alone every valid Building-Segment and Level choice, named by a Zone or not, with the
+      # settings another feature's export claims on its kind.
       def metadata_findings(request, zones)
         check = Export::MetadataCheck
         check.findings(request, zones.map(&:record), :section => SECTION, :user_data => true,
                                                      :target_kind => REFERENCE_KIND) +
           CHOICE_KINDS.flat_map do |kind|
-            check.findings(request, check.definitions(request, kind.id), :section => SECTION)
+            check.findings(request, check.definitions(request, kind.id), :section => SECTION, :target_kind => kind.id)
           end
       end
 
@@ -262,20 +263,23 @@ module PhComposer
 
       # The section's registered projection, for a contributor that places its own snapshot entries in a Zone
       # (`reader.section(SECTION)`): one row per Zone occurrence with its id, path, name, Building-Segment
-      # name and whether export includes it, as zones.containment names them live. A Zone in no Building
-      # Segment keeps its row with `exported` false: the section leaves it out, and a contributor leaves out
-      # what it holds, yet still knows the container is a Zone. It writes no finding; the section contract
-      # validates the same records and refuses a choice it cannot export.
+      # name and whether export includes it, as zones.containment names them live. A Zone that names a Building
+      # Segment record also carries its id and export identifier, which the HBJSON BldgSegment takes as its
+      # identifier; a legacy Zone's are null. A Zone in no Building Segment keeps its row with `exported` false:
+      # the section leaves it out, and a contributor leaves out what it holds, yet still knows the container is
+      # a Zone. It writes no finding; the section contract validates the same records and refuses a choice it
+      # cannot export.
       def occurrences(reader)
+        segments = option_choices(reader).fetch(Options::SEGMENTS.id)
         zone_occurrences(reader).map do |entry, record|
           record = Names.project(record, entry.native_name)
-          segment = if Schema.managed?(record)
-                      option_choices(reader).fetch(Options::SEGMENTS.id)[record["building_segment_id"]]&.fetch("name")
-                    else
-                      record["building_segment"]
-                    end
+          managed = Schema.managed?(record)
+          segment = managed ? segments[record["building_segment_id"]] : nil
           { "zone_id" => record.fetch("id"), "zone_path" => entry.path, "name" => record.fetch("name"),
-            "building_segment" => segment, "exported" => Schema.exported?(record) }
+            "building_segment" => managed ? segment&.fetch("name") : record["building_segment"],
+            "building_segment_id" => segment && record["building_segment_id"],
+            "building_segment_export_identifier" => segment&.[]("export_identifier"),
+            "exported" => Schema.exported?(record) }
         end
       end
 
@@ -291,12 +295,28 @@ module PhComposer
 
       # Every valid Building-Segment and Level choice as the section exports it, by kind id and id. Each passes
       # the metadata boundary once, whether a Zone names it or not, so an unused option's map is reported as
-      # omitted as a used one's is. An invalid choice is left out, and refuses only when a Zone names it.
+      # omitted as a used one's is, and settings another feature's export claims on the kind (`entity_projections`
+      # on the Building Segment kind) are checked rather than left out. An invalid choice is left out, and
+      # refuses only when a Zone names it.
       def exported_choices(reader)
         choices = option_choices(reader)
         CHOICE_KINDS.to_h do |kind|
           valid = choices.fetch(kind.id).sort.select { |_id, record| kind.problems(record).empty? }
-          [kind.id, valid.to_h { |id, record| [id, reader.entity_record(record, :fields => CHOICE_FIELDS)] }]
+          [kind.id, valid.to_h do |id, record|
+            [id, reader.entity_record(record, :fields => CHOICE_FIELDS, :target_kind => kind.id)]
+          end]
+        end
+      end
+
+      # Hands each exported Building Segment's claimed settings to their claimants, once per Segment in id order:
+      # only a Segment an exported Zone names becomes an HBJSON BldgSegment, so an empty one's settings stay home.
+      # An invalid Segment is not among `choices`; the Zone naming it refuses below.
+      def capture_segment_settings(reader, kept, choices)
+        valid = choices.fetch(Options::SEGMENTS.id)
+        stored = option_choices(reader).fetch(Options::SEGMENTS.id)
+        named = kept.map { |_entry, record| record["building_segment_id"] }.compact.uniq.sort
+        named.select { |id| valid.key?(id) }.each do |id|
+          reader.capture_record(stored.fetch(id), :target_kind => Options::SEGMENTS.id)
         end
       end
 
@@ -332,6 +352,7 @@ module PhComposer
         raise Export::Blocked.new("zone.no_segment", NO_SEGMENT) if kept.empty? && !left_out.empty?
 
         note_left_out(reader, left_out, choices, kept)
+        capture_segment_settings(reader, kept, choices)
         kept.map do |entry, record|
           Schema.validate!(record)
           owned = zone_faces(reader, entry)

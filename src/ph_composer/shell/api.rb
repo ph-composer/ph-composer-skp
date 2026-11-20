@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 75
+    MINOR = 76
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -433,7 +433,16 @@ module PhComposer
                     "thermal_bridge.zone_left_out and window.zone_left_out. " \
                     "ph_composer.zones.faces.attached_zone.offer is new: the Faces a Zone moved out shares with " \
                     "exported Zones, both sides, for create_and_assign or classify. An AttachedZone Face exports as " \
-                    "honeybee-ph PhAdditionalZone." }
+                    "honeybee-ph PhAdditionalZone." },
+      { "minor" => 76, "date" => "2026-11-20",
+        "change" => "ph_composer.certification is a new feature: the ph_composer.certification.segment extension on " \
+                    "each Building Segment (category, program, use, status, type), saved through " \
+                    "zones.save_segment_settings, read by ph_composer.certification.segment.get with its defaults, " \
+                    "and exported to the BldgSegment's phius_certification. An export contributor may claim an " \
+                    "extension on a catalog record kind; its rows carry a null path, and Zones' export and preflight " \
+                    "now check a claimed envelope on every valid Building Segment instead of leaving it out. The " \
+                    "Zones section's projection rows add building_segment_id and building_segment_export_identifier, " \
+                    "and translation sections may attach at the segment host." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

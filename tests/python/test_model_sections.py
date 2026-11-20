@@ -8,6 +8,7 @@ from typing import Any, cast
 import pytest
 
 from ph_composer_translation import stack
+from ph_composer_translation.certification_sections import CertificationSection
 from ph_composer_translation.composition import SECTIONS
 from ph_composer_translation.constructions import ConstructionSection, TranslatedConstruction
 from ph_composer_translation.contract import RecordError
@@ -127,6 +128,7 @@ def test_model_sections_build_rooms_then_resolve_surface_pairs(monkeypatch: pyte
             ApertureSection(),
             ZoneSection(),
             SiteSection(),
+            CertificationSection(),
             ModelMetadataSection(),
             SpaceSection(),
             ThermalBridgeSection(),
@@ -158,6 +160,7 @@ def test_invalid_face_vocabulary_becomes_a_record_error(monkeypatch: pytest.Monk
             ApertureSection(),
             ZoneSection(),
             SiteSection(),
+            CertificationSection(),
             ModelMetadataSection(),
             SpaceSection(),
             ThermalBridgeSection(),
@@ -195,6 +198,7 @@ def test_surface_requires_an_available_reciprocal_counterpart(monkeypatch: pytes
             ApertureSection(),
             ZoneSection(),
             SiteSection(),
+            CertificationSection(),
             ModelMetadataSection(),
             SpaceSection(),
             ThermalBridgeSection(),
@@ -260,6 +264,7 @@ def test_explicit_and_reciprocal_omissions_preserve_inputs_and_publish_remaining
             ApertureSection(),
             ZoneSection(),
             SiteSection(),
+            CertificationSection(),
             ModelMetadataSection(),
             SpaceSection(),
             ThermalBridgeSection(),
@@ -308,6 +313,7 @@ def test_retired_face_with_no_boundary_is_a_nonblocking_reported_omission(monkey
                 ApertureSection(),
                 ZoneSection(),
                 SiteSection(),
+                CertificationSection(),
                 ModelMetadataSection(),
                 SpaceSection(),
                 ThermalBridgeSection(),
@@ -363,6 +369,7 @@ def test_malformed_omission_metadata_remains_a_blocker(
                 ApertureSection(),
                 ZoneSection(),
                 SiteSection(),
+                CertificationSection(),
                 ModelMetadataSection(),
                 SpaceSection(),
                 ThermalBridgeSection(),
@@ -392,6 +399,7 @@ def test_missing_boundary_without_explicit_omission_remains_a_blocker(monkeypatc
                 ApertureSection(),
                 ZoneSection(),
                 SiteSection(),
+                CertificationSection(),
                 ModelMetadataSection(),
                 SpaceSection(),
                 ThermalBridgeSection(),
@@ -423,6 +431,7 @@ def test_omitted_face_invalid_classification_still_blocks(monkeypatch: pytest.Mo
                 ApertureSection(),
                 ZoneSection(),
                 SiteSection(),
+                CertificationSection(),
                 ModelMetadataSection(),
                 SpaceSection(),
                 ThermalBridgeSection(),

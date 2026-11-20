@@ -519,6 +519,14 @@ collection ends blocks with `export.blocked`: installing an extension does not e
 (Zone, Face) and Windows (Unit, captured in the Apertures section) are the owners today; the
 development example's `example.foundation.export.face_reviews` is the worked case.
 
+A claim's target kind may also be a catalog record kind, which is how a Building Segment setting exports
+(context/EXTENSIBILITY.md, "Building Segment settings"). The Zones section reads every valid Building
+Segment through `entity_record(..., target_kind:)`, and its preflight the same way, so a claimed envelope
+is validated rather than left out; it captures the claimed fields only of the Segments an exported Zone
+names (`capture_record`), once each in id order, and a catalog record has no occurrence, so each row's
+`path` is null. A settings namespace with `export_relevance: "required"` and no claim still blocks every
+export with a Segment that carries it.
+
 ## Model settings
 
 `PhComposer::ModelSettings` provides one feature-owned dictionary, schema, effective defaults and a
@@ -1418,9 +1426,12 @@ publishing an invalid canonical artifact.
 
 The Honeybee Model is built by the foundation's model assembly (`assembly.py`), which also names
 no feature. A section whose objects belong inside another declares `attaches = Attachment(host,
-key)`, with `host` one of `MODEL`, `ROOM` or `FACE`, and implements `attach(host, objects)`. After
-every section has run, the assembly attaches the host levels outermost first and calls `attach` once
-per host with that host's objects, in id order. A section checks what one object's own record
+key)`, with `host` one of `MODEL`, `SEGMENT`, `ROOM` or `FACE`, and implements `attach(host, objects)`.
+After every section has run, the assembly attaches the host levels in that order and calls `attach` once
+per host with that host's objects, in id order. A `SEGMENT` host is the one honeybee-ph `BldgSegment` the
+Rooms of an exported Building Segment share, keyed by its identifier, the Segment's `bseg_` export
+identifier; it is attached after every `MODEL` section, so it already carries what those set (the `Site`),
+and a section changes it in place and never replaces it. A section checks what one object's own record
 shows in `translate`, so `attach` judges only what needs the host. A missing host, or a
 `RecordError` from `attach`, is an `object.unavailable` finding on each of those objects;
 `AttachmentRefused` names only the objects it refused. The canonical model, `{hbjson, rooms, faces,
@@ -1487,6 +1498,20 @@ climate's identity, the four peak-load temperatures, the limit check, the edited
 file read, the design temperatures, the count of Building Segments and a digest of the built `Site`;
 conformance finds that `Site` on every reloaded Building Segment, honeybee-ph's default for each part the
 record did not carry, Cooling 2 equal to Cooling 1 and no `source_uri`.
+
+Phius certification is the first section to attach at `SEGMENT`: `ph_composer.certification.export.segments`
+(Ruby `features/certification/export.rb`, Python `certification_sections.py`) writes one record per exported
+Building Segment record, `{id, export_identifier, category, program, use, status, type}`, from the
+Segment's `ph_composer.certification.segment` settings, which it claims on the Building Segment kind
+(`entity_projections`, "Exporting a payload on another feature's entity", above), or their defaults where
+it has none. The Zones section's projection names the exported Segments and their export identifiers; a
+legacy Zone names no Segment record, so its `BldgSegment` keeps honeybee-ph's defaults, the same values.
+Python maps each value to honeybee-ph's `PhiusCertification` enum and sets it on the shared `BldgSegment`.
+It is required for export: a record with a value it does not map, or naming no exported Segment, withholds
+the model. Its result fields list each Segment's export identifier and the five honeybee-ph values, and its
+conformance reads them back from every reloaded Building Segment. PHX writes them to the WUFI XML
+(`BuildingCategory`, `PH_CertificateCriteria`, `OccupancyTypeResidential`, `BuildingStatus`,
+`BuildingType`) and the METr JSON (`tests/python/test_certification_phx_round_trip.py`).
 
 Shades are the first section that writes geometry outside every Room: `ph_composer.shading.export.shades` (Ruby
 `features/shading/export.rb`, Python `shade_sections.py`, record `contract/shade_records.py`) `requires:` the

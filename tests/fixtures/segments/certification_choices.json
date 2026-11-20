@@ -1,0 +1,40 @@
+{
+  "choices": {
+    "category": [
+      "residential",
+      "non_residential"
+    ],
+    "program": [
+      "phius_2021_core",
+      "phius_2021_zero",
+      "phius_2018_core",
+      "phius_2018_zero",
+      "phius_2018",
+      "phius_2015"
+    ],
+    "status": [
+      "in_planning",
+      "under_construction",
+      "complete"
+    ],
+    "type": [
+      "new_construction",
+      "retrofit",
+      "mixed"
+    ],
+    "use": [
+      "residential",
+      "office_administrative",
+      "school",
+      "other",
+      "undefined_unfinished"
+    ]
+  },
+  "defaults": {
+    "category": "residential",
+    "program": "phius_2021_core",
+    "status": "in_planning",
+    "type": "new_construction",
+    "use": "residential"
+  }
+}

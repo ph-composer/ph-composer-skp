@@ -8531,6 +8531,130 @@ Example params:
 }
 ```
 
+### `ph_composer.certification.segment.get`
+
+One Building Segment's Phius certification settings, with the defaults where it has none. Owner: `ph_composer.certification`.
+
+Refuses: `record.unreadable`, `target.not_found`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^bsg_[A-Za-z0-9]{12}$",
+      "description": "The Building Segment."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "values",
+    "stored",
+    "extension_status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^bsg_[A-Za-z0-9]{12}$",
+      "description": "The Building Segment."
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "category",
+        "program",
+        "use",
+        "status",
+        "type"
+      ],
+      "properties": {
+        "category": {
+          "type": "string",
+          "enum": [
+            "residential",
+            "non_residential"
+          ]
+        },
+        "program": {
+          "type": "string",
+          "enum": [
+            "phius_2021_core",
+            "phius_2021_zero",
+            "phius_2018_core",
+            "phius_2018_zero",
+            "phius_2018",
+            "phius_2015"
+          ]
+        },
+        "use": {
+          "type": "string",
+          "enum": [
+            "residential",
+            "office_administrative",
+            "school",
+            "other",
+            "undefined_unfinished"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "in_planning",
+            "under_construction",
+            "complete"
+          ]
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "new_construction",
+            "retrofit",
+            "mixed"
+          ]
+        }
+      },
+      "description": "The five settings: the stored payload when it is understood, else the defaults."
+    },
+    "stored": {
+      "type": "boolean",
+      "description": "Whether the values are a stored payload."
+    },
+    "extension_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The stored envelope's status, as a record read reports it; null when the Segment has none."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "bsg_Ab12Cd34Ef56"
+}
+```
+
 ### `ph_composer.climate.climate.get`
 
 The Model's climate with its state, what is missing, the edited cells and the Phius limit check against the site. State none when there is none. Owner: `ph_composer.climate`.
@@ -79620,3 +79744,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.73 | 2026-11-20 | Zone schema 3: building_segment_id may be null, No Building Segment; Zones write schema 3 and schema 2 still reads. ph_composer.zones.update_field and ph_composer.zones.update accept a null building_segment. ph_composer.zones.options.manage and remove accept a null replacement for a used Building Segment, which moves its Zones to No Building Segment; removing the default moves it to the replacement, else to the first remaining Segment; removing the last Segment refuses zone.option_last_segment. manage, remove and merge results add removed_extensions and removed_extensions_total. Colour-by Building Segment shows Zones in no Segment as one neutral No Building Segment row. Until export leaves them out, such a Zone blocks export. |
 | 1.74 | 2026-11-20 | ph_composer.zones.save_segment_settings is new: one Building Segment's name, colour, default and a settings payload per extension namespace in one Undo step, emitting ph_composer.zones.segment_settings_saved. ph_composer.zones.create_segment is new: a Segment under the first free default name with named Zones moved in. A Zone's choice evidence keeps its Building Segment's values only, so a Segment metadata write no longer rewrites its Zones and adoption brings no Segment settings. ph_composer.zones.all adds building_segments, each Segment's Face area; ph_composer.spaces.all and list add airflows and inheriting_count to each building_segments row. |
 | 1.75 | 2026-11-20 | Export leaves a Zone in no Building Segment out with its Faces, Spaces, assigned Edges and the Window Units on its Faces, and a Building Segment no Zone names; export preflight refuses zone.no_segment when Zones exist and none is in a Segment, no longer refuses such a Zone with reference.invalid, refuses face.partner_left_out on a Surface pair across that boundary, and adds the info rows zone.left_out, zone.segment_empty, space.zone_left_out, thermal_bridge.zone_left_out and window.zone_left_out. ph_composer.zones.faces.attached_zone.offer is new: the Faces a Zone moved out shares with exported Zones, both sides, for create_and_assign or classify. An AttachedZone Face exports as honeybee-ph PhAdditionalZone. |
+| 1.76 | 2026-11-20 | ph_composer.certification is a new feature: the ph_composer.certification.segment extension on each Building Segment (category, program, use, status, type), saved through zones.save_segment_settings, read by ph_composer.certification.segment.get with its defaults, and exported to the BldgSegment's phius_certification. An export contributor may claim an extension on a catalog record kind; its rows carry a null path, and Zones' export and preflight now check a claimed envelope on every valid Building Segment instead of leaving it out. The Zones section's projection rows add building_segment_id and building_segment_export_identifier, and translation sections may attach at the segment host. |

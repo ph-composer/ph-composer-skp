@@ -50,11 +50,15 @@ class Requirement(Generic[ObjectT]):
     object_type: type[ObjectT]
 
 
-#: The Honeybee objects an attachment can name as its host, outermost first: the Model, a Room, a Face.
+#: The Honeybee objects an attachment can name as its host, in the order they are attached: the Model, a
+#: honeybee-ph Building Segment, a Room, a Face. A Building Segment is the one `BldgSegment` the Rooms of one
+#: exported Segment share, set when the Zones section attaches its Rooms to the Model; it is attached after every
+#: `MODEL` section, so it already carries what those set (the Site), and is never rebuilt.
 MODEL = "model"
+SEGMENT = "segment"
 ROOM = "room"
 FACE = "face"
-HOSTS = (MODEL, ROOM, FACE)
+HOSTS = (MODEL, SEGMENT, ROOM, FACE)
 
 
 def _no_key(_: object) -> str:
@@ -63,8 +67,9 @@ def _no_key(_: object) -> str:
 
 @dataclass(frozen=True)
 class Attachment:
-    """A section's objects join a `host` object of the assembled model. `key` names the host Room or Face
-    of one object by its identifier; the Model is the only `MODEL` host, so its attachments need no key."""
+    """A section's objects join a `host` object of the assembled model. `key` names the host Building Segment,
+    Room or Face of one object by its identifier (a Building Segment's is its `bseg_` export identifier); the
+    Model is the only `MODEL` host, so its attachments need no key."""
 
     host: str
     key: Callable[[Any], str] = _no_key

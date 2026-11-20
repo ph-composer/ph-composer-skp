@@ -5177,6 +5177,24 @@
         "src/ph_composer/python/ph_composer_translation/model_sections.py"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "PG04",
+      "label": "Phius certification on Building Segments on the installed RBZ: the settings dialog's Phius certification section shows the defaults on a new Segment, a change to all five values saves as one native Undo step that the Edit menu undoes and redoes, the values survive save and fresh-process reopen, Delete of a Segment with settings names them and a merge keeps the survivor's only; Export of the two-Segment reference writes each Segment's values to its BldgSegment and the WUFI XML and METr JSON from the pinned PHX read them back per Variant",
+      "mode": "mixed",
+      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/certification/*",
+        "src/ph_composer/html/features/certification/section.js",
+        "src/ph_composer/python/ph_composer_translation/certification_sections.py",
+        "src/ph_composer/python/ph_composer_translation/assembly.py",
+        "src/ph_composer/python/ph_composer_translation/sections.py",
+        "src/ph_composer/features/zones/export.rb",
+        "src/ph_composer/export/record_reader.rb",
+        "src/ph_composer/shell/registry_validation.rb",
+        "src/ph_composer/html/features/zones/segment_settings.js"
+      ],
+      "native_control_required": true
     }
   ]
 }

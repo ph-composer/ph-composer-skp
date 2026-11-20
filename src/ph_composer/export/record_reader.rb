@@ -18,8 +18,9 @@ module PhComposer
     #   member through `entity_record`, which carries or omits its map.
     # - An extension envelope the contributor names must be understood, and only the named payload
     #   fields go out.
-    # - On an entity, an envelope another contributor claims (`entity_projections:`) must be understood;
-    #   its declared fields go to that contributor's projection store, keyed by occurrence.
+    # - On an entity or a catalog record, an envelope another contributor claims (`entity_projections:`) must be
+    #   understood; its declared fields go to that contributor's projection store, keyed by occurrence, or by
+    #   record for a catalog record.
     # - Any other envelope is left out when it declares itself `local_only`, and blocks the export when
     #   it is `required` or its relevance is unknown: nothing guesses from a payload's text.
     class RecordReader
@@ -102,6 +103,14 @@ module PhComposer
           payload = declared_payload(stored.fetch("id"), namespace, envelope, claimed.fetch("fields"))
           capture_claimed(namespace, target_kind, claimed, stored.fetch("id"), path, payload)
         end
+      end
+
+      # Captures the claimed envelopes of one catalog record (a Building Segment) for their claimants. A catalog
+      # record has no occurrence, so each row's `path` is null. Its owner reads the record through
+      # `entity_record(..., target_kind:)` first, which checks its metadata, and calls this from the claim's
+      # source section once for each record it exports.
+      def capture_record(stored, target_kind:)
+        capture_entity(stored, :target_kind => target_kind, :path => nil)
       end
 
       # The claimed rows for `namespace` on `target_kind`, in the order the owner's section read them.
