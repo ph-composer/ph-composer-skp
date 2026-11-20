@@ -14331,7 +14331,7 @@ Example params:
 
 ### `ph_composer.shading.export_preflight`
 
-Shading's export notes, none blocking: shading.zone_inside names each marked Group or component that is a Zone, holds one or holds another feature's object, which the mark does not reach. Owner: `ph_composer.shading`.
+Shading's export notes, none blocking: shading.zone_inside names each marked Group or component that is a Zone or holds one, another feature's object or a cutting component, which the mark does not reach. Owner: `ph_composer.shading`.
 
 Refuses: `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
@@ -78707,7 +78707,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `shading.cutting_component` | The entity is a cutting component or inside one; export does not read its Faces. |
 | `shading.face_classified` | A classified Zone Face cannot be shading until its classification is cleared with ph_composer.zones.faces.clear_classification. |
 | `shading.inherited` | Clear named an entity that is shading through a marked Group or component above it; the message names that one. |
-| `shading.zone_inside` | Preflight note: a marked Group or component is a Zone, holds one or holds another feature's object, which the mark does not reach. |
+| `shading.zone_inside` | Preflight note: a marked Group or component is a Zone, holds one or holds another feature's object or a cutting component, which the mark does not reach. |
 | `shading.zone_target` | The Group is a Zone or holds one; a whole Zone as shading is not supported. |
 
 ### `ph_composer.spaces`

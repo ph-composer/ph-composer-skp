@@ -84,7 +84,7 @@ module PhComposer
         occurrence.entity.name = @after.fetch("name") if occurrence.entity.respond_to?(:name=)
         Names.track(model, occurrence.entity)
         stamp = Schema.stamp(@after)
-        Occurrences.faces(occurrence).map(&:entity).each do |entity|
+        Occurrences.member_faces(occurrence).map(&:entity).each do |entity|
           existing = STAMP_STORE.read(entity)
           STAMP_STORE.write(entity, stamp) if existing && existing["zone_id"] == @after.fetch("id")
         end
@@ -170,7 +170,8 @@ module PhComposer
       end
 
       def resolve_member(zone, face)
-        occurrence = Occurrences.face_at(zone, face.fetch(:reference).fetch("entity_path"), :mutable => true)
+        occurrence = Occurrences.face_at(zone, face.fetch(:reference).fetch("entity_path"), :mutable => true,
+                                                                                            :envelope => false)
         current = Faces::FACE_STORE.read(occurrence.entity)
         unless current == face.fetch(:before)
           raise CodedError.new("target.changed", "A Face changed after the repair was previewed.")
@@ -286,7 +287,8 @@ module PhComposer
 
       def write(zone, live)
         resolved = live.fetch(:faces).map do |face|
-          [Occurrences.face_at(zone, face.fetch(:reference).fetch("entity_path"), :mutable => true), face]
+          [Occurrences.face_at(zone, face.fetch(:reference).fetch("entity_path"), :mutable => true,
+                                                                                  :envelope => false), face]
         end
         @captured = [capture(ZONE_STORE, zone.entity)]
         resolved.each do |occurrence, _face|

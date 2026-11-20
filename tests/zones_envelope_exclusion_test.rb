@@ -203,18 +203,36 @@ class ZonesEnvelopeExclusionTest < PhComposerTestCase
     assert_equal "Surface", FACE_STORE.read(shared)["boundary_condition"]
   end
 
-  # The membership stamp writer and Zone copy repair read the Zone's Faces through funnel A.
-  def test_zone_stamp_writer_and_copy_repair_leave_out_an_excluded_face
+  # A partial overlap cuts the shared wall when it is in the envelope and leaves it whole when it is not.
+  def test_solve_does_not_split_an_excluded_face
+    @model.entities.delete(@zone_b)
+    @zone_b = box_group(2000, 5, 9, "B", 2)
+    @model.entities << @zone_b
+    shared = face_at(@zone_a, 1004)
+    EXCLUDING.write(shared, "schema_version" => 1)
+    zones = [zone_reference(@zone_a), zone_reference(@zone_b)]
+    assert_equal "completed", invoke("ph_composer.zones.solve_adjacency", "zones" => zones)["status"]
+    assert_equal 1, faces_in(@zone_a).length
+    EXCLUDING.delete(shared)
+    result = invoke("ph_composer.zones.solve_adjacency", "zones" => zones)
+    assert_equal "completed", result["status"], result.inspect
+    assert_equal 2, faces_in(zone_group(1000)).length
+  end
+
+  # Identity maintenance is no envelope read: the stamp writer and Zone copy repair keep every member Face,
+  # excluded or not, in step with its Zone, so clearing the mark returns a Face that still names it.
+  def test_zone_stamp_writer_and_copy_repair_keep_an_excluded_member_in_step
     mark
     zone = Zones::Occurrences.zones(@model).find { |row| row.path == [1000] }
     members = Zones::Repair.send(:member_entries, zone).map { |entry| entry.fetch(:occurrence).path }
-    assert_empty(EXCLUDED.map { |path| path[1..-1] } & members)
-    old = Zones::STAMP_STORE.read(@overhang)
+    assert_equal EXCLUDED.map { |path| path[1..-1] }, EXCLUDED.map { |path| path[1..-1] } & members
     before = Zones::ZONE_STORE.read(@zone_a)
     Zones::UpdateZoneStep.new(:reference => zone_reference(@zone_a), :before => before,
                               :after => before.merge("level" => "L2")).apply(@model, {})
     assert_equal "L2", Zones::STAMP_STORE.read(face_at(@zone_a, 1001))["level"]
-    assert_equal old, Zones::STAMP_STORE.read(@overhang)
+    assert_equal "L2", Zones::STAMP_STORE.read(@overhang)["level"]
+    assert_equal "L2", Zones::STAMP_STORE.read(@fin_face)["level"]
+    assert_same @overhang, Zones::Occurrences.face_at(zone, [1010], :envelope => false).entity
   end
 
   # Funnel D: the Zones section's Room and its blocking face.unclassified, and the Faces section's projection.
@@ -249,13 +267,19 @@ class ZonesEnvelopeExclusionTest < PhComposerTestCase
   end
 
   # Classify and Solve retire the visible side of a pair whose other side has left the envelope, alone.
+  # The excluded side sits in a Group that is then marked and locked: the lock does not stop the visible side.
   def test_retiring_a_pair_leaves_an_excluded_counterpart_unwritten
+    partner = face_at(@zone_b, 2003)
+    @zone_b.entities.delete(partner)
+    holder = Sketchup::Group.new(2040, Sketchup::Entities.new([partner]))
+    @zone_b.entities << holder
     zones = [zone_reference(@zone_a), zone_reference(@zone_b)]
     invoke("ph_composer.zones.solve_adjacency", "zones" => zones)
     [@overhang, @fin_face].each { |face| EXCLUDING.write(face, "schema_version" => 1) }
     shared = face_at(@zone_a, 1004)
-    partner = face_at(@zone_b, 2003)
-    EXCLUDING.write(partner, "schema_version" => 1)
+    assert_equal "Surface", FACE_STORE.read(partner)["boundary_condition"]
+    EXCLUDING.write(holder, "schema_version" => 1)
+    holder.locked = true
     kept = FACE_STORE.read(partner)
     reference = zone_reference(@zone_a).merge("entity_path" => [1004], "entity_id" => FACE_STORE.read(shared)["id"])
     result = invoke("ph_composer.zones.faces.classify",
@@ -270,7 +294,7 @@ class ZonesEnvelopeExclusionTest < PhComposerTestCase
     retired = FACE_STORE.read(face_at(zone_group(1000), 1004))
     assert_nil retired["adjacency"]
     refute_equal "Surface", retired["boundary_condition"]
-    assert_equal kept, FACE_STORE.read(face_at(zone_group(2000), 2003))
+    assert_equal kept, FACE_STORE.read(face_at(face_at(zone_group(2000), 2040), 2003))
   end
 
   # The rule's edges, live and in the snapshot: a component's record excludes as a Group's does; a record on
@@ -366,6 +390,14 @@ class ZonesEnvelopeExclusionTest < PhComposerTestCase
     assert_equal ["shading.zone_inside"], findings.map { |row| row.fetch("code") }
     assert_includes findings.first.fetch("message"), "\"Neighbour\" at path [3000]"
     refute(findings.first.fetch("blocks_export"))
+    cutting = Sketchup::ComponentDefinition.new(Sketchup::Entities.new([Sketchup::Face.new(3101)]))
+    cutting.behavior.cuts_opening = true
+    rack = Sketchup::Group.new(3100, Sketchup::Entities.new([Sketchup::ComponentInstance.new(3102, cutting)]))
+    @model.entities << rack
+    PhComposer::Shading::Mark::STORE.write(rack, "schema_version" => 1)
+    findings = query("ph_composer.shading.export_preflight").dig("value", "findings")
+    assert_equal 2, findings.length
+    assert_includes findings.last.fetch("message"), "a cutting component, such as a Window"
   end
 
   private
@@ -426,6 +458,13 @@ class ZonesEnvelopeExclusionTest < PhComposerTestCase
     row.dig("reference", "zone_path") + row.dig("reference", "entity_path")
   end
 
+  # The Faces of `group` on the x = 5 m plane, facing +x: Zone A's shared wall and any piece cut from it.
+  def faces_in(group)
+    group.entities.grep(Sketchup::Face).select do |face|
+      FACE_STORE.read(face)&.fetch("face_type", nil) == "Wall" && face.normal.x.positive?
+    end
+  end
+
   def face_at(group, persistent_id)
     group.entities.to_a.find { |entity| entity.persistent_id == persistent_id }
   end
@@ -434,8 +473,8 @@ class ZonesEnvelopeExclusionTest < PhComposerTestCase
     { "zone_id" => Zones::ZONE_STORE.read(group).fetch("id"), "zone_path" => [group.persistent_id] }
   end
 
-  def box_group(base, x_min, x_max, letter)
-    faces = box_faces(x_min, x_max).each_with_index.map do |(face_type, normal, loop), index|
+  def box_group(base, x_min, x_max, letter, y_max = 4)
+    faces = box_faces(x_min, x_max, y_max).each_with_index.map do |(face_type, normal, loop), index|
       face = Sketchup::Face.new(base + index + 1, {}, :points => loop, :normal => Geom::Vector3d.new(*normal))
       FACE_STORE.write(face, "id" => format("fac_%<letter>s%<number>011d", :letter => letter, :number => index + 1),
                              "schema_version" => 1, "face_type" => face_type, "boundary_condition" => "Outdoors",
@@ -452,8 +491,8 @@ class ZonesEnvelopeExclusionTest < PhComposerTestCase
   end
 
   # Floor, roof and four walls, as 1..6 after `base`: x-min wall third, x-max wall fourth.
-  def box_faces(x_min, x_max)
-    x0, x1, y0, y1, z0, z1 = [x_min, x_max, 0, 4, 0, 3].map { |value| value * M }
+  def box_faces(x_min, x_max, y_max = 4)
+    x0, x1, y0, y1, z0, z1 = [x_min, x_max, 0, y_max, 0, 3].map { |value| value * M }
     [["Floor", [0, 0, -1], [pt(x0, y0, z0), pt(x0, y1, z0), pt(x1, y1, z0), pt(x1, y0, z0)]],
      ["RoofCeiling", [0, 0, 1], [pt(x0, y0, z1), pt(x1, y0, z1), pt(x1, y1, z1), pt(x0, y1, z1)]],
      ["Wall", [-1, 0, 0], [pt(x0, y0, z0), pt(x0, y0, z1), pt(x0, y1, z1), pt(x0, y1, z0)]],

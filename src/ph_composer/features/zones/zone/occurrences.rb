@@ -130,6 +130,23 @@ module PhComposer
         found
       end
 
+      # Every Face the Zone Group holds, its envelope or not: the members whose stamps and records identity
+      # maintenance keeps in step with the Zone (the stamp writer, Zone copy repair). No envelope read uses it.
+      def member_faces(zone)
+        found = []
+        walk_faces(zone.entity.entities, [], [], zone.transform, zone, found, :envelope => false)
+        found
+      end
+
+      # Whether a Face reference names a Face that has left its Zone's envelope, read without write checks, so a
+      # lock on the way does not hide it. A reference that does not resolve otherwise is not excluded.
+      def outside_envelope?(model, reference, index: nil)
+        resolve_face(model, reference, :allow_unassigned => true, :index => index)
+        false
+      rescue CodedError => error
+        error.code == "face.outside_envelope"
+      end
+
       # Whether the Face at the end of `inside` has left its Zone's envelope, so no Zone read, write or export
       # takes it as one of the Zone's Faces. `inside` runs from the first entity inside the Zone Group down to
       # the leaf, as `holding` returns it. Only a Face leaves the envelope: an Edge or a container is never
@@ -337,9 +354,10 @@ module PhComposer
       # One Face inside an already-resolved Zone occurrence, by path alone. Identity repair needs
       # this: the Zone id it is about to replace is duplicated, so the id-keyed resolver would
       # refuse the very ambiguity the repair exists to remove.
-      def face_at(zone, entity_path, mutable: false)
+      # `envelope: false` is identity maintenance's: it reaches a member Face that has left the envelope.
+      def face_at(zone, entity_path, mutable: false, envelope: true)
         path = integer_path(entity_path)
-        entity, transform, entities = resolve_face_path(zone, path, mutable)
+        entity, transform, entities = resolve_face_path(zone, path, mutable, :envelope => envelope)
         unless entity.is_a?(Sketchup::Face)
           raise_target("target.wrong_kind", "The occurrence does not resolve to a Face.")
         end
@@ -355,7 +373,7 @@ module PhComposer
       # refuses it and asks for it to be opened, which gives that placement its own definition. The
       # rule holds for any element at the end of the path; `noun` names it in the messages. A Face that has
       # left the Zone's envelope refuses `face.outside_envelope`, for reads and writes alike.
-      def resolve_face_path(zone, path, mutable, noun: "Face", children: nil)
+      def resolve_face_path(zone, path, mutable, noun: "Face", children: nil, envelope: true)
         current = zone.entity.entities
         transform = zone.transform
         entity = nil
@@ -386,7 +404,7 @@ module PhComposer
           end
           transform *= entity.transformation
         end
-        if envelope_excluded?(inside)
+        if envelope && envelope_excluded?(inside)
           raise_target("face.outside_envelope", "That Face is not part of the Zone's envelope.")
         end
         # A locked container at the end of the path refuses a write to itself, as one above it does.
@@ -494,11 +512,11 @@ module PhComposer
 
       # `containers` are the Groups and components from inside the Zone down to `entities`, so each Face's
       # `inside` list is `containers + [face]`.
-      def walk_faces(entities, path, containers, transform, zone, found)
+      def walk_faces(entities, path, containers, transform, zone, found, envelope: true)
         entities.each do |entity|
           child_path = path + [entity.persistent_id]
           if entity.is_a?(Sketchup::Face)
-            next if envelope_excluded?(containers + [entity])
+            next if envelope && envelope_excluded?(containers + [entity])
 
             found << FaceOccurrence.new(:entity => entity, :zone => zone, :path => child_path,
                                         :transform => transform, :entities => entities)
@@ -507,7 +525,7 @@ module PhComposer
 
             child_entities = entity.is_a?(Sketchup::Group) ? entity.entities : entity.definition.entities
             walk_faces(child_entities, child_path, containers + [entity], transform * entity.transformation, zone,
-                       found)
+                       found, :envelope => envelope)
           end
         end
       end

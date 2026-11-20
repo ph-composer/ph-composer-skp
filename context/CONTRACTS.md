@@ -761,8 +761,8 @@ as Zones' `holding` returns it) carries an excluding store's record and none is 
 ("Zones geometry rules", "Envelope exclusion").
 
 `ph_composer.shading.export_preflight` answers non-blocking notes in `Export::PREFLIGHT_RESULT`:
-`shading.zone_inside` names each marked Group or component that is a Zone, holds one or holds a claimed
-object, which the mark does not reach. Until the Shades export section lands, the aggregate export preflight
+`shading.zone_inside` names each marked Group or component that is a Zone, holds one, holds a claimed
+object or holds a cutting component such as a Window Unit, which the mark does not reach. Until the Shades export section lands, the aggregate export preflight
 does not read it.
 
 **Containment.** `ph_composer.zones.containment` answers, for each root-to-entity path, the Zone
@@ -902,15 +902,17 @@ so a record on the Zone Group or above it never reaches the Zone's Faces. Only a
 container beside it reads its Zone as before. The rule is applied in four places, and every Zones read and
 write goes through one of them: the Face walk (`walk_faces`, behind `faces`, `Zones::Index`, faces.list
 and faces.all, Suggest classification, the unclassified rows, the Zones view's counts, Colour-by, Solve's
-candidates and cuts, the stamp writer and Zone copy repair), the point read (`holding`, behind the Classify
+candidates and cuts), the point read (`holding`, behind the Classify
 tool, the selection read, `faces.host_context` and `zones.containment`, which answers `outside_envelope`),
 the reference resolve (`resolve_face_path`, which refuses `face.outside_envelope` for reads and writes
 alike, without saying why) and the export snapshot (`ExportProjection.zone_faces`,
 `envelope_excluded?` and `outside_envelope?`, behind the Zones and Faces sections). An excluded Face that
 still carries a Face record (classified before a Group above it was marked) stays in the Model and leaves
 the export; a Surface partner pointing at it is omitted as `adjacency.unresolved`. Spaces' candidate Faces
-read the foundation check themselves. Face-record id inventories and Restore offers are not envelope reads
-and do not apply it: a Face stamped before it was excluded keeps its stamp.
+read the foundation check themselves. Identity maintenance is not an envelope read: the stamp writer and
+Zone copy repair walk every member Face (`Occurrences.member_faces`), so an excluded Face's stamp and record
+stay in step with its Zone and it rejoins the envelope intact when the mark is cleared. Face-record id
+inventories and Restore offers do not apply the check either.
 
 **Clear classification.** `ph_composer.zones.faces.clear_classification` removes the records of explicit
 classified Faces in one Undo step, so each reads as never classified; the Zone stamp stays. It refuses

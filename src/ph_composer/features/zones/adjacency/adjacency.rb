@@ -105,10 +105,12 @@ module PhComposer
       # must each identify one live occurrence, and the normal mutable resolver checks its actual
       # path before the proposal uses it. Geometry never selects a candidate.
       def retirement_endpoint(model, reference, index, authored_face_counts)
+        # An endpoint that has left its Zone's envelope is no Zone Face, whatever locks it: the other side
+        # retires alone.
+        return nil if Occurrences.outside_envelope?(model, reference, :index => index)
+
         Occurrences.resolve_face(model, reference, :mutable => true, :index => index)
       rescue CodedError => error
-        # An endpoint that has left its Zone's envelope is no Zone Face: the other side retires alone.
-        return nil if error.code == "face.outside_envelope"
         raise unless %w[target.changed target.not_found target.wrong_kind].include?(error.code)
 
         zones = index.zones.select { |zone| zone.record.fetch("id") == reference.fetch("zone_id") }
@@ -405,11 +407,9 @@ module PhComposer
 
       # The counterpart occurrence for writing, or nil when it has left its Zone's envelope.
       def envelope_counterpart(model, reference, index)
-        Occurrences.resolve_face(model, reference, :mutable => true, :index => index)
-      rescue CodedError => error
-        raise unless error.code == "face.outside_envelope"
+        return nil if Occurrences.outside_envelope?(model, reference, :index => index)
 
-        nil
+        Occurrences.resolve_face(model, reference, :mutable => true, :index => index)
       end
       private_class_method :envelope_counterpart
 

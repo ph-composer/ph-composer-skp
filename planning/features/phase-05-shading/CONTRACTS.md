@@ -107,7 +107,7 @@ P5s-03 bound the seam into `context/CONTRACTS.md`, "Zones geometry rules", "Enve
 now its authority. Departures from the table below: funnel B answers the new reason `outside_envelope`;
 funnel C refuses with a new Zones code, `face.outside_envelope`, not `target.wrong_kind` (step 2 asks for a
 Zones code that does not say why); the check applies to Face leaves only, so `resolve_element` and
-`containment` keep reading an Edge's Zone. Restore offers stay exempt: tagging writes nothing to Zones'
+`containment` keep reading an Edge's Zone. The stamp writer and Zone copy repair walk every member Face (`Occurrences.member_faces`), excluded or not, so a Face rejoins its Zone intact when the mark is cleared. Restore offers stay exempt: tagging writes nothing to Zones'
 stamp, and a Face stamped before it was tagged is offered with its Zone and stays shading by its own mark.
 Assign takes a Group inside a Zone that holds classified Faces, so an excluded Face can keep a Face record:
 it stays in the Model, leaves the export, and its Surface partner is omitted as `adjacency.unresolved`.

@@ -11,7 +11,7 @@ module PhComposer
         "shading.inherited" => "Clear named an entity that is shading through a marked Group or component above " \
                                "it; the message names that one.",
         "shading.zone_inside" => "Preflight note: a marked Group or component is a Zone, holds one or holds " \
-                                 "another feature's object, which the mark does not reach.",
+                                 "another feature's object or a cutting component, which the mark does not reach.",
         "shading.cutting_component" => "The entity is a cutting component or inside one; export does not read its " \
                                        "Faces."
       }.freeze
