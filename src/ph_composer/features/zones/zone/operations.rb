@@ -195,9 +195,19 @@ module PhComposer
       zones = Occurrences.zones(request.model)
       duplicates = duplicate_ids(zones)
       counts = zones.map { |zone| zone.record.fetch("id") }.tally
-      overview(request.model, zones.map { |zone|
-                                zone_view(zone, duplicates.include?(zone.record.fetch("id")), request, counts)
-                              })
+      rows = zones.map { |zone| zone_view(zone, duplicates.include?(zone.record.fetch("id")), request, counts) }
+      overview(request.model, rows).merge("building_segments" => segment_sums(rows))
+    end
+
+    # Each Building Segment's Face area over its Zone occurrences, keyed as a Zone names its Segment: the id, a
+    # legacy Zone's Segment name, or "" for Zones in no Building Segment.
+    def segment_sums(rows)
+      rows.group_by { |row| row.fetch("values").fetch("building_segment_id") { row.dig("values", "building_segment") } }
+          .map do |key, members|
+        { "key" => key.to_s, "zone_count" => members.length,
+          "face_area_m2" => members.sum(0.0) { |row| row.fetch("face_area_m2") },
+          "unclassified_face_area_m2" => members.sum(0.0) { |row| row.fetch("unclassified_face_area_m2") } }
+      end
     end
 
     def overview(model, rows)
@@ -435,7 +445,7 @@ module PhComposer
 
       "found"
     end
-    private_class_method :zone_view, :validate_make_target!, :make_zone_shape?, :zone_state, :overview, :duplicate_ids,
-                         :project_row, :independence, :retired_pairs, :plan_refusal
+    private_class_method :zone_view, :validate_make_target!, :make_zone_shape?, :zone_state, :overview, :segment_sums,
+                         :duplicate_ids, :project_row, :independence, :retired_pairs, :plan_refusal
   end
 end

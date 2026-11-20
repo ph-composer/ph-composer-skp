@@ -35,6 +35,9 @@ module PhComposer
             portable = record.fetch("choice_evidence")[field]
             return nil unless portable
 
+            # A Building Segment is adopted from its values alone: its settings stay in the Model it came from.
+            portable = portable.slice(*Options::SEGMENT_EVIDENCE) if collection == "building_segment"
+
             key = "copied:#{collection}:#{CanonicalJson.digest([record.dig('choice_evidence', 'source_model_id'),
                                                                 portable])}"
           end

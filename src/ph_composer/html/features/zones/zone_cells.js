@@ -1,5 +1,6 @@
-/* Name and Ground depth retain the shared inline drafts. Segment and Level assignments are guarded
-   stable-ID selects. Legacy/missing choices open explicit adoption instead of accepting category text.
+/* Name and Ground depth retain the shared inline drafts. The Level assignment is a guarded stable-ID select; a
+   Zone's Building Segment is the heading row it sits under (segment_rows.js). Legacy/missing choices open
+   explicit adoption instead of accepting category text.
 
    No refusal leaves the screen behind an invisible draft. A refused choice wrote nothing, so the select
    returns to the Model's value and keeps the reason as a diagnostic; nothing is held. A choice the Model
@@ -10,7 +11,7 @@ PhComposerUI.define("features/zones/zone_cells", ["record_edits", "fields", "uni
   "features/zones/zone_options"], function (RecordEdits, fields, units, ui, requests, options) {
   "use strict";
   var GROUND_DEPTH = fields.with(fields.LENGTH_MM, { label: "Ground depth", scope: "ph_composer.zones.ground_depth" });
-  var COLUMNS = [["building_segment", "Building-Segment"], ["level", "Level"], ["ground_depth_mm", "Ground depth"]];
+  var COLUMNS = [["level", "Level"], ["ground_depth_mm", "Ground depth"]];
   var HELD = { differs: "The Model differs from this choice. Cancel, or choose again.",
     changed: "Changed in the Model. Cancel, or choose again." };
   // The resolver's text names the duplicated id; the user needs the route out. Codes stay the contract.
@@ -102,7 +103,7 @@ PhComposerUI.define("features/zones/zone_cells", ["record_edits", "fields", "uni
       }, this);
   };
   ZoneCells.prototype.render = function (td, row, field) {
-    if (field !== "building_segment" && field !== "level") return this.edits.render(td, row, field);
+    if (field !== "level") return this.edits.render(td, row, field);
     if (!row.record.zone) return false;
     var self = this, zone = row.record.zone, id = options.value(zone, field);
     var key = row.key + ":" + field, cell = this.cells[key];
@@ -126,7 +127,7 @@ PhComposerUI.define("features/zones/zone_cells", ["record_edits", "fields", "uni
       if (!adopt) adopt = td._zoneAdopt = ui.button("", function () { self.manage(field); });
       adopt.textContent = options.label(this.options, zone, field);
       adopt.className = "phc-enum-pill phc-zone-adoption";
-      adopt.setAttribute("aria-label", row.record.name + " " + (field === "level" ? "Level" : "Building-Segment"));
+      adopt.setAttribute("aria-label", row.record.name + " Level");
       ui.tooltip(adopt, "Read only. Adopt managed options to assign " + options.title(field) + ".");
       options.paint(adopt, options.colour(this.options, zone, field));
       if (adopt.parentNode !== td) td.replaceChildren(adopt); return true;
@@ -150,14 +151,12 @@ PhComposerUI.define("features/zones/zone_cells", ["record_edits", "fields", "uni
       choice.values.name]; }));
     if (signature !== cell.signature) {
       cell.input.replaceChildren();
-      if (field === "level") cell.input.appendChild(ui.option("", "Not set"));
+      cell.input.appendChild(ui.option("", "Not set"));
       options.list(this.options, field).forEach(function (choice) { cell.input.appendChild(ui.option(choice.id,
         choice.values.name)); });
-      // A Zone in no Building Segment shows it, last, as the Segment groups will.
-      if (field === "building_segment") cell.input.appendChild(ui.option("", "No Building Segment"));
       cell.signature = signature;
     }
-    cell.input.setAttribute("aria-label", row.record.name + " " + (field === "level" ? "Level" : "Building-Segment"));
+    cell.input.setAttribute("aria-label", row.record.name + " Level");
     ui.paintIconButton(cell.cancel, "Cancel " + cell.input.getAttribute("aria-label") + " choice", "clear");
     cell.input.disabled = this.channel.busy() || Boolean(this.guard && this.guard()) || gated(zone);
     cell.input.setAttribute("aria-busy", String(this.pending === cell));

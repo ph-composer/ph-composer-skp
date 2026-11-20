@@ -93,7 +93,10 @@ module PhComposer
         "net_volume_m3" => Shapes.quantity("m3", "Summed net volume.")
       }.freeze
       BUILDING_SEGMENT_ROW = Shapes.object({ "key" => Shapes::TEXT, "name" => { "type" => %w[string null] },
-                                             "zone_count" => Shapes::COUNT }.merge(TOTAL_PROPERTIES))
+                                             "zone_count" => Shapes::COUNT }
+                                           .merge(TOTAL_PROPERTIES)
+                                           .merge("airflows" => ZONE_ROW.dig("properties", "airflows"),
+                                                  "inheriting_count" => Shapes::COUNT))
       STRAY = Shapes.with(FINDING, "reference" => { "type" => "object",
                                                     "description" => "The misplaced record's reference." })
       ALL_RESULT = Shapes.object({

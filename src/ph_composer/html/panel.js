@@ -720,11 +720,35 @@ PhComposerUI.define("panel", ["unit_preferences", "workspace", "table_views", "r
     return profileMoved;
   }
 
+  /* Building Segment settings sections, by namespace (context/EXTENSIBILITY.md, "Building Segment settings").
+     A feature that stores settings on a Building Segment registers one section for its namespace; the Zones
+     tab's settings dialog lists them by `order` after its own General section, and Save sends the
+     `collect(draft)` of each one the user changed as that namespace's payload. `readOnly` sections render and
+     collect nothing. */
+  var settingsSections = [];
+  function segmentSettingsSection(namespace, spec) {
+    if (!namespace || !spec || !spec.title || typeof spec.render !== "function") {
+      throw new Error("A Building Segment settings section needs a namespace, a title and render.");
+    }
+    if (!spec.readOnly && typeof spec.collect !== "function") {
+      throw new Error("Settings section " + namespace + " collects nothing: give it collect, or readOnly.");
+    }
+    if (settingsSections.some(function (entry) { return entry.namespace === namespace; })) {
+      throw new Error("Duplicate Building Segment settings section " + namespace + ".");
+    }
+    settingsSections.push(Object.assign({}, spec, { namespace: namespace }));
+  }
+
   var worked = [];
   api = { receive: receive, section: section, region: region, inspectorHeld: inspectorHeld, ready: ready,
     state: state, showTab: showTab, navigate: navigate,
     send: send,
     setPreference: setPreference, repaint: repaint, notify: notify, withdraw: withdraw, outcomeText: outcomeText,
+    segmentSettingsSection: segmentSettingsSection,
+    // The registered sections, in order.
+    segmentSettingsSections: function () {
+      return settingsSections.slice().sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
+    },
     // `guard(tab)` answers why the tab may not change, or null; `refused`, when given, runs after a
     // refusal is shown, so a section can point the user at the work that holds the tab.
     navigationGuard: function (name, guard, refused) { navigationGuards[name] = { guard: guard, refused: refused }; },

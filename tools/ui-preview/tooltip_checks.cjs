@@ -40,7 +40,7 @@ check({ name: "tooltip", output }, async ({ newPage, step }) => {
     await hint(page.getByRole("button", { name: "Solve adjacencies for checked Zones", exact: true }),
       "Only fully checked Zones are solved, including those hidden by filters. Check touching neighbours too.");
     await page.screenshot({ path: path.join(output, "tooltip-toolbar.png") });
-    const resize = page.getByRole("separator", { name: "Resize Building-Segment column", exact: true });
+    const resize = page.getByRole("separator", { name: "Resize Level column", exact: true });
     await resize.focus();
     await tip.waitFor();
     assert.equal(await tip.innerText(), "Drag to resize. Use Left or Right Arrow; Enter resets.");

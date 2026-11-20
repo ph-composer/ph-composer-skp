@@ -234,11 +234,16 @@ module PhComposer
       # The Zone rows, and the sums per Building-Segment and for the Model, over every Space whatever
       # page a list returns. A Space outside every Zone counts toward the Model only. The Symbol key marks
       # the Zone rows' BuildingSegment as internal: it groups the sums here and is left out of the read.
+      # A Segment's airflows sum its Zones' as a Zone's sum its Spaces': null while any Space inherits.
       def totals(rows, zones)
         segments = zones.group_by { |zone| zone.fetch(:building_segment).key }.map do |key, members|
+          inheriting = members.sum { |zone| zone.fetch("inheriting_count") }
+          flows = AIRFLOWS.to_h do |field|
+            [field, inheriting.zero? ? members.sum { |zone| zone.fetch("airflows").fetch(field) } : nil]
+          end
           { "key" => key.to_s, "name" => members.first.fetch(:building_segment).name,
             "zone_count" => members.length }
-            .merge(Metrics.sums(members, Metrics::TOTALS))
+            .merge(Metrics.sums(members, Metrics::TOTALS)).merge("airflows" => flows, "inheriting_count" => inheriting)
         end
         { "zones" => zones.map { |zone| zone.reject { |key, _value| key == :building_segment } },
           "building_segments" => segments,

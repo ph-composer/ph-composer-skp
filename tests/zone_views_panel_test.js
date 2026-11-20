@@ -125,7 +125,7 @@ test("switching shows the other view's columns and rows, sends nothing to the Mo
   assert.strictEqual(collapse.disabled, true, "nothing opens, so nothing collapses");
   var surface = p.section().querySelectorAll(".phc-zone-view").filter(function (node) { return !node.hidden; })[0];
   assert.deepStrictEqual(surface.querySelectorAll("td").filter(function (td) {
-    return /col-(gross|unclassified)_m2/.test(td.className);
+    return /col-(gross|unclassified)_m2/.test(td.className) && td.parentNode.getAttribute("data-row-key");
   }).map(function (td) { return td.textContent; }), ["20", "8"]);
   assert.strictEqual(surface.querySelectorAll("input").filter(function (node) {
     return node.classList.contains("row-check");
@@ -335,7 +335,9 @@ test("a view's own column sorts the Zone rows by the value it gives", function (
   p.panel.receive({ type: "panel.snapshot", payload: state });
   function names() {
     return p.section().querySelectorAll(".phc-zone-view").filter(function (node) { return !node.hidden; })[0]
-      .querySelectorAll("td").filter(function (td) { return /col-gross_m2/.test(td.className); })
+      .querySelectorAll("td").filter(function (td) {
+        return /col-gross_m2/.test(td.className) && td.parentNode.getAttribute("data-row-key");
+      })
       .map(function (td) { return td.textContent; });
   }
   assert.deepStrictEqual(names(), ["20", "5"]);
@@ -486,7 +488,7 @@ test("a finding that belongs to no Zone row shows below the table in the read's 
 test("a Zone filter on a column the next view does not show leaves with the view that shows it", function () {
   var p = page();
   p.panel.receive({ type: "panel.snapshot", payload: snapshot() });
-  var menu = byLabel(p, "Building-Segment column menu");
+  var menu = byLabel(p, "Level column menu");
   click(menu);
   var box = menu.parentNode.querySelectorAll("input").filter(function (node) { return node.type === "checkbox"; })[0];
   box.checked = false; box.listeners.change({});
@@ -526,18 +528,18 @@ test("a view's filter column has a menu without sorting, and its Zone predicate 
 
 test("a Zone filter set while its column was shown elsewhere replaces an older one held by a view", function () {
   var p = page({ example: false });
-  var probe = { id: "example.segments", label: "Segments", order: 97, sections: ["ph_composer.zones.overview"],
-    zoneFields: ["building_segment"], hiddenColumns: { building_segment: true },
-    optionalColumns: [["building_segment", "Building-Segment"]] };
+  var probe = { id: "example.levels", label: "Levels", order: 97, sections: ["ph_composer.zones.overview"],
+    zoneFields: ["level"], hiddenColumns: { level: true }, optionalColumns: [["level", "Level"]] };
   p.modules.table_views.register("ph_composer.zones", probe);
   var state = snapshot(), zones = state.sections["ph_composer.zones.overview"].value.zones;
   var second = JSON.parse(JSON.stringify(zones[0]));
   second.reference = { zone_id: "zon_b", zone_path: [300] }; second.id = "zon_b";
-  second.values.name = "Zone 2"; second.values.building_segment = "annex";
+  zones[0].values.level = "ground";
+  second.values.name = "Zone 2"; second.values.level = "upper";
   zones.push(second);
   p.panel.receive({ type: "panel.snapshot", payload: state });
   function keep(label) {
-    var menu = byLabel(p, "Building-Segment column menu");
+    var menu = byLabel(p, "Level column menu");
     click(menu);
     menu.parentNode.querySelectorAll("input").filter(function (node) { return node.type === "checkbox"; })
       .forEach(function (box) {
@@ -547,21 +549,21 @@ test("a Zone filter set while its column was shown elsewhere replaces an older o
     p.context.document.activeElement && p.context.document.activeElement.blur();
   }
   function count() { return p.section().querySelector(".phc-view-count").textContent; }
-  keep("house");
-  click(tab(p, "Segments"));
+  keep("ground");
+  click(tab(p, "Levels"));
   var options = byLabel(p, "Columns");
   click(options);
   click(options.parentNode.querySelectorAll(".phc-action-menu-item").filter(function (node) {
-    return node.textContent === "Building-Segment";
+    return node.textContent === "Level";
   })[0]);
-  keep("annex");
+  keep("upper");
   assert.strictEqual(count(), "1 of 2 Zones · 1 filter");
   click(tab(p, "Geometry"));
   var names = p.section().querySelectorAll(".phc-zone-view").filter(function (node) { return !node.hidden; })[0]
     .querySelectorAll("[data-row-key]").filter(function (node) { return !node.hidden; })
     .map(function (node) { return JSON.parse(node.getAttribute("data-row-key")); })
     .filter(function (key) { return key[0] === "Zone"; }).map(function (key) { return key[1][0]; });
-  assert.deepStrictEqual(names, [300], "the filter last set, to annex, is the one in force");
+  assert.deepStrictEqual(names, [300], "the filter last set, to upper, is the one in force");
 });
 
 test("a leading column is the view's own for header and menu hooks", function () {

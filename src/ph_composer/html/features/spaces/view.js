@@ -346,6 +346,23 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
       } }
   ];
 
+  /* A Building Segment's heading sums its Zones as the Spaces read does: areas and volume, and airflows shown
+     only while no Space in it inherits its Zone's. */
+  function segmentSums(vs, group) {
+    var read = snapshot.value(vs.host.snapshot, SECTION) || {};
+    var sums = (read.building_segments || []).filter(function (row) { return row.key === group.key; })[0];
+    if (!sums) return {};
+    var shown = {};
+    ["floor_area_m2", "weighted_area_m2", "net_volume_m3"].forEach(function (field) {
+      shown[field] = format({ value: sums[field] }, field);
+    });
+    AIRFLOWS.forEach(function (airflow) {
+      var field = airflow[0];
+      shown[field] = sums.inheriting_count ? "—" : format({ value: (sums.airflows || {})[field] }, field);
+    });
+    return shown;
+  }
+
   function count(vs) {
     var total = vs.spaces.length;
     return total + (total === 1 ? " Space" : " Spaces");
@@ -354,11 +371,10 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
   var VIEW = {
     id: "ph_composer.spaces", label: "Spaces", order: 20, sections: [SECTION], tiers: 3,
     placeholder: "Zone, number or name",
-    // Building-Segment and Level stay available from the Columns menu; Ground depth is the Faces view's.
-    zoneFields: ["building_segment", "level"],
-    hiddenColumns: { building_segment: true, level: true, net_area_factor: true },
-    optionalColumns: [["building_segment", "Building-Segment"], ["level", "Level"],
-      ["net_area_factor", "Net area factor"]],
+    // Level stays available from the Columns menu; Ground depth is the Faces view's.
+    zoneFields: ["level"],
+    hiddenColumns: { level: true, net_area_factor: true },
+    optionalColumns: [["level", "Level"], ["net_area_factor", "Net area factor"]],
     sorted: SORTED,
     // Four tree levels, each indented, with a chevron and a finding marker, need a wider Hierarchy column.
     widths: { hierarchy: 124, number: 64, floor_area_m2: 104, weighting_factor: 132, weighted_area_m2: 132,
@@ -398,7 +414,7 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
     headerAction: function (vs, field, label) { return field === "weighting_factor" ? vs.paint.header(label) : null; },
     zoneRecord: zoneRecord, extraRows: extraRows, children: children,
     leadingColumns: leadingColumns, columns: columns, value: value, decorate: decorate, zoneMarker: marker,
-    sortValue: sortValue, sort: sort, search: search, queryMatch: queryMatch, count: count,
+    sortValue: sortValue, sort: sort, search: search, queryMatch: queryMatch, count: count, segmentSums: segmentSums,
     colourBy: COLOUR_BY,
     menus: MENUS,
     filteredFields: { weighting_factor: true },

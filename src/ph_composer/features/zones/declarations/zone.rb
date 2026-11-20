@@ -104,12 +104,17 @@ module PhComposer
                                                           "or null when the selection cannot become a Zone."),
         "restorable" => Shapes.list(RESTORABLE),
         "findings" => Shapes.list(FINDING),
+        "building_segments" => Shapes.list(Shapes.object({
+          "key" => { "type" => "string", "description" => "The Segment's id, a legacy Zone's Segment name, or an " \
+                                                          "empty string for Zones in no Building Segment." },
+          "zone_count" => Shapes::COUNT, "face_area_m2" => AREA_TOTAL, "unclassified_face_area_m2" => AREA_TOTAL
+        }), :description => "Each Building Segment's Face area over its Zone occurrences."),
         "units" => Shapes.object({ "ground_depth_mm" => { "type" => "string", "enum" => ["mm"] },
                                    "face_area_m2" => { "type" => "string", "enum" => ["m2"] },
                                    "unclassified_face_area_m2" => { "type" => "string", "enum" => ["m2"] } })
       }).freeze
       LIST_RESULT = Shapes.object(
-        ALL_RESULT.fetch("properties").merge(
+        ALL_RESULT.fetch("properties").reject { |key, _value| key == "building_segments" }.merge(
           "zones" => Shapes.list(PROJECTED_ZONE_ROW, :description => "One page of Zone occurrences in path order."),
           "restorable_total" => Pages::TOTAL.merge("description" => "With overview summary: how many restore offers."),
           "finding_total" => Pages::TOTAL.merge("description" => "With overview summary: how many Zone findings."),

@@ -1,0 +1,153 @@
+/* Building Segment heading rows and the settings dialog in the real panel with synthetic data
+   (context/EXTENSIBILITY.md, "Zone views" and "Building Segment settings"): headings in Geometry and Spaces at every panel size, New Building Segment and its name in
+   place, moving a checked Zone from the selection bar, Delete with a destination, a long name, and the settings
+   dialog with the development Note section (tools/examples/zones/example_segment_note.js). The preview host
+   answers the writes; native transactions and Undo remain SketchUp acceptance gates. */
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
+const { PANEL_SIZES, setPanelSize, paneFacts, assertPaneFits } = require("./support/pane_fit.cjs");
+const { check } = require("./support/browser_evidence.cjs");
+const BASE = `http://127.0.0.1:${process.env.UI_PREVIEW_PORT || "8765"}/tools/ui-preview/`;
+const output = process.env.PH_COMPOSER_PREVIEW_EVIDENCE || fs.mkdtempSync(path.join(os.tmpdir(), "phc-segments-"));
+fs.mkdirSync(output, { recursive: true });
+
+const shownTable = ".phc-zone-view:not([hidden])";
+
+function heading(page, name) {
+  return page.locator(`${shownTable} tr.is-heading`).filter({
+    has: page.locator(".phc-segment-name", { hasText: new RegExp(`^${name}$`) }) });
+}
+
+async function headings(page) {
+  return page.locator(`${shownTable} tr.is-heading:not([hidden]) .phc-segment-name`).allTextContents();
+}
+
+function invokes(page) {
+  return page.evaluate(() => window.previewHost.sent.filter(message => message.type === "action.invoke")
+    .map(message => message.payload.name));
+}
+
+check({ name: "segment_rows", output }, async ({ newPage, step }) => {
+  const page = await newPage({ viewport: { width: 1280, height: 800 } });
+  page.setDefaultTimeout(5000);
+  step("open the zone options fixture: House (default, two Zones) and Annex (empty)");
+  await page.goto(`${BASE}?fixture=zoneoptions`);
+  await page.getByRole("heading", { name: "Zones", exact: true }).waitFor();
+  assert.deepEqual(await headings(page), ["Annex", "House"]);
+  assert.deepEqual(await heading(page, "House").locator(".phc-segment-tag").allTextContents(), ["Default"]);
+  assert.equal(await page.locator(`${shownTable} th`, { hasText: "Building" }).count(), 0, "no Segment column");
+
+  step("headings at every panel size, Geometry and Spaces");
+  for (const [width, height] of PANEL_SIZES) {
+    await setPanelSize(page, width, height);
+    const facts = await paneFacts(page, { floating: [] });
+    assert.equal(facts.sideways, false, `the Zones pane scrolls sideways at ${width} x ${height}`);
+    await page.screenshot({ path: path.join(output, `geometry-headings-${width}.png`) });
+  }
+  await setPanelSize(page, 1280, 800);
+  await page.getByRole("tab", { name: "Spaces", exact: true }).click();
+  assert.deepEqual(await headings(page), ["Annex", "House"]);
+  await page.screenshot({ path: path.join(output, "spaces-headings-1280.png") });
+  await page.getByRole("tab", { name: "Geometry", exact: true }).click();
+
+  step("a heading's actions show on hover; Delete holds on the last Segment");
+  const house = heading(page, "House");
+  await house.hover();
+  await house.getByRole("button", { name: "Settings for House", exact: true }).waitFor();
+  await house.getByRole("button", { name: "Delete House", exact: true }).waitFor();
+  await page.screenshot({ path: path.join(output, "heading-actions.png") });
+
+  step("New Building Segment opens its name in place; Enter renames it");
+  await page.getByRole("button", { name: "New Building Segment", exact: true }).click();
+  const name = page.getByRole("textbox", { name: "Building Segment name", exact: true });
+  await name.waitFor();
+  assert.equal(await name.inputValue(), "Building Segment 3");
+  assert.equal(await name.evaluate(node => node === document.activeElement), true, "the name has focus");
+  await page.screenshot({ path: path.join(output, "new-segment-name.png") });
+  await name.fill("Garage");
+  await name.press("Enter");
+  await heading(page, "Garage").waitFor();
+  assert.deepEqual(await headings(page), ["Annex", "Garage", "House"]);
+
+  step("a checked Zone moves from the selection bar");
+  await page.getByRole("checkbox", { name: "Check Living Zone", exact: true }).check();
+  const move = page.getByRole("combobox", { name: "Building Segment for checked Zones", exact: true });
+  await move.waitFor();
+  assertPaneFits(await paneFacts(page), "the Geometry bar with a Building Segment");
+  await page.screenshot({ path: path.join(output, "bar-move.png") });
+  const garageId = await page.evaluate(() => window.previewHost.zoneOptions.building_segments
+    .filter(entry => entry.values.name === "Garage")[0].id);
+  await move.selectOption(garageId);
+  await page.waitForFunction(id => window.previewHost.zones
+    .filter(zone => zone.values.name === "Living Zone")[0].values.building_segment_id === id, garageId);
+  assert.equal(await heading(page, "Garage").count(), 1);
+
+  step("Delete names where the Zones go and sends that destination");
+  const garage = heading(page, "Garage");
+  await garage.hover();
+  await garage.getByRole("button", { name: "Delete Garage", exact: true }).click();
+  const confirm = page.getByRole("dialog", { name: "Delete Garage?", exact: true });
+  await confirm.waitFor();
+  await confirm.getByRole("combobox").selectOption({ label: "No Building Segment" });
+  assert.match(await confirm.locator(".phc-segment-consequence").innerText(), /left out of export/);
+  await page.screenshot({ path: path.join(output, "delete-destination.png") });
+  await confirm.getByRole("button", { name: "Delete", exact: true }).click();
+  await heading(page, "No Building Segment").waitFor();
+  assert.deepEqual(await headings(page), ["Annex", "House", "No Building Segment"], "No Building Segment is last");
+  assert.equal(await heading(page, "No Building Segment").locator("td.col-name").evaluate(node =>
+    getComputedStyle(node).color !== getComputedStyle(node.closest("tr").nextElementSibling.querySelector("td.col-name")).color),
+  true, "the No Building Segment heading is muted");
+
+  step("the settings dialog: General and the registered Note section, Save held by a problem");
+  await house.hover();
+  await house.getByRole("button", { name: "Settings for House", exact: true }).click();
+  const settings = page.getByRole("dialog", { name: "Building Segment settings", exact: true });
+  await settings.waitFor();
+  assert.deepEqual(await settings.locator("h3").allTextContents(), ["General", "Note"]);
+  assert.equal(await settings.getByRole("checkbox", { name: "New Zones join this Segment", exact: true }).isDisabled(), true);
+  const save = settings.getByRole("button", { name: "Save", exact: true });
+  assert.equal(await save.isDisabled(), false, "an untouched section holds nothing");
+  await settings.getByRole("textbox", { name: "Note text", exact: true }).fill(" ");
+  assert.equal(await save.isDisabled(), true, "a blank note holds Save");
+  assert.match(await settings.locator(".phc-form-status").innerText(), /Note: Enter a note\./);
+  for (const [width, height] of PANEL_SIZES) {
+    await setPanelSize(page, width, height);
+    assert(await settings.evaluate(node => {
+      const box = node.getBoundingClientRect(), actions = node.querySelector(".phc-dialog-actions").getBoundingClientRect();
+      return node.scrollWidth <= node.clientWidth && box.right <= innerWidth && actions.bottom <= box.bottom;
+    }), `the settings dialog fits at ${width} x ${height}`);
+    await page.screenshot({ path: path.join(output, `settings-${width}.png`) });
+  }
+  await setPanelSize(page, 1280, 800);
+  const before = (await invokes(page)).length;
+  await settings.press("Escape");
+  await settings.waitFor({ state: "detached" });
+  assert.equal((await invokes(page)).length, before, "Escape writes nothing");
+  await house.hover();
+  await house.getByRole("button", { name: "Settings for House", exact: true }).click();
+  await settings.getByRole("textbox", { name: "Note text", exact: true }).fill("North wing");
+  await settings.getByRole("textbox", { name: "Name", exact: true }).fill("Main house");
+  await settings.getByRole("button", { name: "Save", exact: true }).click();
+  await settings.waitFor({ state: "detached" });
+  const saved = await page.evaluate(() => window.previewHost.zoneOptions.building_segments
+    .filter(entry => entry.id === "bsg_house")[0]);
+  assert.equal(saved.values.name, "Main house");
+  assert.deepEqual(saved.extension_data["example.segment.note"].payload, { text: "North wing" });
+
+  step("a long name is cut in its cell and whole in its tooltip");
+  const long = "Residential tower with retail podium and below-grade parking, phase two";
+  await page.evaluate(text => { window.previewHost.zoneOptions.building_segments[1].values.name = text;
+    window.previewHost.snapshot(); }, long);
+  for (const [width, height] of [[1280, 800], [360, 520]]) {
+    await setPanelSize(page, width, height);
+    const label = heading(page, long).locator(".phc-segment-name");
+    assert(await label.evaluate(node => node.scrollWidth > node.clientWidth &&
+      getComputedStyle(node).textOverflow === "ellipsis"), `the long name is cut at ${width}`);
+    assert.equal(await label.getAttribute("data-tooltip"), long);
+    assert.equal((await paneFacts(page, { floating: [] })).sideways, false, `no sideways scroll at ${width}`);
+    await page.screenshot({ path: path.join(output, `long-name-${width}.png`) });
+  }
+  return `Segment heading browser checks passed; evidence: ${output}`;
+});

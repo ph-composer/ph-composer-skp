@@ -69,11 +69,11 @@ check({ name: "header", output }, async ({ newPage, step }) => {
     assert.equal(await table.locator("th.col-ground_depth_mm .phc-th-label").innerText(), "Ground depth in");
     assert.match(await table.locator("th.col-ground_depth_mm .phc-th-label").getAttribute("data-tooltip"),
       /Suggest classification sets a Face to Ground/);
-    const resize = table.getByRole("separator", { name: "Resize Building-Segment column", exact: true });
+    const resize = table.getByRole("separator", { name: "Resize Level column", exact: true });
     await resize.focus();
     step("resize by keyboard");
     for (let count = 0; count < 8; count += 1) await resize.press("ArrowLeft");
-    const actionsFit = await table.locator("th.col-building_segment").evaluate(h => {
+    const actionsFit = await table.locator("th.col-level").evaluate(h => {
       const right = h.getBoundingClientRect().right;
       return [...h.querySelectorAll(".phc-header-action")].every(n => n.getBoundingClientRect().right <= right);
     });

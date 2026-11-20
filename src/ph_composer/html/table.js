@@ -366,7 +366,8 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
   }
   function buildRow(root, cache, expanded, row) {
     var entry = { node: element("tr", "tier-" + row.depth), cells: {} };
-    entry.node.setAttribute("data-row-key", row.key);
+    // A record row carries its key; a heading row, which stands for no record, carries it under its own name.
+    entry.node.setAttribute(row.heading ? "data-heading-key" : "data-row-key", row.key);
     cache.rows[row.key] = entry;
     cache.columns.forEach(function (column) {
       var td = element("td", "col-" + column[0]);
@@ -387,8 +388,10 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
       entry.chevron.innerHTML = icons.ROW_CHEVRON;
       hierarchy.insertBefore(entry.chevron, hierarchy.firstChild);
     };
-    if (row.depth < tiers(cache)) entry.needChevron();
-    if (hierarchy) {
+    // A heading row (`row.heading`) opens a run of the rows after it: it heads them, holds none of them, and
+    // takes no chevron and no select target.
+    if (row.depth < tiers(cache) && !row.heading) entry.needChevron();
+    if (hierarchy && !row.heading) {
       entry.target = button(row.tier, function () { if (cache.options.inspect) cache.options.inspect(entry.row); });
       entry.target.className = "row-target";
       entry.target.addEventListener("keydown", function (event) { navigateRows(root, cache, expanded, entry, event); });
@@ -426,9 +429,9 @@ PhComposerUI.define("table", ["dom", "icons", "overlay", "view_controls"],
     if (options.actionsCell) options.actionsCell(entry.cells.actions, row);
     var selected = options.selected && options.selected(row);
     var checked = paintRowCheck(cache, entry, row);
-    entry.node.className = "tier-" + row.depth + (selected ? " host-selected" : "") +
-      (checked ? " is-checked" : "");
-    if (row.depth < tiers(cache)) entry.needChevron();
+    entry.node.className = "tier-" + row.depth + (row.heading ? " is-heading" : "") +
+      (selected ? " host-selected" : "") + (checked ? " is-checked" : "");
+    if (row.depth < tiers(cache) && !row.heading) entry.needChevron();
     if (entry.target) entry.target.disabled = Boolean(options.disabled);
     if (entry.chevron) {
       entry.chevron.hidden = row.depth >= tiers(cache);

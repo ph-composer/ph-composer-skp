@@ -35,28 +35,27 @@ function outcome(p, status, message) {
     outcome: { status: status, message: message, value: { replacement_ids: { lvl_a: null } } } } } }, fixture());
 }
 
-test("the same dialog manages either collection with palette/hex/usage and guarded one-message Save", function () {
-  var p = page(); p.dialog.open("building_segment");
-  assert.strictEqual(p.dialog.dialog.querySelector("h2").textContent, "Manage Building Segments");
-  assert.strictEqual(p.dialog.list.querySelector(".phc-zone-option-usage").textContent, "1 live Zone · 2 recoverable");
+test("the dialog manages Levels with palette/hex/usage and guarded one-message Save", function () {
+  var p = page(); p.dialog.open("level");
+  assert.strictEqual(p.dialog.dialog.querySelector("h2").textContent, "Manage Levels");
+  assert.strictEqual(p.dialog.list.querySelector(".phc-zone-option-usage").textContent, "1 live Zone · 1 recoverable");
   assert.strictEqual(p.dialog.list.querySelector(".phc-zone-option-palette").children.length, 8);
-  var picker = p.find("House custom colour");
+  var picker = p.find("Ground custom colour");
   assert.strictEqual(picker.parentNode.className, "phc-zone-option-swatches", "the picker sits with the swatches");
   assert.strictEqual(picker.getAttribute("data-tooltip"), "Pick a custom colour");
-  type(p.find("House name"), "North House");
-  type(p.find("House hex colour"), "#ffffff");
-  p.dialog.dialog.listeners.keydown({ key: "Enter", target: p.find("House name"), preventDefault: function () {} });
+  type(p.find("Ground name"), "Basement");
+  type(p.find("Ground hex colour"), "#ffffff");
+  p.dialog.dialog.listeners.keydown({ key: "Enter", target: p.find("Ground name"), preventDefault: function () {} });
   click(p.dialog.save);
   assert.strictEqual(p.sent.length, 1);
   assert.strictEqual(p.sent[0].payload.name, "ph_composer.zones.options.manage");
   assert.strictEqual(p.sent[0].payload.expected_revision, 4);
-  assert.deepStrictEqual(p.sent[0].payload.params.options[0], { id: "bsg_a", name: "North House", colour: "#ffffff" });
-  assert.strictEqual(p.sent[0].payload.params.expected_options[0].name, "House");
+  assert.deepStrictEqual(p.sent[0].payload.params.options[0], { id: "lvl_a", name: "Basement", colour: "#ffffff" });
+  assert.strictEqual(p.sent[0].payload.params.expected_options[0].name, "Ground");
   p.dialog.cancel(); assert.ok(p.dialog.active(), "pending Cancel keeps the work surface");
   assert.strictEqual(p.dialog.dialog.closeButton.disabled, true);
   outcome(p, "completed"); assert.strictEqual(p.dialog.active(), false); assert.strictEqual(p.results.length, 1);
   assert.strictEqual(p.notices[0].tone, "success");
-  p.dialog.open("level"); assert.strictEqual(p.dialog.dialog.querySelector("h2").textContent, "Manage Levels");
 });
 
 test("invalid names and colours block Save while edits remain in the draft", function () {
@@ -72,61 +71,29 @@ test("invalid names and colours block Save while edits remain in the draft", fun
 test("Add uses temporary IDs and removing a new choice never creates a replacement source", function () {
   var p = page({ building_segments: [], levels: [], default_segment_id: null, adoption: { required: false,
     sources: [] } });
-  p.dialog.open("building_segment"); assert.strictEqual(p.dialog.save.disabled, true);
+  p.dialog.open("level");
   click(p.dialog.add); assert.ok(p.dialog.draft[0].id.startsWith("new:"));
-  assert.strictEqual(p.dialog.defaultId, p.dialog.draft[0].id);
   click(p.dialog.add); var second = p.dialog.draft[1];
-  assert.strictEqual(second.name, "Building Segment 2");
-  p.dialog.removal(second, p.dialog.list.children[1]); var replacement = p.find("Replacement for Building Segment 2");
+  assert.strictEqual(second.name, "Level 2");
+  p.dialog.removal(second, p.dialog.list.children[1]); var replacement = p.find("Replacement for Level 2");
   replacement.value = ""; replacement.listeners.change({}); click(p.find("Remove"));
   assert.strictEqual(Object.keys(p.dialog.replacements).length, 0); p.dialog.submit();
     assert.strictEqual(p.sent[0].payload.params.options.length, 1);
 });
 
-test("merge retargets recoverable use and the default in one draft; removing a survivor resolves chains", function () {
-  var data = fixture(); data.building_segments.push(choice("bsg_c", "Wing"));
-  var p = page(data); p.dialog.open("building_segment");
+test("merge retargets recoverable use in one draft; removing a survivor resolves chains", function () {
+  var data = fixture(); data.levels.push(choice("lvl_c", "Roof"));
+  var p = page(data); p.dialog.open("level");
   p.dialog.removal(p.dialog.draft[0], p.dialog.list.children[0]);
-  var replacement = p.find("Replacement for House");
-  assert.strictEqual(replacement.children.filter(function (node) { return node.value === ""; })[0].textContent,
-    "No Building Segment", "a used Segment's Zones may leave every Segment");
-  replacement.value = "bsg_b"; replacement.listeners.change({}); click(p.find("Remove"));
-  assert.strictEqual(p.dialog.defaultId, "bsg_b"); assert.strictEqual(p.dialog.replacements.bsg_a, "bsg_b");
-  p.dialog.removal(p.dialog.draft[0], p.dialog.list.children[0]); replacement = p.find("Replacement for Annex");
-  replacement.value = "bsg_c"; replacement.listeners.change({}); click(p.find("Remove"));
-  assert.strictEqual(p.dialog.replacements.bsg_a, "bsg_c"); assert.strictEqual(p.dialog.replacements.bsg_b, "bsg_c");
+  var replacement = p.find("Replacement for Ground");
+  replacement.value = "lvl_b"; replacement.listeners.change({}); click(p.find("Remove"));
+  assert.strictEqual(p.dialog.replacements.lvl_a, "lvl_b");
+  p.dialog.removal(p.dialog.draft[0], p.dialog.list.children[0]); replacement = p.find("Replacement for Upper");
+  replacement.value = "lvl_c"; replacement.listeners.change({}); click(p.find("Remove"));
+  assert.strictEqual(p.dialog.replacements.lvl_a, "lvl_c"); assert.strictEqual(p.dialog.replacements.lvl_b, "lvl_c");
   p.dialog.submit(); assert.strictEqual(p.sent.length, 1);
-    assert.strictEqual(p.sent[0].payload.params.default_segment_id, "bsg_c");
+  assert.deepStrictEqual(p.sent[0].payload.params.replacements, { lvl_a: "lvl_c", lvl_b: "lvl_c" });
 });
-
-test("a used Segment moves its Zones to none, the default moves to the first remaining, and the last stays",
-  function () {
-    var p = page(); p.dialog.open("building_segment");
-    p.dialog.removal(p.dialog.draft[0], p.dialog.list.children[0]);
-    var replacement = p.find("Replacement for House"); replacement.value = ""; replacement.listeners.change({});
-    click(p.find("Remove"));
-    assert.strictEqual(p.dialog.defaultId, "bsg_b", "the default is never none");
-    assert.strictEqual(p.dialog.problem(), "");
-    p.dialog.removal(p.dialog.draft[0], p.dialog.list.children[0]);
-    assert.strictEqual(p.find("Replacement for Annex"), undefined, "the last Segment offers no removal");
-    assert.ok(p.dialog.list.querySelector(".phc-zone-option-help").textContent
-      .includes("keeps at least one Building Segment"));
-    p.dialog.submit();
-    assert.deepStrictEqual(p.sent[0].payload.params.replacements, { bsg_a: null });
-    assert.strictEqual(p.sent[0].payload.params.default_segment_id, "bsg_b");
-  });
-
-test("a Segment that took a used Segment's Zones in this draft offers No Building Segment, not deletion",
-  function () {
-    var data = fixture(); data.building_segments.push(choice("bsg_c", "Wing"));
-    var p = page(data); p.dialog.open("building_segment");
-    p.dialog.removal(p.dialog.draft[0], p.dialog.list.children[0]);
-    var replacement = p.find("Replacement for House"); replacement.value = "bsg_b"; replacement.listeners.change({});
-    click(p.find("Remove"));
-    p.dialog.removal(p.dialog.draft[0], p.dialog.list.children[0]);
-    var none = p.find("Replacement for Annex").children.filter(function (node) { return node.value === ""; })[0];
-    assert.strictEqual(none.textContent, "No Building Segment");
-  });
 
 test("used Level deletion explicitly clears live and recovery assignments", function () {
   var p = page(); p.dialog.open("level"); p.dialog.removal(p.dialog.draft[0], p.dialog.list.children[0]);
@@ -200,15 +167,10 @@ test("adoption source merge terminating at existing choice serializes no competi
   assert.strictEqual(mappings[1].target_id, "lvl_a");
 });
 
-test("each collection's merge note offers what that collection allows", function () {
-  function note(collection) {
-    var p = page(); p.dialog.open(collection);
-    click(p.find("Merge / Delete"));
-    return p.dialog.list.querySelector(".phc-zone-option-help").textContent;
-  }
-  assert.strictEqual(note("building_segment"),
-    "House: 1 live Zone · 2 recoverable. Choose a survivor to merge, or move its Zones to No Building Segment.");
-  assert.strictEqual(note("level"),
+test("a Level's merge note offers a survivor or clearing the assignment", function () {
+  var p = page(); p.dialog.open("level");
+  click(p.find("Merge / Delete"));
+  assert.strictEqual(p.dialog.list.querySelector(".phc-zone-option-help").textContent,
     "Ground: 1 live Zone · 1 recoverable. Choose a survivor to merge, or clear the Level assignment.");
 });
 

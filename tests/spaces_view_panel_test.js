@@ -169,20 +169,20 @@ test("Zone rows sort by the view's sums, and Spaces within each Zone by their ow
     ["Space", "Bath", "4"], ["Zone", "Zone B", "12"], ["Space", "Loft", "12"]]);
 });
 
-test("Building-Segment, Level and Net area factor are hidden by default and offered in the Columns menu", function () {
+test("Level and Net area factor are hidden by default and offered in the Columns menu", function () {
   var p = page();
   p.panel.receive({ type: "panel.snapshot", payload: snapshot() });
   var hidden = shown(p).querySelectorAll("th").filter(function (th) { return th.hidden; }).map(function (th) {
     return th.className.split(" ")[0];
   });
-  assert.deepStrictEqual(hidden, ["col-building_segment", "col-level", "col-net_area_factor"]);
+  assert.deepStrictEqual(hidden, ["col-level", "col-net_area_factor"]);
   var options = p.section().querySelectorAll("button").filter(function (node) {
     return node.getAttribute("aria-label") === "Columns";
   })[0];
   options.listeners.click({ preventDefault: function () {} });
   assert.deepStrictEqual(options.parentNode.querySelectorAll(".phc-action-menu-item").map(function (node) {
     return node.textContent;
-  }), ["Building-Segment", "Level", "Net area factor"]);
+  }), ["Level", "Net area factor"]);
 });
 
 test("filtering, sorting, expansion and switching views send nothing to the Model", function () {
@@ -273,13 +273,13 @@ test("hiding a column through the Columns menu drops its filter", function () {
       return node.textContent === text;
     })[0].listeners.click({ preventDefault: function () {} });
   }
-  option("Building-Segment");
-  var menu = labelled(p, "Building-Segment column menu");
+  option("Level");
+  var menu = labelled(p, "Level column menu");
   menu.listeners.click({ preventDefault: function () {} });
   var box = menu.parentNode.querySelectorAll("input").filter(function (node) { return node.type === "checkbox"; })[0];
   box.checked = false; box.listeners.change({});
   assert.match(p.section().querySelector(".phc-view-count").textContent, /1 filter$/);
   p.context.document.activeElement && p.context.document.activeElement.blur();
-  option("Building-Segment");
+  option("Level");
   assert.doesNotMatch(p.section().querySelector(".phc-view-count").textContent, /filter/);
 });

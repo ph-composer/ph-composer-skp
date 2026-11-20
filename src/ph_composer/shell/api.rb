@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 73
+    MINOR = 74
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -414,7 +414,16 @@ module PhComposer
                     "it to the replacement, else to the first remaining Segment; removing the last Segment refuses " \
                     "zone.option_last_segment. manage, remove and merge results add removed_extensions and " \
                     "removed_extensions_total. Colour-by Building Segment shows Zones in no Segment as one neutral " \
-                    "No Building Segment row. Until export leaves them out, such a Zone blocks export." }
+                    "No Building Segment row. Until export leaves them out, such a Zone blocks export." },
+      { "minor" => 74, "date" => "2026-11-20",
+        "change" => "ph_composer.zones.save_segment_settings is new: one Building Segment's name, colour, default " \
+                    "and a settings payload per extension namespace in one Undo step, emitting " \
+                    "ph_composer.zones.segment_settings_saved. ph_composer.zones.create_segment is new: a Segment " \
+                    "under the first free default name with named Zones moved in. A Zone's choice evidence keeps " \
+                    "its Building Segment's values only, so a Segment metadata write no longer rewrites its Zones " \
+                    "and adoption brings no Segment settings. ph_composer.zones.all adds building_segments, each " \
+                    "Segment's Face area; ph_composer.spaces.all and list add airflows and inheriting_count to " \
+                    "each building_segments row." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

@@ -85,8 +85,10 @@ A record or a preview can be larger than one reply. These reads give all of it e
   `target.changed`, and nothing is written. The kinds' own `update` actions do not take `user_data`.
   The [user data guide](USER_DATA.md) lists the read and write call for every object.
   Building Segments and Levels (`ph_composer.zones.building_segment` and `ph_composer.zones.level`) are
-  written the same way, and each Zone's copy of its choices follows in the same Undo step. A locked Zone
-  refuses the write as `target.locked`; a Zone awaiting adoption keeps its copy until it is adopted. Removing or merging an option keeps the survivor's map; the
+  written the same way. Each Zone's copy of its Level follows in the same Undo step: a locked Zone
+  refuses a Level write as `target.locked`, and a Zone awaiting adoption keeps its copy until it is
+  adopted. A Zone keeps only a Building Segment's name, colour and export identity, so a Segment write
+  touches the Segment alone. Removing or merging an option keeps the survivor's map; the
   result's `removed_user_data` names each removed option whose map was not empty, with its top-level
   keys (as bounded under "Deleting a definition"), and Undo brings it back.
 - **Change a part's metadata.** An Assembly's Layers and Layer-Segments each keep their own
@@ -302,6 +304,27 @@ as No Building Segment. The Model keeps at least one Building Segment, and the d
    settings stored on it go with it, and Undo brings them back.
 5. Read back with `ph_composer.zones.list` and `ph_composer.zones.options.list`. Export does not yet
    take Zones in no Building Segment: its preflight blocks each one until it joins a Segment.
+6. Make a Segment with `ph_composer.zones.create_segment`: give its `colour`, and `targets` (as in
+   step 1) to move Zones into it. It takes the first free name, such as "Building Segment 2", and the
+   result names it; one Undo step covers the Segment and the moves.
+
+### Building Segment settings
+
+A Segment's settings dialog saves through `ph_composer.zones.save_segment_settings`, one Undo step:
+
+1. Read the Segment with `ph_composer.zones.options.list` (`collection` `building_segment`) and the
+   default with `ph_composer.zones.options.all`.
+2. Send its `id`, the `values` to save (`name`, `colour`) with the `expected_values` you read, `default`
+   (true makes it the Segment new Zones join; false on the current default refuses `params.invalid`),
+   `expected_default_segment_id`, and `extension_payloads`: each settings section's payload by its
+   namespace. Send the Segment's `extension_data` as read in `expected_extension_data`. A change since
+   your read refuses `target.changed`.
+3. Each payload is checked by its namespace's installed validator; one it refuses refuses the whole
+   save as `validation.failed`, and nothing is written. A namespace you leave out is kept as stored.
+4. The result's `namespaces` lists the payloads that changed. A feature that owns a section adds its
+   own changes to the save in the same Undo step. A locked
+   member Zone does not block a settings save; a rename or a new default rewrites each member Zone and
+   refuses `target.locked` on a locked one.
 
 ### Spaces from loose Faces
 

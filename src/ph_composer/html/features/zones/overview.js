@@ -13,9 +13,10 @@
  */
 PhComposerUI.define("features/zones/overview", ["panel", "workspace", "request", "snapshot", "units",
   "unit_preferences", "table", "view_controls", "column_menu", "sections/colour_by", "fields", "subtabs",
-  "table_views", "features/zones/zone_cells", "features/zones/zone_options", "features/zones/option_dialog"],
+  "table_views", "features/zones/zone_cells", "features/zones/zone_options", "features/zones/option_dialog",
+  "features/zones/segment_rows"],
 function (panel, ui, requests, snapshot, units, preferences, tables, viewControls, columnMenus, colourBy, fields,
-          Subtabs, tableViews, ZoneCells, zoneOptions, OptionDialog) {
+          Subtabs, tableViews, ZoneCells, zoneOptions, OptionDialog, SegmentRows) {
   "use strict";
   var HOST = "ph_composer.zones";
   var registry = tableViews.host(HOST);
@@ -37,14 +38,14 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
         "cannot be exported as it stands." }
   };
   // The Zone's own columns and the Colour-by mode each shows; a view lists in `zoneFields` which of the
-  // in-place cells it shows beside its own columns, all three when it says nothing.
-  var ZONE_FIELDS = ["building_segment", "level", "ground_depth_mm"];
+  // in-place cells it shows beside its own columns, both when it says nothing. A Zone's Building Segment is the
+  // heading row it sits under (segment_rows.js), not a column.
+  var ZONE_FIELDS = ["level", "ground_depth_mm"];
   var ZONE_COLOUR_BY = { name: { mode: "ph_composer.zones.by_zone" },
-    building_segment: { mode: "ph_composer.zones.by_building_segment" },
     level: { mode: "ph_composer.zones.by_level" } };
-  var ZONE_SORTED = ["name", "building_segment", "level", "ground_depth_mm"];
-  var ZONE_FILTERED = { building_segment: true, level: true };
-  var ZONE_WIDTHS = { name: 142, building_segment: 136, level: 112, ground_depth_mm: 128 };
+  var ZONE_SORTED = ["name", "level", "ground_depth_mm"];
+  var ZONE_FILTERED = { level: true };
+  var ZONE_WIDTHS = { name: 142, level: 112, ground_depth_mm: 128 };
   // Listed while no view is: the Zone rows alone, with nothing beneath them.
   var NO_VIEW = { id: "", label: "Zones" };
 
@@ -63,6 +64,7 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
     if (screen && screen.session === session) return screen;
     if (screen) { screen.disposed = screen.host.disposed = true; screen.edits.reset(); screen.look.reset(); }
     if (screen && screen.optionDialog) screen.optionDialog.dispose();
+    if (screen && screen.segments) screen.segments.dispose();
     if (screen && screen.zoneCells) screen.zoneCells.dispose();
     if (screen) Object.keys(screen.slots).forEach(function (id) { call(screen.slots[id], "dispose"); });
     if (screen && screen.independenceDialog) {
@@ -82,13 +84,18 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
       show: function (id) {
         var intent = { view: id };
         return panel.navigate("overview", intent) && intent.viewShown === true;
-      } };
+      },
+      // A Building Segment control for the view's selection bar, acting on the Zones `zones()` answers.
+      segmentMove: function (zones) { return made.segments.moveControl(zones, ZoneCells.gated); } };
     screen.zoneCells = new ZoneCells(session, send, refuse, function (field) { screen.optionDialog.open(field); },
       function () { return draftReason(screen, true); });
     screen.optionDialog = new OptionDialog(session, send, function () { return draftReason(screen); },
       function (message, tone) { panel.notify(message, tone); }, function (collection, result) {
         reconcileOptionFilters(screen, collection, result);
       });
+    // Adoption covers every option collection, so the heading of an unadopted Segment opens it as a Level does.
+    screen.segments = new SegmentRows(session, send, function () { return draftReason(screen); }, refuse,
+      function () { screen.optionDialog.open("level"); });
     screen.menus = controlMenus(screen);
     screen.controls = new viewControls.ViewControls({
       label: "Zones", placeholder: "Zone", fields: ORDER_FIELDS, initialOrder: "name",
@@ -126,6 +133,8 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
   /* Work in hand that a filter, a tab change or another assignment must not hide or race. */
   function draftReason(state, skipCells) {
     if (state && state.optionDialog && state.optionDialog.active()) return "Finish the managed options draft first.";
+    var segmentWork = state && state.segments && state.segments.draftReason();
+    if (segmentWork) return segmentWork;
     if (!skipCells && state && state.zoneCells && state.zoneCells.active()) {
       return ZONE_DRAFT;
     }
@@ -153,7 +162,7 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
     [state.controls.columnFilters].concat(Object.keys(state.slots).map(function (id) {
       return state.slots[id].filters;
     })).forEach(function (filters) {
-      if (state.optionDialog.adopting) { delete filters.building_segment; delete filters.level; return; }
+      if (state.optionDialog.adopting) { delete filters.level; return; }
       var held = filters[collection]; if (!held) return;
       var mapped = held.map(function (id) {
         if (!Object.prototype.hasOwnProperty.call(replacements, id)) return id;
@@ -314,12 +323,12 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
   /* A value's words in a filter. */
   function filterLabel(state, own, field, value) {
     if ((own.view.filteredFields || {})[field]) return call(own, "filterLabel", [field, value], value);
-    if (field === "building_segment" || field === "level") {
+    if (field === "level") {
       var choice = zoneOptions.find(zoneOptions.read(state.snapshot), field, value);
       if (choice) return choice.values.name;
       var source = (state.zoneRecords || []).filter(function (zone) { return filterValue(zone, field) === value; })[0];
-      return source ? zoneOptions.label(zoneOptions.read(state.snapshot), source,
-        field) : value ? "Choose a replacement" : field === "building_segment" ? "No Building Segment" : "Not set";
+      return source ? zoneOptions.label(zoneOptions.read(state.snapshot), source, field) :
+        value ? "Choose a replacement" : "Not set";
     }
     return value || "Not set";
   }
@@ -338,7 +347,7 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
         },
         extra: function (root, anchor, close, reopen) {
           if (ownColumn) call(own, "menuExtra", [field, root, anchor, close, reopen]);
-          if (field === "building_segment" || field === "level") {
+          if (field === "level") {
             var manage = ui.button("Manage " + zoneOptions.title(field) + "…", function () {
               close(); anchor.focus(); state.optionDialog.open(field);
             });
@@ -381,9 +390,7 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
     if (choice && /^#[0-9a-f]{6}$/i.test(choice.values.colour)) {
       return [1, 3, 5].map(function (start) { return parseInt(choice.values.colour.slice(start, start + 2), 16); });
     }
-    // A Zone in no Building Segment filters as "" but takes the legend's own No Building Segment row.
-    var key = field === "building_segment" && value === "" ? zoneOptions.NO_SEGMENT_KEY : value;
-    return colourBy.colour(state.snapshot, colourBindings(own)[field], key);
+    return colourBy.colour(state.snapshot, colourBindings(own)[field], value);
   }
 
   function headerActions(state, own, field, label) {
@@ -688,6 +695,7 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
     });
     screenState.revision = host.revision = state.revision;
     screenState.optionDialog.consume(state, zoneOptions.read(state));
+    screenState.segments.consume(state);
     if (!root.querySelector(".phc-zone-views")) {
       root.className = "phc-overview";
       root.replaceChildren(ui.element("div", "phc-heading-mount"), ui.element("div", "phc-view-tabs"),
@@ -730,6 +738,10 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
     }
     if (screenState.menus.root.parentNode !== screenState.controls.root) {
       screenState.controls.root.insertBefore(screenState.menus.root, screenState.controls.count.nextSibling);
+    }
+    // New Building Segment follows the count, in every view.
+    if (screenState.segments.newButton.nextSibling !== screenState.menus.root) {
+      screenState.controls.root.insertBefore(screenState.segments.newButton, screenState.menus.root);
     }
     paintMenus(screenState, own);
     // Only the shown view's tools stand in the row, after its menus.
@@ -823,7 +835,7 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
         var viewValue = call(own, "sortValue", [record, field], undefined);
         if (viewValue !== undefined) return viewValue;
         if (viewFields[field] || !record.zone) return null;
-        return field === "building_segment" || field === "level" ?
+        return field === "level" ?
           zoneOptions.label(zoneOptions.read(state.snapshot), record.zone, field) : record.zone.values[field];
       },
       search: function (record) { return searchText(own, record, state); },
@@ -841,7 +853,17 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
     var filters = state.controls.columnFilters, hidden = groupedHidden(own, rows, groupRows, projection, state);
     var shown = ordered(own, projection.records.concat(groupRows.map(function (row) { return row.record; })), byId,
       rows, state.controls);
-    var visible = shown.filter(function (row) { return !hidden(row); });
+    // Each Zone under its Building Segment's heading; the views never see the heading rows. What a view's checks
+    // act on (a Shift-click range) follows the order the table shows, Segment by Segment.
+    var filtering = Boolean((state.controls.filter.value || "").trim()) || state.controls.filterCount() > 0;
+    var arranged = state.segments.arrange(shown, hidden, filtering), sums = Object.create(null);
+    var visible = arranged.rows.filter(function (row) { return !row.heading && !hidden(row); });
+    function headingValue(row, field) {
+      if (field === "name") return row.record.name;
+      if (!sums[row.key]) sums[row.key] = call(own, "segmentSums", [SegmentRows.group(row), profile], null) || {};
+      var text = sums[row.key][field];
+      return text === undefined || text === null ? "" : text;
+    }
     // Only column Show filters affect the viewport. Text search and collapsed rows remain table navigation.
     // A view's group rows join the mask as their rows join the table: by the view's filters.
     var matchingPaths = state.controls.filterCount() ? zoneRows.concat(groupRows).reduce(function (all, row) {
@@ -852,13 +874,19 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
     colourBy.filter(state.snapshot, matchingPaths);
     var check = call(own, "check", [{ visible: visible, zoneRows: visible.filter(zoneRow), allZoneRows: zoneRows,
       filters: filters }], null);
+    if (check) {
+      var viewCheck = check;
+      check = Object.assign({}, viewCheck, { state: function (row) {
+        return row.heading ? null : viewCheck.state(row);
+      } });
+    }
     var parents = Object.create(null);
     rows.forEach(function (row) { if (row.parent) parents[row.parent] = true; });
     tables.table(own.mount, rows, {
       // Sized so the whole table shows at the panel's usual width; labels have their own band above the icons,
       // and the user can still drag any column wider.
       defaultWidths: Object.assign({}, ZONE_WIDTHS, own.view.widths || {}),
-      tree: true, tiers: own.view.tiers, rows: shown, columns: shownColumns,
+      tree: true, tiers: own.view.tiers, rows: arranged.rows, columns: shownColumns,
       painted: function () {
         call(own, "painted"); tables.orientNarrow(own.mount);
       },
@@ -870,18 +898,21 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
       },
       expanded: state.expanded,
       expandable: function (row) { return Boolean(parents[row.key]); },
-      decorate: function (td, row, field) { call(own, "decorate", [td, row, field]); },
+      decorate: function (td, row, field) { if (!row.heading) call(own, "decorate", [td, row, field]); },
       columnWidths: own.columnWidths, visibleCount: projection.visibleCount + hidden.groupsShown,
       disabled: state.edits.busy(),
       empty: zoneRows.length || groupRows.length ? "No Zones match this filter." :
         "No Zones yet. Select geometry in SketchUp, then right-click and choose Make Zone.",
-      value: function (row, field) { return value(own, row, field, profile); },
+      value: function (row, field) { return row.heading ? headingValue(row, field) : value(own, row, field, profile); },
       cell: function (td, row, field) {
+        if (row.heading) return state.segments.cell(td, row, field);
         return (row.depth !== 0 || Boolean(row.record.zone)) && state.zoneCells.render(td, row, field) ||
           call(own, "cell", [td, row, field], false);
       },
-      marker: function (row) { return marker(own, row); }, actions: function (row) { return actions(own, row); },
-      rowHidden: hidden, hiddenColumns: own.hiddenColumns, revealRowActions: true, actionSlots: own.view.actionSlots,
+      marker: function (row) { return row.heading ? null : marker(own, row); },
+      actions: function (row) { return row.heading ? state.segments.actions(row) : actions(own, row); },
+      rowHidden: function (row) { return row.heading ? arranged.hidden(row) : hidden(row); },
+      hiddenColumns: own.hiddenColumns, revealRowActions: true, actionSlots: own.view.actionSlots,
       header: function (th, field) {
         if (field === "ground_depth_mm") ui.tooltip(th.querySelector(".phc-th-label"), ZoneCells.GROUND_DEPTH_HELP);
       },
@@ -894,10 +925,11 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
         else own.columnWidths[field] = width;
       },
       action: function (row, item, control) {
-        if (item.id === "independent") confirmIndependent(state, row);
+        if (row.heading) state.segments.action(row, item, control);
+        else if (item.id === "independent") confirmIndependent(state, row);
         else call(own, "action", [row, item, control]);
       },
-      selected: function (row) { return call(own, "selected", [row], false); }
+      selected: function (row) { return !row.heading && call(own, "selected", [row], false); }
     });
   }
 

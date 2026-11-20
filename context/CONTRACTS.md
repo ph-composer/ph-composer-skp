@@ -429,9 +429,11 @@ missing record `target.not_found`. An internal kind that declares `owner_writes_
 option settings) refuses `target.wrong_kind`. A kind whose owner keeps copies of its records declares
 `metadata_follow_up`, a callable taking the request and the proposal: once every entry is staged, the
 action calls each distinct follow-up of the kinds the batch changed, once, under the kind's owner, and
-the follow-up adds the owner's dependent steps or refuses the batch. Building Segments and Levels share
-one, which rewrites the choice evidence of every adopted Zone and member stamp in the same Undo step
-(a locked one refuses `target.locked`); a Zone awaiting adoption is left as it is. Removing or merging
+the follow-up adds the owner's dependent steps or refuses the batch. Levels declare one, which
+rewrites the choice evidence of every adopted Zone and member stamp in the same Undo step (a locked
+one refuses `target.locked`); a Zone awaiting adoption is left as it is. A Building Segment's evidence
+carries its values only, so a write of its maps or settings changes the Segment alone and declares
+no follow-up. Removing or merging
 options keeps the survivor's map and reports each removed option whose map was not empty with its
 top-level keys, as merging parts does. Clearing the map of a record stored without one writes nothing.
 
@@ -915,7 +917,10 @@ at most one Building Segment, and null is No Building Segment. Make Zone, adopti
 or option rewrite that changes a managed Zone's values or evidence write schema 3, membership stamps
 included; a metadata-only write keeps the stored version. Schema 2, the same shape with a required
 `building_segment_id`, and version 1 remain readable. Unknown versions refuse. The `choice_evidence` capsule on Zones and membership stamps carries
-versioned option definitions and source identity for native clipboard recovery; it is detached
+versioned option definitions and source identity for native clipboard recovery: the Level record
+whole, and of the Building Segment only its `id`, `schema_version`, `name`, `colour` and
+`export_identifier`, so its maps and other features' settings stay on the Segment and adopting a
+copied Zone brings a Segment that reads its defaults; it is detached
 recovery evidence, not assignment authority; it carries null for an option the Zone does not name.
 Managed read rows expose resolved presentation names/colours separately as `display`. Missing/foreign
 choices require explicit destination adoption; a Zone naming neither a Segment nor a Level has
@@ -1223,6 +1228,12 @@ and `references`, the Zone's and Faces' new records as typed `{kind, key, record
 for remapping a child's own references. Windows contributes `ph_composer.windows.units.follow_zone_copy`:
 every Unit inside the occurrence whose id another occurrence holds gets a new id, and copied payloads
 are remapped across the copy.
+
+`ph_composer.zones.segment_settings_saved` is emitted by `ph_composer.zones.save_segment_settings`
+after Zones staged the Segment's General values and every settings payload. Its description is
+`building_segment_id` and `namespaces`, the namespaces whose payload changed, sorted (empty when
+none did). A settings section's owner answers it to add its own side effects in the same Undo step
+(context/EXTENSIBILITY.md, "Building Segment settings").
 
 `Records::ReferencePlan.new(entries:, removals: [])` preserves replacement and addition entries
 as typed `ReferenceEntry(kind:, key:, record:)` values. A removal is a separate typed

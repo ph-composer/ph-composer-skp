@@ -92,7 +92,7 @@ test("the Spaces control row holds Columns, Colour by, Labels and the Spaces vie
   var menus = p.pane().querySelectorAll(".phc-control-menu").filter(function (node) { return !node.hidden; });
   assert.deepStrictEqual(menus.map(function (node) { return node.children[0].getAttribute("data-icon"); }),
     ["columns", "palette", "tag", "settings"]);
-  assert.deepStrictEqual(texts(openMenu(p, "Columns")), ["Building-Segment", "Level", "Net area factor"]);
+  assert.deepStrictEqual(texts(openMenu(p, "Columns")), ["Level", "Net area factor"]);
   assert.deepStrictEqual(texts(openMenu(p, "Colour by")), ["Space", "Ventilation", "Weighting factor", "Height"]);
   assert.strictEqual(p.byLabel("Colour by")[0].getAttribute("aria-pressed"), "false", "no mode is on");
 });

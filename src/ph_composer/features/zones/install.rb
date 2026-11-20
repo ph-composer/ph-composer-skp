@@ -64,6 +64,7 @@ require_relative "options/adoption"
 require_relative "options/operations"
 require_relative "options/registration"
 require_relative "options/commands"
+require_relative "options/segment_settings"
 require_relative "codes"
 require_relative "refuses"
 
@@ -76,6 +77,7 @@ module PhComposer
                                              :requires => ["ph_composer.assemblies"])
       Options::Registration.install(feature)
       Options::CommandRegistration.install(feature)
+      Options::SegmentSettingsRegistration.install(feature)
       ZoneRegistration.install(feature)
       Names.install(feature)
       CopyWatch.install(feature)
