@@ -5092,9 +5092,35 @@
         "src/ph_composer/features/shading/reads.rb",
         "src/ph_composer/python/ph_composer_translation/shade_sections.py",
         "src/ph_composer/python/ph_composer_translation/contract/shade_records.py",
-        "src/ph_composer/export/geometry_snapshot.rb"
+        "src/ph_composer/python/ph_composer_translation/assembly.py",
+        "src/ph_composer/python/ph_composer_translation/composition.py",
+        "src/ph_composer/export/geometry_snapshot.rb",
+        "src/ph_composer/features/zones/export.rb",
+        "src/ph_composer/core/face_capture.rb",
+        "src/ph_composer/core/records/entity_store.rb"
       ],
       "native_control_required": false
+    },
+    {
+      "id": "SD07",
+      "label": "Shading integration on the installed RBZ from a fresh process on the reference model: tagged from the right-click menu, each tag one native Undo step with Redo; a second Model reads no marks and its Colour-by is its own; save and fresh-process reopen keep every mark; the Shading Colour-by mode shows exactly the tagged geometry; the export reloads with 18 orphaned Shades in five components and the pinned PHX converts it to WUFI XML and METr JSON; Ed opens both files and confirms the shading components, the holed Face included",
+      "mode": "mixed",
+      "authority": "planning/features/phase-05-shading/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/shading/*",
+        "src/ph_composer/features/zones/export.rb",
+        "src/ph_composer/export/geometry_snapshot.rb",
+        "src/ph_composer/core/face_capture.rb",
+        "src/ph_composer/core/records/entity_store.rb",
+        "src/ph_composer/colour_by/*",
+        "src/ph_composer/python/ph_composer_translation/shade_sections.py",
+        "src/ph_composer/python/ph_composer_translation/contract/shade_records.py",
+        "src/ph_composer/python/ph_composer_translation/assembly.py",
+        "src/ph_composer/python/ph_composer_translation/composition.py",
+        "src/ph_composer/features/zones/zone/occurrences.rb",
+        "src/ph_composer/shell/commands.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }
