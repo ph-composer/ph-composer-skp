@@ -1451,7 +1451,8 @@ record. The Programs kinds are the shipped example: a Program names its Schedule
   stands locally, and a row's fingerprint covers its references, not the referenced records' values, so a
   change in the library to a Schedule alone shows on that Schedule's own resolution, not its Program's.
 - *Export.* A library export writes each record a written row names, and theirs in turn, even when the
-  selection or `kinds` leaves it out, so the file supplies every dependency. A declared part's map
+  selection or `kinds` leaves it out, so the file supplies every dependency; one it cannot write (a record
+  without a label) refuses the export as `library.dependency_missing`. A declared part's map
   that a row leaves out is listed among the omissions as `<path>.user_data`, such as `devices[].user_data`.
 
 **Callback write ownership.** A create, replace or assign callback shares the caller's proposal.

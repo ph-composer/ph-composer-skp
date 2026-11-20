@@ -85,7 +85,8 @@ module PhComposer
         end
       end
 
-      # Every local record a written row names through its kind's dependencies, written too, and theirs in turn.
+      # Every local record a written row names through its kind's dependencies, written too, and theirs in turn. One
+      # that cannot be written (a record without a label) refuses the export, which would otherwise not supply it.
       def add_dependencies(request, declarations, collected)
         adapter_of = ->(kind) { declarations.find { |row| row.adapter.wire_kind == kind } }
         queue = collected.rows.flat_map { |kind, rows| rows.map { |row| [kind, row] } }
@@ -99,7 +100,14 @@ module PhComposer
             declaration = adapter_of.call(target.fetch("kind"))
             count = written.length
             collect(request, declaration, declaration.record_kind, target.fetch("id"), collected)
-            queue << [target.fetch("kind"), written.last] if written.length > count
+            unless written.length > count
+              raise Error.new("library.dependency_missing", "#{kind} #{row.fetch('id')} names " \
+                                                            "#{target.fetch('kind')} #{target.fetch('id')}, which " \
+                                                            "cannot be written.",
+                              { "kind" => target.fetch("kind"), "record_id" => target.fetch("id") })
+            end
+
+            queue << [target.fetch("kind"), written.last]
           end
         end
       end

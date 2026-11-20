@@ -14137,7 +14137,7 @@ Example params:
 
 Review local library export counts and omissions. Owner: `ph_composer.library`.
 
-Refuses: `library.adapter_invalid`, `library.catalog_too_many_rows`, `library.destination_invalid`, `library.export_write_failed`, `library.kind_unavailable`, `location.kind_mismatch`, `location.revoked`, `location.setup_unavailable`, `location.setup_unreadable`, `location.unavailable`, `location.unknown`, `location.used`, `record.unreadable`, `target.not_found`, and the `query` common set.
+Refuses: `library.adapter_invalid`, `library.catalog_too_many_rows`, `library.dependency_missing`, `library.destination_invalid`, `library.export_write_failed`, `library.kind_unavailable`, `location.kind_mismatch`, `location.revoked`, `location.setup_unavailable`, `location.setup_unreadable`, `location.unavailable`, `location.unknown`, `location.used`, `record.unreadable`, `target.not_found`, and the `query` common set.
 
 Params:
 
@@ -14332,7 +14332,7 @@ Example params:
 
 A bounded page of what a library export leaves out, for the same scope as export_preview. Owner: `ph_composer.library`.
 
-Refuses: `library.adapter_invalid`, `library.catalog_too_many_rows`, `library.kind_unavailable`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `revision.stale`, `target.not_found`, and the `query` common set.
+Refuses: `library.adapter_invalid`, `library.catalog_too_many_rows`, `library.dependency_missing`, `library.kind_unavailable`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `revision.stale`, `target.not_found`, and the `query` common set.
 
 Params:
 
@@ -89645,7 +89645,7 @@ Write local definitions to a library file the user chooses in the native save di
 
 Needs the user: the panel or menu asks for a destination file first. Any other caller passes `location`, the id of a location the user approved, or is refused with `access.user_required`.
 
-Refuses: `export.replace_required`, `library.adapter_invalid`, `library.catalog_too_many_rows`, `library.destination_changed`, `library.destination_invalid`, `library.export_write_failed`, `library.file_malformed`, `library.file_too_large`, `library.format_invalid`, `library.kind_unavailable`, `library.schema_unsupported`, `library.update_destination_invalid`, `library.update_destination_required`, `record.unreadable`, `revision.stale`, `target.not_found`, and the `file_export` and `approval` and `location` common sets.
+Refuses: `export.replace_required`, `library.adapter_invalid`, `library.catalog_too_many_rows`, `library.dependency_missing`, `library.destination_changed`, `library.destination_invalid`, `library.export_write_failed`, `library.file_malformed`, `library.file_too_large`, `library.format_invalid`, `library.kind_unavailable`, `library.schema_unsupported`, `library.update_destination_invalid`, `library.update_destination_required`, `record.unreadable`, `revision.stale`, `target.not_found`, and the `file_export` and `approval` and `location` common sets.
 
 Params:
 

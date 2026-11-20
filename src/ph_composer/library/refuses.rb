@@ -56,8 +56,8 @@ module PhComposer
                         reference.invalid target.ambiguous target.changed target.locked target.not_found
                         target.shared_definition target.wrong_hierarchy target.wrong_kind
                         validation.failed] + USE).uniq.freeze
-      EXPORTABLE = %w[library.adapter_invalid library.catalog_too_many_rows library.kind_unavailable
-                      record.unreadable target.not_found].freeze
+      EXPORTABLE = %w[library.adapter_invalid library.catalog_too_many_rows library.dependency_missing
+                      library.kind_unavailable record.unreadable target.not_found].freeze
       EXPORT_OMISSIONS = (EXPORTABLE + PAGE + %w[revision.stale]).freeze
       EXPORT_PREVIEW = (EXPORTABLE + %w[library.destination_invalid library.export_write_failed location.kind_mismatch
                                         location.revoked location.setup_unavailable location.setup_unreadable

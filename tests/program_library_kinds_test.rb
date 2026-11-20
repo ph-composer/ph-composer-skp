@@ -198,6 +198,10 @@ class ProgramLibraryKindsTest < PhComposerTestCase
     assert_equal "completed", result["status"], result.inspect
     exported = JSON.parse(File.read(path))
     assert_equal [1, 2, 1], %w[programs schedules equipment_sets].map { |kind| exported.dig("kinds", kind).length }
+    refused = unlabelled_schedules do
+      PhComposer::Dispatch.new.query(context, "#{L}.export_preview", selected.slice("scope", "records"))
+    end
+    assert_equal "library.dependency_missing", refused["code"], "a Schedule it cannot write refuses: #{refused}"
 
     @model = Sketchup::Model.new
     Sketchup.active_model = @model
@@ -279,6 +283,18 @@ class ProgramLibraryKindsTest < PhComposerTestCase
     refused = invoke("#{L}.copy", copy_params("equipment_sets", "kitchen", "use_library")
       .merge("local_id" => set.fetch("id"), "expected_values" => candidate.fetch("expected_values")))
     assert_equal ["validation.failed", dishwasher], [refused["code"], refused.dig("detail", "device_id")]
+  end
+
+  # A Schedule an export could not label, as an outside kind's unlabelled record would be.
+  def unlabelled_schedules
+    admission = PhComposer::Library::Admission
+    original = admission.method(:label_for)
+    admission.define_singleton_method(:label_for) do |adapter, mapped|
+      adapter.wire_kind == "schedules" ? nil : original.call(adapter, mapped)
+    end
+    yield
+  ensure
+    admission.define_singleton_method(:label_for, original)
   end
 
   def test_copy_and_model_default_assignment_are_one_undo_step

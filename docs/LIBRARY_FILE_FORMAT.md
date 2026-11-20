@@ -162,7 +162,8 @@ is written. A local Schedule with the same name and other values refuses the cop
 Program again.
 
 Exporting a Program also exports each Schedule it names, even when the selection or the chosen
-kinds leave the Schedule out, so the file can supply it. An exported Equipment Set's devices carry
+kinds leave the Schedule out, so the file can supply it. A Schedule that cannot be written refuses
+the export with `library.dependency_missing`. An exported Equipment Set's devices carry
 no `user_data`; the review before the write lists `devices[].user_data` as omitted.
 
 A copied Program or Equipment Set can become the Model's default in the copy's Undo step. A
