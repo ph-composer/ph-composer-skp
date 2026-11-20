@@ -5,8 +5,9 @@ STATUS: Offline and browser rows pass; the UI polish review is recorded below. T
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
-Run by the P4a-02 stage on branch `feature/phase-06-program-p4a-02`, before the review fixes were final;
-the gate reruns them on the PR head. Screenshots stay in `_private/ui/pg02-20261120/`.
+Run by the P4a-02 stage on PR [#540](https://github.com/ph-composer/ph-composer-skp/pull/540). The offline
+suites and the browser checks named below passed again on the PR head `50ed6d4a`, after the last review
+fix. Screenshots stay in `_private/ui/pg02-20261120/`.
 
 ## What ran
 
@@ -22,6 +23,8 @@ the gate reruns them on the PR head. Screenshots stay in `_private/ui/pg02-20261
 | A `segmentHeading` contribution shows in every view | Pass | Panel test in Geometry and Spaces |
 | The Geometry column and the Manage dialog are gone | Pass | Panel tests; `zone_options_checks.cjs` now manages Levels only |
 | Cancel, close and Escape write nothing | Pass | Panel test for each route; browser check for Escape |
+| A Shift-click range across Segments, a name changed elsewhere during New, a Zone with no Faces moved from the Geometry bar | Pass | Panel tests added for the second Codex review's findings |
+| Bridge rows: New and a settings save each one native Undo step, a settings-only save past a locked member | Owed | The stage's launch of the installed build on `50ed6d4a` reached no bridge in 180 s and no SketchUp window was readable, so nothing ran; SketchUp was quit through hostkit. Case `PG02` is in the case ledger for the batched sitting |
 | Panel gestures in SketchUp, Ed at the mouse | Owed | Runs in the conductor's batched sitting on the final head |
 
 ## UI polish review

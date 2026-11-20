@@ -5137,6 +5137,27 @@
         "tools/examples/authoring/client.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "PG02",
+      "label": "Building Segment heading rows and settings on the installed RBZ: through the public API with the panel closed, New Building Segment with a Zone moved in and a settings save (rename, a development namespace's payload) are each one native Undo step that the bridge undoes and redoes, and a settings-only save is not blocked by a locked member Zone; the panel gestures (heading rows, New, Move, Delete, the settings dialog) with Ed at the mouse",
+      "mode": "mixed",
+      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/zones/options/*",
+        "src/ph_composer/features/zones/zone/selection.rb",
+        "src/ph_composer/html/features/zones/segment_rows.js",
+        "src/ph_composer/html/features/zones/segment_settings.js",
+        "src/ph_composer/html/features/zones/overview.js",
+        "src/ph_composer/html/features/zones/faces_view.js",
+        "src/ph_composer/html/features/spaces/selection.js",
+        "src/ph_composer/html/table.js",
+        "src/ph_composer/html/table_views.js",
+        "src/ph_composer/html/panel.js",
+        "tools/examples/zones/example_segment_note.rb",
+        "tools/examples/authoring/segment_membership_walkthrough.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }
