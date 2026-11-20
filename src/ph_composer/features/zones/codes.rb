@@ -51,6 +51,8 @@ module PhComposer
         "gesture.retirement_conflict" => "One gesture would retire the same Face's pair two different ways.",
         "gesture.too_large" => "The gesture selects more Faces than one edit may change.",
         "zone.option_duplicate" => "An equivalent managed option name already exists.",
+        "zone.option_last_segment" => "The Model keeps at least one Building Segment, so the last one cannot be " \
+                                      "deleted.",
         "zone.option_export_conflict" => "Distinct Building Segments share one export identifier; map to a survivor.",
         "zone.options_conflict" => "Recovery or shared-storage choice evidence conflicts; explicit repair is required.",
         "zone.options_adoption_required" => "Adopt the legacy or copied choices before editing categories.",

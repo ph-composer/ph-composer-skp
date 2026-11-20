@@ -351,14 +351,14 @@
       "sha256": "4b2224b002005cc089bf288895ef1482fc82135cbfd7df23af32770c08d09625"
     },
     "html/features/zones/option_dialog.js": {
-      "bytes": 18234,
+      "bytes": 18914,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "2c0de743bec5ba6b179338e85a6048103ce981e71b1c372a5e0e59ae9927e947"
+      "sha256": "d0f2e0076554790319bab4d21789e2c5fea526c16150dc365f5842bcdc32abf6"
     },
     "html/features/zones/overview.js": {
-      "bytes": 55342,
+      "bytes": 55363,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "d20b24411e2816b8e711aef1c2508966f88a6d2da8c833c5d47e1a6403ef93f4"
+      "sha256": "b47a1bc186af767adb7f69a8f4f7fb5e00fd26995ab6915e1351332e54b0f64c"
     },
     "html/features/zones/selection_assignment.js": {
       "bytes": 3325,
@@ -366,14 +366,14 @@
       "sha256": "a9f33843f372696ccb00b00b12265eb743e1b634abc21d16acdce5fb4f74ca81"
     },
     "html/features/zones/zone_cells.js": {
-      "bytes": 13105,
+      "bytes": 13290,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "3507914a7b5c8eaea453c4c59e2a10762987865e3dec93fa3482641104d9f738"
+      "sha256": "b08fe03d911223525c17e697043051c00ae9a58a04a39ab79087dbdb99ae2a55"
     },
     "html/features/zones/zone_options.js": {
-      "bytes": 2134,
+      "bytes": 2200,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "1db32af794a7c49b83682bffb478b073ea1ef959359301eaf548dfe984c07c54"
+      "sha256": "91042a74a09c81eca4633b3d4e122fe95a7dea7059d0ffb7bca21cabd4f5ac03"
     },
     "html/features/zones/zone_settings.js": {
       "bytes": 5065,

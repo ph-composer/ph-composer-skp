@@ -3,7 +3,7 @@
 DATE: 2026-11-15
 STATUS: Scoped. Phase 4a stages P4a-01 to P4a-04; no stage authorized.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
 A Zone may be in no Building Segment; Segments are managed from every Zone view; each Segment's
 values are edited in one settings dialog; export applies the minimum and the Attached zone rule.

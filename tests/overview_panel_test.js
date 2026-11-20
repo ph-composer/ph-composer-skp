@@ -1531,6 +1531,19 @@ test("managed chip updates send complete v2 values and expected values, with cus
     payload.sections["ph_composer.zones.overview"].value.zones[0].values);
 });
 
+test("a Zone in no Building Segment reads No Building Segment and can be moved back", function () {
+  var p = page(), payload = managedSnapshot(), zone = payload.sections["ph_composer.zones.overview"].value.zones[0];
+  zone.schema_version = 3; zone.values.building_segment_id = null;
+  p.panel.receive({ type: "panel.snapshot", payload: payload });
+  var segment = byLabel(p.query("[data-section='ph_composer.overview']"), "Zone 1 Building-Segment");
+  var none = segment.children[segment.children.length - 1];
+  assert.deepStrictEqual([none.value, none.textContent], ["", "No Building Segment"]);
+  assert.strictEqual(segment.value, "");
+  segment.value = "bsg_tower"; segment.listeners.change({});
+  assert.strictEqual(p.sent[0].payload.params.values.building_segment_id, "bsg_tower");
+  assert.strictEqual(p.sent[0].payload.params.expected_values.building_segment_id, null);
+});
+
 test("managed choice error descriptions remain unique after removing and adding Zone rows", function () {
   var p = page(), payload = managedSnapshot(), zones = payload.sections["ph_composer.zones.overview"].value.zones;
   function another(id, name, path) {

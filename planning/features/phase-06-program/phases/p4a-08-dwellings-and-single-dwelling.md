@@ -3,7 +3,7 @@
 DATE: 2026-11-15
 STATUS: Scoped (rewritten after the Programs tab review). Not authorized.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
 ## Entry and scope
 

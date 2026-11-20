@@ -12,7 +12,8 @@ module PhComposer
         "field" => { "type" => "string", "enum" => Selection::FIELDS.keys, "description" => "The Zone value to set." },
         "value" => { "type" => %w[string number null],
                      "description" => "The new value: text for name, building_segment and level (null clears " \
-                                      "level), a number in mm for ground_depth_mm." }
+                                      "level, and moves the Zone to No Building Segment for building_segment), " \
+                                      "a number in mm for ground_depth_mm." }
       }).freeze
       ASSIGNMENT = Shapes.object({ "token" => { "type" => %w[string null] },
                                    "revision" => { "type" => %w[integer null] },

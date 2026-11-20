@@ -157,7 +157,7 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
       var held = filters[collection]; if (!held) return;
       var mapped = held.map(function (id) {
         if (!Object.prototype.hasOwnProperty.call(replacements, id)) return id;
-        return replacements[id] || (collection === "level" ? "" : null);
+        return replacements[id] || "";
       }).filter(function (id, index, every) { return id !== null && every.indexOf(id) === index; });
       if (mapped.length) filters[collection] = mapped;
       else delete filters[collection];
@@ -319,7 +319,7 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
       if (choice) return choice.values.name;
       var source = (state.zoneRecords || []).filter(function (zone) { return filterValue(zone, field) === value; })[0];
       return source ? zoneOptions.label(zoneOptions.read(state.snapshot), source,
-        field) : value ? "Choose a replacement" : "Not set";
+        field) : value ? "Choose a replacement" : field === "building_segment" ? "No Building Segment" : "Not set";
     }
     return value || "Not set";
   }

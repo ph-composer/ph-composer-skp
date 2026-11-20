@@ -94,11 +94,13 @@ module PhComposer
         raise CodedError.new(code, "#{message}. Nothing was written.")
       end
 
+      # A managed Zone's Building Segment and Level records, each nil where the Zone names none. A named
+      # option that is gone refuses.
       def resolve(engine, record, proposal = nil)
         return record.values_at("building_segment", "level") if record.fetch("schema_version") == 1
 
-        segment = engine.find(SEGMENT_KIND, record.fetch("building_segment_id"),
-                              :change_set => proposal&.record_changes)
+        segment = record["building_segment_id"] && engine.find(SEGMENT_KIND, record.fetch("building_segment_id"),
+                                                               :change_set => proposal&.record_changes)
         level = record["level_id"] && engine.find(LEVEL_KIND, record.fetch("level_id"),
                                                   :change_set => proposal&.record_changes)
         [segment, level]

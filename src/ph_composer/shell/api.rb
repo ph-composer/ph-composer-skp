@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 72
+    MINOR = 73
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -405,7 +405,16 @@ module PhComposer
       { "minor" => 72, "date" => "2026-11-19",
         "change" => "ph_composer.shading.export_preflight gives a marked Group or component inside a Zone both " \
                     "shading.zone_inside and shading.classified_inside when it holds a Zone, a claimed object or a " \
-                    "cutting component beside classified Faces; before, the first note hid the second." }
+                    "cutting component beside classified Faces; before, the first note hid the second." },
+      { "minor" => 73, "date" => "2026-11-20",
+        "change" => "Zone schema 3: building_segment_id may be null, No Building Segment; Zones write schema 3 and " \
+                    "schema 2 still reads. ph_composer.zones.update_field and ph_composer.zones.update accept a null " \
+                    "building_segment. ph_composer.zones.options.manage and remove accept a null replacement for a " \
+                    "used Building Segment, which moves its Zones to No Building Segment; removing the default moves " \
+                    "it to the replacement, else to the first remaining Segment; removing the last Segment refuses " \
+                    "zone.option_last_segment. manage, remove and merge results add removed_extensions and " \
+                    "removed_extensions_total. Colour-by Building Segment shows Zones in no Segment as one neutral " \
+                    "No Building Segment row. Until export leaves them out, such a Zone blocks export." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

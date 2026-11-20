@@ -15,14 +15,28 @@ module PhComposer
                                                           "byte limit."),
           "user_data_key_total" => Shapes::COUNT
         }).freeze
-        # manage, remove and merge also report the maps of the options they remove.
-        MANAGE_RESULT = Shapes.with(RESULT, "removed_user_data" => Shapes.list(
+        REMOVED_EXTENSION = Shapes.object({ "id" => Shapes::ID,
+                                            "namespaces" => Shapes.list({ "type" => "string" }) }).freeze
+        # manage, remove and merge also report the maps and the extension namespaces of the options they remove.
+        REMOVED_USER_DATA = Shapes.list(
           DISCARDED, :description => "Each removed option whose user_data was not empty, in id order, the first " \
                                      "#{Records::Metadata::REPORT_LIMIT} within " \
                                      "#{Records::Metadata::REPORT_BYTES} bytes: its map is gone, the survivor " \
                                      "keeps its own, and Undo brings it back."
-        ), "removed_user_data_total" => Shapes::COUNT, "removed_user_data_truncated" => SchemaShapes::DISCARD_TRUNCATED)
-                              .freeze
+        ).freeze
+        REMOVED_EXTENSIONS = Shapes.list(
+          REMOVED_EXTENSION, :description => "Each removed option that carried extension data, in id order, the " \
+                                             "first #{Records::Metadata::REPORT_LIMIT}, with its namespaces: " \
+                                             "another feature's settings on that option went with it, and Undo " \
+                                             "brings them back."
+        ).freeze
+        MANAGE_RESULT = Shapes.with(RESULT, {
+          "removed_user_data" => REMOVED_USER_DATA,
+          "removed_user_data_total" => Shapes::COUNT,
+          "removed_user_data_truncated" => SchemaShapes::DISCARD_TRUNCATED,
+          "removed_extensions" => REMOVED_EXTENSIONS,
+          "removed_extensions_total" => Shapes::COUNT
+        }).freeze
         COLLECTION = { "type" => "string", "enum" => %w[building_segment level] }.freeze
         MANAGE = Shapes.object({
           "collection" => COLLECTION, "options" => Shapes.list(OPTION), "expected_options" => Shapes.list(OPTION),
@@ -42,7 +56,7 @@ module PhComposer
                                    "collision_clusters" => Shapes.list(Shapes.list(Shapes::ID)) }).freeze
         REFUSALS = (Refuses::ZONE_TARGET + %w[reference.invalid reference.in_use copy.rule_missing extension.invalid
                                               zone.option_duplicate zone.option_export_conflict zone.options_conflict
-                                              zone.options_adoption_required]).uniq.freeze
+                                              zone.options_adoption_required zone.option_last_segment]).uniq.freeze
 
         module_function
 
@@ -181,14 +195,19 @@ module PhComposer
           "collection" => "Building Segment or Level collection to read or edit.",
           "options" => "Complete final collection; additions have temporary new: IDs.",
           "expected_options" => "Complete collection last read; a change refuses.",
-          "default_segment_id" => "The final default Segment; temporary IDs are resolved in the batch.",
+          "default_segment_id" => "The final default Segment; temporary IDs are resolved in the batch. Null " \
+                                  "while removing the current default moves it to that Segment's replacement, " \
+                                  "else to the first remaining Segment.",
           "expected_default_segment_id" => "The default Segment last read.",
-          "replacements" => "Removed option IDs mapped to survivors, or null for explicit Level clearing.",
+          "replacements" => "Removed option IDs mapped to survivors, or null: a Level is cleared, a Building " \
+                            "Segment's Zones move to No Building Segment.",
           "mappings" => "One explicit destination/survivor mapping for every adoption source.",
           "id" => "The stable option ID to read or edit.", "values" => "The option's name and colour.",
           "expected_values" => "The name and colour last read; a change refuses.",
           "user_data" => "JSON-compatible contributor metadata preserved locally.",
-          "replacement_id" => "A surviving replacement; null explicitly clears a Level.",
+          "replacement_id" => "A surviving replacement, or null: clears a Level, or moves a Building Segment's " \
+                              "Zones to No Building Segment. Removing the default Segment makes the replacement " \
+                              "the default, else the first remaining Segment.",
           "target_id" => "The surviving option receiving all source references.",
           "limit" => "Maximum options returned on this page.", "cursor" => "Cursor from the previous page."
         }.freeze

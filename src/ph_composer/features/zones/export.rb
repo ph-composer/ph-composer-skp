@@ -41,11 +41,7 @@ module PhComposer
         zones.each do |zone|
           begin
             Schema.validate!(zone.record)
-            if (managed || zone.record.fetch("schema_version") == 2) &&
-               Options::Adoption.needs_adoption?(request.engine, zone.record)
-              Options.refuse("zone.options_adoption_required", "Adopt legacy or copied choices before export")
-            end
-            Options.resolve(request.engine, zone.record) if zone.record.fetch("schema_version") == 2
+            check_choices!(request, zone.record, managed)
             Occurrences.resolve_zone(request.model, zone.reference, :mutable => true, :index => index)
           rescue CodedError => error
             findings << { "code" => error.code, "section" => SECTION, "object_id" => zone.record["id"],
@@ -67,6 +63,20 @@ module PhComposer
                    "checked" => true, "action" => "#{FEATURE_ID}.solve_adjacency",
                    "params" => { "zones" => zones.map(&:reference) } }
         { "findings" => findings, "repairs" => zones.empty? ? [] : [repair] }
+      end
+
+      # A Zone's options as export needs them: adopted when the Model manages its options, and each named
+      # option present. Until export leaves Zones in no Building Segment out, such a Zone blocks it.
+      def check_choices!(request, record, managed)
+        if (managed || Schema.managed?(record)) && Options::Adoption.needs_adoption?(request.engine, record)
+          Options.refuse("zone.options_adoption_required", "Adopt legacy or copied choices before export")
+        end
+        return unless Schema.managed?(record)
+
+        Options.resolve(request.engine, record)
+        return unless record["building_segment_id"].nil?
+
+        Options.refuse("reference.invalid", "Put this Zone in a Building Segment before export")
       end
 
       # The metadata extraction refuses, read as `records` reads it: each Zone with its user_data passed
@@ -174,7 +184,7 @@ module PhComposer
       def occurrences(reader)
         zone_occurrences(reader).map do |entry, record|
           record = Names.project(record, entry.native_name)
-          segment = if record.fetch("schema_version") == 2
+          segment = if Schema.managed?(record)
                       option_choices(reader).fetch(Options::SEGMENTS.id)[record["building_segment_id"]]&.fetch("name")
                     else
                       record["building_segment"]
@@ -227,7 +237,7 @@ module PhComposer
           exported = reader.entity_record(record, :fields => %w[name building_segment level],
                                                   :target_kind => REFERENCE_KIND, :path => entry.path,
                                                   :user_data => true)
-          if record.fetch("schema_version") == 2
+          if Schema.managed?(record)
             segment = export_choice(choices, Options::SEGMENTS, record.fetch("building_segment_id"))
             level = record["level_id"] && export_choice(choices, Options::LEVELS, record.fetch("level_id"))
             exported.merge!("building_segment_id" => segment.fetch("id"),

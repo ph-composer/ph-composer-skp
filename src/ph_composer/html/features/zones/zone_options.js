@@ -14,14 +14,15 @@ PhComposerUI.define("features/zones/zone_options", ["snapshot", "workspace"], fu
   function find(options, field, id) {
     return list(options, field).filter(function (choice) { return choice.id === id; })[0];
   }
-  function managed(zone) { return zone.schema_version === 2 || Object.prototype.hasOwnProperty.call(zone.values,
+  function managed(zone) { return zone.schema_version >= 2 || Object.prototype.hasOwnProperty.call(zone.values,
     "building_segment_id"); }
   function value(zone, field) { return zone.values[managed(zone) && COLLECTIONS[field] ? field + "_id" : field]; }
   function label(options, zone, field) {
     if (!managed(zone)) return zone.values[field] || "Not set";
     var id = value(zone, field), choice = find(options, field, id);
     if (choice) return choice.values.name;
-    return (zone.display || {})[field] || (id ? "Choose a replacement" : "Not set");
+    if (!id) return field === "building_segment" ? "No Building Segment" : "Not set";
+    return (zone.display || {})[field] || "Choose a replacement";
   }
   function colour(options, zone, field) {
     var choice = find(options, field, value(zone, field));

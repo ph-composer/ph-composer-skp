@@ -1,9 +1,9 @@
 # Building Segments: membership, management and settings
 
 DATE: 2026-11-15
-STATUS: Scoped. Interviewed 2026-11-15 (BS-1 to BS-6 answered, below); revised the same day after an independent review. Built as Phase 4a stages P4a-01 to P4a-04; the Programs-owned settings sections arrive in P4a-06, P4a-08 and P4a-10 ([PLAN](../PLAN.md)). No stage authorized.
+STATUS: Scoped. Interviewed 2026-11-15 (BS-1 to BS-6 answered, below); revised the same day after an independent review. Built as Phase 4a stages P4a-01 to P4a-04; the Programs-owned settings sections arrive in P4a-06, P4a-08 and P4a-10 ([PLAN](../PLAN.md)). Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft; open one when Ed authorizes P4a-01)
+ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
 ## Problem
 

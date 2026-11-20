@@ -53,7 +53,7 @@ module PhComposer
         zone_ids = targets.map do |target|
           zone = resolve(request.model, target.fetch("reference"), index)
           before = Schema.view(zone.record).fetch("values")
-          if %w[building_segment level].include?(field) && zone.record.fetch("schema_version") == 2
+          if %w[building_segment level].include?(field) && Schema.managed?(zone.record)
             key = "#{field}_id"
             values = before.merge(key => (value && Options.existing_name(request.engine, field, value)))
           else

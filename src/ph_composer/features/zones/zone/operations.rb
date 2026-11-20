@@ -105,7 +105,7 @@ module PhComposer
 
     def restore(request, proposal, parent_path:, zone_id:)
       record, offer = Repair.restore_plan(request.model, parent_path, zone_id)
-      if record.fetch("schema_version") == 2 && Options::Adoption.needs_adoption?(request.engine, record)
+      if Schema.managed?(record) && Options::Adoption.needs_adoption?(request.engine, record)
         Options.refuse("zone.options_adoption_required", "Adopt the recoverable choices before Restore")
       end
       parent_path = Occurrences.integer_path(parent_path)
@@ -228,7 +228,7 @@ module PhComposer
       name ||= default_name(request.model)
       segment = Options.ensure_default(request, proposal)
       record = {
-        "id" => zone_id, "schema_version" => 2, "name" => name,
+        "id" => zone_id, "schema_version" => ZONE_SCHEMA_VERSION, "name" => name,
         "building_segment_id" => segment.fetch("id"), "level_id" => nil,
         "ground_depth_mm" => 0.0, "user_data" => {}, "extension_data" => {}
       }
@@ -248,7 +248,7 @@ module PhComposer
     def update(request, proposal, reference:, values:, expected_values:)
       occurrence = Occurrences.resolve_editable_zone(request.model, reference)
       before = occurrence.record
-      if before.fetch("schema_version") == 2 && Options::Adoption.needs_adoption?(request.engine, before)
+      if Schema.managed?(before) && Options::Adoption.needs_adoption?(request.engine, before)
         Options.refuse("zone.options_adoption_required", "Adopt copied Zone choices before editing")
       end
       expected = Options.adapt_values(request.engine, before, expected_values)
@@ -260,9 +260,10 @@ module PhComposer
 
       after = DeepCopy.call(before)
       values.each { |key, value| after[key] = DeepCopy.call(value) }
-      after["choice_evidence"] = Options.evidence(request.engine, after) if after.fetch("schema_version") == 2
-      Schema.validate!(after)
+      after["choice_evidence"] = Options.evidence(request.engine, after) if Schema.managed?(after)
       return { "zone_id" => before.fetch("id") } if before == after
+
+      after = Schema.validate!(Schema.current(after))
 
       scope = Operations::EntityScope.new(reference.fetch("zone_path")[0...-1])
       proposal.add_step(UpdateZoneStep.new(:reference => reference, :before => before, :after => after),

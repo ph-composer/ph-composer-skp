@@ -285,6 +285,24 @@ the selection, edit path and authored records alone. Pass their paths and IDs to
    its `name` and `colour`. Use the choice IDs in `building_segment_id` and `level_id` when
    updating a managed Zone. Preserve the last-read `expected_values`.
 
+### Building Segment membership
+
+A Zone belongs to at most one Building Segment. A Zone in none reads `building_segment_id` null, shown
+as No Building Segment. The Model keeps at least one Building Segment, and the default is never none.
+
+1. Move Zones in or out with `ph_composer.zones.update_field`, `field` `building_segment` and `value`
+   the Segment's name, or null for No Building Segment. Each target carries the `expected_values` it was
+   read with; one Undo step covers the batch.
+2. Delete a Segment with `ph_composer.zones.options.remove`, `collection` `building_segment`. A Segment
+   that holds Zones needs `replacement_id`: another Segment, or null to move its Zones to No Building
+   Segment. Merge two Segments with `ph_composer.zones.options.merge`.
+3. Deleting the default Segment makes the replacement the default, or the first remaining Segment when
+   the replacement is null. Deleting the last Segment refuses `zone.option_last_segment`.
+4. The result lists the deleted Segment's `removed_user_data` and `removed_extensions`: other features'
+   settings stored on it go with it, and Undo brings them back.
+5. Read back with `ph_composer.zones.list` and `ph_composer.zones.options.list`. Export does not yet
+   take Zones in no Building Segment: its preflight blocks each one until it joins a Segment.
+
 ### Spaces from loose Faces
 
 Ask the user to draw separate loose floor surfaces in SketchUp, inset from the walls or

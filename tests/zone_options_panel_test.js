@@ -88,8 +88,8 @@ test("merge retargets recoverable use and the default in one draft; removing a s
   var p = page(data); p.dialog.open("building_segment");
   p.dialog.removal(p.dialog.draft[0], p.dialog.list.children[0]);
   var replacement = p.find("Replacement for House");
-  assert.ok(!replacement.children.some(function (node) { return node.value === ""; }),
-    "used/default Segment cannot clear");
+  assert.strictEqual(replacement.children.filter(function (node) { return node.value === ""; })[0].textContent,
+    "No Building Segment", "a used Segment's Zones may leave every Segment");
   replacement.value = "bsg_b"; replacement.listeners.change({}); click(p.find("Remove"));
   assert.strictEqual(p.dialog.defaultId, "bsg_b"); assert.strictEqual(p.dialog.replacements.bsg_a, "bsg_b");
   p.dialog.removal(p.dialog.draft[0], p.dialog.list.children[0]); replacement = p.find("Replacement for Annex");
@@ -98,6 +98,23 @@ test("merge retargets recoverable use and the default in one draft; removing a s
   p.dialog.submit(); assert.strictEqual(p.sent.length, 1);
     assert.strictEqual(p.sent[0].payload.params.default_segment_id, "bsg_c");
 });
+
+test("a used Segment moves its Zones to none, the default moves to the first remaining, and the last stays",
+  function () {
+    var p = page(); p.dialog.open("building_segment");
+    p.dialog.removal(p.dialog.draft[0], p.dialog.list.children[0]);
+    var replacement = p.find("Replacement for House"); replacement.value = ""; replacement.listeners.change({});
+    click(p.find("Remove"));
+    assert.strictEqual(p.dialog.defaultId, "bsg_b", "the default is never none");
+    assert.strictEqual(p.dialog.problem(), "");
+    p.dialog.removal(p.dialog.draft[0], p.dialog.list.children[0]);
+    assert.strictEqual(p.find("Replacement for Annex"), undefined, "the last Segment offers no removal");
+    assert.ok(p.dialog.list.querySelector(".phc-zone-option-help").textContent
+      .includes("keeps at least one Building Segment"));
+    p.dialog.submit();
+    assert.deepStrictEqual(p.sent[0].payload.params.replacements, { bsg_a: null });
+    assert.strictEqual(p.sent[0].payload.params.default_segment_id, "bsg_b");
+  });
 
 test("used Level deletion explicitly clears live and recovery assignments", function () {
   var p = page(); p.dialog.open("level"); p.dialog.removal(p.dialog.draft[0], p.dialog.list.children[0]);
@@ -177,7 +194,8 @@ test("each collection's merge note offers what that collection allows", function
     click(p.find("Merge / Delete"));
     return p.dialog.list.querySelector(".phc-zone-option-help").textContent;
   }
-  assert.strictEqual(note("building_segment"), "House: 1 live Zone · 2 recoverable. Choose a survivor to merge.");
+  assert.strictEqual(note("building_segment"),
+    "House: 1 live Zone · 2 recoverable. Choose a survivor to merge, or move its Zones to No Building Segment.");
   assert.strictEqual(note("level"),
     "Ground: 1 live Zone · 1 recoverable. Choose a survivor to merge, or clear the Level assignment.");
 });

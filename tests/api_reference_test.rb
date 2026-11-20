@@ -18,7 +18,7 @@ class ApiReferenceTest < PhComposerTestCase
     zone = API.describe(:name => "ph_composer.zones.zone")
     face = API.describe(:name => "ph_composer.zones.faces.face")
 
-    assert_equal ["reference_target", "ph_composer.zones", 2, "id"],
+    assert_equal ["reference_target", "ph_composer.zones", 3, "id"],
                  zone.values_at("kind", "owner", "schema_version", "identity_field")
     assert_equal "mm", zone.dig("values", "properties", "ground_depth_mm", "x-unit")
     assert_equal %w[zone_id zone_path], zone.dig("occurrence_reference", "required")

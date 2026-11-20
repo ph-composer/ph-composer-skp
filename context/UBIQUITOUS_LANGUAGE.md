@@ -47,7 +47,9 @@ See [geometry records and occurrence references](CONTRACTS.md#geometry-records-a
 | Term | Meaning | honeybee object | Note |
 | --- | --- | --- | --- |
 | Zone | The fundamental geometry unit: one SketchUp Group, at Model root or inside plain wrapper groups and never inside another Zone, carrying envelope faces, Spaces, loads and schedules. A building may be one Zone; a Zone is required before export | `honeybee.room.Room` | honeybee calls this a Room. PH-Composer never uses Room for it, and honeybee's own `Room.zone` text tag is a different thing that PH-Composer does not surface |
-| Building-Segment | A Model-owned option that groups Zones. Every Zone belongs to one Building-Segment | honeybee-ph `BldgSegment` | Supplies the grouping for the planned METr handoff |
+| Building-Segment | A Model-owned option that groups Zones. A Zone belongs to at most one Building-Segment, and the Model keeps at least one | honeybee-ph `BldgSegment` | Supplies the grouping for the planned METr handoff |
+| Default Building Segment | The Building-Segment every new Zone joins. Never none: deleting it moves the default to the Segment its Zones moved to, else to the first remaining one | | `default_segment_id` in the Zone option settings |
+| No Building Segment | The state of a Zone in no Building-Segment: `building_segment_id` is null. Such a Zone is left out of export | | Until export leaves these Zones out, export preflight blocks them |
 | Level | An optional Model-owned choice for grouping and sorting Zones. A Space inherits its Zone's Level | `Room.story` | |
 | Adjacency | A reciprocal pairing of path-qualified face endpoints in different Zones, carrying Zone UUIDs, face persistent ids and solved world-geometry stamps | `Surface` boundary condition while current | Solved on demand, never live; identity and freshness are separate |
 | Interior face | A face of a Zone whose other side is another Zone, solved or not | `Surface` when solved, `Adiabatic` when marked To neighbour | Distinct from an envelope face facing Outdoors or Ground |

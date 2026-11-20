@@ -1,9 +1,9 @@
 # Phase 6: Programs
 
 DATE: 2026-11-14
-STATUS: Scoped (2026-11-15): PRDs, contracts, plan, acceptance and stages P4a-01 to P4a-12 written; P4a-01 to P4a-11 ready to authorize. No stage authorized.
+STATUS: Scoped (2026-11-15): PRDs, contracts, plan, acceptance and stages P4a-01 to P4a-12 written; P4a-01 to P4a-12 authorized 2026-11-20 through the implement-loop; progress in [STATUS](STATUS.md).
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
 Renumbered 2026-11-15 when Ed re-ordered the phases. Stage, decision, register and roadmap item ids keep their original prefixes (P4a-, D4a-, Q4a-, C4a-): this was Phase 4a, and its documents still say so. In DECISIONS and the research notes "Phase 4" means Mechanical, now Phase 7; Phase 4 is Climate and Phase 5 is Shading, both archived.
 

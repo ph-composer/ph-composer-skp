@@ -3,7 +3,7 @@
 DATE: 2026-11-15
 STATUS: Scoped for P4a-01 to P4a-11; revised after an independent review against the code (14 findings), the Programs tab review and a consistency sweep, all 2026-11-15. Ed answered C4a-5 and C4a-7 to C4a-10; C4a-2, C4a-3, C4a-4 and C4a-6 settle in their stages. C4a-11 to C4a-14 were raised on 2026-11-20, after Climate and Shading landed; Ed accepted all four recommendations the same day.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
 The data structures the [Phase 4a PRD](PRD.md) and the [Building Segments PRD](building-segments/PRD.md)
 need, who owns each, and the seams between features. Names here bind the stages in [PLAN](PLAN.md).

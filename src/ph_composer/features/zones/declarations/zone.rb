@@ -7,7 +7,7 @@ module PhComposer
     module ZoneRegistration
       TARGET = Records::ReferenceTarget.new(
         :id => REFERENCE_KIND, :label => "Zone", :records => Zones.method(:reference_entries),
-        :validate => Schema.method(:problems), :schema_version => 2, :values => INPUT_VALUES,
+        :validate => Schema.method(:problems), :schema_version => ZONE_SCHEMA_VERSION, :values => INPUT_VALUES,
         :references => Options::CHOICE_REFERENCES,
         :occurrence => ZONE_REFERENCE,
         :locate => Occurrences.method(:locate_zone), :locate_index => Index.method(:new)

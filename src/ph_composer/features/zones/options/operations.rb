@@ -101,6 +101,8 @@ module PhComposer
       # Replaces one option collection as the dialog left it. The order is the commit order: guards on the
       # state the dialog read, the staged options, the replacement for each removed one, the default
       # Building Segment, the Zone rewrites, and last the deletions the rewrites leave unreferenced.
+      # The Model keeps at least one Building Segment. A null `default_segment_id` while the current default
+      # is removed moves the default to that Segment's destination, else to the first remaining Segment.
       def manage(request, proposal, collection:, options:, expected_options:, default_segment_id:,
                  expected_default_segment_id:, replacements:)
         inventory = Inventory.rows(request.model)
@@ -115,6 +117,9 @@ module PhComposer
         kind = KINDS.fetch(collection)
         ids = options.map { |row| row.fetch("id") }
         refuse("params.invalid", "An option appears more than once") unless ids.uniq == ids
+        if collection == "building_segment" && ids.empty?
+          refuse("zone.option_last_segment", "Keep at least one Building Segment")
+        end
         created = stage_options(request, proposal, collection, options)
         final_ids = ids.map { |id| created.fetch(id, id) }
         final = final_ids.map { |id| request.engine.find(kind.id, id, :change_set => proposal.record_changes) }
@@ -122,14 +127,31 @@ module PhComposer
         removed = before.map { |row| row.fetch("id") } - final_ids
         refuse("params.invalid", "Replacement names an option that remains") unless (replacements.keys - removed).empty?
         mapping = replacement_mapping(inventory, collection, removed, replacements, created, final_ids)
-        stage_default_segment(request, proposal, collection, created.fetch(default_segment_id, default_segment_id),
-                              expected_default_segment_id, final_ids)
-        discarded = removed_user_data(request.engine, kind, removed)
+        default_id = created.fetch(default_segment_id, default_segment_id)
+        if default_id.nil? && collection == "building_segment" && removed.include?(expected_default_segment_id)
+          default_id = mapping[expected_default_segment_id] || final_ids.first
+        end
+        stage_default_segment(request, proposal, collection, default_id, expected_default_segment_id, final_ids)
+        discarded = removed_user_data(request.engine, kind, removed).merge(removed_extensions(request.engine, kind,
+                                                                                              removed))
         reference_plan = rewrite(request, proposal, collection, mapping, inventory)
         removed.each do |id|
           request.engine.propose_delete(kind.id, id, proposal, :reference_plan => reference_plan)
         end
         { "created_ids" => created, "replacement_ids" => mapping }.merge(discarded)
+      end
+
+      # What removing options discards beyond user_data: each removed option that carried extension data, by
+      # id with its namespaces sorted, in id order, the first Records::Metadata::REPORT_LIMIT of them, and how
+      # many there are. Another feature's settings on a Building Segment live there, so they go with it in the
+      # same step, and Undo brings them back.
+      def removed_extensions(engine, kind, removed)
+        rows = removed.sort.filter_map do |id|
+          namespaces = engine.find(kind.id, id).fetch("extension_data", {}).keys.sort
+          { "id" => id, "namespaces" => namespaces } unless namespaces.empty?
+        end
+        { "removed_extensions" => rows.first(Records::Metadata::REPORT_LIMIT),
+          "removed_extensions_total" => rows.length }
       end
 
       # What removing options discards, for the result: each removed option whose map was not empty, by id
@@ -141,8 +163,8 @@ module PhComposer
       end
 
       # Each removed option id and the final option its users move to, or nil. A used option needs an
-      # explicit entry in `replacements`; a used Level may map to nil, which clears it, but a used Building
-      # Segment needs a final option. An unused option maps to its replacement or nil.
+      # explicit entry in `replacements`; nil clears a Level or moves a Building Segment's Zones to No
+      # Building Segment. An unused option maps to its replacement or nil.
       def replacement_mapping(inventory, collection, removed, replacements, created, final_ids)
         removed.to_h do |id|
           used = usage(inventory, collection, id).values.any?(&:positive?)
@@ -151,9 +173,6 @@ module PhComposer
           target = created.fetch(replacements[id], replacements[id])
           if target && !final_ids.include?(target)
             refuse("reference.invalid", "Choose an option in the final collection")
-          end
-          if collection == "building_segment" && used && target.nil?
-            refuse("reference.invalid", "Building Segment requires a replacement")
           end
           [id, target]
         end
@@ -204,12 +223,14 @@ module PhComposer
         entries = []
         inventory.each do |row|
           before = row.fetch(:record)
-          next unless before.fetch("schema_version") == 2
+          next unless Schema.managed?(before)
 
           after = DeepCopy.call(before)
           after[field] = mapping.fetch(before[field], before[field])
           after["choice_evidence"] = evidence(request.engine, after, proposal)
           next if after == before
+
+          after = Schema.current(after)
 
           add_rewrite(row, after, writes)
           record = row.fetch(:zone) ? after : after.merge("id" => after.fetch("zone_id"))
@@ -250,7 +271,8 @@ module PhComposer
           return values
         end
 
-        segment_id = existing_name(engine, "building_segment", values.fetch("building_segment"))
+        segment_id = values["building_segment"] && existing_name(engine, "building_segment",
+                                                                 values.fetch("building_segment"))
         level_id = values["level"] && existing_name(engine, "level", values.fetch("level"))
         values.reject { |key, _| %w[building_segment level].include?(key) }
               .merge("building_segment_id" => segment_id, "level_id" => level_id)

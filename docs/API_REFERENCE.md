@@ -3390,7 +3390,7 @@ Values:
 
 ### `ph_composer.zones.zone`
 
-Zone, a entity kind owned by `ph_composer.zones`, schema version 2.
+Zone, a entity kind owned by `ph_composer.zones`, schema version 3.
 
 References: `building_segment_id` names one `ph_composer.zones.building_segment`; `level_id` names one `ph_composer.zones.level`.
 
@@ -3410,7 +3410,10 @@ Values:
       "minLength": 1
     },
     "building_segment": {
-      "type": "string",
+      "type": [
+        "string",
+        "null"
+      ],
       "minLength": 1
     },
     "level": {
@@ -3424,7 +3427,10 @@ Values:
       "x-unit": "mm"
     },
     "building_segment_id": {
-      "type": "string",
+      "type": [
+        "string",
+        "null"
+      ],
       "minLength": 1
     },
     "level_id": {
@@ -30666,7 +30672,10 @@ Result:
                 "minLength": 1
               },
               "building_segment": {
-                "type": "string",
+                "type": [
+                  "string",
+                  "null"
+                ],
                 "minLength": 1
               },
               "level": {
@@ -30680,7 +30689,10 @@ Result:
                 "x-unit": "mm"
               },
               "building_segment_id": {
-                "type": "string",
+                "type": [
+                  "string",
+                  "null"
+                ],
                 "minLength": 1
               },
               "level_id": {
@@ -31179,7 +31191,7 @@ Example params:
 
 All-Zone export checks and adjacency repair. Owner: `ph_composer.zones`.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.options_adoption_required`, `zone.options_conflict`, and the `query` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.option_last_segment`, `zone.options_adoption_required`, `zone.options_conflict`, and the `query` common set.
 
 Params:
 
@@ -33238,7 +33250,10 @@ Result:
                 "minLength": 1
               },
               "building_segment": {
-                "type": "string",
+                "type": [
+                  "string",
+                  "null"
+                ],
                 "minLength": 1
               },
               "level": {
@@ -33252,7 +33267,10 @@ Result:
                 "x-unit": "mm"
               },
               "building_segment_id": {
-                "type": "string",
+                "type": [
+                  "string",
+                  "null"
+                ],
                 "minLength": 1
               },
               "level_id": {
@@ -33812,7 +33830,7 @@ Example params:
 
 Read-only legacy/copied choice inventory. Owner: `ph_composer.zones`.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.options_adoption_required`, `zone.options_conflict`, and the `query` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.option_last_segment`, `zone.options_adoption_required`, `zone.options_conflict`, and the `query` common set.
 
 Params:
 
@@ -33924,7 +33942,7 @@ Example params:
 
 One part of one adoption source as adoption_preview lists it, exactly, as canonical JSON text in fragments: join every fragment's text in order, check its sha256 and parse it. Owner: `ph_composer.zones`.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `query.cursor_expired`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.options_adoption_required`, `zone.options_conflict`, and the `query` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `query.cursor_expired`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.option_last_segment`, `zone.options_adoption_required`, `zone.options_conflict`, and the `query` common set.
 
 Params:
 
@@ -34059,7 +34077,7 @@ Example params:
 
 One bounded page of the legacy and copied choices adoption_preview lists, by key, beside whether adoption is required and the suggested Segment. Owner: `ph_composer.zones`.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.options_adoption_required`, `zone.options_conflict`, and the `query` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.option_last_segment`, `zone.options_adoption_required`, `zone.options_conflict`, and the `query` common set.
 
 Params:
 
@@ -34209,7 +34227,7 @@ Model-owned Segment/Level choices and adoption preview. Owner: `ph_composer.zone
 
 Unbounded: answers the whole Model in one result. A client with a reply budget reads `ph_composer.zones.options.list` instead.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.options_adoption_required`, `zone.options_conflict`, and the `query` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.option_last_segment`, `zone.options_adoption_required`, `zone.options_conflict`, and the `query` common set.
 
 Params:
 
@@ -34479,7 +34497,7 @@ Example params:
 
 One option's values, metadata and usage. Owner: `ph_composer.zones`.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.options_adoption_required`, `zone.options_conflict`, and the `query` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.option_last_segment`, `zone.options_adoption_required`, `zone.options_conflict`, and the `query` common set.
 
 Params:
 
@@ -34575,7 +34593,7 @@ Example params:
 
 One page of model-owned option definitions. Owner: `ph_composer.zones`.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.options_adoption_required`, `zone.options_conflict`, and the `query` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.option_last_segment`, `zone.options_adoption_required`, `zone.options_conflict`, and the `query` common set.
 
 Params:
 
@@ -34699,7 +34717,7 @@ Example params:
 
 Live and recoverable Zone usage of one option. Owner: `ph_composer.zones`.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.options_adoption_required`, `zone.options_conflict`, and the `query` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.option_last_segment`, `zone.options_adoption_required`, `zone.options_conflict`, and the `query` common set.
 
 Params:
 
@@ -35103,7 +35121,10 @@ Result:
                 "minLength": 1
               },
               "building_segment": {
-                "type": "string",
+                "type": [
+                  "string",
+                  "null"
+                ],
                 "minLength": 1
               },
               "level": {
@@ -35117,7 +35138,10 @@ Result:
                 "x-unit": "mm"
               },
               "building_segment_id": {
-                "type": "string",
+                "type": [
+                  "string",
+                  "null"
+                ],
                 "minLength": 1
               },
               "level_id": {
@@ -68931,7 +68955,7 @@ Make one Zone from explicit entities in one edit context. Owner: `ph_composer.zo
 
 Undo step: Make Zone. Groups loose geometry when needed and writes a Zone record.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.edit_path_changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.edit_path_changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.option_last_segment`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
 
 Params:
 
@@ -69077,7 +69101,7 @@ Explicitly adopt legacy/copied Zone and stamp choices. Owner: `ph_composer.zones
 
 Undo step: Adopt Zone Options. Converts choices and stamps atomically.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.option_last_segment`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
 
 Params:
 
@@ -69179,7 +69203,7 @@ Create a managed Zone option atomically. Owner: `ph_composer.zones`.
 
 Undo step: Manage Zone Options. Writes choices and references atomically.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.option_last_segment`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
 
 Params:
 
@@ -69262,7 +69286,7 @@ Save one complete guarded collection draft atomically. Owner: `ph_composer.zones
 
 Undo step: Manage Zone Options. Writes choices and all references atomically.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.option_last_segment`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
 
 Params:
 
@@ -69344,7 +69368,7 @@ Params:
         "string",
         "null"
       ],
-      "description": "The final default Segment; temporary IDs are resolved in the batch."
+      "description": "The final default Segment; temporary IDs are resolved in the batch. Null while removing the current default moves it to that Segment's replacement, else to the first remaining Segment."
     },
     "expected_default_segment_id": {
       "type": [
@@ -69361,7 +69385,7 @@ Params:
           "null"
         ]
       },
-      "description": "Removed option IDs mapped to survivors, or null for explicit Level clearing."
+      "description": "Removed option IDs mapped to survivors, or null: a Level is cleared, a Building Segment's Zones move to No Building Segment."
     }
   }
 }
@@ -69378,7 +69402,9 @@ Result:
     "replacement_ids",
     "removed_user_data",
     "removed_user_data_total",
-    "removed_user_data_truncated"
+    "removed_user_data_truncated",
+    "removed_extensions",
+    "removed_extensions_total"
   ],
   "properties": {
     "created_ids": {
@@ -69435,6 +69461,33 @@ Result:
     "removed_user_data_truncated": {
       "type": "boolean",
       "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
+    },
+    "removed_extensions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "namespaces"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "namespaces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "description": "Each removed option that carried extension data, in id order, the first 50, with its namespaces: another feature's settings on that option went with it, and Undo brings them back."
+    },
+    "removed_extensions_total": {
+      "type": "integer",
+      "minimum": 0
     }
   }
 }
@@ -69459,7 +69512,7 @@ Merge a managed Zone option atomically. Owner: `ph_composer.zones`.
 
 Undo step: Manage Zone Options. Writes choices and references atomically.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.option_last_segment`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
 
 Params:
 
@@ -69504,7 +69557,9 @@ Result:
     "replacement_ids",
     "removed_user_data",
     "removed_user_data_total",
-    "removed_user_data_truncated"
+    "removed_user_data_truncated",
+    "removed_extensions",
+    "removed_extensions_total"
   ],
   "properties": {
     "created_ids": {
@@ -69561,6 +69616,33 @@ Result:
     "removed_user_data_truncated": {
       "type": "boolean",
       "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
+    },
+    "removed_extensions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "namespaces"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "namespaces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "description": "Each removed option that carried extension data, in id order, the first 50, with its namespaces: another feature's settings on that option went with it, and Undo brings them back."
+    },
+    "removed_extensions_total": {
+      "type": "integer",
+      "minimum": 0
     }
   }
 }
@@ -69582,7 +69664,7 @@ Remove a managed Zone option atomically. Owner: `ph_composer.zones`.
 
 Undo step: Manage Zone Options. Writes choices and references atomically.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.option_last_segment`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
 
 Params:
 
@@ -69612,7 +69694,7 @@ Params:
         "string",
         "null"
       ],
-      "description": "A surviving replacement; null explicitly clears a Level."
+      "description": "A surviving replacement, or null: clears a Level, or moves a Building Segment's Zones to No Building Segment. Removing the default Segment makes the replacement the default, else the first remaining Segment."
     }
   }
 }
@@ -69629,7 +69711,9 @@ Result:
     "replacement_ids",
     "removed_user_data",
     "removed_user_data_total",
-    "removed_user_data_truncated"
+    "removed_user_data_truncated",
+    "removed_extensions",
+    "removed_extensions_total"
   ],
   "properties": {
     "created_ids": {
@@ -69686,6 +69770,33 @@ Result:
     "removed_user_data_truncated": {
       "type": "boolean",
       "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
+    },
+    "removed_extensions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "namespaces"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "namespaces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "description": "Each removed option that carried extension data, in id order, the first 50, with its namespaces: another feature's settings on that option went with it, and Undo brings them back."
+    },
+    "removed_extensions_total": {
+      "type": "integer",
+      "minimum": 0
     }
   }
 }
@@ -69706,7 +69817,7 @@ Update a managed Zone option atomically. Owner: `ph_composer.zones`.
 
 Undo step: Manage Zone Options. Writes choices and references atomically.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.option_last_segment`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
 
 Params:
 
@@ -70515,7 +70626,7 @@ Update one explicit Zone occurrence. Owner: `ph_composer.zones`.
 
 Undo step: Edit Zone. Updates Zone values and membership stamps.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.option_last_segment`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
 
 Params:
 
@@ -70562,7 +70673,10 @@ Params:
           "minLength": 1
         },
         "building_segment": {
-          "type": "string",
+          "type": [
+            "string",
+            "null"
+          ],
           "minLength": 1
         },
         "level": {
@@ -70576,7 +70690,10 @@ Params:
           "x-unit": "mm"
         },
         "building_segment_id": {
-          "type": "string",
+          "type": [
+            "string",
+            "null"
+          ],
           "minLength": 1
         },
         "level_id": {
@@ -70601,7 +70718,10 @@ Params:
           "minLength": 1
         },
         "building_segment": {
-          "type": "string",
+          "type": [
+            "string",
+            "null"
+          ],
           "minLength": 1
         },
         "level": {
@@ -70615,7 +70735,10 @@ Params:
           "x-unit": "mm"
         },
         "building_segment_id": {
-          "type": "string",
+          "type": [
+            "string",
+            "null"
+          ],
           "minLength": 1
         },
         "level_id": {
@@ -70679,7 +70802,7 @@ Set one attribute on explicit Zone occurrences. Owner: `ph_composer.zones`.
 
 Undo step: Edit Selected Zones. Updates each Zone and its membership stamps.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.option_last_segment`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
 
 Params:
 
@@ -70735,7 +70858,10 @@ Params:
                 "minLength": 1
               },
               "building_segment": {
-                "type": "string",
+                "type": [
+                  "string",
+                  "null"
+                ],
                 "minLength": 1
               },
               "level": {
@@ -70749,7 +70875,10 @@ Params:
                 "x-unit": "mm"
               },
               "building_segment_id": {
-                "type": "string",
+                "type": [
+                  "string",
+                  "null"
+                ],
                 "minLength": 1
               },
               "level_id": {
@@ -70781,7 +70910,7 @@ Params:
         "number",
         "null"
       ],
-      "description": "The new value: text for name, building_segment and level (null clears level), a number in mm for ground_depth_mm."
+      "description": "The new value: text for name, building_segment and level (null clears level, and moves the Zone to No Building Segment for building_segment), a number in mm for ground_depth_mm."
     }
   }
 }
@@ -78867,6 +78996,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `zone.none` | The Model has no Zone to export. |
 | `zone.option_duplicate` | An equivalent managed option name already exists. |
 | `zone.option_export_conflict` | Distinct Building Segments share one export identifier; map to a survivor. |
+| `zone.option_last_segment` | The Model keeps at least one Building Segment, so the last one cannot be deleted. |
 | `zone.options_adoption_required` | Adopt the legacy or copied choices before editing categories. |
 | `zone.options_conflict` | Recovery or shared-storage choice evidence conflicts; explicit repair is required. |
 | `zone.ownership_conflict` | A Zone record sits on, or inside, a Group another feature owns; deleting or removing that Group through its feature is refused while it is there. |
@@ -78949,3 +79079,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.70 | 2026-11-19 | A Face inside a Zone that is shading, or inside a shading Group or component there, is not part of the Zone's envelope: Zones reads, writes, Solve, Colour-by and export leave it out, and an explicit reference to it refuses face.outside_envelope; zones.containment answers it with the reason outside_envelope. ph_composer.zones.faces.clear_classification is new: it removes Face records in one Undo step, refusing face.surface_paired and face.aperture_host. ph_composer.shading.export_preflight is new and notes shading.zone_inside and shading.classified_inside. shading.assign refuses a Group inside a Zone that holds classified Faces with shading.face_classified; a classified Face leaves the envelope only by its own mark. |
 | 1.71 | 2026-11-19 | Export writes each Shading Face as an orphaned honeybee Shade in the new optional section ph_composer.shading.export.shades, named for its shading component, with the section's result fields shading_components, shade_count and area_m2 and a Shading report section. ph_composer.shading.export_preflight now runs with every export and also lists the Faces export leaves out (shading.geometry_invalid, target.ambiguous), unreadable marks (record.unreadable) and a mark's extension data the left-out rules refuse; every row names its path and carries the object id the export's note uses. A shading component name that reads as a local file path counts as no name. |
 | 1.72 | 2026-11-19 | ph_composer.shading.export_preflight gives a marked Group or component inside a Zone both shading.zone_inside and shading.classified_inside when it holds a Zone, a claimed object or a cutting component beside classified Faces; before, the first note hid the second. |
+| 1.73 | 2026-11-20 | Zone schema 3: building_segment_id may be null, No Building Segment; Zones write schema 3 and schema 2 still reads. ph_composer.zones.update_field and ph_composer.zones.update accept a null building_segment. ph_composer.zones.options.manage and remove accept a null replacement for a used Building Segment, which moves its Zones to No Building Segment; removing the default moves it to the replacement, else to the first remaining Segment; removing the last Segment refuses zone.option_last_segment. manage, remove and merge results add removed_extensions and removed_extensions_total. Colour-by Building Segment shows Zones in no Segment as one neutral No Building Segment row. Until export leaves them out, such a Zone blocks export. |
