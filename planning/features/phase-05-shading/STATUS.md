@@ -23,7 +23,7 @@ Ed authorized every Shading stage on 2026-11-19: "Use the 'pr-loop' skill protoc
 
 | Stage | State | Acceptance | PR |
 | --- | --- | --- | --- |
-| P5s-01 Contracts and host facts | Implemented on branch `feat/shading-p5s-01`: CONTRACTS sections 4 and 7 answered, `tests/shading_mark_store_test.rb`; SD01 recorded `blocked` on `2a9c5e17` with eight of ten gestures measured ([evidence](evidence/sd01-host-facts.md)); Move-copy array and push-pull owed to a later hold | SD01 | |
+| P5s-01 Contracts and host facts | Implemented on branch `feat/shading-p5s-01`: CONTRACTS sections 4 and 7 answered, `tests/shading_mark_store_test.rb`; SD01 recorded `blocked` on `2a9c5e17` with eight of ten gestures measured ([evidence](evidence/sd01-host-facts.md)); Move-copy array and push-pull owed to a later hold | SD01 | [#527](https://github.com/ph-composer/ph-composer-skp/pull/527) |
 | P5s-02 Shading mark and operations | Scoped | SD02 | |
 | P5s-03 Zones seam | Scoped | SD03 | |
 | P5s-04 Native menu | Scoped | SD04 | |

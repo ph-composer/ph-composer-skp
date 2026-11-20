@@ -74,7 +74,7 @@ Face behind shared storage with `target.shared_definition` (D5s-16).
 
 ## 4. The Zones seam
 
-One foundation addition (D5s-12), named here and built in P5s-03:
+One foundation addition (D5s-12), named here. P5s-02 builds the flag and the check with their tests; P5s-03 makes Zones read it:
 
 | Item | Value |
 | --- | --- |

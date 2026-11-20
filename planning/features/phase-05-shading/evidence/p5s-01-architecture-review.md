@@ -20,7 +20,7 @@ or construction-only geometry) constructs its own store with the flag and writes
 file, no shell, no export orchestration: the four funnels already read the check. It must learn the store's
 two flags and the rule that a claimed entity wins. That is the smallest surface the seam can have.
 
-## Findings and recommendations for P5s-03
+## Findings and recommendations for P5s-02 and P5s-03
 
 | # | Finding | Recommendation |
 | --- | --- | --- |
@@ -38,4 +38,4 @@ each consumer row names the funnel its P5s-03 test exercises. Exempt walkers car
 
 ## Not reviewed
 
-Implementation: none exists in this stage. The store flag, the check and its tests land in P5s-02 and P5s-03.
+Implementation: none exists in this stage. The store flag, the check and its tests land in P5s-02; the Zones funnels read it from P5s-03.
