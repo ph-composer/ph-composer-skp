@@ -1,7 +1,7 @@
 # Phase 5: shading
 
 DATE: 2026-11-19
-STATUS: Complete 2026-11-20, archived. Implementation: P5s-01 to P5s-07 built. Merge: all seven merged to main (PRs #527 to #533, last `906a102c`). Host acceptance: SD01 to SD07 Pass 2026-11-20 on `906a102c`. Release: none. Two conductor extensions await Ed's confirmation and three follow-ups are open ([STATUS](STATUS.md#closure-2026-11-20)).
+STATUS: Complete 2026-11-20, archived. Implementation: P5s-01 to P5s-07 built. Merge: all seven merged to main (PRs #527 to #533, last `906a102c`). Host acceptance: SD01 to SD07 Pass 2026-11-20 on `906a102c`. Release: none. Ed confirmed both conductor extensions on 2026-11-20; three follow-ups are open ([STATUS](STATUS.md#closure-2026-11-20)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 
