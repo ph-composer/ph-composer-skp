@@ -5026,7 +5026,7 @@
       "id": "SD01",
       "label": "Shading mark host facts: a marked loose Face, Group and ComponentInstance under native copy and paste, Move-copy array, cut and paste, Make Group, Make Component, Make Unique (with a Face mark behind shared storage), push-pull, Divide of a bounding Edge, Intersect Faces across the Face and explode of the marked Group, each with Undo, Redo, save and fresh-process reopen; hidden, tag-hidden and holed Faces read through the export snapshot",
       "mode": "mixed",
-      "authority": "planning/features/phase-05-shading/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-05-shading/ACCEPTANCE.md",
       "paths": [
         "tools/spikes/shading/shading_spike.rb",
         "src/ph_composer/export/geometry_snapshot.rb",
@@ -5038,7 +5038,7 @@
       "id": "SD02",
       "label": "Shading mark operations on the installed RBZ with the panel closed: assign and clear on explicit root-path references for a Face, a Group and a ComponentInstance, direct and nested, each one native Undo step with Redo; unchanged targets reported; every refusal row of the PRD's table, a Face behind shared storage included, writing nothing and carrying its code; a mixed selection applied with what it left out; a stale revision refused; shading.list returning the reference model's five components",
       "mode": "mixed",
-      "authority": "planning/features/phase-05-shading/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-05-shading/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/shading/*",
         "src/ph_composer/core/records/entity_store.rb"
@@ -5049,7 +5049,7 @@
       "id": "SD03",
       "label": "Shading and Zones on the installed RBZ with the panel closed: a tagged overhang Face and a Face in a tagged Group leave Zone A's envelope (no face.unclassified, Face count drops), Zone A's Room exports closed, Classify, Suggest classification and Solve adjacencies leave them alone, clearing the mark brings the unclassified finding back, a classified Face refuses the tag and takes it after Clear classification (each one native Undo step), a Zone made inside a marked Group keeps its Faces and raises shading.zone_inside, and the Classify tool leaves a tagged Face alone",
       "mode": "mixed",
-      "authority": "planning/features/phase-05-shading/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-05-shading/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/zones/zone/occurrences.rb",
         "src/ph_composer/features/zones/export.rb",
@@ -5062,7 +5062,7 @@
       "id": "SD04",
       "label": "Shading native menu on the installed RBZ: right-click on loose Faces, a closed Group and a Face inside an open Group offers Set as Shading and Clear Shading only when each would change something, and neither on Edges only, a Zone Group or a pane Face; both items in Extensions > PH-Composer; each choice one native Undo step with Redo; a mixed selection's notice and status bar name what was tagged, what was left out with its reason and what was ignored",
       "mode": "mixed",
-      "authority": "planning/features/phase-05-shading/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-05-shading/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/shading/*",
         "src/ph_composer/shell/commands.rb"
@@ -5073,7 +5073,7 @@
       "id": "SD05",
       "label": "Shading Colour-by on the installed RBZ: the Shading mode, chosen from the native Colour by menu, colours all 18 Shading Face occurrences of the reference model, nested and repeated, and nothing else; the legend and HUD show five rows by component name with Face counts and areas in the display units, matching shading.list; a hidden tag hides a placement's drawing and keeps its count; a mark cleared and its Undo redraw the mode; the rebuild and refresh at 5,000 Shading Faces are recorded against the 200 ms target",
       "mode": "mixed",
-      "authority": "planning/features/phase-05-shading/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-05-shading/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/shading/colour_modes.rb",
         "src/ph_composer/features/shading/inventory.rb",
@@ -5085,7 +5085,7 @@
       "id": "SD06",
       "label": "Shading export from the packaged RBZ with the panel closed: the reference model exports; the HBJSON reloads with 18 orphaned Shades in five components by name, each is_detached; conformance passes; the report's Shading section matches; the pinned PHX gives five shading components per Variant with InnerAttachment -1 in WUFI XML and idIC -1 in METr JSON; save, reopen and re-export give the same HBJSON; the section's cost at 5,000 Shading Faces recorded. The forced attach refusal is offline evidence",
       "mode": "bridge",
-      "authority": "planning/features/phase-05-shading/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-05-shading/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/shading/export.rb",
         "src/ph_composer/features/shading/preflight.rb",
@@ -5105,7 +5105,7 @@
       "id": "SD07",
       "label": "Shading integration on the installed RBZ from a fresh process on the reference model: tagged from the right-click menu, each tag one native Undo step with Redo; a second Model reads no marks and its Colour-by is its own; save and fresh-process reopen keep every mark; the Shading Colour-by mode shows exactly the tagged geometry; the export reloads with 18 orphaned Shades in five components and the pinned PHX converts it to WUFI XML and METr JSON; Ed opens both files and confirms the shading components, the holed Face included",
       "mode": "mixed",
-      "authority": "planning/features/phase-05-shading/ACCEPTANCE.md",
+      "authority": "planning/archive/phase-05-shading/ACCEPTANCE.md",
       "paths": [
         "src/ph_composer/features/shading/*",
         "src/ph_composer/features/zones/export.rb",

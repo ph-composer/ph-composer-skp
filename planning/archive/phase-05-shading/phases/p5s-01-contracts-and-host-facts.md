@@ -1,7 +1,7 @@
 # P5s-01: contracts and host facts
 
 DATE: 2026-11-19
-STATUS: Implemented on branch. Authorized 2026-11-19 with every Shading stage ([STATUS](../STATUS.md#authorization)). SD01 recorded blocked: Move-copy array and push-pull owed to a later hold.
+STATUS: Complete. Merged to main 2026-11-20 UTC (PR #527, `f06f0efd`). SD01 recorded blocked on `2a9c5e17` (eight of ten gestures), then Pass 2026-11-20 on `906a102c` with all ten. Authorized 2026-11-19 with every Shading stage ([STATUS](../STATUS.md#authorization)). Not released.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 

@@ -1,7 +1,7 @@
 # P5s-05: the Shading Colour-by mode
 
 DATE: 2026-11-19
-STATUS: Scoped. Authorized 2026-11-19 with every Shading stage ([STATUS](../STATUS.md#authorization)).
+STATUS: Complete. Merged to main 2026-11-20 UTC (PR #531, `ced1be43`). SD05 Pass 2026-11-20 on `906a102c`. Authorized 2026-11-19 with every Shading stage ([STATUS](../STATUS.md#authorization)). Not released.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 

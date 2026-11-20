@@ -2,7 +2,7 @@
 
 DATE: 2026-11-15, amended 2026-11-19
 STATUS: Requested. Brief only; to be fleshed out before it is scheduled. SH-3 and SH-4 closed by
-[Phase 5: shading](../phase-05-shading/README.md) on 2026-11-19.
+[Phase 5: shading](../../archive/phase-05-shading/README.md) on 2026-11-19.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: none (local planning draft)
 
@@ -25,10 +25,11 @@ an adjoining building, a neighbouring wing that is not part of the certified env
   **every** Variant. PHX makes one Variant per Building Segment
   (`create_project.sort_hb_rooms_by_bldg_segment`), so every Segment sees every shade.
 - METr carries the components as PHX writes them for WUFI-Passive, `idIC` -1
-  ([Phase 5 research](../phase-05-shading/research/honeybee-ph-and-phx-shading.md)). PHX writes no
+  ([Phase 5 research](../../archive/phase-05-shading/research/honeybee-ph-and-phx-shading.md)). PHX writes no
   transmittance schedule or reflectance, and Phase 5 stores none (SH-3 below).
-- Not checked: whether WUFI-Passive treats these components as shading for apertures only or for
-  opaque surfaces too. Phase 5's acceptance row SD07 asks Ed to look.
+- Ed, 2026-11-20, in WUFI-Passive: probably apertures only; opaque surfaces keep their own shading factor,
+  which these components are not believed to change. Not confirmed by a calculation
+  ([Phase 5 research](../../archive/phase-05-shading/research/honeybee-ph-and-phx-shading.md#answered-by-ed-in-wufi-passive-2026-11-20)).
 
 ## Open questions
 
@@ -36,6 +37,6 @@ an adjoining building, a neighbouring wing that is not part of the certified env
 | --- | --- |
 | SH-1 | Does a whole Zone become shading, or only its Faces facing the certified Zones? |
 | SH-2 | One shading component per Zone (named for the Zone), or merged? PHX groups by display name |
-| SH-3 | Closed 2026-11-19: opaque only. Phase 5 stores and writes no transmittance, reflectance or schedule ([PRD](../phase-05-shading/PRD.md), "Export") |
-| SH-4 | Closed 2026-11-19: loose geometry is Phase 5, tagged from the right-click menu (D5s-01, D5s-05 in [its decisions](../phase-05-shading/DECISIONS.md)) |
+| SH-3 | Closed 2026-11-19: opaque only. Phase 5 stores and writes no transmittance, reflectance or schedule ([PRD](../../archive/phase-05-shading/PRD.md), "Export") |
+| SH-4 | Closed 2026-11-19: loose geometry is Phase 5, tagged from the right-click menu (D5s-01, D5s-05 in [its decisions](../../archive/phase-05-shading/DECISIONS.md)) |
 | SH-5 | Does any certifier review need the shading geometry listed separately in the export report? |

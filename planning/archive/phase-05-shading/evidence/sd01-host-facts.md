@@ -1,7 +1,7 @@
 # P5s-01 evidence: Shading mark host facts (SD01)
 
 DATE: 2026-11-19
-STATUS: Host run on branch `feat/shading-p5s-01` at `2a9c5e17`, SketchUp 26.1.188, Ruby 3.2.2, macOS. Eight of ten gestures recorded; Move-copy array and push-pull blocked, owed to a later hold.
+STATUS: Host run on branch `feat/shading-p5s-01` at `2a9c5e17`, SketchUp 26.1.188, Ruby 3.2.2, macOS: eight of ten gestures recorded, Move-copy array and push-pull blocked. Rerun 2026-11-20 on `906a102c` from the installed RBZ with all ten gestures: SD01 Pass.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 
@@ -40,8 +40,8 @@ with the same scan, and a final Undo returned the baseline.
 | Divide of a bounding Edge, 2 segments | The marked Face keeps its persistent id, mark, area and single loop. The scan reads Faces and containers only, so it equals the baseline at every step; the Edit menu read "Undo Divide Edges" after the gesture |
 | Intersect Faces > With Model across the Face | The marked Face splits in two: the original persistent id on one half, a new one on the other, both carrying the mark |
 | Explode of the marked Group | The Group and its mark are gone; its Faces become loose and unmarked (10 to 3 Shading Faces on the island) |
-| Move-copy array | Not run (blocked: needs a full-screen hold) |
-| Push-pull | Not run (blocked: needs a full-screen hold) |
+| Move-copy array | Not run (blocked: needs a full-screen hold); measured in the batched rerun below |
+| Push-pull | Not run (blocked: needs a full-screen hold); measured in the batched rerun below |
 
 A mark on a Face inside a definition placed twice is read once per placement (the `shared` island): each
 marked definition Face gives two Shading Face occurrences, four for the island's two Faces.

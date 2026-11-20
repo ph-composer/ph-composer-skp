@@ -884,6 +884,24 @@ regenerates the primary from the authored Type, creating a new one when the inde
 missing or differently stamped, and never adopts an arbitrary matching copy.
 Definition names are presentation.
 
+### Reading shading from another feature
+
+A feature never reads Shading's `ph_composer.shading` dictionary. A feature that walks a Zone's Faces itself
+reads Zones' classification-aware test, `Zones::Occurrences.envelope_excluded?(inside)` (live, as Spaces'
+candidate Faces do) or `Zones::ExportProjection.outside_envelope?` (snapshot), so a Shading Face is never one of
+its Zone's Faces and the check names no feature ("Zones geometry rules", "Envelope exclusion"). Those wrap the
+foundation's `Records::EntityStore.envelope_excluded?` and `envelope_excluded_entries?` and add that a classified
+Face stays in the envelope unless the mark is on the Face itself; the foundation checks alone would drop a
+classified Face under a marked Group ("The shading mark"; context/EXTENSIBILITY.md, the claims and envelope
+exclusion paragraphs). A feature that
+needs the shading components reads `ph_composer.shading.list`, which applies the one rule the Colour-by mode and
+the export apply (`Reads.exported?`: classification wins). The Shades section `ph_composer.shading.export.shades`
+("Translation sections and artifacts") is the only writer of orphaned Shades. PHX groups every orphaned Shade
+in the Model by `display_name`, whichever section wrote it, so a later writer of shading geometry (a whole Zone
+as shading, for one) shares a name only where it means one shading component. These reads, the menus, the Colour-by mode and the export were confirmed
+on SketchUp 2026 in Shading's integrated host run (2026-11-20). Ed opened the PHX output in WUFI-Passive and
+in METr and reported no problem; WUFI-Passive's handling of a holed Face was not observed separately.
+
 ## Managed Zone field options
 
 Zones owns Building Segment (`ph_composer.zones.building_segment`, `bsg_`) and Level

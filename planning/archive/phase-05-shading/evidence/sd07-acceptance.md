@@ -1,7 +1,7 @@
 # SD07: integration acceptance
 
 DATE: 2026-11-20
-STATE: Host part run 2026-11-20 on `906a102c`; eight of ten assertions observed. Ed confirmed the METr JSON in METr on 2026-11-20; his WUFI-Passive check is open, so `finish` has not run.
+STATE: Pass 2026-11-20 on `906a102c`. Host part run 2026-11-20; Ed opened both files and reported them right ("looks ok in METr", "WUFI looks right"); all ten assertions recorded `pass` with `acceptance_case.py finish`.
 
 ## Offline part, P5s-07 branch
 
@@ -33,7 +33,7 @@ They are for an early look in WUFI-Passive and METr. The authoritative files com
 (batch recipe, Part C). The fixture's geometry differs from the host build's: the "Shading" component is
 40 m² here and about 5 m² on the host build, so areas do not compare between them.
 
-## Host part, owed
+## Host part, as planned
 
 The PRD's acceptance shape from a fresh process: tag from the right-click menu, Undo and Redo, a second
 Model, save and reopen, Colour-by, export, reload, PHX conversion, then Ed opens both files. The run order,
@@ -72,3 +72,17 @@ elements as C.1 Louvre, C.2 Neighbour, C.3 Zone A Shading, C.4 Shading and C.5 F
 Inner side and Outer side Outer air; the 3D view draws the holed Face with its hole. METr's two errors (interior
 conditioned floor area and net volume below range) come from the reference model's 5 x 5 x 3 m test Zone, not
 from shading.
+
+## Ed's check in WUFI-Passive, 2026-11-20
+
+Ed opened `sd07-reopened-wufi.xml` in WUFI-Passive V.3.6.0.1 and reported "WUFI looks right"
+(`_private/host/sd07-20261119/SD07/ed/wufi-check.txt`). His screenshot (`ed/wufi-check.webp`) shows the five
+components under Remaining elements (Louvre, Neighbour, Zone A Shading, Shading, Fin) and the holed Face drawn
+as one polygon cut along a diagonal to its hole. He then answered the research note's three open questions
+([research note](../research/honeybee-ph-and-phx-shading.md#answered-by-ed-in-wufi-passive-2026-11-20)).
+
+## Ledger row
+
+SD07 `pass` on `906a102c`, ten assertions, the last two Ed's checks of the WUFI XML and the METr JSON, in
+`planning/native-acceptance/results.jsonl` (evidence path recorded under the packet's former location,
+`planning/features/phase-05-shading/`, and mapped in `planning/native-acceptance/evidence-locations.json`).
