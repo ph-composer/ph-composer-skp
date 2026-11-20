@@ -17,6 +17,7 @@ HBJSON is the canonical export.
 | Build, test and release | [Development guide](docs/DEVELOPMENT.md) |
 | Security reports and implementation | [Security policy](docs/SECURITY.md), [listener rules](context/AGENT_INTERFACE.md#security-posture) and [panel rules](context/TECH_STACK.md#panel) |
 | Site, climate and station files | [Station reader](context/CONTRACTS.md#the-phius-station-reader), [this computer's settings file](context/CONTRACTS.md#this-computers-settings-file) and [climate operations](docs/AGENT_GUIDE.md#climate) |
+| Shading surfaces | [Shading mark](context/CONTRACTS.md#the-shading-mark), [reading shading from another feature](context/CONTRACTS.md#reading-shading-from-another-feature), [shading operations](docs/AGENT_GUIDE.md#shading) and [the user guide](docs/SHADING.md) |
 | Host and preview tools | [Host kit](tools/hostkit/.index.md), [UI preview](tools/ui-preview/.index.md) and [outline map data](tools/map_data/README.md) |
 | Active work and acceptance | [Planning status](planning/STATUS.md), then the owning packet and [native case ledger](planning/native-acceptance/README.md) |
 
