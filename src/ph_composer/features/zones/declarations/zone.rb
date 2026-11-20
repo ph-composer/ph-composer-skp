@@ -234,10 +234,11 @@ module PhComposer
                                       "description" => "The path from inside the Zone to the entity; null " \
                                                        "with no Zone."),
           "reason" => { "type" => %w[string null],
-                        "enum" => [nil, "not_found", "not_a_drawing_element", "cutting_instance", "outside_zone"],
+                        "enum" => [nil, "not_found", "not_a_drawing_element", "cutting_instance", "outside_zone",
+                                   "outside_envelope"],
                         "description" => "Why no Zone holds it: a step missing or repeated, not a drawing " \
-                                         "element, under a cutting component, or outside every Zone. Null with " \
-                                         "a Zone." },
+                                         "element, under a cutting component, outside every Zone, or a Face " \
+                                         "inside a Zone that is not part of its envelope. Null with a Zone." },
           "write_refusal" => REFUSAL.merge("description" => "The refusal a write through this path meets from " \
                                                             "the path alone (a shared, nested or locked Zone, " \
                                                             "locked or shared storage), or null. A duplicated " \

@@ -233,6 +233,7 @@ module PhComposer
             Faces.host_context(request, :paths => request.params.fetch("paths"))
           end
           declare_writes(feature)
+          declare_clear_classification(feature)
           declare_viewport(feature)
           declare_locate(feature)
           declare_attached_zones(feature)
@@ -243,6 +244,11 @@ module PhComposer
         RECORDED_FACE = FACE_REFERENCE.merge(
           "properties" => FACE_REFERENCE.fetch("properties").merge("entity_id" => { "type" => "string" })
         ).freeze
+        CLEAR_CLASSIFICATION_PARAMS = Shapes.object({
+          "faces" => { "type" => "array", "items" => RECORDED_FACE, "minItems" => 1,
+                       "description" => "The classified Face occurrences whose records to remove, each with the " \
+                                        "entity_id last read." }
+        }).freeze
 
         def declare_metadata(feature)
           feature.action("#{PREFIX}.update_metadata",
@@ -295,6 +301,18 @@ module PhComposer
                          :examples => [{ "face" => EXAMPLE_FACE }],
                          :side_effects => "Flips the Face normal; any Surface pair goes stale.") do |request, proposal|
             Faces.reverse(request, proposal, :face => request.params.fetch("face"))
+          end
+        end
+
+        def declare_clear_classification(feature)
+          feature.action("#{PREFIX}.clear_classification",
+                         :description => "Remove the classification records of Faces, so each reads as never " \
+                                         "classified.",
+                         :refuses => Refuses::CLEAR_CLASSIFICATION, :params => CLEAR_CLASSIFICATION_PARAMS,
+                         :result => FACE_IDS_RESULT, :undo_name => "Clear Classification",
+                         :examples => [{ "faces" => [EXAMPLE_FACE.merge("entity_id" => "fac_Ab12Cd34Ef56")] }],
+                         :side_effects => "Removes Face assignment records; Zone stamps stay.") do |request, proposal|
+            Faces.clear_classification(request, proposal, :faces => request.params.fetch("faces"))
           end
         end
 

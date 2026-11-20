@@ -189,21 +189,24 @@ module PhComposer
         located = request.locate(ZONE_KIND, row.fetch("reference"), :mutable => false)
         ZoneInference::Candidate.new(:reference => row.fetch("reference"),
                                      :faces => zone_faces(located.entity.entities,
-                                                          located.transform * located.entity.transformation))
+                                                          located.transform * located.entity.transformation, []))
       rescue CodedError
         nil
       end
 
       # Every Face a Zone can own, through Groups and plain components; a cutting component's geometry is not
-      # the Zone's (context/CONTRACTS.md, "Zones geometry rules").
-      def zone_faces(entities, transform)
+      # the Zone's, nor a Face that has left its envelope (context/CONTRACTS.md, "Zones geometry rules").
+      # `containers` are the Groups and components from inside the Zone down to `entities`.
+      def zone_faces(entities, transform, containers)
         entities.to_a.flat_map do |entity|
           if entity.is_a?(Sketchup::Face)
+            next [] if Records::EntityStore.envelope_excluded?(containers + [entity])
+
             [FaceCapture.call(entity, transform).loops_m]
           elsif entity.is_a?(Sketchup::Group)
-            zone_faces(entity.entities, transform * entity.transformation)
+            zone_faces(entity.entities, transform * entity.transformation, containers + [entity])
           elsif entity.is_a?(Sketchup::ComponentInstance) && !entity.definition.behavior.cuts_opening?
-            zone_faces(entity.definition.entities, transform * entity.transformation)
+            zone_faces(entity.definition.entities, transform * entity.transformation, containers + [entity])
           else
             []
           end

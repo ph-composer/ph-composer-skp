@@ -14329,6 +14329,128 @@ Example params:
 }
 ```
 
+### `ph_composer.shading.export_preflight`
+
+Shading's export notes, none blocking: shading.zone_inside names each marked Group or component that is a Zone, holds one or holds another feature's object, which the mark does not reach. Owner: `ph_composer.shading`.
+
+Refuses: `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "findings",
+    "repairs"
+  ],
+  "properties": {
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "section",
+          "object_id",
+          "message",
+          "blocks_export"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "section": {
+            "type": "string"
+          },
+          "object_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The record the finding is about."
+          },
+          "message": {
+            "type": "string"
+          },
+          "blocks_export": {
+            "type": "boolean"
+          },
+          "locate": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "params"
+            ],
+            "description": "A view command that shows what the finding is about.",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "params": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "repairs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "checked",
+          "action",
+          "params"
+        ],
+        "description": "An action the export workflow offers to run before exporting.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "checked": {
+            "type": "boolean"
+          },
+          "action": {
+            "type": "string"
+          },
+          "params": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{}
+```
+
 ### `ph_composer.shading.list`
 
 Every entity carrying the shading mark and every shading component: the Shading Faces grouped by the name they export under, with Face count and world area. Reads Zones' occurrences, then walks the Model once. Owner: `ph_composer.shading`.
@@ -31008,9 +31130,10 @@ Result:
               "not_found",
               "not_a_drawing_element",
               "cutting_instance",
-              "outside_zone"
+              "outside_zone",
+              "outside_envelope"
             ],
-            "description": "Why no Zone holds it: a step missing or repeated, not a drawing element, under a cutting component, or outside every Zone. Null with a Zone."
+            "description": "Why no Zone holds it: a step missing or repeated, not a drawing element, under a cutting component, outside every Zone, or a Face inside a Zone that is not part of its envelope. Null with a Zone."
           },
           "write_refusal": {
             "type": [
@@ -32698,7 +32821,7 @@ Example params:
 
 Validated selected Face occurrence references. Owner: `ph_composer.zones`.
 
-Refuses: `gesture.too_large`, `record.unreadable`, `selection.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `query` common set.
+Refuses: `face.outside_envelope`, `gesture.too_large`, `record.unreadable`, `selection.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `query` common set.
 
 Params:
 
@@ -67241,7 +67364,7 @@ Set or clear only the Assembly of explicit Faces. Owner: `ph_composer.zones`.
 
 Undo step: Assign Assembly. Changes only assembly_id on all targets.
 
-Refuses: `gesture.too_large`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
+Refuses: `face.outside_envelope`, `gesture.too_large`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -67410,7 +67533,7 @@ Create one Attached zone and assign it to explicit Face occurrences. Owner: `ph_
 
 Undo step: Create and Assign Attached Zone. Creates one Attached zone and classifies its Faces in one Undo step.
 
-Refuses: `adjacency.not_surface`, `adjacency.unresolved`, `gesture.retirement_conflict`, `gesture.too_large`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
+Refuses: `adjacency.not_surface`, `adjacency.unresolved`, `face.outside_envelope`, `gesture.retirement_conflict`, `gesture.too_large`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -68016,7 +68139,7 @@ Suggest a classification for every unrecorded Face in one Zone. Owner: `ph_compo
 
 Undo step: Suggest Classification. Writes suggested values to Faces that have no record yet.
 
-Refuses: `geometry.invalid`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
+Refuses: `face.outside_envelope`, `geometry.invalid`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -68096,7 +68219,7 @@ Apply explicit keep, set or clear intent to Faces. Owner: `ph_composer.zones`.
 
 Undo step: Classify Faces. Writes face assignments and Zone stamps.
 
-Refuses: `adjacency.not_surface`, `adjacency.unresolved`, `gesture.retirement_conflict`, `gesture.too_large`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
+Refuses: `adjacency.not_surface`, `adjacency.unresolved`, `face.outside_envelope`, `gesture.retirement_conflict`, `gesture.too_large`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -68379,13 +68502,110 @@ Example params:
 }
 ```
 
+### `ph_composer.zones.faces.clear_classification`
+
+Remove the classification records of Faces, so each reads as never classified. Owner: `ph_composer.zones`.
+
+Undo step: Clear Classification. Removes Face assignment records; Zone stamps stay.
+
+Refuses: `face.aperture_host`, `face.outside_envelope`, `face.surface_paired`, `gesture.too_large`, `record.unreadable`, `reference.in_use`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "faces"
+  ],
+  "properties": {
+    "faces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "zone_id",
+          "zone_path",
+          "entity_path",
+          "entity_id"
+        ],
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          },
+          "zone_path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "entity_path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "entity_id": {
+            "type": "string"
+          }
+        }
+      },
+      "minItems": 1,
+      "description": "The classified Face occurrences whose records to remove, each with the entity_id last read."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "face_ids"
+  ],
+  "properties": {
+    "face_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Face records written; empty when nothing changed."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "faces": [
+    {
+      "zone_id": "zon_Ab12Cd34Ef56",
+      "zone_path": [
+        1201
+      ],
+      "entity_path": [
+        1202
+      ],
+      "entity_id": "fac_Ab12Cd34Ef56"
+    }
+  ]
+}
+```
+
 ### `ph_composer.zones.faces.reverse`
 
 Reverse one Face and keep its assignment record. Owner: `ph_composer.zones`.
 
 Undo step: Reverse Face. Flips the Face normal; any Surface pair goes stale.
 
-Refuses: `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
+Refuses: `face.outside_envelope`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -68469,7 +68689,7 @@ Replace the user_data and installed extension payloads of recorded Faces, guarde
 
 Undo step: Edit Face Metadata. Rewrites only the named Faces' metadata.
 
-Refuses: `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
+Refuses: `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `face.outside_envelope`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -69658,7 +69878,7 @@ Repair copied Face identities after a native split. Owner: `ph_composer.zones`.
 
 Undo step: Repair Split Face Identity. Reidentifies split pieces and retires invalid Surface links.
 
-Refuses: `adjacency.unresolved`, `copy.rule_missing`, `extension.invalid`, `face.identity_unique`, `identity.choice_conflicts`, `identity.choice_required`, `record.unreadable`, `reference.invalid`, `scope.incomplete`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
+Refuses: `adjacency.unresolved`, `copy.rule_missing`, `extension.invalid`, `face.identity_unique`, `face.outside_envelope`, `identity.choice_conflicts`, `identity.choice_required`, `record.unreadable`, `reference.invalid`, `scope.incomplete`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -69982,7 +70202,7 @@ Retire one reciprocal Surface pair. Owner: `ph_composer.zones`.
 
 Undo step: Retire Zone Adjacency. Removes both endpoints and leaves their boundary condition unassigned.
 
-Refuses: `adjacency.not_surface`, `adjacency.unresolved`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
+Refuses: `adjacency.not_surface`, `adjacency.unresolved`, `face.outside_envelope`, `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -70195,7 +70415,7 @@ Reconcile and pair shared Faces within an explicit Zone scope. Owner: `ph_compos
 
 Undo step: Solve Zone Adjacency. Retires old Surface pairs and writes current endpoints.
 
-Refuses: `adjacency.stale`, `adjacency.unresolved`, `copy.rule_missing`, `extension.invalid`, `geometry.invalid`, `record.unreadable`, `reference.invalid`, `scope.incomplete`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.same_zone`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
+Refuses: `adjacency.stale`, `adjacency.unresolved`, `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `record.unreadable`, `reference.invalid`, `scope.incomplete`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.same_zone`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `action` common set.
 
 Params:
 
@@ -73853,7 +74073,7 @@ Example params:
 
 Review a new Attached zone assignment for explicit Faces. Owner: `ph_composer.zones`.
 
-Refuses: `assignment.pending`, `gesture.too_large`, `record.unreadable`, `revision.stale`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `view_command` common set.
+Refuses: `assignment.pending`, `face.outside_envelope`, `gesture.too_large`, `record.unreadable`, `revision.stale`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, and the `view_command` common set.
 
 Params:
 
@@ -78485,8 +78705,9 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | Code | Meaning |
 | --- | --- |
 | `shading.cutting_component` | The entity is a cutting component or inside one; export does not read its Faces. |
-| `shading.face_classified` | A classified Zone Face cannot be shading until its classification is cleared. |
+| `shading.face_classified` | A classified Zone Face cannot be shading until its classification is cleared with ph_composer.zones.faces.clear_classification. |
 | `shading.inherited` | Clear named an entity that is shading through a marked Group or component above it; the message names that one. |
+| `shading.zone_inside` | Preflight note: a marked Group or component is a Zone, holds one or holds another feature's object, which the mark does not reach. |
 | `shading.zone_target` | The Group is a Zone or holds one; a whole Zone as shading is not supported. |
 
 ### `ph_composer.spaces`
@@ -78624,12 +78845,15 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `construction.incomplete` | A Face names an Assembly that cannot export yet; the message gives the first of its export_blockers. |
 | `construction.invalid` | A Face names an Assembly record that cannot be read. |
 | `construction.missing` | An exported Face names no Assembly. An interior Face within one Building-Segment needs none. |
+| `face.aperture_host` | The Face hosts a glued cutting component, such as a Window, so its classification cannot be cleared. |
 | `face.assembly_exterior_condition_mismatch` | The Face's boundary condition differs from its Assembly's exterior condition. |
 | `face.assembly_pair_mismatch` | The two Faces of a Surface pair do not hold one Assembly, reversed on one side. |
 | `face.assembly_type_mismatch` | The Face's type differs from its Assembly's type. |
 | `face.boundary_unassigned` | A Face has no boundary condition and is omitted from the export. |
 | `face.identity_unique` | The Face has no split copies sharing its identity to repair. |
 | `face.invalid` | A Face's assignment record cannot be read. |
+| `face.outside_envelope` | The Face is inside a Zone but not part of its envelope, so no Zone read or write takes it. |
+| `face.surface_paired` | The Face is one side of a Surface pair, so its classification cannot be cleared until the pair is retired. |
 | `face.type_missing` | A Face has no Face type. |
 | `face.unclassified` | A Zone has unclassified Faces. |
 | `face.wrong_zone` | A Face is contained by more than one Zone. |
@@ -78720,3 +78944,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.67 | 2026-11-18 | ph_composer.climate.site.geolocation is new: what SketchUp reports for the Model's geolocation, latitude and longitude only when SketchUp reports the Model geolocated, and no elevation or offset. The snapshot sections ph_composer.climate.site and ph_composer.climate.design_temperatures carry the site and design-temperature reads for the Climate tab. |
 | 1.68 | 2026-11-18 | ph_composer.climate.stations.all is new: one climate data folder's stations in one unbounded read, nearest the site first, in stations.list's rows, for the station picker; scripts page stations.list. |
 | 1.69 | 2026-11-19 | The Shading feature. ph_composer.shading.assign and ph_composer.shading.clear mark and unmark explicit Faces, Groups and components by root-to-entity path, each one Undo step, answering assigned or cleared, unchanged and left_out; ph_composer.shading.selection and ph_composer.shading.list read the selection and every mark and shading component. shading.face_classified, shading.zone_target, shading.inherited and shading.cutting_component are new. |
+| 1.70 | 2026-11-19 | A Face inside a Zone that is shading, or inside a shading Group or component there, is not part of the Zone's envelope: Zones reads, writes, Solve, Colour-by and export leave it out, and an explicit reference to it refuses face.outside_envelope; zones.containment answers it with the reason outside_envelope. ph_composer.zones.faces.clear_classification is new: it removes Face records in one Undo step, refusing face.surface_paired and face.aperture_host. ph_composer.shading.export_preflight is new and notes shading.zone_inside. |

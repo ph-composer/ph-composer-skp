@@ -884,6 +884,9 @@ store with `excludes_from_envelope: true`. `Records::EntityStore.envelope_exclud
 detached twin `envelope_excluded_entries?(entries)` are the one check Zones reads, so the envelope never
 names the feature that excludes. A claim wins: a Face inside a claimed entity is never excluded through a
 container above it. Shading's mark is the only excluding store (context/CONTRACTS.md, "The shading mark").
+Zones applies the check to Face leaves at its four funnels, and an explicit reference to an excluded Face
+refuses `face.outside_envelope` (context/CONTRACTS.md, "Zones geometry rules", "Envelope exclusion"). A
+feature that walks a Zone's Faces itself, as Spaces' candidate Faces do, reads the same check.
 
 ### Setup entries
 

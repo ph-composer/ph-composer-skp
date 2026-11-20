@@ -133,17 +133,36 @@ module PhComposer
       end
 
       # The snapshot Faces a Zone occurrence owns, at any depth, in snapshot order. One pass files each Face
-      # under every Zone above it, so a Face in a Zone nested in a Zone is in both, as each Zone holds it.
+      # under every Zone above it, so a Face in a Zone nested in a Zone is in both, as each Zone holds it. A Face
+      # that has left a Zone's envelope is not that Zone's (`envelope_excluded?`).
       def zone_faces(reader, zone_entry)
         by_zone_path = reader.projection(:zone_faces_by_zone_path) do
           reader.snapshot.entries.each_with_object({}) do |entry, faces|
             next unless entry.kind == "face"
 
-            enclosing_zones(reader, entry.path).map { |zone, _record| zone.path }.uniq
-                                               .each { |zone_path| (faces[zone_path] ||= []) << entry }
+            enclosing_zones(reader, entry.path).map { |zone, _record| zone.path }.uniq.each do |zone_path|
+              (faces[zone_path] ||= []) << entry unless envelope_excluded?(reader, entry, zone_path)
+            end
           end
         end
         by_zone_path.fetch(zone_entry.path, [])
+      end
+
+      # Whether the snapshot Face `entry` has left the envelope of the Zone at `zone_path`: the live rule
+      # (Occurrences.envelope_excluded?) over the snapshot entries from inside that Zone down to the Face.
+      def envelope_excluded?(reader, entry, zone_path)
+        by_path = reader.projection(:zones_entries_by_path) { reader.snapshot.entries.group_by(&:path) }
+        inside = ((zone_path.length + 1)..entry.path.length).flat_map do |length|
+          by_path.fetch(entry.path[0, length], [])
+        end
+        Records::EntityStore.envelope_excluded_entries?(inside)
+      end
+
+      # Whether the snapshot Face `entry` is inside a Zone and has left the envelope of the innermost one, the
+      # Zone a live read places it in. A Face outside every Zone is not excluded: it has no envelope to leave.
+      def outside_envelope?(reader, entry)
+        zone = enclosing_zones(reader, entry.path).last
+        !zone.nil? && envelope_excluded?(reader, entry, zone.first.path)
       end
 
       # The section's registered projection, for a contributor that places its own snapshot entries in a Zone

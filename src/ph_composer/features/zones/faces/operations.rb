@@ -221,6 +221,39 @@ module PhComposer
         {}
       end
 
+      # Clear classification: each Face's record removed, so it reads as never classified, in one step. It
+      # refuses whole when any Face is one side of a Surface pair (retire the pair with Classify first), hosts
+      # a glued cutting component such as a Window, or is still named by another record. The Zone stamp stays:
+      # the Face is still the Zone's.
+      def clear_classification(request, proposal, faces:)
+        references = deduplicate(faces)
+        check_limit!(references.length)
+        index = Zones::Index.new(request.model)
+        updates = references.map do |reference|
+          occurrence = Zones::Occurrences.resolve_face(request.model, reference, :mutable => true, :index => index)
+          record = FACE_STORE.read(occurrence.entity)
+          check_clearable!(request, occurrence, record)
+          { "reference" => reference, "before" => record }
+        end
+        scopes = updates.map { |update| update.fetch("reference").fetch("zone_path")[0...-1] }.uniq
+                        .map { |path| Operations::EntityScope.new(path) }
+        proposal.add_step(ClearClassificationStep.new(:updates => updates), :scopes => scopes)
+        { "face_ids" => updates.map { |update| update.fetch("before").fetch("id") } }
+      end
+
+      def check_clearable!(request, occurrence, record)
+        id = record.fetch("id")
+        if record["boundary_condition"] == "Surface"
+          raise CodedError.new("face.surface_paired", "Face #{id} is one side of a Surface pair. Set another " \
+                                                      "boundary condition with Classify to retire the pair first.")
+        end
+        if occurrence.entity.get_glued_instances.any? { |instance| instance.definition.behavior.cuts_opening? }
+          raise CodedError.new("face.aperture_host", "Face #{id} hosts a glued cutting component, such as a Window. " \
+                                                     "Remove or rehost it first.")
+        end
+        request.engine.check_identity_removal!(REFERENCE_KIND, id)
+      end
+
       # The Faces this delete rewrites, as they will stand, so the engine's reference check reads the
       # reassignment rather than the Faces it is about to replace.
       def reassignment_plan(updates)
@@ -238,6 +271,7 @@ module PhComposer
       # inside a Zone carries the code its resolution refused.
       STRANDED_ROUTES = {
         "outside_zone" => "Restore its Zone, or remove it",
+        "face.outside_envelope" => "clear what takes it out of its Zone's envelope",
         "target.shared_definition" => "open its shared Group with Edit Group and close it, or explode its component",
         "target.locked" => "unlock its Group or Zone"
       }.freeze
@@ -397,7 +431,7 @@ module PhComposer
       private_class_method :projected_view
       private_class_method :face_view, :patched_record, :validate_intent!, :deduplicate,
                            :retiring?, :plan_retirements, :classify_updates,
-                           :retirement_only_updates, :plan_classification
+                           :retirement_only_updates, :plan_classification, :check_clearable!
     end
   end
 end

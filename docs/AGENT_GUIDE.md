@@ -461,7 +461,8 @@ What `assign` leaves out, and why:
 - Anything locked, or inside a locked Group: `target.locked`.
 - A cutting component, such as a Window Unit, or anything inside one: `shading.cutting_component`.
 - A Zone, or a Group holding one: `shading.zone_target`.
-- A classified Zone Face: `shading.face_classified`. Clear its classification first.
+- A classified Zone Face: `shading.face_classified`. Clear its classification first with
+  `ph_composer.zones.faces.clear_classification`, then mark it.
 - A Space, Volume or Floor Segment, anything inside one, a Group holding one, or anything that is not
   a Face, Group or component: `target.wrong_kind`.
 
@@ -476,6 +477,19 @@ comes between. `ph_composer.shading.list` returns every mark and each shading co
 that export under one name, with their count and area in square metres. The name is the nearest
 enclosing Group or component name, with " Shading" added after a Zone's name, and "Shading" when
 there is none. Rename a Group to split or merge components.
+
+A Shading Face inside a Zone is not part of the Zone's envelope. Zones reads leave it out, so it
+raises no `face.unclassified`, takes no Face type and is not part of the Room. Suggest
+classification, Solve adjacencies and the Classify tool leave it alone, and a call that names it
+directly, such as `ph_composer.zones.faces.classify`, is refused with `face.outside_envelope`. Clear
+the mark and it is a Zone Face again. A mark on a Group above a Zone does not reach the Zone's Faces:
+`ph_composer.shading.export_preflight` notes each such Group with `shading.zone_inside`.
+
+`ph_composer.zones.faces.clear_classification` takes `faces`, each a Face reference with the
+`entity_id` you read, and removes their classification in one Undo step, so each reads as
+unclassified. It is refused for one side of a Surface pair (`face.surface_paired`; set another
+boundary condition with Classify first) and for a Face hosting a Window or other cutting component
+(`face.aperture_host`).
 
 ### Site and design temperatures
 

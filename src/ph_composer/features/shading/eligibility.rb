@@ -62,7 +62,7 @@ module PhComposer
         end
         if facts.classified
           return refusal("shading.face_classified", "The Face is a classified Zone Face. Clear its classification " \
-                                                    "first.")
+                                                    "first (ph_composer.zones.faces.clear_classification).")
         end
         write_refusal(facts)
       end

@@ -757,7 +757,13 @@ The mark's store is constructed with `excludes_from_envelope: true`. `Records::E
 (inside)` is true when an entity in `inside` (from the first entity inside the Zone Group down to the Face,
 as Zones' `holding` returns it) carries an excluding store's record and none is claimed;
 `envelope_excluded_entries?(entries)` applies the same rule to detached snapshot entries through their
-`dictionaries` map. Both read by presence and name no feature. Zones does not read them yet.
+`dictionaries` map. Both read by presence and name no feature. Zones reads them at every call site
+("Zones geometry rules", "Envelope exclusion").
+
+`ph_composer.shading.export_preflight` answers non-blocking notes in `Export::PREFLIGHT_RESULT`:
+`shading.zone_inside` names each marked Group or component that is a Zone, holds one or holds a claimed
+object, which the mark does not reach. Until the Shades export section lands, the aggregate export preflight
+does not read it.
 
 **Containment.** `ph_composer.zones.containment` answers, for each root-to-entity path, the Zone
 occurrence holding the drawing element at its end (`zone_id`, `zone_path`, `name`, `building_segment`,
@@ -766,7 +772,8 @@ alone. One read over many paths, here and in `faces.host_context`, scans each co
 into once (`Zones::ChildLookup`), so its cost grows with the paths asked, not with paths times
 siblings. The Zone is the innermost one above the element, by the rule Face picking applies; with no
 Zone, `reason` says why: `not_found` (a step missing or repeated), `not_a_drawing_element`,
-`cutting_instance` or `outside_zone`. `faces.host_context` stays Face-only over
+`cutting_instance`, `outside_zone` or `outside_envelope` (a Face inside a Zone that has left its envelope).
+`faces.host_context` stays Face-only over
 the same code. A feature whose reference target stores records on other elements inside Zones
 resolves its Face-shaped reference with `Zones::Occurrences.resolve_element(model, reference, noun:,
 mutable:, index:)` from its `locate:`, which has no request: Zones resolves the Zone and every step and
@@ -886,6 +893,30 @@ identifiers before attachment. Room `ph_composer` metadata retains the resolved 
 and distribution acceptance remain separate from these implemented branch contracts.
 
 ## Zones geometry rules
+
+**Envelope exclusion.** A Face inside a Zone leaves the Zone's envelope when
+`Zones::Occurrences.envelope_excluded?(inside)` holds: the Face itself, or a Group or component between
+it and the Zone Group, carries the record of a store built with `excludes_from_envelope: true`, and none
+of them is claimed (`Records::EntityStore.envelope_excluded?`). `inside` starts inside the innermost Zone,
+so a record on the Zone Group or above it never reaches the Zone's Faces. Only a Face leaves; an Edge or a
+container beside it reads its Zone as before. The rule is applied in four places, and every Zones read and
+write goes through one of them: the Face walk (`walk_faces`, behind `faces`, `Zones::Index`, faces.list
+and faces.all, Suggest classification, the unclassified rows, the Zones view's counts, Colour-by, Solve's
+candidates and cuts, the stamp writer and Zone copy repair), the point read (`holding`, behind the Classify
+tool, the selection read, `faces.host_context` and `zones.containment`, which answers `outside_envelope`),
+the reference resolve (`resolve_face_path`, which refuses `face.outside_envelope` for reads and writes
+alike, without saying why) and the export snapshot (`ExportProjection.zone_faces`,
+`envelope_excluded?` and `outside_envelope?`, behind the Zones and Faces sections). An excluded Face that
+still carries a Face record (classified before a Group above it was marked) stays in the Model and leaves
+the export; a Surface partner pointing at it is omitted as `adjacency.unresolved`. Spaces' candidate Faces
+read the foundation check themselves. Face-record id inventories and Restore offers are not envelope reads
+and do not apply it: a Face stamped before it was excluded keeps its stamp.
+
+**Clear classification.** `ph_composer.zones.faces.clear_classification` removes the records of explicit
+classified Faces in one Undo step, so each reads as never classified; the Zone stamp stays. It refuses
+whole with `face.surface_paired` for one side of a Surface pair (retire the pair with Classify first),
+`face.aperture_host` for a Face carrying a glued cutting component, and `reference.in_use` while another
+record names the Face.
 
 **Cutting components.** A ComponentInstance whose definition cuts an opening owns its contents.
 Those Faces are excluded from Zone discovery, Face inventories, classification, viewport picks
