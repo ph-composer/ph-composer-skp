@@ -1,7 +1,7 @@
 # P4a-06: The Programs feature and Segment airtightness
 
 DATE: 2026-11-15
-STATUS: Implemented on branch 2026-11-20; PG06's installed-RBZ rows owed. Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
+STATUS: Merged to main 2026-11-20 ([#544](https://github.com/ph-composer/ph-composer-skp/pull/544)); PG06's installed-RBZ rows owed. Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
