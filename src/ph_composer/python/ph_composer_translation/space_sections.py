@@ -15,7 +15,7 @@ from typing import Any
 
 from . import stack
 from .contract import JSONValue, RecordError
-from .contract.space_records import AIRFLOWS, Polygon, SpaceRecord
+from .contract.space_records import AIRFLOWS, DETAILED, Polygon, SpaceRecord
 from .model_sections import ZONE_SECTION_ID, TranslatedZone
 from .sections import ROOM, Attachment, Inputs, Requirement, Section
 
@@ -41,16 +41,18 @@ class TranslatedSpace:
 
 
 def airflow_rates(record: SpaceRecord) -> dict[str, float | None]:
-    """The any-set rule, in one place: a Space with no rate set inherits its Zone's airflow and writes none;
-    a Space with any rate set writes all three, 0 for an unset one. Converted from m3/h to m3/s here only."""
-    if not record.airflows:
+    """The Zone's airflow mode, in one place: every Space of a By Program Zone writes no rate, so PHX gives it
+    its floor share of the Room's Program ventilation; every Space of a detailed Zone writes all three, 0 for a
+    blank. Converted from m3/h to m3/s here only."""
+    if record.airflow_mode != DETAILED:
         return dict.fromkeys(RATES.values())
     return {name: record.airflows.get(key, 0.0) / SECONDS_PER_HOUR for key, name in RATES.items()}
 
 
 class SpaceSection(Section[SpaceRecord, TranslatedSpace]):
     id = SPACE_SECTION_ID
-    versions = frozenset({1})
+    # Version 2 carries each Space's Zone's `airflow_mode`.
+    versions = frozenset({2})
     object_type = TranslatedSpace
     requires = (ZONES,)
     attaches = Attachment(ROOM, lambda item: item.zone_id)
@@ -162,14 +164,15 @@ def schedule_key(item: TranslatedSpace) -> tuple[str, str, str]:
 
 
 def schedule_row(item: TranslatedSpace) -> dict[str, JSONValue]:
-    """One Space as the report's schedule lists it: the table's columns in SI, airflows as stored (m3/h), an
-    inheriting Space's as null, and its height the floor-area-weighted mean of its Volumes'."""
+    """One Space as the report's schedule lists it: the table's columns in SI, airflows as exported (m3/h, 0 for a
+    blank in a detailed Zone), null in a By Program Zone, and its height the floor-area-weighted mean of its
+    Volumes'."""
     volumes = list(item.space.volumes)
     area = sum(float(volume.floor_area) for volume in volumes)
     height = (
         sum(float(volume.floor_area) * float(volume.avg_ceiling_height) for volume in volumes) / area if area else None
     )
-    inherits = not item.source.airflows
+    by_program = item.source.airflow_mode != DETAILED
     row: dict[str, JSONValue] = {
         "space_id": item.source.id,
         "zone_id": item.zone_id,
@@ -182,7 +185,7 @@ def schedule_row(item: TranslatedSpace) -> dict[str, JSONValue]:
         "offset_from_zone": item.source.offset_from_zone,
     }
     for key in AIRFLOWS:
-        row[key] = None if inherits else item.source.airflows.get(key, 0.0)
+        row[key] = None if by_program else item.source.airflows.get(key, 0.0)
     return row
 
 

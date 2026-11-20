@@ -12,6 +12,14 @@ class ExportPreflightTest < PhComposerTestCase
     @context = API.connect(:session_id => @session.id, :capabilities => ["read"])
   end
 
+  # The findings other than Spaces' warning that the seeded Zone has no Spaces, which never blocks.
+  def beside_spaces(outcome)
+    findings = outcome.dig("value", "findings")
+    spaces, others = findings.partition { |finding| finding["code"] == "space.zone_without_spaces" }
+    assert(spaces.none? { |finding| finding.fetch("blocks_export") })
+    others
+  end
+
   def test_read_only_preflight_reports_empty_model_without_a_task_or_destination
     outcome = API.export_preflight(:context => @context)
     assert_equal "completed", outcome.fetch("status")
@@ -25,7 +33,7 @@ class ExportPreflightTest < PhComposerTestCase
     group = seed_zone
     outcome = API.export_preflight(:context => @context)
     assert_equal "completed", outcome.fetch("status")
-    finding = outcome.dig("value", "findings").first
+    finding = beside_spaces(outcome).first
     assert_equal "face.unclassified", finding.fetch("code")
     assert_equal "ph_composer.zones.faces.locate", finding.dig("locate", "name")
     reference = finding.dig("locate", "params", "faces", 0)
@@ -47,11 +55,11 @@ class ExportPreflightTest < PhComposerTestCase
                "boundary_condition" => "Outdoors", "user_data" => {}, "extension_data" => {} }
     PhComposer::Zones::Faces::FACE_STORE.write(face, record)
     first = API.export_preflight(:context => @context)
-    assert_equal "construction.missing", first.dig("value", "findings", 0, "code")
+    assert_equal "construction.missing", beside_spaces(first).first.fetch("code")
     PhComposer::Zones::Faces::FACE_STORE.write(face, record.merge("assembly_id" => "asm_#{'A' * 12}"))
     second = API.export_preflight(:context => @context)
-    assert_equal "construction.dangling", second.dig("value", "findings", 0, "code")
-    assert second.dig("value", "findings").all? { |finding| finding.fetch("blocks_export") }
+    assert_equal "construction.dangling", beside_spaces(second).first.fetch("code")
+    assert beside_spaces(second).all? { |finding| finding.fetch("blocks_export") }
     assert_empty @model.operations
   end
 
@@ -97,7 +105,7 @@ class ExportPreflightTest < PhComposerTestCase
       "id" => "fac_#{'A' * 12}", "schema_version" => 1, "face_type" => "Wall",
       "user_data" => {}, "extension_data" => {}
     })
-    findings = API.export_preflight(:context => @context).dig("value", "findings")
+    findings = beside_spaces(API.export_preflight(:context => @context))
     assert_equal ["face.boundary_unassigned"], findings.map { |finding| finding.fetch("code") }
     refute findings.first.fetch("blocks_export")
     assert_empty @model.operations

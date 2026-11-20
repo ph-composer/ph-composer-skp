@@ -15083,9 +15083,10 @@ Result:
           "airflow_mode": {
             "type": "string",
             "enum": [
-              "inheriting",
-              "user_specified"
-            ]
+              "by_program",
+              "detailed"
+            ],
+            "description": "A copy of its Zone's mode; a Space in no Zone reads its own rates as a Zone's."
           },
           "airflows": {
             "type": "object",
@@ -15102,7 +15103,7 @@ Result:
                   "null"
                 ],
                 "x-unit": "m3/h",
-                "description": "The rate the Space contributes: a set value, 0 when unset in a user-specified Space, null in an inheriting one."
+                "description": "The rate the Space contributes: a set value, or 0 when unset, in a Zone with detailed airflows; null in a By Program Zone."
               },
               "v_eta_m3h": {
                 "type": [
@@ -15110,7 +15111,7 @@ Result:
                   "null"
                 ],
                 "x-unit": "m3/h",
-                "description": "The rate the Space contributes: a set value, 0 when unset in a user-specified Space, null in an inheriting one."
+                "description": "The rate the Space contributes: a set value, or 0 when unset, in a Zone with detailed airflows; null in a By Program Zone."
               },
               "v_tran_m3h": {
                 "type": [
@@ -15118,7 +15119,7 @@ Result:
                   "null"
                 ],
                 "x-unit": "m3/h",
-                "description": "The rate the Space contributes: a set value, 0 when unset in a user-specified Space, null in an inheriting one."
+                "description": "The rate the Space contributes: a set value, or 0 when unset, in a Zone with detailed airflows; null in a By Program Zone."
               }
             }
           },
@@ -15544,8 +15545,8 @@ Result:
           "floor_area_m2",
           "weighted_area_m2",
           "net_volume_m3",
-          "airflows",
-          "inheriting_count"
+          "airflow_mode",
+          "airflows"
         ],
         "properties": {
           "zone_id": {
@@ -15582,6 +15583,14 @@ Result:
             "x-unit": "m3",
             "description": "Summed net volume."
           },
+          "airflow_mode": {
+            "type": "string",
+            "enum": [
+              "by_program",
+              "detailed"
+            ],
+            "description": "by_program until any Space in the Zone has a rate, then detailed: every Space exports its own rates, 0 for a blank."
+          },
           "airflows": {
             "type": "object",
             "additionalProperties": false,
@@ -15597,7 +15606,7 @@ Result:
                   "null"
                 ],
                 "x-unit": "m3/h",
-                "description": "Summed over user-specified Spaces; null while any Space inherits."
+                "description": "Summed over the Zone's Spaces; null while By Program."
               },
               "v_eta_m3h": {
                 "type": [
@@ -15605,7 +15614,7 @@ Result:
                   "null"
                 ],
                 "x-unit": "m3/h",
-                "description": "Summed over user-specified Spaces; null while any Space inherits."
+                "description": "Summed over the Zone's Spaces; null while By Program."
               },
               "v_tran_m3h": {
                 "type": [
@@ -15613,13 +15622,9 @@ Result:
                   "null"
                 ],
                 "x-unit": "m3/h",
-                "description": "Summed over user-specified Spaces; null while any Space inherits."
+                "description": "Summed over the Zone's Spaces; null while By Program."
               }
             }
-          },
-          "inheriting_count": {
-            "type": "integer",
-            "minimum": 0
           }
         }
       },
@@ -15638,7 +15643,7 @@ Result:
           "weighted_area_m2",
           "net_volume_m3",
           "airflows",
-          "inheriting_count"
+          "by_program_zone_count"
         ],
         "properties": {
           "key": {
@@ -15684,7 +15689,7 @@ Result:
                   "null"
                 ],
                 "x-unit": "m3/h",
-                "description": "Summed over user-specified Spaces; null while any Space inherits."
+                "description": "Summed over its Zones that hold Spaces; null while any of them is By Program."
               },
               "v_eta_m3h": {
                 "type": [
@@ -15692,7 +15697,7 @@ Result:
                   "null"
                 ],
                 "x-unit": "m3/h",
-                "description": "Summed over user-specified Spaces; null while any Space inherits."
+                "description": "Summed over its Zones that hold Spaces; null while any of them is By Program."
               },
               "v_tran_m3h": {
                 "type": [
@@ -15700,13 +15705,14 @@ Result:
                   "null"
                 ],
                 "x-unit": "m3/h",
-                "description": "Summed over user-specified Spaces; null while any Space inherits."
+                "description": "Summed over its Zones that hold Spaces; null while any of them is By Program."
               }
             }
           },
-          "inheriting_count": {
+          "by_program_zone_count": {
             "type": "integer",
-            "minimum": 0
+            "minimum": 0,
+            "description": "Its Zones that hold Spaces and are By Program."
           }
         }
       },
@@ -17495,9 +17501,10 @@ Result:
           "airflow_mode": {
             "type": "string",
             "enum": [
-              "inheriting",
-              "user_specified"
-            ]
+              "by_program",
+              "detailed"
+            ],
+            "description": "A copy of its Zone's mode; a Space in no Zone reads its own rates as a Zone's."
           },
           "airflows": {
             "type": "object",
@@ -17514,7 +17521,7 @@ Result:
                   "null"
                 ],
                 "x-unit": "m3/h",
-                "description": "The rate the Space contributes: a set value, 0 when unset in a user-specified Space, null in an inheriting one."
+                "description": "The rate the Space contributes: a set value, or 0 when unset, in a Zone with detailed airflows; null in a By Program Zone."
               },
               "v_eta_m3h": {
                 "type": [
@@ -17522,7 +17529,7 @@ Result:
                   "null"
                 ],
                 "x-unit": "m3/h",
-                "description": "The rate the Space contributes: a set value, 0 when unset in a user-specified Space, null in an inheriting one."
+                "description": "The rate the Space contributes: a set value, or 0 when unset, in a Zone with detailed airflows; null in a By Program Zone."
               },
               "v_tran_m3h": {
                 "type": [
@@ -17530,7 +17537,7 @@ Result:
                   "null"
                 ],
                 "x-unit": "m3/h",
-                "description": "The rate the Space contributes: a set value, 0 when unset in a user-specified Space, null in an inheriting one."
+                "description": "The rate the Space contributes: a set value, or 0 when unset, in a Zone with detailed airflows; null in a By Program Zone."
               }
             }
           },
@@ -17593,6 +17600,7 @@ Result:
           "zone_path",
           "name",
           "space_count",
+          "airflow_mode",
           "floor_area_m2",
           "weighted_area_m2",
           "net_volume_m3"
@@ -17616,6 +17624,14 @@ Result:
           "space_count": {
             "type": "integer",
             "minimum": 0
+          },
+          "airflow_mode": {
+            "type": "string",
+            "enum": [
+              "by_program",
+              "detailed"
+            ],
+            "description": "by_program until any Space in the Zone has a rate, then detailed: every Space exports its own rates, 0 for a blank."
           },
           "floor_area_m2": {
             "type": "number",
@@ -17649,7 +17665,7 @@ Result:
           "weighted_area_m2",
           "net_volume_m3",
           "airflows",
-          "inheriting_count"
+          "by_program_zone_count"
         ],
         "properties": {
           "key": {
@@ -17695,7 +17711,7 @@ Result:
                   "null"
                 ],
                 "x-unit": "m3/h",
-                "description": "Summed over user-specified Spaces; null while any Space inherits."
+                "description": "Summed over its Zones that hold Spaces; null while any of them is By Program."
               },
               "v_eta_m3h": {
                 "type": [
@@ -17703,7 +17719,7 @@ Result:
                   "null"
                 ],
                 "x-unit": "m3/h",
-                "description": "Summed over user-specified Spaces; null while any Space inherits."
+                "description": "Summed over its Zones that hold Spaces; null while any of them is By Program."
               },
               "v_tran_m3h": {
                 "type": [
@@ -17711,13 +17727,14 @@ Result:
                   "null"
                 ],
                 "x-unit": "m3/h",
-                "description": "Summed over user-specified Spaces; null while any Space inherits."
+                "description": "Summed over its Zones that hold Spaces; null while any of them is By Program."
               }
             }
           },
-          "inheriting_count": {
+          "by_program_zone_count": {
             "type": "integer",
-            "minimum": 0
+            "minimum": 0,
+            "description": "Its Zones that hold Spaces and are By Program."
           }
         }
       },
@@ -50033,6 +50050,97 @@ Example params:
 }
 ```
 
+### `ph_composer.spaces.clear_zone_airflows`
+
+From Program: clear every Space's supply, extract and transfer rates in the named Zones, so each is By Program again and its Spaces take their Zone's Program ventilation, split by floor area. All or nothing: a Space that cannot be written refuses the whole call. A Zone already By Program is left as it is. Owner: `ph_composer.spaces`.
+
+Undo step: Clear Zone Airflows. Removes v_sup_m3h, v_eta_m3h and v_tran_m3h from every Space record hosted in the Zones, in one Undo step.
+
+Refuses: `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "zones"
+  ],
+  "properties": {
+    "zones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "zone_id",
+          "zone_path"
+        ],
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          },
+          "zone_path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        "description": "The Zone occurrence, as ph_composer.zones.list returns it."
+      },
+      "minItems": 1,
+      "maxItems": 500,
+      "description": "The Zones, as ph_composer.zones.list returns them."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "zone_ids",
+    "space_ids"
+  ],
+  "properties": {
+    "zone_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "space_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The Spaces whose rates were cleared; empty when every Zone was By Program."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "zones": [
+    {
+      "zone_id": "zon_Ab12Cd34Ef56",
+      "zone_path": [
+        1201
+      ]
+    }
+  ]
+}
+```
+
 ### `ph_composer.spaces.create`
 
 Make one new Space from a floor surface: explicit Faces loose in the open edit context, each becoming a Floor Segment. Faces joined by a shared Edge, a step included, share one Volume; Faces meeting only at a corner, or not at all, make separate Volumes. Works at the root, in a plain Group and in an open Zone, whose Space Group is placed outside the Zone at the same world position. Owner: `ph_composer.spaces`.
@@ -79528,6 +79636,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `space.volume_unprotected` | A closed Volume is unlocked, so its Faces can be edited from the Space. |
 | `space.zone_left_out` | A Space is in a Zone in no Building Segment, so export leaves it out with its Zone. |
 | `space.zone_missing` | A Space names a Zone that is no longer in the Model. |
+| `space.zone_without_spaces` | An exported Zone has no Spaces, so WUFI-Passive and METr give it no iCFA, net volume or ventilation. Not blocking. |
 
 ### `ph_composer.thermal_bridges`
 
@@ -79745,3 +79854,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.74 | 2026-11-20 | ph_composer.zones.save_segment_settings is new: one Building Segment's name, colour, default and a settings payload per extension namespace in one Undo step, emitting ph_composer.zones.segment_settings_saved. ph_composer.zones.create_segment is new: a Segment under the first free default name with named Zones moved in. A Zone's choice evidence keeps its Building Segment's values only, so a Segment metadata write no longer rewrites its Zones and adoption brings no Segment settings. ph_composer.zones.all adds building_segments, each Segment's Face area; ph_composer.spaces.all and list add airflows and inheriting_count to each building_segments row. |
 | 1.75 | 2026-11-20 | Export leaves a Zone in no Building Segment out with its Faces, Spaces, assigned Edges and the Window Units on its Faces, and a Building Segment no Zone names; export preflight refuses zone.no_segment when Zones exist and none is in a Segment, no longer refuses such a Zone with reference.invalid, refuses face.partner_left_out on a Surface pair across that boundary, and adds the info rows zone.left_out, zone.segment_empty, space.zone_left_out, thermal_bridge.zone_left_out and window.zone_left_out. ph_composer.zones.faces.attached_zone.offer is new: the Faces a Zone moved out shares with exported Zones, both sides, for create_and_assign or classify. An AttachedZone Face exports as honeybee-ph PhAdditionalZone. |
 | 1.76 | 2026-11-20 | ph_composer.certification is a new feature: the ph_composer.certification.segment extension on each Building Segment (category, program, use, status, type), saved through zones.save_segment_settings, read by ph_composer.certification.segment.get with its defaults, and exported to the BldgSegment's phius_certification. An export contributor may claim an extension on a catalog record kind; its rows carry a null path, and Zones' export and preflight now check a claimed envelope on every valid Building Segment instead of leaving it out. The Zones section's projection rows add building_segment_id and building_segment_export_identifier, and translation sections may attach at the segment host. |
+| 1.77 | 2026-11-20 | A Space's airflow mode is its Zone's: by_program until any Space in the Zone has a rate, then detailed, when every Space exports its own rates with 0 for a blank. ph_composer.spaces.all and list add airflow_mode to each Zone row; all's Zone rows drop inheriting_count, and each building_segments row replaces inheriting_count with by_program_zone_count. A Space row's airflow_mode takes by_program or detailed (was inheriting or user_specified), a copy of its Zone's kept for this minor version; read the Zone row's. ph_composer.spaces.clear_zone_airflows is new: From Program, every Space's rates in the named Zones cleared in one Undo step. The Spaces export section moves to version 2, each record carrying airflow_mode, and its preflight adds space.zone_without_spaces, a warning that does not block. |

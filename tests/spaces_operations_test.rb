@@ -299,11 +299,11 @@ class SpacesOperationsTest < PhComposerTestCase
     row = spaces.first
     set = edit(row, { "v_sup_m3h" => 60.0, "v_eta_m3h" => 0.0 }, {})
     assert_equal "completed", set["status"], set.inspect
-    assert_equal "user_specified", spaces.first["airflow_mode"]
+    assert_equal "detailed", spaces.first["airflow_mode"]
     clear = edit(spaces.first, { "v_sup_m3h" => nil, "v_eta_m3h" => nil },
                  { "v_sup_m3h" => 60.0, "v_eta_m3h" => 0.0 })
     assert_equal "completed", clear["status"], clear.inspect
-    assert_equal "inheriting", spaces.first["airflow_mode"]
+    assert_equal "by_program", spaces.first["airflow_mode"]
     stale = edit(spaces.first, { "name" => "Kitchen" }, { "name" => "Other" })
     assert_equal %w[refused target.changed], stale.values_at("status", "code")
     unknown = edit(spaces.first, { "next_volume_sequence" => 9 }, {})

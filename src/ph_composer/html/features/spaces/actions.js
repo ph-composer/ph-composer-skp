@@ -1,4 +1,5 @@
-/* The Spaces view's row actions: Locate every row; Open or Close a Space; Enter a Volume;
+/* The Spaces view's row actions: Locate every row; Open or Close a Space; Enter a Volume; From Program on a Zone
+ * row with detailed airflows, clearing every Space's rates in it after a confirmation naming what goes;
  * Delete a Space, Remove a Space keeping its floors and Delete a Volume with its floor Faces, each after a
  * confirmation naming what goes (a Space's only Volume offers Delete Space instead); Move a Space to Zone; and the
  * repair a row's finding names (Restore position, Make independent).
@@ -125,6 +126,35 @@ function (panel, requests, ui, units, preferences, fields) {
     return items;
   };
 
+  /* A Zone row's own action: From Program, while the Zone uses detailed airflows. */
+  SpaceActions.prototype.zoneActions = function (row) {
+    var sums = row.record.sums;
+    if (!row.record.zone || !sums || sums.airflow_mode !== "detailed") return [];
+    return [{ id: "spaces.from_program", icon: "undo", disabled: this.busy(),
+      label: "From Program: clear every Space's airflows in " + (row.record.name || "this Zone") }];
+  };
+
+  /* From Program: the Zone's Spaces' rates go and the Zone is By Program again, in one Undo step. It discards
+     rates the user entered, so it confirms first, naming how many Spaces hold them. */
+  SpaceActions.prototype.fromProgram = function (row) {
+    if (this.busy()) return;
+    var held = this.host.draftReason();
+    if (held) { this.host.refuse(held); return; }
+    var zone = row.record.zone.reference, name = row.record.name || "this Zone", self = this;
+    var count = row.record.spaces.filter(function (space) {
+      return ["v_sup_m3h", "v_eta_m3h", "v_tran_m3h"].some(function (key) {
+        return Object.prototype.hasOwnProperty.call(space.values, key);
+      });
+    }).length;
+    this.askFirst("Use Program airflows?", "The supply, extract and transfer rates of " + count +
+      (count === 1 ? " Space" : " Spaces") + " in " + name + " will be cleared, and every Space in it takes the " +
+      "Zone's Program ventilation, split by floor area. One Undo brings the rates back.", "Clear airflows",
+    function (revision) {
+      self.runAt(revision, PREFIX + ".clear_zone_airflows",
+        { zones: [{ zone_id: zone.zone_id, zone_path: copy(zone.zone_path) }] });
+    });
+  };
+
   // The actions that change records or the edit context's protection; a held cell draft must not be lost to one.
   var CHANGES = { "spaces.enter": true, "spaces.restore": true, "spaces.independent": true, "spaces.delete": true,
     "spaces.remove": true, "spaces.delete_volume": true, "spaces.move": true, "spaces.unhost": true,
@@ -132,6 +162,7 @@ function (panel, requests, ui, units, preferences, fields) {
 
   /* Runs one of this view's actions; false for an action it does not own. */
   SpaceActions.prototype.run = function (row, item) {
+    if (item.id === "spaces.from_program") { this.fromProgram(row); return true; }
     var record = row.record, target = record.segment || record.volume || record.space;
     if (item.id.indexOf("spaces.") !== 0 || !target) return false;
     if (this.busy()) return true;

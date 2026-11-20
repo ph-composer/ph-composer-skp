@@ -15,8 +15,8 @@ module PhComposer
       EXTENSION_STATUS = { "type" => "object",
                            "description" => "Each extension envelope's status against what is installed." }.freeze
       AIRFLOWS = Shapes.object(AIRFLOWS.to_h do |key|
-        [key, Shapes.quantity("m3/h", "The rate the Space contributes: a set value, 0 when unset in a " \
-                                      "user-specified Space, null in an inheriting one.", :nullable => true)]
+        [key, Shapes.quantity("m3/h", "The rate the Space contributes: a set value, or 0 when unset, in a " \
+                                      "Zone with detailed airflows; null in a By Program Zone.", :nullable => true)]
       end)
       SEGMENT_METRICS = Shapes.object({
         "floor_area_m2" => AREA,
@@ -41,6 +41,9 @@ module PhComposer
                                               :nullable => true)
       })
       ZONE_REFERENCE = Shapes.object({ "zone_id" => Shapes::TEXT, "zone_path" => Shapes::ZONE_PATH })
+      AIRFLOW_MODE = { "type" => "string", "enum" => Metrics::AIRFLOW_MODES,
+                       "description" => "by_program until any Space in the Zone has a rate, then detailed: every " \
+                                        "Space exports its own rates, 0 for a blank." }.freeze
 
       def self.row(kind, extra)
         view = kind.descriptor.view_schema
@@ -74,7 +77,9 @@ module PhComposer
                                                                              "Space, or null outside every Zone."),
                              "state" => { "type" => "string", "enum" => %w[found ambiguous shared_definition] },
                              "nested" => { "type" => "boolean" }, "metrics" => SPACE_METRICS,
-                             "airflow_mode" => { "type" => "string", "enum" => %w[inheriting user_specified] },
+                             "airflow_mode" => AIRFLOW_MODE.merge("description" => "A copy of its Zone's mode; a " \
+                                                                                   "Space in no Zone reads its own " \
+                                                                                   "rates as a Zone's."),
                              "airflows" => AIRFLOWS, "findings" => FINDINGS, "volumes" => Shapes.list(VOLUME_ROW))
       ZONE_ROW = Shapes.object({
         "zone_id" => Shapes::TEXT, "zone_path" => Shapes::ZONE_PATH,
@@ -82,21 +87,25 @@ module PhComposer
         "floor_area_m2" => AREA,
         "weighted_area_m2" => Shapes.quantity("m2", "Summed weighted area (iCFA)."),
         "net_volume_m3" => Shapes.quantity("m3", "Summed net volume."),
+        "airflow_mode" => AIRFLOW_MODE,
         "airflows" => Shapes.object(AIRFLOWS.fetch("properties").transform_values do |field|
-          field.merge("description" => "Summed over user-specified Spaces; null while " \
-                                       "any Space inherits.")
-        end),
-        "inheriting_count" => Shapes::COUNT
+          field.merge("description" => "Summed over the Zone's Spaces; null while By Program.")
+        end)
       })
       TOTAL_PROPERTIES = {
         "floor_area_m2" => AREA, "weighted_area_m2" => Shapes.quantity("m2", "Summed weighted area (iCFA)."),
         "net_volume_m3" => Shapes.quantity("m3", "Summed net volume.")
       }.freeze
+      SEGMENT_AIRFLOWS = Shapes.object(AIRFLOWS.fetch("properties").transform_values do |field|
+        field.merge("description" => "Summed over its Zones that hold Spaces; null while any of them is By Program.")
+      end)
       BUILDING_SEGMENT_ROW = Shapes.object({ "key" => Shapes::TEXT, "name" => { "type" => %w[string null] },
                                              "zone_count" => Shapes::COUNT }
                                            .merge(TOTAL_PROPERTIES)
-                                           .merge("airflows" => ZONE_ROW.dig("properties", "airflows"),
-                                                  "inheriting_count" => Shapes::COUNT))
+                                           .merge("airflows" => SEGMENT_AIRFLOWS,
+                                                  "by_program_zone_count" => Shapes::COUNT.merge(
+                                                    "description" => "Its Zones that hold Spaces and are By Program."
+                                                  )))
       STRAY = Shapes.with(FINDING, "reference" => { "type" => "object",
                                                     "description" => "The misplaced record's reference." })
       ALL_RESULT = Shapes.object({
@@ -143,7 +152,8 @@ module PhComposer
                             "building_segment" => { "type" => %w[string null] }, "volume_count" => Shapes::COUNT,
                             "floor_segment_count" => Shapes::COUNT, "finding_counts" => FINDING_COUNTS)
       LIST_EXAMPLES = [{}, { "limit" => 20, "fields" => %w[values metrics] }].freeze
-      ZONE_SUMS = Shapes.object(ZONE_ROW.fetch("properties").slice("zone_id", "zone_path", "name", "space_count")
+      ZONE_SUMS = Shapes.object(ZONE_ROW.fetch("properties").slice("zone_id", "zone_path", "name", "space_count",
+                                                                   "airflow_mode")
                                         .merge(TOTAL_PROPERTIES))
       LIST_RESULT = Shapes.object({
         "spaces" => Shapes.list(SUMMARY_ROW, :description => "One page in path order, within the reply budget."),

@@ -880,34 +880,47 @@
       heighted += item.metrics.floor_area_m2 * item.values.avg_ceiling_height_m;
     });
     metrics.average_height_m = metrics.floor_area_m2 ? heighted / metrics.floor_area_m2 : null;
-    var mode = Object.keys(airflows).length ? "user_specified" : "inheriting", flows = {};
-    ["v_sup_m3h", "v_eta_m3h", "v_tran_m3h"].forEach(function (key) {
-      flows[key] = mode === "inheriting" ? null : airflows[key] || 0;
-    });
-    return { id: "spc_" + number, state: "found", nested: false, findings: [], airflow_mode: mode, airflows: flows,
+    return { id: "spc_" + number, state: "found", nested: false, findings: [], airflow_mode: null, airflows: {},
       values: Object.assign({ name: name, number: number }, airflows), volumes: volumes, metrics: metrics,
       reference: { space_id: "spc_" + number, entity_path: path },
       zone: zoneId && { zone_id: zoneId, zone_path: zonePath(zoneId) } };
   }
-  // The section: each Zone's sums over its Spaces, as the host computes them.
+  var AIRFLOW_KEYS = ["v_sup_m3h", "v_eta_m3h", "v_tran_m3h"];
+  function rated(space) {
+    return AIRFLOW_KEYS.some(function (key) { return Object.prototype.hasOwnProperty.call(space.values, key); });
+  }
+  // The section: each Space with its Zone's airflow mode (detailed once any Space in the Zone has a rate, else
+  // By Program) and each Zone's sums over its Spaces, as the host computes them.
   function spacesSection(spaces, zoneRecords) {
+    spaces.forEach(function (space) {
+      var zoneId = space.zone && space.zone.zone_id;
+      var members = spaces.filter(function (other) {
+        return zoneId ? other.zone && other.zone.zone_id === zoneId : other === space;
+      });
+      space.airflow_mode = members.some(rated) ? "detailed" : "by_program";
+      AIRFLOW_KEYS.forEach(function (key) {
+        space.airflows[key] = space.airflow_mode === "detailed" ? space.values[key] || 0 : null;
+      });
+    });
     var zones = (zoneRecords || AUTHORING.zones).map(function (zone) {
       var own = spaces.filter(function (space) { return space.zone && space.zone.zone_id === zone.id; });
-      var inheriting = own.filter(function (space) { return space.airflow_mode === "inheriting"; }).length;
+      var mode = own.some(function (space) { return space.airflow_mode === "detailed"; }) ? "detailed" : "by_program";
       var flows = {};
-      ["v_sup_m3h", "v_eta_m3h", "v_tran_m3h"].forEach(function (key) {
-        flows[key] = inheriting ? null : own.reduce(function (sum, space) { return sum + space.airflows[key]; }, 0);
+      AIRFLOW_KEYS.forEach(function (key) {
+        flows[key] = mode === "detailed" ?
+          own.reduce(function (sum, space) { return sum + space.airflows[key]; }, 0) : null;
       });
       function sum(key) { return own.reduce(function (total, space) { return total + space.metrics[key]; }, 0); }
       return { zone_id: zone.id, zone_path: zone.reference.zone_path, name: zone.values.name, space_count: own.length,
         floor_area_m2: sum("floor_area_m2"), weighted_area_m2: sum("weighted_area_m2"),
-        net_volume_m3: sum("net_volume_m3"), airflows: flows, inheriting_count: inheriting };
+        net_volume_m3: sum("net_volume_m3"), airflow_mode: mode, airflows: flows };
     });
     return { spaces: spaces, zones: zones, findings: [], units: { area: "m2", height: "m", volume: "m3",
       airflow: "m3/h" } };
   }
   var LIVING = "zon_Aa11Bb22Cc33", ATTIC = "zon_Dd44Ee55Ff66";
-  // The synthetic reference model's four Spaces (planning ACCEPTANCE): one Zone with airflows set and one inheriting.
+  // The synthetic reference model's four Spaces (planning ACCEPTANCE): one Zone with detailed airflows and one By
+  // Program.
   var REFERENCE_SPACES = spacesSection([
     spaceRow([100, 501], LIVING, "101", "Living", { v_sup_m3h: 60 },
       [spaceVolume([100, 501, 1], 1, 2.5, [spaceSegment([100, 501, 1, 1], 12, 1)])]),
@@ -1186,6 +1199,8 @@
 
   global.PhComposerPreviewFixtures = {
     names: Object.keys(FIXTURES),
+    // The Spaces section summed again after the preview host writes rates, by the same rule as the fixtures.
+    spacesSection: spacesSection,
     fromQuery: function (search) {
       var match = /[?&]fixture=([a-z]+)/.exec(search || "");
       return FIXTURES[match && FIXTURES[match[1]] ? match[1] : "parts"];

@@ -176,14 +176,14 @@
       "sha256": "72e80a2682eee8d51d1648de5e8543338f05d66d6b1a3db14b323273a51a5be1"
     },
     "html/features/spaces/actions.js": {
-      "bytes": 16689,
+      "bytes": 18546,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "871cf40c917b4ec2216df2815c5a6fe253bfedae0f64297a3ee68dd906788f65"
+      "sha256": "11ad4084ef6dbf15822324d09e18b185583519029513f33365679d194985bc5d"
     },
     "html/features/spaces/cells.js": {
-      "bytes": 10273,
+      "bytes": 10396,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "6e9226fcb9dc4ed88b085ed9698b99e8b8c7630b111fa7fb6bd22b855144d224"
+      "sha256": "aabe6c68950fa881b08b030a8f2a15734967b74cfb259ea75b0c0cd388a9ffe9"
     },
     "html/features/spaces/create_review.js": {
       "bytes": 9048,
@@ -201,9 +201,9 @@
       "sha256": "2cc1d826be20472e89379addbb605b89d32778b4cbcf1a658b81c55512c2568d"
     },
     "html/features/spaces/view.js": {
-      "bytes": 21650,
+      "bytes": 25258,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "8a0d00998e2222097fadd102a9741f10473e9dc475f9da15fe17c63443aea847"
+      "sha256": "85af412b3da4965a0d65658c315cb7ca678164a519a4807b42fea8d0ff5a956c"
     },
     "html/features/thermal_bridges/assign_bar.js": {
       "bytes": 11913,
@@ -361,9 +361,9 @@
       "sha256": "918fe136617fd341fd5bd51d85125284fe06b0f99c978070010234b46a1576fa"
     },
     "html/features/zones/overview.js": {
-      "bytes": 57424,
+      "bytes": 57606,
       "mime": "text/javascript; charset=utf-8",
-      "sha256": "845919747b71fae7ca8023c58d1d1da178a5781edfba5bb63c7b446467c37bdb"
+      "sha256": "94ef3378da9224cddc6736e4e5491f40c9341b768892fbdc558d2801338c4413"
     },
     "html/features/zones/segment_rows.js": {
       "bytes": 30538,
@@ -726,9 +726,9 @@
       "sha256": "90df72f3de39af59d3c64d15c85d25eb82940fa7e25778ecae5797f290755848"
     },
     "python/ph_composer_translation/contract/space_records.py": {
-      "bytes": 5956,
+      "bytes": 6553,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "47e0b3c8367d74422e79050122326aec2f1672dd59fabb5cda5a3f9f6c324966"
+      "sha256": "1d3703038d524faef05943358179b31a224ad998f69c1bec0360b6a35f662bb7"
     },
     "python/ph_composer_translation/contract/thermal_bridge_records.py": {
       "bytes": 2908,
@@ -791,9 +791,9 @@
       "sha256": "1d3634e125e48e13bbbb7e44eab6e2e2e8777fa8d50481511f368540789be783"
     },
     "python/ph_composer_translation/space_sections.py": {
-      "bytes": 10120,
+      "bytes": 10311,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "6c42e889160dbe4b52b2879c3fda28a873a9c6428ef1593fdbf6dfc3fb4b5f4c"
+      "sha256": "2edd9370c79b197f92deda6696d8fa2383d31fcf999eff2c6dff0faa85cda47a"
     },
     "python/ph_composer_translation/stack.py": {
       "bytes": 1361,

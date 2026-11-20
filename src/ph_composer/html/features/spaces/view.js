@@ -3,9 +3,12 @@
  * the Zone's sums on its row. A Space outside every Zone is listed under one "No Zone" row after the Zones.
  * Every figure comes from the `spaces` snapshot section; the panel sums and computes nothing.
  *
- * Airflows follow the any-set rule: a set rate reads as typed, an unset rate on a user-specified Space reads
- * as a muted 0, and a Space with all three unset reads "Zone" (it inherits the Zone's ventilation load).
- * A Zone holding any inheriting Space shows a muted dash for its airflow sums.
+ * Airflows follow the Zone's mode, which the snapshot names (context/CONTRACTS.md, "Translation sections and
+ * artifacts"): in a By Program Zone, one whose Spaces have no rate, every airflow cell reads a muted "By
+ * Program" and the Zone's sums a dash; once any Space in it has a rate the Zone uses detailed airflows, a set
+ * rate reads as typed and a blank as a muted 0, and the Zone row offers From Program, which clears them all.
+ * An edit from this view that switches a Zone to detailed says so in a notice. A Zone with no Spaces shows an
+ * amber "No Spaces" row: it exports with no iCFA, net volume or ventilation.
  * Names, numbers, heights, factors and airflows edit in place (cells.js).
  */
 PhComposerUI.define("features/spaces/view", ["panel", "workspace", "snapshot", "units", "unit_preferences", "fields",
@@ -33,6 +36,21 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
     "ph_composer.spaces.selection_totals": "Selection totals" };
   var LABEL_LINES = [["weighted_area", "Weighted area (iCFA)"], ["net_volume", "Net volume"],
     ["airflows", "Supply and extract"]];
+  var DETAILED = "detailed";
+  var BY_PROGRAM_TIP = "By Program: this Zone's Program ventilation, split by floor area, with its schedule. " +
+    "Type a rate and the Zone switches to detailed airflows: every Space in it exports its own rates, 0 where blank.";
+  var ZONE_BY_PROGRAM_TIP = "By Program: this Zone's Program ventilation applies, split by Space floor area.";
+  var BLANK_TIP = "Blank exports 0: this Zone uses detailed airflows.";
+  var NO_SPACES_TIP = "No Spaces: this Zone exports its geometry to WUFI-Passive and METr with no iCFA, net " +
+    "volume or ventilation. Export warns but goes ahead. Add Spaces before calculating.";
+  var TRANSFER_HELP = "Transfer air reaches PHPP only. WUFI-Passive and METr receive supply and extract.";
+
+  /* Whether the Space stores any rate: one is enough to make its Zone detailed. */
+  function rated(space) {
+    return AIRFLOWS.some(function (airflow) {
+      return Object.prototype.hasOwnProperty.call(space.values, airflow[0]);
+    });
+  }
 
   function create(host) {
     var cells = new SpaceCells(host);
@@ -68,14 +86,42 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
       var key = occurrence(space.zone.zone_path);
       (vs.byZone[key] = vs.byZone[key] || []).push(space);
     });
+    var before = vs.sums;
     vs.sums = Object.create(null);
     (value.zones || []).forEach(function (zone) { vs.sums[occurrence(zone.zone_path)] = zone; });
+    noticeSwitch(vs, before);
     vs.actions.consume(state, value.zones || []);
     vs.paint.consume(state);
     vs.review.consume(state);
     // Mark floor runs only while this view is shown on the Zones tab: a start that lands after a switch away
     // is stopped.
     if (state.ui && state.ui.activeTab !== "overview" || vs.host.activeView() !== VIEW.id) vs.paint.stop();
+  }
+
+  /* A Zone this view's own write took from By Program to detailed: the notice says what that does to its other
+     Spaces. It waits for the paint to end, as showing it repaints. An Undo or another client's write, with
+     nothing of this view's in flight, raises none. */
+  function noticeSwitch(vs, before) {
+    if (!vs.cells.inFlight()) return;
+    var names = [], others = 0;
+    Object.keys(vs.sums).forEach(function (key) {
+      var was = before[key], now = vs.sums[key];
+      if (!was || was.airflow_mode === DETAILED || now.airflow_mode !== DETAILED) return;
+      names.push(now.name || "A Zone");
+      others += (vs.byZone[key] || []).filter(function (space) { return !rated(space); }).length;
+    });
+    if (names.length) vs.switchNotice = switchMessage(names, others);
+  }
+
+  /* One notice for every Zone an edit switched, a batch's several included; SketchUp's Set Airflows menu
+     (features/spaces/space_edit_menu.rb, switch_message) says the same. */
+  function switchMessage(names, others) {
+    var head = names.length === 1 ? names[0] + " now uses" :
+      names.slice(0, -1).join(", ") + " and " + names[names.length - 1] + " now use";
+    if (!others) return head + " detailed airflows.";
+    return head + " detailed airflows: " + (names.length === 1 ? "its" : "their") + " " + (others === 1 ?
+      "other Space exports 0 until you enter its rates." : "other " + others + " Spaces export 0 until you " +
+        "enter theirs.");
   }
 
   function zoneRecord(vs, record) {
@@ -91,9 +137,14 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
   }
 
   /* A Zone's (or the group's) rows: each Space, then its Volumes, then each Volume's Floor Segments. The
-     Space Floor has no row. */
+     Space Floor has no row. A Zone with no Spaces has one amber "No Spaces" row instead; a copy of a Zone, whose
+     Spaces are read under its first occurrence, has neither. */
   function children(vs, row) {
     var rows = [];
+    if (row.record.zone && row.record.state === "found" && !row.record.spaces.length) {
+      return [{ key: JSON.stringify(["NoSpaces", row.record.zone.reference.zone_path]), parent: row.key,
+        tier: "Note", depth: 1, record: { id: null, name: "No Spaces", noSpaces: true } }];
+    }
     row.record.spaces.forEach(function (space) {
       var spaceKey = JSON.stringify(["Space", space.reference.entity_path]);
       rows.push({ key: spaceKey, parent: row.key, tier: "Space", depth: 1,
@@ -129,6 +180,7 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
      for a blank; `muted` marks a value the row does not set itself, `tooltip` says why. */
   function cellOf(row, field) {
     var record = row.record;
+    if (record.noSpaces) return null;
     if (record.segment) return segmentCell(record.segment, field);
     if (record.volume) return volumeCell(record.volume, field);
     if (record.space) return spaceCell(record.space, field);
@@ -155,13 +207,9 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
   function spaceCell(space, field) {
     if (field === "number") return { text: space.values.number };
     if (AIRFLOW_FIELDS[field]) {
-      if (space.airflow_mode === "inheriting") {
-        return { text: "Zone", muted: true,
-          tooltip: "No airflow is set, so this Space uses its Zone's ventilation load." };
-      }
+      if (space.airflow_mode !== DETAILED) return { text: "By Program", muted: true, tooltip: BY_PROGRAM_TIP };
       var set = Object.prototype.hasOwnProperty.call(space.values, field);
-      return { value: space.airflows[field], muted: !set,
-        tooltip: set ? "" : "Not set. Another airflow on this Space is, so this one counts as 0." };
+      return { value: space.airflows[field], muted: !set, tooltip: set ? "" : BLANK_TIP };
     }
     return metric(space, field);
   }
@@ -171,11 +219,7 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
     var sums = record.sums;
     if (!sums) return null;
     if (AIRFLOW_FIELDS[field]) {
-      if (sums.inheriting_count) {
-        var noun = sums.inheriting_count === 1 ? " Space in this Zone inherits" : " Spaces in this Zone inherit";
-        return { text: "—", muted: true,
-          tooltip: sums.inheriting_count + noun + " its airflow, so the sums are not shown." };
-      }
+      if (sums.airflow_mode !== DETAILED) return { text: "—", muted: true, tooltip: ZONE_BY_PROGRAM_TIP };
       return { value: sums.airflows[field] };
     }
     return field === "floor_area_m2" || field === "weighted_area_m2" || field === "net_volume_m3" ?
@@ -194,10 +238,13 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
     return format(cellOf(row, field), field);
   }
 
-  /* A muted value says why in its tooltip; every other cell's tooltip is its text, which the table sets. */
+  /* A muted value says why in its tooltip; every other cell's tooltip is its text, which the table sets. The
+     "No Spaces" row is amber across, its reason on its name. */
   function decorate(vs, td, row, field) {
     var cell = cellOf(row, field);
     td.classList.toggle("is-muted", Boolean(cell && cell.muted));
+    td.classList.toggle("is-flagged", Boolean(row.record.noSpaces));
+    if (row.record.noSpaces && field === "name") ui.tooltip(td, NO_SPACES_TIP);
     if (cell && cell.tooltip) ui.tooltip(td, cell.tooltip);
   }
 
@@ -205,6 +252,7 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
      row has none. */
   function marker(vs, row) {
     var record = row.record, target = record.segment || record.volume || record.space;
+    if (record.noSpaces) return { text: "", icon: "alert", tooltip: NO_SPACES_TIP };
     var findings = target && target.findings || [];
     if (!findings.length) return null;
     var blocking = findings.filter(function (finding) { return finding.blocks_export; });
@@ -347,7 +395,7 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
   ];
 
   /* A Building Segment's heading sums its Zones as the Spaces read does: areas and volume, and airflows shown
-     only while no Space in it inherits its Zone's. */
+     only while none of its Zones that hold Spaces is By Program. */
   function segmentSums(vs, group) {
     var read = snapshot.value(vs.host.snapshot, SECTION) || {};
     var sums = (read.building_segments || []).filter(function (row) { return row.key === group.key; })[0];
@@ -358,7 +406,7 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
     });
     AIRFLOWS.forEach(function (airflow) {
       var field = airflow[0];
-      shown[field] = sums.inheriting_count ? "—" : format({ value: (sums.airflows || {})[field] }, field);
+      shown[field] = sums.by_program_zone_count ? "—" : format({ value: (sums.airflows || {})[field] }, field);
     });
     return shown;
   }
@@ -397,7 +445,13 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
       return true;
     },
     cell: function (vs, td, row, field) { return vs.cells.render(td, row, field); },
-    painted: function (vs) { vs.cells.painted(); },
+    painted: function (vs) {
+      vs.cells.painted();
+      var notice = vs.switchNotice;
+      vs.switchNotice = null;
+      if (notice) panel.notify(notice, "info");
+    },
+    headerHelp: function (vs, field) { return field === "v_tran_m3h" ? TRANSFER_HELP : null; },
     draftReason: draftReason,
     cancelDrafts: function (vs) { vs.cells.cancelAll(); vs.selection.cancelDrafts(); },
     canCancelDrafts: function (vs) {
@@ -423,6 +477,7 @@ function (panel, ui, snapshot, units, preferences, fields, tableViews, SpaceCell
     // A Space row holds five actions (locate, open, move, remove, delete); an empty table keeps the width rows give it.
     actionSlots: 5,
     actions: function (vs, row) { return vs.actions.actions(row); },
+    zoneActions: function (vs, row) { return vs.actions.zoneActions(row); },
     action: function (vs, row, item) { vs.actions.run(row, item); },
     selected: function (vs, row) { return vs.actions.open(row); }
   };

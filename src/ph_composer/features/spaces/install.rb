@@ -4,7 +4,7 @@
 # in them. It requires Zones and nothing else, and no Zones file names it.
 #
 #   schema.rb       the three entity-owned records and their stores
-#   scan/           the walk, pure metrics (projected area, the any-set airflow rule, Zone sums) and findings
+#   scan/           the walk, pure metrics (projected area, the Zone airflow mode, Zone sums) and findings
 #   reads.rb        the list and panel reads
 #   authoring.rb    the operations' handlers; steps.rb their native steps; scan/resolve.rb strict targets
 #   create_faces.rb which Faces Create Space takes, from the open edit context

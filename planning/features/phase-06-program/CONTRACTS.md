@@ -238,7 +238,7 @@ exports as a Shade (C4a-12).
 | C4a-3 | A Dwelling's Zones in two Segments | Refused by Programs' actions; a finding on generic routes | P4a-08 |
 | C4a-4 | The n50/q50 conversion's exposed area: PH-Composer's envelope sum, or PHX's `cleanup` rule exactly | Match PHX, proven by a round trip reading back the entered value | P4a-06 |
 | C4a-5 | Which feature owns mechanical cooling and the mechanical room temperature | **Answered (Ed, 2026-11-15): the Mechanical phase** (then Phase 4, now Phase 7); listed under Planned until then | Answered |
-| C4a-6 | Keep a per-Space `airflow_mode` copy for agents | Yes, derived from the Zone, for one API minor version | P4a-05 |
+| C4a-6 | Keep a per-Space `airflow_mode` copy for agents | **Answered (P4a-05, as recommended): yes.** Each Zone row of `spaces.list` and `spaces.all` carries `airflow_mode`, the source; each Space row keeps a copy derived from its Zone, documented as kept for API 1.77 (`API::CHANGES`, `context/AGENT_INTERFACE.md`). Dropping it is a later minor's change note | Answered |
 | C4a-7 | Single dwelling's default: on for every Segment whose extension is absent, or on only for the first | **Answered (Ed, 2026-11-15): on for every Segment**, effective only while residential | Answered |
 | C4a-9 | Weeks per year below 52: where the weeks off fall in the honeybee ruleset | **Answered (Ed, 2026-11-15): one contiguous block centred on 1 August** | Answered |
 | C4a-10 | Operating periods before the F4a-13 fix | **Answered (Ed, 2026-11-15): write them for ventilation Schedules now** (F4a-13 affects only occupancy and lighting); occupancy and lighting stay rulesets only until the fix | Answered |

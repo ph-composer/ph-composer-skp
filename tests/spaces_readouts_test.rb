@@ -88,7 +88,7 @@ class SpacesReadoutsTest < PhComposerTestCase
     assert_equal "completed", result.fetch("status"), result.inspect
     assert_equal "101 Living | iCFA 12 m² | Vol: 30 m³ | Sup 60 m³/h / Ext 0 m³/h", label_text("101 Living", "SI")
     assert_equal "101 Living | iCFA 129 ft² | Vol: 1,059 ft³ | Sup 35 cfm / Ext 0 cfm", label_text("101 Living", "IP")
-    refute_includes label_text("201 Loft", "SI"), "Sup", "an inheriting Space has no rates to show"
+    refute_includes label_text("201 Loft", "SI"), "Sup", "a Space in a By Program Zone has no rates to show"
   end
 
   def test_every_combination_of_options_leaves_no_stray_separator
@@ -181,7 +181,7 @@ class SpacesReadoutsTest < PhComposerTestCase
     @model.active_path = [loft_zone]
     @model.selection.add(loft_zone.entities.to_a.first)
     @service.selection_changed
-    assert_equal ["Supply and extract: 1 of 1 inherit the Zone's airflow"],
+    assert_equal ["Supply and extract: 1 of 1 By Program"],
                  @service.readout_drawings.fetch(TOTALS).last[3]
   end
 

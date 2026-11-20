@@ -6,8 +6,9 @@ module PhComposer
     # Space occurrence, read from the export snapshot and never the live Model, for the Python section that
     # attaches each honeybee-ph Space to its Zone's Room. A Floor Segment's loops are projected onto the
     # horizontal plane at its outer loop's mean height, so the area honeybee-ph reads back is the plan area the
-    # metrics use, and each Volume carries its preview prism (Prism) as its geometry. Airflows leave as stored:
-    # an absent rate stays absent, and the translation applies the any-set rule.
+    # metrics use, and each Volume carries its preview prism (Prism) as its geometry. Airflows leave as stored,
+    # an absent rate absent, with each Space's Zone's airflow mode (`airflow_mode`, section version 2), which
+    # the translation follows and never derives.
     #
     # The preflight reports every finding the Spaces read gives a row, with whether it blocks export, where to
     # find it, and the repair its finding names. The contract itself refuses a structure it cannot write.
@@ -38,7 +39,7 @@ module PhComposer
       module_function
 
       def install(feature)
-        feature.export_contributor(SECTION, :section_version => 1, :preflight => PREFLIGHT,
+        feature.export_contributor(SECTION, :section_version => 2, :preflight => PREFLIGHT,
                                             :requires => [ZONES_SECTION],
                                             :result => {
                                               "space_zone_totals" => [Export::Privacy.fields(%w[zone_id] + TOTALS)],
@@ -53,8 +54,8 @@ module PhComposer
       end
 
       # The Spaces schedule: per Zone, the table's columns and the Zone's totals, then the totals per
-      # Building-Segment, and one line naming any Space drawn off to the side of its Zone. A Space
-      # that inherits its Zone's airflow shows "Zone" in its airflow columns.
+      # Building-Segment, and one line naming any Space drawn off to the side of its Zone. A Space in a By
+      # Program Zone shows "By Program" in its airflow columns.
       def report(result, display_units)
         rows = result.fetch("space_schedule", [])
         return [] if rows.empty?
@@ -98,21 +99,21 @@ module PhComposer
       def cell(row, field, quantity, display_units)
         value = row[field]
         return value.to_s unless quantity
-        return "Zone" if value.nil? && quantity == "airflow"
+        return "By Program" if value.nil? && quantity == "airflow"
         return "" if value.nil?
 
         format("%.2f", PhComposer::Units.to_display(value, :quantity => quantity, :system => display_units))
       end
 
-      # A total row: the reported area and volume totals, and the airflows summed over its Spaces by the table's
-      # rule, a dash while any of them inherits its Zone's airflow.
+      # A total row: the reported area and volume totals, and the airflows summed over its Spaces, a dash while
+      # any of them is in a By Program Zone.
       def total_row(label, totals, spaces, display_units)
-        inheriting = spaces.any? { |row| AIRFLOWS.all? { |key| row[key].nil? } }
+        by_program = spaces.any? { |row| AIRFLOWS.all? { |key| row[key].nil? } }
         COLUMNS.map do |_heading, field, quantity|
           next label if field == "number"
           next cell(totals, field, quantity, display_units) if TOTALS.include?(field) && totals.key?(field)
           next "" unless AIRFLOWS.include?(field) && !spaces.empty?
-          next "\u2014" if inheriting
+          next "\u2014" if by_program
 
           cell({ field => spaces.sum { |row| row[field].to_f } }, field, quantity, display_units)
         end
@@ -146,10 +147,28 @@ module PhComposer
         findings.concat(offset_findings(request.model, left_out))
         findings.concat(metadata_findings(request))
         findings.concat(left_out_findings(gone.map { |space| owners.fetch(space) }, left_out))
+        findings.concat(without_spaces_findings(read.fetch("zones"), left_out))
         { "findings" => findings, "repairs" => repairs.uniq { |row| row.fetch("id") } }
       rescue CodedError => error
         { "findings" => [{ "code" => error.code, "section" => SECTION, "object_id" => nil,
                            "message" => error.message, "blocks_export" => true }], "repairs" => [] }
+      end
+
+      # One warning per exported Zone no Space names, from the Spaces read's Zone rows: a copied Zone's rows are
+      # read together by id, as its Spaces' membership is. Not blocking: WUFI-Passive and METr open such a Zone
+      # with no iCFA, net volume or ventilation.
+      def without_spaces_findings(zone_rows, left_out)
+        zone_rows.group_by { |zone| zone.fetch("zone_id") }.filter_map do |zone_id, rows|
+          next if left_out.key?(zone_id) || rows.sum { |zone| zone.fetch("space_count") }.positive?
+
+          { "code" => "space.zone_without_spaces", "section" => SECTION, "object_id" => zone_id,
+            "message" => without_spaces_message(rows.first["name"]), "blocks_export" => false }
+        end
+      end
+
+      def without_spaces_message(zone_name)
+        "Zone #{zone_name} has no Spaces. It exports its geometry, but WUFI-Passive and METr give it no iCFA, net " \
+          "volume or ventilation. Add Spaces before calculating."
       end
 
       # The metadata extraction refuses, read as `records` reads each Space, Volume, Space Floor and Floor
@@ -258,6 +277,8 @@ module PhComposer
         segments_in = segments.group_by { |segment, _| segment.path[0...-1] }
         space_paths = spaces.to_h { |space, _| [space.path, true] }
         zone_bounds = {}
+        # Every Space record, left out or not, as the reads take the mode, so the table and the export agree.
+        modes = Metrics.zone_modes(snapshot.records(SPACE_STORE.dictionary, :kind => "group").map(&:last))
         left_out = Hash.new { |hash, key| hash[key] = [] }
         rows = spaces.filter_map do |entry, record|
           zone = hosting_zone(reader, record)
@@ -274,7 +295,7 @@ module PhComposer
           bounds = zone_bounds.fetch(zone.first.path) do
             zone_bounds[zone.first.path] = Extents.bounds(own_face_points(reader, zone.first, space_paths))
           end
-          exported.merge("zone_id" => zone.last.fetch("id"),
+          exported.merge("zone_id" => zone.last.fetch("id"), "airflow_mode" => modes.fetch(record["zone_id"]),
                          "offset_from_zone" => Extents.outside_bounds?(floor_points(own, segments_in), bounds),
                          "volumes" => own.map { |volume| volume_record(reader, volume, segments_in) }
                                          .sort_by { |row| row.fetch("id") })

@@ -203,12 +203,12 @@ class SpacesExportTest < PhComposerTestCase
     assert_includes html, "Zone total"
     assert_includes html, "Main Building"
     assert_match(/Drawn outside its Zone.*201 Loft \(Zone B\)/, html)
-    assert_includes html, "<td>Zone</td>", "an inheriting Space's airflow reads Zone"
+    assert_includes html, "<td>By Program</td>", "a Space in a By Program Zone reads By Program"
     zone_a = html[/<h3>Zone A<\/h3>.*?<\/table>/m]
     assert_includes zone_a, "<td>Zone total</td><td></td><td>12.00</td><td>12.00</td><td></td><td>30.00</td>" \
                             "<td>60.00</td><td>0.00</td><td>0.00</td>", "Zone A's airflows are summed"
     zone_b = html[/<h3>Zone B<\/h3>.*?<\/table>/m]
-    assert_includes zone_b, "<td>\u2014</td>", "a Zone with an inheriting Space shows a dash"
+    assert_includes zone_b, "<td>\u2014</td>", "a By Program Zone shows a dash"
     ip = X.report(PhComposer::Export::ResultView.new({ X::SECTION => fields }, contributor), "IP").join
     assert_includes ip, "ft²"
     assert_includes ip, "<td>35.31</td>", "60 m3/h in cfm"

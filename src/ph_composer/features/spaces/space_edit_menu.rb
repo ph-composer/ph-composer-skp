@@ -46,6 +46,18 @@ module PhComposer
       end
 
       # The selected Spaces, or none unless the selection holds nothing else.
+      # What an airflow edit that switched Zones to detailed airflows tells the user; the Spaces view's notice
+      # (html/features/spaces/view.js) says the same. `others` counts their Spaces still with no rate.
+      def switch_message(names, others)
+        head = names.length == 1 ? "#{names.first} now uses" : "#{names[0...-1].join(', ')} and #{names.last} now use"
+        return "#{head} detailed airflows." if others.zero?
+
+        whose = names.length == 1 ? "its" : "their"
+        rest = others == 1 ? "other Space exports 0 until you enter its rates." :
+          "other #{others} Spaces export 0 until you enter theirs."
+        "#{head} detailed airflows: #{whose} #{rest}"
+      end
+
       def selected(model)
         chosen = model.selection.to_a
         return [] unless chosen.all? { |entity| Navigation.space?(entity) }
@@ -115,8 +127,8 @@ module PhComposer
         end
 
         # Supply, Extract and Transfer in the display unit. A field shows the value every selected Space shares and
-        # is blank otherwise. A field left as shown writes nothing; one emptied removes the value; with all three
-        # removed a Space takes its Zone's ventilation load again.
+        # is blank otherwise. A field left as shown writes nothing; one emptied removes the value. Once no Space in a
+        # Zone has a rate, the Zone is By Program again.
         def airflows
           spaces = SpaceEditMenu.selected(@session.model)
           return announce(SELECT_SPACES) if spaces.empty?
@@ -132,8 +144,43 @@ module PhComposer
 
           changes = airflow_changes(entered, defaults, system)
           return announce(INVALID_AIRFLOW) unless changes
+          return if changes.empty?
 
-          submit(spaces, changes, revision) unless changes.empty?
+          before = zone_modes
+          outcome = submit(spaces, changes, revision)
+          announce_switch(before) if outcome.fetch("status") == "completed"
+        end
+
+        # The switched Zones' names through the Zones read, in its order; nil when the read refuses, since the
+        # edit has already completed and its own notice stands.
+        def switched_names(zone_ids)
+          read = API.query(:context => @context, :name => ZONES_READ)
+          return unless read.fetch("status") == "completed"
+
+          read.dig("value", "zones").select { |zone| zone_ids.include?(zone.dig("reference", "zone_id")) }
+              .uniq { |zone| zone.dig("reference", "zone_id") }.map { |zone| zone.dig("values", "name").to_s }
+        end
+
+        # Each Zone's airflow mode now, by id, from every Space record in the Model.
+        def zone_modes
+          Metrics.zone_modes(Occurrences.scan(@session.model, :strict => false).spaces.map(&:record))
+        end
+
+        # The Zones an airflow edit took from By Program to detailed: the notice says what that does to their
+        # other Spaces, as the Spaces view's does.
+        def announce_switch(before)
+          spaces = Occurrences.scan(@session.model, :strict => false).spaces.map(&:record)
+          switched = Metrics.zone_modes(spaces).select do |zone_id, mode|
+            mode == Metrics::DETAILED && before[zone_id] == Metrics::BY_PROGRAM
+          end.keys
+          return if switched.empty?
+
+          names = switched_names(switched)
+          return unless names
+
+          others = spaces.count { |record| switched.include?(record["zone_id"]) && !Metrics.rated?(record) }
+          message = SpaceEditMenu.switch_message(names, others)
+          HostNotice.show(@session, message, :tone => :info)
         end
 
         private

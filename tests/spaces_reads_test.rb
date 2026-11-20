@@ -53,21 +53,37 @@ class SpacesReadsTest < PhComposerTestCase
                                           .map { |number| number.round(6) }
   end
 
-  def test_zone_airflow_sums_follow_the_any_set_rule
+  def test_zone_airflow_mode_and_sums
     reference_model
     zone_a, zone_b = all.fetch("zones")
     assert_equal({ "v_sup_m3h" => 60.0, "v_eta_m3h" => 40.0, "v_tran_m3h" => 20.0 }, zone_a["airflows"])
-    assert_equal 0, zone_a["inheriting_count"]
+    assert_equal "detailed", zone_a["airflow_mode"]
     assert_equal({ "v_sup_m3h" => nil, "v_eta_m3h" => nil, "v_tran_m3h" => nil }, zone_b["airflows"])
-    assert_equal 1, zone_b["inheriting_count"]
+    assert_equal "by_program", zone_b["airflow_mode"]
     living = space(all, "101")
-    assert_equal "user_specified", living["airflow_mode"]
+    assert_equal "detailed", living["airflow_mode"], "a Space row carries its Zone's mode"
     assert_equal({ "v_sup_m3h" => 60.0, "v_eta_m3h" => 0.0, "v_tran_m3h" => 0.0 }, living["airflows"])
-    assert_equal "inheriting", space(all, "201")["airflow_mode"]
-    # A Segment's airflows sum its Zones' the same way: Zone B's Loft inherits, so its Segment's are not shown.
+    assert_equal "by_program", space(all, "201")["airflow_mode"]
+    # A Segment's airflows sum its Zones': Zone B is By Program, so its Segment's are not shown.
     segment = all.fetch("building_segments").first
     assert_equal [{ "v_sup_m3h" => nil, "v_eta_m3h" => nil, "v_tran_m3h" => nil }, 1],
-                 segment.values_at("airflows", "inheriting_count")
+                 segment.values_at("airflows", "by_program_zone_count")
+    listed = API.query(:context => @context, :name => "ph_composer.spaces.list", :params => {}).fetch("value")
+    assert_equal %w[detailed by_program], listed.fetch("zones").map { |zone| zone["airflow_mode"] },
+                 "the bounded read names each Zone's mode too"
+  end
+
+  # A Zone with no Spaces is By Program and exports no ventilation, so it neither counts against nor hides its
+  # Segment's sums.
+  def test_a_zone_with_no_spaces_leaves_its_segments_sums_shown
+    reference_model
+    loft_zone = @model.entities.to_a.last
+    loft_zone.entities.to_a.each { |entity| loft_zone.entities.erase_entities(entity) }
+    zone_b = all.fetch("zones").last
+    assert_equal [0, "by_program"], zone_b.values_at("space_count", "airflow_mode")
+    segment = all.fetch("building_segments").first
+    assert_equal [{ "v_sup_m3h" => 60.0, "v_eta_m3h" => 40.0, "v_tran_m3h" => 20.0 }, 0],
+                 segment.values_at("airflows", "by_program_zone_count")
   end
 
   def test_rows_carry_references_zone_membership_and_the_projected_floor_finding

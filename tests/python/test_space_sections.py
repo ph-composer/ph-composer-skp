@@ -1,6 +1,7 @@
 """The Spaces section: each record becomes a honeybee-ph Space on its Zone's Room, with its areas and volumes
-read back from the canonical HBJSON as the Ruby metrics state them, airflows by the any-set rule, user_data
-passed through, and the run's per-Zone totals checked against the reloaded model."""
+read back from the canonical HBJSON as the Ruby metrics state them, airflows by the Zone's airflow mode the record
+carries (section version 2), user_data passed through, and the run's per-Zone totals checked against the reloaded
+model."""
 
 from __future__ import annotations
 
@@ -14,6 +15,7 @@ import pytest
 from ph_composer_translation import stack
 from ph_composer_translation.composition import SECTIONS
 from ph_composer_translation.conformance import check
+from ph_composer_translation.contract.space_records import AIRFLOWS
 from ph_composer_translation.coordinator import translate
 from ph_composer_translation.space_sections import SPACE_SECTION_ID
 
@@ -49,7 +51,17 @@ def volume(identifier: str, segments: list[dict[str, Any]], height: float) -> di
 
 
 def space(identifier: str, zone: str, volumes: list[dict[str, Any]], **values: Any) -> dict[str, Any]:
-    return {"id": identifier, "zone_id": zone, "name": "Room", "number": "101", "volumes": volumes, **values}
+    """A Space record; unless `airflow_mode` is given, its Zone is detailed exactly when this Space has a rate."""
+    mode = "detailed" if any(key in values for key in AIRFLOWS) else "by_program"
+    return {
+        "id": identifier,
+        "zone_id": zone,
+        "name": "Room",
+        "number": "101",
+        "volumes": volumes,
+        "airflow_mode": mode,
+        **values,
+    }
 
 
 def document(*records: dict[str, Any]) -> dict[str, Any]:
@@ -58,7 +70,7 @@ def document(*records: dict[str, Any]) -> dict[str, Any]:
         {
             "ph_composer.windows.export.window_constructions": {"version": 1, "records": []},
             "ph_composer.windows.export.apertures": {"version": 1, "records": []},
-            SPACE_SECTION_ID: {"version": 1, "records": list(records)},
+            SPACE_SECTION_ID: {"version": 2, "records": list(records)},
         }
     )
     return value
@@ -110,11 +122,41 @@ def test_rectangles_a_two_volume_space_and_a_projected_sloped_segment_read_back_
         ({"v_sup_m3h": 0.0, "v_eta_m3h": 0.0, "v_tran_m3h": 0.0}, (0.0, 0.0, 0.0)),
     ],
 )
-def test_airflows_follow_the_any_set_rule_through_the_hbjson(stored: dict[str, float], written: tuple) -> None:
+def test_airflows_follow_the_zones_mode_through_the_hbjson(stored: dict[str, float], written: tuple) -> None:
     result = run(space("spc_one", ZONE_A, [volume("vol_a", [segment("fsg_a", [square(0, 0, 3)])], 2.5)], **stored))
     ph = spaces_on(reloaded(result), ZONE_A)[0].properties.ph
     actual = (ph._v_sup, ph._v_eta, ph._v_tran)
     assert actual == pytest.approx(written) if written[0] is not None else actual == written
+
+
+def test_a_blank_space_in_a_detailed_zone_writes_zero_and_a_by_program_zone_writes_none() -> None:
+    """The Zone's airflow mode (context/UBIQUITOUS_LANGUAGE.md, "Detailed airflows"): one rate on one Space
+    makes every Space in its Zone write all three rates, 0 for a blank; a Zone with none writes None on every
+    Space, so PHX gives each its Program share."""
+    rated = space("spc_one", ZONE_A, [], v_sup_m3h=60.0)
+    blank = space("spc_two", ZONE_A, [], airflow_mode="detailed")
+    loft = space("spc_three", ZONE_B, [])
+    model = reloaded(run(rated, blank, loft))
+    written = {
+        item.identifier: (item.properties.ph._v_sup, item.properties.ph._v_eta, item.properties.ph._v_tran)
+        for zone in (ZONE_A, ZONE_B)
+        for item in spaces_on(model, zone)
+    }
+    assert written["spc_two"] == (0.0, 0.0, 0.0)
+    assert written["spc_one"] == pytest.approx((60 / 3600, 0.0, 0.0))
+    assert written["spc_three"] == (None, None, None)
+
+
+@pytest.mark.parametrize(
+    "record",
+    [
+        space("spc_bad", ZONE_A, [], v_sup_m3h=60.0, airflow_mode="by_program"),
+        space("spc_bad", ZONE_A, [], airflow_mode="inheriting"),
+        {key: value for key, value in space("spc_bad", ZONE_A, []).items() if key != "airflow_mode"},
+    ],
+)
+def test_a_space_whose_mode_is_missing_unknown_or_contradicts_its_rates_costs_its_space(record: dict[str, Any]) -> None:
+    assert [finding["object_id"] for finding in run(record)["findings"]] == ["spc_bad"]
 
 
 def test_a_space_on_a_zone_that_did_not_translate_blocks_and_a_malformed_record_costs_its_space() -> None:
@@ -213,8 +255,8 @@ def test_the_schedule_lists_each_space_with_stored_airflows_and_its_offset_flag(
         v_sup_m3h=60.0,
         offset_from_zone=True,
     )
-    inheriting = space("spc_two", ZONE_B, [volume("vol_b", [segment("fsg_b", [square(0, 0, 2)])], 3.0)])
-    rows = {row["space_id"]: row for row in run(supplied, inheriting)[SPACE_SECTION_ID]["space_schedule"]}
+    by_program = space("spc_two", ZONE_B, [volume("vol_b", [segment("fsg_b", [square(0, 0, 2)])], 3.0)])
+    rows = {row["space_id"]: row for row in run(supplied, by_program)[SPACE_SECTION_ID]["space_schedule"]}
     assert (rows["spc_one"]["v_sup_m3h"], rows["spc_one"]["v_eta_m3h"]) == (60.0, 0.0)
     assert rows["spc_one"]["offset_from_zone"] is True
     assert rows["spc_one"]["height_m"] == pytest.approx(2.5)

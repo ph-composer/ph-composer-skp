@@ -28,9 +28,10 @@ module PhComposer
       # A label's values are whole numbers grouped from a thousand; the selection totals keep the quantity's format.
       WHOLE = { :precision => 0, :group_from => 1_000 }.freeze
 
-      # What one Space contributes: its record, its summed metrics, its label point in world metres, and its
-      # Volumes' views.
-      SpaceTotals = Struct.new(:space, :weighted_area_m2, :net_volume_m3, :point_m, :volumes, keyword_init: true)
+      # What one Space contributes: its record, its summed metrics, its label point in world metres, its Volumes'
+      # views and its Zone's airflow mode.
+      SpaceTotals = Struct.new(:space, :weighted_area_m2, :net_volume_m3, :point_m, :volumes, :airflow_mode,
+                               keyword_init: true)
 
       module_function
 
@@ -125,7 +126,7 @@ module PhComposer
       def label_sections(row, chosen)
         record = row.space.record
         identity = [record.fetch("number"), record.fetch("name")].map(&:to_s).reject(&:empty?).join(" ")
-        flows = Metrics.airflows(record)
+        flows = Metrics.airflows(record, row.airflow_mode)
         [identity.empty? ? nil : [identity],
          chosen["weighted_area"] ? ["iCFA ", ["area", row.weighted_area_m2, WHOLE]] : nil,
          chosen["net_volume"] ? ["Vol: ", ["volume", row.net_volume_m3, WHOLE]] : nil,
@@ -146,13 +147,13 @@ module PhComposer
         ColourBy::Readout.new(:anchors => [], :hud => rows.empty? ? [] : hud(rows))
       end
 
-      # Airflows follow the any-set rule, as a Zone's sums do: while any selected Space inherits its Zone's
-      # airflow, the sums would read as complete when they are not, so the line says how many inherit instead.
+      # Airflows follow the Zone's mode, as a Zone's sums do: while any selected Space is in a By Program Zone,
+      # the sums would read as complete when they are not, so the line says how many are instead.
       def hud(rows)
-        inheriting = rows.count { |row| Metrics.airflow_mode(row.space.record) == "inheriting" }
-        flows = rows.map { |row| Metrics.airflows(row.space.record) }
-        airflow = if inheriting.positive?
-                    ["Supply and extract: #{inheriting} of #{rows.length} inherit the Zone's airflow"]
+        by_program = rows.count { |row| row.airflow_mode == Metrics::BY_PROGRAM }
+        flows = rows.map { |row| Metrics.airflows(row.space.record, row.airflow_mode) }
+        airflow = if by_program.positive?
+                    ["Supply and extract: #{by_program} of #{rows.length} By Program"]
                   else
                     supply, extract = %w[v_sup_m3h v_eta_m3h].map { |key| flows.sum { |rates| rates.fetch(key) } }
                     ["Supply ", ["airflow", supply], "  Extract ", ["airflow", extract]]
@@ -166,13 +167,16 @@ module PhComposer
       # counts with no area, no volume and no label point.
       def totals(read)
         views = ColourModes.volume_views(read.model).group_by { |view| view.space.path }
-        Occurrences.scan(read.model).spaces.map do |space|
+        spaces = Occurrences.scan(read.model).spaces
+        modes = Metrics.zone_modes(spaces.map(&:record))
+        spaces.map do |space|
           own = views.fetch(space.path, [])
           largest = own.flat_map(&:segments).max_by { |segment| segment.metrics.fetch("floor_area_m2") }
           SpaceTotals.new(:space => space,
                           :weighted_area_m2 => own.sum { |view| view.metrics.fetch("weighted_area_m2") },
                           :net_volume_m3 => own.sum { |view| view.metrics.fetch("net_volume_m3") || 0.0 },
-                          :point_m => largest && centroid(largest), :volumes => own)
+                          :point_m => largest && centroid(largest), :volumes => own,
+                          :airflow_mode => Metrics.space_mode(space.record, modes))
         end
       end
 

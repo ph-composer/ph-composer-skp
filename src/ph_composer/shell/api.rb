@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 76
+    MINOR = 77
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -442,7 +442,18 @@ module PhComposer
                     "extension on a catalog record kind; its rows carry a null path, and Zones' export and preflight " \
                     "now check a claimed envelope on every valid Building Segment instead of leaving it out. The " \
                     "Zones section's projection rows add building_segment_id and building_segment_export_identifier, " \
-                    "and translation sections may attach at the segment host." }
+                    "and translation sections may attach at the segment host." },
+      { "minor" => 77, "date" => "2026-11-20",
+        "change" => "A Space's airflow mode is its Zone's: by_program until any Space in the Zone has a rate, then " \
+                    "detailed, when every Space exports its own rates with 0 for a blank. ph_composer.spaces.all " \
+                    "and list add airflow_mode to each Zone row; all's Zone rows drop inheriting_count, and each " \
+                    "building_segments row replaces inheriting_count with by_program_zone_count. A Space row's " \
+                    "airflow_mode takes by_program or detailed (was inheriting or user_specified), a copy of its " \
+                    "Zone's kept for this minor version; read the Zone row's. " \
+                    "ph_composer.spaces.clear_zone_airflows is new: From Program, every Space's rates in the named " \
+                    "Zones cleared in one Undo step. The Spaces export section moves to version 2, each record " \
+                    "carrying airflow_mode, and its preflight adds space.zone_without_spaces, a warning that does " \
+                    "not block." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

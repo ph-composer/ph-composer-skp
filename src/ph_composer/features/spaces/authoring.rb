@@ -252,8 +252,24 @@ module PhComposer
         { "space_id" => before.fetch("id") }
       end
 
+      # From Program: every Space's rates in each named Zone go, so the Zone is By Program again, in one step.
+      # All or nothing: a Space that cannot be written refuses the call, since skipping it would leave its Zone
+      # detailed. A Zone already By Program writes nothing.
+      def clear_zone_airflows(request, proposal, zones:)
+        ids = zones.map { |zone| host_zone_id(request, zone) }.uniq
+        scan = Occurrences.scan(request.model)
+        rated = scan.spaces.select { |space| ids.include?(space.record["zone_id"]) && Metrics.rated?(space.record) }
+        rated.each { |space| Resolve.writable!(space, scan.spaces, "Space") }
+        rated.each do |space|
+          record_step(proposal, SPACE_KIND, space.path, space.record,
+                      space.record.reject { |key, _value| AIRFLOWS.include?(key) })
+        end
+        { "zone_ids" => ids, "space_ids" => rated.map { |space| space.record.fetch("id") } }
+      end
+
       # Marks explicit Faces directly inside Volumes as Floor Segments with one weighting factor; a Face
       # already marked keeps its record and takes the factor.
+
       def mark_floors(request, proposal, faces:, weighting_factor:)
         limit = Spaces.floor_gesture_limit
         count = faces.uniq.length
