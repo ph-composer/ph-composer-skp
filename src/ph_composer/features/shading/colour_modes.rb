@@ -33,7 +33,7 @@ module PhComposer
 
       # The occurrence's world area in m2, or nil when the transform flattens the Face.
       def area_m2(face, transform)
-        FaceCapture.call(face, transform).area_m2
+        Inventory.area_m2(face, transform)
       rescue CodedError => error
         raise unless error.code == "geometry.invalid"
 

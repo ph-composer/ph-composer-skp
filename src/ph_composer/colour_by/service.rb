@@ -86,6 +86,8 @@ module PhComposer
         @change_unsubscribe = Sessions.on_change do |changed_session, _source, _detail|
           invalidate! if changed_session.equal?(@session)
         end
+        # The HUD formats its figures as it draws, so a display units change needs a repaint, not a rebuild.
+        @units_unsubscribe = Preferences.on_units_change { invalidate_view if drawing? }
       end
 
       def active?
@@ -174,6 +176,7 @@ module PhComposer
         @readout_drawings = {}
         detach_overlay
         @change_unsubscribe.call
+        @units_unsubscribe.call
         self
       end
 

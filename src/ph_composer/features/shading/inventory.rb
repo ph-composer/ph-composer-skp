@@ -26,11 +26,22 @@ module PhComposer
 
           component = components[Reads.component_name(containers)]
           component["face_count"] += 1
-          component["area_m2"] += FaceCapture.call(entity, transform).area_m2
+          component["area_m2"] += area_m2(entity, transform)
         end
         { "marked" => marked.sort_by { |row| row.fetch("entity_path") },
           "components" => components.values.sort_by { |row| row.fetch("display_name") },
           "units" => { "area_m2" => "m2" } }
+      end
+
+      # One Shading Face occurrence's world area in m2; a singular transform refuses geometry.invalid. SketchUp's own
+      # `Face#area(transform)` gives it when nothing is glued to the Face, the same figure as the Face's world loops
+      # at a fraction of the cost. A glued cutting component makes `Face#area` subtract its opening, which the
+      # loops, and so export, keep, so such a Face is read from its loops (context/SKETCHUP_HOST_BEHAVIOR.md).
+      def area_m2(face, transform)
+        return FaceCapture.call(face, transform).area_m2 unless face.get_glued_instances.empty?
+
+        FaceGeometry.check_transform!(transform.to_a)
+        face.area(transform) * SQUARE_INCH_TO_M2
       end
 
       # Yields each Shading Face occurrence, once per placement: the Face, its root path, the transform from its

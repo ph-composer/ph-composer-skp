@@ -228,6 +228,31 @@ class ClassifyToolTest < PhComposerTestCase
 
     assert_empty values("face_type").compact
     assert_includes @notices.map(&:first), PhComposer::Zones::Faces::ClassifyTool::OUTSIDE_ZONE
+    move([20, 20], 0)
+    assert_equal PhComposer::Zones::Faces::ClassifyTool::OUTSIDE_ZONE, @view.tooltip
+  end
+
+  # A Face inside a Zone that another feature's record takes out of the envelope is not "in no Zone": making a
+  # Zone would not help, so the hover and the refused gesture say it is outside the envelope.
+  def test_a_face_outside_the_zone_envelope_says_so_and_refuses_the_whole_gesture
+    tool_class = PhComposer::Zones::Faces::ClassifyTool
+    zone(760)
+    excluding = PhComposer::Records::EntityStore.new("ph_composer.test_classify_envelope",
+                                                     :excludes_from_envelope => true)
+    excluding.write(@faces.fetch(2), "schema_version" => 1)
+    tool.choose("face_type", "Wall")
+    point_at([10, 10], @faces.fetch(0))
+    point_at([20, 20], @faces.fetch(2))
+
+    move([20, 20], 0)
+    assert_equal tool_class::OUTSIDE_ENVELOPE, @view.tooltip
+    press([10, 10])
+    move([20, 20])
+    release
+
+    assert_empty values("face_type").compact
+    assert_includes @notices.map(&:first), "#{tool_class::OUTSIDE_ENVELOPE} Nothing was written."
+    refute_includes @notices.map(&:first), tool_class::OUTSIDE_ZONE
   end
 
   # A drag crosses empty space whenever the Zone has a window opening, a re-entrant corner or sky

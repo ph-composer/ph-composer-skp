@@ -182,6 +182,23 @@ class PreferencesTest < PhComposerTestCase
     Preferences.set("dimension_format", "cm", :scope => "example.editor", :system => "SI")
   end
 
+  # A units subscriber hears each units write and nothing else; one that raises is logged and the change
+  # stands for the rest; an unsubscribed one hears nothing more.
+  def test_a_units_change_reaches_each_subscriber_and_a_raising_one_does_not_undo_it
+    heard = []
+    Preferences.on_units_change { raise "the repaint failed" }
+    unsubscribe = Preferences.on_units_change { heard << Preferences.unit_system }
+
+    Preferences.set("unit_system", "IP")
+    Preferences.set("table_view", "example.zones.faces", :scope => "example.zones")
+    Preferences.reset_display
+    unsubscribe.call
+    Preferences.set("unit_system", "IP")
+
+    assert_equal %w[IP SI], heard
+    assert_equal "IP", Preferences.unit_system
+  end
+
   def test_the_regional_format_takes_the_macos_region_and_the_sketchup_decimal
     Sketchup::RegionalSettings.decimal_separator = ","
     Preferences.apple_locale_reader = proc { "de_DE" }

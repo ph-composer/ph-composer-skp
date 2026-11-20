@@ -49,9 +49,12 @@ module PhComposer
 
       private
 
+      # A leaf with no transformation, such as a Face, adds no plane of its own (ViewState#planes stops at it),
+      # so the Faces of one container share its planes: read once per container, not once per Face.
       def section_planes(path)
         @planes ||= {}
-        @planes[path] ||= @view_state.planes(path, ->(prefix) { resolve(prefix).first })
+        key = (path.nil? || path.empty? || resolve(path).first.respond_to?(:transformation)) ? path : path[0...-1]
+        @planes[key] ||= @view_state.planes(key, ->(prefix) { resolve(prefix).first })
       end
 
       def resolve(path)

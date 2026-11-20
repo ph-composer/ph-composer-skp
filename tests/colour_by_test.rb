@@ -931,6 +931,27 @@ class ColourByTest < PhComposerTestCase
     assert_equal 2, service.rebuilds
   end
 
+  # The HUD formats its figures as it draws, so a display units change, set from the panel or reset from the
+  # support dialog, repaints every Model drawing a legend without rebuilding it, and leaves the rest alone.
+  def test_a_display_units_change_repaints_every_drawing_model_without_a_rebuild
+    other = PhComposer::Sessions.for(Sketchup::Model.new)
+    idle = PhComposer::Sessions.for(Sketchup::Model.new)
+    ColourBy.for(idle)
+    drawing = [activate("ph_composer.zones.faces.by_face_type"),
+               ColourBy.for(other).activate("ph_composer.zones.faces.by_face_type")]
+    views = [@model, other.model, idle.model].map(&:active_view)
+
+    changes = [-> { PhComposer::Preferences.set("unit_system", "IP") }, -> { PhComposer::Preferences.reset_display }]
+    changes.each do |change|
+      before = views.map(&:invalidations)
+      change.call
+      assert_equal [1, 1, 0], views.map(&:invalidations).zip(before).map { |after, start| after - start }
+    end
+    assert_equal [1, 1], drawing.map(&:rebuilds)
+  ensure
+    PhComposer::Preferences.set("unit_system", "SI")
+  end
+
   def test_showing_a_model_with_nothing_changed_does_not_rebuild
     service = activate("ph_composer.zones.faces.by_face_type")
 
