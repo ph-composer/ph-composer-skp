@@ -20,7 +20,8 @@ where they differ.
   `node_modules` into a worktree.
   Run `git rev-parse --abbrev-ref HEAD` before every commit. Stage named paths only, never `git add -A`.
   After `git mv`, `git add` only the new path.
-- Leave the checkout on `main` when the stage ends.
+- Leave the main checkout on `main` when the stage ends. A stage in a worktree leaves its worktree as it is;
+  the conductor removes it after the PR merges.
 
 ## Gate, commit, push
 

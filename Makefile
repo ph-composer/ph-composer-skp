@@ -31,10 +31,13 @@ BUNDLE := $(dir $(RUBY))bundle
 # worktree's own config would override a BUNDLE_PATH variable) and its eslint, so the worktree gate lints the
 # worktree's files exactly as the main checkout does; in a worktree a missing linter fails the gate instead of
 # printing a skip.
-MAIN_CHECKOUT := $(shell d=$$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null) && dirname "$$d")
-TOPLEVEL := $(shell git rev-parse --show-toplevel 2>/dev/null)
-ifneq ($(MAIN_CHECKOUT),$(TOPLEVEL))
+# A linked worktree's git directory differs from the shared one; a primary checkout's does not, whatever its
+# layout (a separate git directory, a submodule). The main checkout is the first entry `git worktree list` gives.
+GIT_DIR_ABS := $(shell git rev-parse --path-format=absolute --git-dir 2>/dev/null)
+GIT_COMMON_DIR := $(shell git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)
+ifneq ($(GIT_DIR_ABS),$(GIT_COMMON_DIR))
 IN_WORKTREE := 1
+MAIN_CHECKOUT := $(shell git worktree list --porcelain | sed -n '1s/^worktree //p')
 export BUNDLE_GEMFILE := $(MAIN_CHECKOUT)/Gemfile
 ESLINT := $(MAIN_CHECKOUT)/node_modules/.bin/eslint
 else
@@ -43,9 +46,9 @@ endif
 SKETCHUP_VERSION ?= 2026
 
 # Every target docs/DEVELOPMENT.md claims for the offline loop that exists today. `ci` holds a machine-wide
-# lock (tools/gate_lock.sh) so two gates never run at once; `ci-run` is the gate itself.
+# lock (tools/gate_lock.py) so two gates never run at once; `ci-run` is the gate itself.
 ci:
-	@tools/gate_lock.sh $(MAKE) --no-print-directory ci-run
+	@python3 tools/gate_lock.py $(MAKE) --no-print-directory ci-run
 
 ci-run: hooks-auto syntax lint test fixtures-check panel-manifest-check help-check runtime-check runtime-pin-check \
     hostkit-test python-check rbz rbz-check
