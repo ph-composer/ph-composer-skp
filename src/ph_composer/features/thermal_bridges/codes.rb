@@ -8,6 +8,8 @@ module PhComposer
         "thermal_bridge.psi_missing" => "A Thermal Bridge Type has no psi-value, so an Edge using it cannot export.",
         "thermal_bridge.type_missing" => "Assigned Edges name a Thermal Bridge Type that no longer exists, so they " \
                                          "cannot export.",
+        "thermal_bridge.zone_left_out" => "An assigned Edge is in a Zone in no Building Segment, so export leaves " \
+                                          "it out with its Zone.",
         "thermal_bridge.outside_zone" => "An assigned Edge is in no Zone, so it is not exported.",
         "thermal_bridge.no_envelope_face" => "An assigned Edge bounds no classified envelope Face; it is likely a " \
                                              "stray line.",

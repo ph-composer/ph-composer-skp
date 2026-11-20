@@ -5158,6 +5158,25 @@
         "tools/examples/authoring/segment_membership_walkthrough.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "PG03",
+      "label": "Building Segment export rules on the installed RBZ: the two-Segment reference exports through Export with the ADU Zone in no Building Segment after the panel's Attached zone offer (one native Undo step, undone and redone from the Edit menu), the left-out Zone, Spaces and Edges absent from the HBJSON and named in the report, the move-back notice; the WUFI XML and METr JSON from the pinned PHX read back the attached zone",
+      "mode": "mixed",
+      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/zones/export.rb",
+        "src/ph_composer/features/zones/faces/export.rb",
+        "src/ph_composer/features/zones/faces/attached_zone_operations.rb",
+        "src/ph_composer/features/spaces/export.rb",
+        "src/ph_composer/features/thermal_bridges/export.rb",
+        "src/ph_composer/features/windows/export.rb",
+        "src/ph_composer/features/windows/export_assessment.rb",
+        "src/ph_composer/export/metadata_check.rb",
+        "src/ph_composer/html/features/zones/segment_rows.js",
+        "src/ph_composer/python/ph_composer_translation/model_sections.py"
+      ],
+      "native_control_required": true
     }
   ]
 }

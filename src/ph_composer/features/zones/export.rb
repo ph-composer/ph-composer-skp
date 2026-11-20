@@ -9,6 +9,8 @@ module PhComposer
       # The option kinds a Zone names, and what the section exports of each choice.
       CHOICE_KINDS = [Options::SEGMENTS, Options::LEVELS].freeze
       CHOICE_FIELDS = %w[name colour export_identifier].freeze
+      NO_SEGMENT = "Put at least one Zone in a Building Segment before exporting: Zones in no Building Segment " \
+                   "are left out."
 
       module_function
 
@@ -37,10 +39,16 @@ module PhComposer
         if zones.empty?
           findings << { "code" => "zone.none", "section" => SECTION, "object_id" => nil,
                         "message" => "Make at least one Zone before exporting.", "blocks_export" => true }
+        elsif zones.none? { |zone| Schema.exported?(zone.record) }
+          findings << { "code" => "zone.no_segment", "section" => SECTION, "object_id" => nil,
+                        "message" => NO_SEGMENT, "blocks_export" => true }
         end
         zones.each do |zone|
           begin
             Schema.validate!(zone.record)
+            # A Zone in no Building Segment leaves export; only whether its record reads is checked.
+            next unless Schema.exported?(zone.record)
+
             check_choices!(request, zone.record, managed)
             Occurrences.resolve_zone(request.model, zone.reference, :mutable => true, :index => index)
           rescue CodedError => error
@@ -58,28 +66,88 @@ module PhComposer
                         "object_id" => finding.dig("reference", "zone_id"), "message" => finding.fetch("message"),
                         "blocks_export" => false }
         end
-        findings.concat(metadata_findings(request, zones))
-        repair = { "id" => "#{FEATURE_ID}.solve_all", "label" => "Re-solve adjacencies before export",
-                   "checked" => true, "action" => "#{FEATURE_ID}.solve_adjacency",
-                   "params" => { "zones" => zones.map(&:reference) } }
-        { "findings" => findings, "repairs" => zones.empty? ? [] : [repair] }
+        findings.concat(metadata_findings(request, zones.select { |zone| Schema.exported?(zone.record) }))
+        findings.concat(left_out_findings(request, zones, index))
+        { "findings" => findings, "repairs" => zones.empty? ? [] : [solve_repair(zones)] }
+      end
+
+      # Re-solving every Zone before export. Solve pairs coincident Faces whatever their boundary, so while a Zone
+      # is in no Building Segment it would pair again the Faces made its Attached zone, which then refuse: the
+      # repair is offered unchecked, and says so.
+      def solve_repair(zones)
+        left_out = zones.any? { |zone| !Schema.exported?(zone.record) }
+        label = if left_out
+                  "Re-solve adjacencies before export (this pairs again the Faces made the Attached zone of a " \
+                    "Zone in no Building Segment)"
+                else
+                  "Re-solve adjacencies before export"
+                end
+        { "id" => "#{FEATURE_ID}.solve_all", "label" => label, "checked" => !left_out,
+          "action" => "#{FEATURE_ID}.solve_adjacency", "params" => { "zones" => zones.map(&:reference) } }
       end
 
       # A Zone's options as export needs them: adopted when the Model manages its options, and each named
-      # option present. Until export leaves Zones in no Building Segment out, such a Zone blocks it.
+      # option present. A Zone in no Building Segment names none, so it passes.
       def check_choices!(request, record, managed)
         if (managed || Schema.managed?(record)) && Options::Adoption.needs_adoption?(request.engine, record)
           Options.refuse("zone.options_adoption_required", "Adopt legacy or copied choices before export")
         end
-        return unless Schema.managed?(record)
-
-        Options.resolve(request.engine, record)
-        return unless record["building_segment_id"].nil?
-
-        Options.refuse("reference.invalid", "Put this Zone in a Building Segment before export")
+        Options.resolve(request.engine, record) if Schema.managed?(record)
       end
 
-      # The metadata extraction refuses, read as `records` reads it: each Zone with its user_data passed
+      # What export leaves out, read live: one row naming the Zones in no Building Segment and counting their
+      # Faces, and one row per Building Segment no exported Zone names. Neither blocks. Features with records
+      # inside a Zone count their own in their preflights, as their sections leave them out.
+      def left_out_findings(request, zones, index)
+        left_out = zones.reject { |zone| Schema.exported?(zone.record) }
+        findings = []
+        unless left_out.empty?
+          counts = left_out.map { |zone| [zone.record.fetch("name"), Occurrences.faces(zone, :index => index).length] }
+          findings << { "code" => "zone.left_out", "section" => SECTION, "object_id" => nil,
+                        "message" => left_out_message(counts), "blocks_export" => false }
+        end
+        named = zones.map(&:record).select { |record|
+          Schema.managed?(record)
+        }.map { |record| record["building_segment_id"] }
+        findings + empty_segments(live_segments(request.model), named).map do |id, record|
+          { "code" => "zone.segment_empty", "section" => SECTION, "object_id" => id,
+            "message" => empty_segment_message(record), "blocks_export" => false }
+        end
+      end
+
+      # The Model's Building Segments by id, as stored; one that cannot be read is left to its own findings.
+      def live_segments(model)
+        store = Options::SEGMENTS.store
+        store.ids(model).to_h do |id|
+          [id, store.read(model, id)]
+        rescue JSON::ParserError
+          [id, nil]
+        end
+      end
+
+      # The valid Building Segments, by id, that no Zone names, in id order: export leaves each out.
+      def empty_segments(choices, named)
+        choices.sort.select do |id, record|
+          record.is_a?(Hash) && Options::SEGMENTS.problems(record).empty? && !named.include?(id)
+        end
+      end
+
+      def left_out_message(counts)
+        listed = counts.map { |name, faces| "#{name} (#{faces} #{faces == 1 ? 'Face' : 'Faces'})" }.join(", ")
+        if counts.length == 1
+          "This Zone is in no Building Segment and left out of export with its Faces and everything inside it: " \
+            "#{listed}."
+        else
+          "These Zones are in no Building Segment and left out of export with their Faces and everything inside " \
+            "them: #{listed}."
+        end
+      end
+
+      def empty_segment_message(record)
+        "Building Segment #{record.fetch('name')} holds no Zone, so export leaves it out."
+      end
+
+      # The metadata extraction refuses, read as `records` reads it: each exported Zone with its user_data passed
       # through, and alone every valid Building-Segment and Level choice, named by a Zone or not.
       def metadata_findings(request, zones)
         check = Export::MetadataCheck
@@ -106,6 +174,21 @@ module PhComposer
         heading = "Gross area (#{Units.label(:quantity => 'area', :system => display_units)})"
         table = Export::ReportHtml.table(["Assembly", "Faces", heading], rows)
         [Export::ReportHtml.section("Construction usage", table)]
+      end
+
+      # The live Zone occurrences in no Building Segment, which export leaves out with everything inside them. A
+      # contributor's preflight passes their entities as `skip` to Export::MetadataCheck.entity_records.
+      def left_out_zones(model, index: nil)
+        Occurrences.zones(model, :index => index).reject { |zone| Schema.exported?(zone.record) }
+      end
+
+      # Whether the snapshot path `path` is inside a Zone in no Building Segment, so it leaves export with its
+      # Zone: a contributor drops such entries before it validates or reads them.
+      def left_out?(reader, path)
+        left_out = reader.projection(:zone_left_out_paths) do
+          zone_occurrences(reader).reject { |_entry, record| Schema.exported?(record) }.map { |entry, _| entry.path }
+        end
+        left_out.any? { |zone_path| path.length > zone_path.length && path[0, zone_path.length] == zone_path }
       end
 
       # Every Zone occurrence in the snapshot as [entry, record], in snapshot order, read once per export and
@@ -178,9 +261,11 @@ module PhComposer
       end
 
       # The section's registered projection, for a contributor that places its own snapshot entries in a Zone
-      # (`reader.section(SECTION)`): one row per Zone occurrence with its id, path, name and Building-Segment
-      # name, as zones.containment names them live. It writes no finding; the section
-      # contract validates the same records and refuses a choice it cannot export.
+      # (`reader.section(SECTION)`): one row per Zone occurrence with its id, path, name, Building-Segment
+      # name and whether export includes it, as zones.containment names them live. A Zone in no Building
+      # Segment keeps its row with `exported` false: the section leaves it out, and a contributor leaves out
+      # what it holds, yet still knows the container is a Zone. It writes no finding; the section contract
+      # validates the same records and refuses a choice it cannot export.
       def occurrences(reader)
         zone_occurrences(reader).map do |entry, record|
           record = Names.project(record, entry.native_name)
@@ -190,7 +275,7 @@ module PhComposer
                       record["building_segment"]
                     end
           { "zone_id" => record.fetch("id"), "zone_path" => entry.path, "name" => record.fetch("name"),
-            "building_segment" => segment }
+            "building_segment" => segment, "exported" => Schema.exported?(record) }
         end
       end
 
@@ -215,16 +300,39 @@ module PhComposer
         end
       end
 
+      # The report's notes on what the section left out: each Zone in no Building Segment with its Face count,
+      # and each valid Building Segment no Zone names.
+      def note_left_out(reader, left_out, choices, kept)
+        left_out.each do |entry, record|
+          count = zone_faces(reader, entry).length
+          reader.note("zone.left_out", record.fetch("id"),
+                      "Zone #{record.fetch('name')} is in no Building Segment and was left out with its #{count} " \
+                      "#{count == 1 ? 'Face' : 'Faces'} and everything inside it.")
+        end
+        named = (kept + left_out).map { |_entry, record| record["building_segment_id"] }
+        choices.fetch(Options::SEGMENTS.id).each do |id, segment|
+          reader.note("zone.segment_empty", id, empty_segment_message(segment)) unless named.include?(id)
+        end
+      end
+
       def export_choice(choices, kind, id)
         choices.fetch(kind.id).fetch(id) do
           raise Export::Blocked.new("reference.invalid", "Choose a valid #{kind.label} before export.")
         end
       end
 
+      # One record per exported Zone occurrence. A Zone in no Building Segment is left out with a note counting
+      # its Faces, and each Building Segment no Zone names is noted as left out; with Zones and none in a
+      # Segment, the section refuses.
       def records(reader)
         choices = exported_choices(reader)
-        zone_occurrences(reader).map do |entry, record|
-          record = Names.project(record, entry.native_name)
+        kept, left_out = zone_occurrences(reader).map do |entry, record|
+          [entry, Names.project(record, entry.native_name)]
+        end.partition { |_entry, record| Schema.exported?(record) }
+        raise Export::Blocked.new("zone.no_segment", NO_SEGMENT) if kept.empty? && !left_out.empty?
+
+        note_left_out(reader, left_out, choices, kept)
+        kept.map do |entry, record|
           Schema.validate!(record)
           owned = zone_faces(reader, entry)
           assigned = owned.map { |face| [face, face.record(Faces::FACE_DICTIONARY)] }

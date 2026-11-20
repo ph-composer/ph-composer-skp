@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 74
+    MINOR = 75
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -423,7 +423,17 @@ module PhComposer
                     "its Building Segment's values only, so a Segment metadata write no longer rewrites its Zones " \
                     "and adoption brings no Segment settings. ph_composer.zones.all adds building_segments, each " \
                     "Segment's Face area; ph_composer.spaces.all and list add airflows and inheriting_count to " \
-                    "each building_segments row." }
+                    "each building_segments row." },
+      { "minor" => 75, "date" => "2026-11-20",
+        "change" => "Export leaves a Zone in no Building Segment out with its Faces, Spaces, assigned Edges and the " \
+                    "Window Units on its Faces, and a Building Segment no Zone names; export preflight refuses " \
+                    "zone.no_segment when Zones exist and none is in a Segment, no longer refuses such a Zone with " \
+                    "reference.invalid, refuses face.partner_left_out on a Surface pair across that boundary, and " \
+                    "adds the info rows zone.left_out, zone.segment_empty, space.zone_left_out, " \
+                    "thermal_bridge.zone_left_out and window.zone_left_out. " \
+                    "ph_composer.zones.faces.attached_zone.offer is new: the Faces a Zone moved out shares with " \
+                    "exported Zones, both sides, for create_and_assign or classify. An AttachedZone Face exports as " \
+                    "honeybee-ph PhAdditionalZone." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

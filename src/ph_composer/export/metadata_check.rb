@@ -107,8 +107,9 @@ module PhComposer
       # The readable records `store` keeps on entities extraction reads (GeometrySnapshot.walk), through Groups
       # and component contents, each entity once however many placements show it: a Face or Edge inside a
       # cutting component is not captured, so its record is not read. An unreadable record is the owner's own
-      # preflight finding already.
-      def entity_records(model, store)
+      # preflight finding already. Nothing inside the containers `skip` names is read, so a contributor that
+      # leaves out what a container holds checks none of it.
+      def entity_records(model, store, skip: [])
         found = []
         seen = {}
         pending = [[model.entities, true]]
@@ -117,6 +118,7 @@ module PhComposer
           entities.each do |entity|
             geometry = entity.is_a?(Sketchup::Face) || entity.is_a?(Sketchup::Edge)
             next if seen[[entity.object_id, captured]] || (geometry && !captured)
+            next if skip.any? { |container| container == entity }
 
             seen[[entity.object_id, captured]] = true
             record = readable(store, entity)

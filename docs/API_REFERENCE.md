@@ -32226,6 +32226,141 @@ Example params:
 {}
 ```
 
+### `ph_composer.zones.faces.attached_zone.offer`
+
+For a Zone moved out of every Building Segment, the Faces of the Surface pairs it shares with exported Zones, both sides: create_and_assign with the Zone's name, or classify with attached_zone_id when one is named, makes them AttachedZone in one Undo step. Owner: `ph_composer.zones`.
+
+Refuses: `record.unreadable`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "zone"
+  ],
+  "properties": {
+    "zone": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "zone_id",
+        "zone_path"
+      ],
+      "properties": {
+        "zone_id": {
+          "type": "string"
+        },
+        "zone_path": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      },
+      "description": "The Zone occurrence moved out of every Building Segment."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "zone_id",
+    "name",
+    "attached_zone_id",
+    "faces",
+    "shared_with",
+    "attached_face_count"
+  ],
+  "properties": {
+    "zone_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string",
+      "description": "The Zone's name, the Attached zone's name to use."
+    },
+    "attached_zone_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "An Attached zone already named for the Zone, to reuse; null to create one."
+    },
+    "faces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "zone_id",
+          "zone_path",
+          "entity_path",
+          "entity_id"
+        ],
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          },
+          "zone_path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "entity_path": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "entity_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "description": "Both sides of every current Surface pair the Zone shares with an exported Zone; empty when there is nothing to offer."
+    },
+    "shared_with": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The names of those other Zones."
+    },
+    "attached_face_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The Zone's Faces already on an Attached zone; moving it back into a Building Segment leaves them so until Solve adjacencies pairs them again."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "zone": {
+    "zone_id": "zon_Ab12Cd34Ef56",
+    "zone_path": [
+      1201
+    ]
+  }
+}
+```
+
 ### `ph_composer.zones.faces.classify_tool`
 
 The Classify tool's palette and whether it runs. Owner: `ph_composer.zones`.
@@ -79267,6 +79402,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `space.volume_orphan` | A Volume record is on a Group outside every Space. |
 | `space.volume_protected` | The Volume is protected; unprotect it before opening it. |
 | `space.volume_unprotected` | A closed Volume is unlocked, so its Faces can be edited from the Space. |
+| `space.zone_left_out` | A Space is in a Zone in no Building Segment, so export leaves it out with its Zone. |
 | `space.zone_missing` | A Space names a Zone that is no longer in the Model. |
 
 ### `ph_composer.thermal_bridges`
@@ -79284,6 +79420,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `thermal_bridge.shared_definition` | An assigned Edge is in shared component storage and counts once per placement. |
 | `thermal_bridge.type_missing` | Assigned Edges name a Thermal Bridge Type that no longer exists, so they cannot export. |
 | `thermal_bridge.unreadable_skipped` | Edges hold thermal-bridge text that is not a JSON object; an edges.clear or Thermal Bridge Type delete left them as they are and did not read them for references. edges.repair removes them. |
+| `thermal_bridge.zone_left_out` | An assigned Edge is in a Zone in no Building Segment, so export leaves it out with its Zone. |
 
 ### `ph_composer.view`
 
@@ -79333,6 +79470,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `window.type_geometry_unknown` | A neighbouring Window's untouched geometry cannot be recovered. |
 | `window.unhosted` | The Window is not glued to a resolvable host Face. |
 | `window.unknown_type` | The Window names a Window Type that is not in the Model. |
+| `window.zone_left_out` | The Window is hosted on a Face of a Zone in no Building Segment, so export leaves it out with its Zone. |
 | `window_type.construction_unavailable` | An element's Uw is outside what the pinned Honeybee simple glazing material accepts. |
 | `window_type.construction_unresolved` | An element is missing a Glazing Ug, Frame Uf or Frame psi-g value. |
 | `window_type.default_install_dangling` | The Model default Psi-Install Type is not in the Model. |
@@ -79380,6 +79518,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `face.identity_unique` | The Face has no split copies sharing its identity to repair. |
 | `face.invalid` | A Face's assignment record cannot be read. |
 | `face.outside_envelope` | The Face is inside a Zone but not part of its envelope, so no Zone read or write takes it. |
+| `face.partner_left_out` | A Surface Face is paired with a Face of a Zone in no Building Segment, which export leaves out. |
 | `face.surface_paired` | The Face is one side of a Surface pair, so its classification cannot be cleared until the pair is retired. |
 | `face.type_missing` | A Face has no Face type. |
 | `face.unclassified` | A Zone has unclassified Faces. |
@@ -79389,6 +79528,8 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `zone.component` | A Zone record sits on a component, as Make Component leaves it, so it is not read as a Zone; Undo, or explode the component and restore the Zone. |
 | `zone.identity_in_use` | The Zone being restored is already in the Model. |
 | `zone.identity_unique` | The Zone's identity is already unique; there is nothing to repair. |
+| `zone.left_out` | A Zone is in no Building Segment, so export leaves it out with its Faces and everything inside it. |
+| `zone.no_segment` | No Zone is in a Building Segment, so export has nothing to write. |
 | `zone.none` | The Model has no Zone to export. |
 | `zone.option_duplicate` | An equivalent managed option name already exists. |
 | `zone.option_export_conflict` | Distinct Building Segments share one export identifier; map to a survivor. |
@@ -79398,6 +79539,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `zone.ownership_conflict` | A Zone record sits on, or inside, a Group another feature owns; deleting or removing that Group through its feature is refused while it is there. |
 | `zone.restore_is_limited` | Restore recovers the Zone id, Building-Segment and Level only. |
 | `zone.restore_unsafe` | The Zone cannot be restored from what remains. |
+| `zone.segment_empty` | A Building Segment holds no Zone, so export leaves it out. |
 
 ## API changes
 
@@ -79477,3 +79619,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.72 | 2026-11-19 | ph_composer.shading.export_preflight gives a marked Group or component inside a Zone both shading.zone_inside and shading.classified_inside when it holds a Zone, a claimed object or a cutting component beside classified Faces; before, the first note hid the second. |
 | 1.73 | 2026-11-20 | Zone schema 3: building_segment_id may be null, No Building Segment; Zones write schema 3 and schema 2 still reads. ph_composer.zones.update_field and ph_composer.zones.update accept a null building_segment. ph_composer.zones.options.manage and remove accept a null replacement for a used Building Segment, which moves its Zones to No Building Segment; removing the default moves it to the replacement, else to the first remaining Segment; removing the last Segment refuses zone.option_last_segment. manage, remove and merge results add removed_extensions and removed_extensions_total. Colour-by Building Segment shows Zones in no Segment as one neutral No Building Segment row. Until export leaves them out, such a Zone blocks export. |
 | 1.74 | 2026-11-20 | ph_composer.zones.save_segment_settings is new: one Building Segment's name, colour, default and a settings payload per extension namespace in one Undo step, emitting ph_composer.zones.segment_settings_saved. ph_composer.zones.create_segment is new: a Segment under the first free default name with named Zones moved in. A Zone's choice evidence keeps its Building Segment's values only, so a Segment metadata write no longer rewrites its Zones and adoption brings no Segment settings. ph_composer.zones.all adds building_segments, each Segment's Face area; ph_composer.spaces.all and list add airflows and inheriting_count to each building_segments row. |
+| 1.75 | 2026-11-20 | Export leaves a Zone in no Building Segment out with its Faces, Spaces, assigned Edges and the Window Units on its Faces, and a Building Segment no Zone names; export preflight refuses zone.no_segment when Zones exist and none is in a Segment, no longer refuses such a Zone with reference.invalid, refuses face.partner_left_out on a Surface pair across that boundary, and adds the info rows zone.left_out, zone.segment_empty, space.zone_left_out, thermal_bridge.zone_left_out and window.zone_left_out. ph_composer.zones.faces.attached_zone.offer is new: the Faces a Zone moved out shares with exported Zones, both sides, for create_and_assign or classify. An AttachedZone Face exports as honeybee-ph PhAdditionalZone. |

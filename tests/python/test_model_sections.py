@@ -580,3 +580,26 @@ def test_an_unassigned_surface_pair_across_building_segments_is_refused() -> Non
 
     assert result["summary"]["publishable"] is False
     assert any("Building-Segment" in finding["message"] for finding in result["findings"])
+
+
+SEGMENTS = Path(__file__).resolve().parents[1] / "fixtures" / "segments" / "extraction.json"
+
+
+def test_an_attached_zone_face_becomes_ph_additional_zone_and_refuses_without_its_values() -> None:
+    """The Attached zone an AttachedZone Face carries reaches honeybee-ph's `PhAdditionalZone` with its id, name
+    and factor; a Face missing those values, or carrying them under another boundary, is refused."""
+    value: dict[str, Any] = json.loads(SEGMENTS.read_text())
+    faces = value["sections"]["ph_composer.zones.faces.export.faces"]["records"]
+    face = next(row for row in faces if row["boundary_condition"] == "AttachedZone")
+    section = FaceSection()
+
+    spec = section.read(face)
+    assert spec.attached_zone is not None
+    assert (spec.attached_zone.name, spec.attached_zone.temperature_reduction_factor) == ("ADU", 0.95)
+    with pytest.raises(RecordError, match="attached_zone must be an object"):
+        section.read({key: item for key, item in face.items() if key != "attached_zone"})
+    outdoors = next(row for row in faces if row["boundary_condition"] == "Outdoors")
+    with pytest.raises(RecordError, match="without the AttachedZone boundary"):
+        section.read({**outdoors, "attached_zone": face["attached_zone"]})
+    with pytest.raises(RecordError, match="between 0 and 1"):
+        section.read({**face, "attached_zone": {**face["attached_zone"], "temperature_reduction_factor": 1.5}})

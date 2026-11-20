@@ -325,15 +325,14 @@ class ZoneSegmentMembershipTest < PhComposerTestCase
     assert_equal options.dig("levels", 0, "id"), adopted.fetch("level_id")
   end
 
-  def test_export_preflight_blocks_a_zone_in_no_segment
+  def test_export_preflight_refuses_when_the_only_zone_is_in_no_segment
     zone_id = make_zone(100)
     completed(set_segment([zone_row(zone_id)], nil))
 
     findings = completed(API.export_preflight(:context => @context)).fetch("findings")
 
-    blocking = findings.find { |row| row["object_id"] == zone_id }
-    assert_equal "reference.invalid", blocking.fetch("code")
-    assert blocking.fetch("blocks_export")
+    assert_equal ["zone.no_segment"], findings.select { |row| row["blocks_export"] }.map { |row| row["code"] }.uniq
+    refute(findings.any? { |row| row["object_id"] == zone_id && row["blocks_export"] })
   end
 
   private

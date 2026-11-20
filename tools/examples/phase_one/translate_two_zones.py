@@ -3,7 +3,7 @@
 # dependencies = [
 #   "honeybee-core==1.64.65",
 #   "honeybee-energy==1.123.23",
-#   "honeybee-ph==1.33.65",
+#   "honeybee-ph==1.33.68",
 #   "honeybee-standards==2.0.7",
 #   "ladybug-core==0.44.56",
 #   "ladybug-geometry==1.35.3",
@@ -31,7 +31,7 @@ FIXTURE = ROOT / "tests" / "fixtures" / "phase_one" / "two_zones_extraction.json
 PINNED = {
     "honeybee-core": "1.64.65",
     "honeybee-energy": "1.123.23",
-    "honeybee-ph": "1.33.65",
+    "honeybee-ph": "1.33.68",
     "honeybee-standards": "2.0.7",
     "ladybug-core": "0.44.56",
     "ladybug-geometry": "1.35.3",

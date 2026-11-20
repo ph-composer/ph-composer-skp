@@ -13,7 +13,9 @@ module PhComposer
       # Aperture and construction rows for the translation, the preflight findings, the batch repairs the
       # preflight offers, and each Unit's world outline that could be placed, as `{unit_id, entity_path,
       # outline_m}` rows.
-      Result = Struct.new(:apertures, :constructions, :findings, :repairs, :outlines, keyword_init: true)
+      # `left_out`: `{unit_id, zone_id}` for each Unit hosted on a Face of a Zone in no Building Segment, which
+      # export leaves out with its Zone, unchecked.
+      Result = Struct.new(:apertures, :constructions, :findings, :repairs, :outlines, :left_out, keyword_init: true)
       # The pinned Honeybee simple glazing material accepts a Uw above zero and up to this value.
       UW_LIMIT_W_M2K = 12
       # The one thermal condition that is reported without blocking export.
@@ -29,7 +31,12 @@ module PhComposer
         @snapshot, @types, @products, @settings = snapshot, types, products, settings
         @faces = faces.to_h { |face| [face.fetch("path"), face] }
         @apertures, @constructions, @findings, @repairs = [], [], [], []
-        @units = unit_records
+        # A Unit on a Face of a Zone in no Building Segment leaves with its Zone before anything, identities and
+        # outlines included, is assessed.
+        @units, left_out = unit_records.partition { |entry, _record| !host(entry)&.fetch("left_out", false) }
+        @left_out = left_out.map do |entry, record|
+          { "unit_id" => record["id"], "zone_id" => host(entry).fetch("zone_id") }
+        end
         @ids = @units.group_by { |_entry, record| record["id"] }
         @plans = {}
         @outlines = {}
@@ -43,7 +50,8 @@ module PhComposer
         constructions = @constructions.uniq { |row| row.fetch("id") }
         Result.new(:apertures => @apertures.sort_by { |row| row.fetch("id") },
                    :constructions => constructions.sort_by { |row| row.fetch("id") },
-                   :findings => @findings, :repairs => @repairs, :outlines => outline_rows).freeze
+                   :findings => @findings, :repairs => @repairs, :outlines => outline_rows,
+                   :left_out => @left_out).freeze
       end
 
       private
