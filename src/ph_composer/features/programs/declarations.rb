@@ -33,9 +33,12 @@ module PhComposer
                  "user_data" => USER_DATA }, :optional => %w[values user_data])
       end
 
+      # An Equipment Set's devices are left out: the device actions change them.
       def update(kind)
+        patch = kind.descriptor.patch_schema
+        patch["properties"].delete("devices")
         object({ "id" => id(kind.id_prefix, "The #{kind.label} to edit."),
-                 "values" => described(kind.descriptor.patch_schema, "The values to change; any not given stay."),
+                 "values" => described(patch, "The values to change; any not given stay."),
                  "expected_values" => EXPECTED_VALUES })
       end
 

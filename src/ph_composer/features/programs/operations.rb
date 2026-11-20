@@ -26,8 +26,15 @@ module PhComposer
         { "id" => request.engine.propose_create(kind, proposal, :values => values, :user_data => user_data) }
       end
 
-      # A guarded edit of named values; nil removes an optional one. On a Schedule a new type swaps the form.
+      # A guarded edit of named values; nil removes an optional one. On a Schedule a new type swaps the form. An
+      # Equipment Set's devices change only through the device operations, which keep each type and report a
+      # removed device's map.
       def update(request, proposal, kind, id:, values:, expected_values:)
+        if kind == EQUIPMENT_SET_KIND && values.key?("devices")
+          raise CodedError.new("params.invalid", "Change devices one at a time with add_device, update_device and " \
+                                                 "delete_device.")
+        end
+
         before = Store.find(request, kind, id, :proposal => proposal)
         values = DeepCopy.call(values)
         values["name"] = values["name"].strip if values["name"]
@@ -232,6 +239,7 @@ module PhComposer
           next if Store.stored?(request.engine, SCHEDULE_KIND, schedule_id) || proposal.find(SCHEDULE_KIND, schedule_id)
 
           record = DefaultProgram::SCHEDULES.find { |row| row.fetch("id") == schedule_id }
+          unique!(request, SCHEDULE_KIND, record.fetch("name"))
           proposal.put(SCHEDULE_KIND, :before => nil, :after => DeepCopy.call(record))
         end
       end

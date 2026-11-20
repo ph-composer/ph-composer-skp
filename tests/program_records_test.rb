@@ -193,6 +193,16 @@ class ProgramRecordsTest < PhComposerTestCase
                                           program.dig("electric_equipment", "schedule_id")]
   end
 
+  def test_reset_refuses_to_write_back_a_schedule_whose_name_another_took
+    always_on = P::DefaultProgram::ALWAYS_ON
+    invoke!("schedules.update", "id" => always_on, "values" => { "name" => "Old always on" }, "expected_values" => {})
+    other = id_of(invoke!("schedules.create", "values" => { "name" => "Always on" }))
+    invoke!("schedules.delete", "id" => always_on, "replacement_id" => other)
+    revision = @session.revision
+    assert_equal "validation.failed", invoke("reset_default", "kind" => "program")["code"]
+    assert_equal revision, @session.revision
+  end
+
   def test_reset_refuses_a_name_another_record_took_and_reports_a_dropped_devices_map
     invoke!("programs.update", "id" => DEFAULT_PROGRAM, "values" => { "name" => "Mine" }, "expected_values" => {})
     invoke!("programs.create", "values" => { "name" => "Residential default" })
@@ -282,6 +292,16 @@ class ProgramRecordsTest < PhComposerTestCase
     assert_equal 2, set_row(set).dig("values", "devices").first["quantity"]
     @model.undo
     assert_equal 1, set_row(set).dig("values", "devices").first["quantity"]
+  end
+
+  def test_an_equipment_set_update_cannot_replace_its_devices
+    set = id_of(invoke!("equipment_sets.create", "values" => { "name" => "Kitchen" }))
+    device = invoke!("equipment_sets.add_device", "id" => set, "type" => "cooktop").dig("value", "device_id")
+    swapped = P::EquipmentTypes.device("dishwasher", device)
+    outcome = invoke("equipment_sets.update", "id" => set, "values" => { "devices" => [swapped] },
+                                              "expected_values" => {})
+    assert_equal "params.invalid", outcome["code"], outcome.inspect
+    assert_equal "cooktop", set_row(set).dig("values", "devices", 0, "type")
   end
 
   # ---------------------------------------------------------------- deletes

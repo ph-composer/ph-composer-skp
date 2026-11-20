@@ -8,7 +8,7 @@ ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 Run by the P4a-07a stage, offline, on Ruby 3.2.2 and 2.7.2 against the SketchUp stub and in Node for the units.
 SketchUp was not launched. The library rows moved to PG07b with the split.
 
-Commands, both Rubies (28 runs, 442 assertions, 0 failures on each):
+Commands, both Rubies (30 runs, 456 assertions, 0 failures on each):
 `ruby -Itests -e 'require "./tests/program_records_test"; require "./tests/program_records_walkthrough_test";
 require "./tests/units_test"'`; and `node --test tests/units_test.js` (22 pass).
 
@@ -21,6 +21,7 @@ require "./tests/units_test"'`; and `node --test tests/units_test.js` (22 pass).
 | A ventilation Schedule must total 24 h | Pass | Periods of 2, 14, 6 and 1 h refuse `validation.failed` with the revision unchanged; 2, 14, 6 and 2 h store, with the profile and daily full-load hours 2 + 14 × 0.77 + 6 × 0.54 + 2 × 0.4; periods out of order refuse |
 | The profile and full-load hours of each form match hand values | Pass | `test_each_form_draws_its_profile_and_full_load_hours`: 7 to 18 h at 0.5 with 0.1 otherwise, 5 days, 50 weeks, is 6.8 h a day and 1,700 h a year; 22 to 6 h wraps midnight; activity and temperature draw their levels with null full-load hours |
 | A Schedule's type is kept while a Program uses it; a Program refuses a Schedule of the wrong type | Pass | `test_a_schedule_a_program_uses_keeps_its_type`, `test_a_new_type_swaps_the_form_and_a_program_refuses_a_schedule_of_the_wrong_type` |
+| An Equipment Set's update cannot replace its devices; a reset refuses a name another record holds | Pass | `test_an_equipment_set_update_cannot_replace_its_devices` (`params.invalid`; the device keeps its type), `test_reset_refuses_to_write_back_a_schedule_whose_name_another_took` (`validation.failed`, revision unchanged) |
 | A rule load keeps its inputs across a switch to a value and back | Pass | `test_a_rule_load_keeps_its_inputs_across_a_switch_to_a_value_and_back`: Lighting `phius_interior` with fraction 0.8, switched to 2.5 W/m² and back, reads the rule, 0.8 and 2.5 |
 | The residential default reads without a write | Pass | `test_a_fresh_model_reads_the_defaults_without_writing`: the Program, six Schedules and eight-device Set read `stored` false, `settings.get` names the reserved ids, the revision and the stores are unchanged |
 | It writes once, with its Schedules, on the first edit | Pass | `test_the_first_edit_writes_the_default_with_its_schedules_once_and_undo_returns_to_the_definition`: one operation; a second edit edits the stored record; two Undos return to the unwritten definition |

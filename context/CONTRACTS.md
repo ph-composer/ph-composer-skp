@@ -608,7 +608,8 @@ datasheet links and source fields, whose source kind may also be `ph_composer_de
   `dev_` ids, its own `user_data`) of one of the fourteen honeybee-ph `PhEquipment` types. `EquipmentTypes`
   names each type's fields, the reference quantity codes and energy norms it allows and a new device's values
   (honeybee-ph's PHIUS defaults); a field the type does not carry, or a missing one, refuses. A device's type is
-  fixed; add, update and delete are each one Undo step, and delete reports the device's removed map.
+  fixed; add, update and delete are each one Undo step, and delete reports the device's removed map. The Set's
+  own update takes no `devices`: devices change only through the device actions (`params.invalid`).
 
 **PH-Composer's defaults.** The residential default Program (`pgm_PHCDEFAULT01`) with its six Schedules
 (`sch_PHCDEFAULT01` to `06`) is one bundle, and the default Equipment Set (`eqs_PHCDEFAULT01`, eight devices)
@@ -621,7 +622,7 @@ ordinary. The generic `ph_composer.records.*` routes see stored records only, so
 for an unwritten default. `ph_composer.programs.reset_default` rewrites the residential Program or the default
 Set from its definition, writing it under its reserved id if the Model holds none and writing back any default
 Schedule the Program names that is gone; an edited Schedule stays, since others may share it, and `user_data`
-stays.
+stays. A reset refuses `validation.failed` when another record holds the name it would write.
 
 **The Model's defaults.** The `ph_composer.programs.settings` dictionary holds `default_program_id` and
 `default_equipment_set_id`, null for PH-Composer's own; the reserved ids are never stored, and
