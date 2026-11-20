@@ -282,7 +282,8 @@ module PhComposer
             Schema.validate!(entry.record)
             reference = reachable[entry.key]
             unless reference
-              stranded << { "id" => entry.record.fetch("id"), "path" => entry.key, "reason" => "outside_zone" }
+              stranded << { "id" => entry.record.fetch("id"), "path" => entry.key,
+                            "reason" => Faces.stranded_reason(request.model, entry.key) }
               next
             end
             begin

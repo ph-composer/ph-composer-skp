@@ -875,9 +875,12 @@ The following public operations have panel-closed walkthroughs.
   repair over every copy first, and says so in its `side_effects`.
   [Walkthrough](../tools/examples/authoring/windows_walkthrough.rb),
   [placement](../tools/examples/authoring/windows_placement_walkthrough.rb).
-- **Shading** (`ph_composer.shading.*`, API 1.69). Reads: `selection`, the selected Faces, Groups and
-  components under the active path as root-path references with what `assign` and `clear` would do to
-  each, and `list`, every mark and each shading component with its Face count and world area. Writes:
+- **Shading** (`ph_composer.shading.*`, API 1.69, preflight 1.70). Reads: `selection`, the selected Faces,
+  Groups and components under the active path as root-path references with what `assign` and `clear` would do
+  to each, `list`, every mark and each shading component with its Face count and world area, and
+  `export_preflight`, the `shading.zone_inside` notes. A Shading Face inside a Zone is not one of its Faces:
+  Zones reads leave it out and an explicit reference refuses `face.outside_envelope`. A classified Face takes
+  the mark after `ph_composer.zones.faces.clear_classification` removes its record. Writes:
   `assign` and `clear` over at most 250 explicit `{"entity_path": [...]}` references, each one Undo step.
   A path that no longer resolves refuses the whole command; a target that cannot change is returned in
   `left_out` with its code, and the command refuses only when every target is. The panel is

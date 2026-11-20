@@ -117,7 +117,7 @@ module PhComposer
         stranded = ReferenceTargets.entries(model).select do |entry|
           entry.record["attached_zone_id"] == attached_zone_id && !keys.include?(entry.key)
         end
-        refuse_stranded!(attached_zone_id, stranded, reasons) unless stranded.empty?
+        refuse_stranded!(model, attached_zone_id, stranded, reasons) unless stranded.empty?
         reachable
       end
 
@@ -128,10 +128,10 @@ module PhComposer
         end
       end
 
-      def refuse_stranded!(attached_zone_id, entries, reasons)
+      def refuse_stranded!(model, attached_zone_id, entries, reasons)
         faces = entries.map do |entry|
           { "id" => entry.record.fetch("id"), "path" => entry.key,
-            "reason" => reasons.fetch(entry.key, "outside_zone") }
+            "reason" => reasons.fetch(entry.key) { Faces.stranded_reason(model, entry.key) } }
         end
         routes = faces.map { |face| STRANDED_ROUTES.fetch(face.fetch("reason"), "resolve its #{face.fetch('reason')}") }
         raise CodedError.new(

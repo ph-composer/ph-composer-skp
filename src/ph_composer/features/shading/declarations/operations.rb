@@ -114,6 +114,14 @@ module PhComposer
                                       "to it; anything else selected is ignored.",
                       :refuses => (RESOLVE + %w[gesture.too_large]).freeze, :params => object({}),
                       :result => SELECTION, :examples => [{}]) { |request| Selection.read(request) }
+        feature.query("#{PREFIX}.export_preflight",
+                      :description => "Shading's export notes, none blocking: shading.zone_inside names each marked " \
+                                      "Group or component that is a Zone or holds one, another feature's " \
+                                      "object or a cutting component, which the mark does not reach; " \
+                                      "shading.classified_inside names one inside a Zone holding classified " \
+                                      "Faces, which stay envelope.",
+                      :refuses => %w[record.unreadable target.wrong_kind validation.failed], :params => object({}),
+                      :result => Export::PREFLIGHT_RESULT, :examples => [{}]) { |request| Preflight.call(request) }
       end
     end
   end

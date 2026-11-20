@@ -11,6 +11,7 @@
 #   operations.rb   assign and clear
 #   selection.rb    the native selection with what each action would do
 #   inventory.rb    shading.list: every mark and every shading component
+#   preflight.rb    shading.export_preflight: the notes on what the mark leaves as it is
 #   codes.rb        the codes under the shading noun
 #   declarations/   what Shading registers
 require_relative "mark/schema"
@@ -21,6 +22,7 @@ require_relative "mark/steps"
 require_relative "operations"
 require_relative "selection"
 require_relative "inventory"
+require_relative "preflight"
 require_relative "declarations/operations"
 require_relative "codes"
 

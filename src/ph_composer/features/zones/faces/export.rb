@@ -25,7 +25,7 @@ module PhComposer
         # needing host context, including unclassified Faces. Classification validity remains the
         # consuming feature's export policy. A contributor reads it as `reader.section(SECTION)`.
         def contexts(reader)
-          zone_faces(reader.snapshot).map do |entry|
+          zone_faces(reader).map do |entry|
             stored = entry.record(FACE_DICTIONARY)
             owner = Zones::ExportProjection.zone_owner(reader, entry.path)
             valid = stored && Schema.problems(stored).empty?
@@ -206,7 +206,7 @@ module PhComposer
 
         def records(reader)
           leave_out_attached_zone_maps(reader)
-          zone_faces(reader.snapshot).filter_map do |entry|
+          zone_faces(reader).filter_map do |entry|
             record = entry.record(FACE_DICTIONARY)
             next unless record
 
@@ -224,7 +224,7 @@ module PhComposer
             ).merge(
               "zone_id" => stamp.fetch("zone_id"), "geometry" => geometry.to_h
             )
-            omission = omission_reason(reader.snapshot, entry, record)
+            omission = omission_reason(reader, entry, record)
             if omission
               exported["omission"] = { "code" => omission.fetch(0), "reason" => omission.fetch(1),
                                        "area_m2" => geometry.area_m2, "zone_id" => stamp.fetch("zone_id") }
@@ -233,8 +233,14 @@ module PhComposer
           end.sort_by { |record| record.fetch("id") }
         end
 
-        def zone_faces(snapshot)
-          snapshot.entries.select { |entry| entry.kind == "face" }
+        # Every snapshot Face but those that have left their Zone's envelope: a Face outside every Zone stays, so
+        # a contributor reading the projection still finds it.
+        def zone_faces(reader)
+          reader.projection(:zone_envelope_faces) do
+            reader.snapshot.entries.select do |entry|
+              entry.kind == "face" && !Zones::ExportProjection.outside_envelope?(reader, entry)
+            end
+          end
         end
 
         # An Attached zone leaves no object of its own (an AttachedZone Face carries only its boundary), so each
@@ -253,7 +259,7 @@ module PhComposer
           end
         end
 
-        def omission_reason(snapshot, entry, record)
+        def omission_reason(reader, entry, record)
           unless record["boundary_condition"]
             return ["face.boundary_unassigned", "Face has no assigned boundary condition."]
           end
@@ -261,9 +267,10 @@ module PhComposer
 
           endpoint = record.dig("adjacency", "counterpart")
           path = Array(endpoint&.fetch("zone_path", nil)) + Array(endpoint&.fetch("entity_path", nil))
-          counterpart = snapshot.entry_at(path, :kind => "face")
+          counterpart = reader.snapshot.entry_at(path, :kind => "face")
           other = counterpart&.record(FACE_DICTIONARY)
-          unless counterpart && other
+          # A counterpart that has left its Zone's envelope is not exported, so the pair has no other side.
+          unless counterpart && other && !Zones::ExportProjection.outside_envelope?(reader, counterpart)
             return ["adjacency.unresolved", "Face has no reciprocal Surface endpoint."]
           end
           return nil if Zones::Adjacency.snapshot_pair_current?(entry, record, counterpart, other)

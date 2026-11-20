@@ -187,8 +187,10 @@ module PhComposer
       # Every member record the repair rewrites. A copied `fac_` id is ambiguous data, so each face
       # takes a fresh one; a copied adjacency envelope is not a relationship, so it is dropped with
       # its boundary condition and the Face needs classifying again.
+      # Every member Face, its Zone's envelope or not: a copy's identity repair renames each one's stamp and
+      # record, so a Face excluded now is not left naming the original once it rejoins the envelope.
       def member_entries(zone)
-        Occurrences.faces(zone).filter_map do |occurrence|
+        Occurrences.member_faces(zone).filter_map do |occurrence|
           record = Faces::FACE_STORE.read(occurrence.entity)
           existing_stamp = STAMP_STORE.read(occurrence.entity)
           next if record.nil? && existing_stamp.nil?

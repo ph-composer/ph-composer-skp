@@ -35,10 +35,16 @@ module PhComposer
                                                        "exterior condition.",
         "face.assembly_pair_mismatch" => "The two Faces of a Surface pair do not hold one Assembly, " \
                                          "reversed on one side.",
+        "face.aperture_host" => "The Face hosts a glued cutting component, such as a Window, so its classification " \
+                                "cannot be cleared.",
         "face.assembly_type_mismatch" => "The Face's type differs from its Assembly's type.",
         "face.boundary_unassigned" => "A Face has no boundary condition and is omitted from the export.",
         "face.identity_unique" => "The Face has no split copies sharing its identity to repair.",
         "face.invalid" => "A Face's assignment record cannot be read.",
+        "face.outside_envelope" => "The Face is inside a Zone but not part of its envelope, so no Zone read or " \
+                                   "write takes it.",
+        "face.surface_paired" => "The Face is one side of a Surface pair, so its classification cannot be cleared " \
+                                 "until the pair is retired.",
         "face.type_missing" => "A Face has no Face type.",
         "face.unclassified" => "A Zone has unclassified Faces.",
         "face.wrong_zone" => "A Face is contained by more than one Zone.",

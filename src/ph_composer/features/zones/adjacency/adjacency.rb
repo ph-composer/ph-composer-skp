@@ -105,6 +105,10 @@ module PhComposer
       # must each identify one live occurrence, and the normal mutable resolver checks its actual
       # path before the proposal uses it. Geometry never selects a candidate.
       def retirement_endpoint(model, reference, index, authored_face_counts)
+        # An endpoint that has left its Zone's envelope is no Zone Face, whatever locks it: the other side
+        # retires alone.
+        return nil if Occurrences.outside_envelope?(model, reference, :index => index)
+
         Occurrences.resolve_face(model, reference, :mutable => true, :index => index)
       rescue CodedError => error
         raise unless %w[target.changed target.not_found target.wrong_kind].include?(error.code)
@@ -386,18 +390,28 @@ module PhComposer
           raise CodedError.new("adjacency.not_surface", "That Face has no Surface pair to retire.")
         end
 
-        counterpart = Occurrences.resolve_face(model, record.fetch("adjacency").fetch("counterpart"),
-                                               :mutable => true, :index => index)
+        own = FaceRecordUpdate.new(:reference => occurrence.reference(record.fetch("id")), :before => record,
+                                   :after => retired(record))
+        counterpart = envelope_counterpart(model, record.fetch("adjacency").fetch("counterpart"), index)
+        # A counterpart that has left its Zone's envelope is no Zone Face to write: this side retires alone.
+        return [own] unless counterpart
+
         other = Faces::FACE_STORE.read(counterpart.entity)
         unless other && reciprocal?(record, other)
           raise CodedError.new("adjacency.unresolved", "The reciprocal Surface endpoint cannot be retired safely.")
         end
 
-        [FaceRecordUpdate.new(:reference => occurrence.reference(record.fetch("id")), :before => record,
-                              :after => retired(record)),
-         FaceRecordUpdate.new(:reference => counterpart.reference(other.fetch("id")), :before => other,
-                              :after => retired(other))]
+        [own, FaceRecordUpdate.new(:reference => counterpart.reference(other.fetch("id")), :before => other,
+                                   :after => retired(other))]
       end
+
+      # The counterpart occurrence for writing, or nil when it has left its Zone's envelope.
+      def envelope_counterpart(model, reference, index)
+        return nil if Occurrences.outside_envelope?(model, reference, :index => index)
+
+        Occurrences.resolve_face(model, reference, :mutable => true, :index => index)
+      end
+      private_class_method :envelope_counterpart
 
       def validate_envelope(envelope)
         return ["adjacency must be an object"] unless envelope.is_a?(Hash)

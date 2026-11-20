@@ -12,13 +12,18 @@ module PhComposer
       ZONE_TARGET = %w[record.unreadable target.ambiguous target.changed target.locked target.not_found
                        target.shared_definition target.wrong_hierarchy target.wrong_kind validation.failed].freeze
       # Resolving an explicit Face occurrence, which also checks the Face is stamped for its Zone.
-      FACE_TARGET = (ZONE_TARGET + %w[target.wrong_zone]).freeze
+      # A Face that has left the Zone's envelope refuses as no Face of it.
+      FACE_TARGET = (ZONE_TARGET + %w[face.outside_envelope target.wrong_zone]).freeze
       # An entity owner's metadata write (Records::Metadata) refuses for its target and for each payload.
       METADATA = %w[extension.invalid extension.migration_required extension.schema_unsupported extension.unavailable
                     reference.invalid].freeze
       # Classifying Faces may retire or need a Surface pair, and is bounded in size.
       CLASSIFY = (FACE_TARGET + %w[adjacency.not_surface adjacency.unresolved gesture.retirement_conflict
                                    gesture.too_large]).freeze
+      # Clearing a classification removes the Face record, which a Surface pair, a glued Window or an incoming
+      # reference still needs.
+      CLEAR_CLASSIFICATION = (FACE_TARGET + %w[copy.rule_missing face.aperture_host face.surface_paired
+                                               gesture.too_large reference.in_use]).freeze
       SOLVE = (FACE_TARGET + %w[adjacency.stale adjacency.unresolved copy.rule_missing extension.invalid
                                 geometry.invalid reference.invalid scope.incomplete target.same_zone]).freeze
       REPAIR_SPLIT_FACE = (FACE_TARGET + %w[adjacency.unresolved copy.rule_missing extension.invalid

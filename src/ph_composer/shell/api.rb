@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 69
+    MINOR = 70
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -383,7 +383,16 @@ module PhComposer
                     "assigned or cleared, unchanged and left_out; ph_composer.shading.selection and " \
                     "ph_composer.shading.list read the selection and every mark and shading component. " \
                     "shading.face_classified, shading.zone_target, shading.inherited and shading.cutting_component " \
-                    "are new." }
+                    "are new." },
+      { "minor" => 70, "date" => "2026-11-19",
+        "change" => "A Face inside a Zone that is shading, or inside a shading Group or component there, is not part " \
+                    "of the Zone's envelope: Zones reads, writes, Solve, Colour-by and export leave it out, and an " \
+                    "explicit reference to it refuses face.outside_envelope; zones.containment answers it with the " \
+                    "reason outside_envelope. ph_composer.zones.faces.clear_classification is new: it removes Face " \
+                    "records in one Undo step, refusing face.surface_paired and face.aperture_host. " \
+                    "ph_composer.shading.export_preflight is new and notes shading.zone_inside and " \
+                    "shading.classified_inside. shading.assign refuses a Group inside a Zone that holds classified " \
+                    "Faces with shading.face_classified; a classified Face leaves the envelope only by its own mark." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

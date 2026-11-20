@@ -126,8 +126,49 @@ module PhComposer
 
       def scan_faces(zone)
         found = []
-        walk_faces(zone.entity.entities, [], zone.transform, zone, found)
+        walk_faces(zone.entity.entities, [], [], zone.transform, zone, found)
         found
+      end
+
+      # Every Face the Zone Group holds, its envelope or not: the members whose stamps and records identity
+      # maintenance keeps in step with the Zone (the stamp writer, Zone copy repair). No envelope read uses it.
+      def member_faces(zone)
+        found = []
+        walk_faces(zone.entity.entities, [], [], zone.transform, zone, found, :envelope => false)
+        found
+      end
+
+      # Whether an entity carries a Face record, readable or not: the classified state envelope exclusion reads,
+      # public so a feature placing marks above Zone Faces can tell which it would reach.
+      def classified_face?(entity)
+        entity.is_a?(Sketchup::Face) && Faces::FACE_STORE.marks?(entity)
+      end
+
+      # Whether an entity carries a Zone record, readable or not.
+      def zone_record?(entity)
+        ZONE_STORE.marks?(entity)
+      end
+
+      # Whether a Face reference names a Face that has left its Zone's envelope, read without write checks, so a
+      # lock on the way does not hide it. A reference that does not resolve otherwise is not excluded.
+      def outside_envelope?(model, reference, index: nil)
+        resolve_face(model, reference, :allow_unassigned => true, :index => index)
+        false
+      rescue CodedError => error
+        error.code == "face.outside_envelope"
+      end
+
+      # Whether the Face at the end of `inside` has left its Zone's envelope, so no Zone read, write or export
+      # takes it as one of the Zone's Faces. `inside` runs from the first entity inside the Zone Group down to
+      # the leaf, as `holding` returns it. Only a Face leaves the envelope: an Edge or a container is never
+      # excluded. The rule is the foundation's (Records::EntityStore.envelope_excluded?), so it names no feature
+      # (context/CONTRACTS.md, "Zones geometry rules"). A classified Face (one carrying a Face record) leaves
+      # only by a record on itself: a record on a container above it does not drop a wall from the envelope.
+      def envelope_excluded?(inside)
+        face = inside.last
+        return false unless face.is_a?(Sketchup::Face) && Records::EntityStore.envelope_excluded?(inside)
+
+        !Faces::FACE_STORE.marks?(face) || Records::EntityStore.envelope_excluded?([face])
       end
 
       # A null `entity_id` asserts that the Face has no record: once it has one the reference is stale and
@@ -239,7 +280,8 @@ module PhComposer
       # path alone, as a Containment. The Zone is the innermost one above the entity, by the rule
       # `occurrence_for_path` applies to Faces; any drawing element may be the leaf. Without a Zone it
       # carries the reason: `not_found` (a step missing or repeated), `not_a_drawing_element`,
-      # `cutting_instance` (a cutting component above it) or `outside_zone`. Like `occurrence_for_path` it
+      # `cutting_instance` (a cutting component above it), `outside_zone` or `outside_envelope` (a Face inside a
+      # Zone that has left its envelope, `envelope_excluded?`). Like `occurrence_for_path` it
       # proves no identity; a write still resolves strictly.
       def containment(model, path, children: nil)
         entities = entities_along(model, path, :children => children)
@@ -308,6 +350,8 @@ module PhComposer
         return [nil, nil, "outside_zone"] unless zone_index
 
         inside = entities[(zone_index + 1)..-1]
+        return [nil, nil, "outside_envelope"] if envelope_excluded?(inside)
+
         zone = zone_for_path(entities[0..zone_index],
                              entities[0...zone_index].any? { |entity| ZONE_STORE.read(entity) })
         [zone, inside, nil]
@@ -325,9 +369,10 @@ module PhComposer
       # One Face inside an already-resolved Zone occurrence, by path alone. Identity repair needs
       # this: the Zone id it is about to replace is duplicated, so the id-keyed resolver would
       # refuse the very ambiguity the repair exists to remove.
-      def face_at(zone, entity_path, mutable: false)
+      # `envelope: false` is identity maintenance's: it reaches a member Face that has left the envelope.
+      def face_at(zone, entity_path, mutable: false, envelope: true)
         path = integer_path(entity_path)
-        entity, transform, entities = resolve_face_path(zone, path, mutable)
+        entity, transform, entities = resolve_face_path(zone, path, mutable, :envelope => envelope)
         unless entity.is_a?(Sketchup::Face)
           raise_target("target.wrong_kind", "The occurrence does not resolve to a Face.")
         end
@@ -341,13 +386,16 @@ module PhComposer
       # through one names a Face this Zone does not own, for reads and writes alike. A Group whose
       # definition another Group shares is storage both placements write through, so a mutable path
       # refuses it and asks for it to be opened, which gives that placement its own definition. The
-      # rule holds for any element at the end of the path; `noun` names it in the messages.
-      def resolve_face_path(zone, path, mutable, noun: "Face", children: nil)
+      # rule holds for any element at the end of the path; `noun` names it in the messages. A Face that has
+      # left the Zone's envelope refuses `face.outside_envelope`, for reads and writes alike.
+      def resolve_face_path(zone, path, mutable, noun: "Face", children: nil, envelope: true)
         current = zone.entity.entities
         transform = zone.transform
         entity = nil
+        inside = []
         path.each_with_index do |persistent_id, index|
           entity = unique_entity(current, persistent_id, :children => children)
+          inside << entity
           break if index == path.length - 1
 
           if ZONE_STORE.read(entity)
@@ -370,6 +418,9 @@ module PhComposer
             raise_target("target.wrong_kind", "The occurrence path passes through a non-container entity.")
           end
           transform *= entity.transformation
+        end
+        if envelope && envelope_excluded?(inside)
+          raise_target("face.outside_envelope", "That Face is not part of the Zone's envelope.")
         end
         # A locked container at the end of the path refuses a write to itself, as one above it does.
         if mutable && entity.respond_to?(:locked?) && entity.locked?
@@ -474,17 +525,22 @@ module PhComposer
         definition.respond_to?(:instances) && definition.instances.length > 1
       end
 
-      def walk_faces(entities, path, transform, zone, found)
+      # `containers` are the Groups and components from inside the Zone down to `entities`, so each Face's
+      # `inside` list is `containers + [face]`.
+      def walk_faces(entities, path, containers, transform, zone, found, envelope: true)
         entities.each do |entity|
           child_path = path + [entity.persistent_id]
           if entity.is_a?(Sketchup::Face)
+            next if envelope && envelope_excluded?(containers + [entity])
+
             found << FaceOccurrence.new(:entity => entity, :zone => zone, :path => child_path,
                                         :transform => transform, :entities => entities)
           elsif entity.is_a?(Sketchup::Group) || entity.is_a?(Sketchup::ComponentInstance)
             next if ZONE_STORE.read(entity) || cutting_component?(entity)
 
             child_entities = entity.is_a?(Sketchup::Group) ? entity.entities : entity.definition.entities
-            walk_faces(child_entities, child_path, transform * entity.transformation, zone, found)
+            walk_faces(child_entities, child_path, containers + [entity], transform * entity.transformation, zone,
+                       found, :envelope => envelope)
           end
         end
       end

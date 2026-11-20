@@ -74,8 +74,29 @@ module PhComposer
           :owned => containers.any?(&:owned) || owned?(leaf), :classified => classified,
           :zone => zones.key?(path),
           :zone_target => container?(leaf) && zones.keys.any? { |zone| zone[0, path.length] == path },
-          :holds_owned => container?(leaf) && Records::EntityStore.claimed_within?(contents(leaf).to_a)
+          :holds_owned => container?(leaf) && Records::EntityStore.claimed_within?(contents(leaf).to_a),
+          :classified_inside => container?(leaf) && in_zone?(path, zones) ? classified_within(contents(leaf).to_a) : 0
         )
+      end
+
+      # Whether a root path lies strictly inside a Zone occurrence.
+      def in_zone?(path, zones)
+        zones.keys.any? { |zone| path.length > zone.length && path[0, zone.length] == zone }
+      end
+
+      # How many classified Zone Faces (a Face record present, readable or not) are among `entities` and inside
+      # their Groups and components, at any depth, where a mark above would reach: never inside a cutting
+      # component, another feature's object or a Zone. A Face carrying the mark itself is already shading.
+      def classified_within(entities)
+        entities.sum do |entity|
+          if entity.is_a?(Sketchup::Face)
+            Zones::Occurrences.classified_face?(entity) && !Mark.marked?(entity) ? 1 : 0
+          elsif container?(entity) && !cutting?(entity) && !owned?(entity) && !Zones::Occurrences.zone_record?(entity)
+            classified_within(contents(entity).to_a)
+          else
+            0
+          end
+        end
       end
 
       # The Reads::Container row for one Group or component at `path`; `zones` maps Zone paths to names.

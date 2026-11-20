@@ -82,6 +82,39 @@ module PhComposer
         end
       end
 
+      # Clear classification's write: every Face's record removed, each checked against the record planned on
+      # before any is removed, so a Face changed since the preview aborts the whole step.
+      class ClearClassificationStep
+        attr_reader :affected
+
+        def initialize(updates:)
+          @updates = updates.map { |update| DeepCopy.call(update).freeze }.freeze
+          @affected = @updates.map do |update|
+            id = update.fetch("before").fetch("id")
+            { "kind" => "face", "id" => id, "change" => "cleared",
+              "reference" => update.fetch("reference").merge("entity_id" => id) }
+          end
+        end
+
+        def descriptor
+          { "name" => "clear_classification", "updates" => @updates }
+        end
+
+        def apply(model, _slots)
+          index = Zones::Index.new(model)
+          resolved = @updates.map do |update|
+            occurrence = Zones::Occurrences.resolve_face(model, update.fetch("reference"), :mutable => true,
+                                                                                           :index => index)
+            unless FACE_STORE.read(occurrence.entity) == update.fetch("before")
+              raise CodedError.new("target.changed", "A Face changed after Clear classification was previewed.")
+            end
+
+            occurrence
+          end
+          resolved.each { |occurrence| FACE_STORE.delete(occurrence.entity) }
+        end
+      end
+
       class ReverseFaceStep
         attr_reader :affected
 

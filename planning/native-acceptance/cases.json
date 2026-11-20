@@ -5044,6 +5044,19 @@
         "src/ph_composer/core/records/entity_store.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "SD03",
+      "label": "Shading and Zones on the installed RBZ with the panel closed: a tagged overhang Face and a Face in a tagged Group leave Zone A's envelope (no face.unclassified, Face count drops), Zone A's Room exports closed, Classify, Suggest classification and Solve adjacencies leave them alone, clearing the mark brings the unclassified finding back, a classified Face refuses the tag and takes it after Clear classification (each one native Undo step), a Zone made inside a marked Group keeps its Faces and raises shading.zone_inside, and the Classify tool leaves a tagged Face alone",
+      "mode": "mixed",
+      "authority": "planning/features/phase-05-shading/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/zones/zone/occurrences.rb",
+        "src/ph_composer/features/zones/export.rb",
+        "src/ph_composer/features/zones/faces/*",
+        "src/ph_composer/features/shading/preflight.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }
