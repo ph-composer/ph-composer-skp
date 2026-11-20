@@ -63,7 +63,8 @@ and version, copied record kind and `assignment_supported`; `describe` answers a
 migrates from, `payload_schema: null` since a declaration carries a validator rather than a schema,
 and what each stored-data status means). Every row comes from registration, so an outside kind,
 extension or adapter is described with no change to the shell or the transport. A library callback's
-optional `examples` must meet its params, which registration checks.
+optional `examples` must meet its params, which registration checks. Since API 1.80 a library kind's
+`describe` also names its `dependencies`, the kinds of record its rows refer to, which a copy brings along.
 
 The agent connection's `discover` tool keeps its compact index and its `owner` page and adds
 `section` (`agent_access/discovery.rb`): `operations` (each row with its `kind`; `owner` filters),
@@ -348,6 +349,10 @@ default Equipment Set until a write stores them ([CONTRACTS.md](CONTRACTS.md), "
 Equipment Sets"); `ph_composer.programs.settings.get` and `.update` read and choose the Model's defaults, and
 `ph_composer.programs.reset_default` restores one. The panel-closed
 [Programs walkthrough](../tools/examples/programs/program_records_walkthrough.rb) authors through each kind.
+The three are library kinds too (API 1.80): `ph_composer.library.copy` copies a library Program with each
+Schedule it names in one Undo step and answers them as `dependencies`, and a Program or Equipment Set copy may
+assign itself as the Model's default (CONTRACTS.md, "Library dependencies"); the
+[Program library walkthrough](../tools/examples/library/programs_walkthrough.rb) copies one with the panel closed.
 `ph_composer.spaces.update_metadata` also writes a Space Floor's own map by a Volume row's
 `floor.reference`, and `ph_composer.model.update_metadata` writes the Model's own maps, read by
 `ph_composer.model.detail` and, for maps larger than a reply, `ph_composer.model.fragment`. Edge rows
@@ -927,6 +932,7 @@ The following public operations have panel-closed walkthroughs.
   other caller passes the id of a location the user approved (see "Locations only the user can
   choose"). `export_preview` with `location` reports what that destination holds.
   [Walkthrough](../tools/examples/library/materials_walkthrough.rb),
+  [Program walkthrough](../tools/examples/library/programs_walkthrough.rb),
   [approved locations](../tools/examples/library/approved_location_walkthrough.rb).
 - **Climate** (`ph_composer.climate.*`). Reads: `site.get`, `design_temperatures.get` and
   `summary.get`, which backs the `summary` snapshot section. Writes: `site.update`, the five site

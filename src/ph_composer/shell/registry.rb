@@ -247,6 +247,10 @@ module PhComposer
         callback = adapter[method]
         adapter[method] = owned_values(callback.dup, LIBRARY_CALLBACK_VALUES).freeze if callback
       end
+      dependencies = adapter.dependencies
+      if dependencies.is_a?(Declarations::LibraryDependencies)
+        adapter.dependencies = owned_values(dependencies.dup, [:kinds]).freeze
+      end
       adapter.freeze
     end
 

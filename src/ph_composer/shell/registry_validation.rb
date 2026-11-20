@@ -846,6 +846,34 @@ module PhComposer
 
             check_library_callback(item, part, adapter[part])
           end
+          check_library_dependencies(item, adapter.dependencies)
+        end
+      end
+
+      # Optional: each wire kind it names has an adapter, in this batch or already published, and is not the
+      # kind's own; `list` and `remap` are callable.
+      def check_library_dependencies(item, dependencies)
+        return if dependencies.nil?
+
+        unless dependencies.is_a?(Declarations::LibraryDependencies)
+          problem(item, "dependencies must be a LibraryDependencies")
+          return
+        end
+        %i[list remap].each do |part|
+          problem(item, "dependencies need callable #{part}") unless dependencies[part].respond_to?(:call)
+        end
+        kinds = dependencies.kinds
+        unless kinds.is_a?(Array) && !kinds.empty? && kinds.uniq.length == kinds.length &&
+               kinds.all? { |kind| wire_kind?(kind) && kind != item.adapter.wire_kind }
+          problem(item, "dependency kinds must be unique wire identifiers other than its own")
+          return
+        end
+        known = (@live.library_kinds.values + @staging.declared_library_kinds).filter_map do |declared|
+          declared.adapter.wire_kind if declared.adapter.is_a?(Declarations::LibraryAdapter)
+        end
+        (kinds - known).each do |kind|
+          add("registration.missing_dependency", item.owner, item.name,
+              "#{item.name} depends on wire kind #{kind}, which no library kind declares.", kind)
         end
       end
 

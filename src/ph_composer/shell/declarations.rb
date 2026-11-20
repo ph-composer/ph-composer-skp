@@ -51,14 +51,15 @@ module PhComposer
       library.adapter_invalid library.assignment_unavailable library.callback_invalid library.catalog_budget
       library.catalog_stale library.catalog_too_large library.catalog_too_many_rows library.connection_changed
       library.connection_required library.credential_store_failed library.credential_store_unavailable
-      library.destination_changed library.destination_invalid library.export_write_failed library.file_malformed
-      library.file_too_large library.file_unreadable library.format_invalid library.kind_unavailable
-      library.lifecycle_unavailable library.load_timeout library.local_choice_required library.model_changed
-      library.provider_ambiguous library.provider_failed library.provider_invalid library.provider_unavailable
-      library.reauthorization_required library.reload_required library.review_required library.row_semantic_invalid
-      library.row_unavailable library.schema_unsupported library.selection_changed library.setup_invalid
-      library.setup_too_large library.setup_unavailable library.setup_unreadable library.source_revision_invalid
-      library.update_destination_invalid library.update_destination_required library.use_expired
+      library.dependency_missing library.destination_changed library.destination_invalid library.export_write_failed
+      library.file_malformed library.file_too_large library.file_unreadable library.format_invalid
+      library.kind_unavailable library.lifecycle_unavailable library.load_timeout library.local_choice_required
+      library.model_changed library.provider_ambiguous library.provider_failed library.provider_invalid
+      library.provider_unavailable library.reauthorization_required library.reload_required library.review_required
+      library.row_semantic_invalid library.row_unavailable library.schema_unsupported library.selection_changed
+      library.setup_invalid library.setup_too_large library.setup_unavailable library.setup_unreadable
+      library.source_revision_invalid library.update_destination_invalid library.update_destination_required
+      library.use_expired
       runtime.asset_refused runtime.boot_timeout runtime.boot_failed runtime.translation_failed runtime.stopped
       runtime.closed runtime.unresponsive runtime.conformance_failed
     ].freeze
@@ -267,10 +268,17 @@ module PhComposer
     # A callback's optional `examples` are params it accepts; discovery publishes the `assign` callback's
     # targets as the kind's assignment examples (Library::KindDescriptor).
     LibraryCallback = Struct.new(:params, :result, :refuses, :handler, :examples, keyword_init: true)
+    # Optional `dependencies` says the kind's records name records of other library kinds, as a Program names
+    # its Schedules (Library::Dependencies). `kinds` lists those wire kinds; `list` is
+    # `->(mapped) { [{ "kind" => wire_kind, "id" => record_id }] }`, each record a row names by its wire record
+    # id in the same library; `remap` is `->(mapped, ids) { mapped }`, the values with each such id replaced
+    # by its local id from `ids` (`{ wire_kind => { record_id => local_id } }`). Copying a row copies or reuses
+    # each one first, in the same proposal.
+    LibraryDependencies = Struct.new(:kinds, :list, :remap, keyword_init: true)
     LibraryAdapter = Struct.new(:wire_kind, :wire_version, :fingerprint_version, :wire_schema,
                                 :mapped_schema, :fingerprint_fields,
                                 :map, :reverse, :fingerprint, :display_label, :local_read, :create, :replace, :assign,
-                                keyword_init: true)
+                                :dependencies, keyword_init: true)
     LibraryKind = Struct.new(:name, :owner, :contract_version, :record_kind, :adapter, keyword_init: true)
 
     # One registration problem. `subject` is the declaration it concerns; `dependency` names what it

@@ -23,6 +23,8 @@ class LibraryAssignmentContractTest < PhComposerTestCase
   L = "ph_composer.library"
   PROVIDER = "synthetic.all"
   COLLECTIONS = %w[frames glazings psi_install_types].freeze
+  # The Programs kinds that assign, each as the Model's default; a Schedule copies without assignment.
+  PROGRAMS = %w[programs equipment_sets].freeze
 
   def setup
     super
@@ -34,8 +36,9 @@ class LibraryAssignmentContractTest < PhComposerTestCase
       W::Products.number_keys(collection).each { |key| row[key] = key.start_with?("psi") ? -0.01 : 0.25 }
       [collection, [row.merge("id" => "public-#{collection}")]]
     end
+    PROGRAMS.each { |kind| rows[kind] = [{ "id" => "public-#{kind}", "name" => "Synthetic #{kind}" }] }
     library = envelope(:kinds => rows.merge("materials" => [library_row])).merge(
-      "kind_schema_versions" => (COLLECTIONS + ["materials"]).to_h { |kind| [kind, 1] }
+      "kind_schema_versions" => (COLLECTIONS + PROGRAMS + ["materials"]).to_h { |kind| [kind, 1] }
     )
     PhComposer::Library::Setup.add_file(:id => PROVIDER, :label => "Synthetic",
                                         :path => write_library(File.join(@directory, "all.json"), library))
@@ -125,7 +128,7 @@ class LibraryAssignmentContractTest < PhComposerTestCase
 
   def test_every_built_in_assignment_is_built_from_the_published_descriptor_alone
     kinds = described_kinds
-    assert(kinds.values.all? { |row| row.dig("assignment", "supported") })
+    assert_equal ["schedules"], kinds.reject { |_kind, row| row.dig("assignment", "supported") }.keys
 
     assembly = fixture_assembly([[100.0, [[600.0, nil]]]])
     Assemblies::Assembly::Schema::KIND.store.write(@model, assembly)
@@ -162,6 +165,19 @@ class LibraryAssignmentContractTest < PhComposerTestCase
       { "mode" => "model_default", "expected_settings" => settings }
     ), :choice => "keep_local"))
     assert_equal default, completed(query("#{W::FEATURE_ID}.settings.get", {})).fetch("default_psi_install_id")
+  end
+
+  # A Program and an Equipment Set each become the Model's default from the published model_default example.
+  def test_programs_kinds_assign_as_the_model_default_from_the_published_descriptor
+    kinds = described_kinds
+    PROGRAMS.each do |kind|
+      settings = completed(query("ph_composer.programs.settings.get", {}))
+      id = assert_assigned(copy(PROVIDER, kind, "public-#{kind}", target(
+        kinds.fetch(kind).fetch("assignment"), { "mode" => "model_default", "expected_settings" => settings }
+      )))
+      field = kind == "programs" ? "default_program_id" : "default_equipment_set_id"
+      assert_equal id, completed(query("ph_composer.programs.settings.get", {})).fetch(field)
+    end
   end
 
   def test_an_invalid_target_leaves_neither_the_copy_nor_the_assignment

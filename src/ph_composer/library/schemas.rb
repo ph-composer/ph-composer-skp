@@ -116,7 +116,13 @@ module PhComposer
       end
 
       def copy_result
-        object({ "resolution" => resolution, "local_id" => NULLABLE_TEXT, "assigned" => BOOLEAN })
+        dependency = object({ "kind" => TEXT, "record_id" => TEXT, "local_id" => TEXT,
+                              "outcome" => { "type" => "string", "enum" => %w[created reused] } })
+        object({ "resolution" => resolution, "local_id" => NULLABLE_TEXT, "assigned" => BOOLEAN,
+                 "dependencies" => list(dependency, :description => "Each record of another kind the row names, " \
+                                                                    "copied or reused in the same Undo step; empty " \
+                                                                    "for keep_local and for a kind without " \
+                                                                    "dependencies.") })
       end
     end
   end

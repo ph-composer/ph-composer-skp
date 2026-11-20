@@ -425,6 +425,15 @@ total 24, each with a fraction of the design flow. An Equipment Set holds honeyb
    a `replacement_id`, which becomes the default; a used Schedule refuses `reference.in_use` unless you name a
    replacement of the same type. `ph_composer.programs.reset_default` with `kind` `program` or `equipment_set`
    restores PH-Composer's definition.
+6. To use a library Program, load both its `programs` and its `schedules` kinds with `ph_composer.library.load`,
+   then copy the Program as "Library records" below says. The copy brings every Schedule the Program names in
+   the same Undo step, or reuses the local copy of one from the same library, and lists each under
+   `dependencies` with its `local_id`. Send `assignment` `{"mode": "model_default", "expected_settings": ...}`,
+   with the defaults `settings.get` answered, to make the copy the Model's default in that step; an Equipment Set
+   copies and assigns the same way. A Schedule missing from the loaded catalog refuses `library.dependency_missing`
+   and writes nothing; its `detail` names the kind and record id, and `catalog_state` `unloaded` means load that
+   kind first. A local Schedule with the same name and other values refuses `library.review_required`: copy that
+   Schedule on its own first, keeping or replacing the local one, then copy the Program again.
 
 ### Spaces from loose Faces
 
@@ -817,7 +826,8 @@ with the ids and the values you read, as the copy's `assignment`; where a target
 shape, its `description` says which keys each takes. Preview the copy, then invoke it with the
 `proposal_digest`: the copy and the assignment are one Undo step, and a target that is wrong or
 changed since you read it refuses both. A kind whose `assignment` says it is not supported is copied
-without one.
+without one. A kind whose `describe` names `dependencies` refers to records of those kinds: load them too,
+and the copy brings each one with it (see "Programs, Schedules and Equipment Sets").
 
 A catalog can be larger than a reply. Pass `compact` true to `ph_composer.library.load`,
 `ph_composer.library.catalog` and `ph_composer.library.in_file`:

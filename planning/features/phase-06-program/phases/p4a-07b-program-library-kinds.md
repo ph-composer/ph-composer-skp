@@ -1,7 +1,7 @@
 # P4a-07b: Program, Schedule and Equipment Set library kinds
 
 DATE: 2026-11-20
-STATUS: Scoped (split from P4a-07 on 2026-11-20). Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
+STATUS: Implemented on branch `feature/phase-06-program-p4a-07b` (2026-11-20); PG07b's host rows owed. Split from P4a-07 and authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
@@ -51,3 +51,26 @@ PG07b in [ACCEPTANCE](../ACCEPTANCE.md).
 ## Done when
 
 PG07b passes and the library file format and contracts are updated.
+
+## Decisions in implementation (2026-11-20)
+
+Each recorded in `context/CONTRACTS.md`, "Library dependencies" and "Programs, Schedules and Equipment Sets".
+
+- **Declaration.** `Declarations::LibraryDependencies` (`kinds`, `list`, `remap`) on the adapter, validated at
+  registration (other registered wire kinds only) and named by `describe`. A wire row names a dependency by its
+  record id in the same library; the local copy names the local record.
+- **Resolution in local terms.** The incoming values are compared with each dependency already copied from the same
+  source named by its local copy, so a reused Program reads `reuse`; the fingerprint stays the row's own.
+- **Which catalog.** A dependency is read from the current loaded catalog of its kind, same provider and library.
+  Absent, or the kind never loaded, refuses `library.dependency_missing` with `catalog_state`. A same-named local
+  record of other values refuses `library.review_required` naming it: the user copies that record on its own first.
+- **Snapshots.** A Program's source snapshot keeps the library's Schedule ids and an Equipment Set's keeps id-less
+  devices, so the Programs kinds declare their library form for the snapshot (`KindFields.with`).
+- **Equipment Set replacement.** Keeps each local device whose place the incoming device of the same type takes,
+  with its id and `user_data`, and refuses `validation.failed` rather than drop a device holding `user_data`.
+- **Assignment.** `{"mode": "model_default", "expected_settings"}` for Programs and Equipment Sets, the Psi-Install
+  Type default's shape; Schedules copy without assignment.
+- **Projected engine.** `ProjectedEngine#find` and `resolve_reference` accept the change set they read through, so
+  the Programs operations, which pass their proposal, run inside a library callback unchanged.
+- **Walkthrough.** A sibling of the Materials walkthrough, `tools/examples/library/programs_walkthrough.rb` with
+  `programs.json`, rather than extending the Materials one, whose fixture other tests pin to four kinds.

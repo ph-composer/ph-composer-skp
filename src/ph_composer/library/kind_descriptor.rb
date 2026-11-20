@@ -6,7 +6,8 @@ module PhComposer
     # "Discover before acting"), read from its declaration alone, so an outside kind's adapter is
     # described with no change here or in any transport. `assignment` is the target shape
     # `ph_composer.library.copy` takes as its `assignment` param, with the adapter's own examples; a kind
-    # without an assign callback says so rather than publishing an empty shape.
+    # without an assign callback says so rather than publishing an empty shape. `dependencies` names the kinds
+    # whose records a row may refer to (Library::Dependencies).
     module KindDescriptor
       module_function
 
@@ -22,8 +23,19 @@ module PhComposer
         { "kind" => "library_kind" }.merge(summary(declaration)).merge(
           "contract_version" => declaration.contract_version, "fingerprint_version" => adapter.fingerprint_version,
           "wire_schema" => adapter.wire_schema, "copy" => "#{FEATURE_ID}.copy",
-          "assignment" => assignment(adapter.assign)
+          "assignment" => assignment(adapter.assign), "dependencies" => dependencies(adapter.dependencies)
         )
+      end
+
+      def dependencies(declared)
+        unless declared
+          return { "kinds" => [], "description" => "Each row copies alone." }
+        end
+
+        { "kinds" => declared.kinds.dup,
+          "description" => "A row names records of these kinds by record id in the same library. Load those " \
+                           "kinds too: a copy copies each one first, or reuses its local copy from the same " \
+                           "source, and refuses library.dependency_missing when one is not in the loaded catalog." }
       end
 
       def assignment(callback)
