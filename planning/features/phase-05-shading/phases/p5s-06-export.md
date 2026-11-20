@@ -1,7 +1,12 @@
 # P5s-06: the Shades export section
 
 DATE: 2026-11-19
-STATUS: Scoped. Authorized 2026-11-19 with every Shading stage ([STATUS](../STATUS.md#authorization)).
+STATUS: Implemented on branch `feat/shading-p5s-06`, 2026-11-19 ([STATUS](../STATUS.md)). Authorized 2026-11-19 with every Shading stage ([STATUS](../STATUS.md#authorization)).
+
+Departures, recorded in `context/CONTRACTS.md`, "Translation sections and artifacts": the record key is `id`,
+which the coordinator requires, not `identifier`; it carries no `is_detached`, which Python sets; preflight rows
+name their path in the message and carry no `locate`, since Shading has no locate command; a component name that
+reads as a local file path counts as none, so a Group's name cannot block an export.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 

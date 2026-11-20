@@ -676,9 +676,9 @@
       "sha256": "67985dfd66315fab3e7a75cbd5f4dfe323cfcbf8efb123ab13f46c6598776d06"
     },
     "python/ph_composer_translation/composition.py": {
-      "bytes": 1170,
+      "bytes": 1231,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "c1e30840787ee1a437d0a59ca6f8e03bb0e4f1f48372b6dd56e7c9eb1a6dc9cf"
+      "sha256": "1f76047104d1113702bbfaae310f3024d35e02224fef5e07a77c3a7a21b20920"
     },
     "python/ph_composer_translation/conformance.py": {
       "bytes": 2658,
@@ -699,6 +699,11 @@
       "bytes": 8013,
       "mime": "text/plain; charset=utf-8",
       "sha256": "6a1149dccb38a1eac635df6c736bdbb20eee16bb268446efe8330cae9769b5c0"
+    },
+    "python/ph_composer_translation/contract/shade_records.py": {
+      "bytes": 1522,
+      "mime": "text/plain; charset=utf-8",
+      "sha256": "90df72f3de39af59d3c64d15c85d25eb82940fa7e25778ecae5797f290755848"
     },
     "python/ph_composer_translation/contract/space_records.py": {
       "bytes": 5956,
@@ -754,6 +759,11 @@
       "bytes": 7039,
       "mime": "text/plain; charset=utf-8",
       "sha256": "8e5908a28c57dcda7e4781e073f504aacd6b80d0c300a5f7ff4f58b96cd01e4e"
+    },
+    "python/ph_composer_translation/shade_sections.py": {
+      "bytes": 6403,
+      "mime": "text/plain; charset=utf-8",
+      "sha256": "afda321b2868db06eb5269dec9fddd7000f1894b70a6b056d6cb9e7a363f2a75"
     },
     "python/ph_composer_translation/site_sections.py": {
       "bytes": 14044,
@@ -985,6 +995,7 @@
     "python/ph_composer_translation/constructions.py",
     "python/ph_composer_translation/contract/__init__.py",
     "python/ph_composer_translation/contract/assembly_records.py",
+    "python/ph_composer_translation/contract/shade_records.py",
     "python/ph_composer_translation/contract/space_records.py",
     "python/ph_composer_translation/contract/thermal_bridge_records.py",
     "python/ph_composer_translation/contract/window_records.py",
@@ -996,6 +1007,7 @@
     "python/ph_composer_translation/model_sections.py",
     "python/ph_composer_translation/result.py",
     "python/ph_composer_translation/sections.py",
+    "python/ph_composer_translation/shade_sections.py",
     "python/ph_composer_translation/site_sections.py",
     "python/ph_composer_translation/space_sections.py",
     "python/ph_composer_translation/stack.py",

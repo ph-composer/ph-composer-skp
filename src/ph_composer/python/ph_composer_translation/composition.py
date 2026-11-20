@@ -14,6 +14,7 @@ from .material_sources import MaterialSourcesSection
 from .model_metadata import ModelMetadataSection
 from .model_sections import FaceSection, ZoneSection
 from .sections import Section
+from .shade_sections import ShadeSection
 from .site_sections import SiteSection
 from .space_sections import SpaceSection
 from .thermal_bridge_sections import ThermalBridgeSection
@@ -30,5 +31,6 @@ SECTIONS: tuple[Section[Any, Any], ...] = (
     ModelMetadataSection(),
     SpaceSection(),
     ThermalBridgeSection(),
+    ShadeSection(),
 )
 EXPORTERS: tuple[Exporter, ...] = ()

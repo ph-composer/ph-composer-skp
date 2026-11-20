@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 70
+    MINOR = 71
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -392,7 +392,16 @@ module PhComposer
                     "records in one Undo step, refusing face.surface_paired and face.aperture_host. " \
                     "ph_composer.shading.export_preflight is new and notes shading.zone_inside and " \
                     "shading.classified_inside. shading.assign refuses a Group inside a Zone that holds classified " \
-                    "Faces with shading.face_classified; a classified Face leaves the envelope only by its own mark." }
+                    "Faces with shading.face_classified; a classified Face leaves the envelope only by its own mark." },
+      { "minor" => 71, "date" => "2026-11-19",
+        "change" => "Export writes each Shading Face as an orphaned honeybee Shade in the new optional section " \
+                    "ph_composer.shading.export.shades, named for its shading component, with the section's result " \
+                    "fields shading_components, shade_count and area_m2 and a Shading report section. " \
+                    "ph_composer.shading.export_preflight now runs with every export and also lists the Faces export " \
+                    "leaves out (shading.geometry_invalid, target.ambiguous), unreadable marks (record.unreadable) " \
+                    "and a mark's extension data the left-out rules refuse; every row names its path and carries the " \
+                    "object id the export's note uses. A shading component name that reads as a local file path " \
+                    "counts as no name." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

@@ -1,0 +1,877 @@
+{
+  "run_id": "run-shading",
+  "schema_version": 1,
+  "sections": {
+    "ph_composer.assemblies.export.constructions": {
+      "records": [
+        {
+          "id": "asm_Single000001",
+          "layers": [
+            {
+              "id": "lyr_000000000001",
+              "segments": [
+                {
+                  "id": "seg_000000000010",
+                  "material_id": "mat_Wool00000001",
+                  "steel_stud_spacing_mm": null,
+                  "width_mm": 1000
+                }
+              ],
+              "thickness_mm": 100
+            },
+            {
+              "id": "lyr_000000000002",
+              "segments": [
+                {
+                  "id": "seg_000000000020",
+                  "material_id": "mat_Wool00000001",
+                  "steel_stud_spacing_mm": null,
+                  "width_mm": 1000
+                }
+              ],
+              "thickness_mm": 50
+            }
+          ],
+          "materials": [
+            {
+              "category": "insulation",
+              "color": "#88aa44",
+              "conductivity_w_mk": 0.04,
+              "density_kg_m3": 40,
+              "emissivity": 0.9,
+              "id": "mat_Wool00000001",
+              "name": "Synthetic wool",
+              "specific_heat_j_kgk": 1400
+            }
+          ],
+          "name": "Two wool thicknesses",
+          "orientation": "first_layer_outside"
+        }
+      ],
+      "version": 1
+    },
+    "ph_composer.assemblies.export.material_sources": {
+      "records": [],
+      "version": 1
+    },
+    "ph_composer.climate.export.site": {
+      "records": [
+        {
+          "climate": null,
+          "climate_left_out": null,
+          "id": "Site",
+          "location": null,
+          "provenance": null,
+          "report": {
+            "climate": null,
+            "design_temperature_source": null,
+            "design_temperatures": {
+              "cooling_1_c": null,
+              "heating_99_c": null
+            },
+            "edited_cells": [],
+            "limit_check": null,
+            "missing_values": 0
+          }
+        }
+      ],
+      "version": 1
+    },
+    "ph_composer.model.export.model": {
+      "records": [],
+      "version": 1
+    },
+    "ph_composer.shading.export.shades": {
+      "records": [
+        {
+          "boundary": [
+            [
+              20.0,
+              0.0,
+              6.0
+            ],
+            [
+              25.0,
+              0.0,
+              6.0
+            ],
+            [
+              25.0,
+              5.0,
+              6.0
+            ],
+            [
+              20.0,
+              5.0,
+              6.0
+            ]
+          ],
+          "display_name": "Neighbour",
+          "holes": [],
+          "id": "shd_0b13adf3c0b8"
+        },
+        {
+          "boundary": [
+            [
+              0.0,
+              -1.0,
+              0.0
+            ],
+            [
+              0.0,
+              -1.0,
+              2.0
+            ],
+            [
+              0.0,
+              0.0,
+              2.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "display_name": "Fin",
+          "holes": [],
+          "id": "shd_14d81aca399a"
+        },
+        {
+          "boundary": [
+            [
+              0.0,
+              -2.0,
+              1.5
+            ],
+            [
+              1.0,
+              -2.0,
+              1.5
+            ],
+            [
+              1.0,
+              -2.0,
+              1.7
+            ],
+            [
+              0.0,
+              -2.0,
+              1.7
+            ]
+          ],
+          "display_name": "Louvre",
+          "holes": [],
+          "id": "shd_18891b19938d"
+        },
+        {
+          "boundary": [
+            [
+              25.0,
+              0.0,
+              0.0
+            ],
+            [
+              25.0,
+              5.0,
+              0.0
+            ],
+            [
+              25.0,
+              5.0,
+              6.0
+            ],
+            [
+              25.0,
+              0.0,
+              6.0
+            ]
+          ],
+          "display_name": "Neighbour",
+          "holes": [],
+          "id": "shd_2aab4f6ba59a"
+        },
+        {
+          "boundary": [
+            [
+              0.0,
+              -2.0,
+              1.0
+            ],
+            [
+              1.0,
+              -2.0,
+              1.0
+            ],
+            [
+              1.0,
+              -2.0,
+              1.2
+            ],
+            [
+              0.0,
+              -2.0,
+              1.2
+            ]
+          ],
+          "display_name": "Louvre",
+          "holes": [],
+          "id": "shd_2f900febda97"
+        },
+        {
+          "boundary": [
+            [
+              12.0,
+              0.0,
+              0.0
+            ],
+            [
+              13.999999999999998,
+              0.0,
+              0.0
+            ],
+            [
+              13.999999999999998,
+              2.0,
+              0.0
+            ],
+            [
+              12.0,
+              2.0,
+              0.0
+            ]
+          ],
+          "display_name": "Shading",
+          "holes": [],
+          "id": "shd_373e9f02d43e"
+        },
+        {
+          "boundary": [
+            [
+              20.0,
+              5.0,
+              0.0
+            ],
+            [
+              20.0,
+              5.0,
+              6.0
+            ],
+            [
+              25.0,
+              5.0,
+              6.0
+            ],
+            [
+              25.0,
+              5.0,
+              0.0
+            ]
+          ],
+          "display_name": "Neighbour",
+          "holes": [],
+          "id": "shd_3f05333c2d98"
+        },
+        {
+          "boundary": [
+            [
+              4.0,
+              -2.0,
+              1.5
+            ],
+            [
+              5.0,
+              -2.0,
+              1.5
+            ],
+            [
+              5.0,
+              -2.0,
+              1.7
+            ],
+            [
+              4.0,
+              -2.0,
+              1.7
+            ]
+          ],
+          "display_name": "Louvre",
+          "holes": [],
+          "id": "shd_45617be91f33"
+        },
+        {
+          "boundary": [
+            [
+              5.0,
+              -1.0,
+              0.0
+            ],
+            [
+              5.0,
+              -1.0,
+              2.0
+            ],
+            [
+              5.0,
+              0.0,
+              2.0
+            ],
+            [
+              5.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "display_name": "Fin",
+          "holes": [],
+          "id": "shd_48bdfa334f7f"
+        },
+        {
+          "boundary": [
+            [
+              20.0,
+              0.0,
+              0.0
+            ],
+            [
+              25.0,
+              0.0,
+              0.0
+            ],
+            [
+              25.0,
+              0.0,
+              6.0
+            ],
+            [
+              20.0,
+              0.0,
+              6.0
+            ]
+          ],
+          "display_name": "Neighbour",
+          "holes": [],
+          "id": "shd_4ac971d96a5a"
+        },
+        {
+          "boundary": [
+            [
+              26.0,
+              0.0,
+              0.0
+            ],
+            [
+              27.0,
+              0.0,
+              0.0
+            ],
+            [
+              27.0,
+              0.0,
+              1.0
+            ],
+            [
+              26.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "display_name": "Neighbour",
+          "holes": [],
+          "id": "shd_5914d2785acc"
+        },
+        {
+          "boundary": [
+            [
+              2.0,
+              -2.0,
+              1.5
+            ],
+            [
+              3.0,
+              -2.0,
+              1.5
+            ],
+            [
+              3.0,
+              -2.0,
+              1.7
+            ],
+            [
+              2.0,
+              -2.0,
+              1.7
+            ]
+          ],
+          "display_name": "Louvre",
+          "holes": [],
+          "id": "shd_5d0c7a5a21a3"
+        },
+        {
+          "boundary": [
+            [
+              0.0,
+              -1.0,
+              2.5
+            ],
+            [
+              5.0,
+              -1.0,
+              2.5
+            ],
+            [
+              5.0,
+              0.0,
+              2.5
+            ],
+            [
+              0.0,
+              0.0,
+              2.5
+            ]
+          ],
+          "display_name": "Zone A Shading",
+          "holes": [],
+          "id": "shd_60ab2b355be9"
+        },
+        {
+          "boundary": [
+            [
+              20.0,
+              0.0,
+              0.0
+            ],
+            [
+              20.0,
+              0.0,
+              6.0
+            ],
+            [
+              20.0,
+              5.0,
+              6.0
+            ],
+            [
+              20.0,
+              5.0,
+              0.0
+            ]
+          ],
+          "display_name": "Neighbour",
+          "holes": [],
+          "id": "shd_682fe99705bc"
+        },
+        {
+          "boundary": [
+            [
+              29.999999999999996,
+              0.0,
+              0.0
+            ],
+            [
+              36.0,
+              0.0,
+              0.0
+            ],
+            [
+              36.0,
+              6.0,
+              0.0
+            ],
+            [
+              29.999999999999996,
+              6.0,
+              0.0
+            ]
+          ],
+          "display_name": "Shading",
+          "holes": [
+            [
+              [
+                32.0,
+                2.0,
+                0.0
+              ],
+              [
+                32.0,
+                4.0,
+                0.0
+              ],
+              [
+                34.0,
+                4.0,
+                0.0
+              ],
+              [
+                34.0,
+                2.0,
+                0.0
+              ]
+            ]
+          ],
+          "id": "shd_a7c7b3cc2c1a"
+        },
+        {
+          "boundary": [
+            [
+              2.0,
+              -2.0,
+              1.0
+            ],
+            [
+              3.0,
+              -2.0,
+              1.0
+            ],
+            [
+              3.0,
+              -2.0,
+              1.2
+            ],
+            [
+              2.0,
+              -2.0,
+              1.2
+            ]
+          ],
+          "display_name": "Louvre",
+          "holes": [],
+          "id": "shd_c0d9438a85cd"
+        },
+        {
+          "boundary": [
+            [
+              4.0,
+              -2.0,
+              1.0
+            ],
+            [
+              5.0,
+              -2.0,
+              1.0
+            ],
+            [
+              5.0,
+              -2.0,
+              1.2
+            ],
+            [
+              4.0,
+              -2.0,
+              1.2
+            ]
+          ],
+          "display_name": "Louvre",
+          "holes": [],
+          "id": "shd_c9d5da0d23fa"
+        },
+        {
+          "boundary": [
+            [
+              10.0,
+              0.0,
+              0.0
+            ],
+            [
+              12.0,
+              0.0,
+              0.0
+            ],
+            [
+              12.0,
+              2.0,
+              0.0
+            ],
+            [
+              10.0,
+              2.0,
+              0.0
+            ]
+          ],
+          "display_name": "Shading",
+          "holes": [],
+          "id": "shd_e8ce31014a2c"
+        }
+      ],
+      "version": 1
+    },
+    "ph_composer.spaces.export.spaces": {
+      "records": [],
+      "version": 1
+    },
+    "ph_composer.thermal_bridges.export.thermal_bridges": {
+      "records": [],
+      "version": 1
+    },
+    "ph_composer.zones.export.zones": {
+      "records": [
+        {
+          "building_segment": "Main_Building",
+          "face_ids": [
+            "fac_A00000000001",
+            "fac_A00000000002",
+            "fac_A00000000003",
+            "fac_A00000000004",
+            "fac_A00000000005",
+            "fac_A00000000006"
+          ],
+          "id": "zon_AAAAAAAAAAAA",
+          "level": "L1",
+          "name": "Zone A"
+        }
+      ],
+      "version": 2
+    },
+    "ph_composer.zones.faces.export.faces": {
+      "records": [
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Ground",
+          "face_type": "Floor",
+          "geometry": {
+            "area_m2": 25.0,
+            "digest": "sha256:a0fbb3770226ff4f7c7649c5f06631abc96e9786d5e317b4d90d92046dd2963f",
+            "loops_m": [
+              [
+                [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  5.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  5.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  0.0,
+                  0.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              0.0,
+              -1.0
+            ],
+            "plane_offset_m": 0.0
+          },
+          "id": "fac_A00000000001",
+          "zone_id": "zon_AAAAAAAAAAAA"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Outdoors",
+          "face_type": "RoofCeiling",
+          "geometry": {
+            "area_m2": 25.0,
+            "digest": "sha256:d413a0f3e855dae776dbad4ee1bed6f44baf9ebdc005fe11c73a574a09965a7f",
+            "loops_m": [
+              [
+                [
+                  0.0,
+                  0.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  0.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  5.0,
+                  3.0
+                ],
+                [
+                  0.0,
+                  5.0,
+                  3.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "plane_offset_m": 3.0
+          },
+          "id": "fac_A00000000002",
+          "zone_id": "zon_AAAAAAAAAAAA"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Outdoors",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 15.0,
+            "digest": "sha256:827401fea6c3a11561cc96ac00b733caca1bd07579f19ee5d253c6fb0c63d8b2",
+            "loops_m": [
+              [
+                [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  3.0
+                ],
+                [
+                  0.0,
+                  5.0,
+                  3.0
+                ],
+                [
+                  0.0,
+                  5.0,
+                  0.0
+                ]
+              ]
+            ],
+            "normal": [
+              -1.0,
+              0.0,
+              0.0
+            ],
+            "plane_offset_m": 0.0
+          },
+          "id": "fac_A00000000003",
+          "zone_id": "zon_AAAAAAAAAAAA"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Outdoors",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 15.0,
+            "digest": "sha256:d0c17668ec16e6f5eee3a143a96456c8a782111315670c05735489dd1443e37c",
+            "loops_m": [
+              [
+                [
+                  5.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  5.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  5.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  0.0,
+                  3.0
+                ]
+              ]
+            ],
+            "normal": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "plane_offset_m": 5.0
+          },
+          "id": "fac_A00000000004",
+          "zone_id": "zon_AAAAAAAAAAAA"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Outdoors",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 15.0,
+            "digest": "sha256:05e7494817c073be6271865c11274c2eb18cdb5290f3548d0784c45a1a03681a",
+            "loops_m": [
+              [
+                [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  0.0,
+                  3.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  3.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              -1.0,
+              0.0
+            ],
+            "plane_offset_m": 0.0
+          },
+          "id": "fac_A00000000005",
+          "zone_id": "zon_AAAAAAAAAAAA"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Outdoors",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 15.0,
+            "digest": "sha256:13e43d5e3b7bc2d555f6fa9cb534f86bd7cc7ea57fa8151699b09f6470276413",
+            "loops_m": [
+              [
+                [
+                  0.0,
+                  5.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  5.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  5.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  5.0,
+                  0.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              1.0,
+              0.0
+            ],
+            "plane_offset_m": 5.0
+          },
+          "id": "fac_A00000000006",
+          "zone_id": "zon_AAAAAAAAAAAA"
+        }
+      ],
+      "version": 1
+    }
+  }
+}

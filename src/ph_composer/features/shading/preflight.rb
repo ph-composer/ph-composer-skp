@@ -2,12 +2,20 @@
 
 module PhComposer
   module Shading
-    # `shading.export_preflight`: what the mark leaves as it is, as non-blocking notes. A marked Group or
-    # component that is a Zone or holds one, holds another feature's object, or holds a cutting component such
-    # as a Window Unit, arises after assign refused it
-    # (Make Zone inside a marked Group, a paste): the mark does not reach through the Zone or the object
-    # (context/CONTRACTS.md, "The shading mark"), so its Faces stay what they are and this names the container.
-    # Reads only.
+    # `shading.export_preflight`: what the Shades section will leave out and what the mark leaves as it is, read
+    # live, one walk of the Model as `shading.list` reads it. Rows about the section's records are the notes it
+    # writes, with the same code and object id (ExportSection.identifier of the path), so the export lists each
+    # once:
+    #
+    # - a Shading Face that cannot become a Shade (`shading.geometry_invalid`), or two that share a path
+    #   (`target.ambiguous`);
+    # - a mark whose text cannot be read (`record.unreadable`), which still marks its entity;
+    # - a mark's extension_data the left-out rules refuse, blocking as for every entity record.
+    #
+    # A marked Group or component that is a Zone or holds one, holds another feature's object, or holds a cutting
+    # component such as a Window Unit, arises after assign refused it (Make Zone inside a marked Group, a paste):
+    # the mark does not reach through it (context/CONTRACTS.md, "The shading mark"), so its Faces stay what they
+    # are and `shading.zone_inside` names the container. Each row names its path in its message. Reads only.
     module Preflight
       SECTION = "#{FEATURE_ID}.export.shades"
 
@@ -16,17 +24,69 @@ module PhComposer
       def call(request)
         zones = Targets.zone_names(request.model)
         findings = []
+        faces = Hash.new { |hash, path| hash[path] = [] }
+        marks = []
         Inventory.walk(request.model.entities, [], [], Geom::Transformation.new,
-                       zones) do |entity, path, _containers, _transform, cut|
-          next if cut || entity.is_a?(Sketchup::Face) || !Mark.marked?(entity)
+                       zones) do |entity, path, containers, transform, cut|
+          # The snapshot keeps a Group or component inside a cutting component, and its mark, but no Face there.
+          marks << [entity, path] if Mark.marked?(entity) && !(cut && entity.is_a?(Sketchup::Face))
+          next if cut
 
-          what = held(entity, path, zones)
-          findings << zone_inside(entity, path, what) if what
-          reaches = !what && Targets.in_zone?(path, zones) && !Targets.cutting?(entity) && !Targets.owned?(entity)
-          count = reaches ? Targets.classified_within(Targets.contents(entity).to_a) : 0
-          findings << classified_inside(entity, path, count) if count.positive?
+          if entity.is_a?(Sketchup::Face)
+            faces[path] << [entity, transform] if Inventory.shading_face?(entity, containers, cut)
+            next
+          end
+          next unless Mark.marked?(entity)
+
+          findings.concat(container_findings(entity, path, zones))
         end
+        findings.concat(face_findings(faces))
+        findings.concat(mark_findings(request, marks))
         { "findings" => findings, "repairs" => [] }
+      end
+
+      def container_findings(entity, path, zones)
+        what = held(entity, path, zones)
+        return [zone_inside(entity, path, what)] if what
+
+        reaches = Targets.in_zone?(path, zones) && !Targets.cutting?(entity) && !Targets.owned?(entity)
+        count = reaches ? Targets.classified_within(Targets.contents(entity).to_a) : 0
+        count.positive? ? [classified_inside(entity, path, count)] : []
+      end
+
+      # The section's left-out notes, read live: two Shading Faces at one path, or one whose geometry cannot
+      # become a Shade. A Face whose transform is singular fails the whole export's snapshot, so it blocks.
+      def face_findings(faces)
+        faces.flat_map do |path, occurrences|
+          next [row("target.ambiguous", path, ExportSection.ambiguous(path))] if occurrences.length > 1
+
+          face, transform = occurrences.first
+          problem = ExportSection.geometry_problem(path, FaceCapture.call(face, transform))
+          problem ? [row(problem.first, path, problem.last)] : []
+        rescue CodedError => error
+          raise unless error.code == "geometry.invalid"
+
+          [row(error.code, path, "The Shading Face at path #{path.inspect}: #{error.message}", :blocks => true)]
+        end
+      end
+
+      # Each mark the export reads, by occurrence: unreadable text as a note, and the metadata rules on a readable
+      # one's record, as the section's entity record reads it.
+      def mark_findings(request, marks)
+        records = []
+        rows = marks.filter_map do |entity, path|
+          record = ExportSection.parse(entity.get_attribute(Mark::STORE.dictionary, Mark::STORE.key))
+          next row("record.unreadable", path, ExportSection.unreadable(path)) unless record
+
+          records << record.merge("id" => ExportSection.identifier(path))
+          nil
+        end
+        rows + Export::MetadataCheck.findings(request, records, :section => SECTION)
+      end
+
+      def row(code, path, message, blocks: false)
+        { "code" => code, "section" => SECTION, "object_id" => ExportSection.identifier(path), "message" => message,
+          "blocks_export" => blocks }
       end
 
       # What the mark does not reach in a marked container, in words, or nil when it reaches everything.
@@ -48,10 +108,10 @@ module PhComposer
 
       # A Face classified after the Group above it was marked stays envelope: classification wins.
       def classified_inside(entity, path, count)
-        { "code" => "shading.classified_inside", "section" => SECTION, "object_id" => nil, "blocks_export" => false,
-          "message" => "#{label(entity)} at path #{path.inspect} carries the shading mark and holds #{count} " \
-                       "classified Zone Face(s). They stay part of the Zone's envelope and are not shading; clear " \
-                       "their classification to make them shading." }
+        row("shading.classified_inside", path,
+            "#{label(entity)} at path #{path.inspect} carries the shading mark and holds #{count} classified Zone " \
+            "Face(s). They stay part of the Zone's envelope and are not shading; clear their classification to " \
+            "make them shading.")
       end
 
       def label(entity)
@@ -60,9 +120,9 @@ module PhComposer
       end
 
       def zone_inside(entity, path, what)
-        { "code" => "shading.zone_inside", "section" => SECTION, "object_id" => nil, "blocks_export" => false,
-          "message" => "#{label(entity)} at path #{path.inspect} carries the shading mark and is or holds #{what}. " \
-                       "The mark does not reach it, so its Faces stay as they are and are not shading." }
+        row("shading.zone_inside", path,
+            "#{label(entity)} at path #{path.inspect} carries the shading mark and is or holds #{what}. The mark " \
+            "does not reach it, so its Faces stay as they are and are not shading.")
       end
     end
   end

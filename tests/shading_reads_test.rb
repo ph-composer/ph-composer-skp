@@ -20,6 +20,10 @@ class ShadingReadsTest < PhComposerTestCase
       "a Zone as the nearest" => [[container(:name => "Site"), container(:zone_name => "Zone A")], "Zone A Shading"],
       "a named Group inside a Zone" => [[container(:zone_name => "Zone A"), container(:name => "Fin")], "Fin"],
       "no named container" => [[container, container], "Shading"],
+      "a path-like name is no name" => [[container(:name => "Site"), container(:name => "/site/north")], "Site"],
+      "a path after a space is no name" => [[container(:name => " /x")], "Shading"],
+      "a path-like Zone name stops the walk" => [[container(:name => "Site"), container(:zone_name => "C:\\Zones")],
+                                                 "Shading"],
       "the Model root" => [[], "Shading"]
     }
     cases.each { |label, (containers, name)| assert_equal name, READS.component_name(containers), label }
@@ -42,5 +46,15 @@ class ShadingReadsTest < PhComposerTestCase
     refute READS.shading_face?(:marked => false, :owned => false, :containers => [container])
     refute READS.shading_face?(:marked => true, :owned => true, :containers => marked)
     refute READS.shading_face?(:marked => true, :owned => false, :containers => [container(:owned => true)])
+  end
+
+  # D5s-11a: classification wins over an inherited mark inside a Zone, never over the Face's own mark.
+  def test_a_classified_zone_face_is_exported_only_by_its_own_mark
+    zone = container(:zone_name => "Zone A")
+    marked = container(:marked => true, :path => [1, 2])
+    assert READS.exported?(:marked => false, :owned => false, :containers => [zone, marked], :classified => false)
+    refute READS.exported?(:marked => false, :owned => false, :containers => [zone, marked], :classified => true)
+    assert READS.exported?(:marked => true, :owned => false, :containers => [zone], :classified => true)
+    assert READS.exported?(:marked => false, :owned => false, :containers => [marked], :classified => true)
   end
 end

@@ -16,6 +16,7 @@ from ph_composer_translation.material_sources import MaterialSourcesSection
 from ph_composer_translation.model_metadata import ModelMetadataSection
 from ph_composer_translation.model_sections import FaceSection, ZoneSection
 from ph_composer_translation.sections import Inputs
+from ph_composer_translation.shade_sections import ShadeSection
 from ph_composer_translation.site_sections import SiteSection
 from ph_composer_translation.space_sections import SpaceSection
 from ph_composer_translation.thermal_bridge_sections import ThermalBridgeSection
@@ -129,6 +130,7 @@ def test_model_sections_build_rooms_then_resolve_surface_pairs(monkeypatch: pyte
             ModelMetadataSection(),
             SpaceSection(),
             ThermalBridgeSection(),
+            ShadeSection(),
         ),
     ).to_document()
 
@@ -159,6 +161,7 @@ def test_invalid_face_vocabulary_becomes_a_record_error(monkeypatch: pytest.Monk
             ModelMetadataSection(),
             SpaceSection(),
             ThermalBridgeSection(),
+            ShadeSection(),
         ),
     ).to_document()
 
@@ -195,6 +198,7 @@ def test_surface_requires_an_available_reciprocal_counterpart(monkeypatch: pytes
             ModelMetadataSection(),
             SpaceSection(),
             ThermalBridgeSection(),
+            ShadeSection(),
         ),
     ).to_document()
 
@@ -259,6 +263,7 @@ def test_explicit_and_reciprocal_omissions_preserve_inputs_and_publish_remaining
             ModelMetadataSection(),
             SpaceSection(),
             ThermalBridgeSection(),
+            ShadeSection(),
         ),
     )
     result = cast(dict[str, Any], translation.to_document())
@@ -306,6 +311,7 @@ def test_retired_face_with_no_boundary_is_a_nonblocking_reported_omission(monkey
                 ModelMetadataSection(),
                 SpaceSection(),
                 ThermalBridgeSection(),
+                ShadeSection(),
             ),
         ).to_document(),
     )
@@ -360,6 +366,7 @@ def test_malformed_omission_metadata_remains_a_blocker(
                 ModelMetadataSection(),
                 SpaceSection(),
                 ThermalBridgeSection(),
+                ShadeSection(),
             ),
         ).to_document(),
     )
@@ -388,6 +395,7 @@ def test_missing_boundary_without_explicit_omission_remains_a_blocker(monkeypatc
                 ModelMetadataSection(),
                 SpaceSection(),
                 ThermalBridgeSection(),
+                ShadeSection(),
             ),
         ).to_document(),
     )
@@ -418,6 +426,7 @@ def test_omitted_face_invalid_classification_still_blocks(monkeypatch: pytest.Mo
                 ModelMetadataSection(),
                 SpaceSection(),
                 ThermalBridgeSection(),
+                ShadeSection(),
             ),
         ).to_document(),
     )
