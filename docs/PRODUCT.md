@@ -152,8 +152,13 @@ first.
 
 1. Select a Group or loose geometry. Right-click and choose **PH-Composer > Make Zone**. Each
    Zone becomes one Honeybee Room.
-2. Set the Zone's Building-Segment and optional Level. Use the column menus in **Zones > Geometry**
-   to manage the choices and their colours.
+2. Place each Zone in a Building Segment. Every Zone view groups the Zones under a heading row for
+   each Segment, with Zones in no Segment last. To move Zones, check their rows and choose a
+   Segment, **New Building Segment** or **No Building Segment** under **Building Segment** in the
+   selection bar. The **+** icon beside the Zone count makes a new Segment and opens its name. A
+   heading row's settings icon opens the Segment's settings: its name, colour, whether new Zones
+   join it, and the settings other features add. Its delete icon asks where its Zones go. Set the
+   optional Level in the Level column, whose menu manages the Levels and their colours.
 3. Set Face Type, Face Boundary and Face Assembly from the context menu. To paint a value onto
    several Faces, use the paint icon beside it in the column menu. An Attached zone, such as
    a garage or attic, defines a boundary with a temperature reduction factor.

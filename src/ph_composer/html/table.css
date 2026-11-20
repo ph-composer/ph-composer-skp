@@ -135,6 +135,12 @@ body.phc-column-resizing, body.phc-column-resizing * { cursor: col-resize !impor
 .phc-table.is-tree tr.tier-0 .phc-cell-input { font-weight: 600; }
 .phc-table.has-check-only-actions th.col-actions .phc-th-label { display: none; }
 .live-panel .phc-table.is-tree .host-selected td, .phc-table.is-tree tr.tier-0:focus-within > td { background-color: #e6f1f3; }
+/* A heading row (`row.heading`) opens a run of top-level rows without holding them: a firmer band than the rows it
+   heads, its cells at the top of the band so a two-line name and the row's actions line up. A muted cell stands
+   for rows left aside (the Zones tab's No Building Segment). */
+.phc-table.is-tree tr.is-heading > td { background-color: var(--line); border-top: 1px solid var(--line-strong);
+  vertical-align: top; }
+.phc-table.is-tree tr.is-heading > td.is-muted { color: var(--muted); font-weight: 400; }
 
 /* Header actions (a column menu, a Colour-by toggle) sit below the label and show while the pointer is over
    the header or focus is inside it. A persistent one (a pressed toggle, an active filter) is state, so it

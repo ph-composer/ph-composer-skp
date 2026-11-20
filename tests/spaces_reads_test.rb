@@ -64,6 +64,10 @@ class SpacesReadsTest < PhComposerTestCase
     assert_equal "user_specified", living["airflow_mode"]
     assert_equal({ "v_sup_m3h" => 60.0, "v_eta_m3h" => 0.0, "v_tran_m3h" => 0.0 }, living["airflows"])
     assert_equal "inheriting", space(all, "201")["airflow_mode"]
+    # A Segment's airflows sum its Zones' the same way: Zone B's Loft inherits, so its Segment's are not shown.
+    segment = all.fetch("building_segments").first
+    assert_equal [{ "v_sup_m3h" => nil, "v_eta_m3h" => nil, "v_tran_m3h" => nil }, 1],
+                 segment.values_at("airflows", "inheriting_count")
   end
 
   def test_rows_carry_references_zone_membership_and_the_projected_floor_finding

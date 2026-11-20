@@ -1,9 +1,10 @@
 /* The Spaces view's checked rows and the selection bar that edits them together.
  *
- * The checked set holds Space, Volume and Floor Segment rows. A row's box checks it and everything beneath it,
- * so a Zone's box checks every Space, Volume and Floor Segment in the Zone, and reads mixed while only some are.
- * The bar shows one group of controls for each kind it holds: the weighting and net area factors for Floor
- * Segments, the height for Volumes, the three airflows for Spaces. A value the checked rows of that kind share
+ * The checked set holds Zone, Space, Volume and Floor Segment rows. A row's box checks it and everything beneath
+ * it, so a Zone's box checks the Zone and every Space, Volume and Floor Segment in it, and reads mixed while only
+ * some are. The bar shows one group of controls for each kind it holds: the Building Segment for Zones (the
+ * Zones screen's own control, `host.segmentMove`), the weighting and net area factors for Floor Segments, the
+ * height for Volumes, the three airflows for Spaces. A value the checked rows of that kind share
  * shows in its field; one they do not share reads "Mixed". Each choice applies to every checked row of that
  * kind, hidden by a filter or not, as one `batch_update` and one Undo step. An airflow left blank clears the
  * rate on each row that has one.
@@ -13,6 +14,7 @@ PhComposerUI.define("features/spaces/selection", ["panel", "workspace", "units",
 function (panel, ui, units, preferences, fields, selectionBars) {
   "use strict";
   var KINDS = {
+    zone: { noun: ["Zone", "Zones"], controls: [] },
     segment: { noun: ["Floor Segment", "Floor Segments"], controls: [
       { key: "weighting_factor", label: "Weighting factor", quantity: fields.FRACTION, factor: true },
       { key: "net_area_factor", label: "Net area factor", quantity: fields.FRACTION, factor: true }] },
@@ -24,10 +26,11 @@ function (panel, ui, units, preferences, fields, selectionBars) {
       { key: "v_eta_m3h", label: "Extract", quantity: fields.with(fields.AIRFLOW_M3H, { allowBlank: true }) },
       { key: "v_tran_m3h", label: "Transfer", quantity: fields.with(fields.AIRFLOW_M3H, { allowBlank: true }) }] }
   };
-  var ORDER = ["space", "volume", "segment"];
+  var ORDER = ["zone", "space", "volume", "segment"];
 
   function kind(row) {
     var record = row.record;
+    if (!row.parent && record.zone) return "zone";
     return record.segment ? "segment" : record.volume ? "volume" : record.space ? "space" : null;
   }
 
@@ -63,7 +66,7 @@ function (panel, ui, units, preferences, fields, selectionBars) {
     }
   };
 
-  /* The checkable rows a box stands for: the row itself when it is a Space, Volume or Floor Segment, and
+  /* The checkable rows a box stands for: the row itself when it is a Zone, Space, Volume or Floor Segment, and
      every such row beneath it. */
   SpaceSelection.prototype.targets = function (row) {
     var found = [], self = this;
@@ -257,10 +260,15 @@ function (panel, ui, units, preferences, fields, selectionBars) {
       // A held entry's way out, in view beside it.
       this.cancel = ui.button("Cancel", function () { self.cancelDrafts(); });
       this.cancel.setAttribute("aria-label", "Cancel the change");
+      // The checked Zones' Building Segment, moved from here as from the Geometry view's bar.
+      this.segment = this.cells.host.segmentMove(function () {
+        return (groups(self.checked()).zone || []).map(function (row) { return row.record.zone; });
+      });
       ORDER.forEach(function (name) {
         var group = ui.element("div", "phc-selection-controls");
         group.setAttribute("role", "group");
         group.setAttribute("aria-label", KINDS[name].noun[1]);
+        if (name === "zone") group.appendChild(self.segment.root);
         KINDS[name].controls.forEach(function (control) {
           var wrap = ui.element("label", "phc-selection-field"), field = new BarField(self, name, control);
           wrap.appendChild(ui.element("span", "", control.label));
@@ -281,6 +289,7 @@ function (panel, ui, units, preferences, fields, selectionBars) {
     this.fields.forEach(function (field) {
       if (byKind[field.name]) field.paint(byKind[field.name], busy);
     });
+    this.segment.paint();
     this.cancel.hidden = !this.fields.some(function (field) { return field.held && !field.editing; });
     if (checked.length) {
       this.root.show(ORDER.filter(function (name) { return byKind[name]; }).map(function (name) {

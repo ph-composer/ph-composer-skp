@@ -15512,7 +15512,9 @@ Result:
           "zone_count",
           "floor_area_m2",
           "weighted_area_m2",
-          "net_volume_m3"
+          "net_volume_m3",
+          "airflows",
+          "inheriting_count"
         ],
         "properties": {
           "key": {
@@ -15542,6 +15544,45 @@ Result:
             "type": "number",
             "x-unit": "m3",
             "description": "Summed net volume."
+          },
+          "airflows": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "v_sup_m3h",
+              "v_eta_m3h",
+              "v_tran_m3h"
+            ],
+            "properties": {
+              "v_sup_m3h": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "m3/h",
+                "description": "Summed over user-specified Spaces; null while any Space inherits."
+              },
+              "v_eta_m3h": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "m3/h",
+                "description": "Summed over user-specified Spaces; null while any Space inherits."
+              },
+              "v_tran_m3h": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "m3/h",
+                "description": "Summed over user-specified Spaces; null while any Space inherits."
+              }
+            }
+          },
+          "inheriting_count": {
+            "type": "integer",
+            "minimum": 0
           }
         }
       },
@@ -17482,7 +17523,9 @@ Result:
           "zone_count",
           "floor_area_m2",
           "weighted_area_m2",
-          "net_volume_m3"
+          "net_volume_m3",
+          "airflows",
+          "inheriting_count"
         ],
         "properties": {
           "key": {
@@ -17512,6 +17555,45 @@ Result:
             "type": "number",
             "x-unit": "m3",
             "description": "Summed net volume."
+          },
+          "airflows": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "v_sup_m3h",
+              "v_eta_m3h",
+              "v_tran_m3h"
+            ],
+            "properties": {
+              "v_sup_m3h": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "m3/h",
+                "description": "Summed over user-specified Spaces; null while any Space inherits."
+              },
+              "v_eta_m3h": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "m3/h",
+                "description": "Summed over user-specified Spaces; null while any Space inherits."
+              },
+              "v_tran_m3h": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "x-unit": "m3/h",
+                "description": "Summed over user-specified Spaces; null while any Space inherits."
+              }
+            }
+          },
+          "inheriting_count": {
+            "type": "integer",
+            "minimum": 0
           }
         }
       },
@@ -30629,6 +30711,7 @@ Result:
     "make_zone",
     "restorable",
     "findings",
+    "building_segments",
     "units"
   ],
   "properties": {
@@ -30979,6 +31062,42 @@ Result:
         },
         "description": "A Zone record no read takes as a Zone, such as one on a component, with the way back, or a Zone on or inside a Group another feature owns."
       }
+    },
+    "building_segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "zone_count",
+          "face_area_m2",
+          "unclassified_face_area_m2"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "The Segment's id, a legacy Zone's Segment name, or an empty string for Zones in no Building Segment."
+          },
+          "zone_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "face_area_m2": {
+            "type": "number",
+            "minimum": 0,
+            "x-unit": "m2",
+            "description": "Summed over this occurrence's Faces, each through its own transform."
+          },
+          "unclassified_face_area_m2": {
+            "type": "number",
+            "minimum": 0,
+            "x-unit": "m2",
+            "description": "Summed over this occurrence's Faces, each through its own transform."
+          }
+        }
+      },
+      "description": "Each Building Segment's Face area over its Zone occurrences."
     },
     "units": {
       "type": "object",
@@ -67382,6 +67501,147 @@ Example params:
 }
 ```
 
+### `ph_composer.zones.create_segment`
+
+Make a Building Segment under the first free default name and move the named Zone occurrences into it, in one Undo step. Owner: `ph_composer.zones`.
+
+Undo step: New Building Segment. Creates one Segment and updates each moved Zone and its membership stamps.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.option_last_segment`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "colour"
+  ],
+  "properties": {
+    "colour": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{6}$",
+      "description": "The new Segment's colour."
+    },
+    "targets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reference",
+          "expected_values"
+        ],
+        "properties": {
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "zone_id",
+              "zone_path"
+            ],
+            "properties": {
+              "zone_id": {
+                "type": "string"
+              },
+              "zone_path": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "expected_values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "ground_depth_mm"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "building_segment": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "minLength": 1
+              },
+              "level": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "ground_depth_mm": {
+                "type": "number",
+                "x-unit": "mm"
+              },
+              "building_segment_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "minLength": 1
+              },
+              "level_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "description": "Zone occurrences to move into the new Segment, each with the values last read; a change refuses. Empty makes an empty Segment."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "name",
+    "zone_ids"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "zone_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "colour": "#1F7478"
+}
+```
+
 ### `ph_composer.zones.faces.assign_assembly`
 
 Set or clear only the Assembly of explicit Faces. Owner: `ph_composer.zones`.
@@ -70398,6 +70658,142 @@ Example params:
     ],
     "entity_id": "fac_Mn34Op56Qr78"
   }
+}
+```
+
+### `ph_composer.zones.save_segment_settings`
+
+Save one Building Segment's settings dialog: its name, colour and default, and a payload per settings namespace, in one Undo step. Owner: `ph_composer.zones`.
+
+Undo step: Change Building Segment Settings. Writes the Segment's values and settings; a rename or a new default also rewrites each member Zone's evidence. Every contributor to ph_composer.zones.segment_settings_saved adds its own changes in the same step.
+
+Refuses: `copy.rule_missing`, `extension.invalid`, `extension.migration_required`, `extension.schema_unsupported`, `extension.unavailable`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.in_use`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `validation.failed`, `zone.option_duplicate`, `zone.option_export_conflict`, `zone.option_last_segment`, `zone.options_adoption_required`, `zone.options_conflict`, and the `action` common set.
+
+Params:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "values",
+    "expected_values",
+    "default",
+    "expected_default_segment_id",
+    "extension_payloads",
+    "expected_extension_data"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^bsg_[A-Za-z0-9]{12}$",
+      "description": "The Building Segment."
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "colour"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "colour": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        }
+      },
+      "description": "The name and colour to save."
+    },
+    "expected_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "colour"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "colour": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        }
+      },
+      "description": "The name and colour the dialog read; a change refuses."
+    },
+    "default": {
+      "type": "boolean",
+      "description": "New Zones join this Segment. True makes it the default; false on the default refuses, because the default moves only to another Segment."
+    },
+    "expected_default_segment_id": {
+      "type": "string",
+      "pattern": "^bsg_[A-Za-z0-9]{12}$",
+      "description": "The default Segment the dialog read; a change refuses."
+    },
+    "extension_payloads": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object"
+      },
+      "description": "Each settings section's payload by its namespace, checked by that namespace's installed validator. A namespace left out is kept as stored."
+    },
+    "expected_extension_data": {
+      "type": "object",
+      "description": "The Segment's extension_data as the dialog read it; a change refuses."
+    }
+  }
+}
+```
+
+Result:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "namespaces"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "namespaces": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The namespaces whose payload changed, sorted."
+    }
+  }
+}
+```
+
+Example params:
+
+```json
+{
+  "id": "bsg_Ab12Cd34Ef56",
+  "values": {
+    "name": "House",
+    "colour": "#1F7478"
+  },
+  "expected_values": {
+    "name": "House",
+    "colour": "#1F7478"
+  },
+  "default": true,
+  "expected_default_segment_id": "bsg_Ab12Cd34Ef56",
+  "extension_payloads": {},
+  "expected_extension_data": {}
 }
 ```
 
@@ -79080,3 +79476,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.71 | 2026-11-19 | Export writes each Shading Face as an orphaned honeybee Shade in the new optional section ph_composer.shading.export.shades, named for its shading component, with the section's result fields shading_components, shade_count and area_m2 and a Shading report section. ph_composer.shading.export_preflight now runs with every export and also lists the Faces export leaves out (shading.geometry_invalid, target.ambiguous), unreadable marks (record.unreadable) and a mark's extension data the left-out rules refuse; every row names its path and carries the object id the export's note uses. A shading component name that reads as a local file path counts as no name. |
 | 1.72 | 2026-11-19 | ph_composer.shading.export_preflight gives a marked Group or component inside a Zone both shading.zone_inside and shading.classified_inside when it holds a Zone, a claimed object or a cutting component beside classified Faces; before, the first note hid the second. |
 | 1.73 | 2026-11-20 | Zone schema 3: building_segment_id may be null, No Building Segment; Zones write schema 3 and schema 2 still reads. ph_composer.zones.update_field and ph_composer.zones.update accept a null building_segment. ph_composer.zones.options.manage and remove accept a null replacement for a used Building Segment, which moves its Zones to No Building Segment; removing the default moves it to the replacement, else to the first remaining Segment; removing the last Segment refuses zone.option_last_segment. manage, remove and merge results add removed_extensions and removed_extensions_total. Colour-by Building Segment shows Zones in no Segment as one neutral No Building Segment row. Until export leaves them out, such a Zone blocks export. |
+| 1.74 | 2026-11-20 | ph_composer.zones.save_segment_settings is new: one Building Segment's name, colour, default and a settings payload per extension namespace in one Undo step, emitting ph_composer.zones.segment_settings_saved. ph_composer.zones.create_segment is new: a Segment under the first free default name with named Zones moved in. A Zone's choice evidence keeps its Building Segment's values only, so a Segment metadata write no longer rewrites its Zones and adoption brings no Segment settings. ph_composer.zones.all adds building_segments, each Segment's Face area; ph_composer.spaces.all and list add airflows and inheriting_count to each building_segments row. |

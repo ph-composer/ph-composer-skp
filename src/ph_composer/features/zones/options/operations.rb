@@ -206,9 +206,9 @@ module PhComposer
         created
       end
 
-      # The metadata follow-up of both option kinds (RecordKind#metadata_follow_up): each Zone and member
-      # stamp keeps a full copy of its options as choice evidence, so a metadata write rebuilds that evidence
-      # from the staged records in the same step. A legacy or copied Zone awaiting adoption names no option of
+      # The Level kind's metadata follow-up (RecordKind#metadata_follow_up): each Zone and member stamp keeps
+      # a full copy of its Level as choice evidence, so a metadata write rebuilds that evidence from the staged
+      # records in the same step. A legacy or copied Zone awaiting adoption names no option of
       # this Model and is left as it is; adoption builds its evidence later. An empty mapping moves no reference.
       def rewrite_evidence(request, proposal)
         adopted = Inventory.rows(request.model).reject do |row|

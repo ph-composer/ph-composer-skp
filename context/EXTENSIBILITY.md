@@ -748,7 +748,7 @@ naming any. Faces (`features/zones/faces_view.js`) registers through the same co
 PhComposerUI.get("table_views").register("ph_composer.zones", {
   id: "example.zones.areas", label: "Areas", order: 90,
   sections: ["ph_composer.zones.overview"],     // listed only while the snapshot publishes these
-  zoneFields: [],                                // the Zone cells it shows; all three when omitted
+  zoneFields: [],                                // the Zone cells it shows; both when omitted
   columns: function (vs, profile) { return [["gross_m2", "Gross area"]]; }, // after the Zone cells
   value: function (vs, row, field, profile) {}   // a cell's text, for Zone rows and the view's own rows
 });
@@ -757,8 +757,10 @@ PhComposerUI.get("table_views").register("ph_composer.zones", {
 Every hook receives the view's own state first: what `create(host)` returned, or `{}` without one.
 `host` is the view's only reach into the screen: `session`, `send`, `snapshot`, `revision`, `edits`
 and `look` (the screen's request channels), `gated` (the read-only Zone occurrences by path),
-`draftReason()`, `refuse(reason)`, `disposed`, `activeView()` (the id shown now) and `show(id)` (shows
-a view through the tab's and the view row's guards, and answers whether it did). A hook a view leaves out takes the host's default,
+`draftReason()`, `refuse(reason)`, `disposed`, `activeView()` (the id shown now), `show(id)` (shows
+a view through the tab's and the view row's guards, and answers whether it did) and `segmentMove(zones)` (the
+Building Segment choice for the view's selection bar: `{ root, paint() }`, moving the Zone records `zones()`
+answers). A hook a view leaves out takes the host's default,
 so `tools/examples/zones/example_zone_view.js`, two columns and `value`, is a complete view.
 
 | Hooks | What the host asks |
@@ -772,6 +774,7 @@ so `tools/examples/zones/example_zone_view.js`, two columns and `value`, is a co
 | `zoneMatch`, `rowMatch`, `search`, `queryMatch(row, query, zone)`, `sortValue(record, field)`, `sort(list, field, direction)`, `viewportPaths` | How the view's filters and sort reach Zone rows (`sortValue` gives a Zone row's value in the view's sorted columns), its own rows and the viewport mask (by default each Zone that passes `zoneMatch`, whole). When the text filter matches a Zone only through the view's `search` text, `queryMatch` says which of the view's rows still show (by default all) |
 | `actions(row)`, `zoneActions(row)`, `action(row, item, control)`, `inspect`, `locate(row)`, `clearLocate`, `selected(row)` | Row actions (`control` is the pressed button, to anchor what it opens), the Zone row's actions after Make independent, Locate (`clearLocate` answers whether it cleared anything), and which rows paint as selected (Spaces: the row open in the edit context) |
 | `checkedZones()`, `checkZones(keys)` | The Zone rows every row beneath which this view has checked, and checking everything beneath Zones another view handed over |
+| `segmentSums(group, profile)` | The text of the view's columns on a Segment heading row, by field: `group` is `{ key, segment, rows }`, its key as the Zones and Spaces reads key their `building_segments` sums (the Segment's id, a legacy Zone's Segment name, or `""` for none), the Segment record (null for none or one not adopted) and its Zone rows. Geometry shows the Segment's gross area, Spaces its areas, volume and airflows. A view reads published sums and adds none of its own |
 | `check(context)`, `selectionBar(overview)`, `settings`, `navigate(intent)`, `count`, `placeholder` | Checkboxes for the rows it checks, a selection bar, a settings control for the page header, a navigation intent's `check`, what the control row's count adds after the Zones ("4 Spaces"), and the text filter's placeholder |
 | `draftReason`, `cancelDrafts`, `canCancelDrafts`, `leaveReason`, `leave`, `escape` | Work a filter, a switch or shutting a row must not hide, and how the guard's notice cancels it (offered only while `canCancelDrafts` answers, never for an edit already sent); what holds a switch; what stops on a switch away; Escape, true when the view used it |
 
@@ -779,8 +782,8 @@ so `tools/examples/zones/example_zone_view.js`, two columns and `value`, is a co
   without a feature shows none of its views, with no line in the composition root. With one view
   listed the view row is hidden; with none the host shows the Zone rows alone.
 - **The host keeps** the Zone rows and their Name column, the Zone row's in-place cells
-  (`zone_cells.js`: Building-Segment, Level, Ground depth), Make independent, the text filter, the
-  Zone filters (Building-Segment, Level), which rows are expanded (the control row's one Collapse all / Expand all
+  (`zone_cells.js`: Level, Ground depth), Make independent, the text filter, the Zone filter (Level),
+  the Segment heading rows and New Building Segment, which rows are expanded (the control row's one Collapse all / Expand all
   toggle reaches every row with rows beneath it), the control row's Columns and Colour by menus, and the panel hooks (`navigationGuard`, `outcomeText`, `workedOn`).
 - **A view owns** its rows, its columns, their header Colour-by toggles and value filters, its sort,
   its checked rows, its selection bar, its settings and its tools. Checked Zones are shared: on a
@@ -817,10 +820,79 @@ so `tools/examples/zones/example_zone_view.js`, two columns and `value`, is a co
   registers. A view registered before its host declares itself is held and listed once it does; the
   panel reports one whose host never declares when it is ready.
 
+- **Segment heading rows** (`features/zones/segment_rows.js`, P4a-02). In every view the host puts
+  each Zone under its Building Segment's heading row: the Model's Segments by name, each shown even
+  while empty (under a text or column filter, only while one of its Zones shows), then Zones whose
+  Segment this Model has not adopted (with an Adopt action), then No Building Segment, muted, last and
+  only while it holds a Zone. A view's own `extraRows` follow under no heading. A heading is the kit's
+  heading row (`row.heading`: no chevron, no checkbox, no select target, `data-heading-key` in place of
+  `data-row-key`), never passed to a view's hooks except `segmentSums`. Its Name cell shows the name
+  (cut, whole in its tooltip) and a findings flag, then the tags of every heading contribution;
+  Settings and Delete sit in its Actions cell. New Building Segment
+  (`ph_composer.zones.create_segment`) opens the new name in place; Delete names the Zones'
+  destination and the settings that go; each is one request and one Undo step.
+- **Heading contributions.** Any feature adds tags and findings to every Segment heading in every
+  view, without the host naming it, through the kit's heading registry:
+
+  ```js
+  PhComposerUI.get("table_views").heading("ph_composer.zones", {
+    id: "example.single_dwelling", order: 20,     // its own under the host; Zones' Default tag is 10
+    segmentHeading: function (segment, state) {   // the Segment record and the panel state
+      return { tags: [{ text: "Single dwelling", tooltip: "..." }], findings: [{ message: "..." }] };
+    }                                             // or null for nothing on this Segment
+  });
+  ```
+
 **Contributor tasks traced.** "Add the Spaces view" (P3a-07) adds one module under
 `html/features/spaces/` registering under `"ph_composer.zones"`: Space, Volume and Floor Segment rows
 three deep through `children`, sums on the Zone row through `value`; no Zones file changes. "Add an
-Occupancy view" registers `columns` and `value` with no `children`, as the example does.
+Occupancy view" registers `columns` and `value` with no `children`, as the example does, and
+`segmentSums` for its heading sums. "Tag the Segments that are single dwellings" (Programs, P4a-08)
+registers one heading contribution; no Zones file changes.
+
+### Building Segment settings
+
+Implemented in P4a-02. One dialog per Building Segment, opened from its heading row in any Zone view,
+edits the Segment's General values (Zones' own section: name, colour, "New Zones join this Segment")
+and one section per settings namespace another feature registers. Each section's data is a structured
+extension on the Segment record (`ph_composer.zones.building_segment`), under a namespace its feature
+registers with `feature.extension` ("Metadata and structured extension data", below). The dialog
+frame, the General section and Save are Zones'; the frame names no section.
+
+```js
+PhComposerUI.get("panel").segmentSettingsSection("example.segment.note", {
+  title: "Note", order: 90,                 // after General, by order
+  readOnly: false,                          // true: renders, collects nothing, needs no collect
+  render: function (segment, draft, context) { return node; },   // draft: a copy of the stored payload, or {}
+  validate: function (draft) { return []; },                      // problems; any holds Save
+  collect: function (draft) { return payload; }                   // what Save sends for this namespace
+});
+```
+
+`render` returns the section's content (rows may use `phc-segment-settings-row` and
+`phc-segment-settings-label` for a label beside its control) and calls `context.changed()` after
+editing the draft: that marks the section changed and the dialog validates again. Only a changed
+section is validated and sent, so a section the user leaves alone keeps its stored payload.
+`context.state` is the panel state the dialog opened on. Save sends one
+`ph_composer.zones.save_segment_settings`: the General values, the default, each changed section's
+payload by namespace, and the Segment's `extension_data` as read. Zones
+checks each payload with that namespace's installed validator (`Records::Extension#problems`), so a
+payload it refuses refuses the whole save and nothing is written, and stages it with
+`engine.propose_metadata_update` in the same proposal as the General values: one Undo step, and no
+section owner writes the Segment record. A Zone keeps only its Segment's values as evidence, so a
+settings save touches the Segment alone and a locked member Zone never blocks it; a rename or a new
+default still rewrites each member Zone. Cancel, the close icon and Escape write nothing.
+
+A section's owner adds its own side effects to the same Undo step by declaring a transition
+contributor for `ph_composer.zones.segment_settings_saved` ("Transition contributors" in
+[CONTRACTS.md](CONTRACTS.md)). Its description is `building_segment_id` and `namespaces`, the
+namespaces whose payload changed. The owner requires `ph_composer.zones`, writes only its own kinds
+and leaves the Segment record to Zones.
+
+The development example is `tools/examples/zones/example_segment_note.rb` (the namespace and its
+validator) and `example_segment_note.js` (its section), loaded together by
+`example_segment_note_load.rb`; `tests/segment_settings_test.rb` and
+`tests/segment_rows_panel_test.js` run it.
 
 ### Native menu items
 
@@ -1076,7 +1148,7 @@ records of every kind take it through `ph_composer.records.update_metadata`
 (`engine.propose_metadata_update`); built-in update actions edit values only. A kind whose nested
 objects carry their own map declares them as `parts:` (`Records::Part`, such as an Assembly's
 `layers[]`), and the same action writes a part's map by `part_ids`. A kind whose owner keeps
-copies of its records, as Zones copy their Building Segment and Level, declares `metadata_follow_up:`
+copies of its records, as Zones copy their Level, declares `metadata_follow_up:`
 so the same action rewrites the copies in the same step. Zones, Faces, Window Units and Thermal
 Bridge Edges use their owner's `update_metadata` action, as do Spaces, Volumes, Floor Segments and
 Space Floors (`spaces.update_metadata`); the Model's own maps use `ph_composer.model.update_metadata`.

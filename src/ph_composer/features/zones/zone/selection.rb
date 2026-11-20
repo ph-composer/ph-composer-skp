@@ -45,25 +45,31 @@ module PhComposer
 
       # Sets one `field` to one `value` on every target Zone, each guarded by its expected values.
       def update_field(request, proposal, field:, value:, targets:)
+        zone_ids = assign(request, proposal, targets) do |before, zone|
+          if %w[building_segment level].include?(field) && Schema.managed?(zone.record)
+            before.merge("#{field}_id" => (value && Options.existing_name(request.engine, field, value)))
+          else
+            before.merge(field => DeepCopy.call(value))
+          end
+        end
+        { "zone_ids" => zone_ids }
+      end
+
+      # Updates every target Zone to the values the block makes from its current ones, each guarded by its
+      # expected values; answers their ids. A Zone may appear once.
+      def assign(request, proposal, targets)
         index = Index.new(request.model)
         if targets.map { |target| target.fetch("reference").fetch("zone_path") }.uniq.length != targets.length
           raise CodedError.new("params.invalid", "A Zone may appear only once in the batch.")
         end
 
-        zone_ids = targets.map do |target|
+        targets.map do |target|
           zone = resolve(request.model, target.fetch("reference"), index)
-          before = Schema.view(zone.record).fetch("values")
-          if %w[building_segment level].include?(field) && Schema.managed?(zone.record)
-            key = "#{field}_id"
-            values = before.merge(key => (value && Options.existing_name(request.engine, field, value)))
-          else
-            values = before.merge(field => DeepCopy.call(value))
-          end
+          values = yield(Schema.view(zone.record).fetch("values"), zone)
           Zones.update(request, proposal, :reference => zone.reference, :values => values,
                                           :expected_values => target.fetch("expected_values"))
           zone.record.fetch("id")
         end
-        { "zone_ids" => zone_ids }
       end
 
       def client(session)

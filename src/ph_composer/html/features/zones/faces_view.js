@@ -172,6 +172,13 @@ function (panel, ui, snapshot, units, fields, words, tableViews, attachedAssignm
         "for each of them and leaves every Face that already has one alone." };
   }
 
+  /* A Building Segment's heading shows the gross area of its Zones, as the Zones read sums it. */
+  function segmentSums(vs, group, profile) {
+    var read = snapshot.value(vs.host.snapshot, "ph_composer.zones.overview") || {};
+    var sums = (read.building_segments || []).filter(function (row) { return row.key === group.key; })[0];
+    return sums ? { area_m2: area(sums.face_area_m2, profile) } : {};
+  }
+
   /* A Zone row and its unclassified summary show the totals the host published for the occurrence. */
   function value(vs, row, field, profile) {
     var face = row.record.face;
@@ -631,8 +638,11 @@ function (panel, ui, snapshot, units, fields, words, tableViews, attachedAssignm
       return (vs.checkedZones || []).filter(function (zone) { return ZoneCells.gated(zone); }).length;
     }
     var why = ui.element("span", "phc-selection-limit");
-    root.appendChild(count); root.appendChild(solve); root.appendChild(why);
+    // The checked Zones move to another Building Segment from here, as from the Spaces view's bar.
+    var segment = host.segmentMove(function () { return vs.checkedZones || []; });
+    root.appendChild(count); root.appendChild(segment.root); root.appendChild(solve); root.appendChild(why);
     return { root: root, paint: function () {
+      segment.paint();
       var total = (vs.checkedZones || []).length, shared = sharedChecked();
       root.hidden = !total;
       var reason = shared ? shared + (shared === 1 ? " checked Zone is" : " checked Zones are") +
@@ -742,6 +752,7 @@ function (panel, ui, snapshot, units, fields, words, tableViews, attachedAssignm
     widths: { face_type: 126, boundary_condition: 110, area_m2: 104, assembly_id: 156 },
     create: create, dispose: dispose, draftReason: draftReason, consume: consume, zoneRecord: zoneRecord,
     children: children, initiallyOpen: initiallyOpen, columns: columns, zoneMarker: zoneMarker, value: value,
+    segmentSums: segmentSums,
     cell: cell, decorate: decorate, filterLabel: filterLabel, filterValues: filterValues,
     zoneMatch: zoneMatch, rowMatch: rowMatch, search: search, sort: sort, sortValue: sortValue,
     viewportPaths: viewportPaths,

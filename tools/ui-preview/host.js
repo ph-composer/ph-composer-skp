@@ -101,6 +101,20 @@
     });
   };
 
+  /* Each Building Segment's Face area over its Zones, keyed as the Zones read keys it: the Segment's id, a legacy
+     Zone's Segment name, or "" for none. */
+  Host.prototype.segmentSums = function () {
+    var sums = {};
+    this.zoneRows().forEach(function (zone) {
+      var values = zone.values, key = Object.prototype.hasOwnProperty.call(values, "building_segment_id") ?
+        values.building_segment_id || "" : values.building_segment || "";
+      var row = sums[key] = sums[key] || { key: key, zone_count: 0, face_area_m2: 0, unclassified_face_area_m2: 0 };
+      row.zone_count++; row.face_area_m2 += zone.face_area_m2;
+      row.unclassified_face_area_m2 += zone.unclassified_face_area_m2;
+    });
+    return Object.keys(sums).map(function (key) { return sums[key]; });
+  };
+
   Host.prototype.publish = function (type, payload) {
     this.window.PhComposerUI.get("panel").receive({ type: type, payload: payload });
   };
@@ -123,7 +137,7 @@
           value: { records: records, units: { length_mm: "mm" }, next_cursor: null, total: records.length } },
         ["ph_composer.zones.options"]: { status: "completed", value: JSON.parse(JSON.stringify(this.zoneOptions)) },
         [ZONES]: { status: "completed", code: "ok", revision: this.revision,
-          value: { zones: this.zoneRows(), make_zone: this.makeZone,
+          value: { zones: this.zoneRows(), make_zone: this.makeZone, building_segments: this.segmentSums(),
             units: { ground_depth_mm: "mm", face_area_m2: "m2", unclassified_face_area_m2: "m2" } } },
         [FACES]: { status: "completed", code: "ok", revision: this.revision,
           value: { faces: JSON.parse(JSON.stringify(this.faces)), units: { area_m2: "m2" } } },
@@ -663,6 +677,8 @@
     if (payload.name.indexOf("ph_composer.assemblies.") === 0 ||
         payload.name.indexOf("ph_composer.zones.faces.attached_zone.") === 0) return this.inventoryAction(payload);
     if (payload.name === "ph_composer.zones.options.manage") return this.manageZoneOptions(payload.params);
+    var segmentOutcome = this.segmentAction(payload);
+    if (segmentOutcome) return segmentOutcome;
     // Create Space answers that it ran; the synthetic Spaces section is not regrouped.
     if (payload.name === "ph_composer.spaces.create") {
       this.revision++;
@@ -745,6 +761,92 @@
     this.revision += 1;
     return { status: "completed", code: "ok", message: "Done.", effect: "committed", revision: this.revision,
       value: resultValue, affected: [], findings: [], detail: null };
+  };
+
+  /* Synthetic Building Segment writes for the Zones tab's heading rows and settings dialog: New (with Zones moved
+     in), rename, delete with a destination, Save and moving Zones. The rules they enforce are Ruby's; this answers
+     only enough of them to drive the panel. Null for any other action. */
+  Host.prototype.segmentAction = function (payload) {
+    var host = this, params = payload.params, segments = this.zoneOptions.building_segments;
+    function find(id) { return segments.filter(function (entry) { return entry.id === id; })[0]; }
+    function move(targets, id) {
+      var moved = [];
+      targets.forEach(function (target) {
+        var zone = host.zones.filter(function (item) {
+          return item.reference.zone_id === target.reference.zone_id;
+        })[0];
+        if (zone) { zone.values.building_segment_id = id; moved.push(zone.reference.zone_id); }
+      });
+      segments.forEach(function (entry) {
+        entry.usage = { live: host.zones.filter(function (zone) {
+          return zone.values.building_segment_id === entry.id;
+        }).length, recoverable: 0 };
+      });
+      return moved;
+    }
+    function done(value) {
+      host.revision++;
+      return { status: "completed", code: "ok", effect: "committed", revision: host.revision, value: value || {},
+        affected: [], findings: [], detail: null };
+    }
+    if (payload.name === "ph_composer.zones.create_segment") {
+      var number = segments.length + 1;
+      while (segments.some(function (entry) { return entry.values.name === "Building Segment " + number; })) number++;
+      var id = "bsg_preview" + String(++this.sequence).padStart(5, "0");
+      segments.push({ id: id, schema_version: 1, values: { name: "Building Segment " + number, colour: params.colour,
+        export_identifier: "segment_" + id }, usage: { live: 0, recoverable: 0 }, extension_data: {} });
+      return done({ id: id, name: "Building Segment " + number, zone_ids: move(params.targets || [], id) });
+    }
+    if (payload.name === "ph_composer.zones.update_field" && params.field === "building_segment") {
+      var named = params.value === null ? null : segments.filter(function (entry) {
+        return entry.values.name === params.value;
+      })[0];
+      if (params.value !== null && !named) {
+        return refused("reference.invalid", "Choose an existing Segment.", this.revision);
+      }
+      return done({ zone_ids: move(params.targets, named ? named.id : null) });
+    }
+    if (payload.name === "ph_composer.zones.options.update" && params.collection === "building_segment") {
+      var renamed = find(params.id);
+      if (!renamed || renamed.values.name !== params.expected_values.name) {
+        return refused("target.changed", "That Segment changed.", this.revision);
+      }
+      if (segments.some(function (entry) { return entry !== renamed && entry.values.name === params.values.name; })) {
+        return refused("zone.option_duplicate", "An equivalent option already exists. Nothing was written.",
+          this.revision);
+      }
+      renamed.values.name = params.values.name; renamed.values.colour = params.values.colour;
+      return done({ id: renamed.id });
+    }
+    if (payload.name === "ph_composer.zones.options.remove" && params.collection === "building_segment") {
+      if (segments.length < 2) {
+        return refused("zone.option_last_segment", "Keep at least one Building Segment. Nothing was written.",
+          this.revision);
+      }
+      var destination = params.replacement_id === undefined ? null : params.replacement_id;
+      move(this.zones.filter(function (zone) { return zone.values.building_segment_id === params.id; })
+        .map(function (zone) { return { reference: zone.reference }; }), destination);
+      this.zoneOptions.building_segments = segments.filter(function (entry) { return entry.id !== params.id; });
+      if (this.zoneOptions.default_segment_id === params.id) {
+        this.zoneOptions.default_segment_id = destination || this.zoneOptions.building_segments[0].id;
+      }
+      return done({ removed_extensions: [] });
+    }
+    if (payload.name === "ph_composer.zones.save_segment_settings") {
+      var saved = find(params.id);
+      if (!saved || saved.values.name !== params.expected_values.name) {
+        return refused("target.changed", "The Building Segment changed since its settings opened.", this.revision);
+      }
+      saved.values.name = params.values.name; saved.values.colour = params.values.colour;
+      if (params.default) this.zoneOptions.default_segment_id = saved.id;
+      saved.extension_data = saved.extension_data || {};
+      Object.keys(params.extension_payloads).forEach(function (namespace) {
+        saved.extension_data[namespace] = { schema_version: 1, payload: params.extension_payloads[namespace],
+          references: [], export_relevance: "local_only" };
+      });
+      return done({ id: saved.id, namespaces: Object.keys(params.extension_payloads).sort() });
+    }
+    return null;
   };
 
   /* Synthetic UI-only choice management. Production reference/adoption behavior belongs to Ruby. */

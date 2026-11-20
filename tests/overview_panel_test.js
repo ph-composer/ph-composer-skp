@@ -61,7 +61,8 @@ function managedSnapshot() {
       export_identifier: "seg_house" }, usage: { live: 1, recoverable: 1 } },
       { id: "bsg_tower", values: { name: "Tower", colour: "#5588BB", export_identifier: "seg_tower" }, usage: {
         live: 0, recoverable: 0 } }],
-    levels: [{ id: "lvl_1", values: { name: "Level 1", colour: "#9977AA" }, usage: { live: 0, recoverable: 0 } }],
+    levels: [{ id: "lvl_1", values: { name: "Level 1", colour: "#9977AA" }, usage: { live: 0, recoverable: 0 } },
+      { id: "lvl_2", values: { name: "Level 2", colour: "#CB7854" }, usage: { live: 0, recoverable: 0 } }],
     default_segment_id: "bsg_house", adoption: { required: false, sources: [], suggested_segment: "House" }
   } };
   return state;
@@ -162,8 +163,9 @@ test("area headers and Zone and Face values follow the display profile together"
     return node.classList.contains("phc-enum-cell") && node.classList.contains("phc-cell-input");
   }), "a Face's type and boundary chips are the kit's enum cell");
   function areas() {
-    return section.querySelectorAll(".col-area_m2").filter(function (node) { return node.tagName === "td"; })
-      .map(nameText);
+    return section.querySelectorAll(".col-area_m2").filter(function (node) {
+      return node.tagName === "td" && node.parentNode.getAttribute("data-row-key");
+    }).map(nameText);
   }
   function header() {
     return section.querySelectorAll(".col-area_m2").filter(function (node) { return node.tagName === "th"; })[0];
@@ -317,8 +319,9 @@ test("an unclassified Face is a row under its Zone's summary, and choosing a val
   p.panel.receive({ type: "panel.snapshot", payload: snapshot() });
   var section = p.query("[data-section='ph_composer.overview']");
 
-  var names = section.querySelectorAll(".col-name").filter(function (node) { return node.tagName === "td"; })
-    .map(nameText);
+  var names = section.querySelectorAll(".col-name").filter(function (node) {
+    return node.tagName === "td" && node.parentNode.getAttribute("data-row-key");
+  }).map(nameText);
   assert.deepStrictEqual(names, ["Zone 1", "Wall 1", "1 unclassified Face", "Face 1"]);
   assert.strictEqual(section.querySelector(".phc-row-marker").textContent, "1", "the Zone still counts them");
 
@@ -383,8 +386,9 @@ test("two Zone occurrences sharing one record id are two rows", function () {
   p.panel.receive({ type: "panel.snapshot", payload: payload });
   var section = p.query("[data-section='ph_composer.overview']");
 
-  var names = section.querySelectorAll(".col-name").filter(function (node) { return node.tagName === "td"; })
-    .map(nameText);
+  var names = section.querySelectorAll(".col-name").filter(function (node) {
+    return node.tagName === "td" && node.parentNode.getAttribute("data-row-key");
+  }).map(nameText);
   assert.deepStrictEqual(names, ["Zone 1", "Wall 1", "1 unclassified Face", "Face 1", "Zone 1 copy", "Floor 1"],
     "each occurrence keeps its own row and its own Faces");
   var markers = section.querySelectorAll(".phc-row-marker").filter(function (node) {
@@ -415,8 +419,9 @@ test("classifying one Face leaves its neighbours' rows alone", function () {
   assert.ok(after.every(function (key) { return before.indexOf(key) >= 0; }),
     "every row still there keeps its key, the newly classified Face included");
   assert.strictEqual(after.length, before.length - 1, "only the emptied summary row goes");
-  var names = section.querySelectorAll(".col-name").filter(function (node) { return node.tagName === "td"; })
-    .map(nameText);
+  var names = section.querySelectorAll(".col-name").filter(function (node) {
+    return node.tagName === "td" && node.parentNode.getAttribute("data-row-key");
+  }).map(nameText);
   assert.deepStrictEqual(names, ["Zone 1", "Wall 1", "Floor 1"],
     "and a Face numbers among the Faces of its own type");
 });
@@ -432,7 +437,9 @@ test("a Face the chips cannot set keeps its value and stays read only", function
   var section = p.query("[data-section='ph_composer.overview']");
 
   assert.strictEqual(byLabel(section, "Air boundary 1 type"), undefined, "no chip offers Air boundary");
-  var cells = section.querySelectorAll(".col-face_type").filter(function (node) { return node.tagName === "td"; });
+  var cells = section.querySelectorAll(".col-face_type").filter(function (node) {
+    return node.tagName === "td" && node.parentNode.getAttribute("data-row-key");
+  });
   assert.strictEqual(cells[1].querySelector(".phc-enum-pill").textContent, "Air boundary",
     "the cell says what the Face is, as a read-only pill");
   assert.match(cells[1].getAttribute("data-tooltip"), /Air boundary/);
@@ -464,7 +471,7 @@ test("a Zone's fields are cells on its row, and each commit is one update of tha
   p.panel.receive({ type: "panel.snapshot", payload: snapshot() });
   var section = p.query("[data-section='ph_composer.overview']");
   assert.strictEqual(p.query("[data-section='ph_composer.zones.details']"), null, "there is no Zone form");
-  assert.strictEqual(byLabel(section, "Zone 1 Building-Segment").textContent, "house");
+  assert.strictEqual(byLabel(section, "Zone 1 Level").textContent, "Not set");
   assert.strictEqual(byLabel(section, "Wall 1 Level"), undefined, "a Face row leaves the Zone columns blank");
 
   enter(byLabel(section, "Zone 1 name"), "North Zone");
@@ -495,10 +502,10 @@ test("managed choices use IDs, unchanged choices send nothing, and an empty Leve
   var p = page(), payload = managedSnapshot();
   payload.sections["ph_composer.zones.overview"].value.zones[0].values.level_id = "lvl_1";
   p.panel.receive({ type: "panel.snapshot", payload: payload });
-  var section = p.query("[data-section='ph_composer.overview']"), segment = byLabel(section, "Zone 1 Building-Segment");
-  segment.listeners.change({});
+  var section = p.query("[data-section='ph_composer.overview']"), level = byLabel(section, "Zone 1 Level");
+  level.listeners.change({});
   assert.strictEqual(p.sent.length, 0);
-  var level = byLabel(section, "Zone 1 Level"); level.value = ""; level.listeners.change({});
+  level.value = ""; level.listeners.change({});
   assert.strictEqual(p.sent[0].payload.params.values.level_id, null);
   assert.strictEqual(p.sent[0].payload.params.expected_values.level_id, "lvl_1");
 });
@@ -519,26 +526,18 @@ function result(p, index, outcome) {
     session: "session-a", outcome: outcome } });
 }
 
-/* A managed snapshot with a third Segment, so a held choice can be retried with a different one. */
-function threeSegments() {
-  var payload = managedSnapshot();
-  payload.sections["ph_composer.zones.options"].value.building_segments.push({ id: "bsg_annex",
-    values: { name: "Annex", colour: "#AA7755", export_identifier: "seg_annex" }, usage: { live: 0, recoverable: 0 } });
-  return payload;
-}
-
 test("a refused Zone choice returns to the Model's value, says why, and leaves the screen usable", function () {
   var p = page();
   p.panel.receive({ type: "panel.snapshot", payload: managedSnapshot() });
-  var section = p.query("[data-section='ph_composer.overview']"), segment = byLabel(section, "Zone 1 Building-Segment");
-  segment.value = "bsg_tower"; segment.listeners.change({});
+  var section = p.query("[data-section='ph_composer.overview']"), level = byLabel(section, "Zone 1 Level");
+  level.value = "lvl_1"; level.listeners.change({});
   result(p, 0, { status: "refused", code: "target.ambiguous", effect: "none",
     message: "Zone zon_a occurs more than once. Nothing was written." });
-  assert.strictEqual(segment.value, "bsg_house", "nothing was written, so the Model's value shows");
-  assert.match(segment.parentNode.querySelector(".cell-error").textContent, /made independent/);
+  assert.strictEqual(level.value, "", "nothing was written, so the Model's value shows");
+  assert.match(level.parentNode.querySelector(".cell-error").textContent, /made independent/);
   assert.match(p.query(".phc-floating-notice-message").textContent, /made independent/,
     "the notice names the route out, not the duplicated id");
-  assert.strictEqual(byLabel(section, "Cancel Zone 1 Building-Segment choice").hidden, true, "nothing is held");
+  assert.strictEqual(byLabel(section, "Cancel Zone 1 Level choice").hidden, true, "nothing is held");
   enter(byLabel(section, "Zone 1 name"), "North Zone");
   assert.strictEqual(p.sent[1].payload.name, "ph_composer.zones.update", "another edit is not blocked");
 });
@@ -546,28 +545,28 @@ test("a refused Zone choice returns to the Model's value, says why, and leaves t
 test("a failed Zone choice with an uncertain effect shows the Model's value and says to check it", function () {
   var p = page();
   p.panel.receive({ type: "panel.snapshot", payload: managedSnapshot() });
-  var section = p.query("[data-section='ph_composer.overview']"), segment = byLabel(section, "Zone 1 Building-Segment");
-  segment.value = "bsg_tower"; segment.listeners.change({});
+  var section = p.query("[data-section='ph_composer.overview']"), level = byLabel(section, "Zone 1 Level");
+  level.value = "lvl_1"; level.listeners.change({});
   result(p, 0, { status: "failed", code: "operation.failed", effect: "unknown", message: "It broke." });
-  assert.strictEqual(segment.value, "bsg_house");
-  assert.match(segment.parentNode.querySelector(".cell-error").textContent, /may have been partly applied/);
+  assert.strictEqual(level.value, "");
+  assert.match(level.parentNode.querySelector(".cell-error").textContent, /may have been partly applied/);
 });
 
 test("a held Zone choice has a visible Cancel, and the guard notice offers it too", function () {
   var p = page();
   p.panel.receive({ type: "panel.snapshot", payload: managedSnapshot() });
-  var section = p.query("[data-section='ph_composer.overview']"), segment = byLabel(section, "Zone 1 Building-Segment");
-  var cancel = byLabel(section, "Cancel Zone 1 Building-Segment choice");
-  segment.value = "bsg_tower"; segment.listeners.change({});
+  var section = p.query("[data-section='ph_composer.overview']"), level = byLabel(section, "Zone 1 Level");
+  var cancel = byLabel(section, "Cancel Zone 1 Level choice");
+  level.value = "lvl_1"; level.listeners.change({});
   result(p, 0, { status: "completed", effect: "committed" });
-  assert.strictEqual(segment.value, "bsg_tower", "the Model settled elsewhere, so the choice is held");
+  assert.strictEqual(level.value, "lvl_1", "the Model settled elsewhere, so the choice is held");
   assert.strictEqual(cancel.hidden, false);
   p.panel.showTab("export");
   assert.strictEqual(p.panel.state.ui.activeTab, "overview", "a held choice guards navigation");
   p.panel.receive({ type: "panel.snapshot", payload: managedSnapshot() });
   assert.strictEqual(cancel.hidden, false, "a later snapshot keeps the held choice and its Cancel");
   click(cancel);
-  assert.strictEqual(segment.value, "bsg_house");
+  assert.strictEqual(level.value, "");
   assert.strictEqual(cancel.hidden, true);
   p.panel.showTab("export");
   assert.strictEqual(p.panel.state.ui.activeTab, "export", "Cancel released the guard without a request");
@@ -577,8 +576,8 @@ test("a held Zone choice has a visible Cancel, and the guard notice offers it to
 test("the guard notice's Cancel drops a held Zone choice", function () {
   var p = page();
   p.panel.receive({ type: "panel.snapshot", payload: managedSnapshot() });
-  var section = p.query("[data-section='ph_composer.overview']"), segment = byLabel(section, "Zone 1 Building-Segment");
-  segment.value = "bsg_tower"; segment.listeners.change({});
+  var section = p.query("[data-section='ph_composer.overview']"), level = byLabel(section, "Zone 1 Level");
+  level.value = "lvl_1"; level.listeners.change({});
   result(p, 0, { status: "completed", effect: "committed" });
   var filter = byLabel(section, "Filter Zones");
   filter.value = "Zone"; filter.listeners.input({});
@@ -587,7 +586,7 @@ test("the guard notice's Cancel drops a held Zone choice", function () {
   assert.strictEqual(action.hidden, false);
   assert.strictEqual(action.textContent, "Cancel the Zone edit");
   click(action);
-  assert.strictEqual(segment.value, "bsg_house");
+  assert.strictEqual(level.value, "");
   assert.strictEqual(p.query(".phc-floating-notice").hidden, true);
   filter.value = "Zone"; filter.listeners.input({});
   assert.strictEqual(filter.value, "Zone", "the filter is no longer refused");
@@ -596,23 +595,23 @@ test("the guard notice's Cancel drops a held Zone choice", function () {
 
 test("choosing the Model's value cancels a held choice; a new choice retries with current values", function () {
   var p = page();
-  p.panel.receive({ type: "panel.snapshot", payload: threeSegments() });
-  var section = p.query("[data-section='ph_composer.overview']"), segment = byLabel(section, "Zone 1 Building-Segment");
-  segment.value = "bsg_tower"; segment.listeners.change({});
+  p.panel.receive({ type: "panel.snapshot", payload: managedSnapshot() });
+  var section = p.query("[data-section='ph_composer.overview']"), level = byLabel(section, "Zone 1 Level");
+  level.value = "lvl_1"; level.listeners.change({});
   result(p, 0, { status: "completed", effect: "committed" });
-  segment.value = "bsg_house"; segment.listeners.change({});
+  level.value = ""; level.listeners.change({});
   assert.strictEqual(p.sent.length, 1, "the Model's own value cancels without a request");
-  assert.strictEqual(byLabel(section, "Cancel Zone 1 Building-Segment choice").hidden, true);
-  segment.value = "bsg_tower"; segment.listeners.change({});
+  assert.strictEqual(byLabel(section, "Cancel Zone 1 Level choice").hidden, true);
+  level.value = "lvl_1"; level.listeners.change({});
   result(p, 1, { status: "completed", effect: "committed" });
-  var moved = threeSegments();
-  moved.sections["ph_composer.zones.overview"].value.zones[0].values.level_id = "lvl_1";
+  var moved = managedSnapshot();
+  moved.sections["ph_composer.zones.overview"].value.zones[0].values.ground_depth_mm = 100;
   p.panel.receive({ type: "panel.snapshot", payload: moved });
-  assert.match(segment.parentNode.querySelector(".cell-error").textContent, /Changed in the Model/);
-  segment.value = "bsg_annex"; segment.listeners.change({});
+  assert.match(level.parentNode.querySelector(".cell-error").textContent, /Changed in the Model/);
+  level.value = "lvl_2"; level.listeners.change({});
   assert.strictEqual(p.sent.length, 3, "a held choice retries instead of being ignored");
-  assert.strictEqual(p.sent[2].payload.params.expected_values.level_id, "lvl_1", "against the current values");
-  assert.strictEqual(segment.parentNode.querySelector(".cell-error").hidden, true);
+  assert.strictEqual(p.sent[2].payload.params.expected_values.ground_depth_mm, 100, "against the current values");
+  assert.strictEqual(level.parentNode.querySelector(".cell-error").hidden, true);
 });
 
 test("a refused Zone name keeps the typed text until a visible Cancel restores the Model's name", function () {
@@ -665,8 +664,8 @@ test("an invalid Ground depth offers Cancel, which restores the Model's value", 
 test("a refused tab change while a Zone choice is held offers Cancel on its notice", function () {
   var p = page();
   p.panel.receive({ type: "panel.snapshot", payload: managedSnapshot() });
-  var section = p.query("[data-section='ph_composer.overview']"), segment = byLabel(section, "Zone 1 Building-Segment");
-  segment.value = "bsg_tower"; segment.listeners.change({});
+  var section = p.query("[data-section='ph_composer.overview']"), level = byLabel(section, "Zone 1 Level");
+  level.value = "lvl_1"; level.listeners.change({});
   result(p, 0, { status: "completed", effect: "committed" });
   p.panel.showTab("export");
   click(p.query(".phc-floating-notice-action"));
@@ -692,10 +691,10 @@ test("a typed draft its Zone turns read only underneath keeps a visible Cancel",
 test("a refused choice's reason clears once the Zone it was refused against changes", function () {
   var p = page();
   p.panel.receive({ type: "panel.snapshot", payload: managedSnapshot() });
-  var section = p.query("[data-section='ph_composer.overview']"), segment = byLabel(section, "Zone 1 Building-Segment");
-  segment.value = "bsg_tower"; segment.listeners.change({});
+  var section = p.query("[data-section='ph_composer.overview']"), level = byLabel(section, "Zone 1 Level");
+  level.value = "lvl_1"; level.listeners.change({});
   result(p, 0, { status: "refused", code: "target.ambiguous", effect: "none", message: "Duplicated." });
-  var error = segment.parentNode.querySelector(".cell-error");
+  var error = level.parentNode.querySelector(".cell-error");
   assert.strictEqual(error.hidden, false);
   p.panel.receive({ type: "panel.snapshot", payload: managedSnapshot() });
   assert.strictEqual(error.hidden, false, "an unchanged Zone keeps the reason");
@@ -995,7 +994,7 @@ test("what the old State column said about a boundary is said on the boundary ce
   p.panel.receive({ type: "panel.snapshot", payload: payload });
   var section = p.query("[data-section='ph_composer.overview']");
   var cell = section.querySelectorAll("td").filter(function (td) {
-    return /col-boundary_condition/.test(td.className);
+    return /col-boundary_condition/.test(td.className) && td.parentNode.getAttribute("data-row-key");
   })[1];
   assert.strictEqual(cell.querySelector(".phc-enum-pill").textContent, "Surface", "a paired Face stays read only");
   assert.ok(cell.classList.contains("is-flagged"));
@@ -1077,8 +1076,9 @@ test("column menus sort: a Zone field orders Zones, a Face field orders Faces wi
   p.panel.receive({ type: "panel.snapshot", payload: payload });
   var section = p.query("[data-section='ph_composer.overview']");
   function names() {
-    return section.querySelectorAll("td").filter(function (td) { return /col-name/.test(td.className); })
-      .map(nameText);
+    return section.querySelectorAll("td").filter(function (td) {
+      return /col-name/.test(td.className) && td.parentNode.getAttribute("data-row-key");
+    }).map(nameText);
   }
   assert.strictEqual(byLabel(section, "Order by").parentNode.hidden, true, "Order by moves into the column menus");
   assert.strictEqual(byLabel(section, "Sort descending").hidden, true);
@@ -1173,7 +1173,7 @@ test("Colour by lives in the column headers and in one Colour by menu that lists
   p.panel.receive({ type: "panel.snapshot", payload: payload });
   var section = p.query("[data-section='ph_composer.overview']");
   var toggles = section.querySelectorAll(".phc-colour-toggle");
-  assert.strictEqual(toggles.length, 6, "Name, Building-Segment, Level, Type, Boundary and Assembly");
+  assert.strictEqual(toggles.length, 5, "Name, Level, Type, Boundary and Assembly");
   var boundary = byLabel(section, "Colour by Boundary condition");
   assert.strictEqual(boundary.getAttribute("aria-pressed"), "true");
   assert.strictEqual(boundary.parentNode.classList.contains("is-persistent"), true, "a pressed toggle stays at rest");
@@ -1518,50 +1518,20 @@ test("column filters combine across Zone and Face values without using text sear
 });
 
 test("managed chip updates send complete v2 values and expected values, with custom colour", function () {
-  var p = page(), payload = managedSnapshot(); p.panel.receive({ type: "panel.snapshot", payload: payload });
-  var section = p.query("[data-section='ph_composer.overview']"), segment = byLabel(section, "Zone 1 Building-Segment");
-  assert.strictEqual(segment.style["--category-fill"], "#268589");
-  assert.strictEqual(segment.children[0].textContent, "House");
-  segment.value = "bsg_tower"; segment.listeners.change({});
+  var p = page(), payload = managedSnapshot();
+  payload.sections["ph_composer.zones.overview"].value.zones[0].values.level_id = "lvl_1";
+  p.panel.receive({ type: "panel.snapshot", payload: payload });
+  var section = p.query("[data-section='ph_composer.overview']"), level = byLabel(section, "Zone 1 Level");
+  assert.strictEqual(level.style["--category-fill"], "#9977AA");
+  assert.strictEqual(level.children[1].textContent, "Level 1");
+  level.value = "lvl_2"; level.listeners.change({});
   assert.strictEqual(p.sent.length, 1);
   assert.strictEqual(p.sent[0].payload.expected_revision, 4);
-  assert.deepStrictEqual(p.sent[0].payload.params.values, { name: "Zone 1", building_segment_id: "bsg_tower",
-    level_id: null, ground_depth_mm: 0 });
+  assert.deepStrictEqual(p.sent[0].payload.params.values, { name: "Zone 1", building_segment_id: "bsg_house",
+    level_id: "lvl_2", ground_depth_mm: 0 });
   assert.deepStrictEqual(p.sent[0].payload.params.expected_values,
     payload.sections["ph_composer.zones.overview"].value.zones[0].values);
 });
-
-test("a Zone in no Building Segment reads No Building Segment and can be moved back", function () {
-  var p = page(), payload = managedSnapshot(), zone = payload.sections["ph_composer.zones.overview"].value.zones[0];
-  zone.schema_version = 3; zone.values.building_segment_id = null;
-  p.panel.receive({ type: "panel.snapshot", payload: payload });
-  var segment = byLabel(p.query("[data-section='ph_composer.overview']"), "Zone 1 Building-Segment");
-  var none = segment.children[segment.children.length - 1];
-  assert.deepStrictEqual([none.value, none.textContent], ["", "No Building Segment"]);
-  assert.strictEqual(segment.value, "");
-  segment.value = "bsg_tower"; segment.listeners.change({});
-  assert.strictEqual(p.sent[0].payload.params.values.building_segment_id, "bsg_tower");
-  assert.strictEqual(p.sent[0].payload.params.expected_values.building_segment_id, null);
-});
-
-test("the No Building Segment filter row takes the legend's neutral swatch while colouring by Segment",
-  function () {
-    var p = page(), payload = managedSnapshot(), zone = payload.sections["ph_composer.zones.overview"].value.zones[0];
-    zone.schema_version = 3; zone.values.building_segment_id = null;
-    payload.sections["ph_composer.colour_by.legend"] = { status: "completed", value: {
-      mode: "ph_composer.zones.by_building_segment", label: "Building-Segment",
-      rows: [{ value: "no_building_segment", label: "No Building Segment", state: "classified", count: 1,
-        colour: [176, 176, 176] }],
-      modes: [{ name: "ph_composer.zones.by_building_segment", label: "Building-Segment", group: null }] } };
-    p.panel.receive({ type: "panel.snapshot", payload: payload });
-    var section = p.query("[data-section='ph_composer.overview']");
-    menuItem(section, "Building-Segment column menu");
-    var row = byLabel(section, "Building-Segment column menu").parentNode.querySelectorAll("label")
-      .filter(function (node) {
-        return node.children.some(function (child) { return child.textContent === "No Building Segment"; });
-      })[0];
-    assert.strictEqual(row.querySelector(".phc-column-filter-swatch").style.background, "rgb(176,176,176)");
-  });
 
 test("managed choice error descriptions remain unique after removing and adding Zone rows", function () {
   var p = page(), payload = managedSnapshot(), zones = payload.sections["ph_composer.zones.overview"].value.zones;
@@ -1577,28 +1547,28 @@ test("managed choice error descriptions remain unique after removing and adding 
   payload.revision++;
   p.panel.receive({ type: "panel.snapshot", payload: payload });
   var section = p.query("[data-section='ph_composer.overview']");
-  var ids = ["Zone 2", "Zone 3"].flatMap(function (name) {
-    return ["Building-Segment", "Level"].map(function (field) {
-      var id = byLabel(section, name + " " + field).getAttribute("aria-describedby");
-      assert.strictEqual(section.querySelectorAll("small").filter(function (node) { return node.id === id; }).length,
-        1, name + " " + field + " describes its own error status");
-      return id;
-    });
+  var ids = ["Zone 2", "Zone 3"].map(function (name) {
+    var id = byLabel(section, name + " Level").getAttribute("aria-describedby");
+    assert.strictEqual(section.querySelectorAll("small").filter(function (node) { return node.id === id; }).length,
+      1, name + " Level describes its own error status");
+    return id;
   });
-  assert.strictEqual(new Set(ids).size, 4);
+  assert.strictEqual(new Set(ids).size, 2);
 });
 
 test("managed category filters retain IDs through rename and use current display text", function () {
-  var p = page(), payload = managedSnapshot(); p.panel.receive({ type: "panel.snapshot", payload: payload });
+  var p = page(), payload = managedSnapshot();
+  payload.sections["ph_composer.zones.overview"].value.zones[0].values.level_id = "lvl_1";
+  p.panel.receive({ type: "panel.snapshot", payload: payload });
   p.section = p.query("[data-section='ph_composer.overview']");
-  menuItem(p.section, "Building-Segment column menu");
-  var trigger = byLabel(p.section, "Building-Segment column menu"),
+  menuItem(p.section, "Level column menu");
+  var trigger = byLabel(p.section, "Level column menu"),
     boxes = trigger.parentNode.querySelectorAll("input");
   boxes[1].checked = false; boxes[1].listeners.change({});
-  payload.sections["ph_composer.zones.options"].value.building_segments[0].values.name = "North House";
+  payload.sections["ph_composer.zones.options"].value.levels[0].values.name = "Ground";
   payload.revision = 5; p.panel.receive({ type: "panel.snapshot", payload: payload });
   assert.ok(p.section.querySelector(".phc-table"));
-  assert.strictEqual(byLabel(p.section, "Zone 1 Building-Segment").children[0].textContent, "North House");
+  assert.strictEqual(byLabel(p.section, "Zone 1 Level").children[1].textContent, "Ground");
 });
 
 test("empty collection column menus still expose management and Cancel writes nothing", function () {
@@ -1616,21 +1586,23 @@ test("empty collection column menus still expose management and Cancel writes no
   assert.strictEqual(p.sent.length, 0);
 });
 
-test("removing an unused Segment drops its stale filter without clearing checked Faces", function () {
-  var p = page(), payload = managedSnapshot(); p.panel.receive({ type: "panel.snapshot", payload: payload });
+test("removing an unused Level drops its stale filter without clearing checked Faces", function () {
+  var p = page(), payload = managedSnapshot();
+  payload.sections["ph_composer.zones.overview"].value.zones[0].values.level_id = "lvl_1";
+  p.panel.receive({ type: "panel.snapshot", payload: payload });
   p.section = p.query("[data-section='ph_composer.overview']");
   var box = p.section.querySelectorAll("input").filter(function (node) { return node.type === "checkbox"; })[1];
   click(box);
-  menuItem(p.section, "Building-Segment column menu");
-  var trigger = byLabel(p.section, "Building-Segment column menu");
+  menuItem(p.section, "Level column menu");
+  var trigger = byLabel(p.section, "Level column menu");
   var filters = trigger.parentNode.querySelectorAll("input");
   filters[0].checked = false; filters[0].listeners.change({});
-  menuItem(p.section, "Building-Segment: filtered. Column menu", "Manage Building Segments…");
+  menuItem(p.section, "Level: filtered. Column menu", "Manage Levels…");
   var dialog = p.query("dialog"), rows = dialog.querySelectorAll(".phc-zone-option-row");
   rows[1].querySelectorAll("button").filter(function (button) { return button.textContent === "Merge / Delete"; })[0]
     .listeners.click({});
   var replacement = dialog.querySelectorAll("select").filter(function (node) {
-    return node.getAttribute("aria-label") === "Replacement for Tower";
+    return node.getAttribute("aria-label") === "Replacement for Level 2";
   })[0];
   replacement.value = ""; replacement.listeners.change({});
   dialog.querySelectorAll("button").filter(function (button) { return button.textContent === "Remove"; })[0]
@@ -1638,19 +1610,19 @@ test("removing an unused Segment drops its stale filter without clearing checked
   dialog.querySelectorAll("button").filter(function (button) { return button.textContent === "Save"; })[0]
     .listeners.click({});
   var request = p.sent[0].payload;
-  payload.revision = 5; payload.sections["ph_composer.zones.options"].value.building_segments.splice(1, 1);
+  payload.revision = 5; payload.sections["ph_composer.zones.options"].value.levels.splice(1, 1);
   p.panel.receive({ type: "panel.snapshot", payload: payload });
   p.panel.receive({ type: "action.result", payload: { session: request.session, request_id: request.request_id,
-    outcome: { status: "completed", value: { replacement_ids: { bsg_tower: null } } } } });
-  assert.ok(byLabel(p.section, "Zone 1 Building-Segment"), "no stale empty filter hides the remaining Zone");
+    outcome: { status: "completed", value: { replacement_ids: { lvl_2: null } } } } });
+  assert.ok(byLabel(p.section, "Zone 1 Level"), "no stale empty filter hides the remaining Zone");
   assert.ok(p.section.closest("[data-pane]").querySelector(".phc-selection-bar"), "checked Faces survive management");
 });
 
 test("the Columns menu will not hide a column while a Zone edit is held", function () {
   var p = page();
   p.panel.receive({ type: "panel.snapshot", payload: managedSnapshot() });
-  var section = p.query("[data-section='ph_composer.overview']"), segment = byLabel(section, "Zone 1 Building-Segment");
-  segment.value = "bsg_tower"; segment.listeners.change({});
+  var section = p.query("[data-section='ph_composer.overview']"), level = byLabel(section, "Zone 1 Level");
+  level.value = "lvl_1"; level.listeners.change({});
   result(p, 0, { status: "completed", effect: "committed" });
   var options = byLabel(section, "Columns");
   click(options);

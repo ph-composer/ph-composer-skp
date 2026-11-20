@@ -16,15 +16,19 @@ module PhComposer
       NAME = { "type" => "string", "minLength" => 1 }.freeze
       FIELDS = [Records::Field.new(:key => "name", :schema => NAME, :required => true),
                 Records::Field.new(:key => "colour", :schema => COLOUR, :required => true)].freeze
-      # Both option kinds share one follow-up, so a batch writing a Segment and a Level rewrites each Zone once.
+      # A Level's evidence copies its maps, so a metadata write on a Level rewrites each Zone's copy. A Building
+      # Segment's evidence carries its values only (`evidence`), so a write of its maps or settings touches the
+      # Segment alone and needs no follow-up.
       EVIDENCE_FOLLOW_UP = ->(request, proposal) { Options.rewrite_evidence(request, proposal) }
       SEGMENTS = Records::RecordKind.new(
         :id => SEGMENT_KIND, :label => "Building Segment", :schema_version => 1, :id_prefix => "bsg",
         :fields => FIELDS + [Records::Field.new(:key => "export_identifier", :required => true,
                                                 :schema => { "type" => "string", "pattern" => "^bseg_[a-zA-Z0-9_]+$",
-                                                             "maxLength" => 100 })],
-        :metadata_follow_up => EVIDENCE_FOLLOW_UP
+                                                             "maxLength" => 100 })]
       )
+      # What a Zone's evidence keeps of its Building Segment: identity and values, never its maps or other
+      # features' settings, so adopting a copied Zone brings a Segment with no settings.
+      SEGMENT_EVIDENCE = %w[id schema_version name colour export_identifier].freeze
       LEVELS = Records::RecordKind.new(:id => LEVEL_KIND, :label => "Level", :schema_version => 1,
                                        :id_prefix => "lvl", :fields => FIELDS,
                                        :metadata_follow_up => EVIDENCE_FOLLOW_UP)
@@ -106,14 +110,15 @@ module PhComposer
         [segment, level]
       end
 
-      # The choice evidence `record` carries after a write: its options as records and the Model they come from.
+      # The choice evidence `record` carries after a write: its Building Segment's identity and values, its Level
+      # as a record, and the Model they come from.
       # A Model with no option settings yet keeps the source the evidence already names: a copied Zone in no
       # Segment and no Level needs no adoption, so it can be edited before this Model has options of its own.
       def evidence(engine, record, proposal = nil)
         segment, level = resolve(engine, record, proposal)
         source = settings(engine, proposal)&.fetch("source_model_id")
         source ||= record.dig("choice_evidence", "source_model_id")
-        { "source_model_id" => source, "building_segment" => segment, "level" => level }
+        { "source_model_id" => source, "building_segment" => segment&.slice(*SEGMENT_EVIDENCE), "level" => level }
       end
 
       def display(engine, record)

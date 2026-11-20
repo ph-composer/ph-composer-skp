@@ -326,8 +326,12 @@ Metadata on authored entities is written the same way: `ph_composer.zones.update
 batch of explicit occurrences with the metadata last read, and refuse every target or none
 ([CONTRACTS.md](CONTRACTS.md), "Records and extension data"). `ph_composer.records.update_metadata`
 does the same for catalog records by `{kind, id}`, and for a record's declared parts, such as an
-Assembly's Layers, by `part_ids`; their update actions no longer take `user_data`. A Building
-Segment or Level write also rewrites the copy each Zone keeps of it, in the same Undo step.
+Assembly's Layers, by `part_ids`; their update actions no longer take `user_data`. A Level write also
+rewrites the copy each Zone keeps of it, in the same Undo step; a Zone keeps only a Building Segment's
+values, so a Segment write touches the Segment alone. `ph_composer.zones.save_segment_settings` saves
+one Segment's settings dialog (its values, default and a payload per extension namespace) as one Undo
+step and emits `ph_composer.zones.segment_settings_saved`; `ph_composer.zones.create_segment` makes a
+Segment with Zones moved in.
 `ph_composer.spaces.update_metadata` also writes a Space Floor's own map by a Volume row's
 `floor.reference`, and `ph_composer.model.update_metadata` writes the Model's own maps, read by
 `ph_composer.model.detail` and, for maps larger than a reply, `ph_composer.model.fragment`. Edge rows

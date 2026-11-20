@@ -1,5 +1,6 @@
-/* One collection draft, one public proposal, one Save. Adoption uses this same modal ownership:
-   opening/cancelling never writes, source mappings remain explicit, and refusals retain the draft. */
+/* The Levels draft, one public proposal, one Save. Adoption, of Levels and Building Segments alike, uses this
+   same modal ownership: opening/cancelling never writes, source mappings remain explicit, and refusals retain the
+   draft. Building Segments are managed from their heading rows (segment_rows.js), not here. */
 PhComposerUI.define("features/zones/option_dialog", ["workspace", "request", "features/zones/zone_options"],
 function (ui, requests, options) {
   "use strict";
@@ -74,27 +75,15 @@ function (ui, requests, options) {
     this.dialog.appendChild(this.list);
     if (!this.adopting) {
       this.add = ui.button("Add", function () {
-        var base = self.collection === "level" ? "Level" : self.draft.length ? "Building Segment" :
-          (self.current.adoption || {}).suggested_segment || "Building Segment";
-        var name = base, suffix = 1;
+        var name = "Level", suffix = 1;
         while (self.draft.some(function (choice) { return options.key(choice.name) === options.key(name);
-          })) name = base + " " + (++suffix);
-        var choice = { id: "new:" + (++serial), name: name, colour: PALETTE[0] };
-        self.draft.push(choice);
-        if (self.collection === "building_segment" && !self.defaultId) self.defaultId = choice.id;
+          })) name = "Level " + (++suffix);
+        self.draft.push({ id: "new:" + (++serial), name: name, colour: PALETTE[0] });
         self.fill();
         var names = self.list.querySelectorAll("[data-option-name]"); names[names.length - 1].focus();
       });
       this.add.classList.add("phc-zone-option-add");
       this.dialog.appendChild(this.add);
-      if (this.collection === "building_segment") {
-        var row = ui.element("label", "phc-zone-option-default", "Default Building Segment");
-        this.defaultSelect = ui.element("select"); this.defaultSelect.setAttribute("aria-label",
-          "Default Building Segment");
-        this.defaultSelect.addEventListener("change", function () {
-          self.defaultId = self.defaultSelect.value || null; self.validate(); });
-        row.appendChild(this.defaultSelect); this.dialog.appendChild(row);
-      }
     }
     this.dialog.appendChild(this.error);
     this.cancelButton = ui.button("Cancel", function () { self.cancel(); });
@@ -148,7 +137,7 @@ function (ui, requests, options) {
         var row = ui.element("div", "phc-zone-option-row"), name = ui.element("input");
         name.type = "text"; name.setAttribute("type", "text"); name.value = choice.name;
         name.setAttribute("aria-label", choice.name + " name"); name.setAttribute("data-option-name", choice.id);
-        name.addEventListener("input", function () { choice.name = name.value; self.fillDefault(); self.validate(); });
+        name.addEventListener("input", function () { choice.name = name.value; self.validate(); });
         row.appendChild(name); row.appendChild(self.colourEditor(choice, choice.name));
         var stored = options.find(self.current, self.collection, choice.id);
         row.appendChild(ui.element("span", "phc-zone-option-usage", stored ? usage(stored) : "Unused"));
@@ -157,39 +146,15 @@ function (ui, requests, options) {
       });
       if (!this.draft.length) this.list.appendChild(ui.element("p", "phc-empty",
         "No " + options.title(this.collection) + " defined."));
-      this.fillDefault();
     }
     this.validate();
   };
-  OptionDialog.prototype.fillDefault = function () {
-    if (!this.defaultSelect) return;
-    var self = this; this.defaultSelect.replaceChildren();
-    this.draft.forEach(function (choice) { self.defaultSelect.appendChild(ui.option(choice.id, choice.name)); });
-    this.defaultSelect.value = this.defaultId || "";
-  };
   OptionDialog.prototype.removal = function (choice, row) {
     var self = this, stored = options.find(this.current, this.collection, choice.id);
-    // An option takes the Zones of every used option this draft already merged into it.
-    var inUse = [choice.id].concat(Object.keys(this.replacements).filter(function (id) {
-      return self.replacements[id] === choice.id;
-    })).some(function (id) {
-      var source = options.find(self.current, self.collection, id), counts = source && source.usage || {};
-      return Boolean(counts.live || counts.recoverable);
-    }), area = ui.element("div", "phc-zone-option-removal");
-    var segments = this.collection === "building_segment";
-    // The Model keeps at least one Building Segment, so the last one says why it stays.
-    if (segments && this.draft.length === 1) {
-      area.appendChild(ui.element("span", "phc-zone-option-help",
-        choice.name + ": the Model keeps at least one Building Segment, so the last one cannot be removed."));
-      area.appendChild(ui.button("Keep", function () { self.fill(); }));
-      var shown = this.list.querySelector(".phc-zone-option-removal"); if (shown) shown.remove();
-      row.appendChild(area);
-      return;
-    }
+    var area = ui.element("div", "phc-zone-option-removal");
     var replacement = ui.element("select"); replacement.setAttribute("aria-label", "Replacement for " + choice.name);
     replacement.appendChild(ui.option("pending", "Choose a replacement"));
-    replacement.appendChild(ui.option("", !segments ? "Not set" : inUse ? "No Building Segment" :
-      "Delete unused option"));
+    replacement.appendChild(ui.option("", "Not set"));
     this.draft.forEach(function (target) { if (target.id !== choice.id) replacement.appendChild(ui.option(target.id,
       target.name)); });
     replacement.value = "pending";
@@ -201,15 +166,11 @@ function (ui, requests, options) {
       });
       if (choice.id.indexOf("new:") !== 0) self.replacements[choice.id] = target;
       self.draft = self.draft.filter(function (entry) { return entry !== choice; });
-      // The default never becomes none: it moves to the destination, else to the first remaining Segment.
-      if (self.defaultId === choice.id) self.defaultId = target || self.draft[0].id;
       self.fill();
     });
     remove.disabled = true;
     replacement.addEventListener("change", function () { remove.disabled = replacement.value === "pending"; });
-    // A Level can be cleared; a Building Segment's Zones merge into another or move to No Building Segment.
-    var next = !segments ? "Choose a survivor to merge, or clear the Level assignment." :
-      "Choose a survivor to merge, or move its Zones to No Building Segment.";
+    var next = "Choose a survivor to merge, or clear the Level assignment.";
     area.appendChild(ui.element("span", "phc-zone-option-help", choice.name + ": " +
       (stored ? usage(stored) + ". " : "") + next));
     area.appendChild(replacement); area.appendChild(remove); area.appendChild(ui.button("Keep", function () {
@@ -284,12 +245,7 @@ function (ui, requests, options) {
     if (this.adopting) {
       try { this.adoptionParams(); return ""; } catch (error) { return error.message; }
     }
-    var error = validChoices(this.draft); if (error) return error;
-    if (this.collection === "building_segment" && !this.draft.some(function (choice) {
-      return choice.id === this.defaultId; }, this)) {
-      return "Choose a default Building Segment.";
-    }
-    return "";
+    return validChoices(this.draft);
   };
   OptionDialog.prototype.validate = function () {
     if (!this.dialog) return;

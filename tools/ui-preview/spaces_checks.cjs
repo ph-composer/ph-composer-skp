@@ -146,7 +146,7 @@ check({ name: "spaces", output }, async ({ newPage, step }) => {
       assert(modes.includes(mode), `the Colour by menu lists ${mode}`);
     }
     const columnsMenu = page.getByRole("button", { name: "Columns", exact: true });
-    assert.deepEqual(await menuTexts(columnsMenu), ["Building-Segment", "Level", "Net area factor"]);
+    assert.deepEqual(await menuTexts(columnsMenu), ["Level", "Net area factor"]);
     await columnsMenu.click();
     await items.filter({ hasText: "Level" }).click();
     await page.locator(".phc-zone-view:not([hidden]) th.col-level:not([hidden])").waitFor();

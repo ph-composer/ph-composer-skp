@@ -422,14 +422,15 @@ class ZoneOptionsTest < PhComposerTestCase
     extension
   end
 
-  def foreign_record(extension, payload, include_level = false)
+  # A copied Zone whose Level evidence carries an extension payload. A Building Segment's evidence carries its
+  # values only, so its settings never travel with a copy.
+  def foreign_record(extension, payload)
     segment = { "id" => "bsg_AAAAAAAAAAAA", "schema_version" => 1, "name" => "Copied", "colour" => "#123456",
-                "export_identifier" => O.export_identifier("Copied"),
-                "extension_data" => { extension.namespace => extension.envelope(payload) } }
-    level = include_level ? { "id" => "lvl_AAAAAAAAAAAA", "schema_version" => 1,
-                              "name" => "Copied Level", "colour" => "#ABCDEF" } : nil
+                "export_identifier" => O.export_identifier("Copied") }
+    level = { "id" => "lvl_AAAAAAAAAAAA", "schema_version" => 1, "name" => "Copied Level", "colour" => "#ABCDEF",
+              "extension_data" => { extension.namespace => extension.envelope(payload) } }
     { "id" => "zon_AAAAAAAAAAAA", "schema_version" => 2, "name" => "Copied Zone", "ground_depth_mm" => 0.0,
-      "building_segment_id" => segment.fetch("id"), "level_id" => level && level.fetch("id"),
+      "building_segment_id" => segment.fetch("id"), "level_id" => level.fetch("id"),
       "choice_evidence" => { "source_model_id" => "foreign", "building_segment" => segment, "level" => level } }
   end
 
@@ -442,7 +443,7 @@ class ZoneOptionsTest < PhComposerTestCase
     result = invoke("#{O::PREFIX}.adopt", "mappings" => mappings)
     assert_equal ["refused", "reference.invalid", "none"], result.values_at("status", "code", "effect")
     assert_equal record, Z::ZONE_STORE.read(group)
-    assert_empty query.fetch("building_segments")
+    assert_empty query.fetch("levels")
   end
 
   def test_foreign_option_extension_remaps_self_and_cross_collection_after_allocation
@@ -450,14 +451,30 @@ class ZoneOptionsTest < PhComposerTestCase
       { "path" => "$.segment_id", "target_kind" => O::SEGMENT_KIND, "cardinality" => "one" },
       { "path" => "$.level_id", "target_kind" => O::LEVEL_KIND, "cardinality" => "one" }
     ])
-    record = foreign_record(extension, { "segment_id" => "bsg_AAAAAAAAAAAA", "level_id" => "lvl_AAAAAAAAAAAA" }, true)
+    record = foreign_record(extension, { "segment_id" => "bsg_AAAAAAAAAAAA", "level_id" => "lvl_AAAAAAAAAAAA" })
     group, = add_zone(100, record)
     adopt
     after = Z::ZONE_STORE.read(group)
-    segment = O::SEGMENTS.store.read(@model, after.fetch("building_segment_id"))
-    payload = segment.dig("extension_data", extension.namespace, "payload")
+    level = O::LEVELS.store.read(@model, after.fetch("level_id"))
+    payload = level.dig("extension_data", extension.namespace, "payload")
     assert_equal after.fetch("building_segment_id"), payload.fetch("segment_id")
     assert_equal after.fetch("level_id"), payload.fetch("level_id")
+  end
+
+  # Evidence an earlier version wrote carried the whole Segment record; adoption keeps only its values, so the
+  # adopted Segment reads its defaults and no other feature's settings or map arrive with a copy.
+  def test_adopting_old_segment_evidence_brings_no_settings_or_map
+    extension = register_portable_extension([])
+    record = foreign_record(extension, {})
+    record.fetch("choice_evidence").fetch("building_segment")
+          .merge!("user_data" => { "firm" => 1 },
+                  "extension_data" => { extension.namespace => extension.envelope({ "note" => "old" }) })
+    group, = add_zone(100, record)
+    adopt
+    segment = O::SEGMENTS.store.read(@model, Z::ZONE_STORE.read(group).fetch("building_segment_id"))
+    assert_equal "Copied", segment.fetch("name")
+    assert_nil segment["user_data"]
+    assert_empty segment.fetch("extension_data", {})
   end
 
   def test_source_merge_can_terminate_at_an_existing_local_option
@@ -513,7 +530,8 @@ class ZoneOptionsTest < PhComposerTestCase
     assert_equal 4, after.length
     after.each do |record|
       assert_equal level_map, record.dig("choice_evidence", "level", "user_data")
-      assert_equal segment_map, record.dig("choice_evidence", "building_segment", "user_data")
+      assert_equal O::SEGMENT_EVIDENCE.sort, record.dig("choice_evidence", "building_segment").keys.sort,
+                   "a Segment's evidence keeps its values, never its map"
     end
     assert_equal before.map { |record| record.reject { |key, _| key == "choice_evidence" } },
                  after.map { |record| record.reject { |key, _| key == "choice_evidence" } }
@@ -565,6 +583,20 @@ class ZoneOptionsTest < PhComposerTestCase
     assert_equal({}, option_map(O::LEVEL_KIND, level_id))
   end
 
+  # A Building Segment's evidence holds its values only, so writing its map touches the Segment alone: a locked
+  # member Zone does not block it and no Zone is rewritten.
+  def test_segment_map_write_leaves_member_zones_alone_even_when_locked
+    group, = add_zone
+    adopt
+    segment_id = Z::ZONE_STORE.read(group).fetch("building_segment_id")
+    before = zones_and_stamps
+    group.locked = true
+    result = write_metadata(metadata_entry(O::SEGMENT_KIND, segment_id, { "firm" => 1 }))
+    assert_equal %w[completed committed], result.values_at("status", "effect"), result.inspect
+    assert_equal before, zones_and_stamps
+    assert_equal({ "firm" => 1 }, option_map(O::SEGMENT_KIND, segment_id))
+  end
+
   def test_merge_and_remove_keep_the_survivor_map_and_report_the_removed_maps
     house, = add_zone(100, legacy("zon_AAAAAAAAAAAA", "House", "Lower"))
     garage, = add_zone(200, legacy("zon_BBBBBBBBBBBB", "Garage", "Upper"))
@@ -585,7 +617,7 @@ class ZoneOptionsTest < PhComposerTestCase
     assert_equal({ "keep" => { "a" => 1 } }, option_map(O::SEGMENT_KIND, house_id), "maps are never combined")
     garage_zone = Z::ZONE_STORE.read(@model.entities.grep(Sketchup::Group).last)
     assert_equal house_id, garage_zone.fetch("building_segment_id")
-    assert_equal({ "keep" => { "a" => 1 } }, garage_zone.dig("choice_evidence", "building_segment", "user_data"))
+    assert_nil garage_zone.dig("choice_evidence", "building_segment", "user_data")
     @model.undo
     assert_equal({ "zeta" => 1, "alpha" => [2] }, option_map(O::SEGMENT_KIND, garage_id))
     assert_equal before_merge, zones_and_stamps, "Undo restores each Zone's choice and evidence"
@@ -625,7 +657,7 @@ class ZoneOptionsTest < PhComposerTestCase
     refute_includes JSON.generate(extraction.document), "attic"
   end
 
-  def test_adopting_a_copied_zone_rebuilds_its_options_with_their_maps
+  def test_adopting_a_copied_zone_rebuilds_its_level_map_and_not_its_segment_map
     group, face = add_zone
     adopt
     segment_id, level_id = Z::ZONE_STORE.read(group).values_at("building_segment_id", "level_id")
@@ -642,7 +674,8 @@ class ZoneOptionsTest < PhComposerTestCase
     adopt
     adopted = Z::ZONE_STORE.read(group)
     refute_equal segment_id, adopted.fetch("building_segment_id")
-    assert_equal({ "firm" => { "block" => "A" } }, option_map(O::SEGMENT_KIND, adopted.fetch("building_segment_id")))
+    assert_equal({}, option_map(O::SEGMENT_KIND, adopted.fetch("building_segment_id")),
+                 "a Segment's map stays in the Model it came from")
     assert_equal({ "firm" => { "floor" => 1 } }, option_map(O::LEVEL_KIND, adopted.fetch("level_id")))
     assert_equal({ "firm" => { "floor" => 1 } }, adopted.dig("choice_evidence", "level", "user_data"))
   end

@@ -4,9 +4,26 @@
    views. This module names no host and no view. */
 PhComposerUI.define("table_views", ["snapshot"], function (snapshot) {
   "use strict";
-  var hosts = Object.create(null), views = Object.create(null);
+  var hosts = Object.create(null), views = Object.create(null), headings = Object.create(null);
 
   function entries(hostId) { return views[hostId] || (views[hostId] = []); }
+
+  /* A contribution to the heading rows a host draws in every view, from any feature: the host names the hook
+     it calls on each (Zones: `segmentHeading(segment, state)`). It needs an id, its own under one host;
+     `order` places it among the others. Answers a function that withdraws it. */
+  function heading(hostId, contribution) {
+    if (!hostId) throw new Error("A heading contribution needs a host id.");
+    if (!contribution || !contribution.id) throw new Error("A heading contribution needs an id.");
+    var list = headings[hostId] || (headings[hostId] = []);
+    if (list.some(function (entry) { return entry.id === contribution.id; })) {
+      throw new Error("Duplicate heading contribution " + contribution.id + " under " + hostId + ".");
+    }
+    list.push(contribution);
+    return function () {
+      var index = list.indexOf(contribution);
+      if (index >= 0) list.splice(index, 1);
+    };
+  }
 
   /* A view is checked as it registers: it needs an id and a label, and its id is its own under one host. */
   function register(hostId, view) {
@@ -33,6 +50,10 @@ PhComposerUI.define("table_views", ["snapshot"], function (snapshot) {
         return entries(hostId).filter(function (view) {
           return (view.sections || []).every(function (name) { return snapshot.section(state, name) !== null; });
         }).slice().sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
+      },
+      // The heading contributions registered under this host, in order.
+      headings: function () {
+        return (headings[hostId] || []).slice().sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
       }
     };
   }
@@ -45,5 +66,5 @@ PhComposerUI.define("table_views", ["snapshot"], function (snapshot) {
       }, []);
   }
 
-  return { register: register, host: host, unhosted: unhosted };
+  return { register: register, heading: heading, host: host, unhosted: unhosted };
 });

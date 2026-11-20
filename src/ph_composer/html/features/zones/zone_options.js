@@ -2,8 +2,6 @@
 PhComposerUI.define("features/zones/zone_options", ["snapshot", "workspace"], function (snapshot, ui) {
   "use strict";
   var COLLECTIONS = { building_segment: "building_segments", level: "levels" };
-  /* The Colour-by legend's value for Zones in no Building Segment (features/zones/colour_modes.rb). */
-  var NO_SEGMENT_KEY = "no_building_segment";
   /* The colours the options dialog offers: each reads at 4.5:1 or better with its chip ink, clear of the point
      where white and the near-black ink are equally poor (dom.js, chipInk). */
   var PALETTE = ["#1F7478", "#5588BB", "#9977AA", "#CB7854", "#A49C42", "#56936A", "#A95C78", "#7C8694"];
@@ -32,6 +30,6 @@ PhComposerUI.define("features/zones/zone_options", ["snapshot", "workspace"], fu
   }
   function key(name) { return name.trim().toLowerCase().replace(/[\s_-]+/g, " "); }
   return { read: read, list: list, find: find, managed: managed, value: value, label: label, colour: colour,
-    paint: ui.paintChip, PALETTE: PALETTE, NO_SEGMENT_KEY: NO_SEGMENT_KEY, key: key, title: function (field) {
+    paint: ui.paintChip, PALETTE: PALETTE, key: key, title: function (field) {
       return field === "building_segment" ? "Building Segments" : "Levels"; } };
 });
