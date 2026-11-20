@@ -29,6 +29,8 @@ module PhComposer
         FILL_ALPHA = 90
         OUTLINE_ALPHA = 230
         OUTSIDE_ZONE = "That Face is in no Zone. Make it a Zone first, then classify its Faces."
+        # A Face inside a Zone that another feature's record has taken out of its envelope (Zones names no feature).
+        OUTSIDE_ENVELOPE = "That Face is not part of the Zone's envelope."
         NOTHING_CHOSEN = "Choose an Assembly, face type or boundary before painting."
         CANCELLED = "The Classify gesture was cancelled. Nothing was written."
 
@@ -254,7 +256,8 @@ module PhComposer
           occurrence = Zones::Occurrences.occurrence_for_path(path)
           unless occurrence
             reset_gesture
-            announce(OUTSIDE_ZONE, :warning)
+            announce(outside_envelope?(path) ? "#{OUTSIDE_ENVELOPE} #{Outcome::NOTHING_WRITTEN}" : OUTSIDE_ZONE,
+                     :warning)
             return
           end
 
@@ -401,9 +404,15 @@ module PhComposer
           Sketchup.status_text = instructions if Sketchup.respond_to?(:status_text=)
         end
 
+        # Whether a pick that found no Zone Face reached one inside a Zone but outside its envelope, which
+        # making a Zone would not fix.
+        def outside_envelope?(path)
+          Zones::Occurrences.pick_reason(path) == "outside_envelope"
+        end
+
         def tooltip(path)
           return "" if path.nil?
-          return OUTSIDE_ZONE unless @hover
+          return outside_envelope?(path) ? OUTSIDE_ENVELOPE : OUTSIDE_ZONE unless @hover
 
           suggested = Geometry.suggested_values(@hover)
           "#{@hover.zone.record.fetch('name')}: #{suggested.fetch('face_type')}, " \

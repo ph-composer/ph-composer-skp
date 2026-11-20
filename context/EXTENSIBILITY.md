@@ -565,7 +565,8 @@ a unit-bearing label ("2.5 m") follows the display units; and an entry may suppl
 `[quantity, si_value]` the legend sums per row and shows beside the count, or a list of them summed
 position by position and shown joined ("60 m³/h / 40 m³/h"); Spaces' modes sum weighted area, airflows,
 floor area or net volume. Labels and figures are formatted where they are shown, in the HUD and in
-`colour_by.state`, never at rebuild, so a unit switch needs no rebuild. A row sums the same quantities
+`colour_by.state`, never at rebuild, so a unit switch needs no rebuild: the service repaints each Model it
+draws on every display units write (`Preferences.on_units_change`). A row sums the same quantities
 throughout; an entry giving others, or a figure that is not quantity pairs, fails the mode.
 An entry may also supply `hatch_outline: false` to retain its unclassified hatch while leaving
 boundary edges to SketchUp. Omission preserves the solid unclassified boundary. This flag affects

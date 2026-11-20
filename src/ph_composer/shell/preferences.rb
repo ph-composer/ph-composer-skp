@@ -77,6 +77,7 @@ module PhComposer
           raise UserError, "Display units must be SI or IP." unless UNIT_SYSTEMS.include?(value)
 
           write(:unit_system, value)
+          units_changed
         when "dimension_format"
           write_dimension_format(value, scope, system)
         when "table_view"
@@ -95,10 +96,22 @@ module PhComposer
       # could not read: resetting is the way out of one. Raises UserError when the host refuses a write.
       def reset_display
         write(:unit_system, DEFAULT_UNIT_SYSTEM)
+        units_changed
         write_map("dimension_formats", {})
         write_map("table_views", {})
         write(:colour_by_mode, "")
         RESETTABLE
+      end
+
+      # Runs `block` after each saved display units write, from the panel or from Reset display preferences,
+      # and answers a lambda that unsubscribes it. A viewport that formats quantities as it draws, such as the
+      # Colour-by legend, repaints from here; nothing about a Model changes. A subscriber that raises is logged
+      # and the change stands.
+      def on_units_change(&block)
+        raise ArgumentError, "A display units subscriber block is required." unless block
+
+        units_subscribers << block
+        -> { units_subscribers.delete(block) }
       end
 
       def snapshot
@@ -107,6 +120,7 @@ module PhComposer
       end
 
       def reset_for_test
+        @units_subscribers = nil
         @number_format = nil
         @apple_locale_reader = nil
       end
@@ -114,6 +128,18 @@ module PhComposer
       attr_writer :apple_locale_reader
 
       private
+
+      def units_subscribers
+        @units_subscribers ||= []
+      end
+
+      def units_changed
+        units_subscribers.dup.each do |subscriber|
+          subscriber.call
+        rescue StandardError => error
+          Diagnostics.exception("preferences_subscriber", error)
+        end
+      end
 
       # A dotted lowercase name, as registered names are.
       def valid_id?(value)

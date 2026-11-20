@@ -544,6 +544,9 @@ The panel targets Chromium 88 and ES2020. ESLint checks both syntax and the allo
 - The first keystroke or paste fixes a draft's starting profile, so a switch never reinterprets
   text already typed.
 - The preference lives in `Sketchup.write_default` (`shell/preferences.rb`), never in page storage.
+  Each saved units write, from the panel or Reset display preferences, runs the
+  `Preferences.on_units_change` subscribers; the Colour-by service uses it to repaint the viewports whose
+  HUD formats quantities as it draws. A subscriber that raises is logged and the write stands.
   A dimension scope's formats are one base64 JSON value, because SketchUp 26.1 reads back a stored
   string containing a double quote as nil. A dimension scope is a dotted name under its feature's
   id; a scope never chosen takes the system default (mm in SI, decimal inches in IP).

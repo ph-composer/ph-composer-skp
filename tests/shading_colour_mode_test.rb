@@ -120,6 +120,36 @@ class ShadingColourModeTest < PhComposerTestCase
     assert_equal 2, service.rows.find { |row| row.label == "Louvre" && row.state == :classified }.count
   end
 
+  # The area comes from Face#area(transform), which must give the loops' figure under every placement
+  # export meets: scaled, mirrored, rotated and with a hole. The stub's Face#area sums the same loops, so this
+  # pins the routing and the unit conversion; the host's agreement is the measured row in
+  # context/SKETCHUP_HOST_BEHAVIOR.md.
+  def test_the_area_figure_is_the_faces_world_loop_area_under_scaled_and_mirrored_placements
+    side = 2 * INCHES
+    holed = Sketchup::Face.new(70, :points => [[0, 0, 0], [side, 0, 0], [side, side, 0], [0, side, 0]].map do |point|
+      Geom::Point3d.new(*point)
+    end, :holes => [[[0.5, 0.5, 0], [1, 0.5, 0], [1, 1, 0], [0.5, 1, 0]].map do |point|
+      Geom::Point3d.new(*point.map { |metres| metres * INCHES })
+    end])
+    # A quarter turn about x, column-major, so the Face stands up out of its plane.
+    rotation = Geom::Transformation.new([1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1])
+    scalings = [[1, 1, 1], [2, 3, 1], [-1, 1, 1], [-2, 0.5, 4]].map { |xyz| Geom::Transformation.scaling(*xyz) }
+    transforms = scalings + [rotation * Geom::Transformation.scaling(1.5, 1, 1)]
+    [square(71, 1), holed].product(transforms).each do |face, transform|
+      assert_in_delta PhComposer::FaceCapture.call(face, transform).area_m2, SH::Inventory.area_m2(face, transform),
+                      1e-9, transform.to_a.inspect
+    end
+  end
+
+  # SketchUp's Face#area subtracts a glued cutting component's opening; the loops, and export, keep it.
+  def test_a_face_with_a_glued_component_is_measured_from_its_loops
+    face = @loose.first
+    window = Sketchup::ComponentDefinition.new(Sketchup::Entities.new([]), :name => "Window")
+    @model.entities << Sketchup::ComponentInstance.new(90, window, :glued_to => face)
+    face.define_singleton_method(:area) { |*_| raise "Face#area is net of the glued opening" }
+    assert_in_delta 1.0, SH::Inventory.area_m2(face, Geom::Transformation.new), 1e-9
+  end
+
   private
 
   def activate

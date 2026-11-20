@@ -137,6 +137,14 @@ Found in the host pass:
 - The Classify tool, clicked on a Shading Face inside a Zone, says "That Face is in no Zone"; it should say
   the Face is a shading surface ([SD03](evidence/sd03-zones-seam.md)).
 
+All three are fixed by [#536](https://github.com/ph-composer/ph-composer-skp/pull/536) (2026-11-20): Shading
+area from `Face#area(transform)` and section planes per container bring the rebuild to a 162.9 ms median plus a
+27.0 ms refresh on `a0d8cb7e` ([timing](evidence/followups-colour-by-timing.md)); a display-units write repaints
+every Model drawing a Colour-by legend (`Preferences.on_units_change`); the Classify tool says "That Face is not
+part of the Zone's envelope." That is under the target at the median; 6 of 21 pairs exceed 200 ms (worst 223.8 ms). The legend repaint and
+the Classify message passed the host check on `63730e18` under background control, the units switched by
+bridge ([evidence](evidence/followups-colour-by-timing.md#host-check-of-the-legend-repaint-and-the-classify-message-63730e18)).
+
 Carried from earlier packets, not Shading's: `tools/ui-preview/assembly_hover_checks.cjs` still fails as it
 did before this packet ([SD07 evidence](evidence/sd07-acceptance.md)).
 
@@ -150,3 +158,4 @@ would reuse P5s-06's section.
 | Date | Event |
 | --- | --- |
 | 2026-11-20 | Ed: "WUFI looks right". SD07 recorded `pass`; SD01 to SD07 all pass on `906a102c`. Packet marked Complete and archived to `planning/archive/phase-05-shading/`. |
+| 2026-11-20 | Ed: "fix the three shading follow-ups". [#536](https://github.com/ph-composer/ph-composer-skp/pull/536) fixes all three; host timing recorded on `a0d8cb7e`. |

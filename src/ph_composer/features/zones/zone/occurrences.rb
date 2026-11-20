@@ -314,6 +314,13 @@ module PhComposer
         end
       end
 
+      # Why one picked root-to-entity list names no Zone Face occurrence, with `containment`'s reasons
+      # (`outside_zone`, `outside_envelope` and the rest), or nil when it names one. Read along the pick alone,
+      # as `occurrence_for_path` is, so a tool can say why a pointer move found nothing.
+      def pick_reason(path)
+        holding(Array(path))[2]
+      end
+
       # The occurrence one picked instance path names, or nil when the path reaches no Face or the
       # Face lies inside no Zone. Nothing here walks the Model: the pick already knows the whole
       # root-to-leaf path, and a viewport tool picks once per pointer move.
