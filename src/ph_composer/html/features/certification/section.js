@@ -53,6 +53,16 @@ PhComposerUI.define("features/certification/section", ["panel", "workspace"], fu
     // user picks one, rather than being replaced unseen.
     render: function (segment, draft, context) {
       var part = ui.element("div");
+      // A stored payload that is not an object cannot be edited here; it is kept as stored, and the dialog's
+      // other sections still save.
+      if (!draft || typeof draft !== "object" || Array.isArray(draft)) {
+        var row = ui.element("div", "phc-segment-settings-row");
+        row.appendChild(ui.element("span", "phc-segment-settings-label", "Settings"));
+        row.appendChild(ui.element("span", "", "These settings cannot be read, so they are kept as stored and " +
+          "the export refuses them."));
+        part.appendChild(row);
+        return part;
+      }
       FIELDS.forEach(function (field) {
         if (!Object.prototype.hasOwnProperty.call(draft, field.key)) draft[field.key] = DEFAULTS[field.key];
         part.appendChild(choice(field, draft, context));

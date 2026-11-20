@@ -144,6 +144,17 @@ class SegmentCertificationTest < PhComposerTestCase
     end
   end
 
+  def test_a_stored_null_or_false_envelope_reads_unsupported_with_the_defaults
+    reference
+    house = segment_id("House")
+    stored = O::SEGMENTS.store.read(@model, house)
+    [nil, false].each do |envelope|
+      O::SEGMENTS.store.write(@model, stored.merge("extension_data" => { NAMESPACE => envelope }))
+      assert_equal({ "id" => house, "values" => C::Segment::DEFAULTS, "stored" => false,
+                     "extension_status" => "unsupported" }, query(C::READ, "id" => house), envelope.inspect)
+    end
+  end
+
   def test_legacy_zones_name_no_segment_record_so_the_section_writes_no_record
     @model.entities << box(1000, "L", "Living", "House", [0, 5, 0, 4])
 

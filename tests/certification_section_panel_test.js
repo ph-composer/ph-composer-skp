@@ -170,3 +170,22 @@ test("a stored value the section does not offer is kept, shows no choice and hol
   selects[2].value = "other"; selects[2].listeners.change({});
   assert.strictEqual(saveButton(dialog).disabled, false);
 });
+
+test("a stored payload that is not an object opens the dialog with a notice and sends nothing for it", function () {
+  var p = load();
+  var options = snapshot();
+  options.sections["ph_composer.zones.options"].value.building_segments[1].extension_data[NAMESPACE].payload =
+    "unreadable";
+  p.panel.receive({ type: "panel.snapshot", payload: options });
+  var dialog = settings(p, "Annex");
+  assert.strictEqual(choices(dialog)[0], undefined, "no choice to edit");
+  assert.ok(dialog.querySelectorAll("span").some(function (node) {
+    return /These settings cannot be read/.test(node.textContent);
+  }), "the section says why");
+  var name = dialog.querySelectorAll("input").filter(function (node) {
+    return node.getAttribute("aria-label") === "Name";
+  })[0];
+  name.value = "East annex"; name.listeners.input({});
+  click(saveButton(dialog));
+  assert.deepStrictEqual(plain(p.actions()[0].payload.params.extension_payloads), {});
+});

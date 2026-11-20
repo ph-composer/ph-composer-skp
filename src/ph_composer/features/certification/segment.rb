@@ -41,11 +41,14 @@ module PhComposer
                                          :export_relevance => "required", :validate => method(:problems))
 
       # One Segment's settings as other features read them: the stored payload when it is understood, else the
-      # defaults, with whether a payload was used and the envelope's status (null when the Segment has none).
+      # defaults, with whether a payload was used and the envelope's status, null only when the Segment stores
+      # none: a stored null or other unreadable envelope is `unsupported`, as a record read says.
       def read(request, id)
         record = request.engine.find(SEGMENT_KIND, id)
-        envelope = record.fetch("extension_data", {})[NAMESPACE]
-        status = envelope && Records::Extension.status(envelope, request.registry.catalog.extension(NAMESPACE))
+        data = record.fetch("extension_data", {})
+        envelope = data[NAMESPACE]
+        installed = request.registry.catalog.extension(NAMESPACE)
+        status = data.key?(NAMESPACE) ? Records::Extension.status(envelope, installed) : nil
         payload = status == "understood" ? envelope.fetch("payload") : nil
         { "id" => id, "values" => values(payload), "stored" => !payload.nil?, "extension_status" => status }
       end
