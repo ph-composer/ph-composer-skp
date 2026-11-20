@@ -123,11 +123,19 @@ class ShadingMenuTest < PhComposerTestCase
     result = handler(ASSIGN).call(@session)
 
     assert_equal %w[refused shading.zone_target none], result.values_at("status", "code", "effect")
-    assert_equal result.fetch("message"), Sketchup.status_texts.last
+    assert_equal "Set as Shading: Nothing was written. Left out 1 entity. The Group is a Zone or holds one. A " \
+                 "whole Zone as shading is not supported.", Sketchup.status_texts.last
 
-    select(@zone, @edge)
+    locked = Sketchup::Group.new(30, Sketchup::Entities.new([Sketchup::Face.new(31)]), :locked => true)
+    @model.entities << locked
+    select(@zone, locked, @edge)
     handler(ASSIGN).call(@session)
-    assert Sketchup.status_texts.last.end_with?("Nothing was written. 1 other selected entity was ignored.")
+    message = Sketchup.status_texts.last
+    assert message.start_with?("Set as Shading: Nothing was written. Left out 2 entities. ")
+    assert_match(/The Group is a Zone or holds one/, message)
+    assert_match(/The Group or a Group above it is locked/, message)
+    assert message.end_with?("1 other selected entity was ignored.")
+    assert_empty @model.operations
     assert_empty @model.operations
     refute STORE.marks?(@zone)
   end

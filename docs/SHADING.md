@@ -26,6 +26,7 @@ right-click menu or from Extensions > PH-Composer. **Clear Shading** removes the
 | --- | --- |
 | A loose Face, at the Model root or inside a plain Group or a component placed once | Tagged |
 | A plain Group or component, at the root, nested, or inside a Zone | Tagged, with every Face inside it |
+| A Group or component inside a Zone that holds classified Faces | Left out. Clear those Faces' classification first |
 | An unclassified Face inside a Zone, such as an overhang | Tagged. It leaves the Zone's envelope and is no longer an unclassified Face |
 | A classified Face inside a Zone | Left out. Clear its classification first |
 | A Face inside a component placed more than once, or inside a copied Group not yet made unique | Left out. Tag the component or Group instead, or make it unique first |

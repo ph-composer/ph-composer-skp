@@ -8,8 +8,6 @@ module PhComposer
     # revision, invokes assign or clear, and reports what changed and what was left out. It writes no record.
     module Menu
       SELECTION = "#{FEATURE_ID}.selection"
-      # Left-out reasons named in the notice; any more are counted.
-      REASONS_SHOWN = 3
 
       module_function
 
@@ -82,9 +80,7 @@ module PhComposer
           result = API.invoke(:context => @context, :name => "#{FEATURE_ID}.#{action}",
                               :params => { "targets" => rows.map { |row| row.fetch("reference") } },
                               :request => { "sequence" => @sequence, "expected_revision" => read.fetch("revision") })
-          unless result["status"] == "completed"
-            return show([result.fetch("message"), ignored_sentence(selection)].compact.join(" "), false, result)
-          end
+          return show(refusal(action, result, selection), false, result) unless result["status"] == "completed"
 
           value = result.fetch("value")
           show(summary(action, value, selection), value.fetch("left_out").empty?, result)
@@ -105,6 +101,16 @@ module PhComposer
           "#{words.fetch(:verb)}: #{parts.compact.join(' ')}"
         end
 
+        # A command refused because every target was left out carries them all in its detail: name each reason.
+        # Any other refusal (a stale revision, a moved entity) is the action's own message.
+        def refusal(action, result, selection)
+          left_out = result.dig("detail", "left_out")
+          return [result.fetch("message"), ignored_sentence(selection)].compact.join(" ") unless left_out
+
+          parts = ["Nothing was written.", left_out_sentence(left_out), ignored_sentence(selection)]
+          "#{ACTIONS.fetch(action).fetch(:verb)}: #{parts.compact.join(' ')}"
+        end
+
         def ignored_sentence(selection)
           ignored = selection.fetch("ignored_total")
           return nil unless ignored.positive?
@@ -112,16 +118,12 @@ module PhComposer
           "#{ignored} other selected #{ignored == 1 ? 'entity was' : 'entities were'} ignored."
         end
 
-        # Left out N: each distinct reason once, with how many it covers, the first few. A reason that names its
-        # container (shading.inherited) is distinct per container.
+        # Left out N: every distinct reason once, with how many it covers. A reason that names its container
+        # (shading.inherited) is distinct per container. The selection limit bounds the rows.
         def left_out_sentence(rows)
-          groups = rows.group_by { |row| row.fetch("message") }.values
-          reasons = groups.first(REASONS_SHOWN).map do |group|
-            message = group.first.fetch("message")
+          reasons = rows.group_by { |row| row.fetch("message") }.map do |message, group|
             group.length == 1 ? message : "#{group.length} of them: #{message}"
           end
-          more = groups.length - REASONS_SHOWN
-          reasons << "#{more} more #{more == 1 ? 'reason' : 'reasons'}." if more.positive?
           "Left out #{count(rows.length)}. #{reasons.join(' ')}"
         end
 
