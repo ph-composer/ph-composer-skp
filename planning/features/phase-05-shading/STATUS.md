@@ -1,7 +1,7 @@
 # Shading: tracking ledger
 
 DATE: 2026-11-19
-STATUS: In progress. Every stage authorized by Ed 2026-11-19 ([Authorization](#authorization)). P5s-01 to P5s-07 merged to main (#527 to #533). Batched host pass 2026-11-20 on `906a102c`: SD01 to SD06 pass; SD07's host part observed, open on Ed's WUFI-Passive and METr check. Not archived: that waits on Ed's acceptance of SD07.
+STATUS: In progress. Every stage authorized by Ed 2026-11-19 ([Authorization](#authorization)). P5s-01 to P5s-07 merged to main (#527 to #533). Batched host pass 2026-11-20 on `906a102c`: SD01 to SD06 pass; SD07's host part observed and Ed confirmed METr; open on his WUFI-Passive check. Not archived: that waits on Ed's acceptance of SD07.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 
@@ -73,10 +73,9 @@ has none of its own.
 
 ## Waiting on Ed
 
-- SD07: open `_private/host/batch-20261119/ed-files/sd07/sd07-reopened-wufi.xml` in WUFI-Passive and
-  `_private/host/batch-20261119/ed-files/sd07/sd07-reopened-metr.json` in METr; confirm the five shading
-  components, the holed Face drawn with its hole, and answer the three "Not checked" lines of the
-  [research note](research/honeybee-ph-and-phx-shading.md).
+- SD07: METr confirmed 2026-11-20. Open `_private/host/batch-20261119/ed-files/sd07/sd07-reopened-wufi.xml`
+  in WUFI-Passive; confirm the five shading components and the holed Face drawn with its hole, and answer the
+  three "Not checked" lines of the [research note](research/honeybee-ph-and-phx-shading.md).
 - D5s-11a and the Window Unit refusal row, both conductor extensions, still need Ed's confirmation.
 - Acceptance, then the archive PR, which closes [#526](https://github.com/ph-composer/ph-composer-skp/issues/526).
 

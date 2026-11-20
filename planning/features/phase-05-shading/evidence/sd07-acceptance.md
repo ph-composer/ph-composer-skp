@@ -1,7 +1,7 @@
 # SD07: integration acceptance
 
 DATE: 2026-11-20
-STATE: Host part run 2026-11-20 on `906a102c`; eight of ten assertions observed. Ed's check of the WUFI XML in WUFI-Passive and the METr JSON in METr is open, so `finish` has not run.
+STATE: Host part run 2026-11-20 on `906a102c`; eight of ten assertions observed. Ed confirmed the METr JSON in METr on 2026-11-20; his WUFI-Passive check is open, so `finish` has not run.
 
 ## Offline part, P5s-07 branch
 
@@ -63,3 +63,12 @@ controls and full-screen steps are in the private batch recipe, `_private/host/b
 Files for Ed's check, converted from the step 11 export:
 `_private/host/batch-20261119/ed-files/sd07/sd07-reopened-wufi.xml` and
 `_private/host/batch-20261119/ed-files/sd07/sd07-reopened-metr.json`.
+
+## Ed's check in METr, 2026-11-20
+
+Ed opened `sd07-reopened-metr.json` in METr v.1.98/2.75 and reported "looks ok in METr" with a screenshot
+(`_private/host/sd07-20261119/SD07/ed/metr-check.webp`). The five shading components appear under Remaining
+elements as C.1 Louvre, C.2 Neighbour, C.3 Zone A Shading, C.4 Shading and C.5 Fin; Shading reads Type Opaque,
+Inner side and Outer side Outer air; the 3D view draws the holed Face with its hole. METr's two errors (interior
+conditioned floor area and net volume below range) come from the reference model's 5 x 5 x 3 m test Zone, not
+from shading.
