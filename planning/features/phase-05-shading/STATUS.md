@@ -1,9 +1,9 @@
 # Shading: tracking ledger
 
 DATE: 2026-11-19
-STATUS: Scoped. PRD, decisions, contracts, plan, acceptance and stages P5s-01 to P5s-07 written 2026-11-19; none authorized.
+STATUS: Scoped. PRD, decisions, contracts, plan, acceptance and stages P5s-01 to P5s-07 written 2026-11-19; every stage authorized by Ed 2026-11-19 ([Authorization](#authorization)). P5s-01 implemented on branch; SD01 owes two gestures.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 
 The one place Phase 5 completeness is read from. Update it in the same change as any stage's state.
 
@@ -12,13 +12,18 @@ The one place Phase 5 completeness is read from. Update it in the same change as
 Ed requested the feature on 2026-11-19 and answered four scope questions the same day (D5s-01 to
 D5s-06). honeybee-ph and PHX were read at the repository's pins and one round trip was run
 ([research](research/honeybee-ph-and-phx-shading.md)). Ed answered D5s-07 to D5s-17 one at a time the same
-day, taking the recommendation each time. No issue is filed; file one at authorization.
+day, taking the recommendation each time. Issue [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
+was filed at authorization.
+
+## Authorization
+
+Ed authorized every Shading stage on 2026-11-19: "Use the 'pr-loop' skill protocol for all reviews. Use a new branch for each phase of the work, and cleanup all branches and worktrees as you go. You are authorized to merge all PRs once the repo CI is green and all reviewer comments are addressed and resolved."
 
 ## Stages
 
 | Stage | State | Acceptance | PR |
 | --- | --- | --- | --- |
-| P5s-01 Contracts and host facts | Scoped | SD01 | |
+| P5s-01 Contracts and host facts | Implemented on branch `feat/shading-p5s-01`: CONTRACTS sections 4 and 7 answered, `tests/shading_mark_store_test.rb`; SD01 recorded `blocked` on `2a9c5e17` with eight of ten gestures measured ([evidence](evidence/sd01-host-facts.md)); Move-copy array and push-pull owed to a later hold | SD01 | [#527](https://github.com/ph-composer/ph-composer-skp/pull/527) |
 | P5s-02 Shading mark and operations | Scoped | SD02 | |
 | P5s-03 Zones seam | Scoped | SD03 | |
 | P5s-04 Native menu | Scoped | SD04 | |
@@ -28,7 +33,7 @@ day, taking the recommendation each time. No issue is filed; file one at authori
 
 ## Waiting on Ed
 
-1. Authorization to implement, per stage or for the phase.
+Nothing. SD07 will ask Ed to open the WUFI XML and METr JSON.
 
 ## Not in this packet
 

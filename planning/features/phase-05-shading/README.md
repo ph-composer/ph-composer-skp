@@ -1,9 +1,9 @@
 # Phase 5: shading
 
 DATE: 2026-11-19
-STATUS: Scoped. PRD, decisions, contracts, plan, acceptance and stages P5s-01 to P5s-07 written 2026-11-19; none authorized.
+STATUS: Scoped. PRD, decisions, contracts, plan, acceptance and stages P5s-01 to P5s-07 written 2026-11-19; every stage authorized by Ed 2026-11-19 ([STATUS](STATUS.md#authorization)).
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 
 Tag Faces and Groups as shading from the right-click menu and export them as honeybee orphaned
 Shades, which PHX turns into shading components in WUFI-Passive and METr. No solar or shading

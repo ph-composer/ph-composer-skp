@@ -163,6 +163,28 @@ the cases B4 left open, each with native Undo, Redo, save and a fresh-process re
 | Native Weld Edges on a three-edge chain keeps every edge's persistent id and dictionary and joins them in one `Sketchup::Curve`. | A welded run is still three tagged edges; chaining reads edges, not curves. |
 | Native Undo restores the pre-step ids and dictionaries exactly in every case, Redo re-applies them, and a saved copy of each state reopens in a fresh process reading the same ids, endpoints and dictionaries. | Undo, Redo and reopen need no feature code for edge records. |
 
+## Entity dictionaries on Faces, Groups and instances
+
+Measured in PH-Composer on 26.1.188, 2026-11-19
+([SD01](../planning/features/phase-05-shading/evidence/sd01-host-facts.md)), for the Shading mark: a
+`ph_composer.shading` dictionary on a loose Face, a Group and a ComponentInstance, written by a spike. Each
+gesture was followed by native Undo, Redo, a saved copy and a fresh-process reopen.
+
+| Gesture | Fact | Consequence |
+| --- | --- | --- |
+| Copy, Paste In Place | A pasted Group or ComponentInstance carries the source's dictionary on a new persistent id and shares storage with the source. A loose Face pasted onto itself merges with the original: one Face, a new persistent id, the dictionary kept | A copied mark is a second mark; nothing repairs or watches it. A Face mark's persistent id is not stable across a paste |
+| Cut, Paste In Place | Every entity returns on a new persistent id with its dictionary | Nothing may hold a persistent id across a cut |
+| Make Group, Make Component | The new container gets no shading dictionary; the selected entities keep their persistent ids and dictionaries inside it | Wrapping marked geometry keeps it marked and marks nothing new |
+| Make Unique on one of two placements | The instance keeps its persistent id and dictionary under a new definition; the definition's marked Face is copied with its dictionary on a new persistent id; the other placement keeps the original definition | A Face mark behind shared storage follows each copy of the definition |
+| Divide of a bounding Edge | The Face keeps its persistent id, dictionary, area and loop count (Edges were not scanned; the Edit menu read "Undo Divide Edges") | A Face mark survives an edge split |
+| Intersect Faces > With Model across a Face | The Face splits: the original persistent id stays on one half, the other half gets a new id, both carry the full dictionary | A split Face mark becomes two marks, as edge records do |
+| Explode of a Group | The Group and its dictionary are removed; its Faces become loose with their own dictionaries only | A container mark does not pass to its contents on explode |
+| Move-copy array, push-pull | Not measured; owed to a later full-screen hold | |
+
+In every measured case native Undo restored the dictionaries and persistent ids exactly, Redo re-applied them,
+and the saved copy reopened in a fresh process with the same reads. A Face with an inner loop lists the outer
+loop first in `Face#loops`; hidden Faces and Faces on a hidden tag are read like any other.
+
 ## Zone grouping and face topology
 
 Measured in PH-Composer on 26.1.188, 2026-09-20

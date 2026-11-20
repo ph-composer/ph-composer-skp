@@ -1,9 +1,9 @@
 # P5s-01: contracts and host facts
 
 DATE: 2026-11-19
-STATUS: Scoped. Not authorized.
+STATUS: Implemented on branch. Authorized 2026-11-19 with every Shading stage ([STATUS](../STATUS.md#authorization)). SD01 recorded blocked: Move-copy array and push-pull owed to a later hold.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 
 ## Entry and scope
 

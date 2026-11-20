@@ -1,9 +1,9 @@
 # Shading: findings and decisions
 
 DATE: 2026-11-19
-STATUS: Scoped. D5s-01 to D5s-17 are Ed's (2026-11-19). Nothing authorized.
+STATUS: Scoped. D5s-01 to D5s-17 are Ed's (2026-11-19). Every stage authorized 2026-11-19 ([STATUS](STATUS.md#authorization)).
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 
 Ids carry the prefix `5s`: stages `P5s-01`, decisions `D5s-01`. `D5-1` and `P5-` belong to the
 post-MVP phase, which was Phase 5 before the 2026-11-15 re-order and kept its ids. Findings are

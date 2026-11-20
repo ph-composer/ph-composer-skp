@@ -1,9 +1,9 @@
 # Shading surfaces: PRD
 
 DATE: 2026-11-19
-STATUS: Scoped. Interviewed 2026-11-19 (Ed's request and seventeen answers, [DECISIONS](DECISIONS.md)); nothing authorized.
+STATUS: Scoped. Interviewed 2026-11-19 (Ed's request and seventeen answers, [DECISIONS](DECISIONS.md)); every stage authorized 2026-11-19 ([STATUS](STATUS.md#authorization)).
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 
 ## Why
 
@@ -92,12 +92,21 @@ renaming a Group is the lever for splitting.
 
 ### Copies and edits
 
-The mark has no identity, so nothing needs repair. A copied, arrayed, split, pasted or
-push-pulled entity keeps or loses the mark as SketchUp carries the attribute dictionary; the
-stage-one host run measures each case and the result is recorded in
-`context/SKETCHUP_HOST_BEHAVIOR.md`. Exploding a tagged Group removes the Group and its mark with
-it; the Faces stop being shading unless they are tagged themselves. PH-Composer does not watch for
-that.
+The mark has no identity, so nothing needs repair. SketchUp carries it as it carries any entity dictionary,
+measured in P5s-01 ([SD01](evidence/sd01-host-facts.md), recorded in `context/SKETCHUP_HOST_BEHAVIOR.md`,
+"Entity dictionaries on Faces, Groups and instances"):
+
+- A Face, Group or Component copied or cut and pasted in place keeps the mark. A copied Group or Component
+  shares storage with its source, so both are shading. A loose Face pasted in place merges with the original
+  and keeps one mark. A copy pasted elsewhere is not yet measured.
+- Make Group and Make Component keep every mark inside the new container; the new container is not marked.
+- Make Unique copies a definition with its Face marks, so both placements stay as they were.
+- Dividing an Edge leaves the Face's mark alone. Intersecting across a marked Face gives two marked Faces.
+- Exploding a tagged Group removes the Group and its mark; its Faces stop being shading unless they are
+  tagged themselves. PH-Composer does not watch for that.
+- Native Undo, Redo, save and reopen keep every mark exactly.
+
+Move-copy arrays and push-pull are not yet measured; SD01 owes them to a later host run.
 
 ### Export
 

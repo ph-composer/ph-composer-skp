@@ -1,9 +1,9 @@
 # Shading: plan
 
 DATE: 2026-11-19
-STATUS: Scoped. Not authorized.
+STATUS: Scoped. Authorized 2026-11-19 with every Shading stage ([STATUS](STATUS.md#authorization)).
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 
 Seven stages, each one branch and one reviewed PR through the PR loop. Behavior owner: the
 [PRD](PRD.md). Names: [CONTRACTS](CONTRACTS.md). Each stage reads the

@@ -3,7 +3,7 @@
 DATE: 2026-11-19
 STATUS: Complete. Research for the [shading PRD](../PRD.md); no code changed.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 
 Read against the pins in `pyproject.toml`: honeybee-core 1.64.65 and honeybee-ph 1.33.65 (the
 vendored wheels) and PHX 1.57.5 (the optional `phx` group; PHX is not shipped). The PHX files cited
