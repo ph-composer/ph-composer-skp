@@ -5068,6 +5068,18 @@
         "src/ph_composer/shell/commands.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "SD05",
+      "label": "Shading Colour-by on the installed RBZ: the Shading mode, chosen from the native Colour by menu, colours all 18 Shading Face occurrences of the reference model, nested and repeated, and nothing else; the legend and HUD show five rows by component name with Face counts and areas in the display units, matching shading.list; a hidden tag hides a placement's drawing and keeps its count; a mark cleared and its Undo redraw the mode; the rebuild and refresh at 5,000 Shading Faces are recorded against the 200 ms target",
+      "mode": "mixed",
+      "authority": "planning/features/phase-05-shading/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/shading/colour_modes.rb",
+        "src/ph_composer/features/shading/inventory.rb",
+        "src/ph_composer/colour_by/*"
+      ],
+      "native_control_required": true
     }
   ]
 }

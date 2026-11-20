@@ -11,6 +11,7 @@
 #   operations.rb   assign and clear
 #   selection.rb    the native selection with what each action would do
 #   inventory.rb    shading.list: every mark and every shading component
+#   colour_modes.rb the Shading Colour-by mode, by component name
 #   preflight.rb    shading.export_preflight: the notes on what the mark leaves as it is
 #   codes.rb        the codes under the shading noun
 #   declarations/   what Shading registers: the actions and reads, and Set as Shading and Clear Shading
@@ -22,6 +23,7 @@ require_relative "mark/steps"
 require_relative "operations"
 require_relative "selection"
 require_relative "inventory"
+require_relative "colour_modes"
 require_relative "preflight"
 require_relative "declarations/operations"
 require_relative "declarations/menu"
@@ -33,6 +35,7 @@ module PhComposer
 
     def install(registry)
       feature = registry.feature(FEATURE_ID, :contract_version => 1, :requires => ["ph_composer.zones"])
+      ColourModes.install(feature)
       Registration.install(feature)
       Menu.install(feature)
       Codes.install(feature)

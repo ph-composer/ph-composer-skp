@@ -757,6 +757,15 @@ every marked entity and each shading component (`display_name`, `face_count`, wo
 Zones' walk of its occurrences and one walk of the Model. A component is named by the nearest enclosing named Group or component (an instance's own name before its definition's), a Zone as
 that container giving its name followed by " Shading", and "Shading" with none.
 
+The Colour-by mode `ph_composer.shading.by_component` (label "Shading", `entity_kind` `face`,
+`features/shading/colour_modes.rb`) gives one entry per Shading Face occurrence by the rule `shading.list`
+applies (`Inventory.shading_face?`), with its root path and world transform, keyed and labelled by the
+component name, each name its own colour (`ColourBy::Palette.spread_entries`); an unmarked Face has no entry.
+Each entry's figure is its world area, so a legend row reads the component's Face count and area in the
+display units. A Face whose transform flattens it is `incomplete` with no area, so the mode stays on. The
+projection reads what `shading.list` reads, Zones' occurrences and one walk of the Model, once per rebuild;
+a committed assign or clear advances the revision and rebuilds it.
+
 The mark's store is constructed with `excludes_from_envelope: true`. `Records::EntityStore.envelope_excluded?
 (inside)` is true when an entity in `inside` (from the first entity inside the Zone Group down to the Face,
 as Zones' `holding` returns it) carries an excluding store's record and none is claimed;
