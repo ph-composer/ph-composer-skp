@@ -1,9 +1,9 @@
 # P4a-11: The Programs tab
 
 DATE: 2026-11-15
-STATUS: Scoped (rewritten after the Programs tab review). Not authorized.
+STATUS: Scoped (rewritten after the Programs tab review). Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
 ## Entry and scope
 

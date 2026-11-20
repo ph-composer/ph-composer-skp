@@ -58,8 +58,9 @@ module PhComposer
           end
           params[:options] = params.fetch(:options).reject { |row| row.fetch("id") == id }
           params[:replacements][id] = replacement if replacement_given
+          # Removing the default leaves the choice to manage: the destination, else the first remaining Segment.
           if collection == "building_segment" && params.fetch(:default_segment_id) == id
-            params[:default_segment_id] = replacement
+            params[:default_segment_id] = nil
           end
           Options.manage(request, proposal, **params)
         end

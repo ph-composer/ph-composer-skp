@@ -10,6 +10,11 @@ module PhComposer
       BY_ZONE = "#{FEATURE_ID}.by_zone"
       BY_BUILDING_SEGMENT = "#{FEATURE_ID}.by_building_segment"
       BY_LEVEL = "#{FEATURE_ID}.by_level"
+      # A Zone in no Building Segment is classified, not missing a record: one neutral swatch under its own
+      # legend value, a grey outside the categorical ramp.
+      NO_SEGMENT_VALUE = "no_building_segment"
+      NO_SEGMENT_LABEL = "No Building Segment"
+      NO_SEGMENT_COLOUR = [176, 176, 176].freeze
 
       module_function
 
@@ -35,6 +40,10 @@ module PhComposer
             value = record[field]
             label = value
             colour = nil
+          elsif field == "building_segment" && record["building_segment_id"].nil?
+            value = NO_SEGMENT_VALUE
+            label = NO_SEGMENT_LABEL
+            colour = NO_SEGMENT_COLOUR
           else
             value = record["#{field}_id"]
             display = Options.display(read.engine, record)

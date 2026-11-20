@@ -910,17 +910,35 @@ Segment has an immutable, collection-unique export identifier. Names compare wit
 trimming and collapsing whitespace, hyphens and underscores. Model-owned option settings hold
 `default_segment_id` and source-model identity; reads never seed records.
 
-Zone schema 2 stores `building_segment_id` and nullable `level_id`. Version 1 remains readable.
-Unknown versions refuse. The `choice_evidence` capsule on Zones and membership stamps carries
+Zone schema 3 stores a nullable `building_segment_id` and a nullable `level_id`: a Zone belongs to
+at most one Building Segment, and null is No Building Segment. Make Zone, adoption, and every edit
+or option rewrite that changes a managed Zone's values or evidence write schema 3, membership stamps
+included; a metadata-only write keeps the stored version. Schema 2, the same shape with a required
+`building_segment_id`, and version 1 remain readable. Unknown versions refuse. The `choice_evidence` capsule on Zones and membership stamps carries
 versioned option definitions and source identity for native clipboard recovery; it is detached
-recovery evidence, not assignment authority. V2 read rows expose resolved presentation names/colours
-separately as `display`. Missing/foreign choices require explicit destination adoption. In a managed Model, export preflight also blocks legacy Zones pending adoption. A wholly legacy Model retains its compatible export path.
+recovery evidence, not assignment authority; it carries null for an option the Zone does not name.
+Managed read rows expose resolved presentation names/colours separately as `display`. Missing/foreign
+choices require explicit destination adoption; a Zone naming neither a Segment nor a Level has
+nothing to adopt, and in a Model with no option settings yet its evidence keeps the source it names;
+the first option such a Zone is given creates the Model's settings and default Segment.
+Option rewrites validate every Zone and stamp they write. In a managed Model, export preflight also blocks legacy Zones pending adoption. A wholly legacy Model retains its compatible export path. Until export
+leaves Zones in no Building Segment out, preflight blocks such a Zone with `reference.invalid`.
 
 The `ph_composer.zones.options.*` operations publish collection reads, usage, guarded definition
 writes, complete-draft management, read-only adoption preview and atomic adoption. Management validates the
 whole final collection and default, retargets live and recovery references, and commits one native
-Undo step. Name/colour changes preserve assignment and export identities. Used deletion requires a
-survivor, or explicit null Level clearing. Stamps have a detached reference projection whose diagnostic
+Undo step. Name/colour changes preserve assignment and export identities. Used deletion requires an
+explicit destination: a survivor, or null, which clears a Level or moves a Building Segment's Zones
+to No Building Segment. The Model keeps at least one Building Segment: a draft or removal that would
+leave none refuses `zone.option_last_segment`. The default is never null. Removing the default
+moves it to that Segment's destination, or, when the destination is null, to the first remaining
+Segment in the final collection's order (id order for `remove`); `manage` applies this when it is
+sent a null `default_segment_id` while removing the current default. `manage`, `remove` and `merge`
+report each removed option's `user_data` keys (`removed_user_data`) and its extension namespaces
+(`removed_extensions`, the first 50 in id order, with `removed_extensions_total`): another
+feature's settings on a Segment go with it in the same Undo step.
+`ph_composer.zones.update_field` with `field: building_segment` and `ph_composer.zones.update`
+accept null for the Segment, guarded by the values last read, as one Undo step. Stamps have a detached reference projection whose diagnostic
 `id` is `zone_id`, keyed by exact root-to-member path; synthetic IDs never enter stored stamps.
 
 Adoption inventories all stamps, including those hidden from Restore by a live Zone ID. Equivalent
@@ -931,8 +949,10 @@ hash; conflicting foreign export keys require a survivor and never silently re-k
 
 Older string writers can resolve existing unambiguous choices on managed Zones; unknown names
 refuse. Before adoption, ordinary name/depth edits preserve legacy fields, but category edits and
-Make requiring new defaults request adoption. The published descriptor names current schema 2;
-owner validation handles both versions without adding generic base-record migration machinery.
+Make requiring new defaults request adoption. Make Zone puts the new Zone in the default Segment;
+Restore recovers a null Segment as null. Colour-by Building Segment shows Zones in no Segment as one
+neutral row, "No Building Segment". The published descriptor names current schema 3;
+owner validation handles every version without adding generic base-record migration machinery.
 
 Zone export section 2 emits resolved names plus managed Segment ID/export key. Python supports
 sections 1/2 and legacy records, groups managed Rooms by identity, and refuses conflicting exported

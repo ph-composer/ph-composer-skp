@@ -43,31 +43,54 @@ module PhComposer
         "ground_depth_mm" => { "type" => "number", "x-unit" => "mm" }
       }
     }.freeze
-    # Public inputs describe both supported versions; the owner checks complete version shapes.
+    # Schema 3: a Zone names at most one Building Segment; null is No Building Segment.
+    MEMBERSHIP_VALUES = MANAGED_VALUES.merge(
+      "properties" => MANAGED_VALUES.fetch("properties")
+                                    .merge("building_segment_id" => { "type" => %w[string null], "minLength" => 1 })
+    ).freeze
+    # The version every Zone write produces. Versions 2 and 3 name model-owned options by id; version 1
+    # stores the option names as text and is read until it is adopted.
+    ZONE_SCHEMA_VERSION = 3
+    MANAGED_VERSIONS = [2, 3].freeze
+    VALUES_BY_VERSION = { 1 => ZONE_VALUES, 2 => MANAGED_VALUES, 3 => MEMBERSHIP_VALUES }.freeze
+    # Public inputs describe every supported version; the owner checks complete version shapes. A
+    # Building Segment given by name or by id may be null, which moves the Zone to No Building Segment.
     INPUT_VALUES = {
       "type" => "object", "additionalProperties" => false, "required" => %w[name ground_depth_mm],
-      "properties" => ZONE_VALUES.fetch("properties").merge(MANAGED_VALUES.fetch("properties"))
+      "properties" => ZONE_VALUES.fetch("properties").merge(MEMBERSHIP_VALUES.fetch("properties"))
+                                 .merge("building_segment" => { "type" => %w[string null], "minLength" => 1 })
     }.freeze
 
     module Schema
       module_function
 
+      # Whether `record` (a Zone or a membership stamp) names its options by id.
+      def managed?(record)
+        MANAGED_VERSIONS.include?(record["schema_version"])
+      end
+
+      # `after`, a managed Zone or stamp about to be written, at the current version: a write never leaves
+      # a version 2 record behind, and an unchanged record is never written.
+      def current(after)
+        managed?(after) ? after.merge("schema_version" => ZONE_SCHEMA_VERSION) : after
+      end
+
       def problems(record)
         return ["Zone record must be a JSON object"] unless record.is_a?(Hash)
 
         version = record["schema_version"]
-        schema = version == 2 ? MANAGED_VALUES : ZONE_VALUES
+        schema = VALUES_BY_VERSION.fetch(version, ZONE_VALUES)
         allowed = %w[id schema_version user_data extension_data] + schema.fetch("properties").keys
-        allowed << "choice_evidence" if version == 2
+        allowed << "choice_evidence" if managed?(record)
         found = (record.keys - allowed).map { |key| "Zone record has unknown field #{key}" }
         found << "Zone id is invalid" unless ID_PATTERN.match?(record["id"].to_s)
-        found << "Zone schema_version must be 1 or 2" unless [1, 2].include?(version)
+        found << "Zone schema_version must be 1, 2 or 3" unless VALUES_BY_VERSION.key?(version)
         values = record.reject { |key, _value|
           %w[id schema_version user_data extension_data choice_evidence].include?(key)
         }
         found.concat(JsonSchema.validate(values, schema))
         found.concat(metadata_problems(record))
-        if version == 2
+        if managed?(record)
           found.concat(evidence_problems(record["choice_evidence"]))
           found << "Zone choice evidence does not match its assignments" unless evidence_matches?(record)
         end
@@ -94,8 +117,8 @@ module PhComposer
       end
 
       def stamp(record)
-        if record.fetch("schema_version") == 2
-          { "schema_version" => 2, "zone_id" => record.fetch("id"),
+        if managed?(record)
+          { "schema_version" => record.fetch("schema_version"), "zone_id" => record.fetch("id"),
             "building_segment_id" => record.fetch("building_segment_id"), "level_id" => record.fetch("level_id"),
             "choice_evidence" => DeepCopy.call(record.fetch("choice_evidence")) }
         else
@@ -107,9 +130,11 @@ module PhComposer
       def stamp?(value)
         return false unless value.is_a?(Hash) && ID_PATTERN.match?(value["zone_id"].to_s)
 
-        if value["schema_version"] == 2
+        if managed?(value)
+          segment_types = value["schema_version"] == 2 ? [String] : [String, NilClass]
           value.keys.sort == %w[building_segment_id choice_evidence level_id schema_version zone_id].sort &&
-            value["building_segment_id"].is_a?(String) && [String, NilClass].include?(value["level_id"].class) &&
+            segment_types.include?(value["building_segment_id"].class) &&
+            [String, NilClass].include?(value["level_id"].class) &&
             evidence_problems(value["choice_evidence"]).empty? && evidence_matches?(value)
         else
           value["schema_version"] == 1 && value["building_segment"].is_a?(String) &&
@@ -117,10 +142,11 @@ module PhComposer
         end
       end
 
+      # The evidence names the same options as the record, each a full option record or null for none.
       def evidence_matches?(record)
         evidence = record["choice_evidence"]
-        return false unless evidence.is_a?(Hash) && evidence["building_segment"].is_a?(Hash) &&
-                            (evidence["level"].nil? || evidence["level"].is_a?(Hash))
+        return false unless evidence.is_a?(Hash) &&
+                            %w[building_segment level].all? { |field| [Hash, NilClass].include?(evidence[field].class) }
 
         evidence.dig("building_segment", "id") == record["building_segment_id"] &&
           evidence.dig("level", "id") == record["level_id"]
@@ -132,7 +158,7 @@ module PhComposer
                                                                                               source_model_id].sort &&
                                                                      evidence["source_model_id"].is_a?(String)
 
-        found = Options::SEGMENTS.problems(evidence["building_segment"])
+        found = evidence["building_segment"] ? Options::SEGMENTS.problems(evidence["building_segment"]) : []
         found.concat(Options::LEVELS.problems(evidence["level"])) if evidence["level"]
         found
       end

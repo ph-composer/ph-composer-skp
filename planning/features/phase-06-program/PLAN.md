@@ -1,9 +1,9 @@
 # Phase 4a delivery plan: Building Segments and Programs on the Zones tab
 
 DATE: 2026-11-15
-STATUS: Scoped. The Programs tab review (G1) is done; P4a-01 to P4a-11 are written and ready to authorize; P4a-12 is the closing outline. No stage authorized.
+STATUS: Authorized 2026-11-20: Ed authorized P4a-01 to P4a-12 through the implement-loop, with the merge delegated. The authorization does not cover the F4a-13 honeybee-ph and PHX fix or creating the ph-composer-standards repository. The Programs tab review (G1) is done; P4a-12 is the closing outline. Progress is read from [STATUS](STATUS.md).
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft; one issue per stage group when Ed authorizes)
+ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
 ## Outcome and scope
 

@@ -5121,6 +5121,22 @@
         "src/ph_composer/shell/commands.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "PG01",
+      "label": "Building Segment membership on the installed RBZ with the panel closed, in a fresh synthetic Model: the walkthrough creates a second Segment, moves Zones into it and out of every Segment, deletes it with its Zones moved to none, is refused deleting the last Segment (zone.option_last_segment) and moves a Zone back, all through registered operations; native Undo and Redo of each step; save, fresh-process reopen and the same memberships read back",
+      "mode": "mixed",
+      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/zones/options/*",
+        "src/ph_composer/features/zones/zone/*",
+        "src/ph_composer/features/zones/declarations/*",
+        "src/ph_composer/features/zones/colour_modes.rb",
+        "src/ph_composer/core/records/entity_store.rb",
+        "tools/examples/authoring/segment_membership_walkthrough.rb",
+        "tools/examples/authoring/client.rb"
+      ],
+      "native_control_required": true
     }
   ]
 }

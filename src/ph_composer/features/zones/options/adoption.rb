@@ -6,8 +6,11 @@ module PhComposer
       module Adoption
         module_function
 
+        # A version 1 Zone, or a managed one whose evidence comes from another Model or names an option this
+        # Model lacks. A managed Zone in no Building Segment and no Level names nothing to adopt.
         def needs_adoption?(engine, record)
           return true if record.fetch("schema_version") == 1
+          return false if record.values_at("building_segment_id", "level_id").none?
 
           origin = Options.settings(engine)&.fetch("source_model_id")
           return true if origin != record.dig("choice_evidence", "source_model_id")
@@ -89,12 +92,11 @@ module PhComposer
 
           mapping = allocate_targets(request, proposal, entries, mappings)
           copy_option_extensions(request, proposal, entries, mappings, mapping)
+          default_id = adopted_default(request, proposal, entries, mapping)
           KINDS.each do |collection, kind|
             Options.validate_collection!(Options.records(request.engine, kind.id, proposal), collection)
           end
           current_default = Options.settings(request.engine)&.fetch("default_segment_id")
-          first_segment = entries.find { |entry| entry.fetch("collection") == "building_segment" }
-          default_id = current_default || mapping.fetch(first_segment.fetch("key"))
           Options.set_settings(request, proposal, default_id) unless default_id == current_default
           writes = []
           final_records = []
@@ -103,7 +105,7 @@ module PhComposer
             next unless needs_adoption?(request.engine, before)
 
             after = DeepCopy.call(before)
-            after["schema_version"] = 2
+            after["schema_version"] = ZONE_SCHEMA_VERSION
             %w[building_segment level].each do |collection|
               entry = source(before, collection)
               after["#{collection}_id"] = entry && mapping.fetch(entry.fetch("key"))
@@ -120,6 +122,19 @@ module PhComposer
           check_membership!(inventory, final_records)
           Options.add_writes(proposal, writes)
           { "created_ids" => mapping, "replacement_ids" => {} }
+        end
+
+        # The Model's default Building Segment after adoption: the current one, else the first adopted Segment.
+        # Copied Zones in no Segment can bring only Levels, so a Model without a default then gets a new one:
+        # the Model keeps at least one Building Segment once its options are managed.
+        def adopted_default(request, proposal, entries, mapping)
+          current = Options.settings(request.engine)&.fetch("default_segment_id")
+          return current if current
+
+          first_segment = entries.find { |entry| entry.fetch("collection") == "building_segment" }
+          return mapping.fetch(first_segment.fetch("key")) if first_segment
+
+          Options.create_choice(request, proposal, "building_segment", Occurrences::DEFAULT_SEGMENT, "#1F7478")
         end
 
         def allocate_targets(request, proposal, entries, mappings)

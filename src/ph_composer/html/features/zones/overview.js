@@ -157,7 +157,7 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
       var held = filters[collection]; if (!held) return;
       var mapped = held.map(function (id) {
         if (!Object.prototype.hasOwnProperty.call(replacements, id)) return id;
-        return replacements[id] || (collection === "level" ? "" : null);
+        return replacements[id] || "";
       }).filter(function (id, index, every) { return id !== null && every.indexOf(id) === index; });
       if (mapped.length) filters[collection] = mapped;
       else delete filters[collection];
@@ -319,7 +319,7 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
       if (choice) return choice.values.name;
       var source = (state.zoneRecords || []).filter(function (zone) { return filterValue(zone, field) === value; })[0];
       return source ? zoneOptions.label(zoneOptions.read(state.snapshot), source,
-        field) : value ? "Choose a replacement" : "Not set";
+        field) : value ? "Choose a replacement" : field === "building_segment" ? "No Building Segment" : "Not set";
     }
     return value || "Not set";
   }
@@ -381,7 +381,9 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
     if (choice && /^#[0-9a-f]{6}$/i.test(choice.values.colour)) {
       return [1, 3, 5].map(function (start) { return parseInt(choice.values.colour.slice(start, start + 2), 16); });
     }
-    return colourBy.colour(state.snapshot, colourBindings(own)[field], value);
+    // A Zone in no Building Segment filters as "" but takes the legend's own No Building Segment row.
+    var key = field === "building_segment" && value === "" ? zoneOptions.NO_SEGMENT_KEY : value;
+    return colourBy.colour(state.snapshot, colourBindings(own)[field], key);
   }
 
   function headerActions(state, own, field, label) {

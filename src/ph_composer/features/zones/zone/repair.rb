@@ -254,7 +254,7 @@ module PhComposer
           # Group itself carried went with it, and saying so is part of the offer.
           "unrecoverable" => %w[name user_data extension_data ground_depth_mm]
         }
-        offer["choice_record"] = first if first.fetch("schema_version") == 2
+        offer["choice_record"] = first if Schema.managed?(first)
         offer
       end
 

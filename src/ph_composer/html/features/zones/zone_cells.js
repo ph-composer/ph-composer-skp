@@ -153,6 +153,8 @@ PhComposerUI.define("features/zones/zone_cells", ["record_edits", "fields", "uni
       if (field === "level") cell.input.appendChild(ui.option("", "Not set"));
       options.list(this.options, field).forEach(function (choice) { cell.input.appendChild(ui.option(choice.id,
         choice.values.name)); });
+      // A Zone in no Building Segment shows it, last, as the Segment groups will.
+      if (field === "building_segment") cell.input.appendChild(ui.option("", "No Building Segment"));
       cell.signature = signature;
     }
     cell.input.setAttribute("aria-label", row.record.name + " " + (field === "level" ? "Level" : "Building-Segment"));

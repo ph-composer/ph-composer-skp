@@ -136,7 +136,7 @@ class ZoneOptionsTest < PhComposerTestCase
     result = invoke("#{Z::FEATURE_ID}.make", "parent_path" => [], "entity_ids" => [100])
     assert_equal "completed", result.fetch("status"), result.inspect
     zone = Z::ZONE_STORE.read(group)
-    assert_equal 2, zone.fetch("schema_version")
+    assert_equal Z::ZONE_SCHEMA_VERSION, zone.fetch("schema_version")
     assert_nil zone.fetch("level_id")
     assert_equal zone.fetch("building_segment_id"), query.fetch("default_segment_id")
     @model.undo

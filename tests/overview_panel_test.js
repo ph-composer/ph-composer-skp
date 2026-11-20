@@ -1531,6 +1531,38 @@ test("managed chip updates send complete v2 values and expected values, with cus
     payload.sections["ph_composer.zones.overview"].value.zones[0].values);
 });
 
+test("a Zone in no Building Segment reads No Building Segment and can be moved back", function () {
+  var p = page(), payload = managedSnapshot(), zone = payload.sections["ph_composer.zones.overview"].value.zones[0];
+  zone.schema_version = 3; zone.values.building_segment_id = null;
+  p.panel.receive({ type: "panel.snapshot", payload: payload });
+  var segment = byLabel(p.query("[data-section='ph_composer.overview']"), "Zone 1 Building-Segment");
+  var none = segment.children[segment.children.length - 1];
+  assert.deepStrictEqual([none.value, none.textContent], ["", "No Building Segment"]);
+  assert.strictEqual(segment.value, "");
+  segment.value = "bsg_tower"; segment.listeners.change({});
+  assert.strictEqual(p.sent[0].payload.params.values.building_segment_id, "bsg_tower");
+  assert.strictEqual(p.sent[0].payload.params.expected_values.building_segment_id, null);
+});
+
+test("the No Building Segment filter row takes the legend's neutral swatch while colouring by Segment",
+  function () {
+    var p = page(), payload = managedSnapshot(), zone = payload.sections["ph_composer.zones.overview"].value.zones[0];
+    zone.schema_version = 3; zone.values.building_segment_id = null;
+    payload.sections["ph_composer.colour_by.legend"] = { status: "completed", value: {
+      mode: "ph_composer.zones.by_building_segment", label: "Building-Segment",
+      rows: [{ value: "no_building_segment", label: "No Building Segment", state: "classified", count: 1,
+        colour: [176, 176, 176] }],
+      modes: [{ name: "ph_composer.zones.by_building_segment", label: "Building-Segment", group: null }] } };
+    p.panel.receive({ type: "panel.snapshot", payload: payload });
+    var section = p.query("[data-section='ph_composer.overview']");
+    menuItem(section, "Building-Segment column menu");
+    var row = byLabel(section, "Building-Segment column menu").parentNode.querySelectorAll("label")
+      .filter(function (node) {
+        return node.children.some(function (child) { return child.textContent === "No Building Segment"; });
+      })[0];
+    assert.strictEqual(row.querySelector(".phc-column-filter-swatch").style.background, "rgb(176,176,176)");
+  });
+
 test("managed choice error descriptions remain unique after removing and adding Zone rows", function () {
   var p = page(), payload = managedSnapshot(), zones = payload.sections["ph_composer.zones.overview"].value.zones;
   function another(id, name, path) {

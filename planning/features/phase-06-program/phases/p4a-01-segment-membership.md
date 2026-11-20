@@ -1,9 +1,9 @@
 # P4a-01: Building Segment membership
 
-DATE: 2026-11-15
-STATUS: Scoped. Not authorized.
+DATE: 2026-11-20
+STATUS: Implemented on branch `feature/phase-06-program-p4a-01` (2026-11-20; authorized 2026-11-20 with P4a-02 to P4a-12). Host gate PG01 in [ACCEPTANCE](../ACCEPTANCE.md).
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
 ## Entry and scope
 
@@ -62,6 +62,21 @@ Behavior: [Building Segments PRD](../building-segments/PRD.md), "Membership". Na
 
 PG01 in [ACCEPTANCE](../ACCEPTANCE.md): delete, move, Undo, Redo, save and fresh-process reopen in
 a real Model.
+
+## Implementation notes (2026-11-20)
+
+- A write upgrades a schema 2 Zone, with its stamps, to schema 3 only when the record changes; a
+  metadata-only write keeps the stored version.
+- "First remaining" is the first Segment in the final collection's order: id order for `remove`,
+  the submitted order for `manage` (sent a null `default_segment_id`) and the dialog's draft.
+- Until P4a-03 leaves them out, export preflight blocks a Zone in no Segment with `reference.invalid`.
+- A copied Zone that names neither a Segment nor a Level has nothing to adopt. Adoption that brings
+  only Levels into a Model without a default creates the default "Building" Segment.
+- The Geometry view's Building-Segment cell lists No Building Segment last, so such a Zone reads
+  correctly and can be moved back; P4a-02 replaces the column.
+- Follow-ups: the native "Set Building-Segment…" menu offers only Segment names, so it cannot move a
+  Zone out (P4a-02's selection bar does); the Spaces read groups no-Segment Zones under key `""`
+  with a null name (P4a-02's heading rows).
 
 ## Done when
 

@@ -3,7 +3,7 @@
 DATE: 2026-11-14
 STATUS: Findings F4a-01 to F4a-29 recorded. Interviewed 2026-11-14; prototype, Building Segment and Programs tab reviews 2026-11-15. Q4a-01 to Q4a-36 answered except Q4a-01, Q4a-16 and Q4a-18 (non-gating). Contract questions C4a-2 to C4a-10 are in CONTRACTS.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
 Findings are cited facts from the [research](README.md#read-order) that constrain any design.
 Questions are the choices the interview must settle before a UI prototype commits to a shape. Each

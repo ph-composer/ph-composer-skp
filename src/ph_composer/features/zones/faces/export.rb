@@ -159,15 +159,19 @@ module PhComposer
 
           other = Zones::Occurrences.resolve_face(request.model, record.fetch("adjacency").fetch("counterpart"),
                                                   :index => index)
-          segment(occurrence.zone.record) == segment(other.zone.record)
+          mine = segment(occurrence.zone.record)
+          !mine.nil? && mine == segment(other.zone.record)
         rescue CodedError
           false
         end
 
-        # A Zone's Building-Segment as the export groups it: the managed choice when it has one, else its name.
+        # A Zone's Building-Segment as the export groups it: the managed choice, or nil for a managed Zone in
+        # no Building Segment, which shares a Segment with no other Zone; else its name.
         def segment(zone_record)
+          return ["legacy", zone_record["building_segment"]] unless Zones::Schema.managed?(zone_record)
+
           id = zone_record["building_segment_id"]
-          id ? ["managed", id] : ["legacy", zone_record["building_segment"]]
+          id && ["managed", id]
         end
 
         def missing_message(record)

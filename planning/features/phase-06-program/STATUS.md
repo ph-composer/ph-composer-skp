@@ -1,9 +1,9 @@
 # Phase 4a status
 
-DATE: 2026-11-15
-STATUS: Scoped (2026-11-15). P4a-01 to P4a-11 ready to authorize. No stage authorized.
+DATE: 2026-11-20
+STATUS: Authorized 2026-11-20: Ed authorized P4a-01 to P4a-12 through the implement-loop, with the merge delegated. The authorization does not cover the F4a-13 honeybee-ph and PHX fix or creating the ph-composer-standards repository. P4a-01 implemented on branch.
 AUTHOR: Ed May, BLDGTYP, with Claude
-ISSUE: none (local planning draft)
+ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
 The one place this packet's progress is read from.
 
@@ -21,10 +21,12 @@ The one place this packet's progress is read from.
 | Research: Zone ventilation and Space airflows | Complete | 2026-11-15 | [ventilation](research/ventilation.md): F4a-24 to F4a-29; Q4a-29 to Q4a-32 raised |
 | UI prototype: Building Segments, Single dwelling per Segment, Zones / Spaces airflows | Complete | 2026-11-15 | [mockups/](mockups/README.md); BS-1 to BS-6 and Q4a-27 to Q4a-32 answered |
 | PRD, contracts, plan and stages for the Zones tab | Scoped | 2026-11-15 | [PRD](PRD.md), [Building Segments PRD](building-segments/PRD.md), [CONTRACTS](CONTRACTS.md), [PLAN](PLAN.md), [ACCEPTANCE](ACCEPTANCE.md), [phases/](phases); C4a-5 and C4a-7 to C4a-10 answered; C4a-2, C4a-3, C4a-4, C4a-6 settle in their stages; consistency sweep folded in |
-| P4a-01 to P4a-11 | Scoped | 2026-11-15 | Ready to authorize; P4a-12 is the closing outline |
+| Authorization: P4a-01 to P4a-12 | Authorized | 2026-11-20 | Ed, through the implement-loop with the merge delegated; not the F4a-13 fix, not the ph-composer-standards repository |
+| P4a-01 Building Segment membership | Implemented on branch | 2026-11-20 | Branch `feature/phase-06-program-p4a-01`. Entry check: installed size 26,093,959 bytes on `main` at `4d346ab4` (`make rbz-check`), written to `installed_baseline_bytes` (C4a-14). Zone schema 3, last-Segment refusal `zone.option_last_segment`, null destination, default rule, `removed_extensions`, null `update_field`, Make and Restore, colour-by row, interim export block; API 1.73. `tests/zone_segment_membership_test.rb` 14 runs, 199 assertions; the panel-closed walkthrough `tools/examples/authoring/segment_membership_walkthrough.rb` and `tests/segment_membership_walkthrough_test.rb` 1 run, 12 assertions; `tests/zone_options_panel_test.js`, `overview_panel_test.js`, `zone_views_panel_test.js` 124 pass. Codex (gpt-6-astra) cycle 1 on `f089ef70`: 2 findings, fixed in `37c0d82a`; cycle 2 on `37c0d82a`: 3 findings, fixed after the two-cycle cap (unreviewed fix commit named in the PR). Host gate PG01 on `53c72dbc`: walkthrough, bridge-sent Undo and Redo, save and fresh-process reopen pass ([evidence](evidence/pg01-segment-membership-bridge.md)); native Edit-menu Undo and Redo owed to the batched sitting, ledger row `unknown` |
+| P4a-02 to P4a-12 | Authorized | 2026-11-20 | P4a-12 is the closing outline |
 | Programs tab review (G1) | Complete | 2026-11-15 | Q4a-21 to Q4a-25 and Q4a-33 to Q4a-36 answered; C4a-5 and C4a-7 to C4a-10 answered |
 | Review against Climate and Shading | Complete | 2026-11-20 | Read against the two archived packets and `main` at `b409bdbc`; no code run. The `phx` test group already exists, so P4a-03 no longer adds it; C4a-11 to C4a-14 raised in [CONTRACTS](CONTRACTS.md#open-contract-questions) and answered by Ed the same day, each as recommended; stage notes added to P4a-03, P4a-04, P4a-06, P4a-07, P4a-10, P4a-11 and P4a-12 |
-| GitHub issue | Requested | | Q4a-18 |
+| GitHub issue | Created | 2026-11-20 | [#538](https://github.com/ph-composer/ph-composer-skp/issues/538) (Q4a-18) |
 | honeybee-ph and PHX fix for F4a-13 | Requested | | Q4a-08; cross-repo, own authorization |
 
 ## Blockers and dependencies
@@ -37,8 +39,8 @@ The one place this packet's progress is read from.
 - P4a-03's entry check chooses the honeybee-ph pin for `PhEquipment` (F4a-18) and moves the `phx` test
   group with it (C4a-11, Ed, 2026-11-20). Today the group pins PHX 1.57.5, the latest release over
   honeybee-ph 1.33.65.
-- P4a-01's entry check resets the installed-size baseline, which still counts from Phase 3b's (C4a-14,
-  Ed, 2026-11-20).
+- P4a-01's entry check reset the installed-size baseline to 26,093,959 bytes, measured on `main` at
+  `4d346ab4` (C4a-14, Ed, 2026-11-20).
 - Building Segment management, the Segment settings dialog and Zones outside every Segment are
   stages P4a-01 to P4a-04 ([building-segments](building-segments/PRD.md)), ahead of the Programs
   stages (BS-5).

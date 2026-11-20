@@ -27,6 +27,25 @@ reports the Zone and classified-Face counts, the canonical Zone values, occurren
 agreement between each Face record and its Zone membership stamp. The fixture contains no
 licensed or project data and is never included in the RBZ.
 
+## Building Segment membership
+
+`segment_membership_walkthrough.rb` creates a second Building Segment, moves Zones into it and out of
+every Segment, deletes it with its Zones moved to none, is refused deleting the last Segment, and
+reads the memberships back. Run it in a fresh scratch Model, one bridge call per step:
+
+```sh
+uv run tools/hostkit/host_bridge.py eval \
+  'load "/absolute/path/to/ph-composer/ph-composer-skp/tools/examples/authoring/segment_membership_walkthrough.rb"; SegmentMembershipWalkthrough.setup'
+uv run tools/hostkit/host_bridge.py eval 'SegmentMembershipWalkthrough.run'
+uv run tools/hostkit/host_bridge.py eval 'AuthoringExample.undo'
+uv run tools/hostkit/host_bridge.py eval 'SegmentMembershipWalkthrough.state'
+uv run tools/hostkit/host_bridge.py eval 'AuthoringExample.redo'
+uv run tools/hostkit/host_bridge.py eval 'SegmentMembershipWalkthrough.verify'
+uv run tools/hostkit/host_bridge.py save
+```
+
+After a reopen, load the script and run `SegmentMembershipWalkthrough.verify`.
+
 ## Repairs: identity repair and limited Restore Zone
 
 `repair_walkthrough.rb` covers the two explicit Zone repairs. Run it in a fresh scratch Model:
