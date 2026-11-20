@@ -860,7 +860,7 @@
     "boot_deadline_ms": 15000,
     "cold_boot_ceiling_ms": 6000,
     "cold_boot_target_ms": 4000,
-    "installed_baseline_bytes": 24541739,
+    "installed_baseline_bytes": 26093959,
     "installed_ceiling_bytes": 28000000,
     "installed_growth_bytes": 2500000,
     "installed_target_bytes": 24000000,
