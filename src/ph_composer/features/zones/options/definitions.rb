@@ -106,10 +106,14 @@ module PhComposer
         [segment, level]
       end
 
+      # The choice evidence `record` carries after a write: its options as records and the Model they come from.
+      # A Model with no option settings yet keeps the source the evidence already names: a copied Zone in no
+      # Segment and no Level needs no adoption, so it can be edited before this Model has options of its own.
       def evidence(engine, record, proposal = nil)
         segment, level = resolve(engine, record, proposal)
-        { "source_model_id" => settings(engine, proposal)&.fetch("source_model_id"),
-          "building_segment" => segment, "level" => level }
+        source = settings(engine, proposal)&.fetch("source_model_id")
+        source ||= record.dig("choice_evidence", "source_model_id")
+        { "source_model_id" => source, "building_segment" => segment, "level" => level }
       end
 
       def display(engine, record)

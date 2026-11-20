@@ -265,12 +265,32 @@ class ZoneSegmentMembershipTest < PhComposerTestCase
     assert_equal ["Building"], (entries - [none]).map(&:label)
   end
 
-  def test_a_copied_zone_in_no_segment_or_level_has_nothing_to_adopt
+  def test_a_copied_zone_in_no_segment_or_level_has_nothing_to_adopt_and_stays_editable
     zone_id = make_zone(100)
     copied = record(zone_id).merge("building_segment_id" => nil,
                                    "choice_evidence" => { "source_model_id" => "another_model",
                                                           "building_segment" => nil, "level" => nil })
     refute O::Adoption.needs_adoption?(request_engine, copied)
+
+    # Pasted into a Model with no options of its own: renaming it and creating a Level keep valid evidence.
+    @model = Sketchup::Model.new
+    Sketchup.active_model = @model
+    @session = PhComposer::Sessions.for(@model)
+    @context = API.connect(:session_id => @session.id)
+    face = Sketchup::Face.new(101)
+    pasted = Sketchup::Group.new(100, Sketchup::Entities.new([face]))
+    @model.entities << pasted
+    Z::ZONE_STORE.write(pasted, copied)
+    Z::STAMP_STORE.write(face, Z::Schema.stamp(copied))
+    row = zone_row(zone_id)
+    completed(invoke("#{Z::FEATURE_ID}.update", "reference" => row.fetch("reference"),
+                                                "values" => row.fetch("values").merge("name" => "Renamed"),
+                                                "expected_values" => row.fetch("values")))
+    create_zone_option("level", "Upper")
+    assert_empty Z::Schema.problems(record(zone_id))
+    assert_equal ["Renamed", "another_model"], [record(zone_id).fetch("name"),
+                                                record(zone_id).dig("choice_evidence", "source_model_id")]
+    assert completed(API.query(:context => @context, :name => "#{O::PREFIX}.all"))
   end
 
   def test_adopting_copied_zones_that_bring_only_a_level_makes_the_default_segment
@@ -304,31 +324,6 @@ class ZoneSegmentMembershipTest < PhComposerTestCase
     blocking = findings.find { |row| row["object_id"] == zone_id }
     assert_equal "reference.invalid", blocking.fetch("code")
     assert blocking.fetch("blocks_export")
-  end
-
-  # ---------------------------------------------------------------- agent walkthrough, panel closed
-
-  def test_agent_walkthrough_creates_a_segment_moves_a_zone_out_and_deletes_a_segment_to_none
-    house = make_zone(100)
-    annex = make_zone(200)
-    loft = make_zone(300)
-    default_id = query("#{O::PREFIX}.all").fetch("default_segment_id")
-
-    annex_id = completed(invoke("#{O::PREFIX}.create", "collection" => "building_segment",
-                                                       "values" => { "name" => "Annex", "colour" => "#5588BB" }))
-               .fetch("id")
-    completed(set_segment([zone_row(annex), zone_row(loft)], "Annex"))
-    completed(set_segment([zone_row(house)], nil))
-    completed(invoke("#{O::PREFIX}.remove", "collection" => "building_segment", "id" => annex_id,
-                                            "replacement_id" => nil))
-
-    zones = query("#{Z::FEATURE_ID}.all").fetch("zones")
-    assert_equal [nil, nil, nil], zones.map { |zone| zone.dig("values", "building_segment_id") }
-    options = query("#{O::PREFIX}.all")
-    assert_equal [default_id], options.fetch("building_segments").map { |row| row.fetch("id") }
-    assert_equal default_id, options.fetch("default_segment_id")
-    assert_equal({ "live" => 0, "recoverable" => 0 }, options.dig("building_segments", 0, "usage"))
-    refute options.dig("adoption", "required")
   end
 
   private

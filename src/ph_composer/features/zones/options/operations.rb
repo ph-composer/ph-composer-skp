@@ -231,6 +231,8 @@ module PhComposer
           next if after == before
 
           after = Schema.current(after)
+          valid = row.fetch(:zone) ? Schema.problems(after).empty? : Schema.stamp?(after)
+          refuse("validation.failed", "A Zone or membership stamp would not be valid after the change") unless valid
 
           add_rewrite(row, after, writes)
           record = row.fetch(:zone) ? after : after.merge("id" => after.fetch("zone_id"))

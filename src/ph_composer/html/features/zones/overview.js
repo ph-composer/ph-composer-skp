@@ -381,7 +381,9 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
     if (choice && /^#[0-9a-f]{6}$/i.test(choice.values.colour)) {
       return [1, 3, 5].map(function (start) { return parseInt(choice.values.colour.slice(start, start + 2), 16); });
     }
-    return colourBy.colour(state.snapshot, colourBindings(own)[field], value);
+    // A Zone in no Building Segment filters as "" but takes the legend's own No Building Segment row.
+    var key = field === "building_segment" && value === "" ? zoneOptions.NO_SEGMENT_KEY : value;
+    return colourBy.colour(state.snapshot, colourBindings(own)[field], key);
   }
 
   function headerActions(state, own, field, label) {
