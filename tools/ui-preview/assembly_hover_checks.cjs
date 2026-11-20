@@ -22,7 +22,14 @@ check({ name: "assembly_hover", output }, async ({ newPage, step }) => {
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     assert.equal(await control.isVisible(), false, "the segment center has no insertion control");
     assert.equal(await line.isVisible(), false);
-    const normalHover = await wool.evaluate(node => getComputedStyle(node).backgroundColor);
+    // The wash waits 120 ms and fades in over 100 ms (assembly.css), so poll rather than read once.
+    const hoverWash = () => wool.evaluate(node => getComputedStyle(node).backgroundColor);
+    const washDeadline = Date.now() + 2000;
+    let normalHover = await hoverWash();
+    while (normalHover === "rgba(0, 0, 0, 0)" && Date.now() < washDeadline) {
+      await page.waitForTimeout(50);
+      normalHover = await hoverWash();
+    }
     assert.notEqual(normalHover, "rgba(0, 0, 0, 0)", "the center has the normal segment hover wash");
     await wool.click();
     assert.equal(await wool.getAttribute("aria-pressed"), "true");
@@ -62,9 +69,13 @@ check({ name: "assembly_hover", output }, async ({ newPage, step }) => {
       const state = await neighbor.evaluate(node => ({ hovered: node.matches(":hover"),
         edge: node.getAttribute("data-hover-edge"), outline: getComputedStyle(node).outlineStyle,
         color: getComputedStyle(node).outlineColor }));
+      // At rest the outline is a transparent 2 px solid so its colour can fade in after the hover delay;
+      // a body hover is therefore transparent, fading or the normal red, never the generic teal.
       if (state.hovered) {
-        if (state.edge) assert.equal(state.outline, "none", "neighbor edge shows only the insertion cue");
-        else assert.equal(state.color, "rgb(191, 85, 96)", "neighbor body uses normal red hover");
+        if (state.edge) assert(state.outline === "none" || state.color === "rgba(0, 0, 0, 0)",
+          `neighbor edge shows only the insertion cue (${state.outline} ${state.color})`);
+        else assert(state.color === "rgba(0, 0, 0, 0)" || /^rgba?\(191, 85, 96[,)]/.test(state.color),
+          `neighbor body uses normal red hover (${state.color})`);
       }
       assert.equal(await neighbor.getAttribute("aria-pressed"), "false");
       assert.equal(await wool.getAttribute("aria-pressed"), "true", "crossing never moves selection");
