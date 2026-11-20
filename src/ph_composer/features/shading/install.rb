@@ -13,7 +13,7 @@
 #   inventory.rb    shading.list: every mark and every shading component
 #   preflight.rb    shading.export_preflight: the notes on what the mark leaves as it is
 #   codes.rb        the codes under the shading noun
-#   declarations/   what Shading registers
+#   declarations/   what Shading registers: the actions and reads, and Set as Shading and Clear Shading
 require_relative "mark/schema"
 require_relative "reads"
 require_relative "eligibility"
@@ -24,6 +24,7 @@ require_relative "selection"
 require_relative "inventory"
 require_relative "preflight"
 require_relative "declarations/operations"
+require_relative "declarations/menu"
 require_relative "codes"
 
 module PhComposer
@@ -33,6 +34,7 @@ module PhComposer
     def install(registry)
       feature = registry.feature(FEATURE_ID, :contract_version => 1, :requires => ["ph_composer.zones"])
       Registration.install(feature)
+      Menu.install(feature)
       Codes.install(feature)
     end
   end
