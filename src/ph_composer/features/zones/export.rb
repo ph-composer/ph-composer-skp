@@ -155,7 +155,9 @@ module PhComposer
         inside = ((zone_path.length + 1)..entry.path.length).flat_map do |length|
           by_path.fetch(entry.path[0, length], [])
         end
-        Records::EntityStore.envelope_excluded_entries?(inside)
+        return false unless Records::EntityStore.envelope_excluded_entries?(inside)
+
+        !Faces::FACE_STORE.carried_by?(entry.dictionaries) || Records::EntityStore.envelope_excluded_entries?([entry])
       end
 
       # Whether the snapshot Face `entry` is inside a Zone and has left the envelope of the innermost one, the

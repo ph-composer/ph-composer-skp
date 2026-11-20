@@ -14,9 +14,10 @@ module PhComposer
       # `owned`: the target or a container above it is another feature's object. `classified`: a Face in a Zone
       # with a Face record, whatever its values.
       # `zone`: the target is a Zone Group. `zone_target`: a container that is a Zone or holds one.
-      # `holds_owned`: a container holding another feature's object.
+      # `holds_owned`: a container holding another feature's object. `classified_inside`: for a container inside a
+      # Zone, how many classified Zone Faces the mark would reach.
       Facts = Struct.new(:path, :kind, :marked, :containers, :locked, :shared, :cutting, :owned, :classified,
-                         :zone, :zone_target, :holds_owned, keyword_init: true)
+                         :zone, :zone_target, :holds_owned, :classified_inside, keyword_init: true)
 
       SHARED = "The %s is in storage another placement shares (a Component placed more than once, or a copied " \
                "Group not yet made unique), so the mark would reach every placement. Tag the Component or Group " \
@@ -64,6 +65,11 @@ module PhComposer
           return refusal("shading.face_classified", "The Face is a classified Zone Face. Clear its classification " \
                                                     "first (ph_composer.zones.faces.clear_classification).")
         end
+        if !facts.marked && facts.classified_inside.to_i.positive?
+          return refusal("shading.face_classified", "The #{noun(facts)} holds #{facts.classified_inside} classified " \
+                                                    "Zone Face(s). Clear their classification first " \
+                                                    "(ph_composer.zones.faces.clear_classification).")
+        end
         write_refusal(facts)
       end
 
@@ -76,9 +82,9 @@ module PhComposer
       end
 
       # Whether a mark above can reach the target at all: never a cutting component or anything inside one, a
-      # Zone Group, or another feature's object.
+      # Zone Group, another feature's object, or a classified Zone Face, which stays envelope.
       def inherits?(facts)
-        !(facts.cutting || facts.zone || facts.owned)
+        !(facts.cutting || facts.zone || facts.owned || facts.classified)
       end
 
       def inherited(container)

@@ -14331,7 +14331,7 @@ Example params:
 
 ### `ph_composer.shading.export_preflight`
 
-Shading's export notes, none blocking: shading.zone_inside names each marked Group or component that is a Zone or holds one, another feature's object or a cutting component, which the mark does not reach. Owner: `ph_composer.shading`.
+Shading's export notes, none blocking: shading.zone_inside names each marked Group or component that is a Zone or holds one, another feature's object or a cutting component, which the mark does not reach; shading.classified_inside names one inside a Zone holding classified Faces, which stay envelope. Owner: `ph_composer.shading`.
 
 Refuses: `record.unreadable`, `target.wrong_kind`, `validation.failed`, and the `query` common set.
 
@@ -78704,6 +78704,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 
 | Code | Meaning |
 | --- | --- |
+| `shading.classified_inside` | Preflight note: a marked Group or component inside a Zone holds classified Zone Faces, which stay envelope and are not shading. |
 | `shading.cutting_component` | The entity is a cutting component or inside one; export does not read its Faces. |
 | `shading.face_classified` | A classified Zone Face cannot be shading until its classification is cleared with ph_composer.zones.faces.clear_classification. |
 | `shading.inherited` | Clear named an entity that is shading through a marked Group or component above it; the message names that one. |
@@ -78944,4 +78945,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.67 | 2026-11-18 | ph_composer.climate.site.geolocation is new: what SketchUp reports for the Model's geolocation, latitude and longitude only when SketchUp reports the Model geolocated, and no elevation or offset. The snapshot sections ph_composer.climate.site and ph_composer.climate.design_temperatures carry the site and design-temperature reads for the Climate tab. |
 | 1.68 | 2026-11-18 | ph_composer.climate.stations.all is new: one climate data folder's stations in one unbounded read, nearest the site first, in stations.list's rows, for the station picker; scripts page stations.list. |
 | 1.69 | 2026-11-19 | The Shading feature. ph_composer.shading.assign and ph_composer.shading.clear mark and unmark explicit Faces, Groups and components by root-to-entity path, each one Undo step, answering assigned or cleared, unchanged and left_out; ph_composer.shading.selection and ph_composer.shading.list read the selection and every mark and shading component. shading.face_classified, shading.zone_target, shading.inherited and shading.cutting_component are new. |
-| 1.70 | 2026-11-19 | A Face inside a Zone that is shading, or inside a shading Group or component there, is not part of the Zone's envelope: Zones reads, writes, Solve, Colour-by and export leave it out, and an explicit reference to it refuses face.outside_envelope; zones.containment answers it with the reason outside_envelope. ph_composer.zones.faces.clear_classification is new: it removes Face records in one Undo step, refusing face.surface_paired and face.aperture_host. ph_composer.shading.export_preflight is new and notes shading.zone_inside. |
+| 1.70 | 2026-11-19 | A Face inside a Zone that is shading, or inside a shading Group or component there, is not part of the Zone's envelope: Zones reads, writes, Solve, Colour-by and export leave it out, and an explicit reference to it refuses face.outside_envelope; zones.containment answers it with the reason outside_envelope. ph_composer.zones.faces.clear_classification is new: it removes Face records in one Undo step, refusing face.surface_paired and face.aperture_host. ph_composer.shading.export_preflight is new and notes shading.zone_inside and shading.classified_inside. shading.assign refuses a Group inside a Zone that holds classified Faces with shading.face_classified; a classified Face leaves the envelope only by its own mark. |

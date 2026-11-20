@@ -462,7 +462,8 @@ What `assign` leaves out, and why:
 - A cutting component, such as a Window Unit, or anything inside one: `shading.cutting_component`.
 - A Zone, or a Group holding one: `shading.zone_target`.
 - A classified Zone Face: `shading.face_classified`. Clear its classification first with
-  `ph_composer.zones.faces.clear_classification`, then mark it.
+  `ph_composer.zones.faces.clear_classification`, then mark it. A Group or component inside a Zone
+  that holds classified Faces is refused the same way, and the message gives their count.
 - A Space, Volume or Floor Segment, anything inside one, a Group holding one, or anything that is not
   a Face, Group or component: `target.wrong_kind`.
 
@@ -483,7 +484,9 @@ raises no `face.unclassified`, takes no Face type and is not part of the Room. S
 classification, Solve adjacencies and the Classify tool leave it alone, and a call that names it
 directly, such as `ph_composer.zones.faces.classify`, is refused with `face.outside_envelope`. Clear
 the mark and it is a Zone Face again. A mark on a Group above a Zone does not reach the Zone's Faces:
-`ph_composer.shading.export_preflight` notes each such Group with `shading.zone_inside`.
+`ph_composer.shading.export_preflight` notes each such Group with `shading.zone_inside`. A Face
+classified after the Group above it was marked stays part of the envelope, and the preflight notes
+that Group with `shading.classified_inside`.
 
 `ph_composer.zones.faces.clear_classification` takes `faces`, each a Face reference with the
 `entity_id` you read, and removes their classification in one Undo step, so each reads as

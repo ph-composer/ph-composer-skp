@@ -390,7 +390,9 @@ module PhComposer
                     "explicit reference to it refuses face.outside_envelope; zones.containment answers it with the " \
                     "reason outside_envelope. ph_composer.zones.faces.clear_classification is new: it removes Face " \
                     "records in one Undo step, refusing face.surface_paired and face.aperture_host. " \
-                    "ph_composer.shading.export_preflight is new and notes shading.zone_inside." }
+                    "ph_composer.shading.export_preflight is new and notes shading.zone_inside and " \
+                    "shading.classified_inside. shading.assign refuses a Group inside a Zone that holds classified " \
+                    "Faces with shading.face_classified; a classified Face leaves the envelope only by its own mark." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

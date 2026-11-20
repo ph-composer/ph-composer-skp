@@ -200,7 +200,7 @@ module PhComposer
       def zone_faces(entities, transform, containers)
         entities.to_a.flat_map do |entity|
           if entity.is_a?(Sketchup::Face)
-            next [] if Records::EntityStore.envelope_excluded?(containers + [entity])
+            next [] if Zones::Occurrences.envelope_excluded?(containers + [entity])
 
             [FaceCapture.call(entity, transform).loops_m]
           elsif entity.is_a?(Sketchup::Group)

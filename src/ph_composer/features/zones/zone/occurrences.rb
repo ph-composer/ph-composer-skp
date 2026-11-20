@@ -138,6 +138,17 @@ module PhComposer
         found
       end
 
+      # Whether an entity carries a Face record, readable or not: the classified state envelope exclusion reads,
+      # public so a feature placing marks above Zone Faces can tell which it would reach.
+      def classified_face?(entity)
+        entity.is_a?(Sketchup::Face) && Faces::FACE_STORE.marks?(entity)
+      end
+
+      # Whether an entity carries a Zone record, readable or not.
+      def zone_record?(entity)
+        ZONE_STORE.marks?(entity)
+      end
+
       # Whether a Face reference names a Face that has left its Zone's envelope, read without write checks, so a
       # lock on the way does not hide it. A reference that does not resolve otherwise is not excluded.
       def outside_envelope?(model, reference, index: nil)
@@ -151,9 +162,13 @@ module PhComposer
       # takes it as one of the Zone's Faces. `inside` runs from the first entity inside the Zone Group down to
       # the leaf, as `holding` returns it. Only a Face leaves the envelope: an Edge or a container is never
       # excluded. The rule is the foundation's (Records::EntityStore.envelope_excluded?), so it names no feature
-      # (context/CONTRACTS.md, "Zones geometry rules").
+      # (context/CONTRACTS.md, "Zones geometry rules"). A classified Face (one carrying a Face record) leaves
+      # only by a record on itself: a record on a container above it does not drop a wall from the envelope.
       def envelope_excluded?(inside)
-        inside.last.is_a?(Sketchup::Face) && Records::EntityStore.envelope_excluded?(inside)
+        face = inside.last
+        return false unless face.is_a?(Sketchup::Face) && Records::EntityStore.envelope_excluded?(inside)
+
+        !Faces::FACE_STORE.marks?(face) || Records::EntityStore.envelope_excluded?([face])
       end
 
       # A null `entity_id` asserts that the Face has no record: once it has one the reference is stale and

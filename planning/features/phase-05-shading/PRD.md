@@ -58,6 +58,7 @@ These go into `context/UBIQUITOUS_LANGUAGE.md` when the feature lands.
 | A plain Group or ComponentInstance, at the root or nested, inside a Zone or not | Tagged; every Face inside it, at any depth, is a Shading Face |
 | A Face inside a Zone that has no classification | Tagged. It leaves the Zone's envelope: it is not an unclassified Face, takes no Face type, and is not part of the Room |
 | A Face inside a Zone that is classified | Refused: clear its classification first (D5s-11) |
+| A Group or ComponentInstance inside a Zone whose mark would reach a classified Face | Refused like a classified Face, naming the count: clear their classification first (D5s-11, conductor extension 2026-11-19, pending Ed's confirmation). A Face classified after its Group was marked stays envelope and `shading.classified_inside` notes the Group |
 | A Group that is a Zone, or holds one at any depth | Refused. A whole Zone as shading is the [zone-shading brief](../unscheduled/zone-shading.md) |
 | A Space, Volume or Floor Segment, anything inside them, or a Group holding one | Refused: another feature owns the entity |
 | A Window Unit, a pane Face, anything inside them | Refused as a cutting component (P5s-02): a Window Unit cuts its opening and claims nothing |

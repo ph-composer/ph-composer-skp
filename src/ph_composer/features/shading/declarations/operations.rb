@@ -117,7 +117,9 @@ module PhComposer
         feature.query("#{PREFIX}.export_preflight",
                       :description => "Shading's export notes, none blocking: shading.zone_inside names each marked " \
                                       "Group or component that is a Zone or holds one, another feature's " \
-                                      "object or a cutting component, which the mark does not reach.",
+                                      "object or a cutting component, which the mark does not reach; " \
+                                      "shading.classified_inside names one inside a Zone holding classified " \
+                                      "Faces, which stay envelope.",
                       :refuses => %w[record.unreadable target.wrong_kind validation.failed], :params => object({}),
                       :result => Export::PREFLIGHT_RESULT, :examples => [{}]) { |request| Preflight.call(request) }
       end

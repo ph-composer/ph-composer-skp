@@ -12,6 +12,8 @@ module PhComposer
                                "it; the message names that one.",
         "shading.zone_inside" => "Preflight note: a marked Group or component is a Zone, holds one or holds " \
                                  "another feature's object or a cutting component, which the mark does not reach.",
+        "shading.classified_inside" => "Preflight note: a marked Group or component inside a Zone holds classified " \
+                                       "Zone Faces, which stay envelope and are not shading.",
         "shading.cutting_component" => "The entity is a cutting component or inside one; export does not read its " \
                                        "Faces."
       }.freeze

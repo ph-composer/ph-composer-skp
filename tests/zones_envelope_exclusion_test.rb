@@ -93,21 +93,21 @@ class ZonesEnvelopeExclusionTest < PhComposerTestCase
   def test_attached_zone_references_leave_out_an_excluded_face
     record = FACE_STORE.read(face_at(@zone_a, 1003)).merge("boundary_condition" => "AttachedZone",
                                                            "attached_zone_id" => "atz_AAAAAAAAAAAA")
-    FACE_STORE.write(@fin_face, record.merge("id" => "fac_F00000000001"))
+    FACE_STORE.write(@overhang, record.merge("id" => "fac_F00000000001"))
     each_state do |excluded|
       found = Zones::Faces.referencing_faces(@model, "atz_AAAAAAAAAAAA").map { |occurrence, _| occurrence.entity }
-      assert_equal(excluded ? [] : [@fin_face], found)
+      assert_equal(excluded ? [] : [@overhang], found)
     end
   end
 
-  # A classified Face inside a marked Group is in no Face inventory, so an Assembly replacement or an Attached
-  # zone delete cannot reach it: each refuses and says to clear what took it out of the envelope.
+  # A classified Face carrying the excluding record itself is in no Face inventory, so an Assembly replacement or
+  # an Attached zone delete cannot reach it: each refuses and says to clear what took it out of the envelope.
   def test_stranded_records_inside_the_envelope_name_the_exclusion
     record = FACE_STORE.read(face_at(@zone_a, 1003)).merge("id" => "fac_F00000000001",
                                                            "boundary_condition" => "AttachedZone",
                                                            "attached_zone_id" => "atz_AAAAAAAAAAAA")
-    FACE_STORE.write(@fin_face, record)
-    EXCLUDING.write(@fin, "schema_version" => 1)
+    FACE_STORE.write(@overhang, record)
+    EXCLUDING.write(@overhang, "schema_version" => 1)
     request = PhComposer::HandlerRequest.for(@session, :owner => Zones::FEATURE_ID, :name => "test",
                                                        :registry => PhComposer::Registry.current)
     retarget = assert_raises(PhComposer::CodedError) do
@@ -267,7 +267,8 @@ class ZonesEnvelopeExclusionTest < PhComposerTestCase
   end
 
   # Classify and Solve retire the visible side of a pair whose other side has left the envelope, alone.
-  # The excluded side sits in a Group that is then marked and locked: the lock does not stop the visible side.
+  # The excluded side carries the record itself and sits in a Group locked after Solve: the lock does not stop
+  # the visible side.
   def test_retiring_a_pair_leaves_an_excluded_counterpart_unwritten
     partner = face_at(@zone_b, 2003)
     @zone_b.entities.delete(partner)
@@ -278,7 +279,7 @@ class ZonesEnvelopeExclusionTest < PhComposerTestCase
     [@overhang, @fin_face].each { |face| EXCLUDING.write(face, "schema_version" => 1) }
     shared = face_at(@zone_a, 1004)
     assert_equal "Surface", FACE_STORE.read(partner)["boundary_condition"]
-    EXCLUDING.write(holder, "schema_version" => 1)
+    EXCLUDING.write(partner, "schema_version" => 1)
     holder.locked = true
     kept = FACE_STORE.read(partner)
     reference = zone_reference(@zone_a).merge("entity_path" => [1004], "entity_id" => FACE_STORE.read(shared)["id"])
@@ -317,6 +318,28 @@ class ZonesEnvelopeExclusionTest < PhComposerTestCase
       refute_includes paths, [1060, 1061]
       assert_includes paths, [1070, 1071, 1072]
       assert_includes paths, [1001]
+    end
+  end
+
+  # Classification wins over a record above it: a classified Face inside a marked Group stays envelope, live
+  # and in the snapshot; an unclassified one beside it leaves.
+  def test_a_classified_face_under_a_marked_group_stays_in_the_envelope
+    classified = Sketchup::Face.new(1022, {}, :points => rectangle_z(0, 5, 6, 8, 3),
+                                              :normal => Geom::Vector3d.new(0, 0, 1))
+    FACE_STORE.write(classified, FACE_STORE.read(face_at(@zone_a, 1002)).merge("id" => "fac_F00000000002"))
+    Zones::STAMP_STORE.write(classified, Zones::STAMP_STORE.read(@overhang))
+    @fin.entities << classified
+    EXCLUDING.write(@fin, "schema_version" => 1)
+    zone = Zones::Occurrences.zones(@model).find { |row| row.path == [1000] }
+    live = Zones::Occurrences.faces(zone).map(&:path)
+    snapshot = reader.then do |read|
+      Zones::ExportProjection.zone_faces(read, read.snapshot.entry_at([1000], :kind => "group")).map { |f|
+        f.path[1..-1]
+      }
+    end
+    [live, snapshot].each do |paths|
+      assert_includes paths, [1020, 1022]
+      refute_includes paths, [1020, 1021]
     end
   end
 
@@ -362,6 +385,33 @@ class ZonesEnvelopeExclusionTest < PhComposerTestCase
     @model.undo
     @model.undo
     assert_equal reference.fetch("entity_id"), FACE_STORE.read(face_at(zone_group(1000), 1003))&.fetch("id")
+  end
+
+  # Assign refuses a Group inside a Zone when the mark would reach a classified Face, naming the count, and
+  # takes it once the classification is cleared.
+  def test_assign_refuses_a_group_holding_classified_faces
+    FACE_STORE.write(@fin_face, FACE_STORE.read(face_at(@zone_a, 1002)).merge("id" => "fac_F00000000003"))
+    refused = shading("assign", [[1000, 1020]])
+    assert_equal %w[refused shading.face_classified], refused.values_at("status", "code")
+    assert_includes refused.fetch("message"), "holds 1 classified Zone Face(s)"
+    FACE_STORE.delete(@fin_face)
+    assert_equal "completed", shading("assign", [[1000, 1020]])["status"]
+  end
+
+  # A Face classified after the Group above it was marked stays envelope; the preflight notes it.
+  def test_a_face_classified_under_a_marked_group_is_noted_by_the_preflight
+    assert_equal "completed", shading("assign", [[1000, 1020]])["status"]
+    FACE_STORE.write(@fin_face, FACE_STORE.read(face_at(@zone_a, 1002)).merge("id" => "fac_F00000000004"))
+    findings = query("ph_composer.shading.export_preflight").dig("value", "findings")
+    assert_equal ["shading.classified_inside"], findings.map { |row| row.fetch("code") }
+    assert_includes findings.first.fetch("message"), "\"Fin\" at path [1000, 1020]"
+    refute findings.first.fetch("blocks_export")
+    names = query("ph_composer.shading.list").dig("value", "components").map { |row| row.fetch("display_name") }
+    refute_includes names, "Fin"
+    unchanged = shading("assign", [[1000, 1020]]).dig("value", "unchanged")
+    assert_equal [[1000, 1020]], unchanged.map { |row| row.fetch("entity_path") }
+    cleared = shading("clear", [[1000, 1020, 1021]])
+    assert_equal [[1000, 1020, 1021]], cleared.dig("value", "unchanged").map { |row| row.fetch("entity_path") }
   end
 
   def test_clear_classification_refuses_a_surface_pair_an_aperture_host_and_an_excluded_face

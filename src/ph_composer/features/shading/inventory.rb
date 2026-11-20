@@ -23,6 +23,8 @@ module PhComposer
           next unless entity.is_a?(Sketchup::Face) && !cut &&
                       Reads.shading_face?(:marked => Mark.marked?(entity), :owned => Targets.owned?(entity),
                                           :containers => containers)
+          # A classified Zone Face stays envelope unless it carries the mark itself.
+          next if !Mark.marked?(entity) && containers.any?(&:zone?) && Zones::Occurrences.classified_face?(entity)
 
           component = components[Reads.component_name(containers)]
           component["face_count"] += 1

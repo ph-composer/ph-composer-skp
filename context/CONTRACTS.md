@@ -762,7 +762,9 @@ as Zones' `holding` returns it) carries an excluding store's record and none is 
 
 `ph_composer.shading.export_preflight` answers non-blocking notes in `Export::PREFLIGHT_RESULT`:
 `shading.zone_inside` names each marked Group or component that is a Zone, holds one, holds a claimed
-object or holds a cutting component such as a Window Unit, which the mark does not reach. Until the Shades export section lands, the aggregate export preflight
+object or holds a cutting component such as a Window Unit, which the mark does not reach, and
+`shading.classified_inside` names each marked Group or component inside a Zone that holds classified Faces,
+which stay envelope. Assign refuses such a Group with `shading.face_classified`, naming the count. Until the Shades export section lands, the aggregate export preflight
 does not read it.
 
 **Containment.** `ph_composer.zones.containment` answers, for each root-to-entity path, the Zone
@@ -897,7 +899,9 @@ and distribution acceptance remain separate from these implemented branch contra
 **Envelope exclusion.** A Face inside a Zone leaves the Zone's envelope when
 `Zones::Occurrences.envelope_excluded?(inside)` holds: the Face itself, or a Group or component between
 it and the Zone Group, carries the record of a store built with `excludes_from_envelope: true`, and none
-of them is claimed (`Records::EntityStore.envelope_excluded?`). `inside` starts inside the innermost Zone,
+of them is claimed (`Records::EntityStore.envelope_excluded?`). A classified Face (a Face record present,
+readable or not) leaves only by a record on itself: a record on a container above it leaves the Face in the
+envelope, so classification wins. `inside` starts inside the innermost Zone,
 so a record on the Zone Group or above it never reaches the Zone's Faces. Only a Face leaves; an Edge or a
 container beside it reads its Zone as before. The rule is applied in four places, and every Zones read and
 write goes through one of them: the Face walk (`walk_faces`, behind `faces`, `Zones::Index`, faces.list
@@ -907,8 +911,8 @@ tool, the selection read, `faces.host_context` and `zones.containment`, which an
 the reference resolve (`resolve_face_path`, which refuses `face.outside_envelope` for reads and writes
 alike, without saying why) and the export snapshot (`ExportProjection.zone_faces`,
 `envelope_excluded?` and `outside_envelope?`, behind the Zones and Faces sections). An excluded Face that
-still carries a Face record (classified before a Group above it was marked) stays in the Model and leaves
-the export; a Surface partner pointing at it is omitted as `adjacency.unresolved`. Spaces' candidate Faces
+still carries a Face record (the record on the Face itself, as a paste can leave it) stays in the Model and
+leaves the export; a Surface partner pointing at it is omitted as `adjacency.unresolved`. Spaces' candidate Faces
 read the foundation check themselves. Identity maintenance is not an envelope read: the stamp writer and
 Zone copy repair walk every member Face (`Occurrences.member_faces`), so an excluded Face's stamp and record
 stay in step with its Zone and it rejoins the envelope intact when the mark is cleared. Face-record id
