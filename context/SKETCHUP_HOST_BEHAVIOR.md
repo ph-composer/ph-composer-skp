@@ -165,7 +165,8 @@ the cases B4 left open, each with native Undo, Redo, save and a fresh-process re
 
 ## Entity dictionaries on Faces, Groups and instances
 
-Measured in PH-Composer on 26.1.188, 2026-11-19
+Measured in PH-Composer on 26.1.188, 2026-11-19, and the whole table again on 2026-11-20 on `906a102c` with the
+last three rows added
 ([SD01](../planning/features/phase-05-shading/evidence/sd01-host-facts.md)), for the Shading mark: a
 `ph_composer.shading` dictionary on a loose Face, a Group and a ComponentInstance, written by a spike. Each
 gesture was followed by native Undo, Redo, a saved copy and a fresh-process reopen.
@@ -179,7 +180,9 @@ gesture was followed by native Undo, Redo, a saved copy and a fresh-process reop
 | Divide of a bounding Edge | The Face keeps its persistent id, dictionary, area and loop count (Edges were not scanned; the Edit menu read "Undo Divide Edges") | A Face mark survives an edge split |
 | Intersect Faces > With Model across a Face | The Face splits: the original persistent id stays on one half, the other half gets a new id, both carry the full dictionary | A split Face mark becomes two marks, as edge records do |
 | Explode of a Group | The Group and its dictionary are removed; its Faces become loose with their own dictionaries only | A container mark does not pass to its contents on explode |
-| Move-copy array, push-pull | Not measured; owed to a later full-screen hold | |
+| Copy, Paste with a placement click | The pasted Face, Group and instance each carry the source's dictionary on new persistent ids; one Undo step "Paste" | A Face pasted elsewhere is a second marked Face |
+| Move-copy, then an array count (`3x`) | Every copy carries the source dictionaries; the copy and the array are one Undo step "Array" | An array of marked geometry is all marked; one Undo removes every copy |
+| Push/Pull of a marked loose Face | Every new Face (the cap and each side) carries the full dictionary; one Undo step "Push/Pull" | Extruding a shading Face makes every new Face a shading Face |
 
 In every measured case native Undo restored the dictionaries and persistent ids exactly, Redo re-applied them,
 and the saved copy reopened in a fresh process with the same reads. A Face with an inner loop lists the outer

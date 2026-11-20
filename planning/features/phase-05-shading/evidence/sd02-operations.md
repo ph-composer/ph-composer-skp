@@ -23,3 +23,10 @@ Limits of this run:
 - The Window Unit row was covered by a cutting component, which every Window Unit is; no real Unit was placed.
 - The Louvre component read "Louvre#2": earlier setup retries in the build left unused "Louvre" definitions,
   so SketchUp suffixed the new one. The name follows the definition name as the rule says.
+
+## Rerun, 2026-11-20
+
+Rerun on `main` at `906a102c` from the installed RBZ, same fixture and calls, panel closed
+(`_private/host/batch-20261119/sd02/SD02/`). Every result matched the 2026-11-19 run: ten targets assigned in one
+step, Undo and Redo of assign and clear, the unchanged and inherited rows, all twelve refusal rows, the mixed
+selection, the stale revision and the five-component list. Recorded `pass`.

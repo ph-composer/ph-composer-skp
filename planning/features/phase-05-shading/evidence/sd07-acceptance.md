@@ -1,7 +1,7 @@
 # SD07: integration acceptance
 
 DATE: 2026-11-20
-STATE: Not run on the host. This file holds the offline part; the host part is owed to the batched host pass.
+STATE: Host part run 2026-11-20 on `906a102c`; eight of ten assertions observed. Ed's check of the WUFI XML in WUFI-Passive and the METr JSON in METr is open, so `finish` has not run.
 
 ## Offline part, P5s-07 branch
 
@@ -38,3 +38,28 @@ They are for an early look in WUFI-Passive and METr. The authoritative files com
 The PRD's acceptance shape from a fresh process: tag from the right-click menu, Undo and Redo, a second
 Model, save and reopen, Colour-by, export, reload, PHX conversion, then Ed opens both files. The run order,
 controls and full-screen steps are in the private batch recipe, `_private/host/batch-20261119/RECIPE.md`.
+
+## Host part, 2026-11-20
+
+`main` at `906a102c`, installed RBZ, SketchUp 26.1.188, panel closed. Fixture: the reference model built by
+`SD06.setup` in a fresh copy of the blank template, nothing tagged, opened in a fresh process. Run folder
+`_private/host/sd07-20261119/SD07/` (not tracked).
+
+| Step | Gesture | Result |
+| --- | --- | --- |
+| 1 | Right-click three root Faces (two loose, one holed) > PH-Composer > Set as Shading | "Tagged 3 entities as shading."; Shading 3 |
+| 2 | Right-click the closed Group Neighbour > Set as Shading | Neighbour 6 |
+| 3 | Right-click the three Louvre placements > Set as Shading | Louvre 6 |
+| 4 | Inside Zone A, right-click the overhang Face and the Fin Group > Set as Shading | Zone A Shading 1, Fin 2; no blocking finding |
+| 5 | Edit > Undo (Close, then Set as Shading), then Redo twice | Step 4's marks off, then back |
+| 6 | File > New; Colour by > Shading in it | No marks, empty legend; the first Model's mode stayed off |
+| 7 | File > Close on the second Model | No prompt; the first Model's revision unchanged |
+| 8 | Colour by > Shading in the reference Model | 18 occurrences in five rows; window shot |
+| 9 | Right-click a Louvre placement | Clear Shading only |
+| 10 | Save, quit, fresh launch of the saved file | Same five components; Colour by > Shading again shows 18 |
+| 11 | Export from the reopened Model | `export.complete`; 18 detached Shades, one with its hole, 1 Room |
+| 12 | Pinned PHX (`phx` 1.57.5, `honeybee-ph` 1.33.65) | Five shading components in WUFI XML and METr JSON, `InnerAttachment` -1, `idIC` -1, areas match |
+
+Files for Ed's check, converted from the step 11 export:
+`_private/host/batch-20261119/ed-files/sd07/sd07-reopened-wufi.xml` and
+`_private/host/batch-20261119/ed-files/sd07/sd07-reopened-metr.json`.

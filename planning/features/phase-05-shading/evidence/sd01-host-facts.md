@@ -56,3 +56,27 @@ Face and a Face on a hidden tag are both in the export snapshot.
 - The recipe placed the copy with a viewport click; the conductor used Paste In Place instead, which is what
   produced the loose-Face merge.
 - A first Divide attempt opened the wrong submenu; its scans are kept apart and are not evidence.
+
+## Batched rerun, 2026-11-20
+
+The whole table reran on `main` at `906a102c` from the installed RBZ, because P5s-06 changed
+`export/geometry_snapshot.rb`, an SD01 input. Run folder `_private/host/batch-20261119/sd01/SD01/`; fixture copied
+from the 2026-11-19 build (the spike file is unchanged since `2a9c5e17`). Recorded `pass` for all twelve assertions.
+
+| Gesture | Shading Faces | Marked entities | Undo step |
+| --- | --- | --- | --- |
+| Copy, Paste, one placement click | 10 to 20 | 3 to 6 | Paste |
+| Move-copy 3 m, then `3x` | 10 to 40 | 3 to 12 | Array (one step for the copy and the array) |
+| Cut, Paste In Place | 10 | 3 (new ids) | Paste, Cut |
+| Make Group | 10 | 3 | Group |
+| Make Component (Create clicked) | 10 | 3 | Make Component |
+| Make Unique | 11 | 5 | Make Unique |
+| Push/Pull 1 m of a marked loose Face | 10 to 14, plus 1 side Face counted in the neighbouring island at the 60 m boundary | 3 to 8 | Push/Pull |
+| Divide of a bounding Edge | 10 | 3 | Divide Edges |
+| Intersect Faces > With Model | 10 to 11 | 3 to 4 | Intersect |
+| Explode of a marked Group | 10 to 3 | 3 to 2 | Explode |
+
+Every Undo returned the baseline, every Redo the gesture's state, and every saved copy reopened in a fresh
+process equal to its pre-save scan. A first pass of five System Events gestures misfired (the Edit menu was read
+before SketchUp refreshed it after a selection change; the Make Component dialog was not accepted); those scans
+are kept in `void/` and the gestures were rerun one at a time from the baseline.
