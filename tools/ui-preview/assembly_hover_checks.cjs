@@ -64,18 +64,27 @@ check({ name: "assembly_hover", output }, async ({ newPage, step }) => {
     // unselected neighbor inherit the generic button's teal hover/focus outline.
     const neighbor = drawing.locator(".assembly-hit-target[data-segment-id='seg_stud_0']");
     const offsets = [-22, -18, -12, -2, 0, 2, 6, 10, 12, 16, 20];
+    // At rest the outline is a transparent 2 px solid so its colour can fade in after the hover delay and
+    // out again; between those states it is the normal red at partial alpha, never the generic teal.
+    const neighborState = () => neighbor.evaluate(node => ({ hovered: node.matches(":hover"),
+      edge: node.getAttribute("data-hover-edge"), outline: getComputedStyle(node).outlineStyle,
+      color: getComputedStyle(node).outlineColor }));
+    const transparent = "rgba(0, 0, 0, 0)";
+    const redOrClear = color => color === transparent || /^rgba?\(191, 85, 96[,)]/.test(color);
     for (const offset of offsets.concat(offsets.slice().reverse())) {
       await page.mouse.move(box.x + box.width + offset, box.y + box.height / 2 - 20);
-      const state = await neighbor.evaluate(node => ({ hovered: node.matches(":hover"),
-        edge: node.getAttribute("data-hover-edge"), outline: getComputedStyle(node).outlineStyle,
-        color: getComputedStyle(node).outlineColor }));
-      // At rest the outline is a transparent 2 px solid so its colour can fade in after the hover delay;
-      // a body hover is therefore transparent, fading or the normal red, never the generic teal.
+      let state = await neighborState();
       if (state.hovered) {
-        if (state.edge) assert(state.outline === "none" || state.color === "rgba(0, 0, 0, 0)",
+        assert(redOrClear(state.color), `neighbor hover uses normal red, never teal (${state.color})`);
+        // A body hover that outlived the delay fades out on edge entry; the edge must settle invisible.
+        const edgeDeadline = Date.now() + 1000;
+        while (state.edge && state.outline !== "none" && state.color !== transparent && Date.now() < edgeDeadline) {
+          await page.waitForTimeout(25);
+          state = await neighborState();
+          assert(redOrClear(state.color), `neighbor edge fades the normal red, never teal (${state.color})`);
+        }
+        if (state.edge) assert(state.outline === "none" || state.color === transparent,
           `neighbor edge shows only the insertion cue (${state.outline} ${state.color})`);
-        else assert(state.color === "rgba(0, 0, 0, 0)" || /^rgba?\(191, 85, 96[,)]/.test(state.color),
-          `neighbor body uses normal red hover (${state.color})`);
       }
       assert.equal(await neighbor.getAttribute("aria-pressed"), "false");
       assert.equal(await wool.getAttribute("aria-pressed"), "true", "crossing never moves selection");
