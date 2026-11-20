@@ -679,6 +679,8 @@
     if (payload.name === "ph_composer.zones.options.manage") return this.manageZoneOptions(payload.params);
     var segmentOutcome = this.segmentAction(payload);
     if (segmentOutcome) return segmentOutcome;
+    var airflowOutcome = this.spacesAirflowAction(payload);
+    if (airflowOutcome) return airflowOutcome;
     // Create Space answers that it ran; the synthetic Spaces section is not regrouped.
     if (payload.name === "ph_composer.spaces.create") {
       this.revision++;
@@ -761,6 +763,45 @@
     this.revision += 1;
     return { status: "completed", code: "ok", message: "Done.", effect: "committed", revision: this.revision,
       value: resultValue, affected: [], findings: [], detail: null };
+  };
+
+  /* Synthetic Spaces airflow writes: a cell edit or a batch that changes only Space rates, and From Program. The
+     rates land on the Space rows and the section is summed again by the fixtures' rule, so a Zone's airflow mode
+     follows its Spaces' rates as Ruby's does. Null for any other write. */
+  Host.prototype.spacesAirflowAction = function (payload) {
+    var section = this.spaces, keys = ["v_sup_m3h", "v_eta_m3h", "v_tran_m3h"];
+    if (!section || !section.spaces) return null;
+    function find(reference) {
+      return section.spaces.filter(function (space) {
+        return JSON.stringify(space.reference) === JSON.stringify(reference);
+      })[0];
+    }
+    if (payload.name === "ph_composer.spaces.clear_zone_airflows") {
+      var ids = payload.params.zones.map(function (zone) { return zone.zone_id; });
+      section.spaces.forEach(function (space) {
+        if (!space.zone || ids.indexOf(space.zone.zone_id) < 0) return;
+        keys.forEach(function (key) { delete space.values[key]; });
+      });
+    } else if (payload.name === "ph_composer.spaces.update" || payload.name === "ph_composer.spaces.batch_update") {
+      var edits = payload.params.edits || [payload.params];
+      var rates = edits.every(function (edit) {
+        return find(edit.reference) && Object.keys(edit.values).every(function (key) {
+          return keys.indexOf(key) >= 0;
+        });
+      });
+      if (!rates) return null;
+      edits.forEach(function (edit) {
+        var space = find(edit.reference);
+        Object.keys(edit.values).forEach(function (key) {
+          if (edit.values[key] === null) delete space.values[key];
+          else space.values[key] = edit.values[key];
+        });
+      });
+    } else return null;
+    this.spaces = this.window.PhComposerPreviewFixtures.spacesSection(section.spaces, this.zones);
+    this.revision += 1;
+    return { status: "completed", code: "ok", message: "Done.", effect: "committed", revision: this.revision,
+      value: {}, affected: [], findings: [], detail: null };
   };
 
   /* Synthetic Building Segment writes for the Zones tab's heading rows and settings dialog: New (with Zones moved

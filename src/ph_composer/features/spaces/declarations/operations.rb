@@ -256,6 +256,29 @@ module PhComposer
         }, lambda { |request, proposal, params|
           Authoring.unhost(request, proposal, :space => params.fetch("space"))
         }],
+        ["clear_zone_airflows", {
+          :description => "From Program: clear every Space's supply, extract and transfer rates in the named " \
+                          "Zones, so each is By Program again and its Spaces take their Zone's Program " \
+                          "ventilation, split by floor area. All or nothing: a Space that cannot be written " \
+                          "refuses the whole call. A Zone already By Program is left as it is.",
+          :refuses => (ZONE_TARGET + TARGET).uniq,
+          :params => Shapes.object({ "zones" => Shapes.list(ZONE).merge("minItems" => 1,
+                                                                        "maxItems" => Pages::MAXIMUM_LIMIT,
+                                                                        "description" => "The Zones, as " \
+                                                                                         "ph_composer.zones.list " \
+                                                                                         "returns them.") }),
+          :result => Shapes.object({ "zone_ids" => Shapes.list(Shapes::TEXT),
+                                     "space_ids" => Shapes.list(Shapes::TEXT,
+                                                                :description => "The Spaces whose rates were " \
+                                                                                "cleared; empty when every Zone " \
+                                                                                "was By Program.") }),
+          :undo_name => "Clear Zone Airflows",
+          :side_effects => "Removes v_sup_m3h, v_eta_m3h and v_tran_m3h from every Space record hosted in the " \
+                           "Zones, in one Undo step.",
+          :examples => [{ "zones" => [EXAMPLE_ZONE] }]
+        }, lambda { |request, proposal, params|
+          Authoring.clear_zone_airflows(request, proposal, :zones => params.fetch("zones"))
+        }],
         ["floors.mark", {
           :description => "Mark explicit Faces directly inside Volumes as Floor Segments with one weighting factor; " \
                           "a marked Face takes the factor.",

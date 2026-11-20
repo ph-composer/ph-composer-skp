@@ -55,9 +55,9 @@ module PhComposer
         project(row, fields, SEGMENT_FIELDS)
       end
 
-      # A Zone's sums without its airflow detail, which `all` keeps for the panel.
+      # A Zone's sums and airflow mode without its airflow sums, which `all` keeps for the panel.
       def zone(row)
-        row.slice("zone_id", "zone_path", "name", "space_count", "floor_area_m2", "weighted_area_m2",
+        row.slice("zone_id", "zone_path", "name", "space_count", "airflow_mode", "floor_area_m2", "weighted_area_m2",
                   "net_volume_m3")
       end
 

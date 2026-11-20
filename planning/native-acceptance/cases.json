@@ -5195,6 +5195,26 @@
         "src/ph_composer/html/features/zones/segment_settings.js"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "PG05",
+      "label": "Detailed airflows per Zone on the installed RBZ: in the Spaces view a By Program Zone's cells read By Program and its sums a dash; typing one rate on one Space switches the Zone to detailed with the notice, its blanks reading 0; From Program on the Zone row confirms and clears every Space's rates as one native Undo step that the Edit menu undoes and redoes; a Zone with no Spaces shows the amber No Spaces row and the export preflight warns without blocking; Export of the reference writes 0 for a blank in a detailed Zone and no rate in a By Program Zone, and the WUFI XML and METr JSON from the pinned PHX read them back",
+      "mode": "mixed",
+      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/spaces/scan/metrics.rb",
+        "src/ph_composer/features/spaces/reads.rb",
+        "src/ph_composer/features/spaces/export.rb",
+        "src/ph_composer/features/spaces/authoring.rb",
+        "src/ph_composer/features/spaces/declarations/operations.rb",
+        "src/ph_composer/html/features/spaces/view.js",
+        "src/ph_composer/html/features/spaces/cells.js",
+        "src/ph_composer/html/features/spaces/actions.js",
+        "src/ph_composer/html/features/zones/overview.js",
+        "src/ph_composer/python/ph_composer_translation/space_sections.py",
+        "src/ph_composer/python/ph_composer_translation/contract/space_records.py"
+      ],
+      "native_control_required": true
     }
   ]
 }

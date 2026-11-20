@@ -222,7 +222,11 @@ linking a solid to a Volume: `context.children`' `solid` and `volumes.height_fro
 route.
 `spaces.update` and `spaces.batch_update` type `values` and `expected_values` field by field from the
 record definitions, with units; null clears an optional value, and a field the referenced kind does
-not take is refused.
+not take is refused. Airflows apply per Zone: `spaces.list` and `spaces.all` name each
+Zone row's `airflow_mode` (`by_program` until any of its Spaces has a rate, then `detailed`), and each
+Space row carries a copy of its Zone's, kept for API 1.77, so an agent reading one Space needs no join;
+the Zone row is the source. `spaces.clear_zone_airflows` returns named Zones to By Program in one Undo
+step, refusing the whole call when one of their Spaces cannot be written.
 
 Some reads carry derived facts so no client recomputes a domain rule. Every Window Type row's
 `display.install_topology` gives each non-empty element's four edges with their classification

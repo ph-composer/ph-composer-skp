@@ -397,7 +397,7 @@ Use separate surfaces for separate Spaces. Create Space rejects classified Zone 
    is for and the refusal it would meet now. Faces that share an Edge go together, and each joined set becomes
    its own Volume.
 4. `ph_composer.spaces.volumes.create` from those Faces, `ph_composer.spaces.floors.mark` for a Face in
-   a Volume, then `ph_composer.spaces.update` for heights and airflows. Read a Space's Volumes with
+   a Volume, then `ph_composer.spaces.update` for heights and airflows (see Airflows below). Read a Space's Volumes with
    `ph_composer.spaces.volumes.list`, which needs `space`, the Space's `reference` as
    `ph_composer.spaces.list` gives it; `ph_composer.spaces.floor_segments.list` takes exactly one of
    `space` and `volume`.
@@ -405,6 +405,15 @@ Use separate surfaces for separate Spaces. Create Space rejects classified Zone 
    Space's record and moves no geometry. Read every changed reference back.
 
 Leaving a Volume locks it again; the navigation commands say so in `side_effects`.
+
+Airflows apply per Zone. A Zone is `by_program` until any of its Spaces has a supply, extract or transfer
+rate: its Spaces then take the Zone's Program ventilation, split by floor area. Once one Space has a rate the
+Zone is `detailed`, and every Space in it exports its own three rates, a blank counting as 0. Read the mode
+from each Zone row's `airflow_mode` in `ph_composer.spaces.list`; each Space row carries a copy. Before
+writing one rate into a `by_program` Zone, tell the user that its other Spaces will export 0 until they have
+rates. `ph_composer.spaces.clear_zone_airflows` with the Zones' references (`zone_id`, `zone_path`) returns
+them to By Program in one Undo step. The export preflight warns `space.zone_without_spaces` for a Zone with
+no Spaces; it does not block.
 
 For Height from solid, find the solid with `ph_composer.context.children`: a Group or component with `solid`
 true and no Spaces record. `ph_composer.spaces.volumes.height_from_solid_preview` with the Volume and the

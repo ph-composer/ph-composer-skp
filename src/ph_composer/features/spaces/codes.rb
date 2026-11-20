@@ -23,6 +23,8 @@ module PhComposer
         "space.zone_left_out" => "A Space is in a Zone in no Building Segment, so export leaves it out with its " \
                                  "Zone.",
         "space.zone_missing" => "A Space names a Zone that is no longer in the Model.",
+        "space.zone_without_spaces" => "An exported Zone has no Spaces, so WUFI-Passive and METr give it no iCFA, " \
+                                       "net volume or ventilation. Not blocking.",
         "space.same_zone" => "The Space is already in that Zone.",
         "space.solid_invalid" => "The chosen Group or component is not a closed solid, or encloses no volume.",
         "space.shares_edge" => "A Face shares an Edge with a Face outside the set being grouped.",

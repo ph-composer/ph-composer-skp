@@ -5,7 +5,8 @@
  * Undo step, with every change to one record merged into one edit (inventory_grid.js).
  *
  * Airflows keep unset distinct from zero: a blank cell clears the rate (null), a typed 0 is a value. An unset
- * rate shows as a muted placeholder, "0" on a Space with another rate set and "Zone" on a Space that inherits.
+ * rate shows as a muted placeholder by its Zone's mode: "0" in a Zone with detailed airflows, "By Program" in a
+ * By Program Zone.
  */
 PhComposerUI.define("features/spaces/cells", ["record_edits", "inventory_grid", "request", "snapshot", "fields",
   "workspace"],
@@ -116,7 +117,7 @@ function (RecordEdits, Grid, requests, snapshot, fields, ui) {
       this.host.refuse(snapshot.message(outcome, "The range edit was not applied. Nothing was written."));
     }
     this.edits.batchPending = this.batch.busy();
-    this.edits.refresh(rows.filter(function (row) { return row.depth > 0; }), state);
+    this.edits.refresh(rows.filter(function (row) { return row.depth > 0 && kind(row); }), state);
   };
 
   /* The view's surface is known once: the range-edit grid binds to its table mount. */
@@ -146,12 +147,13 @@ function (RecordEdits, Grid, requests, snapshot, fields, ui) {
     var cell = this.edits.cells[row.key + ":" + field], space = row.record.space;
     td.classList.toggle("is-numeric", NUMERIC[field] === true);
     if (AIRFLOWS[field] && kind(row) === "space") {
-      var inheriting = space.airflow_mode === "inheriting";
-      cell.input.placeholder = inheriting ? "Zone" : "0";
-      td.classList.toggle("is-muted", !Object.prototype.hasOwnProperty.call(space.values, field));
-      ui.tooltip(td, inheriting ? "No airflow is set, so this Space uses its Zone's ventilation load." :
-        Object.prototype.hasOwnProperty.call(space.values, field) ? "" :
-          "Not set. Another airflow on this Space is, so this one counts as 0.");
+      var byProgram = space.airflow_mode !== "detailed";
+      var set = Object.prototype.hasOwnProperty.call(space.values, field);
+      cell.input.placeholder = byProgram ? "By Program" : "0";
+      td.classList.toggle("is-muted", !set);
+      ui.tooltip(td, byProgram ? "By Program: this Zone's Program ventilation, split by floor area, with its " +
+        "schedule. Type a rate and the Zone switches to detailed airflows: every Space in it exports its own " +
+        "rates, 0 where blank." : set ? "" : "Blank exports 0: this Zone uses detailed airflows.");
     }
     if (this.grid) this.grid.bind(td, row, field, this.batch.busy());
     return true;

@@ -109,18 +109,19 @@ test("height and airflow cells read what the row sets, muted where it does not",
     ["Space", "Bath", "", "9.6", "0", "40", "0"],
     ["Space", "Hall", "", "20", "0", "0", "20"],
     ["Zone", "Zone B", "", "36", "—", "—", "—"],
-    ["Space", "Loft", "", "36", "Zone", "Zone", "Zone"]]);
+    ["Space", "Loft", "", "36", "By Program", "By Program", "By Program"]]);
   var volumes = rows.filter(function (row) { return row[0] === "Volume"; });
   assert.deepStrictEqual(volumes.map(function (row) { return row[2]; }), ["2.5", "2.4", "2.5", "5", "3"],
     "Height shows on the Volume row, where it is set");
   var muted = shown(p).querySelectorAll("td").filter(function (td) { return td.classList.contains("is-muted"); });
-  assert.ok(muted.some(function (td) { return text(td) === "Zone"; }), "an inheriting Space reads a muted Zone");
+  assert.ok(muted.some(function (td) { return text(td) === "By Program"; }),
+    "a Space in a By Program Zone reads a muted By Program");
   assert.ok(muted.some(function (td) { return text(td) === "—"; }), "and its Zone a muted dash");
   assert.ok(muted.some(function (td) { return text(td) === "0"; }),
     "an unset rate beside a set one is a muted 0");
 });
 
-test("a Zone whose supply and extract differ carries no marker; one with an inheriting Space shows a dash",
+test("a Zone whose supply and extract differ carries no marker; a By Program Zone shows a dash",
   function () {
     var p = page();
     p.panel.receive({ type: "panel.snapshot", payload: snapshot() });
@@ -130,7 +131,7 @@ test("a Zone whose supply and extract differ carries no marker; one with an inhe
     var zoneB = shown(p).querySelectorAll("td").filter(function (td) {
       return td.classList.contains("col-v_sup_m3h") && text(td) === "—";
     })[0];
-    assert.match(zoneB.getAttribute("data-tooltip"), /^1 Space in this Zone inherits/);
+    assert.match(zoneB.getAttribute("data-tooltip"), /^By Program: this Zone's Program ventilation applies/);
   });
 
 test("a Floor Segment's row reads Floor in the Hierarchy column", function () {

@@ -1,7 +1,7 @@
 # P4a-05: Detailed airflows per Zone
 
 DATE: 2026-11-15
-STATUS: Scoped. Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
+STATUS: Implemented on branch 2026-11-20; PG05's host rows owed ([STATUS](../STATUS.md)). Authorized 2026-11-20 with the rest of Phase 4a.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 

@@ -8,7 +8,7 @@ module PhComposer
     #
     # - By Space: each Volume by its Space's id, every Space a distinct hue on the categorical ramp, usually
     #   kept as others come and go (Palette.spread); the legend sums weighted area (iCFA).
-    # - By ventilation: each Volume by what its Space supplies or extracts under the any-set rule; the legend
+    # - By ventilation: each Volume by what its Space supplies or extracts in its Zone's airflow mode; the legend
     #   sums the rates the category is named for, supply and extract both for a Space with both, once per Space.
     # - By weighting factor: each Floor Segment by its factor, with its own prism, since one Volume may hold
     #   several factors. A band's key is the factor's shortest exact text ("1", "0.5", "0.1234561"); the
@@ -34,13 +34,15 @@ module PhComposer
         "extract" => ["Extract only", [214, 39, 40], %w[v_eta_m3h]],
         "transfer" => ["Transfer only", [148, 103, 189], %w[v_tran_m3h]],
         "none" => ["No airflow", [190, 190, 190], []],
-        # Every rate unset: the Space uses its Zone's ventilation load, as the Spaces view's "Zone" says.
-        "zone" => ["Zone ventilation", [196, 176, 150], []]
+        # A By Program Zone: its Spaces take its Program's ventilation, as the Spaces view's "By Program" says.
+        "by_program" => ["By Program", [196, 176, 150], []]
       }.freeze
       VENTILATION_COLOURS = VENTILATION.transform_values { |row| row[1] }.freeze
       INCHES_PER_M = 1.0 / 0.0254
 
-      VolumeView = Struct.new(:space, :volume, :segments, :metrics, :height, :incomplete, keyword_init: true)
+      # `airflow_mode` is the Space's Zone's (Metrics.space_mode).
+      VolumeView = Struct.new(:space, :volume, :segments, :metrics, :height, :incomplete, :airflow_mode,
+                              keyword_init: true)
       SegmentView = Struct.new(:occurrence, :metrics, :prism, keyword_init: true)
 
       module_function
@@ -77,7 +79,10 @@ module PhComposer
       # `blocked` is the Volume paths to mark incomplete. A caller that draws no incomplete state leaves it
       # out and is spared the whole Spaces read.
       def volume_views(model, blocked = {})
-        Occurrences.scan(model).spaces.flat_map do |space|
+        spaces = Occurrences.scan(model).spaces
+        modes = Metrics.zone_modes(spaces.map(&:record))
+        spaces.flat_map do |space|
+          mode = Metrics.space_mode(space.record, modes)
           space.volumes.map do |volume|
             height = volume.record["avg_ceiling_height_m"]
             segments = volume.segments.map do |segment|
@@ -88,7 +93,7 @@ module PhComposer
             end
             VolumeView.new(:space => space, :volume => volume, :segments => segments, :height => height,
                            :metrics => Metrics.volume(volume.record, segments.map(&:metrics)),
-                           :incomplete => blocked.include?(volume.path))
+                           :incomplete => blocked.include?(volume.path), :airflow_mode => mode)
           end
         end
       end
@@ -131,24 +136,24 @@ module PhComposer
       def by_ventilation(views)
         counted = {}
         views.map do |view|
-          category = ventilation(view.space.record)
+          category = ventilation(view.space.record, view.airflow_mode)
           label, _colour, rates = VENTILATION.fetch(category)
           # A Space occurrence's rates count once, on its first Volume; the other Volumes add zero. Occurrences are
           # told apart by path, so a copy still awaiting repair adds its own rates, as the read sums them.
           first = !counted.key?(view.space.path)
           counted[view.space.path] = true
-          flows = Metrics.airflows(view.space.record)
+          flows = Metrics.airflows(view.space.record, view.airflow_mode)
           figure = rates.map { |rate| ["airflow", first ? flows.fetch(rate).to_f : 0.0] }
           entry(view, category, label, figure.empty? ? nil : figure)
         end
       end
 
-      # The any-set rule's rates: supply, extract, both, transfer alone, or none set above zero; a Space with
-      # no rate set at all inherits its Zone's airflow.
-      def ventilation(record)
-        return "zone" if Metrics.airflow_mode(record) == "inheriting"
+      # A Space's rates in its Zone's mode: supply, extract, both, transfer alone, or none above zero in a
+      # detailed Zone; By Program in a By Program one.
+      def ventilation(record, mode)
+        return Metrics::BY_PROGRAM if mode == Metrics::BY_PROGRAM
 
-        rates = Metrics.airflows(record)
+        rates = Metrics.airflows(record, mode)
         supply, extract, transfer = rates.values_at("v_sup_m3h", "v_eta_m3h", "v_tran_m3h").map(&:to_f)
         return "both" if supply.positive? && extract.positive?
         return "supply" if supply.positive?

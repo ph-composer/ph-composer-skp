@@ -213,14 +213,23 @@ class SpacesEditMenuTest < PhComposerTestCase
     assert_equal @operations + 1, @model.operations.length
   end
 
-  def test_all_three_airflows_emptied_return_the_space_to_its_zones_load
+  # Bath and Hall keep their rates, so Zone A stays detailed and Living's blanks read 0; with every Space's rates
+  # emptied the Zone is By Program again.
+  def test_all_three_airflows_emptied_remove_the_rates_and_the_last_returns_the_zone_to_by_program
     @model.active_path = [@zone_a]
     write_airflows(@living, "v_sup_m3h" => 60.0, "v_eta_m3h" => 40.0, "v_tran_m3h" => 5.0)
     select(@living)
     UI.inputbox_result = ["", "", ""]
     choose(nil, EDIT::AIRFLOWS_LABEL)
-    assert_equal "inheriting", space_row("101").fetch("airflow_mode")
     assert_empty space_record_of(@living).slice(*PhComposer::Spaces::AIRFLOWS)
+    assert_equal ["detailed", { "v_sup_m3h" => 0.0, "v_eta_m3h" => 0.0, "v_tran_m3h" => 0.0 }],
+                 space_row("101").values_at("airflow_mode", "airflows")
+    [@bath, @hall].each do |space|
+      select(space)
+      UI.inputbox_result = ["", "", ""]
+      choose(nil, EDIT::AIRFLOWS_LABEL)
+    end
+    assert_equal "by_program", space_row("101").fetch("airflow_mode")
   end
 
   def test_an_airflow_that_is_not_a_number_of_zero_or_more_writes_nothing

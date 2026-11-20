@@ -1449,9 +1449,16 @@ Spaces is the first section to attach to `ROOM`: `ph_composer.spaces.export.spac
 `features/spaces/export.rb`, Python `space_sections.py`) keys each honeybee-ph `Space` on its Zone
 record's id, which is the Room's identifier, and is required for export. A Floor Segment leaves with
 its loops projected onto its horizontal plane, so honeybee-ph's area is the plan area the metrics use,
-and a Volume with its preview prism as `geometry`. Airflows follow the any-set rule in the section
-alone: a Space with no rate stored writes none of `_v_sup`, `_v_eta`, `_v_tran`; one with any writes
-all three, 0 for an unset rate, converted from m3/h to m3/s there and nowhere else. Its result fields
+and a Volume with its preview prism as `geometry`. Airflows follow the Zone's airflow mode, which Ruby
+decides (`Spaces::Metrics.zone_modes`) and section version 2 carries on each record as `airflow_mode`:
+a Zone is `by_program` until any of its Spaces stores a rate, and every Space in it then writes none of
+`_v_sup`, `_v_eta`, `_v_tran`, so PHX gives it its floor share of the Room's Program ventilation; once
+any Space stores one the Zone is `detailed` and every Space in it writes all three, 0 for an unset
+rate, converted from m3/h to m3/s in the section and nowhere else. The section refuses a record whose
+mode is missing or that stores a rate under `by_program`. The reads publish the mode on each Zone row
+and a copy on each Space row; `ph_composer.spaces.clear_zone_airflows` (From Program) returns a Zone to
+By Program in one Undo step. Room ventilation is never written from Space rates. A Zone exported with no
+Spaces is the preflight warning `space.zone_without_spaces`, which does not block. Its result fields
 total floor area, weighted area and net volume per Zone and per Building-Segment, and its
 conformance checks the reloaded Rooms' Spaces against the per-Zone totals.
 

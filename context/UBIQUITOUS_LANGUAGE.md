@@ -144,7 +144,7 @@ Face types and boundary conditions follow Honeybee. A Zone owns its Face assignm
 | Set Weighting Factor | The context-menu submenu that sets one weighting factor on every Floor Segment the selection holds: a Floor Segment Face in an open Volume, each Floor Segment of a Volume, or each one in a Space's Volumes, in one Undo step |
 | Space label | Viewport text at a Space's reference point, as `101 Living \| iCFA 2,083 ft² \| Vol: 20,831 ft³`. Its values are whole numbers. iCFA and net volume show unless turned off; supply and extract, shown on request, follow as `\| Sup 60 cfm / Ext 60 cfm` |
 | Selection totals | The HUD readout of summed iCFA, net volume and airflows for the selected Spaces |
-| Airflow balance | Each Zone row of the Spaces view: its Spaces' supply, extract and transfer sums. A Zone holding a Space that inherits its airflow shows a dash. Nothing compares supply with extract per Zone: balance is per ventilator, and that check belongs to the planned Zones / Ventilation view |
+| Airflow balance | Each Zone row of the Spaces view: its Spaces' supply, extract and transfer sums. A By Program Zone shows a dash. Nothing compares supply with extract per Zone: balance is per ventilator, and that check belongs to the planned Zones / Ventilation view |
 | Move Space to Zone | The action that hosts one Space in another Zone by writing the Zone's id on the Space record. The Space Group stays where it stands |
 | Mark floor | The Spaces tool that marks a face inside a Volume as a Floor Segment with a weighting factor, started from the Weighting factor column menu. A separate tool beside Classify, not a mode of it |
 | Make independent | The repair for a copied Space, Volume or Floor Segment: the copy and everything inside it receive new identities, in one Undo step. Resolve shared identities before export |
@@ -156,7 +156,9 @@ Face types and boundary conditions follow Honeybee. A Zone owns its Face assignm
 | Authoring context | The active Space or Volume editing path that determines structural ownership |
 | Reconciliation | Updating PH-Composer structure and protection after external geometry changes |
 | Volume protection | Contextual locking that prevents independent Volume movement outside its edit context |
-| Supply, Extract and Transfer airflow | Separate optional Space inputs, stored so that unset is different from explicitly zero. When all three are unset the Zone's ventilation load applies. When any one is set the Space is user-specified: its values override the Zone's load and an unset rate counts as zero |
+| Supply, Extract and Transfer airflow | Separate optional Space inputs, stored so that unset is different from explicitly zero. Whether they apply is the Zone's airflow mode: see By Program and Detailed airflows |
+| By Program | A Zone's airflow mode while none of its Spaces has a rate: every Space takes its floor-area share of the Zone's Program ventilation, with the Program's schedule. Its airflow cells read By Program and its sums a dash. Stored as `by_program` |
+| Detailed airflows | A Zone's airflow mode once any of its Spaces has a rate: every Space in it exports its own supply, extract and transfer, a blank counting as 0, and none takes a Program share. **From Program** clears every rate in the Zone and returns it to By Program. Stored as `detailed` |
 | Ventilation assignment | Relationship from a Space to serving ventilation equipment |
 
 ## Site and climate

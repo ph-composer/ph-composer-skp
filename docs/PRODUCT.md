@@ -224,8 +224,12 @@ reported by preflight.
    separate closed solid and the net floor area.
 4. Set weighting factors in the table or use **Mark floor** from the Weighting factor column menu.
    To edit a protected floor surface, use **Edit Floor Surface** and leave the Volume when finished.
-5. Enter Supply, Extract and Transfer for each Space that needs its own airflows. Clear all three
-   fields to use the Zone's ventilation load.
+5. Leave the airflows empty to use each Zone's Program ventilation: its cells read **By Program**.
+   Typing any rate on a Space switches that Zone to detailed airflows: every Space in it then exports
+   its own Supply, Extract and Transfer, and a blank counts as 0. **From Program** on the Zone row
+   clears them all. Transfer reaches PHPP only; WUFI-Passive and METr receive supply and extract.
+   A Zone with no Spaces shows an amber No Spaces row and exports with no iCFA, net volume or
+   ventilation.
 
 Use the table to review iCFA, net volume and airflows. Locate an item from its row. **Move to Zone**
 changes a Space's Zone assignment and keeps its position. **Remove** returns its Floor Segments

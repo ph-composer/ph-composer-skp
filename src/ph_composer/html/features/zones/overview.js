@@ -913,8 +913,10 @@ function (panel, ui, requests, snapshot, units, preferences, tables, viewControl
       actions: function (row) { return row.heading ? state.segments.actions(row) : actions(own, row); },
       rowHidden: function (row) { return row.heading ? arranged.hidden(row) : hidden(row); },
       hiddenColumns: own.hiddenColumns, revealRowActions: true, actionSlots: own.view.actionSlots,
+      // A column's header help: the host's for Ground depth, the view's (`headerHelp`) for its own columns.
       header: function (th, field) {
-        if (field === "ground_depth_mm") ui.tooltip(th.querySelector(".phc-th-label"), ZoneCells.GROUND_DEPTH_HELP);
+        var help = field === "ground_depth_mm" ? ZoneCells.GROUND_DEPTH_HELP : call(own, "headerHelp", [field], null);
+        if (help) ui.tooltip(th.querySelector(".phc-th-label"), help);
       },
       check: check || undefined,
       headerActions: function (field) { return headerActions(state, own, field, labels[field]); },

@@ -28,15 +28,29 @@ class SpacesRecordsTest < PhComposerTestCase
       SPACES::SPACE_STORE.write(group, record)
       assert_equal record, SPACES::SPACE_STORE.read(group)
     end
-    modes = [absent, zero, set].map { |record| METRICS.airflow_mode(record) }
-    assert_equal %w[inheriting user_specified user_specified], modes
-    assert_equal [nil, 0.0, 0.0], [absent, zero, set].map { |record| METRICS.airflows(record)["v_eta_m3h"] }
+    modes = [absent, zero, set].map { |record| METRICS.airflow_mode([record]) }
+    assert_equal %w[by_program detailed detailed], modes
+    extract = [absent, zero, set].zip(modes).map { |record, mode| METRICS.airflows(record, mode)["v_eta_m3h"] }
+    assert_equal [nil, 0.0, 0.0], extract
   end
 
-  def test_clearing_the_last_airflow_returns_a_space_to_inheriting
-    record = space_record("A", :number => "1", :airflows => { "v_tran_m3h" => 12.0 })
-    assert_equal "user_specified", METRICS.airflow_mode(record)
-    assert_equal "inheriting", METRICS.airflow_mode(record.reject { |key, _value| key == "v_tran_m3h" })
+  # The Zone's airflow mode (context/UBIQUITOUS_LANGUAGE.md, "Detailed airflows"): one rate on one Space makes
+  # its whole Zone detailed, a blank counting 0, and clearing the last rate in the Zone returns it to By Program.
+  def test_one_rate_makes_the_zone_detailed_and_clearing_the_last_returns_it_to_by_program
+    zone = { "zone_id" => "zon_ZZZZZZZZZZZZ" }
+    rated = space_record("A", :number => "1", :airflows => { "v_tran_m3h" => 12.0 }).merge(zone)
+    blank = space_record("B", :number => "2").merge(zone)
+    elsewhere = space_record("C", :number => "3").merge("zone_id" => "zon_YYYYYYYYYYYY")
+    modes = METRICS.zone_modes([rated, blank, elsewhere])
+    assert_equal({ "zon_ZZZZZZZZZZZZ" => "detailed", "zon_YYYYYYYYYYYY" => "by_program" }, modes)
+    assert_equal({ "v_sup_m3h" => 0.0, "v_eta_m3h" => 0.0, "v_tran_m3h" => 0.0 },
+                 METRICS.airflows(blank, METRICS.space_mode(blank, modes)))
+    assert_equal({ "v_sup_m3h" => nil, "v_eta_m3h" => nil, "v_tran_m3h" => nil },
+                 METRICS.airflows(elsewhere, METRICS.space_mode(elsewhere, modes)))
+    cleared = rated.reject { |key, _value| key == "v_tran_m3h" }
+    assert_equal "by_program", METRICS.zone_modes([cleared, blank]).fetch("zon_ZZZZZZZZZZZZ")
+    alone = space_record("D", :number => "4", :airflows => { "v_sup_m3h" => 1.0 })
+    assert_equal "detailed", METRICS.space_mode(alone, {}), "a Space in no Zone reads its own rates as a Zone's"
   end
 
   def test_projected_area_takes_plan_area_and_subtracts_holes

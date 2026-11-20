@@ -46,9 +46,9 @@ function snapshot(view, change) {
   var spaces = fixture.section();
   spaces.building_segments = [
     { key: "bsg_house", name: "House", zone_count: 1, floor_area_m2: 22, weighted_area_m2: 20, net_volume_m3: 55,
-      airflows: { v_sup_m3h: 60, v_eta_m3h: 40, v_tran_m3h: 20 }, inheriting_count: 0 },
+      airflows: { v_sup_m3h: 60, v_eta_m3h: 40, v_tran_m3h: 20 }, by_program_zone_count: 0 },
     { key: "", name: null, zone_count: 1, floor_area_m2: 12, weighted_area_m2: 12, net_volume_m3: 36,
-      airflows: { v_sup_m3h: null, v_eta_m3h: null, v_tran_m3h: null }, inheriting_count: 1 }];
+      airflows: { v_sup_m3h: null, v_eta_m3h: null, v_tran_m3h: null }, by_program_zone_count: 1 }];
   var state = {
     product: "PH-Composer", version: "0.1.0-dev", session: "session-a", revision: 4, file_name: "house.skp",
     edit_path: [], preferences: { unit_system: "SI", dimension_formats: {}, number_format: { decimal: ".",
@@ -178,7 +178,7 @@ test("No Building Segment is shown only while it holds a Zone", function () {
     ["Zone", "Zone A"]]);
 });
 
-test("Spaces groups the same way and fills its sums, with a dash while a Space inherits its airflow", function () {
+test("Spaces groups the same way and fills its sums, with a dash while a Zone in it is By Program", function () {
   var p = load("ph_composer.spaces");
   assert.deepStrictEqual(outline(p).map(function (row) { return row[1]; }),
     ["Annex", "House", "Zone A", "No Building Segment", "Zone B"]);

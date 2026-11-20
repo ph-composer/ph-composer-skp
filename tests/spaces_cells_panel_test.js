@@ -125,7 +125,7 @@ test("the three airflow states: all unset, supply only, three explicit zeros", f
     section.spaces[2].values.v_tran_m3h = 0;
   }));
   function shown(label) { var input = p.input(label); return [input.value, input.placeholder]; }
-  assert.deepStrictEqual(shown("Loft supply"), ["", "Zone"], "all unset inherits");
+  assert.deepStrictEqual(shown("Loft supply"), ["", "By Program"], "a Zone with no rate is By Program");
   assert.deepStrictEqual(shown("Living supply"), ["60", "0"]);
   assert.deepStrictEqual(shown("Living transfer"), ["", "0"], "supply only: the others a muted 0");
   assert.deepStrictEqual(shown("Hall supply"), ["0", "0"], "an explicit zero is a value");

@@ -1,11 +1,34 @@
 "use strict";
 
 /* The synthetic reference model (planning ACCEPTANCE, "Synthetic reference model") as the `spaces` snapshot
-   section reads it: Zone A holds 101 Living, 102 Bath and 103 Hall (two Volumes); Zone B holds 201 Loft,
-   whose airflows are all unset. `outside` adds a Space no Zone holds, with no Volume. Numbers are the
+   section reads it: Zone A holds 101 Living, 102 Bath and 103 Hall (two Volumes), each with one rate, so it uses
+   detailed airflows; Zone B holds 201 Loft, with none, so it is By Program. `outside` adds a Space no Zone holds,
+   with no Volume; `loft` gives Loft those rates; `noLoft` leaves Zone B with no Spaces; `stair` adds 202 Stair,
+   with no rate, to Zone B. Numbers are the
    hand-computed ones, as the host publishes them. */
 
 var ZONE_A = [100], ZONE_B = [200];
+var AIRFLOW_KEYS = ["v_sup_m3h", "v_eta_m3h", "v_tran_m3h"];
+
+function rated(item) {
+  return AIRFLOW_KEYS.some(function (key) { return Object.prototype.hasOwnProperty.call(item.values, key); });
+}
+
+/* Each Space carries its Zone's mode, as the host publishes it: detailed once any Space in the Zone has a rate,
+   a blank then 0; By Program otherwise, every rate null. A Space in no Zone reads its own rates. */
+function applyModes(spaces) {
+  spaces.forEach(function (item) {
+    var zone = item.zone && item.zone.zone_id;
+    var members = spaces.filter(function (other) {
+      return zone ? other.zone && other.zone.zone_id === zone : other === item;
+    });
+    item.airflow_mode = members.some(rated) ? "detailed" : "by_program";
+    AIRFLOW_KEYS.forEach(function (key) {
+      item.airflows[key] = item.airflow_mode === "detailed" ? item.values[key] || 0 : null;
+    });
+  });
+  return spaces;
+}
 
 function segment(path, name, area, factor) {
   return { id: "sfs_" + path.join("_"), weighting_band: String(factor),
@@ -34,30 +57,25 @@ function space(path, zonePath, number, name, airflows, volumes) {
       heighted += item.metrics.floor_area_m2 * item.values.avg_ceiling_height_m;
     }
   });
-  var mode = Object.keys(airflows).length ? "user_specified" : "inheriting";
-  var flows = {};
-  ["v_sup_m3h", "v_eta_m3h", "v_tran_m3h"].forEach(function (key) {
-    flows[key] = mode === "inheriting" ? null : airflows[key] || 0;
-  });
   return { id: "spc_" + number, values: Object.assign({ name: name, number: number }, airflows),
     reference: { space_id: "spc_" + number, entity_path: path },
     zone: zonePath && { zone_id: zonePath === ZONE_A ? "zon_a" : "zon_b", zone_path: zonePath },
-    state: "found", nested: false, findings: [], airflow_mode: mode, airflows: flows, volumes: volumes,
+    state: "found", nested: false, findings: [], airflow_mode: null, airflows: {}, volumes: volumes,
     metrics: { floor_area_m2: area, weighted_area_m2: weighted, net_area_m2: area, net_volume_m3: net,
       average_height_m: heightArea ? heighted / heightArea : null } };
 }
 
 function zoneSums(zonePath, name, spaces) {
   var own = spaces.filter(function (item) { return item.zone && item.zone.zone_path === zonePath; });
-  var inheriting = own.filter(function (item) { return item.airflow_mode === "inheriting"; }).length;
+  var mode = own.some(function (item) { return item.airflow_mode === "detailed"; }) ? "detailed" : "by_program";
   var flows = {};
-  ["v_sup_m3h", "v_eta_m3h", "v_tran_m3h"].forEach(function (key) {
-    flows[key] = inheriting ? null : own.reduce(function (sum, item) { return sum + item.airflows[key]; }, 0);
+  AIRFLOW_KEYS.forEach(function (key) {
+    flows[key] = mode === "detailed" ? own.reduce(function (sum, item) { return sum + item.airflows[key]; }, 0) : null;
   });
   function sum(key) { return own.reduce(function (total, item) { return total + item.metrics[key]; }, 0); }
   return { zone_id: zonePath === ZONE_A ? "zon_a" : "zon_b", zone_path: zonePath, name: name,
     space_count: own.length, floor_area_m2: sum("floor_area_m2"), weighted_area_m2: sum("weighted_area_m2"),
-    net_volume_m3: sum("net_volume_m3"), airflows: flows, inheriting_count: inheriting };
+    net_volume_m3: sum("net_volume_m3"), airflow_mode: mode, airflows: flows };
 }
 
 function section(options) {
@@ -69,10 +87,16 @@ function section(options) {
     space([100, 103], ZONE_A, "103", "Hall", { v_tran_m3h: 20 },
       [volume([100, 103, 1], 1, 2.5, [segment([100, 103, 1, 1], "Segment 1", 4, 1)]),
         volume([100, 103, 2], 2, 5.0, [segment([100, 103, 2, 1], "Segment 1", 2, 0)])]),
-    space([200, 201], ZONE_B, "201", "Loft", {},
+    space([200, 201], ZONE_B, "201", "Loft", options && options.loft || {},
       [volume([200, 201, 1], 1, 3.0, [segment([200, 201, 1, 1], "Segment 1", 12, 1)])])
   ];
+  if (options && options.noLoft) spaces.pop();
+  if (options && options.stair) {
+    spaces.push(space([200, 202], ZONE_B, "202", "Stair", {},
+      [volume([200, 202, 1], 1, 2.5, [segment([200, 202, 1, 1], "Segment 1", 4, 1)])]));
+  }
   if (options && options.outside) spaces.push(space([300], null, "301", "Shed", {}, []));
+  applyModes(spaces);
   return { spaces: spaces, findings: [], units: { area: "m2", height: "m", volume: "m3", airflow: "m3/h" },
     zones: [zoneSums(ZONE_A, "Zone A", spaces), zoneSums(ZONE_B, "Zone B", spaces)] };
 }

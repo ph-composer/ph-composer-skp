@@ -115,8 +115,8 @@ module PhComposer
         end
 
         # Supply, Extract and Transfer in the display unit. A field shows the value every selected Space shares and
-        # is blank otherwise. A field left as shown writes nothing; one emptied removes the value; with all three
-        # removed a Space takes its Zone's ventilation load again.
+        # is blank otherwise. A field left as shown writes nothing; one emptied removes the value. Once no Space in a
+        # Zone has a rate, the Zone is By Program again.
         def airflows
           spaces = SpaceEditMenu.selected(@session.model)
           return announce(SELECT_SPACES) if spaces.empty?

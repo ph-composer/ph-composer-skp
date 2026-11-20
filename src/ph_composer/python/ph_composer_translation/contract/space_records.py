@@ -11,6 +11,9 @@ from . import JSONObject, RecordError, as_number, as_text, user_data
 
 #: The three airflow rates a Space record may store, in m3/h.
 AIRFLOWS = ("v_sup_m3h", "v_eta_m3h", "v_tran_m3h")
+#: A Zone's airflow modes: By Program until any of its Spaces has a rate, then detailed (section version 2).
+BY_PROGRAM = "by_program"
+DETAILED = "detailed"
 
 Point = tuple[float, float, float]
 Polygon = tuple[Point, ...]
@@ -128,6 +131,8 @@ class SpaceRecord:
     #: The stored rates in m3/h; an absent rate is absent here too.
     airflows: Mapping[str, float]
     volumes: tuple[VolumeRecord, ...]
+    #: The Space's Zone's airflow mode, as the extraction decided it.
+    airflow_mode: str
     user_data: JSONObject = field(default_factory=dict)
     #: Drawn outside its Zone's extents: exported as drawn, named in the report.
     offset_from_zone: bool = False
@@ -147,6 +152,11 @@ class SpaceRecord:
         offset = row.get("offset_from_zone", False)
         if not isinstance(offset, bool):
             raise RecordError(f"{label} offset_from_zone must be true or false")
+        mode = row.get("airflow_mode")
+        if not isinstance(mode, str) or mode not in (BY_PROGRAM, DETAILED):
+            raise RecordError(f"{label} airflow_mode must be {BY_PROGRAM} or {DETAILED}")
+        if mode == BY_PROGRAM and airflows:
+            raise RecordError(f"{label} stores an airflow in a By Program Zone")
         return cls(
             identifier,
             as_text(row.get("zone_id"), f"{label} zone_id"),
@@ -154,6 +164,7 @@ class SpaceRecord:
             text(row.get("number"), f"{label} number"),
             airflows,
             tuple(VolumeRecord.read(item) for item in rows(row.get("volumes"), f"{label} volumes")),
+            mode,
             user_data(row.get("user_data"), label),
             offset,
         )

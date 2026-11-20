@@ -61,7 +61,34 @@ check({ name: "spaces", output }, async ({ newPage, step }) => {
     const living = page.locator('.phc-zone-view:not([hidden]) tr[data-row-key=\'["Zone",[100]]\']');
     assert.equal(await living.locator(".phc-row-marker:not([hidden])").count(), 0, "no supply and extract marker on a Zone");
     const loft = page.getByRole("textbox", { name: "Loft supply" });
-    assert.equal(await loft.getAttribute("placeholder"), "Zone", "an inheriting Space reads Zone");
+    assert.equal(await loft.getAttribute("placeholder"), "By Program", "a Space in a By Program Zone reads By Program");
+
+    step("detailed airflows per Zone");
+    // The Zone's airflow mode (context/UBIQUITOUS_LANGUAGE.md, "By Program"): Attic Zone's sums dash while By
+    // Program; a rate typed on Loft makes the Zone detailed with a notice; From Program on its row clears it again
+    // after a confirmation.
+    const view = page.locator(".phc-zone-view:not([hidden])");
+    const zoneB = view.locator('tr[data-row-key=\'["Zone",[200]]\']');
+    assert.equal((await zoneB.locator("td.col-v_sup_m3h").textContent()).trim(), "—", "a By Program Zone's sums dash");
+    assert.match(await view.locator("th.col-v_tran_m3h .phc-th-label").getAttribute("data-tooltip"),
+      /^Transfer air reaches PHPP only/);
+    await loft.click();
+    await page.keyboard.type("30");
+    await page.keyboard.press("Enter");
+    const notice = page.locator("[data-notice-layer] .phc-floating-notice:not(.phc-recovery)");
+    await notice.filter({ hasText: "Attic Zone now uses detailed airflows." }).waitFor();
+    assert.equal(await page.getByRole("textbox", { name: "Loft extract" }).getAttribute("placeholder"), "0",
+      "a blank in a detailed Zone reads 0");
+    await page.screenshot({ path: path.join(output, "spaces-detailed-notice.png") });
+    await zoneB.hover();
+    await zoneB.getByRole("button", { name: "From Program: clear every Space's airflows in Attic Zone" }).click();
+    const confirm = page.locator("dialog[open]");
+    assert.match(await confirm.textContent(), /rates of 1 Space in Attic Zone will be cleared/);
+    await page.screenshot({ path: path.join(output, "spaces-from-program.png") });
+    await confirm.getByRole("button", { name: "Clear airflows" }).click();
+    await page.waitForFunction(() => document.querySelector(
+      '.phc-zone-view:not([hidden]) input[aria-label="Loft supply"]').placeholder === "By Program");
+    assert.equal(await loft.inputValue(), "", "From Program cleared Loft's rate");
     step("Spaces at panel widths");
     for (const width of [1280, 900, 420, 365]) {
       await page.setViewportSize({ width, height: 900 });
@@ -235,10 +262,17 @@ check({ name: "spaces", output }, async ({ newPage, step }) => {
     await page.locator("dialog.phc-create-space").waitFor({ state: "hidden" });
 
     step("Zones without Spaces");
-    // Zones with no Spaces yet: the Zones and nothing beneath them.
+    // Zones with no Spaces yet: each Zone with one amber No Spaces row beneath it.
     await open(page, "spacesnone");
     assert.equal(await page.locator(".phc-overview .phc-view-count").textContent(), "2 Zones · 0 Spaces");
-    assert.equal(await visibleRows(page).count(), 2);
+    assert.equal(await visibleRows(page).count(), 4);
+    const noSpaces = page.locator('.phc-zone-view:not([hidden]) tr[data-row-key^=\'["NoSpaces"\'] td.col-name');
+    assert.equal(await noSpaces.count(), 2);
+    assert.equal(await noSpaces.first().textContent(), "No Spaces");
+    assert(await noSpaces.first().evaluate(node => node.classList.contains("is-flagged")), "the row is amber");
+    assert.notEqual(await noSpaces.first().evaluate(node => getComputedStyle(node).backgroundColor),
+      "rgba(0, 0, 0, 0)", "the amber shows");
+    await page.screenshot({ path: path.join(output, "spaces-no-spaces.png") });
     step("empty Model");
     // An empty Model: no rows, and the empty table says what to do first.
     await open(page, "spacesempty");

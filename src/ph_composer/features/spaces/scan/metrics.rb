@@ -69,28 +69,48 @@ module PhComposer
         volumes.sum { |metrics, height| metrics.fetch("floor_area_m2") * height } / area
       end
 
-      # The any-set rule: a Space with any airflow set is user-specified and its unset rates are zero;
-      # with all three unset it inherits the Zone's ventilation load.
-      def airflow_mode(record)
-        AIRFLOWS.any? { |key| record.key?(key) } ? "user_specified" : "inheriting"
+      # A Zone's airflow mode (context/CONTRACTS.md, "Translation sections and artifacts"): By Program until
+      # any of its Spaces has any rate stored, then detailed, when every Space in it exports its own rates and a
+      # blank counts as 0.
+      BY_PROGRAM = "by_program"
+      DETAILED = "detailed"
+      AIRFLOW_MODES = [BY_PROGRAM, DETAILED].freeze
+
+      def rated?(record)
+        AIRFLOWS.any? { |key| record.key?(key) }
       end
 
-      # The rates the Space contributes: each set value, 0 for an unset one in a user-specified Space,
-      # and nil for all three in an inheriting one.
-      def airflows(record)
-        user_specified = airflow_mode(record) == "user_specified"
-        AIRFLOWS.to_h { |key| [key, user_specified ? record.fetch(key, 0.0).to_f : nil] }
+      # The mode of the Spaces whose records these are, read together as one Zone.
+      def airflow_mode(records)
+        records.any? { |record| rated?(record) } ? DETAILED : BY_PROGRAM
       end
 
-      # One Zone's sums over its Spaces' metrics and airflows. Airflow sums cover user-specified Spaces;
-      # while any Space inherits, the sums are not meaningful.
+      # Every Zone's mode, by the `zone_id` its Spaces' records name, from every Space record there is.
+      def zone_modes(records)
+        records.select { |record| record["zone_id"] }.group_by { |record| record["zone_id"] }
+               .transform_values { |members| airflow_mode(members) }
+      end
+
+      # One Space's mode: its Zone's, from `zone_modes`. A Space in no Zone reads as a Zone of its own.
+      def space_mode(record, modes)
+        record["zone_id"] ? modes.fetch(record["zone_id"]) : airflow_mode([record])
+      end
+
+      # The rates a Space contributes in its Zone's mode: each stored value and 0 for a blank while detailed,
+      # nil for all three while By Program.
+      def airflows(record, mode)
+        AIRFLOWS.to_h { |key| [key, mode == DETAILED ? record.fetch(key, 0.0).to_f : nil] }
+      end
+
+      # One Zone's sums over its Spaces' metrics, its mode and its airflow sums, nil while By Program. A Zone
+      # with no Spaces is By Program: its Program applies and nothing is summed.
       def zone(spaces)
         totals = sums(spaces.map { |space| space.fetch("metrics") }, TOTALS)
-        inheriting = spaces.count { |space| space.fetch("airflow_mode") == "inheriting" }
+        detailed = spaces.any? { |space| space.fetch("airflow_mode") == DETAILED }
         flows = AIRFLOWS.to_h do |key|
-          [key, inheriting.zero? ? spaces.sum { |space| space.fetch("airflows").fetch(key) } : nil]
+          [key, detailed ? spaces.sum { |space| space.fetch("airflows").fetch(key) } : nil]
         end
-        totals.merge("airflows" => flows, "inheriting_count" => inheriting)
+        totals.merge("airflow_mode" => detailed ? DETAILED : BY_PROGRAM, "airflows" => flows)
       end
 
       def sums(rows, keys)
