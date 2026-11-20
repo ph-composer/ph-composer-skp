@@ -83,7 +83,24 @@ module PhComposer
           return show(refusal(action, result, selection), false, result) unless result["status"] == "completed"
 
           value = result.fetch("value")
-          show(summary(action, value, selection), value.fetch("left_out").empty?, result)
+          still = action == "clear" ? still_shading(value.fetch("cleared")) : []
+          message = [summary(action, value, selection), *still].join(" ")
+          show(message, value.fetch("left_out").empty? && still.empty?, result)
+        end
+
+        # A cleared entity can still be shading through a marked container above it. Read the selection again,
+        # after the clear, and name each such container, as clearing an inherited Face would.
+        def still_shading(cleared)
+          return [] if cleared.empty?
+
+          read = API.query(:context => @context, :name => SELECTION, :params => {})
+          return [] unless read["status"] == "completed"
+
+          references = cleared.map { |row| row.fetch("entity_path") }
+          rows = read.dig("value", "entities").select do |row|
+            references.include?(row.dig("reference", "entity_path")) && row.dig("clear", "code") == "shading.inherited"
+          end
+          rows.map { |row| "Still shading: #{row.dig('clear', 'message')}" }.uniq
         end
 
         # What changed, what was already so, what was left out with its reasons, and what was ignored.

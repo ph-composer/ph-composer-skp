@@ -104,6 +104,21 @@ class ShadingMenuTest < PhComposerTestCase
     assert STORE.marks?(@model.entities.to_a.find { |entity| entity.persistent_id == 5 })
   end
 
+  def test_clearing_a_face_that_stays_shading_through_its_group_names_the_group
+    @group.name = "Fin"
+    STORE.write(@group, "schema_version" => 1)
+    STORE.write(@inner, "schema_version" => 1)
+    @model.active_path = [@group]
+    select(@inner)
+    notices = capture_notices { handler(CLEAR).call(@session) }
+
+    assert_equal 1, @model.operations.length
+    message = Sketchup.status_texts.last
+    assert_match(/\AClear Shading: Cleared shading from 1 entity\. Still shading: The entity is shading through "Fin"/,
+                 message)
+    assert_equal [[message, :warning]], notices
+  end
+
   def test_a_mixed_selection_tags_what_it_can_and_names_what_it_left_out
     STORE.write(@face, "schema_version" => 1)
     select(@face, @group, @zone)
