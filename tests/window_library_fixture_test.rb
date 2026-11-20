@@ -9,6 +9,7 @@ class WindowLibraryFixtureTest < PhComposerTestCase
   def test_published_synthetic_file_reads_all_four_kinds_without_warnings_and_roundtrips
     declarations = PhComposer::Registry.current.library_kinds.values
     adapters = declarations.to_h { |entry| [entry.adapter.wire_kind, entry.adapter] }
+                           .slice("frames", "glazings", "materials", "psi_install_types")
     provider = PhComposer::Library::FileProvider.new(
       :id => "example.file", :label => "Synthetic products",
       :path => File.expand_path("../tools/examples/library/materials.json", __dir__),

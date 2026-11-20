@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 79
+    MINOR = 80
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -467,7 +467,17 @@ module PhComposer
                     "delete_device and device_types; schedules.profile; settings.get and settings.update for the " \
                     "Model's default Program and Equipment Set; and reset_default. Reads answer PH-Composer's " \
                     "residential default Program, its Schedules and the default Equipment Set until a write stores " \
-                    "them. Deleting a default without a replacement refuses programs.default_in_use." }
+                    "them. Deleting a default without a replacement refuses programs.default_in_use." },
+      { "minor" => 80, "date" => "2026-11-20",
+        "change" => "The programs, schedules and equipment_sets library kinds: ph_composer.library.copy copies a " \
+                    "library Program with every Schedule it names, reusing a local copy of each from the same " \
+                    "source, in one Undo step, and a Program or Equipment Set copy may assign itself as the " \
+                    "Model's default (mode model_default). A library kind may declare dependencies, which describe " \
+                    "names; copy answers dependencies, each record of another kind it copied or reused, and refuses " \
+                    "library.dependency_missing when the loaded catalog of that kind does not hold one. Library " \
+                    "export writes each dependency of a written row, whatever kinds or records select, and refuses " \
+                    "library.dependency_missing for one it cannot write; its omissions list a declared part's map " \
+                    "the file leaves out as <path>.user_data, such as devices[].user_data." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

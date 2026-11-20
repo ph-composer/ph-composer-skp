@@ -25,6 +25,7 @@ module PhComposer
         result(outcome, names, mapped)
       end
 
+      # Whether a local record's `source` attribution names exactly `source`'s library row.
       def same_source?(local, source)
         local.is_a?(Hash) && local["kind"] == "library" &&
           IDENTITY_FIELDS.all? { |key| source.key?(key) && local[key] == source[key] }
@@ -46,7 +47,7 @@ module PhComposer
           end
         }
       end
-      private_class_method :same_source?, :result
+      private_class_method :result
     end
   end
 end

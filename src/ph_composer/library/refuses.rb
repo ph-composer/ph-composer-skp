@@ -49,14 +49,15 @@ module PhComposer
       CATALOG_DETAIL = (CATALOG + ROW_DETAIL).freeze
       IN_FILE_DETAIL = (IN_FILE + ROW_DETAIL).freeze
       COPY = (LOAD + %w[copy.rule_missing extension.invalid identity.conflict library.adapter_invalid
-                        library.callback_invalid library.catalog_stale library.local_choice_required
+                        library.callback_invalid library.catalog_stale library.dependency_missing
+                        library.local_choice_required
                         library.review_required library.row_semantic_invalid
                         library.row_unavailable proposal.contribution_replaced proposal.foreign_write record.unreadable
                         reference.invalid target.ambiguous target.changed target.locked target.not_found
                         target.shared_definition target.wrong_hierarchy target.wrong_kind
                         validation.failed] + USE).uniq.freeze
-      EXPORTABLE = %w[library.adapter_invalid library.catalog_too_many_rows library.kind_unavailable
-                      record.unreadable target.not_found].freeze
+      EXPORTABLE = %w[library.adapter_invalid library.catalog_too_many_rows library.dependency_missing
+                      library.kind_unavailable record.unreadable target.not_found].freeze
       EXPORT_OMISSIONS = (EXPORTABLE + PAGE + %w[revision.stale]).freeze
       EXPORT_PREVIEW = (EXPORTABLE + %w[library.destination_invalid library.export_write_failed location.kind_mismatch
                                         location.revoked location.setup_unavailable location.setup_unreadable

@@ -247,7 +247,7 @@ Codes are stable `noun.condition` strings, one per outcome:
 | Registration | `registration.duplicate_id`, `registration.missing_dependency`, `registration.cycle`, `registration.contract_major`, `registration.schema_invalid` |
 | Translation | `payload.contract`, `section.missing_dependency`, `section.cycle`, `section.duplicate`, `section.version_unsupported`, `object.unavailable`, `dependency.unavailable` |
 | Export | `export.blocked`, `export.busy`, `export.cancelled`, `export.failed`, `export.refused`, `export.model_changed`, `export.destination_changed`, `export.replace_required`, `export.privacy_undeclared`, `export.relevance_unknown`, `export.metadata_omitted` (a finding), `export.user_data_passed` (a finding: how many HBJSON objects of each type carry a user's user_data), `export.revoked` (the access that started the task was revoked before it wrote anything), `task.expired`, `task.foreign` (another caller started that task), `task.running` (a part read of a task that has not ended), `artifact.none` (a file part of a task that wrote no file), `artifact.changed` (a file part whose file no longer hashes to its receipt) |
-| Library | `library.adapter_invalid`, `library.assignment_unavailable`, `library.callback_invalid`, `library.catalog_budget`, `library.catalog_stale`, `library.catalog_too_large`, `library.catalog_too_many_rows`, `library.connection_changed`, `library.connection_required`, `library.credential_store_failed`, `library.credential_store_unavailable`, `library.destination_changed`, `library.destination_invalid`, `library.export_write_failed`, `library.file_malformed`, `library.file_too_large`, `library.file_unreadable`, `library.format_invalid`, `library.kind_unavailable`, `library.lifecycle_unavailable`, `library.load_timeout`, `library.local_choice_required`, `library.model_changed`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.reauthorization_required`, `library.reload_required`, `library.review_required`, `library.row_semantic_invalid`, `library.row_unavailable`, `library.schema_unsupported`, `library.selection_changed`, `library.setup_invalid`, `library.setup_too_large`, `library.setup_unavailable`, `library.setup_unreadable`, `library.source_revision_invalid`, `library.update_destination_invalid`, `library.update_destination_required`, `library.use_expired`. Catalog notes are listed in "Library providers and catalogs" |
+| Library | `library.adapter_invalid`, `library.assignment_unavailable`, `library.callback_invalid`, `library.catalog_budget`, `library.catalog_stale`, `library.catalog_too_large`, `library.catalog_too_many_rows`, `library.connection_changed`, `library.connection_required`, `library.credential_store_failed`, `library.credential_store_unavailable`, `library.dependency_missing`, `library.destination_changed`, `library.destination_invalid`, `library.export_write_failed`, `library.file_malformed`, `library.file_too_large`, `library.file_unreadable`, `library.format_invalid`, `library.kind_unavailable`, `library.lifecycle_unavailable`, `library.load_timeout`, `library.local_choice_required`, `library.model_changed`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.reauthorization_required`, `library.reload_required`, `library.review_required`, `library.row_semantic_invalid`, `library.row_unavailable`, `library.schema_unsupported`, `library.selection_changed`, `library.setup_invalid`, `library.setup_too_large`, `library.setup_unavailable`, `library.setup_unreadable`, `library.source_revision_invalid`, `library.update_destination_invalid`, `library.update_destination_required`, `library.use_expired`. Catalog notes are listed in "Library providers and catalogs" |
 | Runtime | `runtime.asset_refused`, `runtime.boot_timeout`, `runtime.boot_failed`, `runtime.translation_failed`, `runtime.stopped`, `runtime.closed`, `runtime.unresponsive` (a ready runtime sent nothing within the export task's silence deadline), `runtime.conformance_failed` (the canonical HBJSON did not reconcile with the result) |
 
 Shared nouns (`request`, `session`, `revision`, `proposal`, `target`, `params`, `validation`,
@@ -638,6 +638,17 @@ with a retargeter per kind.
 same type every Program slot naming it takes the replacement first. Zone assignments and Dwellings join these
 uses in P4a-08. Duplicate keeps a Program's Schedules shared and gives an Equipment Set's devices new ids, each
 keeping its map.
+
+**Library kinds.** `programs`, `schedules` and `equipment_sets` (`features/programs/library_kinds.rb`; wire rows
+in [LIBRARY_FILE_FORMAT.md](../docs/LIBRARY_FILE_FORMAT.md)). Each callback calls the Programs operation its
+action does, and a local read sees PH-Composer's unwritten defaults as the reads do. A Program names its
+Schedules as library dependencies (below, "Library dependencies"), so a copy brings them; its source snapshot
+keeps the library's record ids. A library row's missing load or value takes a new Program's, a Schedule's missing
+form values its type's, and a device's missing fields its type's. An Equipment Set copy allocates device ids; a
+`use_library` replacement keeps the id and `user_data` of each local device whose place the incoming device of the
+same type takes, and refuses `validation.failed` rather than drop a device holding `user_data`. A Program or
+Equipment Set copy may assign itself as the Model's default (`{"mode": "model_default", "expected_settings"}`,
+through `update_settings`); a Schedule copies without assignment. Zone assignment joins in P4a-08.
 
 ## This computer's settings file
 
@@ -1416,6 +1427,33 @@ proposals". Its own checks run in this order, each refusing the whole proposal:
    step 7 window and identity checks, and registers them as a commit check that Dispatch runs again
    immediately before the native transaction, after every participant has staged; its `source`
    carries `source_revision` and `source_revision_schema_version`.
+
+**Library dependencies.** A kind whose rows name records of other library kinds declares them on its
+adapter (`Declarations::LibraryDependencies`: `kinds`, `list(mapped)` and `remap(mapped, ids)`,
+`library/dependencies.rb`); registration refuses an undeclared or own wire kind
+(`registration.missing_dependency`, `registration.schema_invalid`), and `describe` names the kinds. A row
+names each such record by its wire record id in the same library; its local copy names the local
+record. The Programs kinds are the shipped example: a Program names its Schedules.
+
+- *Resolution* compares the incoming values in local terms: each dependency that already has a local
+  copy from the same source (exact source identity) is named by that copy, the others by record id.
+  The fingerprint stays the row's own, as its attribution stores it.
+- *Copy.* A `create` or `use_library` choice copies each dependency first, in the same proposal and
+  Undo step, then the row with its references remapped, and answers `dependencies`, each one's kind,
+  record id, local id and outcome (`created` or `reused`). A dependency is read from the current loaded
+  catalog of its kind from the same provider and library; a record that catalog does not hold, or a
+  kind never loaded, refuses the whole copy as `library.dependency_missing` with its `kind`,
+  `library_id`, `record_id` and `catalog_state`. It resolves as a row does: `reuse` takes the local
+  record unchanged, `create` copies it (its own dependencies first) with its own attribution and use
+  check, and any other outcome refuses as `library.review_required` naming it, until that record is
+  replaced from the library (`use_library`, which gives it the source) or renamed. Each record is copied once per copy, however many references name it; a cycle
+  refuses as `library.adapter_invalid`. `keep_local` copies nothing. A reused dependency is taken as it
+  stands locally, and a row's fingerprint covers its references, not the referenced records' values, so a
+  change in the library to a Schedule alone shows on that Schedule's own resolution, not its Program's.
+- *Export.* A library export writes each record a written row names, and theirs in turn, even when the
+  selection or `kinds` leaves it out, so the file supplies every dependency; one it cannot write (a record
+  without a label) refuses the export as `library.dependency_missing`. A declared part's map
+  that a row leaves out is listed among the omissions as `<path>.user_data`, such as `devices[].user_data`.
 
 **Callback write ownership.** A create, replace or assign callback shares the caller's proposal.
 Its request's engine is `engine.projected(proposal, writable_kinds:, refusal_code:)`

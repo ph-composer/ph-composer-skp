@@ -24,9 +24,13 @@ module PhComposer
         end
       end
 
-      # `own` after the shared fields, with the source snapshot declared over them all.
-      def with(own)
-        Fields.with_source_snapshot(common + own)
+      # `own` after the shared fields, with the source snapshot declared over them all. A copied library row's
+      # snapshot holds the library file's form of a field where `library` gives one (a Program's Schedules by
+      # their record ids in the library, an Equipment Set's devices without ids).
+      def with(own, library = {})
+        snapshot = Fields.source_snapshot_schema(common + own)
+        snapshot["properties"] = snapshot.fetch("properties").merge(DeepCopy.call(library))
+        Fields.with_source_snapshot(common + own, snapshot)
       end
     end
 

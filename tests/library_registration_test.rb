@@ -286,4 +286,33 @@ class LibraryRegistrationTest < PhComposerTestCase
     described = PhComposer::API.describe(:name => "test.library.wire")
     assert_equal [true, []], [described.dig("assignment", "supported"), described.dig("assignment", "examples")]
   end
+
+  # A kind's dependencies name other registered wire kinds, never its own, with callable list and remap.
+  def test_dependencies_name_registered_other_kinds_with_callable_list_and_remap
+    deps = ->(kinds) {
+      D::LibraryDependencies.new(:kinds => kinds, :list => ->(_mapped) { [] }, :remap => ->(m, _) {
+        m
+      })
+    }
+    [deps.call(["widgets"]), deps.call([]), deps.call(%w[parts parts]), {},
+     D::LibraryDependencies.new(:kinds => ["parts"], :list => nil, :remap => ->(m, _) { m })].each do |declared|
+      value = adapter
+      value.dependencies = declared
+      diagnostics = refused(feature("test.library", value))
+      assert(diagnostics.any? { |item|
+        item.code == "registration.schema_invalid" && item.message.include?("dependenc")
+      },
+             diagnostics.inspect)
+    end
+    value = adapter
+    value.dependencies = deps.call(["parts"])
+    assert_includes refused(feature("test.library", value)).map(&:code), "registration.missing_dependency"
+    parts = feature("test.parts", adapter("parts"))
+    value = adapter
+    value.dependencies = deps.call(["parts"])
+    Registry.install([feature("test.library", value), parts])
+    described = PhComposer::API.describe(:name => "test.library.wire")
+    assert_equal ["parts"], described.dig("dependencies", "kinds")
+    assert Registry.current.library_kinds.fetch("test.library.wire").adapter.dependencies.kinds.frozen?
+  end
 end

@@ -164,10 +164,13 @@ module PhComposer
       declaration = State.kind(request.params.fetch("kind"), request.registry)
       locals = CallbackInvoker.call(request, declaration, declaration.adapter.local_read, {}, :readonly => true)
       provider = State.for(request.session).provider(request.params.fetch("provider_id"), request.registry)
+      adapter = declaration.adapter
+      dependency_locals = {}
       rows.map do |row|
-        mapped = Coordinator.map(declaration.adapter, row.fetch("snapshot"))
+        mapped = Coordinator.map(adapter, row.fetch("snapshot"))
         source = Coordinator.source_identity(provider, row, request.params.fetch("kind"))
-        row.merge("resolution" => Coordinator.resolve(declaration.adapter, source, mapped, locals))
+        local_terms = Dependencies.in_local_terms(request, source, adapter, mapped, dependency_locals)
+        row.merge("resolution" => Coordinator.resolve(adapter, source, local_terms, locals, :fingerprint_of => mapped))
       end
     end
   end

@@ -2,7 +2,7 @@
 
 Use a UTF-8 JSON file or a folder of immediate JSON files to publish a library. PH-Composer
 copies definitions into the SKP as editable records. The built-in wire kinds are `materials`,
-`frames`, `glazings` and `psi_install_types`.
+`frames`, `glazings`, `psi_install_types`, `programs`, `schedules` and `equipment_sets`.
 
 ## Envelope
 
@@ -120,9 +120,61 @@ The Installs editor stages selected library identities and review choices; Save 
 catalog generation again and copies products with all assignments in one Undo step. Cancelling
 that session makes no Model change.
 
+## Programs, Schedules and Equipment Sets version 1
+
+These three kinds use the same envelope and identity rules. Values use the units the Program,
+Schedule and Equipment Set records use, which `describe` lists for each kind. A row carries no
+`source`, `user_data` or extension payloads.
+
+**Schedules.** Supply `id`, `name` and `type`: `fractional`, `activity`, `temperature` or
+`ventilation`. Give only the fields of that type's form; a field of another form skips the row.
+
+| Type | Form fields | Missing value |
+| --- | --- | --- |
+| `fractional` | `start_h`, `end_h` (whole hours), `fraction_on`, `fraction_off` | On all day: 0, 24, 1.0, 0.0 |
+| `activity` | `start_h`, `end_h`, `watts_on`, `watts_off` (W per person) | 0, 24, 120.0, 120.0 |
+| `temperature` | `value_c` | 20.0 |
+| `ventilation` | `periods`: `high`, `standard`, `basic` and `minimum` in that order, each with whole `hours` and a `fraction`, the hours totalling 24 | The standard period all day at 1.0 |
+
+Every type also takes `days_per_week` (1 to 7, default 7) and `weeks_per_year` (1 to 52,
+default 52). Because a row gives only its own form, a Schedule row is read with the
+`library.row_optional_absent` warning.
+
+**Programs.** Supply `id` and `name`. A Program has eight loads: `people`, `lighting`,
+`electric_equipment`, `gas_equipment`, `service_hot_water`, `infiltration`, `ventilation` and
+`setpoint`. Each load is an object holding any of its values; a missing load or value takes a new
+Program's. A load may name `source`, the base program its values came from. A load names its
+Schedules by their `id` in the `schedules` kind of the same library, such as
+`"occupancy_schedule_id": "office-hours"`. Each named Schedule must be of the type its load reads;
+a copy checks this and refuses with `validation.failed` otherwise.
+
+**Equipment Sets.** Supply `id` and `name`. `devices` is an array of devices, each with its
+`type`, one of the fourteen honeybee-ph equipment types, and any of that type's fields; missing
+fields take the type's defaults. A device carries no `id`: PH-Composer gives each copied device its
+own.
+
+**Copying a Program.** Load the `schedules` kind as well as `programs`. Copying a Program copies
+each Schedule it names in the same Undo step, or reuses the local copy of that Schedule from the
+same library. The copy result lists each Schedule under `dependencies`. A Schedule that the loaded
+`schedules` catalog does not hold refuses the copy with `library.dependency_missing`, and nothing
+is written. A local Schedule with the same name and other values refuses the copy with
+`library.review_required`. Replace that Schedule from the library first, or rename it, then copy the
+Program again.
+
+Exporting a Program also exports each Schedule it names, even when the selection or the chosen
+kinds leave the Schedule out, so the file can supply it. A Schedule that cannot be written refuses
+the export with `library.dependency_missing`. An exported Equipment Set's devices carry
+no `user_data`; the review before the write lists `devices[].user_data` as omitted.
+
+A copied Program or Equipment Set can become the Model's default in the copy's Undo step. A
+replacement of a local Equipment Set keeps each local device whose place in the list the library
+device of the same type takes, with its `user_data`. It refuses rather than remove a device that
+holds `user_data`. The synthetic file at `tools/examples/library/programs.json` holds a Program, its
+two Schedules and an Equipment Set.
+
 ## Versions, identity and limits
 
-Envelope version 1 and all four wire kinds at version 1 are implemented. An unsupported envelope version
+Envelope version 1 and all seven wire kinds at version 1 are implemented. An unsupported envelope version
 rejects that file. An unknown kind or unsupported kind version marks that library and kind
 unavailable while other supported kinds can load. In folder mode, a malformed file produces a
 code-only warning; valid neighboring files can load.
@@ -156,4 +208,7 @@ gesture. The timestamp is excluded from the semantic fingerprint.
 See [library kinds](API_REFERENCE.md#library-kinds) for wire schemas. The
 [copy walkthrough](../tools/examples/library/materials_walkthrough.rb) uses the
 [synthetic fixture](../tools/examples/library/materials.json) to load a catalog, copy a Material
-and read it back in a scratch model.
+and read it back in a scratch model. The
+[Program walkthrough](../tools/examples/library/programs_walkthrough.rb) does the same with the
+[Programs fixture](../tools/examples/library/programs.json): it copies a Program with its Schedules
+as the Model's default, then copies it again and reuses them.

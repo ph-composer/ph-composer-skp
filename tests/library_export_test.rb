@@ -50,8 +50,9 @@ class LibraryExportTest < PhComposerTestCase
     Assemblies::Materials::Schema::KIND.store.write(Sketchup.active_model, row)
     read = preview
     assert_equal "completed", read["status"], read.inspect
-    assert_equal [%w[frames Frame 0], %w[glazings Glazing 0], %w[materials Material 2],
-                  ["psi_install_types", "Psi-Install Type", "0"]],
+    assert_equal [["equipment_sets", "Equipment Set", "0"], %w[frames Frame 0], %w[glazings Glazing 0],
+                  %w[materials Material 2], %w[programs Program 0], ["psi_install_types", "Psi-Install Type", "0"],
+                  %w[schedules Schedule 0]],
                  read.dig("value", "kinds").map { |row|
                    row.values_at("kind", "record_kind_label", "count").map(&:to_s)
                  }

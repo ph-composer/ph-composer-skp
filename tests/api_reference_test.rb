@@ -105,14 +105,16 @@ class ApiReferenceTest < PhComposerTestCase
     refute_equal pointer, API.discover.fetch("refusal_documentation")
   end
 
-  # Each shipped library kind publishes the target its copy's assignment takes and examples that meet it,
-  # so the one-Undo copy and assign can be written from describe alone.
+  # Each shipped library kind but Schedules publishes the target its copy's assignment takes and examples that meet
+  # it, so the one-Undo copy and assign can be written from describe alone; Programs names its Schedules.
   def test_every_shipped_library_kind_describes_its_assignment_target_with_examples
     kinds = API.discover.fetch("library_kinds")
     described = kinds.to_h { |row| [row.fetch("wire_kind"), API.describe(:name => row.fetch("name"))] }
 
-    assert_equal %w[frames glazings materials psi_install_types], described.keys.sort
-    described.each do |wire_kind, description|
+    assert_equal %w[equipment_sets frames glazings materials programs psi_install_types schedules], described.keys.sort
+    assert_equal [false, ["programs"]], [described.fetch("schedules").dig("assignment", "supported"),
+                                         described.select { |_kind, row| row.dig("dependencies", "kinds").any? }.keys]
+    described.reject { |wire_kind, _description| wire_kind == "schedules" }.each do |wire_kind, description|
       assignment = description.fetch("assignment")
       assert_equal [true, wire_kind], [assignment.fetch("supported"), description.fetch("wire_kind")]
       refute_empty assignment.fetch("examples"), wire_kind

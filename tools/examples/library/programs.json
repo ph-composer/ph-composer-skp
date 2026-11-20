@@ -1,0 +1,117 @@
+{
+  "format": "ph-composer.library",
+  "schema_version": 1,
+  "kind_schema_versions": {
+    "programs": 1,
+    "schedules": 1,
+    "equipment_sets": 1
+  },
+  "library": {
+    "id": "example.programs",
+    "name": "Synthetic programs"
+  },
+  "exported_at": "2026-11-20T12:00:00Z",
+  "kinds": {
+    "schedules": [
+      {
+        "id": "example-office-hours",
+        "name": "Walkthrough office hours",
+        "type": "fractional",
+        "start_h": 8,
+        "end_h": 18,
+        "fraction_on": 1.0,
+        "fraction_off": 0.05,
+        "days_per_week": 5,
+        "weeks_per_year": 50,
+        "notes": "Synthetic example.",
+        "datasheet_links": []
+      },
+      {
+        "id": "example-office-ventilation",
+        "name": "Walkthrough office ventilation",
+        "type": "ventilation",
+        "periods": [
+          {
+            "period": "high",
+            "hours": 0,
+            "fraction": 1.0
+          },
+          {
+            "period": "standard",
+            "hours": 10,
+            "fraction": 1.0
+          },
+          {
+            "period": "basic",
+            "hours": 0,
+            "fraction": 0.5
+          },
+          {
+            "period": "minimum",
+            "hours": 14,
+            "fraction": 0.3
+          }
+        ],
+        "days_per_week": 5,
+        "weeks_per_year": 50,
+        "notes": "Synthetic example.",
+        "datasheet_links": []
+      }
+    ],
+    "programs": [
+      {
+        "id": "example-office",
+        "name": "Walkthrough office",
+        "notes": "Synthetic example.",
+        "datasheet_links": [],
+        "people": {
+          "people_per_area": 0.05,
+          "occupancy_schedule_id": "example-office-hours"
+        },
+        "lighting": {
+          "watts_per_area": 6.5,
+          "schedule_id": "example-office-hours"
+        },
+        "electric_equipment": {
+          "watts_per_area": 8.0,
+          "schedule_id": "example-office-hours"
+        },
+        "gas_equipment": {
+          "watts_per_area": 0.0
+        },
+        "service_hot_water": {
+          "flow_per_area": 0.04
+        },
+        "infiltration": {
+          "flow_per_exterior_area": 0.0001
+        },
+        "ventilation": {
+          "flow_per_person": 0.0085,
+          "schedule_id": "example-office-ventilation"
+        },
+        "setpoint": {
+          "heating_c": 20.0,
+          "cooling_c": 25.0
+        }
+      }
+    ],
+    "equipment_sets": [
+      {
+        "id": "example-office-kitchen",
+        "name": "Walkthrough office kitchen",
+        "notes": "Synthetic example.",
+        "datasheet_links": [],
+        "devices": [
+          {
+            "type": "dishwasher",
+            "display_name": "Office dishwasher"
+          },
+          {
+            "type": "refrigerator",
+            "display_name": "Office refrigerator"
+          }
+        ]
+      }
+    ]
+  }
+}

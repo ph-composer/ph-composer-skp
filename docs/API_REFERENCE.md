@@ -1703,20 +1703,9 @@ Values:
                 "type": "object",
                 "additionalProperties": false,
                 "required": [
-                  "id",
-                  "type",
-                  "display_name",
-                  "quantity",
-                  "in_conditioned_space",
-                  "comment",
-                  "reference_quantity"
+                  "type"
                 ],
                 "properties": {
-                  "id": {
-                    "type": "string",
-                    "pattern": "^dev_[A-Za-z0-9]{12}$",
-                    "description": "This device's id, unique within its Equipment Set."
-                  },
                   "type": {
                     "type": "string",
                     "enum": [
@@ -1754,10 +1743,6 @@ Values:
                   "reference_quantity": {
                     "type": "integer",
                     "description": "The WUFI-Passive and METr reference quantity code the type allows."
-                  },
-                  "user_data": {
-                    "type": "object",
-                    "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                   },
                   "reference_energy_norm": {
                     "type": "integer",
@@ -2143,14 +2128,7 @@ Values:
             "people": {
               "type": "object",
               "additionalProperties": false,
-              "required": [
-                "rule",
-                "people_per_area",
-                "occupancy_schedule_id",
-                "activity_schedule_id",
-                "radiant_fraction",
-                "latent_fraction"
-              ],
+              "required": [],
               "properties": {
                 "rule": {
                   "type": [
@@ -2177,16 +2155,16 @@ Values:
                     "string",
                     "null"
                   ],
-                  "pattern": "^sch_[A-Za-z0-9]{12}$",
-                  "description": "A fractional Schedule, of the peak."
+                  "minLength": 1,
+                  "description": "A Schedule, by its record id in the same library."
                 },
                 "activity_schedule_id": {
                   "type": [
                     "string",
                     "null"
                   ],
-                  "pattern": "^sch_[A-Za-z0-9]{12}$",
-                  "description": "An activity Schedule, W per person."
+                  "minLength": 1,
+                  "description": "A Schedule, by its record id in the same library."
                 },
                 "radiant_fraction": {
                   "type": "number",
@@ -2214,15 +2192,7 @@ Values:
             "lighting": {
               "type": "object",
               "additionalProperties": false,
-              "required": [
-                "rule",
-                "watts_per_area",
-                "high_efficacy_fraction",
-                "schedule_id",
-                "return_air_fraction",
-                "radiant_fraction",
-                "visible_fraction"
-              ],
+              "required": [],
               "properties": {
                 "rule": {
                   "type": [
@@ -2255,8 +2225,8 @@ Values:
                     "string",
                     "null"
                   ],
-                  "pattern": "^sch_[A-Za-z0-9]{12}$",
-                  "description": "A fractional Schedule."
+                  "minLength": 1,
+                  "description": "A Schedule, by its record id in the same library."
                 },
                 "return_air_fraction": {
                   "type": "number",
@@ -2286,13 +2256,7 @@ Values:
             "electric_equipment": {
               "type": "object",
               "additionalProperties": false,
-              "required": [
-                "watts_per_area",
-                "schedule_id",
-                "radiant_fraction",
-                "latent_fraction",
-                "lost_fraction"
-              ],
+              "required": [],
               "properties": {
                 "watts_per_area": {
                   "type": [
@@ -2307,8 +2271,8 @@ Values:
                     "string",
                     "null"
                   ],
-                  "pattern": "^sch_[A-Za-z0-9]{12}$",
-                  "description": "A fractional Schedule."
+                  "minLength": 1,
+                  "description": "A Schedule, by its record id in the same library."
                 },
                 "radiant_fraction": {
                   "type": "number",
@@ -2338,13 +2302,7 @@ Values:
             "gas_equipment": {
               "type": "object",
               "additionalProperties": false,
-              "required": [
-                "watts_per_area",
-                "schedule_id",
-                "radiant_fraction",
-                "latent_fraction",
-                "lost_fraction"
-              ],
+              "required": [],
               "properties": {
                 "watts_per_area": {
                   "type": [
@@ -2359,8 +2317,8 @@ Values:
                     "string",
                     "null"
                   ],
-                  "pattern": "^sch_[A-Za-z0-9]{12}$",
-                  "description": "A fractional Schedule."
+                  "minLength": 1,
+                  "description": "A Schedule, by its record id in the same library."
                 },
                 "radiant_fraction": {
                   "type": "number",
@@ -2390,14 +2348,7 @@ Values:
             "service_hot_water": {
               "type": "object",
               "additionalProperties": false,
-              "required": [
-                "rule",
-                "flow_per_area",
-                "target_temperature_c",
-                "schedule_id",
-                "sensible_fraction",
-                "latent_fraction"
-              ],
+              "required": [],
               "properties": {
                 "rule": {
                   "type": [
@@ -2430,8 +2381,8 @@ Values:
                     "string",
                     "null"
                   ],
-                  "pattern": "^sch_[A-Za-z0-9]{12}$",
-                  "description": "A fractional Schedule."
+                  "minLength": 1,
+                  "description": "A Schedule, by its record id in the same library."
                 },
                 "sensible_fraction": {
                   "type": "number",
@@ -2455,10 +2406,7 @@ Values:
             "infiltration": {
               "type": "object",
               "additionalProperties": false,
-              "required": [
-                "flow_per_exterior_area",
-                "schedule_id"
-              ],
+              "required": [],
               "properties": {
                 "flow_per_exterior_area": {
                   "type": [
@@ -2474,8 +2422,8 @@ Values:
                     "string",
                     "null"
                   ],
-                  "pattern": "^sch_[A-Za-z0-9]{12}$",
-                  "description": "A fractional Schedule."
+                  "minLength": 1,
+                  "description": "A Schedule, by its record id in the same library."
                 },
                 "source": {
                   "type": "string",
@@ -2487,13 +2435,7 @@ Values:
             "ventilation": {
               "type": "object",
               "additionalProperties": false,
-              "required": [
-                "flow_per_person",
-                "flow_per_area",
-                "flow_per_zone",
-                "air_changes_per_hour",
-                "schedule_id"
-              ],
+              "required": [],
               "properties": {
                 "flow_per_person": {
                   "type": [
@@ -2532,8 +2474,8 @@ Values:
                     "string",
                     "null"
                   ],
-                  "pattern": "^sch_[A-Za-z0-9]{12}$",
-                  "description": "A ventilation Schedule."
+                  "minLength": 1,
+                  "description": "A Schedule, by its record id in the same library."
                 },
                 "source": {
                   "type": "string",
@@ -2545,14 +2487,7 @@ Values:
             "setpoint": {
               "type": "object",
               "additionalProperties": false,
-              "required": [
-                "heating_c",
-                "cooling_c",
-                "heating_schedule_id",
-                "cooling_schedule_id",
-                "dehumidify_rh",
-                "humidify_rh"
-              ],
+              "required": [],
               "properties": {
                 "heating_c": {
                   "type": [
@@ -2573,16 +2508,16 @@ Values:
                     "string",
                     "null"
                   ],
-                  "pattern": "^sch_[A-Za-z0-9]{12}$",
-                  "description": "A temperature Schedule, in place of heating_c."
+                  "minLength": 1,
+                  "description": "A Schedule, by its record id in the same library."
                 },
                 "cooling_schedule_id": {
                   "type": [
                     "string",
                     "null"
                   ],
-                  "pattern": "^sch_[A-Za-z0-9]{12}$",
-                  "description": "A temperature Schedule, in place of cooling_c."
+                  "minLength": 1,
+                  "description": "A Schedule, by its record id in the same library."
                 },
                 "dehumidify_rh": {
                   "type": [
@@ -5752,6 +5687,94 @@ Example assignment:
   "segment_id": "seg_Ab12Cd34Ef56"
 }
 ```
+
+### `ph_composer.programs.library_equipment_sets`
+
+Wire kind `equipment_sets`, version 1, copied as `ph_composer.programs.equipment_set`. Owner: `ph_composer.programs`.
+
+Assignment target:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "mode",
+    "expected_settings"
+  ],
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": [
+        "model_default"
+      ]
+    },
+    "expected_settings": {
+      "type": "object",
+      "description": "The defaults as ph_composer.programs.settings.get last read them; those given are checked. {} skips the check."
+    }
+  },
+  "description": "model_default makes the copy the Model's default of its kind."
+}
+```
+
+Example assignment:
+
+```json
+{
+  "mode": "model_default",
+  "expected_settings": {
+    "default_equipment_set_id": "eqs_PHCDEFAULT01"
+  }
+}
+```
+
+### `ph_composer.programs.library_programs`
+
+Wire kind `programs`, version 1, copied as `ph_composer.programs.program`. Owner: `ph_composer.programs`.
+
+Assignment target:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "mode",
+    "expected_settings"
+  ],
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": [
+        "model_default"
+      ]
+    },
+    "expected_settings": {
+      "type": "object",
+      "description": "The defaults as ph_composer.programs.settings.get last read them; those given are checked. {} skips the check."
+    }
+  },
+  "description": "model_default makes the copy the Model's default of its kind."
+}
+```
+
+Example assignment:
+
+```json
+{
+  "mode": "model_default",
+  "expected_settings": {
+    "default_program_id": "pgm_PHCDEFAULT01"
+  }
+}
+```
+
+### `ph_composer.programs.library_schedules`
+
+Wire kind `schedules`, version 1, copied as `ph_composer.programs.schedule`. Owner: `ph_composer.programs`.
+
+No assignment: `ph_composer.library.copy` refuses one with `library.assignment_unavailable`.
 
 ### `ph_composer.windows.library_frames`
 
@@ -14114,7 +14137,7 @@ Example params:
 
 Review local library export counts and omissions. Owner: `ph_composer.library`.
 
-Refuses: `library.adapter_invalid`, `library.catalog_too_many_rows`, `library.destination_invalid`, `library.export_write_failed`, `library.kind_unavailable`, `location.kind_mismatch`, `location.revoked`, `location.setup_unavailable`, `location.setup_unreadable`, `location.unavailable`, `location.unknown`, `location.used`, `record.unreadable`, `target.not_found`, and the `query` common set.
+Refuses: `library.adapter_invalid`, `library.catalog_too_many_rows`, `library.dependency_missing`, `library.destination_invalid`, `library.export_write_failed`, `library.kind_unavailable`, `location.kind_mismatch`, `location.revoked`, `location.setup_unavailable`, `location.setup_unreadable`, `location.unavailable`, `location.unknown`, `location.used`, `record.unreadable`, `target.not_found`, and the `query` common set.
 
 Params:
 
@@ -14139,7 +14162,7 @@ Params:
         "minLength": 1
       },
       "minItems": 1,
-      "description": "Limit the export to these library kinds, such as materials."
+      "description": "Limit the export to these library kinds, such as materials. A written row's dependencies, a Program's Schedules, are written too."
     },
     "records": {
       "type": "array",
@@ -14309,7 +14332,7 @@ Example params:
 
 A bounded page of what a library export leaves out, for the same scope as export_preview. Owner: `ph_composer.library`.
 
-Refuses: `library.adapter_invalid`, `library.catalog_too_many_rows`, `library.kind_unavailable`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `revision.stale`, `target.not_found`, and the `query` common set.
+Refuses: `library.adapter_invalid`, `library.catalog_too_many_rows`, `library.dependency_missing`, `library.kind_unavailable`, `query.cursor_expired`, `query.limit_invalid`, `record.unreadable`, `revision.stale`, `target.not_found`, and the `query` common set.
 
 Params:
 
@@ -14334,7 +14357,7 @@ Params:
         "minLength": 1
       },
       "minItems": 1,
-      "description": "Limit the export to these library kinds, such as materials."
+      "description": "Limit the export to these library kinds, such as materials. A written row's dependencies, a Program's Schedules, are written too."
     },
     "records": {
       "type": "array",
@@ -16272,20 +16295,9 @@ Result:
                           "type": "object",
                           "additionalProperties": false,
                           "required": [
-                            "id",
-                            "type",
-                            "display_name",
-                            "quantity",
-                            "in_conditioned_space",
-                            "comment",
-                            "reference_quantity"
+                            "type"
                           ],
                           "properties": {
-                            "id": {
-                              "type": "string",
-                              "pattern": "^dev_[A-Za-z0-9]{12}$",
-                              "description": "This device's id, unique within its Equipment Set."
-                            },
                             "type": {
                               "type": "string",
                               "enum": [
@@ -16323,10 +16335,6 @@ Result:
                             "reference_quantity": {
                               "type": "integer",
                               "description": "The WUFI-Passive and METr reference quantity code the type allows."
-                            },
-                            "user_data": {
-                              "type": "object",
-                              "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                             },
                             "reference_energy_norm": {
                               "type": "integer",
@@ -16872,20 +16880,9 @@ Result:
                           "type": "object",
                           "additionalProperties": false,
                           "required": [
-                            "id",
-                            "type",
-                            "display_name",
-                            "quantity",
-                            "in_conditioned_space",
-                            "comment",
-                            "reference_quantity"
+                            "type"
                           ],
                           "properties": {
-                            "id": {
-                              "type": "string",
-                              "pattern": "^dev_[A-Za-z0-9]{12}$",
-                              "description": "This device's id, unique within its Equipment Set."
-                            },
                             "type": {
                               "type": "string",
                               "enum": [
@@ -16923,10 +16920,6 @@ Result:
                             "reference_quantity": {
                               "type": "integer",
                               "description": "The WUFI-Passive and METr reference quantity code the type allows."
-                            },
-                            "user_data": {
-                              "type": "object",
-                              "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                             },
                             "reference_energy_norm": {
                               "type": "integer",
@@ -17436,14 +17429,7 @@ Result:
                       "people": {
                         "type": "object",
                         "additionalProperties": false,
-                        "required": [
-                          "rule",
-                          "people_per_area",
-                          "occupancy_schedule_id",
-                          "activity_schedule_id",
-                          "radiant_fraction",
-                          "latent_fraction"
-                        ],
+                        "required": [],
                         "properties": {
                           "rule": {
                             "type": [
@@ -17470,16 +17456,16 @@ Result:
                               "string",
                               "null"
                             ],
-                            "pattern": "^sch_[A-Za-z0-9]{12}$",
-                            "description": "A fractional Schedule, of the peak."
+                            "minLength": 1,
+                            "description": "A Schedule, by its record id in the same library."
                           },
                           "activity_schedule_id": {
                             "type": [
                               "string",
                               "null"
                             ],
-                            "pattern": "^sch_[A-Za-z0-9]{12}$",
-                            "description": "An activity Schedule, W per person."
+                            "minLength": 1,
+                            "description": "A Schedule, by its record id in the same library."
                           },
                           "radiant_fraction": {
                             "type": "number",
@@ -17507,15 +17493,7 @@ Result:
                       "lighting": {
                         "type": "object",
                         "additionalProperties": false,
-                        "required": [
-                          "rule",
-                          "watts_per_area",
-                          "high_efficacy_fraction",
-                          "schedule_id",
-                          "return_air_fraction",
-                          "radiant_fraction",
-                          "visible_fraction"
-                        ],
+                        "required": [],
                         "properties": {
                           "rule": {
                             "type": [
@@ -17548,8 +17526,8 @@ Result:
                               "string",
                               "null"
                             ],
-                            "pattern": "^sch_[A-Za-z0-9]{12}$",
-                            "description": "A fractional Schedule."
+                            "minLength": 1,
+                            "description": "A Schedule, by its record id in the same library."
                           },
                           "return_air_fraction": {
                             "type": "number",
@@ -17579,13 +17557,7 @@ Result:
                       "electric_equipment": {
                         "type": "object",
                         "additionalProperties": false,
-                        "required": [
-                          "watts_per_area",
-                          "schedule_id",
-                          "radiant_fraction",
-                          "latent_fraction",
-                          "lost_fraction"
-                        ],
+                        "required": [],
                         "properties": {
                           "watts_per_area": {
                             "type": [
@@ -17600,8 +17572,8 @@ Result:
                               "string",
                               "null"
                             ],
-                            "pattern": "^sch_[A-Za-z0-9]{12}$",
-                            "description": "A fractional Schedule."
+                            "minLength": 1,
+                            "description": "A Schedule, by its record id in the same library."
                           },
                           "radiant_fraction": {
                             "type": "number",
@@ -17631,13 +17603,7 @@ Result:
                       "gas_equipment": {
                         "type": "object",
                         "additionalProperties": false,
-                        "required": [
-                          "watts_per_area",
-                          "schedule_id",
-                          "radiant_fraction",
-                          "latent_fraction",
-                          "lost_fraction"
-                        ],
+                        "required": [],
                         "properties": {
                           "watts_per_area": {
                             "type": [
@@ -17652,8 +17618,8 @@ Result:
                               "string",
                               "null"
                             ],
-                            "pattern": "^sch_[A-Za-z0-9]{12}$",
-                            "description": "A fractional Schedule."
+                            "minLength": 1,
+                            "description": "A Schedule, by its record id in the same library."
                           },
                           "radiant_fraction": {
                             "type": "number",
@@ -17683,14 +17649,7 @@ Result:
                       "service_hot_water": {
                         "type": "object",
                         "additionalProperties": false,
-                        "required": [
-                          "rule",
-                          "flow_per_area",
-                          "target_temperature_c",
-                          "schedule_id",
-                          "sensible_fraction",
-                          "latent_fraction"
-                        ],
+                        "required": [],
                         "properties": {
                           "rule": {
                             "type": [
@@ -17723,8 +17682,8 @@ Result:
                               "string",
                               "null"
                             ],
-                            "pattern": "^sch_[A-Za-z0-9]{12}$",
-                            "description": "A fractional Schedule."
+                            "minLength": 1,
+                            "description": "A Schedule, by its record id in the same library."
                           },
                           "sensible_fraction": {
                             "type": "number",
@@ -17748,10 +17707,7 @@ Result:
                       "infiltration": {
                         "type": "object",
                         "additionalProperties": false,
-                        "required": [
-                          "flow_per_exterior_area",
-                          "schedule_id"
-                        ],
+                        "required": [],
                         "properties": {
                           "flow_per_exterior_area": {
                             "type": [
@@ -17767,8 +17723,8 @@ Result:
                               "string",
                               "null"
                             ],
-                            "pattern": "^sch_[A-Za-z0-9]{12}$",
-                            "description": "A fractional Schedule."
+                            "minLength": 1,
+                            "description": "A Schedule, by its record id in the same library."
                           },
                           "source": {
                             "type": "string",
@@ -17780,13 +17736,7 @@ Result:
                       "ventilation": {
                         "type": "object",
                         "additionalProperties": false,
-                        "required": [
-                          "flow_per_person",
-                          "flow_per_area",
-                          "flow_per_zone",
-                          "air_changes_per_hour",
-                          "schedule_id"
-                        ],
+                        "required": [],
                         "properties": {
                           "flow_per_person": {
                             "type": [
@@ -17825,8 +17775,8 @@ Result:
                               "string",
                               "null"
                             ],
-                            "pattern": "^sch_[A-Za-z0-9]{12}$",
-                            "description": "A ventilation Schedule."
+                            "minLength": 1,
+                            "description": "A Schedule, by its record id in the same library."
                           },
                           "source": {
                             "type": "string",
@@ -17838,14 +17788,7 @@ Result:
                       "setpoint": {
                         "type": "object",
                         "additionalProperties": false,
-                        "required": [
-                          "heating_c",
-                          "cooling_c",
-                          "heating_schedule_id",
-                          "cooling_schedule_id",
-                          "dehumidify_rh",
-                          "humidify_rh"
-                        ],
+                        "required": [],
                         "properties": {
                           "heating_c": {
                             "type": [
@@ -17866,16 +17809,16 @@ Result:
                               "string",
                               "null"
                             ],
-                            "pattern": "^sch_[A-Za-z0-9]{12}$",
-                            "description": "A temperature Schedule, in place of heating_c."
+                            "minLength": 1,
+                            "description": "A Schedule, by its record id in the same library."
                           },
                           "cooling_schedule_id": {
                             "type": [
                               "string",
                               "null"
                             ],
-                            "pattern": "^sch_[A-Za-z0-9]{12}$",
-                            "description": "A temperature Schedule, in place of cooling_c."
+                            "minLength": 1,
+                            "description": "A Schedule, by its record id in the same library."
                           },
                           "dehumidify_rh": {
                             "type": [
@@ -18614,14 +18557,7 @@ Result:
                       "people": {
                         "type": "object",
                         "additionalProperties": false,
-                        "required": [
-                          "rule",
-                          "people_per_area",
-                          "occupancy_schedule_id",
-                          "activity_schedule_id",
-                          "radiant_fraction",
-                          "latent_fraction"
-                        ],
+                        "required": [],
                         "properties": {
                           "rule": {
                             "type": [
@@ -18648,16 +18584,16 @@ Result:
                               "string",
                               "null"
                             ],
-                            "pattern": "^sch_[A-Za-z0-9]{12}$",
-                            "description": "A fractional Schedule, of the peak."
+                            "minLength": 1,
+                            "description": "A Schedule, by its record id in the same library."
                           },
                           "activity_schedule_id": {
                             "type": [
                               "string",
                               "null"
                             ],
-                            "pattern": "^sch_[A-Za-z0-9]{12}$",
-                            "description": "An activity Schedule, W per person."
+                            "minLength": 1,
+                            "description": "A Schedule, by its record id in the same library."
                           },
                           "radiant_fraction": {
                             "type": "number",
@@ -18685,15 +18621,7 @@ Result:
                       "lighting": {
                         "type": "object",
                         "additionalProperties": false,
-                        "required": [
-                          "rule",
-                          "watts_per_area",
-                          "high_efficacy_fraction",
-                          "schedule_id",
-                          "return_air_fraction",
-                          "radiant_fraction",
-                          "visible_fraction"
-                        ],
+                        "required": [],
                         "properties": {
                           "rule": {
                             "type": [
@@ -18726,8 +18654,8 @@ Result:
                               "string",
                               "null"
                             ],
-                            "pattern": "^sch_[A-Za-z0-9]{12}$",
-                            "description": "A fractional Schedule."
+                            "minLength": 1,
+                            "description": "A Schedule, by its record id in the same library."
                           },
                           "return_air_fraction": {
                             "type": "number",
@@ -18757,13 +18685,7 @@ Result:
                       "electric_equipment": {
                         "type": "object",
                         "additionalProperties": false,
-                        "required": [
-                          "watts_per_area",
-                          "schedule_id",
-                          "radiant_fraction",
-                          "latent_fraction",
-                          "lost_fraction"
-                        ],
+                        "required": [],
                         "properties": {
                           "watts_per_area": {
                             "type": [
@@ -18778,8 +18700,8 @@ Result:
                               "string",
                               "null"
                             ],
-                            "pattern": "^sch_[A-Za-z0-9]{12}$",
-                            "description": "A fractional Schedule."
+                            "minLength": 1,
+                            "description": "A Schedule, by its record id in the same library."
                           },
                           "radiant_fraction": {
                             "type": "number",
@@ -18809,13 +18731,7 @@ Result:
                       "gas_equipment": {
                         "type": "object",
                         "additionalProperties": false,
-                        "required": [
-                          "watts_per_area",
-                          "schedule_id",
-                          "radiant_fraction",
-                          "latent_fraction",
-                          "lost_fraction"
-                        ],
+                        "required": [],
                         "properties": {
                           "watts_per_area": {
                             "type": [
@@ -18830,8 +18746,8 @@ Result:
                               "string",
                               "null"
                             ],
-                            "pattern": "^sch_[A-Za-z0-9]{12}$",
-                            "description": "A fractional Schedule."
+                            "minLength": 1,
+                            "description": "A Schedule, by its record id in the same library."
                           },
                           "radiant_fraction": {
                             "type": "number",
@@ -18861,14 +18777,7 @@ Result:
                       "service_hot_water": {
                         "type": "object",
                         "additionalProperties": false,
-                        "required": [
-                          "rule",
-                          "flow_per_area",
-                          "target_temperature_c",
-                          "schedule_id",
-                          "sensible_fraction",
-                          "latent_fraction"
-                        ],
+                        "required": [],
                         "properties": {
                           "rule": {
                             "type": [
@@ -18901,8 +18810,8 @@ Result:
                               "string",
                               "null"
                             ],
-                            "pattern": "^sch_[A-Za-z0-9]{12}$",
-                            "description": "A fractional Schedule."
+                            "minLength": 1,
+                            "description": "A Schedule, by its record id in the same library."
                           },
                           "sensible_fraction": {
                             "type": "number",
@@ -18926,10 +18835,7 @@ Result:
                       "infiltration": {
                         "type": "object",
                         "additionalProperties": false,
-                        "required": [
-                          "flow_per_exterior_area",
-                          "schedule_id"
-                        ],
+                        "required": [],
                         "properties": {
                           "flow_per_exterior_area": {
                             "type": [
@@ -18945,8 +18851,8 @@ Result:
                               "string",
                               "null"
                             ],
-                            "pattern": "^sch_[A-Za-z0-9]{12}$",
-                            "description": "A fractional Schedule."
+                            "minLength": 1,
+                            "description": "A Schedule, by its record id in the same library."
                           },
                           "source": {
                             "type": "string",
@@ -18958,13 +18864,7 @@ Result:
                       "ventilation": {
                         "type": "object",
                         "additionalProperties": false,
-                        "required": [
-                          "flow_per_person",
-                          "flow_per_area",
-                          "flow_per_zone",
-                          "air_changes_per_hour",
-                          "schedule_id"
-                        ],
+                        "required": [],
                         "properties": {
                           "flow_per_person": {
                             "type": [
@@ -19003,8 +18903,8 @@ Result:
                               "string",
                               "null"
                             ],
-                            "pattern": "^sch_[A-Za-z0-9]{12}$",
-                            "description": "A ventilation Schedule."
+                            "minLength": 1,
+                            "description": "A Schedule, by its record id in the same library."
                           },
                           "source": {
                             "type": "string",
@@ -19016,14 +18916,7 @@ Result:
                       "setpoint": {
                         "type": "object",
                         "additionalProperties": false,
-                        "required": [
-                          "heating_c",
-                          "cooling_c",
-                          "heating_schedule_id",
-                          "cooling_schedule_id",
-                          "dehumidify_rh",
-                          "humidify_rh"
-                        ],
+                        "required": [],
                         "properties": {
                           "heating_c": {
                             "type": [
@@ -19044,16 +18937,16 @@ Result:
                               "string",
                               "null"
                             ],
-                            "pattern": "^sch_[A-Za-z0-9]{12}$",
-                            "description": "A temperature Schedule, in place of heating_c."
+                            "minLength": 1,
+                            "description": "A Schedule, by its record id in the same library."
                           },
                           "cooling_schedule_id": {
                             "type": [
                               "string",
                               "null"
                             ],
-                            "pattern": "^sch_[A-Za-z0-9]{12}$",
-                            "description": "A temperature Schedule, in place of cooling_c."
+                            "minLength": 1,
+                            "description": "A Schedule, by its record id in the same library."
                           },
                           "dehumidify_rh": {
                             "type": [
@@ -55802,7 +55695,7 @@ Copy or reuse one library record with optional assignment. Owner: `ph_composer.l
 
 Undo step: Copy Library Record. Copies or replaces local definitions and optional assignments in one Undo step.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `library.adapter_invalid`, `library.callback_invalid`, `library.catalog_stale`, `library.connection_changed`, `library.kind_unavailable`, `library.local_choice_required`, `library.model_changed`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.reauthorization_required`, `library.reload_required`, `library.review_required`, `library.row_semantic_invalid`, `library.row_unavailable`, `library.selection_changed`, `library.use_expired`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `library.adapter_invalid`, `library.callback_invalid`, `library.catalog_stale`, `library.connection_changed`, `library.dependency_missing`, `library.kind_unavailable`, `library.local_choice_required`, `library.model_changed`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.reauthorization_required`, `library.reload_required`, `library.review_required`, `library.row_semantic_invalid`, `library.row_unavailable`, `library.selection_changed`, `library.use_expired`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -55879,7 +55772,8 @@ Result:
   "required": [
     "resolution",
     "local_id",
-    "assigned"
+    "assigned",
+    "dependencies"
   ],
   "properties": {
     "resolution": {
@@ -56027,6 +55921,38 @@ Result:
     },
     "assigned": {
       "type": "boolean"
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "record_id",
+          "local_id",
+          "outcome"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "record_id": {
+            "type": "string"
+          },
+          "local_id": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "created",
+              "reused"
+            ]
+          }
+        }
+      },
+      "description": "Each record of another kind the row names, copied or reused in the same Undo step; empty for keep_local and for a kind without dependencies."
     }
   }
 }
@@ -56434,20 +56360,9 @@ Params:
                     "type": "object",
                     "additionalProperties": false,
                     "required": [
-                      "id",
-                      "type",
-                      "display_name",
-                      "quantity",
-                      "in_conditioned_space",
-                      "comment",
-                      "reference_quantity"
+                      "type"
                     ],
                     "properties": {
-                      "id": {
-                        "type": "string",
-                        "pattern": "^dev_[A-Za-z0-9]{12}$",
-                        "description": "This device's id, unique within its Equipment Set."
-                      },
                       "type": {
                         "type": "string",
                         "enum": [
@@ -56485,10 +56400,6 @@ Params:
                       "reference_quantity": {
                         "type": "integer",
                         "description": "The WUFI-Passive and METr reference quantity code the type allows."
-                      },
-                      "user_data": {
-                        "type": "object",
-                        "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                       },
                       "reference_energy_norm": {
                         "type": "integer",
@@ -57405,20 +57316,9 @@ Params:
                     "type": "object",
                     "additionalProperties": false,
                     "required": [
-                      "id",
-                      "type",
-                      "display_name",
-                      "quantity",
-                      "in_conditioned_space",
-                      "comment",
-                      "reference_quantity"
+                      "type"
                     ],
                     "properties": {
-                      "id": {
-                        "type": "string",
-                        "pattern": "^dev_[A-Za-z0-9]{12}$",
-                        "description": "This device's id, unique within its Equipment Set."
-                      },
                       "type": {
                         "type": "string",
                         "enum": [
@@ -57456,10 +57356,6 @@ Params:
                       "reference_quantity": {
                         "type": "integer",
                         "description": "The WUFI-Passive and METr reference quantity code the type allows."
-                      },
-                      "user_data": {
-                        "type": "object",
-                        "description": "Local JSON metadata of this part, written with ph_composer.records.update_metadata by part_ids. A new part has none."
                       },
                       "reference_energy_norm": {
                         "type": "integer",
@@ -58177,14 +58073,7 @@ Params:
                 "people": {
                   "type": "object",
                   "additionalProperties": false,
-                  "required": [
-                    "rule",
-                    "people_per_area",
-                    "occupancy_schedule_id",
-                    "activity_schedule_id",
-                    "radiant_fraction",
-                    "latent_fraction"
-                  ],
+                  "required": [],
                   "properties": {
                     "rule": {
                       "type": [
@@ -58211,16 +58100,16 @@ Params:
                         "string",
                         "null"
                       ],
-                      "pattern": "^sch_[A-Za-z0-9]{12}$",
-                      "description": "A fractional Schedule, of the peak."
+                      "minLength": 1,
+                      "description": "A Schedule, by its record id in the same library."
                     },
                     "activity_schedule_id": {
                       "type": [
                         "string",
                         "null"
                       ],
-                      "pattern": "^sch_[A-Za-z0-9]{12}$",
-                      "description": "An activity Schedule, W per person."
+                      "minLength": 1,
+                      "description": "A Schedule, by its record id in the same library."
                     },
                     "radiant_fraction": {
                       "type": "number",
@@ -58248,15 +58137,7 @@ Params:
                 "lighting": {
                   "type": "object",
                   "additionalProperties": false,
-                  "required": [
-                    "rule",
-                    "watts_per_area",
-                    "high_efficacy_fraction",
-                    "schedule_id",
-                    "return_air_fraction",
-                    "radiant_fraction",
-                    "visible_fraction"
-                  ],
+                  "required": [],
                   "properties": {
                     "rule": {
                       "type": [
@@ -58289,8 +58170,8 @@ Params:
                         "string",
                         "null"
                       ],
-                      "pattern": "^sch_[A-Za-z0-9]{12}$",
-                      "description": "A fractional Schedule."
+                      "minLength": 1,
+                      "description": "A Schedule, by its record id in the same library."
                     },
                     "return_air_fraction": {
                       "type": "number",
@@ -58320,13 +58201,7 @@ Params:
                 "electric_equipment": {
                   "type": "object",
                   "additionalProperties": false,
-                  "required": [
-                    "watts_per_area",
-                    "schedule_id",
-                    "radiant_fraction",
-                    "latent_fraction",
-                    "lost_fraction"
-                  ],
+                  "required": [],
                   "properties": {
                     "watts_per_area": {
                       "type": [
@@ -58341,8 +58216,8 @@ Params:
                         "string",
                         "null"
                       ],
-                      "pattern": "^sch_[A-Za-z0-9]{12}$",
-                      "description": "A fractional Schedule."
+                      "minLength": 1,
+                      "description": "A Schedule, by its record id in the same library."
                     },
                     "radiant_fraction": {
                       "type": "number",
@@ -58372,13 +58247,7 @@ Params:
                 "gas_equipment": {
                   "type": "object",
                   "additionalProperties": false,
-                  "required": [
-                    "watts_per_area",
-                    "schedule_id",
-                    "radiant_fraction",
-                    "latent_fraction",
-                    "lost_fraction"
-                  ],
+                  "required": [],
                   "properties": {
                     "watts_per_area": {
                       "type": [
@@ -58393,8 +58262,8 @@ Params:
                         "string",
                         "null"
                       ],
-                      "pattern": "^sch_[A-Za-z0-9]{12}$",
-                      "description": "A fractional Schedule."
+                      "minLength": 1,
+                      "description": "A Schedule, by its record id in the same library."
                     },
                     "radiant_fraction": {
                       "type": "number",
@@ -58424,14 +58293,7 @@ Params:
                 "service_hot_water": {
                   "type": "object",
                   "additionalProperties": false,
-                  "required": [
-                    "rule",
-                    "flow_per_area",
-                    "target_temperature_c",
-                    "schedule_id",
-                    "sensible_fraction",
-                    "latent_fraction"
-                  ],
+                  "required": [],
                   "properties": {
                     "rule": {
                       "type": [
@@ -58464,8 +58326,8 @@ Params:
                         "string",
                         "null"
                       ],
-                      "pattern": "^sch_[A-Za-z0-9]{12}$",
-                      "description": "A fractional Schedule."
+                      "minLength": 1,
+                      "description": "A Schedule, by its record id in the same library."
                     },
                     "sensible_fraction": {
                       "type": "number",
@@ -58489,10 +58351,7 @@ Params:
                 "infiltration": {
                   "type": "object",
                   "additionalProperties": false,
-                  "required": [
-                    "flow_per_exterior_area",
-                    "schedule_id"
-                  ],
+                  "required": [],
                   "properties": {
                     "flow_per_exterior_area": {
                       "type": [
@@ -58508,8 +58367,8 @@ Params:
                         "string",
                         "null"
                       ],
-                      "pattern": "^sch_[A-Za-z0-9]{12}$",
-                      "description": "A fractional Schedule."
+                      "minLength": 1,
+                      "description": "A Schedule, by its record id in the same library."
                     },
                     "source": {
                       "type": "string",
@@ -58521,13 +58380,7 @@ Params:
                 "ventilation": {
                   "type": "object",
                   "additionalProperties": false,
-                  "required": [
-                    "flow_per_person",
-                    "flow_per_area",
-                    "flow_per_zone",
-                    "air_changes_per_hour",
-                    "schedule_id"
-                  ],
+                  "required": [],
                   "properties": {
                     "flow_per_person": {
                       "type": [
@@ -58566,8 +58419,8 @@ Params:
                         "string",
                         "null"
                       ],
-                      "pattern": "^sch_[A-Za-z0-9]{12}$",
-                      "description": "A ventilation Schedule."
+                      "minLength": 1,
+                      "description": "A Schedule, by its record id in the same library."
                     },
                     "source": {
                       "type": "string",
@@ -58579,14 +58432,7 @@ Params:
                 "setpoint": {
                   "type": "object",
                   "additionalProperties": false,
-                  "required": [
-                    "heating_c",
-                    "cooling_c",
-                    "heating_schedule_id",
-                    "cooling_schedule_id",
-                    "dehumidify_rh",
-                    "humidify_rh"
-                  ],
+                  "required": [],
                   "properties": {
                     "heating_c": {
                       "type": [
@@ -58607,16 +58453,16 @@ Params:
                         "string",
                         "null"
                       ],
-                      "pattern": "^sch_[A-Za-z0-9]{12}$",
-                      "description": "A temperature Schedule, in place of heating_c."
+                      "minLength": 1,
+                      "description": "A Schedule, by its record id in the same library."
                     },
                     "cooling_schedule_id": {
                       "type": [
                         "string",
                         "null"
                       ],
-                      "pattern": "^sch_[A-Za-z0-9]{12}$",
-                      "description": "A temperature Schedule, in place of cooling_c."
+                      "minLength": 1,
+                      "description": "A Schedule, by its record id in the same library."
                     },
                     "dehumidify_rh": {
                       "type": [
@@ -59457,14 +59303,7 @@ Params:
                 "people": {
                   "type": "object",
                   "additionalProperties": false,
-                  "required": [
-                    "rule",
-                    "people_per_area",
-                    "occupancy_schedule_id",
-                    "activity_schedule_id",
-                    "radiant_fraction",
-                    "latent_fraction"
-                  ],
+                  "required": [],
                   "properties": {
                     "rule": {
                       "type": [
@@ -59491,16 +59330,16 @@ Params:
                         "string",
                         "null"
                       ],
-                      "pattern": "^sch_[A-Za-z0-9]{12}$",
-                      "description": "A fractional Schedule, of the peak."
+                      "minLength": 1,
+                      "description": "A Schedule, by its record id in the same library."
                     },
                     "activity_schedule_id": {
                       "type": [
                         "string",
                         "null"
                       ],
-                      "pattern": "^sch_[A-Za-z0-9]{12}$",
-                      "description": "An activity Schedule, W per person."
+                      "minLength": 1,
+                      "description": "A Schedule, by its record id in the same library."
                     },
                     "radiant_fraction": {
                       "type": "number",
@@ -59528,15 +59367,7 @@ Params:
                 "lighting": {
                   "type": "object",
                   "additionalProperties": false,
-                  "required": [
-                    "rule",
-                    "watts_per_area",
-                    "high_efficacy_fraction",
-                    "schedule_id",
-                    "return_air_fraction",
-                    "radiant_fraction",
-                    "visible_fraction"
-                  ],
+                  "required": [],
                   "properties": {
                     "rule": {
                       "type": [
@@ -59569,8 +59400,8 @@ Params:
                         "string",
                         "null"
                       ],
-                      "pattern": "^sch_[A-Za-z0-9]{12}$",
-                      "description": "A fractional Schedule."
+                      "minLength": 1,
+                      "description": "A Schedule, by its record id in the same library."
                     },
                     "return_air_fraction": {
                       "type": "number",
@@ -59600,13 +59431,7 @@ Params:
                 "electric_equipment": {
                   "type": "object",
                   "additionalProperties": false,
-                  "required": [
-                    "watts_per_area",
-                    "schedule_id",
-                    "radiant_fraction",
-                    "latent_fraction",
-                    "lost_fraction"
-                  ],
+                  "required": [],
                   "properties": {
                     "watts_per_area": {
                       "type": [
@@ -59621,8 +59446,8 @@ Params:
                         "string",
                         "null"
                       ],
-                      "pattern": "^sch_[A-Za-z0-9]{12}$",
-                      "description": "A fractional Schedule."
+                      "minLength": 1,
+                      "description": "A Schedule, by its record id in the same library."
                     },
                     "radiant_fraction": {
                       "type": "number",
@@ -59652,13 +59477,7 @@ Params:
                 "gas_equipment": {
                   "type": "object",
                   "additionalProperties": false,
-                  "required": [
-                    "watts_per_area",
-                    "schedule_id",
-                    "radiant_fraction",
-                    "latent_fraction",
-                    "lost_fraction"
-                  ],
+                  "required": [],
                   "properties": {
                     "watts_per_area": {
                       "type": [
@@ -59673,8 +59492,8 @@ Params:
                         "string",
                         "null"
                       ],
-                      "pattern": "^sch_[A-Za-z0-9]{12}$",
-                      "description": "A fractional Schedule."
+                      "minLength": 1,
+                      "description": "A Schedule, by its record id in the same library."
                     },
                     "radiant_fraction": {
                       "type": "number",
@@ -59704,14 +59523,7 @@ Params:
                 "service_hot_water": {
                   "type": "object",
                   "additionalProperties": false,
-                  "required": [
-                    "rule",
-                    "flow_per_area",
-                    "target_temperature_c",
-                    "schedule_id",
-                    "sensible_fraction",
-                    "latent_fraction"
-                  ],
+                  "required": [],
                   "properties": {
                     "rule": {
                       "type": [
@@ -59744,8 +59556,8 @@ Params:
                         "string",
                         "null"
                       ],
-                      "pattern": "^sch_[A-Za-z0-9]{12}$",
-                      "description": "A fractional Schedule."
+                      "minLength": 1,
+                      "description": "A Schedule, by its record id in the same library."
                     },
                     "sensible_fraction": {
                       "type": "number",
@@ -59769,10 +59581,7 @@ Params:
                 "infiltration": {
                   "type": "object",
                   "additionalProperties": false,
-                  "required": [
-                    "flow_per_exterior_area",
-                    "schedule_id"
-                  ],
+                  "required": [],
                   "properties": {
                     "flow_per_exterior_area": {
                       "type": [
@@ -59788,8 +59597,8 @@ Params:
                         "string",
                         "null"
                       ],
-                      "pattern": "^sch_[A-Za-z0-9]{12}$",
-                      "description": "A fractional Schedule."
+                      "minLength": 1,
+                      "description": "A Schedule, by its record id in the same library."
                     },
                     "source": {
                       "type": "string",
@@ -59801,13 +59610,7 @@ Params:
                 "ventilation": {
                   "type": "object",
                   "additionalProperties": false,
-                  "required": [
-                    "flow_per_person",
-                    "flow_per_area",
-                    "flow_per_zone",
-                    "air_changes_per_hour",
-                    "schedule_id"
-                  ],
+                  "required": [],
                   "properties": {
                     "flow_per_person": {
                       "type": [
@@ -59846,8 +59649,8 @@ Params:
                         "string",
                         "null"
                       ],
-                      "pattern": "^sch_[A-Za-z0-9]{12}$",
-                      "description": "A ventilation Schedule."
+                      "minLength": 1,
+                      "description": "A Schedule, by its record id in the same library."
                     },
                     "source": {
                       "type": "string",
@@ -59859,14 +59662,7 @@ Params:
                 "setpoint": {
                   "type": "object",
                   "additionalProperties": false,
-                  "required": [
-                    "heating_c",
-                    "cooling_c",
-                    "heating_schedule_id",
-                    "cooling_schedule_id",
-                    "dehumidify_rh",
-                    "humidify_rh"
-                  ],
+                  "required": [],
                   "properties": {
                     "heating_c": {
                       "type": [
@@ -59887,16 +59683,16 @@ Params:
                         "string",
                         "null"
                       ],
-                      "pattern": "^sch_[A-Za-z0-9]{12}$",
-                      "description": "A temperature Schedule, in place of heating_c."
+                      "minLength": 1,
+                      "description": "A Schedule, by its record id in the same library."
                     },
                     "cooling_schedule_id": {
                       "type": [
                         "string",
                         "null"
                       ],
-                      "pattern": "^sch_[A-Za-z0-9]{12}$",
-                      "description": "A temperature Schedule, in place of cooling_c."
+                      "minLength": 1,
+                      "description": "A Schedule, by its record id in the same library."
                     },
                     "dehumidify_rh": {
                       "type": [
@@ -76935,7 +76731,7 @@ Undo step: Edit Window Installations. Creates or edits installation products and
 
 Calls: `ph_composer.library.copy_into_proposal`.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `library.adapter_invalid`, `library.callback_invalid`, `library.catalog_stale`, `library.connection_changed`, `library.kind_unavailable`, `library.local_choice_required`, `library.model_changed`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.reauthorization_required`, `library.reload_required`, `library.review_required`, `library.row_semantic_invalid`, `library.row_unavailable`, `library.selection_changed`, `library.use_expired`, `operation.participant_cycle`, `operation.proposal_required`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `library.adapter_invalid`, `library.callback_invalid`, `library.catalog_stale`, `library.connection_changed`, `library.dependency_missing`, `library.kind_unavailable`, `library.local_choice_required`, `library.model_changed`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.reauthorization_required`, `library.reload_required`, `library.review_required`, `library.row_semantic_invalid`, `library.row_unavailable`, `library.selection_changed`, `library.use_expired`, `operation.participant_cycle`, `operation.proposal_required`, `proposal.contribution_replaced`, `proposal.foreign_write`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `action` common set.
 
 Params:
 
@@ -89849,7 +89645,7 @@ Write local definitions to a library file the user chooses in the native save di
 
 Needs the user: the panel or menu asks for a destination file first. Any other caller passes `location`, the id of a location the user approved, or is refused with `access.user_required`.
 
-Refuses: `export.replace_required`, `library.adapter_invalid`, `library.catalog_too_many_rows`, `library.destination_changed`, `library.destination_invalid`, `library.export_write_failed`, `library.file_malformed`, `library.file_too_large`, `library.format_invalid`, `library.kind_unavailable`, `library.schema_unsupported`, `library.update_destination_invalid`, `library.update_destination_required`, `record.unreadable`, `revision.stale`, `target.not_found`, and the `file_export` and `approval` and `location` common sets.
+Refuses: `export.replace_required`, `library.adapter_invalid`, `library.catalog_too_many_rows`, `library.dependency_missing`, `library.destination_changed`, `library.destination_invalid`, `library.export_write_failed`, `library.file_malformed`, `library.file_too_large`, `library.format_invalid`, `library.kind_unavailable`, `library.schema_unsupported`, `library.update_destination_invalid`, `library.update_destination_required`, `record.unreadable`, `revision.stale`, `target.not_found`, and the `file_export` and `approval` and `location` common sets.
 
 Params:
 
@@ -89882,7 +89678,7 @@ Params:
         "minLength": 1
       },
       "minItems": 1,
-      "description": "Limit the export to these library kinds, such as materials."
+      "description": "Limit the export to these library kinds, such as materials. A written row's dependencies, a Program's Schedules, are written too."
     },
     "records": {
       "type": "array",
@@ -90111,7 +89907,7 @@ Called by no client. An action of a feature that requires the owner names the pa
 
 Copy or reuse one library record, with optional assignment, inside the calling action's own proposal and Undo step. Owner: `ph_composer.library`.
 
-Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `library.adapter_invalid`, `library.callback_invalid`, `library.catalog_stale`, `library.connection_changed`, `library.kind_unavailable`, `library.local_choice_required`, `library.model_changed`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.reauthorization_required`, `library.reload_required`, `library.review_required`, `library.row_semantic_invalid`, `library.row_unavailable`, `library.selection_changed`, `library.use_expired`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `participant` common set.
+Refuses: `copy.rule_missing`, `extension.invalid`, `face.outside_envelope`, `geometry.invalid`, `identity.conflict`, `library.adapter_invalid`, `library.callback_invalid`, `library.catalog_stale`, `library.connection_changed`, `library.dependency_missing`, `library.kind_unavailable`, `library.local_choice_required`, `library.model_changed`, `library.provider_ambiguous`, `library.provider_failed`, `library.provider_invalid`, `library.provider_unavailable`, `library.reauthorization_required`, `library.reload_required`, `library.review_required`, `library.row_semantic_invalid`, `library.row_unavailable`, `library.selection_changed`, `library.use_expired`, `record.unreadable`, `reference.invalid`, `target.ambiguous`, `target.changed`, `target.locked`, `target.not_found`, `target.shared_definition`, `target.wrong_hierarchy`, `target.wrong_kind`, `target.wrong_zone`, `validation.failed`, `window.definition_editing`, `window.definition_missing`, `window.host_required`, `window.nested_units`, `window.overhang`, `window.overlap`, `window.surface_host`, `window.type_geometry_unknown`, and the `participant` common set.
 
 Params:
 
@@ -90188,7 +89984,8 @@ Result:
   "required": [
     "resolution",
     "local_id",
-    "assigned"
+    "assigned",
+    "dependencies"
   ],
   "properties": {
     "resolution": {
@@ -90336,6 +90133,38 @@ Result:
     },
     "assigned": {
       "type": "boolean"
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "record_id",
+          "local_id",
+          "outcome"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "record_id": {
+            "type": "string"
+          },
+          "local_id": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "created",
+              "reused"
+            ]
+          }
+        }
+      },
+      "description": "Each record of another kind the row names, copied or reused in the same Undo step; empty for keep_local and for a kind without dependencies."
     }
   }
 }
@@ -92149,3 +91978,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.77 | 2026-11-20 | A Space's airflow mode is its Zone's: by_program until any Space in the Zone has a rate, then detailed, when every Space exports its own rates with 0 for a blank. ph_composer.spaces.all and list add airflow_mode to each Zone row; all's Zone rows drop inheriting_count, and each building_segments row replaces inheriting_count with by_program_zone_count. A Space row's airflow_mode takes by_program or detailed (was inheriting or user_specified), a copy of its Zone's kept for this minor version; read the Zone row's. ph_composer.spaces.clear_zone_airflows is new: From Program, every Space's rates in the named Zones cleared in one Undo step. The Spaces export section moves to version 2, each record carrying airflow_mode, and its preflight adds space.zone_without_spaces, a warning that does not block. |
 | 1.78 | 2026-11-20 | ph_composer.programs is a new feature: the ph_composer.programs.airtightness extension on each Building Segment (basis n50 or q50, value or null, wind_exposure), saved through zones.save_segment_settings, read by ph_composer.programs.airtightness.get with its defaults, and exported to each Zone's Infiltration and the BldgSegment's wind exposure. Export refuses airtightness.no_net_volume and airtightness.no_exposed_face. The Spaces export section registers a projection of each Zone's net volume. |
 | 1.79 | 2026-11-20 | ph_composer.programs adds the Program, Schedule and Equipment Set record kinds with create, update, duplicate, delete, list and all reads; equipment_sets.add_device, update_device, delete_device and device_types; schedules.profile; settings.get and settings.update for the Model's default Program and Equipment Set; and reset_default. Reads answer PH-Composer's residential default Program, its Schedules and the default Equipment Set until a write stores them. Deleting a default without a replacement refuses programs.default_in_use. |
+| 1.80 | 2026-11-20 | The programs, schedules and equipment_sets library kinds: ph_composer.library.copy copies a library Program with every Schedule it names, reusing a local copy of each from the same source, in one Undo step, and a Program or Equipment Set copy may assign itself as the Model's default (mode model_default). A library kind may declare dependencies, which describe names; copy answers dependencies, each record of another kind it copied or reused, and refuses library.dependency_missing when the loaded catalog of that kind does not hold one. Library export writes each dependency of a written row, whatever kinds or records select, and refuses library.dependency_missing for one it cannot write; its omissions list a declared part's map the file leaves out as <path>.user_data, such as devices[].user_data. |

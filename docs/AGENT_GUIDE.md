@@ -425,6 +425,16 @@ total 24, each with a fraction of the design flow. An Equipment Set holds honeyb
    a `replacement_id`, which becomes the default; a used Schedule refuses `reference.in_use` unless you name a
    replacement of the same type. `ph_composer.programs.reset_default` with `kind` `program` or `equipment_set`
    restores PH-Composer's definition.
+6. To use a library Program, load both its `programs` and its `schedules` kinds with `ph_composer.library.load`,
+   then copy the Program as "Library records" below says. The copy brings every Schedule the Program names in
+   the same Undo step, or reuses the local copy of one from the same library, and lists each under
+   `dependencies` with its `local_id`. Send `assignment` `{"mode": "model_default", "expected_settings": ...}`,
+   with the defaults `settings.get` answered, to make the copy the Model's default in that step; an Equipment Set
+   copies and assigns the same way. A Schedule missing from the loaded catalog refuses `library.dependency_missing`
+   and writes nothing; its `detail` names the kind and record id, and `catalog_state` `unloaded` means load that
+   kind first. A local Schedule with the same name and other values refuses `library.review_required`: either
+   copy that Schedule on its own with `use_library`, which gives the local one the library's values and source,
+   or rename the local one; then copy the Program again. `keep_local` does not resolve it.
 
 ### Spaces from loose Faces
 
@@ -817,7 +827,8 @@ with the ids and the values you read, as the copy's `assignment`; where a target
 shape, its `description` says which keys each takes. Preview the copy, then invoke it with the
 `proposal_digest`: the copy and the assignment are one Undo step, and a target that is wrong or
 changed since you read it refuses both. A kind whose `assignment` says it is not supported is copied
-without one.
+without one. A kind whose `describe` names `dependencies` refers to records of those kinds: load them too,
+and the copy brings each one with it (see "Programs, Schedules and Equipment Sets").
 
 A catalog can be larger than a reply. Pass `compact` true to `ph_composer.library.load`,
 `ph_composer.library.catalog` and `ph_composer.library.in_file`:
@@ -849,6 +860,8 @@ what it leaves out (`omissions`), its `projection_digest` and, with an approved 
 `scope`, `kinds` and `records` and the `projection_digest` pages them, refused as `revision.stale`
 once the projection is no longer that one. Read every omission of an all-scope export before you
 replace a file with it; choosing fewer records is a different export, not a way round a long list.
+A Program exports with every Schedule it names, even when `kinds` or `records` leave them out, and
+one that cannot be written refuses `library.dependency_missing`.
 `ph_composer.library.export_file` (an `export_file` tool call with the location) replaces an
 existing file only with `replace`, the reported `state` as `expected_destination` and the
 `projection_digest`; a destination that changed since is refused as `library.destination_changed`.

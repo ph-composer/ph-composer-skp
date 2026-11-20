@@ -19,7 +19,10 @@ module PhComposer
 
       # ---------------------------------------------------------------- reads
 
-      def find(kind_id, id)
+      # `change_set`, accepted so an owner's operation reads the same way under either engine, must be the one
+      # this projection reads through.
+      def find(kind_id, id, change_set: nil)
+        same_change_set!(change_set)
         @engine.find(kind_id, id, :change_set => @change_set)
       end
 
@@ -36,7 +39,8 @@ module PhComposer
         @engine.view(kind_id, record)
       end
 
-      def resolve_reference(kind_id, id, reference_plan: nil)
+      def resolve_reference(kind_id, id, reference_plan: nil, change_set: nil)
+        same_change_set!(change_set)
         @engine.resolve_reference(kind_id, id, :reference_plan => reference_plan, :change_set => @change_set)
       end
 
@@ -97,6 +101,12 @@ module PhComposer
       end
 
       private
+
+      def same_change_set!(change_set)
+        return if change_set.nil? || change_set.equal?(@change_set)
+
+        raise InternalError, "A projection reads only through its own change set."
+      end
 
       def writable!(kind_id, change_set)
         return if @change_set && change_set.equal?(@change_set) && @writable_kinds.include?(kind_id)

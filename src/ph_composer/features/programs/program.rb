@@ -129,8 +129,20 @@ module PhComposer
                         "cooling_schedule_id" => nil, "dehumidify_rh" => nil, "humidify_rh" => nil }
       }.freeze
 
-      FIELDS = KindFields.with(SECTIONS.map { |name, schema| Fields.field(name, schema, :required => true) })
-      SNAPSHOT_SCHEMA = Fields.source_snapshot_schema(FIELDS)
+      # A library file's form of each load (docs/LIBRARY_FILE_FORMAT.md): every value optional, as a library row
+      # may leave one to its default, and each Schedule named by its record id in the same library.
+      LIBRARY_SECTIONS = SECTIONS.to_h do |name, schema|
+        properties = schema.fetch("properties").to_h do |key, field|
+          reference = SLOTS.key?("#{name}.#{key}")
+          [key, reference ? { "type" => %w[string null], "minLength" => 1,
+                              "description" => "A Schedule, by its record id in the same library." } : field]
+        end
+        [name, SchemaShapes.object(properties, :optional => properties.keys)]
+      end.freeze
+
+      FIELDS = KindFields.with(SECTIONS.map { |name, schema| Fields.field(name, schema, :required => true) },
+                               LIBRARY_SECTIONS)
+      SNAPSHOT_SCHEMA = FIELDS.find { |field| field.key == "source" }.schema.dig("properties", "snapshot")
 
       module_function
 
@@ -172,10 +184,19 @@ module PhComposer
     # An Equipment Set: honeybee-ph PhEquipment devices, each a part with its own `user_data`,
     # laid out by its type (EquipmentTypes). A Set is assigned to a Dwelling or to a Zone that is not a dwelling.
     module EquipmentSet
+      # A library file's device: no id, which each copy allocates, and no user_data; every value but the type
+      # optional, the type's defaults filling the rest (docs/LIBRARY_FILE_FORMAT.md).
+      LIBRARY_DEVICE = EquipmentTypes::DEVICE.fetch("properties").reject { |key, _| %w[id user_data].include?(key) }
+                                             .then { |properties|
+        SchemaShapes.object(properties,
+                            :optional => properties.keys -
+                                                                ["type"])
+      }
+                                             .freeze
       FIELDS = KindFields.with([
         Fields.field("devices", { "type" => "array", "items" => EquipmentTypes::DEVICE }, :required => true)
-      ])
-      SNAPSHOT_SCHEMA = Fields.source_snapshot_schema(FIELDS)
+      ], "devices" => { "type" => "array", "items" => LIBRARY_DEVICE })
+      SNAPSHOT_SCHEMA = FIELDS.find { |field| field.key == "source" }.schema.dig("properties", "snapshot")
       PARTS = [Records::Part.new(:label => "Device", :path => "devices[]")].freeze
 
       module_function

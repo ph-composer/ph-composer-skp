@@ -117,7 +117,7 @@ class AgentAccessDiscoveryTest < PhComposerTestCase
     tags = rows.find { |row| row.fetch("wire_kind") == "tags" }
     described = @executor.call(@reader, "describe", "name" => tags.fetch("name")).fetch("structuredContent")
 
-    assert_equal 5, rows.length
+    assert_equal 8, rows.length
     assert_equal true, tags.fetch("assignment_supported")
     assert_equal({ "type" => "object", "required" => ["id"], "properties" => { "id" => { "type" => "string" } } },
                  described.dig("assignment", "target").slice("type", "required", "properties"))

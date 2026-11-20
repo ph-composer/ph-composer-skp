@@ -1,36 +1,52 @@
 # frozen_string_literal: true
 
 require_relative "callback_invoker"
+require_relative "dependencies"
 require_relative "resolver"
 require_relative "state"
 
 module PhComposer
   module Library
     # Review resolves detached values. Explicit choices call only the record owner's registered
-    # callbacks, with copy and assignment sharing the dispatcher's single guarded proposal.
+    # callbacks, with copy and assignment sharing the dispatcher's single guarded proposal. A row that names
+    # records of other kinds (Dependencies) has each copied or reused first, in the same proposal.
     module Coordinator
       # What a copy reviews: the kind's declaration, the catalog entry and row, the row mapped to local
-      # values, its source identity, and how it resolves against the local records.
+      # values, its source identity, and how it resolves against the local records. `mapped` keeps the row's
+      # own record ids for its dependencies; the resolution compares it in local terms.
       Review = Struct.new(:declaration, :entry, :row, :mapped, :source, :resolution, keyword_init: true)
       FINGERPRINT = /\A[0-9a-f]{64}\z/.freeze
 
       module_function
 
       def inspect_row(request)
-        declaration, entry, row = selected(request)
-        mapped = map(declaration.adapter, row.fetch("snapshot"))
-        source = source_identity(provider(request), row, request.params.fetch("kind"))
-        locals = CallbackInvoker.call(request, declaration, declaration.adapter.local_read, {}, :readonly => true)
+        review(request, *selected(request))
+      end
+
+      # The Review of one catalog row of `declaration`'s kind, read from `entry`.
+      def review(request, declaration, entry, row)
+        adapter = declaration.adapter
+        mapped = map(adapter, row.fetch("snapshot"))
+        source = source_identity(provider(request), row, adapter.wire_kind)
         Review.new(:declaration => declaration, :entry => entry, :row => row, :mapped => mapped, :source => source,
-                   :resolution => resolve(declaration.adapter, source, mapped, locals))
+                   :resolution => resolution(request, declaration, source, mapped))
+      end
+
+      # How `mapped`, the row `source` names, resolves against the local records of its kind.
+      def resolution(request, declaration, source, mapped)
+        adapter = declaration.adapter
+        locals = CallbackInvoker.call(request, declaration, adapter.local_read, {}, :readonly => true)
+        resolve(adapter, source, Dependencies.in_local_terms(request, source, adapter, mapped), locals,
+                :fingerprint_of => mapped)
       end
 
       # Compare incoming semantic content with the stored attribution, not with local edits.
-      # An older fingerprint contract cannot establish whether the provider changed.
-      def resolve(adapter, source, mapped, locals)
+      # An older fingerprint contract cannot establish whether the provider changed. The fingerprint is the
+      # row's own (`fingerprint_of`), as its attribution stores it, when `mapped` is in local terms.
+      def resolve(adapter, source, mapped, locals, fingerprint_of: mapped)
         result = Resolver.resolve(:source => source, :mapped => mapped, :label => label(adapter, mapped),
                                   :locals => locals.map { |row| labelled(adapter, row) })
-        fingerprint = semantic_fingerprint(adapter, mapped)
+        fingerprint = semantic_fingerprint(adapter, fingerprint_of)
         result.fetch("candidates").each do |candidate|
           attribution = locals.find { |row| row.fetch("id") == candidate.fetch("id") }["source"]
           compatible = attribution.is_a?(Hash) && attribution["kind"] == "library" &&
@@ -59,7 +75,7 @@ module PhComposer
         declaration = review.declaration
         resolution = review.resolution
         choice = request.params.fetch("choice")
-        result = { "resolution" => resolution, "local_id" => nil, "assigned" => false }
+        result = { "resolution" => resolution, "local_id" => nil, "assigned" => false, "dependencies" => [] }
         id = local_id(request.params["local_id"], resolution)
         use = nil
         case choice
@@ -69,9 +85,9 @@ module PhComposer
           end
 
           use = authorize_use(request, review)
+          values, result["dependencies"] = copy_dependencies(request, proposal, review)
           value = CallbackInvoker.call(request, declaration, declaration.adapter.create,
-                                       { "values" => review.mapped.merge("source" => attribution(request, review,
-                                                                                                 use)) })
+                                       { "values" => values.merge("source" => attribution(request, review, use)) })
           id = value.fetch("id")
         when "keep_local"
           raise Error.new("library.local_choice_required", "Choose an existing local record.") unless id
@@ -84,9 +100,9 @@ module PhComposer
           end
 
           use = authorize_use(request, review)
+          values, result["dependencies"] = copy_dependencies(request, proposal, review)
           CallbackInvoker.call(request, declaration, declaration.adapter.replace,
-                               { "id" => id, "values" => review.mapped.merge("source" => attribution(request, review,
-                                                                                                     use)),
+                               { "id" => id, "values" => values.merge("source" => attribution(request, review, use)),
                                  "expected_values" => expected })
         else
           raise Error.new("params.invalid", "Choose an explicit library copy action.")
@@ -98,6 +114,73 @@ module PhComposer
       rescue StandardError => error
         proposal.refuse(error)
         raise
+      end
+
+      # [`review`'s values in local terms, a report of each dependency]: every record the row names copied from
+      # the same library first, or its local copy from that source reused, each once (`copying`, by kind and
+      # record id). A record the loaded catalog does not hold refuses the copy, and so does one whose name a
+      # local record of other values already holds, until that record is resolved by its own copy.
+      def copy_dependencies(request, proposal, review, copying = {})
+        adapter = review.declaration.adapter
+        ids = {}
+        reports = Dependencies.targets(adapter, review.mapped).flat_map do |target|
+          local_id, rows = copy_dependency(request, proposal, review, target, copying)
+          (ids[target.fetch("kind")] ||= {})[target.fetch("id")] = local_id
+          rows
+        end
+        [Dependencies.remap(adapter, review.mapped, ids), reports]
+      end
+
+      def copy_dependency(request, proposal, referrer, target, copying)
+        key = target.values_at("kind", "id")
+        if copying.key?(key)
+          raise Error.new("library.adapter_invalid", "Library dependencies refer to each other.") unless copying[key]
+
+          return [copying[key], []]
+        end
+
+        copying[key] = nil
+        review = dependency_review(request, referrer, target)
+        resolution = review.resolution
+        case resolution.fetch("outcome")
+        when "reuse"
+          id = resolution.fetch("candidates").first.fetch("id")
+          reports = [Dependencies.report(target, id, "reused")]
+        when "create"
+          use = authorize_use(request, review)
+          values, reports = copy_dependencies(request, proposal, review, copying)
+          id = CallbackInvoker.call(request, review.declaration, review.declaration.adapter.create,
+                                    { "values" => values.merge("source" => attribution(request, review, use)) })
+                              .fetch("id")
+          hold_until_commit(use, proposal)
+          reports += [Dependencies.report(target, id, "created")]
+        else
+          raise Error.new("library.review_required", "#{review.row.fetch('display_label')} (#{target.fetch('kind')}) " \
+                                                     "needs review: replace the local one from the library, or " \
+                                                     "rename it.",
+                          target.merge("outcome" => resolution.fetch("outcome")))
+        end
+        copying[key] = id
+        [id, reports]
+      end
+
+      # The Review of a dependency's row, in the current catalog of its kind from the referrer's library.
+      def dependency_review(request, referrer, target)
+        kind = target.fetch("kind")
+        library_id = referrer.row.fetch("library_id")
+        entry = State.for(request.session).fetch(request.params.fetch("provider_id"), kind, request.registry)
+        rows = entry.fetch("rows").select do |row|
+          row.fetch("library_id") == library_id && row.fetch("record_id") == target.fetch("id")
+        end
+        unless rows.length == 1
+          raise Error.new("library.dependency_missing",
+                          "#{referrer.row.fetch('display_label')} names #{kind} #{target.fetch('id')}, which the " \
+                          "loaded #{kind} catalog of its library does not hold. Load #{kind}, or correct the file.",
+                          { "kind" => kind, "library_id" => library_id, "record_id" => target.fetch("id"),
+                            "catalog_state" => entry.fetch("state") })
+        end
+
+        review(request, State.kind(kind, request.registry), entry, rows.first)
       end
 
       # A version 2 source's use check (Connection::Use) before any write is staged; nil for version 1.
@@ -212,6 +295,7 @@ module PhComposer
         raise Error.new("library.adapter_invalid", "The kind adapter returned invalid mapped values.")
       end
       private_class_method :reviewed_values?, :authorize_use, :hold_until_commit, :assign, :selected, :provider,
+                           :copy_dependencies, :copy_dependency, :dependency_review,
                            :semantic_fingerprint, :attribution, :local_id, :validate!
     end
   end

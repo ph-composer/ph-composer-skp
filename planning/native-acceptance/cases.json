@@ -5250,6 +5250,22 @@
         "tools/examples/authoring/client.rb"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "PG07b",
+      "label": "Program, Schedule and Equipment Set library kinds on the installed RBZ with the panel closed, in a fresh synthetic Model: the Program library walkthrough loads tools/examples/library/programs.json, copies the library Program with its two Schedules as the Model's default in one step and copies it again, reusing them; native Undo and Redo of the copy from the Edit menu",
+      "mode": "mixed",
+      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/library/coordinator.rb",
+        "src/ph_composer/library/dependencies.rb",
+        "src/ph_composer/features/programs/library_kinds.rb",
+        "src/ph_composer/features/programs/program.rb",
+        "src/ph_composer/features/programs/operations.rb",
+        "tools/examples/library/programs_walkthrough.rb",
+        "tools/examples/library/programs.json"
+      ],
+      "native_control_required": true
     }
   ]
 }

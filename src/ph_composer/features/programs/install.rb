@@ -22,6 +22,7 @@
 #   operations.rb       create, edit, duplicate, delete, devices, reset and the defaults update
 #   inventory.rb        the list and all reads, with what uses each record
 #   declarations.rb     the actions, queries and codes
+#   library_kinds.rb    the programs, schedules and equipment_sets library kinds; a Program copies with its Schedules
 #
 # The panel half is html/features/programs/airtightness.js.
 module PhComposer
@@ -42,6 +43,7 @@ require_relative "store"
 require_relative "operations"
 require_relative "inventory"
 require_relative "declarations"
+require_relative "library_kinds"
 
 module PhComposer
   module Programs
@@ -90,6 +92,7 @@ module PhComposer
       [Schedule::KIND, Program::KIND, EquipmentSet::KIND].each { |kind| feature.record_kind(kind) }
       Settings.install(feature)
       Declarations.install(feature)
+      LibraryKinds.install(feature)
     end
   end
 end
