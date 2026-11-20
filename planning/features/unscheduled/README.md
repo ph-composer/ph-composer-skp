@@ -18,4 +18,4 @@ requests. A packet moves into a phase directory when it is scheduled.
 | [zones-entry-points](zones-entry-points/README.md) | feature | Requested |
 | [panel-keyboard-focus](panel-keyboard-focus/README.md) | feature | Requested |
 | [ph-composer-standards](ph-composer-standards/README.md) | workflow | Scoped 2026-11-15: PRD and stages S1 to S4; repository needs Ed's go |
-| [zone-shading](zone-shading.md) | feature | Requested; brief only (2026-11-15) |
+| [zone-shading](zone-shading.md) | feature | Requested; brief only (2026-11-15); SH-3 and SH-4 closed by Phase 5 (2026-11-19) |

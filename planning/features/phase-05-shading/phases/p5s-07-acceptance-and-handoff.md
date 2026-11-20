@@ -1,7 +1,7 @@
 # P5s-07: acceptance and handoff
 
 DATE: 2026-11-19
-STATUS: Scoped. Authorized 2026-11-19 with every Shading stage ([STATUS](../STATUS.md#authorization)).
+STATUS: Implemented on branch; SD07 owed to the batched host pass and Ed's check of the two files. Authorized 2026-11-19 with every Shading stage ([STATUS](../STATUS.md#authorization)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 

@@ -507,6 +507,30 @@ class ZoneRepairTest < PhComposerTestCase
     assert_equal %w[found found], zone_states
   end
 
+  # A member Face outside the envelope (it carries the shading mark) is still a member: identity repair
+  # gives it the copy's new id like every other member Face.
+  def test_repair_restamps_a_member_face_outside_the_envelope
+    _original, copy = copied_zone
+    excluded = copy.entities.to_a.first
+    PhComposer::Shading::Mark.write(excluded)
+
+    result = invoke("ph_composer.zones.repair_identity", { "zone_path" => [copy.persistent_id] })
+
+    assert_equal %w[completed committed], result.values_at("status", "effect")
+    assert_equal ZONE_STORE.read(copy).fetch("id"), STAMP_STORE.read(excluded).fetch("zone_id")
+  end
+
+  def test_make_independent_restamps_a_member_face_outside_the_envelope
+    original, copy = shared_copy(760)
+    PhComposer::Shading::Mark.write(original.entities.to_a.first)
+
+    result = invoke(MAKE_INDEPENDENT, { "zone_path" => [copy.persistent_id] })
+
+    assert_equal %w[completed committed], result.values_at("status", "effect")
+    excluded = copy.entities.to_a.find { |face| PhComposer::Shading::Mark.marked?(face) }
+    assert_equal ZONE_STORE.read(copy).fetch("id"), STAMP_STORE.read(excluded).fetch("zone_id")
+  end
+
   def test_make_independent_refuses_what_it_cannot_isolate_and_says_what_to_do
     unique = box_group(740, 2)
     @model.entities << unique

@@ -875,7 +875,7 @@ The following public operations have panel-closed walkthroughs.
   repair over every copy first, and says so in its `side_effects`.
   [Walkthrough](../tools/examples/authoring/windows_walkthrough.rb),
   [placement](../tools/examples/authoring/windows_placement_walkthrough.rb).
-- **Shading** (`ph_composer.shading.*`, API 1.69, preflight 1.70, export 1.71). Reads: `selection`, the selected
+- **Shading** (`ph_composer.shading.*`, API 1.69, preflight 1.70, export 1.71, both preflight notes 1.72). Reads: `selection`, the selected
   Faces, Groups and components under the active path as root-path references with what `assign` and `clear`
   would do to each, `list`, every mark and each shading component with its Face count and world area, and
   `export_preflight`, the Shades section's checks: the `shading.zone_inside` and `shading.classified_inside`

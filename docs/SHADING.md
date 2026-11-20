@@ -51,6 +51,21 @@ its Face count and area in the Model's display units. A Face hidden by a tag sto
 still counts in the legend. A component placed with a scale that flattens it shows in amber with no
 area.
 
+## Export
+
+Every export writes each shading surface as a honeybee Shade on the Model, outside every Room: one
+Shade per Face and per placement, so a component placed three times gives three Shades, each with
+its shading component's name. Converted to WUFI-Passive XML and METr JSON, each name becomes one
+shading component in every Building Segment's file. Shading is opaque: no transmittance,
+reflectance or schedule is stored or written. A Face with a hole is written with its hole.
+
+Shading does not stop an export for its own reasons. A Face with no area is left out, and the
+Export tab and the report name it with its path. Two things still stop it, as they do for any
+object: a tag whose `extension_data` breaks the metadata rules, and a Face placed with a scale that
+flattens it. A tagged Group above a Zone does not reach the Zone's Faces, and a Face classified
+after its Group was tagged stays part of the envelope; the Export tab names both cases. The
+report's Shading section lists each shading component with its Face count and area.
+
 ## Scripts and agents
 
 Set as Shading and Clear Shading call the same actions a script or a connected agent uses:

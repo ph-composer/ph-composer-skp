@@ -1,7 +1,7 @@
 # Phase 5: shading
 
 DATE: 2026-11-19
-STATUS: Scoped. PRD, decisions, contracts, plan, acceptance and stages P5s-01 to P5s-07 written 2026-11-19; every stage authorized by Ed 2026-11-19 ([STATUS](STATUS.md#authorization)).
+STATUS: In progress. Every stage authorized by Ed 2026-11-19; P5s-01 to P5s-06 merged, P5s-07 implemented; host acceptance SD01 to SD07 and Ed's check of the two files outstanding ([STATUS](STATUS.md)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 

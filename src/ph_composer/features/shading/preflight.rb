@@ -45,13 +45,15 @@ module PhComposer
         { "findings" => findings, "repairs" => [] }
       end
 
+      # A container can take both notes: a cutting component or a Zone below it does not hide the classified
+      # Faces beside them, which the mark would otherwise reach.
       def container_findings(entity, path, zones)
         what = held(entity, path, zones)
-        return [zone_inside(entity, path, what)] if what
-
-        reaches = Targets.in_zone?(path, zones) && !Targets.cutting?(entity) && !Targets.owned?(entity)
+        rows = what ? [zone_inside(entity, path, what)] : []
+        reaches = Targets.in_zone?(path, zones) && !Targets.cutting?(entity) && !Targets.owned?(entity) &&
+                  !Zones::Occurrences.zone_record?(entity)
         count = reaches ? Targets.classified_within(Targets.contents(entity).to_a) : 0
-        count.positive? ? [classified_inside(entity, path, count)] : []
+        count.positive? ? rows << classified_inside(entity, path, count) : rows
       end
 
       # The section's left-out notes, read live: two Shading Faces at one path, or one whose geometry cannot

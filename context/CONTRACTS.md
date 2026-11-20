@@ -781,7 +781,8 @@ feature. Zones reads them at every call site
 every export reads it. Its notes: `shading.zone_inside` names each marked Group or component that is a Zone,
 holds one, holds a claimed object or holds a cutting component such as a Window Unit, which the mark does not
 reach; `shading.classified_inside` names each marked Group or component inside a Zone that holds classified
-Faces, which stay envelope (assign refuses such a Group with `shading.face_classified`, naming the count);
+Faces, which stay envelope (assign refuses such a Group with `shading.face_classified`, naming the count), and
+a container that also holds a Zone, a claimed object or a cutting component takes both notes;
 `shading.geometry_invalid` and `target.ambiguous` name a Shading Face the section leaves out; and
 `record.unreadable` names a mark whose text is not a JSON object with object metadata maps; any metadata map it
 holds that is an object is still read, so a required envelope beside a malformed `user_data` still refuses. A

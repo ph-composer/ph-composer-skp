@@ -414,6 +414,17 @@ class ZonesEnvelopeExclusionTest < PhComposerTestCase
     assert_equal [[1000, 1020, 1021]], cleared.dig("value", "unchanged").map { |row| row.fetch("entity_path") }
   end
 
+  # A cutting component beside the classified Face does not hide it: the Group takes both notes.
+  def test_a_marked_group_holding_a_cutting_component_and_a_classified_face_takes_both_notes
+    assert_equal "completed", shading("assign", [[1000, 1020]])["status"]
+    FACE_STORE.write(@fin_face, FACE_STORE.read(face_at(@zone_a, 1002)).merge("id" => "fac_F00000000004"))
+    cutting = Sketchup::ComponentDefinition.new(Sketchup::Entities.new([Sketchup::Face.new(1031)]))
+    cutting.behavior.cuts_opening = true
+    @fin.entities << Sketchup::ComponentInstance.new(1030, cutting)
+    findings = query("ph_composer.shading.export_preflight").dig("value", "findings")
+    assert_equal %w[shading.classified_inside shading.zone_inside], findings.map { |row| row.fetch("code") }.sort
+  end
+
   def test_clear_classification_refuses_a_surface_pair_an_aperture_host_and_an_excluded_face
     invoke("ph_composer.zones.solve_adjacency", "zones" => [zone_reference(@zone_a), zone_reference(@zone_b)])
     surface = face_at(@zone_a, 1004)

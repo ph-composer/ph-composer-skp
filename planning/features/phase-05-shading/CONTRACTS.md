@@ -109,8 +109,11 @@ funnel C refuses with a new Zones code, `face.outside_envelope`, not `target.wro
 Zones code that does not say why); the check applies to Face leaves only, so `resolve_element` and
 `containment` keep reading an Edge's Zone. The stamp writer and Zone copy repair walk every member Face (`Occurrences.member_faces`), excluded or not, so a Face rejoins its Zone intact when the mark is cleared. Restore offers stay exempt: tagging writes nothing to Zones'
 stamp, and a Face stamped before it was tagged is offered with its Zone and stays shading by its own mark.
-Assign takes a Group inside a Zone that holds classified Faces, so an excluded Face can keep a Face record:
-it stays in the Model, leaves the export, and its Surface partner is omitted as `adjacency.unresolved`.
+Assign refuses a Group inside a Zone that holds classified Faces (`shading.face_classified`, D5s-11a), and a Face
+classified after the Group above it was marked stays envelope: classification wins over an inherited mark. A
+classified Face leaves the envelope only through an excluding mark on the Face itself, which no Shading
+operation writes on a classified Face: its record stays in the Model, it leaves the export, and its Surface
+partner is omitted as `adjacency.unresolved`.
 Clear classification is `ph_composer.zones.faces.clear_classification`, an operation only; no menu item.
 
 ### Which Faces a Zone owns (question 2)

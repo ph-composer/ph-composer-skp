@@ -18,7 +18,7 @@ module PhComposer
   # never live SketchUp objects.
   module API
     MAJOR = 1
-    MINOR = 71
+    MINOR = 72
     # One line per shape change under this major, newest last (context/CONTRACTS.md, "Public
     # interface"); the generated reference lists them.
     CHANGES = [
@@ -401,7 +401,11 @@ module PhComposer
                     "leaves out (shading.geometry_invalid, target.ambiguous), unreadable marks (record.unreadable) " \
                     "and a mark's extension data the left-out rules refuse; every row names its path and carries the " \
                     "object id the export's note uses. A shading component name that reads as a local file path " \
-                    "counts as no name." }
+                    "counts as no name." },
+      { "minor" => 72, "date" => "2026-11-19",
+        "change" => "ph_composer.shading.export_preflight gives a marked Group or component inside a Zone both " \
+                    "shading.zone_inside and shading.classified_inside when it holds a Zone, a claimed object or a " \
+                    "cutting component beside classified Faces; before, the first note hid the second." }
     ].freeze
     # A mutation's `request` envelope.
     REQUEST_SCHEMA = {

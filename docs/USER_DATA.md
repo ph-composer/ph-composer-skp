@@ -70,10 +70,11 @@ from the record down. "Omitted" means the map stays in the Model and the export 
 | Space Floor | the Volume row's `floor.reference` | `ph_composer.spaces.volumes.list` with `fields` naming `floor` | `ph_composer.spaces.update_metadata` | Travels with its Volume | Its SpaceFloor | Not a library kind |
 | Thermal Bridge Type | `{kind: "ph_composer.thermal_bridges.type", id}` | `ph_composer.thermal_bridges.types.list`, `ph_composer.records.list` | Core action; create takes `user_data` | Duplicate copies the map | Omitted | Not a library kind |
 | Thermal Bridge Edge | the Edge row's `reference` | `ph_composer.thermal_bridges.edges.selection`, `selection_all`, `at`, `candidates`, `edges.detail` | Owner action, once the Edge has an assignment | A split or copied Edge keeps a copy on each piece, written separately by path; reassigning keeps it; repair removes it and lists its keys | Omitted, since a run joins several Edges | Not a library kind |
+| Shading mark | The marked entity's `entity_path` from the Model root; the mark has no id | Not returned: `ph_composer.shading.list` names marked entities without their maps | No action writes it: Set as Shading and `ph_composer.shading.assign` write the mark without a map, and an entity already marked is left unchanged | Copy, paste, cut and Make Unique carry the mark and its map with the entity; Intersect Faces gives each half a copy; Explode of a marked Group removes it | Omitted: each Shading Face is written as a Shade, and the map stays in the Model | Not a library kind |
 | Climate | `{kind: "ph_composer.climate.climate", id: "clm_AAAAAAAAAAAA"}`, one per Model | `ph_composer.records.detail`, `ph_composer.records.list` | Core action | Editing and restoring the values keep it, and so does replacing the station; Clear deletes it with the climate, and Undo brings it back | Omitted: the climate is written as the Building Segments' `Site`, and its map stays in the Model | Not a library kind |
 
-Definitions and Attached zones are records stored in the Model. Zones, Faces, Window Units, Spaces
-and Thermal Bridge Edge assignments are stored on their SketchUp entities, so a copy made in
+Definitions and Attached zones are records stored in the Model. Zones, Faces, Window Units, Spaces,
+Thermal Bridge Edge assignments and shading marks are stored on their SketchUp entities, so a copy made in
 SketchUp carries the map with the entity. The Model's map is stored in the Model's own settings.
 
 Zones, Faces, Spaces and Thermal Bridge Edges take no `user_data` when you create them. Create the
