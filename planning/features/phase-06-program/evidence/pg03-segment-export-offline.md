@@ -36,7 +36,39 @@ which the duplicate question needs.
 | The Site section's Segment count matches the reloaded Model | Pass | `building_segments` 1, one Segment in the reloaded HBJSON (`test_segment_phx_round_trip.py`) |
 | WUFI XML and METr JSON from the pinned PHX, the Attached zone read back | Pass | One Variant, House. WUFI XML: Zones House (`KindZone` 1) and ADU (`KindZone` 2, `KindAttachedZone` 1, `TemperatureReductionFactorUserDefined` 0.95); the wall component facing it has `OuterAttachment` = ADU's `IdentNr`. METr JSON: `lZone` House (`typeZ` 1) and ADU (`typeZ` 2); 24 m² of wall with `idEC` = ADU's id |
 | The per-Room duplicate | **Disproved** for the default conversion: `convert_hb_model_to_PhxProject` merges a Segment's Rooms (`cleanup.merge_rooms`) before `create_attached_zones_from_hb_room` runs once on the merged Room, which keys by boundary identifier. One Attached zone named by two Rooms reaches WUFI and METr once |
-| The packaged RBZ exports both reference models | Owed | Batched sitting |
+| The packaged RBZ exports both reference models | Owed | Batched sitting, case `PG03` in the case ledger. The stage's one launch (below) reached no bridge |
+
+## Host attempt
+
+One launch on PR #541 head `10766bee`, as the stage brief allows: `make install` (RBZ verified, 26,203,710
+bytes installed), `make bridge-install`, then `host_bridge.py launch` on a fresh copy of the blank
+synthetic template. No bridge within 180 s: SketchUp activated once at 25 s, and no bridge state file was
+ever written, so the extension and the bridge plugin never loaded. Readable without computer use:
+System Events listed the SketchUp process as visible, not frontmost, with **no windows**; there was no
+SketchUp crash report; the entitlement log's last check read `NO_ERROR` with a current subscription, so a
+licence prompt is unlikely. `host_bridge.py diagnostics` answered "host bridge is not running (no live
+state file)". `host_bridge.py quit` killed SketchUp after 30 s; no SketchUp process remains. This is the
+same failure as the P4a-02 stage's launch, so the cause is the host session and not this build. A window
+on another display or a launch-time sheet would fit; checking it needs the screen, which belongs to the
+batched sitting. Raw output stays in `_private/host/pg03-20261120/`.
+
+## Review
+
+Codex (gpt-6.1-sol), two cycles. Cycle 1 on `3499bec1` gave 3 findings, all fixed in `ec4dac88`:
+- the checked Solve repair re-paired the Attached zone Faces, so it is now unchecked while a Zone is left out;
+- Spaces were validated before they were left out;
+- metadata was read inside a left-out Zone.
+
+Cycle 2 on `ec4dac88` gave 5 inline findings and 1 general finding. Fixed in `10766bee`, after the cap, so
+that commit is unreviewed:
+- Attached zone envelopes now pass whole;
+- left-out Units are set aside before identities;
+- stray Spaces records inside a left-out Zone no longer block;
+- moving a Zone into a New Building Segment now shows the notice.
+
+Two were declined as follow-ups:
+- a Space identity shared across the boundary still blocks;
+- the metadata of a Space drawn outside its Zone Group, in a left-out Zone, is still checked.
 
 ## Limits found
 
