@@ -887,9 +887,13 @@ Definition names are presentation.
 ### Reading shading from another feature
 
 A feature never reads Shading's `ph_composer.shading` dictionary. A feature that walks a Zone's Faces itself
-reads `Records::EntityStore.envelope_excluded?` (live) or `envelope_excluded_entries?` (snapshot), as
-Spaces' candidate Faces do, so a Shading Face is never one of its Zone's Faces and the check names no feature
-("The shading mark"; context/EXTENSIBILITY.md, the claims and envelope exclusion paragraphs). A feature that
+reads Zones' classification-aware test, `Zones::Occurrences.envelope_excluded?(inside)` (live, as Spaces'
+candidate Faces do) or `Zones::ExportProjection.outside_envelope?` (snapshot), so a Shading Face is never one of
+its Zone's Faces and the check names no feature ("Zones geometry rules", "Envelope exclusion"). Those wrap the
+foundation's `Records::EntityStore.envelope_excluded?` and `envelope_excluded_entries?` and add that a classified
+Face stays in the envelope unless the mark is on the Face itself; the foundation checks alone would drop a
+classified Face under a marked Group ("The shading mark"; context/EXTENSIBILITY.md, the claims and envelope
+exclusion paragraphs). A feature that
 needs the shading components reads `ph_composer.shading.list`, which applies the one rule the Colour-by mode and
 the export apply (`Reads.exported?`: classification wins). The Shades section `ph_composer.shading.export.shades`
 ("Translation sections and artifacts") is the only writer of orphaned Shades. PHX groups every orphaned Shade
