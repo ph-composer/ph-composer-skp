@@ -77,7 +77,8 @@ class AgentAccessDiscoveryTest < PhComposerTestCase
       end
     end
     assert_includes all_rows("record_kinds").map { |row| row.fetch("id") }, "test.fixture.part"
-    assert_equal ["ph_composer.certification.segment", "test.fixture.review"],
+    assert_equal ["ph_composer.certification.segment", "ph_composer.programs.airtightness",
+                  "test.fixture.review"],
                  all_rows("extensions").map { |row| row.fetch("namespace") }
   end
 

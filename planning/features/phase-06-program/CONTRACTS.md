@@ -1,7 +1,7 @@
 # Phase 4a contracts: records, ownership and seams
 
 DATE: 2026-11-15
-STATUS: Scoped for P4a-01 to P4a-11; revised after an independent review against the code (14 findings), the Programs tab review and a consistency sweep, all 2026-11-15. Ed answered C4a-5 and C4a-7 to C4a-10; C4a-2, C4a-3, C4a-4 and C4a-6 settle in their stages. C4a-11 to C4a-14 were raised on 2026-11-20, after Climate and Shading landed; Ed accepted all four recommendations the same day.
+STATUS: Scoped for P4a-01 to P4a-11; revised after an independent review against the code (14 findings), the Programs tab review and a consistency sweep, all 2026-11-15. Ed answered C4a-5 and C4a-7 to C4a-10; C4a-2, C4a-3 and C4a-6 settle in their stages; P4a-06 answered C4a-4. C4a-11 to C4a-14 were raised on 2026-11-20, after Climate and Shading landed; Ed accepted all four recommendations the same day.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
@@ -236,7 +236,7 @@ exports as a Shade (C4a-12).
 | --- | --- | --- | --- |
 | C4a-2 | A copied Zone shares its source's Dwelling: does it stay in it? | Yes, until the user chooses One dwelling each; a finding when a Dwelling spans Segments | P4a-08 |
 | C4a-3 | A Dwelling's Zones in two Segments | Refused by Programs' actions; a finding on generic routes | P4a-08 |
-| C4a-4 | The n50/q50 conversion's exposed area: PH-Composer's envelope sum, or PHX's `cleanup` rule exactly | Match PHX, proven by a round trip reading back the entered value | P4a-06 |
+| C4a-4 | The n50/q50 conversion's exposed area: PH-Composer's envelope sum, or PHX's `cleanup` rule exactly | **Answered (P4a-06, 2026-11-20): match PHX.** q50 needs no area. n50 divides by PHX's gross envelope area, every Face of the Segment's merged Room (all Faces less Surface pairs inside the Segment), over the Spaces' net volume; the `cleanup` exposed-area rule only weights the merge, which returns the one flow every Room carries. Proven by the round trip ([evidence](evidence/pg06-segment-airtightness-offline.md)) | Answered |
 | C4a-5 | Which feature owns mechanical cooling and the mechanical room temperature | **Answered (Ed, 2026-11-15): the Mechanical phase** (then Phase 4, now Phase 7); listed under Planned until then | Answered |
 | C4a-6 | Keep a per-Space `airflow_mode` copy for agents | **Answered (P4a-05, as recommended): yes.** Each Zone row of `spaces.list` and `spaces.all` carries `airflow_mode`, the source; each Space row keeps a copy derived from its Zone, documented as kept for API 1.77 (`API::CHANGES`, `context/AGENT_INTERFACE.md`). Dropping it is a later minor's change note | Answered |
 | C4a-7 | Single dwelling's default: on for every Segment whose extension is absent, or on only for the first | **Answered (Ed, 2026-11-15): on for every Segment**, effective only while residential | Answered |

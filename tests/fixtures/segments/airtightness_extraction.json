@@ -1,0 +1,1740 @@
+{
+  "run_id": "segment-airtightness",
+  "schema_version": 1,
+  "sections": {
+    "ph_composer.assemblies.export.constructions": {
+      "records": [
+        {
+          "id": "asm_Single000001",
+          "layers": [
+            {
+              "id": "lyr_000000000001",
+              "segments": [
+                {
+                  "id": "seg_000000000010",
+                  "material_id": "mat_Wool00000001",
+                  "steel_stud_spacing_mm": null,
+                  "width_mm": 1000
+                }
+              ],
+              "thickness_mm": 100
+            },
+            {
+              "id": "lyr_000000000002",
+              "segments": [
+                {
+                  "id": "seg_000000000020",
+                  "material_id": "mat_Wool00000001",
+                  "steel_stud_spacing_mm": null,
+                  "width_mm": 1000
+                }
+              ],
+              "thickness_mm": 50
+            }
+          ],
+          "materials": [
+            {
+              "category": "insulation",
+              "color": "#88aa44",
+              "conductivity_w_mk": 0.04,
+              "density_kg_m3": 40,
+              "emissivity": 0.9,
+              "id": "mat_Wool00000001",
+              "name": "Synthetic wool",
+              "specific_heat_j_kgk": 1400
+            }
+          ],
+          "name": "Two wool thicknesses",
+          "orientation": "first_layer_outside"
+        }
+      ],
+      "version": 1
+    },
+    "ph_composer.assemblies.export.material_sources": {
+      "records": [],
+      "version": 1
+    },
+    "ph_composer.certification.export.segments": {
+      "records": [
+        {
+          "category": "residential",
+          "export_identifier": "bseg_d6e6d36e20e0d1ed",
+          "id": "bsg_FIXED0000001",
+          "program": "phius_2021_core",
+          "status": "in_planning",
+          "type": "new_construction",
+          "use": "residential"
+        },
+        {
+          "category": "residential",
+          "export_identifier": "bseg_2526c620c18174be",
+          "id": "bsg_FIXED0000002",
+          "program": "phius_2021_core",
+          "status": "in_planning",
+          "type": "new_construction",
+          "use": "residential"
+        }
+      ],
+      "version": 1
+    },
+    "ph_composer.climate.export.site": {
+      "records": [
+        {
+          "climate": null,
+          "climate_left_out": null,
+          "id": "Site",
+          "location": null,
+          "provenance": null,
+          "report": {
+            "climate": null,
+            "design_temperature_source": null,
+            "design_temperatures": {
+              "cooling_1_c": null,
+              "heating_99_c": null
+            },
+            "edited_cells": [],
+            "limit_check": null,
+            "missing_values": 0
+          }
+        }
+      ],
+      "version": 1
+    },
+    "ph_composer.model.export.model": {
+      "records": [],
+      "version": 1
+    },
+    "ph_composer.programs.export.airtightness": {
+      "records": [
+        {
+          "basis": "q50",
+          "building_segment_id": "bsg_FIXED0000001",
+          "export_identifier": "bseg_d6e6d36e20e0d1ed",
+          "flow_per_exterior_area": 0.00003227433043692842,
+          "id": "zon_AAAAAAAAAAAA",
+          "value": 0.6,
+          "wind_exposure": "several_sides_high_screening"
+        },
+        {
+          "basis": "n50",
+          "building_segment_id": "bsg_FIXED0000002",
+          "export_identifier": "bseg_2526c620c18174be",
+          "flow_per_exterior_area": 0.00006468483948329536,
+          "id": "zon_KKKKKKKKKKKK",
+          "value": 2.0,
+          "wind_exposure": "one_side_moderate_screening"
+        },
+        {
+          "basis": "n50",
+          "building_segment_id": "bsg_FIXED0000002",
+          "export_identifier": "bseg_2526c620c18174be",
+          "flow_per_exterior_area": 0.00006468483948329536,
+          "id": "zon_LLLLLLLLLLLL",
+          "value": 2.0,
+          "wind_exposure": "one_side_moderate_screening"
+        }
+      ],
+      "version": 1
+    },
+    "ph_composer.shading.export.shades": {
+      "records": [],
+      "version": 1
+    },
+    "ph_composer.spaces.export.spaces": {
+      "records": [
+        {
+          "airflow_mode": "by_program",
+          "id": "spc_AAAAAAAAAAAA",
+          "name": "ADU",
+          "number": "1",
+          "offset_from_zone": false,
+          "volumes": [
+            {
+              "avg_ceiling_height_m": 2.5,
+              "display_name": "",
+              "floor_id": "flr_AAAAAAAAAAAA",
+              "floor_segments": [
+                {
+                  "display_name": "",
+                  "id": "fsg_AAAAAAAAAAAA",
+                  "loops_m": [
+                    [
+                      [
+                        5.0,
+                        0.0,
+                        0.0
+                      ],
+                      [
+                        5.0,
+                        8.0,
+                        0.0
+                      ],
+                      [
+                        9.0,
+                        8.0,
+                        0.0
+                      ],
+                      [
+                        9.0,
+                        0.0,
+                        0.0
+                      ]
+                    ]
+                  ],
+                  "net_area_factor": 1.0,
+                  "weighting_factor": 1.0
+                }
+              ],
+              "geometry": [
+                [
+                  [
+                    5.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    5.0,
+                    8.0,
+                    0.0
+                  ],
+                  [
+                    9.0,
+                    8.0,
+                    0.0
+                  ],
+                  [
+                    9.0,
+                    0.0,
+                    0.0
+                  ]
+                ],
+                [
+                  [
+                    5.0,
+                    0.0,
+                    2.5
+                  ],
+                  [
+                    5.0,
+                    8.0,
+                    2.5
+                  ],
+                  [
+                    9.0,
+                    8.0,
+                    2.5
+                  ],
+                  [
+                    9.0,
+                    0.0,
+                    2.5
+                  ]
+                ],
+                [
+                  [
+                    5.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    5.0,
+                    8.0,
+                    0.0
+                  ],
+                  [
+                    5.0,
+                    8.0,
+                    2.5
+                  ],
+                  [
+                    5.0,
+                    0.0,
+                    2.5
+                  ]
+                ],
+                [
+                  [
+                    5.0,
+                    8.0,
+                    0.0
+                  ],
+                  [
+                    9.0,
+                    8.0,
+                    0.0
+                  ],
+                  [
+                    9.0,
+                    8.0,
+                    2.5
+                  ],
+                  [
+                    5.0,
+                    8.0,
+                    2.5
+                  ]
+                ],
+                [
+                  [
+                    9.0,
+                    8.0,
+                    0.0
+                  ],
+                  [
+                    9.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    9.0,
+                    0.0,
+                    2.5
+                  ],
+                  [
+                    9.0,
+                    8.0,
+                    2.5
+                  ]
+                ],
+                [
+                  [
+                    9.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    5.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    5.0,
+                    0.0,
+                    2.5
+                  ],
+                  [
+                    9.0,
+                    0.0,
+                    2.5
+                  ]
+                ]
+              ],
+              "id": "vol_AAAAAAAAAAAA"
+            }
+          ],
+          "zone_id": "zon_AAAAAAAAAAAA"
+        },
+        {
+          "airflow_mode": "by_program",
+          "id": "spc_KKKKKKKKKKKK",
+          "name": "Kitchen",
+          "number": "1",
+          "offset_from_zone": false,
+          "volumes": [
+            {
+              "avg_ceiling_height_m": 2.5,
+              "display_name": "",
+              "floor_id": "flr_KKKKKKKKKKKK",
+              "floor_segments": [
+                {
+                  "display_name": "",
+                  "id": "fsg_KKKKKKKKKKKK",
+                  "loops_m": [
+                    [
+                      [
+                        0.0,
+                        4.0,
+                        0.0
+                      ],
+                      [
+                        0.0,
+                        8.0,
+                        0.0
+                      ],
+                      [
+                        5.0,
+                        8.0,
+                        0.0
+                      ],
+                      [
+                        5.0,
+                        4.0,
+                        0.0
+                      ]
+                    ]
+                  ],
+                  "net_area_factor": 1.0,
+                  "weighting_factor": 1.0
+                }
+              ],
+              "geometry": [
+                [
+                  [
+                    0.0,
+                    4.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    8.0,
+                    0.0
+                  ],
+                  [
+                    5.0,
+                    8.0,
+                    0.0
+                  ],
+                  [
+                    5.0,
+                    4.0,
+                    0.0
+                  ]
+                ],
+                [
+                  [
+                    0.0,
+                    4.0,
+                    2.5
+                  ],
+                  [
+                    0.0,
+                    8.0,
+                    2.5
+                  ],
+                  [
+                    5.0,
+                    8.0,
+                    2.5
+                  ],
+                  [
+                    5.0,
+                    4.0,
+                    2.5
+                  ]
+                ],
+                [
+                  [
+                    0.0,
+                    4.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    8.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    8.0,
+                    2.5
+                  ],
+                  [
+                    0.0,
+                    4.0,
+                    2.5
+                  ]
+                ],
+                [
+                  [
+                    0.0,
+                    8.0,
+                    0.0
+                  ],
+                  [
+                    5.0,
+                    8.0,
+                    0.0
+                  ],
+                  [
+                    5.0,
+                    8.0,
+                    2.5
+                  ],
+                  [
+                    0.0,
+                    8.0,
+                    2.5
+                  ]
+                ],
+                [
+                  [
+                    5.0,
+                    8.0,
+                    0.0
+                  ],
+                  [
+                    5.0,
+                    4.0,
+                    0.0
+                  ],
+                  [
+                    5.0,
+                    4.0,
+                    2.5
+                  ],
+                  [
+                    5.0,
+                    8.0,
+                    2.5
+                  ]
+                ],
+                [
+                  [
+                    5.0,
+                    4.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    4.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    4.0,
+                    2.5
+                  ],
+                  [
+                    5.0,
+                    4.0,
+                    2.5
+                  ]
+                ]
+              ],
+              "id": "vol_KKKKKKKKKKKK"
+            }
+          ],
+          "zone_id": "zon_KKKKKKKKKKKK"
+        },
+        {
+          "airflow_mode": "by_program",
+          "id": "spc_LLLLLLLLLLLL",
+          "name": "Living",
+          "number": "1",
+          "offset_from_zone": false,
+          "volumes": [
+            {
+              "avg_ceiling_height_m": 2.5,
+              "display_name": "",
+              "floor_id": "flr_LLLLLLLLLLLL",
+              "floor_segments": [
+                {
+                  "display_name": "",
+                  "id": "fsg_LLLLLLLLLLLL",
+                  "loops_m": [
+                    [
+                      [
+                        0.0,
+                        0.0,
+                        0.0
+                      ],
+                      [
+                        0.0,
+                        4.0,
+                        0.0
+                      ],
+                      [
+                        5.0,
+                        4.0,
+                        0.0
+                      ],
+                      [
+                        5.0,
+                        0.0,
+                        0.0
+                      ]
+                    ]
+                  ],
+                  "net_area_factor": 0.9,
+                  "weighting_factor": 1.0
+                }
+              ],
+              "geometry": [
+                [
+                  [
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    4.0,
+                    0.0
+                  ],
+                  [
+                    5.0,
+                    4.0,
+                    0.0
+                  ],
+                  [
+                    5.0,
+                    0.0,
+                    0.0
+                  ]
+                ],
+                [
+                  [
+                    0.0,
+                    0.0,
+                    2.5
+                  ],
+                  [
+                    0.0,
+                    4.0,
+                    2.5
+                  ],
+                  [
+                    5.0,
+                    4.0,
+                    2.5
+                  ],
+                  [
+                    5.0,
+                    0.0,
+                    2.5
+                  ]
+                ],
+                [
+                  [
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    4.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    4.0,
+                    2.5
+                  ],
+                  [
+                    0.0,
+                    0.0,
+                    2.5
+                  ]
+                ],
+                [
+                  [
+                    0.0,
+                    4.0,
+                    0.0
+                  ],
+                  [
+                    5.0,
+                    4.0,
+                    0.0
+                  ],
+                  [
+                    5.0,
+                    4.0,
+                    2.5
+                  ],
+                  [
+                    0.0,
+                    4.0,
+                    2.5
+                  ]
+                ],
+                [
+                  [
+                    5.0,
+                    4.0,
+                    0.0
+                  ],
+                  [
+                    5.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    5.0,
+                    0.0,
+                    2.5
+                  ],
+                  [
+                    5.0,
+                    4.0,
+                    2.5
+                  ]
+                ],
+                [
+                  [
+                    5.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    0.0,
+                    2.5
+                  ],
+                  [
+                    5.0,
+                    0.0,
+                    2.5
+                  ]
+                ]
+              ],
+              "id": "vol_LLLLLLLLLLLL"
+            }
+          ],
+          "zone_id": "zon_LLLLLLLLLLLL"
+        }
+      ],
+      "version": 2
+    },
+    "ph_composer.thermal_bridges.export.thermal_bridges": {
+      "records": [],
+      "version": 1
+    },
+    "ph_composer.windows.export.apertures": {
+      "records": [],
+      "version": 1
+    },
+    "ph_composer.windows.export.window_constructions": {
+      "records": [],
+      "version": 1
+    },
+    "ph_composer.zones.export.zones": {
+      "records": [
+        {
+          "building_segment": "ADU",
+          "building_segment_export_identifier": "bseg_d6e6d36e20e0d1ed",
+          "building_segment_id": "bsg_FIXED0000001",
+          "face_ids": [
+            "fac_A00000000001",
+            "fac_A00000000002",
+            "fac_A00000000003",
+            "fac_A00000000004",
+            "fac_A00000000005",
+            "fac_A00000000006",
+            "fac_A00000000007"
+          ],
+          "id": "zon_AAAAAAAAAAAA",
+          "level": "L1",
+          "name": "ADU"
+        },
+        {
+          "building_segment": "House",
+          "building_segment_export_identifier": "bseg_2526c620c18174be",
+          "building_segment_id": "bsg_FIXED0000002",
+          "face_ids": [
+            "fac_K00000000001",
+            "fac_K00000000002",
+            "fac_K00000000003",
+            "fac_K00000000004",
+            "fac_K00000000005",
+            "fac_K00000000006"
+          ],
+          "id": "zon_KKKKKKKKKKKK",
+          "level": "L1",
+          "name": "Kitchen"
+        },
+        {
+          "building_segment": "House",
+          "building_segment_export_identifier": "bseg_2526c620c18174be",
+          "building_segment_id": "bsg_FIXED0000002",
+          "face_ids": [
+            "fac_L00000000001",
+            "fac_L00000000002",
+            "fac_L00000000003",
+            "fac_L00000000004",
+            "fac_L00000000005",
+            "fac_L00000000006"
+          ],
+          "id": "zon_LLLLLLLLLLLL",
+          "level": "L1",
+          "name": "Living"
+        }
+      ],
+      "version": 2
+    },
+    "ph_composer.zones.faces.export.faces": {
+      "records": [
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Ground",
+          "face_type": "Floor",
+          "geometry": {
+            "area_m2": 32.0,
+            "digest": "sha256:0dfa8898b2141c6caf1224c3d7798eb2086cb5129fb90f29c8b045c263604473",
+            "loops_m": [
+              [
+                [
+                  5.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  8.0,
+                  0.0
+                ],
+                [
+                  9.0,
+                  8.0,
+                  0.0
+                ],
+                [
+                  9.0,
+                  0.0,
+                  0.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              0.0,
+              -1.0
+            ],
+            "plane_offset_m": 0.0
+          },
+          "id": "fac_A00000000001",
+          "zone_id": "zon_AAAAAAAAAAAA"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Outdoors",
+          "face_type": "RoofCeiling",
+          "geometry": {
+            "area_m2": 32.0,
+            "digest": "sha256:d1f308c9d053a8eb985bdcbe7f284f0a91775c532c61e0cd7b0fb90ae4db861a",
+            "loops_m": [
+              [
+                [
+                  5.0,
+                  0.0,
+                  3.0
+                ],
+                [
+                  9.0,
+                  0.0,
+                  3.0
+                ],
+                [
+                  9.0,
+                  8.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  8.0,
+                  3.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "plane_offset_m": 3.0
+          },
+          "id": "fac_A00000000002",
+          "zone_id": "zon_AAAAAAAAAAAA"
+        },
+        {
+          "adjacency": {
+            "counterpart": {
+              "entity_id": "fac_L00000000004",
+              "entity_path": [
+                1004
+              ],
+              "zone_id": "zon_LLLLLLLLLLLL",
+              "zone_path": [
+                1000
+              ]
+            },
+            "counterpart_geometry": {
+              "area_m2": 12.0,
+              "digest": "sha256:8b82bb2ae5a5277caa03e3f9b58417f5af27a4efe3b4e9e832d05f06ab00ff44"
+            },
+            "pair_id": "adj_bc1ea1fe4542",
+            "schema_version": 1,
+            "self": {
+              "entity_id": "fac_A00000000003",
+              "entity_path": [
+                3003
+              ],
+              "zone_id": "zon_AAAAAAAAAAAA",
+              "zone_path": [
+                3000
+              ]
+            },
+            "self_geometry": {
+              "area_m2": 12.0,
+              "digest": "sha256:27a6780a7a255f332018a8ee92abe5365f6a053937d1cdd95ce32e7750decf22"
+            }
+          },
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Surface",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 12.0,
+            "digest": "sha256:27a6780a7a255f332018a8ee92abe5365f6a053937d1cdd95ce32e7750decf22",
+            "loops_m": [
+              [
+                [
+                  5.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  0.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  4.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  4.0,
+                  0.0
+                ]
+              ]
+            ],
+            "normal": [
+              -1.0,
+              0.0,
+              0.0
+            ],
+            "plane_offset_m": -5.0
+          },
+          "id": "fac_A00000000003",
+          "zone_id": "zon_AAAAAAAAAAAA"
+        },
+        {
+          "adjacency": {
+            "counterpart": {
+              "entity_id": "fac_K00000000004",
+              "entity_path": [
+                2004
+              ],
+              "zone_id": "zon_KKKKKKKKKKKK",
+              "zone_path": [
+                2000
+              ]
+            },
+            "counterpart_geometry": {
+              "area_m2": 12.0,
+              "digest": "sha256:48f78423d055024498ca05d4c7dd4125a297928d93b395d35b90a1ca0fcad93e"
+            },
+            "pair_id": "adj_48e54df6a14d",
+            "schema_version": 1,
+            "self": {
+              "entity_id": "fac_A00000000004",
+              "entity_path": [
+                3004
+              ],
+              "zone_id": "zon_AAAAAAAAAAAA",
+              "zone_path": [
+                3000
+              ]
+            },
+            "self_geometry": {
+              "area_m2": 12.0,
+              "digest": "sha256:7783e0d8da712118985ffcd05ebf8535966072179c2b76f94446e7b348dff5f1"
+            }
+          },
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Surface",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 12.0,
+            "digest": "sha256:7783e0d8da712118985ffcd05ebf8535966072179c2b76f94446e7b348dff5f1",
+            "loops_m": [
+              [
+                [
+                  5.0,
+                  4.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  4.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  8.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  8.0,
+                  0.0
+                ]
+              ]
+            ],
+            "normal": [
+              -1.0,
+              0.0,
+              0.0
+            ],
+            "plane_offset_m": -5.0
+          },
+          "id": "fac_A00000000004",
+          "zone_id": "zon_AAAAAAAAAAAA"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Outdoors",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 24.0,
+            "digest": "sha256:face0c8d25033e838e3a3d3a702446153d7798683abd2cfc331484344540d053",
+            "loops_m": [
+              [
+                [
+                  9.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  9.0,
+                  8.0,
+                  0.0
+                ],
+                [
+                  9.0,
+                  8.0,
+                  3.0
+                ],
+                [
+                  9.0,
+                  0.0,
+                  3.0
+                ]
+              ]
+            ],
+            "normal": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "plane_offset_m": 9.0
+          },
+          "id": "fac_A00000000005",
+          "zone_id": "zon_AAAAAAAAAAAA"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Outdoors",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 12.0,
+            "digest": "sha256:dbf455a7a4d59365f053ea9066547d3efec09f7a1c0600a121485f564237380e",
+            "loops_m": [
+              [
+                [
+                  5.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  9.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  9.0,
+                  0.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  0.0,
+                  3.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              -1.0,
+              0.0
+            ],
+            "plane_offset_m": 0.0
+          },
+          "id": "fac_A00000000006",
+          "zone_id": "zon_AAAAAAAAAAAA"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Adiabatic",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 12.0,
+            "digest": "sha256:d587ae5624585da5b2194f03067b7ff99cd2f16414881a44890d3ed1e914caf5",
+            "loops_m": [
+              [
+                [
+                  5.0,
+                  8.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  8.0,
+                  3.0
+                ],
+                [
+                  9.0,
+                  8.0,
+                  3.0
+                ],
+                [
+                  9.0,
+                  8.0,
+                  0.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              1.0,
+              0.0
+            ],
+            "plane_offset_m": 8.0
+          },
+          "id": "fac_A00000000007",
+          "zone_id": "zon_AAAAAAAAAAAA"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Ground",
+          "face_type": "Floor",
+          "geometry": {
+            "area_m2": 20.0,
+            "digest": "sha256:8e5049bd10e96f47c46077c3d5dddaf67e600d08f79a1a61cbacd7c1facdc69e",
+            "loops_m": [
+              [
+                [
+                  0.0,
+                  4.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  8.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  8.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  4.0,
+                  0.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              0.0,
+              -1.0
+            ],
+            "plane_offset_m": 0.0
+          },
+          "id": "fac_K00000000001",
+          "zone_id": "zon_KKKKKKKKKKKK"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Outdoors",
+          "face_type": "RoofCeiling",
+          "geometry": {
+            "area_m2": 20.0,
+            "digest": "sha256:494b3d9c352fc42c0619d58208b7c80c4cf944fed961eaffbdf44e774a49ddb1",
+            "loops_m": [
+              [
+                [
+                  0.0,
+                  4.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  4.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  8.0,
+                  3.0
+                ],
+                [
+                  0.0,
+                  8.0,
+                  3.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "plane_offset_m": 3.0
+          },
+          "id": "fac_K00000000002",
+          "zone_id": "zon_KKKKKKKKKKKK"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Outdoors",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 12.0,
+            "digest": "sha256:ab965c337314e5054de9ed567a863105a357ac1ffdc942a4091755004c3b8a62",
+            "loops_m": [
+              [
+                [
+                  0.0,
+                  4.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  4.0,
+                  3.0
+                ],
+                [
+                  0.0,
+                  8.0,
+                  3.0
+                ],
+                [
+                  0.0,
+                  8.0,
+                  0.0
+                ]
+              ]
+            ],
+            "normal": [
+              -1.0,
+              0.0,
+              0.0
+            ],
+            "plane_offset_m": 0.0
+          },
+          "id": "fac_K00000000003",
+          "zone_id": "zon_KKKKKKKKKKKK"
+        },
+        {
+          "adjacency": {
+            "counterpart": {
+              "entity_id": "fac_A00000000004",
+              "entity_path": [
+                3004
+              ],
+              "zone_id": "zon_AAAAAAAAAAAA",
+              "zone_path": [
+                3000
+              ]
+            },
+            "counterpart_geometry": {
+              "area_m2": 12.0,
+              "digest": "sha256:7783e0d8da712118985ffcd05ebf8535966072179c2b76f94446e7b348dff5f1"
+            },
+            "pair_id": "adj_48e54df6a14d",
+            "schema_version": 1,
+            "self": {
+              "entity_id": "fac_K00000000004",
+              "entity_path": [
+                2004
+              ],
+              "zone_id": "zon_KKKKKKKKKKKK",
+              "zone_path": [
+                2000
+              ]
+            },
+            "self_geometry": {
+              "area_m2": 12.0,
+              "digest": "sha256:48f78423d055024498ca05d4c7dd4125a297928d93b395d35b90a1ca0fcad93e"
+            }
+          },
+          "assembly_id": "asm_Single000001",
+          "assembly_reversed": true,
+          "boundary_condition": "Surface",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 12.0,
+            "digest": "sha256:48f78423d055024498ca05d4c7dd4125a297928d93b395d35b90a1ca0fcad93e",
+            "loops_m": [
+              [
+                [
+                  5.0,
+                  4.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  8.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  8.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  4.0,
+                  3.0
+                ]
+              ]
+            ],
+            "normal": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "plane_offset_m": 5.0
+          },
+          "id": "fac_K00000000004",
+          "zone_id": "zon_KKKKKKKKKKKK"
+        },
+        {
+          "adjacency": {
+            "counterpart": {
+              "entity_id": "fac_L00000000006",
+              "entity_path": [
+                1006
+              ],
+              "zone_id": "zon_LLLLLLLLLLLL",
+              "zone_path": [
+                1000
+              ]
+            },
+            "counterpart_geometry": {
+              "area_m2": 15.0,
+              "digest": "sha256:82e2fd0d84e8191ac271277959d3fc0b4473b7bb27b47ffa913ed64d8d164333"
+            },
+            "pair_id": "adj_81dc9e96930c",
+            "schema_version": 1,
+            "self": {
+              "entity_id": "fac_K00000000005",
+              "entity_path": [
+                2005
+              ],
+              "zone_id": "zon_KKKKKKKKKKKK",
+              "zone_path": [
+                2000
+              ]
+            },
+            "self_geometry": {
+              "area_m2": 15.0,
+              "digest": "sha256:00977740f7bb65efee5cfd9420654016a05e27aa87612a367b5b469b154ce72c"
+            }
+          },
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Surface",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 15.0,
+            "digest": "sha256:00977740f7bb65efee5cfd9420654016a05e27aa87612a367b5b469b154ce72c",
+            "loops_m": [
+              [
+                [
+                  0.0,
+                  4.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  4.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  4.0,
+                  3.0
+                ],
+                [
+                  0.0,
+                  4.0,
+                  3.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              -1.0,
+              0.0
+            ],
+            "plane_offset_m": -4.0
+          },
+          "id": "fac_K00000000005",
+          "zone_id": "zon_KKKKKKKKKKKK"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Adiabatic",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 15.0,
+            "digest": "sha256:4320ea3c279a02fb4245661ff91a8453be2b651188c5f387651c0dfea5585999",
+            "loops_m": [
+              [
+                [
+                  0.0,
+                  8.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  8.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  8.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  8.0,
+                  0.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              1.0,
+              0.0
+            ],
+            "plane_offset_m": 8.0
+          },
+          "id": "fac_K00000000006",
+          "zone_id": "zon_KKKKKKKKKKKK"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Ground",
+          "face_type": "Floor",
+          "geometry": {
+            "area_m2": 20.0,
+            "digest": "sha256:5f37e16acc1185591dbaa2058c76ed186893282618d53ae1930c3081977d07fb",
+            "loops_m": [
+              [
+                [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  4.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  4.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  0.0,
+                  0.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              0.0,
+              -1.0
+            ],
+            "plane_offset_m": 0.0
+          },
+          "id": "fac_L00000000001",
+          "zone_id": "zon_LLLLLLLLLLLL"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Outdoors",
+          "face_type": "RoofCeiling",
+          "geometry": {
+            "area_m2": 20.0,
+            "digest": "sha256:17b65ff3930b50bf11ad9f5866c15f9808164db83b1235db04a1c2ed8a017b6e",
+            "loops_m": [
+              [
+                [
+                  0.0,
+                  0.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  0.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  4.0,
+                  3.0
+                ],
+                [
+                  0.0,
+                  4.0,
+                  3.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "plane_offset_m": 3.0
+          },
+          "id": "fac_L00000000002",
+          "zone_id": "zon_LLLLLLLLLLLL"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Outdoors",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 12.0,
+            "digest": "sha256:b50a8e75059a7bdca15dc293eade2da6e66acea50807bfd65772389d53d6e77c",
+            "loops_m": [
+              [
+                [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  3.0
+                ],
+                [
+                  0.0,
+                  4.0,
+                  3.0
+                ],
+                [
+                  0.0,
+                  4.0,
+                  0.0
+                ]
+              ]
+            ],
+            "normal": [
+              -1.0,
+              0.0,
+              0.0
+            ],
+            "plane_offset_m": 0.0
+          },
+          "id": "fac_L00000000003",
+          "zone_id": "zon_LLLLLLLLLLLL"
+        },
+        {
+          "adjacency": {
+            "counterpart": {
+              "entity_id": "fac_A00000000003",
+              "entity_path": [
+                3003
+              ],
+              "zone_id": "zon_AAAAAAAAAAAA",
+              "zone_path": [
+                3000
+              ]
+            },
+            "counterpart_geometry": {
+              "area_m2": 12.0,
+              "digest": "sha256:27a6780a7a255f332018a8ee92abe5365f6a053937d1cdd95ce32e7750decf22"
+            },
+            "pair_id": "adj_bc1ea1fe4542",
+            "schema_version": 1,
+            "self": {
+              "entity_id": "fac_L00000000004",
+              "entity_path": [
+                1004
+              ],
+              "zone_id": "zon_LLLLLLLLLLLL",
+              "zone_path": [
+                1000
+              ]
+            },
+            "self_geometry": {
+              "area_m2": 12.0,
+              "digest": "sha256:8b82bb2ae5a5277caa03e3f9b58417f5af27a4efe3b4e9e832d05f06ab00ff44"
+            }
+          },
+          "assembly_id": "asm_Single000001",
+          "assembly_reversed": true,
+          "boundary_condition": "Surface",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 12.0,
+            "digest": "sha256:8b82bb2ae5a5277caa03e3f9b58417f5af27a4efe3b4e9e832d05f06ab00ff44",
+            "loops_m": [
+              [
+                [
+                  5.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  4.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  4.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  0.0,
+                  3.0
+                ]
+              ]
+            ],
+            "normal": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "plane_offset_m": 5.0
+          },
+          "id": "fac_L00000000004",
+          "zone_id": "zon_LLLLLLLLLLLL"
+        },
+        {
+          "assembly_id": "asm_Single000001",
+          "boundary_condition": "Outdoors",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 15.0,
+            "digest": "sha256:05e7494817c073be6271865c11274c2eb18cdb5290f3548d0784c45a1a03681a",
+            "loops_m": [
+              [
+                [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  5.0,
+                  0.0,
+                  3.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  3.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              -1.0,
+              0.0
+            ],
+            "plane_offset_m": 0.0
+          },
+          "id": "fac_L00000000005",
+          "zone_id": "zon_LLLLLLLLLLLL"
+        },
+        {
+          "adjacency": {
+            "counterpart": {
+              "entity_id": "fac_K00000000005",
+              "entity_path": [
+                2005
+              ],
+              "zone_id": "zon_KKKKKKKKKKKK",
+              "zone_path": [
+                2000
+              ]
+            },
+            "counterpart_geometry": {
+              "area_m2": 15.0,
+              "digest": "sha256:00977740f7bb65efee5cfd9420654016a05e27aa87612a367b5b469b154ce72c"
+            },
+            "pair_id": "adj_81dc9e96930c",
+            "schema_version": 1,
+            "self": {
+              "entity_id": "fac_L00000000006",
+              "entity_path": [
+                1006
+              ],
+              "zone_id": "zon_LLLLLLLLLLLL",
+              "zone_path": [
+                1000
+              ]
+            },
+            "self_geometry": {
+              "area_m2": 15.0,
+              "digest": "sha256:82e2fd0d84e8191ac271277959d3fc0b4473b7bb27b47ffa913ed64d8d164333"
+            }
+          },
+          "assembly_id": "asm_Single000001",
+          "assembly_reversed": true,
+          "boundary_condition": "Surface",
+          "face_type": "Wall",
+          "geometry": {
+            "area_m2": 15.0,
+            "digest": "sha256:82e2fd0d84e8191ac271277959d3fc0b4473b7bb27b47ffa913ed64d8d164333",
+            "loops_m": [
+              [
+                [
+                  0.0,
+                  4.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  4.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  4.0,
+                  3.0
+                ],
+                [
+                  5.0,
+                  4.0,
+                  0.0
+                ]
+              ]
+            ],
+            "normal": [
+              0.0,
+              1.0,
+              0.0
+            ],
+            "plane_offset_m": 4.0
+          },
+          "id": "fac_L00000000006",
+          "zone_id": "zon_LLLLLLLLLLLL"
+        }
+      ],
+      "version": 2
+    }
+  }
+}

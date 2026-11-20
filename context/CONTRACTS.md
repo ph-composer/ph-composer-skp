@@ -1520,6 +1520,28 @@ conformance reads them back from every reloaded Building Segment. PHX writes the
 (`BuildingCategory`, `PH_CertificateCriteria`, `OccupancyTypeResidential`, `BuildingStatus`,
 `BuildingType`) and the METr JSON (`tests/python/test_certification_phx_round_trip.py`).
 
+Airtightness attaches at `ROOM`: `ph_composer.programs.export.airtightness` (Ruby `features/programs/export.rb`,
+Python `airtightness_sections.py`) writes one record per exported Zone whose Building Segment stores
+`ph_composer.programs.airtightness` settings, claimed on the Building Segment kind as certification's are:
+`{id, building_segment_id, export_identifier, basis, value, wind_exposure, flow_per_exterior_area}`. Ruby
+converts the test result (`features/programs/conversion.rb`) and Python computes nothing: it sets the Room's
+honeybee `Infiltration` to that flow, in m³/s per m² at 4 Pa, when there is one, and the shared
+`BldgSegment.wind_exposure_type` from each of the Segment's Rooms. A Segment with no test result writes a null
+flow, so each Room keeps its Program's Infiltration, or none, and PHX's default; a Segment with no settings
+writes no record. The conversion inverts the pinned PHX's (`from_HBJSON/create_variant.py`): q50 is the flow
+times (50/4)^0.65 × 3600, with flow exponent 0.65 and air density 1, and n50 is q50 times the Segment's gross
+envelope area over its net volume. The envelope is PHX's merged Room of the Segment (`cleanup.merge_rooms`):
+every Face the Faces section writes for the Segment's Zones (`Faces::ExportProjection.segment_envelope`), less each
+Surface Face whose other side is in the same Segment; a Surface Face to another Segment, an Adiabatic Face and
+an Attached zone's Face stay, and a shading Face is in no Zone's Faces. The net volume is the Spaces section's
+projection, each Zone's Volumes' net floor area times average clear ceiling height. PHX's merge weights each
+Room's flow by its Outdoors and Ground area, which returns the one flow every Room of the Segment carries, so
+that area only has to be greater than 0 (C4a-4, Phase 4a). Export refuses `airtightness.no_exposed_face` for a
+Segment with a result and no such Face, and `airtightness.no_net_volume` for an n50 result with no Space net
+volume, where PHX would write an n50 of 1.0. WUFI-Passive (`EnvelopeAirtightnessCoefficient`) and METr
+(`tightEnv50`) carry q50 only; `tests/python/test_airtightness_phx_round_trip.py` reads it back from both and
+PHX's own n50 from its Variant.
+
 Shades are the first section that writes geometry outside every Room: `ph_composer.shading.export.shades` (Ruby
 `features/shading/export.rb`, Python `shade_sections.py`, record `contract/shade_records.py`) `requires:` the
 Zones section for its Zone names and writes one record per Shading Face occurrence, `{id, display_name,

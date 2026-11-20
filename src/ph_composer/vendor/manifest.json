@@ -175,6 +175,11 @@
       "mime": "text/javascript; charset=utf-8",
       "sha256": "72e80a2682eee8d51d1648de5e8543338f05d66d6b1a3db14b323273a51a5be1"
     },
+    "html/features/programs/airtightness.js": {
+      "bytes": 6001,
+      "mime": "text/javascript; charset=utf-8",
+      "sha256": "1ba6547b5fb6af959b789532336b3179d65ead7cbaddb544ecf90568933d7e7a"
+    },
     "html/features/spaces/actions.js": {
       "bytes": 18546,
       "mime": "text/javascript; charset=utf-8",
@@ -411,9 +416,9 @@
       "sha256": "ae769a7d0c4b07031ab9812cd350d17b6e4638549d0f5295ccaafe1f1390ed54"
     },
     "html/index.html": {
-      "bytes": 9481,
+      "bytes": 9543,
       "mime": "text/html; charset=utf-8",
-      "sha256": "fd68fdbab18af38a4dc8f47a57e8b757713cbbb0c35a7153689c5b34c289b087"
+      "sha256": "b67c5202b9d8a36b5f10f0c57031b311ba3224f2abf5f5d65b7c165dd2d76c16"
     },
     "html/inventory.js": {
       "bytes": 12812,
@@ -685,6 +690,11 @@
       "mime": "text/plain; charset=utf-8",
       "sha256": "884e2725e72e1d8e08c345067699790718ca70c6a0a3c83ae241abb9dce64dbd"
     },
+    "python/ph_composer_translation/airtightness_sections.py": {
+      "bytes": 6519,
+      "mime": "text/plain; charset=utf-8",
+      "sha256": "78ee9c20deafedadc9475e221e6a8e149bfe82e76c4c39bc00d02f6996fac193"
+    },
     "python/ph_composer_translation/assembly.py": {
       "bytes": 4949,
       "mime": "text/plain; charset=utf-8",
@@ -696,9 +706,9 @@
       "sha256": "061d45d1ee4319e1f269474e985c5da61c7617dbee49283d86d61ed6380b24ac"
     },
     "python/ph_composer_translation/composition.py": {
-      "bytes": 1316,
+      "bytes": 1398,
       "mime": "text/plain; charset=utf-8",
-      "sha256": "fae1b127810f9c8de45f3ffc630f13aee60d06aa37cd40b5ed017e63055a21e1"
+      "sha256": "26e7f51265d707520b32d9c5ebaae243ce5e7635bdb2d3af35a91d9224d94412"
     },
     "python/ph_composer_translation/conformance.py": {
       "bytes": 2658,
@@ -1009,6 +1019,7 @@
   "schema_version": 1,
   "translation_assets": [
     "python/ph_composer_translation/__init__.py",
+    "python/ph_composer_translation/airtightness_sections.py",
     "python/ph_composer_translation/assembly.py",
     "python/ph_composer_translation/certification_sections.py",
     "python/ph_composer_translation/composition.py",

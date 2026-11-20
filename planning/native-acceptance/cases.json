@@ -5215,6 +5215,21 @@
         "src/ph_composer/python/ph_composer_translation/contract/space_records.py"
       ],
       "native_control_required": true
+    },
+    {
+      "id": "PG06",
+      "label": "Building Segment airtightness on the installed RBZ: the settings dialog's Airtightness section shows n50, a blank test result and the default wind exposure on a new Segment, its unit follows the basis, a zero or negative result holds Save, a change saves as one native Undo step that the Edit menu undoes and redoes, the values survive save and fresh-process reopen, Delete of a Segment with settings names them; Export of a two-Segment reference with Spaces writes each Zone's Infiltration and the Segment's wind exposure, and the WUFI XML and METr JSON from the pinned PHX read back the entered q50, with PHX's n50 the entered n50, within 0.01",
+      "mode": "mixed",
+      "authority": "planning/features/phase-06-program/ACCEPTANCE.md",
+      "paths": [
+        "src/ph_composer/features/programs/*",
+        "src/ph_composer/html/features/programs/airtightness.js",
+        "src/ph_composer/python/ph_composer_translation/airtightness_sections.py",
+        "src/ph_composer/features/zones/faces/export.rb",
+        "src/ph_composer/features/spaces/export.rb",
+        "src/ph_composer/html/features/zones/segment_settings.js"
+      ],
+      "native_control_required": true
     }
   ]
 }

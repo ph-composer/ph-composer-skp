@@ -1,0 +1,20 @@
+{
+  "bases": [
+    "n50",
+    "q50"
+  ],
+  "defaults": {
+    "basis": "n50",
+    "value": null,
+    "wind_exposure": "several_sides_no_screening"
+  },
+  "wind_exposures": [
+    "several_sides_no_screening",
+    "several_sides_moderate_screening",
+    "several_sides_high_screening",
+    "one_side_no_screening",
+    "one_side_moderate_screening",
+    "one_side_high_screening",
+    "user_defined"
+  ]
+}

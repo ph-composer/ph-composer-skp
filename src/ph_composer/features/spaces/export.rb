@@ -47,7 +47,8 @@ module PhComposer
                                                 Export::Privacy.fields(%w[building_segment] + TOTALS)
                                               ],
                                               "space_schedule" => [Export::Privacy.fields(SCHEDULE)]
-                                            }, :report => method(:report)) { |reader| records(reader) }
+                                            }, :report => method(:report),
+                                            :projection => method(:zone_net_volumes)) { |reader| records(reader) }
         feature.query(PREFLIGHT, :description => "Spaces export checks: every finding with where it is and its repair.",
                                  :refuses => [], :params => Shapes::NONE, :result => Export::PREFLIGHT_RESULT,
                                  :examples => [{}]) { |request| preflight(request) }
@@ -304,6 +305,32 @@ module PhComposer
           reader.note("space.zone_left_out", zone.fetch("id"), left_out_message(zone.fetch("name"), records.length))
         end
         rows.sort_by { |row| row.fetch("id") }
+      end
+
+      # The section's registered projection, for a contributor that needs each exported Zone's net volume
+      # (`reader.section(SECTION)`): one row per Zone that holds a Volume, in Zone id order, with the sum of its
+      # Volumes' net volumes as the metrics measure them (net floor area times average clear ceiling height),
+      # which is what honeybee-ph and PHX read back. What sits in a Zone in no Building Segment is left out with
+      # it, and a Volume with no height counts nothing here: the section's records refuse it.
+      def zone_net_volumes(reader)
+        snapshot = reader.snapshot
+        kept = lambda do |dictionary, kind|
+          snapshot.records(dictionary, :kind => kind)
+                  .reject { |entry, _record| Zones::ExportProjection.left_out?(reader, entry.path) }
+        end
+        spaces = kept.call(SPACE_STORE.dictionary, "group").to_h { |entry, record| [entry.path, record] }
+        segments_in = kept.call(FLOOR_SEGMENT_STORE.dictionary, "face").group_by { |entry, _| entry.path[0...-1] }
+        totals = Hash.new(0.0)
+        kept.call(VOLUME_STORE.dictionary, "group").each do |entry, record|
+          zone_id = spaces[entry.path[0...-1]]&.fetch("zone_id", nil)
+          next unless zone_id
+
+          metrics = segments_in.fetch(entry.path, []).map do |segment, segment_record|
+            Metrics.segment(segment.geometry.loops_m, segment.geometry.normal, segment_record)
+          end
+          totals[zone_id] += Metrics.volume(record, metrics).fetch("net_volume_m3") || 0.0
+        end
+        totals.sort.map { |zone_id, volume| { "zone_id" => zone_id, "net_volume_m3" => volume } }
       end
 
       # One note per Zone in no Building Segment counting the Spaces inside it that leave with it.
