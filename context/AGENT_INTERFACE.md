@@ -339,6 +339,15 @@ Segment with Zones moved in. `ph_composer.certification.segment.get` reads one S
 certification payload with its defaults applied, the read other features take it from;
 `ph_composer.programs.airtightness.get` reads one Segment's airtightness test result and wind exposure
 the same way.
+Programs, Schedules and Equipment Sets (API 1.79) have `create`, `update`, `duplicate` and `delete`, and
+`list` and `all` reads whose rows carry `stored`, what uses each record and, for a Schedule, its `profile`;
+`ph_composer.programs.schedules.profile` draws unsaved Schedule values. An Equipment Set's devices change one
+at a time with `equipment_sets.add_device`, `update_device` and `delete_device`, laid out by
+`equipment_sets.device_types`. The reads answer PH-Composer's residential default Program, its Schedules and the
+default Equipment Set until a write stores them ([CONTRACTS.md](CONTRACTS.md), "Programs, Schedules and
+Equipment Sets"); `ph_composer.programs.settings.get` and `.update` read and choose the Model's defaults, and
+`ph_composer.programs.reset_default` restores one. The panel-closed
+[Programs walkthrough](../tools/examples/programs/program_records_walkthrough.rb) authors through each kind.
 `ph_composer.spaces.update_metadata` also writes a Space Floor's own map by a Volume row's
 `floor.reference`, and `ph_composer.model.update_metadata` writes the Model's own maps, read by
 `ph_composer.model.detail` and, for maps larger than a reply, `ph_composer.model.fragment`. Edge rows

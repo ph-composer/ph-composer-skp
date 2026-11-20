@@ -531,6 +531,7 @@ class EntityReferencesTest < PhComposerTestCase
     inventory = PhComposer::API.discover.fetch("reference_targets")
     assert_equal [FACE::REFERENCE_KIND, ZONES::REFERENCE_KIND, ZONES::Options::STAMP_KIND,
                   PhComposer::Windows::Settings::KIND, PhComposer::Windows::Units::REFERENCE_KIND,
+                  PhComposer::Programs::Settings::KIND,
                   *PhComposer::Spaces::KINDS.keys, PhComposer::ThermalBridges::EDGE_KIND,
                   PhComposer::ModelMetadata::REFERENCE_KIND].sort,
                  inventory.map { |target| target.fetch("id") }.sort

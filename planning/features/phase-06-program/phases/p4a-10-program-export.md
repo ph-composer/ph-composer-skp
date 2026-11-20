@@ -23,7 +23,8 @@ Q4a-25, Q4a-31, Q4a-33. Paths are relative to `src/ph_composer/`.
    effective Program's loads, already resolved per Dwelling, the Schedules they use, the Room's
    People extension values and its Process devices; plus each exported Segment's set points.
    Preflight rows: a Program value missing (blocking), Zones in one Segment whose Programs' set
-   points disagree or are not constant (warning, Q4a-04).
+   points disagree or are not constant (warning, Q4a-04), and a Program whose heating set point is above
+   its cooling one once a temperature Schedule is read (blocking; P4a-07a checks two constants only).
 2. **Per-Dwelling Programs.** A Program with a Phius rule exports one honeybee `ProgramType` per
    Dwelling group, as honeybee-ph's Set Residential Program does (F4a-20): people per area from the
    Dwelling's occupants over the presence schedule's mean and the group's floor area; lighting

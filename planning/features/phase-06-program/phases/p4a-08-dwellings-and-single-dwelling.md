@@ -7,7 +7,7 @@ ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
 ## Entry and scope
 
-Requires P4a-07, and P4a-05 (detailed airflows feed the ventilation derivation). Owns Dwellings, the per-Zone assignment extension, the derivations in Ruby,
+Requires P4a-07a, and P4a-05 (detailed airflows feed the ventilation derivation). Owns Dwellings, the per-Zone assignment extension, the derivations in Ruby,
 Single dwelling per Building Segment and the Segment settings' Occupancy section. No Zones /
 Programs view (P4a-09) and no export (P4a-10).
 

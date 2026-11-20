@@ -20,5 +20,10 @@
   { "quantity": "irradiation", "canonical_unit": "kwh_m2", "canonical_value": 1.0, "expected_ip_value": 0.3169983306281505, "tolerance": 1e-12 },
   { "quantity": "irradiance", "canonical_unit": "w_m2", "canonical_value": 1.0, "expected_ip_value": 0.3169983306281505, "tolerance": 1e-12 },
   { "quantity": "wind_speed", "canonical_unit": "m_s", "canonical_value": 1.0, "expected_ip_value": 2.236936292054402, "tolerance": 1e-12 },
-  { "quantity": "distance", "canonical_unit": "km", "canonical_value": 80.4672, "expected_ip_value": 50.0, "tolerance": 1e-12 }
+  { "quantity": "distance", "canonical_unit": "km", "canonical_value": 80.4672, "expected_ip_value": 50.0, "tolerance": 1e-12 },
+  { "quantity": "power", "canonical_unit": "w", "canonical_value": 100.0, "expected_ip_value": 341.2141633127942, "tolerance": 1e-9 },
+  { "quantity": "power_per_area", "canonical_unit": "w_m2", "canonical_value": 10.0, "expected_ip_value": 0.9290304, "tolerance": 1e-12 },
+  { "quantity": "people_per_area", "canonical_unit": "people_m2", "canonical_value": 0.05, "expected_ip_value": 0.0046451520000000005, "tolerance": 1e-12 },
+  { "quantity": "airflow_per_person", "canonical_unit": "m3_h_person", "canonical_value": 30.0, "expected_ip_value": 17.657333360744293, "tolerance": 1e-9 },
+  { "quantity": "airflow_per_area", "canonical_unit": "m3_h_m2", "canonical_value": 1.08, "expected_ip_value": 0.05905511811023621, "tolerance": 1e-12 }
 ]

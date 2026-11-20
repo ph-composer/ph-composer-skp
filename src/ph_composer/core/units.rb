@@ -81,6 +81,26 @@ module PhComposer
       "distance" => {
         :si_label => "km", :ip_label => "mi", :si_precision => 1, :ip_precision => 1,
         :factor => 1000 / METRES_PER_MILE
+      },
+      # Program loads. The airflows' canonical unit is m³/h, as `airflow`'s; a Program stores honeybee's
+      # m³/s, which the panel scales by 3600 before display.
+      "power" => {
+        :si_label => "W", :ip_label => "Btu/h", :si_precision => 0, :ip_precision => 0, :factor => BTU_H_PER_W
+      },
+      "power_per_area" => {
+        :si_label => "W/m²", :ip_label => "W/ft²", :si_precision => 2, :ip_precision => 2, :factor => 1.0 / FT2_PER_M2
+      },
+      "people_per_area" => {
+        :si_label => "people/m²", :ip_label => "people/ft²", :si_precision => 3, :ip_precision => 4,
+        :factor => 1.0 / FT2_PER_M2
+      },
+      "airflow_per_person" => {
+        :si_label => "m³/h per person", :ip_label => "cfm per person", :si_precision => 1, :ip_precision => 1,
+        :factor => FT3_PER_M3 / 60
+      },
+      "airflow_per_area" => {
+        :si_label => "m³/h per m²", :ip_label => "cfm/ft²", :si_precision => 2, :ip_precision => 3,
+        :factor => FT3_PER_M3 / 60 / FT2_PER_M2
       }
     }.freeze
 

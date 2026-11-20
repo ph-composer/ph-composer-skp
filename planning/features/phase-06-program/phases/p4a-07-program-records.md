@@ -1,7 +1,7 @@
-# P4a-07: Program, Schedule and Equipment Set records
+# P4a-07a: Program, Schedule and Equipment Set records
 
 DATE: 2026-11-15
-STATUS: Scoped (rewritten after the Programs tab review). Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
+STATUS: Implemented on branch 2026-11-20 as P4a-07a; PG07's native Undo, Redo and reopen rows owed. Split on 2026-11-20: steps 7 and 8 (library kinds and dependency copy) and test 6 moved to [P4a-07b](p4a-07b-program-library-kinds.md). Authorized 2026-11-20 with the rest of Phase 4a ([STATUS](../STATUS.md)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#538](https://github.com/ph-composer/ph-composer-skp/issues/538)
 
@@ -80,10 +80,10 @@ sections 1 to 8 and 10. Paths are relative to `src/ph_composer/`.
    the Model defaults, Programs using a Schedule; P4a-08 adds Zone assignments and Dwellings; delete
    with a named replacement rewrites them). One Undo
    step each. Reads: `programs.all`, `schedules.all`, `equipment_sets.all` with used-by counts.
-7. **Library kinds** (Q4a-19, Q4a-22): wire kinds `programs`, `schedules`, `equipment_sets` in
+7. **Moved to [P4a-07b](p4a-07b-program-library-kinds.md).** **Library kinds** (Q4a-19, Q4a-22): wire kinds `programs`, `schedules`, `equipment_sets` in
    `docs/LIBRARY_FILE_FORMAT.md`, each with its `kind_descriptor`, wire mapping, fingerprint and
    create, replace and assign callbacks, through the existing coordinator as Materials and Frames.
-8. **Dependency copy** (new in the coordinator, `library/copy_participant.rb`, `catalog.rb`): a
+8. **Moved to P4a-07b.** **Dependency copy** (new in the coordinator, `library/copy_participant.rb`, `catalog.rb`): a
    kind declares `dependencies(record) -> [{kind, id}]`; copying a Program also copies each Schedule
    it references in the same proposal, reusing a local copy found by source identity, and remaps
    the references. A missing dependency in the library refuses the copy
@@ -111,7 +111,7 @@ sections 1 to 8 and 10. Paths are relative to `src/ph_composer/`.
 4. Residential default: a read of a fresh Model answers it without writing; the first edit
    materializes it once; Reset restores it; deleting it while default refuses.
 5. Delete: refused while referenced; with a replacement, every reference rewritten in one Undo step.
-6. Library: copy a Program from a synthetic library file; its Schedules come with it; a second copy
+6. Moved to P4a-07b. Library: copy a Program from a synthetic library file; its Schedules come with it; a second copy
    reuses the local Program and Schedules; a Schedule missing from the file refuses the copy.
 7. `user_data` survives edit, duplicate, Undo/Redo and reopen on each kind and on devices.
 8. The panel-closed walkthrough runs through registered actions only.
@@ -122,4 +122,51 @@ PG07 in [ACCEPTANCE](../ACCEPTANCE.md).
 
 ## Done when
 
-PG07 passes, the library file format and contracts are updated, and the walkthrough runs.
+PG07 passes, the contracts are updated, and the walkthrough runs. The library file format is P4a-07b's.
+
+## Split and decisions (2026-11-20)
+
+The stage was split because the library half changes the neutral library coordinator, a foundation contract,
+and adds three adapters and the file-format document: on its own it is a full reviewable PR, and P4a-08 needs
+only the records. P4a-07a is steps 0 to 6 and 9 with tests 1 to 5, 7 and 8; P4a-07b is steps 7 and 8 with
+test 6. P4a-09 (journey 2's library Programs copied on choice) and P4a-11 (the sidebar's copy with Schedules) now
+need P4a-07b as well, as does stage S3 of the ph-composer-standards plan.
+
+Decided in P4a-07a, each recorded in `context/CONTRACTS.md`, "Programs, Schedules and Equipment Sets":
+
+- **Activity form.** An activity Schedule's values are `watts_on` and `watts_off`, W per person; `fraction_on`
+  and `fraction_off` stay the fractional form's, so no field's unit depends on the type.
+- **Whole hours.** `start_h`, `end_h` and each ventilation period's `hours` are integers, so the 24-hour strip
+  and the profile are exact. Full-load hours count days off as zero: the daily sum on days_per_week ×
+  weeks_per_year operating days, honeybee-ph's operating-day count. P4a-10's ruleset writes days off at zero.
+- **Default Schedules.** honeybee-ph's occupancy, lighting and hot water schedules are hourly profiles; a
+  fractional form holds two levels. Each default Schedule holds its profile's daily mean all day. PHX reads a
+  schedule without operating periods as 0 to 24 h at its mean, and the Phius People and lighting rules divide by
+  that mean, so WUFI-Passive, METr and the rules see the honeybee-ph values; EnergyPlus loses the hourly shape
+  until the hourly editor (Q4a-07). Set Residential Program gives Ventilation no schedule (full flow); the
+  default is the prototype's "Constant ventilation", the standard period 24 h at 1.0.
+- **Default devices.** The eight are `set_res_program.py`'s, not `create_elec_equip.py`'s Phius list: interior
+  lighting rides on the Program's Lighting load (F4a-20). honeybee-ph gives garage lighting quantity 0, which
+  PHX reads as 1 (F4a-18), and a device's quantity is at least 1, so it is 1; garage lighting allows reference
+  quantity 2 (the wheel) and 8 (the component), which disagree.
+- **Device fields.** honeybee-ph's `capacity` is place settings on a dishwasher and m³ on a washer, so the keys
+  are `capacity_place_settings` and `capacity_m3`; enumerations are stored as snake-case values mapped to
+  honeybee-ph's strings in `equipment_types.rb`. The clothes dryer carries no `energy_demand` (WUFI-Passive and
+  METr read its CEF).
+- **One settings dictionary.** Each settings update guards only the fields it names, so the two defaults share
+  `ph_composer.programs.settings` without staling each other. The reserved ids are never stored.
+- **Unwritten defaults.** The default Program with its Schedules, and the default Set, are bundles written whole
+  by the first write that touches them, including a settings update that makes another record the default.
+  The generic `records.*` routes see stored records only. Reset rewrites the record and writes back a missing
+  default Schedule; an edited one stays, and a default Schedule given another type refuses the reset.
+- **Deleting a default.** Without a replacement it refuses `programs.default_in_use`; with one, the default
+  moves to it (step 5 and step 6 read together). An unwritten default deleted that way takes its Schedules out
+  of the reads with it.
+- **Guarded uses at this stage.** The Model defaults and Programs naming a Schedule; the Segment's
+  `default_program_id` arrives with `ph_composer.programs.segment` in P4a-08, which registers its own
+  retargeter. A Schedule a Program uses keeps its type.
+- **Rename** is `update` with a `name`; no separate action.
+- **Units.** `power`, `power_per_area`, `people_per_area`, `airflow_per_person` and `airflow_per_area` on both
+  sides with shared vectors. The two airflows display m³/h, as `airflow` does; Programs store honeybee's m³/s,
+  which the panel scales by 3600 (P4a-11).
+- **Not here.** Snapshot sections for the panel wait for the Programs tab (P4a-11).

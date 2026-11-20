@@ -396,6 +396,36 @@ values: `basis` (`n50`, air changes per hour at 50 Pa, or `q50`, m³/h per m² o
    Outdoors or Ground Face refuses `airtightness.no_exposed_face`. With no test result, each Zone keeps its
    Program's infiltration, and the wind exposure still reaches the Segment.
 
+### Programs, Schedules and Equipment Sets
+
+A Program holds the eight loads a Zone carries (`people`, `lighting`, `electric_equipment`, `gas_equipment`,
+`service_hot_water`, `infiltration`, `ventilation`, `setpoint`), each one object with its values in honeybee
+units and the Schedules it uses. A Schedule is shared by id: Fractional and Activity level forms give operating
+hours (`start_h`, `end_h`) with a value while operating and otherwise, a Temperature form one constant
+(`value_c`), and a Ventilation form the four periods `high`, `standard`, `basic` and `minimum`, whole hours that
+total 24, each with a fraction of the design flow. An Equipment Set holds honeybee-ph devices.
+
+1. Read `ph_composer.programs.programs.all`, `.schedules.all` and `.equipment_sets.all` (or their bounded
+   `.list` reads). A fresh Model answers PH-Composer's residential default Program, its six Schedules and the
+   default Equipment Set with `stored` false; nothing is written until you change one of them, and that first
+   change writes the default with its Schedules as one Undo step. `ph_composer.programs.settings.get` names the
+   Model's default Program and Equipment Set.
+2. Create with `ph_composer.programs.programs.create` (and `.schedules.create`, `.equipment_sets.create`); a
+   missing name takes the first free "Program N". Edit with `.update`, sending each changed load whole with the
+   load as last read in `expected_values`. A Schedule of the wrong type for its load refuses
+   `validation.failed`, as does a Ventilation Schedule whose hours do not total 24.
+3. To switch a Phius rule load to a fixed value, set its `rule` to null and give the value; set the rule back
+   later and the rule's inputs, such as the lighting `high_efficacy_fraction`, are still there.
+4. Add, edit and delete devices one at a time with `ph_composer.programs.equipment_sets.add_device`,
+   `update_device` and `delete_device`. `equipment_sets.device_types` lists each of the fourteen types with the
+   fields it carries, the reference quantity codes and energy norms it allows, and a new device's values. A
+   device's type is fixed once added.
+5. Choose another default with `ph_composer.programs.settings.update`, naming only the default you change in
+   `values` and `expected_values`. Deleting the Model's default refuses `programs.default_in_use` unless you name
+   a `replacement_id`, which becomes the default; a used Schedule refuses `reference.in_use` unless you name a
+   replacement of the same type. `ph_composer.programs.reset_default` with `kind` `program` or `equipment_set`
+   restores PH-Composer's definition.
+
 ### Spaces from loose Faces
 
 Ask the user to draw separate loose floor surfaces in SketchUp, inset from the walls or

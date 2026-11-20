@@ -11,6 +11,18 @@
 #   conversion.rb     pure: a test result to the Infiltration flow PHX reads back as that result
 #   export.rb         the export section: one record per exported Zone of a Segment with settings
 #
+# Its catalog is three record kinds, the Model's two defaults and PH-Composer's residential defaults:
+#
+#   schedule.rb         the Schedule kind, its PH forms and the pure 24-hour profile
+#   equipment_types.rb  the fourteen honeybee-ph device types an Equipment Set's device may be
+#   program.rb          the Program kind's eight loads, and the Equipment Set kind
+#   default_program.rb  the frozen residential default Program, its Schedules and the default Equipment Set
+#   settings.rb         the Model's default Program and Equipment Set
+#   store.rb            reads over stored records and unwritten defaults; writing a default's bundle
+#   operations.rb       create, edit, duplicate, delete, devices, reset and the defaults update
+#   inventory.rb        the list and all reads, with what uses each record
+#   declarations.rb     the actions, queries and codes
+#
 # The panel half is html/features/programs/airtightness.js.
 module PhComposer
   module Programs
@@ -21,6 +33,15 @@ end
 require_relative "conversion"
 require_relative "airtightness"
 require_relative "export"
+require_relative "schedule"
+require_relative "equipment_types"
+require_relative "program"
+require_relative "default_program"
+require_relative "settings"
+require_relative "store"
+require_relative "operations"
+require_relative "inventory"
+require_relative "declarations"
 
 module PhComposer
   module Programs
@@ -66,6 +87,9 @@ module PhComposer
         Airtightness.read(request, request.params.fetch("id"))
       end
       AirtightnessExport.install(feature)
+      [Schedule::KIND, Program::KIND, EquipmentSet::KIND].each { |kind| feature.record_kind(kind) }
+      Settings.install(feature)
+      Declarations.install(feature)
     end
   end
 end
