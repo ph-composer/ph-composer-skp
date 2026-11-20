@@ -1,7 +1,7 @@
 # Shading: findings and decisions
 
 DATE: 2026-11-19
-STATUS: Scoped. D5s-01 to D5s-17 are Ed's (2026-11-19). Every stage authorized 2026-11-19 ([STATUS](STATUS.md#authorization)).
+STATUS: Complete. D5s-01 to D5s-17 are Ed's (2026-11-19). Every stage authorized 2026-11-19 ([STATUS](STATUS.md#authorization)). D5s-11a and the Window Unit refusal row (P5s-02) are conductor extensions, shipped and bound in `context/CONTRACTS.md`, still awaiting Ed's confirmation ([STATUS](STATUS.md#closure-2026-11-20)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 

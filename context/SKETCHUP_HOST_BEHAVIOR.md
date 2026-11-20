@@ -167,7 +167,7 @@ the cases B4 left open, each with native Undo, Redo, save and a fresh-process re
 
 Measured in PH-Composer on 26.1.188, 2026-11-19, and the whole table again on 2026-11-20 on `906a102c` with the
 last three rows added
-([SD01](../planning/features/phase-05-shading/evidence/sd01-host-facts.md)), for the Shading mark: a
+([SD01](../planning/archive/phase-05-shading/evidence/sd01-host-facts.md)), for the Shading mark: a
 `ph_composer.shading` dictionary on a loose Face, a Group and a ComponentInstance, written by a spike. Each
 gesture was followed by native Undo, Redo, a saved copy and a fresh-process reopen.
 

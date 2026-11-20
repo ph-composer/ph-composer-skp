@@ -1,7 +1,7 @@
 # P5s-06: the Shades export section
 
 DATE: 2026-11-19
-STATUS: Implemented on branch `feat/shading-p5s-06`, 2026-11-19 ([STATUS](../STATUS.md)). Authorized 2026-11-19 with every Shading stage ([STATUS](../STATUS.md#authorization)).
+STATUS: Complete. Merged to main 2026-11-20 UTC (PR #532, `ca3b9ea9`). SD06 Pass 2026-11-20 on `906a102c`. Authorized 2026-11-19 with every Shading stage ([STATUS](../STATUS.md#authorization)). Not released.
 
 Departures, recorded in `context/CONTRACTS.md`, "Translation sections and artifacts": the record key is `id`,
 which the coordinator requires, not `identifier`; it carries no `is_detached`, which Python sets; preflight rows

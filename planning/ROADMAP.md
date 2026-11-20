@@ -166,7 +166,7 @@ to 7, piping and ducting are gate stubs until their interviews. No stage authori
 ## Phase 8: post-MVP (was Phase 5; items 5.1 to 5.5)
 
 Climate data (5.1) is now [Phase 4](archive/phase-04-climate/README.md) and
-[Phase 5: shading](features/phase-05-shading/README.md) was scoped on 2026-11-19; neither has a section above yet.
+[Phase 5: shading](archive/phase-05-shading/README.md) was scoped on 2026-11-19 and archived complete on 2026-11-20; neither has a section above yet.
 
 | # | Item | State | Note |
 | --- | --- | --- | --- |
@@ -274,3 +274,4 @@ prerequisites and carried B1/B2 conditions into the next phase.
 | 2026-11-18 | Climate (Phase 4) P4c-01 to P4c-12 merged (PRs #512 to #523), the review fixes in PR #524 (`73ef7ba9`); the packet is archived at `archive/phase-04-climate/` with host acceptance open for Ed's verification pass (CM06 to CM12) and CM04 to CM12 reading `needs_recheck`. Not released. |
 | 2026-11-19 | Phase 5 Shading scoped: tag Faces and Groups, export as honeybee orphaned Shades, no solver. Packet written with stages P5s-01 to P5s-07; none authorized. |
 | 2026-11-19 | Ed authorized every Shading stage. P5s-01 to P5s-06 merged (PRs #527 to #532); P5s-07 implemented. Host acceptance SD01 to SD07 owed to one batched pass, then Ed's check of the WUFI-Passive and METr files. Not released. |
+| 2026-11-20 | Shading (Phase 5) P5s-01 to P5s-07 merged (PRs #527 to #533, last `906a102c`); SD01 to SD07 pass on `906a102c`, Ed's check of the WUFI-Passive and METr files included. The packet is archived at `archive/phase-05-shading/`; Ed's confirmation of D5s-11a and the Window Unit refusal row and three follow-ups stay in the master STATUS row. Not released. |

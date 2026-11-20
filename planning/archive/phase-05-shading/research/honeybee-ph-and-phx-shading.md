@@ -45,7 +45,7 @@ WUFI XML, one `Component` per name group:
 
 METr JSON, the same component: `{"n": "Neighbour", "idIC": -1, "idEC": -1, "typeC": 1,
 "areaC": 8.0, "idAssC": -1}`. METr carries shading as PHX writes it for WUFI-Passive; this closes the
-"not checked" line in the [zone-shading brief](../../unscheduled/zone-shading.md).
+"not checked" line in the [zone-shading brief](../../../features/unscheduled/zone-shading.md).
 
 ## What the Grasshopper route writes
 

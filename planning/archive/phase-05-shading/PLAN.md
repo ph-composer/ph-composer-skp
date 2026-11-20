@@ -1,7 +1,7 @@
 # Shading: plan
 
 DATE: 2026-11-19
-STATUS: Scoped. Authorized 2026-11-19 with every Shading stage ([STATUS](STATUS.md#authorization)).
+STATUS: Complete. Authorized 2026-11-19 with every Shading stage ([STATUS](STATUS.md#authorization)). P5s-01 to P5s-07 merged to main (PRs #527 to #533, last `906a102c`); SD01 to SD07 Pass 2026-11-20 ([STATUS](STATUS.md#closure-2026-11-20)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 

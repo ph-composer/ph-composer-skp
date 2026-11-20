@@ -1,7 +1,7 @@
 # P5s-03: a Shading Face inside a Zone leaves its envelope
 
 DATE: 2026-11-19
-STATUS: Scoped. Authorized 2026-11-19 with every Shading stage ([STATUS](../STATUS.md#authorization)).
+STATUS: Complete. Merged to main 2026-11-20 UTC (PR #529, `afc108ad`). SD03 Pass 2026-11-20 on `906a102c`. Authorized 2026-11-19 with every Shading stage ([STATUS](../STATUS.md#authorization)). Not released.
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 

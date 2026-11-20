@@ -15,7 +15,7 @@ direction CONTRACTS section 1 states (Shading requires Zones, not the reverse).
 
 ## One contributor task, traced
 
-A later feature that wants some geometry out of a Zone's envelope (the [zone-shading brief](../../unscheduled/zone-shading.md),
+A later feature that wants some geometry out of a Zone's envelope (the [zone-shading brief](../../../features/unscheduled/zone-shading.md),
 or construction-only geometry) constructs its own store with the flag and writes its record. It changes no Zones
 file, no shell, no export orchestration: the four funnels already read the check. It must learn the store's
 two flags and the rule that a claimed entity wins. That is the smallest surface the seam can have.

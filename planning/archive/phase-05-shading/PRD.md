@@ -1,7 +1,7 @@
 # Shading surfaces: PRD
 
 DATE: 2026-11-19
-STATUS: Scoped. Interviewed 2026-11-19 (Ed's request and seventeen answers, [DECISIONS](DECISIONS.md)); every stage authorized 2026-11-19 ([STATUS](STATUS.md#authorization)).
+STATUS: Complete. Interviewed 2026-11-19 (Ed's request and seventeen answers, [DECISIONS](DECISIONS.md)); every stage authorized 2026-11-19 ([STATUS](STATUS.md#authorization)); built and merged in P5s-01 to P5s-07 (PRs #527 to #533), SD01 to SD07 Pass 2026-11-20. Not released ([STATUS](STATUS.md#closure-2026-11-20)).
 AUTHOR: Ed May, BLDGTYP, with Claude
 ISSUE: [#526](https://github.com/ph-composer/ph-composer-skp/issues/526)
 
@@ -59,7 +59,7 @@ These go into `context/UBIQUITOUS_LANGUAGE.md` when the feature lands.
 | A Face inside a Zone that has no classification | Tagged. It leaves the Zone's envelope: it is not an unclassified Face, takes no Face type, and is not part of the Room |
 | A Face inside a Zone that is classified | Refused: clear its classification first (D5s-11) |
 | A Group or ComponentInstance inside a Zone whose mark would reach a classified Face | Refused like a classified Face, naming the count: clear their classification first (D5s-11, conductor extension 2026-11-19, pending Ed's confirmation). A Face classified after its Group was marked stays envelope and `shading.classified_inside` notes the Group |
-| A Group that is a Zone, or holds one at any depth | Refused. A whole Zone as shading is the [zone-shading brief](../unscheduled/zone-shading.md) |
+| A Group that is a Zone, or holds one at any depth | Refused. A whole Zone as shading is the [zone-shading brief](../../features/unscheduled/zone-shading.md) |
 | A Space, Volume or Floor Segment, anything inside them, or a Group holding one | Refused: another feature owns the entity |
 | A Window Unit, a pane Face, anything inside them | Refused as a cutting component (P5s-02): a Window Unit cuts its opening and claims nothing |
 | A Face inside a cutting component | Refused: export does not read those Faces |
@@ -100,7 +100,7 @@ measured in P5s-01 ([SD01](evidence/sd01-host-facts.md), recorded in `context/SK
 
 - A Face, Group or Component copied or cut and pasted in place keeps the mark. A copied Group or Component
   shares storage with its source, so both are shading. A loose Face pasted in place merges with the original
-  and keeps one mark. A copy pasted elsewhere is not yet measured.
+  and keeps one mark. A copy pasted elsewhere carries the mark on a new persistent id (SD01's rerun, 2026-11-20).
 - Make Group and Make Component keep every mark inside the new container; the new container is not marked.
 - Make Unique copies a definition with its Face marks, so both placements stay as they were.
 - Dividing an Edge leaves the Face's mark alone. Intersecting across a marked Face gives two marked Faces.
@@ -108,7 +108,7 @@ measured in P5s-01 ([SD01](evidence/sd01-host-facts.md), recorded in `context/SK
   tagged themselves. PH-Composer does not watch for that.
 - Native Undo, Redo, save and reopen keep every mark exactly.
 
-Move-copy arrays and push-pull are not yet measured; SD01 owes them to a later host run.
+Move-copy arrays and push-pull were measured in SD01's rerun on `906a102c`, 2026-11-20: every copy, and every Face a push-pull makes from a marked Face, carries the mark, in one Undo step.
 
 ### Export
 
@@ -126,12 +126,12 @@ Move-copy arrays and push-pull are not yet measured; SD01 owes them to a later h
 - Shading factors, shading dimensions, Radiance or any other solver, and the per-Aperture values
   they write.
 - A whole Zone as shading, and Zones outside every Building Segment
-  ([brief](../unscheduled/zone-shading.md)). This packet answers that brief's SH-3 (opaque only)
+  ([brief](../../features/unscheduled/zone-shading.md)). This packet answers that brief's SH-3 (opaque only)
   and SH-4 (loose geometry is this packet); SH-1, SH-2 and SH-5 stay with it. Its export would
   reuse this packet's section.
 - Window shades and blinds (`PhxWindowShade`), which belong to Window Types.
 - A Shading panel tab, a tagging tool with a cursor, user-typed component names.
-- Sun-path and overlay views ([post-MVP](../phase-08-post-mvp/README.md)).
+- Sun-path and overlay views ([post-MVP](../../features/phase-08-post-mvp/README.md)).
 
 ## Acceptance shape
 
