@@ -22,7 +22,9 @@ module PhComposer
         "programs.equipment_watts_residential" => "A Zone's Program has electric equipment watts in a residential " \
                                                   "Building Segment; PHX reads only Equipment Set devices there.",
         "programs.single_dwelling_overrides" => "A Zone in a single dwelling keeps an assignment of its own, which " \
-                                                "the setting overrides."
+                                                "the setting overrides.",
+        "programs.set_points_disagree" => "The Programs of a Building Segment's Zones give different heating or " \
+                                          "cooling set points; the Segment carries one pair."
       }.freeze
 
       module_function
@@ -160,18 +162,23 @@ module PhComposer
         end
         dwellings = zones.filter_map { |row| row.fetch("dwelling_id") }.uniq
         programs = zones.map { |row| inputs.program(row.fetch("program_id")) }.compact.uniq
+        set_points = Derive.set_points(programs, inputs.schedules)
         { "id" => segment.id, "name" => segment.name, "category" => segment.category,
           "settings" => segment.settings, "stored" => segment.stored, "single_dwelling" => segment.single?,
           "dwelling" => house && house.slice("name", "units", "bedrooms", "occupants", "occupants_rule",
                                              "equipment_set_id"),
           "dwelling_count" => segment.single? && !zones.empty? ? 1 : dwellings.length,
-          "set_points" => Derive.set_points(programs, inputs.schedules),
+          "set_points" => set_points,
           "single_dwelling_preview" => SingleDwelling.preview(state, segment.id),
-          "findings" => segment_findings(segment, zones, dwellings) }
+          "findings" => segment_findings(segment, zones, dwellings, set_points) + member_findings(zones) }
       end
 
-      def segment_findings(segment, zones, dwellings)
+      def segment_findings(segment, zones, dwellings, set_points)
         found = []
+        unless set_points.fetch("agree")
+          found << finding("programs.set_points_disagree", "The Programs of #{segment.name}'s Zones give " \
+                                                           "different set points.")
+        end
         if segment.stored && segment.settings["single_dwelling"] && segment.category == "non_residential"
           found << finding("programs.single_dwelling_no_effect", "Single dwelling has no effect in " \
                                                                  "#{segment.name}, a non-residential Segment.")
@@ -185,6 +192,15 @@ module PhComposer
                                                                  "Dwellings.")
         end
         found
+      end
+
+      # Its Zones' findings, one per code for the heading: the Zone's own words for one Zone, else a count.
+      def member_findings(zones)
+        zones.flat_map { |row| row.fetch("findings") }.group_by { |row| row.fetch("code") }.map do |code, rows|
+          next rows.first if rows.length == 1
+
+          finding(code, "#{rows.length} Zones: #{FINDINGS.fetch(code)}")
+        end
       end
 
       def finding(code, message)

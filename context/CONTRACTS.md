@@ -657,9 +657,9 @@ for the Zones / Programs view (P4a-09); `Assignments.assign_program` takes its i
 `ph_composer.programs` owns Dwellings, each Zone's assignment and Single dwelling per Building Segment
 (`features/programs/occupancy.rb`, `assignments.rb`, `single_dwelling.rb`, `derive/occupancy.rb`).
 
-- **Dwelling** (`ph_composer.programs.dwelling`, `dwl_`): the shared fields, `units` (integer, at least 1),
-  `bedrooms` and `occupants` (its own counts, number or null) and `equipment_set_id` (a core reference, null for the
-  Model's default Set). Its own counts are set when Single dwelling is switched off; otherwise its Zones' counts sum.
+- **Dwelling** (`ph_composer.programs.dwelling`, `dwl_`): the shared fields, `units` (integer, at least 1), and
+  optional `bedrooms` and `occupants` (its own counts) and `equipment_set_id` (a core reference; absent for the
+  Model's default Set). An edit to null removes one. Its own counts are set when Single dwelling is switched off; otherwise its Zones' counts sum.
 - **Zone assignment**, the structured extension `ph_composer.programs.zone_assignment` on each Zone: `program_id`,
   `dwelling_id`, `equipment_set_id` (declared references, each null for none) and `bedrooms`, `occupants`. Absent,
   or every field null, the Zone is unassigned. It travels with a copied Zone, which keeps its Dwelling.
@@ -674,7 +674,7 @@ Zones never reads them. Programs writes them through Zones' proposal participant
 checked by the installed validator, a Zone as one Zone update step chained after any earlier write of it in the
 proposal); its result gives each changed Zone as a reference entry, so an action that deletes a Dwelling its Zones
 stop naming plans the delete over them. `assign_program`, `assign_dwelling` (`shared`, `each`, `none`,
-`existing`; a Dwelling no Zone names afterwards is deleted), `set_counts` (a Zone in a Dwelling) and
+`existing`; a Dwelling no Zone names afterwards is deleted, and its map reported as `removed_user_data`), `set_counts` (a Zone in a Dwelling) and
 `assign_equipment_set` (Dwellings, or Zones in none) are each one Undo step, store an unwritten default they name
 first, and refuse `programs.single_dwelling` for a Zone a single dwelling decides and
 `programs.dwelling_across_segments` for a Dwelling whose Zones would lie in two Segments (no Segment counts as
@@ -702,8 +702,10 @@ watts over the lighting Schedule's mean × 8,760 h, shared by iCFA; other loads 
 m² of floor; ventilation from the Program's four terms, or the larger of a detailed Zone's Spaces' supply and
 extract. Findings: `programs.dwelling_across_segments`, `programs.single_dwelling_no_effect` (a stored true on a
 non-residential Segment), `programs.residential_without_dwelling`, `programs.non_residential_dwellings`,
-`programs.unassigned_zone`, `programs.equipment_watts_residential` and `programs.single_dwelling_overrides` (a
-Zone of a single dwelling that keeps an assignment, which the setting overrides), each a warning. Programs' own
+`programs.unassigned_zone`, `programs.equipment_watts_residential`, `programs.single_dwelling_overrides` (a
+Zone of a single dwelling that keeps an assignment, which the setting overrides) and `programs.set_points_disagree`,
+each a warning. A Segment row also carries its Zones' findings, one per code, for its heading. A per-person
+ventilation term over people still unknown leaves the Zone's ventilation unknown. Programs' own
 actions refuse a Dwelling across Segments only for the Dwelling they join, so one already across never blocks the
 repair.
 

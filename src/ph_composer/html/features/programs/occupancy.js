@@ -113,10 +113,10 @@ function (panel, ui, snapshot, tableViews) {
     box.addEventListener("change", function () {
       draft.single_dwelling = box.checked;
       var preview = row && row.single_dwelling_preview;
-      // Switching on enters the Zones' summed counts, for the user to see and change before saving.
+      // Switching on enters the Zones' summed counts in place of any the Segment kept from before it was switched
+      // off, for the user to see and change before saving.
       if (box.checked && preview && !row.settings.single_dwelling) {
-        if (draft.bedrooms === null || draft.bedrooms === "") draft.bedrooms = preview.bedrooms;
-        if (draft.occupants === null || draft.occupants === "") draft.occupants = preview.occupants;
+        draft.bedrooms = preview.bedrooms; draft.occupants = preview.occupants;
       }
       context.changed(); paint(view);
     });

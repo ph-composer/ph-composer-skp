@@ -140,8 +140,10 @@ module PhComposer
                                          "none: no Dwelling; existing: the Dwelling dwelling_id names." },
           "dwelling_id" => SchemaShapes.id("dwl", "The Dwelling, for existing.")
         }, :optional => ["dwelling_id"])
-        result = Shapes.object({ "zone_ids" => Shapes.list(Shapes::TEXT), "dwelling_ids" => Shapes.list(Shapes::TEXT),
-                                 "deleted_dwelling_ids" => Shapes.list(Shapes::TEXT) })
+        result = Shapes.with_removed_user_data(
+          Shapes.object({ "zone_ids" => Shapes.list(Shapes::TEXT), "dwelling_ids" => Shapes.list(Shapes::TEXT),
+                          "deleted_dwelling_ids" => Shapes.list(Shapes::TEXT) })
+        )
         action(feature, "assign_dwelling",
                :description => "Put Zones in a Dwelling: one shared, one each, none, or an existing one. A Dwelling " \
                                "left with no Zones is deleted in the same step.",
@@ -240,7 +242,7 @@ module PhComposer
       def retarget_dwellings(request, proposal, from:, to:)
         request.engine.ids(DWELLING_KIND).sort.each do |id|
           record = request.engine.find(DWELLING_KIND, id, :change_set => proposal)
-          next unless record.fetch("equipment_set_id") == from
+          next unless record["equipment_set_id"] == from
 
           request.engine.propose_update(DWELLING_KIND, id, proposal, :values => { "equipment_set_id" => to })
         end

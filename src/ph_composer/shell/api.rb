@@ -483,8 +483,8 @@ module PhComposer
                     "create, update, duplicate and delete; the ph_composer.programs.zone_assignment extension on " \
                     "Zones and ph_composer.programs.segment on Building Segments, both local_only; " \
                     "programs.assign_program, assign_dwelling (shared, each, none or existing; an emptied Dwelling " \
-                    "is deleted), set_counts and assign_equipment_set, each one Undo step, refusing " \
-                    "programs.single_dwelling and programs.dwelling_across_segments; the programs.zones, " \
+                    "is deleted and its map reported), set_counts and assign_equipment_set, each one Undo step, " \
+                    "refusing programs.single_dwelling and programs.dwelling_across_segments; the programs.zones, " \
                     "programs.dwellings and programs.single_dwelling_preview reads with their findings. Switching " \
                     "Single dwelling in zones.save_segment_settings clears or writes the Segment's Zone assignments " \
                     "and Dwellings in the same Undo step. The proposal participant ph_composer.zones.stage_extension " \

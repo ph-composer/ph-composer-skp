@@ -6,7 +6,8 @@ module PhComposer
 
     # A Dwelling: one or more Zones counted as one dwelling unit, or as `units` identical ones (honeybee-ph's
     # PhDwellings). Its Zones name it through their assignment; its counts are each Zone's, summed, unless it holds
-    # its own, which only switching Single dwelling off gives it. A Dwelling with no Equipment Set of its own uses
+    # its own, which only switching Single dwelling off gives it. The counts and the Set are optional: an edit to
+    # null removes one, which reads as none. A Dwelling with no Equipment Set of its own uses
     # the Model's default Set.
     module Dwelling
       COUNT = { "type" => %w[number null], "minimum" => 0 }.freeze
@@ -14,13 +15,12 @@ module PhComposer
         Fields.field("units", { "type" => "integer", "minimum" => 1,
                                 "description" => "How many identical dwelling units it counts as." },
                      :required => true),
-        Fields.field("bedrooms", COUNT.merge("description" => "Its own bedroom count; null sums its Zones'."),
-                     :required => true),
-        Fields.field("occupants", COUNT.merge("description" => "Its own occupant count; null sums its Zones', " \
-                                                               "else the Phius rule, bedrooms + units."),
-                     :required => true),
-        Fields.field("equipment_set_id", SchemaShapes.id("eqs", "Its Equipment Set; null for the Model's default.",
-                                                         :nullable => true), :required => true)
+        Fields.field("bedrooms", COUNT.merge("description" => "Its own bedroom count; absent or null sums its " \
+                                                              "Zones'.")),
+        Fields.field("occupants", COUNT.merge("description" => "Its own occupant count; absent or null sums its " \
+                                                               "Zones', else the Phius rule, bedrooms + units.")),
+        Fields.field("equipment_set_id", SchemaShapes.id("eqs", "Its Equipment Set; absent or null for the Model's " \
+                                                                "default.", :nullable => true))
       ])
       REFERENCES = [Records::Reference.new(:key => "equipment_set_id", :target_kind => EQUIPMENT_SET_KIND,
                                            :cardinality => "one", :required => false)].freeze

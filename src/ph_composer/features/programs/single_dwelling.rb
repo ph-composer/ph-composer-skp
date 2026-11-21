@@ -58,7 +58,8 @@ module PhComposer
         entries = Assignments.stage(request, proposal, zones.to_h { |zone| [zone, Occupancy::UNASSIGNED.dup] })
         named = state.zones.reject { |zone| zones.include?(zone) }.map { |zone| zone.assignment["dwelling_id"] }
         emptied = zones.map { |zone| zone.assignment["dwelling_id"] }.compact.uniq - named
-        Assignments.delete_dwellings(request, proposal, emptied, entries).map do |dwelling_id|
+        # A transition answers only the references it affects, so a deleted Dwelling's map is not reported here.
+        Assignments.delete_dwellings(request, proposal, emptied, entries).first.map do |dwelling_id|
           { "kind" => DWELLING_KIND, "id" => dwelling_id }
         end
       end
@@ -98,7 +99,7 @@ module PhComposer
           end,
           "dwelling_ids" => dwellings,
           "equipment_set_ids" => (assigned.map { |zone| zone.assignment["equipment_set_id"] } +
-                                  dwellings.map { |id| state.dwelling(id)&.fetch("equipment_set_id") }).compact.uniq,
+                                  dwellings.map { |id| state.dwelling(id)&.[]("equipment_set_id") }).compact.uniq,
           "bedrooms" => sum(zones, "bedrooms"), "occupants" => sum(zones, "occupants")
         }
       end

@@ -111,6 +111,9 @@ module PhComposer
         return { "m3h" => nil, "source" => "by_program" } if terms.all?(&:nil?)
 
         per_person, per_area, per_zone, ach = terms.map(&:to_f)
+        # A rate per person over people still unknown is unknown, not zero.
+        return { "m3h" => nil, "source" => "by_program" } if people.nil? && per_person.positive?
+
         m3s = (per_person * people.to_f) + (per_area * zone.floor_area_m2) + per_zone +
               (ach * zone.net_volume_m3.to_f / 3600.0)
         { "m3h" => m3s * 3600.0, "source" => "by_program" }

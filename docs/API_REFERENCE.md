@@ -1619,10 +1619,7 @@ Values:
   "additionalProperties": false,
   "required": [
     "name",
-    "units",
-    "bedrooms",
-    "occupants",
-    "equipment_set_id"
+    "units"
   ],
   "properties": {
     "name": {
@@ -1713,7 +1710,7 @@ Values:
                 "null"
               ],
               "minimum": 0,
-              "description": "Its own bedroom count; null sums its Zones'."
+              "description": "Its own bedroom count; absent or null sums its Zones'."
             },
             "occupants": {
               "type": [
@@ -1721,7 +1718,7 @@ Values:
                 "null"
               ],
               "minimum": 0,
-              "description": "Its own occupant count; null sums its Zones', else the Phius rule, bedrooms + units."
+              "description": "Its own occupant count; absent or null sums its Zones', else the Phius rule, bedrooms + units."
             },
             "equipment_set_id": {
               "type": [
@@ -1729,7 +1726,7 @@ Values:
                 "null"
               ],
               "pattern": "^eqs_[A-Za-z0-9]{12}$",
-              "description": "Its Equipment Set; null for the Model's default."
+              "description": "Its Equipment Set; absent or null for the Model's default."
             }
           }
         },
@@ -1756,7 +1753,7 @@ Values:
         "null"
       ],
       "minimum": 0,
-      "description": "Its own bedroom count; null sums its Zones'."
+      "description": "Its own bedroom count; absent or null sums its Zones'."
     },
     "occupants": {
       "type": [
@@ -1764,7 +1761,7 @@ Values:
         "null"
       ],
       "minimum": 0,
-      "description": "Its own occupant count; null sums its Zones', else the Phius rule, bedrooms + units."
+      "description": "Its own occupant count; absent or null sums its Zones', else the Phius rule, bedrooms + units."
     },
     "equipment_set_id": {
       "type": [
@@ -1772,7 +1769,7 @@ Values:
         "null"
       ],
       "pattern": "^eqs_[A-Za-z0-9]{12}$",
-      "description": "Its Equipment Set; null for the Model's default."
+      "description": "Its Equipment Set; absent or null for the Model's default."
     }
   }
 }
@@ -16533,10 +16530,7 @@ Result:
             "additionalProperties": false,
             "required": [
               "name",
-              "units",
-              "bedrooms",
-              "occupants",
-              "equipment_set_id"
+              "units"
             ],
             "properties": {
               "name": {
@@ -16627,7 +16621,7 @@ Result:
                           "null"
                         ],
                         "minimum": 0,
-                        "description": "Its own bedroom count; null sums its Zones'."
+                        "description": "Its own bedroom count; absent or null sums its Zones'."
                       },
                       "occupants": {
                         "type": [
@@ -16635,7 +16629,7 @@ Result:
                           "null"
                         ],
                         "minimum": 0,
-                        "description": "Its own occupant count; null sums its Zones', else the Phius rule, bedrooms + units."
+                        "description": "Its own occupant count; absent or null sums its Zones', else the Phius rule, bedrooms + units."
                       },
                       "equipment_set_id": {
                         "type": [
@@ -16643,7 +16637,7 @@ Result:
                           "null"
                         ],
                         "pattern": "^eqs_[A-Za-z0-9]{12}$",
-                        "description": "Its Equipment Set; null for the Model's default."
+                        "description": "Its Equipment Set; absent or null for the Model's default."
                       }
                     }
                   },
@@ -16670,7 +16664,7 @@ Result:
                   "null"
                 ],
                 "minimum": 0,
-                "description": "Its own bedroom count; null sums its Zones'."
+                "description": "Its own bedroom count; absent or null sums its Zones'."
               },
               "occupants": {
                 "type": [
@@ -16678,7 +16672,7 @@ Result:
                   "null"
                 ],
                 "minimum": 0,
-                "description": "Its own occupant count; null sums its Zones', else the Phius rule, bedrooms + units."
+                "description": "Its own occupant count; absent or null sums its Zones', else the Phius rule, bedrooms + units."
               },
               "equipment_set_id": {
                 "type": [
@@ -16686,7 +16680,7 @@ Result:
                   "null"
                 ],
                 "pattern": "^eqs_[A-Za-z0-9]{12}$",
-                "description": "Its Equipment Set; null for the Model's default."
+                "description": "Its Equipment Set; absent or null for the Model's default."
               }
             }
           },
@@ -16827,10 +16821,7 @@ Result:
             "additionalProperties": false,
             "required": [
               "name",
-              "units",
-              "bedrooms",
-              "occupants",
-              "equipment_set_id"
+              "units"
             ],
             "properties": {
               "name": {
@@ -16921,7 +16912,7 @@ Result:
                           "null"
                         ],
                         "minimum": 0,
-                        "description": "Its own bedroom count; null sums its Zones'."
+                        "description": "Its own bedroom count; absent or null sums its Zones'."
                       },
                       "occupants": {
                         "type": [
@@ -16929,7 +16920,7 @@ Result:
                           "null"
                         ],
                         "minimum": 0,
-                        "description": "Its own occupant count; null sums its Zones', else the Phius rule, bedrooms + units."
+                        "description": "Its own occupant count; absent or null sums its Zones', else the Phius rule, bedrooms + units."
                       },
                       "equipment_set_id": {
                         "type": [
@@ -16937,7 +16928,7 @@ Result:
                           "null"
                         ],
                         "pattern": "^eqs_[A-Za-z0-9]{12}$",
-                        "description": "Its Equipment Set; null for the Model's default."
+                        "description": "Its Equipment Set; absent or null for the Model's default."
                       }
                     }
                   },
@@ -16964,7 +16955,7 @@ Result:
                   "null"
                 ],
                 "minimum": 0,
-                "description": "Its own bedroom count; null sums its Zones'."
+                "description": "Its own bedroom count; absent or null sums its Zones'."
               },
               "occupants": {
                 "type": [
@@ -16972,7 +16963,7 @@ Result:
                   "null"
                 ],
                 "minimum": 0,
-                "description": "Its own occupant count; null sums its Zones', else the Phius rule, bedrooms + units."
+                "description": "Its own occupant count; absent or null sums its Zones', else the Phius rule, bedrooms + units."
               },
               "equipment_set_id": {
                 "type": [
@@ -16980,7 +16971,7 @@ Result:
                   "null"
                 ],
                 "pattern": "^eqs_[A-Za-z0-9]{12}$",
-                "description": "Its Equipment Set; null for the Model's default."
+                "description": "Its Equipment Set; absent or null for the Model's default."
               }
             }
           },
@@ -57663,7 +57654,10 @@ Result:
   "required": [
     "zone_ids",
     "dwelling_ids",
-    "deleted_dwelling_ids"
+    "deleted_dwelling_ids",
+    "removed_user_data",
+    "removed_user_data_total",
+    "removed_user_data_truncated"
   ],
   "properties": {
     "zone_ids": {
@@ -57683,6 +57677,51 @@ Result:
       "items": {
         "type": "string"
       }
+    },
+    "removed_user_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user_data_keys",
+          "user_data_key_total"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The removed record, or the record holding the part."
+          },
+          "part_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a part, its ids from the record down."
+          },
+          "user_data_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The map's first 50 top-level keys, sorted, while the report fits its byte limit."
+          },
+          "user_data_key_total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "description": "Each removed record, then each of its parts, whose user_data was not empty, the first 50 within 8192 bytes: the map is gone, a survivor keeps its own, and Undo brings it back."
+    },
+    "removed_user_data_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "removed_user_data_truncated": {
+      "type": "boolean",
+      "description": "True when removed_user_data leaves out a removed map or one of a listed map's keys, by its count or byte limit."
     }
   }
 }
@@ -58039,7 +58078,7 @@ Params:
                     "null"
                   ],
                   "minimum": 0,
-                  "description": "Its own bedroom count; null sums its Zones'."
+                  "description": "Its own bedroom count; absent or null sums its Zones'."
                 },
                 "occupants": {
                   "type": [
@@ -58047,7 +58086,7 @@ Params:
                     "null"
                   ],
                   "minimum": 0,
-                  "description": "Its own occupant count; null sums its Zones', else the Phius rule, bedrooms + units."
+                  "description": "Its own occupant count; absent or null sums its Zones', else the Phius rule, bedrooms + units."
                 },
                 "equipment_set_id": {
                   "type": [
@@ -58055,7 +58094,7 @@ Params:
                     "null"
                   ],
                   "pattern": "^eqs_[A-Za-z0-9]{12}$",
-                  "description": "Its Equipment Set; null for the Model's default."
+                  "description": "Its Equipment Set; absent or null for the Model's default."
                 }
               }
             },
@@ -58082,7 +58121,7 @@ Params:
             "null"
           ],
           "minimum": 0,
-          "description": "Its own bedroom count; null sums its Zones'."
+          "description": "Its own bedroom count; absent or null sums its Zones'."
         },
         "occupants": {
           "type": [
@@ -58090,7 +58129,7 @@ Params:
             "null"
           ],
           "minimum": 0,
-          "description": "Its own occupant count; null sums its Zones', else the Phius rule, bedrooms + units."
+          "description": "Its own occupant count; absent or null sums its Zones', else the Phius rule, bedrooms + units."
         },
         "equipment_set_id": {
           "type": [
@@ -58098,7 +58137,7 @@ Params:
             "null"
           ],
           "pattern": "^eqs_[A-Za-z0-9]{12}$",
-          "description": "Its Equipment Set; null for the Model's default."
+          "description": "Its Equipment Set; absent or null for the Model's default."
         }
       },
       "description": "The new Dwelling's values; any not given take their defaults, and a missing name the first free \"Dwelling N\"."
@@ -58439,7 +58478,7 @@ Params:
                     "null"
                   ],
                   "minimum": 0,
-                  "description": "Its own bedroom count; null sums its Zones'."
+                  "description": "Its own bedroom count; absent or null sums its Zones'."
                 },
                 "occupants": {
                   "type": [
@@ -58447,7 +58486,7 @@ Params:
                     "null"
                   ],
                   "minimum": 0,
-                  "description": "Its own occupant count; null sums its Zones', else the Phius rule, bedrooms + units."
+                  "description": "Its own occupant count; absent or null sums its Zones', else the Phius rule, bedrooms + units."
                 },
                 "equipment_set_id": {
                   "type": [
@@ -58455,7 +58494,7 @@ Params:
                     "null"
                   ],
                   "pattern": "^eqs_[A-Za-z0-9]{12}$",
-                  "description": "Its Equipment Set; null for the Model's default."
+                  "description": "Its Equipment Set; absent or null for the Model's default."
                 }
               }
             },
@@ -58485,7 +58524,7 @@ Params:
             "null"
           ],
           "minimum": 0,
-          "description": "Its own bedroom count; null sums its Zones'."
+          "description": "Its own bedroom count; absent or null sums its Zones'."
         },
         "occupants": {
           "type": [
@@ -58493,7 +58532,7 @@ Params:
             "null"
           ],
           "minimum": 0,
-          "description": "Its own occupant count; null sums its Zones', else the Phius rule, bedrooms + units."
+          "description": "Its own occupant count; absent or null sums its Zones', else the Phius rule, bedrooms + units."
         },
         "equipment_set_id": {
           "type": [
@@ -58501,7 +58540,7 @@ Params:
             "null"
           ],
           "pattern": "^eqs_[A-Za-z0-9]{12}$",
-          "description": "Its Equipment Set; null for the Model's default."
+          "description": "Its Equipment Set; absent or null for the Model's default."
         }
       },
       "description": "The values to change; any not given stay."
@@ -94455,6 +94494,7 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | `programs.equipment_watts_residential` | A Zone's Program has electric equipment watts in a residential Building Segment; PHX reads only Equipment Set devices there. |
 | `programs.non_residential_dwellings` | A non-residential Building Segment holds Dwellings. |
 | `programs.residential_without_dwelling` | A residential Building Segment has no Dwelling. |
+| `programs.set_points_disagree` | The Programs of a Building Segment's Zones give different heating or cooling set points; the Segment carries one pair. |
 | `programs.single_dwelling` | The Zone is in a Building Segment that is a single dwelling, where the setting decides its Program, Dwelling and counts. |
 | `programs.single_dwelling_no_effect` | Single dwelling is on in a non-residential Building Segment, where it has no effect. |
 | `programs.single_dwelling_overrides` | A Zone in a single dwelling keeps an assignment of its own, which the setting overrides. |
@@ -94726,4 +94766,4 @@ The codes each feature raises under its own noun, as an outcome's `code` or a fi
 | 1.78 | 2026-11-20 | ph_composer.programs is a new feature: the ph_composer.programs.airtightness extension on each Building Segment (basis n50 or q50, value or null, wind_exposure), saved through zones.save_segment_settings, read by ph_composer.programs.airtightness.get with its defaults, and exported to each Zone's Infiltration and the BldgSegment's wind exposure. Export refuses airtightness.no_net_volume and airtightness.no_exposed_face. The Spaces export section registers a projection of each Zone's net volume. |
 | 1.79 | 2026-11-20 | ph_composer.programs adds the Program, Schedule and Equipment Set record kinds with create, update, duplicate, delete, list and all reads; equipment_sets.add_device, update_device, delete_device and device_types; schedules.profile; settings.get and settings.update for the Model's default Program and Equipment Set; and reset_default. Reads answer PH-Composer's residential default Program, its Schedules and the default Equipment Set until a write stores them. Deleting a default without a replacement refuses programs.default_in_use. |
 | 1.80 | 2026-11-20 | The programs, schedules and equipment_sets library kinds: ph_composer.library.copy copies a library Program with every Schedule it names, reusing a local copy of each from the same source, in one Undo step, and a Program or Equipment Set copy may assign itself as the Model's default (mode model_default). A library kind may declare dependencies, which describe names; copy answers dependencies, each record of another kind it copied or reused, and refuses library.dependency_missing when the loaded catalog of that kind does not hold one. Library export writes each dependency of a written row, whatever kinds or records select, and refuses library.dependency_missing for one it cannot write; its omissions list a declared part's map the file leaves out as <path>.user_data, such as devices[].user_data. |
-| 1.81 | 2026-11-20 | Dwellings and occupancy. The ph_composer.programs.dwelling kind with dwellings.list, all, create, update, duplicate and delete; the ph_composer.programs.zone_assignment extension on Zones and ph_composer.programs.segment on Building Segments, both local_only; programs.assign_program, assign_dwelling (shared, each, none or existing; an emptied Dwelling is deleted), set_counts and assign_equipment_set, each one Undo step, refusing programs.single_dwelling and programs.dwelling_across_segments; the programs.zones, programs.dwellings and programs.single_dwelling_preview reads with their findings. Switching Single dwelling in zones.save_segment_settings clears or writes the Segment's Zone assignments and Dwellings in the same Undo step. The proposal participant ph_composer.zones.stage_extension stages a feature's payload on Zones and Segments; save_segment_settings names it for its transition's contributors. An Equipment Set delete with a replacement moves Dwellings to it. |
+| 1.81 | 2026-11-20 | Dwellings and occupancy. The ph_composer.programs.dwelling kind with dwellings.list, all, create, update, duplicate and delete; the ph_composer.programs.zone_assignment extension on Zones and ph_composer.programs.segment on Building Segments, both local_only; programs.assign_program, assign_dwelling (shared, each, none or existing; an emptied Dwelling is deleted and its map reported), set_counts and assign_equipment_set, each one Undo step, refusing programs.single_dwelling and programs.dwelling_across_segments; the programs.zones, programs.dwellings and programs.single_dwelling_preview reads with their findings. Switching Single dwelling in zones.save_segment_settings clears or writes the Segment's Zone assignments and Dwellings in the same Undo step. The proposal participant ph_composer.zones.stage_extension stages a feature's payload on Zones and Segments; save_segment_settings names it for its transition's contributors. An Equipment Set delete with a replacement moves Dwellings to it. |

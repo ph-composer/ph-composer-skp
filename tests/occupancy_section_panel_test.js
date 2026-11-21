@@ -14,6 +14,8 @@ var fixture = require("./support/spaces_fixture");
 var NAMESPACE = "ph_composer.programs.segment";
 var STORED = { single_dwelling: false, default_program_id: "pgm_office", bedrooms: null, occupants: null,
   equipment_set_id: null };
+// Counts the Annex kept from before it was switched off, for one test.
+var KEPT = null;
 var PREVIEW = { building_segment_id: "bsg_annex", programs: [{ zone_id: "zon_b", program_id: "pgm_office" }],
   dwelling_ids: ["dwl_one", "dwl_two"], equipment_set_ids: [], bedrooms: 3, occupants: null };
 
@@ -42,7 +44,8 @@ function snapshot() {
     zones[index].schema_version = 3;
     zones[index].values = { name: pair[0], building_segment_id: pair[1], level_id: null, ground_depth_mm: 0 };
   });
-  var envelope = { schema_version: 1, payload: STORED, references: [], export_relevance: "local_only" };
+  var envelope = { schema_version: 1, payload: Object.assign({}, STORED, KEPT || {}), references: [],
+    export_relevance: "local_only" };
   return {
     product: "PH-Composer", version: "0.1.0-dev", session: "session-a", revision: 4, file_name: "house.skp",
     edit_path: [], preferences: { unit_system: "SI", dimension_formats: {}, number_format: { decimal: ".",
@@ -75,7 +78,8 @@ function occupancy() {
       equipment_set_id: null }, dwelling_count: 1, set_points: { heating_c: 20, cooling_c: 25, agree: true },
     single_dwelling_preview: { building_segment_id: "bsg_house", programs: [], dwelling_ids: [],
       equipment_set_ids: [], bedrooms: null, occupants: null }, findings: [] };
-  var annex = { id: "bsg_annex", name: "Annex", category: "residential", settings: STORED, stored: true,
+  var annex = { id: "bsg_annex", name: "Annex", category: "residential",
+    settings: Object.assign({}, STORED, KEPT || {}), stored: true,
     single_dwelling: false, dwelling: null, dwelling_count: 2, set_points: { heating_c: 20, cooling_c: 25,
       agree: true }, single_dwelling_preview: PREVIEW,
     findings: [{ code: "programs.residential_without_dwelling", severity: "warning",
@@ -213,4 +217,15 @@ test("typing a count keeps its field, and the note follows the stored setting, n
   box.checked = false; box.listeners.change({});
   box.checked = true; box.listeners.change({});
   assert.ok(!/Saving replaces/.test(shownText(sectionNode(dialog))), "stored on: switching back replaces nothing");
+});
+
+test("switching on replaces counts the Segment kept with the preview's sums", function () {
+  KEPT = { bedrooms: 1, occupants: 2 };
+  var p = load();
+  KEPT = null;
+  var dialog = settings(p, "Annex");
+  var box = control(dialog, "input", "Single dwelling");
+  box.checked = true; box.listeners.change({});
+  assert.strictEqual(control(dialog, "input", "Bedrooms").value, "3", "the Zones' sum, not the kept 1");
+  assert.strictEqual(control(dialog, "input", "Occupants").value, "", "the kept 2 gives way to the Phius rule");
 });

@@ -9,7 +9,7 @@ module PhComposer
     # Each refuses what the generic metadata routes only report (context/CONTRACTS.md, "Occupancy"): a Zone of a
     # Segment that is a single dwelling, where the setting decides (`programs.single_dwelling`), and a Dwelling whose
     # Zones would lie in two Segments (`programs.dwelling_across_segments`). A Dwelling no Zone names afterwards is
-    # deleted in the same step.
+    # deleted in the same step, and the maps it held are reported as any delete reports them.
     module Assignments
       STAGE = Zones::ExtensionStaging::NAME
       SINGLE = "programs.single_dwelling"
@@ -45,8 +45,9 @@ module PhComposer
         end
         check_segments!(state, payloads)
         entries = stage(request, proposal, payloads)
-        removed = delete_emptied(request, proposal, state, payloads, entries)
-        { "zone_ids" => targets.map(&:id), "dwelling_ids" => ids.compact.uniq, "deleted_dwelling_ids" => removed }
+        removed, report = delete_emptied(request, proposal, state, payloads, entries)
+        { "zone_ids" => targets.map(&:id), "dwelling_ids" => ids.compact.uniq,
+          "deleted_dwelling_ids" => removed }.merge(report)
       end
 
       # The Dwelling each target joins, creating the new ones.
@@ -89,7 +90,7 @@ module PhComposer
         set_id = stored_id!(request, proposal, EQUIPMENT_SET_KIND, equipment_set_id)
         dwelling_ids.uniq.each do |id|
           before = Store.find(request, DWELLING_KIND, id, :proposal => proposal)
-          next if before.fetch("equipment_set_id") == set_id
+          next if before["equipment_set_id"] == set_id
 
           request.engine.propose_update(DWELLING_KIND, id, proposal, :values => { "equipment_set_id" => set_id })
         end
@@ -185,8 +186,12 @@ module PhComposer
           Records::ReferenceEntry.new(:kind => entry.fetch("kind"), :key => entry.fetch("key"),
                                       :record => entry.fetch("record"))
         end)
-        ids.sort.each { |id| request.engine.propose_delete(DWELLING_KIND, id, proposal, :reference_plan => plan) }
-        ids.sort
+        records = ids.sort.map do |id|
+          record = request.engine.find(DWELLING_KIND, id, :change_set => proposal)
+          request.engine.propose_delete(DWELLING_KIND, id, proposal, :reference_plan => plan)
+          record
+        end
+        [ids.sort, Records::Metadata.removed_user_data(Dwelling::KIND, records)]
       end
     end
   end

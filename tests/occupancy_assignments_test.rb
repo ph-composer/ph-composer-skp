@@ -56,7 +56,8 @@ class OccupancyAssignmentsTest < PhComposerTestCase
     apartments = segments.fetch("Apartments")
     assert_equal false, apartments.fetch("single_dwelling")
     assert_nil zone_row("Apt 1").fetch("dwelling_name")
-    assert_empty apartments.fetch("findings"), "an absent payload is the default, not a choice to report"
+    refute_includes codes(apartments), "programs.single_dwelling_no_effect",
+                    "an absent payload is the default, not a choice to report"
 
     completed(save("Apartments", SEGMENT_NAMESPACE => settings("single_dwelling" => true)))
     assert_equal false, segments.fetch("Apartments").fetch("single_dwelling")
@@ -304,6 +305,41 @@ class OccupancyAssignmentsTest < PhComposerTestCase
     refused(invoke("#{P::FEATURE_ID}.dwellings.delete", "id" => dwelling), "reference.in_use")
   end
 
+  def test_a_dwelling_returns_to_its_zones_counts_and_the_default_set
+    switch_off("House")
+    house = records.first
+    set = completed(invoke("#{P::FEATURE_ID}.equipment_sets.create", "values" => { "name" => "Laundry" })).fetch("id")
+    completed(invoke("#{P::FEATURE_ID}.assign_equipment_set", "equipment_set_id" => set,
+                                                              "dwelling_ids" => [house.fetch("id")]))
+    completed(invoke("#{P::FEATURE_ID}.assign_equipment_set", "equipment_set_id" => nil,
+                                                              "dwelling_ids" => [house.fetch("id")]))
+    assert_nil zone_row("Living").fetch("equipment_set_id"), "back to the Model's default"
+    completed(invoke("#{P::FEATURE_ID}.dwellings.update", "id" => house.fetch("id"), "values" => { "bedrooms" => 4 },
+                                                          "expected_values" => {}))
+    completed(invoke("#{P::FEATURE_ID}.set_counts", "zone" => reference("Bedroom"), "bedrooms" => 2,
+                                                    "occupants" => nil))
+    assert_equal 4, records.first.fetch("bedrooms")
+    completed(invoke("#{P::FEATURE_ID}.dwellings.update", "id" => house.fetch("id"), "values" => { "bedrooms" => nil },
+                                                          "expected_values" => { "bedrooms" => 4 }))
+    assert_equal 2, records.first.fetch("bedrooms"), "the Zones' count again"
+  end
+
+  def test_an_emptied_dwelling_reports_the_map_it_held
+    switch_off("Apartments", :release => ["Apt 1"])
+    dwelling = completed(invoke("#{P::FEATURE_ID}.assign_dwelling", "zones" => [reference("Apt 1")],
+                                                                    "choice" => "shared")).fetch("dwelling_ids").first
+    completed(invoke("ph_composer.records.update_metadata", "updates" => [{
+      "reference" => { "kind" => P::DWELLING_KIND, "id" => dwelling },
+      "expected_metadata" => { "user_data" => {}, "extension_data" => {} },
+      "user_data" => { "tag" => "A" }
+    }]))
+    result = completed(invoke("#{P::FEATURE_ID}.assign_dwelling", "zones" => [reference("Apt 1")],
+                                                                  "choice" => "none"))
+    assert_equal [dwelling], result.fetch("deleted_dwelling_ids")
+    assert_equal [{ "id" => dwelling, "user_data_keys" => ["tag"], "user_data_key_total" => 1 }],
+                 result.fetch("removed_user_data")
+  end
+
   def test_an_equipment_set_delete_moves_its_dwellings_to_the_replacement
     switch_off("Apartments", :release => ["Apt 1"])
     first = completed(invoke("#{P::FEATURE_ID}.equipment_sets.create", "values" => { "name" => "A" })).fetch("id")
@@ -368,6 +404,11 @@ class OccupancyAssignmentsTest < PhComposerTestCase
     assert_in_delta 5.0 * 20, corridor.fetch("lighting_w"), 1e-9
     assert_in_delta 0.0003 * 20 * 3600, corridor.fetch("ventilation_m3h"), 1e-9
     assert_equal false, segments.fetch("Apartments").dig("set_points", "agree"), "the Zones' Programs disagree"
+    assert_includes codes(segments.fetch("Apartments")), "programs.set_points_disagree"
+    per_person = create_program("Lobby", "ventilation" => { "flow_per_person" => 0.01 })
+    completed(invoke("#{P::FEATURE_ID}.assign_program", "zones" => [reference("Apt 1 bed")],
+                                                        "program_id" => per_person))
+    assert_nil zone_row("Apt 1 bed").fetch("ventilation_m3h"), "per person over unknown people is unknown"
 
     zone_space = zone_group_named("Apt 1").entities.to_a.grep(Sketchup::Group).first
     SPACES::SPACE_STORE.write(zone_space, SPACES::SPACE_STORE.read(zone_space).merge("v_sup_m3h" => 60.0,
@@ -394,6 +435,7 @@ class OccupancyAssignmentsTest < PhComposerTestCase
   def test_findings_follow_programs_actions_and_generic_metadata_writes
     completed(save("Apartments", CERTIFICATION => certification("non_residential")))
     assert_includes codes(zone_row("Corridor")), "programs.unassigned_zone"
+    assert_includes codes(segments.fetch("Apartments")), "programs.unassigned_zone", "the heading carries it"
     switch_off("House")
     assert_empty codes(segments.fetch("House")), "the house's Dwelling counts"
 
